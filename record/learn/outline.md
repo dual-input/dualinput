@@ -26,7 +26,7 @@ Each part is marked with its depth:
   - The flight lifecycle: main menu, loading, flight start, aircraft change, return to menu
   - Developer Mode tools: the Behaviors window, the SimVar watcher, the console, the Project Editor
 
-## 3. Variables, events, and units (full)
+## [3. Variables, events, and units (full)](03-01-units-and-variables.md)
 
 - Units: names, conversions, enums, booleans, `Position 16k`, percent vs. `percent over 100`
 - `A:` simulation variables: indexed, read-only vs. settable

@@ -87,7 +87,7 @@ Each part is marked with its depth:
 - Sources of divergence: randomness, frame timing, physics
 - Matching aircraft: the same addon, version, and livery on both machines
 
-## 8. Synchronization (full)
+## [8. Synchronization (full)](08-01-replication-models-and-authority.md)
 
 - Replication models: state, input, lockstep, hybrid
 - Authority: pilot in control, per-system or per-control ownership, handover, contention
@@ -101,7 +101,7 @@ Each part is marked with its depth:
 - Position and attitude: freeze and set, slew, dead reckoning, interpolation buffers, jitter, time shift, ground contact
 - Clocks: offset estimation, sim time vs. wall time, syncing pause and sim rate
 - Detecting divergence and correcting it
-- Two pilots on one screen
+- Two pilots on one screen: both working the same display, such as an MCDU or a touchscreen, at the same moment
 
 ## 9. Networking (full, from the ground up)
 

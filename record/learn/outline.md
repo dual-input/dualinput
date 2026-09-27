@@ -14,7 +14,7 @@ Each part is marked with its depth:
 - Prior art: FSX and P3D shared cockpit, YourControls, FS Copilot, SmartCopilot (X-Plane), JoinFS
 - CRM, callouts, and transfer of control
 
-## 2. The MSFS 2024 platform
+## [2. The MSFS 2024 platform](02-01-installs-and-packages.md)
 
 - Brief: Store vs. Steam installs, `UserCfg.opt`, where packages live
 - Refresher: packages (Community, Official, streamed), `manifest.json`, `layout.json`, load order, overriding core files, the virtual file system, why package changes need a restart

@@ -23,7 +23,7 @@ Everything in [writing.md](../writing.md) applies too.
 6. Use a table or diagram wherever it replaces a paragraph, such as which namespaces each API can read.
 7. Mark each claim that needs evidence with a numbered reference to the source list, like `[3]`, and mark an unverified claim `(unverified)`.
 8. End with the sources as a numbered list, each with its [Evidence](../writing.md#evidence) marker, then the claims nobody has verified, each with what would settle it.
-9. A part that runs past 3,000 words splits into chapters by bullet group, named `NN-MM-<slug>.md`.
+9. A part that runs past 3,000 words splits into chapters of whole sections, in outline order, named `NN-MM-<slug>.md`.
 
 The outline is the plan for the learning material.
 A part's heading links to its chapter, or to the first of its chapters, once it's written, and those links are the only record of which parts are done.

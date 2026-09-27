@@ -28,7 +28,7 @@ The names are the API.
 `VCockpit.js` learns its gauges from `Coherent.on("ShowVCockpitPanel", ...)` ([06-01](06-01-the-engine-and-instruments.md#vcockpit-baseinstrument-and-panelcfg-gauges)).
 It receives `H:` events from `Coherent.on("OnInteractionEvent", (target, args) => ...)`, and passes each to `onInteractionEvent(args)` on every instrument in the document, or only on the instrument whose `Guid` matches when the sim names a target [1].
 A WASM gauge's shell sends the pilot's mouse to the sim with calls such as `Coherent.call("WASM_MOUSE_DOWN", guid, clientX, clientY, button)` [2].
-The SDK's Coherent.js page indexes hundreds of call names and marks itself a work in progress [3], so what a call does is learned by reading the sim's JavaScript ([the next section](#the-coherent-debugger-on-port-19999)) or by measuring it.
+The SDK's Coherent.js page indexes a long list of call names and marks itself a work in progress [3], so what a call does is learned by reading the sim's JavaScript ([the next section](#the-coherent-debugger-on-port-19999)) or by measuring it.
 
 `SimVar` is built from both halves, and its reads and writes differ because of it [1]:
 
@@ -39,7 +39,7 @@ Which namespaces each reaches, and how their names are spelled, is in [03-03](03
 `SimVar.IsReady()` is false until the native object exists, and `BaseInstrument` waits for it before calling `Init` [1].
 
 A CommBus listener is one more view listener.
-`RegisterCommBusListener()` opens `JS_LISTENER_COMM_BUS`, and its `callWasm(name, text)` is `this.call("COMM_BUS_WASM_CALLBACK", name, text)` [1].
+`RegisterCommBusListener()` opens `JS_LISTENER_COMM_BUS`, and its `callWasm(name, jsonBuf)` is `this.call("COMM_BUS_WASM_CALLBACK", name, jsonBuf)` [1].
 [05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm) covers the CommBus itself.
 Instruments also reach each other on channels of their own: `BaseInstrument`'s `triggerEventToAllInstruments` sends an event to every view through `LaunchFlowEvent("ON_HTMLEVENT_TO_ALL_VIEWS", ...)` [1], and the Avionics Framework syncs its bus through `JS_LISTENER_GENERICDATA` ([06-01](06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
 
@@ -154,11 +154,11 @@ Whatever Crosscheck adds runs in every instrument's load, so a fault there takes
 
 - A second package that overrides the same file replaces yours with no error, which is what our prototype and FS Copilot's package did to each other [15].
 - `Include.addImports` loads asynchronously, and the sim can create instruments before the injected scripts exist, so code called from `createInstrument` has to queue, as FS Copilot's does [14].
-- The `VCockpit.js` in our captures is FS Copilot's copy, not Asobo's, because FS Copilot was installed when they were taken [9] [16].
+- The `VCockpit.js` in our captures is FS Copilot's copy, not Asobo's: it carries FS Copilot's `/* FS Copilot Integration */` blocks, because FS Copilot was installed when the captures were taken [1] [16].
 
 ## Sources
 
-1. Documented, read from JavaScript captured out of the running sim: FS Copilot profiles at d3d7689, `sim-sources/vcockpit02-displayunits/`, captured from MSFS 2024 on 2026-08-30: `html_UI_JS_coherent.js` (`engine.call`, `engine.trigger`, and `engine.on`), `html_UI_JS_common.js` (the assignment of `Coherent`), `html_UI_JS_simvar.js` (`GetSimVarValue`, `SetSimVarValue`, and `IsReady`), `html_ui_js_services_commbus.js`, `html_UI_Pages_VCockpit_Core_VCockpit.js` (the `OnInteractionEvent` handler), and `html_UI_Pages_VCockpit_Instruments_Shared_BaseInstrument.js`.
+1. Documented, read from JavaScript captured out of the running sim: FS Copilot profiles at d3d7689, `sim-sources/vcockpit02-displayunits/`, captured from MSFS 2024 on 2026-08-30: `html_UI_JS_coherent.js` (`engine.call`, `engine.trigger`, and `engine.on`), `html_UI_JS_common.js` (the assignment of `Coherent`), `html_UI_JS_simvar.js` (`GetSimVarValue`, `SetSimVarValue`, and `IsReady`), `html_ui_js_services_commbus.js`, `html_UI_Pages_VCockpit_Core_VCockpit.js` (the `OnInteractionEvent` handler, and the `/* FS Copilot Integration */` blocks that show the capture is FS Copilot's copy), and `html_UI_Pages_VCockpit_Instruments_Shared_BaseInstrument.js`.
 2. Documented in our record, read from the sim's `WasmSimCanvas.js` through the inspector: FS Copilot fork, `record/pointer-forwarding/docs/07-wasm-surface.md`, section "The input channel".
 3. Documented: MSFS 2024 SDK, [Coherent.js](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/JavaScript/Coherent.htm), as of 2026-09-27.
 4. Measured on MSFS 2024, 2026-08-30: FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 — Q00 is yes: the sim hosts a WebKit inspector and it evaluates anything".

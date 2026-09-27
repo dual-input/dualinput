@@ -43,6 +43,7 @@ FS Copilot's panel side, `channel.js`, handles what a document's short life does
 
 The app side is .NET's `HttpListener` with `AcceptWebSocketAsync`, bound to `127.0.0.1` [5].
 A published build, not run as administrator, bound `127.0.0.1:9020` and accepted a WebSocket upgrade [6].
+FS Copilot's later PR notes still list that test as not done [10], and we trust the log, which describes running it.
 How fast panels find a restarted app depends on the backoff: lengthening the wait after every failed port made them take about 80s, and lengthening it once per lap of the five ports brought that to about 20s [7].
 
 FS Copilot moved forwarded clicks onto this channel from its CommBus path because a drag of 240 points is about 2.4KB [5], and the client data areas on the CommBus path hold one 512-byte message each ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)).
@@ -70,6 +71,7 @@ Any process on the machine can connect to the same port, so the app has to decid
 7. Measured on MSFS 2024, 2026-09-01: FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-01 - Single-machine cockpit validation: the production pipeline works".
 8. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, "R12 · The panel listener accepts any origin", and `record/pointer-forwarding/docs/15-sim-session.md`, "1 · R12 — what Origin does Coherent actually send?".
 9. Measured on MSFS 2024, 2026-09-08: FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-11 — First multi-machine session, read from the app log", with our side's log in `record/pointer-forwarding/results/session-2026-09-08-app.txt`.
+10. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, the trimming risk in §12, "trimmed-publish survival" under "Not verified" in §14, and the unchecked publish item in §16.
 
 ## Unverified claims
 

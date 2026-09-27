@@ -64,7 +64,7 @@ Each part is marked with its depth:
 - Protocol versioning between the app and the module; packed structs
 - Debugging, crashes, required exports
 
-## 6. Glass cockpits and Coherent GT (full)
+## [6. Glass cockpits and Coherent GT (full)](06-01-the-engine-and-instruments.md)
 
 - Coherent GT: the Chrome 49 engine and its limits
 - VCockpit, `BaseInstrument`, `panel.cfg` gauges; the instrument lifecycle, lazy loading, reloads

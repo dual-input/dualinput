@@ -80,7 +80,7 @@ On the A350's MFD, the sim acted on each press and discarded its coordinates [7]
 
 1. With the real cursor parked on the IRS button, a replay sent moves toward another control, waited 400ms, and pressed: the IRS page opened.
 2. The same sequence in one JavaScript tick, with no wait, opened IRS again, 120 pixels from where every event said to press.
-3. 61 `WASM_MOUSE_MOVE` calls to the display's far corner moved neither the cursor the gauge draws nor what a press would hit.
+3. 61 `WASM_MOUSE_MOVE` calls to the display's far corner didn't move the cursor the gauge draws.
 4. A press sent while the real cursor was over nothing waited, and fired on the RETURN button when the real cursor next moved onto it.
 
 The sim keeps the hovered control from its own raycast against the physical mouse, and nothing in a document writes it [7].

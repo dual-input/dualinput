@@ -101,7 +101,7 @@ BaseInstrument  connectedCallback(): unless at the main menu, start a requestAni
                 wait until all instruments are loaded and SimVar.IsReady(); Init() once; Update() each frame
 ```
 
-The A220's own instrument class is 30 lines.
+The A220's own instrument class is 33 lines.
 It loads a 4MB bundle that draws the display, dispatches a DOM `update` event from `Update`, and turns each `H:` event that reaches `onInteractionEvent` into a DOM event [7].
 
 An instrument's `instrumentIdentifier` is its class's `templateID`, with `_<n>` added when the gauge's query holds `index=<n>`, and the document's title becomes `VCockpitNN - <instrumentIdentifier>` [7].
@@ -116,7 +116,7 @@ Three things stop or restart an instrument, all read from the sim's code [7]:
 | Trigger | What happens |
 | --- | --- |
 | The `quality` attribute the sim sets on the document | At `hidden` or `disabled`, the panel element is hidden; at `disabled`, `Update` stops |
-| The game state | At the main menu the frame loop ends; going from loading into the flight calls `reboot()` |
+| The game state | At the main menu the frame loop ends; going from loading into the briefing or the flight calls `reboot()`, and going from the briefing into the flight calls `onFlightStart()` |
 | `ShowVCockpitPanel` arriving at a panel that already has data | `window.location.reload()`: a fresh document, with every script, global, and instrument started again |
 
 When the sim changes `quality`, and when it sends panel data a second time, isn't in our records.
@@ -139,7 +139,7 @@ Naming one instrument the same way on both machines takes its identifier and its
 
 - A document's title isn't unique either: it's built from the identifier, so the two A220 CTP documents share one [7] [12].
 - `BaseInstrument.isInteractive` defaults to false, and FS Copilot's element-name sync skips every instrument that doesn't override it, such as the A220's MKP [7] [12].
-- A section can hold several gauges in one document: an A350 document listed as `VCockpit02 - WasmInstrument - WasmInstrument` holds two [3].
+- A section can hold several gauges in one document: a document listed as `VCockpit02 - WasmInstrument - WasmInstrument` holds two [3].
   [06-02](06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open) shows how that broke FS Copilot's loader.
 
 ## The MSFS Avionics Framework and Working Title avionics

@@ -4,7 +4,6 @@
 Purpose:  How everything an agent writes for this repository is written.
 Covers:   The record, code comments, commit messages, and instructions for agents.
 Loaded:   Into every main session, through the import in CLAUDE.md.
-          An agent definition that writes tells its agent to read this file.
 ```
 
 ## The test
@@ -109,9 +108,9 @@ Use a numbered prefix (`01-`) only where order matters, and write dates as `YYYY
 
 **One sentence per line** in the source, list items included.
 A diff then shows the sentence that changed rather than the paragraph that reflowed, and a sentence that runs off the edge of the editor is visibly too long.
-A table cell is the one exception, because it can't span lines.
+A table cell and a front-matter field are the exceptions, because neither can span lines.
 
-**Show the mechanism. Don't describe a property of it.**
+**Show the mechanism, not a property of it.**
 Naming a property makes the reader rebuild the concrete case to check the claim.
 Showing the case carries the conclusion and costs fewer words.
 
@@ -179,12 +178,13 @@ So every MSFS-specific claim says where it came from:
 
 - **Measured:** we ran it.
   Name the sim, the date, and the log entry: `(measured on MSFS 2024, <date>, [log](log.md#<entry>))`.
-  For a measurement outside this repository, cite the repository, path, and entry heading as text, because a link would break for anyone else: `(measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/09-environment.md)`.
 - **Documented:** a vendor or project says so.
   Link the page.
   Before a design leans on a documented claim, we measure it.
 - **Unverified:** an inference, a forum post, or a guess.
   Mark it unverified, and if anything depends on it, say what would settle it.
+
+For a source in another of our repositories, cite the repository, the path, and for a log the entry heading, as text, because a link would break for anyone else: `(measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/09-environment.md)`.
 
 Say which sim a claim holds for: 2020, 2024, or both.
 If only one was checked, say which.
@@ -208,8 +208,8 @@ Check function and API names against the SDK or the source before they go in.
   Where aviation leaves the unit ambiguous, it also carries its reference: heading true or magnetic, altitude MSL or AGL, speed IAS, TAS, or GS.
 - Sim units are named as the sim names them: `radians`, `Position 16k`, `percent over 100`.
 - Sim identifiers go in code format, with their namespace prefix, spelled as the sim spells them: `A:PLANE ALTITUDE`, `K:TOGGLE_LAUNCH_BAR_SWITCH`.
-- Measurements, limits, and anything a reader might compare or check are digits: 3,000 words, 150 lines.
-  A small count in running prose can be a word: two pilots, one job.
+- Measurements, and anything a reader might look up or compare, are digits: 3,000 words, 150 lines, 20ms.
+  A count under 10 in running prose can be a word, limits included: two pilots, one em dash.
 - Time units close up with no space: 20ms, 2s.
 - Printed counts handle the singular: "1 profile", never "1 profiles".
 - Dates are absolute, like 2026-09-27.
@@ -224,7 +224,7 @@ A committed document outlives the session that wrote it, and "I" leaves the read
 "We" is the project.
 Admissions stay in the first person: "we haven't tested this on MSFS 2020" is someone talking, and "this has not been tested" reads as evasion.
 
-**You, for the reader**, in procedures: "run the probe", "you'll see the lever move".
+**You, for the reader**, in procedures and agent instructions: "run the probe", "you'll see the lever move".
 
 **Plain.**
 No enthusiasm, no apology, no emoji, and no exclamation marks.
@@ -298,7 +298,7 @@ These patterns are beyond the lint, so the `doc-reviewer` agent looks for them:
   A colon, a period, or a pair of commas usually does better.
 - Put a callout box (`> **Note**`, GitHub alerts) only on an amendment pointer or on a warning that costs something if ignored.
 - Write paths with placeholders, never a real home folder: `%APPDATA%\Microsoft Flight Simulator 2024\`, `<user>`.
-- Quote sources briefly and link to them.
+- Quote sources briefly, and link to them or cite them as [Evidence](#evidence) says.
   Don't copy SDK doc pages into the record, because the repository will be public.
 
 ## Code comments
@@ -308,10 +308,11 @@ A comment earns its place by saying what the code can't: why it's this way, the 
 
 ```text
 ✗  // Use tagged data.
-✓  // SimConnect rejects a data definition for a variable the simulator doesn't have, and
-   // rejects it asynchronously, so a positional read shifts every later value onto the
-   // wrong variable. Tagged data says which variable each value is. (fsc-editor,
-   // docs/sim-vars/build/v1-log.md, 2026-08-23, "The A: read crashed the app")
+✓  // SimConnect rejects a data-definition entry for a variable the simulator doesn't have,
+   // but only later, so nothing fails where the entry was added. A positional read then
+   // shifts every later value onto the wrong variable, and tagged data says which
+   // variable each value is. (fsc-editor, docs/sim-vars/build/v1-log.md, "2026-08-23 —
+   // The `A:` read crashed the app. Positional reads were the wrong shape.")
 ```
 
 A workaround for sim behavior cites how we know, the same as a document does: a log entry, another document in `record/`, or an SDK page.
@@ -329,7 +330,7 @@ Until the repository goes public, a commit title only has to say what changed.
 - **Every line changes behavior.**
   Delete a line and ask whether an agent would act differently.
   If not, leave it deleted.
-  A new rule comes with the failure that prompted it.
+  A new rule's reason sentence names the failure that prompted it.
 - **Rule first, then the reason in one sentence.**
   The reason is what lets an agent handle the case the rule didn't name.
 - **Name the trigger.**
@@ -351,6 +352,6 @@ Until the repository goes public, a commit title only has to say what changed.
 
 1. Read it once, at speed, as its reader, and note each place you slowed down.
 2. Rewrite each of those places.
-3. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a file in `.claude/`, run the `doc-reviewer` agent.
+3. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a Markdown file in `.claude/`, run the `doc-reviewer` agent.
    Fix or answer each finding.
    You're done when its report opens by saying the document is ready.

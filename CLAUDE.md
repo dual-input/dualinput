@@ -1,8 +1,8 @@
 # Crosscheck
 
 Crosscheck is a shared cockpit for Microsoft Flight Simulator: two pilots on two PCs flying one aircraft, each seeing the other's switches, knobs, and displays move.
-As of 2026-09-27 we're learning the domain before building anything.
-The language, frameworks, and architecture are still open, so propose them rather than choosing.
+Don't write product code until a plan in `record/` has a stage for it.
+Until a decision in `record/decisions/` picks them, propose a language, framework, or architecture rather than choosing one.
 
 @record/writing.md
 
@@ -10,7 +10,7 @@ The language, frameworks, and architecture are still open, so propose them rathe
 
 - `docs/` is reserved for documentation people write for other people.
   Create or edit it only when asked, and keep the author's voice.
-- `record/` holds the documents agents write: design docs, plans, logs, decisions, and references.
+- `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.
 - `record/writing.md` is how everything agents write is written.
   It's imported above, so it's already loaded.
@@ -26,7 +26,7 @@ When 2020 needs its own code path, lacks something a design depends on, or needs
 ## Prior work
 
 Before Crosscheck we worked on FS Copilot, another shared-cockpit app, and on tools around it.
-Their records hold measured answers to many of the questions we'll have.
+Before designing a probe or planning a sim session, search their records, because they hold measured answers to many of the questions we'll have.
 They're sibling checkouts on the development machine.
 Read and run them, but don't edit their files, commit, or switch branches there, because each has its own work in progress.
 Build output and logs from running them are fine.
@@ -39,7 +39,6 @@ Build output and logs from running them are fine.
 | `../fsc-editor/` | A profile editor with its own SimConnect link (`src/main/sim/`), WASM module (`link/`), and relay (`relay/`). `docs/sim-vars/build/v1-log.md` is our most detailed record of how the sim behaves. | fsc-editor |
 | `../fsc-exerciser/` | A test bench that plays the second pilot on the same machine. | fsc-exerciser |
 
-Those paths exist only on the development machine.
 When the record uses one of their findings, restate it and cite it as [Evidence](record/writing.md#evidence) describes, using the names in the last column.
 
 Some of these records contradict each other.
@@ -62,7 +61,7 @@ On the day it goes public, we squash the history into one commit.
 
 **Nothing personal in the tree.**
 The squash removes old commits, not the files in the last one, so everything in the tree on that day goes public.
-Nothing committed may carry a username, a home folder path, a machine name, or an email address.
+No file in the tree may carry a username, a home folder path, a machine name, or an email address.
 Before committing, run this in Git Bash.
 No output means it found none of your account name, machine name, or email address:
 
@@ -84,5 +83,5 @@ That catches a file that doesn't parse at all, the failure that once broke every
 It doesn't catch syntax newer than Chrome 49, because Node accepts it.
 
 Anything injected into the pilot's own input path must fail open.
-In our FS Copilot work, a probe that wrapped a sim API disabled the aircraft's clicks, and the handle to undo it had already been deleted (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "13 · Dead ends").
+In our FS Copilot work, a probe that wrapped a sim API to suppress input was left installed and disabled the aircraft's clicks, and the handle to undo it had already been deleted (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "13 · Dead ends").
 So clear suppressing state unconditionally, expose a restore function at a fixed global that survives losing every other handle (FS Copilot's is `window.fscUnlock()`), and add a deadman timer that uninstalls the injection on its own.

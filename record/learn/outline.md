@@ -40,7 +40,7 @@ Each part is marked with its depth:
 - Enumerating vs. observing
 - Precision, change thresholds, and value types on the wire
 
-## 4. SimConnect (full)
+## [4. SimConnect (full)](04-01-connection-and-data.md)
 
 - What it is: client–server IPC; native, managed .NET, and third-party bindings
 - Connecting: `SimConnect.cfg`, named pipes, remote SimConnect, version detection

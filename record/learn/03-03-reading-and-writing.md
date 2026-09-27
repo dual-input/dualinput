@@ -87,7 +87,8 @@ Seeing `H:` events, listing `L:` variables, and running calculator code each nee
   The SDK documents `L:` in data definitions [8], FS Copilot reads and writes `L:` that way [3], and fsc-editor's own later language-core doc says so too [18].
   We trust the SDK and FS Copilot's source.
 - An aircraft can keep its state out of every namespace.
-  The A220's systems module publishes most of its live state, including the altimeter setting, on the CommBus, which SimConnect can't see [19].
+  The A220's systems module publishes most of its live state, including the altimeter setting, on the CommBus [19].
+  Our notes on the A220 say SimConnect can't see those channels [19], but the SDK documents SimConnect clients subscribing to CommBus events, so whether a SimConnect client can read the A220's is unverified ([04-01](04-01-connection-and-data.md#what-it-is)).
 
 ## Enumerating vs. observing
 

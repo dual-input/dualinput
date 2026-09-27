@@ -49,6 +49,7 @@ Each parameter must travel as an integer, in its documented slot.
   We trust the measurement.
 - An aircraft can take a key event over.
   An input event with `<Binding EventID=...>` intercepts it ([02-02](02-02-aircraft.md#model-behaviors)), and the A220's systems module intercepts a list of key events of its own [11].
+  A key event sent through SimConnect may skip that interception: Asobo said so for MSFS 2020 SU15, and it's unverified for 2024 ([04-02](04-02-events.md#client-events)).
   The same event can do different things on different aircraft.
 
 ## `B:` input events

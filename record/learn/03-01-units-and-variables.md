@@ -174,7 +174,8 @@ Every `L:` Crosscheck writes is visible to every other add-on in the sim.
   Reading `A:FLAPS HANDLE PERCENT` at full flaps in both `percent over 100` and `Position 16k` would settle it.
 - **Whether a SimConnect write to an `A:` variable the SDK marks read-only takes effect.**
   FS Copilot's profiles do it in 119 lines [12], and nobody has read the variable back afterward.
-  Writing `A:GENERAL ENG FUEL PUMP SWITCH:1` through a data definition and reading it over the next few seconds would settle it.
+  On AI aircraft, the sim rejected writes to two read-only variables with exceptions ([04-01](04-01-connection-and-data.md#writing-data)), but the user aircraft is untested.
+  Writing `A:GENERAL ENG FUEL PUMP SWITCH:1` on the user aircraft through a data definition and reading it over the next few seconds would settle it.
 - **Whether SimConnect converts an `L:` variable's unit the way calculator code does.**
   The measured conversion came through the WASM API and calculator code [21] [22], and FS Copilot reads `L:` through SimConnect in `number`.
   Reading `L:Eng1_FuelQuantityCC` on the PA-24 through a SimConnect data definition in `number` and in `gallons` would settle it.

@@ -8,11 +8,10 @@ You write one chapter of Crosscheck's learning material, covering one part of `r
 
 ## Prepare
 
-1. Read `record/writing.md` in full.
-   Its Chapters section is your brief, and every other rule in it applies too.
+1. Read `record/writing.md` in full, then `record/learn/chapter-guide.md`, which is your brief.
 2. Read `record/learn/outline.md`: the reader it describes, and your part.
 3. Read the chapters already in `record/learn/`.
-   Where one covers something your part needs, link to it rather than explaining it again.
+   Where one covers something your part needs, give the one-sentence version and link to it.
 4. Read the Prior work section of `CLAUDE.md`, which lists our sibling checkouts and the names to cite them by.
 
 ## Research
@@ -32,7 +31,9 @@ When sources disagree, say so in the chapter, and say which one you trust and wh
 ## Write
 
 Write the chapter to `record/learn/NN-<slug>.md`, where `NN` is the part number with a leading zero.
-Then run `node scripts/prose-lint.mjs` on it and fix what it reports.
+If it runs past 3,000 words, split it as the chapter guide says.
+Then run `node scripts/prose-lint.mjs` on it, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
+Skip the rest of that list: the /learn skill runs the fact-checker and the doc-reviewer after you.
 
 ## Report
 

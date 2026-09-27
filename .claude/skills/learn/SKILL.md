@@ -14,10 +14,15 @@ If an agent type isn't available, which happens when its definition was added af
 
 1. **Write.** Run the `chapter-writer` agent with the part number.
 2. **Check the facts.** Run the `fact-checker` agent on the new chapter, and fix every failure it reports.
+   Mark each claim it couldn't check as unverified, and add it to the chapter's closing list with what would settle it.
    If a fix turns on a design choice for Crosscheck, ask the user rather than choosing.
-3. **Review the prose.** Run the `doc-reviewer` agent on the chapter, and fix what it finds.
-   Run it again after fixing, up to two more times, until its report says the chapter is ready.
-4. **Link it.** Turn the part's heading in `record/learn/outline.md` into a link to the chapter.
+3. **Review the prose.** Run the `doc-reviewer` agent on the chapter.
+   Tell it the reader is the one `record/learn/outline.md` describes, that a chapter's shape is in `record/learn/chapter-guide.md`, and that the fact-checker has already checked the claims.
+   When you apply a rewrite, keep each claim's meaning and its reference.
+   If a rewrite changes a claim anyway, run the fact-checker again on that section.
+   Run the reviewer again after fixing, up to two more times.
+   If the third report still says the chapter isn't ready, stop, and give the user its findings instead of going on.
+4. **Link it.** Turn the part's heading in `record/learn/outline.md` into a link to the chapter, or to the first chapter if the part was split.
 5. **Commit** the chapter and the outline together.
 6. **Hand it over.** Give the user the chapter's path, its word count, and the claims still unverified.
    Don't summarize the chapter, because the user is about to read it.

@@ -26,6 +26,7 @@ The kind decides who reads it and what shape it takes.
 | Log | `record/<area>/log.md` | know what was found |
 | Decision | `record/decisions/NNN-<slug>.md` | know why one option won |
 | Reference | beside what it describes | look one thing up |
+| Outline | `record/learn/outline.md` | know what the learning covers, in what order and depth, and which parts have a chapter |
 | Chapter | `record/learn/NN-<slug>.md` | understand one part of the learning outline well enough to use it |
 | Agent instructions | `CLAUDE.md`, `.claude/`, and files `CLAUDE.md` imports, such as this one | act correctly without asking |
 
@@ -69,24 +70,10 @@ The reversing decision says what it reverses and links back.
 Tables and lists, with no argument.
 The reasoning lives in a design doc, and the reference links to it.
 
-### Chapters
+### Outline and chapters
 
-A chapter teaches one part of the [learning outline](learn/outline.md) to the reader the outline describes.
-It wastes none of the reader's time, and it skips none of the steps they need to understand.
-When those pull against each other, understanding wins: a skipped step saves the writer one sentence and costs the reader minutes.
-
-- Open with the outline's bullets for the part, as a list, with nothing before them.
-- Give each concept its own section, in outline order:
-  - the answer first, in one or two sentences, so a reader who already knows it can move on
-  - then the mechanism, shown with one real example, taken from our records where one exists
-  - then what it means for Crosscheck, in one to three sentences
-  - then its traps, each with its evidence
-- Pitch each section at the depth the outline gives its part.
-  At full depth, build from what the reader already knows, one step at a time.
-  At refresher depth, state the facts without building them up.
-- Leave out what the outline says the reader already knows.
-- Use a table or diagram wherever it replaces a paragraph, such as which namespaces each API can read.
-- End with the chapter's sources, then the claims nobody has verified, each with what would settle it.
+The outline and the chapters written from it follow [the chapter guide](learn/chapter-guide.md).
+It lives apart from this file because only a chapter writer needs it.
 
 ## Structure
 
@@ -194,7 +181,7 @@ Use the present for how things work, the past for what we did, and the future fo
 
 Our own records have been wrong: one fsc-editor log entry is headed "The `B:` subscription is a change feed; the entry below was wrong" (fsc-editor, `docs/sim-vars/build/v1-log.md`, 2026-09-04).
 A design built on a wrong claim fails in the sim weeks later, far from the sentence that caused it.
-So every MSFS-specific claim says where it came from:
+So every MSFS-specific claim, and any other claim a reader could ask "says who?" about, says where it came from:
 
 - **Measured:** we ran it.
   Name the sim, the date, and the log entry: `(measured on MSFS 2024, <date>, [log](log.md#<entry>))`.
@@ -209,8 +196,7 @@ For a source in another of our repositories, cite the repository, the path, and 
 Crosscheck targets MSFS 2024, so a claim is about 2024 unless it says otherwise.
 When a source describes MSFS 2020, say so, because 2024 may behave differently.
 
-A claim with no marker is general knowledge that holds outside MSFS, like "UDP doesn't guarantee delivery".
-If a reader could reasonably ask "says who?", it needs a marker.
+A claim with no marker is knowledge a working developer accepts without a source, like "UDP doesn't guarantee delivery".
 
 Say what we don't know.
 A gap that's stated can be closed, and a gap that's skipped is a trap.
@@ -372,6 +358,7 @@ Until the repository goes public, a commit title only has to say what changed.
 
 1. Read it once, at speed, as its reader, and note each place you slowed down.
 2. Rewrite each of those places.
-3. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a Markdown file in `.claude/`, run the `doc-reviewer` agent.
+3. If it makes MSFS claims a design will lean on, run the `fact-checker` agent and fix what it reports.
+4. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a Markdown file in `.claude/`, run the `doc-reviewer` agent.
    Fix or answer each finding.
    You're done when its report opens by saying the document is ready.

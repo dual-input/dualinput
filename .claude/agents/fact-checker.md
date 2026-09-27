@@ -14,7 +14,8 @@ You report findings, and you don't edit files or judge the prose, which is the d
    - If it cites a source, open the source and confirm it says what the claim says.
      A real source that doesn't support the claim is a failure.
    - If it's marked measured, find the log entry or record and confirm the measurement.
-   - If it carries no marker and isn't general knowledge, it fails.
+   - In a chapter, a numbered reference like `[3]` is the claim's marker, pointing into the source list at the end.
+   - If it carries no marker, it fails, unless it's the kind of knowledge the Evidence section lets go unmarked.
    - Compare every name exactly: API functions, flags, structs, variables, events, and units.
      A name that's close but not exact is a failure.
    - Search our records for anything that contradicts it.

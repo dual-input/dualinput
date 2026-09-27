@@ -102,7 +102,7 @@ The SDK header calls `H:` events "events distributed to js vcockpits", and decla
 
 A JavaScript instrument receives `H:` events through its `onInteractionEvent` method.
 FS Copilot's panel hook wraps that method on each instrument and forwards `_args[0]`, the event's name [21].
-It reports an event only from the one instrument whose random ID is in `L:FSC_HOOK` [21], which suggests that every instrument receives every event (unverified).
+It reports an event only from the one instrument whose random ID is in `L:FSC_HOOK` [21], because MSFS's stock `VCockpit.js` hands each `H:` event to every instrument in a document unless the sim names a target ([06-02](06-02-apis-debugger-and-injection.md#the-js-apis-coherentcall-simvar-commbus-listeners)).
 FS Copilot holds each `H:` event for 500ms before sending it to the other machine, where its WASM module fires the event through calculator code [5] [22].
 
 **What it changes for Crosscheck.**
@@ -172,8 +172,8 @@ The SDK's list has six more prefixes: `F:` for built-in functions, `G:` for gaug
 
 ## Unverified claims
 
-- **Every JavaScript instrument receives every `H:` event.**
-  FS Copilot's hook elects one instrument to report events [21], which only makes sense if several receive them, and nobody has logged it.
+- **Which `H:` events the sim sends to a named instrument rather than to every instrument.**
+  The stock `VCockpit.js` broadcasts an event within its document unless the sim names a target ([06-02](06-02-apis-debugger-and-injection.md#the-js-apis-coherentcall-simvar-commbus-listeners)), and nobody has logged which events arrive with one.
   Logging `onInteractionEvent` in two instruments of one aircraft while pressing a keypad key would settle it.
 - **Which name SimConnect reports for an input event.**
   The A220 lists `<InputEvent ID>` values [18], and the PA-24 reported a preset's name ([02-02](02-02-aircraft.md#unverified-claims)).

@@ -183,11 +183,51 @@ function lint(file, text, ranges) {
     if (bold > 1) add(first, `${bold} bold phrases in one paragraph. Bold only the one a skimmer must catch.`)
   }
 
+  checkReferences(lines, add, inRange)
+
   if (!ranges) {
     const words = lines.reduce((sum, l) => sum + (l.code.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) || []).length, 0)
     if (words > WORD_LIMIT) add(1, `${words} words. Past ${WORD_LIMIT}, look for a second job to split out.`)
   }
   return findings.sort((a, b) => a.line - b.line)
+}
+
+// A document with a "## Sources" section cites it with numbered references like [3]. A source
+// added by hand once reused a number already taken, and the citation it was meant for pointed
+// at a different source without anything failing.
+function checkReferences(lines, add, inRange) {
+  const start = lines.findIndex((l) => l.heading && /^#{1,6}\s+Sources\s*$/.test(l.code.trim()))
+  if (start < 0) return
+  let end = lines.findIndex((l, i) => i > start && l.heading)
+  if (end < 0) end = lines.length
+
+  const sources = new Map()
+  for (const l of lines.slice(start + 1, end)) {
+    const item = l.code.match(/^(\d+)\.\s/)
+    if (!item) continue
+    const n = Number(item[1])
+    if (sources.has(n)) {
+      if (inRange(l.n)) add(l.n, `Source ${n} is numbered twice, also at line ${sources.get(n)}.`)
+    } else {
+      sources.set(n, l.n)
+    }
+  }
+  const numbers = [...sources.keys()].sort((a, b) => a - b)
+  numbers.forEach((n, i) => {
+    if (n !== i + 1 && inRange(sources.get(n))) add(sources.get(n), `Source ${n} breaks the sequence: expected ${i + 1}.`)
+  })
+
+  const cited = new Set()
+  for (const l of lines) {
+    for (const m of l.code.matchAll(/\[(\d+)\](?!\()/g)) {
+      const n = Number(m[1])
+      cited.add(n)
+      if (!sources.has(n) && inRange(l.n)) add(l.n, `Reference [${n}] has no entry in the Sources list.`)
+    }
+  }
+  for (const [n, line] of sources) {
+    if (!cited.has(n) && inRange(line)) add(line, `Source ${n} is never cited.`)
+  }
 }
 
 function checkLink(file, dest, cache) {

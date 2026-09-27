@@ -26,6 +26,7 @@ The kind decides who reads it and what shape it takes.
 | Log | `record/<area>/log.md` | know what was found |
 | Decision | `record/decisions/NNN-<slug>.md` | know why one option won |
 | Reference | beside what it describes | look one thing up |
+| Chapter | `record/learn/NN-<slug>.md` | understand one part of the learning outline well enough to use it |
 | Agent instructions | `CLAUDE.md`, `.claude/`, and files `CLAUDE.md` imports, such as this one | act correctly without asking |
 
 A document that's two kinds at once serves neither reader.
@@ -67,6 +68,25 @@ The reversing decision says what it reverses and links back.
 
 Tables and lists, with no argument.
 The reasoning lives in a design doc, and the reference links to it.
+
+### Chapters
+
+A chapter teaches one part of the [learning outline](learn/outline.md) to the reader the outline describes.
+It wastes none of the reader's time, and it skips none of the steps they need to understand.
+When those pull against each other, understanding wins: a skipped step saves the writer one sentence and costs the reader minutes.
+
+- Open with the outline's bullets for the part, as a list, with nothing before them.
+- Give each concept its own section, in outline order:
+  - the answer first, in one or two sentences, so a reader who already knows it can move on
+  - then the mechanism, shown with one real example, taken from our records where one exists
+  - then what it means for Crosscheck, in one to three sentences
+  - then its traps, each with its evidence
+- Pitch each section at the depth the outline gives its part.
+  At full depth, build from what the reader already knows, one step at a time.
+  At refresher depth, state the facts without building them up.
+- Leave out what the outline says the reader already knows.
+- Use a table or diagram wherever it replaces a paragraph, such as which namespaces each API can read.
+- End with the chapter's sources, then the claims nobody has verified, each with what would settle it.
 
 ## Structure
 
@@ -224,7 +244,7 @@ A committed document outlives the session that wrote it, and "I" leaves the read
 "We" is the project.
 Admissions stay in the first person: "we haven't tested this over the relay" is someone talking, and "this has not been tested" reads as evasion.
 
-**You, for the reader**, in procedures and agent instructions: "run the probe", "you'll see the lever move".
+**You, for the reader**, in procedures, chapters, and agent instructions: "run the probe", "you'll see the lever move".
 
 **Plain.**
 No enthusiasm, no apology, no emoji, and no exclamation marks.

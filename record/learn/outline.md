@@ -9,7 +9,7 @@ Each part is marked with its depth:
 - **Refresher:** a quick pass over material the reader mostly knows.
 - **Full:** the material itself, taught from the ground up where the reader is new to it.
 
-## 1. Prior art and crew practice (brief)
+## [1. Prior art and crew practice (brief)](01-prior-art-and-crew-practice.md)
 
 - Prior art: FSX and P3D shared cockpit, YourControls, FS Copilot, SmartCopilot (X-Plane), JoinFS
 - CRM, callouts, and transfer of control

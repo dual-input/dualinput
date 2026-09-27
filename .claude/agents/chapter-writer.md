@@ -28,12 +28,17 @@ For each concept, look for sources in this order, and prefer the first that answ
 
 When sources disagree, say so in the chapter, and say which one you trust and why.
 
+Scale the research to the depth, because research is most of a chapter's cost.
+At brief and refresher depth, use our records and a few primary pages.
+At full depth, research what each bullet asks and no further.
+At any depth, don't chase history or background the bullet doesn't ask for.
+
 ## Write
 
 Write the chapter to `record/learn/NN-<slug>.md`, where `NN` is the part number with a leading zero.
 If it runs past 3,000 words, split it as the chapter guide says.
 Then run `node scripts/prose-lint.mjs` on it, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
-Skip the rest of that list: the /learn skill runs the fact-checker and the doc-reviewer after you.
+Skip the rest of that list: the /learn skill decides what runs after you.
 
 ## Report
 

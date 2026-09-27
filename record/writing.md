@@ -359,6 +359,6 @@ Until the repository goes public, a commit title only has to say what changed.
 1. Read it once, at speed, as its reader, and note each place you slowed down.
 2. Rewrite each of those places.
 3. If it makes MSFS claims a design will lean on, run the `fact-checker` agent and fix what it reports.
-4. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a Markdown file in `.claude/`, run the `doc-reviewer` agent.
+4. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a Markdown file in `.claude/`, run the `doc-reviewer` agent, unless it's a chapter, which its reader reviews.
    Fix or answer each finding.
    You're done when its report opens by saying the document is ready.

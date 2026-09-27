@@ -38,7 +38,7 @@ ingress:  physics 4 × 2.3 KB/s + traffic 1.8 + audio 3 (while talking)  ≈ 14 
 egress:   ingress × 3                                                    ≈ 42 KB/s  (~340 kbps)
 ```
 
-A hundred such sessions at once would send about 45 Mbps out of the relay [4].
+The record puts a hundred such sessions at about 45 Mbps out of the relay, though its own per-session figure of 42 KB/s gives about 34 Mbps, and it doesn't say what makes up the difference [4].
 
 Every relayed packet crosses two legs, sender to relay and relay to receiver, and our fork's relay loop adds up to 10ms of its own [4].
 So where the relay sits sets the delay.

@@ -58,7 +58,7 @@ UPnP and NAT-PMP let the app add that rule itself:
 - With UPnP, the app finds the router by a multicast search on the home network and asks its Internet Gateway Device service, `WANIPConnection`, to add a mapping [7].
 - With NAT-PMP, the app sends a UDP request to port 5351 on its gateway, and RFC 6886 notes that the Port Control Protocol (PCP) superseded it in 2013 [8].
 
-FS Copilot tries both when it starts, through the Open.NAT library: UPnP first, with 3s to find a device, then NAT-PMP [9].
+FS Copilot tries both when it starts, through the Open.Nat.V2 library, version 3.1.1: UPnP first, with 3s to find a device, then NAT-PMP [9].
 When UPnP finds a router, the app binds its socket to the local address that faces that router and asks for the same port number outside as inside [9].
 On our development machine, neither a UPnP search for an Internet Gateway Device nor a NAT-PMP request to the router got an answer [3].
 

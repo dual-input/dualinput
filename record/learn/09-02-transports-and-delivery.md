@@ -90,7 +90,7 @@ Every method but `Unreliable` travels on a numbered channel, and its header grow
 A reliable channel keeps up to 64 packets in flight, and the receiver acknowledges what arrives [9] [13].
 A packet that isn't acknowledged in time goes again after 25ms plus 2.1 times the average RTT, which the source comments as "25 ms + double rtt" [13].
 
-Here is head-of-line blocking on one reliable-ordered channel, on a direct link with a 117ms RTT, about the round trip from our development machine to New York (arithmetic from source [13]):
+Here is head-of-line blocking on one reliable-ordered channel, on a direct link with a 117ms RTT, the round trip we measured from our development machine to New York ([09-01](09-01-addresses-and-link-quality.md#latency-jitter-loss-and-bandwidth-typical-figures-on-a-lan-vs-the-internet)), with the timings worked out from source [13]:
 
 ```text
 t =   0ms   cockpit update A is sent on channel 1 and lost
@@ -125,7 +125,7 @@ Which MTU to design for is an open question: LiteNetLib starts at 1,024 bytes, I
 **Traps.**
 
 - LiteNetLib's `Unreliable` packets have no channel field, so they arrive as channel 0 whatever the sender asked, which broke our fork's first relay protocol ([08-03](08-03-ordering-and-classes-of-data.md#classes-of-data-what-must-arrive-vs-what-can-be-dropped)).
-- A burst bigger than the window waits for acknowledgments: a joining peer's 130 or so traffic identities need at least two round trips through a 64-packet window [18].
+- A burst bigger than the window waits for acknowledgments: a joining peer's hundred-odd traffic identities need at least two round trips through a 64-packet window [18].
 - The fragments of a large reliable message share its channel, so one lost fragment holds the whole message and everything queued behind it on that channel (unverified).
 
 ## Sources

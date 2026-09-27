@@ -103,7 +103,7 @@ Each part is marked with its depth:
 - Detecting divergence and correcting it
 - Two pilots on one screen: both working the same display, such as an MCDU or a touchscreen, at the same moment
 
-## 9. Networking (full, from the ground up)
+## [9. Networking (full, from the ground up)](09-01-addresses-and-link-quality.md)
 
 - Addresses and ports: public vs. private addresses, what a home router does
 - Latency, jitter, loss, and bandwidth: typical figures on a LAN vs. the internet

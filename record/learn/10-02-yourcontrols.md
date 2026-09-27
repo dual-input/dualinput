@@ -47,10 +47,10 @@ each pilot's PC
 | Panel scripts | Inside every panel document, loaded by YourControls' copy of `VCockpit.js` | Report `H:` events, touchscreen clicks, and text entry, and replay the other pilot's | [06-02](06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open) |
 | `yourcontrols-server` | A server, as one process with a rendezvous thread and a hoster thread [8] | Hands out session codes, introduces pilots for Cloud P2P, and hosts Cloud Host sessions | [09-03](09-03-nat-and-traversal.md#stun-turn-ice-and-hole-punching), [09-04](09-04-relays-and-sessions.md#relays-when-theyre-needed-hosting-fan-out-cost) |
 
-Each pass of the main loop drains SimConnect's messages, drains what the network thread passed it, handles one message from the UI, and sends what changed, then sleeps 10ms if the pass took less [1] [3].
+Each pass of the main loop drains SimConnect's messages, drains what the network thread passed it, sends what changed, and handles one message from the UI, then sleeps 10ms if the pass took less [1] [3].
 The network thread and the main loop talk through channels, and only the main loop touches the sim and the sync state [1] [2].
 
-The module's source isn't in the repository: `src/yourcontrols-gauge` holds only a Rust `Cargo.lock`, and the built module's strings name a C++ file, `YourControlsGauge.cpp` [6].
+The module's source isn't in the repository: `src/yourcontrols-gauge` holds only a Rust `Cargo.lock` and a `.cargo/Config.toml`, and the built module's strings name a C++ file, `YourControlsGauge.cpp` [6].
 It exports `module_init` and `module_deinit` and no `Update_StandAlone`, and its only import that can set a variable or fire an event is `execute_calculator_code` [6].
 
 ### One switch flip
@@ -106,7 +106,8 @@ Nobody has measured their actual rate, the delay the module adds, or whether its
 
 **Authority lives with the host.**
 The host starts in control.
-The pilot in control gives it away with a button or with `K:TOGGLE_LAUNCH_BAR_SWITCH`, a pilot without it takes it with a Take Control button or the same key, and the host can make a pilot an observer, whose updates the other machines ignore [3] [9].
+The pilot in control gives it away with a button or with `K:TOGGLE_LAUNCH_BAR_SWITCH`, a pilot without it takes it with a Take Control button or the same key, and an observer's updates are ignored by the other machines [3] [9].
+On a pilot-hosted session only the host can make a pilot an observer, but the Cloud Host server applies anyone's observer command without checking the sender [2] [8].
 YourControls' documentation describes only giving [10], and the source has both, which we trust for what the build does.
 The host tells each joiner who is in control, and each machine takes `master:` entries only from that pilot [2] [3] [4].
 When the pilot in control leaves, the host takes control back ([08-01](08-01-replication-models-and-authority.md#authority-pilot-in-control-per-system-or-per-control-ownership-handover-contention)), and on Cloud Host the hoster hands it to a remaining pilot [8].

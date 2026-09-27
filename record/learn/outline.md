@@ -117,7 +117,7 @@ Each part is marked with its depth:
 - Security: authentication, encryption, validating what a peer writes into your sim
 - Connection lifecycle: heartbeats, timeouts, a clean leave vs. an outage, reconnecting
 
-## 10. Case studies
+## [10. Case studies](10-01-fs-copilot.md)
 
 - FS Copilot internals, from our records
 - YourControls

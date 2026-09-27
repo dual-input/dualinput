@@ -94,7 +94,8 @@ The SDK answers the first question for the sim's own systems, and [part 7](outli
 - SimConnect rejects a data-definition entry for a variable the sim doesn't have, but only later, so nothing fails where the entry was added.
   fsc-editor's app then read past the end of a message and crashed, and requesting tagged data fixed it [14].
 - An aircraft can ignore an `A:` variable.
-  The A220's systems module never reads `A:KOHLSMAN SETTING MB`, so that variable reports an altimeter setting the pilot's displays don't use [7].
+  The name `A:KOHLSMAN SETTING MB` appears nowhere in the A220's systems module [7], so that variable likely reports an altimeter setting the pilot's displays don't use.
+  A module can read the variable by its SDK number without the name, so only a flight can prove it ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
 
 ## `L:` and `Z:` local variables
 

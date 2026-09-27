@@ -107,7 +107,7 @@ Our FS Copilot fork moved forwarded clicks off this path, to a WebSocket from ea
 [Part 6](outline.md#6-glass-cockpits-and-coherent-gt-full) covers that WebSocket.
 
 Aircraft use the CommBus too.
-The Synaptic A220's systems module publishes its state as JSON on more than 30 named channels, such as `A22X.L PFD Data`, for its JavaScript displays to draw, and the selected altimeter setting exists nowhere else: no `L:` or `A:` variable holds it [15].
+The Synaptic A220's systems module publishes its state as JSON on more than 30 named channels, such as `A22X.L PFD Data`, for its JavaScript displays to draw, and the selected altimeter setting appears on no other channel we've found: no `L:` variable holds it, and the `A:` variable's name is absent from the module [15], which a flight has yet to confirm ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
 
 **What it changes for Crosscheck.**
 Some aircraft keep state only on the CommBus, and a Crosscheck module could register for the same names to read it, but it receives only calls whose sender set the WASM flag.

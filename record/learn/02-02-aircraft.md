@@ -181,6 +181,7 @@ One click can surface as an input event, an `H:` event, an `L:` write, or nothin
 
 - **Streamed and Marketplace aircraft have no readable `aircraft.cfg` on disk.**
   One forum report says so [9], and our measurements are all of Community aircraft.
+  An iniBuilds A380 in the `Official2024` folder keeps its content in `.fsarchive` files, with only its `manifest.json` readable ([07](07-aircraft-specific-systems.md#matching-aircraft)).
   Reading the path `AircraftLoaded` reports for a stock MSFS 2024 aircraft, and checking whether the file exists, would settle it.
 - **The input event name SimConnect reports is the template's preset name, uppercased.**
   The one example matches [18] [19], but nobody has compared a full enumeration against the XML, and the PA-24 uses the 2020 template set.

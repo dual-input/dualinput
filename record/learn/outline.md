@@ -77,7 +77,7 @@ Each part is marked with its depth:
 - Pop-out windows
 - WebSockets from a panel to localhost
 
-## 7. Aircraft-specific systems (refresher)
+## [7. Aircraft-specific systems (refresher)](07-aircraft-specific-systems.md)
 
 - Why study-level aircraft diverge: their own systems code, variables, and events
 - How major addons expose state: FlyByWire, PMDG, Fenix, iniBuilds, the Asobo defaults

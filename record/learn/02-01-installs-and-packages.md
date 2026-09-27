@@ -88,7 +88,8 @@ If it overrides a core file, it competes with FS Copilot and YourControls, which
 3. Documented: MSFS 2024 SDK, [Using The SDK](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/Using_The_SDK.htm).
 4. Documented: MSFS 2024 SDK, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm), sections on package precedence, mount order, and VFS overriding.
 5. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/10-module.md`, sections "Building" and "The conflict, and why the build refuses".
-6. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, the built package's `FsCopilot.Bridge/Packages/fscopilot-bridge/manifest.json` and `layout.json`, and its package definition, `FsCopilot.Bridge/PackageDefinitions/fscopilot-bridge.xml`.
+6. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, the package definition `FsCopilot.Bridge/PackageDefinitions/fscopilot-bridge.xml`.
+   Read from disk: the built package's `manifest.json` and `layout.json` under `FsCopilot.Bridge/Packages/fscopilot-bridge/`, which the fork's `.gitignore` excludes.
 7. Measured on MSFS 2024, 2026-08-23: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — First 2a attempt: the module did not load".
 8. Documented: MSFS 2024 SDK, [The Project Inspector](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Project_Editor/The_Project_Inspector.htm), sections "Package Order Hint" and "Globally Overridden Files".
 9. Measured on MSFS 2024, 2026-08-30: FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - The prototype module works end to end in the simulator".

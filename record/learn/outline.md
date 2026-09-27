@@ -53,7 +53,7 @@ Each part is marked with its depth:
 - The AI objects API and the Facilities API
 - Throughput, threading, and reconnects
 
-## 5. WASM modules (full)
+## [5. WASM modules (full)](05-01-kinds-lifecycle-and-apis.md)
 
 - Gauge vs. standalone modules; the sandbox: no sockets, restricted file access, the work folder
 - Lifecycle: init, per-frame update, deinit

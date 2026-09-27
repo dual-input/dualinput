@@ -1,0 +1,5 @@
+# Text is stored with LF endings.
+# Batch files keep CRLF, because cmd.exe can misread labels in a file with LF endings.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf

@@ -38,7 +38,8 @@ The operators, from the SDK [1]:
 | Strings | Single quotes, with `scat` to join and `scmp` to compare |
 
 Inside the sim, a WASM module runs calculator code with `execute_calculator_code` [2].
-We know of no SimConnect function that runs calculator code (unverified), so FS Copilot's and fsc-editor's apps each pass it to their own WASM module to run [3] [6].
+No SimConnect function runs calculator code: of the 117 in `SimConnect.h`, the nearest, `SimConnect_ExecuteAction`, calls a named action from an XML file [5] [30].
+So FS Copilot's and fsc-editor's apps each pass calculator code to their own WASM module to run [3] [6].
 When fsc-editor ran `1 (>L:Battery1Switch)` that way, it got back `ok` and 0, because a write leaves nothing on the stack [6].
 
 **What it changes for Crosscheck.**
@@ -192,6 +193,7 @@ For each variable, Crosscheck needs a wire type that keeps every value the recei
 27. Measured on MSFS 2024, 2026-08-24: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — An aircraft keeps five names for one lever".
 28. Measured on MSFS 2024, 2026-09-04: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-09-04 — The `B:` subscription is a change feed; the entry below was wrong".
 29. Documented, read from FS Copilot's source: fsc-editor, `docs/fscopilot-behavior.md`, sections "How a change leaves this machine", "What type a value is", and "K: event parameters are coerced to uint", checked against `FsCopilot/Simulation/Coordinator.cs` in the FS Copilot fork at 9d4e864.
+30. Documented: MSFS 2024 SDK, [SimConnect_ExecuteAction](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_ExecuteAction.htm).
 30. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, `FsCopilot/Connection/SimConnectExtensions.cs`, `InferDataType`.
 31. Documented in our record: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Stage 2b: the module streams. Transport built, untested against the sim.", which describes the module's design; the entry itself says it hadn't yet run against the sim.
 
@@ -202,6 +204,3 @@ For each variable, Crosscheck needs a wire type that keeps every value the recei
   Reading every `L:` a profile syncs both ways for one flight, and listing those that differ, would settle it.
 - **Whether SimConnect rounds or truncates a value it converts to `INT32`.**
   Reading `A:GENERAL ENG THROTTLE LEVER POSITION:1` in `percent` as both `FLOAT64` and `INT32` with the lever at a fractional position would settle it.
-- **No SimConnect call runs calculator code.**
-  `SimConnect.h` declares none by that description [5], and we haven't checked what `SimConnect_ExecuteAction` accepts.
-  Reading its SDK page, and calling it with a calculator expression, would settle it.

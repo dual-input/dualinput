@@ -20,8 +20,8 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 
 ## Targets
 
-Build for MSFS 2024, and make everything work on MSFS 2020 too.
-When 2020 needs its own code path, lacks something a design depends on, or needs a workaround 2024 doesn't, stop and raise it, rather than dropping 2020 or quietly working around it.
+Crosscheck supports MSFS 2024 only.
+Don't spend effort on MSFS 2020 compatibility, and don't assume a 2020 source holds for 2024.
 
 ## Prior work
 
@@ -74,7 +74,6 @@ It can't see inside images or compressed files, so check screenshots and capture
 ## Before writing code that runs in a panel
 
 MSFS 2024 panels run in Coherent GT, whose engine is Chrome 49 (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`).
-We haven't checked MSFS 2020, and running the same probe (FS Copilot fork, `record/pointer-forwarding/probes/p08-environment.js`) in a 2020 panel would settle it.
 These are syntax errors there, and a syntax error takes out the whole file rather than one line: optional chaining (`a?.b`), `??`, logical assignment (`||=`, `&&=`, `??=`), class fields and `#private` members, and numeric separators (`1_000`).
 `Object.fromEntries`, `Array.prototype.at`, `String.prototype.replaceAll`, and `Promise.allSettled` don't exist, and fail when called.
 

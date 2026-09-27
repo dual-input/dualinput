@@ -186,8 +186,8 @@ So every MSFS-specific claim says where it came from:
 
 For a source in another of our repositories, cite the repository, the path, and for a log the entry heading, as text, because a link would break for anyone else: `(measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/09-environment.md)`.
 
-Say which sim a claim holds for: 2020, 2024, or both.
-If only one was checked, say which.
+Crosscheck targets MSFS 2024, so a claim is about 2024 unless it says otherwise.
+When a source describes MSFS 2020, say so, because 2024 may behave differently.
 
 A claim with no marker is general knowledge that holds outside MSFS, like "UDP doesn't guarantee delivery".
 If a reader could reasonably ask "says who?", it needs a marker.
@@ -222,7 +222,7 @@ Check function and API names against the SDK or the source before they go in.
 **We, not I.**
 A committed document outlives the session that wrote it, and "I" leaves the reader guessing whether a person or an agent wrote it, and which one.
 "We" is the project.
-Admissions stay in the first person: "we haven't tested this on MSFS 2020" is someone talking, and "this has not been tested" reads as evasion.
+Admissions stay in the first person: "we haven't tested this over the relay" is someone talking, and "this has not been tested" reads as evasion.
 
 **You, for the reader**, in procedures and agent instructions: "run the probe", "you'll see the lever move".
 

@@ -1,0 +1,121 @@
+p01 · how panel JavaScript reaches the CommBus
+2026-09-28T18:07:41.147Z
+26 inspectable documents, 14 with "vcockpit" in the title
+
+1 · Panels
+   11  VCockpit14 - Sentry                  coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   12  VCockpit13 - efbA220_2               coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   13  VCockpit12 - efbA220_1               coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   14  VCockpit11 - FCP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   15  VCockpit10 - FCP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   16  VCockpit09 - FCP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   17  VCockpit08 - FCP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   18  VCockpit07 - ISI                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   19  VCockpit06 - CTP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   20  VCockpit05 - CTP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   21  VCockpit04 - MKP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   22  VCockpit03 - MKP                     coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   23  VCockpit02 - DisplayUnits            coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+   24  VCockpit01 - WasmInstrument          coui://html_UI/Pages/VCockpit/Core/VCockpit.html
+
+2 · What each panel has
+   11  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   12  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   13  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   14  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   15  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   16  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   17  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   18  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   19  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   20  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   21  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   22  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   23  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+   24  RegisterCommBusListener function, Coherent.on function, source set 7e18461e1c
+
+  1 distinct set of listener source across the panels.
+
+3 · The listener code
+  Read from panel 11, VCockpit14 - Sentry.
+
+  Types:
+    RegisterCommBusListener      function
+    RegisterViewListener         function
+    ViewListener                 object
+    ViewListener.ViewListener    function
+    Coherent                     object
+    Coherent.on                  function
+    Coherent.off                 function
+    Coherent.call                function
+    Coherent.trigger             function
+
+  Functions and methods read:
+    RegisterCommBusListener                              133 chars
+    RegisterViewListener                                 161 chars
+    ViewListener.ViewListener                            5202 chars
+    ViewListener.ViewListener.prototype.onGlobalEvent    471 chars
+    ViewListener.ViewListener.prototype.off              912 chars
+    ViewListener.ViewListener.prototype.on               794 chars
+    ViewListener.ViewListener.prototype.call             381 chars
+    ViewListener.ViewListener.prototype.trigger          236 chars
+    ViewListener.ViewListener.prototype.triggerToAllSubscribers 332 chars
+    Coherent.on                                          1153 chars
+    Coherent.off                                         683 chars
+    Coherent.call                                        496 chars
+    Coherent.trigger                                     336 chars
+    RegisterViewListenerT                                2534 chars
+
+  Coherent calls made with a literal name:
+    Coherent.on("EVENT_FROM_VIEW_LISTENER")
+    Coherent.on("ON_VIEW_LOADED")
+    Coherent.trigger("ADD_VIEW_LISTENER")
+    Coherent.trigger("EVENT_TO_VIEW_LISTENER")
+    Coherent.trigger("TRIGGER_EVENT_TO_ALL_SUBSCRIBERS")
+
+  Properties the code assigns on this (where a list of registrations would live):
+    CheckCoherentEvent, connected, eventFromViewListenerHandle, eventHandlers, m_name, onEventToAllSubscribers, unregister
+
+  Own properties of Coherent:
+    isAttached: boolean, forceEnableMocking: boolean, IsAttached: boolean, onEventsReplayed: object, triggerIterationRecDepth: number, events: object, eventsToDelete: object, _createClear: function, on: function, off: function, trigger: function, merge: function, _trigger: function, showOverlay: function, hideOverlay: function, mock: function, _BindingsReady: boolean, _WindowLoaded: boolean, _RequestId: number, _ActiveRequests: object, call: function, _Result: function, _Errors: object, _ForEachError: function, _MapErrors: function, _TriggerError: function, _OnError: function, _eventHandles: object, _Register: function, _removeEventThunk: function, _Unregister: function, _boundTypes: object, _createInstance: function, _OnReady: function, _OnWindowLoaded: function, _ThrowError: function, reloadLocalization: function, isViewLoaded: boolean
+
+  Globals whose name mentions comm bus or view listener:
+    ViewListener: object, RegisterCommBusListener: function, RegisterViewListenerT: function, RegisterViewListener: function
+
+  Source for panels 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24 saved to experiments/sim-sources/commbus/p01-vcockpit14-sentry-7e18461e1c.js
+
+4 · Objects on window whose constructor looks like a listener
+   11  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   12  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   13  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   14  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   15  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   16  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   17  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   18  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   19  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   20  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   21  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   22  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   23  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+   24  window.globalInstrumentListener: ViewListener { connected, eventHandlers, CheckCoherentEvent, unregister, onEventToAllSubscribers, m_name, eventFromViewListenerHandle, m_onConnected, urlCaller }
+
+5 · Scripts that mention the CommBus
+  coui://html_ui/js/services/commbus.js
+      RegisterCommBusListener 1, callWasm 1, callSimConnect 1, callAll 1, COMM_BUS 4, defines RegisterCommBusListener; panels 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+  coui://html_ui/fscopilot/bus.js
+      RegisterCommBusListener 1, callWasm 1; panels 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+  coui://html_ui/pages/vcockpit/instruments/a22x/sentry/instrument.js
+      COMM_BUS 2; panels 11
+  coui://html_ui/pages/vcockpit/instruments/efb-a220/efb-a220.js
+      COMM_BUS 10; panels 12, 13
+  coui://html_ui/pages/vcockpit/instruments/a22x/fcp/instrument.js
+      COMM_BUS 2; panels 14, 15, 16, 17
+  coui://html_ui/pages/vcockpit/instruments/a22x/isi/instrument.js
+      COMM_BUS 2; panels 18
+  coui://html_ui/pages/vcockpit/instruments/a22x/ctp/instrument.js
+      COMM_BUS 2; panels 19, 20
+  coui://html_ui/pages/vcockpit/instruments/a22x/displayunits/instrument.js
+      COMM_BUS 2; panels 23
+
+32 distinct scripts scanned.

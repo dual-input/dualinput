@@ -1,0 +1,256 @@
+{
+ "A220.Sentry Heartbeat": {},
+ "A22X.ISI Data": {
+  "pitch": 0.19150531,
+  "roll": -0.19837819,
+  "v_max": 300.0002,
+  "altitude": 265.654,
+  "airspeed_indicated": 1.4560926,
+  "airspeed_mach": 0.0021836436
+ },
+ "A22X DU1 Data": {
+  "state": 3,
+  "brightness": 1,
+  "leftReversion": 0,
+  "rightReversion": 0
+ },
+ "A22X DU2 Data": {
+  "state": 3,
+  "brightness": 1,
+  "leftReversion": 2,
+  "rightReversion": 1
+ },
+ "A22X DU3 Data": {
+  "state": 3,
+  "brightness": 1,
+  "leftReversion": 2,
+  "rightReversion": 2
+ },
+ "A22X DU4 Data": {
+  "state": 3,
+  "brightness": 1,
+  "leftReversion": 0,
+  "rightReversion": 0
+ },
+ "A22X DU5 Data": {
+  "state": 3,
+  "brightness": 1,
+  "leftReversion": 2,
+  "rightReversion": 2
+ },
+ "A22X.Engine Data": {
+  "eng1_fuel_flow": 360,
+  "eng2_fuel_flow": 350,
+  "eng1_egt": 580
+ },
+ "A22X.L CTP State": {
+  "powered": true,
+  "brightness": 1
+ },
+ "A22X.R CTP State": {
+  "powered": true,
+  "brightness": 1
+ },
+ "A22X.CAS Data": {
+  "msg[0]": 0,
+  "msg[1]": 0,
+  "msg[2]": 0,
+  "msg[3]": 0,
+  "msg[4]": 0,
+  "msg[5]": 0,
+  "msg[6]": 0,
+  "msg[7]": 0,
+  "msg[8]": 335544320,
+  "msg[9]": 12,
+  "msg[10]": 0,
+  "msg[11]": 0,
+  "msg[12]": 0,
+  "msg[13]": 0,
+  "msg[14]": 0,
+  "msg[15]": 0,
+  "msg[16]": 0,
+  "msg[17]": 0,
+  "info[0]": 0,
+  "info[1]": 0,
+  "info[2]": 0,
+  "info[3]": 0,
+  "info[4]": 0,
+  "info[5]": 0,
+  "info[6]": 0,
+  "info[7]": 0,
+  "info[8]": 0,
+  "info[9]": 0,
+  "info[10]": 0,
+  "info[11]": 0,
+  "info[12]": 0,
+  "info[13]": 0,
+  "info[14]": 0,
+  "info[15]": 0,
+  "info[16]": 0,
+  "info[17]": 0,
+  "info[18]": 0,
+  "info[19]": 0,
+  "info[20]": 0,
+  "ecl[0]": 2454196224,
+  "ecl[1]": 605036624,
+  "ecl[2]": 2449606784,
+  "ecl[3]": 1145176580,
+  "ecl[4]": 2274394784,
+  "ecl[5]": 3486580996,
+  "ecl[6]": 32895
+ },
+ "A22X.Electrical Data": {
+  "tru1_amps": 154,
+  "tru2_amps": 177,
+  "gen2_power": 8
+ },
+ "A22X.Anti Ice Data": {},
+ "A22X.L PFD Data": {
+  "utc": 1790619865,
+  "stby_speed_bug_ias": 101
+ },
+ "A22X.R PFD Data": {
+  "utc": 1790619865,
+  "stby_speed_bug_ias": 101
+ },
+ "A22X.L CTP Data": {
+  "utc": 1790619865,
+  "qnh.type": "InHg",
+  "qnh.value": 30.081268
+ },
+ "A22X.R CTP Data": {
+  "utc": 1790619865,
+  "qnh.type": "InHg",
+  "qnh.value": 30.081268
+ },
+ "A22X.FCP Data": {
+  "spd_input": false,
+  "spd_sel_ias": 101,
+  "spd_sel_mach": 0.14999999,
+  "hdg_sel": 204,
+  "alt_sel_ft": 14000,
+  "alt_sel_m": 4270
+ },
+ "A22X.ATC Data": {
+  "mode": 0,
+  "tss_mode": 0
+ },
+ "A22X.Autoflight Data": {},
+ "A22X.Radio Data": {
+  "vhf.com_1.standby": 122800000,
+  "vhf.com_1.active": 123035000
+ },
+ "A220.FMS Position": {
+  "fms_1.track": 179,
+  "fms_2.track": 179,
+  "gnss_1.sensor.track": 179,
+  "gnss_2.sensor.track": 179
+ },
+ "A22X.Status Data": {},
+ "A22X.Gear Data": {},
+ "A22X.Avionic Data": {},
+ "A220.Flight Plan Status": {
+  "msgs[0]": 0,
+  "msgs[1]": 64,
+  "msgs[2]": 1073741824,
+  "msgs[3]": 0
+ },
+ "A22X.L ADS Data": {
+  "altitude": 413,
+  "altitude_m": 126,
+  "qnh_inhg": 30.08,
+  "qnh_hpa": 1019,
+  "qnh_std": false,
+  "qnh_misconfig_std": false,
+  "angle_of_attack": 2.7,
+  "airspeed_indicated": 1.4599999,
+  "airspeed_true": 1,
+  "v_max": 300
+ },
+ "A22X.R ADS Data": {
+  "altitude": 413,
+  "altitude_m": 126,
+  "qnh_inhg": 30.08,
+  "qnh_hpa": 1019,
+  "qnh_std": false,
+  "qnh_misconfig_std": false,
+  "angle_of_attack": 2.7,
+  "airspeed_indicated": 1.4599999,
+  "airspeed_true": 1,
+  "v_max": 300
+ },
+ "A22X.Fuel Data": {
+  "total_used": 280,
+  "l_boost": 2,
+  "l_boost_out": 2,
+  "l_feed_a": 2,
+  "r_feed": 2,
+  "l_boost_xfeed": 2,
+  "r_boost_xfeed": 2,
+  "r_boost": 2,
+  "r_boost_out": 2,
+  "grav_r": null,
+  "xfer_sov": 0,
+  "xfer_sov_flow": 2,
+  "xfer_sov_outline": 2,
+  "xfer_r_sov": null,
+  "xfer_r_sov_flow": 2,
+  "xfer_r": 2,
+  "xfer": 2,
+  "total_qty": 2520,
+  "l_qty": 1260,
+  "r_qty": 1260
+ },
+ "A22X.L Nav Data": {},
+ "A22X.R Nav Data": {},
+ "A22X.Flight Control Data": {
+  "slat_flap": 0,
+  "slat_flap_color": 3,
+  "s0": 3,
+  "s1": 2,
+  "f0": 3,
+  "f2": 2,
+  "slat_pos": 0,
+  "f3": 2,
+  "s2": 2,
+  "f4": 2,
+  "s3": 2,
+  "f5": 2,
+  "slat_extended": false,
+  "spoiler": 0,
+  "l_mfs1": 0,
+  "l_mfs2": 0,
+  "l_mfs3": 0,
+  "l_mfs4": 0,
+  "r_mfs1": 0,
+  "r_mfs2": 0,
+  "r_mfs3": 0,
+  "r_mfs4": 0,
+  "spoiler_color": 2,
+  "r_ail": 0,
+  "sidestick_x": 0,
+  "l_ail": 0,
+  "l_elev": 0,
+  "r_elev": 0,
+  "sidestick_y": 0
+ },
+ "A22X.L IRS Data": {
+  "pitch": 0.19,
+  "roll": -0.19999999
+ },
+ "A22X.R IRS Data": {
+  "pitch": 0.19,
+  "roll": -0.19999999
+ },
+ "A22X.Air Data": {},
+ "A22X.Hydraulic Data": {
+  "hyd2_temp": 45,
+  "_3b": 2,
+  "acmp_3b": 2,
+  "hyd3_temp": 43
+ },
+ "A22X.Doors Data": {},
+ "A220.Flight Plan Update": {
+  "active.fuel.fob_wt": 2527
+ }
+}

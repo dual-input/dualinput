@@ -1,0 +1,306 @@
+{
+ "A22X DU1 Data": {
+  "panel": 23,
+  "t": 1790619585288,
+  "argc": 1,
+  "bytes": 65,
+  "fields": 4,
+  "raw": "{\"state\":3,\"brightness\":1.0,\"leftReversion\":0,\"rightReversion\":0}"
+ },
+ "A22X DU2 Data": {
+  "panel": 23,
+  "t": 1790619585288,
+  "argc": 1,
+  "bytes": 65,
+  "fields": 4,
+  "raw": "{\"state\":3,\"brightness\":1.0,\"leftReversion\":2,\"rightReversion\":1}"
+ },
+ "A22X DU3 Data": {
+  "panel": 23,
+  "t": 1790619585288,
+  "argc": 1,
+  "bytes": 65,
+  "fields": 4,
+  "raw": "{\"state\":3,\"brightness\":1.0,\"leftReversion\":2,\"rightReversion\":2}"
+ },
+ "A22X DU4 Data": {
+  "panel": 23,
+  "t": 1790619585288,
+  "argc": 1,
+  "bytes": 65,
+  "fields": 4,
+  "raw": "{\"state\":3,\"brightness\":1.0,\"leftReversion\":0,\"rightReversion\":0}"
+ },
+ "A22X DU5 Data": {
+  "panel": 23,
+  "t": 1790619585289,
+  "argc": 1,
+  "bytes": 65,
+  "fields": 4,
+  "raw": "{\"state\":3,\"brightness\":1.0,\"leftReversion\":2,\"rightReversion\":2}"
+ },
+ "A22X.CAS Data": {
+  "panel": 23,
+  "t": 1790619585289,
+  "argc": 1,
+  "bytes": 184,
+  "fields": 46,
+  "raw": "{\"msg\":[0,0,0,0,0,0,0,0,335544320,12,0,0,0,0,0,0,0,0],\"info\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"ecl\":[2454196224,605036624,2449606784,3351380484,2274394791,3486580996,32895]}"
+ },
+ "A22X.L CTP State": {
+  "panel": 23,
+  "t": 1790619585289,
+  "argc": 1,
+  "bytes": 33,
+  "fields": 2,
+  "raw": "{\"powered\":true,\"brightness\":1.0}"
+ },
+ "A22X.R CTP State": {
+  "panel": 23,
+  "t": 1790619585289,
+  "argc": 1,
+  "bytes": 33,
+  "fields": 2,
+  "raw": "{\"powered\":true,\"brightness\":1.0}"
+ },
+ "A220.FMS Position": {
+  "panel": 23,
+  "t": 1790619585290,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Status Data": {
+  "panel": 23,
+  "t": 1790619585353,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Gear Data": {
+  "panel": 23,
+  "t": 1790619585354,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Avionic Data": {
+  "panel": 23,
+  "t": 1790619585354,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A220.Flight Plan Status": {
+  "panel": 23,
+  "t": 1790619585355,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A220.Flight Plan Update": {
+  "panel": 23,
+  "t": 1790619585390,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.ISI Data": {
+  "panel": 18,
+  "t": 1790619585389,
+  "argc": 1,
+  "bytes": 55,
+  "fields": 3,
+  "raw": "{\"pitch\":0.1955451,\"roll\":-0.20617245,\"v_max\":300.0002}"
+ },
+ "A22X.L Nav Data": {
+  "panel": 23,
+  "t": 1790619585555,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.R Nav Data": {
+  "panel": 23,
+  "t": 1790619585555,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Engine Data": {
+  "panel": 23,
+  "t": 1790619585555,
+  "argc": 1,
+  "bytes": 24,
+  "fields": 1,
+  "raw": "{\"eng2_fuel_flow\":357.0}"
+ },
+ "A22X.L ADS Data": {
+  "panel": 23,
+  "t": 1790619585653,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.R ADS Data": {
+  "panel": 23,
+  "t": 1790619585653,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.L IRS Data": {
+  "panel": 23,
+  "t": 1790619585686,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.R IRS Data": {
+  "panel": 23,
+  "t": 1790619585687,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Air Data": {
+  "panel": 23,
+  "t": 1790619585853,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Hydraulic Data": {
+  "panel": 23,
+  "t": 1790619585853,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Doors Data": {
+  "panel": 23,
+  "t": 1790619585853,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Electrical Data": {
+  "panel": 23,
+  "t": 1790619586086,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Fuel Data": {
+  "panel": 23,
+  "t": 1790619586086,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Anti Ice Data": {
+  "panel": 23,
+  "t": 1790619586086,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.FCP Data": {
+  "panel": 23,
+  "t": 1790619586120,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.L PFD Data": {
+  "panel": 23,
+  "t": 1790619586155,
+  "argc": 1,
+  "bytes": 18,
+  "fields": 1,
+  "raw": "{\"utc\":1790619586}"
+ },
+ "A22X.R PFD Data": {
+  "panel": 23,
+  "t": 1790619586155,
+  "argc": 1,
+  "bytes": 18,
+  "fields": 1,
+  "raw": "{\"utc\":1790619586}"
+ },
+ "A22X.L CTP Data": {
+  "panel": 23,
+  "t": 1790619586155,
+  "argc": 1,
+  "bytes": 18,
+  "fields": 1,
+  "raw": "{\"utc\":1790619586}"
+ },
+ "A22X.R CTP Data": {
+  "panel": 23,
+  "t": 1790619586155,
+  "argc": 1,
+  "bytes": 18,
+  "fields": 1,
+  "raw": "{\"utc\":1790619586}"
+ },
+ "A22X.ATC Data": {
+  "panel": 23,
+  "t": 1790619586155,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Flight Control Data": {
+  "panel": 23,
+  "t": 1790619586254,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Autoflight Data": {
+  "panel": 23,
+  "t": 1790619586254,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A22X.Radio Data": {
+  "panel": 23,
+  "t": 1790619586254,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ },
+ "A220.Sentry Heartbeat": {
+  "panel": 11,
+  "t": 1790619590518,
+  "argc": 1,
+  "bytes": 2,
+  "fields": 1,
+  "raw": "{}"
+ }
+}

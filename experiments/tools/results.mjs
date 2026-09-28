@@ -29,12 +29,21 @@ export function areaOf(probePath) {
   return basename(dirname(probePath))
 }
 
-export function saveResult(area, name, text) {
+export function resultFile(area, name, ext = "txt", when = stamp()) {
   const dir = join(REPO, "experiments", area, "results")
   mkdirSync(dir, { recursive: true })
-  const file = join(dir, `${name}-${stamp()}.txt`)
+  return join(dir, `${name}-${when}.${ext}`)
+}
+
+export function saveResult(area, name, text) {
+  const file = resultFile(area, name)
   writeFileSync(file, text.endsWith("\n") ? text : text + "\n")
   return file
+}
+
+// For printing a saved path without the home folder in it.
+export function repoRelative(file) {
+  return file.replace(/\\/g, "/").replace(REPO.replace(/\\/g, "/") + "/", "")
 }
 
 export function simSourcesDir(...parts) {

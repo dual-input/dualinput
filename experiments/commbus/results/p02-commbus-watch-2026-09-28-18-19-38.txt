@@ -1,0 +1,280 @@
+p02 · CommBus names and traffic in panel JavaScript
+2026-09-28T18:19:43.827Z, 14 panels, watching for 10 minutes
+
+1 · Names each panel's listeners registered
+   11  VCockpit14 - Sentry
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (ViewListener, ViewListener, CommBusListener): 5
+         A220.Sentry Heartbeat
+         A220.Sentry Log
+         A220.Sentry Session End
+         A220.Sim Paused
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener): 1
+         wt.eb.evt
+   12  VCockpit13 - efbA220_2
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_GENERICDATA (GenericDataListener): 1
+         wt.eb.evt
+       JS_LISTENER_COMM_BUS (ViewListener, CommBusListener): 3
+         A220.EFB FMS Response
+         A220.EFB FMS Set TO Perf
+         FSC_CLIENT_EVENT
+       JS_LISTENER_FACILITY (ViewListener): 6
+         NearestSearchCompleted
+         NearestSearchCompletedWithStruct
+         SendAirport
+         SendIntersection
+         SendNdb
+         SendVor
+       JS_LISTENER_CHARTS (ViewListener): 6
+         SendChartIndex
+         SendChartIndexError
+         SendChartPages
+         SendChartPagesError
+         SendLiveViewError
+         SendLiveViewName
+   13  VCockpit12 - efbA220_1
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_GENERICDATA (GenericDataListener): 1
+         wt.eb.evt
+       JS_LISTENER_COMM_BUS (ViewListener, CommBusListener): 3
+         A220.EFB FMS Response
+         A220.EFB FMS Set TO Perf
+         FSC_CLIENT_EVENT
+       JS_LISTENER_FACILITY (ViewListener): 6
+         NearestSearchCompleted
+         NearestSearchCompletedWithStruct
+         SendAirport
+         SendIntersection
+         SendNdb
+         SendVor
+       JS_LISTENER_CHARTS (ViewListener): 6
+         SendChartIndex
+         SendChartIndexError
+         SendChartPages
+         SendChartPagesError
+         SendLiveViewError
+         SendLiveViewName
+   14  VCockpit11 - FCP
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (ViewListener, ViewListener, CommBusListener): 4
+         A220.Sim Paused
+         A22X.Autoflight Data
+         A22X.FCP Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener, GenericDataListener): 1
+         wt.eb.evt
+   15  VCockpit10 - FCP
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (ViewListener, ViewListener, CommBusListener): 4
+         A220.Sim Paused
+         A22X.Autoflight Data
+         A22X.FCP Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener, GenericDataListener): 1
+         wt.eb.evt
+   16  VCockpit09 - FCP
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (ViewListener, ViewListener, CommBusListener): 4
+         A220.Sim Paused
+         A22X.Autoflight Data
+         A22X.FCP Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener, GenericDataListener): 1
+         wt.eb.evt
+   17  VCockpit08 - FCP
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (ViewListener, ViewListener, CommBusListener): 4
+         A220.Sim Paused
+         A22X.Autoflight Data
+         A22X.FCP Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener, GenericDataListener): 1
+         wt.eb.evt
+   18  VCockpit07 - ISI
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (ViewListener, ViewListener, CommBusListener): 3
+         A220.Sim Paused
+         A22X.ISI Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener, GenericDataListener): 1
+         wt.eb.evt
+   19  VCockpit06 - CTP
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (CommBusListener, ViewListener, ViewListener): 10
+         A220.Sim Paused
+         A22X.ATC Data
+         A22X.L CTP Data
+         A22X.L CTP State
+         A22X.L Nav Data
+         A22X.R CTP Data
+         A22X.R CTP State
+         A22X.R Nav Data
+         A22X.Radio Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener): 1
+         wt.eb.evt
+   20  VCockpit05 - CTP
+       JS_LISTENER_SIMVARS (ViewListener): 1
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (CommBusListener, ViewListener, ViewListener): 10
+         A220.Sim Paused
+         A22X.ATC Data
+         A22X.L CTP Data
+         A22X.L CTP State
+         A22X.L Nav Data
+         A22X.R CTP Data
+         A22X.R CTP State
+         A22X.R Nav Data
+         A22X.Radio Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener): 1
+         wt.eb.evt
+   21  VCockpit04 - MKP
+       JS_LISTENER_SIMVARS (ViewListener): 2
+         A220.Scratchpad
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (CommBusListener): 1
+         FSC_CLIENT_EVENT
+   22  VCockpit03 - MKP
+       JS_LISTENER_SIMVARS (ViewListener): 2
+         A220.Scratchpad
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (CommBusListener): 1
+         FSC_CLIENT_EVENT
+   23  VCockpit02 - DisplayUnits
+       JS_LISTENER_SIMVARS (ViewListener): 2
+         A220.Scratchpad
+         A22X.Data Storage
+       JS_LISTENER_COMM_BUS (CommBusListener, ViewListener, ViewListener, ViewListener): 42
+         A220.Config Request
+         A220.FMS Position
+         A220.Flight Plan Response
+         A220.Flight Plan Status
+         A220.Flight Plan Update
+         A220.Nav Data Response
+         A220.Sim Paused
+         A22X DU1 Data
+         A22X DU2 Data
+         A22X DU3 Data
+         A22X DU4 Data
+         A22X DU5 Data
+         A22X.ATC Data
+         A22X.Air Data
+         A22X.Anti Ice Data
+         A22X.Autoflight Data
+         A22X.Avionic Data
+         A22X.CAS Acknowledge
+         A22X.CAS Data
+         A22X.Doors Data
+         A22X.Electrical Data
+         A22X.Engine Data
+         A22X.FCP Data
+         A22X.Flight Control Data
+         A22X.Fuel Data
+         A22X.Gear Data
+         A22X.Hydraulic Data
+         A22X.L ADS Data
+         A22X.L CTP Data
+         A22X.L CTP State
+         A22X.L IRS Data
+         A22X.L Nav Data
+         A22X.L PFD Data
+         A22X.R ADS Data
+         A22X.R CTP Data
+         A22X.R CTP State
+         A22X.R IRS Data
+         A22X.R Nav Data
+         A22X.R PFD Data
+         A22X.Radio Data
+         A22X.Status Data
+         FSC_CLIENT_EVENT
+       JS_LISTENER_GENERICDATA (GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener, GenericDataListener): 1
+         wt.eb.evt
+       JS_LISTENER_COMMUNITY (ViewListener): 1
+         SetGamercardInfo
+       JS_LISTENER_FACILITY (ViewListener): 5
+         NearestSearchCompleted
+         SendAirport
+         SendIntersection
+         SendNdb
+         SendVor
+   24  VCockpit01 - WasmInstrument
+       JS_LISTENER_WASM_MODULE (ViewListener): 5
+         WasmGaugeNotFound
+         WasmGaugeReady
+         WasmModuleCrashed
+         WasmModuleLoaded
+         WasmModuleNotFound
+       JS_LISTENER_COMM_BUS (CommBusListener): 1
+         FSC_CLIENT_EVENT
+
+2 · Watching 48 CommBus names from 4 panels
+   23  42 names
+   11  3 names
+   12  2 names
+   18  1 names
+
+3 · Traffic over 18s (stopped with Ctrl+C)
+  channel                           msgs   msg/s   bytes  fields  now&then  contin.
+  A220.Config Request                  0   (no message)
+  A220.EFB FMS Response                0   (no message)
+  A220.EFB FMS Set TO Perf             0   (no message)
+  A220.FMS Position                   17     0.9       2       1         0        0
+  A220.Flight Plan Response            0   (no message)
+  A220.Flight Plan Status             17     0.9       2       1         0        0
+  A220.Flight Plan Update             18     1.0       8       1         2        0
+  A220.Nav Data Response               0   (no message)
+  A220.Sentry Heartbeat                1     0.1       2       1         0        0
+  A220.Sentry Log                      0   (no message)
+  A220.Sentry Session End              0   (no message)
+  A220.Sim Paused                      0   (no message)
+  A22X DU1 Data                      489    27.3      65       4         0        0
+  A22X DU2 Data                      489    27.3      65       4         0        0
+  A22X DU3 Data                      489    27.3      65       4         0        0
+  A22X DU4 Data                      489    27.3      65       4         0        0
+  A22X DU5 Data                      489    27.3      65       4         0        0
+  A22X.ATC Data                       16     0.9       2       1         0        0
+  A22X.Air Data                       16     0.9       2       1         0        0
+  A22X.Anti Ice Data                  16     0.9       2       1         0        0
+  A22X.Autoflight Data                16     0.9       2       1         0        0
+  A22X.Avionic Data                   17     0.9       2       1         0        0
+  A22X.CAS Acknowledge                 0   (no message)
+  A22X.CAS Data                      326    18.2     184      46         0        0
+  A22X.Doors Data                     16     0.9       2       1         0        0
+  A22X.Electrical Data                17     0.9       4       1         3        0
+  A22X.Engine Data                    73     4.1      23       1         1        3
+  A22X.FCP Data                       16     0.9       2       1         0        0
+  A22X.Flight Control Data            16     0.9       2       1         0        0
+  A22X.Fuel Data                      16     0.9       2       1         0        0
+  A22X.Gear Data                      17     0.9       2       1         0        0
+  A22X.Hydraulic Data                 16     0.9       2       1         0        0
+  A22X.ISI Data                      324    18.1      51       3         0        5
+  A22X.L ADS Data                     21     1.2      16       1         2        3
+  A22X.L CTP Data                     20     1.1      25       1         1        2
+  A22X.L CTP State                   489    27.3      33       2         0        0
+  A22X.L IRS Data                     16     0.9       2       1         0        0
+  A22X.L Nav Data                     17     0.9       2       1         0        0
+  A22X.L PFD Data                     16     0.9      18       1         0        1
+  A22X.R ADS Data                     21     1.2      16       1         2        3
+  A22X.R CTP Data                     20     1.1      25       1         1        2
+  A22X.R CTP State                   489    27.3      33       2         0        0
+  A22X.R IRS Data                     16     0.9       2       1         0        0
+  A22X.R Nav Data                     17     0.9       2       1         0        0
+  A22X.R PFD Data                     16     0.9      18       1         0        1
+  A22X.Radio Data                     16     0.9       2       1         0        0
+  A22X.Status Data                    17     0.9       2       1         0        0
+  FSC_CLIENT_EVENT                     0   (no message)
+
+  msgs counts every delivery; bytes is the mean message size; fields is the count in the first message;
+  now&then is fields that changed but never continuously; contin. is fields that changed 4 or more times within 5s.

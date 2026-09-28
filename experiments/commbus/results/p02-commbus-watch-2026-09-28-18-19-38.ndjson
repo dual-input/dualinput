@@ -1,0 +1,358 @@
+{"t":1790619585288,"kind":"first","name":"A22X DU1 Data","panel":23,"argc":1,"bytes":65,"fields":4}
+{"t":1790619585288,"kind":"first","name":"A22X DU2 Data","panel":23,"argc":1,"bytes":65,"fields":4}
+{"t":1790619585288,"kind":"first","name":"A22X DU3 Data","panel":23,"argc":1,"bytes":65,"fields":4}
+{"t":1790619585288,"kind":"first","name":"A22X DU4 Data","panel":23,"argc":1,"bytes":65,"fields":4}
+{"t":1790619585289,"kind":"first","name":"A22X DU5 Data","panel":23,"argc":1,"bytes":65,"fields":4}
+{"t":1790619585289,"kind":"first","name":"A22X.CAS Data","panel":23,"argc":1,"bytes":184,"fields":46}
+{"t":1790619585289,"kind":"first","name":"A22X.L CTP State","panel":23,"argc":1,"bytes":33,"fields":2}
+{"t":1790619585289,"kind":"first","name":"A22X.R CTP State","panel":23,"argc":1,"bytes":33,"fields":2}
+{"t":1790619585290,"kind":"first","name":"A220.FMS Position","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585353,"kind":"first","name":"A22X.Status Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585354,"kind":"first","name":"A22X.Gear Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585354,"kind":"first","name":"A22X.Avionic Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585355,"kind":"first","name":"A220.Flight Plan Status","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585390,"kind":"first","name":"A220.Flight Plan Update","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585389,"kind":"first","name":"A22X.ISI Data","panel":18,"argc":1,"bytes":55,"fields":3}
+{"t":1790619585555,"kind":"first","name":"A22X.L Nav Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585555,"kind":"first","name":"A22X.R Nav Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585555,"kind":"first","name":"A22X.Engine Data","panel":23,"argc":1,"bytes":24,"fields":1}
+{"t":1790619585653,"kind":"first","name":"A22X.L ADS Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585653,"kind":"first","name":"A22X.R ADS Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585686,"kind":"first","name":"A22X.L IRS Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585687,"kind":"first","name":"A22X.R IRS Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585589,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"change","from":null,"to":349,"panel":23}
+{"t":1790619585589,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":357,"panel":23}
+{"t":1790619585456,"name":"A22X.ISI Data","path":"pitch","kind":"change","from":0.1955451,"to":0.19554554,"panel":18}
+{"t":1790619585456,"name":"A22X.ISI Data","path":"roll","kind":"change","from":-0.20617245,"to":-0.20617239,"panel":18}
+{"t":1790619585456,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619585488,"name":"A22X.ISI Data","path":"pitch","kind":"change","from":0.19554554,"to":0.19554578,"panel":18}
+{"t":1790619585488,"name":"A22X.ISI Data","path":"roll","kind":"change","from":-0.20617239,"to":-0.20617236,"panel":18}
+{"t":1790619585556,"name":"A22X.ISI Data","path":"pitch","kind":"change","from":0.19554578,"to":0.19554625,"panel":18}
+{"t":1790619585556,"name":"A22X.ISI Data","path":"roll","kind":"change","from":-0.20617236,"to":-0.20617227,"panel":18}
+{"t":1790619585556,"name":"A22X.ISI Data","path":"v_max","kind":"change","from":null,"to":300.00018,"panel":18}
+{"t":1790619585590,"name":"A22X.ISI Data","path":"pitch","kind":"continuous","panel":18}
+{"t":1790619585590,"name":"A22X.ISI Data","path":"roll","kind":"continuous","panel":18}
+{"t":1790619585590,"name":"A22X.ISI Data","path":"v_max","kind":"change","from":300.00018,"to":300.00015,"panel":18}
+{"t":1790619585654,"name":"A22X.ISI Data","path":"v_max","kind":"change","from":300.00015,"to":300.00018,"panel":18}
+{"t":1790619585687,"name":"A22X.ISI Data","path":"v_max","kind":"continuous","panel":18}
+{"t":1790619585853,"kind":"first","name":"A22X.Air Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585853,"kind":"first","name":"A22X.Hydraulic Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585853,"kind":"first","name":"A22X.Doors Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619585888,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"change","from":null,"to":358,"panel":23}
+{"t":1790619585888,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":349,"panel":23}
+{"t":1790619585889,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619586086,"kind":"first","name":"A22X.Electrical Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586086,"kind":"first","name":"A22X.Fuel Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586086,"kind":"first","name":"A22X.Anti Ice Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586120,"kind":"first","name":"A22X.FCP Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586155,"kind":"first","name":"A22X.L PFD Data","panel":23,"argc":1,"bytes":18,"fields":1}
+{"t":1790619586155,"kind":"first","name":"A22X.R PFD Data","panel":23,"argc":1,"bytes":18,"fields":1}
+{"t":1790619586155,"kind":"first","name":"A22X.L CTP Data","panel":23,"argc":1,"bytes":18,"fields":1}
+{"t":1790619586155,"kind":"first","name":"A22X.R CTP Data","panel":23,"argc":1,"bytes":18,"fields":1}
+{"t":1790619586155,"kind":"first","name":"A22X.ATC Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586254,"kind":"first","name":"A22X.Flight Control Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586254,"kind":"first","name":"A22X.Autoflight Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586254,"kind":"first","name":"A22X.Radio Data","panel":23,"argc":1,"bytes":2,"fields":1}
+{"t":1790619586054,"name":"A22X.ISI Data","path":"altitude","kind":"change","from":null,"to":265.65228,"panel":18}
+{"t":1790619586087,"name":"A22X.ISI Data","path":"altitude","kind":"change","from":265.65228,"to":265.6523,"panel":18}
+{"t":1790619586156,"name":"A22X.ISI Data","path":"altitude","kind":"change","from":265.6523,"to":265.65228,"panel":18}
+{"t":1790619586156,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"change","from":null,"to":1.4560889,"panel":18}
+{"t":1790619586156,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617193,"panel":18}
+{"t":1790619586187,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"change","from":1.4560889,"to":1.456089,"panel":18}
+{"t":1790619586187,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65228,"panel":18}
+{"t":1790619586255,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617191,"panel":18}
+{"t":1790619586255,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619586388,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"change","from":358,"to":359,"panel":23}
+{"t":1790619586355,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.2061719,"panel":18}
+{"t":1790619586489,"name":"A22X.ISI Data","path":"pitch","kind":"removed","from":0.19555046,"panel":18}
+{"t":1790619586686,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"change","from":null,"to":350,"panel":23}
+{"t":1790619586686,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":359,"panel":23}
+{"t":1790619586687,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619586888,"name":"A22X.ISI Data","path":"altitude","kind":"continuous","panel":18}
+{"t":1790619587119,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"change","from":null,"to":358,"panel":23}
+{"t":1790619587119,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":350,"panel":23}
+{"t":1790619587153,"name":"A22X.L PFD Data","path":"utc","kind":"change","from":1790619586,"to":1790619587,"panel":23}
+{"t":1790619587153,"name":"A22X.R PFD Data","path":"utc","kind":"change","from":1790619586,"to":1790619587,"panel":23}
+{"t":1790619587154,"name":"A22X.L CTP Data","path":"utc","kind":"change","from":1790619586,"to":1790619587,"panel":23}
+{"t":1790619587154,"name":"A22X.R CTP Data","path":"utc","kind":"change","from":1790619586,"to":1790619587,"panel":23}
+{"t":1790619586954,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6523,"panel":18}
+{"t":1790619587155,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619587286,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"change","from":null,"to":351,"panel":23}
+{"t":1790619587286,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":358,"panel":23}
+{"t":1790619587387,"name":"A220.Flight Plan Update","path":"active.fuel.fob_wt","kind":"change","from":null,"to":2582,"panel":23}
+{"t":1790619587387,"name":"A220.Flight Plan Update","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619587453,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"continuous","panel":23}
+{"t":1790619587453,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":351,"panel":23}
+{"t":1790619587554,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"continuous","panel":23}
+{"t":1790619587554,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":357,"panel":23}
+{"t":1790619587286,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619587653,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619587753,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619587953,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":353,"panel":23}
+{"t":1790619588153,"name":"A22X.L PFD Data","path":"utc","kind":"change","from":1790619587,"to":1790619588,"panel":23}
+{"t":1790619588153,"name":"A22X.R PFD Data","path":"utc","kind":"change","from":1790619587,"to":1790619588,"panel":23}
+{"t":1790619588154,"name":"A22X.L CTP Data","path":"utc","kind":"change","from":1790619587,"to":1790619588,"panel":23}
+{"t":1790619588154,"name":"A22X.R CTP Data","path":"utc","kind":"change","from":1790619587,"to":1790619588,"panel":23}
+{"t":1790619588387,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":356,"panel":23}
+{"t":1790619588388,"name":"A220.Flight Plan Update","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619588388,"name":"A220.Flight Plan Update","path":"active.fuel.fob_wt","kind":"removed","from":2582,"panel":23}
+{"t":1790619588187,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619588286,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619588388,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"change","from":null,"to":1.4560889,"panel":18}
+{"t":1790619588453,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"continuous","panel":18}
+{"t":1790619588453,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65228,"panel":18}
+{"t":1790619588489,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619588553,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619588687,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6523,"panel":18}
+{"t":1790619589054,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":354,"panel":23}
+{"t":1790619588889,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.206171,"panel":18}
+{"t":1790619588889,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619589055,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619589154,"name":"A22X.L PFD Data","path":"utc","kind":"change","from":1790619588,"to":1790619589,"panel":23}
+{"t":1790619589154,"name":"A22X.R PFD Data","path":"utc","kind":"change","from":1790619588,"to":1790619589,"panel":23}
+{"t":1790619589154,"name":"A22X.L CTP Data","path":"utc","kind":"change","from":1790619588,"to":1790619589,"panel":23}
+{"t":1790619589156,"name":"A22X.R CTP Data","path":"utc","kind":"change","from":1790619588,"to":1790619589,"panel":23}
+{"t":1790619589389,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65228,"panel":18}
+{"t":1790619589389,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619589488,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":355,"panel":23}
+{"t":1790619589488,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6523,"panel":18}
+{"t":1790619589488,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619589488,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619590053,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617162,"panel":18}
+{"t":1790619590154,"name":"A22X.L PFD Data","path":"utc","kind":"continuous","panel":23}
+{"t":1790619590154,"name":"A22X.R PFD Data","path":"utc","kind":"continuous","panel":23}
+{"t":1790619590155,"name":"A22X.L CTP Data","path":"utc","kind":"continuous","panel":23}
+{"t":1790619590155,"name":"A22X.R CTP Data","path":"utc","kind":"continuous","panel":23}
+{"t":1790619590089,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619590486,"name":"A22X.Engine Data","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619590486,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":355,"panel":23}
+{"t":1790619590518,"kind":"first","name":"A220.Sentry Heartbeat","panel":11,"argc":1,"bytes":2,"fields":1}
+{"t":1790619590587,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619590887,"name":"A22X.L CTP Data","path":"qnh.type","kind":"change","from":null,"to":"InHg","panel":23}
+{"t":1790619590887,"name":"A22X.L CTP Data","path":"qnh.value","kind":"change","from":null,"to":29.931253,"panel":23}
+{"t":1790619590887,"name":"A22X.L CTP Data","path":"utc","kind":"removed","from":1790619590,"panel":23}
+{"t":1790619590887,"name":"A22X.R CTP Data","path":"qnh.type","kind":"change","from":null,"to":"InHg","panel":23}
+{"t":1790619590887,"name":"A22X.R CTP Data","path":"qnh.value","kind":"change","from":null,"to":29.931253,"panel":23}
+{"t":1790619590887,"name":"A22X.R CTP Data","path":"utc","kind":"removed","from":1790619590,"panel":23}
+{"t":1790619590888,"name":"A22X.L ADS Data","path":"altitude","kind":"change","from":null,"to":275,"panel":23}
+{"t":1790619590888,"name":"A22X.L ADS Data","path":"altitude_m","kind":"change","from":null,"to":84,"panel":23}
+{"t":1790619590888,"name":"A22X.L ADS Data","path":"qnh_hpa","kind":"change","from":null,"to":1014,"panel":23}
+{"t":1790619590888,"name":"A22X.L ADS Data","path":"qnh_inhg","kind":"change","from":null,"to":29.929998,"panel":23}
+{"t":1790619590888,"name":"A22X.L ADS Data","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619590888,"name":"A22X.R ADS Data","path":"altitude","kind":"change","from":null,"to":275,"panel":23}
+{"t":1790619590888,"name":"A22X.R ADS Data","path":"altitude_m","kind":"change","from":null,"to":84,"panel":23}
+{"t":1790619590888,"name":"A22X.R ADS Data","path":"qnh_hpa","kind":"change","from":null,"to":1014,"panel":23}
+{"t":1790619590888,"name":"A22X.R ADS Data","path":"qnh_inhg","kind":"change","from":null,"to":29.929998,"panel":23}
+{"t":1790619590888,"name":"A22X.R ADS Data","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619590689,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619590753,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619590853,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617212,"panel":18}
+{"t":1790619590889,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65228,"panel":18}
+{"t":1790619591120,"name":"A22X.L ADS Data","path":"altitude","kind":"change","from":275,"to":284,"panel":23}
+{"t":1790619591120,"name":"A22X.L ADS Data","path":"altitude_m","kind":"change","from":84,"to":87,"panel":23}
+{"t":1790619591120,"name":"A22X.L ADS Data","path":"qnh_inhg","kind":"change","from":29.929998,"to":29.939999,"panel":23}
+{"t":1790619591120,"name":"A22X.L ADS Data","path":"qnh_hpa","kind":"removed","from":1014,"panel":23}
+{"t":1790619591120,"name":"A22X.R ADS Data","path":"altitude","kind":"change","from":275,"to":284,"panel":23}
+{"t":1790619591120,"name":"A22X.R ADS Data","path":"altitude_m","kind":"change","from":84,"to":87,"panel":23}
+{"t":1790619591120,"name":"A22X.R ADS Data","path":"qnh_inhg","kind":"change","from":29.929998,"to":29.939999,"panel":23}
+{"t":1790619591120,"name":"A22X.R ADS Data","path":"qnh_hpa","kind":"removed","from":1014,"panel":23}
+{"t":1790619591154,"name":"A22X.L CTP Data","path":"qnh.value","kind":"change","from":29.931253,"to":29.941256,"panel":23}
+{"t":1790619591154,"name":"A22X.R CTP Data","path":"qnh.value","kind":"change","from":29.931253,"to":29.941256,"panel":23}
+{"t":1790619591286,"name":"A22X.L CTP Data","path":"qnh.value","kind":"change","from":29.941256,"to":29.951256,"panel":23}
+{"t":1790619591286,"name":"A22X.L CTP Data","path":"utc","kind":"removed","from":1790619591,"panel":23}
+{"t":1790619591287,"name":"A22X.R CTP Data","path":"qnh.value","kind":"change","from":29.941256,"to":29.951256,"panel":23}
+{"t":1790619591287,"name":"A22X.R CTP Data","path":"utc","kind":"removed","from":1790619591,"panel":23}
+{"t":1790619591287,"name":"A22X.L ADS Data","path":"altitude","kind":"change","from":284,"to":293,"panel":23}
+{"t":1790619591287,"name":"A22X.L ADS Data","path":"altitude_m","kind":"change","from":87,"to":89,"panel":23}
+{"t":1790619591287,"name":"A22X.L ADS Data","path":"qnh_inhg","kind":"change","from":29.939999,"to":29.949999,"panel":23}
+{"t":1790619591288,"name":"A22X.R ADS Data","path":"altitude","kind":"change","from":284,"to":293,"panel":23}
+{"t":1790619591288,"name":"A22X.R ADS Data","path":"altitude_m","kind":"change","from":87,"to":89,"panel":23}
+{"t":1790619591288,"name":"A22X.R ADS Data","path":"qnh_inhg","kind":"change","from":29.939999,"to":29.949999,"panel":23}
+{"t":1790619591054,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6523,"panel":18}
+{"t":1790619591288,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619591421,"name":"A22X.L ADS Data","path":"altitude","kind":"continuous","panel":23}
+{"t":1790619591421,"name":"A22X.L ADS Data","path":"altitude_m","kind":"continuous","panel":23}
+{"t":1790619591421,"name":"A22X.L ADS Data","path":"qnh_hpa","kind":"change","from":null,"to":1015,"panel":23}
+{"t":1790619591421,"name":"A22X.L ADS Data","path":"qnh_inhg","kind":"continuous","panel":23}
+{"t":1790619591421,"name":"A22X.R ADS Data","path":"altitude","kind":"continuous","panel":23}
+{"t":1790619591421,"name":"A22X.R ADS Data","path":"altitude_m","kind":"continuous","panel":23}
+{"t":1790619591421,"name":"A22X.R ADS Data","path":"qnh_hpa","kind":"change","from":null,"to":1015,"panel":23}
+{"t":1790619591421,"name":"A22X.R ADS Data","path":"qnh_inhg","kind":"continuous","panel":23}
+{"t":1790619591453,"name":"A22X.L CTP Data","path":"qnh.value","kind":"continuous","panel":23}
+{"t":1790619591454,"name":"A22X.R CTP Data","path":"qnh.value","kind":"continuous","panel":23}
+{"t":1790619591489,"name":"A22X.L ADS Data","path":"qnh_hpa","kind":"removed","from":1015,"panel":23}
+{"t":1790619591489,"name":"A22X.R ADS Data","path":"qnh_hpa","kind":"removed","from":1015,"panel":23}
+{"t":1790619591355,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619591454,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560888,"panel":18}
+{"t":1790619591491,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65225,"panel":18}
+{"t":1790619591554,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619591589,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617159,"panel":18}
+{"t":1790619591589,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619591786,"name":"A22X.Engine Data","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619591787,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619592154,"name":"A22X.L CTP Data","path":"qnh.type","kind":"removed","from":"InHg","panel":23}
+{"t":1790619592154,"name":"A22X.L CTP Data","path":"qnh.value","kind":"removed","from":29.971258,"panel":23}
+{"t":1790619592154,"name":"A22X.R CTP Data","path":"qnh.type","kind":"removed","from":"InHg","panel":23}
+{"t":1790619592154,"name":"A22X.R CTP Data","path":"qnh.value","kind":"removed","from":29.971258,"panel":23}
+{"t":1790619591986,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619591986,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619592155,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619592187,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619592486,"name":"A22X.L ADS Data","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619592486,"name":"A22X.L ADS Data","path":"altitude","kind":"removed","from":312,"panel":23}
+{"t":1790619592486,"name":"A22X.L ADS Data","path":"altitude_m","kind":"removed","from":95,"panel":23}
+{"t":1790619592486,"name":"A22X.L ADS Data","path":"qnh_inhg","kind":"removed","from":29.97,"panel":23}
+{"t":1790619592487,"name":"A22X.R ADS Data","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619592487,"name":"A22X.R ADS Data","path":"altitude","kind":"removed","from":312,"panel":23}
+{"t":1790619592487,"name":"A22X.R ADS Data","path":"altitude_m","kind":"removed","from":95,"panel":23}
+{"t":1790619592487,"name":"A22X.R ADS Data","path":"qnh_inhg","kind":"removed","from":29.97,"panel":23}
+{"t":1790619592493,"name":"A220.Flight Plan Update","path":"active.fuel.fob_wt","kind":"change","from":null,"to":2581,"panel":23}
+{"t":1790619592493,"name":"A220.Flight Plan Update","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619592254,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619592287,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617115,"panel":18}
+{"t":1790619592354,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619592554,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619592654,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619592654,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619592754,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619592754,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619592787,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617133,"panel":18}
+{"t":1790619592987,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617129,"panel":18}
+{"t":1790619593088,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619593254,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619593286,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.2061714,"panel":18}
+{"t":1790619593286,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0001,"panel":18}
+{"t":1790619593386,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619593490,"name":"A220.Flight Plan Update","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619593490,"name":"A220.Flight Plan Update","path":"active.fuel.fob_wt","kind":"removed","from":2581,"panel":23}
+{"t":1790619593554,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619593588,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619593687,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619593687,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619593856,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619593887,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617095,"panel":18}
+{"t":1790619593887,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619593988,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617092,"panel":18}
+{"t":1790619594053,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619594255,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":363,"panel":23}
+{"t":1790619594158,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619594188,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617095,"panel":18}
+{"t":1790619594188,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619594255,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619594355,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560891,"panel":18}
+{"t":1790619594388,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617096,"panel":18}
+{"t":1790619594420,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":356,"panel":23}
+{"t":1790619594521,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":364,"panel":23}
+{"t":1790619594588,"name":"A22X.Electrical Data","path":"batt1_temp","kind":"change","from":null,"to":38,"panel":23}
+{"t":1790619594588,"name":"A22X.Electrical Data","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619594588,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.2061709,"panel":18}
+{"t":1790619594588,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6522,"panel":18}
+{"t":1790619594653,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619594789,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617092,"panel":18}
+{"t":1790619594789,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619594789,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619594886,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617093,"panel":18}
+{"t":1790619595089,"name":"A22X.Electrical Data","path":"batt2_temp","kind":"change","from":null,"to":38,"panel":23}
+{"t":1790619595089,"name":"A22X.Electrical Data","path":"batt1_temp","kind":"removed","from":38,"panel":23}
+{"t":1790619595287,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65222,"panel":18}
+{"t":1790619595520,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":363,"panel":23}
+{"t":1790619595653,"name":"A22X.ISI Data","path":"pitch","kind":"sample","to":0.19557604,"panel":18}
+{"t":1790619595653,"name":"A22X.ISI Data","path":"roll","kind":"sample","to":-0.20617183,"panel":18}
+{"t":1790619595720,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":365,"panel":23}
+{"t":1790619595688,"name":"A22X.ISI Data","path":"v_max","kind":"sample","to":300.0002,"panel":18}
+{"t":1790619595688,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617183,"panel":18}
+{"t":1790619595688,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6522,"panel":18}
+{"t":1790619595753,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619595753,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619596087,"name":"A22X.Electrical Data","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619596087,"name":"A22X.Electrical Data","path":"batt2_temp","kind":"removed","from":38,"panel":23}
+{"t":1790619595988,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619596088,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619596088,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619596354,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619596720,"name":"A22X.Engine Data","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619596720,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":364,"panel":23}
+{"t":1790619596893,"name":"A22X.Engine Data","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619596689,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.2061709,"panel":18}
+{"t":1790619596753,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619596789,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65222,"panel":18}
+{"t":1790619597053,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":363,"panel":23}
+{"t":1790619597220,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":366,"panel":23}
+{"t":1790619596986,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619597286,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":362,"panel":23}
+{"t":1790619597387,"name":"A220.Flight Plan Update","path":"active.fuel.fob_wt","kind":"change","from":null,"to":2580,"panel":23}
+{"t":1790619597387,"name":"A220.Flight Plan Update","path":"","kind":"removed","from":"{}","panel":23}
+{"t":1790619597254,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619597353,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617115,"panel":18}
+{"t":1790619597486,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619597620,"name":"A22X.Engine Data","path":"eng2_egt","kind":"change","from":null,"to":582,"panel":23}
+{"t":1790619597620,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":367,"panel":23}
+{"t":1790619597653,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"sample","to":368,"panel":23}
+{"t":1790619597653,"name":"A22X.Engine Data","path":"eng2_egt","kind":"removed","from":582,"panel":23}
+{"t":1790619597720,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"sample","to":361,"panel":23}
+{"t":1790619597720,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":368,"panel":23}
+{"t":1790619597588,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617114,"panel":18}
+{"t":1790619597854,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619597954,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619598156,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619598188,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":359,"panel":23}
+{"t":1790619598388,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":367,"panel":23}
+{"t":1790619598389,"name":"A220.Flight Plan Update","path":"","kind":"change","from":null,"to":"{}","panel":23}
+{"t":1790619598389,"name":"A220.Flight Plan Update","path":"active.fuel.fob_wt","kind":"removed","from":2580,"panel":23}
+{"t":1790619598453,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619598687,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":358,"panel":23}
+{"t":1790619598720,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":366,"panel":23}
+{"t":1790619598688,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619598853,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":357,"panel":23}
+{"t":1790619598953,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619599054,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20616971,"panel":18}
+{"t":1790619599186,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":364,"panel":23}
+{"t":1790619599254,"name":"A22X.Engine Data","path":"eng2_egt","kind":"change","from":null,"to":580,"panel":23}
+{"t":1790619599254,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":358,"panel":23}
+{"t":1790619599320,"name":"A22X.Engine Data","path":"eng2_egt","kind":"removed","from":580,"panel":23}
+{"t":1790619599186,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20616974,"panel":18}
+{"t":1790619599287,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20616978,"panel":18}
+{"t":1790619599687,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":361,"panel":23}
+{"t":1790619599454,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0001,"panel":18}
+{"t":1790619599588,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20616989,"panel":18}
+{"t":1790619599588,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619599687,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619599820,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":359,"panel":23}
+{"t":1790619599786,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20616983,"panel":18}
+{"t":1790619599953,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.2061698,"panel":18}
+{"t":1790619599986,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619600220,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":358,"panel":23}
+{"t":1790619600320,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":358,"panel":23}
+{"t":1790619600189,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619600554,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":356,"panel":23}
+{"t":1790619600621,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":357,"panel":23}
+{"t":1790619600354,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619600387,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20617,"panel":18}
+{"t":1790619600489,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619600588,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"sample","to":1.4560889,"panel":18}
+{"t":1790619600588,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00015,"panel":18}
+{"t":1790619600654,"name":"A22X.ISI Data","path":"altitude","kind":"sample","to":265.6522,"panel":18}
+{"t":1790619600654,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560889,"panel":18}
+{"t":1790619600689,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6522,"panel":18}
+{"t":1790619600754,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619600788,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.65222,"panel":18}
+{"t":1790619600788,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619600953,"name":"A22X.ISI Data","path":"roll","kind":"removed","from":-0.20616971,"panel":18}
+{"t":1790619601053,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":352,"panel":23}
+{"t":1790619601152,"name":"A22X.L PFD Data","path":"utc","kind":"sample","to":1790619601,"panel":23}
+{"t":1790619601152,"name":"A22X.R PFD Data","path":"utc","kind":"sample","to":1790619601,"panel":23}
+{"t":1790619601153,"name":"A22X.L CTP Data","path":"utc","kind":"sample","to":1790619601,"panel":23}
+{"t":1790619601153,"name":"A22X.R CTP Data","path":"utc","kind":"sample","to":1790619601,"panel":23}
+{"t":1790619601188,"name":"A22X.Engine Data","path":"eng2_egt","kind":"change","from":null,"to":582,"panel":23}
+{"t":1790619601188,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":356,"panel":23}
+{"t":1790619601219,"name":"A22X.Engine Data","path":"eng2_egt","kind":"continuous","panel":23}
+{"t":1790619601219,"name":"A22X.Engine Data","path":"eng2_fuel_flow","kind":"removed","from":351,"panel":23}
+{"t":1790619601053,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}
+{"t":1790619601425,"name":"A22X.Engine Data","path":"eng2_egt","kind":"removed","from":580,"panel":23}
+{"t":1790619601522,"name":"A22X.Engine Data","path":"eng1_fuel_flow","kind":"removed","from":354,"panel":23}
+{"t":1790619601287,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.00018,"panel":18}
+{"t":1790619601355,"name":"A22X.ISI Data","path":"altitude","kind":"removed","from":265.6522,"panel":18}
+{"t":1790619601386,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.4560888,"panel":18}
+{"t":1790619601454,"name":"A22X.ISI Data","path":"pitch","kind":"removed","from":0.19559593,"panel":18}
+{"t":1790619601490,"name":"A22X.ISI Data","path":"airspeed_indicated","kind":"removed","from":1.456089,"panel":18}
+{"t":1790619601490,"name":"A22X.ISI Data","path":"v_max","kind":"removed","from":300.0002,"panel":18}

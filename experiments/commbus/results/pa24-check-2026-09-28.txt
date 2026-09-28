@@ -1,0 +1,40 @@
+PA-24 CommBus check, 2026-09-28, A2A PA-24 loaded in MSFS 2024
+
+1 · Listener names registered in each panel (ViewListener.g_ViewListenersMgr), every listener type,
+    read with experiments/tools/run.mjs eval about 20:40 local time. A second read, made for this
+    file, ran into the sim shutting down, so this is the first read, copied from its output.
+  VCockpit67 - WTT2            JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit66 - WTT1            JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit65 - GTN750_INT      JS_LISTENER_MAPS: MapBinded, MapUpdated; JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit64 - WasmInstrument  JS_LISTENER_WASM_MODULE: WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed; JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit63 - WasmInstrument  JS_LISTENER_WASM_MODULE: (same five); JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit62 - GTN650_INT_2    JS_LISTENER_MAPS: MapBinded, MapUpdated; JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit61 - GNS_DISABLED    JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit60 - GNS_DISABLED_2  JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit59 - GNS_DISABLED_1  JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit58 - KLN90B          JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit57 - KLN90B          JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit56 - AS5_a2amod_2    JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit55 - AS5_a2amod_1    JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit54 - WasmInstrument  JS_LISTENER_WASM_MODULE: (same five); JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit53 - WasmInstrument  JS_LISTENER_WASM_MODULE: (same five); JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  VCockpit52 - WasmInstrument (x5)  JS_LISTENER_WASM_MODULE: (same five); JS_LISTENER_COMM_BUS: FSC_CLIENT_EVENT
+  FSC_CLIENT_EVENT is FS Copilot's bridge, installed in this sim, not the aircraft.
+
+2 · CommBus imports in the PA-24's WASM modules (grep -a -o 'fsCommBus[A-Za-z]*')
+  Accusim.wasm: (none)
+  Accusim2.wasm: (none)
+  ModelCode1.wasm: (none)
+  ModelCode2.wasm: (none)
+  PA24_Avionics.wasm: (none)
+  control, the A220's systems.wasm: fsCommBusCall fsCommBusRegister fsCommBusUnregisterAll 
+
+3 · Sim API imports of the PA-24's modules
+  Accusim.wasm: SimConnect_AddClientEventToNotificationGroup SimConnect_AddToDataDefinition SimConnect_CallDispatch SimConnect_ClearDataDefinition SimConnect_ClearNotificationGroup SimConnect_Close SimConnect_MapClientEventToSimEvent SimConnect_Open SimConnect_RequestDataOnSimObject SimConnect_RequestSystemState SimConnect_SetDataOnSimObject SimConnect_SetNotificationGroupPriority SimConnect_SubscribeToSystemEvent SimConnect_TransmitClientEvent SimConnect_UnsubscribeFromSystemEvent fsEventsTriggerKeyEvent fsPaused fsVarsAircraftVarGet fsVarsAircraftVarSet fsVarsEnvironmentVarGet fsVarsGetAircraftVarId fsVarsGetEnvironmentVarId fsVarsGetUnitId fsVarsNamedVarGet fsVarsNamedVarSet fsVarsRegisterNamedVar 
+  Accusim2.wasm: fsPaused fsVarsAircraftVarGet fsVarsAircraftVarSet fsVarsGetAircraftVarId fsVarsGetUnitId fsVarsNamedVarGet fsVarsNamedVarSet fsVarsRegisterNamedVar 
+  ModelCode1.wasm: execute_calculator_code get_named_variable_value register_named_variable set_named_variable_value 
+  ModelCode2.wasm: execute_calculator_code get_named_variable_value register_named_variable set_named_variable_value 
+  PA24_Avionics.wasm: SimConnect_AddClientEventToNotificationGroup SimConnect_CallDispatch SimConnect_ClearNotificationGroup SimConnect_Close SimConnect_MapClientEventToSimEvent SimConnect_Open SimConnect_SetNotificationGroupPriority SimConnect_TransmitClientEvent fsEventsTriggerKeyEvent fsRenderCancel fsRenderClearStencil fsRenderCreate fsRenderCreateTexture fsRenderDelete fsRenderDeleteTexture fsRenderFill fsRenderFlush fsRenderGetTextureSize fsRenderStroke fsRenderTriangles fsRenderUpdateTexture fsRenderViewport fsVarsAircraftVarGet fsVarsAircraftVarSet fsVarsEnvironmentVarGet fsVarsGetAircraftVarId fsVarsGetEnvironmentVarId fsVarsGetUnitId fsVarsNamedVarGet fsVarsNamedVarSet fsVarsRegisterNamedVar 
+
+4 · CommBus use in the PA-24's html_ui JavaScript (RegisterCommBusListener, COMM_BUS, callWasm)
+  (no files listed means none)

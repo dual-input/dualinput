@@ -1,9 +1,7 @@
 ---
 name: study-aircraft
-description: Studies how one MSFS 2024 aircraft is built, from every file of it we can open, decompiled WASM and JavaScript included, and writes the study to record/areas/aircraft/<aircraft>/. Use when the user asks to study or research an aircraft, for example "/study-aircraft synaptic-a220", or "/study-aircraft synaptic-a220 the EFB" to take one part deeper.
+description: Studies how one MSFS 2024 aircraft is built, from every file of it we can open, decompiled WASM and JavaScript included, and writes the study to record/areas/aircraft/<aircraft>/. Use when the user asks to study or research an aircraft, for example "/study-aircraft synaptic-a220", or "/study-aircraft synaptic-a220 the EFB" to take one part deeper. A study fills a whole context, so start a background subagent per aircraft and have it invoke this skill, rather than running it in your own session.
 argument-hint: <aircraft> [focus]
-context: fork
-agent: general-purpose
 ---
 
 # Study one aircraft
@@ -92,7 +90,7 @@ Write what you find to `notes.md` as you read, because a long read outlasts your
    If it restricts reverse engineering, decompiling, or publishing what we found, add a License section at the end of the study that names the clause and links to it.
 
 Don't commit, and don't edit `record/areas/aircraft/plan.md`.
-Several studies can run at once, and they'd collide on git's lock and on the plan's table, so the session that started you does both.
+Several studies can run at once in separate subagents, and they'd collide on git's lock and on the plan's table, so the session that started the study does both after you report.
 
 ## Report
 

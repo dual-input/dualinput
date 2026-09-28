@@ -21,8 +21,9 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
   A hook runs it after every Markdown edit, and its findings come back to you as context.
 - `.claude/agents/doc-reviewer.md` makes the judgment checks the lint can't.
 - `.claude/skills/learn/` writes one chapter of the learning material (`/learn <course> <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
-- `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft>`), in a subagent of its own.
-  The session that runs it commits the study and marks it in `record/areas/aircraft/plan.md`.
+- `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft>`).
+  Start a background subagent per aircraft and have it invoke the skill, because a study fills a whole context.
+  When it reports, commit its folder and mark it in `record/areas/aircraft/plan.md`.
 
 ## Targets
 

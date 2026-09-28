@@ -2,11 +2,11 @@
  * Lists panels, runs a panel probe in one, or evaluates one expression there.
  *
  *   node experiments/tools/run.mjs pages [title filter]
- *   node experiments/tools/run.mjs probe <page> experiments/<area>/pNN-name.js [--settle ms]
+ *   node experiments/tools/run.mjs probe <page> experiments/areas/<area>/pNN-name.js [--settle ms]
  *   node experiments/tools/run.mjs eval <page> "<expression>"
  *
  * <page> is an id or a case-insensitive title substring.
- * A probe's report is echoed and saved to experiments/<area>/results/.
+ * A probe's report is echoed and saved to experiments/areas/<area>/results/.
  */
 
 import { readFileSync } from "node:fs"
@@ -61,7 +61,7 @@ async function main() {
     }
 
     if (mode === "probe") {
-      if (!rest[1]) throw new Error("give the probe's path, such as experiments/commbus/p02-listener-wrap.js")
+      if (!rest[1]) throw new Error("give the probe's path, such as experiments/areas/<area>/pNN-name.js")
       const path = resolve(rest[1])
       const source = readFileSync(path, "utf8")
       const header =

@@ -7,9 +7,9 @@
  *
  * Needs MSFS 2024 in a flight with the Synaptic A220-300, panels powered.
  *
- *   node experiments/commbus/p01-commbus-source.mjs [title filter, default VCockpit]
+ *   node experiments/areas/commbus/p01-commbus-source.mjs [title filter, default VCockpit]
  *
- * The report goes to experiments/commbus/results/. The source it reads goes to
+ * The report goes to experiments/areas/commbus/results/. The source it reads goes to
  * experiments/sim-sources/commbus/, which git ignores, because it's Asobo's code.
  */
 
@@ -17,8 +17,8 @@ import { writeFileSync } from "node:fs"
 import { createHash } from "node:crypto"
 import { join } from "node:path"
 
-import { listPages, Inspector, loadedScripts, resourceContent } from "../tools/inspector.mjs"
-import { saveResult, simSourcesDir, slug } from "../tools/results.mjs"
+import { listPages, Inspector, loadedScripts, resourceContent } from "../../tools/inspector.mjs"
+import { saveResult, simSourcesDir, slug } from "../../tools/results.mjs"
 
 const filter = (process.argv[2] || "VCockpit").toLowerCase()
 

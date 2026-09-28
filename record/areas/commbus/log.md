@@ -2,7 +2,7 @@
 
 What our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, newest entry first.
 Reading it works, and how much it yields depends on the aircraft: the Synaptic A220 puts its whole cockpit's state on the CommBus, the A2A PA-24 doesn't use the CommBus at all, and the iniBuilds A350 uses it only between its EFB and its one module.
-The probes are in [experiments/commbus](../../experiments/commbus), and their raw output is in [experiments/commbus/results](../../experiments/commbus/results).
+The probes are in [experiments/areas/commbus](../../../experiments/areas/commbus), and their raw output is in [experiments/areas/commbus/results](../../../experiments/areas/commbus/results).
 All of it was measured on MSFS 2024 on 2026-09-28, with FS Copilot's bridge installed, which is why every panel also registered `FSC_CLIENT_EVENT`.
 
 ## 2026-09-28: The A350's CommBus carries EFB traffic, and its cockpit state stays inside one module
@@ -37,7 +37,7 @@ Seeing those messages needs a wrapper on the EFB's sending path, since a listene
 
 **Affects:** nothing yet.
 
-**Evidence:** [a350-check-2026-09-28.txt](../../experiments/commbus/results/a350-check-2026-09-28.txt).
+**Evidence:** [a350-check-2026-09-28.txt](../../../experiments/areas/commbus/results/a350-check-2026-09-28.txt).
 
 ## 2026-09-28: The A2A PA-24 doesn't use the CommBus
 
@@ -57,7 +57,7 @@ It pays off for aircraft built like the A220, where a module owns the state and 
 
 **Affects:** nothing yet.
 
-**Evidence:** [pa24-check-2026-09-28.txt](../../experiments/commbus/results/pa24-check-2026-09-28.txt).
+**Evidence:** [pa24-check-2026-09-28.txt](../../../experiments/areas/commbus/results/pa24-check-2026-09-28.txt).
 The sim shut down while that file was being written, so its panel listing is copied from the first read, made minutes earlier, as the file says.
 
 ## 2026-09-28: `A22X.Resync` returns the A220's full state, and one listener hears every channel
@@ -83,9 +83,9 @@ So a panel receives any CommBus name a listener in it registers, and Crosscheck 
 **Changed:** on the A220, a late listener can get the full state within about 100ms, whenever it asks.
 The call that asks is Synaptic's, so each aircraft that works this way needs its own in the profile.
 
-**Affects:** [05-02](../learn/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), whose "a listener that registers late has missed what came before" holds for the CommBus but not for the A220.
+**Affects:** [05-02](../../learn/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), whose "a listener that registers late has missed what came before" holds for the CommBus but not for the A220.
 
-**Evidence:** [p03-resync-and-reload-2026-09-28-18-32-49.txt](../../experiments/commbus/results/p03-resync-and-reload-2026-09-28-18-32-49.txt) and the `.ndjson` beside it, which holds every message.
+**Evidence:** [p03-resync-and-reload-2026-09-28-18-32-49.txt](../../../experiments/areas/commbus/results/p03-resync-and-reload-2026-09-28-18-32-49.txt) and the `.ndjson` beside it, which holds every message.
 
 ## 2026-09-28: The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels
 
@@ -114,9 +114,9 @@ The files stamped `18-19-38` carry that error, and p02 has merged each message i
 **Changed:** reading one message tells a listener only what just changed, so a listener has to keep each channel's state, and needs a way to learn the fields that haven't changed (the entry above).
 The CommBus gives an absolute value for controls whose input is relative: the A220's baro knob takes a count of detents, and `qnh_hpa` says where it landed.
 
-**Affects:** [07-aircraft-specific-systems](../learn/07-aircraft-specific-systems.md), whose table puts the setting on `A22X.L PFD Data`, and [05-02](../learn/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), which names that channel as the one holding it.
+**Affects:** [07-aircraft-specific-systems](../../learn/07-aircraft-specific-systems.md), whose table puts the setting on `A22X.L PFD Data`, and [05-02](../../learn/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), which names that channel as the one holding it.
 
-**Evidence:** [p02-commbus-watch-2026-09-28-18-22-39.txt](../../experiments/commbus/results/p02-commbus-watch-2026-09-28-18-22-39.txt), with its `.ndjson` stream and `-state.json`, and the p03 files in the entry above.
+**Evidence:** [p02-commbus-watch-2026-09-28-18-22-39.txt](../../../experiments/areas/commbus/results/p02-commbus-watch-2026-09-28-18-22-39.txt), with its `.ndjson` stream and `-state.json`, and the p03 files in the entry above.
 
 ## 2026-09-28: A script that arrives after a panel loaded can list every CommBus name the panel registered
 
@@ -140,5 +140,5 @@ It sees only names that panel JavaScript listens on, so traffic between modules,
 
 **Affects:** nothing yet.
 
-**Evidence:** [p01-commbus-source-2026-09-28-18-07-44.txt](../../experiments/commbus/results/p01-commbus-source-2026-09-28-18-07-44.txt), and section 1 of the p02 report in the entry above.
+**Evidence:** [p01-commbus-source-2026-09-28-18-07-44.txt](../../../experiments/areas/commbus/results/p01-commbus-source-2026-09-28-18-07-44.txt), and section 1 of the p02 report in the entry above.
 The sim's source that p01 saved stays out of the tree, in `experiments/sim-sources/`, because it's Asobo's.

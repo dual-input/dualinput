@@ -1,8 +1,9 @@
 /*
  * Where a probe's output goes.
  *
- * A probe in experiments/<area>/ saves its report into experiments/<area>/results/.
- * A log entry in record/<area>/ cites it there if the finding is worth keeping.
+ * A probe in experiments/areas/<area>/ saves its report into
+ * experiments/areas/<area>/results/. A log entry in record/areas/<area>/ cites it
+ * there if the finding is worth keeping.
  *
  * Source a probe reads out of the sim or an aircraft goes into
  * experiments/sim-sources/ instead, which .gitignore keeps out of the tree,
@@ -30,7 +31,7 @@ export function areaOf(probePath) {
 }
 
 export function resultFile(area, name, ext = "txt", when = stamp()) {
-  const dir = join(REPO, "experiments", area, "results")
+  const dir = join(REPO, "experiments", "areas", area, "results")
   mkdirSync(dir, { recursive: true })
   return join(dir, `${name}-${when}.${ext}`)
 }

@@ -12,8 +12,9 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
   Create or edit it only when asked, and keep the author's voice.
 - `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.
-- `experiments/` holds probes and prototypes, and their raw results, in one folder per area.
-  A finding worth keeping goes in a log in the matching folder in `record/`, and the area's README links to that log and says nothing else that can go stale.
+  Keep its top level to `decisions/`, `learn/`, `areas/`, and the files there now, and give each part of Crosscheck a folder under `areas/`, so twenty areas don't bury the rest.
+- `experiments/` holds probes and prototypes, and their raw results, in `experiments/areas/<area>/`, the same path the area has under `record/`.
+  A finding worth keeping goes in the area's log in `record/areas/<area>/`, and the area's README links to that log and says nothing else that can go stale.
   `experiments/tools/` drives the sim's inspector on 127.0.0.1:19999, which runs JavaScript in any panel, so a panel probe needs no one to paste it.
 - `record/writing.md` is how everything agents write is written.
   It's imported above, so it's already loaded.

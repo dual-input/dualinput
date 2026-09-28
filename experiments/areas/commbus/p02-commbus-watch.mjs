@@ -11,7 +11,7 @@
  *    messages carry only what changed, so a field is known only once it moves,
  *    or once the aircraft sends it for another reason.
  *
- * Saves to experiments/commbus/results/: a report, every change as NDJSON, the
+ * Saves to experiments/areas/commbus/results/: a report, every change as NDJSON, the
  * first message on each channel, and each channel's state at the end, which is
  * every field seen with its last value. Payloads can carry what the pilot typed
  * into the EFB, so read them before committing.
@@ -24,7 +24,7 @@
  * panel also stops on its own when this process stops polling for 20s, or after
  * --minutes plus one.
  *
- *   node experiments/commbus/p02-commbus-watch.mjs [--minutes 10] [--show <text>]
+ *   node experiments/areas/commbus/p02-commbus-watch.mjs [--minutes 10] [--show <text>]
  *
  * --show prints only changes whose channel or field contains <text>; the files
  * get everything regardless.
@@ -32,8 +32,8 @@
 
 import { createWriteStream, writeFileSync } from "node:fs"
 
-import { listPages, Inspector } from "../tools/inspector.mjs"
-import { resultFile, repoRelative, stamp } from "../tools/results.mjs"
+import { listPages, Inspector } from "../../tools/inspector.mjs"
+import { resultFile, repoRelative, stamp } from "../../tools/results.mjs"
 
 const args = process.argv.slice(2)
 function flag(name, fallback) {

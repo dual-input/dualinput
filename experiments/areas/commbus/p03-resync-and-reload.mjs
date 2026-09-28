@@ -22,13 +22,13 @@
  * own 20s after this process stops polling. window.CROSSCHECK_P03_STOP() in a
  * panel stops one by hand.
  *
- *   node experiments/commbus/p03-resync-and-reload.mjs
+ *   node experiments/areas/commbus/p03-resync-and-reload.mjs
  */
 
 import { createWriteStream, writeFileSync } from "node:fs"
 
-import { listPages, Inspector } from "../tools/inspector.mjs"
-import { resultFile, repoRelative, stamp } from "../tools/results.mjs"
+import { listPages, Inspector } from "../../tools/inspector.mjs"
+import { resultFile, repoRelative, stamp } from "../../tools/results.mjs"
 
 const COMM_BUS = "JS_LISTENER_COMM_BUS"
 const INTERNAL = "ON_EVENT_TO_ALL_SUBSCRIBERS"

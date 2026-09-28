@@ -21,9 +21,9 @@ The kind decides who reads it and what shape it takes.
 
 | Kind               | Lives in                                                                 | The reader wants to                                                                    |
 | ------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Design             | `record/<area>/NN-<slug>.md`                                             | know what a part is and why it's that way                                              |
-| Plan               | `record/<area>/plan.md`                                                  | know what's being built and where it stands                                            |
-| Log                | `record/<area>/log.md`                                                   | know what was found                                                                    |
+| Design             | `record/areas/<area>/NN-<slug>.md`                                       | know what a part is and why it's that way                                              |
+| Plan               | `record/areas/<area>/plan.md`                                            | know what's being built and where it stands                                            |
+| Log                | `record/areas/<area>/log.md`                                             | know what was found                                                                    |
 | Decision           | `record/decisions/NNN-<slug>.md`                                         | know why one option won                                                                |
 | Reference          | beside what it describes                                                 | look one thing up                                                                      |
 | Outline            | `record/learn/outline.md`                                                | know what the learning covers, in what order and depth, and which parts have a chapter |
@@ -57,7 +57,7 @@ Write the entry when the result arrives, not at the end of the day.
 Each entry says what we asked, what we expected, what we found, what changed because of it, and which docs it affects.
 A negative result gets the same care as a positive one, because what was tried and abandoned is the part git history can't tell anyone.
 Raw output goes in a `results/` folder beside the log and gets committed: the log is the reading, and the results are the evidence.
-An experiment's raw output stays beside its probe, in `experiments/<area>/results/`, and the area's log gets an entry only for a finding worth keeping.
+An experiment's raw output stays beside its probe, in `experiments/areas/<area>/results/`, and the area's log gets an entry only for a finding worth keeping.
 
 ### Decisions
 

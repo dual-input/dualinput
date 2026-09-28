@@ -362,3 +362,7 @@ Until the repository goes public, a commit title only has to say what changed.
 4. If you wrote or substantially changed a document in `record/`, `CLAUDE.md`, or a Markdown file in `.claude/`, run the `doc-reviewer` agent, unless it's a chapter, which its reader reviews.
    Fix or answer each finding.
    You're done when its report opens by saying the document is ready.
+
+If the document is a plan, a log, or a probe README written during an experiment, skip steps 3 and 4.
+Those documents change with every result, so a review of each draft costs more time than it saves.
+Run both steps when a finding moves into a design doc or a decision.

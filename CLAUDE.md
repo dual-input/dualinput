@@ -13,7 +13,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 - `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.
 - `experiments/` holds probes and prototypes, and their raw results, in one folder per area.
-  A finding worth keeping goes in a log in the matching folder in `record/`.
+  A finding worth keeping goes in a log in the matching folder in `record/`, and the area's README links to that log and says nothing else that can go stale.
   `experiments/tools/` drives the sim's inspector on 127.0.0.1:19999, which runs JavaScript in any panel, so a panel probe needs no one to paste it.
 - `record/writing.md` is how everything agents write is written.
   It's imported above, so it's already loaded.

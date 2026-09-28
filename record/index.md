@@ -6,4 +6,4 @@ Documentation people write for other people lives in `docs/` instead.
 - [writing.md](writing.md): how everything agents write for this repository is written, including the kinds of document, the sentence rules, how to mark evidence, and the words the lint flags.
 - [learn/outline.md](learn/outline.md): the concepts we need to build Crosscheck, in the order we'll learn them, with the depth each one gets.
 - [learn/chapter-guide.md](learn/chapter-guide.md): how a chapter of the learning material is shaped, pitched, and sourced.
-- [commbus/log.md](commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220 and the A2A PA-24.
+- [commbus/log.md](commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220, the A2A PA-24, and the iniBuilds A350.

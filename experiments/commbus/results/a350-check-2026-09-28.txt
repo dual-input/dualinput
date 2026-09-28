@@ -1,0 +1,75 @@
+A350 CommBus check, 2026-09-28, iniBuilds A350 loaded in MSFS 2024
+
+1 · Listener names registered in each panel (ViewListener.g_ViewListenersMgr), read with experiments/tools/run.mjs eval
+  VCockpit18 - iniFAPA350
+    JS_LISTENER_GENERICDATA (1): wt.eb.evt
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+    JS_LISTENER_FACILITY (5): SendAirport, SendIntersection, SendVor, SendNdb, NearestSearchCompleted
+  VCockpit17 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit16 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit15 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit14 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit13 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit12 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit11 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit10 - iniEfbA350
+    JS_LISTENER_GENERICDATA (1): wt.eb.evt
+    JS_LISTENER_COMM_BUS (20): updateDepartureICAO, updateArrivalICAO, updateDepartureRunway, updateArrivalRunway, RequestNavigraphAccessToken, NAVIGRAPH_FunctionResult, NAVIGRAPH_Event, RouteOverlayNotification, NotificationFunction, AOCClear, AOCMessage, UpdateSL, VersionNotification, AutosaveLoadError, SaveNotification, QuickPerfRequest, ToDataRequest, RequestTerrainDownloadComplete, FailureResetByEnum, FSC_CLIENT_EVENT
+    JS_LISTENER_FACILITY (6): SendAirport, SendIntersection, SendVor, SendNdb, NearestSearchCompleted, NearestSearchCompletedWithStruct
+    JS_LISTENER_CHARTS (3): SendChartIndex, SendChartPages, SendLiveViewName
+  VCockpit09 - iniEfbA350
+    JS_LISTENER_GENERICDATA (1): wt.eb.evt
+    JS_LISTENER_COMM_BUS (21): updateDepartureICAO, updateArrivalICAO, updateDepartureRunway, updateArrivalRunway, RequestNavigraphAccessToken, NavigraphTokenRefreshRequest, NAVIGRAPH_FunctionResult, NAVIGRAPH_Event, RouteOverlayNotification, NotificationFunction, AOCClear, AOCMessage, UpdateSL, VersionNotification, AutosaveLoadError, SaveNotification, QuickPerfRequest, ToDataRequest, RequestTerrainDownloadComplete, FailureResetByEnum, FSC_CLIENT_EVENT
+    JS_LISTENER_FACILITY (6): SendAirport, SendIntersection, SendVor, SendNdb, NearestSearchCompleted, NearestSearchCompletedWithStruct
+    JS_LISTENER_CHARTS (3): SendChartIndex, SendChartPages, SendLiveViewName
+  VCockpit08 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit07 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit06 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit05 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit04 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit03 - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit02 - WasmInstrument - WasmInstrument
+    JS_LISTENER_WASM_MODULE (5): WasmModuleLoaded, WasmGaugeReady, WasmModuleNotFound, WasmGaugeNotFound, WasmModuleCrashed
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+  VCockpit01 - iniFAPA350
+    JS_LISTENER_GENERICDATA (1): wt.eb.evt
+    JS_LISTENER_COMM_BUS (1): FSC_CLIENT_EVENT
+    JS_LISTENER_FACILITY (5): SendAirport, SendIntersection, SendVor, SendNdb, NearestSearchCompleted
+  FSC_CLIENT_EVENT is FS Copilot's bridge, installed in this sim, not the aircraft.
+
+2 · CommBus imports in the A350's WASM modules (grep -a -o)
+  inibuilds-A350.wasm (68952481 bytes): fsCommBusCall fsCommBusRegister fsCommBusUnregister fsCommBusUnregisterAll 
+  msfs_navigation_data_interface.wasm (4210002 bytes): fsCommBusCall fsCommBusRegister fsCommBusUnregister 
+
+3 · Strings within 1,500 bytes of known CommBus names in inibuilds-A350.wasm, identifier-like ones only
+  updateDepartureICAO: VOR 1 | VOR 2 | IDENT | CLASS | ADF 1 | ADF 2 | NAV FREQUENCY | Megahertz | RADIO NAV MODE | RADIO POSITION | LIST OF DESELECTED NAVAIDS | infoReq | LEG NAME | DIRECT START LAT | DIRECT START LON | DIRECT END LAT | DIRECT END LON | ARC START LAT | ARC START LON | ARC END LAT | ARC END LON | Error opening file for writing | CHECK FMS MESSAGE | D-ATIS RECEIVED | KEYBOARD INPUT | ACTIVE | FMS PAGE NOT AVAIL | PENALTY | BDisplayChangeTimer | DisplayChangeTimer | TIME MARKER REACHED | TOTAL WEIGHT | IN-BND | DISCONTINUITY | ETP-REF1 | ETP-REF2 | PPOS-ETP | cpdlc | CHECK T.O DATA | updateDepartureICAO | updateArrivalICAO | UpdateFMGS1_1 | UpdateFMGS1_9_15 | UpdateFMGS1_26 | UpdateFMGS1_27 | UpdateFMGS1_28 | UpdateFMGS1_29 | UpdateFMGS1_31 | UpdateFMGS1_32 | UpdateFMGS1_33 | UpdateFMGS1_34 | UpdateFMGS1_35 | UpdateFMGS1_36 | UpdateFMGS1_37 | UpdateFMGS1_38 | UpdateFMGS1_39 | UpdateFMGS1_40 | UpdateFMGS1_41 | UpdateFMGS1_42 | UpdateFMGS1_43 | UpdateFMGS1_44 | UpdateFMGS1_45 | UpdateFMGS1_46 | WEIGHTS CLEARED | GPS GROUND TRUE TRACK | DEGREES | FPLAN_INIT | TO_DATA | TO_ACCEL | TO_THR_RED | TO_CG | TO_FLAPS | TO_QNH | TO_TEMP | TO_V1 | TO_VR | TO_V2 | TO_THR_OPTION | TO_SHIFT | WIND_HDG | TO_FLEX_TEMP | WIND_SPD | RWY_COND | TO_RWY | COMPANY T.O DATA RECEIVED | WAITING FOR INSERTION | updateDepartureRunway | updateArrivalRunway | __Type | Metar | windDir | windSpeed | altimeterQ | cavok | NOT_SUBSCRIBED | NOT_LOGGED_IN | TOKEN_EXPIRED
+  AOCMessage: level | wind_data | altitude | wind_dir | wind_spd | fetch | status | Success | origin | icao_code | destination | alternate | callsign | times | est_time_enroute | SB_READ_FILE_TIMER | fms_downloads | directory | navlog | stage | ident | altitude_feet | COMPANY WIND DATA RECEIVED | WAITING FOR INSERTION IN ACTIVE | WAITING FOR INSERTION IN SEC 1 | WAITING FOR INSERTION IN SEC 2 | WAITING FOR INSERTION IN SEC 3 | sb_wind_timer | sb_timer | cpdlc | telex | LOADSHEET | TAKEOFF | FINAL_LOADSHEET_TIMER | Category | Content | AOCMessage | iata_code | weights | pax_count_actual | est_zfw | max_zfw | est_tow | max_tow_struct | est_ldw | max_ldw | aircraft | enroute_burn | plan_takeoff | plan_html | DISPATCHER: | PIC SIGNATURE: | SI SERVICE WEIGHT | DEDUCTIONS  | PREPARED BY | J. KELLER | M. SCHMIDT | A. RIVERA | T. NGUYEN | S. FISCHER | L. MARTIN | P. GARCIA | R. EVANS | B. LEE | ADVISE ETA AND FUEL ON ARRIVAL. | NOTED. KEEP US UPDATED ON STATUS. | PROCEED AS REQUESTED. SAFE LANDING.
+  QuickPerfRequest: THR_RED | TO_THR_RED | TO_CG | TO_FLAPS | TO_QNH | TO_TEMP | TO_V1 | TO_VR | TO_V2 | TO_THR_OPTION | TO_SHIFT | WIND_HDG | TO_FLEX_TEMP | WIND_SPD | RWY_COND | TO_RWY | DOME_R | FLOOD | INTEG | FCU INTEG | FCU DISPLAY | SLIDING TABLE LEFT | SLIDING TABLE RIGHT | PEDAL LEFT | PEDAL RIGHT | READING LEFT | READING RIGHT | CONSOLE LEFT | CONSOLE RIGHT | MAP LEFT | MAP RIGHT | STBY COMPASS | ICE IND | COAT STOWAGE | REAR CONSOLE | OIS LEFT | OIS RIGHT | CARGO BAY 1 | CARGO BAY 2 | FIRE ENG1 | FIRE ENG2 | FIRE APU | CABIN 1 | CABIN 2 | CABIN 3 | CABIN 4 | CABIN 5 | CABIN 6 | CABIN 7 | CABIN 8 | CABIN 9 | BEACON SYS 1 | BEACON SYS 2 | WING SYS 1 | WING SYS 2 | TURNOFF | LOGO SYS 1 | LOGO SYS 2 | NAV SYS 1 | STROBES LEFT | STROBES RIGHT | LANDING LEFT | LANDING RIGHT | TAXI CAM | TAKEOFF | PAYLOAD STATION WEIGHT | INI_REQ_CRZ_FLT_TIMER | CENTER WHEEL RPM | LIGHT PEDESTRAL ON | LIGHT PANEL ON | LIGHT STROBE | LIGHT BEACON | CIRCUIT ON | QuickPerfRequestResponse | ENG_AM | ENG_BR | CABIN_ANN_UPDATE_LOOP | ANTI_ICE_BASE_UPDATE_LOOP | GSX_SERVICES_UPDATE_LOOP | SNOW_HANDLER_UPDATE_LOOP | OXYGEN_BASE_UPDATE_LOOP | AFT CARGO | FWD CARGO | AVIONICS | DOOR_BASE_UPDATE_LOOP | GENERAL_SYSTEM_UPDATE_LOOP | GENERAL_SYSTEM_LIGHT_UPDATE_LOOP | WIPERS_UPDATE_LOOP | QuickPerfRequest | TOTAL WEIGHT | INI_CABIN_LANGUAGE_PACK | map::at:  key not found | DEFAULT | INDICATED ALTITUDE CALIBRATED | cold_and_dark.ini | on_gpu.ini | on_apu.ini | ready_for_takeoff.ini | temp.ini | EMPTY WEIGHT | pounds | gps_jam_start_timer
+  FailureResetByEnum: INI_THROTTLE_MAPPING_ | CLEAR | DEACTIVATE | LAND ASAP | LAND ANSA | YES... | NO... | INI_DEV_PROCEDURE_ACTIVATION_DURING_UPDATE | ManualFailureToggleCommand | FWS_UPDATE_LOOP | failure_code | should_fail | FailureResetByEnum | ACFT POS .........................CHECK | ACFT POS : CHECK
+  VersionNotification: RED SYSTEM | SELECT DESIRED SYSTEM | WAIT FOR SYSTEM RESPONSE | PAUSED AT TOD | AUTO STEP CLIMB | reset_step_SC_timer | AUTO STEP DESCENT | reset_step_SD_timer | T.O TIME REACHED | CHECK DATABASE CYCLE | CHECK SPD MODE | EXTEND SPD BRK | ap_delay_timer_first | ap_delay_timer | unordered_map::at: key not found | INI_THROTTLE_MAPPING_ | RWY TRK | TRACK | GA TRK | F-LOC | RWY NAV | OP CLB | OP DES | ALT CRZ | APP-DES | DECEL | EXP CLB | EXP DES | EMER DES | SPEED | THR IDLE | THR CLB | Version | VersionNotification | VARIABLES_UPDATE_LOOP | AIRCRAFT_VARIABLES_UPDATE_LOOP | TIMER_UPDATE_LOOP | SIMCONNECT_UPDATE_LOOP | SIMCONNECT_SLOW_UPDATE_LOOP | GENERAL_SLOW_UPDATE_LOOP | FBW_UPDATE_LOOP | MAINT_MANAGER_UPDATE_LOOP | OISOptionSet | NavigraphUpdateRequested | NavigraphUpdateCompleted | ENTRY OUT OF RANGE | FORMAT ERROR | oooooooooo | NO DH | ooo.o

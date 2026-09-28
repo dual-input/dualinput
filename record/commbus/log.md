@@ -1,8 +1,43 @@
 # CommBus: log
 
 What our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, newest entry first.
+Reading it works, and how much it yields depends on the aircraft: the Synaptic A220 puts its whole cockpit's state on the CommBus, the A2A PA-24 doesn't use the CommBus at all, and the iniBuilds A350 uses it only between its EFB and its one module.
 The probes are in [experiments/commbus](../../experiments/commbus), and their raw output is in [experiments/commbus/results](../../experiments/commbus/results).
 All of it was measured on MSFS 2024 on 2026-09-28, with FS Copilot's bridge installed, which is why every panel also registered `FSC_CLIENT_EVENT`.
+
+## 2026-09-28: The A350's CommBus carries EFB traffic, and its cockpit state stays inside one module
+
+**Asked:** does the iniBuilds A350 put its cockpit state on the CommBus, as the A220 does?
+
+**Expected:** yes, because iniBuilds co-published the A220.
+
+**Found:** no.
+15 of its 18 panels are `WasmInstrument` gauges, and their JavaScript registers no CommBus name of the aircraft's own.
+Only the two EFB panels, `iniEfbA350`, use the CommBus from JavaScript, with 20 and 21 names, all about the EFB:
+
+- flight setup: `updateDepartureICAO`, `updateArrivalRunway`
+- performance: `QuickPerfRequest`, `ToDataRequest`
+- company messages: `AOCMessage`, `AOCClear`
+- Navigraph: `RequestNavigraphAccessToken`, `NAVIGRAPH_FunctionResult`, `NAVIGRAPH_Event`
+- failures: `FailureResetByEnum`
+
+The aircraft has two modules, and both import `fsCommBusCall` and `fsCommBusRegister`.
+`inibuilds-A350.wasm`, at 68,952,481 bytes, runs the systems and draws every display, so its cockpit state never has to cross a bus.
+`msfs_navigation_data_interface.wasm` is Navigraph's navigation-data module.
+
+The strings beside the EFB's names in `inibuilds-A350.wasm` include names no panel registered: `UpdateFMGS1_1`, `UpdateFMGS1_9_15`, `UpdateFMGS1_26` to `UpdateFMGS1_28`, `ManualFailureToggleCommand`, `OISOptionSet`, `NavigraphUpdateRequested`, and `cpdlc`.
+From what's around them, they're likely messages the EFB sends into the module, such as flight-plan and performance data for the FMS, which a listener can't see (unverified: read from strings, not from traffic).
+Nothing near them suggests the module broadcasts cockpit state.
+
+We didn't record the EFB's traffic, because its Navigraph channels can carry an access token.
+
+**Changed:** an aircraft that draws its displays in WASM keeps its cockpit state inside the module, where the CommBus doesn't reach it.
+On such an aircraft the CommBus carries what crosses between the module and the EFB, which could matter for syncing EFB actions, such as sending takeoff data to the FMS.
+Seeing those messages needs a wrapper on the EFB's sending path, since a listener hears only what the module sends.
+
+**Affects:** nothing yet.
+
+**Evidence:** [a350-check-2026-09-28.txt](../../experiments/commbus/results/a350-check-2026-09-28.txt).
 
 ## 2026-09-28: The A2A PA-24 doesn't use the CommBus
 

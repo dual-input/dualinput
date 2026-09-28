@@ -1,5 +1,8 @@
 node_modules/
 
+# Scripts read out of the sim and aircraft by probes: Asobo's and aircraft developers' code
+experiments/sim-sources/
+
 # Claude Code: personal settings and throwaway worktrees
 .claude/settings.local.json
 .claude/worktrees/

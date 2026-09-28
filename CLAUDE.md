@@ -12,6 +12,8 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
   Create or edit it only when asked, and keep the author's voice.
 - `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.
+- `experiments/` holds probes and prototypes, in one folder per area, named like the area's folder in `record/`, which holds its plan, log, and results.
+  `experiments/tools/` drives the sim's inspector on 127.0.0.1:19999, which runs JavaScript in any panel, so a panel probe needs no one to paste it.
 - `record/writing.md` is how everything agents write is written.
   It's imported above, so it's already loaded.
 - `scripts/prose-lint.mjs` makes the mechanical checks from writing.md.
@@ -51,6 +53,14 @@ Prefer the one anchored in source code or a measurement, and say which you used.
 Getting MSFS into a flight with the right aircraft and panel takes a person minutes.
 Write each probe to answer as much as it can in one run, and print a report that stands on its own.
 We haven't tried loading a flight through SimConnect, and this rule loosens if that works.
+
+**Product code never imports from `experiments/`.**
+A prototype that works reaches the product through a plan stage that rebuilds it, so a prototype's shortcuts never ship.
+An experiment still needs a stage in its area's plan, but no decision on language: probes are Node `.mjs` files and panel `.js` files.
+
+**Prefix every name the sim shares with `CROSSCHECK_`.**
+That covers panel globals, CommBus events, client data areas, and `L:` variables.
+Every package in the Community folder shares these namespaces, and FS Copilot's `FSC_` and fsc-editor's `FSCEDITOR_` are already in use there.
 
 **Never delete as a side effect.**
 Deleting a file, or running `git checkout`, `restore`, `stash`, or `reset` on a path, is its own proposal: ask first, and say why.

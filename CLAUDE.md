@@ -21,6 +21,8 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
   A hook runs it after every Markdown edit, and its findings come back to you as context.
 - `.claude/agents/doc-reviewer.md` makes the judgment checks the lint can't.
 - `.claude/skills/learn/` writes one chapter of the learning material (`/learn <course> <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
+- `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft>`), in a subagent of its own.
+  The session that runs it commits the study and marks it in `record/areas/aircraft/plan.md`.
 
 ## Targets
 
@@ -47,6 +49,7 @@ When the record uses one of their findings, restate it and cite it as [Evidence]
 
 Some of these records contradict each other.
 Prefer the one anchored in source code or a measurement, and say which you used.
+FS Copilot's aircraft profiles come from community contributors with varying experience of each aircraft, so treat a profile's claim as a lead to check, not as evidence.
 
 ## Working rules
 

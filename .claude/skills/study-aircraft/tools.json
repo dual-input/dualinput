@@ -1,0 +1,13 @@
+{
+  "platform": "windows-x64, the only platform MSFS 2024 runs on",
+  "wabt": {
+    "version": "1.0.37",
+    "note": "WABT dropped wasm-decompile after 1.0.37, so this stays pinned; add a newer wasm-objdump only if a module fails to parse",
+    "url": "https://github.com/WebAssembly/wabt/releases/download/1.0.37/wabt-1.0.37-windows.tar.gz",
+    "sha256": "498207e092690596ae7014b9e4ee65dc263c69c1fd97f1d6783d614ec37786a7",
+    "files": ["wabt-1.0.37/bin/wasm-decompile.exe", "wabt-1.0.37/bin/wasm-objdump.exe"]
+  },
+  "prettier": {
+    "version": "3.9.9"
+  }
+}

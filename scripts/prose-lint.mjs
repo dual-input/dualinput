@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Mechanical prose checks from record/writing.md.
+// Mechanical prose checks from .claude/rules/writing.md.
 //
 //   node scripts/prose-lint.mjs <file.md>...   Lint whole files. Exits 1 if anything is found.
 //   node scripts/prose-lint.mjs --hook         Lint only what a Write or Edit just wrote, reading the
 //                                              PostToolUse payload on stdin. Findings reach the agent
 //                                              as context, and the edit itself is never blocked.
 //
-// The word list is the table between the prose-lint markers in record/writing.md, so the guide and
+// The word list is the table between the prose-lint markers in .claude/rules/writing.md, so the guide and
 // the lint can't disagree about what gets flagged. Judgment calls belong to the doc-reviewer agent.
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -14,10 +14,10 @@ import { dirname, isAbsolute, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const GUIDE = resolve(ROOT, 'record/writing.md')
+const GUIDE = resolve(ROOT, '.claude/rules/writing.md')
 const TERMS_START = '<!-- prose-lint: terms -->'
 const TERMS_END = '<!-- prose-lint: end -->'
-// Mirrors "One document, one job" in record/writing.md. Change both together.
+// Mirrors "One document, one job" in .claude/rules/writing.md. Change both together.
 const WORD_LIMIT = 3000
 const HOOK_MAX = 25
 const BANNED_HEADINGS = new Set(['overview', 'introduction', 'intro', 'summary', 'conclusion', 'conclusions'])
@@ -29,7 +29,7 @@ function loadTerms() {
   const start = guide.indexOf(TERMS_START)
   const end = guide.indexOf(TERMS_END)
   if (start < 0 || end < start) {
-    throw new Error(`record/writing.md has no table between ${TERMS_START} and ${TERMS_END}`)
+    throw new Error(`.claude/rules/writing.md has no table between ${TERMS_START} and ${TERMS_END}`)
   }
   const terms = []
   for (const row of guide.slice(start, end).split('\n')) {
@@ -317,7 +317,7 @@ async function hook() {
   const lines = findings.slice(0, HOOK_MAX).map((f) => `  line ${f.line}: ${f.message}`)
   if (findings.length > HOOK_MAX) lines.push(`  and ${findings.length - HOOK_MAX} more`)
   return [
-    `prose-lint: ${count} in ${rel.replace(/\\/g, '/')}. The rules are in record/writing.md. Fix each, or keep one on purpose.`,
+    `prose-lint: ${count} in ${rel.replace(/\\/g, '/')}. The rules are in .claude/rules/writing.md. Fix each, or keep one on purpose.`,
     ...lines,
   ].join('\n')
 }

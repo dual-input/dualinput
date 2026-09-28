@@ -4,20 +4,19 @@ Crosscheck is a shared cockpit for Microsoft Flight Simulator: two pilots on two
 Don't write product code until a plan in `record/` has a stage for it.
 Until a decision in `record/decisions/` picks them, propose a language, framework, or architecture rather than choosing one.
 
-@record/writing.md
-
 ## Layout
 
 - `docs/` is reserved for documentation people write for other people.
   Create or edit it only when asked, and keep the author's voice.
 - `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.
-  Keep its top level to `decisions/`, `learn/`, `areas/`, and the files there now, and give each part of Crosscheck a folder under `areas/`, so twenty areas don't bury the rest.
+  Keep its top level to `index.md`, `decisions/`, `learn/`, and `areas/`, and give each part of Crosscheck a folder under `areas/`, so twenty areas don't bury the rest.
 - `experiments/` holds probes and prototypes, and their raw results, in `experiments/areas/<area>/`, the same path the area has under `record/`.
   A finding worth keeping goes in the area's log in `record/areas/<area>/`, and the area's README links to that log and says nothing else that can go stale.
   `experiments/tools/` drives the sim's inspector on 127.0.0.1:19999, which runs JavaScript in any panel, so a panel probe needs no one to paste it.
-- `record/writing.md` is how everything agents write is written.
-  It's imported above, so it's already loaded.
+- `.claude/rules/` holds the conventions agents follow, and Claude Code loads the files there on its own.
+  `writing.md` is how everything agents write is written, and it loads into every session.
+  `chapter-guide.md` is how a learning chapter is written, and it loads when a file in `record/learn/` is read.
 - `scripts/prose-lint.mjs` makes the mechanical checks from writing.md.
   A hook runs it after every Markdown edit, and its findings come back to you as context.
 - `.claude/agents/doc-reviewer.md` makes the judgment checks the lint can't.
@@ -44,7 +43,7 @@ Build output and logs from running them are fine.
 | `../fsc-editor/` | A profile editor with its own SimConnect link (`src/main/sim/`), WASM module (`link/`), and relay (`relay/`). `docs/sim-vars/build/v1-log.md` is our most detailed record of how the sim behaves. | fsc-editor |
 | `../fsc-exerciser/` | A test bench that plays the second pilot on the same machine. | fsc-exerciser |
 
-When the record uses one of their findings, restate it and cite it as [Evidence](record/writing.md#evidence) describes, using the names in the last column.
+When the record uses one of their findings, restate it and cite it as [Evidence](.claude/rules/writing.md#evidence) describes, using the names in the last column.
 
 Some of these records contradict each other.
 Prefer the one anchored in source code or a measurement, and say which you used.

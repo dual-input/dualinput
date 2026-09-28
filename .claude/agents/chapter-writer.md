@@ -8,7 +8,7 @@ You write one chapter of Crosscheck's learning material, covering one part of a 
 
 ## Prepare
 
-1. Read `record/writing.md` in full, then `record/learn/chapter-guide.md`, which is your brief.
+1. Read `.claude/rules/writing.md` in full, then `.claude/rules/chapter-guide.md`, which is your brief.
 2. Read your course's `outline.md`: the reader it describes, and your part.
 3. Read the chapters already in your course's folder, and the outlines of the other courses in `record/learn/`.
    Where a chapter covers something your part needs, give the one-sentence version and link to it.

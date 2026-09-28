@@ -3,7 +3,7 @@
 ```text
 Purpose:  How everything an agent writes for this repository is written.
 Covers:   The record, code comments, commit messages, and instructions for agents.
-Loaded:   Into every main session, through the import in CLAUDE.md.
+Loaded:   Into every session, by Claude Code, from .claude/rules/.
 ```
 
 ## The test
@@ -28,7 +28,7 @@ The kind decides who reads it and what shape it takes.
 | Reference          | beside what it describes                                                 | look one thing up                                                                      |
 | Outline            | `record/learn/<course>/outline.md`                                       | know what a course covers, in what order and depth, and which parts have a chapter     |
 | Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
-| Agent instructions | `CLAUDE.md`, `.claude/`, and files `CLAUDE.md` imports, such as this one | act correctly without asking                                                           |
+| Agent instructions | `CLAUDE.md` and `.claude/`, including rules such as this file            | act correctly without asking                                                           |
 
 A document that's two kinds at once serves neither reader.
 A design doc that also tracks progress goes stale in its progress half and takes the design half down with it.
@@ -76,8 +76,8 @@ The reasoning lives in a design doc, and the reference links to it.
 A course is one body of learning: a folder in `record/learn/` with its own outline and the chapters written from it, such as `foundations`.
 A concept we need later, out of the work, gets a new course rather than new parts at the end of an existing outline, because each outline is a sequence meant to be finished.
 
-Outlines and chapters follow [the chapter guide](learn/chapter-guide.md).
-It lives apart from this file because only a chapter writer needs it.
+Outlines and chapters follow [the chapter guide](chapter-guide.md).
+It lives apart from this file, and loads only when a file in `record/learn/` is read, because only a chapter writer needs it.
 
 ## Structure
 
@@ -247,7 +247,7 @@ The product is Crosscheck, capitalized.
 ## Words and patterns to cut
 
 Each of these usually marks a sentence written on autopilot.
-[prose-lint](../scripts/prose-lint.mjs) reads this table and flags every hit outside code, quotation marks, and URLs, including inflected forms (`robustness`, `leveraged`).
+[prose-lint](../../scripts/prose-lint.mjs) reads this table and flags every hit outside code, quotation marks, and URLs, including inflected forms (`robustness`, `leveraged`).
 The fix is almost always to delete the word or say the concrete thing it stood in for.
 A flagged word doing real work can stay: "actually" correcting a belief the text just stated is fine.
 
@@ -357,8 +357,8 @@ Until the repository goes public, a commit title only has to say what changed.
   A rule that must be seen before an action lives inline in `CLAUDE.md`, and then only there.
 - **Keep `CLAUDE.md` under 150 lines of its own.**
   It's read at the start of every session, whether or not it's relevant.
-  Its imports load with it, so each imported line faces the same deletion test.
-- **An agent definition that writes tells its agent to read this file**, rather than relying on the import reaching it.
+  Every file in `.claude/rules/` without `paths:` in its front matter loads with it, so each of their lines faces the same deletion test.
+- **An agent definition that writes tells its agent to read this file**, rather than relying on Claude Code loading it for the agent.
 
 ## Finishing a document
 

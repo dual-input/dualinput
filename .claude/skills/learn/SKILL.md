@@ -25,6 +25,6 @@ If an agent type isn't available, which happens when its definition was added af
    Don't summarize the chapter, because the user is about to read it.
 
 The user's reading is the chapter's review.
-When they find prose that doesn't work, fix the chapter, and if the problem could recur, add a rule to `record/learn/chapter-guide.md`.
+When they find prose that doesn't work, fix the chapter, and if the problem could recur, add a rule to `.claude/rules/chapter-guide.md`.
 
 Stop there, and start the next part only when the user asks.

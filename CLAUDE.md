@@ -37,8 +37,7 @@ Build output and logs from running them are fine.
 
 | Path | What's there | Cite as |
 | --- | --- | --- |
-| `../fsc/ahead/record/` | Findings from our FS Copilot work: pointer forwarding, traffic and ATC, the exerciser, and a self-hosted relay. `conventions.md` holds the rules that work followed. | FS Copilot fork |
-| `../fsc/ahead-record/record/` | The same records on the fork's `ahead-record` branch. `ahead` is rebuilt from all the `ahead-*` branches, so `ahead-record` can hold findings `ahead` doesn't have yet, such as the A380 and A350 WASM display tests in `wasm-pointer/`. Search both. | FS Copilot fork, with the branch and commit |
+| `../fsc/ahead-record/record/` | Findings from our FS Copilot work: pointer forwarding, WASM displays, traffic and ATC, the exerciser, and a self-hosted relay. `conventions.md` holds the rules that work followed. This is the fork's `ahead-record` branch, where the record is written; `ahead` is rebuilt from all the `ahead-*` branches, so its copy of `record/` can lag. | FS Copilot fork |
 | `../fsc/ahead/` | The FS Copilot fork: a C# desktop app, a WASM bridge module, a JavaScript panel bridge, and a relay. | FS Copilot fork |
 | `../fsc/profiles/` | FS Copilot aircraft profiles, architecture notes in `docs/`, and MSFS simulation-variable reference pages as PDFs in `docs-msfs/`. | FS Copilot profiles |
 | `../fsc-editor/` | A profile editor with its own SimConnect link (`src/main/sim/`), WASM module (`link/`), and relay (`relay/`). `docs/sim-vars/build/v1-log.md` is our most detailed record of how the sim behaves. | fsc-editor |

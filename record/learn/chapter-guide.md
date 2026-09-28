@@ -1,6 +1,7 @@
 # Chapter guide
 
-A chapter teaches one part of the [learning outline](outline.md) to the reader the outline describes.
+A chapter teaches one part of a course's outline to the reader that outline describes.
+A course is a folder in `record/learn/` with its own outline, such as [foundations](foundations/outline.md), and its chapters go in that folder.
 It wastes none of the reader's time, and it skips none of the steps they need to understand.
 When those pull against each other, understanding wins: a skipped step saves the writer one sentence and costs the reader minutes.
 Everything in [writing.md](../writing.md) applies too.
@@ -25,5 +26,5 @@ Everything in [writing.md](../writing.md) applies too.
 8. End with the sources as a numbered list, each with its [Evidence](../writing.md#evidence) marker, then the claims nobody has verified, each with what would settle it.
 9. A part that runs past 3,000 words splits into chapters of whole sections, in outline order, named `NN-MM-<slug>.md`.
 
-The outline is the plan for the learning material.
+A course's outline is its plan.
 A part's heading links to its chapter, or to the first of its chapters, once it's written, and those links are the only record of which parts are done.

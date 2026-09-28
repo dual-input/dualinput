@@ -83,7 +83,7 @@ So a panel receives any CommBus name a listener in it registers, and Crosscheck 
 **Changed:** on the A220, a late listener can get the full state within about 100ms, whenever it asks.
 The call that asks is Synaptic's, so each aircraft that works this way needs its own in the profile.
 
-**Affects:** [05-02](../../learn/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), whose "a listener that registers late has missed what came before" holds for the CommBus but not for the A220.
+**Affects:** [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), whose "a listener that registers late has missed what came before" holds for the CommBus but not for the A220.
 
 **Evidence:** [p03-resync-and-reload-2026-09-28-18-32-49.txt](../../../experiments/areas/commbus/results/p03-resync-and-reload-2026-09-28-18-32-49.txt) and the `.ndjson` beside it, which holds every message.
 
@@ -114,7 +114,7 @@ The files stamped `18-19-38` carry that error, and p02 has merged each message i
 **Changed:** reading one message tells a listener only what just changed, so a listener has to keep each channel's state, and needs a way to learn the fields that haven't changed (the entry above).
 The CommBus gives an absolute value for controls whose input is relative: the A220's baro knob takes a count of detents, and `qnh_hpa` says where it landed.
 
-**Affects:** [07-aircraft-specific-systems](../../learn/07-aircraft-specific-systems.md), whose table puts the setting on `A22X.L PFD Data`, and [05-02](../../learn/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), which names that channel as the one holding it.
+**Affects:** [07-aircraft-specific-systems](../../learn/foundations/07-aircraft-specific-systems.md), whose table puts the setting on `A22X.L PFD Data`, and [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), which names that channel as the one holding it.
 
 **Evidence:** [p02-commbus-watch-2026-09-28-18-22-39.txt](../../../experiments/areas/commbus/results/p02-commbus-watch-2026-09-28-18-22-39.txt), with its `.ndjson` stream and `-state.json`, and the p03 files in the entry above.
 

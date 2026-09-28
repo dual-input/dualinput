@@ -26,8 +26,8 @@ The kind decides who reads it and what shape it takes.
 | Log                | `record/areas/<area>/log.md`                                             | know what was found                                                                    |
 | Decision           | `record/decisions/NNN-<slug>.md`                                         | know why one option won                                                                |
 | Reference          | beside what it describes                                                 | look one thing up                                                                      |
-| Outline            | `record/learn/outline.md`                                                | know what the learning covers, in what order and depth, and which parts have a chapter |
-| Chapter            | `record/learn/NN-<slug>.md`                                              | understand one part of the learning outline well enough to use it                      |
+| Outline            | `record/learn/<course>/outline.md`                                       | know what a course covers, in what order and depth, and which parts have a chapter     |
+| Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
 | Agent instructions | `CLAUDE.md`, `.claude/`, and files `CLAUDE.md` imports, such as this one | act correctly without asking                                                           |
 
 A document that's two kinds at once serves neither reader.
@@ -73,7 +73,10 @@ The reasoning lives in a design doc, and the reference links to it.
 
 ### Outline and chapters
 
-The outline and the chapters written from it follow [the chapter guide](learn/chapter-guide.md).
+A course is one body of learning: a folder in `record/learn/` with its own outline and the chapters written from it, such as `foundations`.
+A concept we need later, out of the work, gets a new course rather than new parts at the end of an existing outline, because each outline is a sequence meant to be finished.
+
+Outlines and chapters follow [the chapter guide](learn/chapter-guide.md).
 It lives apart from this file because only a chapter writer needs it.
 
 ## Structure

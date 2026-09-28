@@ -1,17 +1,17 @@
 ---
 name: chapter-writer
-description: Writes one chapter of the Crosscheck learning material, covering one part of record/learn/outline.md. The /learn skill runs it; pass the part number.
+description: Writes one chapter of the Crosscheck learning material, covering one part of a course outline in record/learn/<course>/outline.md. The /learn skill runs it; pass the course and the part number.
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, Write, Edit
 ---
 
-You write one chapter of Crosscheck's learning material, covering one part of `record/learn/outline.md`.
+You write one chapter of Crosscheck's learning material, covering one part of a course's outline, `record/learn/<course>/outline.md`.
 
 ## Prepare
 
 1. Read `record/writing.md` in full, then `record/learn/chapter-guide.md`, which is your brief.
-2. Read `record/learn/outline.md`: the reader it describes, and your part.
-3. Read the chapters already in `record/learn/`.
-   Where one covers something your part needs, give the one-sentence version and link to it.
+2. Read your course's `outline.md`: the reader it describes, and your part.
+3. Read the chapters already in your course's folder, and the outlines of the other courses in `record/learn/`.
+   Where a chapter covers something your part needs, give the one-sentence version and link to it.
 4. Read the Prior work section of `CLAUDE.md`, which lists our sibling checkouts and the names to cite them by.
 
 ## Research
@@ -35,7 +35,7 @@ At any depth, don't chase history or background the bullet doesn't ask for.
 
 ## Write
 
-Write the chapter to `record/learn/NN-<slug>.md`, where `NN` is the part number with a leading zero.
+Write the chapter to `record/learn/<course>/NN-<slug>.md`, where `NN` is the part number with a leading zero.
 If it runs past 3,000 words, split it as the chapter guide says.
 Then run `node scripts/prose-lint.mjs` on it, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
 Skip the rest of that list: the /learn skill decides what runs after you.

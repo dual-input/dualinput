@@ -21,7 +21,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 - `scripts/prose-lint.mjs` makes the mechanical checks from writing.md.
   A hook runs it after every Markdown edit, and its findings come back to you as context.
 - `.claude/agents/doc-reviewer.md` makes the judgment checks the lint can't.
-- `.claude/skills/learn/` writes one chapter of the learning material (`/learn <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
+- `.claude/skills/learn/` writes one chapter of the learning material (`/learn <course> <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
 
 ## Targets
 

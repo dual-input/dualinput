@@ -19,16 +19,16 @@ When a rule below disagrees with this test, the test wins.
 Before the first sentence, know which kind you're writing.
 The kind decides who reads it and what shape it takes.
 
-| Kind | Lives in | The reader wants to |
-| --- | --- | --- |
-| Design | `record/<area>/NN-<slug>.md` | know what a part is and why it's that way |
-| Plan | `record/<area>/plan.md` | know what's being built and where it stands |
-| Log | `record/<area>/log.md` | know what was found |
-| Decision | `record/decisions/NNN-<slug>.md` | know why one option won |
-| Reference | beside what it describes | look one thing up |
-| Outline | `record/learn/outline.md` | know what the learning covers, in what order and depth, and which parts have a chapter |
-| Chapter | `record/learn/NN-<slug>.md` | understand one part of the learning outline well enough to use it |
-| Agent instructions | `CLAUDE.md`, `.claude/`, and files `CLAUDE.md` imports, such as this one | act correctly without asking |
+| Kind               | Lives in                                                                 | The reader wants to                                                                    |
+| ------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Design             | `record/<area>/NN-<slug>.md`                                             | know what a part is and why it's that way                                              |
+| Plan               | `record/<area>/plan.md`                                                  | know what's being built and where it stands                                            |
+| Log                | `record/<area>/log.md`                                                   | know what was found                                                                    |
+| Decision           | `record/decisions/NNN-<slug>.md`                                         | know why one option won                                                                |
+| Reference          | beside what it describes                                                 | look one thing up                                                                      |
+| Outline            | `record/learn/outline.md`                                                | know what the learning covers, in what order and depth, and which parts have a chapter |
+| Chapter            | `record/learn/NN-<slug>.md`                                              | understand one part of the learning outline well enough to use it                      |
+| Agent instructions | `CLAUDE.md`, `.claude/`, and files `CLAUDE.md` imports, such as this one | act correctly without asking                                                           |
 
 A document that's two kinds at once serves neither reader.
 A design doc that also tracks progress goes stale in its progress half and takes the design half down with it.
@@ -57,6 +57,7 @@ Write the entry when the result arrives, not at the end of the day.
 Each entry says what we asked, what we expected, what we found, what changed because of it, and which docs it affects.
 A negative result gets the same care as a positive one, because what was tried and abandoned is the part git history can't tell anyone.
 Raw output goes in a `results/` folder beside the log and gets committed: the log is the reading, and the results are the evidence.
+An experiment's raw output stays beside its probe, in `experiments/<area>/results/`, and the area's log gets an entry only for a finding worth keeping.
 
 ### Decisions
 
@@ -248,33 +249,35 @@ The fix is almost always to delete the word or say the concrete thing it stood i
 A flagged word doing real work can stay: "actually" correcting a belief the text just stated is fine.
 
 <!-- prose-lint: terms -->
-| Cut | Why | Instead |
-| --- | --- | --- |
-| `genuinely`, `truly`, `really`, `actually`, `honestly` | Sincerity markers imply the rest is less sincere | Delete |
-| `crucial`, `importantly`, `critically`, `vital` | Asserts importance instead of showing it | State the consequence |
-| `essentially`, `basically`, `fundamentally` | Announces an approximation without saying what it leaves out | Say the exact thing |
-| `simply`, `obviously`, `clearly`, `of course`, `straightforward` | Tells the reader how easy it should feel | Delete |
-| `robust`, `seamless`, `powerful`, `elegant` | Praise that says nothing checkable | What it survives or does |
-| `comprehensive`, `holistic`, `nuanced` | Same | What it covers |
-| `leverage`, `utilize`, `utilise` | Longer words for "use" | use |
-| `delve`, `streamline`, `empower` | Marketing verbs | The literal verb |
-| `load-bearing`, `first-class`, `under the hood`, `game-changer`, `game changer` | Stock metaphors | What depends on it, or how it works |
-| `worth noting`, `note that`, `it's important to`, `it is important to`, `keep in mind` | Signposts that announce a sentence instead of writing it | The sentence |
-| `let's`, `in summary`, `in conclusion`, `to summarize`, `as mentioned`, `as noted above` | Tour-guide narration | Delete |
-| `as requested`, `as discussed`, `as you mentioned`, `you asked` | Leftovers from a conversation the reader wasn't in | Delete |
-| `don't worry`, `rest assured`, `you might be wondering`, `you may be wondering` | Reassurance nobody asked for | Delete |
-| `in order to` | Two wasted words | to |
-| `a wide range of`, `a variety of`, `various` | A quantity nobody counted | Count them or name them |
-| `currently`, `recently`, `at the moment`, `as of now`, `nowadays` | True only on the day it was written | A date, or nothing |
-| `may potentially`, `could potentially`, `might potentially`, `could possibly`, `might possibly` | Stacked hedges | One hedge, or a marker from [Evidence](#evidence) |
-| `not just`, `not only`, `not merely` | Argues with a claim nobody made | The positive claim |
-| `successfully` | Success is the default, so only failure needs saying | Delete |
-| `colour`, `behaviour`, `favour`, `honour`, `neighbour`, `flavour` | British spelling | color, behavior, favor, honor, neighbor, flavor |
-| `centre`, `centred`, `metre`, `litre`, `licence`, `defence`, `offence` | British spelling | center, meter, liter, license, defense, offense |
-| `grey`, `whilst`, `amongst`, `aeroplane`, `manoeuvre`, `tyre`, `aluminium`, `programme`, `analogue`, `catalogue` | British spelling | gray, while, among, airplane, maneuver, tire, aluminum, program, analog, catalog |
-| `judgement`, `acknowledgement`, `learnt`, `spelt` | British spelling | judgment, acknowledgment, learned, spelled |
-| `/\b(organi\|recogni\|reali\|normali\|optimi\|initiali\|seriali\|synchroni\|minimi\|maximi\|prioriti\|summari\|customi\|authori\|categori\|finali\|visuali\|standardi\|characteri\|emphasi\|apologi)s(e\|es\|ed\|ing\|er\|ers\|ation\|ations)\b/` | British -ise spelling | -ize: organize, synchronization |
-| `/\b(travel\|cancel\|model\|label\|signal\|fuel\|level\|tunnel\|channel)l(ed\|ing\|er\|ers)\b/` | British doubled l | traveled, modeling, labeled |
+
+| Cut                                                                                                                                                                                                                                               | Why                                                          | Instead                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| `genuinely`, `truly`, `really`, `actually`, `honestly`                                                                                                                                                                                            | Sincerity markers imply the rest is less sincere             | Delete                                                                           |
+| `crucial`, `importantly`, `critically`, `vital`                                                                                                                                                                                                   | Asserts importance instead of showing it                     | State the consequence                                                            |
+| `essentially`, `basically`, `fundamentally`                                                                                                                                                                                                       | Announces an approximation without saying what it leaves out | Say the exact thing                                                              |
+| `simply`, `obviously`, `clearly`, `of course`, `straightforward`                                                                                                                                                                                  | Tells the reader how easy it should feel                     | Delete                                                                           |
+| `robust`, `seamless`, `powerful`, `elegant`                                                                                                                                                                                                       | Praise that says nothing checkable                           | What it survives or does                                                         |
+| `comprehensive`, `holistic`, `nuanced`                                                                                                                                                                                                            | Same                                                         | What it covers                                                                   |
+| `leverage`, `utilize`, `utilise`                                                                                                                                                                                                                  | Longer words for "use"                                       | use                                                                              |
+| `delve`, `streamline`, `empower`                                                                                                                                                                                                                  | Marketing verbs                                              | The literal verb                                                                 |
+| `load-bearing`, `first-class`, `under the hood`, `game-changer`, `game changer`                                                                                                                                                                   | Stock metaphors                                              | What depends on it, or how it works                                              |
+| `worth noting`, `note that`, `it's important to`, `it is important to`, `keep in mind`                                                                                                                                                            | Signposts that announce a sentence instead of writing it     | The sentence                                                                     |
+| `let's`, `in summary`, `in conclusion`, `to summarize`, `as mentioned`, `as noted above`                                                                                                                                                          | Tour-guide narration                                         | Delete                                                                           |
+| `as requested`, `as discussed`, `as you mentioned`, `you asked`                                                                                                                                                                                   | Leftovers from a conversation the reader wasn't in           | Delete                                                                           |
+| `don't worry`, `rest assured`, `you might be wondering`, `you may be wondering`                                                                                                                                                                   | Reassurance nobody asked for                                 | Delete                                                                           |
+| `in order to`                                                                                                                                                                                                                                     | Two wasted words                                             | to                                                                               |
+| `a wide range of`, `a variety of`, `various`                                                                                                                                                                                                      | A quantity nobody counted                                    | Count them or name them                                                          |
+| `currently`, `recently`, `at the moment`, `as of now`, `nowadays`                                                                                                                                                                                 | True only on the day it was written                          | A date, or nothing                                                               |
+| `may potentially`, `could potentially`, `might potentially`, `could possibly`, `might possibly`                                                                                                                                                   | Stacked hedges                                               | One hedge, or a marker from [Evidence](#evidence)                                |
+| `not just`, `not only`, `not merely`                                                                                                                                                                                                              | Argues with a claim nobody made                              | The positive claim                                                               |
+| `successfully`                                                                                                                                                                                                                                    | Success is the default, so only failure needs saying         | Delete                                                                           |
+| `colour`, `behaviour`, `favour`, `honour`, `neighbour`, `flavour`                                                                                                                                                                                 | British spelling                                             | color, behavior, favor, honor, neighbor, flavor                                  |
+| `centre`, `centred`, `metre`, `litre`, `licence`, `defence`, `offence`                                                                                                                                                                            | British spelling                                             | center, meter, liter, license, defense, offense                                  |
+| `grey`, `whilst`, `amongst`, `aeroplane`, `manoeuvre`, `tyre`, `aluminium`, `programme`, `analogue`, `catalogue`                                                                                                                                  | British spelling                                             | gray, while, among, airplane, maneuver, tire, aluminum, program, analog, catalog |
+| `judgement`, `acknowledgement`, `learnt`, `spelt`                                                                                                                                                                                                 | British spelling                                             | judgment, acknowledgment, learned, spelled                                       |
+| `/\b(organi\|recogni\|reali\|normali\|optimi\|initiali\|seriali\|synchroni\|minimi\|maximi\|prioriti\|summari\|customi\|authori\|categori\|finali\|visuali\|standardi\|characteri\|emphasi\|apologi)s(e\|es\|ed\|ing\|er\|ers\|ation\|ations)\b/` | British -ise spelling                                        | -ize: organize, synchronization                                                  |
+| `/\b(travel\|cancel\|model\|label\|signal\|fuel\|level\|tunnel\|channel)l(ed\|ing\|er\|ers)\b/`                                                                                                                                                   | British doubled l                                            | traveled, modeling, labeled                                                      |
+
 <!-- prose-lint: end -->
 
 These patterns are beyond the lint, so the `doc-reviewer` agent looks for them:
@@ -363,6 +366,5 @@ Until the repository goes public, a commit title only has to say what changed.
    Fix or answer each finding.
    You're done when its report opens by saying the document is ready.
 
-If the document is a plan, a log, or a probe README written during an experiment, skip steps 3 and 4.
-Those documents change with every result, so a review of each draft costs more time than it saves.
+If the document is a log written during an experiment, skip steps 3 and 4.
 Run both steps when a finding moves into a design doc or a decision.

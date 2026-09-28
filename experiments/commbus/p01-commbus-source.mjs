@@ -9,7 +9,7 @@
  *
  *   node experiments/commbus/p01-commbus-source.mjs [title filter, default VCockpit]
  *
- * The report goes to record/commbus/results/. The source it reads goes to
+ * The report goes to experiments/commbus/results/. The source it reads goes to
  * experiments/sim-sources/commbus/, which git ignores, because it's Asobo's code.
  */
 

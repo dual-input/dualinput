@@ -6,7 +6,7 @@
  *   node experiments/tools/run.mjs eval <page> "<expression>"
  *
  * <page> is an id or a case-insensitive title substring.
- * A probe's report is echoed and saved to record/<area>/results/.
+ * A probe's report is echoed and saved to experiments/<area>/results/.
  */
 
 import { readFileSync } from "node:fs"

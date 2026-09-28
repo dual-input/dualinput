@@ -132,7 +132,8 @@ Profiles also carry their authors' guesses: the A220's was written without the a
 Every panel document runs FS Copilot's copy of the file, which wraps each instrument ([06-02](06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
 Upstream syncs clicks by element name through the CommBus, the module, and 512-byte client data areas ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), and reports `H:` events the same way, holding each for 500ms before sending it ([03-02](03-02-events-and-other-namespaces.md#h-html-events)).
 Our fork adds pointer gestures, numbered and acknowledged, over a WebSocket from each panel document to the app ([06-04](06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost)).
-Element names miss every SVG, canvas, and WASM display, positions drive SVG, and nothing in a panel drives a WASM display ([06-03](06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges)).
+Element names miss every SVG, canvas, and WASM display, and positions drive SVG.
+Of the WASM displays tested, only the A380's has been driven from a panel, by a probe that wraps the press in `mouseover`, `mouseenter`, and `mouseleave` ([06-03](06-03-display-kinds-input-and-pop-outs.md#touchscreens-pointer-events-and-who-owns-hover)).
 The copy has to be redone after any sim update that changes the stock file.
 The sim runs only one package's copy of a file ([02-01](02-01-installs-and-packages.md#packages-and-the-virtual-file-system)), and FS Copilot's installer deletes YourControls' package.
 Its app also reports "Conflict detected with YourControls package." whenever `L:YourControlsPanelId` is above 0, a sign that YourControls' panel code ran [5].
@@ -164,7 +165,7 @@ Each links to the chapter that shows it, except the last, which this chapter add
 - Profiles write 32 variables the SDK marks read-only, and sync a constant 0 for `Z:AUDIO_Knob_Selector_1` ([03-01](03-01-units-and-variables.md#a-simulation-variables), [03-01](03-01-units-and-variables.md#l-and-z-local-variables)).
 - A livery can change the A220's panel key so that its pointer entry matches nothing (unverified, [02-02](02-02-aircraft.md#unverified-claims)).
 - Element-name sync skips every instrument whose `isInteractive` is false, such as the A220's MKP ([06-01](06-01-the-engine-and-instruments.md#vcockpit-baseinstrument-and-panelcfg-gauges)).
-- A replayed press on a WASM display lands wherever the receiving pilot's cursor is ([06-03](06-03-display-kinds-input-and-pop-outs.md#touchscreens-pointer-events-and-who-owns-hover)).
+- A replayed press on one of the A350's WASM displays lands wherever the receiving pilot's cursor is ([06-03](06-03-display-kinds-input-and-pop-outs.md#touchscreens-pointer-events-and-who-owns-hover)).
 - The module drops a panel message over 512 bytes without a log, and sizes `FSC_EXE` at 200 bytes where the app writes 512 ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm), [05-03](05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)).
 - The module calls `SimConnect_CallDispatch` once, and nothing in MSFS 2024 shows that's enough (unverified, [05-02](05-02-simconnect-and-the-commbus.md#unverified-claims)).
 - Two pilots working one display at once leave it diverged, and only pressing the same page button brings it back ([08-06](08-06-divergence-and-one-screen.md#two-pilots-on-one-screen)).

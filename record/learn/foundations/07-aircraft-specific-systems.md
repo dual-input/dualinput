@@ -59,7 +59,7 @@ The 777's cockpit clicks take a third route: its package declares no `<InputEven
 FS Copilot's PMDG profile replays a left click on switch 1084 as `108401 (>K:ROTOR_BRAKE)`, and reads the switch's state from its animation variable, `L:switch_1084_a` [4] [8].
 
 Displays differ too: 20 of the PMDG 777's 22 `panel.cfg` gauges load `WasmInstrument`, as do 11 of the A350's 15 and 14 of the Fenix's 21, against only the systems gauge among the A220's 14 [1] [9].
-No DOM-level scheme drives a WASM display ([06-03](06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges)).
+Panel code drives the A380's WASM displays at a position, and no sequence tried so far drives the A350's ([06-03](06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges)).
 
 **What it changes for Crosscheck.**
 Crosscheck needs a reader and a writer for each kind of channel: the namespaces [part 3](outline.md#3-variables-events-and-units-full) covers, SimConnect client data for PMDG, and the CommBus for the A220.

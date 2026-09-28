@@ -104,7 +104,8 @@ Whether Crosscheck keeps two pilots off one display, and whether some displays h
 - A drag reaches the other machine only when it ends, as one packet of up to 240 points, about 8s, so the window in which the other pilot can collide with a drag is the whole drag [3].
 - The replaying lock doesn't cover a quick tap that arrives with nothing queued, which replays at once and shows no lock [10].
 - No lock covers the first seconds after a display loads, before its code runs [3] [8].
-- On a WASM display the other pilot's press can't be replayed at all, because only the local cursor presses anything ([06-03](06-03-display-kinds-input-and-pop-outs.md#touchscreens-pointer-events-and-who-owns-hover)).
+- On the A350's WASM displays the other pilot's press can't be replayed yet, because the module presses only under the local cursor ([06-03](06-03-display-kinds-input-and-pop-outs.md#touchscreens-pointer-events-and-who-owns-hover)).
+  On the A380's it can, inside an enter wrapper whose `mouseleave` may disturb the local pilot's own hover, and we haven't measured whether it does.
 
 ## Sources
 

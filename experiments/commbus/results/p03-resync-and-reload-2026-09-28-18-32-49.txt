@@ -1,0 +1,78 @@
+p03 · A220 full state: our resync call, then a DisplayUnits reload
+2026-09-28T18:32:49.341Z
+
+1 · Recorders
+   11  VCockpit14 - Sentry: Sentry, every name, 48 names
+   19  VCockpit06 - CTP: its own names, 10 names
+
+2 · Run
+  20:32:55  baseline
+  20:33:01  A22X.Resync called from panel 11: sent
+  20:33:07  DisplayUnits (panel 23) reloaded
+
+3 · Largest message per channel, in fields, as the VCockpit14 - Sentry recorder saw it
+  channel                       baseline   resync  latency   reload  latency
+  A220.Config Request                  -        -                 -         
+  A220.EFB FMS Response                -        -                 -         
+  A220.EFB FMS Set TO Perf             -        -                 -         
+  A220.FMS Position                    0       70    108ms       70   2302ms
+  A220.Flight Plan Response            -        -                 2   2498ms
+  A220.Flight Plan Status              0       13    108ms       13   2301ms
+  A220.Flight Plan Update              1      370    108ms      370   2300ms
+  A220.Nav Data Response               -        -                 4   2361ms
+  A220.Sentry Heartbeat                -        -                 0         
+  A220.Sentry Log                      -        -                 -         
+  A220.Sentry Session End              -        -                 -         
+  A220.Sim Paused                      -        -                 -         
+  A22X DU1 Data                        4        4     30ms        4     26ms
+  A22X DU2 Data                        4        4     31ms        4     27ms
+  A22X DU3 Data                        4        4     31ms        4     27ms
+  A22X DU4 Data                        4        4     31ms        4     27ms
+  A22X DU5 Data                        4        4     32ms        4     27ms
+  A22X.ATC Data                        0       14    106ms       14   2297ms
+  A22X.Air Data                        0       81     99ms       81   2254ms
+  A22X.Anti Ice Data                   0        4    104ms        4   2288ms
+  A22X.Autoflight Data                 0       37    102ms       37   2284ms
+  A22X.Avionic Data                    0       10    105ms       10   2291ms
+  A22X.CAS Acknowledge                 -        -                 -         
+  A22X.CAS Data                       46       46     66ms       46     62ms
+  A22X.Doors Data                      0       15    104ms       15   2290ms
+  A22X.Electrical Data                 1      463     99ms      463   2257ms
+  A22X.Engine Data                     1       50    106ms       50   2295ms
+  A22X.FCP Data                        0       11    107ms       11   2299ms
+  A22X.Flight Control Data             0       77    101ms       77   2283ms
+  A22X.Fuel Data                       0       65    100ms       65   2262ms
+  A22X.Gear Data                       0       27    104ms       27   2288ms
+  A22X.Hydraulic Data                  0       43    100ms       43   2264ms
+  A22X.ISI Data                        5       11    107ms       11   2299ms
+  A22X.L ADS Data                      0       24    105ms       24   2292ms
+  A22X.L CTP Data                      1       19    105ms       19   2290ms
+  A22X.L CTP State                     2        2     32ms        2     28ms
+  A22X.L IRS Data                      0       18    106ms       18   2293ms
+  A22X.L Nav Data                      0       24    103ms       24   2285ms
+  A22X.L PFD Data                      1       42    103ms       42   2286ms
+  A22X.R ADS Data                      0       24    106ms       24   2293ms
+  A22X.R CTP Data                      1       19    105ms       19   2291ms
+  A22X.R CTP State                     2        2     33ms        2     28ms
+  A22X.R IRS Data                      0       18    106ms       18   2294ms
+  A22X.R Nav Data                      0       24    103ms       24   2286ms
+  A22X.R PFD Data                      1       42    104ms       42   2287ms
+  A22X.Radio Data                      0       31    104ms       31   2289ms
+  A22X.Status Data                     0       28    101ms       28   2284ms
+  FSC_CLIENT_EVENT                     -        -                 -         
+
+4 · Delivery to a panel that never registered the name
+  39 of 43 names registered only in other panels reached the Sentry recorder
+    A220.Sim Paused              Sentry     0   CTP     0
+    A22X.ATC Data                Sentry    27   CTP    27
+    A22X.L CTP Data              Sentry    30   CTP    30
+    A22X.L CTP State             Sentry   803   CTP   802
+    A22X.L Nav Data              Sentry    27   CTP    27
+    A22X.R CTP Data              Sentry    30   CTP    30
+    A22X.R CTP State             Sentry   803   CTP   802
+    A22X.R Nav Data              Sentry    27   CTP    27
+    A22X.Radio Data              Sentry    27   CTP    27
+    FSC_CLIENT_EVENT             Sentry     0   CTP     0
+
+5 · DisplayUnits after the reload
+  registered 42 CommBus names again (42 before)

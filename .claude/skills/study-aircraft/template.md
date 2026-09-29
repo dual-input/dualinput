@@ -31,7 +31,8 @@ A text diagram of how the parts talk to each other and to the sim, with real nam
 
 **State.**
 Which namespaces hold cockpit state (`A:`, `L:`, input events, `O:`, CommBus, client data, files), with counts and naming conventions.
-Which stock variables the aircraft ignores or overwrites, since those still read plausible values.
+Which stock variables and events the aircraft's code reads, writes, listens for, masks, or only sends.
+A stock variable the aircraft writes follows the cockpit, and one it never writes still reads a plausible value that means nothing.
 
 **Input path.**
 How a click becomes a state change, followed through the files for one control of each kind: latching, momentary, toggle, relative, guarded, multi-position, spring-loaded, and any kind this aircraft adds.
@@ -56,7 +57,7 @@ Panel states, saved files, what the aircraft keeps between flights, and what rel
 SDKs, documented variables and events, and external tools the vendor supports.
 
 **Prior records.**
-Each claim our records or FS Copilot's profile make about this aircraft, and whether its files confirm it, contradict it, or can't settle it.
+A count of the claims our records and FS Copilot's profile make about this aircraft that its files confirm, then a table of every claim they contradict, can't settle, or we didn't check, with which side is right where they differ.
 
 **Sim questions.**
 Numbered.

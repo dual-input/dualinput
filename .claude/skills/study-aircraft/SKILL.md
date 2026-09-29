@@ -61,6 +61,12 @@ A decompiled module past a few MB is too big to read whole.
 Start from its `.objdump.txt`: the imports say which sim APIs it calls, and the function names, where it has them, map its systems.
 Then search its `.strings.txt` and `.dcmp` for the names you're following, and read the functions that use them.
 
+A name in a module's strings says the module knows it, not what the module does with it, and the direction is what Crosscheck needs.
+So find the module's wrappers around the imports that register names with the sim, such as `SimConnect_AddToDataDefinition`, `SimConnect_MapClientEventToSimEvent`, and `SimConnect_AddClientEventToNotificationGroup`, and resolve every call site.
+Record each variable as read or written, by which data definition `SimConnect_RequestDataOnSimObject` and `SimConnect_SetDataOnSimObject` use, and each event as listened for, listened for and masked, or only sent.
+A module copies each name from its data segment into a buffer just before the call, but builds a name of 8 bytes or fewer from an integer constant, which a strings search misses, so decode the constants stored into the buffer too.
+
+
 ## Read
 
 Read in this order, because each step tells you where to look in the next:
@@ -71,8 +77,11 @@ Read in this order, because each step tells you where to look in the next:
 4. Instrument code: the gauges `panel.cfg` names, and their HTML and JavaScript.
 5. WASM modules.
 6. Programs that run outside the sim.
-7. Our prior records on this aircraft.
+7. Our prior records on this aircraft, including every copy of its FS Copilot profile: `../fsc/profiles/definitions/` and the fork's `../fsc/ahead/Definitions/` can hold different versions.
+   Take the newest by its `Updated:` line, and cite an older copy only where it differs.
    FS Copilot's profiles come from community contributors with varying experience of each aircraft, so treat a profile's claim as a lead to check in the files, not as evidence.
+   In `notes.md`, list every concrete claim each prior source makes about the aircraft, with a status: confirmed, contradicted, unsettled, or not checked.
+   Where our records measured something the files also say, compare the two and explain each difference.
 8. The web: the vendor's SDK pages, manuals, and forums, marked unverified.
 
 The template's sections are the least a study covers.
@@ -82,9 +91,10 @@ Write what you find to `notes.md` as you read, because a long read outlasts your
 ## Write
 
 1. Write each name list you pulled, such as input events, `L:` variables, CommBus names, or a module's imports, to its own plain-text file in `inventory/`.
-   Its first line says which package, version, file, and method it came from.
+   Its first line says which package, version, file, and method it came from, and each name carries its direction where the files say it.
 2. Write `study.md` from the template, citing each claim as the Evidence section of writing.md says.
 3. Run `node scripts/prose-lint.mjs` on each Markdown file, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
+   Then check every sentence that cites one of our measurements against the log entry it cites, because a study read from files can outrun what was measured.
 4. Search what you wrote for a username, a home folder path, or a machine name, and replace each path with a placeholder such as `%APPDATA%`.
 5. Last, find the aircraft's license, in its packages, its installer, or on the vendor's site.
    If it restricts reverse engineering, decompiling, or publishing what we found, add a License section at the end of the study that names the clause and links to it.

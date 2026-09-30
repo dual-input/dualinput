@@ -53,7 +53,9 @@ You write to two folders:
 2. Write `files.md` from that report: one row per file of code, configuration, behavior, or documentation, and one row per group of art, sound, or model files, with a count and a total size.
    Each row gets a status as you go: read, skimmed, skipped with the reason, or unreadable with the reason.
    A rerun resumes from this file, so keep it current.
-3. For a file the script left alone that you need, use what you have: read a PDF with the Read tool.
+3. For a file the script left alone that you need, use what you have: read a PDF with the Read tool, or its text with `pdftotext`.
+   Check each `.fsarchive` header: a Marketplace package can mark some archives `notEncrypted`, storing their files uncompressed and listed in the header's index, as two of the iniBuilds A380's seven were (its study's Code architecture section says how to read them).
+   Leave an encrypted archive shut, because a way to open it would open every product on the Marketplace.
    If it needs a tool we don't have, such as a .NET decompiler, mark it unreadable, name the tool, and report it.
    Don't install anything.
 

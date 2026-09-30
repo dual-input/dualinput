@@ -1,9 +1,35 @@
 # CommBus: log
 
 What our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, newest entry first.
-Reading it works, and how much it yields depends on the aircraft: the Synaptic A220 puts its whole cockpit's state on the CommBus, the A2A PA-24 doesn't use the CommBus at all, and the iniBuilds A350 uses it only between its EFB and its one module.
+Reading it works, and how much it yields depends on the aircraft: the Synaptic A220 puts its whole cockpit's state on the CommBus, the A2A PA-24 doesn't use the CommBus at all, and the iniBuilds A350 uses it only for traffic between its two modules and its EFB and printer.
 The probes are in [experiments/areas/commbus](../../../experiments/areas/commbus), and their raw output is in [experiments/areas/commbus/results](../../../experiments/areas/commbus/results).
-All of it was measured on MSFS 2024 on 2026-09-28, with FS Copilot's bridge installed, which is why every panel also registered `FSC_CLIENT_EVENT`.
+The entries of 2026-09-28 were measured on MSFS 2024 that day, with FS Copilot's bridge installed, which is why every panel also registered `FSC_CLIENT_EVENT`.
+
+## 2026-09-30: Two claims of the A350 entry don't hold against the aircraft's files
+
+**Asked:** do the claims of [the A350 entry](#2026-09-28-the-a350s-commbus-carries-efb-traffic-and-its-cockpit-state-stays-inside-one-module) hold against the aircraft's files?
+
+**Expected:** yes, since they came from the sim and from strings in the module.
+
+**Found:** two don't, by the entry's own results file and by the files of `inibuilds-aircraft-a350` 1.2.6.
+
+- "15 of its 18 panels are `WasmInstrument` gauges" is wrong: 14 panels hold 15 `WasmInstrument` gauges.
+  The results file lists 14 `WasmInstrument` panels, one of them with two gauges, and the package's `panel.cfg` puts the systems gauge and Navigraph's `navigation_data_interface` on one panel.
+  The other four panels are the two EFBs and two flight attendant panels (FAPs).
+
+
+- The module doesn't draw every display, and the EFB isn't the only JavaScript on the CommBus.
+  The FAP and the printer are JavaScript too, and the printer's page listens for `PRINTCALLBACK` (read in `A350_Printer.js`).
+  The probe missed the printer because it listed only `VCockpit` panels, and the printer is a `VPainting` page.
+
+Of the names the entry found among the module's strings, the EFB's JavaScript sends `ManualFailureToggleCommand` and `NavigraphUpdateRequested` (read in `ini-efb-a350.js`).
+
+**Changed:** the entry's conclusion stands: the module keeps the cockpit's state to itself, and the JavaScript on the CommBus is the EFBs' and the printer's.
+
+
+**Affects:** the A350 entry below, whose text stays as it was, and [06-03](../../learn/foundations/06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges), whose table put every A350 display but the EFB in the WASM gauge kind and is corrected in place.
+
+**Evidence:** [a350-check-2026-09-28.txt](../../../experiments/areas/commbus/results/a350-check-2026-09-28.txt) for the panels, and the [A350 study](../aircraft/inibuilds-a350/study.md#prior-records), whose [commbus.tsv](../aircraft/inibuilds-a350/inventory/commbus.tsv) lists each CommBus name with its listener and sender.
 
 ## 2026-09-28: The A350's CommBus carries EFB traffic, and its cockpit state stays inside one module
 

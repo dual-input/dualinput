@@ -107,11 +107,13 @@ Our FS Copilot fork moved forwarded clicks off this path, to a WebSocket from ea
 [Part 6](outline.md#6-glass-cockpits-and-coherent-gt-full) covers that WebSocket.
 
 Aircraft use the CommBus too.
-The Synaptic A220's systems module publishes its state as JSON on more than 30 named channels, such as `A22X.L PFD Data`, for its JavaScript displays to draw, and the selected altimeter setting appears on no other channel we've found: no `L:` variable holds it, and the `A:` variable's name is absent from the module [15], which a flight has yet to confirm ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
+The Synaptic A220's systems module publishes its state as JSON on more than 30 named channels, such as `A22X.L PFD Data`, for its JavaScript displays to draw [15].
+The panels get the selected altimeter setting on the CommBus, as `qnh_hpa` on `A22X.L ADS Data` and `qnh.value` on `A22X.L CTP Data` [17].
+Whether `A:KOHLSMAN SETTING MB` follows it is unverified ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
 
 **What it changes for Crosscheck.**
 Some aircraft keep state only on the CommBus, and a Crosscheck module could register for the same names to read it, but it receives only calls whose sender set the WASM flag.
-Which flags the A220's module sets is unknown, so whether a module can read the A220's altimeter setting is unverified.
+The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a module can't read the A220's channels, and Crosscheck has to read them from panel JavaScript (unverified).
 
 **Traps.**
 
@@ -139,13 +141,16 @@ Which flags the A220's module sets is unknown, so whether a module can read the 
 14. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "4.1 Transport: WebSocket sidecar, not the CommBus".
 15. Documented in our record, read from the aircraft's files: fsc-editor, `docs/aircraft/synaptic-a220.md`, sections "Architecture — the thing to remember", "THE ALTIMETER PROBLEM", and "CommBus channels".
 
+17. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
+
 ## Unverified claims
 
 - **One `SimConnect_CallDispatch` call is enough in an MSFS 2024 module.**
   FS Copilot's module relies on it, and our only support is a 2021 forum post about MSFS 2020 [2] [5].
   A module that calls it once in `module_init` and counts client data deliveries over a minute of the app writing every 200ms would settle it.
-- **A module can read the A220's CommBus channels.**
-  Registering for `A22X.L PFD Data` in a module and logging what arrives while the pilot turns the altimeter knob would settle it.
+- **A module can't read the A220's CommBus channels.**
+  Nobody has measured which flags the module's calls set.
+  Registering for `A22X.L ADS Data` in a module and logging what arrives while the pilot turns the altimeter knob would settle it.
 - **In MSFS 2024, a gauge module gets no `SimStart` or `SimStop`.**
   The report is from MSFS 2020 [8].
   Subscribing to both from a gauge module and from a standalone module through one flight would settle it.

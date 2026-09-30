@@ -102,7 +102,7 @@ What a control does is learned by watching it move or by reading the aircraft's 
 | --- | --- | --- |
 | `A:`, `K:` | None: the SDK documents a fixed list [20] [21] | Every variable or event, used or not |
 | `L:` | A WASM module walks the table by ID [11] | Every add-on's variables: 5,364 with the PA-24 loaded, against the 279 that FS Copilot's PA-24 profile uses [22] |
-| `B:` | `SimConnect_EnumerateInputEvents` [15] | The aircraft's input events and the sim's own: 318 on the PA-24, against 181 declared in A2A's XML [23] |
+| `B:` | `SimConnect_EnumerateInputEvents` [15] | The aircraft's input events, and perhaps the sim's own: 318 on the PA-24, against 223 declared in its package's XML [23] [33] |
 | `H:`, `Z:`, `I:`, `O:` | None [23] [24] | — |
 
 Observing means working a control and recording what moved.
@@ -197,6 +197,7 @@ For each variable, Crosscheck needs a wire type that keeps every value the recei
 30. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, `FsCopilot/Connection/SimConnectExtensions.cs`, `InferDataType`.
 31. Documented in our record: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Stage 2b: the module streams. Transport built, untested against the sim.", which describes the module's design; the entry itself says it hadn't yet run against the sim.
 32. Documented: MSFS 2024 SDK, [SimConnect_ExecuteAction](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_ExecuteAction.htm).
+33. Documented in our record, read from the installed package `a2a-aircraft-pa24` 2.1.3 on 2026-09-29: [a2a-pa24-comanche study](../../areas/aircraft/a2a-pa24-comanche/study.md), "State", with every declared input event in its [input-events.tsv](../../areas/aircraft/a2a-pa24-comanche/inventory/input-events.tsv).
 
 ## Unverified claims
 

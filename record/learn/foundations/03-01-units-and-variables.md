@@ -93,9 +93,9 @@ The SDK answers the first question for the sim's own systems, and [part 7](outli
   Nobody has measured whether those writes take effect.
 - SimConnect rejects a data-definition entry for a variable the sim doesn't have, but only later, so nothing fails where the entry was added.
   fsc-editor's app then read past the end of a message and crashed, and requesting tagged data fixed it [14].
-- An aircraft can ignore an `A:` variable.
-  The name `A:KOHLSMAN SETTING MB` appears nowhere in the A220's systems module [7], so that variable likely reports an altimeter setting the pilot's displays don't use.
-  A module can read the variable by its SDK number without the name, so only a flight can prove it ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
+- An aircraft can keep its own copy of state the sim has an `A:` variable for.
+  The A220 keeps its altimeter setting on its own CommBus channels [27].
+  Whether `A:KOHLSMAN SETTING MB` follows that setting is unverified, and turning the captain's baro knob while reading the variable would settle it ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
 
 ## `L:` and `Z:` local variables
 
@@ -166,6 +166,7 @@ Every `L:` Crosscheck writes is visible to every other add-on in the sim.
 24. Documented in our record: fsc-editor, `docs/sim-vars/18-language-core.md`, the `ref-unresolved` item under "Evidence-backed rules", which lists the profiles.
 25. Measured on MSFS 2024, 2026-08-27: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-27 — One parser, one descriptor table; eight private opinions deleted".
 26. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `ModelBehaviorDefs/Asobo/NAVCOM/NavComSystem.xml`, from the MSFS 2020 template set, where `AUDIO_Knob_Selector#SUFFIX_ID#` appears only as an animation and node name; `ModelBehaviorDefs/Asobo_EX1`, the 2024 set, doesn't contain the name.
+27. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
     The MSFS 2024 SDK's [Model Behaviors](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/Models/ModelBehaviors/Model_Behaviors.htm) page says the `Asobo` folder holds the core files for MSFS 2020, and not to mix it with `Asobo_EX1`.
 
 ## Unverified claims

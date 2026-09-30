@@ -130,9 +130,9 @@ That template names the input event preset `#INPUT_EVENT_ID_SOURCE#_#IE_NAME#`: 
 `USE_INPUT_EVENT_ID` attaches the preset to `<InputEvent ID="Switch_Battery_Master">`, which A2A declares in `Inputs\A2A_Inputs.xml`, with presets that extend `ASOBO_GIE_Anim_Handling` [2] [18].
 When a pilot flipped the switch, SimConnect's input event subscription reported `SWITCH_BATTERY_MASTER_2STATES`, which matches the preset name, uppercased [19].
 
-The aircraft's XML isn't the only source of input events.
-The PA-24 enumerates 318 at runtime, against 181 `<InputEvent>` declarations in A2A's XML, and the first 15 enumerated were all `CLICKSPOT_*` and `WALKAROUND_*` [20].
-Where the rest come from is unverified.
+The input events the sim lists don't match the aircraft's declarations one for one.
+The PA-24 enumerates 318 at runtime, against 223 `<InputEvent>` declarations in its package's XML, so at most 95 can come from the sim [20] [25].
+The first 15 enumerated were all `CLICKSPOT_*` and `WALKAROUND_*`, and A2A declares 43 input events with those prefixes in `A2A_External_Inputs.xml` [20] [25], so whether the sim adds any of its own is unverified.
 A Black Square Bonanza defines 5 of its own, and some aircraft wire a click straight to calculator code with no input event at all [21].
 An input event can bind a key event with `<Binding EventID=...>`, and the sim then intercepts that key event and runs the input event's `<Set>` code instead of the key event's default [17].
 
@@ -176,19 +176,22 @@ One click can surface as an input event, an `H:` event, an `L:` write, or nothin
 21. Documented in our record: fsc-editor, `docs/sim-vars/02-namespaces.md`, sections "But coverage varies enormously" and "Pure-XML interactions".
 22. Measured on MSFS 2024, 2026-08-18: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-18 — Every input event fires twice".
 23. Documented in our record: fsc-editor, `docs/aircraft/synaptic-a220.md`, section "Input events (`B:`)".
+24. Documented in our record, read from the installed package `inibuilds-aircraft-a380` 1.0.0 on 2026-09-29: [inibuilds-a380 study](../../areas/aircraft/inibuilds-a380/study.md), the "Readable" line of its header and "What the encryption hides", and its [file list](../../areas/aircraft/inibuilds-a380/files.md), from each archive's header and index.
+25. Documented in our record, read from the installed package `a2a-aircraft-pa24` 2.1.3 on 2026-09-29: [a2a-pa24-comanche study](../../areas/aircraft/a2a-pa24-comanche/study.md), "State" and "Prior records", with every declared input event in its [input-events.tsv](../../areas/aircraft/a2a-pa24-comanche/inventory/input-events.tsv).
 
 ## Unverified claims
 
 - **Streamed and Marketplace aircraft have no readable `aircraft.cfg` on disk.**
   One forum report says so [9], and our measurements are all of Community aircraft.
-  An iniBuilds A380 in the `Official2024` folder keeps its content in `.fsarchive` files, with only its `manifest.json` readable ([07](07-aircraft-specific-systems.md#matching-aircraft)).
+  An iniBuilds A380 in the `Official2024` folder keeps its WASM module, its model behaviors, and presumably its `aircraft.cfg` in five `.fsarchive` files whose index is encrypted [24].
+  Its other two archives, `html_ui.fsarchive` and `minimal.fsarchive`, have a `notEncrypted` header and store their files uncompressed, and its `manifest.json`, `layout.json`, and `.actiondb` files are loose on disk [24].
   Reading the path `AircraftLoaded` reports for a stock MSFS 2024 aircraft, and checking whether the file exists, would settle it.
 - **The input event name SimConnect reports is the template's preset name, uppercased.**
   The one example matches [18] [19], but nobody has compared a full enumeration against the XML, and the PA-24 uses the 2020 template set.
   Enumerating the input events of the PA-24 and of an aircraft built on `Asobo_EX1`, and matching each against the preset names its templates build, would settle it.
-- **Where the PA-24's other 137 runtime input events come from.**
-  Only the first 15 were looked at, and they were `CLICKSPOT_*` and `WALKAROUND_*` [20], names that appear nowhere in SDK 1.7.3's `ModelBehaviorDefs`.
-  Listing all 318 and grouping them by prefix would settle it.
+- **Whether the sim adds input events to the PA-24's.**
+  The package declares 223, and of the 318 enumerated, only the first 15 were looked at, all with prefixes A2A uses [20] [25].
+  Listing all 318 and matching them against the 223 declared would settle it.
 - **A220 display panels on a non-Default livery match no FS Copilot profile entry.**
   We read it from the code [16], and nobody has flown it.
   A flight on livery N324DU with the pointer-forwarding counters open would settle it.

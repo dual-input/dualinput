@@ -25,7 +25,7 @@ Our FS Copilot fork added a second way, which sends where the click was, as frac
 | React on DOM | Elements a framework creates and reorders | None in our records | Names shift when siblings reorder [3] | Not tested |
 | React on SVG | One HTML `div`, with SVG below it | The A220's DisplayUnits [2] | Every click names the `div` [3] | Works [2] |
 | Canvas | One `<canvas>` | The A220's MKP, FCP, and ISI, suspected [3] | Nothing to name [3] | Not tested |
-| WASM gauge | A live image of the gauge | Every A350 display but the EFB [6], and the A380's DU [21] | On the A350, presses whatever the receiving pilot's cursor is over [7] | Works on the A380, not on the A350 [7] [21] |
+| WASM gauge | A live image of the gauge | Every A350 display but the EFB, the cabin's flight attendant panel, and the printer [6] [24], and the A380's DU [21] | On the A350, presses whatever the receiving pilot's cursor is over [7] | Works on the A380, not on the A350 [7] [21] |
 
 The A220's DisplayUnits is one document, 7410x1110, with five display units side by side, and only its mount `div` and five empty wrapper `div`s are HTML: everything drawn is SVG [2].
 The A350's MFD, seen through the debugger, holds a live image and no element per control [6] [8]:
@@ -178,6 +178,7 @@ Whether popping out reloads the document, which would put the display back in it
 21. Measured on MSFS 2024, 2026-09-23: FS Copilot fork at 34b621d, branch `ahead-record`, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not", with each trial's calls in `record/wasm-pointer/results/p01-wasm-away-2026-09-23.ndjson`.
 
 23. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_GaugeContext.h`, `struct sGaugeDrawData`.
+24. Documented in our record, read from the installed package `inibuilds-aircraft-a350` 1.2.6 on 2026-09-29: [inibuilds-a350 study](../../areas/aircraft/inibuilds-a350/study.md), "Displays", from the `panel.cfg` files of the cockpit and of the two flight attendant panel attachments.
 
 ## Unverified claims
 

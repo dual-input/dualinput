@@ -16,15 +16,16 @@ A study-level aircraft runs its own model of its systems and keeps the state in 
 Each aircraft needs its own map of where its state lives and what changes it.
 
 **How it works.**
-The Synaptic A220's systems run in `systems.wasm`, a 6.8 MB Rust module loaded as a gauge in `panel.cfg`.
-It reads a short list of `A:` variables, such as `A:AMBIENT PRESSURE`, writes `L:A22X` variables for switch positions and lamps, intercepts a list of key events, and publishes the rest of its state as JSON on the CommBus ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)) [1].
-fsc-editor searched the module's strings for the sim names it uses [1]:
+The Synaptic A220's systems run in `systems.wasm`, a 13.5 MB Rust module at package 1.0.10, loaded as a gauge in `panel.cfg` [19].
+
+It publishes its state as JSON on the CommBus ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)) [21].
+This is where four of its systems keep their state [19] [21]:
 
 | System | Stock name | On the A220 |
 | --- | --- | --- |
-| Altimeter | `A:KOHLSMAN SETTING MB` | Absent from the module; the setting is `qnh_hpa` on the `A22X.L PFD Data` channel |
+| Altimeter | `A:KOHLSMAN SETTING MB` | The module keeps its own setting and gives it to the panels as `qnh_hpa` on the `A22X.L ADS Data` channel [21]; whether the stock variable follows it is unverified |
 | APU | `A:APU PCT RPM`, `A:APU SWITCH` | The sounds read the RPM from `L:A22X APU RPM` [19] |
-| Transponder | `A:TRANSPONDER CODE` | Absent; the module intercepts `K:XPNDR_SET` and keeps the code itself |
+| Transponder | `A:TRANSPONDER CODE` | A change reaches the panels on the CommBus [21]; whether the stock variable follows it is unverified |
 | Autopilot | `K:AP_MASTER` | The button fires it, and lights from `L:A22X AP Master` [19] |
 
 **What it changes for Crosscheck.**
@@ -34,9 +35,11 @@ State kept only on the CommBus needs code in the sim to read.
 **Traps.**
 
 - A stale `A:` variable reads a plausible number, not an error ([03-01](03-01-units-and-variables.md#a-simulation-variables)).
-- Vendor documentation, profiles, and binaries disagree.
-  FS Copilot's A220 profile, written "without the aircraft installed", syncs baro through `A:KOHLSMAN SETTING MB:1` and `K:KOHLSMAN_SET` [2], and neither name appears in the module [1].
-  fsc-editor's notes call that conclusive, but the SDK also numbers both, as `KEY_KOHLSMAN_SET` and the gauge token `KOHLSMAN_SETTING_MB`, and a module can use the numbers without the names [19], so only a flight can settle it.
+- Vendor documentation, profiles, and binaries disagree, and an update can change which one is right.
+  FS Copilot's A220 profile, written "without the aircraft installed", syncs baro through `A:KOHLSMAN SETTING MB:1` and `K:KOHLSMAN_SET` [2], and fsc-editor's notes, read at package 1.0.8, found neither name in the module and called that conclusive [1].
+
+
+  Only a flight on the installed 1.0.10 can settle which holds.
 
 ## How major addons expose state
 
@@ -58,7 +61,7 @@ It says the data stays off until the user adds `EnableDataBroadcast=1` under `[S
 The 777's cockpit clicks take a third route: its package declares no `<InputEvent>`, and each of 797 mouse callbacks in its cockpit XML sends the switch's number times 100, plus a code for the mouse action, through `K:ROTOR_BRAKE` [8].
 FS Copilot's PMDG profile replays a left click on switch 1084 as `108401 (>K:ROTOR_BRAKE)`, and reads the switch's state from its animation variable, `L:switch_1084_a` [4] [8].
 
-Displays differ too: 20 of the PMDG 777's 22 `panel.cfg` gauges load `WasmInstrument`, as do 11 of the A350's 15 and 14 of the Fenix's 21, against only the systems gauge among the A220's 14 [1] [9].
+Displays differ too: of the `htmlgauge` lines in each aircraft's `panel.cfg` files, 28 of the PMDG 777's 30 load `WasmInstrument`, as do 15 of the A350's 19 and 14 of the Fenix's 21, against only the systems gauge among the A220's 14 [9].
 Panel code drives the A380's WASM displays at a position, and no sequence tried so far drives the A350's ([06-03](06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges)).
 
 **What it changes for Crosscheck.**
@@ -81,7 +84,7 @@ A momentary press, a toggle, and a relative step carry an action, whose result d
 | Latching | `L:A22X L Pack Off`, readable and writable [1] | Write the value |
 | Momentary | `L:A22X External Power Toggle`, only ever written 1, with the state in `L:A22X External Power In Use` [1] | Replay the press, or compare the state |
 | Toggle vs. set | The A220's autopilot buttons have only toggle events, such as `K:AP_MASTER` [2]; a PMDG event takes a position or a mouse flag [5] | Toggle only when the states differ |
-| Relative | `L:A22X L Altimeter Set` takes a signed number of detents [1] [7]; Fenix's baro knob runs `(L:E_FCU_EFIS1_BARO) ++ (>L:E_FCU_EFIS1_BARO)` on each increment [6] | An absolute set and readback: FlyByWire has `A32NX.FCU_EFIS_L_BARO_SET`, and the A220 has neither [1] [3] |
+| Relative | `L:A22X L Altimeter Set` takes a signed number of detents [1] [7]; Fenix's baro knob runs `(L:E_FCU_EFIS1_BARO) ++ (>L:E_FCU_EFIS1_BARO)` on each increment [6] | An absolute set and readback: FlyByWire has `A32NX.FCU_EFIS_L_BARO_SET`, and the A220 has a readback, `qnh.value` on the `A22X.L CTP Data` channel, and no set we've found [3] [21] |
 | Guarded | An A220 guard is its own input event, with its state in `O:GuardState` [1]; a PMDG guard is its own switch, `L:switch_516_a` [4] | Sync the guard as a control |
 | Multi-position | `L:A22X Taxi Lights`, 0 to 2 [1] | Write the index |
 | Spring-loaded | `L:A22X APU Switch`, where 2 is START [1] | Knowing whether the variable springs back or only its drawing |
@@ -102,7 +105,8 @@ Crosscheck's knowledge of an aircraft has to record each control's semantics, be
 - FS Copilot's built-in guard, which skips a toggle whose value the machine already has, compares against `current`, which is null until the machine has read the variable once, so the first apply after connecting is never guarded [10].
 - Pulses from a fast-turned knob can merge: the A220 profile says "Several increments can land inside one poll interval with no intervening zero, so clicks coalesce" [2].
 - A spring can be drawn without moving the variable.
-  The A220's XML draws the APU switch back at ON 3s after a mouse move but leaves `L:A22X APU Switch` at 2 [1], while the profile says the aircraft's systems return it to 1 once the APU lights [2].
+  The A220's XML draws the APU switch back at ON 3s after a mouse move but leaves `L:A22X APU Switch` at 2, and nothing in its XML returns the variable to 1 [19].
+  FS Copilot's profile says the aircraft's systems return it to 1 once the APU lights [2].
 
 ## Causes vs. effects
 
@@ -190,7 +194,8 @@ The sim reports the folder, title, and livery ([02-02](02-02-aircraft.md#how-an-
   The A220's liveries are separate packages, such as `synaptic-a220-livery-dal-324` at 0.0.14 [17].
   The livery's registration shows up in the identity of the A220's display panel, `DisplayUnits|config=N324DU` ([02-02](02-02-aircraft.md#how-an-aircraft-is-identified)).
 - **Options.**
-  The A220 keeps options in `L:INI_*` variables: `L:INI_BARO_SYNC_OPTION` ties its three altimeters together, and `L:INI_LIGHT_PANEL_OPTION` flips which way the light switches animate [1].
+  The A220 keeps options in `L:INI_*` variables: `L:INI_BARO_SYNC_OPTION` ties the captain's and first officer's altimeters together, and `L:INI_LIGHT_PANEL_OPTION` flips which way the light switches animate [1] [19].
+  With baro sync on, the standby altimeter kept its own setting, 1013 hPa against the main altimeters' 1019 hPa [21].
   PMDG keeps the 777's in `777_Options.ini`, beside 11 saved panel states such as `COLDDARK.sav` [20].
 
 **What it changes for Crosscheck.**
@@ -204,7 +209,7 @@ Reading the version means finding the package on disk, and the path `AircraftLoa
 
 ## Sources
 
-1. Documented in our record, read from the aircraft's files: fsc-editor, `docs/aircraft/synaptic-a220.md`, from package 1.0.8 on 2026-09-04: "Provenance", "Package layout", "Architecture — the thing to remember", "THE ALTIMETER PROBLEM", "LVAR catalogue", "Input events (`B:`)", "Key events the WASM intercepts", "Radios and transponder", "CommBus channels", and "Rust module map (from panic paths in `systems.wasm`)".
+1. Documented in our record, read from the aircraft's files: fsc-editor, `docs/aircraft/synaptic-a220.md`, from package 1.0.8 on 2026-09-04: "Provenance", "Package layout", "Architecture — the thing to remember", "THE ALTIMETER PROBLEM", "LVAR catalogue", "Input events (`B:`)", "Key events the WASM intercepts", "Radios and transponder", "CommBus channels", and "Rust module map (from panic paths in `systems.wasm`)"; at 1.0.10, [19] finds several of its claims wrong.
 2. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, `Definitions/synaptic_a220.yaml`.
 3. Documented: FlyByWire, [A32NX custom events](https://github.com/flybywiresim/aircraft/blob/master/fbw-a32nx/docs/a320-events.md), `A32NX.FCU_EFIS_{side}_BARO_SET`, and [A320neo local SimVars](https://github.com/flybywiresim/aircraft/blob/master/fbw-a32nx/docs/a320-simvars.md), for the `A32NX_` prefix; read 2026-09-27, and neither names a sim version.
 4. Documented, read from disk: FS Copilot profiles, `definitions/`, which isn't committed to that repository as of 2026-09-27: `FlyByWire_A320_NEO.yaml`, `PMDG 777-300ER.yaml`, `FNX_32X.yaml`, `A350.yaml`, `ASOBO_C172SP_G1000.yaml`, and `microsoft-a320neo.yaml`.
@@ -212,7 +217,8 @@ Reading the version means finding the package on disk, and the path `AircraftLoa
 6. Documented, read from the installed package: Fenix A320 (`fnx-aircraft-320` 2.4.0.4720), 2026-09-27: the `EFIS` component in `SimObjects/Airplanes/FNX_32X/attachments/fnx/Part_Interior_Cockpit/model/Cockpit_Behavior.xml`, and `FNX32X_Interact_Knob_PushPullButton_Template` in `ModelBehaviorDefs/fnx32x/Templates/Interactions.xml`; the 424 are distinct `I_` names across the package's XML.
 7. Documented: Synaptic, [A220 simvars](https://docs.synapticsim.com/pilots/simvars), read 2026-09-27.
 8. Documented, read from the installed package: PMDG 777-300ER, `SimObjects/Airplanes/PMDG 777-300ER/attachments/pmdg/Function_Interior_77W/model/77W_Cockpit_Behavior.xml`: the component `switch_1084_a`, and a count of the callbacks that end `(L:SwitchID, number) (>K:ROTOR_BRAKE)`; no XML file in the package contains `<InputEvent `.
-9. Documented, read from installed packages: FS Copilot fork, `record/exerciser/results/p04-panel-identifiers-2026-09-17.txt`, a count of each aircraft's `htmlgauge` lines and of those loading `WasmInstrument`.
+9. Documented, read from the installed packages, 2026-09-30: the `htmlgauge` lines in every `panel.cfg` of `pmdg-aircraft-77w` 2.4.143, `inibuilds-aircraft-a350` 1.2.6, `fnx-aircraft-320` 2.4.0.4720, and `synaptic-aircraft-a220` 1.0.10, and those loading `WasmInstrument`; the [pmdg-777-300er study](../../areas/aircraft/pmdg-777-300er/study.md) and the [inibuilds-a350 study](../../areas/aircraft/inibuilds-a350/study.md) count the same.
+   FS Copilot fork's `record/exerciser/results/p04-panel-identifiers-2026-09-17.txt` counts distinct gauges instead, 22 for the PMDG 777 and 15 for the A350.
 10. Documented, read from FS Copilot's source: fsc-editor, `docs/fscopilot-behavior.md`, sections "The execution split: shared vs master" and "How a change leaves this machine".
 11. Documented in our record, counted over FS Copilot's profiles: fsc-editor, `docs/sim-vars/18-language-core.md`, the struck row on `set:` and `get:` names under "Setter-shape rules".
 12. Documented in our record: fsc-editor, `docs/sim-vars/10-probe.md`, "Cause versus symptom — the real payoff", from a design that isn't being built.
@@ -222,13 +228,14 @@ Reading the version means finding the package on disk, and the path `AircraftLoa
 16. Documented in our record: FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "One host, and it need not be the master", a sketch that hadn't run.
 17. Documented, read from the installed packages, 2026-09-27: the `manifest.json` of `synaptic-aircraft-a220`, whose release notes say "VERSION 1.0.10 RELEASED SEPTEMBER 25, 2026", of `synaptic-a220-livery-dal-324`, and of `inibuilds-aircraft-a380` in `Official2024\Steam`.
 18. Documented in our record: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Two version numbers for one package, and neither is trustworthy".
-19. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/Types/MSFS_EventsEnum.h`, where `KEY_KOHLSMAN_SET` is `KEY_ID_MIN + 504`, and `WASM/include/MSFS/Legacy/gauges.h`, where the `GAUGE_TOKEN` enum has `KOHLSMAN_SETTING_MB = 75`.
+19. Documented, read from the installed package `synaptic-aircraft-a220` 1.0.10 on 2026-09-29: the package's file listing; in `SimObjects\Airplanes\Synaptic_A220\attachments\inibuilds\Part_Interior_A223_Cockpit\panel\`, `panel.cfg` and the export table of `systems.wasm`, which exports `rust_eh_personality`; under `attachments\inibuilds\Asset_A220_Common\Synaptic\A220\Cockpit\`, `Glareshield\Autopilot.xml`, `Overhead\APU.xml`, and `Overhead\Lights.xml`; `common\sound\sound.xml`; and `html_ui\Pages\VCockpit\Instruments\efb-a220\efb-a220.js`.
 20. Documented, read from our MSFS 2024 Steam install, 2026-09-27: `%APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\pmdg-aircraft-77w\work\`: `777_Options.ini`, the 11 `.sav` files in `PanelState\`, the routes in `Flightplans\`, and `NavigationData\cycle_info.txt`.
+21. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
 
 ## Unverified claims
 
-- **Which A220 sim names are dead.**
-  The list comes from the strings in `systems.wasm` [1], which miss a name built at runtime and a numeric ID [19].
+- **Which stock variables follow the A220's cockpit.**
+
   Turning the captain's baro knob while reading `A:KOHLSMAN SETTING MB:1`, and squawking a new code while reading `A:TRANSPONDER CODE:1`, would settle the two FS Copilot's profile relies on [2].
 - **SimConnect lists none of the PMDG 777's switches.**
   Enumerating the 777's input events would settle it.

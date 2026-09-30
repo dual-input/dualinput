@@ -17,8 +17,6 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const GUIDE = resolve(ROOT, '.claude/rules/writing.md')
 const TERMS_START = '<!-- prose-lint: terms -->'
 const TERMS_END = '<!-- prose-lint: end -->'
-// Mirrors "One document, one job" in .claude/rules/writing.md. Change both together.
-const WORD_LIMIT = 3000
 const HOOK_MAX = 25
 const BANNED_HEADINGS = new Set(['overview', 'introduction', 'intro', 'summary', 'conclusion', 'conclusions'])
 // Plain entries in the table also catch these endings: robust → robustness, leverage → leveraged.
@@ -185,10 +183,6 @@ function lint(file, text, ranges) {
 
   checkReferences(lines, add, inRange)
 
-  if (!ranges) {
-    const words = lines.reduce((sum, l) => sum + (l.code.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) || []).length, 0)
-    if (words > WORD_LIMIT) add(1, `${words} words. Past ${WORD_LIMIT}, look for a second job to split out.`)
-  }
   return findings.sort((a, b) => a.line - b.line)
 }
 

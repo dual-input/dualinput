@@ -94,7 +94,7 @@ Background, history, and caveats come after the reader knows what they're for.
 So no heading is called Overview, Introduction, Summary, or Conclusion: the first paragraph is the overview, and a closing summary repeats the document.
 
 **One document, one job.**
-Past about 3,000 words, look for the second job and split it out.
+A document runs as long as its job needs, and a second job goes into a document of its own.
 
 **Write a value down once.**
 Everywhere else links to it.

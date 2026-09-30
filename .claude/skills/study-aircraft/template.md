@@ -64,7 +64,8 @@ Numbered.
 Each says what to find out, what to do in the sim to find it (which control to move, which values to watch), the state the aircraft must be in, and what each answer would change in the study.
 
 **Sources.**
-Numbered, as the claims cite them.
+Numbered, as the claims cite them, each opening with its marker from the Evidence section of writing.md.
+What we read in the aircraft's own files, decompiled or not, is Read; Documented is for what a vendor or project says, such as a manual or an SDK page.
 
 **License.**
 Only when the aircraft's license restricts reverse engineering, decompiling, or publishing: the clause, and a link.

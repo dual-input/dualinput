@@ -5,6 +5,26 @@ Reading it works, and how much it yields depends on the aircraft: the Synaptic A
 The probes are in [experiments/areas/commbus](../../../experiments/areas/commbus), and their raw output is in [experiments/areas/commbus/results](../../../experiments/areas/commbus/results).
 The entries of 2026-09-28 were measured on MSFS 2024 that day, with FS Copilot's bridge installed, which is why every panel also registered `FSC_CLIENT_EVENT`.
 
+## 2026-09-30: The PA-24 keeps some of its state in stock `A:` variables
+
+**Asked:** does the claim of [the PA-24 entry](#2026-09-28-the-a2a-pa-24-doesnt-use-the-commbus) that "A2A keeps the PA-24's state in `L:` variables" hold against the aircraft's files?
+
+**Expected:** yes, since the modules import the variable API and no CommBus call.
+
+**Found:** it holds for most of the cockpit and misses one place, by the model and panel XML of `a2a-aircraft-pa24` 2.1.3.
+
+- The radio stack's frequencies, the OBS, the transponder code, the altimeter setting, the avionics master, and the fuel pump switch are stock `A:` variables.
+  The avionics master's switch sends `K:TOGGLE_AVIONICS_MASTER` and draws itself from `A:AVIONICS MASTER SWITCH:1`, and the altimeter knob sends `K:KOHLSMAN_INC` and `K:KOHLSMAN_DEC` and draws from `A:KOHLSMAN SETTING MB` (read in a2a-aircraft-pa24 2.1.3, `common\model\PA24_250_INTERIOR.xml`).
+
+
+
+**Changed:** the entry's finding stands: the PA-24 doesn't use the CommBus.
+Reading its state takes these stock `A:` variables as well as its `L:` variables.
+
+**Affects:** the PA-24 entry below, whose text stays as it was.
+
+**Evidence:** the [PA-24 study](../aircraft/a2a-pa24-comanche/study.md#state), sections "State" and "Hidden state".
+
 ## 2026-09-30: Two claims of the A350 entry don't hold against the aircraft's files
 
 **Asked:** do the claims of [the A350 entry](#2026-09-28-the-a350s-commbus-carries-efb-traffic-and-its-cockpit-state-stays-inside-one-module) hold against the aircraft's files?

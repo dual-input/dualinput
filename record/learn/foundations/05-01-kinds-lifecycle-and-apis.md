@@ -61,7 +61,8 @@ It can't read the loaded aircraft's files either, so what Crosscheck knows about
 
 - A system module must be in the same package as the `systems.cfg` that names it [6], so Crosscheck can't add one to another vendor's aircraft from a package of its own.
 - A module that reads a file with the C library's blocking calls, while the sim is still streaming that file, is paused "for few frames" until it arrives; the SDK advises the asynchronous file API instead [1] [11].
-- Marketplace packages are encrypted, and the SDK tells module authors not to read an aircraft's `*.xml`, `systems.cfg`, or `flight_model.cfg`, even in their own package [1].
+- The SDK says Marketplace packages are encrypted, and tells module authors not to read an aircraft's `*.xml`, `systems.cfg`, or `flight_model.cfg`, even in their own package [1].
+  Two Marketplace aircraft we've studied are encrypted only in part: the iniBuilds A380's package and the FSReborn Phenom 300E's each have seven `.fsarchive` files, and two of them have a `notEncrypted` header and hold `panel.cfg`, the `.flt` files, and the panels' JavaScript [24] [25].
 - Whether an `https` request to `localhost` reaches a local app is unverified, and it would need a certificate the sim accepts.
 
 ## Lifecycle: init, per-frame update, deinit
@@ -195,6 +196,8 @@ The one call that runs it is deprecated in SDK 1.7.3 with no replacement, and it
 21. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h`, `MSFS_Vars.h`, and `Types/MSFS_EventsEnum.h`.
 22. Measured on MSFS 2024, 2026-08-23: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — `get_name_of_named_variable` is deprecated. MSFS 2024 has a better `L:` API." and "2026-08-23 — Stage 2a COMPLETE. All five questions pass; `L:` is reachable."
 23. Measured on MSFS 2024, 2026-08-25: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-25 — The wire runs calculator code, and `gauges.h` came back clean".
+24. Documented in our record, read from the installed package `inibuilds-aircraft-a380` 1.0.0 on 2026-09-29: [inibuilds-a380 study](../../areas/aircraft/inibuilds-a380/study.md), the "Readable" line of its header and "What the encryption hides", from each archive's header.
+25. Documented in our record, read from the installed package `fsreborn-aircraft-phenom300e` 1.0.24 on 2026-09-29: [fsreborn-phenom-300e study](../../areas/aircraft/fsreborn-phenom-300e/study.md), the "Readable" line of its header and "What the encryption hides", from each archive's header.
 
 ## Unverified claims
 

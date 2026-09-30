@@ -107,9 +107,10 @@ The SDK says an undefined `L:` is created and set to 0 the first time code refer
 The PA-24's battery switch writes `L:Battery1Switch` ([02-02](02-02-aircraft.md#model-behaviors)), and fsc-editor wrote the same variable from outside through calculator code, `1 (>L:Battery1Switch)` [18].
 
 One table serves the whole sim.
-With the PA-24 loaded, a WASM module listed 5,364 `L:` names, and about 5% of them belonged to the aircraft [16].
-The rest came from other installed add-ons, such as a GTN 750 and GSX, and from the sim [16].
-FS Copilot's PA-24 profile names 279 `L:` variables [16].
+With the PA-24 loaded, a WASM module listed 5,364 `L:` names [16].
+FS Copilot's PA-24 profile names 279 `L:` variables, about 5% of that count [16].
+
+Other installed add-ons, such as a GTN 750 and GSX, and the sim registered the rest [16].
 Switching to a Black Square Baron removed none of the 6,149 names and added 3 [19].
 The table grew from 5,341 to 6,125 names over a few minutes with no aircraft change, as instruments and add-ons registered theirs [20].
 The SDK says the same from SimConnect's side: `L:` variables are "global" in scope, and when two clients write one, the last write wins [2].
@@ -167,6 +168,7 @@ Every `L:` Crosscheck writes is visible to every other add-on in the sim.
 25. Measured on MSFS 2024, 2026-08-27: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-27 — One parser, one descriptor table; eight private opinions deleted".
 26. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `ModelBehaviorDefs/Asobo/NAVCOM/NavComSystem.xml`, from the MSFS 2020 template set, where `AUDIO_Knob_Selector#SUFFIX_ID#` appears only as an animation and node name; `ModelBehaviorDefs/Asobo_EX1`, the 2024 set, doesn't contain the name.
 27. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
+
     The MSFS 2024 SDK's [Model Behaviors](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/Models/ModelBehaviors/Model_Behaviors.htm) page says the `Asobo` folder holds the core files for MSFS 2020, and not to mix it with `Asobo_EX1`.
 
 ## Unverified claims

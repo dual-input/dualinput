@@ -1,0 +1,110 @@
+{"t":1790879365115,"s":0,"kind":"start","text":"harness for fenix-a320-family (Fenix A320, CFM, sharklets); states parked, runway; tests parked: none; runway: none"}
+{"t":1790879365482,"s":0.367,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790879365497,"s":0.382,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790879365498,"s":0.383,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1790879365498,"s":0.383,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1790879365701,"s":0.586,"kind":"state","text":"position -0.000000, 90.000323, 228 ft, on ground 0","lat":-2.1556893808986427e-7,"lon":90.00032277330374,"altFt":227.8342312242239,"onGround":0}
+{"t":1790879365701,"s":0.586,"kind":"state","text":"LIVERY NAME \"Turkish Airlines 'Turkey Discover the potential' TC-JRG (2025)\"","liveryName":"Turkish Airlines 'Turkey Discover the potential' TC-JRG (2025)"}
+{"t":1790879365702,"s":0.587,"kind":"state","text":"TITLE \"FenixA321 IAE WF SC\"","title":"FenixA321 IAE WF SC"}
+{"t":1790879365702,"s":0.587,"kind":"state","text":"LIVERY FOLDER \"THY-TC-JRG-8148\"","liveryFolder":"THY-TC-JRG-8148"}
+{"t":1790879368492,"s":3.377,"kind":"start","text":"the sim is in a flight; TITLE \"FenixA321 IAE WF SC\"; AircraftLoaded (unknown)"}
+{"t":1790879368580,"s":3.465,"kind":"backup","text":"13 files backed up to %LOCALAPPDATA%\\Crosscheck\\harness-backups\\2026-10-01-18-29-25-fenix-a320-family; every item existed","dest":"%LOCALAPPDATA%\\Crosscheck\\harness-backups\\2026-10-01-18-29-25-fenix-a320-family","files":13,"large":0,"items":[{"label":"WASM work fnx-aircraft-320","path":"%APPDATA%\\Microsoft Flight Simulator 2024\\WASM\\MSFS2024\\fnx-aircraft-320\\work","existed":true,"files":0,"large":0},{"label":"SimObjects FNX_32X","path":"%APPDATA%\\Microsoft Flight Simulator 2024\\SimObjects\\Airplanes\\FNX_32X","existed":true,"files":9,"large":0},{"label":"Fenix fenixConfig.xml","path":"C:\\ProgramData\\Fenix\\FenixSim A320\\fenixConfig.xml","existed":true,"files":1,"large":0},{"label":"Fenix persistancy.xml","path":"C:\\ProgramData\\Fenix\\FenixSim A320\\persistancy.xml","existed":true,"files":1,"large":0},{"label":"Fenix cockpitsetup.xml","path":"C:\\ProgramData\\Fenix\\FenixSim A320\\cockpitsetup.xml","existed":true,"files":1,"large":0},{"label":"Fenix calibration.xml","path":"C:\\ProgramData\\Fenix\\FenixSim A320\\calibration.xml","existed":true,"files":1,"large":0}]}
+{"t":1790879368582,"s":3.467,"kind":"load","text":"parked: experiments/areas/aircraft/flights/fenix-a320-family-parked.flt, FenixA320 CFM SL (pgt-tc-dci-248f), PREFLIGHT_GATE at GVAC PARKING 7, from inside a flight","load":"parked","file":"experiments/areas/aircraft/flights/fenix-a320-family-parked.flt","title":"FenixA320 CFM SL","livery":"pgt-tc-dci-248f","state":"PREFLIGHT_GATE","from":"inside a flight"}
+{"t":1790879368583,"s":3.468,"kind":"gate","text":"parked: sim met at 0.0s","load":"parked","condition":"sim","ms":1}
+{"t":1790879368610,"s":3.495,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\FNX_32X\\presets\\fnx\\FNX_321_IAE_WF_SC\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\FNX_32X\\presets\\fnx\\FNX_321_IAE_WF_SC\\config\\aircraft.CFG","signal":false}
+{"t":1790879368670,"s":3.555,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1790879368670,"s":3.555,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1790879368831,"s":3.716,"kind":"system","text":"FlightLoaded <repo>\\experiments\\areas\\aircraft\\flights\\fenix-a320-family-parked.FLT","event":"FlightLoaded","file":"<repo>\\experiments\\areas\\aircraft\\flights\\fenix-a320-family-parked.FLT","signal":true}
+{"t":1790879368834,"s":3.719,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1790879368834,"s":3.719,"kind":"gate","text":"parked: signal met at 0.3s","load":"parked","condition":"signal","ms":252}
+{"t":1790879368840,"s":3.725,"kind":"state","text":"TITLE \"FenixA320 CFM SL\"","title":"FenixA320 CFM SL"}
+{"t":1790879368857,"s":3.742,"kind":"flow","text":"FLT_LOAD fenix-a320-family-parked","flow":"FLT_LOAD","id":1,"file":"fenix-a320-family-parked","signal":false}
+{"t":1790879368857,"s":3.742,"kind":"flow","text":"FLT_LOADED fenix-a320-family-parked","flow":"FLT_LOADED","id":2,"file":"fenix-a320-family-parked","signal":true}
+{"t":1790879368857,"s":3.742,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1790879368857,"s":3.742,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1790879369096,"s":3.981,"kind":"gate","text":"parked: title met at 0.5s","load":"parked","condition":"title","ms":514}
+{"t":1790879369529,"s":4.414,"kind":"state","text":"SIM ON GROUND 0 → 1","onGround":1}
+{"t":1790879369529,"s":4.414,"kind":"state","text":"position 16.731724, -22.944986, -34 ft, on ground 1","lat":16.731723777715114,"lon":-22.94498633333375,"altFt":-33.86831930141377,"onGround":1}
+{"t":1790879369529,"s":4.414,"kind":"state","text":"LIVERY NAME \"Pegasus 'Standard' TC-DCI (2024)\"","liveryName":"Pegasus 'Standard' TC-DCI (2024)"}
+{"t":1790879369530,"s":4.415,"kind":"state","text":"LIVERY FOLDER \"PGT-TC-DCI-248F\"","liveryFolder":"PGT-TC-DCI-248F"}
+{"t":1790879369609,"s":4.494,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1790879369609,"s":4.494,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790879369609,"s":4.494,"kind":"gate","text":"parked: position met at 1.0s","load":"parked","condition":"position","ms":1027}
+{"t":1790879369609,"s":4.494,"kind":"gate","text":"parked: ground met at 1.0s","load":"parked","condition":"ground","ms":1027}
+{"t":1790879369609,"s":4.494,"kind":"gate","text":"parked: the aircraft reads as the file's, by TITLE, position, and SIM ON GROUND, at 1.0s","load":"parked","condition":"inPlace","ms":1027}
+{"t":1790879369609,"s":4.494,"kind":"pass","text":"parked: passed at 1.0s; 0 m from the file's position","load":"parked","ms":1027,"distanceM":0.0000069679220229234254}
+{"t":1790879369609,"s":4.494,"kind":"timeline","text":"sampling 31 values every 250ms for 60s"}
+{"t":1790879369610,"s":4.495,"kind":"settle","text":"watching 16 values, 5 of them L:, until none changes for 10s, and client data Fenix:Ready at 1"}
+{"t":1790879369635,"s":4.52,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"ELECTRICAL MASTER BATTERY:1 = 0","name":"ELECTRICAL MASTER BATTERY:1","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"AVIONICS MASTER SWITCH = 1","name":"AVIONICS MASTER SWITCH","from":null,"to":1}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"LIGHT BEACON = 1","name":"LIGHT BEACON","from":null,"to":1}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"LIGHT NAV = 1","name":"LIGHT NAV","from":null,"to":1}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"LIGHT STROBE = 1","name":"LIGHT STROBE","from":null,"to":1}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"LIGHT LANDING = 1","name":"LIGHT LANDING","from":null,"to":1}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"BRAKE PARKING POSITION = 0","name":"BRAKE PARKING POSITION","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"GENERAL ENG COMBUSTION:1 = 0","name":"GENERAL ENG COMBUSTION:1","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"FLAPS HANDLE INDEX = 0","name":"FLAPS HANDLE INDEX","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"COM ACTIVE FREQUENCY:1 = 124.85","name":"COM ACTIVE FREQUENCY:1","from":null,"to":124.85}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"TRANSPONDER CODE:1 = 0","name":"TRANSPONDER CODE:1","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"L:Panel_state = 1","name":"L:Panel_state","from":null,"to":1}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"L:FNX_FLT_LOADED = 2","name":"L:FNX_FLT_LOADED","from":null,"to":2}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"L:S_OH_ELEC_BAT1 = 0","name":"L:S_OH_ELEC_BAT1","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"L:I_OH_ELEC_BAT1_L = 0","name":"L:I_OH_ELEC_BAT1_L","from":null,"to":0}
+{"t":1790879369642,"s":4.527,"kind":"settle","text":"L:S_MIP_PARKING_BRAKE = 1","name":"L:S_MIP_PARKING_BRAKE","from":null,"to":1}
+{"t":1790879371120,"s":6.005,"kind":"settle","text":"client data Fenix:Ready at 1 reads timed out","ready":"client data Fenix:Ready at 1","value":"timed out","ok":false}
+{"t":1790879371399,"s":6.284,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1790879373166,"s":8.051,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1790879373620,"s":8.505,"kind":"pages","text":"parked: 14 documents, 0 VCockpit; others atlas <coui://html_UI/Global/atlas.html>, Shared variables <coui://html_UI/Global/sharedVariables.html>, mainUi <coui://html_UI/Global/mainUI.html>, notifications <coui://html_UI/Global/notifications.html?type=POPUP|MESSAGE|OBJECTIVE|ACTION_STEP|SUBTITLES|STACKABLE&theme=SYSTEM>, transition <coui://html_UI/Global/transition.html>, VLivery01 - FNX32XLiveryRegistration <coui://html_UI/Pages/VLivery/Core/VLivery.html>, VLivery02 - Readouts <coui://html_UI/Pages/VLivery/Core/VLivery.html>, VLivery03 - Readouts <coui://html_UI/Pages/VLivery/Core/VLivery.html>, Electronic Flight Bag <coui://html_ui/efb_ui/efb_os/efb_ui.html>, Mission Steps <coui://html_UI/Global/Panel.html>, Toolbar <coui://html_UI/Global/Panel.html>, notifications <coui://html_UI/Global/notifications.html?type=MESSAGE|STACKABLE|OVERLAY&theme=TIPS|GAMEPLAY|INFO|SCORE>, //42 Flow <coui://html_UI/ingamePanels/P42Flow/P42Flow.html>, //42 CP Overlay (Reqd.) <coui://html_UI/ingamePanels/P42ChasePlane/P42ChasePlane_overlay.html>","load":"parked","up":true,"total":14,"panels":0,"others":["atlas <coui://html_UI/Global/atlas.html>","Shared variables <coui://html_UI/Global/sharedVariables.html>","mainUi <coui://html_UI/Global/mainUI.html>","notifications <coui://html_UI/Global/notifications.html?type=POPUP|MESSAGE|OBJECTIVE|ACTION_STEP|SUBTITLES|STACKABLE&theme=SYSTEM>","transition <coui://html_UI/Global/transition.html>","VLivery01 - FNX32XLiveryRegistration <coui://html_UI/Pages/VLivery/Core/VLivery.html>","VLivery02 - Readouts <coui://html_UI/Pages/VLivery/Core/VLivery.html>","VLivery03 - Readouts <coui://html_UI/Pages/VLivery/Core/VLivery.html>","Electronic Flight Bag <coui://html_ui/efb_ui/efb_os/efb_ui.html>","Mission Steps <coui://html_UI/Global/Panel.html>","Toolbar <coui://html_UI/Global/Panel.html>","notifications <coui://html_UI/Global/notifications.html?type=MESSAGE|STACKABLE|OVERLAY&theme=TIPS|GAMEPLAY|INFO|SCORE>","//42 Flow <coui://html_UI/ingamePanels/P42Flow/P42Flow.html>","//42 CP Overlay (Reqd.) <coui://html_UI/ingamePanels/P42ChasePlane/P42ChasePlane_overlay.html>"]}
+{"t":1790879374793,"s":9.678,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\FNX_32X\\presets\\fnx\\FNX_320_CFM_SL\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\FNX_32X\\presets\\fnx\\FNX_320_CFM_SL\\config\\aircraft.CFG","signal":true}
+{"t":1790879374793,"s":9.678,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\fnx-aircraft-320\\simobjects\\airplanes\\fnx_32x\\presets\\fnx\\fnx_320_cfm_sl\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\fnx-aircraft-320\\simobjects\\airplanes\\fnx_32x\\presets\\fnx\\fnx_320_cfm_sl\\config\\aircraft.cfg","signal":true}
+{"t":1790879374826,"s":9.711,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1790879374858,"s":9.743,"kind":"timeline","text":"+5.2s GENERAL ENG RPM:1 0 → 9091.712702","name":"GENERAL ENG RPM:1","from":0,"to":9091.712701620907,"ms":5217}
+{"t":1790879374858,"s":9.743,"kind":"timeline","text":"+5.2s TURB ENG N1:1 18.018 → 18.308001","name":"TURB ENG N1:1","from":18.018000173568726,"to":18.308001450231128,"ms":5217}
+{"t":1790879374858,"s":9.743,"kind":"timeline","text":"+5.2s ELECTRICAL MAIN BUS VOLTAGE 0 → 28","name":"ELECTRICAL MAIN BUS VOLTAGE","from":0,"to":28,"ms":5217}
+{"t":1790879375179,"s":10.064,"kind":"timeline","text":"+5.5s GENERAL ENG RPM:1 9091.712702 → 9066.043278","name":"GENERAL ENG RPM:1","from":9091.712701620907,"to":9066.043278055817,"ms":5473}
+{"t":1790879375179,"s":10.064,"kind":"timeline","text":"+5.5s TURB ENG N1:1 18.308001 → 18.232304","name":"TURB ENG N1:1","from":18.308001450231128,"to":18.23230387864705,"ms":5473}
+{"t":1790879375179,"s":10.064,"kind":"settle","text":"client data Fenix:Ready at 1 reads 00000000","ready":"client data Fenix:Ready at 1","value":"00000000","ok":false}
+{"t":1790879375394,"s":10.279,"kind":"timeline","text":"+5.7s GENERAL ENG RPM:1 9066.043278 → 8658.377319","name":"GENERAL ENG RPM:1","from":9066.043278055817,"to":8658.377318816452,"ms":5735}
+{"t":1790879375394,"s":10.279,"kind":"timeline","text":"+5.7s TURB ENG N1:1 18.232304 → 16.784702","name":"TURB ENG N1:1","from":18.23230387864705,"to":16.784701827062694,"ms":5735}
+{"t":1790879375573,"s":10.458,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\FNX_32X\\presets\\fnx\\FNX_320_CFM_SL\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\FNX_32X\\presets\\fnx\\FNX_320_CFM_SL\\config\\aircraft.CFG","signal":true}
+{"t":1790879375640,"s":10.525,"kind":"timeline","text":"+6.0s GENERAL ENG RPM:1 8658.377319 → 8411.162203","name":"GENERAL ENG RPM:1","from":8658.377318816452,"to":8411.162202622421,"ms":6000}
+{"t":1790879375640,"s":10.525,"kind":"timeline","text":"+6.0s TURB ENG N1:1 16.784702 → 15.818637","name":"TURB ENG N1:1","from":16.784701827062694,"to":15.81863717443329,"ms":6000}
+{"t":1790879375873,"s":10.758,"kind":"timeline","text":"+6.3s GENERAL ENG RPM:1 8411.162203 → 8217.093111","name":"GENERAL ENG RPM:1","from":8411.162202622421,"to":8217.093111253418,"ms":6251}
+{"t":1790879375873,"s":10.758,"kind":"timeline","text":"+6.3s TURB ENG N1:1 15.818637 → 15.169078","name":"TURB ENG N1:1","from":15.81863717443329,"to":15.16907804345697,"ms":6251}
+{"t":1790879375873,"s":10.758,"kind":"timeline","text":"+6.3s FUEL TOTAL QUANTITY 3141 → 3140.94751","name":"FUEL TOTAL QUANTITY","from":3141,"to":3140.947509765625,"ms":6251}
+{"t":1790879375973,"s":10.858,"kind":"settle","text":"client data Fenix:Ready at 1 reads 01000000, ready","ready":"client data Fenix:Ready at 1","value":"01000000","ok":true}
+{"t":1790879376140,"s":11.025,"kind":"timeline","text":"+6.5s GENERAL ENG RPM:1 8217.093111 → 8000.777349","name":"GENERAL ENG RPM:1","from":8217.093111253418,"to":8000.777349330734,"ms":6514}
+{"t":1790879376140,"s":11.025,"kind":"timeline","text":"+6.5s TURB ENG N1:1 15.169078 → 14.453698","name":"TURB ENG N1:1","from":15.16907804345697,"to":14.453697589008376,"ms":6514}
+{"t":1790879376438,"s":11.323,"kind":"timeline","text":"+6.8s GENERAL ENG RPM:1 8000.777349 → 7844.001711","name":"GENERAL ENG RPM:1","from":8000.777349330734,"to":7844.0017108615775,"ms":6779}
+{"t":1790879376438,"s":11.323,"kind":"timeline","text":"+6.8s TURB ENG N1:1 14.453698 → 13.932203","name":"TURB ENG N1:1","from":14.453697589008376,"to":13.932203370271296,"ms":6779}
+{"t":1790879376655,"s":11.54,"kind":"timeline","text":"+7.0s GENERAL ENG RPM:1 7844.001711 → 7598.963872","name":"GENERAL ENG RPM:1","from":7844.0017108615775,"to":7598.963871757552,"ms":7030}
+{"t":1790879376655,"s":11.54,"kind":"timeline","text":"+7.0s TURB ENG N1:1 13.932203 → 13.173618","name":"TURB ENG N1:1","from":13.932203370271296,"to":13.17361836951047,"ms":7030}
+{"t":1790879376922,"s":11.807,"kind":"timeline","text":"+7.3s FUEL TOTAL QUANTITY 3140.94751 → 3140.893799","name":"FUEL TOTAL QUANTITY","from":3140.947509765625,"to":3140.893798828125,"ms":7295}
+{"t":1790879377968,"s":12.853,"kind":"timeline","text":"+8.3s FUEL TOTAL QUANTITY 3140.893799 → 3140.839355","name":"FUEL TOTAL QUANTITY","from":3140.893798828125,"to":3140.83935546875,"ms":8348}
+{"t":1790879379017,"s":13.902,"kind":"timeline","text":"+9.4s FUEL TOTAL QUANTITY 3140.839355 → 3140.783936","name":"FUEL TOTAL QUANTITY","from":3140.83935546875,"to":3140.783935546875,"ms":9388}
+{"t":1790879379686,"s":14.571,"kind":"settle","text":"TRANSPONDER CODE:1 0 → 7000","name":"TRANSPONDER CODE:1","from":0,"to":7000}
+{"t":1790879380527,"s":15.412,"kind":"timeline","text":"+10.2s TRANSPONDER CODE:1 0 → 7000","name":"TRANSPONDER CODE:1","from":0,"to":7000,"ms":10177}
+{"t":1790879380557,"s":15.442,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1790879380557,"s":15.442,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1790879380557,"s":15.442,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1790879380557,"s":15.442,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1790879380598,"s":15.483,"kind":"timeline","text":"+10.9s BRAKE PARKING POSITION 0 → 1","name":"BRAKE PARKING POSITION","from":0,"to":1,"ms":10921}
+{"t":1790879380598,"s":15.483,"kind":"timeline","text":"+10.9s COM ACTIVE FREQUENCY:1 124.85 → 122.8","name":"COM ACTIVE FREQUENCY:1","from":124.85,"to":122.8,"ms":10921}
+{"t":1790879380598,"s":15.483,"kind":"timeline","text":"+10.9s TRANSPONDER CODE:1 7000 → 2000","name":"TRANSPONDER CODE:1","from":7000,"to":2000,"ms":10921}
+{"t":1790879380598,"s":15.483,"kind":"timeline","text":"+10.9s GEAR HANDLE POSITION 1 → 0","name":"GEAR HANDLE POSITION","from":1,"to":0,"ms":10921}
+{"t":1790879380598,"s":15.483,"kind":"timeline","text":"+10.9s FUEL TOTAL QUANTITY 3140.783936 → 3140.727295","name":"FUEL TOTAL QUANTITY","from":3140.783935546875,"to":3140.727294921875,"ms":10921}
+{"t":1790879380598,"s":15.483,"kind":"timeline","text":"+10.9s GROUND VELOCITY 2.073862 → 0","name":"GROUND VELOCITY","from":2.0738619679560117,"to":0,"ms":10921}
+{"t":1790879380605,"s":15.49,"kind":"settle","text":"BRAKE PARKING POSITION 0 → 1","name":"BRAKE PARKING POSITION","from":0,"to":1}
+{"t":1790879380605,"s":15.49,"kind":"settle","text":"COM ACTIVE FREQUENCY:1 124.85 → 122.8","name":"COM ACTIVE FREQUENCY:1","from":124.85,"to":122.8}
+{"t":1790879380606,"s":15.491,"kind":"settle","text":"TRANSPONDER CODE:1 7000 → 2000","name":"TRANSPONDER CODE:1","from":7000,"to":2000}
+{"t":1790879380848,"s":15.733,"kind":"timeline","text":"+11.2s GEAR HANDLE POSITION 0 → 1","name":"GEAR HANDLE POSITION","from":0,"to":1,"ms":11184}
+{"t":1790879381447,"s":16.332,"kind":"timeline","text":"+11.7s FUEL TOTAL QUANTITY 3140.727295 → 3140.670166","name":"FUEL TOTAL QUANTITY","from":3140.727294921875,"to":3140.670166015625,"ms":11696}
+{"t":1790879381797,"s":16.682,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1790879381823,"s":16.708,"kind":"timeline","text":"+12.2s GROUND VELOCITY 0 → 0.011242","name":"GROUND VELOCITY","from":0,"to":0.01124153196452202,"ms":12209}
+{"t":1790879389152,"s":24.037,"kind":"lost","text":"the SimConnect connection closed"}
+{"t":1790879389152,"s":24.037,"kind":"stop","text":"stopping: the SimConnect connection closed"}
+{"t":1790879389154,"s":24.039,"kind":"timeline","text":"53 samples; 9 of 31 values moved: BRAKE PARKING POSITION ×1 (last +10.9s), COM ACTIVE FREQUENCY:1 ×1 (last +10.9s), TRANSPONDER CODE:1 ×2 (last +10.9s), GENERAL ENG RPM:1 ×26 (last +12.2s), TURB ENG N1:1 ×26 (last +12.2s), GEAR HANDLE POSITION ×2 (last +11.2s), FUEL TOTAL QUANTITY ×6 (last +11.7s), ELECTRICAL MAIN BUS VOLTAGE ×1 (last +5.2s), GROUND VELOCITY ×2 (last +12.2s)","samples":53,"moved":9,"answered":31,"total":31}
+{"t":1790879389278,"s":24.163,"kind":"settle","text":"not settled after 19.7s: still changing: TRANSPONDER CODE:1 ×3, BRAKE PARKING POSITION ×2, COM ACTIVE FREQUENCY:1 ×2, ELECTRICAL MASTER BATTERY:1 ×1","settled":false,"quiet":false,"ms":null,"lastChangeMs":12024,"last":"TRANSPONDER CODE:1","answered":16,"total":16,"lAnswered":5,"lTotal":5,"silent":[],"busiest":["TRANSPONDER CODE:1 ×3","BRAKE PARKING POSITION ×2","COM ACTIVE FREQUENCY:1 ×2","ELECTRICAL MASTER BATTERY:1 ×1"],"ready":[{"label":"client data Fenix:Ready at 1","ms":7391,"value":"01000000"}]}
+{"t":1790879392649,"s":27.534,"kind":"crash","text":"recorded in experiments/areas/aircraft/results/crashes.tsv: 2026-10-01T20:29:44 Faulting application name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Faulting module name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Exception code: 0xc0000005; Fault offset: 0x000000000050fd04; Faulting process id: 0x8A28","last":"FLT_LOADED apron.flt","windowsLog":"2026-10-01T20:29:44 Faulting application name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Faulting module name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Exception code: 0xc0000005; Fault offset: 0x000000000050fd04; Faulting process id: 0x8A28"}
+{"t":1790879392653,"s":27.538,"kind":"restore","text":"pending: 1 of 13 backed-up files differ from the backup now; with the sim closed, run node experiments/areas/aircraft/run.mjs --restore-pending","changed":["%APPDATA%\\Microsoft Flight Simulator 2024\\SimObjects\\Airplanes\\FNX_32X\\common\\config\\state.CFG"],"pending":"experiments/areas/aircraft/results/pending-restores.tsv"}

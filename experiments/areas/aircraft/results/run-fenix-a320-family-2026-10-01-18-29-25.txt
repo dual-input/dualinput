@@ -1,0 +1,26 @@
+run · fenix-a320-family on MSFS 2024
+2026-10-01T18:29:25.114Z, node-simconnect 4.2.0, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+Command: node experiments/areas/aircraft/run.mjs fenix-a320-family
+Aircraft: Fenix A320, CFM, sharklets, "FenixA320 CFM SL", livery pgt-tc-dci-248f
+
+Backup: 13 files in %LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-29-25-fenix-a320-family
+  WASM work fnx-aircraft-320: 0 files
+  SimObjects FNX_32X: 9 files
+  Fenix fenixConfig.xml: 1 file
+  Fenix persistancy.xml: 1 file
+  Fenix cockpitsetup.xml: 1 file
+  Fenix calibration.xml: 1 file
+Restore: pending, in experiments/areas/aircraft/results/pending-restores.tsv; 1 of 13 files differ from the backup at the end of the run. With the sim closed, run:
+  node experiments/areas/aircraft/run.mjs --restore-pending
+  changed: %APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\FNX_32X\common\config\state.CFG
+
+Load parked  experiments/areas/aircraft/flights/fenix-a320-family-parked.flt
+  PASSED at 1.0s; not settled: TRANSPONDER CODE:1 ×3, BRAKE PARKING POSITION ×2, COM ACTIVE FREQUENCY:1 ×2, ELECTRICAL MASTER BATTERY:1 ×1
+  ready marks: client data Fenix:Ready at 1 at 7.4s
+  settle values: 16 of 16 answered; L: 5 of 5
+  read: TITLE "FenixA320 CFM SL", LIVERY FOLDER "PGT-TC-DCI-248F", LIVERY NAME "Pegasus 'Standard' TC-DCI (2024)"; 0 m from the file's position, -34 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.2s FlightLoaded fenix-a320-family-parked.FLT · +0.3s PositionChanged 0 · +0.3s TITLE "FenixA320 CFM SL" · +0.3s flow FLT_LOAD fenix-a320-family-parked · +0.3s flow FLT_LOADED fenix-a320-family-parked · +0.3s flow TELEPORT_START · +0.3s flow TELEPORT_DONE · +1.0s SimStart 0 · +1.0s Sim 1 · +1.1s exception ILLEGAL_OPERATION on send 0 · +2.8s exception ILLEGAL_OPERATION on send 0 · +4.6s exception ILLEGAL_OPERATION on send 0 · +6.2s AircraftLoaded aircraft.cfg · +6.2s Pause_EX1 0 · +12.0s flow FLIGHT_START · +12.0s flow FLT_LOAD apron.flt · +12.0s flow FLT_LOADED apron.flt · +12.0s flow RTC_START · +13.2s flow RTC_END
+
+Exceptions: ILLEGAL_OPERATION on send 0 ×3
+The connection was lost: the SimConnect connection closed.
+The sim crashed; the harness's last action was FLT_LOADED apron.flt. Windows: 2026-10-01T20:29:44 Faulting application name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Faulting module name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Exception code: 0xc0000005; Fault offset: 0x000000000050fd04; Faulting process id: 0x8A28

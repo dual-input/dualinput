@@ -1,0 +1,31 @@
+run · a2a-pa24-comanche on MSFS 2024
+2026-10-01T18:11:10.183Z, node-simconnect 4.2.0, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+Command: node experiments/areas/aircraft/run.mjs a2a-pa24-comanche --state runway --skip-generic --only 7
+Aircraft: A2A PA-24 Comanche 250, "A2A Piper PA-24-250 Comanche", livery N8351P
+
+Backup: 24 files in %LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-11-10-a2a-pa24-comanche
+  WASM work a2a-aircraft-pa24: 22 files
+  SimObjects pa24-250: 2 files
+Restore: 11 of 24 rewritten; 24 of 24 byte for byte after the restore, 24 still 5s later
+  rewritten: %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\A2A_Piper_PA-24-250_Comanche_N8351P.dat, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak10, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak2, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak3, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak4, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak5, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak6, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak7, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak8, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak9, %APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\pa24-250\common\config\STATE.CFG
+Neutral flight: loaded in 1.5s, "Cessna C152"
+
+Load runway  experiments/areas/aircraft/flights/a2a-pa24-comanche-runway.flt
+  PASSED at 1.3s; settled at 10.3s, the last change LIGHT NAV
+  ready marks: L:DATLoaded or L:DatNotFound at 1 at 7.7s
+  settle values: 15 of 15 answered; L: 4 of 4
+  read: TITLE "A2A Piper PA-24-250 Comanche", LIVERY FOLDER "N8351P", LIVERY NAME "N8351P"; 0 m from the file's position, 171 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.3s FlightLoaded a2a-pa24-comanche-runway.FLT · +0.3s PositionChanged 0 · +0.3s View 0 · +0.3s flow FLIGHT_END · +0.3s flow FLT_LOAD a2a-pa24-comanche-runway · +0.3s flow FLT_LOADED a2a-pa24-comanche-runway · +0.3s flow TELEPORT_START · +0.3s flow TELEPORT_DONE · +1.1s TITLE "A2A Piper PA-24-250 Comanche" · +1.2s SimStart 0 · +1.2s Sim 1 · +7.3s AircraftLoaded aircraft.cfg · +8.9s flow FLIGHT_START · +8.9s flow FLT_LOAD taxi.flt · +8.9s flow FLT_LOADED taxi.flt · +8.9s flow RTC_START · +10.0s PositionChanged 0 · +10.0s View 2 · +10.0s flow TELEPORT_START · +10.0s flow TELEPORT_DONE · +10.0s flow FLT_LOAD runway.flt · +10.0s flow FLT_LOADED runway.flt · +10.0s flow RTC_END · +30.9s SimStop 0 · +30.9s Sim 0 · +31.0s FlightLoaded neutral-runway.FLT · +31.0s PositionChanged 0 · +31.0s View 0 · and 5 more
+  identity: ATC TYPE "ATCCOM.ATC_NAME PIPER.0.text", MODEL "ATCCOM.AC_MODEL PA24.0.text", ID "N8351P", AIRLINE "", FLIGHT "773", CATEGORY "Airplane"
+            AircraftLoaded SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG
+            NUMBER OF ENGINES 1; ENGINE TYPE 0; ATC HEAVY 0; FLAPS NUM HANDLE POSITIONS 9; FLAPS HANDLE INDEX 6; FLAPS HANDLE PERCENT 66.666667; TRAILING EDGE FLAPS LEFT ANGLE 25.08; EMPTY WEIGHT 1700; TOTAL WEIGHT 2091.454346; MAX GROSS WEIGHT 3000; FUEL TOTAL CAPACITY 90; FUEL TOTAL QUANTITY 28.889252; FUEL TOTAL QUANTITY WEIGHT 173.33551; PAYLOAD STATION COUNT 20; DESIGN SPEED VC 160; L:AircraftID 9; L:Mark 20; L:AvionicsConfiguration 96; L:RNAV 0; L:G5 0; L:CockpitPersistence 1; L:OptionSaveStatePerLivery 1
+  input events: 318, types {"double":318}, parameters {"":189,";FLOAT64":125,";FLOAT64;FLOAT64":4}; names and values in the NDJSON, kind "inputEvent"
+  Q7 Do stock toggles and set events agree with the cockpit
+    ELECT_FUEL_PUMP1_SET passed, stock stayed; TOGGLE_AVIONICS_MASTER passed, stock moved; TOGGLE_BEACON_LIGHTS masked, stock moved, L: moved; PITOT_HEAT_ON masked, stock stayed, L: stayed (10.1s)
+      +2.0s control K:COM_STBY_RADIO_SET_HZ 124850000: COM STANDBY FREQUENCY:1 124850000 → 124850000; heard at priority 1 1×, at 10,000,001 1× (not masked)
+      +4.0s K:ELECT_FUEL_PUMP1_SET 1: GENERAL ENG FUEL PUMP SWITCH:1 1 → 1; heard at priority 1 1×, at 10,000,001 1× (not masked)
+      +6.1s K:TOGGLE_AVIONICS_MASTER: AVIONICS MASTER SWITCH:1 1 → 0; heard at priority 1 1×, at 10,000,001 1× (not masked)
+      +8.1s K:TOGGLE_BEACON_LIGHTS: LIGHT BEACON 1 → 1→0, L:BeaconLightSwitch 1 → 1→0; heard at priority 1 1×, at 10,000,001 0× (masked at or above HIGHEST_MASKABLE)
+      +10.1s K:PITOT_HEAT_ON: PITOT HEAT 1 → 1, L:PitotHeatSwitch 1 → 1; heard at priority 1 1×, at 10,000,001 0× (masked at or above HIGHEST_MASKABLE)
+
+Exceptions: none

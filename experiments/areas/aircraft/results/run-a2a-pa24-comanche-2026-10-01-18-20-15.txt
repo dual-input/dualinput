@@ -1,0 +1,100 @@
+run · a2a-pa24-comanche on MSFS 2024
+2026-10-01T18:20:15.356Z, node-simconnect 4.2.0, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+Command: node experiments/areas/aircraft/run.mjs a2a-pa24-comanche
+Aircraft: A2A PA-24 Comanche 250, "A2A Piper PA-24-250 Comanche", livery N8351P
+
+Backup: 24 files in %LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-20-15-a2a-pa24-comanche
+  WASM work a2a-aircraft-pa24: 22 files
+  SimObjects pa24-250: 2 files
+Restore: 12 of 24 rewritten; 24 of 24 byte for byte after the restore, 24 still 5s later
+  rewritten: %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\A2A_Piper_PA-24-250_Comanche_N8351P.dat, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak1, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak10, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak2, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak3, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak4, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak5, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak6, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak7, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak8, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak9, %APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\pa24-250\common\config\STATE.CFG
+Neutral flight: loaded in 1.6s, "Cessna C152"
+
+Load parked  experiments/areas/aircraft/flights/a2a-pa24-comanche-parked.flt
+  PASSED at 1.6s; settled at 16.0s, the last change LIGHT NAV
+  ready marks: L:DATLoaded or L:DatNotFound at 1 at 9.0s
+  settle values: 15 of 15 answered; L: 4 of 4
+  read: TITLE "A2A Piper PA-24-250 Comanche", LIVERY FOLDER "N8351P", LIVERY NAME "N8351P"; 0 m from the file's position, -41 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.3s FlightLoaded a2a-pa24-comanche-parked.FLT · +0.3s PositionChanged 0 · +0.3s flow FLT_LOAD a2a-pa24-comanche-parked · +0.3s flow FLT_LOADED a2a-pa24-comanche-parked · +0.3s flow TELEPORT_START · +0.3s flow TELEPORT_DONE · +0.6s TITLE "A2A Piper PA-24-250 Comanche" · +1.3s SimStart 0 · +1.3s Sim 1 · +7.6s AircraftLoaded aircraft.cfg · +7.6s Pause_EX1 0 · +7.9s Pause_EX1 1 · +8.0s Pause_EX1 0 · +14.5s flow FLIGHT_START · +14.5s flow FLT_LOAD apron.flt · +14.5s flow FLT_LOADED apron.flt · +14.5s flow RTC_START · +15.7s flow RTC_END
+  identity: ATC TYPE "ATCCOM.ATC_NAME PIPER.0.text", MODEL "ATCCOM.AC_MODEL PA24.0.text", ID "N8351P", AIRLINE "", FLIGHT "773", CATEGORY "Airplane"
+            AircraftLoaded SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG
+            NUMBER OF ENGINES 1; ENGINE TYPE 0; ATC HEAVY 0; FLAPS NUM HANDLE POSITIONS 9; FLAPS HANDLE INDEX 6; FLAPS HANDLE PERCENT 66.666667; TRAILING EDGE FLAPS LEFT ANGLE 25.08; EMPTY WEIGHT 1700; TOTAL WEIGHT 2091.452881; MAX GROSS WEIGHT 3000; FUEL TOTAL CAPACITY 90; FUEL TOTAL QUANTITY 28.889006; FUEL TOTAL QUANTITY WEIGHT 173.334034; PAYLOAD STATION COUNT 20; DESIGN SPEED VC 160; L:AircraftID 9; L:Mark 20; L:AvionicsConfiguration 96; L:RNAV 0; L:G5 0; L:CockpitPersistence 1; L:OptionSaveStatePerLivery 1
+  input events: 318, types {"double":318}, parameters {"":189,";FLOAT64":125,";FLOAT64;FLOAT64":4}; names and values in the NDJSON, kind "inputEvent"
+  panels: 31 documents, 16 VCockpit; gauges in the NDJSON, kind "panel"
+          VCockpit33 - KLN90B [1], VCockpit32 - WTT2 [1], VCockpit31 - WTT1 [1], VCockpit30 - GTN750_INT [1], VCockpit29 - KLN90B [1], VCockpit28 - GNS_DISABLED [1], VCockpit27 - WasmInstrument [1], VCockpit26 - GNS_DISABLED_2 [1], VCockpit25 - GNS_DISABLED_1 [1], VCockpit24 - WasmInstrument [1], VCockpit23 - GTN650_INT_2 [1], VCockpit22 - AS5_a2amod_2 [1], VCockpit21 - AS5_a2amod_1 [1], VCockpit20 - WasmInstrument [1], VCockpit19 - WasmInstrument [1], VCockpit18 - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument [5]
+  timeline: 231 samples over 60s from the gate; 15 of 30 values moved
+            ELECTRICAL MASTER BATTERY:1: 0 → 1, 3 change(s), last at +14.5s
+            AVIONICS MASTER SWITCH: 1 → 0, 1 change(s), last at +13.0s
+            LIGHT BEACON: 1 → 1, 2 change(s), last at +7.0s
+            LIGHT NAV: 1 → 1, 2 change(s), last at +14.5s
+            LIGHT STROBE: 1 → 1, 2 change(s), last at +7.0s
+            LIGHT LANDING: 1 → 1, 2 change(s), last at +7.0s
+            FLAPS HANDLE INDEX: 0 → 6, 1 change(s), last at +7.0s
+            COM ACTIVE FREQUENCY:1: 124.85 → 124.85, 2 change(s), last at +13.0s
+            LIGHT TAXI: 1 → 1, 2 change(s), last at +7.0s
+            FUEL TOTAL QUANTITY: 45 → 28.888641, 35 change(s), last at +25.5s
+            ELECTRICAL MAIN BUS VOLTAGE: 0 → 11.863381, 169 change(s), last at +59.9s
+            GROUND VELOCITY: 2.073862 → 0.000036, 178 change(s), last at +59.9s
+            L:DATLoaded: 0 → 1, 1 change(s), last at +7.0s
+            L:FlightPhase: 0 → 2, 1 change(s), last at +13.0s
+            L:Battery1Switch: 0 → 1, 1 change(s), last at +7.0s
+  frame rate: 31.0 sim frames/s by SIM_FRAME deliveries over 10s, longest gap 35ms; Frame event 30.0 fps
+  radios, each sent at priority highest and watched every frame for 2s:
+    K:COM_STBY_RADIO_SET_HZ 122800000: COM STANDBY FREQUENCY:1 124850000 → 124850000, never reached; echoes 122800000 tag EX1 +1ms
+    K:COM_RADIO_SET_HZ 123450000: COM ACTIVE FREQUENCY:1 124850000 → 124850000, never reached; echoes 123450000 tag EX1 +0ms
+    K:NAV1_RADIO_SET_HZ 110500000: NAV ACTIVE FREQUENCY:1 110500000 → 110500000, held; echoes 110500000 tag EX1 +1ms
+    K:XPNDR_SET 17697: TRANSPONDER CODE:1 1200 → 1200, never reached; echoes 17697 tag EX1 +1ms
+
+Load runway  experiments/areas/aircraft/flights/a2a-pa24-comanche-runway.flt
+  PASSED at 1.9s; settled at 12.3s, the last change GENERAL ENG COMBUSTION:1
+  ready marks: L:DATLoaded or L:DatNotFound at 1 at 9.4s
+  settle values: 15 of 15 answered; L: 4 of 4
+  read: TITLE "A2A Piper PA-24-250 Comanche", LIVERY FOLDER "N8351P", LIVERY NAME "N8351P"; 0 m from the file's position, 171 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.3s FlightLoaded a2a-pa24-comanche-runway.FLT · +0.3s flow FLT_LOAD a2a-pa24-comanche-runway · +0.3s flow FLT_LOADED a2a-pa24-comanche-runway · +0.6s TITLE "A2A Piper PA-24-250 Comanche" · +1.2s SimStart 0 · +1.2s Sim 1 · +6.0s AircraftLoaded aircraft.cfg · +8.9s flow FLIGHT_START · +8.9s flow FLT_LOAD taxi.flt · +8.9s flow FLT_LOADED taxi.flt · +8.9s flow RTC_START · +10.1s PositionChanged 0 · +10.1s View 2 · +10.1s flow TELEPORT_START · +10.1s flow TELEPORT_DONE · +10.1s flow FLT_LOAD runway.flt · +10.1s flow FLT_LOADED runway.flt · +10.1s flow RTC_END · +10.2s Pause_EX1 1 · +10.3s Pause_EX1 0
+  identity: ATC TYPE "ATCCOM.ATC_NAME PIPER.0.text", MODEL "ATCCOM.AC_MODEL PA24.0.text", ID "N8351P", AIRLINE "", FLIGHT "773", CATEGORY "Airplane"
+            AircraftLoaded SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG
+            NUMBER OF ENGINES 1; ENGINE TYPE 0; ATC HEAVY 0; FLAPS NUM HANDLE POSITIONS 9; FLAPS HANDLE INDEX 6; FLAPS HANDLE PERCENT 66.666667; TRAILING EDGE FLAPS LEFT ANGLE 25.08; EMPTY WEIGHT 1700; TOTAL WEIGHT 2091.450684; MAX GROSS WEIGHT 3000; FUEL TOTAL CAPACITY 90; FUEL TOTAL QUANTITY 28.888641; FUEL TOTAL QUANTITY WEIGHT 173.331848; PAYLOAD STATION COUNT 20; DESIGN SPEED VC 160; L:AircraftID 9; L:Mark 20; L:AvionicsConfiguration 96; L:RNAV 0; L:G5 0; L:CockpitPersistence 1; L:OptionSaveStatePerLivery 1
+  input events: 318, types {"double":318}, parameters {"":189,";FLOAT64":125,";FLOAT64;FLOAT64":4}; names and values in the NDJSON, kind "inputEvent"
+  panels: 31 documents, 16 VCockpit; gauges in the NDJSON, kind "panel"
+          VCockpit16 - GNS_DISABLED [1], VCockpit15 - WasmInstrument [1], VCockpit14 - WasmInstrument [1], VCockpit13 - GTN650_INT_2 [1], VCockpit12 - WTT2 [1], VCockpit11 - WTT1 [1], VCockpit10 - GTN750_INT [1], VCockpit09 - GNS_DISABLED_2 [1], VCockpit08 - GNS_DISABLED_1 [1], VCockpit07 - KLN90B [1], VCockpit06 - KLN90B [1], VCockpit05 - AS5_a2amod_2 [1], VCockpit04 - AS5_a2amod_1 [1], VCockpit03 - WasmInstrument [1], VCockpit02 - WasmInstrument [1], VCockpit01 - HourMeter - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument [6]
+  timeline: 231 samples over 60s from the gate; 17 of 30 values moved
+            ELECTRICAL MASTER BATTERY:1: 0 → 1, 1 change(s), last at +7.3s
+            AVIONICS MASTER SWITCH: 1 → 1, 2 change(s), last at +10.4s
+            LIGHT BEACON: 1 → 1, 2 change(s), last at +7.6s
+            LIGHT NAV: 1 → 1, 2 change(s), last at +8.9s
+            LIGHT STROBE: 1 → 1, 2 change(s), last at +7.6s
+            LIGHT LANDING: 1 → 1, 2 change(s), last at +7.6s
+            GENERAL ENG COMBUSTION:1: 0 → 0, 2 change(s), last at +10.6s
+            FLAPS HANDLE INDEX: 0 → 6, 1 change(s), last at +7.6s
+            COM ACTIVE FREQUENCY:1: 124.85 → 127.85, 1 change(s), last at +7.3s
+            LIGHT TAXI: 1 → 1, 2 change(s), last at +7.6s
+            GENERAL ENG RPM:1: 0 → 0, 19 change(s), last at +11.9s
+            FUEL TOTAL QUANTITY: 45 → 28.888641, 3 change(s), last at +7.8s
+            ELECTRICAL MAIN BUS VOLTAGE: 0 → 11.76511, 204 change(s), last at +60.0s
+            GROUND VELOCITY: 2.628597 → 0.00021, 204 change(s), last at +60.0s
+            L:DATLoaded: 0 → 1, 1 change(s), last at +7.3s
+            L:FlightPhase: 0 → 4, 2 change(s), last at +8.3s
+            L:Battery1Switch: 0 → 1, 1 change(s), last at +7.3s
+  frame rate: 31.0 sim frames/s by SIM_FRAME deliveries over 10s, longest gap 36ms; Frame event 30.0 fps
+  radios, each sent at priority highest and watched every frame for 2s:
+    K:COM_STBY_RADIO_SET_HZ 122800000: COM STANDBY FREQUENCY:1 124850000 → 122800000, held; echoes 122800000 tag EX1 +1ms
+    K:COM_RADIO_SET_HZ 123450000: COM ACTIVE FREQUENCY:1 127850000 → 123450000, held; echoes 123450000 tag EX1 +1ms
+    K:NAV1_RADIO_SET_HZ 110500000: NAV ACTIVE FREQUENCY:1 110500000 → 110500000, held; echoes 110500000 tag EX1 +0ms
+    K:XPNDR_SET 17697: TRANSPONDER CODE:1 1200 → 4521, held; echoes 17697 tag EX1 +1ms
+  Q11 Do the aircraft's input events set its state
+    yes for latching switches: SWITCH_BATTERY_MASTER_2STATES set L:Battery1Switch 0 and back 1; setting the tooltip-only RADIO1_DME_SWITCH_DRAG moved none of L:DmeFunction and its helpers (4.6s)
+      +0.0s 318 input events at runtime; 153 of 223 declared IDs match one, 70 don't
+      +0.0s SWITCH_BATTERY_MASTER_2STATES reads 1; L:Battery1Switch 1, A:ELECTRICAL MASTER BATTERY:1 1
+      +1.6s set SWITCH_BATTERY_MASTER_2STATES to 0: L:Battery1Switch 0, ELECTRICAL MASTER BATTERY:1 1; the input event reads 0
+      +3.1s set SWITCH_BATTERY_MASTER_2STATES back to 1: L:Battery1Switch 1, ELECTRICAL MASTER BATTERY:1 1; the input event reads 1
+      +4.6s set RADIO1_DME_SWITCH_DRAG from 0 to 1: L:DmeFunction 0, L:DmeFunction_Position 0, L:DmeFunction_Knob 0; the input event reads 0
+  Q7 Do stock toggles and set events agree with the cockpit
+    ELECT_FUEL_PUMP1_SET passed, stock moved; TOGGLE_AVIONICS_MASTER passed, stock moved; TOGGLE_BEACON_LIGHTS masked, stock moved, L: moved; PITOT_HEAT_ON masked, stock stayed, L: stayed (10.1s)
+      +2.0s control K:COM_STBY_RADIO_SET_HZ 124850000: COM STANDBY FREQUENCY:1 124850000 → 124850000; heard at priority 1 1×, at 10,000,001 1× (not masked)
+      +4.0s K:ELECT_FUEL_PUMP1_SET 1: GENERAL ENG FUEL PUMP SWITCH:1 0 → 1; heard at priority 1 1×, at 10,000,001 1× (not masked)
+      +6.1s K:TOGGLE_AVIONICS_MASTER: AVIONICS MASTER SWITCH:1 1 → 0; heard at priority 1 1×, at 10,000,001 1× (not masked)
+      +8.1s K:TOGGLE_BEACON_LIGHTS: LIGHT BEACON 1 → 1→0, L:BeaconLightSwitch 1 → 1→0; heard at priority 1 1×, at 10,000,001 0× (masked at or above HIGHEST_MASKABLE)
+      +10.1s K:PITOT_HEAT_ON: PITOT HEAT 1 → 1, L:PitotHeatSwitch 1 → 1; heard at priority 1 1×, at 10,000,001 0× (masked at or above HIGHEST_MASKABLE)
+
+Exceptions: none
+The connection was lost: the SimConnect connection closed.

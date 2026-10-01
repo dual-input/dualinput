@@ -1,0 +1,61 @@
+run · a2a-pa24-comanche on MSFS 2024
+2026-10-01T18:08:19.016Z, node-simconnect 4.2.0, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+Command: node experiments/areas/aircraft/run.mjs a2a-pa24-comanche --state runway
+Aircraft: A2A PA-24 Comanche 250, "A2A Piper PA-24-250 Comanche", livery N8351P
+
+Backup: 24 files in %LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-08-19-a2a-pa24-comanche
+  WASM work a2a-aircraft-pa24: 22 files
+  SimObjects pa24-250: 2 files
+Restore: 11 of 24 rewritten; 24 of 24 byte for byte after the restore, 24 still 5s later
+  rewritten: %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\A2A_Piper_PA-24-250_Comanche_N8351P.dat, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak10, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak2, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak3, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak4, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak5, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak6, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak7, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak8, %APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\a2a-aircraft-pa24\work\DATBackups\A2A_Piper_PA-24-250_Comanche_N8351P.dat.bak9, %APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\pa24-250\common\config\STATE.CFG
+Neutral flight: loaded in 1.3s, "Cessna C152"
+
+Load runway  experiments/areas/aircraft/flights/a2a-pa24-comanche-runway.flt
+  PASSED at 2.1s; settled at 10.5s, the last change LIGHT NAV
+  ready marks: L:DATLoaded or L:DatNotFound at 1 at 9.1s
+  settle values: 15 of 15 answered; L: 4 of 4
+  read: TITLE "A2A Piper PA-24-250 Comanche", LIVERY FOLDER "N8351P", LIVERY NAME "N8351P"; 0 m from the file's position, 171 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.3s FlightLoaded a2a-pa24-comanche-runway.FLT · +0.3s PositionChanged 0 · +0.3s View 0 · +0.3s flow FLIGHT_END · +0.3s flow FLT_LOAD a2a-pa24-comanche-runway · +0.3s flow FLT_LOADED a2a-pa24-comanche-runway · +0.3s flow TELEPORT_START · +0.3s flow TELEPORT_DONE · +1.2s SimStart 0 · +1.2s Sim 1 · +1.9s TITLE "A2A Piper PA-24-250 Comanche" · +7.3s AircraftLoaded aircraft.cfg · +9.2s flow FLIGHT_START · +9.2s flow FLT_LOAD taxi.flt · +9.2s flow FLT_LOADED taxi.flt · +9.2s flow RTC_START · +10.3s PositionChanged 0 · +10.3s View 2 · +10.3s flow TELEPORT_START · +10.3s flow TELEPORT_DONE · +10.3s flow FLT_LOAD runway.flt · +10.3s flow FLT_LOADED runway.flt · +10.3s flow RTC_END
+  identity: ATC TYPE "ATCCOM.ATC_NAME PIPER.0.text", MODEL "ATCCOM.AC_MODEL PA24.0.text", ID "N8351P", AIRLINE "", FLIGHT "773", CATEGORY "Airplane"
+            AircraftLoaded SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG
+            NUMBER OF ENGINES 1; ENGINE TYPE 0; ATC HEAVY 0; FLAPS NUM HANDLE POSITIONS 9; FLAPS HANDLE INDEX 6; FLAPS HANDLE PERCENT 66.666667; TRAILING EDGE FLAPS LEFT ANGLE 25.08; EMPTY WEIGHT 1700; TOTAL WEIGHT 2091.45459; MAX GROSS WEIGHT 3000; FUEL TOTAL CAPACITY 90; FUEL TOTAL QUANTITY 28.889277; FUEL TOTAL QUANTITY WEIGHT 173.335659; PAYLOAD STATION COUNT 20; DESIGN SPEED VC 160; L:AircraftID 9; L:Mark 20; L:AvionicsConfiguration 96; L:RNAV 0; L:G5 0; L:CockpitPersistence 1; L:OptionSaveStatePerLivery 1
+  input events: 318, types {"double":318}, parameters {"":189,";FLOAT64":125,";FLOAT64;FLOAT64":4}; names and values in the NDJSON, kind "inputEvent"
+  panels: 31 documents, 16 VCockpit; gauges in the NDJSON, kind "panel"
+          VCockpit20 - WasmInstrument [1], VCockpit19 - WasmInstrument [1], VCockpit18 - GTN650_INT_2 [1], VCockpit17 - WTT2 [1], VCockpit16 - WTT1 [1], VCockpit15 - GTN750_INT [1], VCockpit14 - GNS_DISABLED [1], VCockpit13 - GNS_DISABLED_2 [1], VCockpit12 - GNS_DISABLED_1 [1], VCockpit11 - KLN90B [1], VCockpit10 - KLN90B [1], VCockpit09 - AS5_a2amod_2 [1], VCockpit08 - AS5_a2amod_1 [1], VCockpit07 - WasmInstrument [1], VCockpit06 - WasmInstrument [1], VCockpit05 - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument [5]
+  timeline: 230 samples over 60s from the gate; 15 of 30 values moved
+            LIGHT BEACON: 1 → 1, 2 change(s), last at +5.9s
+            LIGHT NAV: 1 → 1, 2 change(s), last at +8.6s
+            LIGHT STROBE: 1 → 1, 2 change(s), last at +5.9s
+            LIGHT LANDING: 1 → 1, 2 change(s), last at +5.9s
+            GENERAL ENG COMBUSTION:1: 0 → 0, 2 change(s), last at +24.6s
+            FLAPS HANDLE INDEX: 0 → 6, 1 change(s), last at +5.9s
+            LIGHT TAXI: 1 → 1, 2 change(s), last at +5.9s
+            GENERAL ENG RPM:1: 0 → 0, 73 change(s), last at +26.1s
+            COM STANDBY FREQUENCY:1: 123.9 → 124.85, 1 change(s), last at +5.7s
+            FUEL TOTAL QUANTITY: 45 → 28.886505, 59 change(s), last at +45.6s
+            ELECTRICAL MAIN BUS VOLTAGE: 12.598493 → 11.725912, 200 change(s), last at +59.9s
+            GROUND VELOCITY: 2.655675 → 0.000167, 203 change(s), last at +59.9s
+            L:DATLoaded: 0 → 1, 1 change(s), last at +5.7s
+            L:FlightPhase: 0 → 4, 2 change(s), last at +8.4s
+            L:Battery1Switch: 0 → 1, 1 change(s), last at +5.7s
+  frame rate: 31.0 sim frames/s by SIM_FRAME deliveries over 10s, longest gap 36ms; Frame event 30.0 fps
+  radios, each sent at priority highest and watched every frame for 2s:
+    K:COM_STBY_RADIO_SET_HZ 122800000: COM STANDBY FREQUENCY:1 124850000 → 122800000, held; echoes 122800000 tag EX1 +1ms
+    K:COM_RADIO_SET_HZ 123450000: COM ACTIVE FREQUENCY:1 127850000 → 123450000, held; echoes 123450000 tag EX1 +0ms
+    K:NAV1_RADIO_SET_HZ 110500000: NAV ACTIVE FREQUENCY:1 110500000 → 110500000, held; echoes 110500000 tag EX1 +1ms
+    K:XPNDR_SET 17697: TRANSPONDER CODE:1 1200 → 4521, held; echoes 17697 tag EX1 +0ms
+  Q11 Do the aircraft's input events set its state
+    yes for latching switches: SWITCH_BATTERY_MASTER_2STATES set L:Battery1Switch 0 and back 1; setting the tooltip-only RADIO1_DME_SWITCH_DRAG moved none of L:DmeFunction and its helpers (4.6s)
+      +0.0s 318 input events at runtime; 153 of 223 declared IDs match one, 70 don't
+      +0.0s SWITCH_BATTERY_MASTER_2STATES reads 1; L:Battery1Switch 1, A:ELECTRICAL MASTER BATTERY:1 1
+      +1.6s set SWITCH_BATTERY_MASTER_2STATES to 0: L:Battery1Switch 0, ELECTRICAL MASTER BATTERY:1 1; the input event reads 0
+      +3.1s set SWITCH_BATTERY_MASTER_2STATES back to 1: L:Battery1Switch 1, ELECTRICAL MASTER BATTERY:1 1; the input event reads 1
+      +4.6s set RADIO1_DME_SWITCH_DRAG from 0 to 1: L:DmeFunction 0, L:DmeFunction_Position 0, L:DmeFunction_Knob 0; the input event reads 0
+  Q7 Do stock toggles and set events agree with the cockpit
+    ELECT_FUEL_PUMP1_SET masked, stock stayed; TOGGLE_AVIONICS_MASTER masked, stock moved; TOGGLE_BEACON_LIGHTS masked, stock moved, L: moved; PITOT_HEAT_ON masked, stock stayed, L: stayed (8.1s)
+      +2.0s K:ELECT_FUEL_PUMP1_SET 1: GENERAL ENG FUEL PUMP SWITCH:1 1 → 1; heard at priority highest 1×, at default 0× (masked on the way down)
+      +4.1s K:TOGGLE_AVIONICS_MASTER: AVIONICS MASTER SWITCH:1 1 → 0; heard at priority highest 1×, at default 0× (masked on the way down)
+      +6.1s K:TOGGLE_BEACON_LIGHTS: LIGHT BEACON 1 → 1→0, L:BeaconLightSwitch 1 → 1→0; heard at priority highest 1×, at default 0× (masked on the way down)
+      +8.1s K:PITOT_HEAT_ON: PITOT HEAT 1 → 1, L:PitotHeatSwitch 1 → 1; heard at priority highest 1×, at default 0× (masked on the way down)
+
+Exceptions: none

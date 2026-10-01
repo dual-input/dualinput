@@ -1,0 +1,344 @@
+
+[Main]
+Title=Crosscheck pmdg-777-300er runway
+Description=Crosscheck harness: PMDG 777-300ER, runway at GVAC
+AppVersion=12.0.1
+FlightVersion=1
+MissionType=FreeFlight
+MissionLocation=Amilcar Cabral
+OriginalFlight=
+FlightType=NORMAL
+StartingCameraCategory=Custom
+
+[Options]
+Sound=True
+Moonlight=False
+Save=False
+SaveOriginalFlightPlan=False
+TextDisplayPage=0
+SlewDisplayPage=0
+AxisIndicator=Off
+Titles=False
+
+[Sim.0]
+Sim=777-300ER
+Livery=cathay_pacific_bkqu_or_2020
+Pilot=Default
+Copilot=Default
+TailNumber=B-KQU
+AirlineCallSign=
+FlightNumber=773
+AppendHeavy=False
+DisableMassSections=False
+
+[Copilot]
+CopilotWeight=-1
+PilotWeight=-1
+SpawnCopilot=TRUE
+CopilotProfil=
+
+[ObjectFile]
+File.0=Missions\Asobo\FreeFlights\FreeFlight\FreeFlight
+File.1=Missions\Asobo\FreeFlights\FreeFlight\Generic_Logic_Pause
+File.2=missions\Asobo\FreeFlights\FreeFlight\Generic_Logic_MissionFailed
+File.3=Missions\Asobo\FreeFlights\FreeFlight\ToolBarSettings
+File.4=Missions\Asobo\FreeFlights\FreeFlight\FreeFlight_Services
+File.5=Missions\Asobo\FreeFlights\FreeFlight\Generic_Logic_FlightPath
+File.6=Missions\Asobo\FreeFlights\FreeFlight\Freeflight_BackOnTrack
+File.7=missions\Asobo\SR\Common\Generic\Utilities\Detent_Notif_Mgr
+File.8=missions\Asobo\SR\Common\Generic\FullFlight\FullFlightOverride
+
+[WolfProgram]
+NbFiles=1
+File.0=missions\Asobo\FreeFlights\FreeFlight\FreeFlightMain.wolf
+
+[FreeFlight]
+FirstFlightState=PREFLIGHT_HOLDSHORT
+
+[Weather]
+UseWeatherFile=False
+UseLiveWeather=True
+WeatherPresetFile=.\WeatherPresets\fewclouds.WPR
+WeatherCanBeLive=False
+CloudmapPosOverride=False
+CloudmapInitialPosX=0
+CloudmapInitialPosY=0
+FixedClouds=False
+DebugPublicAirflowDisplay=False
+
+[SoundPackages]
+NbFiles=0
+
+[Departure]
+ICAO=GVAC
+RunwayNumber=19
+RunwayDesignator=NONE
+
+[TrafficOptions]
+AllowAmbientVehicleTraffic=True
+
+[Panels]
+Panel.On=True
+HUD.On=False
+
+[Window.1]
+Order=255
+Active=True
+Undocked=False
+Maximized=False
+ScreenUniCoords=0, 0, 8191, 6143
+UndocCoords=0, 0, 0, 0
+
+[ATC_AgentManager]
+NumberofAgents=0
+
+[ATC_Aircraft.0]
+ActiveFlightPlan=False
+RequestedFlightPlan=False
+AcState=ACSTATE_REQUEST_TAXI_CLEARANCE_OUT_VFR_ATIS
+NumberofWaypoints=0
+ClearanceFlags=882
+CtCur=CLEARANCE_NONE
+WaypointNext=0
+AltCleared=-1
+HdgAssigned=-1
+SquawkAssigned=4608
+LandingSequence=LANDING_NONE
+DepartureRequest=DEPARTURE_VFR_REQUEST_NONE
+ParkingRequest=PARKING_NAME_NONE
+ParkingTypeRequest=PARKING_TYPE_NONE
+PatternLeg=PATTERN_LEG_NONE
+ApproachIndex=-1
+ApproachTransitionIndex=-1
+ApproachRequestIndex=-1
+ApproachTransitionRequestIndex=-1
+HelipadIndex=-1
+HelipadRequestIndex=-1
+RunwayIndex=-1
+RunwayRequestIndex=-1
+ParkingIndex=-1
+FlightFollowing=FLIGHT_FOLLOWING_NO
+AirspaceTransition=AIRSPACE_TRANSITION_NONE
+BVAirspaceTransition=BV_TYPE_NONE
+BVAirspaceTransitionReq=BV_TYPE_NONE
+TakeoffSequence=TAKEOFF_SEQUENCE_NONE
+LandingSequenceNumber=-1
+TaxiRouteCurrent=-1
+CruisingAltitude=-1
+RequestedCruisingAltitude=-1
+ExpectedAltitude=-1
+AircraftSignature=1,0
+
+[ATC_AircraftManager]
+NumberofAircraft=1
+
+[ATC_MessageSystem]
+FrequencyNodes=0
+
+[Panel.2]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.3]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.4]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.5]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.6]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.7]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.8]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.9]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.10]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.11]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.12]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.13]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.14]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.15]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.16]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.17]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[Panel.18]
+ScreenUniCoords=4095, 6142, 2, 2
+UndocCoords=0, 0, 0, 0
+Visible=False
+Undocked=False
+HiddenOn=False
+ID=-1
+ViewsOn=1
+
+[SimplifiedSim.0]
+Mode=None
+
+[SimVars.0]
+Latitude=N16° 45' 0.6666"
+Longitude=W22° 56' 52.2163"
+Altitude=+000177.90
+Pitch=0.099999999225363331301
+Bank=0
+Heading=-60.409218790009603595
+PVelBodyAxis=0
+BVelBodyAxis=0
+HVelBodyAxis=0
+XVelBodyAxis=0
+YVelBodyAxis=0
+ZVelBodyAxis=0
+ZVelBodyAxis_IAS=0
+SimOnGround=True
+OnPlatformHeight=-9999999999
+
+[Slew.0]
+Active=False
+
+[Freeze.0]
+Location=False
+Altitude=False
+Attitude=False
+
+[LocalVars.0]
+
+[SimScheduler]
+SimSpeed=001.00
+SimTime=15223.98989355219237

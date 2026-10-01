@@ -1,0 +1,13 @@
+p02 · K: event IDs, groups, and echoes on MSFS 2024
+2026-10-01T18:07:51.957Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+COM STANDBY FREQUENCY:1 reads 123900000
+A: COM STANDBY FREQUENCY:1 reads 123100000, expected 123100000
+B EX1: ex1 id 5002 group 70 value 123400000
+B legacy: event id 5002 group 70 value 123500000
+C EX1 through 5003: ex1 id 5003 group 70 value 123600000; ex1 id 5003 group 71 value 123600000
+C EX1 through 5001: ex1 id 5003 group 70 value 123700000; ex1 id 5003 group 71 value 123700000
+D: nothing
+E through 5001: nothing
+E through 5003: nothing
+E: COM STANDBY FREQUENCY:1 reads 124000000, expected 124100000
+Exceptions: ERROR on E: 5003 EX1 after the removal

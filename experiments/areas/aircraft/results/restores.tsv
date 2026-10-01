@@ -1,0 +1,6 @@
+# Restores of harness backups, made with the sim closed: what was rewritten, and whether every file matched its backup afterwards.
+restored (UTC)	aircraft	backup	files	rewritten	identical	created during the runs, left in place	large files changed, not restored
+2026-10-01T18:26:32.254Z	a2a-pa24-comanche	%LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-20-15-a2a-pa24-comanche	24	0	24 of 24	none	none
+2026-10-01T18:30:21.484Z	fenix-a320-family	%LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-29-25-fenix-a320-family	13	1	13 of 13	none	none
+2026-10-01T18:37:14.054Z	fenix-a320-family	%LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-36-11-fenix-a320-family	13	0	13 of 13	none	none
+2026-10-01T18:45:36.891Z	black-square-bonanza-pro	%LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-41-38-black-square-bonanza-pro	3	1	3 of 3	none	none

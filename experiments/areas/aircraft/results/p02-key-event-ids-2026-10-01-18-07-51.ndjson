@@ -1,0 +1,15 @@
+{"t":1790878072002,"s":0.045,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790878072018,"s":0.061,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790878072018,"s":0.061,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1790878072019,"s":0.062,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1790878072019,"s":0.062,"kind":"start","text":"COM STANDBY FREQUENCY:1 reads 123900000"}
+{"t":1790878074051,"s":2.094,"kind":"read","text":"A: COM STANDBY FREQUENCY:1 reads 123100000, expected 123100000"}
+{"t":1790878074872,"s":2.915,"kind":"heard","text":"B EX1: ex1 id 5002 group 70 value 123400000","label":"B EX1","heard":[{"kind":"ex1","id":5002,"group":70,"value":123400000,"data":[123400000,0,0,0,0]}]}
+{"t":1790878075388,"s":3.431,"kind":"heard","text":"B legacy: event id 5002 group 70 value 123500000","label":"B legacy","heard":[{"kind":"event","id":5002,"group":70,"value":123500000}]}
+{"t":1790878076199,"s":4.242,"kind":"heard","text":"C EX1 through 5003: ex1 id 5003 group 70 value 123600000; ex1 id 5003 group 71 value 123600000","label":"C EX1 through 5003","heard":[{"kind":"ex1","id":5003,"group":70,"value":123600000,"data":[123600000,0,0,0,0]},{"kind":"ex1","id":5003,"group":71,"value":123600000,"data":[123600000,0,0,0,0]}]}
+{"t":1790878076714,"s":4.757,"kind":"heard","text":"C EX1 through 5001: ex1 id 5003 group 70 value 123700000; ex1 id 5003 group 71 value 123700000","label":"C EX1 through 5001","heard":[{"kind":"ex1","id":5003,"group":70,"value":123700000,"data":[123700000,0,0,0,0]},{"kind":"ex1","id":5003,"group":71,"value":123700000,"data":[123700000,0,0,0,0]}]}
+{"t":1790878077227,"s":5.27,"kind":"heard","text":"D: nothing","label":"D","heard":[]}
+{"t":1790878078049,"s":6.092,"kind":"heard","text":"E through 5001: nothing","label":"E through 5001","heard":[]}
+{"t":1790878078051,"s":6.094,"kind":"exception","text":"ERROR (1) on E: 5003 EX1 after the removal, parameter 2","exception":1,"name":"ERROR","sendId":33,"index":2,"sent":"E: 5003 EX1 after the removal"}
+{"t":1790878078562,"s":6.605,"kind":"heard","text":"E through 5003: nothing","label":"E through 5003","heard":[]}
+{"t":1790878078584,"s":6.627,"kind":"read","text":"E: COM STANDBY FREQUENCY:1 reads 124000000, expected 124100000"}

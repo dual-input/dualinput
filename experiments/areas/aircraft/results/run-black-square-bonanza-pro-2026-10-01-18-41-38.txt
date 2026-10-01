@@ -1,0 +1,81 @@
+run · black-square-bonanza-pro on MSFS 2024
+2026-10-01T18:41:38.681Z, node-simconnect 4.2.0, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+Command: node experiments/areas/aircraft/run.mjs black-square-bonanza-pro
+Aircraft: Black Square Bonanza Pro, piston, "Black Square A36 Bonanza Professional N6TQ"
+
+Backup: 3 files in %LOCALAPPDATA%\Crosscheck\harness-backups\2026-10-01-18-41-38-black-square-bonanza-pro
+  SimObjects bksq-aircraft-bonanzapro: 1 file
+  SimObjects bksq-aircraft-bonanzaproturbo: 1 file
+  SimObjects bksq-aircraft-bonanzaproturbine: 1 file
+Restore: pending, in experiments/areas/aircraft/results/pending-restores.tsv; 1 of 3 files differ from the backup at the end of the run. With the sim closed, run:
+  node experiments/areas/aircraft/run.mjs --restore-pending
+  changed: %APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\bksq-aircraft-bonanzapro\state.CFG
+Neutral flight: loaded in 1.8s, "Cessna C152"
+
+Load parked  experiments/areas/aircraft/flights/black-square-bonanza-pro-parked.flt
+  PASSED at 1.8s; settled at 18.4s, the last change L:bksq_controlLocks
+  ready marks: L:var_startupComplete at 1 at 18.4s
+  settle values: 14 of 14 answered; L: 3 of 3
+  read: TITLE "Black Square A36 Bonanza Professional N6TQ", LIVERY FOLDER "", LIVERY NAME ""; 0 m from the file's position, 176 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.2s FlightLoaded black-square-bonanza-pro-parked.FLT · +0.2s PositionChanged 0 · +0.2s View 0 · +0.2s flow FLIGHT_END · +0.2s flow FLT_LOAD black-square-bonanza-pro-parked · +0.2s flow FLT_LOADED black-square-bonanza-pro-parked · +0.2s flow TELEPORT_START · +0.2s flow TELEPORT_DONE · +1.1s SimStart 0 · +1.1s Sim 1 · +1.6s TITLE "Black Square A36 Bonanza Professional N6TQ" · +7.5s AircraftLoaded aircraft.cfg · +8.3s flow FLIGHT_START · +8.3s flow FLT_LOAD apron.flt · +8.3s flow FLT_LOADED apron.flt · +8.3s flow RTC_START · +9.6s flow RTC_END
+  identity: ATC TYPE "ATCCOM.ATC_NAME_BEECHCRAFT.0.text", MODEL "ATCCOM.AC_MODEL BE36.0.text", ID "N6TQ", AIRLINE "", FLIGHT "773", CATEGORY "Airplane"
+            AircraftLoaded SimObjects\Airplanes\bksq-aircraft-bonanzapro\aircraft.CFG
+            NUMBER OF ENGINES 1; ENGINE TYPE 0; ATC HEAVY 0; FLAPS NUM HANDLE POSITIONS 2; FLAPS HANDLE INDEX 0; FLAPS HANDLE PERCENT 0; TRAILING EDGE FLAPS LEFT ANGLE 0; EMPTY WEIGHT 2145; TOTAL WEIGHT 2706.939941; MAX GROSS WEIGHT 3650; FUEL TOTAL CAPACITY 110; FUEL TOTAL QUANTITY 35.323322; FUEL TOTAL QUANTITY WEIGHT 211.939934; PAYLOAD STATION COUNT 7; DESIGN SPEED VC 174; L:BKSQ_Turbocharged 0; L:BKSQ_TipTanks 0; L:BKSQ_TurbochargerExcessFuelBurn 0; L:var_radio1Mode 0
+  input events: 117, types {"double":117}, parameters {";FLOAT64":115,";FLOAT64;FLOAT64":2}; names and values in the NDJSON, kind "inputEvent"
+  panels: 33 documents, 20 VCockpit; gauges in the NDJSON, kind "panel"
+          VCockpit24 - WeatherSquare4000_int [1], VCockpit23 - BlackSquareTablet [1], VCockpit22 - WTT2 [1], VCockpit21 - WTT1 [1], VCockpit20 - EDM800_1 [1], VCockpit19 - KAS297B_1 [1], VCockpit18 - bksq_wradar1 [1], VCockpit17 - KNS81_1 [1], VCockpit16 - KDI572R [1], VCockpit15 - AS330 [1], VCockpit14 - KR87A [1], VCockpit13 - KX155B_2 [1], VCockpit12 - KX155B_1 [1], VCockpit11 - KLN90B [1], VCockpit10 - GNS_DISABLED [1], VCockpit09 - GNS_DISABLED [1], VCockpit08 - WasmInstrument [1], VCockpit07 - WasmInstrument [1], VCockpit06 [1], VCockpit05 [1]
+  timeline: 210 samples over 60s from the gate; 14 of 29 values moved
+            ELECTRICAL MASTER BATTERY:1: 1 → 0, 1 change(s), last at +7.0s
+            AVIONICS MASTER SWITCH: 1 → 0, 1 change(s), last at +7.0s
+            LIGHT BEACON: 1 → 0, 1 change(s), last at +7.0s
+            LIGHT NAV: 1 → 0, 1 change(s), last at +7.0s
+            LIGHT STROBE: 1 → 0, 1 change(s), last at +7.0s
+            LIGHT LANDING: 1 → 0, 1 change(s), last at +7.0s
+            BRAKE PARKING POSITION: 0 → 1, 1 change(s), last at +7.0s
+            COM ACTIVE FREQUENCY:1: 127.85 → 124.85, 1 change(s), last at +7.0s
+            LIGHT TAXI: 1 → 0, 1 change(s), last at +7.0s
+            FUEL TOTAL QUANTITY: 55 → 35.323322, 2 change(s), last at +10.1s
+            ELECTRICAL MAIN BUS VOLTAGE: 0 → 0, 26 change(s), last at +7.0s
+            GROUND VELOCITY: 4.545511 → 0.000017, 182 change(s), last at +60.1s
+            L:var_startupComplete: 0 → 1, 1 change(s), last at +10.1s
+            L:bksq_controlLocks: 0 → 1, 1 change(s), last at +10.1s
+  frame rate: 31.0 sim frames/s by SIM_FRAME deliveries over 10s, longest gap 35ms; Frame event 30.0 fps
+  radios, each sent at priority highest and watched every frame for 2s:
+    K:COM_STBY_RADIO_SET_HZ 122800000: COM STANDBY FREQUENCY:1 124850000 → 124850000, never reached; echoes 122800000 tag EX1 +1ms
+    K:COM_RADIO_SET_HZ 123450000: COM ACTIVE FREQUENCY:1 124850000 → 124850000, never reached; echoes 123450000 tag EX1 +1ms
+    K:NAV1_RADIO_SET_HZ 110500000: NAV ACTIVE FREQUENCY:1 110500000 → 110500000, held; echoes 110500000 tag EX1 +1ms
+    K:XPNDR_SET 17697: TRANSPONDER CODE:1 7000 → 7000, never reached; echoes 17697 tag EX1 +34ms
+
+Load runway  experiments/areas/aircraft/flights/black-square-bonanza-pro-runway.flt
+  PASSED at 1.6s; settled at 16.9s, the last change GENERAL ENG COMBUSTION:1
+  ready marks: L:var_startupComplete at 1 at 16.9s
+  settle values: 14 of 14 answered; L: 3 of 3
+  read: TITLE "Black Square A36 Bonanza Professional N6TQ", LIVERY FOLDER "DEFAULT", LIVERY NAME "Default"; 0 m from the file's position, 171 ft, on ground 1, Sim 1
+  events from the request: +0.1s SimStop 0 · +0.1s Sim 0 · +0.1s FlightLoaded black-square-bonanza-pro-runway.FLT · +0.1s PositionChanged 0 · +0.2s View 0 · +0.2s flow FLIGHT_END · +0.2s flow FLT_LOAD black-square-bonanza-pro-runway · +0.2s flow FLT_LOADED black-square-bonanza-pro-runway · +0.2s flow TELEPORT_START · +0.2s flow TELEPORT_DONE · +0.9s SimStart 0 · +0.9s Sim 1 · +1.6s TITLE "Black Square A36 Bonanza Professional N6TQ" · +5.9s AircraftLoaded aircraft.cfg · +6.7s flow FLIGHT_START · +6.7s flow FLT_LOAD taxi.flt · +6.7s flow FLT_LOADED taxi.flt · +6.7s flow RTC_START · +7.9s PositionChanged 0 · +7.9s View 2 · +7.9s flow TELEPORT_START · +7.9s flow TELEPORT_DONE · +7.9s flow FLT_LOAD runway.flt · +7.9s flow FLT_LOADED runway.flt · +7.9s flow RTC_END
+  identity: ATC TYPE "ATCCOM.ATC_NAME_BEECHCRAFT.0.text", MODEL "ATCCOM.AC_MODEL BE36.0.text", ID "N6TQ", AIRLINE "", FLIGHT "773", CATEGORY "Airplane"
+            AircraftLoaded SimObjects\Airplanes\bksq-aircraft-bonanzapro\aircraft.CFG
+            NUMBER OF ENGINES 1; ENGINE TYPE 0; ATC HEAVY 0; FLAPS NUM HANDLE POSITIONS 2; FLAPS HANDLE INDEX 0; FLAPS HANDLE PERCENT 0; TRAILING EDGE FLAPS LEFT ANGLE 0; EMPTY WEIGHT 2145; TOTAL WEIGHT 2706.939941; MAX GROSS WEIGHT 3650; FUEL TOTAL CAPACITY 110; FUEL TOTAL QUANTITY 35.323322; FUEL TOTAL QUANTITY WEIGHT 211.939934; PAYLOAD STATION COUNT 7; DESIGN SPEED VC 174; L:BKSQ_Turbocharged 0; L:BKSQ_TipTanks 0; L:BKSQ_TurbochargerExcessFuelBurn 0; L:var_radio1Mode 0
+  input events: 117, types {"double":117}, parameters {";FLOAT64":115,";FLOAT64;FLOAT64":2}; names and values in the NDJSON, kind "inputEvent"
+  panels: 33 documents, 20 VCockpit; gauges in the NDJSON, kind "panel"
+          VCockpit24 - WeatherSquare4000_int [1], VCockpit23 - BlackSquareTablet [1], VCockpit22 - WTT2 [1], VCockpit21 - WTT1 [1], VCockpit20 - EDM800_1 [1], VCockpit19 - KAS297B_1 [1], VCockpit18 - bksq_wradar1 [1], VCockpit17 - KNS81_1 [1], VCockpit16 - KDI572R [1], VCockpit15 - AS330 [1], VCockpit14 - KR87A [1], VCockpit13 - KX155B_2 [1], VCockpit12 - KX155B_1 [1], VCockpit11 - KLN90B [1], VCockpit10 - GNS_DISABLED [1], VCockpit09 - GNS_DISABLED [1], VCockpit08 - WasmInstrument [1], VCockpit07 - WasmInstrument [1], VCockpit06 - GTN650_INT_2 [1], VCockpit05 - GTN750_INT [1]
+  timeline: 224 samples over 60s from the gate; 10 of 29 values moved
+            LIGHT LANDING: 1 → 1, 2 change(s), last at +6.6s
+            BRAKE PARKING POSITION: 0 → 0, 2 change(s), last at +6.8s
+            GENERAL ENG COMBUSTION:1: 0 → 0, 2 change(s), last at +9.3s
+            LIGHT TAXI: 1 → 0, 1 change(s), last at +6.6s
+            GENERAL ENG RPM:1: 0 → 0, 18 change(s), last at +10.4s
+            GEAR HANDLE POSITION: 1 → 0, 1 change(s), last at +6.8s
+            FUEL TOTAL QUANTITY: 55 → 35.323322, 5 change(s), last at +8.8s
+            ELECTRICAL MAIN BUS VOLTAGE: 25.700001 → 25.597677, 223 change(s), last at +60.0s
+            GROUND VELOCITY: 2.628661 → 0.000687, 204 change(s), last at +60.0s
+            L:var_startupComplete: 0 → 1, 1 change(s), last at +8.8s
+  frame rate: 31.0 sim frames/s by SIM_FRAME deliveries over 10s, longest gap 35ms; Frame event 30.0 fps
+  radios, each sent at priority highest and watched every frame for 2s:
+    K:COM_STBY_RADIO_SET_HZ 122800000: COM STANDBY FREQUENCY:1 124850000 → 122800000, held; echoes 122800000 tag EX1 +1ms
+    K:COM_RADIO_SET_HZ 123450000: COM ACTIVE FREQUENCY:1 127850000 → 123450000, held; echoes 123450000 tag EX1 +0ms
+    K:NAV1_RADIO_SET_HZ 110500000: NAV ACTIVE FREQUENCY:1 110500000 → 110500000, held; echoes 110500000 tag EX1 +1ms
+    K:XPNDR_SET 17697: TRANSPONDER CODE:1 7000 → 4521, held; echoes 17697 tag EX1 +1ms
+
+Exceptions: none
+The connection was lost: the SimConnect connection closed.
+The sim crashed; the harness's last action was FLT_LOADED runway.flt. Windows: 2026-10-01T20:45:10 Faulting application name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Faulting module name: FlightSimulator2024.exe, version: 1.8.16.0, time stamp: 0x00000000; Exception code: 0xc0000005; Fault offset: 0x0000000003146bd2; Faulting process id: 0x7310

@@ -1,0 +1,2 @@
+# Backups waiting for a restore with the sim closed: node experiments/areas/aircraft/run.mjs --restore-pending
+aircraft	backup	backed up (UTC)	runs

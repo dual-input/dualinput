@@ -1,5 +1,8 @@
 # Text is stored with LF endings.
 # Batch files keep CRLF, because cmd.exe can misread labels in a file with LF endings.
+# Flight files keep the sim's own bytes, CRLF and Windows-1252, because the sim reads
+# them back and we haven't tested whether it accepts any other form.
 * text=auto eol=lf
 *.cmd text eol=crlf
 *.bat text eol=crlf
+*.[fF][lL][tT] -text

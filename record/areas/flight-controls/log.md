@@ -3,9 +3,29 @@
 What our experiments found about keeping a pilot's own flight controls out of the sim, newest entry first.
 A SimConnect client's mask at 10,000,000 blocks the pilot's hardware input and gives it back when the client dies.
 On an aircraft whose module masks at the same priority, the mask registered first wins.
-A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777's own yoke ignored it at every priority we tried.
+A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777's own yoke takes it only when it's sent with the legacy `SimConnect_TransmitClientEvent`.
 The probe is [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), and its raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-01, with the yoke and throttle on our development machine.
+
+## 2026-10-01: The PMDG 777 takes a value sent back with the legacy transmit call
+
+**Asked:** does the 777 act on a value sent back with `SimConnect_TransmitClientEvent`, rather than the `_EX1` form it ignored ([the entry below](#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values))?
+
+**Expected:** yes, if PMDG's module handles only `SIMCONNECT_RECV_EVENT`.
+
+**Found:**
+
+- At 10,001,000, `L:yokes_Fore_Aft` followed our half-value sends: 0.5 to 1.5, against 0 to 2 unmasked.
+- From 100,000,000 down, the stock yoke followed at half and PMDG's didn't, as with `_EX1`, because those sends land behind PMDG's groups.
+- So PMDG's module masks an `_EX1` event and drops it, and acts on the same event sent by the legacy call.
+  That its dispatch handles only `SIMCONNECT_RECV_EVENT` is our reading of its behavior, not of its code (unverified).
+
+**Changed:** mixing two pilots' inputs works on the 777: mask at 10,000,000, then send the mixed value with the legacy call at 10,001,000, in front of PMDG's groups.
+A send meant for a module's own handler should use the legacy call, which carries no fifth parameter to tag it with.
+
+**Affects:** the idea [Mixed flight controls](../product/ideas.md#mixed-flight-controls).
+
+**Evidence:** [the 777's legacy run](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-21-07-52.txt).
 
 ## 2026-10-01: A value sent back at 10,000,001 doesn't get past a group at 10,000,000, and the 777 ignored re-sent values
 

@@ -1,0 +1,19 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T21:07:52.239Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "777-300ER", study pmdg-777-300er
+Mask priority 10000000, re-send priorities 10001000, 100000000, 1900000000, 2000000000 by the legacy SimConnect_TransmitClientEvent, 5s phases
+
+pitch: masked AXIS_ELEVATOR_SET
+  free: baseline · heard AXIS_ELEVATOR_SET ×116 -16384..16384 · input events none · values L:yokes_Fore_Aft 0..2
+  masked: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×108 -16384..16384 · masker got AXIS_ELEVATOR_SET ×107 -16384..16384 · input events none · values none moved · as expected
+  cleared: moved (L:yokes_Fore_Aft at 100% of the free range) · heard AXIS_ELEVATOR_SET ×104 -16384..16384 · masker got none · input events none · values L:yokes_Fore_Aft 0..2 · as expected
+  half, re-sent by the legacy call at 10001000: half (L:yokes_Fore_Aft at 50% of the free range) · heard AXIS_ELEVATOR_SET ×86 -16384..16384 · masker got AXIS_ELEVATOR_SET ×85 -16384..16384 · input events none · values L:yokes_Fore_Aft 0.5..1.5 · as expected
+  half, re-sent by the legacy call at 100000000: blocked (L:yokes_Fore_Aft at 8% of the free range) · heard AXIS_ELEVATOR_SET ×95 -16384..16384 · masker got AXIS_ELEVATOR_SET ×96 -16384..16384 · input events none · values L:yokes_Fore_Aft 1.335144..1.5, YOKE Y POSITION -50..50, ELEVATOR POSITION -50..50 · expected half
+  half, re-sent by the legacy call at 1900000000: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×91 -16384..16384 · masker got AXIS_ELEVATOR_SET ×89 -16384..16384 · masker heard its own re-sends AXIS_ELEVATOR_SET ×2 -7226..-4271 · input events none · values YOKE Y POSITION -50..50, ELEVATOR POSITION -50..50 · expected half
+  half, re-sent by the legacy call at 2000000000: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×107 -16384..16384 · masker got AXIS_ELEVATOR_SET ×107 -16384..16384 · input events none · values YOKE Y POSITION -50..50.000001, ELEVATOR POSITION -50..50.000001 · expected half
+  killed: moved (L:yokes_Fore_Aft at 100% of the free range) · heard AXIS_ELEVATOR_SET ×84 -16384..16384 · masker got none · input events none · values L:yokes_Fore_Aft 0..2 · as expected
+
+throttle: masked nothing
+  not run
+
+Exceptions: ERROR (1) on enumerate input events, parameter 4294967295

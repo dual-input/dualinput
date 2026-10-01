@@ -152,7 +152,7 @@ In FS Copilot and YourControls only the pilot in control's hardware reaches the 
 - **Tech:**
   - Masking the axis events keeps them from the sim, and the block ends when the masking client dies (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
     On an aircraft whose module masks at the same priority, Crosscheck's masks have to be in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-at-the-same-priority-the-mask-registered-first-wins)).
-  - A mixed value sent back reaches stock flight controls from priority 10,001,000 down, and the PMDG 777's own yoke ignored it at every priority tried ([log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values)).
+  - A mixed value sent back reaches stock flight controls from priority 10,001,000 down ([log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values)), and the PMDG 777's own yoke takes it at 10,001,000 only when it's sent with the legacy `SimConnect_TransmitClientEvent` ([log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)).
   - Whether a masked event carries the value after MSFS's sensitivity curves and dead zones is unmeasured; if it does, the pilot's settings survive.
   - The other pilot's input arrives one network delay late, which the network design has to keep short.
 - **Product:** an exact dual-input warning, and a second pair of hands on the controls.

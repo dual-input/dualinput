@@ -10,44 +10,46 @@
  * "never has worked properly in MSFS" (record/learn/foundations/04-02-events.md).
  * Nobody in our records has measured it.
  *
- * A guided session, one aircraft per run, with someone at the controls. Each
- * step waits for Page Down, read globally so the sim can stay in front, and End
- * skips the step. A high beep opens a capture window and a low beep closes it.
+ * One aircraft per run, with someone at the controls. For pitch, then
+ * throttle, you press Page Down once (read globally, so the sim stays in front)
+ * and keep moving that control until the low beep, about 40s. The probe steps
+ * through the phases by itself, 5s each, with a short beep at each:
  *
- *   1  Discover  No masking: which K: events and input events each control
- *                fires, and which values move. Yaw is moved slowly, so a dead
- *                zone set in MSFS shows whether an event carries the value
- *                after MSFS's own sensitivity and dead zone.
- *   2  Mask      A second process, the masker, masks the K: events step 1
- *                heard, at 10,000,000. Does each control stay still, and does
- *                the masker hear the events? It hears them only if no module
- *                masked them first. Then the masker clears its group, and pitch
- *                is checked free.
- *   3  Re-send   The masker sends each axis value back at half, at 10,000,001,
- *                just after its own group. Does the control follow at half? On
- *                an aircraft whose module reads its own input variable, such as
- *                Accu-Sim's L:ElevatorInput, it also tries writing that.
- *   4  Kill      A new masker is killed outright. Is pitch free again?
- *   5  Reload    Masks set before the aircraft reloads, to see whether the
- *                order of registration decides a tie at 10,000,000.
+ *   free     Nothing masked: which K: events and input events the control
+ *            fires, and which values move.
+ *   masked   A second process, the masker, masks the K: events the free phase
+ *            heard, at 10,000,000. Does the control stay still? Does the masker
+ *            hear the events? It hears them only if no aircraft module masked
+ *            them first.
+ *   cleared  The masker cleared its group and exited. Does the control move
+ *            again?
+ *   half     A new masker masks, and sends each axis value back at half, at
+ *            10,000,001, just after its own group. Does the control follow at
+ *            half?
+ *   written  Pitch only, on an aircraft with an input variable of its own,
+ *            such as Accu-Sim's L:ElevatorInput: the masker writes that
+ *            variable at half instead.
+ *   killed   The last masker is killed outright. Does the control move again?
+ *
+ * With --reload, the masks then go in before you reload the aircraft, to see
+ * whether the order of registration decides a tie at 10,000,000.
  *
  * The masker fails open:
  *   - it clears its group and exits when the observer's keepalive stops for
  *     15s or its stdin closes, and after 10 minutes in any case (30 for the
- *     reload step);
- *   - killing it closes its SimConnect connection, which step 4 checks
- *     releases the mask;
+ *     reload);
+ *   - killing it closes its SimConnect connection, which the killed phase
+ *     checks releases the mask;
  *   - `node experiments/areas/flight-controls/p01-mask.mjs --release` kills
  *     every masker this probe started, from any terminal.
  *
- *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--only 1,2,3]
+ *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--reload]
  *
  * <study folder> is a folder under record/areas/aircraft/, such as
  * a2a-pa24-comanche. Without it the probe matches the loaded aircraft's TITLE,
- * and with no match it watches the stock variables alone. Steps 2 to 5 mask
- * what step 1 heard in the same run, so --only without 1 masks nothing.
+ * and with no match it watches the stock variables alone.
  *
- * Output: one line per step on the console, every event in
+ * Output: one line per phase on the console, every event in
  * experiments/areas/flight-controls/results/p01-mask-<time>.ndjson, and the
  * report in the .txt beside it.
  */
@@ -66,6 +68,7 @@ const opt = (name) => { const i = argv.indexOf(name); return i === -1 ? null : a
 
 const MASK_PRIORITY = PRIORITY.highest_maskable
 const RESEND_PRIORITY = MASK_PRIORITY + 1
+const PHASE_MS = 5_000
 const KEEPALIVE_MS = 5_000
 const DEADMAN_MS = 15_000
 const CAP_MS = 10 * 60_000
@@ -74,29 +77,18 @@ const SCALE = 0.5
 
 // Every name is in MSFS 2024 SDK 1.7.3, WASM/include/MSFS/Types/MSFS_EventsEnum.h.
 const CANDIDATES = [
-  "AXIS_ELEVATOR_SET", "AXIS_AILERONS_SET", "AXIS_RUDDER_SET",
-  "ELEVATOR_SET", "AILERON_SET", "RUDDER_SET",
-  "AXIS_ELEV_TRIM_SET", "ELEV_TRIM_UP", "ELEV_TRIM_DN", "ELEVATOR_TRIM_SET",
+  "AXIS_ELEVATOR_SET", "ELEVATOR_SET",
   "AXIS_THROTTLE_SET", "AXIS_THROTTLE1_SET", "AXIS_THROTTLE2_SET",
   "THROTTLE_AXIS_SET_EX1", "THROTTLE1_AXIS_SET_EX1", "THROTTLE2_AXIS_SET_EX1",
   "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET",
   "THROTTLE_FULL", "THROTTLE_CUT", "THROTTLE_INCR", "THROTTLE_DECR",
-  "AXIS_MIXTURE_SET", "AXIS_MIXTURE1_SET", "AXIS_PROPELLER_SET", "AXIS_PROPELLER1_SET",
-  "AXIS_FLAPS_SET", "FLAPS_INCR", "FLAPS_DECR", "FLAPS_UP", "FLAPS_DOWN", "FLAPS_SET",
-  "AXIS_SPOILER_SET", "SPOILERS_SET",
-  "AXIS_LEFT_BRAKE_SET", "AXIS_RIGHT_BRAKE_SET", "BRAKES",
-  "GEAR_UP", "GEAR_DOWN", "GEAR_TOGGLE", "GEAR_SET",
-  "AXIS_STEERING_SET",
 ]
 
 // Events an aircraft's own module may send to move the sim's surfaces and
-// such as the A220's K:AILERON_SET (record/areas/aircraft/synaptic-a220/study.md,
+// levers, such as K:ELEVATOR_SET (unverified for any one aircraft), and the normally aspirated Baron's
 // Flight controls and autoflight). Masking one would cut the module's output,
 // so the probe listens for them and never masks them.
-const OUTPUTS = new Set([
-  "ELEVATOR_SET", "AILERON_SET", "RUDDER_SET", "ELEVATOR_TRIM_SET",
-  "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET", "FLAPS_SET", "SPOILERS_SET", "GEAR_SET",
-])
+const OUTPUTS = new Set(["ELEVATOR_SET", "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET"])
 
 const isAxis = (name) => name.includes("AXIS")
 
@@ -105,63 +97,26 @@ const isAxis = (name) => name.includes("AXIS")
 const CONTROLS = {
   pitch: {
     label: "Pitch: yoke or stick fore and aft",
-    how: "through its full travel, back and forth, for the whole window",
-    seconds: 6,
+    how: "through its full travel, back and forth",
     stock: [["YOKE Y POSITION", "percent"], ["ELEVATOR POSITION", "percent"]],
-  },
-  roll: {
-    label: "Roll: yoke or stick left and right",
-    how: "through its full travel, back and forth, for the whole window",
-    seconds: 6,
-    stock: [["YOKE X POSITION", "percent"], ["AILERON POSITION", "percent"]],
-  },
-  yaw: {
-    label: "Yaw: rudder pedals or twist",
-    how: "slowly, from center to full right over 4s, then back to center",
-    seconds: 8,
-    stock: [["RUDDER PEDAL POSITION", "percent"], ["RUDDER POSITION", "percent"]],
   },
   throttle: {
     label: "Throttle: engine 1's lever",
-    how: "from idle to full and back, twice",
-    seconds: 6,
+    how: "from idle to full and back",
     stock: [["GENERAL ENG THROTTLE LEVER POSITION:1", "percent"]],
-  },
-  flaps: {
-    label: "Flaps: your lever or buttons",
-    how: "one notch down, then back up, twice",
-    seconds: 8,
-    stock: [["FLAPS HANDLE INDEX", "number"]],
-  },
-  trim: {
-    label: "Elevator trim: your wheel or buttons",
-    how: "a few steps nose up, then back down",
-    seconds: 8,
-    stock: [["ELEVATOR TRIM PCT", "percent"]],
   },
 }
 
 // Each aircraft's own variables for the pilot's input, unverified for an
 // aircraft no run has watched. They come first when the
 // probe judges whether a control moved, because a module's input can move
-// while the stock values don't. `write` names the input variable step 3 tries
-// writing directly.
+// while the stock values don't. `write` names the input variable the written
+// phase writes directly.
 const LOCAL = {
-  "a2a-pa24-comanche": {
-    pitch: ["L:ElevatorInput"], roll: ["L:AileronInput"], yaw: ["L:RudderInput"],
-    throttle: ["L:Throttle1Position"], flaps: ["L:LandFlapsPos"],
-    write: { pitch: "L:ElevatorInput" },
-  },
-  "a2a-aerostar-600": {
-    pitch: ["L:ElevatorInput"], roll: ["L:AileronInput"], yaw: ["L:RudderInput"],
-    throttle: ["L:Eng1_ThrottlePosition"],
-    write: { pitch: "L:ElevatorInput" },
-  },
-  "synaptic-a220": {
-    pitch: ["L:A22X L Sidestick Y"], roll: ["L:A22X L Sidestick X"], yaw: ["L:A22X Rudder Pedals"],
-    throttle: ["L:A22X Throttle L Raw", "L:A22X Throttle 1 TLA"],
-  },
-  "pmdg-777-300er": { pitch: ["L:yokes_Fore_Aft"], roll: ["L:yokes_L_R"] },
+  "a2a-pa24-comanche": { pitch: ["L:ElevatorInput"], throttle: ["L:Throttle1Position"], write: "L:ElevatorInput" },
+  "a2a-aerostar-600": { pitch: ["L:ElevatorInput"], throttle: ["L:Eng1_ThrottlePosition"], write: "L:ElevatorInput" },
+  "synaptic-a220": { pitch: ["L:A22X L Sidestick Y"], throttle: ["L:A22X Throttle L Raw", "L:A22X Throttle 1 TLA"] },
+  "pmdg-777-300er": { pitch: ["L:yokes_Fore_Aft"] },
   "fenix-a320-family": { pitch: ["L:N_FC_SIDESTICK_CAPT_PITCH"] },
 }
 
@@ -173,7 +128,7 @@ const CONTROL_LOCKS = {
   "black-square-bonanza-pro": "L:bksq_controlLocks",
 }
 
-const INPUT_EVENT_NAMES = /THROTTLE|FLAP|TRIM|ELEV|AILERON|RUDDER|YOKE|STICK|SPOILER|BRAKE|GEAR|LEVER|PITCH|ROLL/i
+const INPUT_EVENT_NAMES = /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER/i
 
 // ---------------------------------------------------------------- keys and beeps
 
@@ -185,6 +140,7 @@ const powershell = (ps, stdio) =>
 // did (FS Copilot fork, record/wasm-pointer/probes/p01-wasm-away.mjs).
 // GetAsyncKeyState doesn't consume the key, so the sim sees it too.
 const KEYS_PS = `
+$ProgressPreference = "SilentlyContinue"
 Add-Type @"
 using System; using System.Runtime.InteropServices;
 public static class CrosscheckKeys {
@@ -226,8 +182,9 @@ function startKeys() {
     ps.on("error", fail)
     out.on("line", (l) => {
       if (l === "READY") return ready({ next: () => new Promise((r) => { waiter = r }) })
+      if (!l.startsWith("KEY ")) return
       const [, key, ...fg] = l.split(" ")
-      // A press while nobody waits is dropped, so a stray key can't start a step.
+      // A press while nobody waits is dropped, so a stray key can't start a run.
       if (waiter) { const w = waiter; waiter = null; w({ key, foreground: fg.join(" ") }) }
     })
   })
@@ -243,13 +200,12 @@ function startBeeper() {
 
 function track(map, name, v) {
   let s = map.get(name)
-  if (!s) map.set(name, s = { n: 0, min: v, max: v, first: v, last: v, minAbs: Infinity })
+  if (!s) map.set(name, s = { n: 0, min: v, max: v, last: v })
   s.n++
-  if (typeof v !== "number") { s.last = v; return }
+  s.last = v
+  if (typeof v !== "number") return
   s.min = Math.min(s.min, v)
   s.max = Math.max(s.max, v)
-  s.last = v
-  if (v !== 0) s.minAbs = Math.min(s.minAbs, Math.abs(v))
 }
 
 const span = (s) => (s && typeof s.min === "number" ? s.max - s.min : 0)
@@ -315,7 +271,10 @@ async function masker(cfg) {
     maskable: true,
     quiet: true,
     onEvent: (e) => {
-      emit({ kind: "got", text: `${e.name} ${e.value}`, name: e.name, value: e.value, ours: e.ours })
+      // Quiet, or a line per hardware event buries the observer's prompts, as it
+      // did in the first run (experiments/areas/flight-controls/results/
+      // p01-mask-2026-10-01-20-28-54.txt).
+      emit({ kind: "got", text: `${e.name} ${e.value}`, quiet: true, name: e.name, value: e.value, ours: e.ours })
       if (e.ours || done) return
       if (cfg.resend === "event" && isAxis(e.name)) {
         sim.transmit(e.name, [Math.round(e.value * cfg.scale)], { priority: cfg.resendPriority, quiet: true })
@@ -340,7 +299,7 @@ async function masker(cfg) {
   await sleep(500)
   emit({
     kind: "ready",
-    text: `masking ${plural(cfg.events.length, "event")} at priority ${cfg.priority}${cfg.resend ? `, re-sending by ${cfg.resend} at ${cfg.scale}` : ""}`,
+    text: `masking ${cfg.events.join(", ")} at priority ${cfg.priority}${cfg.resend ? `, re-sending by ${cfg.resend} at ${cfg.scale}` : ""}`,
     events: cfg.events,
   })
 }
@@ -348,7 +307,6 @@ async function masker(cfg) {
 // The observer's handle on one masker process.
 class Masker {
   constructor(rec, cfg, onGot) {
-    this.rec = rec
     this.exited = new Promise((r) => { this.onExit = r })
     this.ready = new Promise((r, f) => { this.onReady = r; this.onFail = f })
     const b64 = Buffer.from(JSON.stringify(cfg)).toString("base64")
@@ -373,6 +331,8 @@ class Masker {
     this.alive = setInterval(() => this.write("ALIVE"), KEEPALIVE_MS)
   }
 
+  get running() { return this.child.exitCode === null && this.child.signalCode === null }
+
   write(line) {
     try { this.child.stdin.write(line + "\n") } catch { /* exited */ }
   }
@@ -380,7 +340,7 @@ class Masker {
   async clear() {
     this.write("CLEAR")
     await Promise.race([this.exited, sleep(5000)])
-    if (this.child.exitCode === null) await this.kill()
+    if (this.running) await this.kill()
   }
 
   async kill() {
@@ -392,8 +352,6 @@ class Masker {
 // ---------------------------------------------------------------- the observer
 
 async function observer() {
-  const only = opt("--only") ? new Set(opt("--only").split(",").map(Number)) : null
-  const runs = (n) => !only || only.has(n)
   const rec = new Recorder("p01-mask", { area: "flight-controls" })
   const sim = await Sim.connect(rec, { name: "CROSSCHECK p01-mask observer" })
   rec.open()
@@ -412,7 +370,6 @@ async function observer() {
 
   let win = null
   const latest = new Map()
-  const lastKey = new Map()
   let effects = null
   let inputs = null
   let inputNames = new Map()
@@ -422,13 +379,15 @@ async function observer() {
     maskable: false,
     quiet: true,
     onEvent: (e) => {
-      lastKey.set(e.name, e.value)
       if (!win) return
       track(win.heard, e.name, e.value)
       win.keySeries.push([e.t, e.name, e.value])
     },
   })
 
+  // Started again after a reload, because whether a request on the user
+  // aircraft survives an aircraft change isn't in our records, and input event
+  // hashes change with the aircraft (lib/sim.mjs, requestAll and inputEvents).
   async function startWatches() {
     effects?.stop()
     inputs?.stop()
@@ -443,7 +402,7 @@ async function observer() {
       },
     })
     const list = await sim.inputEvents()
-    const chosen = list.filter((d) => INPUT_EVENT_NAMES.test(d.name)).slice(0, 150)
+    const chosen = list.filter((d) => INPUT_EVENT_NAMES.test(d.name)).slice(0, 100)
     inputNames = new Map(chosen.map((d) => [String(d.hash), d.name]))
     rec.log("inputs", `${plural(list.length, "input event")} listed; watching ${chosen.length} whose names match ${INPUT_EVENT_NAMES}`, { listed: list.length, watched: chosen.map((d) => d.name) })
     inputs = chosen.length ? sim.subscribeInputEvents(chosen.map((d) => d.hash), ({ hash, value }) => {
@@ -455,26 +414,23 @@ async function observer() {
   const lock = CONTROL_LOCKS[key]
   if (lock) {
     const v = await sim.readOne(lock, "number")
-    rec.log("check", `${lock} reads ${v}${v ? ": take the control lock out, or the elevator and ailerons stay within 1%" : ""}`, { lock, value: v })
+    rec.log("check", `${lock} reads ${v}${v ? ": take the control lock out, or the elevator stays within 1%" : ""}`, { lock, value: v })
   }
 
-  // ------------------------------------------------ steps
+  // ------------------------------------------------ maskers
 
-  const results = []
   let masker = null
-  let maskSet = []
-
-  function onGot(o) {
-    if (win && !o.ours) track(win.masker, o.name, o.value)
-  }
 
   async function startMasker(cfg) {
-    masker = new Masker(rec, { priority: MASK_PRIORITY, resend: null, scale: SCALE, resendPriority: RESEND_PRIORITY, capMs: CAP_MS, ...cfg }, onGot)
+    masker = new Masker(rec, { priority: MASK_PRIORITY, resend: null, scale: SCALE, resendPriority: RESEND_PRIORITY, capMs: CAP_MS, ...cfg }, (o) => {
+      if (win && !o.ours) track(win.masker, o.name, o.value)
+    })
     try {
       await masker.ready
       return true
     } catch (e) {
-      rec.log("error", `masker didn't start: ${e.message}`)
+      rec.log("error", `the masker didn't start: ${e.message}`)
+      masker = null
       return false
     }
   }
@@ -487,6 +443,12 @@ async function observer() {
     else await m.clear()
   }
 
+  // ------------------------------------------------ phases
+
+  const results = []
+  const baseline = {}
+  const maskEvents = {}
+
   async function ask(heading, instruction) {
     console.log(`\n▶ ${heading}\n  ${instruction}\n  Page Down to start, End to skip.`)
     const k = await keys.next()
@@ -494,33 +456,25 @@ async function observer() {
     return k.key === "PGDN"
   }
 
-  async function capture(step, control, note, { expect = null, seconds = null } = {}) {
-    const c = CONTROLS[control]
-    const go = await ask(`${step}. ${c.label}${note ? `, ${note}` : ""}`, `Move it ${c.how}, after the high beep, until the low one.`)
-    if (!go) {
-      rec.log("skip", `${step} ${control}`)
-      results.push({ step, control, note, skipped: true })
-      return null
-    }
+  async function phase(control, name, expect = null) {
     win = {
-      step, control, note, t0: Date.now(),
+      control, phase: name,
       heard: new Map(), masker: new Map(), inputs: new Map(), effects: new Map(),
       keySeries: [], effectSeries: [],
     }
-    for (const [name] of effectVars(control)) if (latest.has(name)) track(win.effects, name, latest.get(name))
-    beep(1200, 150)
-    await sleep((seconds ?? c.seconds) * 1000)
+    for (const [v] of effectVars(control)) if (latest.has(v)) track(win.effects, v, latest.get(v))
+    beep(1000, 100)
+    await sleep(PHASE_MS)
     const w = win
     win = null
-    beep(600, 300)
-    const r = { step, control, note, expect, window: w }
-    r.verdict = verdict(w, discovered[control])
+    const r = { control, phase: name, expect, window: w, verdict: verdict(w, baseline[control]) }
     results.push(r)
-    rec.log("result", `${step} ${control}${note ? ` (${note})` : ""}: ${summary(r)}`, { step, control, note, expect, verdict: r.verdict, heard: Object.fromEntries(w.heard), masker: Object.fromEntries(w.masker) })
+    rec.log("phase", `${control} ${name}: ${summary(r)}`, {
+      control, phase: name, expect, verdict: r.verdict,
+      heard: Object.fromEntries(w.heard), masker: Object.fromEntries(w.masker), inputs: Object.fromEntries(w.inputs),
+    })
     return r
   }
-
-  const discovered = {}
 
   function verdict(w, base) {
     if (!base) return { word: "baseline" }
@@ -531,30 +485,100 @@ async function observer() {
       const word = ratio < 0.1 ? "blocked" : ratio > 0.8 ? "moved" : ratio >= 0.35 && ratio <= 0.65 ? "half" : "partly moved"
       return { word, name, ratio }
     }
-    return { word: "no baseline: nothing moved in step 1" }
+    return { word: "no baseline: nothing moved while free" }
   }
 
   function summary(r) {
     const w = r.window
     const list = (m) => [...m].map(([n, s]) => `${n} ×${s.n} ${rangeText(s)}`).join(", ") || "none"
-    const moved = [...w.effects].filter(([, s]) => s.n > 1 && (span(s) > 0 || typeof s.min !== "number"))
-    const v = r.verdict.ratio !== undefined ? `${r.verdict.word} (${r.verdict.name} at ${Math.round(r.verdict.ratio * 100)}% of step 1's range)` : r.verdict.word
+    const moved = [...w.effects].filter(([, s]) => s.n > 1 && span(s) > 0)
+    const v = r.verdict.ratio !== undefined ? `${r.verdict.word} (${r.verdict.name} at ${Math.round(r.verdict.ratio * 100)}% of the free range)` : r.verdict.word
     return [
       v,
       `heard ${list(w.heard)}`,
-      masker || w.masker.size ? `masker got ${list(w.masker)}` : null,
+      w.masker.size || r.phase !== "free" ? `masker got ${list(w.masker)}` : null,
       `input events ${list(w.inputs)}`,
       `values ${moved.map(([n, s]) => `${n} ${rangeText(s)}`).join(", ") || "none moved"}`,
     ].filter(Boolean).join(" · ")
   }
 
-  const cleanup = async () => { await stopMasker() }
+  // The pitch axis event against the module's input variable, from the free
+  // phase, for the written phase.
+  function writeMap(w, events) {
+    const lvar = local.write
+    const event = events.filter(isAxis).sort((a, b) => (w.heard.get(b)?.n ?? 0) - (w.heard.get(a)?.n ?? 0))[0]
+    if (!lvar || !event) return null
+    const merged = [
+      ...w.keySeries.filter(([, n]) => n === event).map(([t, , v]) => [t, "k", v]),
+      ...w.effectSeries.filter(([, n]) => n === lvar).map(([t, , v]) => [t, "l", v]),
+    ].sort((a, b) => a[0] - b[0])
+    const pairs = []
+    let last = null
+    for (const [, kind, v] of merged) {
+      if (kind === "k") last = v
+      else if (last !== null) pairs.push([last, v])
+    }
+    const f = fit(pairs)
+    rec.log("fit", f ? `${lvar} ≈ ${fmt(f.a)} × ${event} + ${fmt(f.b)}, r² ${fmt(f.r2)} over ${f.n} pairs` : `no fit of ${lvar} to ${event}`, { lvar, event, fit: f })
+    return f && f.r2 >= 0.9 ? { [event]: { lvar, a: f.a, b: f.b } } : null
+  }
+
+  async function run(control) {
+    const c = CONTROLS[control]
+    if (!await ask(c.label, `Keep moving it ${c.how}, from Page Down until the long low beep, about 40s. Don't stop at the short beeps.`)) {
+      rec.log("skip", control)
+      return
+    }
+    const free = await phase(control, "free")
+    baseline[control] = free.window
+    const events = [...free.window.heard.keys()].filter((n) => !OUTPUTS.has(n))
+    maskEvents[control] = events
+    if (!events.length) {
+      rec.log("plan", `${control}: no maskable K: event heard, so nothing to mask`)
+    } else {
+      if (await startMasker({ events })) await phase(control, "masked", "blocked")
+      await stopMasker()
+      await phase(control, "cleared", "moved")
+      if (await startMasker({ events, resend: "event" })) await phase(control, "half", "half")
+      const write = control === "pitch" ? writeMap(free.window, events) : null
+      if (write) {
+        await stopMasker()
+        if (await startMasker({ events, resend: "lvar", write })) await phase(control, "written", "half")
+      }
+      if (masker) {
+        await stopMasker("kill")
+        rec.log("kill", "the masker was killed")
+        await phase(control, "killed", "moved")
+      }
+    }
+    beep(500, 600)
+    console.log("  Stop.")
+  }
+
+  async function reload() {
+    const events = [...new Set(Object.values(maskEvents).flat())]
+    if (!events.length) return rec.log("plan", "reload: nothing to mask")
+    if (!await ask("Reload with the masks in place", "Page Down installs the masks. Then reload this aircraft however you like, and press Page Down again once you're back in the cockpit.")) return
+    if (!await startMasker({ events, capMs: RELOAD_CAP_MS })) return
+    console.log("  Masks in place. Reload now, then Page Down once you're in the cockpit.")
+    const k = await keys.next()
+    rec.log("key", `${k.key}, with ${k.foreground} in front: back in the cockpit`, k)
+    await startWatches()
+    if (!masker?.running) return rec.log("phase", "reload: the masker didn't survive the reload")
+    for (const control of Object.keys(CONTROLS)) {
+      if (!maskEvents[control]?.length) continue
+      if (!await ask(`${CONTROLS[control].label}, masked before the reload`, `Keep moving it ${CONTROLS[control].how} until the long low beep, about 5s.`)) continue
+      await phase(control, "masked before the reload", "blocked")
+      beep(500, 600)
+    }
+    await stopMasker()
+  }
+
   let stopping = false
   process.on("SIGINT", async () => {
     if (stopping) process.exit(1)
     stopping = true
     rec.log("stop", "Ctrl+C: clearing the masker and writing the report")
-    await cleanup()
     await finish()
     process.exit(0)
   })
@@ -564,95 +588,10 @@ async function observer() {
     "Before you start:",
     "  - the aircraft on the ground, unpaused, with the parking brake set; engines may be off",
     "  - this console where you can read it, and the sim in front",
-    "  - optional: a large dead zone, about 50%, on your rudder axis in MSFS's controls,",
-    "    so step 1's slow yaw shows whether events carry MSFS's processed value",
   ].join("\n"))
 
-  // 1 · Discover
-  if (runs(1)) {
-    for (const control of Object.keys(CONTROLS)) {
-      const r = await capture(1, control, null)
-      if (r) discovered[control] = r.window
-    }
-  }
-
-  const heardInputs = [...new Set(Object.values(discovered).flatMap((w) => [...w.heard.keys()]))]
-  maskSet = heardInputs.filter((n) => !OUTPUTS.has(n))
-  rec.log("plan", maskSet.length ? `steps 2 to 5 mask ${maskSet.join(", ")}` : "step 1 heard no maskable event: nothing to mask", { maskSet })
-
-  // Step 3's direct write: the pitch event against the module's input variable.
-  let writeMap = null
-  const writeVar = local.write?.pitch
-  if (writeVar && discovered.pitch) {
-    const w = discovered.pitch
-    const pitchEvent = [...w.heard].filter(([n]) => isAxis(n)).sort((a, b) => b[1].n - a[1].n)[0]?.[0]
-    if (pitchEvent) {
-      const pairs = []
-      let last = null
-      const merged = [
-        ...w.keySeries.filter(([, n]) => n === pitchEvent).map(([t, , v]) => [t, "k", v]),
-        ...w.effectSeries.filter(([, n]) => n === writeVar).map(([t, , v]) => [t, "l", v]),
-      ].sort((a, b) => a[0] - b[0])
-      for (const [, kind, v] of merged) {
-        if (kind === "k") last = v
-        else if (last !== null) pairs.push([last, v])
-      }
-      const f = fit(pairs)
-      rec.log("fit", f ? `${writeVar} ≈ ${fmt(f.a)} × ${pitchEvent} + ${fmt(f.b)}, r² ${fmt(f.r2)} over ${f.n} pairs` : `no fit of ${writeVar} to ${pitchEvent}`, { writeVar, pitchEvent, fit: f })
-      if (f && f.r2 >= 0.9) writeMap = { [pitchEvent]: { lvar: writeVar, a: f.a, b: f.b } }
-    }
-  }
-
-  if (maskSet.length) {
-    // 2 · Mask, then release
-    if (runs(2) && await startMasker({ events: maskSet })) {
-      for (const control of Object.keys(CONTROLS)) await capture(2, control, "masked", { expect: "blocked" })
-      await stopMasker()
-      await capture(2, "pitch", "after the masker cleared its group", { expect: "moved" })
-    }
-
-    // 3 · Re-send
-    if (runs(3)) {
-      if (await startMasker({ events: maskSet, resend: "event" })) {
-        await capture(3, "pitch", `masked, re-sent at ${SCALE} at ${RESEND_PRIORITY}`, { expect: "half" })
-        await capture(3, "throttle", `masked, re-sent at ${SCALE} at ${RESEND_PRIORITY}`, { expect: "half" })
-        await stopMasker()
-      }
-      if (writeMap && await startMasker({ events: maskSet, resend: "lvar", write: writeMap })) {
-        await capture(3, "pitch", `masked, ${writeVar} written at ${SCALE}`, { expect: "half" })
-        await stopMasker()
-      }
-    }
-
-    // 4 · Kill
-    if (runs(4) && await startMasker({ events: maskSet })) {
-      await capture(4, "pitch", "masked, before the kill", { expect: "blocked", seconds: 4 })
-      await stopMasker("kill")
-      rec.log("kill", "the masker was killed")
-      await capture(4, "pitch", "after the masker was killed", { expect: "moved", seconds: 4 })
-    }
-
-    // 5 · Reload with the masks in place
-    if (runs(5)) {
-      const go = await ask("5. Reload the aircraft with the masks in place",
-        "Page Down to install the masks. Then reload this aircraft however you like, and press Page Down again once you're back in the cockpit.")
-      if (go && await startMasker({ events: maskSet, capMs: RELOAD_CAP_MS })) {
-        console.log("  Masks in place. Reload now, then Page Down once you're in the cockpit.")
-        const k = await keys.next()
-        rec.log("key", `${k.key}, with ${k.foreground} in front: back in the cockpit`, k)
-        await startWatches()
-        if (masker) {
-          await capture(5, "pitch", "masked before the reload", { expect: "blocked" })
-          await capture(5, "throttle", "masked before the reload", { expect: "blocked" })
-          await stopMasker()
-          await capture(5, "pitch", "after the masker cleared its group", { expect: "moved" })
-        } else {
-          rec.log("result", "5: the masker didn't survive the reload")
-        }
-      }
-    }
-  }
-
+  for (const control of Object.keys(CONTROLS)) await run(control)
+  if (argv.includes("--reload")) await reload()
   await finish()
   process.exit(0)
 
@@ -662,31 +601,19 @@ async function observer() {
       "p01 · Masking a pilot's own flight-control input on MSFS 2024",
       `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
       `Aircraft: TITLE ${JSON.stringify(title)}, ${key ? `study ${key}` : "no study matched: stock variables only"}`,
-      `Mask priority ${MASK_PRIORITY}, re-send priority ${RESEND_PRIORITY}`,
-      "",
+      `Mask priority ${MASK_PRIORITY}, re-send priority ${RESEND_PRIORITY}, ${PHASE_MS / 1000}s phases`,
     ]
-    for (const step of [1, 2, 3, 4, 5]) {
-      const rs = results.filter((r) => r.step === step)
-      if (!rs.length) continue
-      lines.push(`${step} ${["", "Discover", "Mask", "Re-send", "Kill", "Reload"][step]}`)
+    for (const control of Object.keys(CONTROLS)) {
+      const rs = results.filter((r) => r.control === control)
+      lines.push("", `${control}: masked ${maskEvents[control]?.join(", ") || "nothing"}`)
+      if (!rs.length) lines.push("  not run")
       for (const r of rs) {
-        const head = `${r.control}${r.note ? ` (${r.note})` : ""}`
-        if (r.skipped) { lines.push(`  ${head}: skipped`); continue }
-        const ok = r.expect ? (r.verdict.word === r.expect ? "as expected" : `expected ${r.expect}`) : null
-        lines.push(`  ${head}: ${summary(r)}${ok ? ` · ${ok}` : ""}`)
+        const ok = r.expect ? (r.verdict.word === r.expect ? " · as expected" : ` · expected ${r.expect}`) : ""
+        lines.push(`  ${r.phase}: ${summary(r)}${ok}`)
       }
-      if (step === 1) {
-        const yaw = discovered.yaw
-        const ax = yaw ? [...yaw.heard].filter(([n]) => isAxis(n)) : []
-        for (const [n, s] of ax) {
-          lines.push(`  yaw's smallest nonzero |value| on ${n}: ${s.minAbs === Infinity ? "none" : `${s.minAbs} of 16383`}; with a dead zone set in MSFS, a large smallest value means the event carries MSFS's processed value`)
-        }
-        lines.push(`  masked in steps 2 to 5: ${maskSet.join(", ") || "nothing"}`)
-      }
-      lines.push("")
     }
     const exceptions = rec.timeline.filter((e) => e.kind === "exception" || (e.kind === "masker" && e.maskerKind === "exception")).map((e) => e.text)
-    lines.push(`Exceptions: ${exceptions.join("; ") || "none"}`)
+    lines.push("", `Exceptions: ${exceptions.join("; ") || "none"}`)
     const report = lines.join("\n")
     console.log("\n" + report)
     rec.writeReport(report)

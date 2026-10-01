@@ -1,0 +1,20 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T20:39:35.057Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N513LW", no study matched: stock variables only
+Mask priority 10000000, re-send priority 10000001, 5s phases
+
+pitch: masked AXIS_ELEVATOR_SET
+  free: baseline · heard AXIS_ELEVATOR_SET ×142 -16384..14996 · input events none · values YOKE Y POSITION -91.528323..100.000002, ELEVATOR POSITION -91.528323..100.000002
+  masked: blocked (YOKE Y POSITION at 0% of the free range) · heard AXIS_ELEVATOR_SET ×103 -16384..16384 · masker got AXIS_ELEVATOR_SET ×103 -16384..16384 · input events none · values none moved · as expected
+  cleared: moved (YOKE Y POSITION at 104% of the free range) · heard AXIS_ELEVATOR_SET ×95 -16384..16384 · masker got none · input events none · values YOKE Y POSITION -100.000001..100.000003, ELEVATOR POSITION -100.000001..100.000003 · as expected
+  half: blocked (YOKE Y POSITION at 0% of the free range) · heard AXIS_ELEVATOR_SET ×122 -16384..16384 · masker got AXIS_ELEVATOR_SET ×121 -16384..16384 · input events none · values none moved · expected half
+  killed: moved (YOKE Y POSITION at 104% of the free range) · heard AXIS_ELEVATOR_SET ×111 -16384..16384 · masker got none · input events none · values YOKE Y POSITION -100.000002..100.000003, ELEVATOR POSITION -100.000002..100.000003 · as expected
+
+throttle: masked AXIS_THROTTLE1_SET, AXIS_THROTTLE2_SET, AXIS_ELEVATOR_SET
+  free: baseline · heard AXIS_THROTTLE1_SET ×411 -16383..16383, AXIS_THROTTLE2_SET ×425 -16383..16383, AXIS_ELEVATOR_SET ×2 -28..-26 · input events ENGINE_THROTTLE_1 ×104 0.003052..99.996948, ENGINE_THROTTLE_2 ×107 0.003052..99.996948 · values GENERAL ENG THROTTLE LEVER POSITION:1 0.003052..99.996948, YOKE Y POSITION 0.158691..0.170898, ELEVATOR POSITION 0.158691..0.170898
+  masked: blocked (GENERAL ENG THROTTLE LEVER POSITION:1 at 0% of the free range) · heard AXIS_THROTTLE1_SET ×335 -16383..16383, AXIS_THROTTLE2_SET ×342 -16383..16383 · masker got AXIS_THROTTLE1_SET ×335 -16383..16383, AXIS_THROTTLE2_SET ×342 -16383..16383 · input events none · values none moved · as expected
+  cleared: moved (GENERAL ENG THROTTLE LEVER POSITION:1 at 100% of the free range) · heard AXIS_THROTTLE2_SET ×416 -16159..16383, AXIS_THROTTLE1_SET ×403 -16255..16383 · masker got none · input events ENGINE_THROTTLE_1 ×100 0.003052..99.996948, ENGINE_THROTTLE_2 ×106 0.003052..99.996948 · values GENERAL ENG THROTTLE LEVER POSITION:1 0.003052..99.996948 · as expected
+  half: blocked (GENERAL ENG THROTTLE LEVER POSITION:1 at 0% of the free range) · heard AXIS_THROTTLE1_SET ×438 -16383..16383, AXIS_THROTTLE2_SET ×442 -16383..16383 · masker got AXIS_THROTTLE1_SET ×437 -16383..16383, AXIS_THROTTLE2_SET ×441 -16383..16383 · input events none · values none moved · expected half
+  killed: moved (GENERAL ENG THROTTLE LEVER POSITION:1 at 98% of the free range) · heard AXIS_THROTTLE1_SET ×468 -12283..15646, AXIS_THROTTLE2_SET ×477 -12443..16031 · masker got none · input events ENGINE_THROTTLE_1 ×120 12.515259..97.747803, ENGINE_THROTTLE_2 ×130 12.026978..98.922729 · values GENERAL ENG THROTTLE LEVER POSITION:1 0.003052..97.747803 · as expected
+
+Exceptions: none

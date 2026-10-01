@@ -12,7 +12,8 @@
  *
  * One aircraft per run, with someone at the controls. For pitch, then
  * throttle, you press Page Down once (read globally, so the sim stays in front)
- * and keep moving that control until the low beep, about 40s. The probe steps
+ * and keep moving that control until the long low beep, about a minute for
+ * pitch and 30s for throttle. The probe steps
  * through the phases by itself, 5s each, with a short beep at each:
  *
  *   free     Nothing masked: which K: events and input events the control
@@ -23,9 +24,10 @@
  *            them first.
  *   cleared  The masker cleared its group and exited. Does the control move
  *            again?
- *   half     A new masker masks, and sends each axis value back at half, at
- *            10,000,001, just after its own group. Does the control follow at
- *            half?
+ *   half     Pitch only: a new masker masks, and sends each axis value back at
+ *            half, at each priority in RESEND_SWEEP in turn, 5s each. Does the
+ *            control follow at half, and does the masker's own group hear the
+ *            re-send?
  *   written  Pitch only, on an aircraft with an input variable of its own,
  *            such as Accu-Sim's L:ElevatorInput: the masker writes that
  *            variable at half instead.
@@ -67,7 +69,15 @@ const argv = process.argv.slice(2)
 const opt = (name) => { const i = argv.indexOf(name); return i === -1 ? null : argv[i + 1] ?? null }
 
 const MASK_PRIORITY = PRIORITY.highest_maskable
-const RESEND_PRIORITY = MASK_PRIORITY + 1
+// Where the masker sends a value back. Our first full run sent at 10,000,001,
+// and the masker's own group at 10,000,000 heard every re-send and masked it,
+// although the SDK has delivery start at the priority given (measured on MSFS
+// 2024, 2026-10-01, experiments/areas/flight-controls/results/
+// p01-mask-2026-10-01-20-39-35.ndjson). The sweep finds where a re-send gets
+// past our group: just behind it, the PMDG 777's lowest group (10,001,000),
+// further down, SIMCONNECT_GROUP_PRIORITY_STANDARD, and the sim's own turn,
+// SIMCONNECT_GROUP_PRIORITY_DEFAULT.
+const RESEND_SWEEP = [MASK_PRIORITY + 1, 10_001_000, 100_000_000, PRIORITY.standard, PRIORITY.default]
 const PHASE_MS = 5_000
 const KEEPALIVE_MS = 5_000
 const DEADMAN_MS = 15_000
@@ -289,6 +299,10 @@ async function masker(cfg) {
   lines.on("line", (l) => {
     if (l === "ALIVE") lastAlive = Date.now()
     if (l === "CLEAR") clear("the observer asked")
+    if (l.startsWith("RESEND ")) {
+      cfg.resendPriority = Number(l.slice(7))
+      emit({ kind: "resend", text: `re-sending at priority ${cfg.resendPriority}`, priority: cfg.resendPriority })
+    }
   })
   lines.on("close", () => clear("the observer's pipe closed"))
   setInterval(() => {
@@ -335,6 +349,10 @@ class Masker {
 
   write(line) {
     try { this.child.stdin.write(line + "\n") } catch { /* exited */ }
+  }
+
+  resendAt(priority) {
+    this.write(`RESEND ${priority}`)
   }
 
   async clear() {
@@ -422,8 +440,8 @@ async function observer() {
   let masker = null
 
   async function startMasker(cfg) {
-    masker = new Masker(rec, { priority: MASK_PRIORITY, resend: null, scale: SCALE, resendPriority: RESEND_PRIORITY, capMs: CAP_MS, ...cfg }, (o) => {
-      if (win && !o.ours) track(win.masker, o.name, o.value)
+    masker = new Masker(rec, { priority: MASK_PRIORITY, resend: null, scale: SCALE, resendPriority: RESEND_SWEEP[0], capMs: CAP_MS, ...cfg }, (o) => {
+      if (win) track(o.ours ? win.maskerOurs : win.masker, o.name, o.value)
     })
     try {
       await masker.ready
@@ -459,7 +477,7 @@ async function observer() {
   async function phase(control, name, expect = null) {
     win = {
       control, phase: name,
-      heard: new Map(), masker: new Map(), inputs: new Map(), effects: new Map(),
+      heard: new Map(), masker: new Map(), maskerOurs: new Map(), inputs: new Map(), effects: new Map(),
       keySeries: [], effectSeries: [],
     }
     for (const [v] of effectVars(control)) if (latest.has(v)) track(win.effects, v, latest.get(v))
@@ -497,6 +515,7 @@ async function observer() {
       v,
       `heard ${list(w.heard)}`,
       w.masker.size || r.phase !== "free" ? `masker got ${list(w.masker)}` : null,
+      w.maskerOurs.size ? `masker heard its own re-sends ${list(w.maskerOurs)}` : null,
       `input events ${list(w.inputs)}`,
       `values ${moved.map(([n, s]) => `${n} ${rangeText(s)}`).join(", ") || "none moved"}`,
     ].filter(Boolean).join(" · ")
@@ -525,7 +544,8 @@ async function observer() {
 
   async function run(control) {
     const c = CONTROLS[control]
-    if (!await ask(c.label, `Keep moving it ${c.how}, from Page Down until the long low beep, about 40s. Don't stop at the short beeps.`)) {
+    const length = control === "pitch" ? "about a minute" : "about 30s"
+    if (!await ask(c.label, `Keep moving it ${c.how}, from Page Down until the long low beep, ${length}. Don't stop at the short beeps.`)) {
       rec.log("skip", control)
       return
     }
@@ -539,7 +559,12 @@ async function observer() {
       if (await startMasker({ events })) await phase(control, "masked", "blocked")
       await stopMasker()
       await phase(control, "cleared", "moved")
-      if (await startMasker({ events, resend: "event" })) await phase(control, "half", "half")
+      if (control === "pitch" && await startMasker({ events, resend: "event" })) {
+        for (const p of RESEND_SWEEP) {
+          masker.resendAt(p)
+          await phase(control, `half, re-sent at ${p}`, "half")
+        }
+      }
       const write = control === "pitch" ? writeMap(free.window, events) : null
       if (write) {
         await stopMasker()
@@ -601,7 +626,7 @@ async function observer() {
       "p01 · Masking a pilot's own flight-control input on MSFS 2024",
       `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
       `Aircraft: TITLE ${JSON.stringify(title)}, ${key ? `study ${key}` : "no study matched: stock variables only"}`,
-      `Mask priority ${MASK_PRIORITY}, re-send priority ${RESEND_PRIORITY}, ${PHASE_MS / 1000}s phases`,
+      `Mask priority ${MASK_PRIORITY}, re-send priorities ${RESEND_SWEEP.join(", ")}, ${PHASE_MS / 1000}s phases`,
     ]
     for (const control of Object.keys(CONTROLS)) {
       const rs = results.filter((r) => r.control === control)

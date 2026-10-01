@@ -52,8 +52,20 @@
  *   - `node experiments/areas/flight-controls/p01-mask.mjs --release` kills
  *     every masker this probe started, from any terminal.
  *
- *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--reload]
+ * With --legacy, pitch only: the masker sends values back with
+ * SimConnect_TransmitClientEvent rather than its _EX1 form, because the PMDG
+ * 777's yoke ignored _EX1 sends at every priority (record/areas/flight-controls/
+ * log.md, 2026-10-01). Its sweep leaves out 10,000,001, which our own group hears,
+ * and a legacy send carries no tag to recognize it by.
+ *
+ * With --deadzone, set a dead zone of about 50% on the pitch axis in MSFS's
+ * controls first. The probe asks you to hold the yoke at about a quarter of its
+ * travel. Events near ±4,000 mean they carry the raw axis; events near 0, or
+ * none, mean they carry the value after MSFS's dead zone.
+ *
+ *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--reload] [--legacy]
  *   node experiments/areas/flight-controls/p01-mask.mjs --masks-first <study folder>
+ *   node experiments/areas/flight-controls/p01-mask.mjs --deadzone
  *
  * <study folder> is a folder under record/areas/aircraft/, such as
  * a2a-pa24-comanche. Without it the probe matches the loaded aircraft's TITLE,
@@ -67,6 +79,8 @@
 import { execFileSync, spawn } from "node:child_process"
 import { createInterface } from "node:readline"
 import { fileURLToPath } from "node:url"
+
+import { EventFlag, SimConnectConstants } from "node-simconnect"
 
 import { AIRCRAFT, NEUTRAL } from "../aircraft/lib/aircraft.mjs"
 import { readFlight } from "../aircraft/lib/flights.mjs"
@@ -293,6 +307,20 @@ async function masker(cfg) {
   // event; arrivals are routed by name either way (lib/sim.mjs, subscribeKeys).
   if (cfg.resend === "event") for (const name of cfg.events.filter(isAxis)) sim.event(name)
 
+  // A legacy send has no fifth parameter to tag, so it's listed in sim.sends,
+  // which subscribeKeys matches arrivals against by name, value, and time. It's
+  // listed as unsigned and as signed, because which form a legacy arrival's
+  // dwData takes is unmeasured.
+  const sendLegacy = (name, value, priority) => {
+    const id = sim.event(name)
+    const t = Date.now()
+    for (const v of [value >>> 0, value | 0]) sim.sends.push({ name, data: [v, 0, 0, 0, 0], t, matched: false })
+    while (sim.sends.length > 500) sim.sends.shift()
+    rec.data("send", `K:${name} ${value} at priority ${priority}, legacy`, { event: name, values: [value], priority, legacy: true })
+    sim.send(`K:${name} ${value} legacy`, () =>
+      sim.handle.transmitClientEvent(SimConnectConstants.OBJECT_ID_USER, id, value >>> 0, priority, EventFlag.EVENT_FLAG_GROUPID_IS_PRIORITY))
+  }
+
   sim.subscribeKeys(cfg.events, {
     priority: cfg.priority,
     maskable: true,
@@ -304,7 +332,9 @@ async function masker(cfg) {
       emit({ kind: "got", text: `${e.name} ${e.value}`, quiet: true, name: e.name, value: e.value, ours: e.ours })
       if (e.ours || done) return
       if (cfg.resend === "event" && isAxis(e.name)) {
-        sim.transmit(e.name, [Math.round(e.value * cfg.scale)], { priority: cfg.resendPriority, quiet: true })
+        const v = Math.round(e.value * cfg.scale)
+        if (cfg.legacy) sendLegacy(e.name, v, cfg.resendPriority)
+        else sim.transmit(e.name, [v], { priority: cfg.resendPriority, quiet: true })
       }
       const w = cfg.resend === "lvar" ? cfg.write?.[e.name] : null
       if (w) sim.write(w.lvar, "number", w.a * e.value * cfg.scale + w.b)
@@ -484,6 +514,8 @@ async function observer() {
   const results = []
   const baseline = {}
   const maskEvents = {}
+  const legacy = argv.includes("--legacy")
+  const sweep = legacy ? RESEND_SWEEP.filter((p) => p !== MASK_PRIORITY + 1) : RESEND_SWEEP
 
   async function ask(heading, instruction) {
     console.log(`\n▶ ${heading}\n  ${instruction}\n  Page Down to start, End to skip.`)
@@ -577,10 +609,10 @@ async function observer() {
       if (await startMasker({ events })) await phase(control, "masked", "blocked")
       await stopMasker()
       await phase(control, "cleared", "moved")
-      if (control === "pitch" && await startMasker({ events, resend: "event" })) {
-        for (const p of RESEND_SWEEP) {
+      if (control === "pitch" && await startMasker({ events, resend: "event", legacy, resendPriority: sweep[0] })) {
+        for (const p of sweep) {
           masker.resendAt(p)
-          await phase(control, `half, re-sent at ${p}`, "half")
+          await phase(control, `half, re-sent${legacy ? " by the legacy call" : ""} at ${p}`, "half")
         }
       }
       const write = control === "pitch" ? writeMap(free.window, events) : null
@@ -697,10 +729,31 @@ async function observer() {
     }
   }
 
+  // The pitch axis held inside a dead zone set in MSFS: raw events would read
+  // about a quarter of full scale, and processed ones 0, or none at all.
+  async function deadzone() {
+    if (!await ask("Pitch, held inside a dead zone of about 50% set in MSFS's controls",
+      "Hold the yoke at about a quarter of its travel, nose down, wiggling it a little so it keeps sending, from Page Down until the long low beep, 5s.")) return
+    const w = await captureAll("held at a quarter of its travel, dead zone set")
+    beep(500, 600)
+    console.log("  Stop.")
+    const values = w.keySeries.filter(([, n]) => n === "AXIS_ELEVATOR_SET").map(([, , v]) => v).sort((a, b) => a - b)
+    const median = values.length ? values[Math.floor(values.length / 2)] : null
+    const word = median === null ? "no AXIS_ELEVATOR_SET: consistent with the value after the dead zone, if the yoke was off center"
+      : Math.abs(median) < 1000 ? `median ${median}: the event carries the value after the dead zone`
+        : Math.abs(median) >= 2000 && Math.abs(median) <= 8000 ? `median ${median}: the event carries the raw axis`
+          : `median ${median}: unclear`
+    const r = { control: "pitch", phase: w.phase, expect: null, window: w, verdict: { word } }
+    results.push(r)
+    rec.log("phase", `pitch ${r.phase}: ${summary(r)}`, { median, n: values.length })
+  }
+
   if (target) {
     await masksFirst()
+  } else if (argv.includes("--deadzone")) {
+    await deadzone()
   } else {
-    for (const control of Object.keys(CONTROLS)) await run(control)
+    for (const control of legacy ? ["pitch"] : Object.keys(CONTROLS)) await run(control)
     if (argv.includes("--reload")) await reload()
   }
   await finish()
@@ -712,7 +765,7 @@ async function observer() {
       "p01 · Masking a pilot's own flight-control input on MSFS 2024",
       `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
       `Aircraft: TITLE ${JSON.stringify(title)}, ${key ? `study ${key}` : "no study matched: stock variables only"}`,
-      `Mask priority ${MASK_PRIORITY}, re-send priorities ${RESEND_SWEEP.join(", ")}, ${PHASE_MS / 1000}s phases`,
+      `Mask priority ${MASK_PRIORITY}, re-send priorities ${sweep.join(", ")}${legacy ? " by the legacy SimConnect_TransmitClientEvent" : ""}, ${PHASE_MS / 1000}s phases`,
       ...(target ? [`Mode: masks installed with TITLE ${JSON.stringify(title)} loaded, before ${AIRCRAFT[key]?.name ?? key} loaded through SimConnect`] : []),
     ]
     for (const control of Object.keys(CONTROLS)) {

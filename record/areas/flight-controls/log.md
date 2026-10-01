@@ -69,8 +69,8 @@ A mask on an event the aircraft also sends, such as the PA-24's own `K:AXIS_ELEV
 - On the PMDG 777, masks at 10,000,000 held `L:yokes_Fore_Aft` and the throttle lever still.
 - Clearing the group gave the controls back within the next 5s window, and so did killing the masking process outright, with no cleanup: 104% and 98% of the unmasked range on the Baron, and 100% on the PA-24 and the 777.
 - The same throttle fired `K:AXIS_THROTTLE1_SET` on the Baron and the PA-24, and `K:THROTTLE1_AXIS_SET_EX1` on the 777, so the event a binding fires can change with the aircraft (cause unverified).
-- On the Baron, trim fired none of the four trim key events we listened for, only the input event `HANDLING_ELEVATORTRIM_1`.
-  How it was moved wasn't recorded, so this doesn't yet show hardware input that goes around key events.
+- In the first run's trim step on the Baron, nobody touched the trim, yet `A:ELEVATOR TRIM PCT` moved from 14.7% to 19.6% and the input event `HANDLING_ELEVATORTRIM_1` changed, with none of the four trim key events we listened for.
+  Something in the aircraft or the sim moved it (unverified which), so this shows nothing about hardware input that goes around key events.
 
 **Changed:** masking key events blocks a pilot's hardware input, and the block ends when the masking client dies, so a crashed Crosscheck leaves the pilot with working controls.
 

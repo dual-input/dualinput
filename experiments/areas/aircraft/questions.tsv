@@ -1,0 +1,165 @@
+# The sim questions the unattended session runs, from the 11 aircraft studies' Sim questions sections.
+# run: in the session. later: worth answering in another session. drop: low weight or already settled.
+# A question runs only if it finishes in 90s or less from the parked or runway start, with no extra aircraft load, no flight, and no person.
+aircraft	question	decision	title	note
+a2a-aerostar-600	1	run	Does the aircraft follow a saved-state `L:` value written after load	Drop the tablet page check; Watch 70s, through one 64s save
+a2a-aerostar-600	2	later	Does copying the files give two machines one airframe	Two machines
+a2a-aerostar-600	3	run	When does MSFS 2024 fire `FlightSaved`, and does quitting the flight save	Loading the next flight stands in for quitting; Passive: record the airframe files' times at each load
+a2a-aerostar-600	4	run	Does an axis event from another client count as pilot input	On the ground with engines running, not in flight
+a2a-aerostar-600	5	run	Does writing `L:Eng1_ThrottlePosition` move the lever and the engine against a local throttle axis	SimConnect axis events stand in for the hardware throttle
+a2a-aerostar-600	6	run	Do the input events do anything	
+a2a-aerostar-600	7	run	Does a stock autopilot event from another client press the button the files map it to	
+a2a-aerostar-600	8	run	Does a synced radio counter tune one step per count	
+a2a-aerostar-600	9	later	How far do two machines diverge from randomness	Two machines
+a2a-aerostar-600	10	later	Does a frozen Aerostar behave as the files predict	A2A physics investigation
+a2a-aerostar-600	11	run	What does `L:FlightPhase` read on a pilot-built flight, and what does `L:CockpitPersistence` restore	Read at the apron and runway loads we make anyway; skip the option on/off restarts
+a2a-aerostar-600	12	run	What does a panel reload reset	Skip the RNAV waypoint, which needs typing
+a2a-aerostar-600	13	drop	Does anything react to the `H:A2A_*` events	Needs a mouse, and nothing in the files reacts to them
+a2a-aerostar-600	14	later	Does the probe's override hold on the Aerostar	A2A physics investigation
+a2a-aerostar-600	15	later	Can an outside write reach the flight model's inputs	A2A physics investigation
+a2a-aerostar-600	16	later	Does feeding the flight model the same inputs keep its state matched	A2A physics investigation
+a2a-pa24-comanche	1	later	Do two machines on one airframe file start the same aircraft	Two machines
+a2a-pa24-comanche	2	run	Does a condition written at runtime hold	
+a2a-pa24-comanche	3	run	Does `L:MaintLogDisabled` keep a machine's airframe untouched	3 minutes with an engine running; Run 70s, through one 60s save, not 3 minutes
+a2a-pa24-comanche	4	run	Do axis events from another client reach the flight model	
+a2a-pa24-comanche	5	later	Does a frozen aircraft behave as the files predict	A2A physics investigation
+a2a-pa24-comanche	6	run	Who wins fuel and payload	
+a2a-pa24-comanche	7	run	Do stock toggles and set events agree with the cockpit	
+a2a-pa24-comanche	8	run	How do the knob counters step, and do stock frequency sets stick	
+a2a-pa24-comanche	9	drop	Does the JPI act on press length	Low weight
+a2a-pa24-comanche	10	later	Can an outside write reach the flight model's inputs	A2A physics investigation
+a2a-pa24-comanche	11	run	Do the aircraft's input events set its state	
+a2a-pa24-comanche	12	run	Does pausing one machine trip the SimConnect check	
+a2a-pa24-comanche	13	run	What does reloading a panel do	
+a2a-pa24-comanche	14	later	Does feeding the flight model the same inputs keep its state matched	A2A physics investigation
+a2a-pa24-comanche	15	later	What does a `SpeedOffset` correction do	A2A physics investigation
+a2a-pa24-comanche	16	later	Is the probe's 0.19 m/s error in Y one frame of gravity	A2A physics investigation
+black-square-baron-pro	1	run	Does writing the radio modes reconfigure the avionics	Read the flags; drop the 3D panel and tablet checks
+black-square-baron-pro	2	run	When is the aircraft's own restore finished	Part of the settle timeline
+black-square-baron-pro	3	drop	Does the failure system run while the tablet is hidden	Runs 5 minutes
+black-square-baron-pro	4	run	What does `K:SET_STARTER1_HELD` do	
+black-square-baron-pro	5	drop	Does a written stock mixture hold on the 58P	Needs loading the 58P variant
+black-square-baron-pro	6	run	Do the aircraft's physics writes fight a follower's position	
+black-square-baron-pro	7	run	Does a replayed failure land the same way	One machine: send the `H:` event and read the circuit
+black-square-baron-pro	8	run	Can SimConnect read breaker state	
+black-square-baron-pro	9	run	Do annunciator variables update when the cockpit isn't drawn	Needs an automated camera switch, tested first
+black-square-baron-pro	10	drop	Do `L:` names match regardless of case	Settled
+black-square-baron-pro	11	later	Where does DataStorage live, and does Steam carry it	Second machine
+black-square-baron-pro	12	run	Does the transponder take `H:Transponder<ID>` or the manual's names	
+black-square-bonanza-pro	1	drop	Are `L:` names case-insensitive	Settled
+black-square-bonanza-pro	2	run	Does a bound key event still reach the sim, and with what value	
+black-square-bonanza-pro	3	run	Which input events do the piston and turbocharged variants enumerate	Generic enumeration, if variant loads are cheap; The loaded variant only
+black-square-bonanza-pro	4	run	Does animation and emissive code run when the cockpit isn't drawn	With the Baron's question 9
+black-square-bonanza-pro	5	drop	How does an avionics swap reach the second machine	The Baron's question 1 answers it on one machine
+black-square-bonanza-pro	6	later	How far do two machines drift on the same inputs	Two machines
+black-square-bonanza-pro	7	run	Does an `H:BKSQ_FAILURE_*` event sent from outside reach the tablet	
+black-square-bonanza-pro	8	run	Do the aircraft's writes fight a frozen or slewed follower	With the Baron's question 6
+black-square-bonanza-pro	9	run	Does every start path set the variant variables	Part of the identity probe; The parked and runway starts only
+black-square-bonanza-pro	10	run	When are `state.CFG` and DataStorage written	Loading the next flight stands in for the menu
+black-square-bonanza-pro	11	run	Do the gauges' `TRIGGER_KEY_EVENT` calls reach SimConnect subscribers	Turn the knob by its event, not the mouse
+black-square-bonanza-pro	12	drop	Which autopilot state does a PMS50 primary use	Needs a PMS50 fit; low weight
+fenix-a320-family	1	run	Does the systems program treat an outside write of a switch variable like a click	
+fenix-a320-family	2	run	How does the program read an encoder or push-pull counter that jumps	
+fenix-a320-family	3	run	Does the mailbox stop when the captain's PFD isn't drawn, and how fast does it answer	With the camera switch
+fenix-a320-family	4	run	Does a written spring-loaded switch stay where it's put	
+fenix-a320-family	5	run	How do stick and throttle inputs reach the aircraft, and can a dataref drive one seat	Drop "listen for dual input"; read the variables
+fenix-a320-family	6	run	Do outside radio and transponder sets stick	Generic radios
+fenix-a320-family	7	run	Does the program listen for stock autopilot and autobrake events	Autobrake on the ground; the autopilot half only if the in-air load works; Autobrake half only; the autopilot half needs an in-flight start
+fenix-a320-family	8	run	Can a GraphQL write move a switch, and does the API stream changes	Runs from Node over HTTP
+fenix-a320-family	9	run	What do the control options change	SimConnect axis events stand in for the stick
+fenix-a320-family	10	run	What input events does SimConnect list	Generic enumeration
+fenix-a320-family	11	run	Does `Fenix:Ready` say when the aircraft can take inputs	
+fenix-a320-family	12	run	What does the MCDU dataref hold	Read it on the idle page; skip entering a flight plan
+fsreborn-phenom-300e	1	run	What moves the throttles	Drop the hardware throttle and the lever drag
+fsreborn-phenom-300e	2	run	Which variable each cockpit control moves, and what its values mean	Input events stand in for clicks, once question 4 has found them
+fsreborn-phenom-300e	3	run	Whether the autopilot modes follow a key event	Send the events; drop pressing the buttons
+fsreborn-phenom-300e	4	run	The cockpit's input events	
+fsreborn-phenom-300e	5	drop	How the G3000 bezels and GTC knobs reach the displays	Needs pressing softkeys and knobs with the mouse
+fsreborn-phenom-300e	6	run	Where the module is	Generic panel inventory
+fsreborn-phenom-300e	7	drop	What an EFB ground service writes, and whether anything writes it back	Needs EFB clicks; low weight
+fsreborn-phenom-300e	8	run	Whether the maintenance variables are inputs	Skip the Realism page, which needs a click; Write-and-watch half only; skip reloading the flight
+fsreborn-phenom-300e	9	drop	What the CommBus carries for the tug	Low weight
+fsreborn-phenom-300e	10	run	What the sim reports for each preset, in place of `aircraft.cfg`	Generic identity
+fsreborn-phenom-300e	11	drop	Whether a G3000 page change or setting crosses to the other displays through `wt.eb.evt`	Needs GTC clicks
+fsreborn-phenom-300e	12	drop	Whether the pop-outs work	Needs a person; low weight
+fsreborn-phenom-300e	13	drop	Which stock key events move the Phenom's switches	Needs an in-flight start
+inibuilds-a350	1	run	Does writing a command variable from outside act once	
+inibuilds-a350	2	run	Can a reader see a command pulse at all	Input events stand in for turning the knob with the mouse
+inibuilds-a350	3	run	Do pulses written together merge	
+inibuilds-a350	4	run	Does a stock mirror stay when written from outside	The knob turns by its command variable
+inibuilds-a350	5	run	Does a latching button's animation follow a direct `L:` write	
+inibuilds-a350	6	run	Does `Set` on a toggling event toggle whatever the value	
+inibuilds-a350	7	run	What do the stock autopilot variables say	With question 1
+inibuilds-a350	8	run	Does masking hold	
+inibuilds-a350	9	run	Does the MFD page follow its variable	Write the variable and read the page back; skip the cursor
+inibuilds-a350	10	later	What changes the sim rate	Needs a cruise flight
+inibuilds-a350	11	later	What does an autosave restore	Needs EFB clicks
+inibuilds-a350	12	run	What's in the client data areas	Read them idle; skip typing
+inibuilds-a350	13	run	What does reloading a display reset	Without a flight plan
+inibuilds-a350	14	drop	Do the WASM displays pop out, and does a pop-out keep its page	Needs a person; low weight
+inibuilds-a350	15	run	Does the enter-wrapped press drive the A350	Runs from the inspector
+inibuilds-a350	16	drop	Do the stock fuel quantities need an EFB panel running	Low weight
+inibuilds-a380	1	run	What an input event accepts and does	
+inibuilds-a380	2	run	Which `L:` variable each control moves, and whether it's a state or a pulse	Input events stand in for clicks
+inibuilds-a380	3	later	How a KCCU key reaches the module	Needs pressing keys and typing
+inibuilds-a380	4	run	Whether a press at a position drives the MFD and the ND	Runs from the inspector
+inibuilds-a380	5	run	Which stock variables follow the cockpit	Controls moved by input events
+inibuilds-a380	6	run	Which stock events the module takes	
+inibuilds-a380	7	drop	Whether `L:` names are case-sensitive	Settled
+inibuilds-a380	8	drop	Whether the two OIS screens and the two tablets share state	Needs clicks; low weight
+inibuilds-a380	9	run	How the aircraft identifies itself	Generic identity
+inibuilds-a380	10	later	What the aircraft does to the sim rate and pause	Needs a cruise flight to top of descent
+inibuilds-a380	11	run	How the sticks and thrust levers reach the module	SimConnect axis events stand in for the joystick
+inibuilds-a380	12	run	Which outputs the module recomputes	
+inibuilds-a380	13	run	What loading a panel state writes	Panel states only; skip loading a cold-and-dark flight
+inibuilds-a380	14	later	What restoring an autosave, loading a save, and jumping ahead write	Needs EFB clicks and a flight plan
+inibuilds-a380	15	later	Which controls the aircraft moves by itself	Needs a landing and a turnaround
+inibuilds-a380	16	later	Whether the two FMSs hold separate data	Needs typing on the MFD
+inibuilds-a380	17	later	What Link Instruments links	Needs EFB clicks
+inibuilds-l1011	1	run	Does an engineer switch need its group event	
+inibuilds-l1011	2	run	Do momentary input events do anything	
+inibuilds-l1011	3	run	Does the input event of a stock-toggle control diverge the aircraft	
+inibuilds-l1011	4	run	What carries a flight control across	On the ground with hydraulics
+inibuilds-l1011	5	later	Do two machines' calibrations give the same throttle position	Two machines
+inibuilds-l1011	6	drop	Where does the autopilot's state survive a reload	Needs an in-flight start
+inibuilds-l1011	7	run	Does reloading the engineer document change the generator breakers	
+inibuilds-l1011	8	later	Do two fuel managers fight	Needs a PFB click and 10 minutes airborne
+inibuilds-l1011	9	run	Does the module see pauses	
+inibuilds-l1011	10	run	What does `INTERCEPT_KEY_EVENT`'s flag do	
+inibuilds-l1011	11	later	How far apart do two INS units drift	Two machines, an hour's flight
+inibuilds-l1011	12	run	Which copy does the sim mount	Read at load
+inibuilds-l1011	13	run	What identity does the sim report	Generic identity
+inibuilds-l1011	14	later	Where does stored data live, and does it survive a restart	Needs typing an INS waypoint and a sim restart
+pmdg-777-300er	1	run	Does an SDK event with a position set a switch whatever its state	
+pmdg-777-300er	2	run	Does the module overwrite a switch animation	
+pmdg-777-300er	3	run	How does the baro take an outside setting	
+pmdg-777-300er	4	run	What does the module do with axis events from another client, and with a moved aircraft	
+pmdg-777-300er	5	run	Do stock trim events reach the aircraft	On the ground, not in flight
+pmdg-777-300er	6	run	Do outside radio and transponder sets stick	Generic radios
+pmdg-777-300er	7	run	Who wins the fuel and payload variables	
+pmdg-777-300er	8	run	Does `K:AXIS_SPOILER_SET` from outside move the lever, and to where	
+pmdg-777-300er	9	later	What does the SDK expose without configuration	Needs a sim restart
+pmdg-777-300er	10	run	What do a panel reload and the approach start state load	Keep the reload; drop the `APROACH.sav` check, a vendor bug
+pmdg-777-300er	11	run	Can page code drive a display unit at a position	Runs from the inspector
+pmdg-777-300er	12	later	How far do two machines drift from one panel state	Two machines
+pmdg-777-300er	13	drop	Do `L:` names ignore case	Settled
+synaptic-a220	1	run	Does writing a switch's variable move the switch and its system, and does writing its input event stick	
+synaptic-a220	2	run	Does a momentary write from outside register, and how fast may presses follow	
+synaptic-a220	3	run	Does an APU start need a new edge	Variable writes stand in for the mouse
+synaptic-a220	4	run	Does `A:KOHLSMAN SETTING MB:1` follow the knob, and does anything from outside set the QNH by value	
+synaptic-a220	5	run	Can another client set the autopilot targets	
+synaptic-a220	6	run	Does an event from another client move the throttles, and does the mouse	Drop the mouse drag
+synaptic-a220	7	drop	Does a second client's stick input reach the fly-by-wire, and how often does the module send the surfaces	Needs an in-flight start
+synaptic-a220	8	run	Do the stock variables the files predict follow the cockpit	CTP actions and variable writes stand in for clicks
+synaptic-a220	9	run	How long does a lamp variable written from outside survive	
+synaptic-a220	10	run	What sets the initial state: the flight file, `L:A22X Flight Stage`, or the EFB	Read at load and write `L:A22X Flight Stage`; skip the EFB click
+synaptic-a220	11	later	Does a captured FMS request replay on the other machine	Needs entering a route on the keypad, a session of its own
+synaptic-a220	12	run	Do the sidestick priority, mech call, and fire bottle controls do anything	
+synaptic-a220	13	run	Does a CTP action sent from a panel script change the module	
+synaptic-a220	14	drop	Where does a replayed display key land	Two machines, and needs page changes by click
+synaptic-a220	15	run	Is the scratchpad one store for both keyboards	Types through the keypad's `H:` events
+synaptic-a220	16	drop	What serves `ws://localhost:49200`	Low weight
+synaptic-a220	17	drop	Do the EFB settings persist, and where	Needs EFB clicks; low weight
+synaptic-a220	18	run	How fast does a written switch variable reach the systems	With question 1
+synaptic-a220	19	run	What tunes the sim's NAV receivers	
+synaptic-a220	20	run	Does a COM or transponder value from another client land	Generic radios

@@ -1,0 +1,15 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T20:55:38.500Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Cessna C152 Aerial Advertising", study a2a-pa24-comanche
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+Mode: masks installed with TITLE "Cessna C152 Aerial Advertising" loaded, before A2A PA-24 Comanche 250 loaded through SimConnect
+
+pitch: masked AXIS_ELEVATOR_SET, AXIS_THROTTLE1_SET, AXIS_THROTTLE2_SET
+  masked before the aircraft loaded: blocked (L:ElevatorInput at 0% of the free range) · heard AXIS_ELEVATOR_SET ×467 -16380..16380, AXIS_THROTTLE1_SET ×434 -12293..16284 · masker got AXIS_ELEVATOR_SET ×467 -16380..16380, AXIS_THROTTLE1_SET ×434 -12293..16284 · input events none · values none moved · as expected
+  cleared: baseline · heard AXIS_ELEVATOR_SET ×458 -16380..16380, AXIS_THROTTLE1_SET ×778 -16383..16135 · masker got none · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -32.647706..32.647706, ELEVATOR POSITION -32.647706..32.647706, L:Throttle1Position 0.003052..99.240112
+
+throttle: masked AXIS_ELEVATOR_SET, AXIS_THROTTLE1_SET, AXIS_THROTTLE2_SET
+  masked before the aircraft loaded: blocked (L:Throttle1Position at 0% of the free range) · heard AXIS_ELEVATOR_SET ×467 -16380..16380, AXIS_THROTTLE1_SET ×434 -12293..16284 · masker got AXIS_ELEVATOR_SET ×467 -16380..16380, AXIS_THROTTLE1_SET ×434 -12293..16284 · input events none · values none moved · as expected
+  cleared: baseline · heard AXIS_ELEVATOR_SET ×458 -16380..16380, AXIS_THROTTLE1_SET ×778 -16383..16135 · masker got none · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -32.647706..32.647706, ELEVATOR POSITION -32.647706..32.647706, L:Throttle1Position 0.003052..99.240112
+
+Exceptions: none

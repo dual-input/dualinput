@@ -30,6 +30,7 @@ The kind decides who reads it and what shape it takes.
 | Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
 | Agent instructions | `CLAUDE.md` and `.claude/`, including rules such as this file            | act correctly without asking                                                           |
 | Study              | `record/areas/aircraft/<aircraft>/study.md`                              | know how one aircraft is built, where its state lives, and what changes it             |
+| Ideas              | `record/areas/product/ideas.md`                                          | know what Crosscheck might do, how promising each idea looked, and what we left out    |
 
 A document that's two kinds at once serves neither reader.
 A design doc that also tracks progress goes stale in its progress half and takes the design half down with it.

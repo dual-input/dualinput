@@ -95,12 +95,14 @@ const opt = (name) => { const i = argv.indexOf(name); return i === -1 ? null : a
 
 const MASK_PRIORITY = PRIORITY.highest_maskable
 // Where the masker sends a value back. Our first full run sent at 10,000,001,
-// and the masker's own group at 10,000,000 heard every re-send and masked it,
-// although the SDK has delivery start at the priority given (measured on MSFS
-// 2024, 2026-10-01, experiments/areas/flight-controls/results/
-// p01-mask-2026-10-01-20-39-35.ndjson). The sweep finds where a re-send gets
-// past our group: just behind it, the PMDG 777's lowest group (10,001,000),
-// further down, SIMCONNECT_GROUP_PRIORITY_STANDARD, and the sim's own turn,
+// and the masker's own group, asked for at 10,000,000, heard every re-send and
+// masked it (measured on MSFS 2024, 2026-10-01, experiments/areas/
+// flight-controls/results/p01-mask-2026-10-01-20-39-35.ndjson). That fits the
+// SDK placing a group that asks for a taken priority at the next lower free one
+// (record/learn/foundations/04-02-events.md, Traps), if another client held
+// 10,000,000. The sweep finds where a re-send gets past our group: just behind
+// it, 10,001,000, where the PMDG 777's own groups may start (unverified), further down,
+// SIMCONNECT_GROUP_PRIORITY_STANDARD, and the sim's own turn,
 // SIMCONNECT_GROUP_PRIORITY_DEFAULT.
 const RESEND_SWEEP = [MASK_PRIORITY + 1, 10_001_000, 100_000_000, PRIORITY.standard, PRIORITY.default]
 const PHASE_MS = 5_000

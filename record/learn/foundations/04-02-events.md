@@ -13,7 +13,7 @@ The connection, data definitions, and writing data are in [04-01-connection-and-
 A client event is a client's own number for a sim event, such as `K:FLAPS_SET`.
 The client maps the number to the event's name, then transmits it to fire the event, or adds it to a notification group to hear the event whenever anyone fires it [1] [2] [3].
 Groups hear an event in priority order, and the sim takes its turn among them, at a fixed priority [4].
-The SDK says a group ahead of the sim can mask an event so the sim never acts on it, and a forum thread says masking has never worked in MSFS (unverified) [4] [5].
+The SDK says a group ahead of the sim can mask an event so the sim never acts on it, and on MSFS 2024 it does, though a forum thread says masking has never worked in MSFS [4] [5] [26].
 
 **How it works.**
 Picture an event bus whose subscribers are ordered by a number, lowest first, with the sim as one of them [4] [6].
@@ -47,7 +47,7 @@ Our code does both halves:
 
 **What it changes for Crosscheck.**
 Crosscheck can hear key events on one machine and fire them on the other, but, by the SDK, the machine that fires an event can hear it again, so it needs the guard [part 8](outline.md#8-synchronization-full) covers as echo suppression [2].
-A design that stops a pilot's input before the sim acts on it would rest on masking, which forum reports say doesn't work, so it would need measuring first.
+Crosscheck can stop a pilot's input before the sim acts on it by masking, as long as its group sits ahead of any aircraft module that masks the same events, which means registering before the aircraft loads [26].
 
 **Traps.**
 
@@ -58,8 +58,10 @@ A design that stops a pilot's input before the sim acts on it would rest on mask
 - Which message an event arrives in is unsettled.
   The header has both `SIMCONNECT_RECV_ID_EVENT` and `SIMCONNECT_RECV_ID_EVENT_EX1` [6], the SDK's page for `SIMCONNECT_RECV_EVENT_EX1` says it arrives with `SIMCONNECT_RECV_ID_EVENT` [11], and an Asobo developer on the forum said events a module fires with `trigger_key_event_EX1` arrive as `SIMCONNECT_RECV_ID_EVENT_EX1` [12].
   We trust the header and the developer.
+  On MSFS 2024, our listener received hardware axis events as `SIMCONNECT_RECV_EVENT` and a client's `_EX1` sends as `SIMCONNECT_RECV_EVENT_EX1`, and the PMDG 777's module masked the second and dropped it [26].
   FS Copilot's listener handles only `OnRecvEvent`, so it misses any event that arrives the other way [9].
 - Two groups can't share a priority, across all clients: the SDK gives a group that asks for a taken priority the next lower one free [4].
+  Our measurements fit it: the A2A PA-24's module beat our masks when the aircraft loaded first and lost when our masks went in first, and a send at 10,000,001 reached our own group, asked for at 10,000,000 [26].
 - The SDK limits a group to 1000 events, and a forum poster reports adding about 1,800 to one group without seeing an error or a missing notification (unverified) [3] [14].
 
 ## System events and state
@@ -168,12 +170,10 @@ It also has to tell the burst ahead of a change from a pilot's hands, and the se
 23. Documented: MSFS 2024 SDK, [SimConnect_SubscribeInputEvent](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/InputEvents/SimConnect_SubscribeInputEvent.htm).
 24. Measured on MSFS 2024, 2026-08-23: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself".
 25. Unverified, forum: MSFS DevSupport, [EnumerateInputEvents doesn't return _INC, _DEC, _TOGGLE, _ON, and _OFF events](https://devsupport.flightsimulator.com/t/enumerateinputevents-doesnt-return-inc-dec-toggle-on-and-off-events/6598), with the Asobo reply of 2023-10-26 and the report on `SetInputEvent` of 2024-11-21.
+26. Measured on MSFS 2024, 2026-10-01: [record/areas/flight-controls/log.md](../../areas/flight-controls/log.md), every entry of that date.
 
 ## Unverified claims
 
-- **Masking works in MSFS 2024.**
-  The SDK documents it [4], and a forum thread says it never has [5].
-  Adding `K:TOGGLE_MASTER_BATTERY` as maskable to a group at `SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE`, pressing the battery key, and reading `A:ELECTRICAL MASTER BATTERY` would settle it.
 - **A key event sent through SimConnect skips the aircraft's input event bindings in MSFS 2024.**
   Asobo said so for MSFS 2020 [10].
   Transmitting a key event the PA-24 binds, and watching whether its input event fires, would settle it.

@@ -137,7 +137,7 @@ Crosscheck ignores their axis until the lever crosses the aircraft's value, as M
 Trim wheels and flap and gear levers on hardware have the same mismatch.
 
 - **Tech:** masking the pilot's axis events holds them back from the sim on stock flight controls and on the PMDG 777 (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
-  On an aircraft whose module masks at the same priority, such as the A2A PA-24, it works only if Crosscheck's masks are in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-at-the-same-priority-the-mask-registered-first-wins)).
+  On an aircraft whose module asks for the same priority, such as the A2A PA-24, it works only if Crosscheck's masks are in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
 - **Product:** removes the thrust jump at handover.
 
 ### Mixed flight controls
@@ -151,8 +151,8 @@ In FS Copilot and YourControls only the pilot in control's hardware reaches the 
 
 - **Tech:**
   - Masking the axis events keeps them from the sim, and the block ends when the masking client dies (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
-    On an aircraft whose module masks at the same priority, Crosscheck's masks have to be in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-at-the-same-priority-the-mask-registered-first-wins)).
-  - A mixed value sent back reaches stock flight controls from priority 10,001,000 down ([log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values)), and the PMDG 777's own yoke takes it at 10,001,000 only when it's sent with the legacy `SimConnect_TransmitClientEvent` ([log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)).
+    On an aircraft whose module asks for the same priority, Crosscheck's masks have to be in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
+  - A mixed value sent back reaches stock flight controls from priority 10,001,000 down ([log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-reached-our-own-masking-group-and-the-777-ignored-re-sent-values)), and the PMDG 777's own yoke takes it at 10,001,000 only when it's sent with the legacy `SimConnect_TransmitClientEvent` ([log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)).
   - A masked event carries the value after the pilot's dead zone set in MSFS, so that setting survives ([log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)); whether the sensitivity curve does is unmeasured.
   - The other pilot's input arrives one network delay late, which the network design has to keep short.
 - **Product:** an exact dual-input warning, and a second pair of hands on the controls.

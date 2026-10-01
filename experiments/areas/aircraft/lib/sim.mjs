@@ -65,8 +65,8 @@ export const PRIORITY = {
 // aircraft's when they come back on its own subscription. The sim passes the
 // fifth parameter on to subscribers (measured on MSFS 2024, 2026-10-01,
 // record/areas/flight-controls/log.md, "2026-10-01: A value sent back at
-// 10,000,001 doesn't get past a group at 10,000,000, and the 777 ignored
-// re-sent values"). subscribeKeys also matches each arrival against the sends
+// 10,000,001 reached our own masking group, and the 777 ignored re-sent
+// values"). subscribeKeys also matches each arrival against the sends
 // by name, value, and time, and says which of the two recognized it.
 export const TAG = 0x43524f53 // "CROS"
 

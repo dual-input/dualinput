@@ -117,11 +117,11 @@ Two cases follow from the source, and neither is measured:
 - At a handover, the new flying pilot's hardware becomes the source, so if their levers sit somewhere else, the throttles go there on the next axis event their hardware sends (unverified).
 
 A two-pilot Airbus meets the same problem in hardware, and answers it by adding simultaneous sidestick inputs and announcing DUAL INPUT ([01](01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)).
-Keeping the following pilot's hardware out of their sim would take SimConnect's masking, which a forum thread says has never worked in MSFS ([04-02](04-02-events.md#client-events)).
+Keeping the following pilot's hardware out of their sim takes SimConnect's masking, which works on MSFS 2024 when Crosscheck's group sits ahead of the aircraft's own ([04-02](04-02-events.md#client-events)).
 
 **What it changes for Crosscheck.**
 Crosscheck needs a rule for what the following pilot's hardware does, whether ignored, blocked, or combined, and a handover that copes with two sets of levers in different places.
-Whether MSFS 2024 lets an app keep one machine's hardware from reaching its aircraft is an open question.
+Blocking is open to it, as long as it registers its masks before the aircraft's module does ([04-02](04-02-events.md#client-events)).
 
 **Traps.**
 

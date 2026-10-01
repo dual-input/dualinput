@@ -2,7 +2,7 @@
 
 What our experiments found about keeping a pilot's own flight controls out of the sim, newest entry first.
 A SimConnect client's mask at 10,000,000 blocks the pilot's hardware input and gives it back when the client dies.
-On an aircraft whose module masks at the same priority, the mask registered first wins.
+Two groups can't share a priority, so on an aircraft whose module asks for the same one, the group that registers first is ahead.
 A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777's own yoke takes it only when it's sent with the legacy `SimConnect_TransmitClientEvent`.
 The probe is [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), and its raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-01, with the yoke and throttle on our development machine.
@@ -26,7 +26,7 @@ Whether MSFS applies its sensitivity curve at the same stage is unmeasured.
 
 ## 2026-10-01: The PMDG 777 takes a value sent back with the legacy transmit call
 
-**Asked:** does the 777 act on a value sent back with `SimConnect_TransmitClientEvent`, rather than the `_EX1` form it ignored ([the entry below](#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values))?
+**Asked:** does the 777 act on a value sent back with `SimConnect_TransmitClientEvent`, rather than the `_EX1` form it ignored ([the entry below](#2026-10-01-a-value-sent-back-at-10000001-reached-our-own-masking-group-and-the-777-ignored-re-sent-values))?
 
 **Expected:** yes, if PMDG's module handles only `SIMCONNECT_RECV_EVENT`.
 
@@ -44,7 +44,7 @@ A send meant for a module's own handler should use the legacy call, which carrie
 
 **Evidence:** [the 777's legacy run](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-21-07-52.txt).
 
-## 2026-10-01: A value sent back at 10,000,001 doesn't get past a group at 10,000,000, and the 777 ignored re-sent values
+## 2026-10-01: A value sent back at 10,000,001 reached our own masking group, and the 777 ignored re-sent values
 
 **Asked:** can Crosscheck send a masked input back changed, at half, so the aircraft acts on it, and at which priority?
 
@@ -52,9 +52,10 @@ A send meant for a module's own handler should use the legacy call, which carrie
 
 **Found:**
 
-- At 10,000,001, a group at 10,000,000 still received the send.
+- At 10,000,001, the send reached our own masking group, which we had asked for at 10,000,000.
   On the Baron and the 777, our masker heard every value it sent back, recognized as its own, and masked it.
-  On the PA-24, the stock yoke didn't move and our masker heard none, which fits Accu-Sim's group, registered first at the same priority, taking it (unverified).
+  That fits the SDK's rule that a group asking for a taken priority gets the next lower free one ([04-02](../../learn/foundations/04-02-events.md#client-events)), if another client on our machine already held 10,000,000 and our group sat at 10,000,001 (unverified which client).
+  On the PA-24, the stock yoke didn't move and our masker heard none, which fits Accu-Sim's group sitting ahead of ours (unverified).
 - At 10,001,000, 100,000,000, 1,900,000,000, and 2,000,000,000, the send got past our group.
   On the PA-24 the stock `A:YOKE Y POSITION` followed at half, ±16.3% against ±32.6% unmasked, at every one of the four.
   On the 777 it followed at half, ±50%, from 100,000,000 down, and didn't move at 10,001,000, where something took the event first, likely PMDG's group (unverified).
@@ -70,11 +71,12 @@ On the 777 it's unsettled, so mixing two pilots' inputs there isn't shown to wor
 
 **Evidence:** [the Baron's run](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-39-35.txt), [the PA-24's](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-46-10.txt), and [the 777's](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-59-42.txt), with each send and arrival in the `.ndjson` beside each.
 
-## 2026-10-01: At the same priority, the mask registered first wins
+## 2026-10-01: The mask registered first gets ahead of Accu-Sim's
 
 **Asked:** does Crosscheck's mask at 10,000,000 stop the A2A PA-24's input?
 
-**Expected:** no prediction, since the SDK doesn't say how it orders two groups at one priority.
+**Expected:** no prediction.
+We missed that the SDK gives a group asking for a taken priority the next lower free one ([04-02](../../learn/foundations/04-02-events.md#client-events)), which predicts what we found.
 
 **Found:**
 
@@ -84,8 +86,9 @@ On the 777 it's unsettled, so mixing two pilots' inputs there isn't shown to wor
 - With our masks in place before the PA-24 loaded through SimConnect, our masker heard all 467 elevator events across ±16,380, and neither variable moved.
   Once the masks cleared, both covered their full range.
 - The masks survived the flight load.
+- Both results follow from the SDK's rule: whichever group asks second for a priority is placed behind the first.
 
-**Changed:** on an aircraft that masks at 10,000,000, Crosscheck blocks input only if its masks are in place before the aircraft loads, so it has to connect before the flight starts.
+**Changed:** on an aircraft that masks at 10,000,000, Crosscheck's group gets ahead only if it registers before the aircraft's module, so Crosscheck has to connect before the flight starts.
 Whether its masks stay first across later aircraft changes was measured for one load only.
 A mask on an event the aircraft also sends, such as the PA-24's own `K:AXIS_ELEVATOR_SET`, catches the aircraft's output too.
 

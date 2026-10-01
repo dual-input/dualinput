@@ -1,0 +1,23 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T20:46:10.146Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "A2A Piper PA-24-250 Comanche", study a2a-pa24-comanche
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+
+pitch: masked AXIS_THROTTLE1_SET, AXIS_ELEVATOR_SET
+  free: baseline · heard AXIS_THROTTLE1_SET ×128 -16383..-16309, AXIS_ELEVATOR_SET ×345 -16380..16380 · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -32.647706..32.647706, ELEVATOR POSITION -32.647706..32.647706, L:Throttle1Position 0.003052..0.228882
+  masked: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_ELEVATOR_SET ×361 -16380..16380, AXIS_THROTTLE1_SET ×126 -16383..-16309 · masker got AXIS_ELEVATOR_SET ×46 -5349..5349 · input events none · values L:ElevatorInput -99.981688..99.981688, L:Throttle1Position 0.003052..0.15564 · expected blocked
+  cleared: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_THROTTLE1_SET ×124 -16383..-16309, AXIS_ELEVATOR_SET ×384 -16380..16380 · masker got none · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -32.647706..32.647705, ELEVATOR POSITION -32.647706..32.647705, L:Throttle1Position 0.003052..0.228882 · as expected
+  half, re-sent at 10000001: moved (L:ElevatorInput at 96% of the free range) · heard AXIS_ELEVATOR_SET ×350 -16380..16380, AXIS_THROTTLE1_SET ×128 -16383..-16284 · masker got AXIS_ELEVATOR_SET ×48 -5349..5218 · input events none · values L:ElevatorInput -99.981688..92.950009, L:Throttle1Position 0.003052..0.305176 · expected half
+  half, re-sent at 10001000: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_ELEVATOR_SET ×398 -16380..16380, AXIS_THROTTLE1_SET ×130 -16383..-16333 · masker got AXIS_ELEVATOR_SET ×52 -5349..5349 · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -16.326904..16.320801, ELEVATOR POSITION -16.326904..16.320801, L:Throttle1Position 0.003052..0.15564 · expected half
+  half, re-sent at 100000000: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_THROTTLE1_SET ×124 -16383..-16309, AXIS_ELEVATOR_SET ×474 -16380..16380 · masker got AXIS_ELEVATOR_SET ×58 -5349..5349 · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -16.326904..16.320801, ELEVATOR POSITION -16.326904..16.320801, L:Throttle1Position 0.003052..0.15564 · expected half
+  half, re-sent at 1900000000: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_ELEVATOR_SET ×510 -16380..16380, AXIS_THROTTLE1_SET ×134 -16383..-16309 · masker got AXIS_ELEVATOR_SET ×64 -5349..5349 · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -16.326904..16.320801, ELEVATOR POSITION -16.326904..16.320801, L:Throttle1Position 0.003052..0.228882 · expected half
+  half, re-sent at 2000000000: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_ELEVATOR_SET ×395 -16380..16380, AXIS_THROTTLE1_SET ×118 -16383..-16309 · masker got AXIS_ELEVATOR_SET ×51 -5349..5349 · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -16.326904..16.320801, ELEVATOR POSITION -16.326904..16.320801, L:Throttle1Position 0.003052..0.15564 · expected half
+  written: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_ELEVATOR_SET ×348 -16380..16380, AXIS_THROTTLE1_SET ×134 -16383..-16309 · masker got AXIS_ELEVATOR_SET ×44 -5349..5349 · input events none · values L:ElevatorInput -99.981688..99.981688, L:Throttle1Position 0.003052..0.228882 · expected half
+  killed: moved (L:ElevatorInput at 100% of the free range) · heard AXIS_THROTTLE1_SET ×117 -16383..-16309, AXIS_ELEVATOR_SET ×354 -16380..16380 · masker got none · input events none · values L:ElevatorInput -99.981688..99.981688, YOKE Y POSITION -32.647705..32.647705, ELEVATOR POSITION -32.647705..32.647705, L:Throttle1Position 0.003052..0.15564 · as expected
+
+throttle: masked AXIS_THROTTLE1_SET
+  free: baseline · heard AXIS_THROTTLE1_SET ×659 -16383..16309 · input events none · values L:Throttle1Position 0.003052..99.771118
+  masked: moved (L:Throttle1Position at 100% of the free range) · heard AXIS_THROTTLE1_SET ×779 -16284..16383 · masker got none · input events none · values L:Throttle1Position 0.305176..99.996948 · expected blocked
+  cleared: moved (L:Throttle1Position at 100% of the free range) · heard AXIS_THROTTLE1_SET ×776 -16234..16383 · masker got none · input events none · values L:Throttle1Position 0.457764..99.996948 · as expected
+
+Exceptions: none

@@ -136,7 +136,8 @@ When control passes, the new pilot in control's hardware throttle can sit far fr
 Crosscheck ignores their axis until the lever crosses the aircraft's value, as MIDI controllers do in pickup mode, and shows where to move it.
 Trim wheels and flap and gear levers on hardware have the same mismatch.
 
-- **Tech:** unverified, because Crosscheck has to hold an axis back from the sim, the same open question as in [mixed flight controls](#mixed-flight-controls).
+- **Tech:** masking the pilot's axis events holds them back from the sim on stock flight controls and on the PMDG 777 (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
+  On an aircraft whose module masks at the same priority, such as the A2A PA-24, it works only if Crosscheck's masks are in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-at-the-same-priority-the-mask-registered-first-wins)).
 - **Product:** removes the thrust jump at handover.
 
 ### Mixed flight controls
@@ -144,14 +145,15 @@ Trim wheels and flap and gear levers on hardware have the same mismatch.
 Both pilots' hands reach the flight controls, as in a real cockpit.
 The flying machine is the pilot in control's, and the following machine is the other.
 The following machine still freezes its aircraft and sets it from the flying machine's position, attitude, and velocity, as FS Copilot and YourControls do ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#prior-art)).
-What changes is that Crosscheck reads each pilot's joystick, yoke, and throttle itself, sends the other pilot's axes one way to the flying machine, and mixes them there with the pilot in control's, by a rule for each aircraft type.
+What changes is that Crosscheck takes each pilot's yoke and throttle input before the sim acts on it, sends the other pilot's axes one way to the flying machine, and mixes them there with the pilot in control's, by a rule for each aircraft type.
 Where the type warns of dual input, Crosscheck does too: on an Airbus, the two sidesticks' inputs are added and a "DUAL INPUT" voice warns the crew (documented, secondary, in [01](../../learn/foundations/01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)).
 In FS Copilot and YourControls only the pilot in control's hardware reaches the sim, and this sends both pilots' hardware to it, so building it starts with a decision in `record/decisions/`.
 
 - **Tech:**
-  - How the sim stops reading the axes itself is open: each pilot removes the bindings in MSFS, or Crosscheck masks the axis events, which is unverified in MSFS 2024.
-    We'd rather avoid a virtual joystick, because it means installing a device driver on every pilot's machine.
-  - Sensitivity curves and dead zones set in MSFS don't apply to axes Crosscheck reads itself, so Crosscheck imports them from MSFS if it can, or the pilot sets them again in Crosscheck.
+  - Masking the axis events keeps them from the sim, and the block ends when the masking client dies (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
+    On an aircraft whose module masks at the same priority, Crosscheck's masks have to be in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-at-the-same-priority-the-mask-registered-first-wins)).
+  - A mixed value sent back reaches stock flight controls from priority 10,001,000 down, and the PMDG 777's own yoke ignored it at every priority tried ([log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values)).
+  - Whether a masked event carries the value after MSFS's sensitivity curves and dead zones is unmeasured; if it does, the pilot's settings survive.
   - The other pilot's input arrives one network delay late, which the network design has to keep short.
 - **Product:** an exact dual-input warning, and a second pair of hands on the controls.
 

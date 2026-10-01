@@ -6,4 +6,5 @@ Documentation people write for other people lives in `docs/` instead.
 - [learn/foundations/outline.md](learn/foundations/outline.md): the foundations course, the concepts we need to build Crosscheck, in the order we'll learn them, with the depth each one gets.
 - [areas/commbus/log.md](areas/commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220, the A2A PA-24, and the iniBuilds A350.
 - [areas/aircraft/plan.md](areas/aircraft/plan.md): how the aircraft we fly are built, studied from their files, then checked in the sim.
+- [areas/flight-controls/log.md](areas/flight-controls/log.md): what our experiments found about keeping a pilot's own flight controls out of the sim by masking key events.
 - [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.

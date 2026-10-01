@@ -1,0 +1,178 @@
+{"t":1790887969766,"s":0.032,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790887970184,"s":0.45,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790887970184,"s":0.45,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1790887970185,"s":0.451,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1790887970484,"s":0.75,"kind":"aircraft","text":"TITLE \"A2A Piper PA-24-250 Comanche\", study a2a-pa24-comanche","title":"A2A Piper PA-24-250 Comanche","key":"a2a-pa24-comanche"}
+{"t":1790887970534,"s":0.8,"kind":"inputs","text":"318 input events listed; watching 23 whose names match /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER/i","listed":318,"watched":["WALKAROUND_ELEVATORSHAKE","OILINSPECTIONSTICK","YOKE_LEFT_HIDER_SINGLE","YOKE_RIGHT_HIDER_SINGLE","HANDLING_ELEVATORTRIM_1","LEVER_DOOR_LATCH_2STATES","LEVER_THROTTLE_DRAG","LEVER_MIXTURE_DRAG","LEVER_RPM_DRAG","LEVER_CARB_HEAT_DRAG","LEVER_CABIN_VENT_L_DRAG","LEVER_CABIN_VENT_R_DRAG","LEVER_WINDOW_DEFROST_DRAG","LEVER_CABIN_HEAT_DRAG","LEVER_FLAPS_HANDLE_FLAPS_4STATE","LEVER_CABIN_VENT_RING_1_SHORT_NAME_KNOB","LEVER_CABIN_VENT_RING_2_SHORT_NAME_KNOB","LEVER_CABIN_VENT_RING_3_SHORT_NAME_KNOB","LEVER_CABIN_VENT_RING_4_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_1_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_2_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_3_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_4_SHORT_NAME_KNOB"]}
+{"t":1790887970551,"s":0.817,"kind":"state","text":"FlightLoaded state <repo>\\experiments\\areas\\aircraft\\flights\\a2a-pa24-comanche-parked.FLT","flight":"<repo>\\experiments\\areas\\aircraft\\flights\\a2a-pa24-comanche-parked.FLT","signal":false}
+{"t":1790887970552,"s":0.818,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.CFG","signal":false}
+{"t":1790887970724,"s":0.99,"kind":"state","text":"position 16.731724, -22.944986, 176 ft, on ground 1","lat":16.73172377758207,"lon":-22.944986079120067,"altFt":175.8299515861037,"onGround":1}
+{"t":1790887970725,"s":0.991,"kind":"state","text":"LIVERY FOLDER \"N8351P\"","liveryFolder":"N8351P"}
+{"t":1790887970725,"s":0.991,"kind":"state","text":"TITLE \"A2A Piper PA-24-250 Comanche\"","title":"A2A Piper PA-24-250 Comanche"}
+{"t":1790887970725,"s":0.991,"kind":"state","text":"LIVERY NAME \"N8351P\"","liveryName":"N8351P"}
+{"t":1790887973041,"s":3.307,"kind":"load","text":"1: experiments/areas/aircraft/flights/neutral-runway.flt, Cessna C152 (no livery), PREFLIGHT_HOLDSHORT at GVAC runway 19, from inside a flight","load":1,"file":"experiments/areas/aircraft/flights/neutral-runway.flt","title":"Cessna C152","livery":null,"state":"PREFLIGHT_HOLDSHORT","from":"inside a flight"}
+{"t":1790887973042,"s":3.308,"kind":"gate","text":"1: sim met at 0.0s","load":1,"condition":"sim","ms":1}
+{"t":1790887973123,"s":3.389,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1790887973123,"s":3.389,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1790887973175,"s":3.441,"kind":"system","text":"FlightLoaded <repo>\\experiments\\areas\\aircraft\\flights\\neutral-runway.FLT","event":"FlightLoaded","file":"<repo>\\experiments\\areas\\aircraft\\flights\\neutral-runway.FLT","signal":true}
+{"t":1790887973181,"s":3.447,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1790887973198,"s":3.464,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1790887973198,"s":3.464,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1790887973198,"s":3.464,"kind":"flow","text":"FLT_LOAD neutral-runway","flow":"FLT_LOAD","id":1,"file":"neutral-runway","signal":false}
+{"t":1790887973198,"s":3.464,"kind":"flow","text":"FLT_LOADED neutral-runway","flow":"FLT_LOADED","id":2,"file":"neutral-runway","signal":true}
+{"t":1790887973199,"s":3.465,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1790887973199,"s":3.465,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1790887973307,"s":3.573,"kind":"gate","text":"1: signal met at 0.3s","load":1,"condition":"signal","ms":266}
+{"t":1790887973308,"s":3.574,"kind":"state","text":"TITLE \"Cessna C152\"","title":"Cessna C152"}
+{"t":1790887973571,"s":3.837,"kind":"gate","text":"1: title met at 0.5s","load":1,"condition":"title","ms":530}
+{"t":1790887974129,"s":4.395,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1790887974129,"s":4.395,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790887974628,"s":4.894,"kind":"state","text":"position 16.750185, -22.947838, 171 ft, on ground 1","lat":16.750185166616223,"lon":-22.947837861110536,"altFt":170.60959443478816,"onGround":1}
+{"t":1790887974629,"s":4.895,"kind":"state","text":"LIVERY FOLDER \"DEFAULT\"","liveryFolder":"DEFAULT"}
+{"t":1790887974629,"s":4.895,"kind":"state","text":"LIVERY NAME \"Default\"","liveryName":"Default"}
+{"t":1790887974629,"s":4.895,"kind":"gate","text":"1: position met at 1.6s","load":1,"condition":"position","ms":1588}
+{"t":1790887974629,"s":4.895,"kind":"gate","text":"1: ground met at 1.6s","load":1,"condition":"ground","ms":1588}
+{"t":1790887974629,"s":4.895,"kind":"gate","text":"1: the aircraft reads as the file's, by TITLE, position, and SIM ON GROUND, at 1.6s","load":1,"condition":"inPlace","ms":1588}
+{"t":1790887974629,"s":4.895,"kind":"pass","text":"1: passed at 1.6s; 0 m from the file's position","load":1,"ms":1588,"distanceM":0.000005609560766716511}
+{"t":1790887974630,"s":4.896,"kind":"settle","text":"watching 11 values, 0 of them L:, until none changes for 10s"}
+{"t":1790887974662,"s":4.928,"kind":"settle","text":"ELECTRICAL MASTER BATTERY:1 = 0","name":"ELECTRICAL MASTER BATTERY:1","from":null,"to":0}
+{"t":1790887974662,"s":4.928,"kind":"settle","text":"AVIONICS MASTER SWITCH = 1","name":"AVIONICS MASTER SWITCH","from":null,"to":1}
+{"t":1790887974662,"s":4.928,"kind":"settle","text":"LIGHT BEACON = 1","name":"LIGHT BEACON","from":null,"to":1}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"LIGHT NAV = 1","name":"LIGHT NAV","from":null,"to":1}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"LIGHT STROBE = 1","name":"LIGHT STROBE","from":null,"to":1}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"LIGHT LANDING = 1","name":"LIGHT LANDING","from":null,"to":1}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"BRAKE PARKING POSITION = 0","name":"BRAKE PARKING POSITION","from":null,"to":0}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"GENERAL ENG COMBUSTION:1 = 0","name":"GENERAL ENG COMBUSTION:1","from":null,"to":0}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"FLAPS HANDLE INDEX = 0","name":"FLAPS HANDLE INDEX","from":null,"to":0}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"COM ACTIVE FREQUENCY:1 = 127.85","name":"COM ACTIVE FREQUENCY:1","from":null,"to":127.85}
+{"t":1790887974663,"s":4.929,"kind":"settle","text":"TRANSPONDER CODE:1 = 1200","name":"TRANSPONDER CODE:1","from":null,"to":1200}
+{"t":1790887975089,"s":5.355,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887975090,"s":5.356,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16358, not ours","event":"AXIS_THROTTLE1_SET","data":[16358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887978523,"s":8.789,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\asobo_c152\\presets\\asobo\\cessna_c152\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\asobo_c152\\presets\\asobo\\cessna_c152\\config\\aircraft.CFG","signal":true}
+{"t":1790887978524,"s":8.79,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\streamedpackages\\fs24-asobo-aircraft-c152\\content\\simobjects\\airplanes\\asobo_c152\\presets\\asobo\\cessna_c152\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\streamedpackages\\fs24-asobo-aircraft-c152\\content\\simobjects\\airplanes\\asobo_c152\\presets\\asobo\\cessna_c152\\config\\aircraft.cfg","signal":true}
+{"t":1790887978622,"s":8.888,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\asobo_c152\\presets\\asobo\\cessna_c152\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\asobo_c152\\presets\\asobo\\cessna_c152\\config\\aircraft.CFG","signal":true}
+{"t":1790887984783,"s":15.049,"kind":"settle","text":"settled at 1.6s after the load request; the last change was TRANSPONDER CODE:1","settled":true,"quiet":true,"ms":1622,"lastChangeMs":1622,"last":"TRANSPONDER CODE:1","answered":11,"total":11,"lAnswered":0,"lTotal":0,"silent":[],"busiest":["ELECTRICAL MASTER BATTERY:1 ×1","AVIONICS MASTER SWITCH ×1","LIGHT BEACON ×1","LIGHT NAV ×1"],"ready":[]}
+{"t":1790887984946,"s":15.212,"kind":"masker","text":"open: SunRise 12.2.282174.999, SimConnect 12.2.0.0","maskerKind":"open","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790887984961,"s":15.227,"kind":"masker","text":"system: Sim 1 (running)","maskerKind":"system","event":"Sim","data":1}
+{"t":1790887984962,"s":15.228,"kind":"masker","text":"system: Pause_EX1 0 (none)","maskerKind":"system","event":"Pause_EX1","data":0}
+{"t":1790887984962,"s":15.228,"kind":"masker","text":"system: View 0 (none)","maskerKind":"system","event":"View","data":0}
+{"t":1790887985455,"s":15.721,"kind":"masker","text":"ready: masking AXIS_ELEVATOR_SET, AXIS_THROTTLE1_SET, AXIS_THROTTLE2_SET at priority 10000000","maskerKind":"ready","events":["AXIS_ELEVATOR_SET","AXIS_THROTTLE1_SET","AXIS_THROTTLE2_SET"]}
+{"t":1790887985456,"s":15.722,"kind":"load","text":"1: experiments/areas/aircraft/flights/a2a-pa24-comanche-parked.flt, A2A Piper PA-24-250 Comanche (N8351P), PREFLIGHT_GATE at GVAC PARKING 7, from inside a flight","load":1,"file":"experiments/areas/aircraft/flights/a2a-pa24-comanche-parked.flt","title":"A2A Piper PA-24-250 Comanche","livery":"N8351P","state":"PREFLIGHT_GATE","from":"inside a flight"}
+{"t":1790887985456,"s":15.722,"kind":"gate","text":"1: sim met at 0.0s","load":1,"condition":"sim","ms":0}
+{"t":1790887985530,"s":15.796,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1790887985531,"s":15.797,"kind":"masker","text":"system: SimStop 0","maskerKind":"system","event":"SimStop","data":0}
+{"t":1790887985531,"s":15.797,"kind":"masker","text":"system: Sim 0 (not running)","maskerKind":"system","event":"Sim","data":0}
+{"t":1790887985531,"s":15.797,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1790887985724,"s":15.99,"kind":"system","text":"FlightLoaded <repo>\\experiments\\areas\\aircraft\\flights\\a2a-pa24-comanche-parked.FLT","event":"FlightLoaded","file":"<repo>\\experiments\\areas\\aircraft\\flights\\a2a-pa24-comanche-parked.FLT","signal":true}
+{"t":1790887985725,"s":15.991,"kind":"masker","text":"system: FlightLoaded <repo>\\experiments\\areas\\aircraft\\flights\\a2a-pa24-comanche-parked.FLT","maskerKind":"system","event":"FlightLoaded","file":"<repo>\\experiments\\areas\\aircraft\\flights\\a2a-pa24-comanche-parked.FLT","signal":true}
+{"t":1790887985741,"s":16.007,"kind":"flow","text":"FLT_LOAD a2a-pa24-comanche-parked","flow":"FLT_LOAD","id":1,"file":"a2a-pa24-comanche-parked","signal":false}
+{"t":1790887985742,"s":16.008,"kind":"flow","text":"FLT_LOADED a2a-pa24-comanche-parked","flow":"FLT_LOADED","id":2,"file":"a2a-pa24-comanche-parked","signal":true}
+{"t":1790887985742,"s":16.008,"kind":"masker","text":"flow: FLT_LOAD a2a-pa24-comanche-parked","maskerKind":"flow","flow":"FLT_LOAD","id":1,"file":"a2a-pa24-comanche-parked","signal":false}
+{"t":1790887985742,"s":16.008,"kind":"masker","text":"flow: FLT_LOADED a2a-pa24-comanche-parked","maskerKind":"flow","flow":"FLT_LOADED","id":2,"file":"a2a-pa24-comanche-parked","signal":true}
+{"t":1790887985971,"s":16.237,"kind":"gate","text":"1: signal met at 0.5s","load":1,"condition":"signal","ms":514}
+{"t":1790887986162,"s":16.428,"kind":"state","text":"TITLE \"A2A Piper PA-24-250 Comanche\"","title":"A2A Piper PA-24-250 Comanche"}
+{"t":1790887986236,"s":16.502,"kind":"gate","text":"1: title met at 0.8s","load":1,"condition":"title","ms":780}
+{"t":1790887988213,"s":18.479,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1790887988213,"s":18.479,"kind":"masker","text":"flow: FLIGHT_START","maskerKind":"flow","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1790887988249,"s":18.515,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1790887988250,"s":18.516,"kind":"masker","text":"system: View 2 (cockpit virtual)","maskerKind":"system","event":"View","data":2}
+{"t":1790887988710,"s":18.976,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1790887988710,"s":18.976,"kind":"masker","text":"flow: FLT_LOAD apron.flt","maskerKind":"flow","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1790887988710,"s":18.976,"kind":"masker","text":"flow: FLT_LOADED apron.flt","maskerKind":"flow","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1790887988710,"s":18.976,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1790887988730,"s":18.996,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887988730,"s":18.996,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16358, not ours","event":"AXIS_THROTTLE1_SET","data":[16358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887988730,"s":18.996,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16234","name":"AXIS_THROTTLE1_SET","value":16234,"ours":null}
+{"t":1790887988731,"s":18.997,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16358","name":"AXIS_THROTTLE1_SET","value":16358,"ours":null}
+{"t":1790887988754,"s":19.02,"kind":"state","text":"position 16.731724, -22.944986, 176 ft, on ground 1","lat":16.731723777260918,"lon":-22.94498638428943,"altFt":175.9055006461178,"onGround":1}
+{"t":1790887988755,"s":19.021,"kind":"state","text":"LIVERY FOLDER \"N8351P\"","liveryFolder":"N8351P"}
+{"t":1790887988755,"s":19.021,"kind":"state","text":"LIVERY NAME \"N8351P\"","liveryName":"N8351P"}
+{"t":1790887988823,"s":19.089,"kind":"gate","text":"1: position met at 3.4s","load":1,"condition":"position","ms":3367}
+{"t":1790887988823,"s":19.089,"kind":"gate","text":"1: ground met at 3.4s","load":1,"condition":"ground","ms":3367}
+{"t":1790887988823,"s":19.089,"kind":"gate","text":"1: the aircraft reads as the file's, by TITLE, position, and SIM ON GROUND, at 3.4s","load":1,"condition":"inPlace","ms":3367}
+{"t":1790887989082,"s":19.348,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1790887989082,"s":19.348,"kind":"masker","text":"system: SimStart 0","maskerKind":"system","event":"SimStart","data":0}
+{"t":1790887989083,"s":19.349,"kind":"masker","text":"system: Sim 1 (running)","maskerKind":"system","event":"Sim","data":1}
+{"t":1790887989083,"s":19.349,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790887989338,"s":19.604,"kind":"pass","text":"1: passed at 3.9s; 0 m from the file's position","load":1,"ms":3882,"distanceM":0.00542648114583681}
+{"t":1790887989339,"s":19.605,"kind":"settle","text":"watching 15 values, 4 of them L:, until none changes for 10s, and L:DATLoaded or L:DatNotFound at 1"}
+{"t":1790887989359,"s":19.625,"kind":"settle","text":"L:DATLoaded or L:DatNotFound at 1 reads {\"L:DATLoaded\":0,\"L:DatNotFound\":0}","ready":"L:DATLoaded or L:DatNotFound at 1","value":{"L:DATLoaded":0,"L:DatNotFound":0},"ok":false}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"ELECTRICAL MASTER BATTERY:1 = 0","name":"ELECTRICAL MASTER BATTERY:1","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"AVIONICS MASTER SWITCH = 0","name":"AVIONICS MASTER SWITCH","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"LIGHT BEACON = 0","name":"LIGHT BEACON","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"LIGHT NAV = 0","name":"LIGHT NAV","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"LIGHT STROBE = 0","name":"LIGHT STROBE","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"LIGHT LANDING = 0","name":"LIGHT LANDING","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"BRAKE PARKING POSITION = 0","name":"BRAKE PARKING POSITION","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"GENERAL ENG COMBUSTION:1 = 0","name":"GENERAL ENG COMBUSTION:1","from":null,"to":0}
+{"t":1790887989365,"s":19.631,"kind":"settle","text":"FLAPS HANDLE INDEX = 0","name":"FLAPS HANDLE INDEX","from":null,"to":0}
+{"t":1790887989366,"s":19.632,"kind":"settle","text":"COM ACTIVE FREQUENCY:1 = 124.85","name":"COM ACTIVE FREQUENCY:1","from":null,"to":124.85}
+{"t":1790887989366,"s":19.632,"kind":"settle","text":"TRANSPONDER CODE:1 = 1200","name":"TRANSPONDER CODE:1","from":null,"to":1200}
+{"t":1790887989366,"s":19.632,"kind":"settle","text":"L:DATLoaded = 0","name":"L:DATLoaded","from":null,"to":0}
+{"t":1790887989366,"s":19.632,"kind":"settle","text":"L:DatNotFound = 0","name":"L:DatNotFound","from":null,"to":0}
+{"t":1790887989366,"s":19.632,"kind":"settle","text":"L:FlightPhase = 2","name":"L:FlightPhase","from":null,"to":2}
+{"t":1790887989366,"s":19.632,"kind":"settle","text":"L:Battery1Switch = 0","name":"L:Battery1Switch","from":null,"to":0}
+{"t":1790887990192,"s":20.458,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887990192,"s":20.458,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16234","name":"AXIS_THROTTLE1_SET","value":16234,"ours":null}
+{"t":1790887990271,"s":20.537,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16358, not ours","event":"AXIS_THROTTLE1_SET","data":[16358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887990271,"s":20.537,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16358","name":"AXIS_THROTTLE1_SET","value":16358,"ours":null}
+{"t":1790887991719,"s":21.985,"kind":"state","text":"SIM ON GROUND 1 → 0","onGround":0}
+{"t":1790887995292,"s":25.558,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1790887995292,"s":25.558,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.CFG","signal":true}
+{"t":1790887995293,"s":25.559,"kind":"masker","text":"system: AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","maskerKind":"system","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1790887995740,"s":26.006,"kind":"state","text":"SIM ON GROUND 0 → 1","onGround":1}
+{"t":1790887996037,"s":26.303,"kind":"settle","text":"COM ACTIVE FREQUENCY:1 124.85 → 127.85","name":"COM ACTIVE FREQUENCY:1","from":124.85,"to":127.85}
+{"t":1790887996037,"s":26.303,"kind":"settle","text":"L:DATLoaded 0 → 1","name":"L:DATLoaded","from":0,"to":1}
+{"t":1790887996071,"s":26.337,"kind":"settle","text":"LIGHT BEACON 0 → 1","name":"LIGHT BEACON","from":0,"to":1}
+{"t":1790887996071,"s":26.337,"kind":"settle","text":"LIGHT STROBE 0 → 1","name":"LIGHT STROBE","from":0,"to":1}
+{"t":1790887996071,"s":26.337,"kind":"settle","text":"LIGHT LANDING 0 → 1","name":"LIGHT LANDING","from":0,"to":1}
+{"t":1790887996072,"s":26.338,"kind":"settle","text":"FLAPS HANDLE INDEX 0 → 6","name":"FLAPS HANDLE INDEX","from":0,"to":6}
+{"t":1790887996387,"s":26.653,"kind":"settle","text":"ELECTRICAL MASTER BATTERY:1 0 → 1","name":"ELECTRICAL MASTER BATTERY:1","from":0,"to":1}
+{"t":1790887997373,"s":27.639,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887997373,"s":27.639,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887997373,"s":27.639,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16234","name":"AXIS_THROTTLE1_SET","value":16234,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16259, not ours","event":"AXIS_THROTTLE1_SET","data":[16259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16259, not ours","event":"AXIS_THROTTLE1_SET","data":[16259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"settle","text":"L:DATLoaded or L:DatNotFound at 1 reads {\"L:DATLoaded\":1,\"L:DatNotFound\":0}, ready","ready":"L:DATLoaded or L:DatNotFound at 1","value":{"L:DATLoaded":1,"L:DatNotFound":0},"ok":true}
+{"t":1790887997374,"s":27.64,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16259","name":"AXIS_THROTTLE1_SET","value":16259,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16259","name":"AXIS_THROTTLE1_SET","value":16259,"ours":null}
+{"t":1790887997374,"s":27.64,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790887998652,"s":28.918,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16259, not ours","event":"AXIS_THROTTLE1_SET","data":[16259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887998652,"s":28.918,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887998652,"s":28.918,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16284, not ours","event":"AXIS_THROTTLE1_SET","data":[16284,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790887998652,"s":28.918,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16259","name":"AXIS_THROTTLE1_SET","value":16259,"ours":null}
+{"t":1790887998652,"s":28.918,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790887998652,"s":28.918,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16284","name":"AXIS_THROTTLE1_SET","value":16284,"ours":null}
+{"t":1790888000178,"s":30.444,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888000179,"s":30.445,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790888000278,"s":30.544,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16259, not ours","event":"AXIS_THROTTLE1_SET","data":[16259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888000279,"s":30.545,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16259","name":"AXIS_THROTTLE1_SET","value":16259,"ours":null}
+{"t":1790888000379,"s":30.645,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888000379,"s":30.645,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790888000578,"s":30.844,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888000578,"s":30.844,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16234","name":"AXIS_THROTTLE1_SET","value":16234,"ours":null}
+{"t":1790888000611,"s":30.877,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16358, not ours","event":"AXIS_THROTTLE1_SET","data":[16358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888000611,"s":30.877,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16358","name":"AXIS_THROTTLE1_SET","value":16358,"ours":null}
+{"t":1790888006517,"s":36.783,"kind":"settle","text":"settled at 11.9s after the load request; the last change was ELECTRICAL MASTER BATTERY:1","settled":true,"quiet":true,"ms":11918,"lastChangeMs":10931,"last":"ELECTRICAL MASTER BATTERY:1","answered":15,"total":15,"lAnswered":4,"lTotal":4,"silent":[],"busiest":["ELECTRICAL MASTER BATTERY:1 ×2","LIGHT BEACON ×2","LIGHT STROBE ×2","LIGHT LANDING ×2"],"ready":[{"label":"L:DATLoaded or L:DatNotFound at 1","ms":11918,"value":{"L:DATLoaded":1,"L:DatNotFound":0}}]}
+{"t":1790888006550,"s":36.816,"kind":"inputs","text":"318 input events listed; watching 23 whose names match /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER/i","listed":318,"watched":["WALKAROUND_ELEVATORSHAKE","OILINSPECTIONSTICK","YOKE_LEFT_HIDER_SINGLE","YOKE_RIGHT_HIDER_SINGLE","HANDLING_ELEVATORTRIM_1","LEVER_DOOR_LATCH_2STATES","LEVER_THROTTLE_DRAG","LEVER_MIXTURE_DRAG","LEVER_RPM_DRAG","LEVER_CARB_HEAT_DRAG","LEVER_CABIN_VENT_L_DRAG","LEVER_CABIN_VENT_R_DRAG","LEVER_WINDOW_DEFROST_DRAG","LEVER_CABIN_HEAT_DRAG","LEVER_FLAPS_HANDLE_FLAPS_4STATE","LEVER_CABIN_VENT_RING_1_SHORT_NAME_KNOB","LEVER_CABIN_VENT_RING_2_SHORT_NAME_KNOB","LEVER_CABIN_VENT_RING_3_SHORT_NAME_KNOB","LEVER_CABIN_VENT_RING_4_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_1_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_2_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_3_SHORT_NAME_KNOB","LEVER_CABIN_VENT_BALL_4_SHORT_NAME_KNOB"]}
+{"t":1790888008549,"s":38.815,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888008549,"s":38.815,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16234","name":"AXIS_THROTTLE1_SET","value":16234,"ours":null}
+{"t":1790888008582,"s":38.848,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16358, not ours","event":"AXIS_THROTTLE1_SET","data":[16358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888008582,"s":38.848,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16358","name":"AXIS_THROTTLE1_SET","value":16358,"ours":null}
+{"t":1790888016682,"s":46.948,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16234, not ours","event":"AXIS_THROTTLE1_SET","data":[16234,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888016682,"s":46.948,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16234","name":"AXIS_THROTTLE1_SET","value":16234,"ours":null}
+{"t":1790888016682,"s":46.948,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16358, not ours","event":"AXIS_THROTTLE1_SET","data":[16358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888016682,"s":46.948,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16358","name":"AXIS_THROTTLE1_SET","value":16358,"ours":null}
+{"t":1790888019348,"s":49.614,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16383, not ours","event":"AXIS_THROTTLE1_SET","data":[16383,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888019348,"s":49.614,"kind":"key","text":"K:AXIS_THROTTLE1_SET 16333, not ours","event":"AXIS_THROTTLE1_SET","data":[16333,0,0,0,0],"ex1":false,"ours":null}
+{"t":1790888019349,"s":49.615,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16383","name":"AXIS_THROTTLE1_SET","value":16383,"ours":null}
+{"t":1790888019349,"s":49.615,"kind":"masker got","text":"AXIS_THROTTLE1_SET 16333","name":"AXIS_THROTTLE1_SET","value":16333,"ours":null}
+{"t":1790888020220,"s":50.486,"kind":"key","text":"END, with FlightSimulator2024 in front","key":"END","foreground":"FlightSimulator2024"}
+{"t":1790888020220,"s":50.486,"kind":"masker","text":"cleared: cleared the mask group: the observer asked","maskerKind":"cleared","why":"the observer asked"}
+{"t":1790888020353,"s":50.619,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1790888020353,"s":50.619,"kind":"masker","text":"system: View 0 (none)","maskerKind":"system","event":"View","data":0}
+{"t":1790888020533,"s":50.799,"kind":"masker","text":"exited (code 0)","code":0,"signal":null}

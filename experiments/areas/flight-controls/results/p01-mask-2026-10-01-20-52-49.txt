@@ -1,0 +1,13 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T20:52:49.734Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "A2A Piper PA-24-250 Comanche", study a2a-pa24-comanche
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+Mode: masks installed with the Asobo Cessna 152 loaded, before A2A PA-24 Comanche 250 loaded through SimConnect
+
+pitch: masked AXIS_ELEVATOR_SET, AXIS_THROTTLE1_SET, AXIS_THROTTLE2_SET
+  not run
+
+throttle: masked AXIS_ELEVATOR_SET, AXIS_THROTTLE1_SET, AXIS_THROTTLE2_SET
+  not run
+
+Exceptions: none

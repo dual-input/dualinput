@@ -36,12 +36,12 @@
  * With --reload, the masks then go in before you reload the aircraft, to see
  * whether the order of registration decides a tie at 10,000,000.
  *
- * With --masks-first <study folder>, the probe instead loads the stock Cessna
- * 152, installs the masks, loads the aircraft's parked flight through
- * SimConnect, and asks for one window of yoke and throttle together: masked,
- * then cleared. It answers the same question as --reload without loading the
- * same aircraft twice in a row, which crashed the sim once
- * (record/areas/aircraft/log.md, 2026-10-01).
+ * With --masks-first <study folder>, start with another aircraft loaded, such
+ * as the stock Cessna 152. The probe installs the masks, loads the study
+ * aircraft's parked flight through SimConnect, and asks for one window of yoke
+ * and throttle together: masked, then cleared. It answers the same question as
+ * --reload without loading the same aircraft twice in a row, which crashed the
+ * sim once (record/areas/aircraft/log.md, 2026-10-01).
  *
  * The masker fails open:
  *   - it clears its group and exits when the observer's keepalive stops for
@@ -669,10 +669,10 @@ async function observer() {
     const a = AIRCRAFT[key]
     if (!a) return rec.log("error", `--masks-first: no aircraft ${JSON.stringify(key)} in experiments/areas/aircraft/lib/aircraft.mjs`)
     for (const control of Object.keys(CONTROLS)) maskEvents[control] = MASKS_FIRST
+    if (title === a.title) return rec.log("error", `--masks-first: ${a.name} is already loaded; load another aircraft, such as the ${NEUTRAL.name}, and run again`)
     try {
       sim.track()
       await sleep(2500)
-      if (sim.live.title !== NEUTRAL.title) await load("neutral", "runway")
       if (!await startMasker({ events: MASKS_FIRST, capMs: RELOAD_CAP_MS })) return
       await load(key, "parked", a)
     } catch (e) {
@@ -713,7 +713,7 @@ async function observer() {
       `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
       `Aircraft: TITLE ${JSON.stringify(title)}, ${key ? `study ${key}` : "no study matched: stock variables only"}`,
       `Mask priority ${MASK_PRIORITY}, re-send priorities ${RESEND_SWEEP.join(", ")}, ${PHASE_MS / 1000}s phases`,
-      ...(target ? [`Mode: masks installed with the ${NEUTRAL.name} loaded, before ${AIRCRAFT[key]?.name ?? key} loaded through SimConnect`] : []),
+      ...(target ? [`Mode: masks installed with TITLE ${JSON.stringify(title)} loaded, before ${AIRCRAFT[key]?.name ?? key} loaded through SimConnect`] : []),
     ]
     for (const control of Object.keys(CONTROLS)) {
       const rs = results.filter((r) => r.control === control)

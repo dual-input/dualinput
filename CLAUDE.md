@@ -57,7 +57,7 @@ FS Copilot's aircraft profiles come from community contributors with varying exp
 **Batch everything that needs the simulator into one deliberate session.**
 Getting MSFS into a flight with the right aircraft and panel takes a person minutes.
 Write each probe to answer as much as it can in one run, and print a report that stands on its own.
-We haven't tried loading a flight through SimConnect, and this rule loosens if that works.
+`SimConnect_FlightLoad` can switch the aircraft without a person, but MSFS 2024 crashed on 5 of about 30 such loads ([aircraft log](record/areas/aircraft/log.md)), so plan on someone nearby to relaunch it.
 
 **Product code never imports from `experiments/`.**
 A prototype that works reaches the product through a plan stage that rebuilds it, so a prototype's shortcuts never ship.

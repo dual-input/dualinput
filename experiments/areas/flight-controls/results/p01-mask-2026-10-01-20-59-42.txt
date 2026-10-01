@@ -1,0 +1,22 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T20:59:42.109Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "777-300ER", study pmdg-777-300er
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+
+pitch: masked AXIS_ELEVATOR_SET
+  free: baseline · heard AXIS_ELEVATOR_SET ×112 -16384..16384 · input events none · values L:yokes_Fore_Aft 0..2
+  masked: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×83 -16384..16384 · masker got AXIS_ELEVATOR_SET ×82 -16384..16384 · input events none · values none moved · as expected
+  cleared: moved (L:yokes_Fore_Aft at 100% of the free range) · heard AXIS_ELEVATOR_SET ×91 -16384..16384 · masker got none · input events none · values L:yokes_Fore_Aft 0..2 · as expected
+  half, re-sent at 10000001: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×107 -16384..16384 · masker got AXIS_ELEVATOR_SET ×107 -16384..16384 · masker heard its own re-sends AXIS_ELEVATOR_SET ×108 -8192..8192 · input events none · values none moved · expected half
+  half, re-sent at 10001000: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×135 -16384..16384 · masker got AXIS_ELEVATOR_SET ×135 -16384..16384 · input events none · values none moved · expected half
+  half, re-sent at 100000000: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×96 -16384..16384 · masker got AXIS_ELEVATOR_SET ×96 -16384..16384 · input events none · values YOKE Y POSITION -50.000001..50.000001, ELEVATOR POSITION -50.000001..50.000001 · expected half
+  half, re-sent at 1900000000: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×98 -16384..16384 · masker got AXIS_ELEVATOR_SET ×98 -16384..16384 · input events none · values YOKE Y POSITION -50.000001..50.000001, ELEVATOR POSITION -50.000001..50.000001 · expected half
+  half, re-sent at 2000000000: blocked (L:yokes_Fore_Aft at 0% of the free range) · heard AXIS_ELEVATOR_SET ×105 -16384..16384 · masker got AXIS_ELEVATOR_SET ×103 -16384..16384 · masker heard its own re-sends AXIS_ELEVATOR_SET ×1 6120 · input events none · values YOKE Y POSITION -50.000001..50.000001, ELEVATOR POSITION -50.000001..50.000001 · expected half
+  killed: moved (L:yokes_Fore_Aft at 100% of the free range) · heard AXIS_ELEVATOR_SET ×106 -16384..16384 · masker got none · input events none · values L:yokes_Fore_Aft 0..2 · as expected
+
+throttle: masked THROTTLE1_AXIS_SET_EX1
+  free: baseline · heard THROTTLE1_AXIS_SET_EX1 ×64 -16384..16384 · input events none · values GENERAL ENG THROTTLE LEVER POSITION:1 0..90
+  masked: blocked (GENERAL ENG THROTTLE LEVER POSITION:1 at 0% of the free range) · heard THROTTLE1_AXIS_SET_EX1 ×57 -16384..16384, AXIS_ELEVATOR_SET ×2 -56..-54 · masker got THROTTLE1_AXIS_SET_EX1 ×57 -16384..16384 · input events none · values L:yokes_Fore_Aft 1.003296..1.003418 · as expected
+  cleared: moved (GENERAL ENG THROTTLE LEVER POSITION:1 at 100% of the free range) · heard THROTTLE1_AXIS_SET_EX1 ×64 -16384..16384 · masker got none · input events none · values GENERAL ENG THROTTLE LEVER POSITION:1 0..90 · as expected
+
+Exceptions: ERROR (1) on enumerate input events, parameter 4294967295

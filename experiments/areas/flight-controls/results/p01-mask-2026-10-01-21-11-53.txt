@@ -1,0 +1,12 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-01T21:11:53.011Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "777-300ER", study pmdg-777-300er
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+
+pitch: masked nothing
+  held at a quarter of its travel, dead zone set: no AXIS_ELEVATOR_SET: consistent with the value after the dead zone, if the yoke was off center · heard none · masker got none · input events none · values none moved
+
+throttle: masked nothing
+  not run
+
+Exceptions: ERROR (1) on enumerate input events, parameter 4294967295

@@ -7,6 +7,23 @@ A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777
 The probe is [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), and its raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-01, with the yoke and throttle on our development machine.
 
+## 2026-10-01: Inside a dead zone set in MSFS, the axis fires no event
+
+**Asked:** does an axis event carry the value after MSFS's own dead zone, or the raw axis?
+
+**Expected:** no prediction.
+
+**Found:** with a dead zone of about 50% set on the pitch axis, and the yoke held at about a quarter of its travel and wiggled, our listener at priority 1 heard no `K:AXIS_ELEVATOR_SET` in 5s, and the PMDG 777's `L:yokes_Fore_Aft` didn't move.
+Every earlier window with the yoke moving heard 83 or more in 5s.
+So MSFS applies the dead zone before it fires the event, and a masked event carries the value after it.
+Whether MSFS applies its sensitivity curve at the same stage is unmeasured.
+
+**Changed:** Crosscheck keeps the pilot's own dead zone when it takes their input by masking, so it needn't rebuild that setting.
+
+**Affects:** the idea [Mixed flight controls](../product/ideas.md#mixed-flight-controls).
+
+**Evidence:** [the dead-zone run](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-21-11-53.txt).
+
 ## 2026-10-01: The PMDG 777 takes a value sent back with the legacy transmit call
 
 **Asked:** does the 777 act on a value sent back with `SimConnect_TransmitClientEvent`, rather than the `_EX1` form it ignored ([the entry below](#2026-10-01-a-value-sent-back-at-10000001-doesnt-get-past-a-group-at-10000000-and-the-777-ignored-re-sent-values))?

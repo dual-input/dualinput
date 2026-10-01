@@ -36,6 +36,13 @@
  * With --reload, the masks then go in before you reload the aircraft, to see
  * whether the order of registration decides a tie at 10,000,000.
  *
+ * With --masks-first <study folder>, the probe instead loads the stock Cessna
+ * 152, installs the masks, loads the aircraft's parked flight through
+ * SimConnect, and asks for one window of yoke and throttle together: masked,
+ * then cleared. It answers the same question as --reload without loading the
+ * same aircraft twice in a row, which crashed the sim once
+ * (record/areas/aircraft/log.md, 2026-10-01).
+ *
  * The masker fails open:
  *   - it clears its group and exits when the observer's keepalive stops for
  *     15s or its stdin closes, and after 10 minutes in any case (30 for the
@@ -46,6 +53,7 @@
  *     every masker this probe started, from any terminal.
  *
  *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--reload]
+ *   node experiments/areas/flight-controls/p01-mask.mjs --masks-first <study folder>
  *
  * <study folder> is a folder under record/areas/aircraft/, such as
  * a2a-pa24-comanche. Without it the probe matches the loaded aircraft's TITLE,
@@ -60,7 +68,10 @@ import { execFileSync, spawn } from "node:child_process"
 import { createInterface } from "node:readline"
 import { fileURLToPath } from "node:url"
 
-import { AIRCRAFT } from "../aircraft/lib/aircraft.mjs"
+import { AIRCRAFT, NEUTRAL } from "../aircraft/lib/aircraft.mjs"
+import { readFlight } from "../aircraft/lib/flights.mjs"
+import { loadFlight, settle } from "../aircraft/lib/load.mjs"
+import { flightFile } from "../aircraft/lib/make.mjs"
 import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, PRIORITY, Sim } from "../aircraft/lib/sim.mjs"
 
@@ -101,6 +112,12 @@ const CANDIDATES = [
 const OUTPUTS = new Set(["ELEVATOR_SET", "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET"])
 
 const isAxis = (name) => name.includes("AXIS")
+
+// What --masks-first masks: the events the PA-24's free phases heard from our
+// development machine's yoke and throttle (measured on MSFS 2024, 2026-10-01,
+// experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-46-10.txt),
+// and the second engine's throttle, which the Baron's heard.
+const MASKS_FIRST = ["AXIS_ELEVATOR_SET", "AXIS_THROTTLE1_SET", "AXIS_THROTTLE2_SET"]
 
 // Units as the sim's own behaviors read these variables (MSFS 2024 SDK 1.7.3,
 // ModelBehaviorDefs/Asobo/Common/Handling.xml and Subtemplates/).
@@ -377,7 +394,8 @@ async function observer() {
   const beep = startBeeper()
 
   const title = (await sim.readStrings(["TITLE"])).get("TITLE") ?? null
-  const key = opt("--aircraft") ?? Object.entries(AIRCRAFT).find(([, a]) => a.title === title)?.[0] ?? null
+  const target = opt("--masks-first")
+  const key = target ?? opt("--aircraft") ?? Object.entries(AIRCRAFT).find(([, a]) => a.title === title)?.[0] ?? null
   const local = LOCAL[key] ?? {}
   rec.log("aircraft", `TITLE ${JSON.stringify(title)}, ${key ? `study ${key}` : "no study matched: stock variables only"}`, { title, key })
 
@@ -494,9 +512,9 @@ async function observer() {
     return r
   }
 
-  function verdict(w, base) {
+  function verdict(w, base, control = w.control) {
     if (!base) return { word: "baseline" }
-    for (const [name] of effectVars(w.control)) {
+    for (const [name] of effectVars(control)) {
       const b = span(base.effects.get(name))
       if (b <= 0) continue
       const ratio = span(w.effects.get(name)) / b
@@ -615,8 +633,76 @@ async function observer() {
     "  - this console where you can read it, and the sim in front",
   ].join("\n"))
 
-  for (const control of Object.keys(CONTROLS)) await run(control)
-  if (argv.includes("--reload")) await reload()
+  // Loads a flight through SimConnect with the aircraft harness's gate, then
+  // waits for the aircraft to settle (experiments/areas/aircraft/lib/load.mjs).
+  async function load(id, state, a = null) {
+    const flight = readFlight(flightFile(id, state))
+    const r = await loadFlight(sim, rec, flight, { pages: false })
+    if (!r.passed) throw new Error(`the load of ${flight.rel} failed: ${r.failed}`)
+    const ready = (a?.ready ?? []).filter((x) => x.vars).map((x) => ({
+      label: x.label,
+      check: async () => {
+        const v = await sim.read(x.vars.map((n) => [n, "number"]))
+        const value = Object.fromEntries(x.vars.map((n) => [n, v.get(n)]))
+        return { ok: x.test(value), value }
+      },
+    }))
+    await settle(sim, rec, { t0: r.t0, lVars: a?.settleL ?? [], ready, capMs: 90_000 })
+  }
+
+  // One window over every control's values at once.
+  async function captureAll(label) {
+    win = {
+      control: null, phase: label,
+      heard: new Map(), masker: new Map(), maskerOurs: new Map(), inputs: new Map(), effects: new Map(),
+      keySeries: [], effectSeries: [],
+    }
+    for (const [v] of allEffects) if (latest.has(v)) track(win.effects, v, latest.get(v))
+    beep(1000, 100)
+    await sleep(PHASE_MS)
+    const w = win
+    win = null
+    return w
+  }
+
+  async function masksFirst() {
+    const a = AIRCRAFT[key]
+    if (!a) return rec.log("error", `--masks-first: no aircraft ${JSON.stringify(key)} in experiments/areas/aircraft/lib/aircraft.mjs`)
+    for (const control of Object.keys(CONTROLS)) maskEvents[control] = MASKS_FIRST
+    try {
+      sim.track()
+      await sleep(2500)
+      if (sim.live.title !== NEUTRAL.title) await load("neutral", "runway")
+      if (!await startMasker({ events: MASKS_FIRST, capMs: RELOAD_CAP_MS })) return
+      await load(key, "parked", a)
+    } catch (e) {
+      return rec.log("error", e.message)
+    }
+    if (!masker?.running) return rec.log("phase", "masks first: the masker didn't survive the load")
+    await startWatches()
+    if (!await ask(`${a.name}, masked before it loaded`, "Keep moving the yoke and the throttle together, from Page Down until the long low beep, about 12s. Don't stop at the short beep.")) return
+    const masked = await captureAll("masked before the aircraft loaded")
+    await stopMasker()
+    const cleared = await captureAll("cleared")
+    beep(500, 600)
+    console.log("  Stop.")
+    for (const control of Object.keys(CONTROLS)) {
+      for (const r of [
+        { control, phase: masked.phase, expect: "blocked", window: masked, verdict: verdict(masked, cleared, control) },
+        { control, phase: cleared.phase, expect: null, window: cleared, verdict: { word: "baseline" } },
+      ]) {
+        results.push(r)
+        rec.log("phase", `${control} ${r.phase}: ${summary(r)}`, { control, phase: r.phase, expect: r.expect, verdict: r.verdict })
+      }
+    }
+  }
+
+  if (target) {
+    await masksFirst()
+  } else {
+    for (const control of Object.keys(CONTROLS)) await run(control)
+    if (argv.includes("--reload")) await reload()
+  }
   await finish()
   process.exit(0)
 
@@ -627,6 +713,7 @@ async function observer() {
       `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
       `Aircraft: TITLE ${JSON.stringify(title)}, ${key ? `study ${key}` : "no study matched: stock variables only"}`,
       `Mask priority ${MASK_PRIORITY}, re-send priorities ${RESEND_SWEEP.join(", ")}, ${PHASE_MS / 1000}s phases`,
+      ...(target ? [`Mode: masks installed with the ${NEUTRAL.name} loaded, before ${AIRCRAFT[key]?.name ?? key} loaded through SimConnect`] : []),
     ]
     for (const control of Object.keys(CONTROLS)) {
       const rs = results.filter((r) => r.control === control)

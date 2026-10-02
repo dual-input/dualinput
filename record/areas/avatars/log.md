@@ -9,6 +9,33 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: SimConnect_CameraGet includes a Tobii head tracker's rotation, and its position is in meters
+
+**Asked:** does a head tracker's movement show in `SimConnect_CameraGet`, and what are the axes and unit of its position?
+
+**Expected:** ChasePlane mixes head tracking into the pose it gives the camera, since `CP.dll` logs `tobii_raw`, `applied_pose`, and `output_pose` (read in p42-util-chaseplane 26.39.1).
+No prediction for the sim's own camera with ChasePlane off.
+The pilot expected no translation from the tracker, which they believe a recent MSFS update broke (unverified).
+
+**Found:**
+
+- The pilot moved only their head, with a Tobii tracker running and their hand off the mouse.
+  `A:CAMERA GAMEPLAY PITCH YAW` held at −6.3° and 1.3° throughout, so it doesn't include the tracker.
+- With ChasePlane on, turning the head moved `SimConnect_CameraGet`'s pitch from −60° to 31° and its yaw from −87° to 73°, in the `SIMOBJECT` referential.
+  Its position moved too, by up to 0.31m during the step where the pilot rose and sank in the seat.
+- With ChasePlane disabled, turning the head moved the pitch from −80° to 11° and the yaw from −122° to 59°, and leaning rolled the camera by up to 21°.
+  The position didn't move: every axis stayed within 0.0002m.
+- From the `WORLD` referential's latitude, longitude, and altitude, the probe worked out where the camera was in meters from the aircraft's reference point.
+  Against those, the `SIMOBJECT` and `EYEPOINT` positions are in meters, with x pointing left, y up, and z forward (correlation 1.000 on each axis, slope 1.00).
+- ChasePlane's `L:p42_cp_r_x`, `_y`, and `_z` are in meters too, with x pointing right, y up, and z forward (slopes 1.00, 0.94, and 0.99).
+
+**Changed:** `SimConnect_CameraGet` is the one source that follows the mouse, ChasePlane, and a head tracker, so it's what Crosscheck reads to turn the other pilot's head.
+With ChasePlane off, the sim's own camera carries the tracker's rotation and none of its translation, so a lean shows only with ChasePlane on.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p07's run](../../../experiments/areas/avatars/results/p07-tracker-2026-10-02-22-16-05.txt).
+
 ## 2026-10-03: SimConnect_CameraGet gives where the pilot looks, with ChasePlane driving the camera or not
 
 **Asked:** what tells Crosscheck where the pilot looks in the cockpit, whether or not ChasePlane drives the camera?

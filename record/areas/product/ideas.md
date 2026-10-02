@@ -226,6 +226,7 @@ Crosscheck's controls, such as session status and the take-control button, run a
 That makes the interface a client of Crosscheck's app on whichever screen it runs, and the app's design has to allow that from the start.
 
 - **Tech:** MSFS 2024 runs third-party EFB apps: the A2A Aerostar 600's tablet is one, `Aerostar600App` (read in a2a-aircraft-aerostar600 1.0.6, `html_ui/efb_ui/efb_apps/Aerostar600App/A2ATabletApp.js`).
+  The sim's EFB opens with the Tab key in any aircraft, including those that ship their own tablet, such as the Black Square Baron Pro (from our own use of MSFS 2024, as of 2026-10-02).
 
 ## Tools
 

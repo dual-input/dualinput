@@ -23,6 +23,19 @@ export function offset(p, aheadM, rightM) {
   }
 }
 
+// Where p is in a's frame: meters forward along a.hdg, to its right, and up,
+// with altitudes in feet as the sim gives them.
+export function toBody(a, p) {
+  const north = (p.lat - a.lat) * RAD * EARTH_M
+  const east = (p.lon - a.lon) * RAD * EARTH_M * Math.cos(a.lat * RAD)
+  const h = a.hdg * RAD
+  return {
+    forward: north * Math.cos(h) + east * Math.sin(h),
+    right: -north * Math.sin(h) + east * Math.cos(h),
+    up: (p.alt - a.alt) * 0.3048,
+  }
+}
+
 // The true bearing from a to b.
 export function bearing(a, b) {
   const y = Math.sin((b.lon - a.lon) * RAD) * Math.cos(b.lat * RAD)

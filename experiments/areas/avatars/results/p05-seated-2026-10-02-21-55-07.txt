@@ -1,0 +1,9 @@
+p05 · A seated GSX passenger beside the pilot, on MSFS 2024
+2026-10-02T21:55:07.576Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  aircraft TITLE "Cessna C152 Aerial Advertising"
+  placing at seat SEAT_C152_Pax: 0.10m forward, 0.21m right, -0.13m up
+  FSDT_Passenger_CASUAL_M_0030_SEATED: object 55328775, StaticObject, read back at 0.10m forward, 0.21m right, -0.13m up; SITS
+
+Exceptions: 
+  1 × ERROR (1) on release object 55328775, parameter 1

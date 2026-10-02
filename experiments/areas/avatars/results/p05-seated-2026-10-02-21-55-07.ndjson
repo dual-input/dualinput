@@ -1,0 +1,14 @@
+{"t":1790978107614,"s":0.038,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790978108063,"s":0.487,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790978108063,"s":0.487,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1790978108064,"s":0.488,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1790978108429,"s":0.853,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\"","title":"Cessna C152 Aerial Advertising","aircraft":{"lat":43.824383840443154,"lon":18.339351750369566,"alt":1684.225179366071,"hdg":26.663229817951446,"error":null}}
+{"t":1790978108629,"s":1.053,"kind":"setup","text":"placing at seat SEAT_C152_Pax: 0.10m forward, 0.21m right, -0.13m up"}
+{"t":1790978113210,"s":5.634,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1790978113231,"s":5.655,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 55328775","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790978113231,"s":5.655,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 55328775","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790978113231,"s":5.655,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 55328775","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790978113231,"s":5.655,"kind":"write","text":"PLANE LATITUDE ← 43.824384, PLANE LONGITUDE ← 18.339355, PLANE ALTITUDE ← 1683.790202, PLANE HEADING DEGREES TRUE ← 26.66323 on object 55328775","object":55328775,"values":[43.82438375072691,18.339354674070584,1683.790201903015,26.663229817951446]}
+{"t":1790978113232,"s":5.656,"kind":"exception","text":"ERROR (1) on release object 55328775, parameter 1","exception":1,"name":"ERROR","sendId":34,"index":1,"sent":"release object 55328775"}
+{"t":1790978117527,"s":9.951,"kind":"press","text":"Page Down: it sits"}
+{"t":1790978125215,"s":17.639,"kind":"seated","text":"FSDT_Passenger_CASUAL_M_0030_SEATED: object 55328775, StaticObject, read back at 0.10m forward, 0.21m right, -0.13m up; SITS","category":"StaticObject","readBack":{"lat":43.824383750726895,"lon":18.339354674070577,"alt":1683.790201903015,"hdg":26.663229817951436,"error":null},"presses":1}

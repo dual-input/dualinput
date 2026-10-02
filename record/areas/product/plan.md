@@ -44,11 +44,40 @@ v1 has these whatever is picked, because they're the product rather than ideas:
 - the connection between machines
 - profiles, and the profile IDE we write them in
 
-Picks so far:
+v1's aircraft is the [Black Square Baron Pro](../aircraft/black-square-baron-pro/study.md).
 
-- **v1:** Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off.
-  The tablet part has no pick yet.
-- **v1 if its probe finds a way to hide the other pilot's copy of the aircraft:** [Multiplayer kept on](ideas.md#multiplayer-kept-on).
+The picks, picked on 2026-10-02:
+
+- **v1:**
+  - [State sync](ideas.md#state-sync-with-variables-and-events)
+  - [Pointer sync](ideas.md#pointer-sync)
+  - [Traffic sync](ideas.md#traffic-sync)
+  - Hearing ATC, from [ATC sync](ideas.md#atc-sync)
+  - Time, date, sim rate, and pause, from [Environment sync](ideas.md#environment-sync)
+  - [Flight setup by the host](ideas.md#flight-setup-by-the-host)
+  - [Preflight match check](ideas.md#preflight-match-check)
+  - The invite code, from [One-click invite](ideas.md#one-click-invite)
+  - The take-control key, and voice phrases, both from [Voice handover](ideas.md#voice-handover)
+  - All three kinds of [shared pointing](ideas.md#shared-pointing): in the 3D cockpit, on a switch, and on panel displays
+  - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
+  - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
+- **Soon:**
+  - [Ground operations sync](ideas.md#ground-operations-sync)
+  - [Soft takeover](ideas.md#soft-takeover-on-handover)
+  - [Mixed flight controls](ideas.md#mixed-flight-controls)
+  - [Seat awareness](ideas.md#seat-awareness)
+- **Later:**
+  - [Bus bridge](ideas.md#bus-bridge)
+  - [EventBus bridge](ideas.md#eventbus-bridge)
+  - [WASM instrument sync](ideas.md#wasm-instrument-sync)
+  - The second pilot's mic reaching ATC, from [ATC sync](ideas.md#atc-sync)
+  - Weather, from [Environment sync](ideas.md#environment-sync)
+  - Home-network discovery, from [One-click invite](ideas.md#one-click-invite)
+  - Crews beyond two, and passengers, both from [Join modes](ideas.md#join-modes)
+  - The tablet in a browser, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet)
+  - The debrief timeline, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
+  - Automatic profile fetch, and the community profile registry, both from [Profile registry](ideas.md#profile-registry)
+- **Not picked yet:** [Avatar sync](ideas.md#avatar-sync).
 
 ## 4. v1 scope
 
@@ -70,8 +99,6 @@ Exit: each risk below has a log entry that answers it.
 - Whether our own code can listen on `wt.eb.evt` ([EventBus bridge](ideas.md#eventbus-bridge)).
 - How much network delay mixed flight controls can take ([Mixed flight controls](ideas.md#mixed-flight-controls)).
 - What share of pilot pairs can't connect directly, which decides how much traffic the relay carries ([01-aims](01-aims.md#relay-and-license)).
-- Whether SimConnect lists the other pilot's aircraft in a multiplayer session, and whether anything can hide it ([Multiplayer kept on](ideas.md#multiplayer-kept-on)).
-
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture

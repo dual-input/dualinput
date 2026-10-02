@@ -106,8 +106,18 @@ The check leaves out Crosscheck's own version, which the connection checks, and 
 
 ### One-click invite
 
-A pilot invites the other with a link to paste into Discord, such as `crosscheck://join/<code>` (hypothetical).
-Two PCs on the same home network find each other without a link, and the connection shows in plain words, such as "Direct, 38ms" (hypothetical).
+A pilot invites the other with a short code to paste into Discord.
+When the other pilot copies the code and switches to Crosscheck, Crosscheck finds its own code on the clipboard and joins the session, so copying is the only step.
+Two PCs on the same home network find each other without a code, and the connection shows in plain words, such as "Direct, 38ms" (hypothetical).
+
+- **Tech:** Discord shows `crosscheck://join/<code>` as plain text, and again as plain text when it's written as a Markdown link (tested in Discord, 2026-10-02).
+  We think Discord makes only http and https links clickable, whichever apps are installed (unverified).
+  An invite link could still start with https, pointing to a static page, on GitHub Pages for example, that sends the browser on to `crosscheck://join/<code>`.
+  The other pilot would then click past Discord's warning that the link leaves Discord and the browser's "Open Crosscheck?" prompt, which is more work than copying a code, so we expect to drop links in favor of codes.
+  Crosscheck can tell its own code on the clipboard from anything else only if the code's format is distinctive, such as a fixed prefix.
+- **Product:** a code also works in any chat app, and one pilot can read it out to the other over voice.
+- **Open questions:** whether Crosscheck joins as soon as it finds a code or asks first, since an old code can sit on the clipboard from an earlier session.
+  Whether Discord's own join invitations, which games send through Rich Presence, are open to an app that isn't a game.
 
 ## Control
 

@@ -19,9 +19,9 @@ The problems below are ones we expect.
 
 ### Host
 
-- **Who:** starts the session, and usually knows the aircraft and the sim better than the joiners.
+- **Who:** starts the session, and can be the pilot who knows the aircraft and the sim best, or someone using Crosscheck for the first time.
 - **Wants:** their friends in the same flight without walking them through it.
-- **Goes wrong:** they end up debugging a friend's setup over voice.
+- **Goes wrong:** an experienced host ends up debugging a friend's setup over voice, and a first-time host doesn't know how to start a session or get their friend into it.
 
 ### Joiner
 

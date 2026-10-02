@@ -51,11 +51,9 @@
  * the .txt beside it.
  */
 
-import { spawn } from "node:child_process"
-import { createInterface } from "node:readline"
-
 import { InitPosition } from "node-simconnect"
 
+import { SKIP, START, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { distance } from "../aircraft/lib/flights.mjs"
 import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "../aircraft/lib/sim.mjs"
@@ -106,79 +104,6 @@ const HUMAN = /character|human|people|person|pilot|crew|passenger|marshal|walker
 // (devsupport.flightsimulator.com/t/11769). Tried only when the sim lists no
 // person-like title of its own.
 const FORUM_TITLE = "CharacterSim_Female_Slim"
-
-// ---------------------------------------------------------------- keys and beeps
-
-// From p01-mask (experiments/areas/flight-controls/p01-mask.mjs), with
-// listeners added, so the figures step can count presses without waiting.
-const encode = (ps) => Buffer.from(ps, "utf16le").toString("base64")
-const powershell = (ps, stdio) =>
-  spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encode(ps)], { stdio })
-
-const KEYS_PS = `
-$ProgressPreference = "SilentlyContinue"
-Add-Type @"
-using System; using System.Runtime.InteropServices;
-public static class CrosscheckKeys {
-  [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int v);
-  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
-}
-"@
-[Console]::Out.WriteLine("READY")
-$keys = @{ 0x22 = "PGDN"; 0x23 = "END" }
-$was = @{ 0x22 = $false; 0x23 = $false }
-while ($true) {
-  foreach ($k in @(0x22, 0x23)) {
-    $now = ([CrosscheckKeys]::GetAsyncKeyState($k) -band 0x8000) -ne 0
-    if ($now -and -not $was[$k]) {
-      $procId = 0
-      [void][CrosscheckKeys]::GetWindowThreadProcessId([CrosscheckKeys]::GetForegroundWindow(), [ref]$procId)
-      $name = "?"
-      try { $name = (Get-Process -Id $procId -ErrorAction Stop).ProcessName } catch {}
-      [Console]::Out.WriteLine("KEY " + $keys[$k] + " " + $name)
-    }
-    $was[$k] = $now
-  }
-  Start-Sleep -Milliseconds 20
-}`
-
-const BEEP_PS = `
-while (($line = [Console]::In.ReadLine()) -ne $null) {
-  $p = $line.Split(" ")
-  [Console]::Beep([int]$p[0], [int]$p[1])
-}`
-
-function startKeys() {
-  const ps = powershell(KEYS_PS, ["ignore", "pipe", "ignore"])
-  process.on("exit", () => { try { ps.kill() } catch { /* gone */ } })
-  let waiter = null
-  const listeners = new Set()
-  const out = createInterface({ input: ps.stdout })
-  return new Promise((ready, fail) => {
-    ps.on("error", fail)
-    out.on("line", (l) => {
-      if (l === "READY") {
-        return ready({
-          next: () => new Promise((r) => { waiter = r }),
-          listen: (fn) => { listeners.add(fn); return () => listeners.delete(fn) },
-        })
-      }
-      if (!l.startsWith("KEY ")) return
-      const [, key, ...fg] = l.split(" ")
-      const k = { key, foreground: fg.join(" "), t: Date.now() }
-      for (const fn of listeners) fn(k)
-      // A press while nobody waits is dropped, so a stray key can't start a step.
-      if (waiter) { const w = waiter; waiter = null; w(k) }
-    })
-  })
-}
-
-function startBeeper() {
-  const ps = powershell(BEEP_PS, ["pipe", "ignore", "ignore"])
-  process.on("exit", () => { try { ps.kill() } catch { /* gone */ } })
-  return (hz, ms) => { try { ps.stdin.write(`${hz} ${ms}\n`) } catch { /* no sound is no failure */ } }
-}
 
 // ---------------------------------------------------------------- geometry
 
@@ -466,10 +391,10 @@ function phaseSummary(name) {
 // ------------------------------------------------ steps
 
 async function ask(heading, instruction) {
-  console.log(`\n▶ ${heading}\n  ${instruction}\n  Page Down to start, End to skip.`)
+  console.log(`\n▶ ${heading}\n  ${instruction}\n  ${START} to start, ${SKIP} to skip.`)
   const k = await keys.next()
   rec.log("key", `${k.key}, with ${k.foreground} in front`, k)
-  return k.key === "PGDN"
+  return k.key === "START"
 }
 
 async function timed(name, ms) {
@@ -569,7 +494,7 @@ rec.log("candidates", candidates.join(", "), { candidates })
 
 if (anchor() && await ask("Figures in front of you", `Stand still, facing open ground, and press Page Down. At each short beep a figure appears ${AHEAD_M}m in front of you for ${SHOW_MS / 1000}s; press Page Down each time you see one. ${plural(candidates.length, "figure")}, about ${Math.ceil(candidates.length * (SHOW_MS + 1500) / 1000)}s.`)) {
   const presses = []
-  const unlisten = keys.listen((k) => { if (k.key === "PGDN") presses.push(k.t) })
+  const unlisten = keys.listen((k) => { if (k.key === "START") presses.push(k.t) })
   for (const title of candidates) {
     const a = anchor()
     beep(1000, 100)

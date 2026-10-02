@@ -82,6 +82,7 @@ import { fileURLToPath } from "node:url"
 
 import { EventFlag, SimConnectConstants } from "node-simconnect"
 
+import { SKIP, START, encode, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { AIRCRAFT, NEUTRAL } from "../aircraft/lib/aircraft.mjs"
 import { readFlight } from "../aircraft/lib/flights.mjs"
 import { loadFlight, settle } from "../aircraft/lib/load.mjs"
@@ -172,72 +173,6 @@ const CONTROL_LOCKS = {
 }
 
 const INPUT_EVENT_NAMES = /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER/i
-
-// ---------------------------------------------------------------- keys and beeps
-
-const encode = (ps) => Buffer.from(ps, "utf16le").toString("base64")
-const powershell = (ps, stdio) =>
-  spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encode(ps)], { stdio })
-
-// Page Down and End, read globally, as our FS Copilot fork's guided WASM probe
-// did (FS Copilot fork, record/wasm-pointer/probes/p01-wasm-away.mjs).
-// GetAsyncKeyState doesn't consume the key, so the sim sees it too.
-const KEYS_PS = `
-$ProgressPreference = "SilentlyContinue"
-Add-Type @"
-using System; using System.Runtime.InteropServices;
-public static class CrosscheckKeys {
-  [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int v);
-  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
-}
-"@
-[Console]::Out.WriteLine("READY")
-$keys = @{ 0x22 = "PGDN"; 0x23 = "END" }
-$was = @{ 0x22 = $false; 0x23 = $false }
-while ($true) {
-  foreach ($k in @(0x22, 0x23)) {
-    $now = ([CrosscheckKeys]::GetAsyncKeyState($k) -band 0x8000) -ne 0
-    if ($now -and -not $was[$k]) {
-      $procId = 0
-      [void][CrosscheckKeys]::GetWindowThreadProcessId([CrosscheckKeys]::GetForegroundWindow(), [ref]$procId)
-      $name = "?"
-      try { $name = (Get-Process -Id $procId -ErrorAction Stop).ProcessName } catch {}
-      [Console]::Out.WriteLine("KEY " + $keys[$k] + " " + $name)
-    }
-    $was[$k] = $now
-  }
-  Start-Sleep -Milliseconds 20
-}`
-
-const BEEP_PS = `
-while (($line = [Console]::In.ReadLine()) -ne $null) {
-  $p = $line.Split(" ")
-  [Console]::Beep([int]$p[0], [int]$p[1])
-}`
-
-function startKeys() {
-  const ps = powershell(KEYS_PS, ["ignore", "pipe", "ignore"])
-  process.on("exit", () => { try { ps.kill() } catch { /* gone */ } })
-  let waiter = null
-  const out = createInterface({ input: ps.stdout })
-  return new Promise((ready, fail) => {
-    ps.on("error", fail)
-    out.on("line", (l) => {
-      if (l === "READY") return ready({ next: () => new Promise((r) => { waiter = r }) })
-      if (!l.startsWith("KEY ")) return
-      const [, key, ...fg] = l.split(" ")
-      // A press while nobody waits is dropped, so a stray key can't start a run.
-      if (waiter) { const w = waiter; waiter = null; w({ key, foreground: fg.join(" ") }) }
-    })
-  })
-}
-
-function startBeeper() {
-  const ps = powershell(BEEP_PS, ["pipe", "ignore", "ignore"])
-  process.on("exit", () => { try { ps.kill() } catch { /* gone */ } })
-  return (hz, ms) => { try { ps.stdin.write(`${hz} ${ms}\n`) } catch { /* no sound is no failure */ } }
-}
 
 // ---------------------------------------------------------------- statistics
 
@@ -520,10 +455,10 @@ async function observer() {
   const sweep = legacy ? RESEND_SWEEP.filter((p) => p !== MASK_PRIORITY + 1) : RESEND_SWEEP
 
   async function ask(heading, instruction) {
-    console.log(`\n▶ ${heading}\n  ${instruction}\n  Page Down to start, End to skip.`)
+    console.log(`\n▶ ${heading}\n  ${instruction}\n  ${START} to start, ${SKIP} to skip.`)
     const k = await keys.next()
     rec.log("key", `${k.key}, with ${k.foreground} in front`, k)
-    return k.key === "PGDN"
+    return k.key === "START"
   }
 
   async function phase(control, name, expect = null) {

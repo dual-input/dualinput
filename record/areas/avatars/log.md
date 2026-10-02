@@ -1,10 +1,99 @@
 # Avatars: log
 
-What our experiments found about showing one pilot's avatar on the other pilot's machine with MSFS multiplayer off, as a figure, a person-shaped object Crosscheck spawns and moves, newest entry first.
-SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR`.
-The sim's own people stay invisible when a SimConnect client spawns them, while GSX's people show and follow a position we write every frame, sliding rather than walking.
-The probes are [p01-avatar.mjs](../../../experiments/areas/avatars/p01-avatar.mjs) and [p02-figures.mjs](../../../experiments/areas/avatars/p02-figures.mjs), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
-Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX and ChasePlane running.
+What our experiments found about showing one pilot's avatar on the other pilot's machine with MSFS multiplayer off, newest entry first.
+The avatar shows as a figure: a person-shaped object Crosscheck spawns and moves.
+SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR`, and `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not.
+The sim's own people stay invisible when a SimConnect client spawns them.
+GSX's people show, and walk when we write their animation frame every frame.
+GSX's separate seated people move on their own, though they sit a seat's height too high on a seat object.
+The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
+Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-03: SimConnect_CameraGet gives where the pilot looks, with ChasePlane driving the camera or not
+
+**Asked:** what tells Crosscheck where the pilot looks in the cockpit, whether or not ChasePlane drives the camera?
+
+**Expected:** `A:CAMERA GAMEPLAY PITCH YAW` would read 0 with ChasePlane on and track the look with it off, as in p03 ([entry below](#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
+ChasePlane moves the sim's camera through Asobo's Camera API (read in p42-util-chaseplane 26.39.1, `ChasePlaneModule.wasm`, which imports `fsCameraAcquire`, `fsCameraSet`, and `fsCameraGet`), and Asobo staff wrote that from the sim's Sim Update 6 beta, 1.8.8.0, `SimConnect_CameraGet` returns the active camera even when nobody has acquired it ([thread](https://devsupport.flightsimulator.com/t/cameraapi-cameraget-behavior-requires-clarification/17697)).
+ChasePlane's overlay adds `L:p42_cp_r_pitch` and `L:p42_cp_r_yaw` to the aircraft's attitude to show where the camera points (read in the same package, `P42ChasePlane_overlay.js`).
+So we expected `SimConnect_CameraGet` to report where the pilot looks in both states, and the two `L:` variables to track it with ChasePlane on.
+
+**Found:**
+
+- With ChasePlane on, `SimConnect_CameraGetStatus` reported `ACQUIRED_BY_OTHER`, and with ChasePlane disabled in its own settings, `NOT_ACQUIRED`.
+  Our client never acquired the camera.
+- In both states, we sent `SimConnect_CameraGet` about every 100ms for 8s in each of the `SIMOBJECT`, `WORLD`, and `EYEPOINT` referentials, and got 77 replies in each, with no SimConnect exception.
+- Its rotation is in degrees, and two fields of `SIMCONNECT_DATA_PBH` carry a different angle from the one `SimConnect.h` names.
+  With ChasePlane on, the first, `Pitch`, carried the pitch, from −65° to 57°.
+  The second, `Bank`, carried the yaw, from −115° to 96°.
+  The third, `Heading`, carried the roll: it followed `L:p42_cp_r_roll` and stayed within 0.2° of 0 in the `SIMOBJECT` referential.
+- With ChasePlane on, `L:p42_cp_r_pitch` and `L:p42_cp_r_yaw` tracked the look too.
+  CameraGet's pitch was the negative of `L:p42_cp_r_pitch` (correlation −0.995), and its yaw matched `L:p42_cp_r_yaw` (0.996).
+  With ChasePlane disabled, both held still.
+- With ChasePlane disabled, CameraGet's pitch and yaw were the negatives of `A:CAMERA GAMEPLAY PITCH YAW:0` and `:1` in degrees (−0.996 each).
+- In the `SIMOBJECT` referential the camera's position read about 0.22, 0.52, and −2.21 on x, y, and z, and moved by 0.02 to 0.04 while ChasePlane ran, and not at all without it.
+  We don't know the axes or the unit.
+  In meters the movement would be 2cm to 4cm, and a read taken after moving the camera a known distance would settle it.
+  In `WORLD` it read latitude, longitude, and an altitude of 513.9, which matches the aircraft's 1,684 ft MSL in meters.
+
+**Changed:** `SimConnect_CameraGet` gives where the pilot looks, both from ChasePlane's camera and from the sim's own, so Crosscheck can turn the head of the other pilot's figure without asking anyone to disable ChasePlane.
+Whether a head tracker's movement shows in it is unmeasured.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p06's run](../../../experiments/areas/avatars/results/p06-camera-2026-10-02-22-02-56.txt), whose file name carries the time in UTC.
+
+## 2026-10-02: Writing a GSX person's animation frame makes it walk, and a seated one moves on its own
+
+**Asked:** can Crosscheck make a figure walk rather than slide, and sit in a seat?
+
+**Expected:** each GSX person's model plays the animation frame whose number one variable of its own object holds.
+The passengers' model XML passes `(A:VELOCITY BODY Y,m/s)` to `ASOBO_GT_Anim_Code`, the cleaner's passes `(A:WAGON FRONT LINK ORIENTATION, number)`, and each `sim.cfg` lists which frames are the idle and walk loops at 30 frames a second (read in fsdreamteam-gsx-pro 4.0.19, `SimObjects/GroundVehicles/FSDT_Passengers` and `FSDT_cleaning_crew`).
+p02, in the [entry below](#2026-10-02-a-gsx-person-shows-and-follows-where-we-write-it-and-the-sims-own-people-stay-invisible), wrote `A:VELOCITY BODY Z`, which nothing in the model reads.
+GSX's seated people are separate objects, whose model plays its clip with `typeParam="AutoPlay,Random"` and no variable (read in the same package, `FSDT_Passengers_Seated`).
+
+**Found:**
+
+- Every sim frame we wrote walk-loop frames to `A:VELOCITY BODY Y` on `FSDT_Passenger_CASUAL_M_0030`, and to `A:WAGON FRONT LINK ORIENTATION` on `FSDT_cleaning_crew_M_0020`.
+  Both walked in place: the pilot pressed Page Down, the probe's signal that a figure's legs were moving, about 1.3s after each appeared.
+- The objects, released with `SimConnect_AIReleaseControl` and frozen with `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET`, kept what we wrote: frame 245 read back as 245, and 165 as 165.000002.
+- The passenger then kept 4m in front of the avatar for 30s.
+  While the pilot walked, we advanced its walk frame by the distance it covered, at the rate its 3.57m stride sets, and while the pilot stood, we played its idle loop by time.
+  It spent 349 sim frames walking and 582 idling, and the pilot judged its steps close enough to tune later.
+- `FSDT_Passenger_CASUAL_M_0030_SEATED`, of `A:CATEGORY` `StaticObject`, sat on `SEAT_C152_Pax` and moved on its own, breathing and shifting, with nothing written.
+  Its feet were at the seat object's position, so it sat a seat's height too high: the model's origin is at its feet, while the seat object marks where a person sits.
+
+**Changed:** a figure Crosscheck ships can walk under our own writes, built as GSX's people are: one clip whose frame is a variable of the figure's own object.
+A seated figure needs only a position, and with its origin at the hip it would sit on an aircraft's seat objects with no offset.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p04's run](../../../experiments/areas/avatars/results/p04-walk-2026-10-02-21-50-46.txt) for walking, and [p05's run](../../../experiments/areas/avatars/results/p05-seated-2026-10-02-21-55-07.txt) for sitting.
+The p04 run from 21:50:18 was a false start, and nothing here uses it.
+
+## 2026-10-02: Seat objects place the other pilot in the cockpit, and the seated avatar doesn't turn with the look
+
+**Asked:** what can Crosscheck read and show of the other pilot in the cockpit?
+
+**Expected:** no prediction.
+
+**Found:**
+
+- The C152 has seat objects, `SEAT_C152_Pilot` and `SEAT_C152_Pax`, of `A:CATEGORY` `SimpleObjectSim`, which `SimConnect_RequestDataOnSimObjectType` lists within 50m.
+  From the aircraft's reference point, the pilot's sits 0.10m forward, 0.23m left, and 0.14m down, and the passenger's 0.10m forward, 0.21m right, and 0.13m down.
+- Seated, the avatar's object sits exactly on `SEAT_C152_Pilot`.
+- While the pilot looked around for 8s, the avatar's object's heading held at 26.66° true, the aircraft's heading.
+- A standing GSX passenger placed on `SEAT_C152_Pax` was drawn in the cockpit view, standing and clipping through the aircraft.
+- With ChasePlane driving the camera, `A:CAMERA GAMEPLAY PITCH YAW` read 0 at both indexes.
+  With ChasePlane disabled in its own settings but its bridge, `CP MSFS Bridge.exe`, still running, `A:CAMERA GAMEPLAY PITCH YAW` tracked the look: pitch −77.5° to 74.6°, yaw −156.7° to 119.7°.
+- `L:p42_cp_rendered_camera_sequence` advanced every frame, and `L:p42_cp_rendered_camera_valid` stayed 0.
+
+**Changed:** on an aircraft with seat objects, Crosscheck can read both seats' positions, and the figure goes in the other pilot's seat.
+Where the pilot looks has to come from the camera, not the avatar, and the [entry above](#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not) finds a source that works with ChasePlane.
+
+**Affects:** the ideas [Avatar sync](../product/ideas.md#avatar-sync) and [Seat awareness](../product/ideas.md#seat-awareness).
+
+**Evidence:** [p03's run](../../../experiments/areas/avatars/results/p03-cockpit-2026-10-02-21-42-04.txt).
 
 ## 2026-10-02: A GSX person shows and follows where we write it, and the sim's own people stay invisible
 

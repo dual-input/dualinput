@@ -187,6 +187,8 @@ Where an aircraft lists no usable seats, the profile author moves the camera to 
 - **Tech:** MSFS 2024 aircraft can ship seat parts with their own navigation graphs.
   The A220 has `A220_Seat_Pilot` and `A220_Seat_Copilot` (read in synaptic-aircraft-a220 1.0.10, [files](../aircraft/synaptic-a220/files.md)), and the Phenom 300E has a passenger seat, `fsreborn_phenom300e_seat_pax` (read in fsreborn-aircraft-phenom300e 1.0.24, [files](../aircraft/fsreborn-phenom-300e/files.md)).
   Whether they hold positions Crosscheck can use is unverified.
+  The C152's seats show up in SimConnect as objects, `SEAT_C152_Pilot` and `SEAT_C152_Pax`, whose positions it reads, and the seated pilot's avatar sits exactly on `SEAT_C152_Pilot` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
+  Whether the A220's and Phenom's seat parts show up the same way is unverified.
 - **Open questions:** whether Crosscheck can move the camera to a seat at all.
   After a flight load we set `A:CAMERA STATE` to 3, the chase camera, and it went back to 2, the cockpit, 32ms later, with ChasePlane running, so we don't know whether the sim or ChasePlane moved it back (measured on MSFS 2024, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
   Setting it again with ChasePlane closed would settle it.
@@ -212,11 +214,16 @@ Each pilot sees the other pilot's avatar, with MSFS multiplayer off.
 Crosscheck reads where the avatar is and which way it faces, and on the other machine moves a figure to match: a person-shaped object that Crosscheck ships.
 
 - **Tech:** SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)).
-  The sim's own people stay invisible when a SimConnect client spawns them, while GSX's people show and follow a position written every frame, sliding rather than walking (same date, [avatars log](../avatars/log.md#2026-10-02-a-gsx-person-shows-and-follows-where-we-write-it-and-the-sims-own-people-stay-invisible)).
-  So the figure would be a person Crosscheck ships as a SimObject with a model of its own, which means building a modeled, animated character.
+  The sim's own people stay invisible when a SimConnect client spawns them, while GSX's people show (same date, [avatars log](../avatars/log.md#2026-10-02-a-gsx-person-shows-and-follows-where-we-write-it-and-the-sims-own-people-stay-invisible)).
+  A GSX person walks when we write its animation frame every frame, and a seated one sits and moves on its own (same date, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)).
+  So the figure would be a person Crosscheck ships as a SimObject built as GSX's are, which means building a modeled, animated character.
+  On an aircraft with seat objects, the seated figure goes on the seat object of the other pilot's seat ([avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
+  `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
-- **Open questions:** what makes a figure walk rather than slide, which GSX's SimObject files may show.
-  How the other pilot shows in the cockpit: once a pilot is seated, the avatar's object sits 0.3m from the aircraft's reference point at the aircraft's heading (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)), and whether it turns when they look around is unmeasured.
+  In the cockpit, the other pilot sits in their seat and turns their head where they look.
+- **Open questions:** how a seated figure turns its head, since GSX's seated people play a fixed clip.
+  Whether a head tracker's movement shows in `SimConnect_CameraGet`.
+  How Crosscheck seats the figure on an aircraft without seat objects.
 
 ## Interface
 

@@ -199,6 +199,17 @@ Later, a pilot could invite a passenger to a given seat, with the invite made to
 
 - **Open questions:** a passenger probably needs the aircraft installed to sit in its cabin (unverified), so passenger mode is an option for groups who all own the aircraft.
 
+### Multiplayer kept on
+
+Crosscheck hides the other pilot's copy of the aircraft, so both pilots can keep MSFS multiplayer on.
+FS Copilot requires pilots to turn multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), because with it on, each pilot also sees the aircraft the other pilot is flying, a second copy of their own in the same place (from our experience with FS Copilot).
+YourControls probably requires the same (unverified).
+
+- **Tech:** hiding the copy needs a way to reach another player's aircraft from SimConnect or panel code, and we don't know of one.
+  Traffic sync as our FS Copilot fork designed it relies on multiplayer being off, so other players' aircraft never enter the traffic it copies (FS Copilot fork, same file and section), and with multiplayer on it would have to leave them out itself.
+- **Product:** with multiplayer on, each pilot could see the other's avatar during a walkaround (unverified).
+- **Next:** a probe with both pilots in one multiplayer session, to find whether SimConnect lists the other pilot's aircraft, and whether anything can hide it.
+
 ## Interface
 
 ### Crosscheck's interface in the EFB and on a tablet

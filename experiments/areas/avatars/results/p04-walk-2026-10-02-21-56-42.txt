@@ -1,0 +1,9 @@
+p04 · A GSX person walking by our own animation writes, on MSFS 2024
+2026-10-02T21:56:42.134Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Walking in place:
+  not run
+
+Following: not run
+
+Exceptions: none

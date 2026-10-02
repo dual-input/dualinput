@@ -1,0 +1,7 @@
+{"t":1790978202162,"s":0.028,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790978202512,"s":0.378,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790978202513,"s":0.379,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1790978202515,"s":0.381,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1790978203019,"s":0.885,"kind":"avatar","text":"43.824386, 18.339262, heading 291°"}
+{"t":1790978207862,"s":5.728,"kind":"key","text":"SKIP, with claude in front","key":"SKIP","foreground":"claude"}
+{"t":1790978207862,"s":5.728,"kind":"follow","text":"skipped: the walking-in-place step didn't run"}

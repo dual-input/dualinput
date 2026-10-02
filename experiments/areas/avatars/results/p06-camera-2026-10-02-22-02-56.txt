@@ -1,0 +1,15 @@
+p06 · Where the pilot looks: the sim's camera variables, ChasePlane's L: variables, and SimConnect_CameraGet, on MSFS 2024
+2026-10-02T22:02:56.524Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  ChasePlane on: camera ACQUIRED_BY_OTHER
+    variables: CAMERA STATE 2; CAMERA GAMEPLAY PITCH YAW:0 0°; CAMERA GAMEPLAY PITCH YAW:1 0°; L:p42_cp_mode 0; L:p42_cp_r_x -0.019877..0.021121 (251 changes); L:p42_cp_r_y -0.015814..0.01896 (251 changes); L:p42_cp_r_z -0.02787..0.000507 (251 changes); L:p42_cp_r_pitch -56.927342..65.143112 (251 changes); L:p42_cp_r_yaw -114.976783..95.91908 (251 changes); L:p42_cp_r_roll -0.032475..0.054966 (251 changes); L:p42_cp_r_zoom 0.576227; L:p42_cp_rendered_camera_valid 0
+    CameraGet SIMOBJECT: 77 replies, pitch -65.095436..56.730843, bank -114.957565..95.91909, heading -0.048457..0.034264, x 0.198371..0.239366, y 0.500936..0.53567, z -2.226755..-2.198384, fov 0.859071
+    CameraGet WORLD: 77 replies, pitch -65.130898..56.686516, bank -88.260132..122.579033, heading -0.111552..0.757697, x 43.824384..43.824385, y 18.339349..18.339349, z 513.851503..513.886227, fov 0.859071
+    CameraGet EYEPOINT: 77 replies, pitch -65.095436..56.730843, bank -114.957565..95.91909, heading -0.048457..0.034264, x -0.071072..-0.030077, y 0.074216..0.10895, z -0.849059..-0.820688, fov 0.859071
+  ChasePlane off: camera NOT_ACQUIRED
+    variables: CAMERA STATE 2; CAMERA GAMEPLAY PITCH YAW:0 -66.729145..67.759247° (207 changes); CAMERA GAMEPLAY PITCH YAW:1 -103.267324..83.65143° (239 changes); L:p42_cp_mode 0; L:p42_cp_r_x 0.000742; L:p42_cp_r_y -0.000338; L:p42_cp_r_z 0.000338; L:p42_cp_r_pitch -3.264058; L:p42_cp_r_yaw 1.720089; L:p42_cp_r_roll 0.032837; L:p42_cp_r_zoom 0.576227; L:p42_cp_rendered_camera_valid 0
+    CameraGet SIMOBJECT: 77 replies, pitch -65.463646..69.151772, bank -83.653473..103.257729, heading -0.132704..0, x 0.219492..0.219494, y 0.516724..0.516724, z -2.198891..-2.198887, fov 0.859071
+    CameraGet WORLD: 77 replies, pitch -65.595398..69.061615, bank -56.991364..129.920197, heading -0.06674..0.753025, x 43.824385..43.824385, y 18.339349..18.339349, z 513.867281..513.867282, fov 0.859071
+    CameraGet EYEPOINT: 77 replies, pitch -65.463646..69.151772, bank -83.653473..103.257729, heading -0.132704..0, x -0.049951..-0.049949, y 0.090004..0.090004, z -0.821195..-0.821191, fov 0.859071
+
+Exceptions: none

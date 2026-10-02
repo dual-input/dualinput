@@ -5,7 +5,10 @@
  *
  *   const sim = await Sim.connect(rec)            rec is an out.mjs Recorder
  *   await sim.read([["PLANE ALTITUDE", "feet"], ["L:DATLoaded", "number"]])
+ *   await sim.read(vars, { object: id })                         any object, not only the user's
  *   await sim.readStrings(["TITLE", "LIVERY NAME"])
+ *   await sim.byType(5, 300)                                     object IDs of one type in a radius
+ *   await sim.spawn(title, livery, initPos)                      an AI object's ID, or { error }
  *   await sim.burst([["COM STANDBY FREQUENCY:1", "Hz"]], 2000)  every sim frame
  *   sim.watch(vars, { onChange })                                changes, tagged
  *   sim.write("L:Battery1Switch", "number", 1)
@@ -160,6 +163,8 @@ export class Sim {
     h.on("flowEvent", (e) => this.onFlow(e))
     h.on("systemState", (s) => this.answer(s.requestID, s))
     h.on("simObjectData", (d) => this.answer(d.requestID, d))
+    h.on("simObjectDataByType", (d) => this.answer(d.requestID, d))
+    h.on("assignedObjectID", (a) => this.answer(a.requestID, a))
     h.on("clientData", (d) => this.answer(d.requestID, d))
     h.on("inputEventsList", (l) => this.answer(l.requestID, l))
     h.on("getInputEvent", (g) => this.answer(g.requestID, g))
@@ -298,12 +303,12 @@ export class Sim {
     return values
   }
 
-  // Values for the user aircraft, once: a Map of name → value, and the names
-  // that didn't answer.
-  async read(vars, { timeoutMs = 3000, label = null } = {}) {
+  // Values for the user aircraft, or for `object`, once: a Map of name → value,
+  // and the names that didn't answer.
+  async read(vars, { timeoutMs = 3000, label = null, object = USER } = {}) {
     const def = this.define(vars)
-    const r = await this.ask(label ?? `read ${def.vars.length} values`, timeoutMs,
-      (req) => this.handle.requestDataOnSimObject(req, def.id, USER, SimConnectPeriod.ONCE, DataRequestFlag.DATA_REQUEST_FLAG_TAGGED),
+    const r = await this.ask(label ?? `read ${def.vars.length} values${object === USER ? "" : ` on object ${object}`}`, timeoutMs,
+      (req) => this.handle.requestDataOnSimObject(req, def.id, object, SimConnectPeriod.ONCE, DataRequestFlag.DATA_REQUEST_FLAG_TAGGED),
       (d) => Sim.readTagged(d, def))
     const values = r instanceof Map ? r : new Map()
     return Object.assign(values, {
@@ -323,7 +328,7 @@ export class Sim {
 
   // Changes, as SimConnect reports them, until stop(): period "frame" (sim
   // frame), "visual", or "second". onChange gets (name, value, before, t).
-  watch(vars, { period = "frame", changed = true, onChange = null, onData = null, label = "watch" } = {}) {
+  watch(vars, { period = "frame", changed = true, onChange = null, onData = null, label = "watch", object = USER } = {}) {
     const def = this.define(vars)
     const req = this.ids.req++
     const values = new Map()
@@ -342,13 +347,13 @@ export class Sim {
       },
     })
     const flags = DataRequestFlag.DATA_REQUEST_FLAG_TAGGED | (changed ? DataRequestFlag.DATA_REQUEST_FLAG_CHANGED : 0)
-    const sendId = this.send(`${label}: request ${def.vars.length} values every ${period}`, () => this.handle.requestDataOnSimObject(req, def.id, USER, per, flags))
+    const sendId = this.send(`${label}: request ${def.vars.length} values every ${period}`, () => this.handle.requestDataOnSimObject(req, def.id, object, per, flags))
     if (sendId !== null) this.bySend.set(sendId, req)
     return {
       values,
       stop: () => {
         this.pending.delete(req)
-        if (!this.gone) this.send(`${label}: stop`, () => this.handle.requestDataOnSimObject(req, def.id, USER, SimConnectPeriod.NEVER, DataRequestFlag.DATA_REQUEST_FLAG_DEFAULT))
+        if (!this.gone) this.send(`${label}: stop`, () => this.handle.requestDataOnSimObject(req, def.id, object, SimConnectPeriod.NEVER, DataRequestFlag.DATA_REQUEST_FLAG_DEFAULT))
       },
     }
   }
@@ -383,6 +388,19 @@ export class Sim {
     return this.send(label ?? `write ${name} = ${value}`, () => this.handle.setDataOnSimObject(def.id, USER, { buffer, arrayCount: 0, tagged: false }))
   }
 
+  // Several numeric values in one write, to `object`. Positional, so every name
+  // has to be one the sim accepts: a rejected name shifts the values after it.
+  // quiet keeps a write per frame off the console.
+  set(vars, values, { object = USER, label = null, quiet = false } = {}) {
+    const def = this.define(vars.map((v) => [parseVar(v).name, parseVar(v).units, "number"]))
+    const buffer = new RawBuffer(8 * values.length)
+    for (const v of values) buffer.writeFloat64(Number(v))
+    const text = `${def.vars.map((v, i) => `${v.name} ← ${fmt(values[i])}`).join(", ")}${object === USER ? "" : ` on object ${object}`}`
+    if (quiet) this.rec.data("write", text, { object, values })
+    else this.rec.log("write", text, { object, values })
+    return this.send(label ?? `set ${def.vars.length} values on object ${object}`, () => this.handle.setDataOnSimObject(def.id, object, { buffer, arrayCount: 0, tagged: false }))
+  }
+
   // ---------------------------------------------------------------- K: events
 
   event(name) {
@@ -400,7 +418,7 @@ export class Sim {
   // number; the sim hands the event to notification groups from that priority
   // down (MSFS 2024 SDK, SimConnect_TransmitClientEvent_EX1,
   // SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY).
-  transmit(name, values = [], { priority = "highest", tag = true, quiet = false } = {}) {
+  transmit(name, values = [], { priority = "highest", tag = true, quiet = false, object = USER } = {}) {
     const bare = eventName(name)
     const id = this.event(bare)
     const data = [0, 0, 0, 0, 0]
@@ -411,10 +429,10 @@ export class Sim {
     if (pr === undefined) throw new Error(`unknown priority ${priority}`)
     const t = Date.now()
     const sendId = this.send(`K:${bare} ${values.join(" ")}`, () =>
-      this.handle.transmitClientEventEx(USER, id, pr, EventFlag.EVENT_FLAG_GROUPID_IS_PRIORITY, ...data.map(u32)))
+      this.handle.transmitClientEventEx(object, id, pr, EventFlag.EVENT_FLAG_GROUPID_IS_PRIORITY, ...data.map(u32)))
     this.sends.push({ name: bare, data: data.map(u32), t, matched: false })
     if (this.sends.length > 500) this.sends.shift()
-    const text = `K:${bare} ${values.map(fmt).join(" ")} at priority ${typeof priority === "number" ? priority : priority}${tagged ? ", tagged" : ""}`
+    const text = `K:${bare} ${values.map(fmt).join(" ")} at priority ${typeof priority === "number" ? priority : priority}${tagged ? ", tagged" : ""}${object === USER ? "" : ` to object ${object}`}`
     if (quiet) this.rec.data("send", text, { event: bare, values, priority: pr, tagged })
     else this.rec.log("send", text, { event: bare, values, priority: pr, tagged })
     return sendId
@@ -521,6 +539,44 @@ export class Sim {
       (req) => this.handle.enumerateSimObjectsAndLiveries(req, type),
       (l) => c.add(l))
     return Array.isArray(r) ? r : Object.assign(c.list, { error: r.error ?? "timed out" })
+  }
+
+  // ---------------------------------------------------------------- AI objects
+
+  // The IDs of the objects of one SIMCONNECT_SIMOBJECT_TYPE within radiusM
+  // meters (MSFS 2024 SDK, SimConnect_RequestDataOnSimObjectType). The sim sends
+  // one reply per object, each counting the total in dwOutOf, and with no
+  // object it may send none, so a timeout ends the list too. The reply is
+  // positional, so the definition holds one variable every object has.
+  async byType(type, radiusM, { timeoutMs = 3000 } = {}) {
+    const def = this.define([["PLANE LATITUDE", "degrees"]], "byType")
+    const ids = []
+    const r = await this.ask(`objects of type ${type} within ${radiusM}m`, timeoutMs,
+      (req) => this.handle.requestDataOnSimObjectType(req, def.id, radiusM, type),
+      (d) => {
+        if (d.outOf === 0) return ids
+        ids.push(d.objectID)
+        return ids.length >= d.outOf ? ids : undefined
+      })
+    return Array.isArray(r) ? r : Object.assign(ids, { error: r.error ?? null, timedOut: Boolean(r.timedOut) })
+  }
+
+  // A non-aircraft object, through SimConnect_AICreateSimulatedObject_EX1:
+  // { id } once the sim assigns one, or { error }.
+  async spawn(title, livery, initPos, { timeoutMs = 5000 } = {}) {
+    const r = await this.ask(`create ${JSON.stringify(title)}`, timeoutMs,
+      (req) => this.handle.aICreateSimulatedObjectEx1(title, livery, initPos, req),
+      (a) => ({ id: a.objectID }))
+    return r.id !== undefined ? r : { error: r.error ?? (r.timedOut ? "timed out" : "no reply") }
+  }
+
+  // Neither call has a reply; a failure arrives as an exception.
+  release(id) {
+    return this.send(`release object ${id}`, () => this.handle.aIReleaseControl(id, this.ids.req++))
+  }
+
+  remove(id) {
+    return this.send(`remove object ${id}`, () => this.handle.aIRemoveObject(id, this.ids.req++))
   }
 
   // ---------------------------------------------------------------- tracking

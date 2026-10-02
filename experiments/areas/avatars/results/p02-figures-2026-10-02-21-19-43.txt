@@ -1,0 +1,16 @@
+p02 · A GSX person in the avatar's place, and the avatar's heading, on MSFS 2024
+2026-10-02T21:19:43.432Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Running: GSX, ChasePlane
+Avatar: 31 samples a second through SIMCONNECT_OBJECT_ID_USER_AVATAR
+
+Heading:
+  look around, standing: 155 samples, 72 distinct headings, heading turned 249° in all, moved 0.0m
+  one full circle: 310 samples, 127 distinct headings, heading turned 309° in all, moved 17.0m; heading minus direction of travel: median 3° either way, over 32 0.5m steps
+  backward: 124 samples, 68 distinct headings, heading turned 133° in all, moved 7.4m; heading minus direction of travel: median 10° either way, over 14 0.5m steps
+
+People put in front of you:
+  not run
+
+Following: not run
+
+Exceptions: none

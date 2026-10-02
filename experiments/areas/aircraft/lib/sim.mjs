@@ -561,11 +561,12 @@ export class Sim {
     return Array.isArray(r) ? r : Object.assign(ids, { error: r.error ?? null, timedOut: Boolean(r.timedOut) })
   }
 
-  // A non-aircraft object, through SimConnect_AICreateSimulatedObject_EX1:
-  // { id } once the sim assigns one, or { error }.
-  async spawn(title, livery, initPos, { timeoutMs = 5000 } = {}) {
-    const r = await this.ask(`create ${JSON.stringify(title)}`, timeoutMs,
-      (req) => this.handle.aICreateSimulatedObjectEx1(title, livery, initPos, req),
+  // A non-aircraft object, through SimConnect_AICreateSimulatedObject_EX1, or
+  // with legacy, the call without a livery: { id } once the sim assigns one,
+  // or { error }.
+  async spawn(title, livery, initPos, { timeoutMs = 5000, legacy = false } = {}) {
+    const r = await this.ask(`create ${JSON.stringify(title)}${legacy ? " by the legacy call" : ""}`, timeoutMs,
+      (req) => (legacy ? this.handle.aICreateSimulatedObject(title, initPos, req) : this.handle.aICreateSimulatedObjectEx1(title, livery, initPos, req)),
       (a) => ({ id: a.objectID }))
     return r.id !== undefined ? r : { error: r.error ?? (r.timedOut ? "timed out" : "no reply") }
   }

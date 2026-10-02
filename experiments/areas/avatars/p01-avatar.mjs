@@ -57,6 +57,7 @@ import { SKIP, START, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { distance } from "../aircraft/lib/flights.mjs"
 import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "../aircraft/lib/sim.mjs"
+import { RAD, offset, poseAt, turn, wrap } from "./lib/pose.mjs"
 
 // MSFS 2024 SDK, SimConnect.h: SIMCONNECT_OBJECT_ID_MAX is DWORD_MAX - 128, and
 // the avatar's and the current object's proxy IDs are the two after it.
@@ -105,37 +106,6 @@ const HUMAN = /character|human|people|person|pilot|crew|passenger|marshal|walker
 // person-like title of its own.
 const FORUM_TITLE = "CharacterSim_Female_Slim"
 
-// ---------------------------------------------------------------- geometry
-
-const RAD = Math.PI / 180
-const EARTH_M = 6_371_000
-const wrap = (deg) => ((deg % 360) + 360) % 360
-const turn = (from, to) => ((to - from + 540) % 360) - 180
-
-// A point aheadM along the heading and rightM to its right.
-function offset(p, aheadM, rightM) {
-  const h = p.hdg * RAD
-  const north = aheadM * Math.cos(h) - rightM * Math.sin(h)
-  const east = aheadM * Math.sin(h) + rightM * Math.cos(h)
-  return {
-    ...p,
-    lat: p.lat + (north / EARTH_M) / RAD,
-    lon: p.lon + (east / (EARTH_M * Math.cos(p.lat * RAD))) / RAD,
-  }
-}
-
-// The pose at time t, between the two samples around it.
-function poseAt(samples, t) {
-  for (let i = samples.length - 1; i > 0; i--) {
-    const a = samples[i - 1]
-    const b = samples[i]
-    if (a.t > t || b.t < t) continue
-    const f = b.t === a.t ? 1 : (t - a.t) / (b.t - a.t)
-    const mix = (x, y) => x + (y - x) * f
-    return { t, lat: mix(a.lat, b.lat), lon: mix(a.lon, b.lon), alt: mix(a.alt, b.alt), hdg: wrap(a.hdg + turn(a.hdg, b.hdg) * f), fps: mix(a.fps, b.fps) }
-  }
-  return null
-}
 
 // ---------------------------------------------------------------- the probe
 

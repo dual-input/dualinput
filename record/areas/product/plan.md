@@ -19,8 +19,9 @@ New ideas keep arriving after that, and each gets an entry.
 
 ## 2. Users
 
-Produces: `02-users.md`.
+Produces: [02-users](02-users.md).
 Exit: each kind of pilot we design for is described, with what they need from a session.
+Done on 2026-10-02.
 
 ## 3. v1 or later
 

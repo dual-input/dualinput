@@ -197,6 +197,13 @@ Anyone who joins a session joins as a pilot or as a passenger.
 A passenger picks one of the aircraft's [seats](#seat-awareness) and rides along, so a group of four can have two flying and two in the cabin.
 Later, a pilot could invite a passenger to a given seat, with the invite made to look like a boarding pass.
 
+- **Tech:** a crew and its passengers need different things from the connection.
+  The crew, usually two or three people, sends every change and needs it to arrive with little delay, while passengers send almost nothing and can take more delay (unverified).
+  Connecting each of 150 people to every other takes 11,175 connections (150 × 149 / 2).
+  Instead, the crew could connect to each other, and passengers receive a one-way feed.
+  The feed would come from one crew machine, or pass down a tree in which each passenger forwards it to a few others.
+  Crosscheck would cap how many of a session's connections the relay carries, so one large event can't use up the relay.
+- **Product:** serves the [groups](02-users.md#groups) who fly with passengers.
 - **Open questions:** a passenger probably needs the aircraft installed to sit in its cabin (unverified), so passenger mode is an option for groups who all own the aircraft.
 
 ### Multiplayer kept on

@@ -1,0 +1,339 @@
+{"t":1790977818186,"s":0.034,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1790977818872,"s":0.72,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1790977818872,"s":0.72,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1790977818872,"s":0.72,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1790977819308,"s":1.156,"kind":"avatar","text":"43.824425, 18.339186, heading 289°"}
+{"t":1790977830119,"s":11.967,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1790977830139,"s":11.987,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 55328770","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790977830139,"s":11.987,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 55328770","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790977830139,"s":11.987,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 55328770","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790977830141,"s":11.989,"kind":"write","text":"VELOCITY BODY Y ← 155 on object 55328770","object":55328770,"values":[155]}
+{"t":1790977830176,"s":12.024,"kind":"write","text":"VELOCITY BODY Y ← 156 on object 55328770","object":55328770,"values":[156]}
+{"t":1790977830207,"s":12.055,"kind":"write","text":"VELOCITY BODY Y ← 157 on object 55328770","object":55328770,"values":[157]}
+{"t":1790977830241,"s":12.089,"kind":"write","text":"VELOCITY BODY Y ← 158 on object 55328770","object":55328770,"values":[158]}
+{"t":1790977830273,"s":12.121,"kind":"write","text":"VELOCITY BODY Y ← 159 on object 55328770","object":55328770,"values":[159]}
+{"t":1790977830307,"s":12.155,"kind":"write","text":"VELOCITY BODY Y ← 160 on object 55328770","object":55328770,"values":[160]}
+{"t":1790977830340,"s":12.188,"kind":"write","text":"VELOCITY BODY Y ← 161 on object 55328770","object":55328770,"values":[161]}
+{"t":1790977830374,"s":12.222,"kind":"write","text":"VELOCITY BODY Y ← 162 on object 55328770","object":55328770,"values":[162]}
+{"t":1790977830407,"s":12.255,"kind":"write","text":"VELOCITY BODY Y ← 163 on object 55328770","object":55328770,"values":[163]}
+{"t":1790977830440,"s":12.288,"kind":"write","text":"VELOCITY BODY Y ← 164 on object 55328770","object":55328770,"values":[164]}
+{"t":1790977830474,"s":12.322,"kind":"write","text":"VELOCITY BODY Y ← 165 on object 55328770","object":55328770,"values":[165]}
+{"t":1790977830475,"s":12.323,"kind":"write","text":"VELOCITY BODY Y ← 165 on object 55328770","object":55328770,"values":[165]}
+{"t":1790977830507,"s":12.355,"kind":"write","text":"VELOCITY BODY Y ← 166 on object 55328770","object":55328770,"values":[166]}
+{"t":1790977830540,"s":12.388,"kind":"write","text":"VELOCITY BODY Y ← 167 on object 55328770","object":55328770,"values":[167]}
+{"t":1790977830574,"s":12.422,"kind":"write","text":"VELOCITY BODY Y ← 168 on object 55328770","object":55328770,"values":[168]}
+{"t":1790977830607,"s":12.455,"kind":"write","text":"VELOCITY BODY Y ← 169 on object 55328770","object":55328770,"values":[169]}
+{"t":1790977830641,"s":12.489,"kind":"write","text":"VELOCITY BODY Y ← 170 on object 55328770","object":55328770,"values":[170]}
+{"t":1790977830673,"s":12.521,"kind":"write","text":"VELOCITY BODY Y ← 171 on object 55328770","object":55328770,"values":[171]}
+{"t":1790977830707,"s":12.555,"kind":"write","text":"VELOCITY BODY Y ← 172 on object 55328770","object":55328770,"values":[172]}
+{"t":1790977830740,"s":12.588,"kind":"write","text":"VELOCITY BODY Y ← 173 on object 55328770","object":55328770,"values":[173]}
+{"t":1790977830773,"s":12.621,"kind":"write","text":"VELOCITY BODY Y ← 174 on object 55328770","object":55328770,"values":[174]}
+{"t":1790977830807,"s":12.655,"kind":"write","text":"VELOCITY BODY Y ← 175 on object 55328770","object":55328770,"values":[175]}
+{"t":1790977830840,"s":12.688,"kind":"write","text":"VELOCITY BODY Y ← 176 on object 55328770","object":55328770,"values":[176]}
+{"t":1790977830873,"s":12.721,"kind":"write","text":"VELOCITY BODY Y ← 177 on object 55328770","object":55328770,"values":[177]}
+{"t":1790977830907,"s":12.755,"kind":"write","text":"VELOCITY BODY Y ← 178 on object 55328770","object":55328770,"values":[178]}
+{"t":1790977830940,"s":12.788,"kind":"write","text":"VELOCITY BODY Y ← 179 on object 55328770","object":55328770,"values":[179]}
+{"t":1790977830974,"s":12.822,"kind":"write","text":"VELOCITY BODY Y ← 180 on object 55328770","object":55328770,"values":[180]}
+{"t":1790977831007,"s":12.855,"kind":"write","text":"VELOCITY BODY Y ← 181 on object 55328770","object":55328770,"values":[181]}
+{"t":1790977831040,"s":12.888,"kind":"write","text":"VELOCITY BODY Y ← 182 on object 55328770","object":55328770,"values":[182]}
+{"t":1790977831073,"s":12.921,"kind":"write","text":"VELOCITY BODY Y ← 183 on object 55328770","object":55328770,"values":[183]}
+{"t":1790977831107,"s":12.955,"kind":"write","text":"VELOCITY BODY Y ← 184 on object 55328770","object":55328770,"values":[184]}
+{"t":1790977831140,"s":12.988,"kind":"write","text":"VELOCITY BODY Y ← 185 on object 55328770","object":55328770,"values":[185]}
+{"t":1790977831173,"s":13.021,"kind":"write","text":"VELOCITY BODY Y ← 186 on object 55328770","object":55328770,"values":[186]}
+{"t":1790977831207,"s":13.055,"kind":"write","text":"VELOCITY BODY Y ← 187 on object 55328770","object":55328770,"values":[187]}
+{"t":1790977831240,"s":13.088,"kind":"write","text":"VELOCITY BODY Y ← 188 on object 55328770","object":55328770,"values":[188]}
+{"t":1790977831273,"s":13.121,"kind":"write","text":"VELOCITY BODY Y ← 189 on object 55328770","object":55328770,"values":[189]}
+{"t":1790977831306,"s":13.154,"kind":"write","text":"VELOCITY BODY Y ← 190 on object 55328770","object":55328770,"values":[190]}
+{"t":1790977831340,"s":13.188,"kind":"write","text":"VELOCITY BODY Y ← 191 on object 55328770","object":55328770,"values":[191]}
+{"t":1790977831374,"s":13.222,"kind":"write","text":"VELOCITY BODY Y ← 192 on object 55328770","object":55328770,"values":[192]}
+{"t":1790977831407,"s":13.255,"kind":"write","text":"VELOCITY BODY Y ← 193 on object 55328770","object":55328770,"values":[193]}
+{"t":1790977831440,"s":13.288,"kind":"write","text":"VELOCITY BODY Y ← 194 on object 55328770","object":55328770,"values":[194]}
+{"t":1790977831473,"s":13.321,"kind":"write","text":"VELOCITY BODY Y ← 195 on object 55328770","object":55328770,"values":[195]}
+{"t":1790977831473,"s":13.321,"kind":"write","text":"VELOCITY BODY Y ← 195 on object 55328770","object":55328770,"values":[195]}
+{"t":1790977831507,"s":13.355,"kind":"write","text":"VELOCITY BODY Y ← 196 on object 55328770","object":55328770,"values":[196]}
+{"t":1790977831540,"s":13.388,"kind":"write","text":"VELOCITY BODY Y ← 197 on object 55328770","object":55328770,"values":[197]}
+{"t":1790977831573,"s":13.421,"kind":"write","text":"VELOCITY BODY Y ← 198 on object 55328770","object":55328770,"values":[198]}
+{"t":1790977831606,"s":13.454,"kind":"write","text":"VELOCITY BODY Y ← 199 on object 55328770","object":55328770,"values":[199]}
+{"t":1790977831640,"s":13.488,"kind":"write","text":"VELOCITY BODY Y ← 200 on object 55328770","object":55328770,"values":[200]}
+{"t":1790977831674,"s":13.522,"kind":"write","text":"VELOCITY BODY Y ← 201 on object 55328770","object":55328770,"values":[201]}
+{"t":1790977831707,"s":13.555,"kind":"write","text":"VELOCITY BODY Y ← 202 on object 55328770","object":55328770,"values":[202]}
+{"t":1790977831740,"s":13.588,"kind":"write","text":"VELOCITY BODY Y ← 203 on object 55328770","object":55328770,"values":[203]}
+{"t":1790977831774,"s":13.622,"kind":"write","text":"VELOCITY BODY Y ← 204 on object 55328770","object":55328770,"values":[204]}
+{"t":1790977831806,"s":13.654,"kind":"write","text":"VELOCITY BODY Y ← 205 on object 55328770","object":55328770,"values":[205]}
+{"t":1790977831840,"s":13.688,"kind":"write","text":"VELOCITY BODY Y ← 206 on object 55328770","object":55328770,"values":[206]}
+{"t":1790977831873,"s":13.721,"kind":"write","text":"VELOCITY BODY Y ← 207 on object 55328770","object":55328770,"values":[207]}
+{"t":1790977831907,"s":13.755,"kind":"write","text":"VELOCITY BODY Y ← 208 on object 55328770","object":55328770,"values":[208]}
+{"t":1790977831940,"s":13.788,"kind":"write","text":"VELOCITY BODY Y ← 209 on object 55328770","object":55328770,"values":[209]}
+{"t":1790977831973,"s":13.821,"kind":"write","text":"VELOCITY BODY Y ← 210 on object 55328770","object":55328770,"values":[210]}
+{"t":1790977832007,"s":13.855,"kind":"write","text":"VELOCITY BODY Y ← 211 on object 55328770","object":55328770,"values":[211]}
+{"t":1790977832040,"s":13.888,"kind":"write","text":"VELOCITY BODY Y ← 212 on object 55328770","object":55328770,"values":[212]}
+{"t":1790977832073,"s":13.921,"kind":"write","text":"VELOCITY BODY Y ← 213 on object 55328770","object":55328770,"values":[213]}
+{"t":1790977832107,"s":13.955,"kind":"write","text":"VELOCITY BODY Y ← 214 on object 55328770","object":55328770,"values":[214]}
+{"t":1790977832140,"s":13.988,"kind":"write","text":"VELOCITY BODY Y ← 215 on object 55328770","object":55328770,"values":[215]}
+{"t":1790977832173,"s":14.021,"kind":"write","text":"VELOCITY BODY Y ← 216 on object 55328770","object":55328770,"values":[216]}
+{"t":1790977832207,"s":14.055,"kind":"write","text":"VELOCITY BODY Y ← 217 on object 55328770","object":55328770,"values":[217]}
+{"t":1790977832241,"s":14.089,"kind":"write","text":"VELOCITY BODY Y ← 218 on object 55328770","object":55328770,"values":[218]}
+{"t":1790977832275,"s":14.123,"kind":"write","text":"VELOCITY BODY Y ← 219 on object 55328770","object":55328770,"values":[219]}
+{"t":1790977832307,"s":14.155,"kind":"write","text":"VELOCITY BODY Y ← 220 on object 55328770","object":55328770,"values":[220]}
+{"t":1790977832340,"s":14.188,"kind":"write","text":"VELOCITY BODY Y ← 221 on object 55328770","object":55328770,"values":[221]}
+{"t":1790977832374,"s":14.222,"kind":"write","text":"VELOCITY BODY Y ← 222 on object 55328770","object":55328770,"values":[222]}
+{"t":1790977832406,"s":14.254,"kind":"write","text":"VELOCITY BODY Y ← 223 on object 55328770","object":55328770,"values":[223]}
+{"t":1790977832440,"s":14.288,"kind":"write","text":"VELOCITY BODY Y ← 224 on object 55328770","object":55328770,"values":[224]}
+{"t":1790977832473,"s":14.321,"kind":"write","text":"VELOCITY BODY Y ← 225 on object 55328770","object":55328770,"values":[225]}
+{"t":1790977832473,"s":14.321,"kind":"write","text":"VELOCITY BODY Y ← 225 on object 55328770","object":55328770,"values":[225]}
+{"t":1790977832506,"s":14.354,"kind":"write","text":"VELOCITY BODY Y ← 226 on object 55328770","object":55328770,"values":[226]}
+{"t":1790977832540,"s":14.388,"kind":"write","text":"VELOCITY BODY Y ← 227 on object 55328770","object":55328770,"values":[227]}
+{"t":1790977832573,"s":14.421,"kind":"write","text":"VELOCITY BODY Y ← 228 on object 55328770","object":55328770,"values":[228]}
+{"t":1790977832607,"s":14.455,"kind":"write","text":"VELOCITY BODY Y ← 229 on object 55328770","object":55328770,"values":[229]}
+{"t":1790977832640,"s":14.488,"kind":"write","text":"VELOCITY BODY Y ← 230 on object 55328770","object":55328770,"values":[230]}
+{"t":1790977832673,"s":14.521,"kind":"write","text":"VELOCITY BODY Y ← 231 on object 55328770","object":55328770,"values":[231]}
+{"t":1790977832707,"s":14.555,"kind":"write","text":"VELOCITY BODY Y ← 232 on object 55328770","object":55328770,"values":[232]}
+{"t":1790977832740,"s":14.588,"kind":"write","text":"VELOCITY BODY Y ← 233 on object 55328770","object":55328770,"values":[233]}
+{"t":1790977832774,"s":14.622,"kind":"write","text":"VELOCITY BODY Y ← 234 on object 55328770","object":55328770,"values":[234]}
+{"t":1790977832807,"s":14.655,"kind":"write","text":"VELOCITY BODY Y ← 235 on object 55328770","object":55328770,"values":[235]}
+{"t":1790977832840,"s":14.688,"kind":"write","text":"VELOCITY BODY Y ← 236 on object 55328770","object":55328770,"values":[236]}
+{"t":1790977832873,"s":14.721,"kind":"write","text":"VELOCITY BODY Y ← 237 on object 55328770","object":55328770,"values":[237]}
+{"t":1790977832907,"s":14.755,"kind":"write","text":"VELOCITY BODY Y ← 238 on object 55328770","object":55328770,"values":[238]}
+{"t":1790977832940,"s":14.788,"kind":"write","text":"VELOCITY BODY Y ← 239 on object 55328770","object":55328770,"values":[239]}
+{"t":1790977832973,"s":14.821,"kind":"write","text":"VELOCITY BODY Y ← 240 on object 55328770","object":55328770,"values":[240]}
+{"t":1790977833007,"s":14.855,"kind":"write","text":"VELOCITY BODY Y ← 241 on object 55328770","object":55328770,"values":[241]}
+{"t":1790977833040,"s":14.888,"kind":"write","text":"VELOCITY BODY Y ← 242 on object 55328770","object":55328770,"values":[242]}
+{"t":1790977833073,"s":14.921,"kind":"write","text":"VELOCITY BODY Y ← 243 on object 55328770","object":55328770,"values":[243]}
+{"t":1790977833107,"s":14.955,"kind":"write","text":"VELOCITY BODY Y ← 244 on object 55328770","object":55328770,"values":[244]}
+{"t":1790977833140,"s":14.988,"kind":"write","text":"VELOCITY BODY Y ← 245 on object 55328770","object":55328770,"values":[245]}
+{"t":1790977833174,"s":15.022,"kind":"write","text":"VELOCITY BODY Y ← 246 on object 55328770","object":55328770,"values":[246]}
+{"t":1790977833207,"s":15.055,"kind":"write","text":"VELOCITY BODY Y ← 247 on object 55328770","object":55328770,"values":[247]}
+{"t":1790977833240,"s":15.088,"kind":"write","text":"VELOCITY BODY Y ← 248 on object 55328770","object":55328770,"values":[248]}
+{"t":1790977833274,"s":15.122,"kind":"write","text":"VELOCITY BODY Y ← 249 on object 55328770","object":55328770,"values":[249]}
+{"t":1790977833307,"s":15.155,"kind":"write","text":"VELOCITY BODY Y ← 250 on object 55328770","object":55328770,"values":[250]}
+{"t":1790977833340,"s":15.188,"kind":"write","text":"VELOCITY BODY Y ← 251 on object 55328770","object":55328770,"values":[251]}
+{"t":1790977833374,"s":15.222,"kind":"write","text":"VELOCITY BODY Y ← 252 on object 55328770","object":55328770,"values":[252]}
+{"t":1790977833407,"s":15.255,"kind":"write","text":"VELOCITY BODY Y ← 253 on object 55328770","object":55328770,"values":[253]}
+{"t":1790977833440,"s":15.288,"kind":"write","text":"VELOCITY BODY Y ← 254 on object 55328770","object":55328770,"values":[254]}
+{"t":1790977833473,"s":15.321,"kind":"write","text":"VELOCITY BODY Y ← 255 on object 55328770","object":55328770,"values":[255]}
+{"t":1790977833473,"s":15.321,"kind":"write","text":"VELOCITY BODY Y ← 255 on object 55328770","object":55328770,"values":[255]}
+{"t":1790977833507,"s":15.355,"kind":"write","text":"VELOCITY BODY Y ← 256 on object 55328770","object":55328770,"values":[256]}
+{"t":1790977833540,"s":15.388,"kind":"write","text":"VELOCITY BODY Y ← 257 on object 55328770","object":55328770,"values":[257]}
+{"t":1790977833573,"s":15.421,"kind":"write","text":"VELOCITY BODY Y ← 258 on object 55328770","object":55328770,"values":[258]}
+{"t":1790977833606,"s":15.454,"kind":"write","text":"VELOCITY BODY Y ← 259 on object 55328770","object":55328770,"values":[259]}
+{"t":1790977833640,"s":15.488,"kind":"write","text":"VELOCITY BODY Y ← 155 on object 55328770","object":55328770,"values":[155]}
+{"t":1790977833674,"s":15.522,"kind":"write","text":"VELOCITY BODY Y ← 156 on object 55328770","object":55328770,"values":[156]}
+{"t":1790977833707,"s":15.555,"kind":"write","text":"VELOCITY BODY Y ← 157 on object 55328770","object":55328770,"values":[157]}
+{"t":1790977833740,"s":15.588,"kind":"write","text":"VELOCITY BODY Y ← 158 on object 55328770","object":55328770,"values":[158]}
+{"t":1790977833773,"s":15.621,"kind":"write","text":"VELOCITY BODY Y ← 159 on object 55328770","object":55328770,"values":[159]}
+{"t":1790977833807,"s":15.655,"kind":"write","text":"VELOCITY BODY Y ← 160 on object 55328770","object":55328770,"values":[160]}
+{"t":1790977833840,"s":15.688,"kind":"write","text":"VELOCITY BODY Y ← 161 on object 55328770","object":55328770,"values":[161]}
+{"t":1790977833873,"s":15.721,"kind":"write","text":"VELOCITY BODY Y ← 162 on object 55328770","object":55328770,"values":[162]}
+{"t":1790977833907,"s":15.755,"kind":"write","text":"VELOCITY BODY Y ← 163 on object 55328770","object":55328770,"values":[163]}
+{"t":1790977833940,"s":15.788,"kind":"write","text":"VELOCITY BODY Y ← 164 on object 55328770","object":55328770,"values":[164]}
+{"t":1790977833973,"s":15.821,"kind":"write","text":"VELOCITY BODY Y ← 165 on object 55328770","object":55328770,"values":[165]}
+{"t":1790977834007,"s":15.855,"kind":"write","text":"VELOCITY BODY Y ← 166 on object 55328770","object":55328770,"values":[166]}
+{"t":1790977834040,"s":15.888,"kind":"write","text":"VELOCITY BODY Y ← 167 on object 55328770","object":55328770,"values":[167]}
+{"t":1790977834074,"s":15.922,"kind":"write","text":"VELOCITY BODY Y ← 168 on object 55328770","object":55328770,"values":[168]}
+{"t":1790977834107,"s":15.955,"kind":"write","text":"VELOCITY BODY Y ← 169 on object 55328770","object":55328770,"values":[169]}
+{"t":1790977834140,"s":15.988,"kind":"write","text":"VELOCITY BODY Y ← 170 on object 55328770","object":55328770,"values":[170]}
+{"t":1790977834173,"s":16.021,"kind":"write","text":"VELOCITY BODY Y ← 171 on object 55328770","object":55328770,"values":[171]}
+{"t":1790977834207,"s":16.055,"kind":"write","text":"VELOCITY BODY Y ← 172 on object 55328770","object":55328770,"values":[172]}
+{"t":1790977834241,"s":16.089,"kind":"write","text":"VELOCITY BODY Y ← 173 on object 55328770","object":55328770,"values":[173]}
+{"t":1790977834274,"s":16.122,"kind":"write","text":"VELOCITY BODY Y ← 174 on object 55328770","object":55328770,"values":[174]}
+{"t":1790977834307,"s":16.155,"kind":"write","text":"VELOCITY BODY Y ← 175 on object 55328770","object":55328770,"values":[175]}
+{"t":1790977834340,"s":16.188,"kind":"write","text":"VELOCITY BODY Y ← 176 on object 55328770","object":55328770,"values":[176]}
+{"t":1790977834374,"s":16.222,"kind":"write","text":"VELOCITY BODY Y ← 177 on object 55328770","object":55328770,"values":[177]}
+{"t":1790977834407,"s":16.255,"kind":"write","text":"VELOCITY BODY Y ← 178 on object 55328770","object":55328770,"values":[178]}
+{"t":1790977834440,"s":16.288,"kind":"write","text":"VELOCITY BODY Y ← 179 on object 55328770","object":55328770,"values":[179]}
+{"t":1790977834473,"s":16.321,"kind":"write","text":"VELOCITY BODY Y ← 180 on object 55328770","object":55328770,"values":[180]}
+{"t":1790977834473,"s":16.321,"kind":"write","text":"VELOCITY BODY Y ← 180 on object 55328770","object":55328770,"values":[180]}
+{"t":1790977834506,"s":16.354,"kind":"write","text":"VELOCITY BODY Y ← 181 on object 55328770","object":55328770,"values":[181]}
+{"t":1790977834540,"s":16.388,"kind":"write","text":"VELOCITY BODY Y ← 182 on object 55328770","object":55328770,"values":[182]}
+{"t":1790977834573,"s":16.421,"kind":"write","text":"VELOCITY BODY Y ← 183 on object 55328770","object":55328770,"values":[183]}
+{"t":1790977834607,"s":16.455,"kind":"write","text":"VELOCITY BODY Y ← 184 on object 55328770","object":55328770,"values":[184]}
+{"t":1790977834640,"s":16.488,"kind":"write","text":"VELOCITY BODY Y ← 185 on object 55328770","object":55328770,"values":[185]}
+{"t":1790977834673,"s":16.521,"kind":"write","text":"VELOCITY BODY Y ← 186 on object 55328770","object":55328770,"values":[186]}
+{"t":1790977834707,"s":16.555,"kind":"write","text":"VELOCITY BODY Y ← 187 on object 55328770","object":55328770,"values":[187]}
+{"t":1790977834740,"s":16.588,"kind":"write","text":"VELOCITY BODY Y ← 188 on object 55328770","object":55328770,"values":[188]}
+{"t":1790977834773,"s":16.621,"kind":"write","text":"VELOCITY BODY Y ← 189 on object 55328770","object":55328770,"values":[189]}
+{"t":1790977834806,"s":16.654,"kind":"write","text":"VELOCITY BODY Y ← 190 on object 55328770","object":55328770,"values":[190]}
+{"t":1790977834840,"s":16.688,"kind":"write","text":"VELOCITY BODY Y ← 191 on object 55328770","object":55328770,"values":[191]}
+{"t":1790977834874,"s":16.722,"kind":"write","text":"VELOCITY BODY Y ← 192 on object 55328770","object":55328770,"values":[192]}
+{"t":1790977834907,"s":16.755,"kind":"write","text":"VELOCITY BODY Y ← 193 on object 55328770","object":55328770,"values":[193]}
+{"t":1790977834940,"s":16.788,"kind":"write","text":"VELOCITY BODY Y ← 194 on object 55328770","object":55328770,"values":[194]}
+{"t":1790977834974,"s":16.822,"kind":"write","text":"VELOCITY BODY Y ← 195 on object 55328770","object":55328770,"values":[195]}
+{"t":1790977835008,"s":16.856,"kind":"write","text":"VELOCITY BODY Y ← 196 on object 55328770","object":55328770,"values":[196]}
+{"t":1790977835040,"s":16.888,"kind":"write","text":"VELOCITY BODY Y ← 197 on object 55328770","object":55328770,"values":[197]}
+{"t":1790977835073,"s":16.921,"kind":"write","text":"VELOCITY BODY Y ← 198 on object 55328770","object":55328770,"values":[198]}
+{"t":1790977835107,"s":16.955,"kind":"write","text":"VELOCITY BODY Y ← 199 on object 55328770","object":55328770,"values":[199]}
+{"t":1790977835141,"s":16.989,"kind":"write","text":"VELOCITY BODY Y ← 200 on object 55328770","object":55328770,"values":[200]}
+{"t":1790977835173,"s":17.021,"kind":"write","text":"VELOCITY BODY Y ← 201 on object 55328770","object":55328770,"values":[201]}
+{"t":1790977835207,"s":17.055,"kind":"write","text":"VELOCITY BODY Y ← 202 on object 55328770","object":55328770,"values":[202]}
+{"t":1790977835240,"s":17.088,"kind":"write","text":"VELOCITY BODY Y ← 203 on object 55328770","object":55328770,"values":[203]}
+{"t":1790977835273,"s":17.121,"kind":"write","text":"VELOCITY BODY Y ← 204 on object 55328770","object":55328770,"values":[204]}
+{"t":1790977835307,"s":17.155,"kind":"write","text":"VELOCITY BODY Y ← 205 on object 55328770","object":55328770,"values":[205]}
+{"t":1790977835340,"s":17.188,"kind":"write","text":"VELOCITY BODY Y ← 206 on object 55328770","object":55328770,"values":[206]}
+{"t":1790977835375,"s":17.223,"kind":"write","text":"VELOCITY BODY Y ← 207 on object 55328770","object":55328770,"values":[207]}
+{"t":1790977835407,"s":17.255,"kind":"write","text":"VELOCITY BODY Y ← 208 on object 55328770","object":55328770,"values":[208]}
+{"t":1790977835440,"s":17.288,"kind":"write","text":"VELOCITY BODY Y ← 209 on object 55328770","object":55328770,"values":[209]}
+{"t":1790977835473,"s":17.321,"kind":"write","text":"VELOCITY BODY Y ← 210 on object 55328770","object":55328770,"values":[210]}
+{"t":1790977835473,"s":17.321,"kind":"write","text":"VELOCITY BODY Y ← 210 on object 55328770","object":55328770,"values":[210]}
+{"t":1790977835506,"s":17.354,"kind":"write","text":"VELOCITY BODY Y ← 211 on object 55328770","object":55328770,"values":[211]}
+{"t":1790977835540,"s":17.388,"kind":"write","text":"VELOCITY BODY Y ← 212 on object 55328770","object":55328770,"values":[212]}
+{"t":1790977835573,"s":17.421,"kind":"write","text":"VELOCITY BODY Y ← 213 on object 55328770","object":55328770,"values":[213]}
+{"t":1790977835606,"s":17.454,"kind":"write","text":"VELOCITY BODY Y ← 214 on object 55328770","object":55328770,"values":[214]}
+{"t":1790977835640,"s":17.488,"kind":"write","text":"VELOCITY BODY Y ← 215 on object 55328770","object":55328770,"values":[215]}
+{"t":1790977835673,"s":17.521,"kind":"write","text":"VELOCITY BODY Y ← 216 on object 55328770","object":55328770,"values":[216]}
+{"t":1790977835706,"s":17.554,"kind":"write","text":"VELOCITY BODY Y ← 217 on object 55328770","object":55328770,"values":[217]}
+{"t":1790977835740,"s":17.588,"kind":"write","text":"VELOCITY BODY Y ← 218 on object 55328770","object":55328770,"values":[218]}
+{"t":1790977835773,"s":17.621,"kind":"write","text":"VELOCITY BODY Y ← 219 on object 55328770","object":55328770,"values":[219]}
+{"t":1790977835807,"s":17.655,"kind":"write","text":"VELOCITY BODY Y ← 220 on object 55328770","object":55328770,"values":[220]}
+{"t":1790977835840,"s":17.688,"kind":"write","text":"VELOCITY BODY Y ← 221 on object 55328770","object":55328770,"values":[221]}
+{"t":1790977835873,"s":17.721,"kind":"write","text":"VELOCITY BODY Y ← 222 on object 55328770","object":55328770,"values":[222]}
+{"t":1790977835907,"s":17.755,"kind":"write","text":"VELOCITY BODY Y ← 223 on object 55328770","object":55328770,"values":[223]}
+{"t":1790977835940,"s":17.788,"kind":"write","text":"VELOCITY BODY Y ← 224 on object 55328770","object":55328770,"values":[224]}
+{"t":1790977835974,"s":17.822,"kind":"write","text":"VELOCITY BODY Y ← 225 on object 55328770","object":55328770,"values":[225]}
+{"t":1790977836007,"s":17.855,"kind":"write","text":"VELOCITY BODY Y ← 226 on object 55328770","object":55328770,"values":[226]}
+{"t":1790977836040,"s":17.888,"kind":"write","text":"VELOCITY BODY Y ← 227 on object 55328770","object":55328770,"values":[227]}
+{"t":1790977836073,"s":17.921,"kind":"write","text":"VELOCITY BODY Y ← 228 on object 55328770","object":55328770,"values":[228]}
+{"t":1790977836107,"s":17.955,"kind":"write","text":"VELOCITY BODY Y ← 229 on object 55328770","object":55328770,"values":[229]}
+{"t":1790977836154,"s":18.002,"kind":"in place","text":"FSDT_Passenger_CASUAL_M_0030: 186 frames written to VELOCITY BODY Y; wrote 245, read back 245; legs didn't move","name":"passenger","title":"FSDT_Passenger_CASUAL_M_0030","channel":"VELOCITY BODY Y","id":55328770,"error":null,"frames":186,"readBack":{"wrote":245,"got":244.99999999999974,"error":null},"moved":false,"refused":false}
+{"t":1790977837673,"s":19.521,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 55328771","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790977837673,"s":19.521,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 55328771","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790977837673,"s":19.521,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 55328771","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1790977837675,"s":19.523,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 139 on object 55328771","object":55328771,"values":[139]}
+{"t":1790977837707,"s":19.555,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 140 on object 55328771","object":55328771,"values":[140]}
+{"t":1790977837740,"s":19.588,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 141 on object 55328771","object":55328771,"values":[141]}
+{"t":1790977837774,"s":19.622,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 142 on object 55328771","object":55328771,"values":[142]}
+{"t":1790977837807,"s":19.655,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 143 on object 55328771","object":55328771,"values":[143]}
+{"t":1790977837841,"s":19.689,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 144 on object 55328771","object":55328771,"values":[144]}
+{"t":1790977837874,"s":19.722,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 145 on object 55328771","object":55328771,"values":[145]}
+{"t":1790977837907,"s":19.755,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 146 on object 55328771","object":55328771,"values":[146]}
+{"t":1790977837940,"s":19.788,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 147 on object 55328771","object":55328771,"values":[147]}
+{"t":1790977837974,"s":19.822,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 148 on object 55328771","object":55328771,"values":[148]}
+{"t":1790977838007,"s":19.855,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 149 on object 55328771","object":55328771,"values":[149]}
+{"t":1790977838041,"s":19.889,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 150 on object 55328771","object":55328771,"values":[150]}
+{"t":1790977838074,"s":19.922,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 151 on object 55328771","object":55328771,"values":[151]}
+{"t":1790977838107,"s":19.955,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 152 on object 55328771","object":55328771,"values":[152]}
+{"t":1790977838140,"s":19.988,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 153 on object 55328771","object":55328771,"values":[153]}
+{"t":1790977838173,"s":20.021,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 154 on object 55328771","object":55328771,"values":[154]}
+{"t":1790977838207,"s":20.055,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 155 on object 55328771","object":55328771,"values":[155]}
+{"t":1790977838240,"s":20.088,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 156 on object 55328771","object":55328771,"values":[156]}
+{"t":1790977838274,"s":20.122,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 157 on object 55328771","object":55328771,"values":[157]}
+{"t":1790977838307,"s":20.155,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 158 on object 55328771","object":55328771,"values":[158]}
+{"t":1790977838340,"s":20.188,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 159 on object 55328771","object":55328771,"values":[159]}
+{"t":1790977838374,"s":20.222,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 160 on object 55328771","object":55328771,"values":[160]}
+{"t":1790977838407,"s":20.255,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 161 on object 55328771","object":55328771,"values":[161]}
+{"t":1790977838440,"s":20.288,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 162 on object 55328771","object":55328771,"values":[162]}
+{"t":1790977838474,"s":20.322,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 163 on object 55328771","object":55328771,"values":[163]}
+{"t":1790977838474,"s":20.322,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 163 on object 55328771","object":55328771,"values":[163]}
+{"t":1790977838507,"s":20.355,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 164 on object 55328771","object":55328771,"values":[164]}
+{"t":1790977838540,"s":20.388,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 165 on object 55328771","object":55328771,"values":[165]}
+{"t":1790977838573,"s":20.421,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 166 on object 55328771","object":55328771,"values":[166]}
+{"t":1790977838607,"s":20.455,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 167 on object 55328771","object":55328771,"values":[167]}
+{"t":1790977838640,"s":20.488,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 168 on object 55328771","object":55328771,"values":[168]}
+{"t":1790977838673,"s":20.521,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 169 on object 55328771","object":55328771,"values":[169]}
+{"t":1790977838708,"s":20.556,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 170 on object 55328771","object":55328771,"values":[170]}
+{"t":1790977838741,"s":20.589,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 171 on object 55328771","object":55328771,"values":[171]}
+{"t":1790977838774,"s":20.622,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 172 on object 55328771","object":55328771,"values":[172]}
+{"t":1790977838808,"s":20.656,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 173 on object 55328771","object":55328771,"values":[173]}
+{"t":1790977838840,"s":20.688,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 174 on object 55328771","object":55328771,"values":[174]}
+{"t":1790977838873,"s":20.721,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 175 on object 55328771","object":55328771,"values":[175]}
+{"t":1790977838907,"s":20.755,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 176 on object 55328771","object":55328771,"values":[176]}
+{"t":1790977838940,"s":20.788,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 177 on object 55328771","object":55328771,"values":[177]}
+{"t":1790977838974,"s":20.822,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 178 on object 55328771","object":55328771,"values":[178]}
+{"t":1790977839007,"s":20.855,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 179 on object 55328771","object":55328771,"values":[179]}
+{"t":1790977839040,"s":20.888,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 180 on object 55328771","object":55328771,"values":[180]}
+{"t":1790977839073,"s":20.921,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 181 on object 55328771","object":55328771,"values":[181]}
+{"t":1790977839107,"s":20.955,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 182 on object 55328771","object":55328771,"values":[182]}
+{"t":1790977839140,"s":20.988,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 183 on object 55328771","object":55328771,"values":[183]}
+{"t":1790977839173,"s":21.021,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 184 on object 55328771","object":55328771,"values":[184]}
+{"t":1790977839207,"s":21.055,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 185 on object 55328771","object":55328771,"values":[185]}
+{"t":1790977839240,"s":21.088,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 186 on object 55328771","object":55328771,"values":[186]}
+{"t":1790977839273,"s":21.121,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 187 on object 55328771","object":55328771,"values":[187]}
+{"t":1790977839307,"s":21.155,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 188 on object 55328771","object":55328771,"values":[188]}
+{"t":1790977839340,"s":21.188,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 189 on object 55328771","object":55328771,"values":[189]}
+{"t":1790977839374,"s":21.222,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 190 on object 55328771","object":55328771,"values":[190]}
+{"t":1790977839407,"s":21.255,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 191 on object 55328771","object":55328771,"values":[191]}
+{"t":1790977839440,"s":21.288,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 192 on object 55328771","object":55328771,"values":[192]}
+{"t":1790977839473,"s":21.321,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 193 on object 55328771","object":55328771,"values":[193]}
+{"t":1790977839473,"s":21.321,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 193 on object 55328771","object":55328771,"values":[193]}
+{"t":1790977839507,"s":21.355,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 194 on object 55328771","object":55328771,"values":[194]}
+{"t":1790977839540,"s":21.388,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 195 on object 55328771","object":55328771,"values":[195]}
+{"t":1790977839573,"s":21.421,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 196 on object 55328771","object":55328771,"values":[196]}
+{"t":1790977839607,"s":21.455,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 197 on object 55328771","object":55328771,"values":[197]}
+{"t":1790977839640,"s":21.488,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 198 on object 55328771","object":55328771,"values":[198]}
+{"t":1790977839673,"s":21.521,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 199 on object 55328771","object":55328771,"values":[199]}
+{"t":1790977839707,"s":21.555,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 200 on object 55328771","object":55328771,"values":[200]}
+{"t":1790977839740,"s":21.588,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 201 on object 55328771","object":55328771,"values":[201]}
+{"t":1790977839774,"s":21.622,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 202 on object 55328771","object":55328771,"values":[202]}
+{"t":1790977839806,"s":21.654,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 139 on object 55328771","object":55328771,"values":[139]}
+{"t":1790977839840,"s":21.688,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 140 on object 55328771","object":55328771,"values":[140]}
+{"t":1790977839873,"s":21.721,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 141 on object 55328771","object":55328771,"values":[141]}
+{"t":1790977839906,"s":21.754,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 142 on object 55328771","object":55328771,"values":[142]}
+{"t":1790977839940,"s":21.788,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 143 on object 55328771","object":55328771,"values":[143]}
+{"t":1790977839973,"s":21.821,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 144 on object 55328771","object":55328771,"values":[144]}
+{"t":1790977840007,"s":21.855,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 145 on object 55328771","object":55328771,"values":[145]}
+{"t":1790977840040,"s":21.888,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 146 on object 55328771","object":55328771,"values":[146]}
+{"t":1790977840073,"s":21.921,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 147 on object 55328771","object":55328771,"values":[147]}
+{"t":1790977840107,"s":21.955,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 148 on object 55328771","object":55328771,"values":[148]}
+{"t":1790977840140,"s":21.988,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 149 on object 55328771","object":55328771,"values":[149]}
+{"t":1790977840173,"s":22.021,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 150 on object 55328771","object":55328771,"values":[150]}
+{"t":1790977840207,"s":22.055,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 151 on object 55328771","object":55328771,"values":[151]}
+{"t":1790977840240,"s":22.088,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 152 on object 55328771","object":55328771,"values":[152]}
+{"t":1790977840273,"s":22.121,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 153 on object 55328771","object":55328771,"values":[153]}
+{"t":1790977840307,"s":22.155,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 154 on object 55328771","object":55328771,"values":[154]}
+{"t":1790977840340,"s":22.188,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 155 on object 55328771","object":55328771,"values":[155]}
+{"t":1790977840374,"s":22.222,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 156 on object 55328771","object":55328771,"values":[156]}
+{"t":1790977840407,"s":22.255,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 157 on object 55328771","object":55328771,"values":[157]}
+{"t":1790977840440,"s":22.288,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 158 on object 55328771","object":55328771,"values":[158]}
+{"t":1790977840473,"s":22.321,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 159 on object 55328771","object":55328771,"values":[159]}
+{"t":1790977840473,"s":22.321,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 159 on object 55328771","object":55328771,"values":[159]}
+{"t":1790977840507,"s":22.355,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 160 on object 55328771","object":55328771,"values":[160]}
+{"t":1790977840540,"s":22.388,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 161 on object 55328771","object":55328771,"values":[161]}
+{"t":1790977840573,"s":22.421,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 162 on object 55328771","object":55328771,"values":[162]}
+{"t":1790977840606,"s":22.454,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 163 on object 55328771","object":55328771,"values":[163]}
+{"t":1790977840640,"s":22.488,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 164 on object 55328771","object":55328771,"values":[164]}
+{"t":1790977840673,"s":22.521,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 165 on object 55328771","object":55328771,"values":[165]}
+{"t":1790977840707,"s":22.555,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 166 on object 55328771","object":55328771,"values":[166]}
+{"t":1790977840740,"s":22.588,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 167 on object 55328771","object":55328771,"values":[167]}
+{"t":1790977840773,"s":22.621,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 168 on object 55328771","object":55328771,"values":[168]}
+{"t":1790977840807,"s":22.655,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 169 on object 55328771","object":55328771,"values":[169]}
+{"t":1790977840840,"s":22.688,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 170 on object 55328771","object":55328771,"values":[170]}
+{"t":1790977840873,"s":22.721,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 171 on object 55328771","object":55328771,"values":[171]}
+{"t":1790977840907,"s":22.755,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 172 on object 55328771","object":55328771,"values":[172]}
+{"t":1790977840940,"s":22.788,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 173 on object 55328771","object":55328771,"values":[173]}
+{"t":1790977840974,"s":22.822,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 174 on object 55328771","object":55328771,"values":[174]}
+{"t":1790977841007,"s":22.855,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 175 on object 55328771","object":55328771,"values":[175]}
+{"t":1790977841040,"s":22.888,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 176 on object 55328771","object":55328771,"values":[176]}
+{"t":1790977841073,"s":22.921,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 177 on object 55328771","object":55328771,"values":[177]}
+{"t":1790977841107,"s":22.955,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 178 on object 55328771","object":55328771,"values":[178]}
+{"t":1790977841140,"s":22.988,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 179 on object 55328771","object":55328771,"values":[179]}
+{"t":1790977841173,"s":23.021,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 180 on object 55328771","object":55328771,"values":[180]}
+{"t":1790977841207,"s":23.055,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 181 on object 55328771","object":55328771,"values":[181]}
+{"t":1790977841240,"s":23.088,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 182 on object 55328771","object":55328771,"values":[182]}
+{"t":1790977841273,"s":23.121,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 183 on object 55328771","object":55328771,"values":[183]}
+{"t":1790977841307,"s":23.155,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 184 on object 55328771","object":55328771,"values":[184]}
+{"t":1790977841341,"s":23.189,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 185 on object 55328771","object":55328771,"values":[185]}
+{"t":1790977841374,"s":23.222,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 186 on object 55328771","object":55328771,"values":[186]}
+{"t":1790977841407,"s":23.255,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 187 on object 55328771","object":55328771,"values":[187]}
+{"t":1790977841440,"s":23.288,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 188 on object 55328771","object":55328771,"values":[188]}
+{"t":1790977841474,"s":23.322,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 189 on object 55328771","object":55328771,"values":[189]}
+{"t":1790977841474,"s":23.322,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 189 on object 55328771","object":55328771,"values":[189]}
+{"t":1790977841507,"s":23.355,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 190 on object 55328771","object":55328771,"values":[190]}
+{"t":1790977841541,"s":23.389,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 191 on object 55328771","object":55328771,"values":[191]}
+{"t":1790977841574,"s":23.422,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 192 on object 55328771","object":55328771,"values":[192]}
+{"t":1790977841607,"s":23.455,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 193 on object 55328771","object":55328771,"values":[193]}
+{"t":1790977841640,"s":23.488,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 194 on object 55328771","object":55328771,"values":[194]}
+{"t":1790977841673,"s":23.521,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 195 on object 55328771","object":55328771,"values":[195]}
+{"t":1790977841707,"s":23.555,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 196 on object 55328771","object":55328771,"values":[196]}
+{"t":1790977841740,"s":23.588,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 197 on object 55328771","object":55328771,"values":[197]}
+{"t":1790977841776,"s":23.624,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 198 on object 55328771","object":55328771,"values":[198]}
+{"t":1790977841808,"s":23.656,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 199 on object 55328771","object":55328771,"values":[199]}
+{"t":1790977841841,"s":23.689,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 200 on object 55328771","object":55328771,"values":[200]}
+{"t":1790977841874,"s":23.722,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 201 on object 55328771","object":55328771,"values":[201]}
+{"t":1790977841907,"s":23.755,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 202 on object 55328771","object":55328771,"values":[202]}
+{"t":1790977841940,"s":23.788,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 139 on object 55328771","object":55328771,"values":[139]}
+{"t":1790977841974,"s":23.822,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 140 on object 55328771","object":55328771,"values":[140]}
+{"t":1790977842007,"s":23.855,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 141 on object 55328771","object":55328771,"values":[141]}
+{"t":1790977842048,"s":23.896,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 142 on object 55328771","object":55328771,"values":[142]}
+{"t":1790977842074,"s":23.922,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 143 on object 55328771","object":55328771,"values":[143]}
+{"t":1790977842107,"s":23.955,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 144 on object 55328771","object":55328771,"values":[144]}
+{"t":1790977842141,"s":23.989,"kind":"write","text":"WAGON FRONT LINK ORIENTATION ← 145 on object 55328771","object":55328771,"values":[145]}
+{"t":1790977842168,"s":24.016,"kind":"stop","text":"Ctrl+C: removing the figures and writing the report"}

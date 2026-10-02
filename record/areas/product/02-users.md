@@ -54,6 +54,9 @@ The problems below are ones we expect.
 - **Who:** a crew, and sometimes passengers.
   The crew is usually two pilots, or three with a flight engineer.
   The iniBuilds L-1011 has a flight engineer's panel, though its manual says it's designed for single-pilot operations (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)).
+  A crew can be much larger: the Boeing 314 flying boat had six flight-deck stations, and the B-36 bomber's reconnaissance version flew with 22 crew ([Boeing 314](https://en.wikipedia.org/wiki/Boeing_314_Clipper) and [B-36](https://en.wikipedia.org/wiki/Convair_B-36_Peacemaker) on Wikipedia).
+  We design for crews of up to 22, the largest real crew we found in which everyone works a station on the aircraft.
+  The E-4B carries up to 108 more people, but they're battle staff at desks, so in Crosscheck's terms they'd be passengers ([E-4](https://en.wikipedia.org/wiki/Boeing_E-4) on Wikipedia).
   Passengers range from one friend riding along to an event filling an A320 with more than 150 people, and some groups already fly with passengers (unverified: reported to us by an FS Copilot user).
 - **Wants:** the crew want what the other kinds want, and passengers want to be aboard and watch the flight.
 - **Goes wrong:** each extra machine is another setup that can differ from the host's, and another connection that can fail.

@@ -206,16 +206,17 @@ Later, a pilot could invite a passenger to a given seat, with the invite made to
 - **Product:** serves the [groups](02-users.md#groups) who fly with passengers.
 - **Open questions:** a passenger probably needs the aircraft installed to sit in its cabin (unverified), so passenger mode is an option for groups who all own the aircraft.
 
-### Multiplayer kept on
+### Avatar sync
 
-Crosscheck hides the other pilot's copy of the aircraft, so both pilots can keep MSFS multiplayer on.
-FS Copilot requires pilots to turn multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), because with it on, each pilot also sees the aircraft the other pilot is flying, a second copy of their own in the same place (from our experience with FS Copilot).
-YourControls probably requires the same (unverified).
+Each pilot sees the other pilot's avatar, with MSFS multiplayer off.
+Crosscheck reads where the avatar is and which way it faces, and on the other machine moves a figure to match: a person-shaped object that Crosscheck ships.
 
-- **Tech:** hiding the copy needs a way to reach another player's aircraft from SimConnect or panel code, and we don't know of one.
-  Traffic sync as our FS Copilot fork designed it relies on multiplayer being off, so other players' aircraft never enter the traffic it copies (FS Copilot fork, same file and section), and with multiplayer on it would have to leave them out itself.
-- **Product:** with multiplayer on, each pilot could see the other's avatar during a walkaround (unverified).
-- **Next:** a probe with both pilots in one multiplayer session, to find whether SimConnect lists the other pilot's aircraft, and whether anything can hide it.
+- **Tech:** SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)).
+  The sim's own people stay invisible when a SimConnect client spawns them, while GSX's people show and follow a position written every frame, sliding rather than walking (same date, [avatars log](../avatars/log.md#2026-10-02-a-gsx-person-shows-and-follows-where-we-write-it-and-the-sims-own-people-stay-invisible)).
+  So the figure would be a person Crosscheck ships as a SimObject with a model of its own, which means building a modeled, animated character.
+- **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
+- **Open questions:** what makes a figure walk rather than slide, which GSX's SimObject files may show.
+  How the other pilot shows in the cockpit: once a pilot is seated, the avatar's object sits 0.3m from the aircraft's reference point at the aircraft's heading (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)), and whether it turns when they look around is unmeasured.
 
 ## Interface
 
@@ -263,3 +264,6 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
 - **Learn by demonstration in the profile IDE:** the IDE would list what changed when the author flipped a switch, and propose a profile entry.
   We set it aside while we build the core product.
 - **Cockpit diff and resync:** we don't know how reliably Crosscheck can read an aircraft's state, and a resync prompt interrupts the pilots.
+- **Multiplayer kept on:** other players in the session would see the shared aircraft twice, and Crosscheck can't hide anything on their machines (unverified: nobody has looked from a third machine).
+  In multiplayer each pilot also sees the other pilot's copy of the aircraft (unverified: from our FS Copilot sessions), and hiding that copy would fix only the two pilots' own view.
+  [Avatar sync](#avatar-sync) gives the walkaround presence that keeping multiplayer on was for.

@@ -100,6 +100,11 @@ sim.watch(POSE, {
 })
 const latest = () => samples[samples.length - 1] ?? null
 
+// The first sample takes a moment to arrive, and without one there's nowhere
+// to put a figure.
+for (let i = 0; i < 30 && !latest(); i++) await sleep(100)
+rec.log("avatar", latest() ? `${fmt(latest().lat)}, ${fmt(latest().lon)}, heading ${Math.round(latest().hdg)}°` : "no answer from SIMCONNECT_OBJECT_ID_USER_AVATAR in 3s: are you on foot?")
+
 // Stops writing a definition after its first exception, so a variable the sim
 // refuses doesn't print a line per frame.
 const failed = new Set()
@@ -158,7 +163,9 @@ console.log([
 
 // in place ----------------------------------------
 
-if (latest() && await ask("Figures walking in place", `Stand still facing open ground, and press Page Down. A passenger, then a cleaner, stands ${AHEAD_M}m in front of you for ${IN_PLACE_MS / 1000}s each, with its walk loop playing. Press Page Down whenever a figure's legs move.`)) {
+if (!latest()) {
+  rec.log("in place", "skipped: no avatar position to place the figures by")
+} else if (await ask("Figures walking in place", `Stand still facing open ground, and press Page Down. A passenger, then a cleaner, stands ${AHEAD_M}m in front of you for ${IN_PLACE_MS / 1000}s each, with its walk loop playing. Press Page Down whenever a figure's legs move.`)) {
   const presses = []
   const unlisten = keys.listen((k) => {
     if (k.key !== "START") return
@@ -203,7 +210,7 @@ if (latest() && await ask("Figures walking in place", `Stand still facing open g
 
 const walker = FIGURES.find((f) => report.inPlace.find((x) => x.name === f.name)?.moved) ?? null
 if (!walker) {
-  rec.log("follow", "skipped: no figure's legs moved")
+  rec.log("follow", `skipped: ${report.inPlace.length ? "no figure's legs moved" : "the walking-in-place step didn't run"}`)
 } else if (await ask("A walking figure in front of you", `Press Page Down, then walk, stop, and walk again for ${FOLLOW_MS / 1000}s: the ${walker.name} stays ${AHEAD_M}m in front of you, walking while you walk and idling while you stand. It goes at the long low beep.`)) {
   const p = latest()
   const r = await create(walker, offset(p, AHEAD_M, 0), p.hdg)

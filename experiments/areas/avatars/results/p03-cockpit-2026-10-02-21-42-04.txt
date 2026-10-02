@@ -1,0 +1,23 @@
+p03 · The other pilot in the cockpit: the seated avatar, the camera, and a person beside you, on MSFS 2024
+2026-10-02T21:42:04.481Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Setup:
+  aircraft TITLE "Cessna C152 Aerial Advertising", heading 27°; IS AIRCRAFT 1
+  ChasePlane's bridge is running
+  avatar's object: 0.10m forward, -0.23m right, -0.14m up of the aircraft's reference point, heading 27°
+  seat SEAT_C152_Pilot: 0.10m forward, -0.23m right, -0.14m up, heading 27°, 0.00m from the avatar's object
+  seat SEAT_C152_Pax: 0.10m forward, 0.21m right, -0.13m up, heading 27°, 0.44m from the avatar's object
+
+Looking around:
+  looking around (ChasePlane running)
+    avatar's object: PLANE LONGITUDE 18.33935..18.33935, 247 changes; PLANE HEADING DEGREES TRUE turned 0° (26.66022..26.661678°), 249 changes; PLANE PITCH DEGREES -0.021497..0.021224, 177 changes; PLANE BANK DEGREES 0.323177..0.32885, 250 changes; PLANE LATITUDE 43.824386..43.824386, 4 changes; PLANE ALTITUDE 1683.781691..1683.781792, 3 changes
+    camera: L:p42_cp_rendered_camera_sequence 116598..117096, 251 changes; L:p42_cp_camera_api_heartbeat 9344.596967..9352.933217, 251 changes
+    unchanged: CAMERA STATE 2, CAMERA SUBSTATE 1, CAMERA GAMEPLAY PITCH YAW:0 0, CAMERA GAMEPLAY PITCH YAW:1 0, CAMERA VIEW TYPE AND INDEX:0 1, CAMERA VIEW TYPE AND INDEX:1 1, L:p42_cp_rendered_camera_valid 0, L:p42_cp_is_avatar 0
+  looking around, ChasePlane closed (ChasePlane running)
+    avatar's object: PLANE LONGITUDE 18.33935..18.33935, 243 changes; PLANE HEADING DEGREES TRUE turned 0° (26.6603..26.662505°), 250 changes; PLANE PITCH DEGREES -0.023716..0.021887, 190 changes; PLANE BANK DEGREES 0.323796..0.332075, 250 changes; PLANE LATITUDE 43.824386..43.824386, 6 changes; PLANE ALTITUDE 1683.781691..1683.781741, 2 changes
+    camera: L:p42_cp_rendered_camera_sequence 120284..120782, 251 changes; L:p42_cp_camera_api_heartbeat 9406.896064..9415.195466, 251 changes; CAMERA SUBSTATE 1..2, 4 changes; CAMERA GAMEPLAY PITCH YAW:0 -77.5°..74.6°, 184 changes; CAMERA GAMEPLAY PITCH YAW:1 -156.7°..119.7°, 230 changes
+    unchanged: CAMERA STATE 2, CAMERA VIEW TYPE AND INDEX:0 1, CAMERA VIEW TYPE AND INDEX:1 1, L:p42_cp_rendered_camera_valid 0, L:p42_cp_is_avatar 0
+
+Person beside you: FSDT_Passenger_CASUAL_M_0030 at seat SEAT_C152_Pax, read back at 0.10m forward, 0.21m right, -0.13m up; SEEN
+
+Exceptions: none

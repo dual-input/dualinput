@@ -334,3 +334,42 @@ Before a pilot starts flying, Crosscheck compares what each pilot has for the sh
   A package's manifest declares its dependencies, but optional add-ons go undeclared, as the Baron's GPS units do, so the profile could list the packages that matter.
 - Whether the check compares the scenery at the departure airport, since v1 doesn't support different scenery.
 - Whether each pilot starts flying on their own, or the crew starts together.
+
+## Around the aircraft
+
+### Traffic sync
+
+The AI traffic in one pilot's sim, usually injected by an ATC add-on such as BeyondATC, appears in every pilot's sim, out of the window and on TCAS.
+
+**In v1:**
+
+- A traffic host, the pilot whose sim has the traffic, in a role of its own, separate from control, as in our FS Copilot fork (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "One host, and it need not be the master").
+- Aircraft and ground vehicles, GSX's tugs, fuel trucks, and catering among them, accepting that ground vehicles may show issues in v1.
+- A radius as a setting, up to the SDK's 200km cap, which is the default (FS Copilot fork, same file, "Reading").
+- In the start-flying list, the traffic sources a receiving pilot should turn off, the traffic packs that differ from the host's, and a warning when multiplayer is on, each where Crosscheck can detect it.
+
+**Not in v1:**
+
+- Removing another source's traffic for the pilot, because SimConnect removes only the AI objects its own client created ([SimConnect_AIRemoveObject](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/AI_Object/SimConnect_AIRemoveObject.htm)).
+
+**Rules:**
+
+- A receiving pilot runs the same traffic packs as the host and no others, and the same scenery.
+  With other packs, aircraft go missing or fall back to generic models, and a frozen object isn't clamped to the ground, so with other scenery it floats or sinks (FS Copilot fork, same file, "Model matching"; measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Baseline: BeyondATC's own traffic scores 0.56").
+  Two groups of FS Copilot testers missed this and flew with airliners missing (from our experience with FS Copilot), which is why the start-flying list names packs one by one.
+- The copies move smoothly.
+  Frozen and written every frame from samples at 2Hz, our fork's copies scored 0.17 median jitter against 0.56 for BeyondATC's own traffic, on one PC (measured on MSFS 2024, 2026-09-06, same log, "Jitter measured, not eyeballed"), and ran well between two machines (from our experience with FS Copilot).
+  BeyondATC has since released an update for smoother AI traffic, which we haven't compared (reported by the user, 2026-10-03).
+- When the traffic host changes, the new host removes the traffic it had injected before it starts, and the old host stops sending (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "One host, and it need not be the master").
+
+**Depends on:**
+
+- The [preflight match check](#preflight-match-check)'s start-flying list.
+- [The connection](#the-connection).
+
+**Open questions:**
+
+- Whether the traffic host is chosen by hand or taken automatically by whoever has traffic, perhaps as a setting with a default yet to pick.
+- How Crosscheck detects installed traffic packs, running injectors, and multiplayer: the installed packages and the running processes are candidates (unverified).
+- Whether Crosscheck can hide another source's traffic without removing it, such as by freezing it out of sight, which is untested and would leave ATC talking to aircraft nobody sees.
+- How our copies compare with BeyondATC's updated traffic.

@@ -3,6 +3,32 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-03: The Baron 58P lists only its pilot's seat, because the seat objects are the seats in each aircraft's navigation graph
+
+**Asked:** does the Black Square Baron 58P, v1's aircraft, list seat objects for both front seats, so the other pilot's figure can sit in the right seat with no seat named in the profile?
+
+**Expected:** both front seats, as the A2A Comanche lists ([avatars log](../avatars/log.md#2026-10-03-the-cockpit-models-own-space-lines-up-with-simconnects-within-8mm-but-the-models-input-event-ids-arent-the-names-the-sim-lists)).
+
+**Found:**
+
+- With the 58P loaded, bksq-aircraft-baronpro 0.1.1, the 3 objects within 50m were the aircraft, the avatar's object, and one seat, `SEAT_DEFAULT_Pilot`, 0.06m behind the aircraft's reference point, 0.28m left, and 0.13m up, with the avatar's object on it.
+- The copilot's payload station held 160 lb, so an empty seat doesn't explain the missing copilot's seat.
+- Each aircraft's `navigation_graph_pilot.cfg` lists its seats.
+  The Comanche's has two seat nodes, on the cockpit model's `PILOT_1` and `PILOT_2`, with `interactiveObject = SEAT_DEFAULT_Pilot` and `SEAT_DEFAULT_Copilot`.
+  The 58P's has one, on `PILOT_0`, with Asobo's `Seat_without_seatbelt` interaction (read in a2a-aircraft-pa24 2.1.3 and bksq-aircraft-baronpro 0.1.1, `navigation_graph_pilot.cfg`).
+- Of the 9 aircraft packages on our development machine with a navigation graph, 7 list both front seats in it: the A2A Aerostar and Comanche, the Fenix A320, the iniBuilds A350 and L-1011, the PMDG 777, and the Synaptic A220.
+  Black Square's Baron and Bonanza, both 0.1.1, list only the pilot's.
+- The 58P's cockpit model has both `PILOT_0` and `PILOT_1` nodes, and p25 seated our figure on `PILOT_1`, the right seat ([avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
+  The Aerostar, the Comanche, the Bonanza, and the A220 have `PILOT_` nodes too.
+  The search found none in the other packages, but it read only files whose names say interior or cockpit, so it may have missed theirs (unverified).
+
+**Changed:** the seat objects can't be the only automatic source of seats.
+On v1's aircraft, the right seat comes from the cockpit model's `PILOT_1` node or from the profile.
+
+**Affects:** the ideas [Seat awareness](../product/ideas.md#seat-awareness) and [Avatar sync](../product/ideas.md#avatar-sync), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** [p03's run on the 58P](../../../experiments/areas/aircraft/results/p03-seat-objects-2026-10-03-20-46-58.txt).
+
 ## 2026-10-03: Two partly encrypted aircraft list seat objects, the Phenom 300E for its pilots and passengers and the A380 for its pilots
 
 **Asked:** does the sim list seat objects through SimConnect for an aircraft whose model files are partly encrypted, so a figure can be seated where the cockpit model can't be loaded?

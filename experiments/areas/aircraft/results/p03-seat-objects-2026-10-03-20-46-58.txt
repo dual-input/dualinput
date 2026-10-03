@@ -1,0 +1,11 @@
+p03 · Seat objects for the loaded aircraft, through SimConnect, on MSFS 2024
+2026-10-03T20:46:58.947Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N513LW"
+
+Objects within 50m: 3
+  object 32768: TITLE "", CATEGORY "CharacterSim", -0.06m forward, -0.28m right, 0.13m up, heading 89.419278°
+  object 2883584: TITLE "Black Square Baron 58P Professional N513LW", CATEGORY "Airplane", -0.00m forward, -0.00m right, -0.00m up, heading 89.415561°
+  object 50020363: TITLE "SEAT_DEFAULT_Pilot", CATEGORY "SimpleObjectSim", -0.06m forward, -0.28m right, 0.13m up, heading 89.419278°
+
+Seat objects: 1
+Exceptions: none

@@ -1,0 +1,9 @@
+{"t":1791060418975,"s":0.028,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791060418995,"s":0.048,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791060418995,"s":0.048,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791060418995,"s":0.048,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791060419028,"s":0.081,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}
+{"t":1791060419062,"s":0.115,"kind":"objects","text":"3 objects within 50m"}
+{"t":1791060419095,"s":0.148,"kind":"object","text":"object 32768: TITLE \"\", CATEGORY \"CharacterSim\", -0.06m forward, -0.28m right, 0.13m up, heading 89.419278°","id":32768,"title":"","category":"CharacterSim","body":{"forward":-0.05739934376731723,"right":-0.28449554477440486,"up":0.12992299950724}}
+{"t":1791060419128,"s":0.181,"kind":"object","text":"object 2883584: TITLE \"Black Square Baron 58P Professional N513LW\", CATEGORY \"Airplane\", -0.00m forward, -0.00m right, -0.00m up, heading 89.415561°","id":2883584,"title":"Black Square Baron 58P Professional N513LW","category":"Airplane","body":{"forward":-6.125632272094187e-7,"right":-5.136469461325333e-7,"up":-3.797641444407418e-8}}
+{"t":1791060419161,"s":0.214,"kind":"object","text":"object 50020363: TITLE \"SEAT_DEFAULT_Pilot\", CATEGORY \"SimpleObjectSim\", -0.06m forward, -0.28m right, 0.13m up, heading 89.419278°","id":50020363,"title":"SEAT_DEFAULT_Pilot","category":"SimpleObjectSim","body":{"forward":-0.05735606369974254,"right":-0.2845561769657884,"up":0.1298924819291161}}

@@ -9,6 +9,35 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Led by one frame, a WASM-written figure sits in the seat of a flying aircraft, but doesn't hold still
+
+**Asked:** where does a figure written from inside the sim's frame land in a flying aircraft's cabin, and can a lead put it in the seat?
+In p12 the wand sat by the tail ([entry below](#2026-10-03-written-from-inside-the-sims-frame-by-a-wasm-module-an-object-keeps-up-with-a-flying-aircraft)), so p13 and p14 used GSX's seated passenger, `FSDT_Passenger_CASUAL_M_0030_SEATED`, whose origin is at its feet, placed 0.45m below the seat point.
+
+**Expected:** a write from `Update_StandAlone` would land in the frame it's made.
+
+**Found:**
+
+- With no lead (p13), the passenger sat outside, behind the C152's cabin: a meter or two back when written at the seat's parked offset from the aircraft, and further back when written on the seat object's own position.
+  The pilot's screen recording shows both through the rear window.
+- From inside the frame, `SEAT_C152_Pax` read 1.4m to 1.8m behind the aircraft's reference point at 84 to 114 kt, against 0.10m ahead parked, and SimConnect from outside read it 1.8m to 2.3m behind.
+  At about 32 frames a second that's about one frame of travel, so the seat object's reported position is a frame old (inference).
+- p14 moved the passenger on by what the aircraft moved since the previous frame, times a lead, at 76 to 97 kt:
+  - at the parked offset, led one frame: inside the cabin at the passenger seat, sitting too high;
+  - at the parked offset, led two frames: outside, ahead of the aircraft, seen through the windshield;
+  - on the seat object, led two frames: inside the cabin at the seat, sitting too high.
+- In no step did the passenger sit exactly in the seat or hold perfectly still, the pilot reported, and the recording shows it shifting between frames.
+- The module wrote every frame of every step with no error.
+
+**Changed:** a write from `Update_StandAlone` shows a frame after the aircraft is drawn, so a WASM-written figure needs a one-frame lead and still wobbles.
+For a figure that must sit still, attaching it through the aircraft's own files is the route measured to work ([entry below](#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)), and the WASM writer is a rougher fallback.
+Why it wobbles is unknown: frame times vary, and the parked offset turns by heading only while the pilot rocked the wings.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p13's runs, the last [from 06:41:53](../../../experiments/areas/avatars/results/p13-seat-follow-2026-10-03-06-41-53.txt), and [p14's run](../../../experiments/areas/avatars/results/p14-lead-frames-2026-10-03-06-50-09.txt).
+The pilot's screen recordings of both are kept out of the repository, because they show the home folder's path.
+
 ## 2026-10-03: Written from inside the sim's frame by a WASM module, an object keeps up with a flying aircraft
 
 **Asked:** does an object written every frame from inside the sim, by a WASM module, hold still in a moving cockpit, where writes from outside stuttered ([entry below](#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still))?

@@ -1,0 +1,27 @@
+{"t":1791010173486,"s":0.04,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791010173969,"s":0.523,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791010173969,"s":0.523,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791010173971,"s":0.525,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791010175868,"s":2.422,"kind":"module","text":"crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 800 → 816 in 0.5s)"}
+{"t":1791010175969,"s":2.523,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\", 105 kt; seats SEAT_C152_Pilot, SEAT_C152_Pax"}
+{"t":1791010182434,"s":8.988,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791010182470,"s":9.024,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 53067776","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791010182470,"s":9.024,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 53067776","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791010182470,"s":9.024,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 53067776","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791010182470,"s":9.024,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791010182471,"s":9.025,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}
+{"t":1791010182471,"s":9.025,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 53067776","object":0,"values":[53067776]}
+{"t":1791010182471,"s":9.025,"kind":"write","text":"L:CROSSCHECK_P12_SEAT ← 50806785","object":0,"values":[50806785]}
+{"t":1791010182471,"s":9.025,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.1","object":0,"values":[0.1]}
+{"t":1791010182471,"s":9.025,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.21","object":0,"values":[0.21]}
+{"t":1791010182471,"s":9.025,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.45","object":0,"values":[-0.45]}
+{"t":1791010183502,"s":10.056,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791010183502,"s":10.056,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791010188282,"s":14.836,"kind":"press","text":"Page Down during offset, 1 frame"}
+{"t":1791010193635,"s":20.189,"kind":"step","text":"offset, 1 frame: 1 press; 89 kt, attitude up to 16.8°; module wrote 303 frames with 0 errors","step":"offset, 1 frame","presses":1,"speedKt":88.52423385992398,"attitude":16.77875514298047,"frames":303,"errors":0,"lastError":0}
+{"t":1791010193636,"s":20.19,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 2","object":0,"values":[2]}
+{"t":1791010193636,"s":20.19,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791010194797,"s":21.351,"kind":"stop","text":"Ctrl+C: turning the module off and removing the passenger"}
+{"t":1791010194797,"s":21.351,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791010194798,"s":21.352,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791010194798,"s":21.352,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}

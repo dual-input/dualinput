@@ -1,0 +1,8 @@
+p14 · How many frames ahead the WASM module writes a seated figure, in a flying aircraft, on MSFS 2024
+2026-10-03T06:50:09.999Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 1887 → 1903 in 0.5s)
+  aircraft TITLE "Cessna C152 Aerial Advertising", 105 kt; seats SEAT_C152_Pilot, SEAT_C152_Pax
+  offset, 1 frame: 1 press; 76 kt, attitude up to 23.3°; module wrote 302 frames with 0 errors
+  offset, 2 frames: 0 presses; 97 kt, attitude up to 15.7°; module wrote 302 frames with 0 errors
+  seat, 2 frames: 0 presses; 92 kt, attitude up to 21.3°; module wrote 305 frames with 0 errors

@@ -231,13 +231,14 @@ Crosscheck reads where the avatar is and which way it faces, and on the other ma
   On an aircraft with seat objects, the seated figure goes on the seat object of the other pilot's seat ([avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
   In flight, an object written every frame from outside the sim stutters against the cockpit (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)).
   GSX keeps its seated passengers still by adding its model to the aircraft package's own `attached_objects.cfg`, which the sim then draws as part of the aircraft (read in files, [avatars log](../avatars/log.md#2026-10-03-gsx-keeps-its-passengers-aboard-by-adding-its-model-to-the-aircrafts-own-attachments)).
-  So the figure would be attached the same way, with its head and hands moved by its own animations reading `CROSSCHECK_` `L:` variables, or else written by a WASM module inside the sim's frame, which is untested.
+  So the figure would be attached the same way, with its head and hands moved by its own animations reading `CROSSCHECK_` `L:` variables, which holds still in flight ([avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
+  On aircraft whose files Crosscheck doesn't edit, a WASM module writing the figure inside the sim's frame, led by one frame, gets it into the seat but not perfectly still ([avatars log](../avatars/log.md#2026-10-03-led-by-one-frame-a-wasm-written-figure-sits-in-the-seat-of-a-flying-aircraft-but-doesnt-hold-still)).
   `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), and includes a Tobii head tracker's rotation (same date, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat and turns their head where they look.
   When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
 - **Open questions:** whether Crosscheck should edit other developers' aircraft packages, as GSX does, which needs a decision in `record/decisions/`, and how its edit coexists with GSX's in the same file.
-  Whether a WASM module writing from `Update_StandAlone` holds a figure still, for aircraft whose files Crosscheck doesn't edit.
+  Whether a WASM-written figure can be made to hold still, for aircraft whose files Crosscheck doesn't edit.
   How a seated figure turns its head, since GSX's seated people play a fixed clip.
   How Crosscheck seats the figure on an aircraft without seat objects.
 

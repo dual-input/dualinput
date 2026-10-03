@@ -276,12 +276,20 @@ That makes the interface a client of Crosscheck's app on whichever screen it run
 - **Tech:** MSFS 2024 runs third-party EFB apps: the A2A Aerostar 600's tablet is one, `Aerostar600App` (read in a2a-aircraft-aerostar600 1.0.6, `html_ui/efb_ui/efb_apps/Aerostar600App/A2ATabletApp.js`).
   The sim's EFB opens with the Tab key in any aircraft, including those that ship their own tablet, such as the Black Square Baron Pro (from our own use of MSFS 2024, as of 2026-10-02).
 
+### Notification banner
+
+A banner floats in front of the pilot and moves with their view, like a pair of AR glasses, for every notice Crosscheck has: "James is in the pause menu", latency trouble, lost packets, a lost connection.
+A pilot sees it whether or not the EFB is open, in VR as on a monitor.
+
+- **Tech:** `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), so a banner can be placed in front of the view.
+  How to draw text there is unknown: candidates are an object of our own whose model carries an HTML gauge, and the sim's own text display from SimConnect, `SimConnect_Text`.
+  An object written every frame by a WASM module holds its place with a slight lag that reads as inertia on a seated figure ([avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), and how steady a banner locked to a moving view would look is untested.
+- **Open questions:** whether a banner can carry a button, such as "disconnect and take control", since catching a click on our own object is untested.
+
 ### Crosscheck objects in the cockpit
 
-Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches without a tablet.
-One is a general notification banner floating in front of the pilot, like a pair of AR glasses, for every notice Crosscheck has: "James is in the pause menu", latency trouble, lost packets, a lost connection.
-Another is a take-control button the pilot puts above the glareshield or sticks to a window.
-A banner like AR glasses moves with the pilot's view, while the button stays put in the cockpit, and `SimConnect_CameraGet` gives where the pilot looks (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)).
+Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches without a tablet, such as a take-control button the pilot puts above the glareshield or sticks to a window.
+The first of them, the [notification banner](#notification-banner), is its own idea.
 
 - **Tech:** an object attached through the aircraft's own files holds still in flight, as GSX's seated passengers did at up to 244 kt, but that means editing each aircraft package (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
   An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window shouldn't show.

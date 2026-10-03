@@ -272,7 +272,7 @@ The connection carries everything between the crew's machines, directly when it 
 - When the cheapest relay and the best one for flight data differ, flight data wins.
 - A short gap in the flying machine's data holds the following aircraft still, and it jumps to the flying machine's position when data returns, which is acceptable for v1.
 - When a pilot loses the connection, the others fly on without pausing.
-  The cut-off pilot's synced displays lock, and Crosscheck tells them they've lost the connection and offers to keep trying or to disconnect and take control of their own aircraft.
+  The cut-off pilot's synced displays lock, and the [notification banner](#notification-banner) tells them they've lost the connection, while Crosscheck offers to keep trying or to disconnect and take control of their own aircraft.
 - After 5 minutes cut off, the session ends for that pilot.
   Our FS Copilot fork waits the same 5 minutes, which its notes call "long enough for a router reboot or a sim reload" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `DegradedTimeout`, and `record/pointer-forwarding/docs/13-pr-prep.md`).
 - Recovery is the app's job, and each part of Crosscheck recovers its own state within it.
@@ -418,7 +418,7 @@ The crew's sims share one clock: the same time of day, date, and simulation rate
 
 - When any pilot turns active pause on or off, every machine follows.
 - The PF's time of day, date, and simulation rate reach every machine, when a pilot starts flying and whenever the PF changes them, and a following pilot who changes one gets it put back.
-- When the PF opens the sim's pause menu, the rest of the crew is told, such as "James is in the pause menu", so a frozen aircraft has a reason.
+- When the PF opens the sim's pause menu, the [notification banner](#notification-banner) tells the rest of the crew, such as "James is in the pause menu", so a frozen aircraft has a reason.
 
 **Not in v1:**
 
@@ -442,6 +442,62 @@ The crew's sims share one clock: the same time of day, date, and simulation rate
 - What happens when an add-on puts one machine into a full pause: no pilot action raised one, but `K:PAUSE_SET` from SimConnect did, and SimConnect then sent no frame data until it cleared (measured, same date, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)).
 - Whether a frozen follower keeps up at a raised simulation rate, which a replay at 4x would show.
 - Whether the pause menu stops a flying aircraft, which our parked run couldn't show.
+
+## Interface
+
+### EFB app
+
+A small app on the sim's EFB holds what a pilot needs during a flight, so a pilot in VR can use Crosscheck without taking the headset off.
+
+**In v1:**
+
+- An app of its own, built on the sim's EFB framework, not the desktop app reused.
+  Shipping EFB apps are written that way: A2A's tablet is TSX bundled by esbuild on Asobo's EFB API and the MSFS Avionics Framework, and it registers with `Efb.use` (read in a2a-aircraft-aerostar600 1.0.6, `A2ATabletApp.js`).
+- What a pilot needs during a flight: the take-control button, the crew and the connection's state, starting to fly with the list of warnings and errors, the box for an invite code, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
+- A button that brings the desktop app to the front while Crosscheck's core is running.
+- How it looks is for a design later.
+
+**Not in v1:**
+
+- The desktop app's interface running in the EFB.
+  Coherent GT rejects syntax newer tools emit and lacks APIs a desktop interface uses (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), and fitting the main app to it would hold the main app back.
+- Settings, binding the take-control key, the output device, the recording mode, and the report page, which stay in the desktop app, set before the headset goes on.
+- Notices, which go on the [notification banner](#notification-banner), because the EFB may be closed when one comes.
+
+**Rules:**
+
+- The EFB app shows the core's state and sends it commands, and decides nothing itself, so two interfaces don't mean two implementations.
+
+**Depends on:**
+
+- Crosscheck's core, which owns the session; a headless core with the apps as its clients is the architecture's leading candidate in [the plan](plan.md).
+
+**Open questions:**
+
+- Whether the EFB app can start the core when it isn't running, since a panel may not be allowed to start a program.
+- Whether the EFB can fill its code box from the clipboard, as the [invite code](#invite-code) section asks.
+
+### Notification banner
+
+A banner floats in front of the pilot and moves with their view, like a pair of AR glasses, and shows Crosscheck's notices whether or not the EFB is open.
+
+**In v1:**
+
+- The banner, in VR as on a monitor, for notices such as "James is in the pause menu" and "You've lost the connection".
+- Notices that other features add, such as trouble with the connection, as each is scoped.
+
+**Not in v1:**
+
+- Crosscheck's other objects in the cockpit, such as a take-control button stuck to a window, a Later pick.
+
+**Depends on:**
+
+- Where the pilot looks: `SimConnect_CameraGet` gives it, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)).
+
+**Open questions:**
+
+- How to draw text there, steadily, which a step 6 probe in [the plan](plan.md) answers: an object of our own whose model carries an HTML gauge, or the sim's own text display, `SimConnect_Text`, are the candidates.
+- Whether the banner can carry a button, such as "disconnect and take control", since catching a click on our own object is untested; if not, the action lives in the EFB app and the desktop app.
 
 ## Tools
 

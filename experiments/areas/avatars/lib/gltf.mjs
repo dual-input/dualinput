@@ -28,6 +28,18 @@ export function local(n) {
 }
 export const apply = (m, p) => [0, 1, 2].map((r) => m[12 + r] + m[r] * p[0] + m[4 + r] * p[1] + m[8 + r] * p[2])
 
+// The inverse of a transform that rotates, scales, and moves, as a node's do:
+// the 3x3 part inverted by its cofactors, and the translation carried back.
+export function invert(m) {
+  const [a, b, c, d, e, f, g, h, i] = [m[0], m[4], m[8], m[1], m[5], m[9], m[2], m[6], m[10]]
+  const A = e * i - f * h, B = -(d * i - f * g), C = d * h - e * g
+  const det = a * A + b * B + c * C
+  const r = [A, -(b * i - c * h), b * f - c * e, B, a * i - c * g, -(a * f - c * d), C, -(a * h - b * g), a * e - b * d].map((x) => x / det)
+  const t = [m[12], m[13], m[14]]
+  const u = [0, 1, 2].map((row) => -(r[row * 3] * t[0] + r[row * 3 + 1] * t[1] + r[row * 3 + 2] * t[2]))
+  return [r[0], r[3], r[6], 0, r[1], r[4], r[7], 0, r[2], r[5], r[8], 0, u[0], u[1], u[2], 1]
+}
+
 // One glTF file: its JSON, each node's parent, and each node's transform to the
 // model's space, composed down from the root.
 export function readGltf(file) {

@@ -79,13 +79,13 @@ function triangle(o, d, pos, i0, i1, i2) {
 }
 
 // skip: nodes, by index into the first model, the ray passes through, such as
-// a yoke the sim hides.
-export function cast(cockpit, origin, direction, { maxM = 5, invisible = false, skip = null } = {}) {
+// a yoke the sim hides; only: the nodes it can hit, all others passed through.
+export function cast(cockpit, origin, direction, { maxM = 5, invisible = false, skip = null, only = null } = {}) {
   const n = Math.hypot(...direction)
   const d = direction.map((x) => x / n)
   const inv = d.map((x) => 1 / x)
   const near = cockpit.prims
-    .filter((p) => (invisible || !p.invisible) && !(skip && p.model === 0 && skip.has(p.node)))
+    .filter((p) => (invisible || !p.invisible) && !(skip && p.model === 0 && skip.has(p.node)) && !(only && !(p.model === 0 && only.has(p.node))))
     .map((p) => ({ p, t: box(origin, inv, p.lo, p.hi) }))
     .filter((x) => x.t <= maxM)
     .sort((a, b) => a.t - b.t)

@@ -9,8 +9,9 @@
  * (record/areas/avatars/log.md, 2026-10-03). The probe reads the code the
  * aircraft's behavior XML plays them with (lib/cockpit-files.mjs), watches the
  * variables that code reads, runs it (lib/rpn.mjs) to get each animation's
- * frame, and poses the model with the animations (lib/animate.mjs). The grips
- * of the posed yoke are where the yoke hand goes, and the click ray (as in p20)
+ * frame, and poses the model with the animations (lib/animate.mjs). The yoke
+ * hand goes on the horn's surface in front of each grip node, toward the
+ * pilot, since the nodes sit inside the horns; the click ray (as in p20)
  * meets the posed yoke rather than the one the file stores. Parts the
  * aircraft's visibility code hides, such as a hidden yoke, let the ray through.
  *
@@ -56,7 +57,7 @@ import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "../aircraft/lib/sim.mjs"
 import { findAnimation, poseAt } from "./lib/animate.mjs"
 import { animationCode, behaviorText, cockpitFiles, visibilityCode } from "./lib/cockpit-files.mjs"
-import { apply } from "./lib/gltf.mjs"
+import { apply, invert } from "./lib/gltf.mjs"
 import { MEASURED, rayThrough } from "./lib/pick.mjs"
 import { RAD, toBody, wrap } from "./lib/pose.mjs"
 import { cast, crossPlane, loadCockpit, repose, subtree } from "./lib/raycast.mjs"
@@ -267,11 +268,16 @@ const rest = {
 // and the yoke's pose.
 const state = { yokeHand: HOME, tapHand: null, tap: null, normal: null, lingerUntil: 0, yokeShown: true, pose: null }
 
+// Where each hand sits on its grip, in the grip node's own frame, so it moves
+// and rolls with the yoke: the anchor itself until the start measures the
+// horn's surface in front of it.
+const gripLocal = { left: [0, 0, 0], right: [0, 0, 0] }
+
 function posed() {
   const fx = runX.run(get), fy = runY.run(get)
   const world = poseAt(model, [{ animation: animX, frame: fx, length: codeX.length }, { animation: animY, frame: fy, length: codeY.length }])
-  const at = (i) => apply(world[i], [0, 0, 0])
-  return { fx, fy, world, grip: { left: at(grips.left), right: at(grips.right) }, wheel: wheelNode >= 0 ? at(wheelNode) : at(grips.left).map((x, k) => (x + at(grips.right)[k]) / 2) }
+  const at = (i, p = [0, 0, 0]) => apply(world[i], p)
+  return { fx, fy, world, grip: { left: at(grips.left, gripLocal.left), right: at(grips.right, gripLocal.right) }, wheel: wheelNode >= 0 ? at(wheelNode) : at(grips.left).map((x, k) => (x + at(grips.right)[k]) / 2) }
 }
 
 function place(hand, p) {
@@ -312,7 +318,25 @@ for (let i = 0; i < visVars.length; i += 200) sim.watch(visVars.slice(i, i + 200
 // The visibility codes' first values come within a second; until then they'd
 // run on zeros.
 await sleep(1500)
-if (!state.pose) updateYoke()
+
+// The grip anchors sit inside the yoke's horns, where a closed hand's center
+// would be, so a ball on one is hidden in the horn (p21's first run). With the
+// yoke centered, a ray from the pilot's eye to each anchor meets the horn's
+// surface first; the hand goes there, one ball's radius out, kept in the
+// anchor's own frame.
+{
+  const world = poseAt(model, [{ animation: animX, frame: 50 }, { animation: animY, frame: 50 }])
+  repose(cockpit, 0, world, moved)
+  const eye = camModel(cam)
+  for (const hand of ["left", "right"]) {
+    const anchor = apply(world[grips[hand]], [0, 0, 0])
+    const hit = cast(cockpit, eye, anchor.map((x, k) => x - eye[k]), { only: moved })
+    if (!hit || hit.distance > dist(eye, anchor)) { note("grip", `${GRIP[hand]}: no yoke surface between the eye and the anchor, so the hand sits on the anchor`); continue }
+    gripLocal[hand] = apply(invert(world[grips[hand]]), hit.point.map((x, k) => x + hit.normal[k] * radius(SCALE)))
+    note("grip", `${GRIP[hand]}: the yoke's surface (${hit.chain[0]}) is ${(dist(anchor, hit.point) * 100).toFixed(1)}cm in front of the anchor toward the eye; the hand sits ${(Math.hypot(...gripLocal[hand]) * 100).toFixed(1)}cm from it`, { local: gripLocal[hand] })
+  }
+}
+updateYoke()
 note("yoke", `at the start, frames ${state.pose.fx.toFixed(1)} and ${state.pose.fy.toFixed(1)}: left grip at ${pt(state.pose.grip.left)}, right grip at ${pt(state.pose.grip.right)}, wheel center at ${pt(state.pose.wheel)}, the yoke ${state.yokeShown ? "shown" : "hidden"}; ${plural(yokeVars.length, "variable")} watched every frame, ${visVars.length} every second`, { pose: { fx: state.pose.fx, fy: state.pose.fy, grip: state.pose.grip, wheel: state.pose.wheel } })
 
 // ------------------------------------------------ the spheres

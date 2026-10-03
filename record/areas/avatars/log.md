@@ -9,6 +9,32 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: One hand holds the yoke through its whole travel, posed from the aircraft's own code, while the other taps and they swap by side
+
+**Asked:** can the figure's free hand hold the yoke's grip while the pilot moves the yoke, posed from the code the aircraft's own behavior XML plays the yoke with, while the other hand taps where the pilot clicks, the two swapping by which side of the wheel the click is on?
+
+**Expected:** the grips would hold, since posed offline they sat level either side of the wheel ([entry below](#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, p21 posed the yoke 1,703 times across its whole travel, frames 0 to 100 of both animations, running the aircraft's own code on 3 variables it watched every frame.
+  The module (`crosscheck-p12-follow` 0.6.0) placed the two hands as two objects.
+- The pilot saw the yoke hand stay with the yoke, and its one fault was that it sat inside the yoke.
+  The grip nodes sit inside the horns: with the yoke centered, a ray from the pilot's eye to each meets the horn's surface 1.7cm before it.
+  The probe now puts the hand there, one ball's radius out, 3.1cm from the node, and keeps that spot in the node's own frame, so it rolls with the yoke (checked offline at a quarter roll).
+- Of 37 taps, the left hand made 18 and the right 19, and the hands swapped 16 times.
+  A click on the yoke itself counts by its side like any other: the first press hit `Yoke_L` 13.6cm left of the wheel, so the left hand tapped and the right took the yoke.
+- The probe ran all 51 of the 58P's visibility codes from 18 variables, and 13 rays passed a hidden part to hit what was behind it.
+- The seat object `SEAT_DEFAULT_Pilot` sat 0.283m left of SimConnect's reference point, and the model's `PILOT_1` node 0.282m right of the model's origin, with forward and up within 3mm of each other.
+  So in the Baron `PILOT_1` is the copilot's seat, and if the cabin is symmetric, the model's origin lines up with the reference point within about 3mm, as in the Comanche ([entry below](#2026-10-03-the-cockpit-models-own-space-lines-up-with-simconnects-within-8mm-but-the-models-input-event-ids-arent-the-names-the-sim-lists)).
+
+**Changed:** in the Baron, the figure's free hand holds the yoke from the aircraft's own files, with nothing picked by hand, and sits on the horn's surface.
+Clicks on the yoke itself need a rule of their own.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p21's run](../../../experiments/areas/avatars/results/p21-yoke-hands-2026-10-03-10-17-37.txt), whose log has every press with the hands' choice and the yoke's pose every 0.5s.
+
 ## 2026-10-03: Aircraft mark their yoke grips with the same node names, and the yoke's own animations put them on a level wheel
 
 **Asked:** where on the yoke does the figure's free hand go, and can Crosscheck find that point in an aircraft's files instead of a profile author picking it?

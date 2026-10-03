@@ -42,6 +42,13 @@ export const FPS = 30
 export const FRAMES = 120
 const ROT_STEP = 30
 
+// A stretch's shortest length, and its scale animation's first key. With a
+// first key of 0 the sim drew every stick at its full 1m, while the hand or
+// foot at its end, placed by translation, landed right (p24's run,
+// 2026-10-03, results/p24-figure-2026-10-03-12-18-15.txt). p17's scale
+// animation, which worked, never reached 0.
+const STRETCH_MIN = 0.01
+
 const ARMS = [["ARM_L", "arm_l"], ["ARM_R", "arm_r"]]
 const LEGS = [["LEG_L", "leg_l"], ["LEG_R", "leg_r"]]
 
@@ -57,15 +64,15 @@ export const CHANNELS = [
   ...ARMS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
     { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
-    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_end`, kind: "stretch", min: 0, max: 1.5 },
+    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_end`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
   ]),
   ...LEGS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
     { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
-    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_knee`, kind: "stretch", min: 0, max: 1.5 },
+    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_knee`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
     { name: `${n}_ROLL`, node: `${l}_roll`, kind: "turn", axis: "twist", min: -180, max: 180 },
     { name: `${n}_BEND`, node: `${l}_seg`, kind: "turn", axis: "bend", segments: "knee", min: 0, max: 180 },
-    { name: `${n}_SHIN`, node: `${l}_shin_len`, end: `${l}_shin_end`, kind: "stretch", min: 0, max: 1.5 },
+    { name: `${n}_SHIN`, node: `${l}_shin_len`, end: `${l}_shin_end`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
   ]),
 ]
 

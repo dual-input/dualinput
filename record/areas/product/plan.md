@@ -84,7 +84,7 @@ How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, 
 
 ## 4. v1 scope
 
-Produces: a design doc for v1's features, written with the users from step 2 in mind.
+Produces: [03-v1-scope](03-v1-scope.md), written with the users from step 2 in mind.
 Exit: every v1 feature, and installing and updating Crosscheck, is scoped: what it does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 Then a pass strings the features into one session, from installing Crosscheck to ending a flight, and scopes the gaps between them, such as rejoining after a dropped connection.
 

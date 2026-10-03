@@ -11,4 +11,5 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/product/plan.md](areas/product/plan.md): Crosscheck's master plan, the steps from ideas to a released v1, and where each one stands.
 - [areas/product/01-aims.md](areas/product/01-aims.md): who Crosscheck is for, what it aims at, what it won't do, and its relay and license commitments.
 - [areas/product/02-users.md](areas/product/02-users.md): the kinds of pilots Crosscheck is designed for, and the problems each runs into.
+- [areas/product/03-v1-scope.md](areas/product/03-v1-scope.md): what each v1 feature does, where v1 stops, and the rules for its behavior.
 - [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.

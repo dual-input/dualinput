@@ -233,6 +233,7 @@ Crosscheck reads where the avatar is and which way it faces, and on the other ma
   `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), and includes a Tobii head tracker's rotation (same date, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat and turns their head where they look.
+  When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
 - **Open questions:** whether a WASM module writing from `Update_StandAlone` holds a figure still in a flying aircraft.
   How a seated figure turns its head, since GSX's seated people play a fixed clip.
   How Crosscheck seats the figure on an aircraft without seat objects.

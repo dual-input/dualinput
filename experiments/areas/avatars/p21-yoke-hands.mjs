@@ -25,11 +25,13 @@
  *   the yoke  a press on the pilot's own yoke, such as its autopilot
  *             disconnect, is a thumb: the hand on the button's side of the
  *             wheel presses it, and the hand holding the yoke keeps hold
- *   a swap    the hand taking the yoke grabs its grip first, and the other
- *             keeps hold 0.3s more before it lets go, both ways
+ *   a swap    to tap, both hands move at once, since the sim acts on the click
+ *             at once; going home, the home hand takes the yoke first and the
+ *             other keeps hold 0.3s more
  *   a drag    the tapping hand glides on the surface it touched (p20); no swap
  *             while the button is down; a thumb stays on its button
- *   release   the tapping hand stays 0.25s, then both go home
+ *   release   the tapping hand stays 0.25s on the spot, then hovers 5cm off it;
+ *             2s after the last release, with no press since, both go home
  *   hidden    with the yoke hidden, both hands rest unless one is tapping
  *
  * The left hand is the blue ball and the right hand the yellow one, so a swap
@@ -84,9 +86,13 @@ const radius = (scale) => 0.02 * (0.5 + 4.5 * scale / 100)
 // The module's first object is the left hand and its second the right.
 const SLOT = { left: "", right: "2" }
 const LINGER_MS = { release: 250, wheel: 1000 }
-// A hand handing the yoke to the other keeps hold this long after the other
-// takes it.
+// A hand handing the yoke back keeps hold this long after the other takes it.
 const OVERLAP_MS = 300
+// A run of presses with the same hand is one session: it ends this long after
+// the last release, and only then do the hands go home. Between presses, the
+// tapping hand hovers this far off its last spot.
+const SESSION_MS = 2000
+const HOVER_M = 0.05
 const TAP_MS = 300
 const DRAG_PX = 5
 const DRAG_COUNTS = 20
@@ -117,7 +123,7 @@ async function readModule(names) {
 const setModule = (values) => { for (const [k, x] of Object.entries(values)) sim.set([L(k)], [x], { label: `set CROSSCHECK_P12_${k}`, quiet: true }) }
 
 // What happened, summed up however the probe ends.
-const stats = { yokeUpdates: 0, fx: [Infinity, -Infinity], fy: [Infinity, -Infinity], presses: { left: 0, right: 0 }, thumbs: { left: 0, right: 0 }, swaps: 0, hiddenPresses: 0, skippedHits: 0, outside: 0, looks: 0, drags: 0 }
+const stats = { yokeUpdates: 0, fx: [Infinity, -Infinity], fy: [Infinity, -Infinity], presses: { left: 0, right: 0 }, thumbs: { left: 0, right: 0 }, swaps: 0, sessions: 0, hiddenPresses: 0, skippedHits: 0, outside: 0, looks: 0, drags: 0 }
 const spheres = []
 let stopMouse = null
 let finished = false
@@ -129,7 +135,7 @@ async function finish(why) {
   for (const id of spheres) sim.remove(id)
   await sleep(800)
   if (stats.yokeUpdates) note("yoke", `${plural(stats.yokeUpdates, "yoke pose")}: roll frames ${stats.fx[0].toFixed(1)} to ${stats.fx[1].toFixed(1)}, fore-aft frames ${stats.fy[0].toFixed(1)} to ${stats.fy[1].toFixed(1)}`)
-  if (stats.presses.left + stats.presses.right + stats.thumbs.left + stats.thumbs.right) note("presses", `the left hand tapped ${plural(stats.presses.left, "time")} and the right hand ${plural(stats.presses.right, "time")}, ${plural(stats.drags, "drag")}; on the yoke, the left thumb pressed ${plural(stats.thumbs.left, "time")} and the right ${plural(stats.thumbs.right, "time")}; the yoke hand swapped ${plural(stats.swaps, "time")}; ${plural(stats.hiddenPresses, "press", "presses")} with the yoke hidden, ${plural(stats.skippedHits, "ray")} passing a hidden part to hit behind it; ${plural(stats.looks, "right press", "right presses")} turned the view; ${plural(stats.outside, "click")} outside the sim`)
+  if (stats.presses.left + stats.presses.right + stats.thumbs.left + stats.thumbs.right) note("presses", `the left hand tapped ${plural(stats.presses.left, "time")} and the right hand ${plural(stats.presses.right, "time")}, ${plural(stats.drags, "drag")}; on the yoke, the left thumb pressed ${plural(stats.thumbs.left, "time")} and the right ${plural(stats.thumbs.right, "time")}; the yoke hand swapped ${plural(stats.swaps, "time")}, and the hands went home after ${plural(stats.sessions, "session")}; ${plural(stats.hiddenPresses, "press", "presses")} with the yoke hidden, ${plural(stats.skippedHits, "ray")} passing a hidden part to hit behind it; ${plural(stats.looks, "right press", "right presses")} turned the view; ${plural(stats.outside, "click")} outside the sim`)
   const text = [
     "p21 · The figure's two hands: one on the yoke's grip, following the yoke, and one tapping where the pilot clicks, swapping by side, on MSFS 2024",
     `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
@@ -279,9 +285,10 @@ const rest = {
 
 // The state the hands are drawn from: which holds the yoke, which taps where,
 // and the yoke's pose.
-// A thumb press is { node, local }: where on the yoke, in that part's own
-// frame, so it moves with the yoke.
-const state = { yokeHand: HOME, tapHand: null, tap: null, normal: null, thumb: null, lingerUntil: 0, yokeShown: true, pose: null }
+// A thumb press is { hand, node, local }: where on the yoke, in that part's
+// own frame, so it moves with the yoke. It sits apart from the tapping hand's
+// session, so a thumb press in the middle of one doesn't end it.
+const state = { yokeHand: HOME, tapHand: null, tap: null, normal: null, hover: false, thumb: null, lingerUntil: 0, thumbUntil: 0, sessionUntil: 0, handoff: null, yokeShown: true, pose: null }
 
 // Where each hand sits on its grip, in the grip node's own frame, so it moves
 // and rolls with the yoke: the anchor itself until the start measures the
@@ -305,8 +312,12 @@ function place(hand, p) {
 // other.
 const holding = (hand) => state.handoff?.from === hand && Date.now() < state.handoff.until && state.yokeShown && state.pose
 
-function takeYoke(hand) {
-  if (hand !== state.yokeHand && state.yokeShown) state.handoff = { from: state.yokeHand, until: Date.now() + OVERLAP_MS }
+// Gives the yoke to a hand, with the other keeping hold a moment if overlap.
+// A hand leaving the yoke to tap can't wait: the sim acts on the click at
+// once, so the hand arrived 0.3s after its switch had flipped (p21's third
+// run). Going home has nothing to wait for, so it keeps the overlap.
+function takeYoke(hand, overlap) {
+  state.handoff = overlap && hand !== state.yokeHand && state.yokeShown ? { from: state.yokeHand, until: Date.now() + OVERLAP_MS } : null
   state.yokeHand = hand
 }
 
@@ -314,8 +325,8 @@ function takeYoke(hand) {
 function draw() {
   for (const hand of ["left", "right"]) {
     if (holding(hand)) place(hand, state.pose.grip[hand])
-    else if (hand === state.tapHand && state.thumb && state.pose) place(hand, apply(state.pose.world[state.thumb.node], state.thumb.local))
-    else if (hand === state.tapHand && state.tap) place(hand, state.tap.map((x, k) => x + state.normal[k] * radius(SCALE)))
+    else if (state.thumb?.hand === hand && state.pose) place(hand, apply(state.pose.world[state.thumb.node], state.thumb.local))
+    else if (hand === state.tapHand && state.tap) place(hand, state.tap.map((x, k) => x + state.normal[k] * (radius(SCALE) + (state.hover ? HOVER_M : 0))))
     else if (hand === state.yokeHand && state.yokeShown && state.pose) place(hand, state.pose.grip[hand])
     else place(hand, rest[hand])
   }
@@ -427,12 +438,18 @@ function begin(m, c, label) {
   if (swapped) stats.swaps++
   if (!state.yokeShown) stats.hiddenPresses++
   ;(thumb ? stats.thumbs : stats.presses)[hand]++
-  takeYoke(yoke)
-  state.tapHand = hand
-  state.thumb = thumb ? { node: hit.node, local: apply(invert(state.pose.world[hit.node]), hit.point.map((x, k) => x + hit.normal[k] * radius(SCALE))) } : null
-  state.tap = thumb ? null : hit.point
-  state.normal = hit.normal
-  state.lingerUntil = 0
+  if (thumb) {
+    state.thumb = { hand, node: hit.node, local: apply(invert(state.pose.world[hit.node]), hit.point.map((x, k) => x + hit.normal[k] * radius(SCALE))) }
+    state.thumbUntil = 0
+  } else {
+    takeYoke(yoke, false)
+    state.tapHand = hand
+    state.tap = hit.point
+    state.normal = hit.normal
+    state.hover = false
+    state.lingerUntil = 0
+    state.sessionUntil = 0
+  }
   draw()
   const what = thumb ? `the ${hand} thumb presses it${hand === yoke ? ", holding the yoke" : `, the ${yoke} hand keeping hold`}` : `the ${hand} hand taps${state.yokeShown ? `, the ${yoke} holds the yoke` : ", the yoke hidden"}`
   rec.log("press", `${label} at ${m.x}, ${m.y}: ${node}, ${(Math.abs(side) * 100).toFixed(1)}cm ${side > 0 ? "left" : "right"} of the wheel: ${what}${swapped ? " (swapped)" : ""}`, { mouse: m, cam: c, origin, dir, hit: { point: hit.point, normal: hit.normal, distance: hit.distance, chain: hit.chain }, hand, thumb, swapped, hidden, pose: { fx: state.pose.fx, fy: state.pose.fy } })
@@ -440,13 +457,20 @@ function begin(m, c, label) {
   return { hit, thumb }
 }
 
-function release(ms) {
-  state.lingerUntil = Date.now() + ms
+// After a press ends: a thumb leaves its button after ms; a tapping hand
+// waits ms on the spot, then hovers off it, and the session ends SESSION_MS
+// after the release unless another press comes.
+function release(r, ms) {
+  const now = Date.now()
+  if (r.thumb) { state.thumbUntil = now + ms; return }
+  state.lingerUntil = now + ms
+  state.sessionUntil = now + ms + SESSION_MS
 }
 
 let grab = null
 let rightPress = null
 let lastWheel = 0
+let wheelPress = null
 const pixels = (m, a) => Math.hypot((m.x - a.x) * m.width / 2, (m.y - a.y) * m.height / 2)
 stopMouse = await startMouse((m) => {
   if (m.kind === "size") return
@@ -459,13 +483,16 @@ stopMouse = await startMouse((m) => {
     rightPress = null
     if (!p) return
     if (m.t - p.m.t >= TAP_MS || pixels(m, p.m) >= DRAG_PX || m.delta >= DRAG_COUNTS) { stats.looks++; return }
-    if (begin(p.m, p.c, "right click")) release(LINGER_MS.release)
+    const r = begin(p.m, p.c, "right click")
+    if (r) release(r, LINGER_MS.release)
     return
   }
   if (m.kind === "wheel") {
-    if (m.t - lastWheel < 600 && state.tap) { lastWheel = m.t; release(LINGER_MS.wheel); return }
+    // Notches in a row turn the same knob: the hand stays on it.
+    if (m.t - lastWheel < 600 && wheelPress) { lastWheel = m.t; release(wheelPress, LINGER_MS.wheel); return }
     lastWheel = m.t
-    if (begin(m, c, "wheel")) release(LINGER_MS.wheel)
+    wheelPress = begin(m, c, "wheel")
+    if (wheelPress) release(wheelPress, LINGER_MS.wheel)
     return
   }
   if (m.kind === "left") {
@@ -482,22 +509,33 @@ stopMouse = await startMouse((m) => {
     grab.raw += Math.hypot(m.dx, m.dy)
   } else if (m.kind === "leftup") {
     if (grab.cursorPx >= DRAG_PX || grab.raw >= DRAG_COUNTS) stats.drags++
+    release(grab, LINGER_MS.release)
     grab = null
-    release(LINGER_MS.release)
   }
 })
 
-// After a release, the tapping hand rests and both hands go home, the home
-// hand taking the yoke before the other lets go; and when a handoff ends, the
-// hand that let go moves on.
+// The timers: a thumb leaves its button; a tapping hand lifts off its spot to
+// hover; the session ends and both hands go home, the home hand taking the
+// yoke before the other lets go; and a handoff ends.
 const tick = setInterval(() => {
   const now = Date.now()
+  if (state.thumb && state.thumbUntil && now > state.thumbUntil && !grab?.thumb) {
+    state.thumb = null
+    state.thumbUntil = 0
+    draw()
+  }
   if (!grab && state.lingerUntil && now > state.lingerUntil) {
     state.lingerUntil = 0
+    state.hover = true
+    draw()
+  }
+  if (!grab && state.sessionUntil && now > state.sessionUntil) {
+    state.sessionUntil = 0
     state.tap = null
-    state.thumb = null
     state.tapHand = null
-    takeYoke(HOME)
+    state.hover = false
+    stats.sessions++
+    takeYoke(HOME, true)
     draw()
   }
   if (state.handoff && now >= state.handoff.until) {

@@ -126,6 +126,7 @@ It's Crosscheck's own setup list, unlike the aircraft's checklists under [Ideas 
 A pilot invites the other with a short code to paste into Discord.
 When the other pilot copies the code and switches to Crosscheck, Crosscheck finds its own code on the clipboard and joins the session, so copying is the only step.
 Two PCs on the same home network find each other without a code, and the connection shows in plain words, such as "Direct, 38ms" (hypothetical).
+Later, a pilot could keep a permanent code, handed out first come, first served.
 
 - **Tech:** Discord shows `crosscheck://join/<code>` as plain text, and again as plain text when it's written as a Markdown link (tested in Discord, 2026-10-02).
   We think Discord makes only http and https links clickable, whichever apps are installed (unverified).

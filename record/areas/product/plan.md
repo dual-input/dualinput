@@ -74,7 +74,7 @@ The picks, picked on 2026-10-02:
   - [WASM instrument sync](ideas.md#wasm-instrument-sync)
   - The second pilot's mic reaching ATC, from [ATC sync](ideas.md#atc-sync)
   - Weather, from [Environment sync](ideas.md#environment-sync)
-  - Home-network discovery, from [One-click invite](ideas.md#one-click-invite)
+  - Home-network discovery, and permanent codes, both from [One-click invite](ideas.md#one-click-invite)
   - Crews beyond two, and passengers, both from [Join modes](ideas.md#join-modes)
   - The tablet in a browser, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet)
   - The debrief timeline, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
@@ -99,6 +99,7 @@ Agreed:
 - Flight-model sync, on 2026-10-03.
 - State sync, on 2026-10-03.
 - Pointer sync, on 2026-10-03.
+- The invite code, on 2026-10-03.
 
 ## 5. What later features need from the core
 
@@ -125,6 +126,9 @@ Steps 4 and 5 add to this list as they find risks.
 Produces: decisions in `record/decisions/`.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
 The profile format waits for the features, because they decide what it has to express, and it decides in turn whether a machine joining or reconnecting mid-flight can take the flying machine's state: only an entry with an absolute setter can be sent at connect.
+
+The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the profile IDE.
+The EFB app is panel code, so it runs under Coherent GT's Chrome 49 limits and can't share a modern interface bundle with the desktop app unless one is compiled down for it.
 
 ## 8. v1 build plan
 

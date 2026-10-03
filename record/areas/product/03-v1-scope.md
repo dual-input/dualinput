@@ -12,7 +12,7 @@ It says what Crosscheck does, not how: mechanisms are for the architecture, step
 
 The pilot flying (PF) is the pilot whose yoke, rudder, toe brakes, engine levers, and trim fly the aircraft, and the pilot monitoring (PM) is the other front-seat pilot.
 The flying machine is the PF's, and the following machine is the PM's.
-v1 sessions have two pilots, because crews beyond two are a Later pick.
+v1 sessions have two pilots, because crews beyond two are a Later pick, but the design supports larger crews from the start, unless that costs much more work, so nothing gets rebuilt when they come.
 
 ## Control
 
@@ -213,3 +213,37 @@ A press or drag on a panel display travels to the other machine as the position 
 
 - When both pilots type on one display at once, each machine may apply the keys in a different order (unverified, [08-06](../../learn/foundations/08-06-divergence-and-one-screen.md#unverified-claims)).
 - A display press that also changes a value state sync sends could apply twice, flipping a toggle back; we deal with it if a profile runs into it.
+
+## Session
+
+### Invite code
+
+The host starts a session and gets a code, and the other pilot enters it to join.
+
+**In v1:**
+
+- The code is six characters from the 30-character alphabet fsc-editor uses, which leaves out I, L, O, U, 0, and 1, because codes are read aloud and typed by someone looking at a sim (read in fsc-editor, `src/shared/remote-connect.ts`, `CODE_ALPHABET`, and `docs/remote-connect.md`, "The code").
+- When the pilot selects the box for the code, Crosscheck fills it from the clipboard if the clipboard holds a code, and joins at once.
+- The code lasts until the host ends the session, and a pilot who dropped out rejoins with the same code.
+
+**Not in v1:**
+
+- Invite links, because Discord shows a `crosscheck://` link as plain text and an https redirect adds two prompts ([One-click invite](ideas.md#one-click-invite)).
+- Permanent codes, handed out first come, first served, a Later pick in [the plan](plan.md).
+- Reading the clipboard at any other moment.
+- Host approval of each joiner.
+
+**Rules:**
+
+- The code alone admits a pilot, as it does in fsc-editor, where the relay limits how fast one address can guess codes and the host sees how many peers are connected (read in fsc-editor, `docs/remote-connect.md`, "The code").
+  It's a game among friends, and confirming each joiner would get in the way.
+- The host always sees who's in the crew.
+
+**Depends on:**
+
+- The connection between machines, which carries the code to the host's session.
+
+**Open questions:**
+
+- Whether the EFB app can fill its box from the clipboard: the EFB runs inside the sim's panel, so Crosscheck's own app would read the clipboard when the EFB's box is selected (unverified).
+- Whether the profile IDE joins through the same session and code, making the Crosscheck session the editing session too, or the session points the IDE at a server of its own; either way has consequences for the relay and the protocol, settled later.

@@ -19,16 +19,31 @@
  *                    the aircraft's reference point, turned by heading only;
  *                    mode 3: UP is meters above the seat object
  *
- *   LEAD     frames to write ahead: the object is moved on by LEAD times what
- *            the aircraft moved since the previous frame. In p13 the module's
- *            writes sat a frame behind the drawn aircraft, and the seat object
- *            read a frame behind it too (record/areas/avatars/log.md).
+ *   LEAD     frames to write ahead: the aircraft's pose is carried on by LEAD
+ *            times what it changed since the previous frame, position and
+ *            attitude both. In p13 the module's writes sat a frame behind the
+ *            drawn aircraft, and the seat object read a frame behind it too
+ *            (record/areas/avatars/log.md).
+ *   SIGN_PITCH, SIGN_BANK   how A:PLANE PITCH DEGREES and A:PLANE BANK DEGREES
+ *            map to nose up and right wing down: +1, -1, or 0 to turn the
+ *            offset by heading only, as versions before 0.4.0 did
+ *   CAL_FWD, CAL_RIGHT, CAL_UP   the seat object's parked offset, for the
+ *            calibration below
+ *   CAL_RESET   set to 1 to restart the calibration; the module sets it to 0
  *
  * Every mode gives the object the aircraft's heading, pitch, and bank. It
  * reports back through ALIVE (every frame), FRAMES (every frame it wrote),
  * ERRORS, LAST_ERROR (an FsVarError, or 1000 + a SimConnect exception), and
  * SEAT_FWD, SEAT_RIGHT, SEAT_UP: where the seat object is from the aircraft's
  * reference point, read inside this frame, turned by heading only.
+ *
+ * The calibration predicts where the seat object is every frame, from its
+ * parked offset turned by each of the four pairs of signs, once from this
+ * frame's aircraft pose and once from the previous frame's. CAL_NOW_PP,
+ * _PN, _NP, _NN and CAL_PREV_PP, ... hold each prediction's running RMS error
+ * in meters, P and N for the sign of pitch then bank. The sim carries the seat
+ * object through pitch and roll itself, so the pair near zero is the
+ * convention, and NOW against PREV says which frame's pose the seat follows.
  */
 
 #include <MSFS/MSFS.h>
@@ -37,6 +52,7 @@
 #include <MSFS/MSFS_Vars.h>
 #include <SimConnect.h>
 #include <cmath>
+#include <cstdio>
 
 namespace
 {
@@ -58,8 +74,20 @@ FsUnitId u_number, u_degrees, u_feet;
 FsAVarId a_lat, a_lon, a_alt, a_hdg, a_pitch, a_bank;
 FsLVarId l_alive, l_mode, l_object, l_seat, l_fwd, l_right, l_up, l_frames, l_errors, l_last_error;
 FsLVarId l_seat_fwd, l_seat_right, l_seat_up, l_lead;
+FsLVarId l_sign_pitch, l_sign_bank, l_cal_fwd, l_cal_right, l_cal_up, l_cal_reset;
+FsLVarId l_cal_now[4], l_cal_prev[4];
 
-// The aircraft's pose in the previous frame, for the lead.
+// The four sign pairs, pitch then bank, in the order of the CAL_ names.
+const double SIGNS[4][2]  = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+const char*  SUFFIXES[4]  = {"PP", "PN", "NP", "NN"};
+double       ms_now[4]    = {0, 0, 0, 0};
+double       ms_prev[4]   = {0, 0, 0, 0};
+bool         cal_started  = false;
+// Each frame's squared error is mixed in at this weight: about a 2s memory
+// at 30 frames a second.
+const double CAL_WEIGHT = 0.02;
+
+// The aircraft's pose in the previous frame, for the lead and the calibration.
 Pos  prev{};
 bool have_prev = false;
 
@@ -97,14 +125,44 @@ bool read_pose(Pos& a, FsObjectId object)
            fsVarsAVarGet(a_bank, u_degrees, none, &a.bank, object) == FS_VAR_ERROR_NONE;
 }
 
-// The same turn as experiments/areas/avatars/lib/pose.mjs, toWorld.
-Pos place(const Pos& a, double fwd, double right, double up)
+// The point fwd, right, and up meters from the aircraft in its own frame,
+// turned by heading, then pitch and bank with the signs given (0 leaves them
+// out). Yaw, then pitch, then roll, the usual aerospace order, with nose up
+// and right wing down positive once the signs are applied.
+Pos place(const Pos& a, double fwd, double right, double up, double sign_pitch, double sign_bank)
 {
-    const double h     = a.hdg * RAD;
-    const double north = fwd * std::cos(h) - right * std::sin(h);
-    const double east  = fwd * std::sin(h) + right * std::cos(h);
+    const double th = sign_pitch * a.pitch * RAD;
+    const double ph = sign_bank * a.bank * RAD;
+    const double ps = a.hdg * RAD;
+    const double down = -up;
+    // Roll about the forward axis, then pitch about the right axis, then yaw.
+    const double y1 = std::cos(ph) * right - std::sin(ph) * down;
+    const double z1 = std::sin(ph) * right + std::cos(ph) * down;
+    const double x2 = std::cos(th) * fwd + std::sin(th) * z1;
+    const double z2 = -std::sin(th) * fwd + std::cos(th) * z1;
+    const double north = std::cos(ps) * x2 - std::sin(ps) * y1;
+    const double east  = std::sin(ps) * x2 + std::cos(ps) * y1;
     return Pos{a.lat + (north / EARTH_M) / RAD, a.lon + (east / (EARTH_M * std::cos(a.lat * RAD))) / RAD,
-               a.alt + up / FT, a.hdg, a.pitch, a.bank};
+               a.alt - z2 / FT, a.hdg, a.pitch, a.bank};
+}
+
+// Meters between two positions.
+double apart(const Pos& p, const Pos& q)
+{
+    const double north = (q.lat - p.lat) * RAD * EARTH_M;
+    const double east  = (q.lon - p.lon) * RAD * EARTH_M * std::cos(p.lat * RAD);
+    const double up    = (q.alt - p.alt) * FT;
+    return std::sqrt(north * north + east * east + up * up);
+}
+
+// The aircraft's pose carried on by lead times its change since prev.
+Pos ahead(const Pos& a, const Pos& prev, double lead)
+{
+    double dh = a.hdg - prev.hdg;
+    if (dh > 180) dh -= 360;
+    if (dh < -180) dh += 360;
+    return Pos{a.lat + (a.lat - prev.lat) * lead, a.lon + (a.lon - prev.lon) * lead, a.alt + (a.alt - prev.alt) * lead,
+               a.hdg + dh * lead,                 a.pitch + (a.pitch - prev.pitch) * lead, a.bank + (a.bank - prev.bank) * lead};
 }
 
 // And its toBody: where p is from a, forward, right, and up, in meters.
@@ -166,6 +224,20 @@ extern "C" MSFS_CALLBACK void module_init(void)
     l_seat_right = fsVarsRegisterLVar("CROSSCHECK_P12_SEAT_RIGHT");
     l_seat_up    = fsVarsRegisterLVar("CROSSCHECK_P12_SEAT_UP");
     l_lead       = fsVarsRegisterLVar("CROSSCHECK_P12_LEAD");
+    l_sign_pitch = fsVarsRegisterLVar("CROSSCHECK_P12_SIGN_PITCH");
+    l_sign_bank  = fsVarsRegisterLVar("CROSSCHECK_P12_SIGN_BANK");
+    l_cal_fwd    = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_FWD");
+    l_cal_right  = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_RIGHT");
+    l_cal_up     = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_UP");
+    l_cal_reset  = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_RESET");
+    for (int i = 0; i < 4; i++)
+    {
+        char name[48];
+        (void)snprintf(name, sizeof(name), "CROSSCHECK_P12_CAL_NOW_%s", SUFFIXES[i]);
+        l_cal_now[i] = fsVarsRegisterLVar(name);
+        (void)snprintf(name, sizeof(name), "CROSSCHECK_P12_CAL_PREV_%s", SUFFIXES[i]);
+        l_cal_prev[i] = fsVarsRegisterLVar(name);
+    }
 
     // Off until the probe says otherwise, whatever an earlier session left.
     put(l_mode, 0);
@@ -214,13 +286,37 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
         put(l_seat_up, u);
     }
 
-    // What the aircraft moved since the previous frame, times the lead.
-    const double lead  = get(l_lead);
-    const double dlat  = have_prev ? (a.lat - prev.lat) * lead : 0;
-    const double dlon  = have_prev ? (a.lon - prev.lon) * lead : 0;
-    const double dalt  = have_prev ? (a.alt - prev.alt) * lead : 0;
-    prev               = a;
-    have_prev          = have_aircraft;
+    // The calibration: where each sign pair puts the seat, from this frame's
+    // pose and from the previous frame's, against where the seat object is.
+    if (get(l_cal_reset) != 0)
+    {
+        for (int i = 0; i < 4; i++) ms_now[i] = ms_prev[i] = 0;
+        cal_started = false;
+        put(l_cal_reset, 0);
+    }
+    if (have_seat && have_prev)
+    {
+        const double cf = get(l_cal_fwd), cr = get(l_cal_right), cu = get(l_cal_up);
+        for (int i = 0; i < 4; i++)
+        {
+            const double e_now  = apart(place(a, cf, cr, cu, SIGNS[i][0], SIGNS[i][1]), s);
+            const double e_prev = apart(place(prev, cf, cr, cu, SIGNS[i][0], SIGNS[i][1]), s);
+            ms_now[i]  = cal_started ? ms_now[i] + CAL_WEIGHT * (e_now * e_now - ms_now[i]) : e_now * e_now;
+            ms_prev[i] = cal_started ? ms_prev[i] + CAL_WEIGHT * (e_prev * e_prev - ms_prev[i]) : e_prev * e_prev;
+            put(l_cal_now[i], std::sqrt(ms_now[i]));
+            put(l_cal_prev[i], std::sqrt(ms_prev[i]));
+        }
+        cal_started = true;
+    }
+
+    // The aircraft's pose carried on by the lead.
+    const Pos  a_ahead = have_prev ? ahead(a, prev, get(l_lead)) : a;
+    const Pos  s_ahead = have_prev && have_seat ? ahead(s, Pos{s.lat - (a.lat - prev.lat), s.lon - (a.lon - prev.lon),
+                                                               s.alt - (a.alt - prev.alt), s.hdg, s.pitch, s.bank},
+                                                          get(l_lead))
+                                                : s;
+    prev      = a;
+    have_prev = have_aircraft;
 
     if (mode == 0 || object <= 0) return;
     if (!have_aircraft)
@@ -229,10 +325,7 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
         return;
     }
     const FsObjectId target = static_cast<FsObjectId>(object);
-    Pos              p      = place(a, get(l_fwd), get(l_right), get(l_up));
-    p.lat += dlat;
-    p.lon += dlon;
-    p.alt += dalt;
+    const Pos p = place(a_ahead, get(l_fwd), get(l_right), get(l_up), get(l_sign_pitch), get(l_sign_bank));
 
     if (mode == 1)
     {
@@ -245,7 +338,7 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
             fail(-3);
             return;
         }
-        (void)write_pose(target, Pos{s.lat + dlat, s.lon + dlon, s.alt + get(l_up) / FT + dalt, a.hdg, a.pitch, a.bank});
+        (void)write_pose(target, Pos{s_ahead.lat, s_ahead.lon, s_ahead.alt + get(l_up) / FT, a_ahead.hdg, a_ahead.pitch, a_ahead.bank});
     }
     else if (mode == 2 && h_sim != 0)
     {

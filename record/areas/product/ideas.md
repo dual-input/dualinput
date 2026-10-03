@@ -197,20 +197,19 @@ A pilot points at something in the cockpit and the other pilot sees it, tried in
 3. If neither can, a pointer on panel displays, built on what [pointer sync](#pointer-sync) already reads.
 
 - **Tech:** the ray that puts the hand where a pilot clicks, under [Avatar sync](#avatar-sync), also gives a pointer in the 3D cockpit its spot, though it has been measured only in the A2A Comanche.
-  A hand that follows the cursor or the gaze all the time isn't what a pilot does, so pointing would be something the pilot chooses to do, such as a laser pointer they switch on (the pilot's judgment, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object)).
+  A hand that follows the cursor all the time isn't what a pilot does, so pointing would be something the pilot chooses to do, such as a laser pointer they switch on (our judgment from p17, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object)).
   The sim's checklist highlight might serve the second (unverified).
 
 ### Seat awareness
 
 Each pilot has a seat, and their camera starts there.
-Where an aircraft lists no usable seats, the profile author moves the camera to each seat, and the profile IDE's "capture position" button saves it to the profile, relative to the aircraft, with the view direction.
+Where SimConnect shows no seat objects for an aircraft, the profile author moves the camera to each seat, and the profile IDE's "capture position" button saves it to the profile, relative to the aircraft, with the view direction.
 
 - **Tech:** MSFS 2024 aircraft can ship seat parts with their own navigation graphs.
   The A220 has `A220_Seat_Pilot` and `A220_Seat_Copilot` (read in synaptic-aircraft-a220 1.0.10, [files](../aircraft/synaptic-a220/files.md)), and the Phenom 300E has a passenger seat, `fsreborn_phenom300e_seat_pax` (read in fsreborn-aircraft-phenom300e 1.0.24, [files](../aircraft/fsreborn-phenom-300e/files.md)).
-  Whether they hold positions Crosscheck can use is unverified.
-  The C152's seats show up in SimConnect as objects, `SEAT_C152_Pilot` and `SEAT_C152_Pax`, whose positions it reads, and the seated pilot's avatar sits exactly on `SEAT_C152_Pilot` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
+  The C152's seats show up in SimConnect as objects, `SEAT_C152_Pilot` and `SEAT_C152_Pax`, whose positions a SimConnect client reads, and the seated pilot's avatar sits exactly on `SEAT_C152_Pilot` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
   The A2A Comanche's show up the same way, as `SEAT_DEFAULT_Pilot` and `SEAT_DEFAULT_Copilot`, and sit about 1cm from where its model puts the nodes `PILOT_1` and `PILOT_2`, shifted the same way for both seats (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-the-cockpit-models-own-space-lines-up-with-simconnects-within-8mm-but-the-models-input-event-ids-arent-the-names-the-sim-lists)).
-  Whether the A220's and Phenom's seat parts show up the same way is unverified.
+  Whether the A220's and Phenom's seat parts show up the same way, with positions Crosscheck can use, is unverified.
 - **Open questions:** whether Crosscheck can place the camera at a seat.
   ChasePlane moves the sim's camera from a WASM module through Asobo's Camera API, `fsCameraAcquire` and `fsCameraSet` (read in p42-util-chaseplane 26.39.1, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), so a module of ours that sets the camera to a seat's position would settle it.
   Setting `A:CAMERA STATE` to 3, the chase camera, after a flight load didn't stick: with ChasePlane running it went straight back to 2, the cockpit (measured on MSFS 2024, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
@@ -244,7 +243,7 @@ In the cockpit, a hand goes to whatever the pilot clicks or drags.
     So the figure can be Crosscheck's own simple model, with no modeled, animated character to build.
   - **Holding it in a moving cockpit:** on an aircraft with seat objects, the seated figure goes on the seat object of the other pilot's seat (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
     In flight, an object written every frame from outside the sim stutters against the cockpit (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)).
-    GSX keeps its seated passengers still by adding its model to the aircraft package's own `attached_objects.cfg`, which the sim then draws as part of the aircraft (read in GSX Pro 4.0.19 and the aircraft packages it patches, [avatars log](../avatars/log.md#2026-10-03-gsx-keeps-its-passengers-aboard-by-adding-its-model-to-the-aircrafts-own-attachments)), and a model attached that way holds still in flight (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
+    GSX keeps its seated passengers still by adding its model to the aircraft package's own `attached_objects.cfg`, which the sim then draws as part of the aircraft (read in GSX Pro 4.0.19 and fnx-aircraft-320, preset `FNX_320_CFM_SL`, `attached_objects.cfg`, [avatars log](../avatars/log.md#2026-10-03-gsx-keeps-its-passengers-aboard-by-adding-its-model-to-the-aircrafts-own-attachments)), and a model attached that way holds still in flight (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
     A WASM module needs no edit to the aircraft: it writes the figure inside the sim's frame, turns its seat offset by the aircraft's heading, pitch, and bank, and moves it ahead by 0.75 to 1 frame's worth of the aircraft's motion.
     In the C152, over 3 minutes of flying, that held GSX's seated passenger, standing in for our figure, in its seat, and the pilot judged the slight lag left as the passenger's inertia (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)).
   - **The head:** `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), and includes a Tobii head tracker's rotation (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
@@ -256,7 +255,7 @@ In the cockpit, a hand goes to whatever the pilot clicks or drags.
     A right press released within 300ms, with the cursor moving under 5px, counts as a click and places the hand at its release, and a longer or moving right press turns the view and brings no hand (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-quick-still-right-press-is-a-click-and-a-held-or-moved-one-turns-the-view)).
     The other machine needs only the point, relative to the aircraft, since both pilots fly the same aircraft package.
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
-  In the cockpit, the other pilot sits in their seat, turns their head where they look, and reaches for each switch, knob, and lever they work, so a pilot sees who did what as it happens.
+  In the cockpit, the other pilot sits in their seat, turns their head where they look, and reaches for each switch, knob, and lever they click, so a pilot sees who did what as it happens.
   When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
 - **Open questions:**
   - Whether Crosscheck should edit other developers' aircraft packages, as GSX does, which needs a decision in `record/decisions/`, and how its edit coexists with GSX's in the same file.
@@ -271,7 +270,7 @@ In the cockpit, a hand goes to whatever the pilot clicks or drags.
   - Which aircraft the hand reaches.
     The eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files, as the Comanche does, though only the Comanche's has been read through (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
     The C152, which streams with the sim, and Marketplace aircraft may have no model we can read (unverified).
-    The hand has only been measured in the Comanche, so a run in a second aircraft would show whether reading its model is as general as the ray.
+    The ray and the hand have both been measured only in the Comanche, so a run in a second aircraft would show whether either carries over.
   - A change with no click, from a hardware switch or a key binding, brings no hand.
     The profile IDE could link each profile entry to a point in the model by having the author click the control during discovery, so the hand still reaches for it.
   - VR has no cursor.

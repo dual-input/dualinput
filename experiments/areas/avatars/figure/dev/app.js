@@ -156,6 +156,9 @@ async function rebuild() {
   const materials = {}
   gltf.scene.traverse((o) => {
     if (!o.isMesh) return
+    // A skinned stick's bounds are its unposed 1m at the figure's root, so
+    // culling by them would hide it while it's in view.
+    if (o.isSkinnedMesh) o.frustumCulled = false
     o.castShadow = o.receiveShadow = state.shadows
     materials[o.material.name] = o.material
   })

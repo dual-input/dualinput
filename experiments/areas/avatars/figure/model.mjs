@@ -17,12 +17,16 @@
  *   move     one node's translation along one axis, two keys
  *   turn     one node's rotation about one axis, a key every ROT_STEP degrees,
  *            because glTF interpolates a rotation the short way round
- *   stretch  a length: a stick's scale along z, and the translation along z
- *            of what hangs off its end, both in one animation
+ *   stretch  a length: the translation along z of the node at a stick's end
  *
- * A limb points along +z at zero yaw and pitch, and a stick is a unit
- * cylinder, so yaw, pitch, and length put the hand or foot at any point while
- * the stick stays round.
+ * A limb points along +z at zero yaw and pitch, so yaw, pitch, and length put
+ * the hand or foot at any point. A stick that stretches is skinned: its near
+ * ring follows a joint at its base, and its far ring the node at its end, so
+ * it reaches whatever that node reaches and stays round. The sim didn't play
+ * a scale animation that stretched only along the stick, with a first key of
+ * 0 or of 1cm, and drew the sticks at their full 1m (p24's runs, 2026-10-03,
+ * results/p24-figure-2026-10-03-12-18-15.txt and -12-25-37.txt), while p17's
+ * scale animation, the same on all three axes, played.
  *
  * An arm is one straight stick: yaw, pitch, and length.
  *
@@ -42,11 +46,7 @@ export const FPS = 30
 export const FRAMES = 120
 const ROT_STEP = 30
 
-// A stretch's shortest length, and its scale animation's first key. With a
-// first key of 0 the sim drew every stick at its full 1m, while the hand or
-// foot at its end, placed by translation, landed right (p24's run,
-// 2026-10-03, results/p24-figure-2026-10-03-12-18-15.txt). p17's scale
-// animation, which worked, never reached 0.
+// A stretch's shortest length.
 const STRETCH_MIN = 0.01
 
 const ARMS = [["ARM_L", "arm_l"], ["ARM_R", "arm_r"]]
@@ -64,15 +64,15 @@ export const CHANNELS = [
   ...ARMS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
     { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
-    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_end`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
+    { name: `${n}_LEN`, end: `${l}_end`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
   ]),
   ...LEGS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
     { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
-    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_knee`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
+    { name: `${n}_LEN`, end: `${l}_knee`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
     { name: `${n}_ROLL`, node: `${l}_roll`, kind: "turn", axis: "twist", min: -180, max: 180 },
     { name: `${n}_BEND`, node: `${l}_seg`, kind: "turn", axis: "bend", segments: "knee", min: 0, max: 180 },
-    { name: `${n}_SHIN`, node: `${l}_shin_len`, end: `${l}_shin_end`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
+    { name: `${n}_SHIN`, end: `${l}_shin_end`, kind: "stretch", min: STRETCH_MIN, max: 1.5 },
   ]),
 ]
 
@@ -185,7 +185,7 @@ function packer() {
     return bufferViews.length - 1
   }
   function accessor(typed, type, componentType, target, bounds) {
-    const size = { SCALAR: 1, VEC3: 3, VEC4: 4 }[type]
+    const size = { SCALAR: 1, VEC3: 3, VEC4: 4, MAT4: 16 }[type]
     const a = { bufferView: view(typed, target), componentType, count: typed.length / size, type }
     if (bounds) {
       a.min = Array.from({ length: size }, (_, k) => Math.min(...typed.filter((_, i) => i % size === k)))
@@ -200,6 +200,7 @@ function packer() {
     floats: (arr, type, bounds) => accessor(new Float32Array(arr), type, 5126, type === "SCALAR" ? undefined : 34962, bounds),
     keys: (arr) => accessor(new Float32Array(arr), "SCALAR", 5126, undefined, true),
     out: (arr, type) => accessor(new Float32Array(arr), type, 5126),
+    joints: (arr) => accessor(new Uint16Array(arr), "VEC4", 5123, 34962),
     indices: (arr) => accessor(arr.length && Math.max(...arr) > 65535 ? new Uint32Array(arr) : new Uint16Array(arr), "SCALAR", Math.max(...arr) > 65535 ? 5125 : 5123, 34963),
     bin() {
       const out = new Uint8Array(offset)
@@ -244,14 +245,30 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
   // the balls (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-58-55.txt).
   // Balls share one mesh under even scales, which it left alone.
   const knee = spec.knee.arc / spec.knee.segments
+  // A stretching stick, 1m long as built: its near ring follows the skin's
+  // first joint, and its far ring the second.
+  const skinned = (r) => {
+    const g = stick(r, 1)
+    const ring = g.pos.length / 6
+    return {
+      ...geometry(g),
+      JOINTS_0: P.joints(Array.from({ length: ring * 2 }, (_, i) => [i < ring ? 0 : 1, 0, 0, 0]).flat()),
+      WEIGHTS_0: P.floats(Array.from({ length: ring * 2 }, () => [1, 0, 0, 0]).flat(), "VEC4"),
+    }
+  }
   const geo = {
     sphere: geometry(sphere()),
-    arm: geometry(stick(spec.arm.radius, 1)),
-    leg: geometry(stick(spec.leg.radius, 1)),
+    arm: skinned(spec.arm.radius),
+    leg: skinned(spec.leg.radius),
     knee: geometry(stick(spec.leg.radius, knee)),
     nose: geometry(nose(spec)),
   }
-  const prim = (g, material) => ({ attributes: { POSITION: g.POSITION, NORMAL: g.NORMAL }, indices: g.indices, material, mode: 4 })
+  const prim = (g, material) => ({
+    attributes: { POSITION: g.POSITION, NORMAL: g.NORMAL, ...(g.JOINTS_0 !== undefined ? { JOINTS_0: g.JOINTS_0, WEIGHTS_0: g.WEIGHTS_0 } : {}) },
+    indices: g.indices,
+    material,
+    mode: 4,
+  })
   const meshes = [
     { name: "sphere_main", primitives: [prim(geo.sphere, 0)] },
     { name: "sphere_light", primitives: [prim(geo.sphere, 1)] },
@@ -285,36 +302,43 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
   const chest = chain(root, ["chest_fwd", "chest_right", "chest_up"])
   ball(chest, "chest_ball", spec.chest.radius, "sphere_light")
 
-  // A stick from a node along its +z, under a node that LEN's animation may
-  // stretch. A fixed scale on that node drew each knee segment 1m long
-  // (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-42-56.txt).
-  const stickOn = (parent, name, mesh) => {
-    const len = add(parent, { name: `${name}_len` })
-    add(len, { name: `${name}_stick`, mesh: MESH[mesh] })
+  // A stick from `base` along its +z to `end`, the node a stretch animation
+  // moves: a joint at the base and `end` as the skin's two joints, bound with
+  // the end 1m along. The mesh's own node sits at the figure's root, since a
+  // skinned mesh ignores its node's transform.
+  const bind = P.out([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 1], "MAT4")
+  const skins = []
+  const stretchStick = (base, end, name, mesh) => {
+    const near = add(base, { name: `${name}_root` })
+    skins.push({ name, joints: [near, end], inverseBindMatrices: bind })
+    add(root, { name: `${name}_stick`, mesh: MESH[mesh], skin: skins.length - 1 })
   }
 
   function arm(parent, l, anchor) {
     const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
-    stickOn(pitch, l, "arm_stick")
-    ball(add(pitch, { name: `${l}_end` }), `${l}_ball`, spec.hand.radius, "sphere_main")
+    const end = add(pitch, { name: `${l}_end` })
+    ball(end, `${l}_ball`, spec.hand.radius, "sphere_main")
+    stretchStick(pitch, end, l, "arm_stick")
   }
 
   // The leg: a thigh to the knee, a fixed-length curve, then the shin.
   function leg(parent, l, anchor) {
     const r = spec.leg.radius, n = spec.knee.segments
     const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
-    stickOn(pitch, l, "leg_stick")
-    let tip = chain(add(pitch, { name: `${l}_knee` }), [`${l}_roll`])
+    const kneeAt = add(pitch, { name: `${l}_knee` })
+    stretchStick(pitch, kneeAt, l, "leg_stick")
+    let tip = add(kneeAt, { name: `${l}_roll` })
     for (let k = 0; k < n; k++) {
       const bend = add(add(tip, { name: `${l}_seg${k}`, ...(k ? { translation: [0, 0, knee] } : {}) }), { name: `${l}_seg${k}_bend` })
       ball(bend, `${l}_seg${k}_ball`, r, "sphere_main")
-      stickOn(bend, `${l}_seg${k}`, "knee_stick")
+      add(bend, { name: `${l}_seg${k}_stick`, mesh: MESH.knee_stick })
       tip = bend
     }
     const shin = add(tip, { name: `${l}_shin`, translation: [0, 0, knee] })
     ball(shin, `${l}_shin_ball`, r, "sphere_main")
-    stickOn(shin, `${l}_shin`, "leg_stick")
-    ball(add(shin, { name: `${l}_shin_end` }), `${l}_ball`, spec.foot.radius, "sphere_main")
+    const foot = add(shin, { name: `${l}_shin_end` })
+    ball(foot, `${l}_ball`, spec.foot.radius, "sphere_main")
+    stretchStick(shin, foot, `${l}_shin`, "leg_stick")
   }
 
   arm(chest, "arm_l", a.shoulderL)
@@ -344,10 +368,7 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
       else track(ch.node, "rotation", out)
     }
     if (ch.kind === "move") track(ch.node, "translation", P.out([...m({ [ch.axis]: ch.min }), ...m({ [ch.axis]: ch.max })], "VEC3"))
-    if (ch.kind === "stretch") {
-      track(ch.node, "scale", P.out([1, 1, ch.min, 1, 1, ch.max], "VEC3"))
-      track(ch.end, "translation", P.out([0, 0, ch.min, 0, 0, ch.max], "VEC3"))
-    }
+    if (ch.kind === "stretch") track(ch.end, "translation", P.out([0, 0, ch.min, 0, 0, ch.max], "VEC3"))
     return { name: variable(ch), samplers, channels }
   })
 
@@ -388,6 +409,7 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
     scenes: [{ nodes: [root] }],
     nodes,
     meshes,
+    skins,
     materials: [material("CROSSCHECK_Main", c.main), material("CROSSCHECK_Light", c.light)],
     animations,
     accessors: P.accessors,

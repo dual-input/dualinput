@@ -7,8 +7,39 @@ The sim's own people stay invisible when a SimConnect client spawns them, GSX's 
 A figure of our own, balls and sticks whose joints are animations that read variables, poses in the cockpit as our dev page poses it, and one variable changes its color.
 In a moving cockpit, a WASM module that writes the figure inside the sim's frame, turned by the aircraft's full attitude and led by 0.75 to 1 frame, holds it in its seat.
 The figure's hand goes where the pilot clicks: the ray from the eye through the cursor, cast into the aircraft's interior model, lands within 2mm with no calibration and no control names, and a held press glides along the surface it touched.
-The probes are p01 to p24 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
+The probes are p01 to p25 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-03: With the seats swapped, the yoke rules drove the figure's hands from the right seat, and the module held it in its seat at up to 185 kt
+
+**Asked:** driven as a session would drive it, does the figure look right?
+Its hands go where the pilot clicks, by the yoke rules with the seats swapped, its head looks where the pilot looks, and the module holds it in the copilot's seat, parked and in flight.
+
+**Expected:** the rules would carry over by swapping the hands, and the module, which held GSX's seated passenger in a flying C152 ([entry below](#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), would hold our figure too.
+
+**Found:**
+
+- In the Black Square Baron 58P, p25 placed `CROSSCHECK_Figure` on the copilot's seat node `PILOT_1` through `crosscheck-p12-follow`, every frame, turned by the aircraft's full attitude and led by 1 frame.
+  The module wrote it in 34,739 frames with no error over 19 minutes: about 10 minutes of clicks while parked, then flight up to 185 kt.
+- The Baron marks grips only on the pilot's yoke.
+  Its copilot's yoke repeats the pilot's yoke's hierarchy, `YokePitch_R`, `YokeRoll_R`, and `Yoke_R`, moved by the same two animations, but `Yoke_R` is turned 180° from `Yoke_L`.
+  Grip nodes placed under `Yoke_R` missed the copilot's yoke.
+  Placed relative to `YokeRoll_R` as they sit relative to `YokeRoll_L`, a ray from the copilot's eye met the horn 1.7cm before each grip, as it meets the pilot's ([entry below](#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
+- The pilot clicked from the left seat as the right-seat pilot: the left hand tapped 128 times and the right hand 36, with 26 drags, and the yoke changed hands 14 times over 33 sessions.
+  All 3 thumb presses were on the copilot's wheel itself, `Yoke_R`, not on its buttons.
+- The middle of the pilot's view met the cockpit on 2,906 of 5,737 looks, and on the rest the figure looked the way the pilot looked.
+- The pilot judged that the figure held its seat in flight and looked good, except that some part of it missed a frame now and then.
+  Which part, and why, is unknown.
+  A telescope switching pairs on a frame before its length moves, if visibility and translation update on different frames, would show that way, and so would a late placement (both unverified).
+
+**Changed:** the yoke rules and the module's placement carry over to the right seat with our own figure.
+Where a copilot's yoke repeats the pilot's, its grips can come from the pilot's, relative to the yoke's roll node.
+The missed frame needs looking into when the product builds the figure.
+A click on a yoke's wheel itself still falls under the thumb rule, which needs a rule of its own ([entry below](#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
+
+**Affects:** [the avatars' tentative decisions](decisions.md) and the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p25's run](../../../experiments/areas/avatars/results/p25-figure-hands-2026-10-03-15-04-36.txt), and its record with the figure's per-tick writes taken out.
 
 ## 2026-10-03: A probe can screenshot the sim window, and a screenshot can show a home folder's path and a person's name
 

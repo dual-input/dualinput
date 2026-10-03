@@ -6,3 +6,6 @@ results/*.mp4
 # license holder on the GTN's start screen. Add a cropped JPEG with git add -f
 # only after reading it.
 results/p24-figure-*/
+# A record too big to commit, kept on the machine that ran it; a filtered copy
+# under the plain name goes in instead.
+results/*.full.ndjson

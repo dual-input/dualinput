@@ -103,6 +103,10 @@ const TICK_MS = 33
 // each tick closes 1 - e^(-dt / s) of what's left.
 const EASE_S = { hand: 0.06, head: 0.12 }
 const GAZE_MS = 200
+// The figure's variables go to the sim every tick and into the record this
+// often, enough to replay a session in the dev page: every tick filled 43MB in
+// 19 minutes.
+const RECORD_MS = 200
 const SIMOBJECT = 1
 const L = (n) => [`L:CROSSCHECK_P12_${n}`, "number"]
 const other = (hand) => (hand === "left" ? "right" : "left")
@@ -409,9 +413,13 @@ function drive(dt) {
   look.pitch += (gazeTarget.pitch - look.pitch) * a
   const v = solve(spec, { eye: eyeFigure, look: { yaw: look.yaw, pitch: look.pitch, roll: 0 }, handL: toFigure(hands.left), handR: toFigure(hands.right) })
   v.COLOR = 0
-  sim.set(VARS, ALL.map((ch) => v[ch.name]), { quiet: true, label: "figure variables" })
+  const now = Date.now()
+  const record = now - lastRecorded >= RECORD_MS
+  if (record) lastRecorded = now
+  sim.set(VARS, ALL.map((ch) => v[ch.name]), { quiet: true, record, label: "figure variables" })
   stats.ticks++
 }
+let lastRecorded = 0
 drive(1)
 
 const v0 = await sim.read(POS)

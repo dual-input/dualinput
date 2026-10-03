@@ -390,14 +390,18 @@ export class Sim {
 
   // Several numeric values in one write, to `object`. Positional, so every name
   // has to be one the sim accepts: a rejected name shifts the values after it.
-  // quiet keeps a write per frame off the console.
-  set(vars, values, { object = USER, label = null, quiet = false } = {}) {
+  // quiet keeps a write per frame off the console, and record: false keeps it
+  // out of the record too: p25's figure, written every tick for 19 minutes,
+  // filled 43MB.
+  set(vars, values, { object = USER, label = null, quiet = false, record = true } = {}) {
     const def = this.define(vars.map((v) => [parseVar(v).name, parseVar(v).units, "number"]))
     const buffer = new RawBuffer(8 * values.length)
     for (const v of values) buffer.writeFloat64(Number(v))
-    const text = `${def.vars.map((v, i) => `${v.name} ← ${fmt(values[i])}`).join(", ")}${object === USER ? "" : ` on object ${object}`}`
-    if (quiet) this.rec.data("write", text, { object, values })
-    else this.rec.log("write", text, { object, values })
+    if (record) {
+      const text = `${def.vars.map((v, i) => `${v.name} ← ${fmt(values[i])}`).join(", ")}${object === USER ? "" : ` on object ${object}`}`
+      if (quiet) this.rec.data("write", text, { object, values })
+      else this.rec.log("write", text, { object, values })
+    }
     return this.send(label ?? `set ${def.vars.length} values on object ${object}`, () => this.handle.setDataOnSimObject(def.id, object, { buffer, arrayCount: 0, tagged: false }))
   }
 

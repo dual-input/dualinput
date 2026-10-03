@@ -1,7 +1,8 @@
 # Avatars: tentative decisions
 
 What the avatar experiments have settled for now about the figure's hands, each with the findings behind it and what it leaves out.
-They hold until the figure itself has been probed and the product feature is designed; that design confirms each one as a decision in `record/decisions/`, changes it, or drops it.
+They hold until the product feature is designed, and that design confirms each one as a decision in `record/decisions/`, changes it, or drops it.
+Our own figure has run them, in the Baron's copilot's seat ([log](log.md#2026-10-03-with-the-seats-swapped-the-yoke-rules-drove-the-figures-hands-from-the-right-seat-and-the-module-held-it-in-its-seat-at-up-to-185-kt)).
 The findings are in [the avatars log](log.md), and the questions still open are in the idea [Avatar sync](../product/ideas.md#avatar-sync).
 All of them were reached on 2026-10-03 with our test pilot, from probes on MSFS 2024 in the A2A Comanche and the Black Square Baron 58P.
 
@@ -46,23 +47,28 @@ All of them were reached on 2026-10-03 with our test pilot, from probes on MSFS 
 ## The yoke hand holds the grip the aircraft marks
 
 - **Decided:** a hand holds the yoke at the aircraft's `HANDLING_Yoke_1_Hand_Left` or `HANDLING_Yoke_1_Hand_Right` node, posed with the yoke, on the horn's surface 3.1cm from the node toward the pilot's eye.
+  Where a copilot's yoke repeats the pilot's, as the Baron's does, its grips are those nodes placed relative to the copilot's yoke's roll node as they sit relative to the pilot's, on the horn's surface toward the copilot's eye.
   Where an aircraft has no such nodes, the profile author picks a grip in the profile IDE.
 - **Because:** four aircraft mark their grips with these names ([log](log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
   The nodes sit inside the horns, so a hand placed on them sank into the yoke ([log](log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)), and on the horn's surface our test pilot raised no fault ([log](log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
+  The Baron's copilot's yoke node is turned 180° from the pilot's, so grips placed under it missed the yoke, while relative to the roll node a ray met the horn 1.7cm before each grip, as on the pilot's yoke ([log](log.md#2026-10-03-with-the-seats-swapped-the-yoke-rules-drove-the-figures-hands-from-the-right-seat-and-the-module-held-it-in-its-seat-at-up-to-185-kt)).
 
-## The hands follow a left-seat pilot's habits
+## The hands follow a pilot's habits, with the hands swapped in the right seat
 
-- **Decided:**
+- **Decided:** in the left seat:
   - At rest, the left hand holds the yoke, and the right hand rests.
   - A click more than 5cm left of the wheel's center is the left hand's, and the right hand takes the yoke; more than 5cm right of it is the right hand's, and the left keeps the yoke; between the two, the hand that's free clicks.
   - A hand leaving the yoke to click goes at once, since the sim acts on the click at once.
   - A run of clicks with one hand keeps the hands as they are; between clicks, the clicking hand hovers 5cm off its last spot.
   - 2s after the last click or drag is released, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
   - A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
+
+  In the right seat, the same rules run with the hands swapped: the right hand holds the copilot's yoke at rest, a click more than 5cm right of that yoke's wheel is the right hand's, and going home the right hand takes the yoke first.
 - **Because:** with these rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+  With the hands swapped for the right seat, 164 taps took 14 swaps, and our test pilot found that the figure looked good, parked and in flight ([log](log.md#2026-10-03-with-the-seats-swapped-the-yoke-rules-drove-the-figures-hands-from-the-right-seat-and-the-module-held-it-in-its-seat-at-up-to-185-kt)).
   Handing the yoke over with an overlap when a hand leaves to click put the hand on its switch after the switch had moved ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
   A thumb that took the yoke made the holding hand let go and take it back ([log](log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
-- **Leaves out:** the right seat, sidesticks, and center sticks, whose habits differ.
+- **Leaves out:** sidesticks and center sticks, whose habits differ, and a click on a yoke's wheel itself, which the thumb rule catches though it isn't a button.
 
 ## A drag glides inside and follows a fresh cast outside
 

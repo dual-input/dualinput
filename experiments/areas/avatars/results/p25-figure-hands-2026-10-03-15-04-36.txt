@@ -1,0 +1,14 @@
+p25 · The figure in the copilot's seat: hands by the pilot's clicks and the yoke rules with the seats swapped, head by the pilot's look, held in its seat by the module, on MSFS 2024
+2026-10-03T15:04:36.063Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.011212 kt
+  bksq-aircraft-baronpro, BaronProfessional_Pressurized_INT.gltf: 490,963 triangles; 102 of 499 animations posed from their code, 51 visibility codes run
+  the copilot's grips are HANDLING_Yoke_1_Hand_Left and HANDLING_Yoke_1_Hand_Right, placed relative to YokeRoll_R as they sit relative to YokeRoll_L; its own yoke is 66 nodes under YokePitch_R; it shows while YokePitch_R: (L:XMLVAR_YokeHidden2) !
+  left: the copilot's yoke's surface (Yoke_R) is 1.7cm in front of the grip toward the eye
+  right: the copilot's yoke's surface (Yoke_R) is 1.7cm in front of the grip toward the eye
+  the figure on PILOT_1 at -0.282, 0.132, -0.054 in the model; the copilot's eye at -0.236, 0.811, -0.116
+  CROSSCHECK_Figure: object 51331073, placed by the module on PILOT_1 every frame, led by 1 frame
+  the module wrote the figure in 34,739 frames, with 0 errors
+  the left hand tapped 128 times and the right hand 36 times, 26 drags; on the copilot's yoke, the left thumb pressed 3 times and the right 0 times; the yoke hand swapped 14 times, and the hands went home after 33 sessions; 0 presses with the copilot's yoke hidden; 38 right presses turned the view; 63 clicks outside the sim
+  the middle of the view met the cockpit on 2,906 looks and nothing on 2831; the aircraft reached 185 kt over the run

@@ -52,6 +52,7 @@
 
 import { readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
+import { gunzipSync } from "node:zlib"
 
 import { SKIP, START, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { REPO } from "../../tools/results.mjs"
@@ -182,7 +183,8 @@ async function record() {
 
 function newestRecording() {
   const dir = join(REPO, "experiments", "areas", "flight-model", "results")
-  const files = readdirSync(dir).filter((f) => /^p02-replay-record-.*\.ndjson$/.test(f)).sort()
+  // Recordings are committed gzipped, because they run to tens of megabytes.
+  const files = readdirSync(dir).filter((f) => /^p02-replay-record-.*\.ndjson(\.gz)?$/.test(f)).sort()
   if (!files.length) throw new Error("no recording yet: run with --record first")
   return join(dir, files[files.length - 1])
 }
@@ -209,8 +211,9 @@ function sampler(samples) {
 }
 
 async function replay() {
-  const file = process.argv.slice(2).find((a) => a.endsWith(".ndjson")) ?? newestRecording()
-  const samples = readFileSync(file, "utf8").trim().split("\n").map((l) => JSON.parse(l)).filter((r) => r.kind === "sample")
+  const file = process.argv.slice(2).find((a) => /\.ndjson(\.gz)?$/.test(a)) ?? newestRecording()
+  const raw = file.endsWith(".gz") ? gunzipSync(readFileSync(file)).toString("utf8") : readFileSync(file, "utf8")
+  const samples = raw.trim().split("\n").map((l) => JSON.parse(l)).filter((r) => r.kind === "sample")
   if (samples.length < 10) throw new Error(`${file} has only ${samples.length} samples`)
   const lengthMs = samples[samples.length - 1].ms
   rec.log("recording", `${file.replace(/\\/g, "/").replace(REPO.replace(/\\/g, "/") + "/", "")}: ${samples.length} frames over ${(lengthMs / 1000).toFixed(0)}s`)

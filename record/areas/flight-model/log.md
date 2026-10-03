@@ -42,7 +42,7 @@ The engine temperatures need the flying machine's values when a follower starts 
 
 **Affects:** flight-model sync and state sync in [03-v1-scope](../product/03-v1-scope.md).
 
-**Evidence:** [the recording](../../../experiments/areas/flight-model/results/p02-replay-record-2026-10-03-09-45-01.txt), [the replay](../../../experiments/areas/flight-model/results/p02-replay-replay-2026-10-03-09-52-02.txt), and [the replay without velocities](../../../experiments/areas/flight-model/results/p02-replay-replay-pose-only-2026-10-03-09-59-04.txt), with each frame in the `.ndjson` beside each.
+**Evidence:** [the recording](../../../experiments/areas/flight-model/results/p02-replay-record-2026-10-03-09-45-01.txt), [the replay](../../../experiments/areas/flight-model/results/p02-replay-replay-2026-10-03-09-52-02.txt), and [the replay without velocities](../../../experiments/areas/flight-model/results/p02-replay-replay-pose-only-2026-10-03-09-59-04.txt), with each frame in the gzipped `.ndjson.gz` beside each.
 
 ## 2026-10-03: Freezing holds the pose but not the velocities, so a follower has to write them all
 

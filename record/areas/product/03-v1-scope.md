@@ -105,3 +105,44 @@ The PF offers control by voice, and the PM takes it by answering within 5s.
   A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
 - How Crosscheck tells speech from noise before it listens for a phrase.
   The intent is to run recognition only while the pilot's microphone is loud enough to be speech, and the architecture designs it.
+
+## Sync
+
+### Flight-model sync
+
+The following machine's aircraft goes where the flying machine's goes, with the same position, attitude, and motion, so both pilots fly one aircraft.
+
+**In v1:**
+
+- The following machine freezes its aircraft's position, altitude, and attitude, as FS Copilot's does (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`).
+- Each frame it writes the flying machine's pose and its body and rotation velocities.
+
+**Not in v1:**
+
+- Different scenery on the two machines.
+  The following aircraft sits high or low against its own ground (from our experience with FS Copilot), and a frozen Baron's ground contact follows the written altitude, so a few feet high tells it it's airborne (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-the-barons-ground-contact-follows-the-written-altitude-and-its-own-physics-writes-dont-hold-against-ours)).
+
+**Rules:**
+
+- The following machine writes the velocities along with the pose, every frame.
+  A frozen aircraft keeps integrating its own velocities, and with the pose alone a replayed Baron's airspeed was 22 kt off within two minutes, where written velocities kept it within 3.2 kt (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)).
+- The following aircraft moves smoothly in flight.
+  Writes from outside the sim stutter in a moving cockpit and writes from inside the sim's frame don't (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)), and the architecture decides how.
+- The PM sees the aircraft about 0.4s plus the network delay behind the PF, as FS Copilot's following machine draws it 400ms in the past (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm`).
+  That's acceptable, because the PM has nothing to compare it against, and shortening it is welcome but not required.
+- At a handover, the new flying machine carries on from the last state it was written, and a small step there is acceptable (from our experience with FS Copilot).
+- If Crosscheck stops on the following machine, the aircraft unfreezes within about 1s and nothing writes to it afterward.
+  FS Copilot's module unfreezes after 1s without a write, and may keep writing its last pose into the unfrozen aircraft after that (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`; unverified in the sim).
+- When a machine starts following, it takes the flying machine's engine temperatures.
+  A replayed Baron whose engines had just started read its CHT 59°C off the recording's on average at first and still 6°C off in the replay's last fifth (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)).
+
+**Depends on:**
+
+- The [take-control key](#take-control-key), for which machine flies.
+- The flying machine's engine levers reaching the following machine continuously, as the take-control key's rules require: in the replay they carried RPM, manifold pressure, and fuel flow.
+- State sync, for the engine temperatures.
+
+**Open questions:**
+
+- Whether two machines with the same scenery agree on the ground's elevation closely enough, which needs two PCs.
+- Whether the single-frame spikes in the replayed body and rotation velocities, up to 7.6 ft/s and 2.3 rad/s, show on screen or come from mixing samples across sharp changes such as the touchdown.

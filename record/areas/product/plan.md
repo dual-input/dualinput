@@ -95,6 +95,7 @@ Agreed:
 
 - The take-control key, on 2026-10-03.
 - The voice phrases, on 2026-10-03.
+- Flight-model sync, on 2026-10-03.
 
 ## 5. What later features need from the core
 

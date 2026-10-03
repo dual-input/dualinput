@@ -22,8 +22,9 @@ All of them were reached on 2026-10-03 with our test pilot, from probes on MSFS 
 - **Decided:** the ray comes from `SimConnect_CameraGet`'s `WORLD` referential and the cursor's place in the sim window, inside and out, by measured rules:
   - the `WORLD` yaw is the camera's true heading and its pitch the angle below the horizon, and its position and angles are turned into the aircraft's frame by the aircraft's heading, pitch, and bank
   - the field of view is the view's height, and the view's width follows the window's shape
-- **Because:** inside, the `SIMOBJECT` ray landed within 2mm of known spots at two zooms and two window shapes ([log](log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)), and in the cockpit the `WORLD` ray matched it with no error and its eye within 0.1cm.
-  On foot outside, the `WORLD` ray landed within 1cm of known spots and the `SIMOBJECT` ray within 7cm ([log](log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
+- **Because:** inside, the `SIMOBJECT` ray landed within 2mm of known spots at two zooms and two window shapes ([log](log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
+  In the cockpit, the `WORLD` angles turned into the aircraft's frame matched `SIMOBJECT`'s with 0.00° of error, and the `WORLD` position sat a median 0.1cm from `SIMOBJECT`'s ([log](log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
+  On foot outside, the `WORLD` ray landed within 1cm of known spots and the `SIMOBJECT` ray within 7cm (same entry).
 
 ## The models come from the aircraft's own package
 
@@ -58,8 +59,8 @@ All of them were reached on 2026-10-03 with our test pilot, from probes on MSFS 
   - A run of clicks with one hand keeps the hands as they are; between clicks, the clicking hand hovers 5cm off its last spot.
   - 2s after the last click or drag is released, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
   - A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
-- **Because:** with these rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right.
-  Handing the yoke over with an overlap when a hand leaves to click put the hand on its switch after the switch had moved (both in [log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+- **Because:** with these rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+  Handing the yoke over with an overlap when a hand leaves to click put the hand on its switch after the switch had moved ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
   A thumb that took the yoke made the holding hand let go and take it back ([log](log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
 - **Leaves out:** the right seat, sidesticks, and center sticks, whose habits differ.
 
@@ -71,7 +72,9 @@ All of them were reached on 2026-10-03 with our test pilot, from probes on MSFS 
 
 ## Left clicks, quick right clicks, and wheel turns all bring the hand
 
-- **Decided:** a left press, held or dragged, a right press released within 300ms with the cursor moving under 5px, and a wheel turn each bring the hand; a longer or moving right press turns the view and brings none.
+- **Decided:** a left press brings the hand, whether tapped, held, or dragged.
+  A right press brings it when released within 300ms, with the cursor moving under 5px and the mouse under 20 counts; a longer or moving right press turns the view and brings none.
+  A wheel turn brings it too, as p21 and p22 ran it, though no log entry has measured it (unverified).
 - **Because:** the right button both clicks controls and, held, turns the view ([log](log.md#2026-10-03-a-quick-still-right-press-is-a-click-and-a-held-or-moved-one-turns-the-view)).
 
 ## No hand without a click, and a reach of 2m to 3m on foot

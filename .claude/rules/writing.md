@@ -69,7 +69,7 @@ It gives the context that forced a choice, each option with what it would cost, 
 Once made, a decision isn't edited, except to add a blockquote at the top naming the decision that reverses it.
 The reversing decision says what it reverses and links back.
 
-An answer an area's experiments settle before any product design goes in the area's `decisions.md` as a tentative decision, because a numbered decision can't be edited and these change with each probe.
+When an area's experiments settle a question before any product design does, the answer goes in the area's `decisions.md` as a tentative decision, because a numbered decision can't be edited and these change with each probe.
 Each one gives what was decided, the findings behind it with links into the log, and what it leaves out, if anything, and it's edited in place as findings arrive.
 A product design confirms each one as a decision in `record/decisions/`, changes it, or drops it, and the tentative one links to the result.
 

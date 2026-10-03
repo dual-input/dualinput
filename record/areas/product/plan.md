@@ -67,6 +67,7 @@ The picks, picked on 2026-10-02:
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - [Seat awareness](ideas.md#seat-awareness)
   - [Avatar sync](ideas.md#avatar-sync)
+  - The profile's checklist and the two-step start, and state watching, all from [Pre-sync checklist](ideas.md#pre-sync-checklist)
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
   - [EventBus bridge](ideas.md#eventbus-bridge)

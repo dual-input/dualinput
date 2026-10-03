@@ -1,0 +1,13 @@
+p22 · The hand on the aircraft's outside, where the pilot clicks in an external view or on foot, on MSFS 2024
+2026-10-03T11:06:55.510Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.000026 kt
+  bksq-aircraft-baronpro: exterior BaronProfessional_Pressurized_EXT.gltf, 479,609 triangles, read in 103ms
+  23 of 51 animations posed from their code, moving 117 nodes; not posed: staticCoverFlag_L, staticCoverFlag_R, staticCoverFlagRotation_L, staticCoverFlagRotation_R, staticCoverRope_L, staticCoverRope_R, WingFlex, Gear_L, Wheel_L, Gear_R, Wheel_R, WingBoots, StallWarningTab, PistonPropSpin_L, PistonBladePitch_L, CowlFlap_L, CowlFlap_R, PistonPropSpin_R, PistonBladePitch_R, Gear_C, NoseGearSteering, Wheel_C, pitotCoverRope, pitotCoverFlagRotation, pitotCoverFlag, EngineCoverFlag_L, EngineCoverFlag_R, BootsTail; 55 visibility codes run
+  193 pairs over 349° of WORLD yaw and 138° of pitch: heading = yaw - 0.00° (RMS 0.00°), rise = -pitch (RMS 0.00°); next best RMS 63.62°; WORLD's eye is a median 0.1cm from SIMOBJECT's
+  the nose at 0.00, 0.13, 2.97; the tail at -0.01, 1.90, -6.22; the left wingtip at 6.01, 0.78, -0.69; the right wingtip at -6.01, 0.78, -0.69; the top of the fin at 0.00, 2.12, -5.44
+  by world: RMS 73.72° (the nose 221cm, the tail -2316cm, the left wingtip 500cm, the right wingtip -228cm, the top of the fin 304cm)
+  by simobject: RMS 73.69° (the nose 225cm, the tail -2323cm, the left wingtip 505cm, the right wingtip -230cm, the top of the fin 304cm)
+  the clicks use the simobject referential
+  207 presses outside: 156 hit the exterior; nodes: PressurizedDoorFuselage.001 ×3, BaronWing_R ×12, BaronEngineNacelle_R, Aileron_R, Winglets_R ×9, Winglets.002 ×5, Wings.041 ×6, BaronNormallyAspiratedNacelle_L.012, BaronTurbochargedNacelle_R ×10, nothing ×51, EngineInsides_R ×2, BaronEngineNacelle_L.006 ×3, EngineDetails_R ×5, PistonSpinnerStill_Frost_R ×5, BaronEngineNacelle_R.002, NoseDoorLatchFront ×2, BaronNose ×6, Cube.003, BaronPreHeatingRig ×3, BaronNose.006 ×2, Wings.032, Circle.027 ×2, BaronPitotMast, BaronPitotMast.001, Wings.040 ×7, BaronEngineNacelle_L.004 ×3, BaronEngineNacelle_L.001 ×2, PistonEngineNacelle_L.006, BaronGroundPowerRig ×8, Wings.024, Aileron_L ×4, Winglets.003 ×3, Wings.010, Wings.016, Cylinder.164, TireStill_L ×3, GearStrutTop_L ×2, PressurizedDoorLatchHandle, PressurizedDoorFuselage.002, Cube.006 ×2, BaronElevator_L ×7, Cube.239, BaronRudder ×2, BaronElevator_R ×2, PressurizedDoorFuselage.006 ×3, Windshield.013 ×11, Windshield.001 ×6; the avatar stood a median 1.82m from the spot (0.98m to 5.79m)

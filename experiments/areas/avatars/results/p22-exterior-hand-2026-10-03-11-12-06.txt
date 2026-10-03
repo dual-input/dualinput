@@ -1,0 +1,13 @@
+p22 · The hand on the aircraft's outside, where the pilot clicks in an external view or on foot, on MSFS 2024
+2026-10-03T11:12:06.315Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.000125 kt
+  bksq-aircraft-baronpro: exterior BaronProfessional_Pressurized_EXT.gltf, 479,609 triangles, read in 106ms
+  23 of 51 animations posed from their code, moving 117 nodes; not posed: staticCoverFlag_L, staticCoverFlag_R, staticCoverFlagRotation_L, staticCoverFlagRotation_R, staticCoverRope_L, staticCoverRope_R, WingFlex, Gear_L, Wheel_L, Gear_R, Wheel_R, WingBoots, StallWarningTab, PistonPropSpin_L, PistonBladePitch_L, CowlFlap_L, CowlFlap_R, PistonPropSpin_R, PistonBladePitch_R, Gear_C, NoseGearSteering, Wheel_C, pitotCoverRope, pitotCoverFlagRotation, pitotCoverFlag, EngineCoverFlag_L, EngineCoverFlag_R, BootsTail; 55 visibility codes run
+  193 pairs over 340° of WORLD yaw and 177° of pitch: heading = yaw + 0.00° (RMS 0.00°), rise = -pitch (RMS 0.00°); next best RMS 86.71°; WORLD's eye is a median 0.1cm from SIMOBJECT's
+  the nose at 0.00, 0.13, 2.97; the tail at 0.01, 1.90, -6.22; the left wingtip at 6.01, 0.78, -0.69; the right wingtip at -6.01, 0.78, -0.69; the top of the fin at -0.00, 2.12, -5.44
+  by world: RMS 0.14° (the nose 0cm, the tail 1cm, the left wingtip 1cm, the right wingtip 1cm, the top of the fin 1cm)
+  by simobject: RMS 0.39° (the nose 0cm, the tail 7cm, the left wingtip 3cm, the right wingtip 1cm, the top of the fin 4cm)
+  the clicks use the world referential
+  35 presses outside: 32 hit the exterior; nodes: Cube.273, PressurizedDoorFuselage.001 ×2, BaronWing_R ×3, nothing ×3, Wings.041 ×4, Winglets.005, Winglets.002 ×5, BaronTurbochargedNacelle_R ×3, PistonSpinnerStill_Frost_R, BaronNose ×2, BaronNose.006 ×5, Wings.040 ×2, BaronTurbochargedNacelle_L, Wings.024, UtilityDoorFuselage; the avatar stood a median 2.55m from the spot (1.81m to 5.74m)

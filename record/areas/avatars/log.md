@@ -9,6 +9,34 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: On foot outside, the click ray lands within 1cm on the exterior, and the pilot clicks from up to 6m away
+
+**Asked:** can the hand follow clicks on the aircraft's outside, on the walkaround or in an external view, by casting the click's ray into the exterior model?
+And does `SimConnect_CameraGet` still give the camera in the aircraft's frame when the user's object is the avatar on foot?
+
+**Expected:** the `SIMOBJECT` referential might follow the avatar on foot, so p22 also built the ray from the `WORLD` referential, whose angles we fitted against `SIMOBJECT` in the cockpit first (lib/frames.mjs).
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, the pilot looked around in the cockpit for 6s in each of two runs, 193 pairs of readings each, over 340° to 349° of yaw and 138° to 177° of pitch.
+  Both runs gave the same fit with 0.00° of error: the `WORLD` referential's yaw, in SimConnect.h's `Bank` field, is the camera's true heading, and its pitch is the camera's angle below the horizon.
+  `WORLD`'s position, turned into the aircraft's frame by its heading, pitch, and bank, sat a median 0.1cm from `SIMOBJECT`'s.
+- On foot, with the camera 1.6m above the avatar's position, the pilot clicked yellow balls on the exterior's nose, tail, both wingtips, and fin top, from 1.7m to 11.3m away.
+  The `WORLD` ray landed 0cm to 1cm from each (RMS 0.14°), and the `SIMOBJECT` ray 0cm to 7cm (RMS 0.39°), so `SIMOBJECT` stays in the aircraft's frame on foot too.
+  In the other run the pilot didn't aim at the balls, so its ball clicks say nothing.
+- The exterior model, `BaronProfessional_Pressurized_EXT.gltf`, has 479,609 triangles.
+  23 of its 51 animations posed from their own code, and 55 visibility codes ran.
+  The gear and wheels, which sim templates drive, and the wing flex, cover flags, and props, whose code keeps its own state from frame to frame, stayed as the file stores them.
+- Over the two runs' free clicks, 188 of 242 presses hit the exterior; the rest hit nothing in the model.
+  The avatar stood a median 1.8m and 2.6m from the spot it touched, from 1.0m to 5.8m, so the pilot often clicks from beyond arm's reach.
+
+**Changed:** the hand reaches the aircraft's outside the same way it reaches the cockpit, with either referential.
+The figure's arm needs to reach several metres, or the figure to step closer.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p22's runs [without the balls aimed](../../../experiments/areas/avatars/results/p22-exterior-hand-2026-10-03-11-06-55.txt) and [with them](../../../experiments/areas/avatars/results/p22-exterior-hand-2026-10-03-11-12-06.txt).
+
 ## 2026-10-03: With a run of clicks treated as one session, 115 taps took 9 swaps instead of one swap a click
 
 **Asked:** once the thumb on the far horn leaves the yoke with the holding hand, do the hands stop swapping for every click, if they stay swapped through a run of clicks and the tapping hand hovers near the panel between them?

@@ -62,6 +62,12 @@
  *
  * and it writes the camera's world pose, read inside the frame, to CAM_P,
  * CAM_B, CAM_H (FsPBH's three fields, degrees), CAM_FOV, and CAM_OK.
+ *
+ * From 0.6.0, a second object, for the figure's other hand:
+ *
+ *   OBJECT2, FWD2, RIGHT2, UP2, SCALE2, COLOR2   placed every frame as mode 1
+ *            places the first object, with the same LEAD and signs, while MODE
+ *            isn't 0, whatever the first object is doing
  */
 
 #include <MSFS/MSFS.h>
@@ -116,6 +122,11 @@ FsLVarId l_ray_x, l_ray_y, l_ray_dist, l_ray_aspect, l_fov_is_h, l_cam_pitch_sig
 // The object's own Z: variables, registered again when the object changes.
 double   z_target = 0;
 FsZVarId z_scale = -1, z_color = -1;
+
+// The second object's L: variables and its own Z: variables.
+FsLVarId l_object2, l_fwd2, l_right2, l_up2, l_scale2, l_color2;
+double   z_target2 = 0;
+FsZVarId z_scale2 = -1, z_color2 = -1;
 
 // The last ray point and the aircraft pose of the same frame, for mode 5.
 Pos  last_ray{}, last_ray_aircraft{};
@@ -296,6 +307,12 @@ extern "C" MSFS_CALLBACK void module_init(void)
     l_fov_is_h       = fsVarsRegisterLVar("CROSSCHECK_P12_FOV_IS_H");
     l_cam_pitch_sign = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_PITCH_SIGN");
     l_cam_yaw_sign   = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_YAW_SIGN");
+    l_object2        = fsVarsRegisterLVar("CROSSCHECK_P12_OBJECT2");
+    l_fwd2           = fsVarsRegisterLVar("CROSSCHECK_P12_FWD2");
+    l_right2         = fsVarsRegisterLVar("CROSSCHECK_P12_RIGHT2");
+    l_up2            = fsVarsRegisterLVar("CROSSCHECK_P12_UP2");
+    l_scale2         = fsVarsRegisterLVar("CROSSCHECK_P12_SCALE2");
+    l_color2         = fsVarsRegisterLVar("CROSSCHECK_P12_COLOR2");
     for (int i = 0; i < 4; i++)
     {
         char name[48];
@@ -412,6 +429,22 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
         last_ray          = place(c, dist / n, dist * cr / n, dist * cu / n, 1, 0);
         last_ray_aircraft = a;
         have_ray          = true;
+    }
+
+    // The second object, placed as mode 1 places the first.
+    const double object2 = get(l_object2);
+    if (mode != 0 && object2 > 0 && have_aircraft)
+    {
+        const FsObjectId target2 = static_cast<FsObjectId>(object2);
+        if (object2 != z_target2)
+        {
+            z_scale2  = fsVarsRegisterZVar("CROSSCHECK_SCALE", target2);
+            z_color2  = fsVarsRegisterZVar("CROSSCHECK_COLOR", target2);
+            z_target2 = object2;
+        }
+        if (fsVarsZVarSet(z_scale2, u_number, get(l_scale2), target2) != FS_VAR_ERROR_NONE) fail(3002);
+        if (fsVarsZVarSet(z_color2, u_number, get(l_color2), target2) != FS_VAR_ERROR_NONE) fail(3003);
+        (void)write_pose(target2, place(a_ahead, get(l_fwd2), get(l_right2), get(l_up2), get(l_sign_pitch), get(l_sign_bank)));
     }
 
     if (mode == 0 || object <= 0)

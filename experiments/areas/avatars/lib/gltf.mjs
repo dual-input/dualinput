@@ -51,8 +51,9 @@ export function ancestry(model, i) {
 }
 
 // Every triangle of every node that has a mesh, turned into the model's space:
-// per primitive, the node, its vertices as x, y, z floats, its indices, its
-// bounds, and whether its material is invisible (ASOBO_material_invisible).
+// per primitive, the node, its vertices as x, y, z floats, the same vertices in
+// the node's own space (local), its indices, its bounds, and whether its
+// material is invisible (ASOBO_material_invisible).
 export function triangles(model) {
   const { g, nodes, world } = model
   const bin = fs.readFileSync(path.join(path.dirname(model.file), g.buffers[0].uri))
@@ -68,11 +69,13 @@ export function triangles(model) {
       const base = (pv.byteOffset ?? 0) + (pa.byteOffset ?? 0)
       const m = world[i]
       const pos = new Float32Array(pa.count * 3)
+      const own = new Float32Array(pa.count * 3)
       const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity]
       for (let v = 0; v < pa.count; v++) {
         const o = base + v * stride
-        const q = apply(m, [bin.readFloatLE(o), bin.readFloatLE(o + 4), bin.readFloatLE(o + 8)])
-        for (let k = 0; k < 3; k++) { pos[v * 3 + k] = q[k]; if (q[k] < lo[k]) lo[k] = q[k]; if (q[k] > hi[k]) hi[k] = q[k] }
+        const p = [bin.readFloatLE(o), bin.readFloatLE(o + 4), bin.readFloatLE(o + 8)]
+        const q = apply(m, p)
+        for (let k = 0; k < 3; k++) { own[v * 3 + k] = p[k]; pos[v * 3 + k] = q[k]; if (q[k] < lo[k]) lo[k] = q[k]; if (q[k] > hi[k]) hi[k] = q[k] }
       }
       const ia = g.accessors[p.indices]
       const iv = g.bufferViews[ia.bufferView]
@@ -80,7 +83,7 @@ export function triangles(model) {
       const idx = new Uint32Array(ia.count)
       for (let k = 0; k < ia.count; k++) idx[k] = ia.componentType === 5125 ? bin.readUInt32LE(ibase + k * 4) : ia.componentType === 5121 ? bin.readUInt8(ibase + k) : bin.readUInt16LE(ibase + k * 2)
       const material = p.material !== undefined ? g.materials?.[p.material] : null
-      out.push({ node: i, pos, idx, lo, hi, invisible: !!material?.extensions?.ASOBO_material_invisible })
+      out.push({ node: i, pos, local: own, idx, lo, hi, invisible: !!material?.extensions?.ASOBO_material_invisible })
     }
   })
   return out

@@ -14,12 +14,36 @@
  * it is hit where it rests.
  */
 
-import { ancestry, readGltf, triangles } from "./gltf.mjs"
+import { ancestry, apply, readGltf, triangles } from "./gltf.mjs"
 
 export function loadCockpit(files) {
   const models = files.map(readGltf)
   const prims = models.flatMap((m, mi) => triangles(m).map((p) => ({ ...p, model: mi })))
   return { models, prims, triangles: prims.reduce((s, p) => s + p.idx.length / 3, 0) }
+}
+
+// Moves the triangles of the given nodes of one model to a new pose, such as
+// the yoke posed by lib/animate.mjs: world holds every node's transform.
+export function repose(cockpit, modelIndex, world, nodes) {
+  for (const p of cockpit.prims) {
+    if (p.model !== modelIndex || !nodes.has(p.node)) continue
+    const m = world[p.node]
+    p.lo = [Infinity, Infinity, Infinity]
+    p.hi = [-Infinity, -Infinity, -Infinity]
+    for (let v = 0; v < p.local.length; v += 3) {
+      const q = apply(m, [p.local[v], p.local[v + 1], p.local[v + 2]])
+      for (let k = 0; k < 3; k++) { p.pos[v + k] = q[k]; if (q[k] < p.lo[k]) p.lo[k] = q[k]; if (q[k] > p.hi[k]) p.hi[k] = q[k] }
+    }
+  }
+}
+
+// A node and every node under it.
+export function subtree(model, root) {
+  const out = new Set([root])
+  for (let i = 0; i < model.nodes.length; i++) {
+    for (let j = model.parent[i]; j !== -1; j = model.parent[j]) if (out.has(j)) { out.add(i); break }
+  }
+  return out
 }
 
 // The distance along the ray to a box, or Infinity.
@@ -54,12 +78,14 @@ function triangle(o, d, pos, i0, i1, i2) {
   return t > 1e-4 ? t : Infinity
 }
 
-export function cast(cockpit, origin, direction, { maxM = 5, invisible = false } = {}) {
+// skip: nodes, by index into the first model, the ray passes through, such as
+// a yoke the sim hides.
+export function cast(cockpit, origin, direction, { maxM = 5, invisible = false, skip = null } = {}) {
   const n = Math.hypot(...direction)
   const d = direction.map((x) => x / n)
   const inv = d.map((x) => 1 / x)
   const near = cockpit.prims
-    .filter((p) => invisible || !p.invisible)
+    .filter((p) => (invisible || !p.invisible) && !(skip && p.model === 0 && skip.has(p.node)))
     .map((p) => ({ p, t: box(origin, inv, p.lo, p.hi) }))
     .filter((x) => x.t <= maxM)
     .sort((a, b) => a.t - b.t)

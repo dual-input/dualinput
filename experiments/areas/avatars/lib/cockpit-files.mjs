@@ -46,6 +46,50 @@ function fltsimWithTitle(text, title) {
   return null
 }
 
+const unescape = (s) => s.replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&")
+
+// A behavior XML's text with every file it names in <IncludeBase
+// RelativeFile="..."/> after it: the Baron 58P's interior XML holds only its
+// LODs and includes the base Baron's, where the yoke's components are
+// (bksq-aircraft-baronpro 0.1.1, BaronProfessional_Pressurized_INT.xml).
+export function behaviorText(xml, seen = new Set()) {
+  if (seen.has(xml.toLowerCase()) || !fs.existsSync(xml)) return ""
+  seen.add(xml.toLowerCase())
+  const text = read(xml)
+  const included = [...text.matchAll(/<IncludeBase\b[^>]*RelativeFile="([^"]+)"/gi)].map((m) => behaviorText(path.join(path.dirname(xml), m[1]), seen))
+  return [text, ...included].join("\n")
+}
+
+// Each animation's code, from the <UseTemplate> blocks that name it: by
+// lower-case ANIM_NAME, { name, code, length } with length 100 unless
+// ANIM_LENGTH says otherwise.
+export function animationCode(text) {
+  const out = new Map()
+  for (const m of text.matchAll(/<UseTemplate\b[^>]*>([\s\S]*?)<\/UseTemplate>/g)) {
+    const name = m[1].match(/<ANIM_NAME>\s*([^<]+?)\s*<\/ANIM_NAME>/)?.[1]
+    const code = m[1].match(/<ANIM_CODE>([\s\S]*?)<\/ANIM_CODE>/)?.[1]
+    if (!name || !code || out.has(name.toLowerCase())) continue
+    const length = Number(m[1].match(/<ANIM_LENGTH>\s*([\d.]+)\s*<\/ANIM_LENGTH>/)?.[1] ?? 100)
+    out.set(name.toLowerCase(), { name, code: unescape(code), length })
+  }
+  return out
+}
+
+// The components that show or hide a node, by the node's lower-case name: the
+// VISIBILITY_CODE in a <Component Node="..."> before any component inside it.
+export function visibilityCode(text) {
+  const out = new Map()
+  for (const m of text.matchAll(/<Component\b([^>]*)>/g)) {
+    const node = m[1].match(/\bNode="([^"]+)"/i)?.[1]
+    if (!node) continue
+    const rest = text.slice(m.index + m[0].length)
+    const end = rest.search(/<Component\b|<\/Component>/)
+    const code = rest.slice(0, end < 0 ? undefined : end).match(/<VISIBILITY_CODE>([\s\S]*?)<\/VISIBILITY_CODE>/)?.[1]
+    if (code && !out.has(node.toLowerCase())) out.set(node.toLowerCase(), unescape(code).trim())
+  }
+  return out
+}
+
 export function cockpitFiles(title) {
   for (const root of packageRoots()) {
     for (const pkg of dirs(root)) {

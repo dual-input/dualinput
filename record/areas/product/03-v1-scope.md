@@ -453,7 +453,10 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 - Every crew member's machine records what passes through Crosscheck: each synced change, each handover, and the connection's events.
 - Each machine keeps at least the whole flight, and more flights if recordings turn out small enough.
-- A bug report gathers every crew member's recording through the session, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.
+- A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.
+- Each pilot uploads their own part to a server of ours, labeled with the session's ID, and the parts meet there, so a report works after the crew has gone: if something goes wrong on landing and everyone goes to bed, there's no live session the next morning.
+- A report page lists the pilot's recorded sessions so each is easy to recognize, by date and time, aircraft, departure airport, and crew, and offers to upload one.
+- On our end, a report shows as one session with who has uploaded and who's missing, such as "uploaded: James, Adam; missing: Greg".
 - A setting chooses full or minimal recording, and says that a minimal recording limits how far we can help.
 
 **Not in v1:**
@@ -467,11 +470,12 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 **Depends on:**
 
-- [The connection](#the-connection), which carries the other pilots' recordings to the one reporting.
+- [The connection](#the-connection), for the session's ID that labels every part.
 
 **Open questions:**
 
-- Where reports go, as a file the pilot sends us or as an upload to a server of ours; either way, sending one has to be easy.
+- How a missing pilot is asked for their part: their Crosscheck could offer the upload the next time it starts, once the server holds a report for a session they were in.
+- The session's ID, which every machine shares and which differs from the code, since a code can outlive a session once permanent codes come.
+- How long the server keeps reports, and how it limits junk uploads with no accounts, as fsc-editor's relay limits how fast one address can guess codes.
 - How big a flight's recording is, which decides how many flights each machine keeps.
 - What a minimal recording leaves out.
-- How a report gets a crew member's recording after the session has ended and they've left.

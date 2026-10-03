@@ -22,10 +22,10 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 ## The ray needs no calibration
 
 - **Decided:** the ray comes from `SimConnect_CameraGet`'s `WORLD` referential and the cursor's place in the sim window, inside and out, by measured rules:
-  - the `WORLD` yaw, in SimConnect.h's `Bank` field, is the camera's true heading, and its pitch the angle below the horizon; the aircraft's heading, pitch, and bank turn its position and angles into the aircraft's frame
+  - the `WORLD` yaw, in SimConnect.h's `Bank` field, is the camera's true heading, and its pitch the angle below the horizon; the aircraft's heading, pitch, and bank turn the `WORLD` position and angles into the aircraft's frame
   - `fov`, in radians, is the view's vertical angle, and the horizontal angle follows the window's shape
 - **Because:** inside, the `SIMOBJECT` ray landed within 2mm of known spots at two zooms and two window shapes ([log](log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
-  In the cockpit, the `WORLD` angles turned into the aircraft's frame matched `SIMOBJECT`'s with 0.00° of error, and the `WORLD` position sat a median 0.1cm from `SIMOBJECT`'s ([log](log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
+  Inside, the `WORLD` angles turned into the aircraft's frame matched `SIMOBJECT`'s with 0.00° of error, and the `WORLD` position sat a median 0.1cm from `SIMOBJECT`'s ([log](log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
   On foot outside, the `WORLD` ray landed within 1cm of known spots and the `SIMOBJECT` ray within 7cm (same entry).
 
 ## The models come from the aircraft's own package
@@ -51,7 +51,8 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 - **Decided:** the pilot's yoke is the one in front of the left seat, and the copilot's yoke the one in front of the right.
   A hand holds the pilot's yoke by the aircraft's `HANDLING_Yoke_1_Hand_Left` or `HANDLING_Yoke_1_Hand_Right` node, which sits inside the horn.
   With the yoke centered, the hand's center goes one hand's radius out from where the line from the pilot's eye to the node meets the horn's surface, and keeps that spot in the node's own frame, so it moves with the yoke.
-  Where the copilot's yoke repeats the pilot's yoke's nodes with `_R` for `_L`, as the Baron's `YokePitch_R`, `YokeRoll_R`, and `Yoke_R` do, its grips are the pilot's grip nodes, each placed relative to the copilot's roll node (`YokeRoll_R` in the Baron) as it sits relative to the pilot's (`YokeRoll_L`), and the hand goes where the line from the copilot's eye to the grip meets the horn.
+  Where the copilot's yoke repeats the pilot's yoke's nodes with `_R` for `_L`, as the Baron's `YokePitch_R`, `YokeRoll_R`, and `Yoke_R` do, its grips are copies of the pilot's grip nodes.
+  Each copy sits relative to the copilot's roll node, `YokeRoll_R` in the Baron, as the pilot's grip sits relative to the pilot's, `YokeRoll_L`, and the hand goes where the line from the copilot's eye to the copy meets the horn.
   Where an aircraft has no `HANDLING_Yoke_1_Hand_` nodes, the profile author picks a grip in the profile IDE.
 - **Because:** the Baron, the Comanche, Black Square's Bonanza Pro, and the iniBuilds L-1011 mark their grips with these names ([log](log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
   The nodes sit inside the horns, so a hand placed on them sank into the yoke, and p21's hand, a ball of 1.45cm radius, sat 3.1cm from the node on the horn's surface ([log](log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
@@ -72,11 +73,11 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
   - 2s after the last click or drag is released, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
   - A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
 
-  In the right seat, the right hand holds the copilot's yoke at rest, and going home it takes the yoke 0.3s before the left lets go.
+  In the right seat, the right hand holds the copilot's yoke at rest, and when the hands go back to rest it takes the yoke 0.3s before the left lets go.
   A click more than 5cm left of that yoke's wheel center is the left hand's, and the right keeps the yoke; one more than 5cm right of it is the right hand's, and the left takes the yoke.
   A button on the copilot's yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
   The other rules are the left seat's.
-- **Because:** with these rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+- **Because:** with the left-seat rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
   With the right-seat rules, 138 clicks and 26 drags, made by our test pilot from the left seat for the figure in the right seat, took 14 swaps ([log](log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
   Our test pilot found that the figure looked good, parked and in flight, except that some part of it missed a frame now and then; which part is unknown (same entry).
   Handing the yoke over with an overlap when a hand leaves to click put the hand on its switch after the switch had moved ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).

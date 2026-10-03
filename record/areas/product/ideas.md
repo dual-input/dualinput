@@ -104,6 +104,12 @@ The check leaves out Crosscheck's own version, which the connection checks, and 
 - **Tech:** each package's version is in its `manifest.json`, which our aircraft studies already read.
   On livery N324DU the A220's DisplayUnits panel identifies itself as `DisplayUnits|config=N324DU`, while FS Copilot's profile matches only `DisplayUnits|config=Default`, so by our reading, not yet flown, that display syncs on no other livery, which is why the check compares liveries (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — The A220's DisplayUnits key carries the livery, and the profile names only Default").
 
+### What doesn't sync
+
+Crosscheck tells pilots what on their aircraft doesn't sync, from the aircraft's profile, so nobody is surprised when a knob doesn't move on the other side.
+
+- **Open questions:** when pilots learn it, before the flight or when they touch the control, and how a profile records what we tried and couldn't sync.
+
 ### Pre-sync checklist
 
 A profile carries a checklist of what the pilots line up before sync starts, such as "both panels start in the same state", and Crosscheck shows it before syncing begins.

@@ -79,6 +79,7 @@ The picks, picked on 2026-10-02:
   - The tablet in a browser, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet)
   - The debrief timeline, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Automatic profile fetch, and the community profile registry, both from [Profile registry](ideas.md#profile-registry)
+  - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
 
 How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, is left to step 4, because it's a detail of the interface rather than a feature.
 
@@ -96,6 +97,7 @@ Agreed:
 - The take-control key, on 2026-10-03.
 - The voice phrases, on 2026-10-03.
 - Flight-model sync, on 2026-10-03.
+- State sync, on 2026-10-03.
 
 ## 5. What later features need from the core
 
@@ -120,7 +122,8 @@ Steps 4 and 5 add to this list as they find risks.
 ## 7. Tech stack and architecture
 
 Produces: decisions in `record/decisions/`.
-Exit: the language, the frameworks, and the core architecture each have a decision.
+Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
+The profile format waits for the features, because they decide what it has to express, and it decides in turn whether a machine joining or reconnecting mid-flight can take the flying machine's state: only an entry with an absolute setter can be sent at connect.
 
 ## 8. v1 build plan
 

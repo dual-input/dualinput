@@ -133,16 +133,50 @@ The following machine's aircraft goes where the flying machine's goes, with the 
 - At a handover, the new flying machine carries on from the last state it was written, and a small step there is acceptable (from our experience with FS Copilot).
 - If Crosscheck stops on the following machine, the aircraft unfreezes within about 1s and nothing writes to it afterward.
   FS Copilot's module unfreezes after 1s without a write, and may keep writing its last pose into the unfrozen aircraft after that (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`; unverified in the sim).
-- When a machine starts following, it takes the flying machine's engine temperatures.
-  A replayed Baron whose engines had just started read its CHT 59°C off the recording's on average at first and still 6°C off in the replay's last fifth (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)).
 
 **Depends on:**
 
 - The [take-control key](#take-control-key), for which machine flies.
 - The flying machine's engine levers reaching the following machine continuously, as the take-control key's rules require: in the replay they carried RPM, manifold pressure, and fuel flow.
-- State sync, for the engine temperatures.
 
 **Open questions:**
 
 - Whether two machines with the same scenery agree on the ground's elevation closely enough, which needs two PCs.
 - Whether the single-frame spikes in the replayed body and rotation velocities, up to 7.6 ft/s and 2.3 rad/s, show on screen or come from mixing samples across sharp changes such as the touchdown.
+
+### State sync
+
+A change either pilot makes in the cockpit shows up in the other pilot's cockpit, so both cockpits stay in the same state.
+
+**In v1:**
+
+- Every control, and every panel with a function in flying the aircraft, display units included, that the aircraft's profile names.
+
+**Not in v1:**
+
+- Telling pilots what on their aircraft doesn't sync, a Later pick in [the plan](plan.md), because we first learn what Crosscheck can sync.
+- Detecting and correcting cockpits that drift apart, because Crosscheck can't reliably read the state of most aircraft ([Ideas left out](ideas.md#ideas-left-out)).
+- The pilot's own MSFS EFB overlay.
+
+**Rules:**
+
+- The profile marks which of its entries belong to the PF: the aircraft's flight controls, toe brakes, engine levers, and trim, the categories the [take-control key](#take-control-key) names.
+  Those reach the following machine from the flying machine.
+  Everything else in the profile is shared: either pilot can change it, and the other cockpit follows.
+- When both pilots change the same thing at nearly the same moment, the flying machine decides which change stands, and both cockpits end in that state.
+- Crosscheck sends every change a pilot makes, and never a change it applied itself.
+  The PM turns the beacon on, Crosscheck sets it on the PF's machine, and the PF's sim reports that the beacon changed: Crosscheck doesn't send that report back.
+  If the PF turns the beacon off half a second later, that change goes through, where a guard that ignores reports for a while after each write would drop it, as one dropped two real pilot inputs in our FS Copilot work ([08-02](../../learn/foundations/08-02-echoes-and-initial-sync.md#echo-loops-and-suppressing-them)).
+- A change the aircraft makes on its own syncs like a pilot's, such as the Baron taking its chocks away once it moves.
+
+**Depends on:**
+
+- Profiles, which name what syncs, how each entry is set, and which entries belong to the PF.
+- The [take-control key](#take-control-key), for which machine is flying.
+
+**Open questions:**
+
+- Joining or reconnecting mid-flight.
+  A machine can take the flying machine's state only for entries with an absolute setter, since an increment sent at connect changes nothing useful, so the profile format answers it.
+- How Crosscheck recognizes its own writes on each channel, which the architecture settles.
+  A `K:` event can carry a tag in its spare fifth value, which reaches every listener (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-reached-our-own-masking-group-and-the-777-ignored-re-sent-values)), while a variable write carries only the value.

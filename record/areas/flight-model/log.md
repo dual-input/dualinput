@@ -38,7 +38,7 @@ Our writes came from outside the sim, once per sim frame, which is fine on the g
 
 **Changed:** writing the velocities each frame is what keeps the following pilot's airspeed and vertical speed indicators with the flying pilot's: without them, the follower's airspeed was 22 kt off within two minutes.
 The levers carry RPM, manifold pressure, and fuel flow.
-The engine temperatures need the flying machine's values when a follower starts following, or the following pilot's CHT gauges disagree for minutes.
+On the Baron, a follower whose engines started cold shows CHT readings that disagree with the flying machine's for minutes.
 
 **Affects:** flight-model sync and state sync in [03-v1-scope](../product/03-v1-scope.md).
 

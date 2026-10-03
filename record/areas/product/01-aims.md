@@ -15,7 +15,7 @@ When two choices are otherwise even, Crosscheck takes the one we'd want when fly
 
 - **Pilots never need to understand Crosscheck to use it.**
   Someone who has never heard of a profile goes from installing Crosscheck to flying with a friend without reading any documentation.
-- **Every aircraft we list has been flown gate to gate with Crosscheck,** and Crosscheck tells pilots what on that aircraft doesn't sync.
+- **Every aircraft we list has been flown gate to gate with Crosscheck.**
   We write and maintain the profiles for a short list of aircraft, and open profile writing to everyone after v1.
 - **A session can hold any number of people.**
 - **Pilots join with a code and never make an account.**

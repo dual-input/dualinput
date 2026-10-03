@@ -84,7 +84,10 @@ How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, 
 ## 4. v1 scope
 
 Produces: a design doc for v1's features, written with the users from step 2 in mind.
-Exit: each v1 feature says what the pilot sees and does, including installing Crosscheck, updating it, and connecting through home routers.
+Exit: every v1 feature, and installing and updating Crosscheck, is scoped: what it does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
+Then a pass strings the features into one session, from installing Crosscheck to ending a flight, and scopes the gaps between them, such as rejoining after a dropped connection.
+
+We scope control first, because which pilot is in control decides which machine flies the aircraft, then sync, then the session, then the remaining features, and installing and updating last.
 
 ## 5. What later features need from the core
 

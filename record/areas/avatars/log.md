@@ -4,10 +4,173 @@ What our experiments found about showing one pilot's avatar on the other pilot's
 The avatar shows as a figure: an object Crosscheck spawns and moves.
 SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR`, and `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not.
 The sim's own people stay invisible when a SimConnect client spawns them, GSX's people show, and a model of our own compiles from generated glTF, with its size and color set per object while it runs.
+A figure of our own, balls and sticks whose joints are animations that read variables, poses in the cockpit as our dev page poses it, and one variable changes its color.
 In a moving cockpit, a WASM module that writes the figure inside the sim's frame, turned by the aircraft's full attitude and led by 0.75 to 1 frame, holds it in its seat.
 The figure's hand goes where the pilot clicks: the ray from the eye through the cursor, cast into the aircraft's interior model, lands within 2mm with no calibration and no control names, and a held press glides along the surface it touched.
-The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
+The probes are p01 to p24 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-03: A probe can screenshot the sim window, and a screenshot can show a home folder's path and a person's name
+
+**Asked:** can a probe take a screenshot at each pose for us to judge afterward, so the pilot only has to point the view?
+
+**Expected:** a copy of the window's client area would work with the sim in a window, and would come back black in exclusive fullscreen (unverified).
+
+**Found:**
+
+- p24 copies the sim window's client area with .NET's `Graphics.CopyFromScreen`, after `SetProcessDPIAware`, at 2401×1360 pixels, the window's size as p20 measured it.
+  None of the shots over 7 runs came back black: their mean brightness ran from 87 to 138 out of 255.
+- A full shot is about 5.9MB as PNG, 159MB for a run of 27, so p24 also writes a JPEG 1,200 pixels wide with the top 100 pixels cut off, about 120KB.
+- The full shots show the home folder's path in the title bar of Devmode's Project Editor.
+  The Baron's GTN shows, on its start screen, the name its license is registered to, readable in the full shot.
+
+**Changed:** a probe can screenshot each pose for us to read afterward.
+p24's screenshots stay out of the tree ([experiments/areas/avatars/.gitignore](../../../experiments/areas/avatars/.gitignore)), and one goes in only after someone has read it.
+
+**Affects:** the probes in [experiments/areas/avatars](../../../experiments/areas/avatars).
+
+**Evidence:** the capture in [p24-figure.mjs](../../../experiments/areas/avatars/p24-figure.mjs), and the shot lines in [p24's last run](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-12-44-14.txt).
+
+## 2026-10-03: Sticks that telescope, two fixed pieces shown by the stick's length, end at the hands and feet
+
+**Asked:** with neither a stretching scale nor a skin usable ([entry below](#2026-10-03-the-sim-doesnt-play-a-scale-animation-that-stretches-a-stick-along-its-length), [entry below](#2026-10-03-a-skinned-stick-took-the-sim-down-in-an-in-sim-build-and-a-crashed-sim-held-fspackagetool-until-it-was-closed)), can a stick reach any length from what the sim has shown it plays: fixed meshes, translation, and visibility from a variable?
+
+**Expected:** yes, since p17's sphere showed visibility from a variable, and p24's hands landed by translation.
+
+**Found:**
+
+- Each arm, thigh, and shin is 7 pairs of fixed pieces, from 2cm to 1.28m long.
+  One piece of a pair runs forward from the stick's base, and the other back from the node at its end, 1% thinner, so where they overlap one surface is always in front.
+  A pair of length s covers any length from s to 2s, and visibility rules on the stick's length show only the pair that fits: 84 pieces, 12 shown at a time.
+- fspackagetool compiled all 32 of the model's meshes at their source dimensions.
+- In the Black Square Baron 58P, parked, at rest, with both hands on the panel, and with both feet on the pedals, every stick ended at its hand, knee, or foot, and the knee drew as one even tube.
+- In the runs before, the colors looked paler in the sim than in the dev page, which the pilot put down to the sim's HDR.
+  In this run, after the pilot turned HDR off, the screenshots show them as the dev page does.
+
+**Changed:** the figure's limbs reach whatever length the variables give, with no scale animation and no skin.
+The figure is 207 nodes, 32 meshes, 28 animations, and 84 visibility rules.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p24's run](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-12-44-14.txt), and `TELESCOPE` in [figure/model.mjs](../../../experiments/areas/avatars/figure/model.mjs).
+
+## 2026-10-03: A skinned stick took the sim down in an in-sim build, and a crashed sim held fspackagetool until it was closed
+
+**Asked:** can a skinned stick, its near ring bound to a joint at its base and its far ring to the node at its end, stretch by that node's translation alone?
+
+**Expected:** yes, since the sim plays GSX's skinned people from a variable (p04).
+
+**Found:**
+
+- In the dev page, every vertex of a stick's far ring sat one stick radius from its ball's center, at rest and reaching.
+- In the sim, Build and Mount of the skinned model in the Project Editor took the sim down.
+  The build had copied the model's XML and never wrote its glTF or buffer.
+- With the sim closed, fspackagetool failed twice after 121s with an empty `_RPTErrors.xml`, once on the skinned model and once on the telescoping one.
+  Something of the crashed sim that `build.mjs`'s check for `FlightSimulator2024.exe` didn't catch was still running, and once the pilot closed it, the telescoping model built in 16s.
+  Which process it was is unknown.
+- So the standalone failures came from the crashed sim, and whether the skin caused the crash is unknown.
+  The skin's layout was unusual, though the glTF 2.0 spec allows it: six skins of two joints each, `JOINTS_0` as unsigned shorts, and inverse bind matrices that put each stick's mesh in its base joint's frame rather than where the stick sits in the model.
+
+**Changed:** we set skins aside for the telescope ([entry above](#2026-10-03-sticks-that-telescope-two-fixed-pieces-shown-by-the-sticks-length-end-at-the-hands-and-feet)).
+After a crash, the sim has to be closed in full before fspackagetool runs.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** the skinned model, `experiments/areas/avatars/figure/model.mjs` at commit d96c749, and the package folder's file times, read when it happened; no run file.
+
+## 2026-10-03: The sim doesn't play a scale animation that stretches a stick along its length
+
+**Asked:** why did every stick run past its hand or foot?
+
+**Expected:** each stick's scale animation, from (1, 1, 0) to (1, 1, 1.5) along the stick, would stretch it to its length, as it does in the dev page.
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, with each stick size a mesh of its own 1m long, every arm, thigh, and shin drew its full 1m from its base, past its hand or foot.
+  The hands and feet, placed by translation, landed where the dev page puts them.
+- fspackagetool kept the animation as written, 2 keys from (1, 1, 0) to (1, 1, 1.5).
+- With the first key at (1, 1, 0.01), the sticks drew at 1m again.
+- p17's scale animation, from 0.5 to 5 the same on all three axes, played.
+
+**Changed:** a stick can't stretch by a scale animation along its length, and the stretch moved to a skin, then to the telescope ([entry above](#2026-10-03-sticks-that-telescope-two-fixed-pieces-shown-by-the-sticks-length-end-at-the-hands-and-feet)).
+Why is unknown: the sim may play only a scale that's the same on all three axes, or only one of the three components (unverified).
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p24's runs [with a first key of 0](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-12-18-15.txt) and [of 1cm](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-12-25-37.txt).
+
+## 2026-10-03: fspackagetool rewrote a mesh that nodes shared under different uneven scales
+
+**Asked:** why did the sticks draw thinner than the balls at the knee, when both had the leg's radius?
+
+**Expected:** each node's scale would size the one shared stick, as it does in the dev page.
+
+**Found:**
+
+- The model used one unit stick, radius 1 and length 1, under nodes scaled (0.015, 0.015, 1) for the arms, (0.018, 0.018, 1) for the thighs and shins, and (0.018, 0.018, 0.028) for the knee's segments.
+- fspackagetool's compiled model kept every node's scale and rewrote that mesh to radius 0.044 and length 2.913.
+  0.044 is 0.015 times 2.913, the arm's scale times a factor we can't account for.
+- The sphere mesh, shared by balls each scaled the same on all three axes, kept its radius of 1.
+- With each stick size a mesh of its own, its radius and any fixed length in its vertices and no scale on its node, the compiled meshes kept their dimensions.
+
+**Changed:** the figure's meshes carry their sizes in their vertices, and only balls carry a scale, the same on all three axes.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p24's run](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-11-58-55.txt), whose screenshots showed the thin sticks, and the compiled models read after this run and after the next build.
+
+## 2026-10-03: Build and Mount gives a freshly spawned figure a rebuilt model with no restart
+
+**Asked:** can we change the figure's model while the sim runs, when a build with fspackagetool needs the sim closed and a restart?
+
+**Expected:** the SDK documents that the Project Editor's Build package button "temporarily" adds the package to the sim, and that its right-click menu has Build and Mount ([The Project Editor](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Project_Editor/The_Project_Editor.htm)).
+
+**Found:**
+
+- With `crosscheck-figure` installed in Community, a build of the project in the Project Editor, then a fresh spawn, drew the old model, and so did a spawn after the build had reloaded the flight.
+- Build and Mount, from the package's right-click menu, then a fresh spawn, drew the rebuilt model: a test build's 30cm nose showed at once, over the Community copy.
+- Before building, the Project Editor upgraded the package's SimObject asset group from `Type Version="0"` to `"1"`, and Build and Mount asked for the package's order hint, `CUSTOM_SIMOBJECTS` for a SimObject of our own.
+  We didn't separate which of Build and Mount and the order hint made the second try work.
+
+**Changed:** a change to the figure's model reaches the sim in about a minute, with no restart: `build.mjs --write-only`, Build and Mount, and a fresh spawn.
+`build.mjs` writes the asset group's version and the order hint, so the Project Editor shouldn't ask again (unverified).
+
+**Affects:** [figure/build.mjs](../../../experiments/areas/avatars/figure/build.mjs).
+
+**Evidence:** p24's runs [after the build](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-11-50-36.txt) and [after Build and Mount](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-12-07-09.txt).
+
+## 2026-10-03: Our own figure poses in the sim from its variables, plays between frames smoothly, and changes color through `ASOBO_property_animation`
+
+**Asked:** does a figure of our own pose in the sim as our dev page poses it?
+It's a glTF that [figure/model.mjs](../../../experiments/areas/avatars/figure/model.mjs) generates, balls and sticks whose joints are animations reading variables.
+Does a value between two of an animation's frames play smoothly?
+And can `ASOBO_property_animation` change its color from a variable?
+
+**Expected:** the joints would follow, since p17's sphere scaled from a variable.
+We had no prediction for values between frames.
+The extension animates a texture's offset in A2A's Aerostar (read in a2a-aircraft-aerostar600, `EXTERIOR_LOD07.gltf`), and an Asobo developer wrote that the sim plays it only linearly ([thread](https://devsupport.flightsimulator.com/t/animated-material-uv-offset-via-asobo-property-animation-blender-undocumented-export-requirements-interpolation-mode-ignored-both-at-export-and-at-runtime/18336)), but nothing we found said a base color could be its target.
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, p24 spawned `CROSSCHECK_Figure`, a StaticObject in our `crosscheck-figure` package, on the copilot's seat node `PILOT_1` with the aircraft's attitude.
+  It set the figure's 27 joints and its color as global `L:` variables through SimConnect, and took a screenshot at each pose.
+- The head turned through yaw, pitch, and roll, the head and chest leaned, the hands went to `JpiButton_R` and `FUEL_Lever_Mixture_2`, and the legs bent at the knee to rest and to the copilot's pedals.
+  The dev page, drawn from the camera that `SimConnect_CameraGet` gave, put the head, hands, and feet where the screenshots show them, by eye.
+- A value between frames plays smoothly.
+  Moving the head right a sixth of a frame at a time, 1.67cm a frame, from frame 57, moved the red pixels' center by 1.3, 1.8, 1.6, 1.5, 1.8, and 1.3 pixels a step, with no stall and jump, and by 0.8 to 1.3 pixels in a second run.
+- The color animation targets `materials/0/pbrMetallicRoughness/baseColorFactor` and `materials/1/pbrMetallicRoughness/baseColorFactor`, and fspackagetool kept it.
+  The figure took each palette color, its body and its lighter chest together, and a value halfway between red and blue showed violet.
+  The red pixels counted 84,426 while it was red, about 1,260 while it was blue, green, yellow, purple, teal, or pink, 16,791 while orange, and 80,041 back at red.
+- The knee's 10 segments drew 1m long, fanned out from the knee.
+  Each segment's 2.8cm length was a fixed scale on a node with no mesh, which fspackagetool kept as written, so the sim ignored it.
+  With the length on the mesh's own node, the knee curved.
+
+**Changed:** one figure model shows any palette color from one variable, with no hidden copy of each part for each color as p17's sphere had.
+A fixed length belongs on a mesh's own node or in its vertices ([entry above](#2026-10-03-fspackagetool-rewrote-a-mesh-that-nodes-shared-under-different-uneven-scales)).
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p24's runs [first](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-11-42-56.txt), [after the knee fix](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-11-58-55.txt), and [with the camera compared](../../../experiments/areas/avatars/results/p24-figure-2026-10-03-12-18-15.txt).
 
 ## 2026-10-03: Inside, with the cockpit posed, a fresh cast stays on a posed lever but still falls through one the file holds still
 

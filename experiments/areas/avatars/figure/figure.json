@@ -1,18 +1,18 @@
 {
   "head": { "radius": 0.1, "eyeForward": 0.06 },
-  "nose": { "radius": 0.022, "length": 0.12 },
-  "chest": { "radius": 0.13, "at": 0.5 },
-  "hips": { "radius": 0.15, "up": 0.08, "back": 0.03 },
-  "shoulders": { "width": 0.2, "down": 0.03 },
-  "legs": { "width": 0.16, "down": 0.05 },
+  "nose": { "radius": 0.038, "length": 0.099 },
+  "chest": { "radius": 0.134, "at": 0.48 },
+  "hips": { "radius": 0.179, "up": 0.071, "back": -0.044 },
+  "shoulders": { "width": 0.208, "down": -0.01 },
+  "legs": { "width": 0.16, "down": 0.066 },
   "arm": { "radius": 0.015 },
   "leg": { "radius": 0.018 },
-  "knee": { "fwd": 0.188, "up": 0.033, "arc": 0.28, "segments": 10 },
+  "knee": { "fwd": 0.208, "up": 0.033, "arc": 0.296, "segments": 12 },
   "hand": { "radius": 0.038 },
   "foot": { "radius": 0.045 },
   "rest": {
     "hand": { "fwd": 0.2, "right": 0.17, "up": 0.1 },
-    "leg": { "bend": 44, "shin": 0.14 }
+    "leg": { "bend": 60, "shin": 0.14 }
   },
   "material": { "roughness": 0.72, "lighten": 0.3 },
   "palette": [

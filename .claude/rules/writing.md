@@ -25,6 +25,7 @@ The kind decides who reads it and what shape it takes.
 | Plan               | `record/areas/<area>/plan.md`                                            | know what's being built and where it stands                                            |
 | Log                | `record/areas/<area>/log.md`                                             | know what was found                                                                    |
 | Decision           | `record/decisions/NNN-<slug>.md`                                         | know why one option won                                                                |
+| Tentative decisions | `record/areas/<area>/decisions.md`                                      | know what an area's experiments have settled for now, and on what findings             |
 | Reference          | beside what it describes                                                 | look one thing up                                                                      |
 | Outline            | `record/learn/<course>/outline.md`                                       | know what a course covers, in what order and depth, and which parts have a chapter     |
 | Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
@@ -67,6 +68,10 @@ One file per decision, numbered, written when the decision is made.
 It gives the context that forced a choice, each option with what it would cost, the decision, and what it commits us to.
 Once made, a decision isn't edited, except to add a blockquote at the top naming the decision that reverses it.
 The reversing decision says what it reverses and links back.
+
+Experiments settle questions before any product design does, and those answers go in the area's `decisions.md` as tentative decisions.
+Each one gives what was decided, the findings behind it with links into the log, and what it leaves out, and it changes in place as findings arrive.
+When a product design takes one up, it becomes a decision in `record/decisions/`, and the tentative one links to it.
 
 ### Reference
 

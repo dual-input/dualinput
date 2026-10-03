@@ -234,28 +234,8 @@ Later, a pilot could invite a passenger to a given seat, with the invite made to
 Each pilot sees the other pilot's avatar, with MSFS multiplayer off.
 Crosscheck reads where the avatar is, which way it faces, where the pilot looks, and where they click, and on the other machine moves a figure of its own to match.
 The figure is a few plain shapes that carry meaning by how they move, after the people in the game Big Walk: a long nose shows where the pilot looks, the head turns and nods, and the hands are balls on arms that stretch.
-In the cockpit, one hand holds the yoke and the other goes to whatever the pilot clicks or drags, by a left-seat pilot's habits:
-
-- At rest, the left hand holds the yoke at its grip, and the right hand rests.
-- A click more than 5cm left of the wheel's center is the left hand's, and the right hand takes the yoke.
-  A click more than 5cm right of it is the right hand's, and the left hand keeps the yoke.
-  Between the two, the hand that's free clicks.
-- A hand leaving the yoke to click goes at once, since the sim acts on the click at once.
-- A run of clicks with one hand keeps the hands as they are.
-  Between clicks, the clicking hand hovers 5cm off its last spot.
-  2s after the last click or drag is released, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
-- A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
-- Inside, a drag glides along the surface it first touched.
-  Outside, where the skin curves, it follows the ray cast afresh onto the aircraft.
-- On foot or in an external view, the hand goes where the pilot clicks on the aircraft's outside, the same way.
-
-Where the hands stop, as agreed with the pilot on 2026-10-03:
-
-- They need the aircraft's model files, so they don't work on aircraft that stream with the sim, such as the C152, or on Marketplace aircraft if their models are encrypted (unverified).
-- They need a click, so VR, hardware switches, and key bindings bring no hand.
-- Moving parts are posed only from code in the aircraft's own files, the yoke above all.
-  Parts that sim templates drive, such as the Baron's throttle, prop levers, and gear, and parts whose code keeps its own state, such as the Baron's wing flex, stay as the files store them, so the hand can land a few centimeters off them or inside the skin.
-- On foot, the hand reaches about 2m to 3m.
+In the cockpit, one hand holds the yoke and the other goes to whatever the pilot clicks or drags, inside or on the aircraft's outside, by a left-seat pilot's habits.
+How the hands work, and where they stop, is in [the avatars' tentative decisions](../avatars/decisions.md).
 
 - **Tech:**
   - **The avatar:** SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)).
@@ -268,22 +248,7 @@ Where the hands stop, as agreed with the pilot on 2026-10-03:
     A WASM module needs no edit to the aircraft: it writes the figure inside the sim's frame, turns its seat offset by the aircraft's heading, pitch, and bank, and moves it ahead by 0.75 to 1 frame's worth of the aircraft's motion.
     In the C152, over 3 minutes of flying, that held GSX's seated passenger, standing in for our figure, in its seat, and the pilot judged the slight lag left as the passenger's inertia (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)).
   - **The head:** `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), and includes a Tobii head tracker's rotation (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
-  - **The hand:** it goes where the ray from the pilot's eye through the cursor meets the aircraft's interior model, which Crosscheck reads from the aircraft's own glTF files, with no input event or control name involved (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
-    Picking the control by the name of the input event that changed failed, because the names in the Comanche's behavior files, such as `SWITCH_avionics_master`, aren't the ones the sim lists, such as `SWITCH_AVIONICS_MASTER_TOGGLE` (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-the-cockpit-models-own-space-lines-up-with-simconnects-within-8mm-but-the-models-input-event-ids-arent-the-names-the-sim-lists)).
-    The ray needs no calibration.
-    `SimConnect_CameraGet` puts the eye in the model's own space within 4mm (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)), and its field of view is the view's height, so clicks on known spots landed within 2mm of them at any zoom and window shape we tried (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
-    A held left press glides along the plane of the surface it first touched, which keeps the hand on a lever the sim has moved (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-during-a-drag-the-cursor-keeps-moving-and-gliding-on-the-touched-surfaces-plane-keeps-the-hand-on-a-lever-where-a-fresh-cast-falls-through)).
-    A right press released within 300ms, with the cursor moving under 5px, counts as a click and places the hand at its release, and a longer or moving right press turns the view and brings no hand (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-quick-still-right-press-is-a-click-and-a-held-or-moved-one-turns-the-view)).
-    The other machine needs only the points, relative to the aircraft, since both pilots fly the same aircraft package.
-  - **The yoke hand:** aircraft mark their yoke's grips with the same node names, `HANDLING_Yoke_1_Hand_Left` and `HANDLING_Yoke_1_Hand_Right`, in Black Square's Baron and Bonanza, the A2A Comanche, and the iniBuilds L-1011 (read in bksq-aircraft-baronpro 0.1.1, bksq-aircraft-bonanzapro 0.1.1, a2a-aircraft-pa24 2.1.3, and inibuilds-aircraft-l1011 1.0.8, [avatars log](../avatars/log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
-    In the Baron and the Comanche, `aircraft.cfg`'s `[VR]` section names the yoke's two animations as `yoke_anim_x` and `yoke_anim_y` (read in bksq-aircraft-baronpro 0.1.1 and a2a-aircraft-pa24 2.1.3, same entry).
-    In the Baron 58P, the figure's hand stayed on the grip through 1,703 poses across the yoke's whole travel, with the yoke posed by those animations, which the aircraft's own behavior code plays from 3 variables (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
-    The grip nodes sit inside the horns, so the hand goes on the horn's surface in front of each, 3.1cm out (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
-    The click ray meets the posed yoke, and passes the parts the aircraft's own visibility code hides: the Baron 58P has 51 such codes, which read 18 `A:` and `L:` variables in all (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
-  - **Outside:** on foot, the click ray met the Baron 58P's exterior model within 1cm of known spots up to 11.3m away, by either of `SimConnect_CameraGet`'s referentials, `WORLD` turned into the aircraft's frame or `SIMOBJECT`, which stays in that frame on foot (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
-    The exterior posed 23 of its 51 animations from their own code; the gear, driven by sim templates, stayed as the file stores it.
-    Across curved skin, the plane of the first spot left the skin by a median 15.5cm and 2.1m at the 90th percentile, and the pilot judged a fresh cast right (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-outside-a-drag-should-follow-a-fresh-cast-since-the-plane-of-the-first-spot-leaves-curved-skin)).
-  - **The rules above:** in the Baron 58P, 75 clicks and 40 drags took 9 swaps instead of one swap each, and the pilot found that the hands felt right (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+  - **The hands:** measured in the A2A Comanche and the Black Square Baron 58P, inside and on foot outside; what they do, where they stop, and the findings behind each are in [the avatars' tentative decisions](../avatars/decisions.md).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat, turns their head where they look, and reaches for each switch, knob, and lever they click, so a pilot sees who did what as it happens.
   When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
@@ -294,7 +259,6 @@ Where the hands stop, as agreed with the pilot on 2026-10-03:
   - Whether the figure's head and arms can turn and stretch through variables of its own object, as its size does (unverified).
   - Whether Crosscheck loads attachments' models: the Comanche's GPS units have models of their own, so rays aimed at them hit the panel behind (`BlackPanel` in the Comanche) (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
   - Which aircraft carry over.
-    The eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
     The ray has been measured against known spots only in the Comanche, and the yoke hand has run only in the Baron 58P.
     The Comanche plays its yoke from A2A's `L:YokeBank_Anim` and `L:YokePitch_Anim`, where the Baron plays its yoke from `A:YOKE X POSITION WITH AP LINEAR` and `A:YOKE Y POSITION WITH AP` (read in a2a-aircraft-pa24 2.1.3 and bksq-aircraft-baronpro 0.1.1, [avatars log](../avatars/log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
     The yoke hand runs whichever code the aircraft has, so it would pose the Comanche's yoke the same way (unverified).

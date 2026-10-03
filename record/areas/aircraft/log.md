@@ -3,6 +3,28 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-03: The encrypted Phenom 300E lists seat objects for its pilots and passengers
+
+**Asked:** does the sim list seat objects through SimConnect for an aircraft whose model files are partly encrypted, so a figure can be seated where the cockpit model can't be loaded?
+The C152 and the A2A Comanche, whose files are readable, list theirs ([avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
+
+**Expected:** yes, since the sim spawns seat objects rather than reading them from the model.
+
+**Found:** with the FSReborn Phenom 300E loaded, fsreborn-aircraft-phenom300e 1.0.24, a Marketplace package with encrypted archives ([Phenom study](fsreborn-phenom-300e/study.md)), the 15 objects within 50m included 10 seats:
+
+- `SEAT_FSReborn_Phenom300E_Pilot`, 3.60m ahead of the aircraft's reference point, 0.34m left, and 0.46m up, facing forward.
+- `SEAT_FSReborn_Phenom300E_Copilot`, listed as two objects at the same spot, 3.59m ahead, 0.33m right, and 0.48m up.
+- 7 of `SEAT_FSReborn_Phenom300E_Pax`, from 0.96m behind the reference point to 0.78m ahead and about 0.4m either side, 4 facing forward and 3 facing aft.
+
+The seated pilot's avatar object sat exactly on the pilot's seat.
+The package's readable files show only a passenger seat part, `fsreborn_phenom300e_seat_pax` ([files](fsreborn-phenom-300e/files.md)), so SimConnect shows more than the files did.
+
+**Changed:** a figure can sit in the right seat on an aircraft whose cockpit model can't be loaded, both pilots and every passenger, though it can't reach for controls without the model.
+
+**Affects:** the ideas [Seat awareness](../product/ideas.md#seat-awareness) and [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p03's run](../../../experiments/areas/aircraft/results/p03-seat-objects-2026-10-03-20-14-37.txt).
+
 ## 2026-10-01: Loading flights through SimConnect works, but the sim crashed on 5 of about 30 loads, so we canceled the unattended session
 
 **Asked:** can a harness answer the 108 unattended sim questions in [questions.tsv](../../../experiments/areas/aircraft/questions.tsv) by loading each aircraft from a flight file with `SimConnect_FlightLoad`, with nobody at the sim?

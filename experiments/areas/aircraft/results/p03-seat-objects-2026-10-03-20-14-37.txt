@@ -1,0 +1,23 @@
+p03 · Seat objects for the loaded aircraft, through SimConnect, on MSFS 2024
+2026-10-03T20:14:37.906Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "FSReborn Phenom 300E Manchester Interior"
+
+Objects within 50m: 15
+  object 32768: TITLE "", CATEGORY "CharacterSim", 3.60m forward, -0.34m right, 0.46m up, heading 74.432515°
+  object 2883584: TITLE "FSReborn Phenom 300E Manchester Interior", CATEGORY "Airplane", 0.00m forward, 0.00m right, -0.00m up, heading 74.432519°
+  object 48070661: TITLE "SEAT_FSReborn_Phenom300E_Copilot", CATEGORY "SimpleObjectSim", 3.59m forward, 0.33m right, 0.48m up, heading 74.43252°
+  object 48087045: TITLE "SEAT_FSReborn_Phenom300E_Copilot", CATEGORY "SimpleObjectSim", 3.59m forward, 0.33m right, 0.48m up, heading 74.43252°
+  object 48693253: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", -0.96m forward, 0.40m right, 0.51m up, heading 74.432521°
+  object 48709637: TITLE "SEAT_FSReborn_Phenom300E_Pilot", CATEGORY "SimpleObjectSim", 3.60m forward, -0.34m right, 0.46m up, heading 74.43252°
+  object 48807941: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", 0.08m forward, -0.40m right, 0.49m up, heading 74.432521°
+  object 48971781: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", -0.15m forward, -0.40m right, 0.50m up, heading 254.432511°
+  object 50266121: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", 0.07m forward, 0.39m right, 0.50m up, heading 74.432521°
+  object 50282505: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", -0.96m forward, -0.39m right, 0.51m up, heading 74.432525°
+  object 50446345: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", -0.15m forward, 0.40m right, 0.50m up, heading 254.432515°
+  object 50921481: TITLE "CharacterSim_Male_Heavy", CATEGORY "ProceduralCharacter", 12.16m forward, -0.00m right, -0.73m up, heading 254.430359°
+  object 50937865: TITLE "Marshaller_Stick", CATEGORY "StaticObject", 12.21m forward, 0.04m right, -0.66m up, heading 0°
+  object 50954249: TITLE "SEAT_FSReborn_Phenom300E_Pax", CATEGORY "SimpleObjectSim", 0.78m forward, 0.40m right, 0.48m up, heading 254.432543°
+  object 51101705: TITLE "Marshaller_Stick", CATEGORY "StaticObject", 12.21m forward, -0.04m right, -0.66m up, heading 0°
+
+Seat objects: 10
+Exceptions: none

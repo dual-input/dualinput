@@ -1,0 +1,11 @@
+p09 · The lead an external client needs to keep an object still in a moving cockpit, on MSFS 2024
+2026-10-03T05:18:42.427Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Cessna C152 Aerial Advertising"; seats p03's parked measurement, the wand 0.4m above the seat beside the pilot
+
+  lead   0ms: 0 presses; 95 kt, 32 fps, attitude up to 3.8°; wand reads -1.53m forward, avatar's object -2.35m, wand ahead of the sim's objects by 0.82m
+  lead  33ms: 0 presses; 97 kt, 32 fps, attitude up to 5.2°; wand reads 0.08m forward, avatar's object -2.39m, wand ahead of the sim's objects by 2.47m
+  lead  67ms: 0 presses; 95 kt, 32 fps, attitude up to 6.5°; wand reads 1.74m forward, avatar's object -2.32m, wand ahead of the sim's objects by 4.06m
+  lead 100ms: 0 presses; 91 kt, 32 fps, attitude up to 6.5°; wand reads 3.22m forward, avatar's object -2.24m, wand ahead of the sim's objects by 5.45m
+  lead 133ms: 0 presses; 92 kt, 32 fps, attitude up to 2.8°; wand reads 4.81m forward, avatar's object -2.27m, wand ahead of the sim's objects by 7.08m
+  lead 200ms: 0 presses; 95 kt, 32 fps, attitude up to 9.2°; wand reads 8.24m forward, avatar's object -2.33m, wand ahead of the sim's objects by 10.57m
+  lead 300ms: 0 presses; 96 kt, 32 fps, attitude up to 11.8°; wand reads 13.28m forward, avatar's object -2.37m, wand ahead of the sim's objects by 15.66m

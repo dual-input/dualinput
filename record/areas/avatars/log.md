@@ -9,6 +9,32 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: GSX keeps its passengers aboard by adding its model to the aircraft's own attachments
+
+**Asked:** how does GSX keep its seated passengers still in a flying aircraft, when the object we spawned from its files stayed behind ([entry below](#2026-10-03-the-sim-doesnt-carry-an-object-of-category-viewer-with-the-aircraft))?
+
+**Expected:** no prediction; GSX's own program is packed and its scripts encrypted.
+
+**Found** (read in files, not run):
+
+- GSX adds a section to the aircraft package's own preset `attached_objects.cfg`, and keeps the original beside it as `attached_objects.cfg.gsx`.
+  In `fnx-aircraft-320`, preset `FNX_320_CFM_SL`, the added `[sim_attachment.2]` gives `attachment_root = SimObjects/GroundVehicles/FSDT_Passengers_Seats`, `attachment_file = model.FNX_A320_01/FSDT_Passengers_Seats.xml`, and `attach_to_model = exterior`.
+  GSX also rewrote the package's `layout.json` to match the larger file.
+- The same section is in 24 presets: every preset of `fnx-aircraft-320` and `fnx-aircraft-319-321`, three of `inibuilds-aircraft-a350`, and one of `pmdg-aircraft-77w`, the packages enabled in `%APPDATA%\Virtuali\Airplanes\PaxAirplanes_2024.json`.
+- The attached model is 192 nodes at seat positions in meters from the aircraft's reference point, with no mesh and no animation of its own.
+  Its XML hangs a seated figure on each node with `<ModelAttachments>`, each shown while its `L:FSDT_GSX_PASSENGER_SEAT_*` and `L:FSDT_GSX_INTPAX_VISIBLE` are set, and each figure plays its own idle animation.
+- The PMDG 777 attaches its own copilot figure the same way, `[sim_attachment.5]` with `attach_to_model = "interior"` (read in pmdg-aircraft-77w 2.4.143).
+- GSX's in-sim module, `fsdt-msfs-bridge.wasm`, exports only `module_init` and `module_deinit` and imports `set_named_variable_value` and `execute_calculator_code`, so it can set the `L:` variables and can't move an object.
+
+**Changed:** the sim carries a model smoothly only when the aircraft's own files attach it, and GSX gets there by editing those files on the user's machine.
+A Crosscheck figure could be attached the same way, with its parts moved by its own animations reading `CROSSCHECK_` `L:` variables, since an attached model's animations run on the aircraft it's attached to ([Model Attachments](https://docs.flightsimulator.com/msfs2024/html/3_Models_And_Textures/Model_Attachments.htm)).
+Then a frame of lag in our writes moves a hand late, not the whole figure against the cockpit.
+Editing another developer's aircraft package is a product decision, and it has to coexist with GSX's own edit of the same file.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** the subagent's read of the Fenix package and GSX Pro 4.0.19 on our development machine; the files belong to Fenix and FSDreamTeam, so nothing of them is in the repository.
+
 ## 2026-10-03: The sim doesn't carry an object of category Viewer with the aircraft
 
 **Asked:** does the sim carry GSX's per-aircraft seat object with the aircraft by itself?

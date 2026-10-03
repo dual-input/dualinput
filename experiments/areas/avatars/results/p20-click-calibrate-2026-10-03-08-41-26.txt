@@ -1,0 +1,13 @@
+p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere where the pilot presses, holds, and drags, on MSFS 2024
+2026-10-03T08:41:26Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Stopped by an error in its report, after the three passes of clicks on yellow balls and before free clicking: it read fitK's k as own.k, where fitK returns own.params.k.
+The lines from "pass" on are its report, replayed from this run's .ndjson with lib/pick.mjs as fixed in the next commit.
+
+  PA24_250_INTERIOR_LOD00.gltf: 650,660 triangles
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.000014 kt
+  the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point
+  at 0.009m forward, -0.304m right, 0.539m up of the reference point, fov 41.1°
+  first: fov 41.1°, window 2401×1360, 10 clicks; the measured ray is off by RMS 0.11° (KNOB_CabinVent1 0.1cm, NoiseCancellingSwitch 0.1cm, knob_nav_instr_light 0.1cm, Switch_Light_Strobe 0.0cm, HSI_Course_Knob 0.1cm, INSTRUMENT_altitude_knob 0.1cm, BUTTON_EDM730_Step 0.1cm, GAUGE_ADF_Knob 0.0cm, KNOB_CabinVent2 0.2cm, SWITCH_Light_Red 0.1cm); fitted alone, k 1.000
+  zoomed: fov 19.8°, window 2401×1360, 4 clicks; the measured ray is off by RMS 0.14° (KNOB_CabinVent1 0.2cm, INSTRUMENT_altitude_knob 0.2cm, GAUGE_ADF_Knob 0.2cm, KNOB_CabinVent2 0.2cm); fitted alone, k 1.000
+  resized: fov 55.9°, window 5120×1440, 4 clicks; the measured ray is off by RMS 0.14° (KNOB_CabinVent1 0.2cm, INSTRUMENT_altitude_knob 0.2cm, GAUGE_ADF_Knob 0.1cm, KNOB_CabinVent2 0.1cm); fitted alone, k 0.996
+  fitted to all 18 clicks: mirror +, yaw +, pitch −, fov as the view's height times 1.000, yaw bias 0.00°, pitch bias -0.05°, RMS 0.12°; the next best signs, mirror −, yaw +, pitch −, fov as the view's height times 0.160, yaw bias 8.50°, pitch bias -0.90°, RMS 24.64°; p19's ray RMS 12.69°

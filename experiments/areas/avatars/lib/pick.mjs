@@ -16,8 +16,8 @@
  *   mirror     +1 when the screen's right is the model's -x
  *   yaw        +1 or -1, the sign that turns the camera's yaw to the right
  *   pitch      +1 or -1, the sign that turns its pitch to up
- *   k          the half-width of the view is k * tan(fov / 2), so k = 1 reads
- *              the fov as horizontal, and k = aspect reads it as vertical
+ *   vertical   true to read the fov as the view's height, false as its width
+ *   k          the half-height (or half-width) of the view is k * tan(fov / 2)
  *   yawBias, pitchBias   degrees added after the signs
  *
  * Roll is left out: it stays near 0 unless the pilot leans with a tracker (p07).
@@ -25,12 +25,18 @@
 
 const RAD = Math.PI / 180
 
-// p19's clicks named controls best with these (record/areas/avatars/log.md).
-export const P19 = { mirror: 1, yaw: 1, pitch: -1, k: 1, yawBias: 0, pitchBias: 0 }
+// p20 measured this on the A2A Comanche: clicks at two zooms and two window
+// shapes land within 2mm of their targets, with nothing fitted
+// (record/areas/avatars/log.md).
+export const MEASURED = { mirror: 1, yaw: 1, pitch: -1, vertical: true, k: 1, yawBias: 0, pitchBias: 0 }
+
+// p19's ray, which read the fov as the view's width.
+export const P19 = { mirror: 1, yaw: 1, pitch: -1, vertical: false, k: 1, yawBias: 0, pitchBias: 0 }
 
 export function rayThrough(cam, mouse, h) {
-  const th = Math.tan(cam.fov / 2) * h.k
-  const tv = th / (mouse.width / mouse.height)
+  const aspect = mouse.width / mouse.height
+  const tv = h.vertical ? Math.tan(cam.fov / 2) * h.k : (Math.tan(cam.fov / 2) * h.k) / aspect
+  const th = tv * aspect
   let f = 1, r = h.mirror * mouse.x * th, u = mouse.y * tv
   const p = (h.pitch * cam.pitch + h.pitchBias) * RAD
   ;[f, u] = [f * Math.cos(p) - u * Math.sin(p), f * Math.sin(p) + u * Math.cos(p)]
@@ -60,10 +66,10 @@ function search(samples, base, ks, pbs, ybs) {
 }
 const steps = (from, to, step) => Array.from({ length: Math.round((to - from) / step) + 1 }, (_, i) => from + i * step)
 
-// k alone, with the signs and biases of base: how the view's width relates to
-// CameraGet's fov in one set of clicks, to compare across zooms and windows.
+// k alone, with the rest of base: how the view's size relates to CameraGet's
+// fov in one set of clicks, to compare across zooms and windows.
 export function fitK(samples, base) {
-  return search(samples, base, steps(0.3, 3.5, 0.002), [base.pitchBias], [base.yawBias])
+  return search(samples, base, steps(0.2, 3.5, 0.002), [base.pitchBias], [base.yawBias])
 }
 export const rmsOf = rms
 
@@ -72,9 +78,10 @@ export const rmsOf = rms
 export function fitProjection(samples) {
   const tried = []
   for (const mirror of [1, -1]) for (const yaw of [1, -1]) for (const pitch of [1, -1]) {
-    const coarse = search(samples, { mirror, yaw, pitch }, steps(0.4, 2.4, 0.04), steps(-8, 8, 0.5), steps(-8, 8, 0.5))
+    const base = { mirror, yaw, pitch, vertical: true }
+    const coarse = search(samples, base, steps(0.2, 2.2, 0.04), steps(-8, 8, 0.5), steps(-8, 8, 0.5))
     const p = coarse.params
-    tried.push(search(samples, { mirror, yaw, pitch }, steps(p.k - 0.04, p.k + 0.04, 0.004), steps(p.pitchBias - 0.5, p.pitchBias + 0.5, 0.05), steps(p.yawBias - 0.5, p.yawBias + 0.5, 0.05)))
+    tried.push(search(samples, base, steps(p.k - 0.04, p.k + 0.04, 0.004), steps(p.pitchBias - 0.5, p.pitchBias + 0.5, 0.05), steps(p.yawBias - 0.5, p.yawBias + 0.5, 0.05)))
   }
   tried.sort((a, b) => a.rms - b.rms)
   const best = tried[0]

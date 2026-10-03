@@ -9,11 +9,13 @@
  * Here a small yellow ball marks a known spot, the pilot clicks its center,
  * and the ray's signs, field of view, and any angle offset are fitted to those
  * clicks (lib/pick.mjs). Two shorter passes, one zoomed and one in a resized
- * window, test whether that fit holds for any field of view and window shape,
+ * window, test whether the ray holds for any field of view and window shape,
  * using CameraGet's field of view and the window's size as they are at each
- * click. The camera's position is taken as SimConnect_CameraGet gives it in
- * the SIMOBJECT referential, which matched the Comanche's eyepoint within 4mm
- * in p19's run.
+ * click. The first run of p20 settled it: CameraGet's fov is the view's
+ * height, with no offset (MEASURED in lib/pick.mjs), so the balls are
+ * optional and only check that ray. The camera's position is taken as
+ * SimConnect_CameraGet gives it in the SIMOBJECT referential, which matched
+ * the Comanche's eyepoint within 4mm in p19's run.
  *
  * Then the sphere goes where the ray meets the model, with no guess at which
  * control that is. While the button is held, it glides along the plane of the
@@ -24,6 +26,8 @@
  *
  * In the A2A Comanche, parked, the sim in front:
  *
+ *   balls     Page Down for the yellow balls below, Page Up to go straight to
+ *             clicking.
  *   targets   A yellow ball sits on a knob, a switch, or a vent, 10 in turn,
  *             from the left wall across the panel to the right wall and the
  *             overhead. Click the center of each ball; Page Up skips one you
@@ -57,7 +61,7 @@ import { findPackage } from "../aircraft/lib/flights.mjs"
 import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "../aircraft/lib/sim.mjs"
 import { RAD, toBody, wrap } from "./lib/pose.mjs"
-import { P19, fitK, fitProjection, rayThrough, rmsOf } from "./lib/pick.mjs"
+import { MEASURED, fitK, fitProjection, rayThrough, rmsOf } from "./lib/pick.mjs"
 import { cast, crossPlane, loadCockpit } from "./lib/raycast.mjs"
 
 const PACKAGE = "a2a-aircraft-pa24"
@@ -105,7 +109,7 @@ const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)]
 const sign = (x) => (x > 0 ? "+" : "−")
 const deg = (rad) => (rad / RAD).toFixed(1)
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
-const label = (h) => `mirror ${sign(h.mirror)}, yaw ${sign(h.yaw)}, pitch ${sign(h.pitch)}, k ${h.k.toFixed(3)}, yaw bias ${h.yawBias.toFixed(2)}°, pitch bias ${h.pitchBias.toFixed(2)}°`
+const label = (h) => `mirror ${sign(h.mirror)}, yaw ${sign(h.yaw)}, pitch ${sign(h.pitch)}, fov as the view's ${h.vertical ? "height" : "width"} times ${h.k.toFixed(3)}, yaw bias ${h.yawBias.toFixed(2)}°, pitch bias ${h.pitchBias.toFixed(2)}°`
 
 async function readModule(names) {
   const v = await sim.read(names.map(L), { timeoutMs: 2000 })
@@ -282,41 +286,35 @@ async function prepare(heading, instruction, changed, now) {
   }
 }
 
-console.log(`\n▶ Click the yellow balls\n  A small yellow ball sits on a spot in the cockpit, ${TARGETS.length} in turn. Click its center. Turn your view only as far as you need to see it. ${SKIP} skips one you can't see.`)
-const first = await targets("first", TARGETS)
-const fov0 = first[0]?.cam.fov ?? cam.fov
-const aspect0 = first.length ? first[0].mouse.width / first[0].mouse.height : (win ? win.width / win.height : 1)
-let zoomed = [], resized = []
-if (await prepare("Zoom", "Zoom the cockpit view in or out, the way you normally do.", () => Math.abs(cam.fov / fov0 - 1) > CHANGED, () => `the field of view is ${deg(cam.fov)}°, and was ${deg(fov0)}°`)) {
-  zoomed = await targets("zoomed", FEW)
-}
-if (await prepare("Resize", "Resize the sim window by dragging its edge, or go fullscreen. Move the mouse over the sim once it's done.", () => win && Math.abs(win.width / win.height / aspect0 - 1) > CHANGED, () => `the window is ${win ? `${win.width}×${win.height}` : "unknown"}, and its shape was ${aspect0.toFixed(3)}`)) {
-  resized = await targets("resized", FEW)
+let first = [], zoomed = [], resized = []
+if (await prepare("Yellow balls", "Click the balls to check the ray, or skip them and go straight to clicking with the ray p20 measured.", () => true, () => "")) {
+  console.log(`\n▶ Click the yellow balls\n  A small yellow ball sits on a spot in the cockpit, ${TARGETS.length} in turn. Click its center. Turn your view only as far as you need to see it. ${SKIP} skips one you can't see.`)
+  first = await targets("first", TARGETS)
+  const fov0 = first[0]?.cam.fov ?? cam.fov
+  const aspect0 = first.length ? first[0].mouse.width / first[0].mouse.height : (win ? win.width / win.height : 1)
+  if (await prepare("Zoom", "Zoom the cockpit view in or out, the way you normally do.", () => Math.abs(cam.fov / fov0 - 1) > CHANGED, () => `the field of view is ${deg(cam.fov)}°, and was ${deg(fov0)}°`)) {
+    zoomed = await targets("zoomed", FEW)
+  }
+  if (await prepare("Resize", "Resize the sim window by dragging its edge, or go fullscreen. Move the mouse over the sim once it's done.", () => win && Math.abs(win.width / win.height / aspect0 - 1) > CHANGED, () => `the window is ${win ? `${win.width}×${win.height}` : "unknown"}, and its shape was ${aspect0.toFixed(3)}`)) {
+    resized = await targets("resized", FEW)
+  }
 }
 
 // ------------------------------------------------ the fit
 
-let params = P19
+// The clicks below use the measured ray; the balls only check it.
+const params = MEASURED
 const all = [...first, ...zoomed, ...resized]
-if (first.length >= 4) {
-  const fit = fitProjection(first)
-  const cm = (s, h) => (dist(s.target, s.origin) * Math.tan(rmsOf([s], h) * RAD) * 100).toFixed(1)
-  note("fit", `first pass: ${label(fit.params)}, RMS ${fit.rms.toFixed(2)}° over ${plural(first.length, "click")}`, { fit: { params: fit.params, rms: fit.rms, errors: fit.errors, runnerUp: fit.runnerUp } })
-  note("fit", `per spot, off by: ${first.map((s) => `${s.id} ${cm(s, fit.params)}cm`).join(", ")}`)
-  note("fit", `the next best signs, ${label(fit.runnerUp.params)}, RMS ${fit.runnerUp.rms.toFixed(2)}°; p19's ray RMS ${fit.p19.rms.toFixed(2)}°`)
-  // If CameraGet's fov is the view's width, k stays put; if it's the height,
-  // k follows the window's shape.
-  const k0 = fit.params.k
-  for (const [name, set] of [["first", first], ["zoomed", zoomed], ["resized", resized]]) {
-    if (!set.length) continue
-    const aspect = set[0].mouse.width / set[0].mouse.height
-    const own = fitK(set, fit.params)
-    note("pass", `${name}: fov ${deg(set[0].cam.fov)}°, window ${set[0].mouse.width}×${set[0].mouse.height} (${aspect.toFixed(3)}), ${plural(set.length, "click")}; the first pass's fit is off by RMS ${rmsOf(set, fit.params).toFixed(2)}° (${set.map((s) => `${cm(s, fit.params)}cm`).join(", ")}); its own k ${own.k.toFixed(3)}, where a fov that's the view's width predicts ${k0.toFixed(3)} and one that's its height ${(k0 * aspect / aspect0).toFixed(3)}`)
-  }
-  params = all.length > first.length ? fitProjection(all).params : fit.params
-  if (all.length > first.length) note("fit", `all passes: ${label(params)}, RMS ${rmsOf(all, params).toFixed(2)}° over ${plural(all.length, "click")}`)
-} else {
-  note("fit", `${plural(first.length, "click")} on spots in the first pass: too few to fit, so the clicks use p19's ray`)
+const cm = (s, h) => (dist(s.target, s.origin) * Math.tan(rmsOf([s], h) * RAD) * 100).toFixed(1)
+for (const [name, set] of [["first", first], ["zoomed", zoomed], ["resized", resized]]) {
+  if (!set.length) continue
+  // k near 1 in every pass means the fov is the view's height at any zoom and window shape.
+  const own = fitK(set, MEASURED)
+  note("pass", `${name}: fov ${deg(set[0].cam.fov)}°, window ${set[0].mouse.width}×${set[0].mouse.height}, ${plural(set.length, "click")}; the measured ray is off by RMS ${rmsOf(set, MEASURED).toFixed(2)}° (${set.map((s) => `${s.id} ${cm(s, MEASURED)}cm`).join(", ")}); fitted alone, k ${own.params.k.toFixed(3)}`)
+}
+if (all.length >= 4) {
+  const fit = fitProjection(all)
+  note("fit", `fitted to all ${plural(all.length, "click")}: ${label(fit.params)}, RMS ${fit.rms.toFixed(2)}°; the next best signs, ${label(fit.runnerUp.params)}, RMS ${fit.runnerUp.rms.toFixed(2)}°; p19's ray RMS ${fit.p19.rms.toFixed(2)}°`, { fit: { params: fit.params, rms: fit.rms, errors: fit.errors, runnerUp: fit.runnerUp } })
 }
 
 // ------------------------------------------------ press, hold, drag

@@ -9,6 +9,41 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: The ray through the cursor needs no calibration: CameraGet's field of view is the view's height, and clicks land within 2mm at any zoom and window shape
+
+**Asked:** what turns a click into the ray from the pilot's eye, for any pilot: which signs, whether `SimConnect_CameraGet`'s field of view is the view's width or its height, and whether any offset is added?
+p19 couldn't settle it, because it never knew what the pilot meant to click ([entry below](#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
+
+**Expected:** a fit to clicks on known spots would settle the signs and offsets, and only a second zoom and a second window shape could tell a width from a height.
+
+**Found:**
+
+- In the A2A Comanche, parked, a small yellow ball sat 3cm in front of a known spot, and the pilot clicked its center: 10 spots from the left wall across the panel to the right wall and the overhead, then 4 more zoomed in, then 4 more with the window resized to fullscreen.
+- One rule lands all 18 clicks within 2mm of their spots, with nothing fitted:
+  - `CameraGet`'s `fov`, in radians, is the view's height, and the view's width follows the window's shape
+  - the screen's right is the model's −x
+  - in the `SIMOBJECT` referential, a positive yaw (SimConnect.h's `Bank` field) turns the view right and a positive pitch turns it down
+  - no offset in either angle
+
+  | Pass | `fov` | Window | Off by, RMS |
+  | --- | --- | --- | --- |
+  | First | 41.1° | 2401×1360 | 0.11° |
+  | Zoomed | 19.8° | 2401×1360 | 0.14° |
+  | Fullscreen | 55.9° | 5120×1440 | 0.14° |
+
+- Fitted to all 18 clicks, every sign and offset came out as in that rule, with the scale at 1.000 and a pitch offset of −0.05°.
+  The best mirrored fit was off by 24.6°.
+- p19's ray took the `fov` as the view's width, and it was off by 12.7° on these clicks.
+  It pulled every ray toward the middle of the screen by the window's aspect ratio, so its error grew with a click's distance from the middle, which fits the pilot's report from p19.
+- The probe stopped at a bug in its report line before the free clicks, so the numbers above come from replaying its recorded clicks with the fixed code.
+
+**Changed:** the ray needs no calibration by anyone: the same rule, fed the live camera and window size, holds for any zoom and window shape.
+The hand can go where the pilot clicks to within the model's own accuracy.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p20's run](../../../experiments/areas/avatars/results/p20-click-calibrate-2026-10-03-08-41-26.txt), and the ray and fit in [lib/pick.mjs](../../../experiments/areas/avatars/lib/pick.mjs).
+
 ## 2026-10-03: A click's ray cast into the cockpit model finds the control the pilot clicked, with no names, but the run couldn't pin down the field of view
 
 **Asked:** without any input event or variable name, can the hand go where the pilot clicks: the ray from the camera through the cursor, cast into the aircraft's interior model, and the hit point taken as the hand's position?

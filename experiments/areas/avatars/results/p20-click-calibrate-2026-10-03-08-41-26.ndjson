@@ -1,0 +1,139 @@
+{"t":1791016886778,"s":0.034,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791016887095,"s":0.351,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791016887095,"s":0.351,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791016887095,"s":0.351,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791016887558,"s":0.814,"kind":"model","text":"PA24_250_INTERIOR_LOD00.gltf: 650,660 triangles"}
+{"t":1791016889095,"s":2.351,"kind":"setup","text":"aircraft TITLE \"A2A Piper PA-24-250 Comanche\", 0.000014 kt"}
+{"t":1791016890494,"s":3.75,"kind":"calibrate","text":"the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point","seatBody":{"PILOT_1":{"forward":0.12922909769475294,"right":-0.3032583781406821,"up":-0.12766967516462466},"PILOT_2":{"forward":0.12808839117591486,"right":0.3034808004839579,"up":-0.12341247301621061}},"offset":{"forward":0.007658744435333903,"right":0.0011112111716378992,"up":0.007458925909582373}}
+{"t":1791016890495,"s":3.751,"kind":"camera","text":"at 0.009m forward, -0.304m right, 0.539m up of the reference point, fov 41.1°","cam":{"t":1791016890494,"x":0.30415248817781637,"y":0.5389065216701054,"z":0.00904352658000715,"pitch":26.575374603271484,"yaw":1.6247375011444092,"roll":-0.02797645516693592,"fov":0.7164620757102966}}
+{"t":1791016890528,"s":3.784,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 68534275","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791016890529,"s":3.785,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 68534275","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791016890529,"s":3.785,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 68534275","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791016890529,"s":3.785,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 68534275","object":0,"values":[68534275]}
+{"t":1791016890529,"s":3.785,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791016890529,"s":3.785,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 5","object":0,"values":[5]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 0","object":0,"values":[0]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.479229","object":0,"values":[0.4792290976947529]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.303258","object":0,"values":[-0.3032583781406821]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.12233","object":0,"values":[0.12233032483537534]}
+{"t":1791016890530,"s":3.786,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791016890903,"s":4.159,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.476597","object":0,"values":[0.47659713547638904]}
+{"t":1791016890903,"s":4.159,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.513029","object":0,"values":[-0.5130286271052502]}
+{"t":1791016890903,"s":4.159,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.162237","object":0,"values":[0.16223707600841675]}
+{"t":1791016890903,"s":4.159,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016890903,"s":4.159,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016898537,"s":11.793,"kind":"target","text":"first, KNOB_CabinVent1: clicked at -0.5793, -0.5971 in 2401×1360, camera pitch 26.559904, yaw 1.624376, roll -0.027976, fov 41.1°","pass":"first","id":"KNOB_CabinVent1","cam":{"t":1791016898527,"x":0.304154657734486,"y":0.5389656688421202,"z":0.008832261066759023,"pitch":26.559904098510742,"yaw":1.6243761777877808,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":-0.5793,"y":-0.5971,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016898537},"origin":[0.30526586890612395,0.5315067429325377,0.00117351663142512],"target":[0.5141398382768881,0.1547781500988344,0.46893839104105517]}
+{"t":1791016898538,"s":11.794,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.565757","object":0,"values":[0.565756877446961]}
+{"t":1791016898538,"s":11.794,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.482206","object":0,"values":[-0.4822063532746531]}
+{"t":1791016898538,"s":11.794,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.006085","object":0,"values":[-0.0060848522625507225]}
+{"t":1791016898538,"s":11.794,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016898538,"s":11.794,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016900794,"s":14.05,"kind":"target","text":"first, NoiseCancellingSwitch: clicked at -0.4002, -0.8735 in 2401×1360, camera pitch 26.561869, yaw 1.624617, roll -0.027976, fov 41.1°","pass":"first","id":"NoiseCancellingSwitch","cam":{"t":1791016900794,"x":0.30415404951003,"y":0.5389406830412993,"z":0.008862931287450582,"pitch":26.56186866760254,"yaw":1.624617099761963,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":-0.4002,"y":-0.8735,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016900794},"origin":[0.3052652606816679,0.5314817571317169,0.0012041868521166788],"target":[0.483317564446291,-0.013543778172133095,0.5580981330116271]}
+{"t":1791016900795,"s":14.051,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.663731","object":0,"values":[0.6637310167768407]}
+{"t":1791016900795,"s":14.051,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.384937","object":0,"values":[-0.3849371176495544]}
+{"t":1791016900795,"s":14.051,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.050313","object":0,"values":[0.05031253860710588]}
+{"t":1791016900795,"s":14.051,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016900795,"s":14.051,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016903962,"s":17.218,"kind":"target","text":"first, knob_nav_instr_light: clicked at -0.1878, -0.4809 in 2401×1360, camera pitch 26.605915, yaw 1.624738, roll -0.027976, fov 41.1°","pass":"first","id":"knob_nav_instr_light","cam":{"t":1791016903961,"x":0.3041415394557714,"y":0.5387355884821725,"z":0.009381349947998802,"pitch":26.605915069580078,"yaw":1.6247375011444092,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":-0.1878,"y":-0.4809,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016903962},"origin":[0.3052527506274093,0.5312766625725901,0.0017226055126648987],"target":[0.3860483288211923,0.04285361269752351,0.6560722723415068]}
+{"t":1791016903962,"s":17.218,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.662631","object":0,"values":[0.6626311500337525]}
+{"t":1791016903962,"s":17.218,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.311614","object":0,"values":[-0.3116139416724292]}
+{"t":1791016903962,"s":17.218,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.05042","object":0,"values":[0.05041997171192826]}
+{"t":1791016903962,"s":17.218,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016903962,"s":17.218,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016906106,"s":19.362,"kind":"target","text":"first, Switch_Light_Strobe: clicked at -0.0496, -0.4809 in 2401×1360, camera pitch 26.605915, yaw 1.624738, roll -0.027976, fov 41.1°","pass":"first","id":"Switch_Light_Strobe","cam":{"t":1791016906094,"x":0.3041415239139033,"y":0.5387355608288293,"z":0.009381349671738537,"pitch":26.605915069580078,"yaw":1.6247375011444092,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":-0.0496,"y":-0.4809,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016906106},"origin":[0.3052527350855412,0.5312766349192469,0.001722605236404634],"target":[0.31272515284406704,0.04296104580234589,0.6549724055984186]}
+{"t":1791016906106,"s":19.362,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.640891","object":0,"values":[0.6408910201357316]}
+{"t":1791016906106,"s":19.362,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.230989","object":0,"values":[-0.23098947587321103]}
+{"t":1791016906106,"s":19.362,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.227645","object":0,"values":[0.22764508060571687]}
+{"t":1791016906106,"s":19.362,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016906106,"s":19.362,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016908109,"s":21.365,"kind":"target","text":"first, HSI_Course_Knob: clicked at 0.1204, 0.025 in 2401×1360, camera pitch 26.605925, yaw 1.624738, roll -0.027976, fov 41.1°","pass":"first","id":"HSI_Course_Knob","cam":{"t":1791016908094,"x":0.3041415489808418,"y":0.5387356053747365,"z":0.009381349849243076,"pitch":26.605924606323242,"yaw":1.6247375011444092,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":0.1204,"y":0.025,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016908109},"origin":[0.3052527601524797,0.5312766794651541,0.0017226054139091729],"target":[0.23210068704484893,0.2201861546961345,0.6332322757003978]}
+{"t":1791016908110,"s":21.366,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.650207","object":0,"values":[0.6502073498843556]}
+{"t":1791016908110,"s":21.366,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.13417","object":0,"values":[-0.13416995005514487]}
+{"t":1791016908110,"s":21.366,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.313124","object":0,"values":[0.3131235846410696]}
+{"t":1791016908110,"s":21.366,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016908110,"s":21.366,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016910131,"s":23.387,"kind":"target","text":"first, INSTRUMENT_altitude_knob: clicked at 0.3394, 0.3471 in 2401×1360, camera pitch 26.605915, yaw 1.624738, roll -0.027976, fov 41.1°","pass":"first","id":"INSTRUMENT_altitude_knob","cam":{"t":1791016910127,"x":0.30414150781924043,"y":0.5387355328159986,"z":0.009381348317704513,"pitch":26.605915069580078,"yaw":1.6247375011444092,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":0.3394,"y":0.3471,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016910131},"origin":[0.30525271899087836,0.5312766069064162,0.0017226038823706102],"target":[0.13528116122678277,0.30566465873148724,0.6425486054490217]}
+{"t":1791016910131,"s":23.387,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.633922","object":0,"values":[0.6339221615377189]}
+{"t":1791016910131,"s":23.387,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.031139","object":0,"values":[-0.031138901026415318]}
+{"t":1791016910131,"s":23.387,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.282998","object":0,"values":[0.2829975821942043]}
+{"t":1791016910131,"s":23.387,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016910131,"s":23.387,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016911863,"s":25.119,"kind":"target","text":"first, BUTTON_EDM730_Step: clicked at 0.5702, 0.2147 in 2401×1360, camera pitch 26.605925, yaw 1.624738, roll -0.027976, fov 41.1°","pass":"first","id":"BUTTON_EDM730_Step","cam":{"t":1791016911861,"x":0.3041415596435057,"y":0.5387356245478668,"z":0.009381350828338408,"pitch":26.605924606323242,"yaw":1.6247375011444092,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":0.5702,"y":0.2147,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016911863},"origin":[0.30525277081514357,0.5312766986382844,0.0017226063930045055],"target":[0.03225011219805322,0.27553865628462193,0.626263417102385]}
+{"t":1791016911864,"s":25.12,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.656651","object":0,"values":[0.6566514220165859]}
+{"t":1791016911864,"s":25.12,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.250261","object":0,"values":[0.2502613909397333]}
+{"t":1791016911864,"s":25.12,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.310228","object":0,"values":[0.3102282268551084]}
+{"t":1791016911864,"s":25.12,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016911864,"s":25.12,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016916877,"s":30.133,"kind":"target","text":"first, GAUGE_ADF_Knob: clicked at 0.8234, 0.4206 in 2401×1360, camera pitch 26.062244, yaw 11.068345, roll -0.027976, fov 41.1°","pass":"first","id":"GAUGE_ADF_Knob","cam":{"t":1791016916861,"x":0.30119885085601444,"y":0.538909816417221,"z":0.009167457259150857,"pitch":26.062244415283203,"yaw":11.068345069885254,"roll":-0.02797645516693592,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":0.8234,"y":0.4206,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016916877},"origin":[0.3023100620276523,0.5314508905076386,0.0015087128238169545],"target":[-0.24915017976809545,0.30276930094552607,0.648992677581252]}
+{"t":1791016916878,"s":30.134,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.454653","object":0,"values":[0.45465334932678236]}
+{"t":1791016916878,"s":30.134,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.52402","object":0,"values":[0.5240199945328939]}
+{"t":1791016916878,"s":30.134,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.118726","object":0,"values":[0.11872566871016173]}
+{"t":1791016916878,"s":30.134,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016916878,"s":30.134,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016922968,"s":36.224,"kind":"target","text":"first, KNOB_CabinVent2: clicked at 0.9409, -0.1338 in 2401×1360, camera pitch 25.902918, yaw 26.074648, roll -0.019782, fov 41.1°","pass":"first","id":"KNOB_CabinVent2","cam":{"t":1791016922961,"x":0.29627409052613296,"y":0.5388994876462714,"z":0.00828407462662159,"pitch":25.902917861938477,"yaw":26.074647903442383,"roll":-0.01978234015405178,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":0.9409,"y":-0.1338,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016922967},"origin":[0.2973853016977709,0.531440561736689,0.0006253301912876874],"target":[-0.522908783361256,0.11126674280057935,0.4469946048914485]}
+{"t":1791016922968,"s":36.224,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.04985","object":0,"values":[0.04984988984661231]}
+{"t":1791016922968,"s":36.224,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.08709","object":0,"values":[-0.08708984478496218]}
+{"t":1791016922968,"s":36.224,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.686395","object":0,"values":[0.6863948171391238]}
+{"t":1791016922968,"s":36.224,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016922968,"s":36.224,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016939506,"s":52.762,"kind":"target","text":"first, SWITCH_Light_Red: clicked at 0.5194, 0.8044 in 2401×1360, camera pitch -17.383915, yaw 55.009064, roll -0.034264, fov 41.1°","pass":"first","id":"SWITCH_Light_Red","cam":{"t":1791016939494,"x":0.28968157812044193,"y":0.5539028074871144,"z":0.0020769732892634285,"pitch":-17.383914947509766,"yaw":55.009063720703125,"roll":-0.03426402062177658,"fov":0.7164620757102966},"mouse":{"kind":"left","delta":0,"x":0.5194,"y":0.8044,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016939506},"origin":[0.29079278929207986,0.546443881577532,-0.005581771146070474],"target":[0.08820105595660008,0.6789358912295413,0.042191145411278407]}
+{"t":1791016939507,"s":52.763,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 5","object":0,"values":[5]}
+{"t":1791016939507,"s":52.763,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.479229","object":0,"values":[0.4792290976947529]}
+{"t":1791016939507,"s":52.763,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.303258","object":0,"values":[-0.3032583781406821]}
+{"t":1791016939507,"s":52.763,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.12233","object":0,"values":[0.12233032483537534]}
+{"t":1791016939507,"s":52.763,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 0","object":0,"values":[0]}
+{"t":1791016957470,"s":70.726,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.476674","object":0,"values":[0.47667432622277195]}
+{"t":1791016957470,"s":70.726,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.51293","object":0,"values":[-0.5129300839044993]}
+{"t":1791016957470,"s":70.726,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.162278","object":0,"values":[0.16227772362701004]}
+{"t":1791016957470,"s":70.726,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016957470,"s":70.726,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016963727,"s":76.983,"kind":"target","text":"zoomed, KNOB_CabinVent1: clicked at -0.7668, 0.1235 in 2401×1360, camera pitch 38.567181, yaw -7.171159, roll 0, fov 19.8°","pass":"zoomed","id":"KNOB_CabinVent1","cam":{"t":1791016963694,"x":0.3067520988040871,"y":0.5353283116628057,"z":0.006964603102142974,"pitch":38.56718063354492,"yaw":-7.171159267425537,"roll":0,"fov":0.34498587250709534},"mouse":{"kind":"left","delta":0,"x":-0.7668,"y":0.1235,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016963727},"origin":[0.307863309975725,0.5278693857532233,-0.0006941413331909285],"target":[0.5140412950761373,0.15481879771742765,0.469015581787438]}
+{"t":1791016963727,"s":76.983,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.650174","object":0,"values":[0.6501743789611643]}
+{"t":1791016963727,"s":76.983,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.134259","object":0,"values":[-0.13425940479488935]}
+{"t":1791016963727,"s":76.983,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.312961","object":0,"values":[0.3129606980998763]}
+{"t":1791016963727,"s":76.983,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016963727,"s":76.983,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016967165,"s":80.421,"kind":"target","text":"zoomed, INSTRUMENT_altitude_knob: clicked at 0.2037, -0.1824 in 2401×1360, camera pitch 17.150681, yaw 10.823547, roll 0, fov 19.8°","pass":"zoomed","id":"INSTRUMENT_altitude_knob","cam":{"t":1791016967161,"x":0.3012112819367043,"y":0.5418991849337634,"z":0.010220039104575834,"pitch":17.150680541992188,"yaw":10.82354736328125,"roll":0,"fov":0.34498587250709534},"mouse":{"kind":"left","delta":0,"x":0.2037,"y":-0.1824,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016967165},"origin":[0.30232249310834225,0.534440259024181,0.0025612946692419314],"target":[0.13537061596652725,0.30550177219029395,0.6425156345258304]}
+{"t":1791016967166,"s":80.422,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.65664","object":0,"values":[0.6566397088906343]}
+{"t":1791016967166,"s":80.422,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.250324","object":0,"values":[0.25032422120899]}
+{"t":1791016967166,"s":80.422,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.310346","object":0,"values":[0.31034632610385554]}
+{"t":1791016967166,"s":80.422,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016967166,"s":80.422,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016971584,"s":84.84,"kind":"target","text":"zoomed, GAUGE_ADF_Knob: clicked at 0.4819, 0.6088 in 2401×1360, camera pitch 21.274611, yaw 31.361706, roll 0, fov 19.8°","pass":"zoomed","id":"GAUGE_ADF_Knob","cam":{"t":1791016971561,"x":0.2951005472512388,"y":0.5405401424380127,"z":0.007363498209549041,"pitch":21.27461051940918,"yaw":31.361705780029297,"roll":0,"fov":0.34498587250709534},"mouse":{"kind":"left","delta":0,"x":0.4819,"y":0.6088,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016971584},"origin":[0.2962117584228767,0.5330812165284303,-0.00029524622578486204],"target":[-0.24921301003735213,0.3028874001942732,0.6489809644553004]}
+{"t":1791016971585,"s":84.841,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.45456","object":0,"values":[0.45455965070376536]}
+{"t":1791016971585,"s":84.841,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.524115","object":0,"values":[0.5241150696739609]}
+{"t":1791016971585,"s":84.841,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.118812","object":0,"values":[0.11881202012257384]}
+{"t":1791016971585,"s":84.841,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016971585,"s":84.841,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791016975443,"s":88.699,"kind":"target","text":"zoomed, KNOB_CabinVent2: clicked at 0.581, 0.775 in 2401×1360, camera pitch 32.156448, yaw 49.935322, roll 0, fov 19.8°","pass":"zoomed","id":"KNOB_CabinVent2","cam":{"t":1791016975428,"x":0.29184164140953894,"y":0.537152234242583,"z":0.0023476350601155382,"pitch":32.15644836425781,"yaw":49.93532180786133,"roll":0,"fov":0.34498587250709534},"mouse":{"kind":"left","delta":0,"x":0.581,"y":0.775,"width":2401,"height":1360,"foreground":true,"dx":0,"dy":0,"t":1791016975443},"origin":[0.29295285258117687,0.5296933083330005,-0.005311109375218365],"target":[-0.523003858502323,0.11135309421299147,0.44690090626843143]}
+{"t":1791016975443,"s":88.699,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 5","object":0,"values":[5]}
+{"t":1791016975444,"s":88.7,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.479229","object":0,"values":[0.4792290976947529]}
+{"t":1791016975444,"s":88.7,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.303258","object":0,"values":[-0.3032583781406821]}
+{"t":1791016975444,"s":88.7,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.12233","object":0,"values":[0.12233032483537534]}
+{"t":1791016975444,"s":88.7,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 0","object":0,"values":[0]}
+{"t":1791016998369,"s":111.625,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.476635","object":0,"values":[0.47663514255331185]}
+{"t":1791016998369,"s":111.625,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.512999","object":0,"values":[-0.5129992072216227]}
+{"t":1791016998369,"s":111.625,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.162268","object":0,"values":[0.16226783199013195]}
+{"t":1791016998369,"s":111.625,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791016998369,"s":111.625,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791017000986,"s":114.242,"kind":"target","text":"resized, KNOB_CabinVent1: clicked at -0.2242, -0.5292 in 5120×1440, camera pitch 24.154531, yaw 3.496984, roll -0.027976, fov 55.9°","pass":"resized","id":"KNOB_CabinVent1","cam":{"t":1791017000980,"x":0.30346722851380603,"y":0.5394481206396652,"z":0.010419632184612587,"pitch":24.154531478881836,"yaw":3.4969840049743652,"roll":-0.02797645516693592,"fov":0.9760643243789673},"mouse":{"kind":"left","delta":0,"x":-0.2242,"y":-0.5292,"width":5120,"height":1440,"foreground":true,"dx":0,"dy":0,"t":1791017000986},"origin":[0.30457843968544396,0.5319891947300828,0.0027608877492786843],"target":[0.5141104183932607,0.1548089060805496,0.4689763981179779]}
+{"t":1791017000986,"s":114.242,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.650217","object":0,"values":[0.6502168088264438]}
+{"t":1791017000986,"s":114.242,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.134151","object":0,"values":[-0.13415103422554955]}
+{"t":1791017000986,"s":114.242,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.313165","object":0,"values":[0.31316459238997196]}
+{"t":1791017000986,"s":114.242,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791017000986,"s":114.242,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791017002403,"s":115.659,"kind":"target","text":"resized, INSTRUMENT_altitude_knob: clicked at 0.1, 0.1667 in 5120×1440, camera pitch 24.154524, yaw 3.496984, roll -0.027976, fov 55.9°","pass":"resized","id":"INSTRUMENT_altitude_knob","cam":{"t":1791017002380,"x":0.3034672413218988,"y":0.539448144111248,"z":0.010419635868106486,"pitch":24.154523849487305,"yaw":3.4969840049743652,"roll":-0.02797645516693592,"fov":0.9760643243789673},"mouse":{"kind":"left","delta":0,"x":0.1,"y":0.1667,"width":5120,"height":1440,"foreground":true,"dx":0,"dy":0,"t":1791017002403},"origin":[0.30457845249353666,0.5319892182016656,0.002760891432772583],"target":[0.13526224539718745,0.3057056664803896,0.64255806439111]}
+{"t":1791017002403,"s":115.659,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.656661","object":0,"values":[0.6566614462151796]}
+{"t":1791017002404,"s":115.66,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.250263","object":0,"values":[0.25026289952322195]}
+{"t":1791017002404,"s":115.66,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.31026","object":0,"values":[0.3102602090744075]}
+{"t":1791017002404,"s":115.66,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791017002404,"s":115.66,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791017003811,"s":117.067,"kind":"target","text":"resized, GAUGE_ADF_Knob: clicked at 0.3824, 0.1819 in 5120×1440, camera pitch 24.154524, yaw 3.496928, roll -0.027976, fov 55.9°","pass":"resized","id":"GAUGE_ADF_Knob","cam":{"t":1791017003780,"x":0.30346720690047335,"y":0.5394480831062844,"z":0.010419634567803732,"pitch":24.154523849487305,"yaw":3.4969282150268555,"roll":-0.02797645516693592,"fov":0.9760643243789673},"mouse":{"kind":"left","delta":0,"x":0.3824,"y":0.1819,"width":5120,"height":1440,"foreground":true,"dx":0,"dy":0,"t":1791017003811},"origin":[0.3045784180721113,0.531989157196702,0.0027608901324698287],"target":[-0.24915168835158405,0.30280128316482513,0.6490027017798458]}
+{"t":1791017003812,"s":117.068,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.454707","object":0,"values":[0.4547072502767232]}
+{"t":1791017003812,"s":117.068,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.52399","object":0,"values":[0.5239898867502532]}
+{"t":1791017003812,"s":117.068,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.118724","object":0,"values":[0.11872352974410465]}
+{"t":1791017003812,"s":117.068,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 3","object":0,"values":[3]}
+{"t":1791017003812,"s":117.068,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 0","object":0,"values":[0]}
+{"t":1791017005501,"s":118.757,"kind":"target","text":"resized, KNOB_CabinVent2: clicked at 0.6801, -0.5458 in 5120×1440, camera pitch 24.154524, yaw 3.496984, roll -0.027976, fov 55.9°","pass":"resized","id":"KNOB_CabinVent2","cam":{"t":1791017005480,"x":0.30346718894146796,"y":0.5394480508526698,"z":0.010419634315087162,"pitch":24.154523849487305,"yaw":3.4969840049743652,"roll":-0.02797645516693592,"fov":0.9760643243789673},"mouse":{"kind":"left","delta":0,"x":0.6801,"y":-0.5458,"width":5120,"height":1440,"foreground":true,"dx":0,"dy":0,"t":1791017005501},"origin":[0.3045784001131059,0.5319891249430874,0.002760889879753259],"target":[-0.5228786755786152,0.11126460383452227,0.44704850584138933]}

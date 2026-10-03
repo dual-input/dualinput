@@ -39,8 +39,10 @@
  *   resized   Resize the sim window, or go fullscreen, and press Page Down,
  *             then click 4 more balls. Page Up skips the pass.
  *   clicks    Click, hold, and drag anywhere: switches, knobs, levers, the
- *             yoke, the panel itself. The console names the node each press
- *             hit. Page Up ends; it ends by itself after 20 minutes.
+ *             yoke, the panel itself. Right-click too, and turn the view with
+ *             the right button held: only a quick, still right press counts as
+ *             a click. The console names the node each press hit. Page Up
+ *             ends; it ends by itself after 20 minutes.
  *
  *   node experiments/areas/avatars/p20-click-calibrate.mjs
  *
@@ -132,7 +134,7 @@ async function finish(why) {
   if (stopMouse) stopMouse()
   if (holds.length || nodes.size) {
     const count = (k) => holds.filter((h) => h.type === k)
-    note("presses", `${plural(holds.length, "press", "presses")} in the sim (${count("tap").length} taps, ${count("hold").length} holds, ${count("drag").length} drags), ${plural(outside, "click")} outside it; nodes hit: ${[...nodes].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
+    note("presses", `left: ${count("tap").length} taps, ${count("hold").length} holds, ${count("drag").length} drags; right: ${count("right tap").length} clicks, ${count("look").length} held or moved to turn the view; ${plural(outside, "click")} outside the sim; nodes hit: ${[...nodes].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
     for (const h of count("drag").slice(0, 12)) note("drag", `on ${h.node}: ${(h.ms / 1000).toFixed(1)}s, the cursor moved up to ${h.cursorPx.toFixed(0)}px from where it pressed and the mouse ${h.raw.toFixed(0)} counts in all; the hand ended ${(h.travel * 100).toFixed(1)}cm from where it started on the plane`)
   }
   setModule({ MODE: 0, OBJECT: 0, LEAD: 0 })
@@ -330,26 +332,58 @@ if (all.length >= 4) {
 // ------------------------------------------------ press, hold, drag
 
 let grab = null
+let rightPress = null
 let lingerUntil = 0
 let lastWheel = 0
 const pixels = (m, a) => Math.hypot((m.x - a.x) * m.width / 2, (m.y - a.y) * m.height / 2)
+
+// Casts a press's ray with the camera as it was at the press, logs and prints
+// the node it hit, and puts the hand there.
+function pressAt(m, c, label) {
+  const origin = camModel(c)
+  const dir = rayThrough(c, m, params)
+  const hit = cast(cockpit, origin, dir)
+  const node = hit?.chain[0] ?? "nothing"
+  nodes.set(node, (nodes.get(node) ?? 0) + 1)
+  rec.log(m.kind === "wheel" ? "wheel" : "press", `${m.kind} at ${m.x}, ${m.y}: ${node}${hit ? ` at ${hit.distance.toFixed(3)}m` : ""}`, { mouse: m, cam: c, origin, dir, hit: hit && { point: hit.point, normal: hit.normal, distance: hit.distance, chain: hit.chain } })
+  console.log(`  ${label}: ${node}`)
+  if (hit) touch(hit.point, hit.normal)
+  return hit
+}
+
 onMouse = (m) => {
   const c = cam
   if (!c || m.t - c.t > 500) return
   const origin = camModel(c)
-  if (m.kind === "left" || m.kind === "wheel") {
-    if (m.kind === "wheel" && m.t - lastWheel < 600) { lastWheel = m.t; lingerUntil = Date.now() + LINGER_MS.wheel; return }
-    if (m.kind === "wheel") lastWheel = m.t
-    const dir = rayThrough(c, m, params)
-    const hit = cast(cockpit, origin, dir)
-    const node = hit?.chain[0] ?? "nothing"
-    nodes.set(node, (nodes.get(node) ?? 0) + 1)
-    rec.log(m.kind === "left" ? "press" : "wheel", `${m.kind} at ${m.x}, ${m.y}: ${node}${hit ? ` at ${hit.distance.toFixed(3)}m` : ""}`, { mouse: m, cam: c, origin, dir, hit: hit && { point: hit.point, normal: hit.normal, distance: hit.distance, chain: hit.chain } })
-    console.log(`  ${m.kind === "left" ? "press" : "wheel"}: ${node}`)
+  // The right button both clicks a control and, held, turns the view, so a
+  // right press waits for its release: only a quick, still one is a click.
+  if (m.kind === "right") { rightPress = { m, c }; return }
+  if (m.kind === "rightup") {
+    const p = rightPress
+    rightPress = null
+    if (!p) return
+    const ms = m.t - p.m.t
+    const px = pixels(m, p.m)
+    if (ms >= TAP_MS || px >= DRAG_PX || m.delta >= DRAG_COUNTS) {
+      holds.push({ type: "look", ms, cursorPx: px, raw: m.delta })
+      rec.log("look", `right held ${ms}ms, the cursor moved ${px.toFixed(0)}px and the mouse ${m.delta} counts: the view, not a click`, { ms, px, raw: m.delta })
+      return
+    }
+    const hit = pressAt(p.m, p.c, "right click")
+    holds.push({ type: "right tap", node: hit?.chain[0] ?? "nothing", ms, cursorPx: px, raw: m.delta })
+    if (hit) lingerUntil = Date.now() + LINGER_MS.release
+    return
+  }
+  if (m.kind === "wheel") {
+    if (m.t - lastWheel < 600) { lastWheel = m.t; lingerUntil = Date.now() + LINGER_MS.wheel; return }
+    lastWheel = m.t
+    if (pressAt(m, c, "wheel")) lingerUntil = Date.now() + LINGER_MS.wheel
+    return
+  }
+  if (m.kind === "left") {
+    const hit = pressAt(m, c, "press")
     if (!hit) return
-    touch(hit.point, hit.normal)
-    if (m.kind === "wheel") { lingerUntil = Date.now() + LINGER_MS.wheel; return }
-    grab = { t0: m.t, start: m, point: hit.point, normal: hit.normal, node, cursorPx: 0, raw: 0, path: [] }
+    grab = { t0: m.t, start: m, point: hit.point, normal: hit.normal, node: hit.chain[0] ?? "an unnamed node", cursorPx: 0, raw: 0, path: [] }
     lingerUntil = 0
     return
   }
@@ -380,7 +414,7 @@ const tick = setInterval(() => {
   if (!grab && lingerUntil && Date.now() > lingerUntil) { lingerUntil = 0; toRest() }
 }, 50)
 
-console.log(`\n▶ Click, hold, and drag anywhere in the cockpit\n  Switches, knobs, levers, the yoke, the panel itself. The sphere goes where you press, slides with a drag, and goes back to rest ${LINGER_MS.release / 1000}s after you let go. The console names the node each press hit. ${SKIP} ends.`)
+console.log(`\n▶ Click, hold, and drag anywhere in the cockpit\n  Switches, knobs, levers, the yoke, the panel itself, with either button; turn the view with the right button held as usual. The sphere goes where you press, slides with a drag, and goes back to rest ${LINGER_MS.release / 1000}s after you let go. A right click shows when you release it. The console names the node each press hit. ${SKIP} ends.`)
 beep(1000, 100)
 const why = await new Promise((resolve) => {
   onSkip = () => resolve("Page Up")

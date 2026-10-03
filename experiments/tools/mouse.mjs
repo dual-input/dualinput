@@ -5,15 +5,17 @@
  *   const stop = await startMouse((m) => …)
  *     m: { kind, delta, x, y, width, height, foreground, dx, dy, t }
  *
- * kind is "left", "leftup", "right", "middle", or "wheel"; "move", at most
- * every 16ms while the left button is held; or "size", when the sim window's
- * client area changes size, checked whenever the mouse does anything.
+ * kind is "left", "leftup", "right", "rightup", "middle", or "wheel"; "move",
+ * at most every 16ms while the left button is held; or "size", when the sim
+ * window's client area changes size, checked whenever the mouse does anything.
  * x and y are where the cursor was in the sim window's client area, from -1 to
  * 1, right and up; width and height are that area in pixels; foreground is
- * whether the sim had the focus. Wheel deltas are in Windows' units, 120 a
- * notch, positive away from the pilot. dx and dy are the mouse's own movement
- * since the last "move", in its counts, which keep coming when an application
- * holds the cursor still.
+ * whether the sim had the focus. For "wheel", delta is in Windows' units, 120
+ * a notch, positive away from the pilot; for "leftup" and "rightup", it's how
+ * far the mouse travelled while that button was down, in the mouse's own
+ * counts, which keep coming when an application holds the cursor still, as the
+ * sim may while the right button turns the view. dx and dy are the mouse's own
+ * movement since the last "move", in the same counts.
  *
  * It reads Raw Input with RIDEV_INPUTSINK, a copy Windows sends to any window
  * that registers for it, so it sits in nobody's input path: unlike a
@@ -48,7 +50,8 @@ public class CrosscheckMouse : NativeWindow {
 
   IntPtr sim = IntPtr.Zero;
   uint simPid = 0;
-  bool leftDown = false;
+  bool leftDown = false, rightDown = false;
+  double leftTravel = 0, rightTravel = 0;
   int dx = 0, dy = 0, lastW = -1, lastH = -1;
   Stopwatch sinceMove = Stopwatch.StartNew();
 
@@ -100,10 +103,15 @@ public class CrosscheckMouse : NativeWindow {
           int moveFlags = (ushort)Marshal.ReadInt16(buf, (int)hs);
           int flags = (ushort)Marshal.ReadInt16(buf, (int)hs + 4);
           short data = Marshal.ReadInt16(buf, (int)hs + 6);
-          if ((moveFlags & 1) == 0) { dx += Marshal.ReadInt32(buf, (int)hs + 12); dy += Marshal.ReadInt32(buf, (int)hs + 16); }
-          if ((flags & 0x0001) != 0) { leftDown = true; dx = 0; dy = 0; Emit("left", 0); sinceMove.Restart(); }
-          if ((flags & 0x0002) != 0) { leftDown = false; Emit("leftup", 0); dx = 0; dy = 0; }
-          if ((flags & 0x0004) != 0) Emit("right", 0);
+          int mx = 0, my = 0;
+          if ((moveFlags & 1) == 0) { mx = Marshal.ReadInt32(buf, (int)hs + 12); my = Marshal.ReadInt32(buf, (int)hs + 16); dx += mx; dy += my; }
+          double step = Math.Sqrt((double)mx * mx + (double)my * my);
+          if (leftDown) leftTravel += step;
+          if (rightDown) rightTravel += step;
+          if ((flags & 0x0001) != 0) { leftDown = true; leftTravel = 0; dx = 0; dy = 0; Emit("left", 0); sinceMove.Restart(); }
+          if ((flags & 0x0002) != 0) { leftDown = false; Emit("leftup", (int)Math.Round(leftTravel)); dx = 0; dy = 0; }
+          if ((flags & 0x0004) != 0) { rightDown = true; rightTravel = 0; Emit("right", 0); }
+          if ((flags & 0x0008) != 0) { rightDown = false; Emit("rightup", (int)Math.Round(rightTravel)); }
           if ((flags & 0x0010) != 0) Emit("middle", 0);
           if ((flags & 0x0400) != 0) Emit("wheel", data);
           if (leftDown && sinceMove.ElapsedMilliseconds >= 16) { Emit("move", 0); dx = 0; dy = 0; sinceMove.Restart(); }

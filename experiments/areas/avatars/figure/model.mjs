@@ -17,24 +17,35 @@
  *   move     one node's translation along one axis, two keys
  *   turn     one node's rotation about one axis, a key every ROT_STEP degrees,
  *            because glTF interpolates a rotation the short way round
- *   stretch  a limb's length: its stick's scale along z, and its hand or
- *            foot's translation along z, both in one animation
+ *   stretch  a length: a stick's scale along z, and the translation along z
+ *            of what hangs off its end, both in one animation
  *
- * A limb points along +z at zero yaw and pitch, and its stick is a unit
+ * A limb points along +z at zero yaw and pitch, and a stick is a unit
  * cylinder, so yaw, pitch, and length put the hand or foot at any point while
  * the stick stays round.
+ *
+ * A bend is a curve of `segments` short sticks with a ball at each seam, and
+ * one animation turns every segment by an equal share of the bend about its
+ * own x axis. The roll before it, about the limb's own axis, picks which way
+ * it bends: at roll 0, down from the limb, and toward the limb's right as the
+ * roll grows.
+ *
+ *   arm   yaw, pitch, roll, then a bend along its whole length, which
+ *         stretches too: each segment's stick and offset scale with LEN
+ *   leg   yaw, pitch, and LEN for the thigh, then roll and a bend of fixed
+ *         length for the knee, then the shin, with its own length
+ *
+ * Every animated node carries one animated path. Where a node needs a second
+ * motion, a child node carries it, because we haven't measured how the sim
+ * combines two animations on one node.
  */
 
 export const FPS = 30
 export const FRAMES = 120
 const ROT_STEP = 30
 
-const LIMBS = [
-  ["ARM_L", "arm_l"],
-  ["ARM_R", "arm_r"],
-  ["LEG_L", "leg_l"],
-  ["LEG_R", "leg_r"],
-]
+const ARMS = [["ARM_L", "arm_l"], ["ARM_R", "arm_r"]]
+const LEGS = [["LEG_L", "leg_l"], ["LEG_R", "leg_r"]]
 
 export const CHANNELS = [
   ...["HEAD", "CHEST"].flatMap((b) => [
@@ -45,10 +56,20 @@ export const CHANNELS = [
   { name: "HEAD_YAW", node: "head_yaw", kind: "turn", axis: "yaw", min: -180, max: 180 },
   { name: "HEAD_PITCH", node: "head_pitch", kind: "turn", axis: "pitch", min: -90, max: 90 },
   { name: "HEAD_ROLL", node: "head_roll", kind: "turn", axis: "roll", min: -90, max: 90 },
-  ...LIMBS.flatMap(([n, l]) => [
+  ...ARMS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
     { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
-    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_end`, kind: "stretch", min: 0, max: 1.5 },
+    { name: `${n}_ROLL`, node: `${l}_roll`, kind: "turn", axis: "twist", min: -180, max: 180 },
+    { name: `${n}_BEND`, node: `${l}_seg`, kind: "turn", axis: "bend", segments: "arm", min: 0, max: 180 },
+    { name: `${n}_LEN`, node: `${l}_seg`, end: `${l}_end`, kind: "stretch", segments: "arm", min: 0, max: 1.5 },
+  ]),
+  ...LEGS.flatMap(([n, l]) => [
+    { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
+    { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
+    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_knee`, kind: "stretch", min: 0, max: 1.5 },
+    { name: `${n}_ROLL`, node: `${l}_roll`, kind: "turn", axis: "twist", min: -180, max: 180 },
+    { name: `${n}_BEND`, node: `${l}_seg`, kind: "turn", axis: "bend", segments: "knee", min: 0, max: 180 },
+    { name: `${n}_SHIN`, node: `${l}_shin_len`, end: `${l}_shin_end`, kind: "stretch", min: 0, max: 1.5 },
   ]),
 ]
 
@@ -67,21 +88,41 @@ export function animCode(ch) {
 }
 
 // The points the model and solve.mjs share, forward, right, and up in meters:
-// the hips and the legs' anchors from the seat point, and the shoulders from
-// the chest's center.
+// the hips, the legs' anchors, and the knees from the seat point, and the
+// shoulders from the chest's center. The knees are one best-effort point for
+// every aircraft, fitted to the Baron's cushion, not read from each seat.
 export function anchors(spec) {
   const hipUp = spec.hips.up, back = -spec.hips.back
   const leg = (side) => ({ fwd: back, right: (side * spec.legs.width) / 2, up: hipUp - spec.legs.down })
+  const knee = (side) => ({ fwd: spec.knee.fwd, right: (side * spec.legs.width) / 2, up: spec.knee.up })
   const shoulder = (side) => ({ fwd: 0, right: (side * spec.shoulders.width) / 2, up: -spec.shoulders.down })
-  return { hips: { fwd: back, right: 0, up: hipUp }, legL: leg(-1), legR: leg(1), shoulderL: shoulder(-1), shoulderR: shoulder(1) }
+  return {
+    hips: { fwd: back, right: 0, up: hipUp },
+    legL: leg(-1), legR: leg(1), kneeL: knee(-1), kneeR: knee(1),
+    shoulderL: shoulder(-1), shoulderR: shoulder(1),
+  }
 }
 
 const m = (p) => [-(p.right ?? 0), p.up ?? 0, p.fwd ?? 0]
 
+// Yaw right, pitch up, and twist toward the right are negative turns about the
+// model's axes; roll right and bend down are positive.
 function quat(axis, deg) {
-  const a = (axis === "roll" ? deg : -deg) * (Math.PI / 180) / 2
+  const a = (axis === "roll" || axis === "bend" ? deg : -deg) * (Math.PI / 180) / 2
   const s = Math.sin(a), c = Math.cos(a)
-  return axis === "yaw" ? [0, s, 0, c] : axis === "pitch" ? [s, 0, 0, c] : [0, 0, s, c]
+  return axis === "yaw" ? [0, s, 0, c] : axis === "pitch" || axis === "bend" ? [s, 0, 0, c] : [0, 0, s, c]
+}
+
+// Where a bend of `segments` equal sticks ends, along the limb and toward the
+// bend, for a total length: each segment turns by its share before it runs.
+export function bendEnd(bendRad, length, segments) {
+  const piece = length / segments
+  let along = 0, toward = 0
+  for (let k = 1; k <= segments; k++) {
+    along += piece * Math.cos((k * bendRad) / segments)
+    toward += piece * Math.sin((k * bendRad) / segments)
+  }
+  return [along, toward]
 }
 
 // ------------------------------------------------ geometry
@@ -212,25 +253,57 @@ export function buildGltf(spec, colorIndex = 0) {
   const chest = chain(root, ["chest_fwd", "chest_right", "chest_up"])
   ball(chest, "chest_ball", spec.chest.radius, "sphere_light")
 
-  function limb(parent, l, anchor, stickR, endR) {
-    const base = add(parent, { name: l, translation: m(anchor) })
-    const pitch = chain(base, [`${l}_yaw`, `${l}_pitch`])
-    const len = add(pitch, { name: `${l}_len` })
-    add(len, { name: `${l}_stick`, mesh: MESH.stick, scale: [stickR, stickR, 1] })
-    const end = add(pitch, { name: `${l}_end` })
-    ball(end, `${l}_ball`, endR, "sphere_main")
+  // A stick from a node along its +z, scaled to length by its own node.
+  const stickOn = (parent, name, r, length) => {
+    const len = add(parent, { name: `${name}_len`, ...(length ? { scale: [1, 1, length] } : {}) })
+    add(len, { name: `${name}_stick`, mesh: MESH.stick, scale: [r, r, 1] })
   }
-  limb(chest, "arm_l", a.shoulderL, spec.arm.radius, spec.hand.radius)
-  limb(chest, "arm_r", a.shoulderR, spec.arm.radius, spec.hand.radius)
-  limb(root, "leg_l", a.legL, spec.leg.radius, spec.foot.radius)
-  limb(root, "leg_r", a.legR, spec.leg.radius, spec.foot.radius)
+
+  // The arm: one curve from the shoulder to the hand. Segment k sits where
+  // segment k - 1 ends (an offset LEN scales), turns by its share of the bend
+  // on a child node, and carries its stick and a seam ball.
+  function arm(parent, l, anchor) {
+    const r = spec.arm.radius, n = spec.arm.segments
+    let tip = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`, `${l}_roll`])
+    for (let k = 0; k < n; k++) {
+      const bend = add(add(tip, { name: `${l}_seg${k}` }), { name: `${l}_seg${k}_bend` })
+      ball(bend, `${l}_seg${k}_ball`, r, "sphere_main")
+      stickOn(bend, `${l}_seg${k}`, r)
+      tip = bend
+    }
+    ball(add(tip, { name: `${l}_end` }), `${l}_ball`, spec.hand.radius, "sphere_main")
+  }
+
+  // The leg: a thigh to the knee, a fixed-length curve, then the shin.
+  function leg(parent, l, anchor) {
+    const r = spec.leg.radius, n = spec.knee.segments, piece = spec.knee.arc / n
+    const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
+    stickOn(pitch, l, r)
+    let tip = chain(add(pitch, { name: `${l}_knee` }), [`${l}_roll`])
+    for (let k = 0; k < n; k++) {
+      const bend = add(add(tip, { name: `${l}_seg${k}`, ...(k ? { translation: [0, 0, piece] } : {}) }), { name: `${l}_seg${k}_bend` })
+      ball(bend, `${l}_seg${k}_ball`, r, "sphere_main")
+      stickOn(bend, `${l}_seg${k}`, r, piece)
+      tip = bend
+    }
+    const shin = add(tip, { name: `${l}_shin`, translation: [0, 0, piece] })
+    ball(shin, `${l}_shin_ball`, r, "sphere_main")
+    stickOn(shin, `${l}_shin`, r)
+    ball(add(shin, { name: `${l}_shin_end` }), `${l}_ball`, spec.foot.radius, "sphere_main")
+  }
+
+  arm(chest, "arm_l", a.shoulderL)
+  arm(chest, "arm_r", a.shoulderR)
+  leg(root, "leg_l", a.legL)
+  leg(root, "leg_r", a.legR)
 
   const animations = CHANNELS.map((ch) => {
+    const n = ch.segments ? spec[ch.segments].segments : 1
     let values, keys
     if (ch.kind === "turn") {
       const steps = Math.round((ch.max - ch.min) / ROT_STEP)
       keys = Array.from({ length: steps + 1 }, (_, k) => (k * FRAMES) / steps / FPS)
-      values = Array.from({ length: steps + 1 }, (_, k) => quat(ch.axis, ch.min + k * ROT_STEP)).flat()
+      values = Array.from({ length: steps + 1 }, (_, k) => quat(ch.axis, (ch.min + k * ROT_STEP) / n)).flat()
     } else {
       keys = [0, FRAMES / FPS]
     }
@@ -240,11 +313,22 @@ export function buildGltf(spec, colorIndex = 0) {
       samplers.push({ input, output: out, interpolation: "LINEAR" })
       channels.push({ sampler: samplers.length - 1, target: { node: at[node], path } })
     }
-    if (ch.kind === "turn") track(ch.node, "rotation", P.out(values, "VEC4"))
+    if (ch.kind === "turn") {
+      const out = P.out(values, "VEC4")
+      if (ch.axis === "bend") for (let k = 0; k < n; k++) track(`${ch.node}${k}_bend`, "rotation", out)
+      else track(ch.node, "rotation", out)
+    }
     if (ch.kind === "move") track(ch.node, "translation", P.out([...m({ [ch.axis]: ch.min }), ...m({ [ch.axis]: ch.max })], "VEC3"))
     if (ch.kind === "stretch") {
-      track(ch.node, "scale", P.out([1, 1, ch.min, 1, 1, ch.max], "VEC3"))
-      track(ch.end, "translation", P.out([0, 0, ch.min, 0, 0, ch.max], "VEC3"))
+      const scale = P.out([1, 1, ch.min / n, 1, 1, ch.max / n], "VEC3")
+      const offset = P.out([0, 0, ch.min / n, 0, 0, ch.max / n], "VEC3")
+      if (ch.segments) {
+        for (let k = 0; k < n; k++) track(`${ch.node}${k}_len`, "scale", scale)
+        for (let k = 1; k < n; k++) track(`${ch.node}${k}`, "translation", offset)
+      } else {
+        track(ch.node, "scale", scale)
+      }
+      track(ch.end, "translation", offset)
     }
     return { name: variable(ch), samplers, channels }
   })

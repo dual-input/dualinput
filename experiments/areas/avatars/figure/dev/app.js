@@ -279,8 +279,13 @@ poseF.add(state, "pedalBack", -0.2, 0.2, 0.005).name("pedal back").onChange(upda
 poseF.add({ rest: () => { hands.L = hands.R = null; update() } }, "rest").name("hands to rest")
 
 const dims = gui.addFolder("Dimensions (m)").close()
-const range = (k) => (k === "at" ? [0, 1, 0.01] : ["up", "down", "back"].includes(k) ? [-0.3, 0.5, 0.001] : [0, 0.5, 0.001])
-for (const part of ["head", "nose", "chest", "hips", "shoulders", "legs", "arm", "leg", "hand", "foot"]) {
+const range = (k) =>
+  k === "at" ? [0, 1, 0.01]
+  : k === "segments" ? [1, 12, 1]
+  : k === "restBend" ? [0, 150, 1]
+  : ["up", "down", "back"].includes(k) ? [-0.3, 0.5, 0.001]
+  : [0, 0.5, 0.001]
+for (const part of ["head", "nose", "chest", "hips", "shoulders", "legs", "arm", "leg", "knee", "hand", "foot"]) {
   const f = dims.addFolder(part).close()
   for (const k of Object.keys(spec[part])) f.add(spec[part], k, ...range(k)).onChange(rebuild)
 }

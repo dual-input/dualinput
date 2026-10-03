@@ -5,13 +5,14 @@
   "hips": { "radius": 0.15, "up": 0.08, "back": 0.03 },
   "shoulders": { "width": 0.2, "down": 0.03 },
   "legs": { "width": 0.16, "down": 0.05 },
-  "arm": { "radius": 0.015 },
+  "arm": { "radius": 0.015, "segments": 8, "restBend": 50 },
   "leg": { "radius": 0.018 },
+  "knee": { "fwd": 0.28, "up": 0.015, "arc": 0.12, "segments": 6 },
   "hand": { "radius": 0.038 },
   "foot": { "radius": 0.045 },
   "rest": {
     "hand": { "fwd": 0.2, "right": 0.17, "up": 0.1 },
-    "foot": { "fwd": 0.45, "right": 0.12, "up": -0.3 }
+    "foot": { "fwd": 0.46, "right": 0.1, "up": -0.27 }
   },
   "material": { "roughness": 0.72, "lighten": 0.3 },
   "palette": [

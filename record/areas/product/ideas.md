@@ -234,7 +234,18 @@ Later, a pilot could invite a passenger to a given seat, with the invite made to
 Each pilot sees the other pilot's avatar, with MSFS multiplayer off.
 Crosscheck reads where the avatar is, which way it faces, where the pilot looks, and where they click, and on the other machine moves a figure of its own to match.
 The figure is a few plain shapes that carry meaning by how they move, after the people in the game Big Walk: a long nose shows where the pilot looks, the head turns and nods, and the hands are balls on arms that stretch.
-In the cockpit, a hand goes to whatever the pilot clicks or drags.
+In the cockpit, one hand holds the yoke and the other goes to whatever the pilot clicks or drags, by a left-seat pilot's habits:
+
+- At rest, the left hand holds the yoke at its grip, and the right hand rests.
+- A click more than 5cm left of the wheel's center is the left hand's, and the right hand takes the yoke.
+  A click more than 5cm right of it is the right hand's, and the left hand keeps the yoke.
+  Between the two, the hand that's free clicks.
+- A hand leaving the yoke to click goes at once, since the sim acts on the click at once.
+- A run of clicks with one hand keeps the hands as they are.
+  Between clicks, the clicking hand hovers 5cm off its last spot.
+  2s after the last click, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
+- A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
+- A drag glides along the surface it first touched.
 
 - **Tech:**
   - **The avatar:** SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)).
@@ -253,7 +264,12 @@ In the cockpit, a hand goes to whatever the pilot clicks or drags.
     `SimConnect_CameraGet` puts the eye in the model's own space within 4mm (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)), and its field of view is the view's height, so clicks on known spots landed within 2mm of them at any zoom and window shape we tried (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
     A held left press glides along the plane of the surface it first touched, which keeps the hand on a lever the sim has moved (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-during-a-drag-the-cursor-keeps-moving-and-gliding-on-the-touched-surfaces-plane-keeps-the-hand-on-a-lever-where-a-fresh-cast-falls-through)).
     A right press released within 300ms, with the cursor moving under 5px, counts as a click and places the hand at its release, and a longer or moving right press turns the view and brings no hand (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-quick-still-right-press-is-a-click-and-a-held-or-moved-one-turns-the-view)).
-    The other machine needs only the point, relative to the aircraft, since both pilots fly the same aircraft package.
+    The other machine needs only the points, relative to the aircraft, since both pilots fly the same aircraft package.
+  - **The yoke hand:** aircraft mark their yoke's grips with the same node names, `HANDLING_Yoke_1_Hand_Left` and `HANDLING_Yoke_1_Hand_Right`, in Black Square's Baron and Bonanza, the A2A Comanche, and the iniBuilds L-1011, and `aircraft.cfg`'s `[VR]` section names the yoke's two animations (read in bksq-aircraft-baronpro 0.1.1, bksq-aircraft-bonanzapro 0.1.1, a2a-aircraft-pa24 2.1.3, and inibuilds-aircraft-l1011 1.0.8, [avatars log](../avatars/log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
+    Posed by those animations, run from the variables the aircraft's own behavior code reads, the Baron 58P's yoke kept a hand on its grip through the yoke's whole travel (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
+    The grip nodes sit inside the horns, so the hand goes on the horn's surface in front of each, 3.1cm out (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
+    The click ray meets the posed yoke, and passes the parts the aircraft's own visibility code hides: the Baron 58P has 51 such codes, which read 18 `A:` and `L:` variables in all (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
+  - **The rules above:** in the Baron 58P, 115 clicks took 9 swaps, and the pilot found that the hands felt right (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat, turns their head where they look, and reaches for each switch, knob, and lever they click, so a pilot sees who did what as it happens.
   When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
@@ -262,15 +278,19 @@ In the cockpit, a hand goes to whatever the pilot clicks or drags.
     Which of the two routes ships: attaching through the aircraft's files holds the figure motionless but edits each aircraft package, and the WASM writer edits nothing, so it also covers stock aircraft such as the C152, where we measured it.
   - How Crosscheck seats the figure on an aircraft without seat objects.
   - Whether the figure's head and arms can turn and stretch through variables of its own object, as its size does (unverified).
-  - Where the cockpit model the hand reads disagrees with the sim.
-    The ray meets each part where the glTF file stores it, not where the sim shows it, so in the Comanche both yokes caught rays aimed at switches behind them, and rays to the throttle levers hit the dash behind them (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
-    The model has a `Yoke_Right_Hider` component, and we don't know whether the sim had hidden the copilot's yoke.
-    The Comanche's `aircraft.cfg` names its yoke node and the yoke's animations under `[VR]` (read in a2a-aircraft-pa24 2.1.3), a lead for yokes.
+  - Where the cockpit model disagrees with the sim beyond the yoke.
+    The ray meets every other part where the glTF file stores it, so rays to the Comanche's throttle levers hit the dash behind them (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
+    The code that poses the yoke could pose every animated part the same way (unverified).
     Attachments, such as the Comanche's GPS units, have models of their own, so rays aimed at them hit the panel behind (`BlackPanel` in the Comanche) unless Crosscheck loads those models too.
   - Which aircraft the hand reaches.
-    The eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files, as the Comanche does, though only the Comanche's has been read through (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
+    The eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
     The C152, which streams with the sim, and Marketplace aircraft may have no model we can read (unverified).
-    The ray and the hand have both been measured only in the Comanche, so a run in a second aircraft would show whether either carries over.
+    The ray has been measured against known spots only in the Comanche, and used in the Black Square Baron 58P, where the pilot found the hands right; the yoke hand has run only in the Baron.
+    The Comanche plays its yoke from A2A's own `L:YokeBank_Anim` and `L:YokePitch_Anim` rather than the sim's `A:YOKE` variables (read in a2a-aircraft-pa24 2.1.3), which the yoke hand reads the same way but hasn't been run with.
+  - The rules are a left-seat pilot's with a yoke.
+    A right-seat pilot would mirror them, a sidestick pilot never swaps hands, and a center stick probably stays in the right hand (unverified).
+  - Whether the hands should wait for each other on the other pilot's machine.
+    There, Crosscheck applies a click's change itself, so it could hold the change until the hand that makes it arrives, and let the yoke hand keep hold a moment before the other leaves, at that much more delay.
   - A change with no click, from a hardware switch or a key binding, brings no hand.
     The profile IDE could link each profile entry to a point in the model by having the author click the control during discovery, so the hand still reaches for it.
   - VR has no cursor.

@@ -23,6 +23,7 @@ The pilot also found the 0.3s overlap wrong when a hand leaves the yoke to tap: 
 - Over the next run, 115 taps (64 left, 51 right, 40 of them drags) took 9 swaps and 9 sessions.
   Each swap was the first click after a pause of 1.1s to 20.9s, or a click on the other side of the wheel from the one before.
 - All 8 right-thumb presses on the right horn left the left hand on the yoke.
+- The pilot found that the hands felt right.
 
 **Changed:** the hands swap once for each run of clicks on one side, and the tapping hand reaches its switch as the sim moves it.
 On the other pilot's machine, where Crosscheck applies the change itself, it could hold the change until the hand arrives, for an overlap, at that much more delay; that's a product decision.

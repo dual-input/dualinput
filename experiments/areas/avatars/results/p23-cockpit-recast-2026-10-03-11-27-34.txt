@@ -1,0 +1,23 @@
+p23 · Inside, with the cockpit posed from its own code, a fresh cast beside the glide while the pilot drags, on MSFS 2024
+2026-10-03T11:27:34.484Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.000088 kt
+  bksq-aircraft-baronpro, BaronProfessional_Pressurized_INT.gltf: 490,963 triangles; 102 of 499 animations posed, moving 435 nodes, among them FUEL_Lever_Mixture_2, PropAmpsPanel, PropSyncSwitch, DEICE_Switch_Propeller, FUEL_Lever_Mixture_1; 51 visibility codes run
+  posed parts: 5 drags, 268 fresh casts, a median 0.9cm from the glide and 6.5cm at the 90th percentile; 52 fell behind the glide point by more than 5cm
+  parts as the file stores them: 10 drags, 394 fresh casts, a median 5.9cm from the glide and 14.8cm at the 90th percentile; 91 fell behind the glide point by more than 5cm
+  on FUEL_Lever_Mixture_1 (posed), 8.1s: 119 fresh casts, a median 2.5cm from the glide, 35 behind it (FUEL_Lever_Mixture_1, Cube.024, Plane.018, FUEL_Lever_Mixture_1_Stem, ENGINE_Lever_Propeller_2)
+  on Cube.133, 1.2s: 18 fresh casts, a median 0.3cm from the glide, 0 behind it (Cube.133, CabinClimbPanel, Cube.092, Cube.024, FUEL_Lever_Mixture_1_Stem)
+  on Sphere.008, 0.8s: 14 fresh casts, a median 1.4cm from the glide, 0 behind it (Sphere.008, Cube.045, Cube.092)
+  on ENGINE_Lever_Throttle_2, 2.9s: 34 fresh casts, a median 11.6cm from the glide, 20 behind it (ENGINE_Lever_Throttle_2, Cube.045, Cube.024, Cube.092, BootPressurePanel)
+  on OatMapCompassLightButton_1 (posed), 4.3s: 63 fresh casts, a median 0.5cm from the glide, 0 behind it (OatMapCompassLightButton_1, Cylinder.078, Yoke_L)
+  on VerticalSpeedPanel_L, 13.7s: 210 fresh casts, a median 7.9cm from the glide, 28 behind it (VerticalSpeedPanel_L, Plane.001, Cube.248, AltimeterPanel_R.001, Cube.040)
+  on Cylinder.080, 3.1s: 53 fresh casts, a median 5.1cm from the glide, 27 behind it (Cylinder.080, Cylinder.086, Plane.001, Cylinder.107, Cylinder.099)
+  on PressurizationDialPanel, 1.0s: 14 fresh casts, a median 0.7cm from the glide, 0 behind it (PressurizationDialPanel, PressurizationDialPanel.001, Cube.092, CabinAltitudeKnob)
+  on Cube.092, 0.7s: 10 fresh casts, a median 2.0cm from the glide, 0 behind it (PressurizationDialPanel, PressurizationDialPanel.001, CabinAltitudeKnob)
+  on FUEL_Lever_Mixture_1 (posed), 4.0s: 56 fresh casts, a median 1.1cm from the glide, 17 behind it (FUEL_Lever_Mixture_1, Plane.084, FrictionLock, FUEL_Lever_Mixture_2_Stem, Cube.133)
+  on FUEL_Lever_Mixture_1 (posed), 1.8s: 20 fresh casts, a median 2.3cm from the glide, 0 behind it (FUEL_Lever_Mixture_1, Cube.133)
+  on FUEL_Lever_Mixture_1 (posed), 1.0s: 10 fresh casts, a median 1.3cm from the glide, 0 behind it (FUEL_Lever_Mixture_1)
+  on ENGINE_Lever_Throttle_2, 1.7s: 21 fresh casts, a median 14.4cm from the glide, 16 behind it (ENGINE_Lever_Throttle_2, Cube.045, Cube.092)
+  on Cube.045, 1.0s: 9 fresh casts, a median 7.5cm from the glide, 0 behind it (Cube.045, ENGINE_Lever_Throttle_2)
+  on CabinClimbPanel, 0.8s: 11 fresh casts, a median 1.5cm from the glide, 0 behind it (CabinClimbPanel, Cube.092, Cube.045, Cube.077, FUEL_Lever_Mixture_1_Stem)

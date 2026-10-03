@@ -9,6 +9,28 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Inside, with the cockpit posed, a fresh cast stays on a posed lever but still falls through one the file holds still
+
+**Asked:** with the cockpit posed from its own code, as the exterior is, does a fresh cast follow a drag inside as well as it does outside, in place of the glide?
+
+**Expected:** a fresh cast would stay on posed levers and fall through unposed ones, as it did before posing ([entry below](#2026-10-03-during-a-drag-the-cursor-keeps-moving-and-gliding-on-the-touched-surfaces-plane-keeps-the-hand-on-a-lever-where-a-fresh-cast-falls-through)).
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, p23 posed 102 of the cockpit's 499 animations from their code, among them both mixture levers, `FUEL_Lever_Mixture_1` and `_2`.
+  The throttle and prop levers are driven by sim templates, so they stayed as the file stores them; 346 animations are template-driven, and 44 more keep their own state.
+- On posed parts, 4 drags of a mixture lever and one of a yoke button, a fresh cast was a median 0.9cm from the glide, and 6.5cm at the 90th percentile.
+  It fell more than 5cm behind the glide point on 52 of 268 casts, mostly in one 8.1s mixture drag, where it landed on the lever's stem and the prop lever beside it.
+- On unposed throttle levers, 2 drags, a fresh cast was a median 11.6cm and 14.4cm from the glide, and fell behind it on 36 of 55 casts.
+- On flat panels and knobs, the two agreed within 0.3cm to 2.0cm, except in one 13.7s drag across panels at different depths, at a median 7.9cm.
+
+**Changed:** posing a lever keeps a fresh cast on it most of the time, and an unposed lever still lets it fall through.
+Both a glide and a fresh cast follow the cursor, which doesn't stay on a lever's knob as it slides, so for a posed part the hand could instead hold the spot it pressed, in the part's own frame, as the thumb holds a yoke button (unverified).
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p23's run](../../../experiments/areas/avatars/results/p23-cockpit-recast-2026-10-03-11-27-34.txt), whose log has every fresh cast of each drag.
+
 ## 2026-10-03: Outside, a drag should follow a fresh cast, since the plane of the first spot leaves curved skin
 
 **Asked:** on the aircraft's outside, where the skin curves, should the hand follow a drag by gliding on the plane of the spot first pressed, as inside (p20), or by casting the ray afresh onto the model?

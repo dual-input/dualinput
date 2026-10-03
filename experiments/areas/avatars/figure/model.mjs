@@ -24,16 +24,14 @@
  * cylinder, so yaw, pitch, and length put the hand or foot at any point while
  * the stick stays round.
  *
- * A bend is a curve of `segments` short sticks with a ball at each seam, and
- * one animation turns every segment by an equal share of the bend about its
- * own x axis. The roll before it, about the limb's own axis, picks which way
- * it bends: at roll 0, down from the limb, and toward the limb's right as the
- * roll grows.
+ * An arm is one straight stick: yaw, pitch, and length.
  *
- *   arm   yaw, pitch, roll, then a bend along its whole length, which
- *         stretches too: each segment's stick and offset scale with LEN
- *   leg   yaw, pitch, and LEN for the thigh, then roll and a bend of fixed
- *         length for the knee, then the shin, with its own length
+ * A leg is a thigh (yaw, pitch, and length), a knee, and a shin with its own
+ * length. The knee is a curve of `segments` short sticks with a ball at each
+ * seam, and one animation turns every segment by an equal share of the bend
+ * about its own x axis. The roll before it, about the thigh's axis, picks
+ * which way it bends: at roll 0, down from the thigh, and toward the thigh's
+ * right as the roll grows.
  *
  * Every animated node carries one animated path. Where a node needs a second
  * motion, a child node carries it, because we haven't measured how the sim
@@ -59,9 +57,7 @@ export const CHANNELS = [
   ...ARMS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
     { name: `${n}_PITCH`, node: `${l}_pitch`, kind: "turn", axis: "pitch", min: -90, max: 90 },
-    { name: `${n}_ROLL`, node: `${l}_roll`, kind: "turn", axis: "twist", min: -180, max: 180 },
-    { name: `${n}_BEND`, node: `${l}_seg`, kind: "turn", axis: "bend", segments: "arm", min: 0, max: 180 },
-    { name: `${n}_LEN`, node: `${l}_seg`, end: `${l}_end`, kind: "stretch", segments: "arm", min: 0, max: 1.5 },
+    { name: `${n}_LEN`, node: `${l}_len`, end: `${l}_end`, kind: "stretch", min: 0, max: 1.5 },
   ]),
   ...LEGS.flatMap(([n, l]) => [
     { name: `${n}_YAW`, node: `${l}_yaw`, kind: "turn", axis: "yaw", min: -180, max: 180 },
@@ -259,19 +255,10 @@ export function buildGltf(spec, colorIndex = 0) {
     add(len, { name: `${name}_stick`, mesh: MESH.stick, scale: [r, r, 1] })
   }
 
-  // The arm: one curve from the shoulder to the hand. Segment k sits where
-  // segment k - 1 ends (an offset LEN scales), turns by its share of the bend
-  // on a child node, and carries its stick and a seam ball.
   function arm(parent, l, anchor) {
-    const r = spec.arm.radius, n = spec.arm.segments
-    let tip = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`, `${l}_roll`])
-    for (let k = 0; k < n; k++) {
-      const bend = add(add(tip, { name: `${l}_seg${k}` }), { name: `${l}_seg${k}_bend` })
-      ball(bend, `${l}_seg${k}_ball`, r, "sphere_main")
-      stickOn(bend, `${l}_seg${k}`, r)
-      tip = bend
-    }
-    ball(add(tip, { name: `${l}_end` }), `${l}_ball`, spec.hand.radius, "sphere_main")
+    const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
+    stickOn(pitch, l, spec.arm.radius)
+    ball(add(pitch, { name: `${l}_end` }), `${l}_ball`, spec.hand.radius, "sphere_main")
   }
 
   // The leg: a thigh to the knee, a fixed-length curve, then the shin.
@@ -320,15 +307,8 @@ export function buildGltf(spec, colorIndex = 0) {
     }
     if (ch.kind === "move") track(ch.node, "translation", P.out([...m({ [ch.axis]: ch.min }), ...m({ [ch.axis]: ch.max })], "VEC3"))
     if (ch.kind === "stretch") {
-      const scale = P.out([1, 1, ch.min / n, 1, 1, ch.max / n], "VEC3")
-      const offset = P.out([0, 0, ch.min / n, 0, 0, ch.max / n], "VEC3")
-      if (ch.segments) {
-        for (let k = 0; k < n; k++) track(`${ch.node}${k}_len`, "scale", scale)
-        for (let k = 1; k < n; k++) track(`${ch.node}${k}`, "translation", offset)
-      } else {
-        track(ch.node, "scale", scale)
-      }
-      track(ch.end, "translation", offset)
+      track(ch.node, "scale", P.out([1, 1, ch.min, 1, 1, ch.max], "VEC3"))
+      track(ch.end, "translation", P.out([0, 0, ch.min, 0, 0, ch.max], "VEC3"))
     }
     return { name: variable(ch), samplers, channels }
   })

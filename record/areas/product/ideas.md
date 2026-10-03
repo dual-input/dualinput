@@ -266,7 +266,7 @@ In the cockpit, a hand goes to whatever the pilot clicks or drags.
     The ray meets each part where the glTF file stores it, not where the sim shows it, so in the Comanche both yokes caught rays aimed at switches behind them, and rays to the throttle levers hit the dash behind them (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
     The model has a `Yoke_Right_Hider` component, and we don't know whether the sim had hidden the copilot's yoke.
     The Comanche's `aircraft.cfg` names its yoke node and the yoke's animations under `[VR]` (read in a2a-aircraft-pa24 2.1.3), a lead for yokes.
-    Attachments, such as the Comanche's GPS units, have models of their own, which Crosscheck doesn't load yet.
+    Attachments, such as the Comanche's GPS units, have models of their own, so rays aimed at them hit the panel behind (`BlackPanel` in the Comanche) unless Crosscheck loads those models too.
   - Which aircraft the hand reaches.
     The eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files, as the Comanche does, though only the Comanche's has been read through (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
     The C152, which streams with the sim, and Marketplace aircraft may have no model we can read (unverified).

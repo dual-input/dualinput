@@ -63,12 +63,12 @@ export function cast(cockpit, origin, direction, { maxM = 5, invisible = false }
     .map((p) => ({ p, t: box(origin, inv, p.lo, p.hi) }))
     .filter((x) => x.t <= maxM)
     .sort((a, b) => a.t - b.t)
-  let best = Infinity, hit = null
+  let best = Infinity, hit = null, tri = -1
   for (const { p, t } of near) {
     if (t > best) break
     for (let k = 0; k < p.idx.length; k += 3) {
       const tt = triangle(origin, d, p.pos, p.idx[k], p.idx[k + 1], p.idx[k + 2])
-      if (tt < best) { best = tt; hit = p }
+      if (tt < best) { best = tt; hit = p; tri = k }
     }
   }
   if (!hit || best > maxM) return null
@@ -76,9 +76,32 @@ export function cast(cockpit, origin, direction, { maxM = 5, invisible = false }
   return {
     distance: best,
     point: origin.map((x, k) => x + d[k] * best),
+    normal: facing(hit.pos, hit.idx[tri], hit.idx[tri + 1], hit.idx[tri + 2], d),
     file: model.name,
     node: hit.node,
     chain: ancestry(model, hit.node),
     invisible: hit.invisible,
   }
+}
+
+// The triangle's unit normal, turned to face back along the ray.
+function facing(pos, i0, i1, i2, d) {
+  const e1 = [0, 1, 2].map((k) => pos[i1 * 3 + k] - pos[i0 * 3 + k])
+  const e2 = [0, 1, 2].map((k) => pos[i2 * 3 + k] - pos[i0 * 3 + k])
+  const n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]]
+  const len = Math.hypot(...n)
+  const s = (n[0] * d[0] + n[1] * d[1] + n[2] * d[2]) > 0 ? -1 / len : 1 / len
+  return n.map((x) => x * s)
+}
+
+// Where the ray crosses the plane through point with this normal, or null
+// when it runs along the plane, points away from it, or meets it beyond maxM.
+export function crossPlane(origin, direction, point, normal, { maxM = 5 } = {}) {
+  const n = Math.hypot(...direction)
+  const d = direction.map((x) => x / n)
+  const den = d[0] * normal[0] + d[1] * normal[1] + d[2] * normal[2]
+  if (Math.abs(den) < 1e-3) return null
+  const t = ((point[0] - origin[0]) * normal[0] + (point[1] - origin[1]) * normal[1] + (point[2] - origin[2]) * normal[2]) / den
+  if (t <= 0 || t > maxM) return null
+  return origin.map((x, k) => x + d[k] * t)
 }

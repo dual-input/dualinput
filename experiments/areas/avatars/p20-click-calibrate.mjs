@@ -1,25 +1,41 @@
 /*
- * p20: the ray through the cursor, fitted to clicks on known spots, and then
- * the hand sphere on the controls the pilot clicks with that fit, on MSFS 2024.
+ * p20: the ray through the cursor, fitted to clicks on known spots at more
+ * than one zoom and window shape, and then the hand sphere wherever the pilot
+ * presses, holds, and drags in the cockpit model, on MSFS 2024.
  *
  * p19 cast each click into the A2A Comanche's interior model (a2a-aircraft-pa24
  * 2.1.3) and named the controls of an engine start, but it couldn't tell which
  * field of view was right, because it never knew what the pilot meant to click.
  * Here a small yellow ball marks a known spot, the pilot clicks its center,
  * and the ray's signs, field of view, and any angle offset are fitted to those
- * clicks (lib/pick.mjs). The camera's position is taken as SimConnect_CameraGet
- * gives it in the SIMOBJECT referential, which matched the Comanche's eyepoint
- * within 4mm in p19's run.
+ * clicks (lib/pick.mjs). Two shorter passes, one zoomed and one in a resized
+ * window, test whether that fit holds for any field of view and window shape,
+ * using CameraGet's field of view and the window's size as they are at each
+ * click. The camera's position is taken as SimConnect_CameraGet gives it in
+ * the SIMOBJECT referential, which matched the Comanche's eyepoint within 4mm
+ * in p19's run.
+ *
+ * Then the sphere goes where the ray meets the model, with no guess at which
+ * control that is. While the button is held, it glides along the plane of the
+ * surface it first touched, where the cursor's ray crosses it, so it follows a
+ * drag across a panel seen from an angle; the probe also logs where a fresh
+ * cast and a fixed distance from the eye would have put it. On release it
+ * stays 0.5s, then goes back to rest.
  *
  * In the A2A Comanche, parked, the sim in front:
  *
  *   targets   A yellow ball sits on a knob, a switch, or a vent, 10 in turn,
  *             from the left wall across the panel to the right wall and the
  *             overhead. Click the center of each ball; Page Up skips one you
- *             can't see. About a minute.
- *   clicks    Then click any control, as in p19: the console names what each
- *             click hit, and the sphere turns green on it for 2.5s. Page Up
- *             ends; it ends by itself after 20 minutes.
+ *             can't see. Turn your view only as far as you need to see a ball:
+ *             clicks away from the middle of the screen tell the fit the most.
+ *   zoomed    Zoom the cockpit view in or out and press Page Down, then click
+ *             4 more balls. Page Up skips the pass.
+ *   resized   Resize the sim window, or go fullscreen, and press Page Down,
+ *             then click 4 more balls. Page Up skips the pass.
+ *   clicks    Click, hold, and drag anywhere: switches, knobs, levers, the
+ *             yoke, the panel itself. The console names the node each press
+ *             hit. Page Up ends; it ends by itself after 20 minutes.
  *
  *   node experiments/areas/avatars/p20-click-calibrate.mjs
  *
@@ -35,14 +51,14 @@ import path from "node:path"
 import { InitPosition } from "node-simconnect"
 
 import { REPO } from "../../tools/results.mjs"
-import { SKIP, startBeeper, startKeys } from "../../tools/guide.mjs"
+import { SKIP, START, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { startMouse } from "../../tools/mouse.mjs"
 import { findPackage } from "../aircraft/lib/flights.mjs"
 import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "../aircraft/lib/sim.mjs"
 import { RAD, toBody, wrap } from "./lib/pose.mjs"
-import { P19, fitProjection, rayThrough } from "./lib/pick.mjs"
-import { cast, loadCockpit } from "./lib/raycast.mjs"
+import { P19, fitK, fitProjection, rayThrough, rmsOf } from "./lib/pick.mjs"
+import { cast, crossPlane, loadCockpit } from "./lib/raycast.mjs"
 
 const PACKAGE = "a2a-aircraft-pa24"
 const MODEL = ["SimObjects", "Airplanes", "pa24-250", "common", "model", "PA24_250_INTERIOR_LOD00.gltf"]
@@ -52,20 +68,28 @@ const SPHERE = "CROSSCHECK_HandSphere"
 // From the left wall across the panel to the right wall, then the overhead;
 // no starter, gear, fuel, or breaker, since the click reaches the control.
 const TARGETS = ["KNOB_CabinVent1", "NoiseCancellingSwitch", "knob_nav_instr_light", "Switch_Light_Strobe", "HSI_Course_Knob", "INSTRUMENT_altitude_knob", "BUTTON_EDM730_Step", "GAUGE_ADF_Knob", "KNOB_CabinVent2", "SWITCH_Light_Red"]
+const FEW = ["KNOB_CabinVent1", "INSTRUMENT_altitude_knob", "GAUGE_ADF_Knob", "KNOB_CabinVent2"]
+// A pass after the first starts only once the field of view or the window's
+// shape is this far from the first pass's.
+const CHANGED = 0.05
 // The ball sits this far in front of the spot, toward the eye, so a knob
 // doesn't hide it; the ray to its center is the ray to the spot.
 const PULL_M = 0.03
 // p15: nose up and right wing down are both negative; lead 1 frame (p16).
 const SIGNS = [-1, -1]
 const LEAD = 1
-const HOLD_MS = 2500
+const LINGER_MS = { release: 500, wheel: 1000 }
+// A press shorter than TAP_MS is a tap unless the cursor moved DRAG_PX or the
+// mouse DRAG_COUNTS (its own units, finer than pixels), which make it a drag.
+const TAP_MS = 300
+const DRAG_PX = 5
+const DRAG_COUNTS = 20
 const CAP_MS = 20 * 60_000
 const COLOR = { rest: 0, touching: 1, target: 3 }
 // tools/sphere.mjs: radius 2cm at scale 1, and SCALE 0 to 100 sweeps the scale
 // from 0.5 to 5.
 const radius = (scale) => 0.02 * (0.5 + 4.5 * scale / 100)
 const SCALE = { target: 0, touching: 5 }
-const NEAR_M = 0.04
 const L = (n) => [`L:CROSSCHECK_P12_${n}`, "number"]
 const SIMOBJECT = 1
 
@@ -79,6 +103,8 @@ const note = (kind, text, fields = {}) => { lines.push(text); rec.log(kind, text
 const where = (b) => `${b.forward.toFixed(3)}m forward, ${b.right.toFixed(3)}m right, ${b.up.toFixed(3)}m up`
 const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)]
 const sign = (x) => (x > 0 ? "+" : "−")
+const deg = (rad) => (rad / RAD).toFixed(1)
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
 const label = (h) => `mirror ${sign(h.mirror)}, yaw ${sign(h.yaw)}, pitch ${sign(h.pitch)}, k ${h.k.toFixed(3)}, yaw bias ${h.yawBias.toFixed(2)}°, pitch bias ${h.pitchBias.toFixed(2)}°`
 
 async function readModule(names) {
@@ -98,7 +124,7 @@ async function finish(why) {
   if (sphere !== null) sim.remove(sphere)
   await sleep(800)
   const text = [
-    "p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere on clicked controls with it, on MSFS 2024",
+    "p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere where the pilot presses, holds, and drags, on MSFS 2024",
     `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
     `Ended by ${why}`,
     "",
@@ -119,12 +145,10 @@ if (!fs.existsSync(MAP)) {
   process.exit(1)
 }
 const map = JSON.parse(fs.readFileSync(MAP, "utf8"))
-const byNode = new Map()
-for (const c of map.controls) if (!byNode.has(c.node.toLowerCase())) byNode.set(c.node.toLowerCase(), c)
 const pkg = findPackage(PACKAGE)
 if (!pkg) { console.error(`${PACKAGE} isn't installed.`); process.exit(1) }
 const cockpit = loadCockpit([path.join(pkg, ...MODEL)])
-note("model", `${MODEL.at(-1)}: ${plural(cockpit.triangles, "triangle")}; map ${plural(map.controls.length, "control")}`)
+note("model", `${MODEL.at(-1)}: ${plural(cockpit.triangles, "triangle")}`)
 
 await sleep(1000)
 const m0 = await readModule(["ALIVE"])
@@ -178,7 +202,7 @@ const frameToModel = (b) => [-(b.right - offset.right), b.up - offset.up, b.forw
 const camModel = (c) => frameToModel({ forward: c.z, right: -c.x, up: c.y })
 for (let i = 0; i < 40 && !cam; i++) await sleep(50)
 if (!cam) { note("camera", "SimConnect_CameraGet didn't answer"); await finish("no camera") }
-note("camera", `at ${where({ forward: cam.z, right: -cam.x, up: cam.y })} of the reference point, fov ${fmt(cam.fov)} rad`, { cam })
+note("camera", `at ${where({ forward: cam.z, right: -cam.x, up: cam.y })} of the reference point, fov ${deg(cam.fov)}°`, { cam })
 
 const pilot = seatBody.PILOT_1 ?? modelToFrame(map.seats.PILOT_1?.origin ?? [0.3, -0.13, 0.12])
 const rest = { forward: pilot.forward + 0.35, right: pilot.right, up: pilot.up + 0.25 }
@@ -194,113 +218,168 @@ sphere = r.id
 for (const e of ["FREEZE_LATITUDE_LONGITUDE_SET", "FREEZE_ALTITUDE_SET", "FREEZE_ATTITUDE_SET"]) sim.transmit(e, [1], { object: r.id, quiet: true })
 setModule({ OBJECT: r.id, SIGN_PITCH: SIGNS[0], SIGN_BANK: SIGNS[1], LEAD, SCALE: SCALE.touching, COLOR: COLOR.rest, FWD: rest.forward, RIGHT: rest.right, UP: rest.up, MODE: 1 })
 
-// Clicks and Page Up go to whichever phase is listening.
-let onClick = null
+// The sphere's center one radius off the surface, on the eye's side.
+function touch(point, normal) {
+  const f = modelToFrame(point.map((x, k) => x + normal[k] * radius(SCALE.touching)))
+  setModule({ FWD: f.forward, RIGHT: f.right, UP: f.up, COLOR: COLOR.touching })
+}
+const toRest = () => setModule({ FWD: rest.forward, RIGHT: rest.right, UP: rest.up, COLOR: COLOR.rest })
+
+// Mouse events go to whichever phase is listening, and Page Up to its skip.
+let onMouse = null
 let outside = 0
+let win = null
 stopMouse = await startMouse((m) => {
-  if (m.kind !== "left" && m.kind !== "wheel") return
+  if (m.width > 0 && m.height > 0) win = { width: m.width, height: m.height }
+  if (m.kind === "size") return
   if (!m.foreground) { if (m.kind === "left") outside++; return }
-  if (onClick) onClick(m)
+  if (onMouse) onMouse(m)
 })
 let onSkip = null
 keys.listen((k) => { if (k.key === "SKIP" && onSkip) onSkip() })
 
 // ------------------------------------------------ targets
 
-console.log(`\n▶ Click the yellow balls\n  A small yellow ball sits on a spot in the cockpit, ${TARGETS.length} in turn. Click its center. ${SKIP} skips one you can't see.`)
-const samples = []
-for (const [i, id] of TARGETS.entries()) {
-  const c = map.controls.find((x) => x.id === id)
-  if (!c) { note("target", `${id}: not in the map`); continue }
-  const spot = c.center ?? c.origin
-  const eye = camModel(cam)
-  const w = eye.map((x, k) => x - spot[k])
-  const n = Math.hypot(...w)
-  const ball = spot.map((x, k) => x + (w[k] / n) * PULL_M)
-  const f = modelToFrame(ball)
-  setModule({ FWD: f.forward, RIGHT: f.right, UP: f.up, COLOR: COLOR.target, SCALE: SCALE.target })
-  console.log(`  ${i + 1}/${TARGETS.length}: ${id}`)
-  beep(1000, 80)
-  const got = await new Promise((resolve) => {
-    onClick = (m) => { if (m.kind === "left") resolve(m) }
-    onSkip = () => resolve(null)
-  })
-  onClick = null
-  onSkip = null
-  if (!got) { rec.log("target", `${id}: skipped`); continue }
-  const s = { id, cam, mouse: got, origin: camModel(cam), target: ball }
-  samples.push(s)
-  rec.log("target", `${id}: clicked at ${got.x}, ${got.y}, camera pitch ${fmt(cam.pitch)}, yaw ${fmt(cam.yaw)}, roll ${fmt(cam.roll)}`, s)
+async function targets(pass, ids) {
+  const out = []
+  for (const [i, id] of ids.entries()) {
+    const c = map.controls.find((x) => x.id === id)
+    if (!c) { note("target", `${id}: not in the map`); continue }
+    const spot = c.center ?? c.origin
+    const eye = camModel(cam)
+    const n = dist(eye, spot)
+    const ball = spot.map((x, k) => x + ((eye[k] - x) / n) * PULL_M)
+    const f = modelToFrame(ball)
+    setModule({ FWD: f.forward, RIGHT: f.right, UP: f.up, COLOR: COLOR.target, SCALE: SCALE.target })
+    console.log(`  ${i + 1}/${ids.length}: ${id}`)
+    beep(1000, 80)
+    const got = await new Promise((resolve) => {
+      onMouse = (m) => { if (m.kind === "left") resolve(m) }
+      onSkip = () => resolve(null)
+    })
+    onMouse = null
+    onSkip = null
+    if (!got) { rec.log("target", `${pass}, ${id}: skipped`); continue }
+    const s = { pass, id, cam, mouse: got, origin: camModel(cam), target: ball }
+    out.push(s)
+    rec.log("target", `${pass}, ${id}: clicked at ${got.x}, ${got.y} in ${got.width}×${got.height}, camera pitch ${fmt(cam.pitch)}, yaw ${fmt(cam.yaw)}, roll ${fmt(cam.roll)}, fov ${deg(cam.fov)}°`, s)
+  }
+  setModule({ SCALE: SCALE.touching })
+  toRest()
+  beep(500, 400)
+  return out
 }
-beep(500, 400)
+
+// Waits for Page Down once the field of view or the window has changed
+// enough; Page Up skips the pass.
+async function prepare(heading, instruction, changed, now) {
+  console.log(`\n▶ ${heading}\n  ${instruction}\n  ${START} to start, ${SKIP} to skip this pass.`)
+  for (;;) {
+    const k = await keys.next()
+    if (k.key === "SKIP") return false
+    if (changed()) return true
+    console.log(`  ${now()}: not enough of a change yet. Change it further, then ${START}.`)
+  }
+}
+
+console.log(`\n▶ Click the yellow balls\n  A small yellow ball sits on a spot in the cockpit, ${TARGETS.length} in turn. Click its center. Turn your view only as far as you need to see it. ${SKIP} skips one you can't see.`)
+const first = await targets("first", TARGETS)
+const fov0 = first[0]?.cam.fov ?? cam.fov
+const aspect0 = first.length ? first[0].mouse.width / first[0].mouse.height : (win ? win.width / win.height : 1)
+let zoomed = [], resized = []
+if (await prepare("Zoom", "Zoom the cockpit view in or out, the way you normally do.", () => Math.abs(cam.fov / fov0 - 1) > CHANGED, () => `the field of view is ${deg(cam.fov)}°, and was ${deg(fov0)}°`)) {
+  zoomed = await targets("zoomed", FEW)
+}
+if (await prepare("Resize", "Resize the sim window by dragging its edge, or go fullscreen. Move the mouse over the sim once it's done.", () => win && Math.abs(win.width / win.height / aspect0 - 1) > CHANGED, () => `the window is ${win ? `${win.width}×${win.height}` : "unknown"}, and its shape was ${aspect0.toFixed(3)}`)) {
+  resized = await targets("resized", FEW)
+}
 
 // ------------------------------------------------ the fit
 
 let params = P19
-if (samples.length >= 4) {
-  const fit = fitProjection(samples)
-  params = fit.params
-  const half = Math.tan(samples[0].cam.fov / 2) * params.k
-  const aspect = samples[0].mouse.width / samples[0].mouse.height
-  const cm = (s, deg) => (Math.hypot(...s.target.map((x, k) => x - s.origin[k])) * Math.tan(deg * RAD) * 100).toFixed(1)
-  note("fit", `${label(params)}: RMS ${fit.rms.toFixed(2)}° over ${plural(samples.length, "click")}, so the view is ${(2 * Math.atan(half) / RAD).toFixed(1)}° wide and ${(2 * Math.atan(half / aspect) / RAD).toFixed(1)}° tall in a ${samples[0].mouse.width}×${samples[0].mouse.height} window, and CameraGet's fov is ${(samples[0].cam.fov / RAD).toFixed(1)}°`, { fit: { params, rms: fit.rms, errors: fit.errors, runnerUp: fit.runnerUp } })
-  note("fit", `per spot, off by: ${samples.map((s, i) => `${s.id} ${fit.errors[i].toFixed(2)}° (${cm(s, fit.errors[i])}cm)`).join(", ")}`)
-  note("fit", `the next best signs, ${label(fit.runnerUp.params)}, RMS ${fit.runnerUp.rms.toFixed(2)}°; p19's ray, RMS ${fit.p19.rms.toFixed(2)}°, off by ${samples.map((s, i) => `${cm(s, fit.p19.errors[i])}cm`).join(", ")}`)
-} else {
-  note("fit", `${plural(samples.length, "click")} on spots: too few to fit, so the clicks use p19's ray`)
-}
-
-// ------------------------------------------------ clicks
-
-// What a hit touched: the mapped control on its node or a parent, or the
-// nearest mapped control within NEAR_M, or only the node it hit.
-function identify(hit) {
-  if (!hit) return { name: null, how: null }
-  for (const n of hit.chain) { const c = byNode.get(n.toLowerCase()); if (c) return { name: c.id, how: "on", node: hit.chain[0] } }
-  let near = null, nd = NEAR_M
-  for (const c of map.controls) {
-    const p = c.center ?? c.origin
-    const d = Math.hypot(p[0] - hit.point[0], p[1] - hit.point[1], p[2] - hit.point[2])
-    if (d < nd) { nd = d; near = c }
+const all = [...first, ...zoomed, ...resized]
+if (first.length >= 4) {
+  const fit = fitProjection(first)
+  const cm = (s, h) => (dist(s.target, s.origin) * Math.tan(rmsOf([s], h) * RAD) * 100).toFixed(1)
+  note("fit", `first pass: ${label(fit.params)}, RMS ${fit.rms.toFixed(2)}° over ${plural(first.length, "click")}`, { fit: { params: fit.params, rms: fit.rms, errors: fit.errors, runnerUp: fit.runnerUp } })
+  note("fit", `per spot, off by: ${first.map((s) => `${s.id} ${cm(s, fit.params)}cm`).join(", ")}`)
+  note("fit", `the next best signs, ${label(fit.runnerUp.params)}, RMS ${fit.runnerUp.rms.toFixed(2)}°; p19's ray RMS ${fit.p19.rms.toFixed(2)}°`)
+  // If CameraGet's fov is the view's width, k stays put; if it's the height,
+  // k follows the window's shape.
+  const k0 = fit.params.k
+  for (const [name, set] of [["first", first], ["zoomed", zoomed], ["resized", resized]]) {
+    if (!set.length) continue
+    const aspect = set[0].mouse.width / set[0].mouse.height
+    const own = fitK(set, fit.params)
+    note("pass", `${name}: fov ${deg(set[0].cam.fov)}°, window ${set[0].mouse.width}×${set[0].mouse.height} (${aspect.toFixed(3)}), ${plural(set.length, "click")}; the first pass's fit is off by RMS ${rmsOf(set, fit.params).toFixed(2)}° (${set.map((s) => `${cm(s, fit.params)}cm`).join(", ")}); its own k ${own.k.toFixed(3)}, where a fov that's the view's width predicts ${k0.toFixed(3)} and one that's its height ${(k0 * aspect / aspect0).toFixed(3)}`)
   }
-  if (near) return { name: near.id, how: "near", node: hit.chain[0], distance: nd }
-  return { name: hit.chain[0] ?? "an unnamed node", how: "unmapped", node: hit.chain[0] }
+  params = all.length > first.length ? fitProjection(all).params : fit.params
+  if (all.length > first.length) note("fit", `all passes: ${label(params)}, RMS ${rmsOf(all, params).toFixed(2)}° over ${plural(all.length, "click")}`)
+} else {
+  note("fit", `${plural(first.length, "click")} on spots in the first pass: too few to fit, so the clicks use p19's ray`)
 }
 
-setModule({ FWD: rest.forward, RIGHT: rest.right, UP: rest.up, COLOR: COLOR.rest, SCALE: SCALE.touching })
-let holdUntil = 0
+// ------------------------------------------------ press, hold, drag
+
+let grab = null
+let lingerUntil = 0
 let lastWheel = 0
-const touched = new Map()
-let clicks = 0
-onClick = (m) => {
-  const burst = m.kind === "wheel" && m.t - lastWheel < 600
-  if (m.kind === "wheel") lastWheel = m.t
+const holds = []
+const nodes = new Map()
+const pixels = (m, a) => Math.hypot((m.x - a.x) * m.width / 2, (m.y - a.y) * m.height / 2)
+onMouse = (m) => {
   const c = cam
   if (!c || m.t - c.t > 500) return
   const origin = camModel(c)
-  const dir = rayThrough(c, m, params)
-  const hit = cast(cockpit, origin, dir)
-  const res = identify(hit)
-  if (!burst) {
-    clicks++
-    touched.set(res.name ?? "nothing", (touched.get(res.name ?? "nothing") ?? 0) + 1)
-    rec.log("touch", `${m.kind} at ${m.x}, ${m.y}: ${res.name ?? "nothing"} (${res.how ?? "no hit"}${res.node && res.how !== "on" ? `, hit ${res.node}` : ""})`, { mouse: m, cam: c, origin, dir, hit: hit && { point: hit.point, distance: hit.distance, chain: hit.chain }, res })
-    console.log(`  ${m.kind === "left" ? "click" : "wheel"}: ${res.name ?? "nothing"}${res.how === "near" ? ` (near, hit ${res.node})` : res.how === "unmapped" ? " (not a mapped control)" : ""}`)
+  if (m.kind === "left" || m.kind === "wheel") {
+    if (m.kind === "wheel" && m.t - lastWheel < 600) { lastWheel = m.t; lingerUntil = Date.now() + LINGER_MS.wheel; return }
+    if (m.kind === "wheel") lastWheel = m.t
+    const dir = rayThrough(c, m, params)
+    const hit = cast(cockpit, origin, dir)
+    const node = hit?.chain[0] ?? "nothing"
+    nodes.set(node, (nodes.get(node) ?? 0) + 1)
+    rec.log(m.kind === "left" ? "press" : "wheel", `${m.kind} at ${m.x}, ${m.y}: ${node}${hit ? ` at ${hit.distance.toFixed(3)}m` : ""}`, { mouse: m, cam: c, origin, dir, hit: hit && { point: hit.point, normal: hit.normal, distance: hit.distance, chain: hit.chain } })
+    console.log(`  ${m.kind === "left" ? "press" : "wheel"}: ${node}`)
+    if (!hit) return
+    touch(hit.point, hit.normal)
+    if (m.kind === "wheel") { lingerUntil = Date.now() + LINGER_MS.wheel; return }
+    grab = { t0: m.t, start: m, point: hit.point, normal: hit.normal, distance: hit.distance, node, hand: hit.point, cursorPx: 0, rawX: 0, rawY: 0, path: [] }
+    lingerUntil = 0
+    return
   }
-  if (!hit) return
-  const n = Math.hypot(...dir)
-  const p = hit.point.map((x, k) => x - (dir[k] / n) * radius(SCALE.touching))
-  const f = modelToFrame(p)
-  setModule({ FWD: f.forward, RIGHT: f.right, UP: f.up, COLOR: COLOR.touching })
-  holdUntil = Date.now() + HOLD_MS
+  if (!grab) return
+  if (m.kind === "move") {
+    const dir = rayThrough(c, m, params)
+    const n = Math.hypot(...dir)
+    const onPlane = crossPlane(origin, dir, grab.point, grab.normal)
+    const recast = cast(cockpit, origin, dir)
+    const fixed = origin.map((x, k) => x + (dir[k] / n) * grab.distance)
+    if (onPlane) { grab.hand = onPlane; touch(onPlane, grab.normal) }
+    grab.cursorPx = Math.max(grab.cursorPx, pixels(m, grab.start))
+    grab.rawX += m.dx
+    grab.rawY += m.dy
+    grab.path.push({ t: m.t, x: m.x, y: m.y, dx: m.dx, dy: m.dy, onPlane, recast: recast?.point ?? null, recastNode: recast?.chain[0] ?? null, fixed })
+  } else if (m.kind === "leftup") {
+    const ms = m.t - grab.t0
+    const raw = Math.hypot(grab.rawX, grab.rawY)
+    const dragged = grab.cursorPx >= DRAG_PX || raw >= DRAG_COUNTS
+    const kind = dragged ? "drag" : ms < TAP_MS ? "tap" : "hold"
+    const moved = grab.path.filter((p) => p.onPlane)
+    const travel = moved.length ? dist(moved[0].onPlane, moved[moved.length - 1].onPlane) : 0
+    const recastGap = moved.filter((p) => p.recast).map((p) => dist(p.onPlane, p.recast))
+    const hold = { kind, node: grab.node, ms, cursorPx: grab.cursorPx, raw, travel, recastGap: recastGap.length ? median(recastGap) : null, moves: grab.path.length }
+    holds.push(hold)
+    rec.log("release", `${kind} on ${grab.node}: ${ms}ms, the cursor moved up to ${grab.cursorPx.toFixed(0)}px and the mouse ${raw.toFixed(0)} counts; the hand slid ${(travel * 100).toFixed(1)}cm on the plane${hold.recastGap !== null ? `, a fresh cast ${(hold.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`, { ...hold, path: grab.path })
+    if (kind !== "tap") console.log(`  ${kind} on ${grab.node}: ${(ms / 1000).toFixed(1)}s, cursor ${grab.cursorPx.toFixed(0)}px, mouse ${raw.toFixed(0)} counts`)
+    grab = null
+    lingerUntil = Date.now() + LINGER_MS.release
+  }
 }
 const tick = setInterval(() => {
-  if (holdUntil && Date.now() > holdUntil) {
-    holdUntil = 0
-    setModule({ FWD: rest.forward, RIGHT: rest.right, UP: rest.up, COLOR: COLOR.rest })
-  }
+  if (!grab && lingerUntil && Date.now() > lingerUntil) { lingerUntil = 0; toRest() }
 }, 50)
-console.log(`\n▶ Click the Comanche's controls\n  The console names what each click hit, and the sphere turns green on it for ${HOLD_MS / 1000}s. ${SKIP} ends.`)
+
+console.log(`\n▶ Click, hold, and drag anywhere in the cockpit\n  Switches, knobs, levers, the yoke, the panel itself. The sphere goes where you press, slides with a drag, and goes back to rest ${LINGER_MS.release / 1000}s after you let go. The console names the node each press hit. ${SKIP} ends.`)
 beep(1000, 100)
 const why = await new Promise((resolve) => {
   onSkip = () => resolve("Page Up")
@@ -308,5 +387,7 @@ const why = await new Promise((resolve) => {
 })
 clearInterval(tick)
 clearInterval(poll)
-note("clicks", `${plural(clicks, "touch", "touches")} in the sim, ${plural(outside, "click")} outside it: ${[...touched].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
+const count = (k) => holds.filter((h) => h.kind === k)
+note("presses", `${plural(holds.length, "press", "presses")} in the sim (${count("tap").length} taps, ${count("hold").length} holds, ${count("drag").length} drags), ${plural(outside, "click")} outside it; nodes hit: ${[...nodes].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
+for (const h of count("drag").slice(0, 12)) note("drag", `on ${h.node}: ${(h.ms / 1000).toFixed(1)}s, the cursor moved up to ${h.cursorPx.toFixed(0)}px while the mouse moved ${h.raw.toFixed(0)} counts; the hand slid ${(h.travel * 100).toFixed(1)}cm on the plane${h.recastGap !== null ? `, and a fresh cast was ${(h.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`)
 await finish(why)

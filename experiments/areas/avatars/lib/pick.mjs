@@ -60,6 +60,13 @@ function search(samples, base, ks, pbs, ybs) {
 }
 const steps = (from, to, step) => Array.from({ length: Math.round((to - from) / step) + 1 }, (_, i) => from + i * step)
 
+// k alone, with the signs and biases of base: how the view's width relates to
+// CameraGet's fov in one set of clicks, to compare across zooms and windows.
+export function fitK(samples, base) {
+  return search(samples, base, steps(0.3, 3.5, 0.002), [base.pitchBias], [base.yawBias])
+}
+export const rmsOf = rms
+
 // Every sign combination, a coarse grid of k and the biases, then a finer one
 // around the best.
 export function fitProjection(samples) {

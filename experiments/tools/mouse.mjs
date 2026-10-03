@@ -1,13 +1,19 @@
 /*
- * The pilot's mouse presses and wheel turns in the sim window, for a probe:
+ * The pilot's mouse presses, drags, and wheel turns in the sim window, for a
+ * probe:
  *
  *   const stop = await startMouse((m) => …)
- *     m: { kind: "left" | "right" | "middle" | "wheel", delta, x, y, width, height, foreground, t }
+ *     m: { kind, delta, x, y, width, height, foreground, dx, dy, t }
  *
+ * kind is "left", "leftup", "right", "middle", or "wheel"; "move", at most
+ * every 16ms while the left button is held; or "size", when the sim window's
+ * client area changes size, checked whenever the mouse does anything.
  * x and y are where the cursor was in the sim window's client area, from -1 to
  * 1, right and up; width and height are that area in pixels; foreground is
  * whether the sim had the focus. Wheel deltas are in Windows' units, 120 a
- * notch, positive away from the pilot.
+ * notch, positive away from the pilot. dx and dy are the mouse's own movement
+ * since the last "move", in its counts, which keep coming when an application
+ * holds the cursor still.
  *
  * It reads Raw Input with RIDEV_INPUTSINK, a copy Windows sends to any window
  * that registers for it, so it sits in nobody's input path: unlike a
@@ -42,6 +48,9 @@ public class CrosscheckMouse : NativeWindow {
 
   IntPtr sim = IntPtr.Zero;
   uint simPid = 0;
+  bool leftDown = false;
+  int dx = 0, dy = 0, lastW = -1, lastH = -1;
+  Stopwatch sinceMove = Stopwatch.StartNew();
 
   public CrosscheckMouse() {
     CreateHandle(new CreateParams());
@@ -60,14 +69,22 @@ public class CrosscheckMouse : NativeWindow {
 
   void Emit(string kind, int delta) {
     FindSim();
-    if (sim == IntPtr.Zero) { Console.Out.WriteLine("M " + kind + " " + delta + " 0 0 0 0 0"); return; }
+    if (sim == IntPtr.Zero) { Console.Out.WriteLine("M " + kind + " " + delta + " 0 0 0 0 0 0 0"); return; }
     RECT r; GetClientRect(sim, out r);
     var o = new POINT(); ClientToScreen(sim, ref o);
     POINT c; GetCursorPos(out c);
     int w = r.R - r.L, h = r.B - r.T;
     uint fg; GetWindowThreadProcessId(GetForegroundWindow(), out fg);
     double x = w > 0 ? 2.0 * (c.X - o.X) / w - 1 : 0, y = h > 0 ? 1 - 2.0 * (c.Y - o.Y) / h : 0;
-    Console.Out.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "M {0} {1} {2:F4} {3:F4} {4} {5} {6}", kind, delta, x, y, w, h, fg == simPid ? 1 : 0));
+    Console.Out.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "M {0} {1} {2:F4} {3:F4} {4} {5} {6} {7} {8}", kind, delta, x, y, w, h, fg == simPid ? 1 : 0, dx, dy));
+    lastW = w; lastH = h;
+  }
+
+  void CheckSize() {
+    FindSim();
+    if (sim == IntPtr.Zero) return;
+    RECT r; GetClientRect(sim, out r);
+    if (r.R - r.L != lastW || r.B - r.T != lastH) Emit("size", 0);
   }
 
   protected override void WndProc(ref Message m) {
@@ -77,13 +94,21 @@ public class CrosscheckMouse : NativeWindow {
       IntPtr buf = Marshal.AllocHGlobal((int)size);
       try {
         if (GetRawInputData(m.LParam, 0x10000003, buf, ref size, hs) == size && Marshal.ReadInt32(buf) == 0) {
-          // RAWMOUSE after the header: usFlags, then usButtonFlags at +4 and usButtonData at +6.
+          // RAWMOUSE after the header: usFlags at +0, usButtonFlags at +4,
+          // usButtonData at +6, and lLastX and lLastY at +12 and +16, relative
+          // unless usFlags has MOUSE_MOVE_ABSOLUTE (1).
+          int moveFlags = (ushort)Marshal.ReadInt16(buf, (int)hs);
           int flags = (ushort)Marshal.ReadInt16(buf, (int)hs + 4);
           short data = Marshal.ReadInt16(buf, (int)hs + 6);
-          if ((flags & 0x0001) != 0) Emit("left", 0);
+          if ((moveFlags & 1) == 0) { dx += Marshal.ReadInt32(buf, (int)hs + 12); dy += Marshal.ReadInt32(buf, (int)hs + 16); }
+          if ((flags & 0x0001) != 0) { leftDown = true; dx = 0; dy = 0; Emit("left", 0); sinceMove.Restart(); }
+          if ((flags & 0x0002) != 0) { leftDown = false; Emit("leftup", 0); dx = 0; dy = 0; }
           if ((flags & 0x0004) != 0) Emit("right", 0);
           if ((flags & 0x0010) != 0) Emit("middle", 0);
           if ((flags & 0x0400) != 0) Emit("wheel", data);
+          if (leftDown && sinceMove.ElapsedMilliseconds >= 16) { Emit("move", 0); dx = 0; dy = 0; sinceMove.Restart(); }
+          if (!leftDown) { dx = 0; dy = 0; }
+          CheckSize();
         }
       } finally { Marshal.FreeHGlobal(buf); }
     }
@@ -108,8 +133,8 @@ export function startMouse(onMouse) {
       if (l === "READY") return ready(stop)
       if (l.startsWith("ERROR")) return fail(new Error(`the mouse reader: ${l}`))
       if (!l.startsWith("M ")) return
-      const [, kind, delta, x, y, width, height, fg] = l.split(" ")
-      onMouse({ kind, delta: Number(delta), x: Number(x), y: Number(y), width: Number(width), height: Number(height), foreground: fg === "1", t: Date.now() })
+      const [, kind, delta, x, y, width, height, fg, dx, dy] = l.split(" ")
+      onMouse({ kind, delta: Number(delta), x: Number(x), y: Number(y), width: Number(width), height: Number(height), foreground: fg === "1", dx: Number(dx), dy: Number(dy), t: Date.now() })
     })
   })
 }

@@ -1,0 +1,9 @@
+p17 · A hand sphere of our own: size and color from outside, and the cursor ray, on MSFS 2024
+2026-10-03T07:26:05.927Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Ctrl+C
+
+  crosscheck-p12-follow is running; fsCameraGet answers: p 9.258029, b -20.357618, h 5.495489, fov 0.859071
+  aircraft TITLE "Cessna C152 Aerial Advertising"
+  CROSSCHECK_HandSphere: object 53067776, StaticObject
+  the module read the sphere's Z:CROSSCHECK_SCALE back as 92.683333, 94.766667, 97.1; module errors 0
+  ahead: p 2.569133, b -90.855356; looking up: p 2.546323; looking right: b -103.197743; so up is −p and right is −b

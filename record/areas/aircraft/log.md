@@ -3,6 +3,33 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-03: A SimConnect client moves the pilot's camera to the copilot's seat by releasing the camera into the aircraft's copilot view
+
+**Asked:** can Crosscheck move a pilot's cockpit camera to another seat, so it can seat the pilot itself rather than tell them to move?
+
+**Expected:** unknown.
+Setting `A:CAMERA STATE` didn't stick ([entry below](#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)), and nothing in our records had called the camera functions that set it.
+
+**Found:** p04 ran in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, once with ChasePlane 26.39.1 driving the camera and twice with ChasePlane disabled in its own settings.
+`SimConnect_CameraGet`'s `SIMOBJECT` position put the pilot's eye 0.253m left of the reference point, 0.855m up, and 0.144m behind it.
+
+- `SimConnect_EnumerateCameraDefinitions` listed the aircraft's 32 camera definitions, among them `Pilot`, `CoPilot`, `CabinForward`, `CabinRearward`, and `PilotVR`.
+- `SimConnect_CameraSetUsingCameraDefinition` raised the exception `CAMERA_API` (46) unless our client held the camera.
+  Holding it, `CoPilot` moved the eye to 0.236m right, 0.811m up, and 0.116m behind the reference point.
+- `SimConnect_CameraAcquire` took the camera from ChasePlane as well as from the sim, and `SimConnect_CameraSet` put the eye exactly where we asked, 0.253m right.
+- `SimConnect_CameraRelease` with an empty name put the eye back in the left seat within 1s.
+  With ChasePlane on, ChasePlane took the camera back, and `SimConnect_CameraGetStatus` read `ACQUIRED_BY_OTHER` again.
+- With ChasePlane disabled, `SimConnect_CameraRelease` with `CoPilot` left the eye in the copilot's view, and it was still there 3s later, with the status `NOT_ACQUIRED`.
+  Releasing with `Pilot` brought it back to the left seat.
+  Whether the pilot's mouse look works as usual after the move is unmeasured, and so is what ChasePlane does after a release into `CoPilot`.
+
+**Changed:** with the sim's own camera, Crosscheck can seat a pilot in any seat the aircraft has a camera definition for, and hand the camera back.
+A seat with no camera definition would need Crosscheck to keep holding the camera, which takes it from the pilot and from ChasePlane.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), whose open question on placing the camera at a seat this answers for the sim's own camera, and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** p04's runs [with ChasePlane](../../../experiments/areas/aircraft/results/p04-camera-seat-2026-10-03-21-01-10.txt), [without it](../../../experiments/areas/aircraft/results/p04-camera-seat-2026-10-03-21-03-45.txt), and [without it, releasing into a definition](../../../experiments/areas/aircraft/results/p04-camera-seat-2026-10-03-21-04-19.txt).
+
 ## 2026-10-03: The Baron 58P lists only its pilot's seat, because the seat objects are the seats in each aircraft's navigation graph
 
 **Asked:** does the Black Square Baron 58P, v1's aircraft, list seat objects for both front seats, so the other pilot's figure can sit in the right seat with no seat named in the profile?

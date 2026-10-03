@@ -1,0 +1,16 @@
+p04 · Moving the cockpit camera to another seat through SimConnect, on MSFS 2024
+2026-10-03T21:01:10.242Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"
+Start: x 0.253m (left +), y 0.855m, z -0.144m; camera ACQUIRED_BY_OTHER
+Camera definitions: "Pilot", "CoPilot", "LeftPanel", "RightPanel", "LeftSubpanel", "RightSubpanel", "ThrottleQuadrant", "Pedestal", "CircuitBreakerPanel", "EmergencyGearExtension", "CabinRearward", "CabinForward", "QuickView_L1", "QuickView_L2", "QuickView_L3", "QuickView_R1", "QuickView_R2", "QuickView_R3", "QuickView_Rear", "QuickView_Up", "FixedOnPlane_Tail", "FixedOnPlane_Left_Wing", "FixedOnPlane_Right_Wing", "FixedOnPlane_Belly", "FixedOnPlane_Flaps", "FixedOnPlane_Ailerons", "FixedOnPlane_Elevator", "FixedOnPlane_Rudder", "FixedOnPlane_LandingGear", "FixedOnPlane_Propeller", "PilotVR", "ShadowsQuality"
+A, after the definition "CoPilot": x 0.253m (left +), y 0.854m, z -0.143m, the starting seat; camera ACQUIRED_BY_OTHER
+A, after the definition "Pilot": x 0.253m (left +), y 0.854m, z -0.143m, the starting seat; camera ACQUIRED_BY_OTHER
+B, after the acquire: x 0.253m (left +), y 0.855m, z -0.143m, the starting seat; camera ACQUIRED
+B, after the set to the mirrored eye: x -0.253m (left +), y 0.855m, z -0.144m, the mirrored seat; camera ACQUIRED
+B, 1s after the release: x 0.253m (left +), y 0.855m, z -0.144m, the starting seat; camera ACQUIRED_BY_OTHER
+B, 3s after the release: x 0.253m (left +), y 0.855m, z -0.144m, the starting seat; camera ACQUIRED_BY_OTHER
+After putting it back: x 0.253m (left +), y 0.854m, z -0.143m, the starting seat; camera ACQUIRED_BY_OTHER
+
+Status updates: ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER
+Exceptions: CAMERA_API (46) on camera set using definition CoPilot, parameter 4294967295; CAMERA_API (46) on camera set using definition Pilot, parameter 4294967295

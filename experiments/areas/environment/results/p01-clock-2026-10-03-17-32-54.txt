@@ -1,0 +1,17 @@
+p01 · The sim's pauses, simulation rate, and time of day from SimConnect, on MSFS 2024
+2026-10-03T17:32:54.726Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Tour, Open the pause menu (Esc): 8 (sim pause); clock ran at 1.00x while on, 1.00x after undoing (0 (none))
+Tour, Turn active pause on: 4 (active pause); clock ran at 0.32x while on, 0.70x after undoing (0 (none))
+Tour, Press the key you use to pause, if it isn't the menu: 4 (active pause); clock ran at 1.00x while on, 0.55x after undoing (0 (none))
+Tour, Open the EFB (Tab): no Pause_EX1; clock ran at 1.00x while on, 1.00x after undoing (no Pause_EX1)
+Tour, Open photo mode: no Pause_EX1; clock ran at 1.00x while on, 1.00x after undoing (no Pause_EX1)
+K:PAUSE_SET 1: 1 (full pause), clock at —x; K:PAUSE_SET 0: 0 (none), clock at 1.00x
+Simulation rate from 1: SIM_RATE_INCR → 2, SIM_RATE_INCR → 4, SIM_RATE_SET 1 → 4, SIM_RATE_INCR → 8, SIM_RATE_SET 256 → 8, put back → 1
+K:ZULU_HOURS_SET 20: before zulu 17:34:07, local 11:34:07, 2026-10-03; after 1s zulu 20:34:08, local 14:34:08, 2026-10-03; after 5s zulu 20:34:12, local 14:34:12, 2026-10-03; at the end zulu 20:34:26, local 14:34:26, 2026-10-03
+K:ZULU_MINUTES_SET 51: before zulu 20:34:26, local 14:34:26, 2026-10-03; after 1s zulu 20:51:28, local 14:51:28, 2026-10-03; after 5s zulu 20:51:32, local 14:51:32, 2026-10-03; at the end zulu 20:51:41, local 14:51:41, 2026-10-03
+K:CLOCK_HOURS_SET 16: before zulu 20:51:41, local 14:51:41, 2026-10-03; after 1s zulu 22:51:43, local 16:51:43, 2026-10-03; after 5s zulu 22:51:47, local 16:51:47, 2026-10-03; at the end zulu 22:51:56, local 16:51:56, 2026-10-03
+Put back: rate 1, zulu 17:32:57 on 2026-10-03, against 1 and 17:32:51 on 2026-10-03 at the start
+
+Every Pause_EX1: Open the pause menu (Esc): 8 (sim pause); Open the pause menu (Esc), undone: 0 (none); Turn active pause on: 4 (active pause); Turn active pause on, undone: 0 (none); Press the key you use to pause, if it isn't the menu: 4 (active pause); Press the key you use to pause, if it isn't the menu, undone: 0 (none); PAUSE_SET 1: 1 (full pause); PAUSE_SET 0: 0 (none)
+Exceptions: none

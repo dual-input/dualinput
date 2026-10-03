@@ -7,6 +7,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/commbus/log.md](areas/commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220, the A2A PA-24, and the iniBuilds A350.
 - [areas/aircraft/plan.md](areas/aircraft/plan.md): how the aircraft we fly are built, studied from their files, then checked in the sim.
 - [areas/flight-controls/log.md](areas/flight-controls/log.md): what our experiments found about keeping a pilot's own flight controls out of the sim by masking key events.
+- [areas/environment/log.md](areas/environment/log.md): what our experiments found about the sim's pause, simulation rate, and time of day, and setting them from SimConnect.
 - [areas/flight-model/log.md](areas/flight-model/log.md): what our experiments found about a following machine setting a frozen aircraft from the flying machine's values, on the Black Square Baron 58P.
 - [areas/avatars/log.md](areas/avatars/log.md): what our experiments found about reading the pilot's avatar and showing a figure in its place on the other machine, with its hand where the pilot clicks.
 - [areas/avatars/decisions.md](areas/avatars/decisions.md): what those experiments have settled for now about the figure's hands, and on what findings.

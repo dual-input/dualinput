@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One asset group, the module; it replaces no file the sim or another package owns. -->
-<AssetPackage Version="0.4.0">
+<!--
+  Two asset groups, the module and the hand sphere, a SimObject that
+  fspackagetool compiles. Neither replaces a file the sim or another package
+  owns.
+-->
+<AssetPackage Version="0.5.0">
 	<ItemSettings>
 		<ContentType>MISC</ContentType>
 		<Title>Crosscheck p12 follow probe</Title>
@@ -19,6 +23,14 @@
 			</Flags>
 			<AssetDir>PackageSources\Modules\</AssetDir>
 			<OutputDir>modules\</OutputDir>
+		</AssetGroup>
+		<AssetGroup Name="CROSSCHECK_HandSphere">
+			<Type Version="0">SimObject</Type>
+			<Flags>
+				<FSXCompatibility>false</FSXCompatibility>
+			</Flags>
+			<AssetDir>PackageSources\SimObjects\Misc\CROSSCHECK_HandSphere\</AssetDir>
+			<OutputDir>SimObjects\Misc\CROSSCHECK_HandSphere\</OutputDir>
 		</AssetGroup>
 	</AssetGroups>
 </AssetPackage>

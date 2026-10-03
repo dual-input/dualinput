@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  The hand sphere: size from the object's own CROSSCHECK_SCALE (0 to 100, 2cm
+  to 20cm), color from its own CROSSCHECK_COLOR (0 red, 1 green, 2 blue,
+  3 yellow). Both are per-object variables the WASM module sets on this
+  object. The two use the two spellings MSFS_Vars.h gives them, Z: and L:1:,
+  so a run shows which one a model reads. The animation markup follows GSX's
+  people (read in fsdreamteam-gsx-pro 4.0.19, FSDT_Passengers).
+-->
+<ModelInfo version="1.1" guid="{7d2a1c94-3e6b-4f0a-9b51-2c8e4d6f1a37}">
+	<LODS>
+		<LOD MinSize="0" ModelFile="CROSSCHECK_HandSphere.gltf"/>
+	</LODS>
+	<Animation name="CROSSCHECK_Scale" guid="{5f1e9b20-8c47-4d3a-a6e2-91b0c7d4e358}" type="Sim" />
+	<Behaviors>
+		<Include ModelBehaviorFile="Asobo\Generic.xml"/>
+		<Component ID="CROSSCHECK_Scale">
+			<UseTemplate Name="ASOBO_GT_Anim_Code">
+				<ANIM_LENGTH>100</ANIM_LENGTH>
+				<ANIM_NAME>CROSSCHECK_Scale</ANIM_NAME>
+				<ANIM_CODE>(Z:CROSSCHECK_SCALE)</ANIM_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="CROSSCHECK_Color_0" Node="ball_0">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(L:1:CROSSCHECK_COLOR) 0 ==</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="CROSSCHECK_Color_1" Node="ball_1">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(L:1:CROSSCHECK_COLOR) 1 ==</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="CROSSCHECK_Color_2" Node="ball_2">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(L:1:CROSSCHECK_COLOR) 2 ==</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+		<Component ID="CROSSCHECK_Color_3" Node="ball_3">
+			<UseTemplate Name="ASOBO_GT_Visibility_Code">
+				<VISIBILITY_CODE>(L:1:CROSSCHECK_COLOR) 3 ==</VISIBILITY_CODE>
+			</UseTemplate>
+		</Component>
+	</Behaviors>
+</ModelInfo>

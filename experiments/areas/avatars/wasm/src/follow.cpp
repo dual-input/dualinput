@@ -44,12 +44,31 @@
  * in meters, P and N for the sign of pitch then bank. The sim carries the seat
  * object through pitch and roll itself, so the pair near zero is the
  * convention, and NOW against PREV says which frame's pose the seat follows.
+ *
+ * From 0.5.0, for the hand sphere (CROSSCHECK_HandSphere, in this package):
+ *
+ *   SCALE, COLOR   copied every frame onto the object's own Z: variables,
+ *            CROSSCHECK_SCALE (0 to 100) and CROSSCHECK_COLOR (0 to 3), which
+ *            the sphere's model reads; Z_SCALE_READ reads the first one back
+ *   MODE 4   on the cursor ray: RAY_DIST meters from the camera, through the
+ *            point RAY_X, RAY_Y on the screen (-1 to 1, right and up), with
+ *            the screen's width over height in RAY_ASPECT and the camera's
+ *            field of view taken as vertical, or horizontal if FOV_IS_H is 1
+ *   MODE 5   held where it was: on entering, the module turns the last ray
+ *            point into an offset from the aircraft, puts it in FWD, RIGHT,
+ *            and UP, and carries on as mode 1
+ *   CAM_PITCH_SIGN, CAM_YAW_SIGN   +1 or -1, turning the camera's pitch to
+ *            nose up positive and its yaw to right positive
+ *
+ * and it writes the camera's world pose, read inside the frame, to CAM_P,
+ * CAM_B, CAM_H (FsPBH's three fields, degrees), CAM_FOV, and CAM_OK.
  */
 
 #include <MSFS/MSFS.h>
 // DWORD and HANDLE, which SimConnect.h assumes (fsc-editor, link/src/module.cpp).
 #include <MSFS/MSFS_WindowsTypes.h>
 #include <MSFS/MSFS_Vars.h>
+#include <MSFS/MSFS_Camera.h>
 #include <SimConnect.h>
 #include <cmath>
 #include <cstdio>
@@ -90,6 +109,18 @@ const double CAL_WEIGHT = 0.02;
 // The aircraft's pose in the previous frame, for the lead and the calibration.
 Pos  prev{};
 bool have_prev = false;
+
+FsLVarId l_scale, l_color, l_z_scale_read, l_cam_p, l_cam_b, l_cam_h, l_cam_fov, l_cam_ok;
+FsLVarId l_ray_x, l_ray_y, l_ray_dist, l_ray_aspect, l_fov_is_h, l_cam_pitch_sign, l_cam_yaw_sign;
+
+// The object's own Z: variables, registered again when the object changes.
+double   z_target = 0;
+FsZVarId z_scale = -1, z_color = -1;
+
+// The last ray point and the aircraft pose of the same frame, for mode 5.
+Pos  last_ray{}, last_ray_aircraft{};
+bool have_ray  = false;
+int  last_mode = 0;
 
 double get(FsLVarId id)
 {
@@ -144,6 +175,26 @@ Pos place(const Pos& a, double fwd, double right, double up, double sign_pitch, 
     const double east  = std::sin(ps) * x2 + std::cos(ps) * y1;
     return Pos{a.lat + (north / EARTH_M) / RAD, a.lon + (east / (EARTH_M * std::cos(a.lat * RAD))) / RAD,
                a.alt - z2 / FT, a.hdg, a.pitch, a.bank};
+}
+
+// The inverse of place: where p is from a, in a's own frame, forward, right,
+// and up, turned back through bank, pitch, and heading.
+void body_full(const Pos& a, const Pos& p, double sign_pitch, double sign_bank, double& fwd, double& right, double& up)
+{
+    const double north = (p.lat - a.lat) * RAD * EARTH_M;
+    const double east  = (p.lon - a.lon) * RAD * EARTH_M * std::cos(a.lat * RAD);
+    const double down  = -(p.alt - a.alt) * FT;
+    const double th = sign_pitch * a.pitch * RAD;
+    const double ph = sign_bank * a.bank * RAD;
+    const double ps = a.hdg * RAD;
+    // Undo the yaw, then the pitch, then the roll.
+    const double x2 = std::cos(ps) * north + std::sin(ps) * east;
+    const double y1 = -std::sin(ps) * north + std::cos(ps) * east;
+    const double x1 = std::cos(th) * x2 - std::sin(th) * down;
+    const double z1 = std::sin(th) * x2 + std::cos(th) * down;
+    fwd             = x1;
+    right           = std::cos(ph) * y1 + std::sin(ph) * z1;
+    up              = -(-std::sin(ph) * y1 + std::cos(ph) * z1);
 }
 
 // Meters between two positions.
@@ -230,6 +281,21 @@ extern "C" MSFS_CALLBACK void module_init(void)
     l_cal_right  = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_RIGHT");
     l_cal_up     = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_UP");
     l_cal_reset  = fsVarsRegisterLVar("CROSSCHECK_P12_CAL_RESET");
+    l_scale          = fsVarsRegisterLVar("CROSSCHECK_P12_SCALE");
+    l_color          = fsVarsRegisterLVar("CROSSCHECK_P12_COLOR");
+    l_z_scale_read   = fsVarsRegisterLVar("CROSSCHECK_P12_Z_SCALE_READ");
+    l_cam_p          = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_P");
+    l_cam_b          = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_B");
+    l_cam_h          = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_H");
+    l_cam_fov        = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_FOV");
+    l_cam_ok         = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_OK");
+    l_ray_x          = fsVarsRegisterLVar("CROSSCHECK_P12_RAY_X");
+    l_ray_y          = fsVarsRegisterLVar("CROSSCHECK_P12_RAY_Y");
+    l_ray_dist       = fsVarsRegisterLVar("CROSSCHECK_P12_RAY_DIST");
+    l_ray_aspect     = fsVarsRegisterLVar("CROSSCHECK_P12_RAY_ASPECT");
+    l_fov_is_h       = fsVarsRegisterLVar("CROSSCHECK_P12_FOV_IS_H");
+    l_cam_pitch_sign = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_PITCH_SIGN");
+    l_cam_yaw_sign   = fsVarsRegisterLVar("CROSSCHECK_P12_CAM_YAW_SIGN");
     for (int i = 0; i < 4; i++)
     {
         char name[48];
@@ -318,18 +384,89 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
     prev      = a;
     have_prev = have_aircraft;
 
-    if (mode == 0 || object <= 0) return;
+    // The camera's world pose: position as latitude, longitude, and altitude
+    // in meters (p06, record/areas/avatars/log.md).
+    FsCameraData cam{};
+    const bool   have_cam = fsCameraGet(FS_POSITION_REFERENTIAL_WORLD, &cam);
+    put(l_cam_ok, have_cam ? 1 : 0);
+    if (have_cam)
+    {
+        put(l_cam_p, cam.pbh.p);
+        put(l_cam_b, cam.pbh.b);
+        put(l_cam_h, cam.pbh.h);
+        put(l_cam_fov, cam.fov);
+    }
+
+    // The point on the ray through the cursor, RAY_DIST from the camera.
+    if (have_cam && have_aircraft)
+    {
+        const double aspect = get(l_ray_aspect) > 0 ? get(l_ray_aspect) : 16.0 / 9.0;
+        const double half   = std::tan(cam.fov / 2);
+        const double tv     = get(l_fov_is_h) != 0 ? half / aspect : half;
+        const double th     = get(l_fov_is_h) != 0 ? half : half * aspect;
+        const double cr = get(l_ray_x) * th, cu = get(l_ray_y) * tv;
+        const double n    = std::sqrt(1 + cr * cr + cu * cu);
+        const double dist = get(l_ray_dist) > 0 ? get(l_ray_dist) : 0.7;
+        const Pos    c{cam.position.x, cam.position.y, cam.position.z / FT, get(l_cam_yaw_sign) * cam.pbh.b,
+                    get(l_cam_pitch_sign) * cam.pbh.p, 0};
+        last_ray          = place(c, dist / n, dist * cr / n, dist * cu / n, 1, 0);
+        last_ray_aircraft = a;
+        have_ray          = true;
+    }
+
+    if (mode == 0 || object <= 0)
+    {
+        last_mode = mode;
+        return;
+    }
     if (!have_aircraft)
     {
         fail(-1);
         return;
     }
     const FsObjectId target = static_cast<FsObjectId>(object);
+
+    // The object's own Z: variables, for the sphere's size and color.
+    if (object != z_target)
+    {
+        z_scale  = fsVarsRegisterZVar("CROSSCHECK_SCALE", target);
+        z_color  = fsVarsRegisterZVar("CROSSCHECK_COLOR", target);
+        z_target = object;
+    }
+    if (fsVarsZVarSet(z_scale, u_number, get(l_scale), target) != FS_VAR_ERROR_NONE) fail(3000);
+    if (fsVarsZVarSet(z_color, u_number, get(l_color), target) != FS_VAR_ERROR_NONE) fail(3001);
+    double z_read = -1;
+    (void)fsVarsZVarGet(z_scale, u_number, &z_read, target);
+    put(l_z_scale_read, z_read);
+
+    // Entering mode 5: the last ray point, as an offset from the aircraft of
+    // the same frame, then carried on as mode 1.
+    if (mode == 5 && last_mode != 5 && have_ray)
+    {
+        double f, r, u;
+        body_full(last_ray_aircraft, last_ray, get(l_sign_pitch), get(l_sign_bank), f, r, u);
+        put(l_fwd, f);
+        put(l_right, r);
+        put(l_up, u);
+    }
+    last_mode = mode;
+
     const Pos p = place(a_ahead, get(l_fwd), get(l_right), get(l_up), get(l_sign_pitch), get(l_sign_bank));
 
-    if (mode == 1)
+    if (mode == 1 || mode == 5)
     {
         (void)write_pose(target, p);
+    }
+    else if (mode == 4)
+    {
+        if (!have_ray)
+        {
+            fail(-4);
+            return;
+        }
+        // Carried on with the aircraft, as the seat placement is.
+        (void)write_pose(target, Pos{last_ray.lat + (a_ahead.lat - a.lat), last_ray.lon + (a_ahead.lon - a.lon),
+                                     last_ray.alt + (a_ahead.alt - a.alt), a.hdg, a.pitch, a.bank});
     }
     else if (mode == 3)
     {

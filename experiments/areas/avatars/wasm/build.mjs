@@ -98,6 +98,10 @@ console.log(`exports OK: all ${REQUIRED.length} present`)
 
 // ------------------------------------------------ 3. the package
 
+// The hand sphere's glTF is generated, so it's written fresh for each build.
+const s = spawnSync(process.execPath, [path.join(HERE, "tools", "sphere.mjs")], { stdio: "inherit" })
+if (s.status !== 0) die("tools/sphere.mjs failed.")
+
 console.log("packaging (fspackagetool)...")
 const p = spawnSync(PACKAGE_TOOL, [path.join(HERE, "project.xml"), "-nopause"], { stdio: "inherit", cwd: HERE })
 if (p.status !== 0 || !fs.existsSync(path.join(BUILT, "manifest.json"))) die(`fspackagetool wrote no package at ${BUILT}.`)

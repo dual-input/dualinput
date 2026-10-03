@@ -4,3 +4,6 @@ Packages/
 PackagesMetadata/
 _PackageInt/
 PackageSources/Modules/*.wasm
+# Written by tools/sphere.mjs at build time.
+PackageSources/SimObjects/Misc/CROSSCHECK_HandSphere/model/*.gltf
+PackageSources/SimObjects/Misc/CROSSCHECK_HandSphere/model/*.bin

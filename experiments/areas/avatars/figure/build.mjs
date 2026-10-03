@@ -31,7 +31,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { CHANNELS, FRAMES, animCode, buildGltf, colorChannel, variable } from "./model.mjs"
+import { CHANNELS, FRAMES, animCode, buildGltf, colorChannel, variable, visibilityCode } from "./model.mjs"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const OUT = path.join(HERE, "package")
@@ -92,7 +92,8 @@ process.argv.forEach((arg, i) => {
   owner[keys.at(-1)] = Number(value)
   console.log(`--set ${key} = ${value} for this build only`)
 })
-const { json, bin } = buildGltf(spec, 0, { colorAnimation })
+const { json, bin, visibility } = buildGltf(spec, 0, { colorAnimation })
+const xmlText = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 const objectDir = `PackageSources/SimObjects/Misc/${TITLE}`
 json.buffers[0].uri = `${TITLE}.bin`
 
@@ -113,6 +114,13 @@ const xml = [
     `\t\t\t\t<ANIM_LENGTH>${FRAMES}</ANIM_LENGTH>`,
     `\t\t\t\t<ANIM_NAME>${variable(ch)}</ANIM_NAME>`,
     `\t\t\t\t<ANIM_CODE>${animCode(ch, "L")}</ANIM_CODE>`,
+    `\t\t\t</UseTemplate>`,
+    `\t\t</Component>`,
+  ]),
+  ...visibility.flatMap((rule) => [
+    `\t\t<Component ID="CROSSCHECK_SHOW_${rule.node}" Node="${rule.node}">`,
+    `\t\t\t<UseTemplate Name="ASOBO_GT_Visibility_Code">`,
+    `\t\t\t\t<VISIBILITY_CODE>${xmlText(visibilityCode(rule, "L"))}</VISIBILITY_CODE>`,
     `\t\t\t</UseTemplate>`,
     `\t\t</Component>`,
   ]),

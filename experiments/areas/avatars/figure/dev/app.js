@@ -143,7 +143,7 @@ let building = false, dirty = false
 async function rebuild() {
   if (building) { dirty = true; return }
   building = true
-  const { json, bin } = buildGltf(spec, state.color)
+  const { json, bin, visibility } = buildGltf(spec, state.color)
   const glb = toGlb(json, bin)
   const gltf = await loader.parseAsync(glb.buffer, "")
   const tracks = {}
@@ -156,14 +156,12 @@ async function rebuild() {
   const materials = {}
   gltf.scene.traverse((o) => {
     if (!o.isMesh) return
-    // A skinned stick's bounds are its unposed 1m at the figure's root, so
-    // culling by them would hide it while it's in view.
-    if (o.isSkinnedMesh) o.frustumCulled = false
     o.castShadow = o.receiveShadow = state.shadows
     materials[o.material.name] = o.material
   })
   if (figure) figureRoot.remove(figure.scene)
-  figure = { scene: gltf.scene, tracks, materials }
+  const shows = visibility.map((rule) => ({ ...rule, obj: gltf.scene.getObjectByName(rule.node) }))
+  figure = { scene: gltf.scene, tracks, materials, shows }
   figureRoot.add(gltf.scene)
   update()
   building = false
@@ -205,6 +203,8 @@ function update() {
     const t = frameOf(ch, values[ch.name]) / FPS
     for (const { obj, prop, interp } of figure.tracks[variable(ch)]) obj[prop].fromArray(interp.evaluate(t))
   }
+  // The telescope's pieces, shown by the same rule as the model XML's VISIBILITY_CODE.
+  for (const { obj, channel, lo, hi } of figure.shows) obj.visible = values[channel] >= lo && values[channel] < hi
   varsEl.textContent = CHANNELS.map((ch) => {
     const v = values[ch.name]
     const unit = ch.kind === "turn" ? "°" : " m"

@@ -20,13 +20,22 @@
  *   stretch  a length: the translation along z of the node at a stick's end
  *
  * A limb points along +z at zero yaw and pitch, so yaw, pitch, and length put
- * the hand or foot at any point. A stick that stretches is skinned: its near
- * ring follows a joint at its base, and its far ring the node at its end, so
- * it reaches whatever that node reaches and stays round. The sim didn't play
- * a scale animation that stretched only along the stick, with a first key of
- * 0 or of 1cm, and drew the sticks at their full 1m (p24's runs, 2026-10-03,
- * results/p24-figure-2026-10-03-12-18-15.txt and -12-25-37.txt), while p17's
- * scale animation, the same on all three axes, played.
+ * the hand or foot at any point. A stick that stretches telescopes: a pair of
+ * fixed pieces of length s, one forward from its base and one back from the
+ * node at its end, covers any length from s to 2s, and visibility rules on the
+ * length show only the pair that fits (TELESCOPE). The piece from the end is
+ * a hair thinner, so where the two overlap, one surface is always in front.
+ * Every piece of this uses what the sim has shown it plays: fixed meshes,
+ * translation, and visibility from a variable (p17). It replaced two ways
+ * that failed:
+ *
+ *   - a scale animation that stretched only along the stick: the sim drew the
+ *     sticks at their full 1m, with a first key of 0 or of 1cm (p24's runs,
+ *     2026-10-03, results/p24-figure-2026-10-03-12-18-15.txt and -12-25-37.txt),
+ *     while p17's scale animation, the same on all three axes, played
+ *   - a skinned stick, its far ring on the end node: fspackagetool died
+ *     compiling it, both inside the sim, which took the sim down, and on its
+ *     own, with no error report (2026-10-03)
  *
  * An arm is one straight stick: yaw, pitch, and length.
  *
@@ -48,6 +57,12 @@ const ROT_STEP = 30
 
 // A stretch's shortest length.
 const STRETCH_MIN = 0.01
+
+// The telescope's piece lengths in meters, each pair covering s to 2s. Below
+// the first, its forward piece pokes past the end by at most 2cm, inside the
+// hand or foot.
+export const TELESCOPE = [0.02, 0.04, 0.08, 0.16, 0.32, 0.64, 1.28]
+const THINNER = 0.99
 
 const ARMS = [["ARM_L", "arm_l"], ["ARM_R", "arm_r"]]
 const LEGS = [["LEG_L", "leg_l"], ["LEG_R", "leg_r"]]
@@ -91,6 +106,15 @@ export function animCode(ch, scope = "Z") {
   const num = (x) => String(+x.toFixed(6))
   const shift = ch.min < 0 ? ` ${num(-ch.min)} +` : ch.min > 0 ? ` ${num(ch.min)} -` : ""
   return `(${scope}:${variable(ch)})${shift} ${num(FRAMES / (ch.max - ch.min))} * 0 max ${FRAMES} min`
+}
+
+// The model XML's VISIBILITY_CODE for one of buildGltf's visibility rules: the
+// piece shows while its channel is at least lo and below hi.
+export function visibilityCode(rule, scope = "Z") {
+  const v = `(${scope}:CROSSCHECK_${rule.channel})`
+  const lo = rule.lo > 0 ? `${v} ${rule.lo} >=` : null
+  const hi = Number.isFinite(rule.hi) ? `${v} ${rule.hi} <` : null
+  return lo && hi ? `${lo} ${hi} and` : lo ?? hi ?? "1"
 }
 
 // The palette as one more channel, its value a palette index: each color sits
@@ -200,7 +224,6 @@ function packer() {
     floats: (arr, type, bounds) => accessor(new Float32Array(arr), type, 5126, type === "SCALAR" ? undefined : 34962, bounds),
     keys: (arr) => accessor(new Float32Array(arr), "SCALAR", 5126, undefined, true),
     out: (arr, type) => accessor(new Float32Array(arr), type, 5126),
-    joints: (arr) => accessor(new Uint16Array(arr), "VEC4", 5123, 34962),
     indices: (arr) => accessor(arr.length && Math.max(...arr) > 65535 ? new Uint32Array(arr) : new Uint16Array(arr), "SCALAR", Math.max(...arr) > 65535 ? 5125 : 5123, 34963),
     bin() {
       const out = new Uint8Array(offset)
@@ -245,39 +268,23 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
   // the balls (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-58-55.txt).
   // Balls share one mesh under even scales, which it left alone.
   const knee = spec.knee.arc / spec.knee.segments
-  // A stretching stick, 1m long as built: its near ring follows the skin's
-  // first joint, and its far ring the second.
-  const skinned = (r) => {
-    const g = stick(r, 1)
-    const ring = g.pos.length / 6
-    return {
-      ...geometry(g),
-      JOINTS_0: P.joints(Array.from({ length: ring * 2 }, (_, i) => [i < ring ? 0 : 1, 0, 0, 0]).flat()),
-      WEIGHTS_0: P.floats(Array.from({ length: ring * 2 }, () => [1, 0, 0, 0]).flat(), "VEC4"),
-    }
+  const prim = (g, material) => ({ attributes: { POSITION: g.POSITION, NORMAL: g.NORMAL }, indices: g.indices, material, mode: 4 })
+  const meshes = []
+  const MESH = {}
+  const mesh = (name, g, material = 0) => { MESH[name] = meshes.length; meshes.push({ name, primitives: [prim(geometry(g), material)] }) }
+  const sphereGeo = sphere()
+  mesh("sphere_main", sphereGeo, 0)
+  mesh("sphere_light", sphereGeo, 1)
+  mesh("knee_stick", stick(spec.leg.radius, knee))
+  mesh("nose", nose(spec))
+  // The telescope's pieces for each stretching stick's radius: forward from
+  // the base along +z, and back from the end along -z, a hair thinner.
+  for (const [part, r] of [["arm", spec.arm.radius], ["leg", spec.leg.radius]]) {
+    TELESCOPE.forEach((s, k) => {
+      mesh(`${part}_fore_${k}`, stick(r, s))
+      mesh(`${part}_back_${k}`, lathe([{ z: -s, r: r * THINNER, nr: 1, nz: 0 }, { z: 0, r: r * THINNER, nr: 1, nz: 0 }], 20))
+    })
   }
-  const geo = {
-    sphere: geometry(sphere()),
-    arm: skinned(spec.arm.radius),
-    leg: skinned(spec.leg.radius),
-    knee: geometry(stick(spec.leg.radius, knee)),
-    nose: geometry(nose(spec)),
-  }
-  const prim = (g, material) => ({
-    attributes: { POSITION: g.POSITION, NORMAL: g.NORMAL, ...(g.JOINTS_0 !== undefined ? { JOINTS_0: g.JOINTS_0, WEIGHTS_0: g.WEIGHTS_0 } : {}) },
-    indices: g.indices,
-    material,
-    mode: 4,
-  })
-  const meshes = [
-    { name: "sphere_main", primitives: [prim(geo.sphere, 0)] },
-    { name: "sphere_light", primitives: [prim(geo.sphere, 1)] },
-    { name: "arm_stick", primitives: [prim(geo.arm, 0)] },
-    { name: "leg_stick", primitives: [prim(geo.leg, 0)] },
-    { name: "knee_stick", primitives: [prim(geo.knee, 0)] },
-    { name: "nose", primitives: [prim(geo.nose, 0)] },
-  ]
-  const MESH = { sphere_main: 0, sphere_light: 1, arm_stick: 2, leg_stick: 3, knee_stick: 4, nose: 5 }
 
   const nodes = []
   const at = {}
@@ -303,32 +310,34 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
   ball(chest, "chest_ball", spec.chest.radius, "sphere_light")
 
   // A stick from `base` along its +z to `end`, the node a stretch animation
-  // moves: a joint at the base and `end` as the skin's two joints, bound with
-  // the end 1m along. The mesh's own node sits at the figure's root, since a
-  // skinned mesh ignores its node's transform.
-  const bind = P.out([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1, 1], "MAT4")
-  const skins = []
-  const stretchStick = (base, end, name, mesh) => {
-    const near = add(base, { name: `${name}_root` })
-    skins.push({ name, joints: [near, end], inverseBindMatrices: bind })
-    add(root, { name: `${name}_stick`, mesh: MESH[mesh], skin: skins.length - 1 })
+  // moves along that axis: each telescope pair's two pieces, and the rule for
+  // when that pair shows, by the channel that sets the length.
+  const visibility = []
+  const stretchStick = (base, end, name, part, channel) => {
+    TELESCOPE.forEach((s, k) => {
+      const lo = k ? s : 0, hi = k === TELESCOPE.length - 1 ? Infinity : 2 * s
+      for (const [node, side, piece] of [[base, "fore", `${name}_fore_${k}`], [end, "back", `${name}_back_${k}`]]) {
+        add(node, { name: piece, mesh: MESH[`${part}_${side}_${k}`] })
+        visibility.push({ node: piece, channel, lo, hi })
+      }
+    })
   }
 
-  function arm(parent, l, anchor) {
+  function arm(parent, l, n, anchor) {
     const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
     const end = add(pitch, { name: `${l}_end` })
     ball(end, `${l}_ball`, spec.hand.radius, "sphere_main")
-    stretchStick(pitch, end, l, "arm_stick")
+    stretchStick(pitch, end, l, "arm", `${n}_LEN`)
   }
 
   // The leg: a thigh to the knee, a fixed-length curve, then the shin.
-  function leg(parent, l, anchor) {
-    const r = spec.leg.radius, n = spec.knee.segments
+  function leg(parent, l, n, anchor) {
+    const r = spec.leg.radius, segs = spec.knee.segments
     const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
     const kneeAt = add(pitch, { name: `${l}_knee` })
-    stretchStick(pitch, kneeAt, l, "leg_stick")
+    stretchStick(pitch, kneeAt, l, "leg", `${n}_LEN`)
     let tip = add(kneeAt, { name: `${l}_roll` })
-    for (let k = 0; k < n; k++) {
+    for (let k = 0; k < segs; k++) {
       const bend = add(add(tip, { name: `${l}_seg${k}`, ...(k ? { translation: [0, 0, knee] } : {}) }), { name: `${l}_seg${k}_bend` })
       ball(bend, `${l}_seg${k}_ball`, r, "sphere_main")
       add(bend, { name: `${l}_seg${k}_stick`, mesh: MESH.knee_stick })
@@ -338,13 +347,13 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
     ball(shin, `${l}_shin_ball`, r, "sphere_main")
     const foot = add(shin, { name: `${l}_shin_end` })
     ball(foot, `${l}_ball`, spec.foot.radius, "sphere_main")
-    stretchStick(shin, foot, `${l}_shin`, "leg_stick")
+    stretchStick(shin, foot, `${l}_shin`, "leg", `${n}_SHIN`)
   }
 
-  arm(chest, "arm_l", a.shoulderL)
-  arm(chest, "arm_r", a.shoulderR)
-  leg(root, "leg_l", a.legL)
-  leg(root, "leg_r", a.legR)
+  arm(chest, "arm_l", "ARM_L", a.shoulderL)
+  arm(chest, "arm_r", "ARM_R", a.shoulderR)
+  leg(root, "leg_l", "LEG_L", a.legL)
+  leg(root, "leg_r", "LEG_R", a.legR)
 
   const animations = CHANNELS.map((ch) => {
     const n = ch.segments ? spec[ch.segments].segments : 1
@@ -409,7 +418,6 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
     scenes: [{ nodes: [root] }],
     nodes,
     meshes,
-    skins,
     materials: [material("CROSSCHECK_Main", c.main), material("CROSSCHECK_Light", c.light)],
     animations,
     accessors: P.accessors,
@@ -417,7 +425,7 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
     buffers: [{ byteLength: bin.length }],
     ...(colorAnimation ? { extensionsUsed: ["ASOBO_property_animation"] } : {}),
   }
-  return { json, bin }
+  return { json, bin, visibility }
 }
 
 // A binary glTF of one JSON chunk and one buffer chunk, for the dev page's loader.

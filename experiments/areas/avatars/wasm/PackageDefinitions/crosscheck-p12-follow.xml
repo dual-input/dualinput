@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- One asset group, the module; it replaces no file the sim or another package owns. -->
-<AssetPackage Version="0.1.0">
+<AssetPackage Version="0.2.0">
 	<ItemSettings>
 		<ContentType>MISC</ContentType>
 		<Title>Crosscheck p12 follow probe</Title>

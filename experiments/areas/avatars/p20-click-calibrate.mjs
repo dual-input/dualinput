@@ -20,9 +20,10 @@
  * Then the sphere goes where the ray meets the model, with no guess at which
  * control that is. While the button is held, it glides along the plane of the
  * surface it first touched, where the cursor's ray crosses it, so it follows a
- * drag across a panel seen from an angle; the probe also logs where a fresh
- * cast and a fixed distance from the eye would have put it. On release it
- * stays a moment (LINGER_MS), then goes back to rest.
+ * drag across a panel seen from an angle and stays on a lever that has moved
+ * in the sim, where a fresh cast would fall through to the floor behind (p20's
+ * second run). On release it stays a moment (LINGER_MS), then goes back to
+ * rest.
  *
  * In the A2A Comanche, parked, the sim in front:
  *
@@ -132,7 +133,7 @@ async function finish(why) {
   if (holds.length || nodes.size) {
     const count = (k) => holds.filter((h) => h.type === k)
     note("presses", `${plural(holds.length, "press", "presses")} in the sim (${count("tap").length} taps, ${count("hold").length} holds, ${count("drag").length} drags), ${plural(outside, "click")} outside it; nodes hit: ${[...nodes].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
-    for (const h of count("drag").slice(0, 12)) note("drag", `on ${h.node}: ${(h.ms / 1000).toFixed(1)}s, the cursor moved up to ${h.cursorPx.toFixed(0)}px while the mouse moved ${h.raw.toFixed(0)} counts; the hand slid ${(h.travel * 100).toFixed(1)}cm on the plane${h.recastGap !== null ? `, and a fresh cast was ${(h.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`)
+    for (const h of count("drag").slice(0, 12)) note("drag", `on ${h.node}: ${(h.ms / 1000).toFixed(1)}s, the cursor moved up to ${h.cursorPx.toFixed(0)}px from where it pressed and the mouse ${h.raw.toFixed(0)} counts in all; the hand ended ${(h.travel * 100).toFixed(1)}cm from where it started on the plane`)
   }
   setModule({ MODE: 0, OBJECT: 0, LEAD: 0 })
   if (sphere !== null) sim.remove(sphere)
@@ -348,35 +349,29 @@ onMouse = (m) => {
     if (!hit) return
     touch(hit.point, hit.normal)
     if (m.kind === "wheel") { lingerUntil = Date.now() + LINGER_MS.wheel; return }
-    grab = { t0: m.t, start: m, point: hit.point, normal: hit.normal, distance: hit.distance, node, hand: hit.point, cursorPx: 0, rawX: 0, rawY: 0, path: [] }
+    grab = { t0: m.t, start: m, point: hit.point, normal: hit.normal, node, cursorPx: 0, raw: 0, path: [] }
     lingerUntil = 0
     return
   }
   if (!grab) return
   if (m.kind === "move") {
-    const dir = rayThrough(c, m, params)
-    const n = Math.hypot(...dir)
-    const onPlane = crossPlane(origin, dir, grab.point, grab.normal)
-    const recast = cast(cockpit, origin, dir)
-    const fixed = origin.map((x, k) => x + (dir[k] / n) * grab.distance)
-    if (onPlane) { grab.hand = onPlane; touch(onPlane, grab.normal) }
+    // Where the ray runs along the plane or away from it, the hand stays put.
+    const onPlane = crossPlane(origin, rayThrough(c, m, params), grab.point, grab.normal)
+    if (onPlane) touch(onPlane, grab.normal)
     grab.cursorPx = Math.max(grab.cursorPx, pixels(m, grab.start))
-    grab.rawX += m.dx
-    grab.rawY += m.dy
-    grab.path.push({ t: m.t, x: m.x, y: m.y, dx: m.dx, dy: m.dy, onPlane, recast: recast?.point ?? null, recastNode: recast?.chain[0] ?? null, fixed })
+    grab.raw += Math.hypot(m.dx, m.dy)
+    grab.path.push({ t: m.t, x: m.x, y: m.y, dx: m.dx, dy: m.dy, onPlane })
   } else if (m.kind === "leftup") {
     const ms = m.t - grab.t0
-    const raw = Math.hypot(grab.rawX, grab.rawY)
-    const dragged = grab.cursorPx >= DRAG_PX || raw >= DRAG_COUNTS
+    const dragged = grab.cursorPx >= DRAG_PX || grab.raw >= DRAG_COUNTS
     const kind = dragged ? "drag" : ms < TAP_MS ? "tap" : "hold"
     const moved = grab.path.filter((p) => p.onPlane)
     const travel = moved.length ? dist(moved[0].onPlane, moved[moved.length - 1].onPlane) : 0
-    const recastGap = moved.filter((p) => p.recast).map((p) => dist(p.onPlane, p.recast))
     // "type", not "kind": a field named kind would replace the record's own.
-    const hold = { type: kind, node: grab.node, ms, cursorPx: grab.cursorPx, raw, travel, recastGap: recastGap.length ? median(recastGap) : null, moves: grab.path.length }
+    const hold = { type: kind, node: grab.node, ms, cursorPx: grab.cursorPx, raw: grab.raw, travel, moves: grab.path.length }
     holds.push(hold)
-    rec.log("release",`${kind} on ${grab.node}: ${ms}ms, the cursor moved up to ${grab.cursorPx.toFixed(0)}px and the mouse ${raw.toFixed(0)} counts; the hand slid ${(travel * 100).toFixed(1)}cm on the plane${hold.recastGap !== null ? `, a fresh cast ${(hold.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`, { ...hold, path: grab.path })
-    if (kind !== "tap") console.log(`  ${kind} on ${grab.node}: ${(ms / 1000).toFixed(1)}s, cursor ${grab.cursorPx.toFixed(0)}px, mouse ${raw.toFixed(0)} counts`)
+    rec.log("release", `${kind} on ${grab.node}: ${ms}ms, the cursor moved up to ${grab.cursorPx.toFixed(0)}px from where it pressed and the mouse ${grab.raw.toFixed(0)} counts in all; the hand ended ${(travel * 100).toFixed(1)}cm from where it started on the plane`, { ...hold, path: grab.path })
+    if (kind !== "tap") console.log(`  ${kind} on ${grab.node}: ${(ms / 1000).toFixed(1)}s, cursor ${grab.cursorPx.toFixed(0)}px, mouse ${grab.raw.toFixed(0)} counts`)
     grab = null
     lingerUntil = Date.now() + LINGER_MS.release
   }

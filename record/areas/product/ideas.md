@@ -289,7 +289,10 @@ That makes the interface a client of Crosscheck's app on whichever screen it run
 
 ### Crosscheck objects in the cockpit
 
-Crosscheck places objects of its own in the cockpit: a message floating in front of the pilot, such as "You've lost the connection", or a take-control button the pilot puts above the glareshield or sticks to a window, which a pilot in VR reaches without a tablet.
+Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches without a tablet.
+One is a general notification banner floating in front of the pilot, like a pair of AR glasses, for every notice Crosscheck has: "James is in the pause menu", latency trouble, lost packets, a lost connection.
+Another is a take-control button the pilot puts above the glareshield or sticks to a window.
+A banner like AR glasses moves with the pilot's view, while the button stays put in the cockpit, and `SimConnect_CameraGet` gives where the pilot looks (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)).
 
 - **Tech:** an object attached through the aircraft's own files holds still in flight, as GSX's seated passengers did at up to 244 kt, but that means editing each aircraft package (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
   An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window shouldn't show.

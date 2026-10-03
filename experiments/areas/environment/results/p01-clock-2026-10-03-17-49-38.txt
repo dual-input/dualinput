@@ -1,0 +1,11 @@
+p01 · The sim's pauses, simulation rate, and time of day from SimConnect, on MSFS 2024
+2026-10-03T17:49:38.762Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+K:ZULU_DAY_SET 316: before 2026-10-03, day of year 276, local 10/3, zulu 17:48:36; after 1s 2026-11-12, day of year 316, local 11/12, zulu 17:48:37; after 6s 2026-11-12, day of year 316, local 11/12, zulu 17:48:41
+K:ZULU_DAY_SET 10: before 2026-11-12, day of year 316, local 11/12, zulu 17:48:41; after 1s 2026-01-10, day of year 10, local 1/10, zulu 17:48:43; after 6s 2026-01-10, day of year 10, local 1/10, zulu 17:48:47
+K:ZULU_YEAR_SET 2027: before 2026-01-10, day of year 10, local 1/10, zulu 17:48:47; after 1s 2027-01-10, day of year 10, local 1/10, zulu 17:48:48; after 6s 2027-01-10, day of year 10, local 1/10, zulu 17:48:52
+K:ZULU_DAY_SET read as a day of the year; put back with K:ZULU_YEAR_SET 2026 and K:ZULU_DAY_SET 276: 2026-10-03, day of year 276, local 10/3, zulu 17:48:55
+Put back: rate 1, zulu 17:48:56 on 2026-10-03, against 1 and 17:48:36 on 2026-10-03 at the start
+
+Every Pause_EX1: none
+Exceptions: none

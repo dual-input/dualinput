@@ -45,6 +45,7 @@ import { NODE_SIMCONNECT, Sim, describeSystemEvent } from "../aircraft/lib/sim.m
 const CLOCK = [
   ["SIMULATION RATE", "number"], ["ZULU TIME", "seconds"], ["LOCAL TIME", "seconds"],
   ["ZULU DAY OF MONTH", "number"], ["ZULU MONTH OF YEAR", "number"], ["ZULU YEAR", "number"],
+  ["ZULU DAY OF YEAR", "number"], ["LOCAL DAY OF MONTH", "number"], ["LOCAL MONTH OF YEAR", "number"],
   ["GROUND VELOCITY", "knots"],
 ]
 
@@ -167,7 +168,44 @@ process.on("uncaughtException", async (e) => {
 
 await sleep(1000)
 start = { ...latest }
-rec.log("start", `rate ${fmt(start["SIMULATION RATE"])}, zulu ${hm(start["ZULU TIME"])}, local ${hm(start["LOCAL TIME"])}, ${date(start)}, pause ${describeSystemEvent("Pause_EX1", sim.live.pause ?? 0)}`)
+rec.log("start", `rate ${fmt(start["SIMULATION RATE"])}, zulu ${hm(start["ZULU TIME"])}, local ${hm(start["LOCAL TIME"])}, ${date(start)}, day of year ${fmt(start["ZULU DAY OF YEAR"])}, pause ${describeSystemEvent("Pause_EX1", sim.live.pause ?? 0)}`)
+
+// --date: only the date events, on their own, about 30s. Whether
+// K:ZULU_DAY_SET takes a day of the month or of the year is what it finds out:
+// a value 40 days on lands in another month only if it's a day of the year.
+if (process.argv.includes("--date")) {
+  const d0 = start["ZULU DAY OF YEAR"]
+  const y0 = start["ZULU YEAR"]
+  const show = (r) => `${date(r)}, day of year ${fmt(r["ZULU DAY OF YEAR"])}, local ${r["LOCAL MONTH OF YEAR"]}/${r["LOCAL DAY OF MONTH"]}, zulu ${hm(r["ZULU TIME"])}`
+  const tests = [
+    ["ZULU_DAY_SET", ((d0 + 40 - 1) % 365) + 1],
+    ["ZULU_DAY_SET", 10],
+    ["ZULU_YEAR_SET", y0 + 1],
+  ]
+  let dayOfYear = null
+  for (const [event, value] of tests) {
+    const before = { ...latest }
+    act(event, [value])
+    const wv = await watchFor(`${event} ${value}`, 6000)
+    const s = wv.samples
+    const end = s[s.length - 1] ?? latest
+    // The first test tells which meaning the day event has, and so how to put
+    // the date back.
+    if (dayOfYear === null) dayOfYear = end["ZULU DAY OF YEAR"] === value
+    const line = `K:${event} ${value}: before ${show(before)}; after 1s ${show(s.find((x) => x.t - s[0].t >= 1000) ?? end)}; after 6s ${show(end)}`
+    report.push(line)
+    rec.log("date", line)
+  }
+  const dayBack = dayOfYear ? d0 : start["ZULU DAY OF MONTH"]
+  act("ZULU_YEAR_SET", [y0])
+  act("ZULU_DAY_SET", [dayBack])
+  const back = await watchFor("date put back", 3000)
+  const line = `K:ZULU_DAY_SET read as a day of the ${dayOfYear ? "year" : "month"}; put back with K:ZULU_YEAR_SET ${y0} and K:ZULU_DAY_SET ${dayBack}: ${show(back.samples[back.samples.length - 1] ?? latest)}`
+  report.push(line)
+  rec.log("date", line)
+  await finish()
+  process.exit(0)
+}
 
 // tour ---------------------------------------------
 console.log([

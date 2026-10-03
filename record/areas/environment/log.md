@@ -3,8 +3,28 @@
 What our experiments found about the sim's pause, simulation rate, and time of day, newest entry first.
 The pause menu raises the sim pause and lets the sim's clock run, active pause stops the clock, and only SimConnect raised a full pause.
 The rate steps and the time events work from SimConnect, and `K:SIM_RATE_SET` doesn't.
+The date events work too, with `K:ZULU_DAY_SET` taking a day of the year.
 The probe is [p01-clock.mjs](../../../experiments/areas/environment/p01-clock.mjs), and its raw output is in [experiments/areas/environment/results](../../../experiments/areas/environment/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-03, with the aircraft parked.
+
+## 2026-10-03: `K:ZULU_DAY_SET` takes a day of the year, and the date events hold
+
+**Asked:** can a SimConnect client set the date, and does `K:ZULU_DAY_SET` take a day of the month or a day of the year?
+
+**Expected:** no prediction.
+
+**Found:**
+
+- From 2026-10-03, day 276 of the year, `K:ZULU_DAY_SET` 316 made the date 2026-11-12 within a second, and `K:ZULU_DAY_SET` 10 made it 2026-01-10, so the event takes a day of the year.
+- `K:ZULU_YEAR_SET` 2027 made it 2027-01-10.
+- Each date held for the 6s we watched, the local date moved with the zulu date, and the time of day ran on untouched.
+- `K:ZULU_YEAR_SET` 2026 and `K:ZULU_DAY_SET` 276 put the date back to 2026-10-03.
+
+**Changed:** Crosscheck can bring every machine to the PF's date as well as the PF's time of day, which matters to weather add-ons that pick the weather by date.
+
+**Affects:** time, date, sim rate, and pause in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** [the date run](../../../experiments/areas/environment/results/p01-clock-2026-10-03-17-49-38.txt).
 
 ## 2026-10-03: The rate steps and the time events work from SimConnect, and `K:SIM_RATE_SET` doesn't
 

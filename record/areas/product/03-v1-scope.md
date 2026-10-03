@@ -409,3 +409,36 @@ The ATC app's audio on the traffic host's machine plays on every other pilot's m
 - Which ATC apps besides BeyondATC capture cleanly, since only BeyondATC was tried live.
 - An ATC app that injects no traffic, on one pilot's machine, alongside a traffic injector on another's would want two hosts; v1 treats that as too rare to support.
 - Whether Crosscheck follows Windows' default output device when a pilot switches headsets mid-session.
+
+### Time, date, sim rate, and pause
+
+The crew's sims share one clock: the same time of day, date, and simulation rate, and an active pause that holds for everyone.
+
+**In v1:**
+
+- When any pilot turns active pause on or off, every machine follows.
+- The PF's time of day, date, and simulation rate reach every machine, when a pilot starts flying and whenever the PF changes them, and a following pilot who changes one gets it put back.
+- When the PF opens the sim's pause menu, the rest of the crew is told, such as "James is in the pause menu", so a frozen aircraft has a reason.
+
+**Not in v1:**
+
+- Syncing the pause menu itself.
+  It raises the sim pause, which stops that pilot's aircraft and leaves the sim's clock running (measured on MSFS 2024, 2026-10-03, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)), so the PF's following machines stop with the PF's aircraft and no clock drifts.
+- Weather, a Later pick.
+
+**Rules:**
+
+- Active pause is the pause that syncs, because it stops the sim's clock, and one machine in active pause alone would drift behind the others (same entry).
+- The simulation rate moves in steps, since `K:SIM_RATE_INCR` and `K:SIM_RATE_DECR` work and `K:SIM_RATE_SET` does nothing (measured on MSFS 2024, 2026-10-03, [environment log](../environment/log.md#2026-10-03-the-rate-steps-and-the-time-events-work-from-simconnect-and-ksim_rate_set-doesnt)).
+- The time and date events hold on this build, and `K:ZULU_DAY_SET` takes a day of the year (same date, [environment log](../environment/log.md#2026-10-03-kzulu_day_set-takes-a-day-of-the-year-and-the-date-events-hold)).
+
+**Depends on:**
+
+- The [take-control key](#take-control-key), for which pilot is the PF.
+- [Flight-model sync](#flight-model-sync), which stops the following aircraft when the PF's aircraft stops.
+
+**Open questions:**
+
+- What happens when an add-on puts one machine into a full pause: no pilot action raised one, but `K:PAUSE_SET` from SimConnect did, and SimConnect then sent no frame data until it cleared (measured, same date, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)).
+- Whether a frozen follower keeps up at a raised simulation rate, which a replay at 4x would show.
+- Whether the pause menu stops a flying aircraft, which our parked run couldn't show.

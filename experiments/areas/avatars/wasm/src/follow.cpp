@@ -19,6 +19,11 @@
  *                    the aircraft's reference point, turned by heading only;
  *                    mode 3: UP is meters above the seat object
  *
+ *   LEAD     frames to write ahead: the object is moved on by LEAD times what
+ *            the aircraft moved since the previous frame. In p13 the module's
+ *            writes sat a frame behind the drawn aircraft, and the seat object
+ *            read a frame behind it too (record/areas/avatars/log.md).
+ *
  * Every mode gives the object the aircraft's heading, pitch, and bank. It
  * reports back through ALIVE (every frame), FRAMES (every frame it wrote),
  * ERRORS, LAST_ERROR (an FsVarError, or 1000 + a SimConnect exception), and
@@ -52,7 +57,11 @@ HANDLE h_sim = 0;
 FsUnitId u_number, u_degrees, u_feet;
 FsAVarId a_lat, a_lon, a_alt, a_hdg, a_pitch, a_bank;
 FsLVarId l_alive, l_mode, l_object, l_seat, l_fwd, l_right, l_up, l_frames, l_errors, l_last_error;
-FsLVarId l_seat_fwd, l_seat_right, l_seat_up;
+FsLVarId l_seat_fwd, l_seat_right, l_seat_up, l_lead;
+
+// The aircraft's pose in the previous frame, for the lead.
+Pos  prev{};
+bool have_prev = false;
 
 double get(FsLVarId id)
 {
@@ -156,6 +165,7 @@ extern "C" MSFS_CALLBACK void module_init(void)
     l_seat_fwd   = fsVarsRegisterLVar("CROSSCHECK_P12_SEAT_FWD");
     l_seat_right = fsVarsRegisterLVar("CROSSCHECK_P12_SEAT_RIGHT");
     l_seat_up    = fsVarsRegisterLVar("CROSSCHECK_P12_SEAT_UP");
+    l_lead       = fsVarsRegisterLVar("CROSSCHECK_P12_LEAD");
 
     // Off until the probe says otherwise, whatever an earlier session left.
     put(l_mode, 0);
@@ -204,6 +214,14 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
         put(l_seat_up, u);
     }
 
+    // What the aircraft moved since the previous frame, times the lead.
+    const double lead  = get(l_lead);
+    const double dlat  = have_prev ? (a.lat - prev.lat) * lead : 0;
+    const double dlon  = have_prev ? (a.lon - prev.lon) * lead : 0;
+    const double dalt  = have_prev ? (a.alt - prev.alt) * lead : 0;
+    prev               = a;
+    have_prev          = have_aircraft;
+
     if (mode == 0 || object <= 0) return;
     if (!have_aircraft)
     {
@@ -211,7 +229,10 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
         return;
     }
     const FsObjectId target = static_cast<FsObjectId>(object);
-    const Pos        p      = place(a, get(l_fwd), get(l_right), get(l_up));
+    Pos              p      = place(a, get(l_fwd), get(l_right), get(l_up));
+    p.lat += dlat;
+    p.lon += dlon;
+    p.alt += dalt;
 
     if (mode == 1)
     {
@@ -224,7 +245,7 @@ extern "C" MSFS_CALLBACK void Update_StandAlone(float)
             fail(-3);
             return;
         }
-        (void)write_pose(target, Pos{s.lat, s.lon, s.alt + get(l_up) / FT, a.hdg, a.pitch, a.bank});
+        (void)write_pose(target, Pos{s.lat + dlat, s.lon + dlon, s.alt + get(l_up) / FT + dalt, a.hdg, a.pitch, a.bank});
     }
     else if (mode == 2 && h_sim != 0)
     {

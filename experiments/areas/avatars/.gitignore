@@ -1,6 +1,8 @@
 # Screen recordings of runs show the terminal, and with it the home folder's
 # path, which can't go in the tree (CLAUDE.md, Nothing personal in the tree).
 results/*.mp4
-# p24's full screenshots of the sim window, which show the home folder's path
-# in Devmode's title bars. Its cropped JPEGs beside them can go in once read.
-results/p24-figure-*/*.png
+# p24's screenshots of the sim window. The full PNGs show the home folder's
+# path in Devmode's title bars, and any of them can show a name, such as the
+# license holder on the GTN's start screen. Add a cropped JPEG with git add -f
+# only after reading it.
+results/p24-figure-*/

@@ -1,0 +1,22 @@
+p24 · Our own figure in the Baron 58P's copilot seat: joints, smoothness between frames, and color, on MSFS 2024
+2026-10-03T12:44:14.364Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by the end of the phases
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", interior BaronProfessional_Pressurized_INT.gltf
+  seat PILOT_1 at -0.054m forward, 0.282m right, 0.132m up of the model's origin; the copilot's eye -0.062m forward, -0.047m right, 0.678m up of the seat
+  aircraft heading 169.543147°, pitch -1.578234°, bank -0.140208°
+  CROSSCHECK_Figure: object 51331072, StaticObject, placed on PILOT_1 with the aircraft's attitude
+  phases: rest, hands, legs
+  CameraGet in SIMOBJECT: -0.158m forward, -0.238m right, 0.848m up of the reference point, pitch 33.398262°, yaw 70.460419°, roll 0°, fov 1.419864
+  screenshot 2401×1360, brightness 72.9, 96024 red samples
+  right hand to JpiButton_R at 0.627m forward, -0.056m right, 0.233m up of the seat, left to FUEL_Lever_Mixture_2 at 0.527m forward, -0.161m right, 0.096m up
+
+Screenshots: p24-figure-2026-10-03-12-44-14/
+  rest: 2401×1360, brightness 72.9, 96024 red samples at 1500.2, 555.9
+  hand-right: 2401×1360, brightness 69.8, 101669 red samples at 1501.3, 556
+  hands-both: 2401×1360, brightness 69.8, 104360 red samples at 1490.3, 559
+  feet-pedals: 2401×1360, brightness 69.3, 99296 red samples at 1511.4, 554.7
+  feet-rest-again: 2401×1360, brightness 69.2, 99582 red samples at 1518.5, 554.2
+
+Exceptions: 
+  1 × ERROR (1) on release object 51331072, parameter 1

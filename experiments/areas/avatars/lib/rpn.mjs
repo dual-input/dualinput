@@ -28,14 +28,14 @@
 
 const BINARY = {
   "+": (a, b) => a + b, "-": (a, b) => a - b, "*": (a, b) => a * b, "/": (a, b) => a / b, "%": (a, b) => a % b,
-  max: Math.max, min: Math.min, pow: (a, b) => a ** b, atg2: Math.atan2,
+  max: Math.max, min: Math.min, pow: (a, b) => a ** b, atg2: Math.atan2, div: (a, b) => Math.trunc(a / b),
   "==": (a, b) => +(a === b), "!=": (a, b) => +(a !== b), "<": (a, b) => +(a < b), ">": (a, b) => +(a > b), "<=": (a, b) => +(a <= b), ">=": (a, b) => +(a >= b),
   eq: (a, b) => +(a === b), ne: (a, b) => +(a !== b), lt: (a, b) => +(a < b), gt: (a, b) => +(a > b), le: (a, b) => +(a <= b), ge: (a, b) => +(a >= b),
   "&&": (a, b) => +(!!a && !!b), "||": (a, b) => +(!!a || !!b), and: (a, b) => +(!!a && !!b), or: (a, b) => +(!!a || !!b),
 }
 const UNARY = {
   "/-/": (a) => -a, neg: (a) => -a, abs: Math.abs, "!": (a) => +!a, not: (a) => +!a,
-  sqrt: Math.sqrt, sin: Math.sin, cos: Math.cos, flr: Math.floor, ceil: Math.ceil, near: Math.round,
+  sqrt: Math.sqrt, sin: Math.sin, cos: Math.cos, flr: Math.floor, ceil: Math.ceil, near: Math.round, int: Math.trunc,
 }
 
 function tokenize(code) {

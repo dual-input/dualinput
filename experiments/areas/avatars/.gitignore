@@ -1,0 +1,3 @@
+# Screen recordings of runs show the terminal, and with it the home folder's
+# path, which can't go in the tree (CLAUDE.md, Nothing personal in the tree).
+results/*.mp4

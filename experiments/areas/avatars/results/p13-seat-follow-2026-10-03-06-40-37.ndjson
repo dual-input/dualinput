@@ -1,0 +1,22 @@
+{"t":1791009637626,"s":0.05,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791009637810,"s":0.234,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791009637810,"s":0.234,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791009637811,"s":0.235,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791009639676,"s":2.1,"kind":"module","text":"crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 2217 → 2233 in 0.5s)"}
+{"t":1791009639743,"s":2.167,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\", 116 kt; seats SEAT_C152_Pax (48742402), SEAT_C152_Pilot (48758786)"}
+{"t":1791009655764,"s":18.188,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791009655778,"s":18.202,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 53067777","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791009655778,"s":18.202,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 53067777","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791009655778,"s":18.202,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 53067777","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791009655778,"s":18.202,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791009655779,"s":18.203,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 53067777","object":0,"values":[53067777]}
+{"t":1791009655779,"s":18.203,"kind":"write","text":"L:CROSSCHECK_P12_SEAT ← 48742402","object":0,"values":[48742402]}
+{"t":1791009655779,"s":18.203,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.1","object":0,"values":[0.1]}
+{"t":1791009655779,"s":18.203,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.21","object":0,"values":[0.21]}
+{"t":1791009655779,"s":18.203,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.45","object":0,"values":[-0.45]}
+{"t":1791009656809,"s":19.233,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 3","object":0,"values":[3]}
+{"t":1791009668943,"s":31.367,"kind":"step","text":"on the seat object: 0 presses; 98 kt, attitude up to 27.3°; module wrote 363 frames with 0 errors; the seat object reads -1.69m forward, 0.24m right, -0.22m up from inside the frame, -2.15m forward, 0.25m right, -0.25m up from SimConnect outside","step":"on the seat object","presses":0,"speedKt":97.59203918382329,"attitude":27.312171419354012,"frames":363,"errors":0,"lastError":0,"seatInside":{"forward":-1.6886400486520305,"right":0.2370732683031231,"up":-0.2236436053167482},"seatOutside":{"forward":-2.1548778280014753,"right":0.2468926224540821,"up":-0.2536833786037532}}
+{"t":1791009668976,"s":31.4,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791009681043,"s":43.467,"kind":"step","text":"at the parked offset: 0 presses; 91 kt, attitude up to 33.7°; module wrote 362 frames with 0 errors; the seat object reads -1.41m forward, 0.26m right, -0.15m up from inside the frame, -1.83m forward, 0.28m right, -0.17m up from SimConnect outside","step":"at the parked offset","presses":0,"speedKt":91.16143954460573,"attitude":33.69864005486029,"frames":362,"errors":0,"lastError":0,"seatInside":{"forward":-1.4085245995983438,"right":0.26438380766207625,"up":-0.14984961141349942},"seatOutside":{"forward":-1.827765113983773,"right":0.2751330231295238,"up":-0.1671773105501372}}
+{"t":1791009681043,"s":43.467,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791009681044,"s":43.468,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 0","object":0,"values":[0]}

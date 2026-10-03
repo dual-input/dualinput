@@ -1,0 +1,7 @@
+p13 · A seated figure written every frame from inside the sim, on the seat object or at its parked offset, on MSFS 2024
+2026-10-03T06:39:55.019Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 950 → 966 in 0.5s)
+  aircraft TITLE "Cessna C152 Aerial Advertising", 92 kt; seats SEAT_C152_Pax (48742402), SEAT_C152_Pilot (48758786)
+  on the seat object: 0 presses; 84 kt, attitude up to 40.9°; module wrote 364 frames with 0 errors; the seat object reads -1.47m forward, 0.17m right, -0.11m up from inside the frame, -1.88m forward, 0.16m right, -0.11m up from SimConnect outside
+  at the parked offset: 0 presses; 107 kt, attitude up to 74.7°; module wrote 364 frames with 0 errors; the seat object reads -1.79m forward, 0.09m right, -0.07m up from inside the frame, -2.32m forward, 0.08m right, -0.04m up from SimConnect outside

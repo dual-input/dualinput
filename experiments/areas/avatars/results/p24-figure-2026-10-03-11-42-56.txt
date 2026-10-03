@@ -1,0 +1,45 @@
+p24 · Our own figure in the Baron 58P's copilot seat: joints, smoothness between frames, and color, on MSFS 2024
+2026-10-03T11:42:56.462Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by the end of the phases
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", interior BaronProfessional_Pressurized_INT.gltf
+  seat PILOT_1 at -0.054m forward, 0.282m right, 0.132m up of the model's origin; the copilot's eye -0.062m forward, -0.047m right, 0.678m up of the seat
+  aircraft heading 26.683447°, pitch -1.350003°, bank 0.489645°
+  CROSSCHECK_Figure: object 63504384, StaticObject, placed on PILOT_1 with the aircraft's attitude
+  CameraGet in SIMOBJECT: -0.156m forward, -0.237m right, 0.850m up of the reference point, pitch 28.145174°, yaw 65.584579°, roll -0.019782°, fov 1.348593
+  screenshot 2401×1360, brightness 123.6, 84426 red samples
+  the head right by sixths of a frame (1.67cm a frame, from frame 57): the red samples' center moved -1.3, -1.8, -1.6, -1.5, -1.8, -1.3 px a step, from 1358.9, 1357.6, 1355.8, 1354.2, 1352.7, 1350.9, 1349.6
+  right hand to JpiButton_R at 0.627m forward, -0.056m right, 0.233m up of the seat, left to FUEL_Lever_Mixture_2 at 0.527m forward, -0.161m right, 0.096m up
+  red samples by palette entry: red 84426, blue 1264, green 1266, yellow 1293, purple 1259, orange 16791, teal 1243, pink 1297, red-blue-half 1284; the figure's red reads only while it's red
+
+Screenshots: p24-figure-2026-10-03-11-42-56/
+  rest: 2401×1360, brightness 123.6, 84426 red samples at 1356, 684.1
+  head-ahead: 2401×1360, brightness 123, 95500 red samples at 1425.8, 622.6
+  head-right: 2401×1360, brightness 122.8, 95229 red samples at 1410.2, 600.1
+  head-up: 2401×1360, brightness 123.9, 82085 red samples at 1338.7, 705.6
+  head-down: 2401×1360, brightness 123.6, 88147 red samples at 1366, 654.4
+  head-roll-right: 2401×1360, brightness 123.6, 84335 red samples at 1355.5, 684.3
+  head-roll-left: 2401×1360, brightness 123.6, 84608 red samples at 1356.7, 683.1
+  smooth-0of6: 2401×1360, brightness 123.4, 85252 red samples at 1358.9, 679
+  smooth-1of6: 2401×1360, brightness 123.4, 84892 red samples at 1357.6, 681.6
+  smooth-2of6: 2401×1360, brightness 123.5, 84514 red samples at 1355.8, 684.8
+  smooth-3of6: 2401×1360, brightness 123.7, 84115 red samples at 1354.2, 687.6
+  smooth-4of6: 2401×1360, brightness 123.8, 83771 red samples at 1352.7, 690.3
+  smooth-5of6: 2401×1360, brightness 123.8, 83322 red samples at 1350.9, 693.3
+  smooth-6of6: 2401×1360, brightness 123.8, 82972 red samples at 1349.6, 696
+  lean: 2401×1360, brightness 124, 89083 red samples at 1189.2, 600.2
+  hand-right: 2401×1360, brightness 123.6, 86641 red samples at 1347.3, 681.9
+  hands-both: 2401×1360, brightness 123.4, 83673 red samples at 1360.7, 664.1
+  feet-pedals: 2401×1360, brightness 123.3, 81434 red samples at 1371.4, 671.9
+  color-blue: 2401×1360, brightness 125.6, 1264 red samples at 929.3, 849.9
+  color-green: 2401×1360, brightness 123.3, 1266 red samples at 940.8, 845.2
+  color-yellow: 2401×1360, brightness 126.2, 1293 red samples at 948, 844.1
+  color-purple: 2401×1360, brightness 128.2, 1259 red samples at 939.4, 848.3
+  color-orange: 2401×1360, brightness 125.5, 16791 red samples at 1209.4, 964
+  color-teal: 2401×1360, brightness 126.2, 1243 red samples at 931, 848.5
+  color-pink: 2401×1360, brightness 130.3, 1297 red samples at 944.3, 848.8
+  color-red-blue-half: 2401×1360, brightness 129.3, 1284 red samples at 934.9, 851.4
+  color-red-again: 2401×1360, brightness 124.1, 80041 red samples at 1373.7, 667.5
+
+Exceptions: 
+  1 × ERROR (1) on release object 63504384, parameter 1

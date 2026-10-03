@@ -263,10 +263,13 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
   const chest = chain(root, ["chest_fwd", "chest_right", "chest_up"])
   ball(chest, "chest_ball", spec.chest.radius, "sphere_light")
 
-  // A stick from a node along its +z, scaled to length by its own node.
-  const stickOn = (parent, name, r, length) => {
-    const len = add(parent, { name: `${name}_len`, ...(length ? { scale: [1, 1, length] } : {}) })
-    add(len, { name: `${name}_stick`, mesh: MESH.stick, scale: [r, r, 1] })
+  // A stick from a node along its +z. A length the stick always has goes in
+  // the mesh node's own scale: as a fixed scale on the node above it, the sim
+  // drew each knee segment 1m long instead of 2.8cm, while an animated scale
+  // there works (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-42-56.txt).
+  const stickOn = (parent, name, r, length = 1) => {
+    const len = add(parent, { name: `${name}_len` })
+    add(len, { name: `${name}_stick`, mesh: MESH.stick, scale: [r, r, length] })
   }
 
   function arm(parent, l, anchor) {

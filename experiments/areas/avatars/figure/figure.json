@@ -11,7 +11,7 @@
   "foot": { "radius": 0.045 },
   "rest": {
     "hand": { "fwd": 0.2, "right": 0.17, "up": 0.1 },
-    "foot": { "fwd": 0.32, "right": 0.12, "up": -0.22 }
+    "foot": { "fwd": 0.45, "right": 0.12, "up": -0.3 }
   },
   "material": { "roughness": 0.72, "lighten": 0.3 },
   "palette": [

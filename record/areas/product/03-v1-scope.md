@@ -43,7 +43,7 @@ A pilot presses take-control and becomes the pilot in control at once.
 
 **Depends on:**
 
-- Soft takeover, so the new pilot's levers and trim don't jump the aircraft's to where their hardware sits.
+- [Soft takeover](#soft-takeover), so the new pilot's levers and trim don't jump the aircraft's to where their hardware sits.
 - Holding back the other pilot's hardware: masking holds back the Baron 58P's yoke and throttles (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), and its mixtures are a step 6 risk in [the plan](plan.md).
 
 **Open questions:**
@@ -83,7 +83,7 @@ The pilot in control offers control by voice, and the other pilot takes it by an
 **Depends on:**
 
 - The [take-control key](#take-control-key)'s rules for what control covers and what each pilot hears.
-- Soft takeover, the same as the take-control key.
+- [Soft takeover](#soft-takeover), the same as the take-control key.
 
 **Open questions:**
 
@@ -92,3 +92,39 @@ The pilot in control offers control by voice, and the other pilot takes it by an
   A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
 - How Crosscheck tells speech from noise before it listens for a phrase.
   The intent is to run recognition only while the pilot's microphone is loud enough to be speech, and the architecture designs it.
+
+### Soft takeover
+
+A pilot's hardware lever that sits away from the aircraft's lever does nothing until the pilot moves it to within a small tolerance of the aircraft's, so the aircraft's lever never jumps to where the hardware happens to sit.
+
+**In v1:**
+
+- The new pilot in control's throttles, propellers, and mixtures, each lever on its own, six on the 58P.
+- The new pilot in control's trim, where their trim is an axis.
+  A trim input that sends steps rather than a position has nothing to pick up.
+- Either pilot's flaps, where their flap lever is an axis, at any time, since flaps work from either pilot's hardware.
+
+**Not in v1:**
+
+- The yoke and rudder, which drive at once.
+  A spring-centered yoke usually sits near the aircraft's position anyway, and one that waited to pick up could leave nobody flying the aircraft.
+- Hardware switches whose position can disagree with the aircraft's, such as a gear lever or a home cockpit panel's switches.
+  [02-users](02-users.md#setups) names this problem for home cockpits, and no v1 feature solves it.
+
+**Rules:**
+
+- Each lever picks up on its own once it comes within the tolerance of the aircraft's lever, and until then the aircraft's lever stays where it was.
+- Every handover starts pickup, whether it came from the take-control key, the voice phrases, or a dropped connection.
+- Whenever the aircraft's lever moves away from a pilot's hardware lever, that lever has to pick up again.
+  For flaps that happens whenever the other pilot moves them.
+
+**Depends on:**
+
+- Holding back a lever that hasn't picked up, the same masking the [take-control key](#take-control-key) depends on.
+- Reading where a held-back lever is: a masked event still carries the lever's value, after the dead zone the pilot set in MSFS (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)).
+
+**Open questions:**
+
+- How large the tolerance is, which a test on real hardware settles.
+- How the new pilot learns which levers haven't picked up yet, and which way to move them.
+- Whether the pilot not in control can move the engine levers with the mouse, which would send the pilot in control's levers back to pickup.

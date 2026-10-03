@@ -1,0 +1,6 @@
+# Build output: the module, fspackagetool's package and scratch, MSBuild's objects.
+build/
+Packages/
+PackagesMetadata/
+_PackageInt/
+PackageSources/Modules/*.wasm

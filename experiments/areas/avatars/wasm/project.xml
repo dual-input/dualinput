@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The fspackagetool project: one package, written to Packages\. -->
+<Project Version="2" Name="CrosscheckP12Follow" FolderName="Packages" MetadataFolderName="PackagesMetadata">
+	<OutputDirectory>.</OutputDirectory>
+	<TemporaryOutputDirectory>_PackageInt</TemporaryOutputDirectory>
+	<Packages>
+		<Package>PackageDefinitions\crosscheck-p12-follow.xml</Package>
+	</Packages>
+	<PublishingGroups/>
+</Project>

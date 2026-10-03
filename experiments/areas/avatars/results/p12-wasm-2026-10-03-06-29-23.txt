@@ -1,0 +1,8 @@
+p12 · An object written every frame from inside the sim by a WASM module, in a moving cockpit, on MSFS 2024
+2026-10-03T06:29:23.397Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  crosscheck-p12-follow is running: L:CROSSCHECK_P12_ALIVE went 1758 → 1774 in 0.5s
+  aircraft TITLE "Cessna C152 Aerial Advertising", 99 kt; seats from p03's parked measurement
+  outside: 0 presses; 97 kt; module wrote 0 frames with 0 errors; wand ahead of the sim's own objects by 0.46m; frame-to-frame the wand moved median 0.01m (p95 0.87m), the avatar's object 0.01m (p95 0.47m)
+  fsVarsAVarSet: 1 press; 109 kt; module wrote 301 frames with 0 errors; wand ahead of the sim's own objects by 1.86m; frame-to-frame the wand moved median 0.00m (p95 0.54m), the avatar's object 0.02m (p95 0.55m)
+  SimConnect: 1 press; 107 kt; module wrote 301 frames with 0 errors; wand ahead of the sim's own objects by 1.87m; frame-to-frame the wand moved median 0.00m (p95 0.60m), the avatar's object 0.01m (p95 0.60m)

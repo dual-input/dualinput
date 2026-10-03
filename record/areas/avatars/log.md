@@ -9,6 +9,29 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Written from inside the sim's frame by a WASM module, an object keeps up with a flying aircraft
+
+**Asked:** does an object written every frame from inside the sim, by a WASM module, hold still in a moving cockpit, where writes from outside stuttered ([entry below](#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still))?
+
+**Expected:** yes along the flight path, since `Update_StandAlone` sees each frame's aircraft pose before the frame is drawn.
+
+**Found:**
+
+- Our module, `crosscheck-p12-follow`, ran: its `L:CROSSCHECK_P12_ALIVE` counted 16 frames in 0.5s.
+  It wrote the wand in all 301 frames of each 10s step, with both `fsVarsAVarSet`, given the wand's SimConnect object ID as its `FsObjectId`, and `SimConnect_SetDataOnSimObject` from inside the module, and neither returned an error.
+- In a Cessna 152 at 97 to 109 kt, the pilot judged both module steps better than writes from outside: the wand no longer lagged along the flight path, and the pilot pressed once in each module step and not at all in the outside step.
+- The wand still lagged when the aircraft pitched and rolled.
+  The module turned its offset by heading only and wrote no pitch or bank, so that part is ours.
+- The pilot saw the wand near the tail rather than at the seat, while SimConnect read it 0.37m behind the aircraft's reference point and the avatar's object 2.24m behind.
+  Why the two disagree is unknown.
+
+**Changed:** writing from inside the sim's frame keeps a figure up with a flying aircraft, so the WASM route works for aircraft whose files Crosscheck doesn't edit.
+Where to write it, and how to follow pitch and roll, are still open.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p12's run](../../../experiments/areas/avatars/results/p12-wasm-2026-10-03-06-29-23.txt), and the module's source in [experiments/areas/avatars/wasm](../../../experiments/areas/avatars/wasm).
+
 ## 2026-10-03: A model attached through the aircraft's own files holds still in flight
 
 **Asked:** do GSX's seated passengers, attached through the Fenix's own `attached_objects.cfg` ([entry below](#2026-10-03-gsx-keeps-its-passengers-aboard-by-adding-its-model-to-the-aircrafts-own-attachments)), hold still in flight with nothing outside the sim moving them?

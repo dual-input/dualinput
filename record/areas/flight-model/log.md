@@ -47,11 +47,11 @@ The Baron sets `A:VELOCITY BODY X` and `Z` to 0 at 60 Hz while `L:bksq_WheelChoc
   - At 0.47s `L:bksq_WheelChocks` went from 1 to 0 without us writing it, and the velocity read 4.58 to 4.80 ft/s after that.
   - The position held within 0.06m of where we wrote it.
 - Frozen, with the attitude written each frame, through an engine start: in all 356 frames with `A:GENERAL ENG STARTER:1` at 1, `A:PLANE BANK DEGREES` read back exactly what we wrote.
-  Whether the cockpit shook on screen wasn't recorded.
+  The cockpit shook on screen all the same (seen by the pilot), so the shake reaches what the sim draws without changing the value SimConnect reads back.
 
 **Changed:** a follower's written altitude decides what the Baron reports about the ground, so a follower written even a few feet high tells the Baron it's airborne.
 The chocks don't stop a follower, but the Baron took its own chocks away once the written aircraft moved: the follower's aircraft changed its own state in reply to written motion, and state sync would see that change as if a pilot had made it.
-The engine-start shake doesn't reach a follower's attitude.
+The engine-start shake doesn't change a follower's written attitude, and the follower's pilot still sees it.
 
 **Affects:** flight-model sync and state sync in [03-v1-scope](../product/03-v1-scope.md); the Baron study's sim question 6.
 

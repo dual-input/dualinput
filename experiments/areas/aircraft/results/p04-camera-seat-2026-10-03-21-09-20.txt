@@ -1,0 +1,30 @@
+p04 · Moving the cockpit camera to another seat through SimConnect, on MSFS 2024
+2026-10-03T21:09:20.335Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"
+Start: x 0.253m (left +), y 0.855m, z -0.144m, pitch 13°, yaw 0°; camera ACQUIRED_BY_OTHER
+Camera definitions: "Pilot", "CoPilot", "LeftPanel", "RightPanel", "LeftSubpanel", "RightSubpanel", "ThrottleQuadrant", "Pedestal", "CircuitBreakerPanel", "EmergencyGearExtension", "CabinRearward", "CabinForward", "QuickView_L1", "QuickView_L2", "QuickView_L3", "QuickView_R1", "QuickView_R2", "QuickView_R3", "QuickView_Rear", "QuickView_Up", "FixedOnPlane_Tail", "FixedOnPlane_Left_Wing", "FixedOnPlane_Right_Wing", "FixedOnPlane_Belly", "FixedOnPlane_Flaps", "FixedOnPlane_Ailerons", "FixedOnPlane_Elevator", "FixedOnPlane_Rudder", "FixedOnPlane_LandingGear", "FixedOnPlane_Propeller", "PilotVR", "ShadowsQuality"
+A, after the definition "CoPilot": x 0.253m (left +), y 0.855m, z -0.144m, pitch 13°, yaw -0°, the starting seat; camera ACQUIRED_BY_OTHER
+A, after the definition "Pilot": x 0.253m (left +), y 0.854m, z -0.143m, pitch 13°, yaw -0°, the starting seat; camera ACQUIRED_BY_OTHER
+B, after the acquire: x 0.253m (left +), y 0.854m, z -0.143m, pitch 13°, yaw 0°, the starting seat; camera ACQUIRED
+B, after the definition "CoPilot", holding the camera: x -0.236m (left +), y 0.811m, z -0.116m, pitch 11°, yaw 0°, the mirrored seat; camera ACQUIRED
+B, after the set to the mirrored eye: x -0.253m (left +), y 0.855m, z -0.144m, pitch 11°, yaw 0°, the mirrored seat; camera ACQUIRED
+B, 1s after the release: x 0.253m (left +), y 0.855m, z -0.144m, pitch 13°, yaw 0°, the starting seat; camera ACQUIRED_BY_OTHER
+B, 3s after the release: x 0.253m (left +), y 0.855m, z -0.144m, pitch 13°, yaw 0°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 1s after the release into "CoPilot": x 0.253m (left +), y 0.855m, z -0.143m, pitch 13°, yaw -0°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 3s after the release into "CoPilot": x 0.273m (left +), y 0.852m, z -0.159m, pitch 19°, yaw -78°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 4s after the release into "CoPilot": x 0.233m (left +), y 0.855m, z -0.161m, pitch 11°, yaw 83°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 5s after the release into "CoPilot": x 0.260m (left +), y 0.847m, z -0.150m, pitch 38°, yaw -27°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 6s after the release into "CoPilot": x 0.272m (left +), y 0.857m, z -0.160m, pitch 7°, yaw -81°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 7s after the release into "CoPilot": x 0.236m (left +), y 0.864m, z -0.155m, pitch -13°, yaw 65°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 8s after the release into "CoPilot": x 0.237m (left +), y 0.856m, z -0.174m, pitch 10°, yaw 124°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 9s after the release into "CoPilot": x 0.258m (left +), y 0.851m, z -0.145m, pitch 24°, yaw -15°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 10s after the release into "CoPilot": x 0.269m (left +), y 0.871m, z -0.161m, pitch -38°, yaw -83°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 11s after the release into "CoPilot": x 0.264m (left +), y 0.844m, z -0.156m, pitch 49°, yaw -57°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 12s after the release into "CoPilot": x 0.238m (left +), y 0.847m, z -0.158m, pitch 35°, yaw 69°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 13s after the release into "CoPilot": x 0.240m (left +), y 0.857m, z -0.149m, pitch 6°, yaw 43°, the starting seat; camera ACQUIRED_BY_OTHER
+C, 1s after the release into "Pilot": x 0.260m (left +), y 0.860m, z -0.145m, pitch -2°, yaw -22°, the starting seat; camera ACQUIRED_BY_OTHER
+After putting it back: x 0.260m (left +), y 0.860m, z -0.145m, pitch -2°, yaw -22°, the starting seat; camera ACQUIRED_BY_OTHER
+
+Status updates: ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED; ACQUIRED; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED; ACQUIRED; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER; ACQUIRED_BY_OTHER
+Exceptions: CAMERA_API (46) on camera set using definition CoPilot, parameter 4294967295; CAMERA_API (46) on camera set using definition Pilot, parameter 4294967295

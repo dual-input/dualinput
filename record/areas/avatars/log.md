@@ -10,22 +10,22 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p25 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
-## 2026-10-03: With the seats swapped, the yoke rules drove the figure's hands from the right seat, and the module held it in its seat at up to 185 kt
+## 2026-10-03: In the right seat, the figure's hands followed the yoke rules with the right hand on the yoke, and the module held it in its seat at up to 185 kt GS
 
 **Asked:** driven as a session would drive it, does the figure look right?
-Its hands go where the pilot clicks, by the yoke rules with the seats swapped, its head looks where the pilot looks, and the module holds it in the copilot's seat, parked and in flight.
+Its hands go where the pilot clicks, by the yoke rules with the right hand holding the copilot's yoke, in front of the right seat, at rest, its head looks where the pilot looks, and the module holds it in the right seat, parked and in flight.
 
-**Expected:** the rules would carry over by swapping the hands, and the module, which held GSX's seated passenger in a flying C152 ([entry below](#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), would hold our figure too.
+**Expected:** the rules would carry over with the right hand on the yoke at rest, and the module, which held GSX's seated passenger in a flying C152 ([entry below](#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), would hold our figure too.
 
 **Found:**
 
-- In the Black Square Baron 58P, p25 placed `CROSSCHECK_Figure` on the copilot's seat node `PILOT_1` through `crosscheck-p12-follow`, every frame, turned by the aircraft's full attitude and led by 1 frame.
-  The module wrote it in 34,739 frames with no error over 19 minutes: about 10 minutes of clicks while parked, then flight up to 185 kt.
+- In the Black Square Baron 58P, p25 placed `CROSSCHECK_Figure` on the right seat's node `PILOT_1` through `crosscheck-p12-follow`, every frame, turned by the aircraft's full attitude and led by 1 frame.
+  The module wrote it in 34,739 frames with no error over 19 minutes: about 10 minutes of clicks while parked, then flight up to 185 kt GS, read as `A:GROUND VELOCITY`.
 - The Baron marks grips only on the pilot's yoke.
   Its copilot's yoke repeats the pilot's yoke's hierarchy, `YokePitch_R`, `YokeRoll_R`, and `Yoke_R`, moved by the same two animations, but `Yoke_R` is turned 180° from `Yoke_L`.
   Grip nodes placed under `Yoke_R` missed the copilot's yoke.
   Placed relative to `YokeRoll_R` as they sit relative to `YokeRoll_L`, a ray from the copilot's eye met the horn 1.7cm before each grip, as it meets the pilot's ([entry below](#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
-- The pilot clicked from the left seat as the right-seat pilot: the left hand tapped 128 times and the right hand 36, with 26 drags, and the yoke changed hands 14 times over 33 sessions.
+- The pilot clicked from the left seat for the figure in the right seat: the left hand tapped 128 times and the right hand 36, 26 of those taps drags, and the yoke changed hands 14 times over 33 sessions.
   All 3 thumb presses were on the copilot's wheel itself, `Yoke_R`, not on its buttons.
 - The middle of the pilot's view met the cockpit on 2,906 of 5,737 looks, and on the rest the figure looked the way the pilot looked.
 - The pilot judged that the figure held its seat in flight and looked good, except that some part of it missed a frame now and then.

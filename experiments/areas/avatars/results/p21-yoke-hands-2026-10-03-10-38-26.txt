@@ -1,0 +1,14 @@
+p21 · The figure's two hands: one on the yoke's grip, following the yoke, and one tapping where the pilot clicks, swapping by side, on MSFS 2024
+2026-10-03T10:38:26.522Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.000069 kt
+  bksq-aircraft-baronpro, BaronProfessional_Pressurized_INT.gltf: 490,963 triangles
+  HANDLING_YOKE_LEVER_StickLR plays ( (A:YOKE X POSITION WITH AP LINEAR, Percent) (L:bksq_controlLocks, bool) if{ -1 max 1 min }   2 / 50 + ) over 100 frames, and HANDLING_yoke_Lever_StickForeAft plays ( (A:YOKE Y POSITION WITH AP, Percent) (L:bksq_controlLocks, bool) if{ -1 max 1 min }   2 / 50 + ) over 100
+  51 visibility codes the probe can run, 0 it can't; the left grip shows while YokePitch_L: (L:XMLVAR_YokeHidden1) !
+  1 seat object, none within 0.3m of a PILOT_ node of the model: its origin taken as SimConnect's reference point
+  HANDLING_Yoke_1_Hand_Left: the yoke's surface (Yoke_L) is 1.7cm in front of the anchor toward the eye; the hand sits 3.1cm from it
+  HANDLING_Yoke_1_Hand_Right: the yoke's surface (Yoke_L) is 1.7cm in front of the anchor toward the eye; the hand sits 3.1cm from it
+  at the start, frames 50.2 and 50.2: left grip at 0.396, 0.442, 0.382, right grip at 0.149, 0.441, 0.381, wheel center at 0.274, 0.386, 0.434, the yoke shown; 3 variables watched every frame, 17 every second
+  2,606 yoke poses: roll frames -0.0 to 100.0, fore-aft frames -0.0 to 100.0
+  the left hand tapped 64 times and the right hand 51 times, 40 drags; on the yoke, the left thumb pressed 1 time and the right 8 times; the yoke hand swapped 9 times, and the hands went home after 9 sessions; 0 presses with the yoke hidden, 33 rays passing a hidden part to hit behind it; 24 right presses turned the view; 6 clicks outside the sim

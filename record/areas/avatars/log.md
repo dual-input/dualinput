@@ -9,6 +9,28 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: With a run of clicks treated as one session, 115 taps took 9 swaps instead of one swap a click
+
+**Asked:** once the thumb on the far horn leaves the yoke with the holding hand, do the hands stop swapping for every click, if they stay swapped through a run of clicks and the tapping hand hovers near the panel between them?
+The pilot also found the 0.3s overlap wrong when a hand leaves the yoke to tap: the hand stayed on the yoke while the switch it was going to press had already moved, since the sim acts on a click at once.
+
+**Expected:** a pilot working one side of the panel swaps hands once, not for every switch.
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, in a run with only the thumb fix, all three right-thumb presses on the right horn left the left hand on the yoke, and five clicks on `ELECTRICAL_Switch_Magneto_1` swapped the hands four times.
+- p21 then took a run of clicks with one hand as one session: the hands go home only 2s after the last release, the tapping hand hovers 5cm off its last spot between clicks, and a hand leaving the yoke to tap moves at once, with the overlap kept only for going home.
+- Over the next run, 115 taps (64 left, 51 right, 40 of them drags) took 9 swaps and 9 sessions.
+  Each swap was the first click after a pause of 1.1s to 20.9s, or a click on the other side of the wheel from the one before.
+- All 8 right-thumb presses on the right horn left the left hand on the yoke.
+
+**Changed:** the hands swap once for each run of clicks on one side, and the tapping hand reaches its switch as the sim moves it.
+On the other pilot's machine, where Crosscheck applies the change itself, it could hold the change until the hand arrives, for an overlap, at that much more delay; that's a product decision.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p21's runs [with the thumb fix](../../../experiments/areas/avatars/results/p21-yoke-hands-2026-10-03-10-33-01.txt) and [with sessions](../../../experiments/areas/avatars/results/p21-yoke-hands-2026-10-03-10-38-26.txt), whose logs have every press with the hands' choice.
+
 ## 2026-10-03: On the horn's surface the yoke hand looks right, and a thumb on the far horn must not take the yoke from the holding hand
 
 **Asked:** with the yoke hand moved onto the horn's surface, buttons on the pilot's own yoke pressed by a thumb, and the yoke handed over with an overlap, do the hands behave as a pilot's would?

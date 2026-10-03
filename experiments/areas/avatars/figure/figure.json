@@ -1,0 +1,27 @@
+{
+  "head": { "radius": 0.1, "eyeForward": 0.06 },
+  "nose": { "radius": 0.022, "length": 0.12 },
+  "chest": { "radius": 0.13, "at": 0.5 },
+  "hips": { "radius": 0.15, "up": 0.08, "back": 0.03 },
+  "shoulders": { "width": 0.2, "down": 0.03 },
+  "legs": { "width": 0.16, "down": 0.05 },
+  "arm": { "radius": 0.015 },
+  "leg": { "radius": 0.018 },
+  "hand": { "radius": 0.038 },
+  "foot": { "radius": 0.045 },
+  "rest": {
+    "hand": { "fwd": 0.2, "right": 0.17, "up": 0.1 },
+    "foot": { "fwd": 0.32, "right": 0.12, "up": -0.22 }
+  },
+  "material": { "roughness": 0.72, "lighten": 0.3 },
+  "palette": [
+    { "name": "red", "hex": "#e2453c" },
+    { "name": "blue", "hex": "#3b7fe0" },
+    { "name": "green", "hex": "#3fae5a" },
+    { "name": "yellow", "hex": "#f2b630" },
+    { "name": "purple", "hex": "#8e5ad8" },
+    { "name": "orange", "hex": "#f0862e" },
+    { "name": "teal", "hex": "#2fb3a6" },
+    { "name": "pink", "hex": "#e46aa6" }
+  ]
+}

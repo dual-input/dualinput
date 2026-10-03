@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "figure-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["experiments/areas/avatars/figure/serve.mjs"],
+      "port": 5181
+    }
+  ]
+}

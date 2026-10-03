@@ -19,11 +19,12 @@ Releasing the camera into a view keeps the pilot's look, and releasing it anywhe
   So the sim moves the cockpit eye through input actions of its own, which SimConnect doesn't carry.
   The pilot thinks they stopped at 0.43m themselves, so how far the eye can travel is unknown.
 - p04's step D held the camera at the mirror of the pilot's eye with `SimConnect_CameraEnableFlag` and `SIMCONNECT_CAMERA_FLAG_INTERACTION`, which the SDK describes only as "The add-on camera will permit interactions" ([SIMCONNECT_CAMERA_FLAG](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_CAMERA_FLAG.htm)).
-  For the 10s the pilot looked around with the mouse, the camera's pitch and yaw stayed at 0°.
+  For the 10s the pilot looked around with the mouse, the camera's pitch and yaw stayed at 0°, and a click on a switch did nothing.
 - That run started with the eye at 0.205m left and 0.256m back of the reference point, moved there by the pilot in p07, and releasing the camera into `Pilot` returned it there rather than to the view's own eye, at 0.253m left and 0.144m back.
   So the sim may keep a pilot's move within each view (unverified).
 
-**Changed:** with the sim's own camera, Crosscheck can put a pilot only where a camera view is, unless it drives the look itself while it holds the camera, as ChasePlane does.
+**Changed:** with the sim's own camera, Crosscheck can put a pilot only where a camera view is, unless it drives the look and the clicks itself while it holds the camera, as ChasePlane does.
+What the interaction flag permits is unknown.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
 

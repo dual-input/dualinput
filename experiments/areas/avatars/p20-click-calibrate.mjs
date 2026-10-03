@@ -120,10 +120,19 @@ const setModule = (values) => { for (const [k, x] of Object.entries(values)) sim
 let sphere = null
 let stopMouse = null
 let finished = false
+// Filled by the clicks phase, and summed up however the probe ends.
+const holds = []
+const nodes = new Map()
+let outside = 0
 async function finish(why) {
   if (finished) return
   finished = true
   if (stopMouse) stopMouse()
+  if (holds.length || nodes.size) {
+    const count = (k) => holds.filter((h) => h.type === k)
+    note("presses", `${plural(holds.length, "press", "presses")} in the sim (${count("tap").length} taps, ${count("hold").length} holds, ${count("drag").length} drags), ${plural(outside, "click")} outside it; nodes hit: ${[...nodes].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
+    for (const h of count("drag").slice(0, 12)) note("drag", `on ${h.node}: ${(h.ms / 1000).toFixed(1)}s, the cursor moved up to ${h.cursorPx.toFixed(0)}px while the mouse moved ${h.raw.toFixed(0)} counts; the hand slid ${(h.travel * 100).toFixed(1)}cm on the plane${h.recastGap !== null ? `, and a fresh cast was ${(h.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`)
+  }
   setModule({ MODE: 0, OBJECT: 0, LEAD: 0 })
   if (sphere !== null) sim.remove(sphere)
   await sleep(800)
@@ -231,7 +240,6 @@ const toRest = () => setModule({ FWD: rest.forward, RIGHT: rest.right, UP: rest.
 
 // Mouse events go to whichever phase is listening, and Page Up to its skip.
 let onMouse = null
-let outside = 0
 let win = null
 stopMouse = await startMouse((m) => {
   if (m.width > 0 && m.height > 0) win = { width: m.width, height: m.height }
@@ -322,8 +330,6 @@ if (all.length >= 4) {
 let grab = null
 let lingerUntil = 0
 let lastWheel = 0
-const holds = []
-const nodes = new Map()
 const pixels = (m, a) => Math.hypot((m.x - a.x) * m.width / 2, (m.y - a.y) * m.height / 2)
 onMouse = (m) => {
   const c = cam
@@ -365,9 +371,10 @@ onMouse = (m) => {
     const moved = grab.path.filter((p) => p.onPlane)
     const travel = moved.length ? dist(moved[0].onPlane, moved[moved.length - 1].onPlane) : 0
     const recastGap = moved.filter((p) => p.recast).map((p) => dist(p.onPlane, p.recast))
-    const hold = { kind, node: grab.node, ms, cursorPx: grab.cursorPx, raw, travel, recastGap: recastGap.length ? median(recastGap) : null, moves: grab.path.length }
+    // "type", not "kind": a field named kind would replace the record's own.
+    const hold = { type: kind, node: grab.node, ms, cursorPx: grab.cursorPx, raw, travel, recastGap: recastGap.length ? median(recastGap) : null, moves: grab.path.length }
     holds.push(hold)
-    rec.log("release", `${kind} on ${grab.node}: ${ms}ms, the cursor moved up to ${grab.cursorPx.toFixed(0)}px and the mouse ${raw.toFixed(0)} counts; the hand slid ${(travel * 100).toFixed(1)}cm on the plane${hold.recastGap !== null ? `, a fresh cast ${(hold.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`, { ...hold, path: grab.path })
+    rec.log("release",`${kind} on ${grab.node}: ${ms}ms, the cursor moved up to ${grab.cursorPx.toFixed(0)}px and the mouse ${raw.toFixed(0)} counts; the hand slid ${(travel * 100).toFixed(1)}cm on the plane${hold.recastGap !== null ? `, a fresh cast ${(hold.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`, { ...hold, path: grab.path })
     if (kind !== "tap") console.log(`  ${kind} on ${grab.node}: ${(ms / 1000).toFixed(1)}s, cursor ${grab.cursorPx.toFixed(0)}px, mouse ${raw.toFixed(0)} counts`)
     grab = null
     lingerUntil = Date.now() + LINGER_MS.release
@@ -385,7 +392,4 @@ const why = await new Promise((resolve) => {
 })
 clearInterval(tick)
 clearInterval(poll)
-const count = (k) => holds.filter((h) => h.kind === k)
-note("presses", `${plural(holds.length, "press", "presses")} in the sim (${count("tap").length} taps, ${count("hold").length} holds, ${count("drag").length} drags), ${plural(outside, "click")} outside it; nodes hit: ${[...nodes].map(([n, c]) => `${n}${c > 1 ? ` ×${c}` : ""}`).join(", ")}`)
-for (const h of count("drag").slice(0, 12)) note("drag", `on ${h.node}: ${(h.ms / 1000).toFixed(1)}s, the cursor moved up to ${h.cursorPx.toFixed(0)}px while the mouse moved ${h.raw.toFixed(0)} counts; the hand slid ${(h.travel * 100).toFixed(1)}cm on the plane${h.recastGap !== null ? `, and a fresh cast was ${(h.recastGap * 100).toFixed(1)}cm from it (median)` : ""}`)
 await finish(why)

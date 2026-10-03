@@ -9,6 +9,32 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: During a drag the cursor keeps moving, and gliding on the touched surface's plane keeps the hand on a lever where a fresh cast falls through
+
+**Asked:** with the hand at the raw hit and no control names, how should it follow a press that's held and dragged: does MSFS 2024 keep moving the cursor while the pilot drags a lever, and does gliding along the plane of the surface first touched beat casting the ray again at every move?
+
+**Expected:** the plane would follow a drag across a panel seen from an angle, and a fresh cast would fall behind a lever, since the model holds the lever where its file stores it.
+We didn't know whether the sim locks or hides the cursor during a lever drag.
+
+**Found:**
+
+- In the A2A Comanche, parked, the pilot pressed 42 times: 14 taps, 2 holds, and 26 drags across the panel, the side wall, the throttle quadrant, the G5 displays, and the copilot's yoke.
+  For the close-up presses on the G5s, the camera sat 0.5m forward of the default eye, and the ray followed it.
+- The cursor kept moving with the mouse through every drag, levers included.
+  On the throttle it ran down and right as the lever came back, then back up, with no jump or lock, and sample by sample it moved the way the mouse's own counts did.
+- On flat surfaces the plane and a fresh cast agreed: medians of 0 to 1.5cm on `MAIN_DASH` and `BlackPanel`.
+- On the levers they split: a fresh cast was a median 8cm and 65cm from the plane on two drags of `LEVER_RPM_2`, and 22cm on `LEVER_Mixture_Rod`, landing on the floor and pedals behind levers that had moved in the sim, while the plane kept the hand at the lever.
+- Where the sphere's 1.45cm radius met a knob and its bezel, it showed dark ragged patches, as if cut away (pilot's screenshot).
+  Its material is single-sided and partly emissive (`tools/sphere.mjs`), so the patches aren't its inside.
+  Shadows from the knob and bezel, with a shadow map's ragged edge, are our guess (unverified).
+
+**Changed:** a held press follows the cursor's ray across the plane of the surface it first touched.
+A fresh cast stays useful only where the plane meets a curve or an edge.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p20's second run](../../../experiments/areas/avatars/results/p20-click-calibrate-2026-10-03-08-47-25.txt), whose log has every press and each drag's path; its releases are logged under the kinds `tap`, `hold`, and `drag`, a bug since fixed.
+
 ## 2026-10-03: The ray through the cursor needs no calibration: CameraGet's field of view is the view's height, and clicks land within 2mm at any zoom and window shape
 
 **Asked:** what turns a click into the ray from the pilot's eye, for any pilot: which signs, whether `SimConnect_CameraGet`'s field of view is the view's width or its height, and whether any offset is added?

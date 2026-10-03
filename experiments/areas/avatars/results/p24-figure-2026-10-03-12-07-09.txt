@@ -1,0 +1,17 @@
+p24 · Our own figure in the Baron 58P's copilot seat: joints, smoothness between frames, and color, on MSFS 2024
+2026-10-03T12:07:09.287Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by the end of the phases
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", interior BaronProfessional_Pressurized_INT.gltf
+  seat PILOT_1 at -0.054m forward, 0.282m right, 0.132m up of the model's origin; the copilot's eye -0.062m forward, -0.047m right, 0.678m up of the seat
+  aircraft heading 296.708799°, pitch -0.899826°, bank -0.146071°
+  CROSSCHECK_Figure: object 63799297, StaticObject, placed on PILOT_1 with the aircraft's attitude
+  phases: rest, rest
+  CameraGet in SIMOBJECT: -0.161m forward, -0.237m right, 0.848m up of the reference point, pitch 33.304676°, yaw 80.704155°, roll 0°, fov 1.4228
+  screenshot 2401×1360, brightness 137.8, 78076 red samples
+
+Screenshots: p24-figure-2026-10-03-12-07-09/
+  rest: 2401×1360, brightness 137.8, 78076 red samples at 1205.4, 535.8
+
+Exceptions: 
+  1 × ERROR (1) on release object 63799297, parameter 1

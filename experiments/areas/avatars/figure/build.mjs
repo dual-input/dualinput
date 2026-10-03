@@ -140,6 +140,9 @@ write(`PackageDefinitions/${NAME}.xml`, [
   `\t\t<VisibleInStore>false</VisibleInStore>`,
   `\t\t<CanBeReferenced>false</CanBeReferenced>`,
   `\t</Flags>`,
+  // A SimObject of our own rather than a patch of someone else's: the order
+  // hint the Project Editor asks for before it builds and mounts.
+  `\t<PackageOrderHint>CUSTOM_SIMOBJECTS</PackageOrderHint>`,
   `\t<AssetGroups>`,
   `\t\t<AssetGroup Name="${TITLE}">`,
   // Version 1: the in-sim Project Editor offered to upgrade version 0 to it.

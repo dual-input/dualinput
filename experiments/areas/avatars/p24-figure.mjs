@@ -78,7 +78,7 @@ const POSE = [["PLANE LATITUDE", "degrees"], ["PLANE LONGITUDE", "degrees"], ["P
 const PHASES = ["head", "smoothness", "lean", "hands", "legs", "color"]
 const arg = (name) => { const i = process.argv.indexOf(name); return i < 0 ? null : process.argv[i + 1] ?? "" }
 const only = arg("--phases")?.split(",").map((s) => s.trim()).filter(Boolean) ?? PHASES
-const unknown = only.filter((p) => !PHASES.includes(p))
+const unknown = only.filter((p) => p !== "rest" && !PHASES.includes(p))
 if (unknown.length) { console.error(`unknown phase ${unknown.join(", ")}: the phases are ${PHASES.join(", ")}`); process.exit(1) }
 const wait = !process.argv.includes("--no-wait")
 

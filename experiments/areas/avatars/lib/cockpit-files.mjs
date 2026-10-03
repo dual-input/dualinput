@@ -4,7 +4,7 @@
  * glTF, and the aircraft.cfg [VR] section that names its yoke.
  *
  *   const files = cockpitFiles("Black Square Baron 58 Professional N972HJ")
- *     { cfg, modelDir, xml, gltf, vr: { yoke_node, yoke_anim_x, ... } } or null
+ *     { cfg, modelDir, xml, gltf, exterior: { xml, gltf }, vr: { yoke_node, yoke_anim_x, ... } } or null
  *
  * The route, read in two packages: the [FLTSIM.n] section with the title names
  * a model folder (model = "base" means model.base); its model.cfg names the
@@ -90,6 +90,13 @@ export function visibilityCode(text) {
   return out
 }
 
+// A model XML's most detailed glTF: the <LOD> with the largest minSize.
+function mostDetailed(xml) {
+  const lods = [...read(xml).matchAll(/<LOD\b[^>]*minSize="([\d.]+)"[^>]*ModelFile="([^"]+)"/g)].map((m) => ({ size: Number(m[1]), file: m[2] }))
+  lods.sort((a, b) => b.size - a.size)
+  return lods.length ? path.join(path.dirname(xml), lods[0].file) : null
+}
+
 export function cockpitFiles(title) {
   for (const root of packageRoots()) {
     for (const pkg of dirs(root)) {
@@ -109,14 +116,16 @@ export function cockpitFiles(title) {
           const models = cfgSection(read(path.join(modelDir, "model.cfg")), "models")
           if (!models.interior) return null
           const xml = path.join(modelDir, models.interior.replace(/^[\\/]+/, ""))
-          const lods = [...read(xml).matchAll(/<LOD\b[^>]*minSize="(\d+)"[^>]*ModelFile="([^"]+)"/g)].map((m) => ({ size: Number(m[1]), file: m[2] }))
-          lods.sort((a, b) => b.size - a.size)
-          const gltf = lods.length ? path.join(path.dirname(xml), lods[0].file) : null
+          const gltf = mostDetailed(xml)
+          // The exterior is "exterior" in the Comanche's model.cfg and "normal" in the Baron's.
+          const outside = models.exterior ?? models.normal
+          const exteriorXml = outside ? path.join(modelDir, outside.replace(/^[\\/]+/, "")) : null
+          const exterior = exteriorXml && fs.existsSync(exteriorXml) ? { xml: exteriorXml, gltf: mostDetailed(exteriorXml) } : null
           // [VR] sits in this aircraft.cfg, or in common/config's for a modular aircraft.
           const common = path.join(base, "common", "config", "aircraft.cfg")
           let vr = cfgSection(text, "VR")
           if (!Object.keys(vr).length && fs.existsSync(common)) vr = cfgSection(read(common), "VR")
-          return { cfg, modelDir, xml, gltf, vr, package: pkg }
+          return { cfg, modelDir, xml, gltf, exterior, vr, package: pkg }
         }
       }
     }

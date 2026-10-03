@@ -36,6 +36,13 @@ export function toBody(a, p) {
   }
 }
 
+// The inverse of toBody: the point forward, right, and up meters from a, with
+// its altitude in feet. It turns by a's heading only, so it holds for an
+// aircraft in level flight, not a pitched or banked one.
+export function toWorld(a, b) {
+  return { ...offset(a, b.forward, b.right), alt: a.alt + b.up / 0.3048 }
+}
+
 // The true bearing from a to b.
 export function bearing(a, b) {
   const y = Math.sin((b.lon - a.lon) * RAD) * Math.cos(b.lat * RAD)

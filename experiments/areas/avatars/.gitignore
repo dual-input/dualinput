@@ -1,5 +1,6 @@
 # Screen recordings of runs show the terminal, and with it the home folder's
 # path, which can't go in the tree (CLAUDE.md, Nothing personal in the tree).
 results/*.mp4
-# p24's screenshots of the sim window: kept out until checked by eye.
-results/p24-figure-*/
+# p24's full screenshots of the sim window, which show the home folder's path
+# in Devmode's title bars. Its cropped JPEGs beside them can go in once read.
+results/p24-figure-*/*.png

@@ -28,8 +28,9 @@
  * frames, the head holds still and then jumps, and the reddish pixels'
  * center in the screenshots shows it.
  *
- * Screenshots go to results/p24-figure-<time>/, which .gitignore keeps out of
- * the tree until someone checks them by eye (CLAUDE.md, Nothing personal in
+ * Screenshots go to results/p24-figure-<time>/: full PNGs, which .gitignore
+ * keeps out of the tree, and a cropped, smaller JPEG of each, which can be
+ * committed once someone has looked at it (CLAUDE.md, Nothing personal in
  * the tree). Nothing touches the pilot's input. The figure goes with
  * AIRemoveObject at the end and on Ctrl+C.
  *
@@ -89,17 +90,38 @@ const VARS = ALL.map((ch) => [`L:${variable(ch)}`, "number"])
 // The sim window's client area as a PNG, and the share of strongly red pixels
 // with their center, read in the same pass: "OK width height brightness
 // redCount redX redY". DPI-aware, so the area is in the screen's own pixels.
+// Beside it goes a JPEG to commit: PREVIEW_WIDTH wide, with the top CROP_TOP
+// pixels cut off, where Devmode's toolbar and the Project Editor's title bar
+// show the home folder's path. Other windows can still show in it, so read a
+// preview before committing it (CLAUDE.md, Nothing personal in the tree).
+const CROP_TOP = 100
+const PREVIEW_WIDTH = 1200
 const SHOT_PS = `
 $ProgressPreference = "SilentlyContinue"
 Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @"
-using System; using System.Drawing; using System.Drawing.Imaging; using System.Runtime.InteropServices;
+using System; using System.Drawing; using System.Drawing.Drawing2D; using System.Drawing.Imaging; using System.Runtime.InteropServices;
 public static class CrosscheckShot {
   [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X; public int Y; }
   [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L; public int T; public int R; public int B; }
   [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
   [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr h, ref POINT p);
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
-  public static string Take(IntPtr h, string file) {
+  static void Preview(Bitmap bmp, string file) {
+    int w = bmp.Width, top = Math.Min(${CROP_TOP}, bmp.Height - 1), ph = bmp.Height - top;
+    int pw = ${PREVIEW_WIDTH}, phs = (int)Math.Round(ph * (double)pw / w);
+    using (Bitmap pv = new Bitmap(pw, phs)) {
+      using (Graphics g = Graphics.FromImage(pv)) {
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        g.DrawImage(bmp, new Rectangle(0, 0, pw, phs), new Rectangle(0, top, w, ph), GraphicsUnit.Pixel);
+      }
+      ImageCodecInfo jpeg = null;
+      foreach (ImageCodecInfo c in ImageCodecInfo.GetImageEncoders()) if (c.FormatID == ImageFormat.Jpeg.Guid) jpeg = c;
+      EncoderParameters q = new EncoderParameters(1);
+      q.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 82L);
+      pv.Save(file, jpeg, q);
+    }
+  }
+  public static string Take(IntPtr h, string file, string preview) {
     RECT r; GetClientRect(h, out r); POINT o = new POINT(); ClientToScreen(h, ref o);
     int w = r.R - r.L, hh = r.B - r.T;
     if (w <= 0 || hh <= 0) return "ERR no client area";
@@ -116,6 +138,7 @@ public static class CrosscheckShot {
         if (rr > 120 && rr > gg * 1.6 && rr > b * 1.6) { red++; rx += x; ry += y; }
       }
       bmp.Save(file, ImageFormat.Png);
+      Preview(bmp, preview);
       return String.Format(System.Globalization.CultureInfo.InvariantCulture, "OK {0} {1} {2:F1} {3} {4:F1} {5:F1}", w, hh, sum / n, red, red > 0 ? rx / red : -1, red > 0 ? ry / red : -1);
     }
   }
@@ -127,7 +150,8 @@ while ($true) {
   if ($line -eq $null) { break }
   $p = Get-Process -Name FlightSimulator2024 -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
   if (-not $p) { [Console]::Out.WriteLine("ERR no sim window"); continue }
-  try { [Console]::Out.WriteLine([CrosscheckShot]::Take($p.MainWindowHandle, $line)) } catch { [Console]::Out.WriteLine("ERR " + $_.Exception.Message) }
+  $files = $line.Split("|")
+  try { [Console]::Out.WriteLine([CrosscheckShot]::Take($p.MainWindowHandle, $files[0], $files[1])) } catch { [Console]::Out.WriteLine("ERR " + $_.Exception.Message) }
 }`
 
 const rec = new Recorder("p24-figure", { area: "avatars" })
@@ -148,7 +172,7 @@ async function shot(name) {
   fs.mkdirSync(shotsDir, { recursive: true })
   const file = path.join(shotsDir, `${String(shots.length + 1).padStart(2, "0")}-${name}.png`)
   const line = await Promise.race([
-    new Promise((resolve) => { replies.push(resolve); shooter.stdin.write(file + "\n") }),
+    new Promise((resolve) => { replies.push(resolve); shooter.stdin.write(`${file}|${file.replace(/\.png$/, ".jpg")}\n`) }),
     sleep(5000).then(() => "ERR no reply in 5s"),
   ])
   const [ok, w, h, bright, red, rx, ry] = line.split(" ")

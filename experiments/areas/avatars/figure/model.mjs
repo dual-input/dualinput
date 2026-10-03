@@ -157,7 +157,7 @@ const arc = (z0, r, from, to, steps) =>
   })
 
 const sphere = () => lathe(arc(0, 1, -Math.PI / 2, Math.PI / 2, 24), 40)
-const stick = () => lathe([{ z: 0, r: 1, nr: 1, nz: 0 }, { z: 1, r: 1, nr: 1, nz: 0 }], 20)
+const stick = (r, length) => lathe([{ z: 0, r, nr: 1, nz: 0 }, { z: length, r, nr: 1, nz: 0 }], 20)
 function nose(spec) {
   const r = spec.nose.radius
   const tip = spec.head.radius + spec.nose.length - r
@@ -230,15 +230,30 @@ export function colors(spec, index) {
 export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {}) {
   const P = packer()
   const geometry = (g) => ({ POSITION: P.floats(g.pos, "VEC3", true), NORMAL: P.floats(g.nrm, "VEC3"), indices: P.indices(g.idx) })
-  const geo = { sphere: geometry(sphere()), stick: geometry(stick()), nose: geometry(nose(spec)) }
+  // Each stick size is a mesh of its own, its radius and any fixed length in
+  // its vertices, and no stick node carries a fixed scale. fspackagetool
+  // rewrote one unit stick shared by nodes with different uneven scales, to
+  // radius 0.044 and length 2.913, and the sim drew the sticks thinner than
+  // the balls (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-58-55.txt).
+  // Balls share one mesh under even scales, which it left alone.
+  const knee = spec.knee.arc / spec.knee.segments
+  const geo = {
+    sphere: geometry(sphere()),
+    arm: geometry(stick(spec.arm.radius, 1)),
+    leg: geometry(stick(spec.leg.radius, 1)),
+    knee: geometry(stick(spec.leg.radius, knee)),
+    nose: geometry(nose(spec)),
+  }
   const prim = (g, material) => ({ attributes: { POSITION: g.POSITION, NORMAL: g.NORMAL }, indices: g.indices, material, mode: 4 })
   const meshes = [
     { name: "sphere_main", primitives: [prim(geo.sphere, 0)] },
     { name: "sphere_light", primitives: [prim(geo.sphere, 1)] },
-    { name: "stick", primitives: [prim(geo.stick, 0)] },
+    { name: "arm_stick", primitives: [prim(geo.arm, 0)] },
+    { name: "leg_stick", primitives: [prim(geo.leg, 0)] },
+    { name: "knee_stick", primitives: [prim(geo.knee, 0)] },
     { name: "nose", primitives: [prim(geo.nose, 0)] },
   ]
-  const MESH = { sphere_main: 0, sphere_light: 1, stick: 2, nose: 3 }
+  const MESH = { sphere_main: 0, sphere_light: 1, arm_stick: 2, leg_stick: 3, knee_stick: 4, nose: 5 }
 
   const nodes = []
   const at = {}
@@ -263,36 +278,35 @@ export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {})
   const chest = chain(root, ["chest_fwd", "chest_right", "chest_up"])
   ball(chest, "chest_ball", spec.chest.radius, "sphere_light")
 
-  // A stick from a node along its +z. A length the stick always has goes in
-  // the mesh node's own scale: as a fixed scale on the node above it, the sim
-  // drew each knee segment 1m long instead of 2.8cm, while an animated scale
-  // there works (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-42-56.txt).
-  const stickOn = (parent, name, r, length = 1) => {
+  // A stick from a node along its +z, under a node that LEN's animation may
+  // stretch. A fixed scale on that node drew each knee segment 1m long
+  // (p24's run, 2026-10-03, results/p24-figure-2026-10-03-11-42-56.txt).
+  const stickOn = (parent, name, mesh) => {
     const len = add(parent, { name: `${name}_len` })
-    add(len, { name: `${name}_stick`, mesh: MESH.stick, scale: [r, r, length] })
+    add(len, { name: `${name}_stick`, mesh: MESH[mesh] })
   }
 
   function arm(parent, l, anchor) {
     const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
-    stickOn(pitch, l, spec.arm.radius)
+    stickOn(pitch, l, "arm_stick")
     ball(add(pitch, { name: `${l}_end` }), `${l}_ball`, spec.hand.radius, "sphere_main")
   }
 
   // The leg: a thigh to the knee, a fixed-length curve, then the shin.
   function leg(parent, l, anchor) {
-    const r = spec.leg.radius, n = spec.knee.segments, piece = spec.knee.arc / n
+    const r = spec.leg.radius, n = spec.knee.segments
     const pitch = chain(add(parent, { name: l, translation: m(anchor) }), [`${l}_yaw`, `${l}_pitch`])
-    stickOn(pitch, l, r)
+    stickOn(pitch, l, "leg_stick")
     let tip = chain(add(pitch, { name: `${l}_knee` }), [`${l}_roll`])
     for (let k = 0; k < n; k++) {
-      const bend = add(add(tip, { name: `${l}_seg${k}`, ...(k ? { translation: [0, 0, piece] } : {}) }), { name: `${l}_seg${k}_bend` })
+      const bend = add(add(tip, { name: `${l}_seg${k}`, ...(k ? { translation: [0, 0, knee] } : {}) }), { name: `${l}_seg${k}_bend` })
       ball(bend, `${l}_seg${k}_ball`, r, "sphere_main")
-      stickOn(bend, `${l}_seg${k}`, r, piece)
+      stickOn(bend, `${l}_seg${k}`, "knee_stick")
       tip = bend
     }
-    const shin = add(tip, { name: `${l}_shin`, translation: [0, 0, piece] })
+    const shin = add(tip, { name: `${l}_shin`, translation: [0, 0, knee] })
     ball(shin, `${l}_shin_ball`, r, "sphere_main")
-    stickOn(shin, `${l}_shin`, r)
+    stickOn(shin, `${l}_shin`, "leg_stick")
     ball(add(shin, { name: `${l}_shin_end` }), `${l}_ball`, spec.foot.radius, "sphere_main")
   }
 

@@ -109,6 +109,7 @@ Agreed:
 - Time, date, sim rate, and pause, on 2026-10-03.
 - Recording and bug reports, on 2026-10-03.
 - The EFB app and the notification banner, on 2026-10-03.
+- Installing and updating, on 2026-10-03.
 
 ## 5. What later features need from the core
 

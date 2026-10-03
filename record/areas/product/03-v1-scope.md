@@ -536,3 +536,42 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 - What the server runs on, which the architecture decides: a Cloudflare Worker is the candidate, with D1 for the reports and R2 for the recordings, since D1 caps a row at 2MB and a free database at 500MB ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)).
 - How big a flight's recording is, which decides how many flights each machine keeps.
 - What a minimal recording leaves out.
+
+## Getting Crosscheck
+
+### Installing and updating
+
+One installer puts Crosscheck's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
+
+**In v1:**
+
+- One installer, for the app and the Community package together.
+  It finds the Community folder as fsc-editor does, from the `InstalledPackagesPath` line in `UserCfg.opt`, which the Steam and Microsoft Store installs keep in different places, and it asks the pilot only if it can't find one ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
+- Updates download silently, and Crosscheck checks for one each time it starts, before the pilot is likely to have the sim running.
+- The app and the package update together, as one version, and only while the sim is closed, because the sim loads a package only at boot ([02-01](../../learn/foundations/02-01-installs-and-packages.md)) and an app ahead of its loaded package would have to cope with every pairing.
+- An "install when the sim is closed" option: if Crosscheck is open when the sim exits, it updates itself then, and if it was closed first, a helper does it.
+- A helper that the sim launches warns, in a Windows notification early in the sim's load, that a waiting update will need a sim restart, so the pilot can close the sim before waiting for it to load.
+  It warns only a pilot who has flown with Crosscheck lately, judged by the date of their last session, and stays quiet for one who hasn't used it in a while.
+- At launch, before anything else, Crosscheck names any Community package that overrides `VCockpit.js`, such as FS Copilot's or YourControls', and offers to disable it, since only one override can win the mount order and a losing Crosscheck quietly breaks pointer sync ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
+  If the sim is running, disabling it takes a sim restart, and Crosscheck says so.
+
+**Not in v1:**
+
+- Code signing, so the installer meets Windows SmartScreen's warning about an unknown publisher; the signing fsc-editor priced was about $10 a month, and flight sim pilots are used to tools that ask more of them (fsc-editor, `docs/pipeline/09-open-questions.md`, "Code signing").
+- A beta channel, since all of v1 is a beta.
+- Pilots on different Crosscheck versions flying together.
+
+**Rules:**
+
+- Pilots on different versions can't join each other's session, and the join check says who is behind and what to do, such as "Adam has a newer Crosscheck; close the sim to update".
+- Disabling another package is reversible from Crosscheck's settings, and puts the package back exactly as it was.
+
+**Depends on:**
+
+- The [preflight match check](#preflight-match-check)'s check of Crosscheck's own version when a pilot joins.
+
+**Open questions:**
+
+- Whether the sim launches our helper from its `exe.xml` in MSFS 2024, and where that file lives for the Steam and Microsoft Store installs (unverified).
+- How a package is disabled and re-enabled: a folder renamed with a suffix such as `.off` may not stop the sim mounting it, and moving it out of the Community folder does (unverified either way), which a probe across one sim restart settles.
+- How recent a last session has to be for the helper to warn.

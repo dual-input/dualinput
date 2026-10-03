@@ -100,6 +100,7 @@ Agreed:
 - State sync, on 2026-10-03.
 - Pointer sync, on 2026-10-03.
 - The invite code, on 2026-10-03.
+- The connection, on 2026-10-03.
 
 ## 5. What later features need from the core
 
@@ -128,7 +129,8 @@ Exit: the language, the frameworks, the core architecture, and the profile forma
 The profile format waits for the features, because they decide what it has to express, and it decides in turn whether a machine joining or reconnecting mid-flight can take the flying machine's state: only an entry with an absolute setter can be sent at connect.
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the profile IDE.
-The EFB app is panel code, so it runs under Coherent GT's Chrome 49 limits and can't share a modern interface bundle with the desktop app unless one is compiled down for it.
+The EFB app is panel code that runs under Coherent GT's Chrome 49 limits, so code it shares with the desktop app is compiled down for it, with the missing functions filled in, and it shares components and logic rather than the whole app, since it lives inside the EFB's own app framework.
+The pilot starts the core whenever they want a shared cockpit; the EFB app, opened while the core isn't running, says so and offers to start it if a panel can (unverified).
 
 ## 8. v1 build plan
 

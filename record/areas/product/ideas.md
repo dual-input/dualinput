@@ -288,6 +288,16 @@ That makes the interface a client of Crosscheck's app on whichever screen it run
 - **Tech:** MSFS 2024 runs third-party EFB apps: the A2A Aerostar 600's tablet is one, `Aerostar600App` (read in a2a-aircraft-aerostar600 1.0.6, `html_ui/efb_ui/efb_apps/Aerostar600App/A2ATabletApp.js`).
   The sim's EFB opens with the Tab key in any aircraft, including those that ship their own tablet, such as the Black Square Baron Pro (from our own use of MSFS 2024, as of 2026-10-02).
 
+### Crosscheck objects in the cockpit
+
+Crosscheck places objects of its own in the cockpit: a message floating in front of the pilot, such as "You've lost the connection", or a take-control button the pilot puts above the glareshield or sticks to a window, which a pilot in VR reaches without a tablet.
+
+- **Tech:** an object attached through the aircraft's own files holds still in flight, as GSX's seated passengers did at up to 244 kt, but that means editing each aircraft package (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
+  An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window shouldn't show.
+  Whether predicting each frame from its actual frame time steadies it fully is unknown.
+  A click's ray cast into the cockpit model finds the control the pilot clicked ([avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)), and whether it can find a click on one of our own objects is untested.
+- **Open questions:** whether Crosscheck edits other developers' aircraft packages, which needs a decision in `record/decisions/`.
+
 ## Tools
 
 ### Flight recorder and debrief
@@ -328,3 +338,5 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
 - **Multiplayer kept on:** other players in the session would see the shared aircraft twice, and Crosscheck can't hide anything on their machines (unverified: nobody has looked from a third machine).
   In multiplayer each pilot also sees the other pilot's copy of the aircraft (unverified: from our FS Copilot sessions), and hiding that copy would fix only the two pilots' own view.
   [Avatar sync](#avatar-sync) gives the walkaround presence that keeping multiplayer on was for.
+- **Pausing the flight when a pilot drops out:** a pilot whose sim restarted comes back with a fresh cockpit that a pause doesn't restore, and pausing doesn't suit flights on online networks such as VATSIM.
+  The others fly on instead, as [03-v1-scope](03-v1-scope.md#the-connection) says.

@@ -224,7 +224,7 @@ The host starts a session and gets a code, and the other pilot enters it to join
 
 - The code is six characters from the 30-character alphabet fsc-editor uses, which leaves out I, L, O, U, 0, and 1, because codes are read aloud and typed by someone looking at a sim (read in fsc-editor, `src/shared/remote-connect.ts`, `CODE_ALPHABET`, and `docs/remote-connect.md`, "The code").
 - When the pilot selects the box for the code, Crosscheck fills it from the clipboard if the clipboard holds a code, and joins at once.
-- The code lasts until the host ends the session, and a pilot who dropped out rejoins with the same code.
+- The code belongs to the session, not to any pilot's machine, and lasts until the last pilot leaves, so it doesn't change when control passes, and a pilot who dropped out rejoins with the same code.
 
 **Not in v1:**
 
@@ -237,13 +237,58 @@ The host starts a session and gets a code, and the other pilot enters it to join
 
 - The code alone admits a pilot, as it does in fsc-editor, where the relay limits how fast one address can guess codes and the host sees how many peers are connected (read in fsc-editor, `docs/remote-connect.md`, "The code").
   It's a game among friends, and confirming each joiner would get in the way.
-- The host always sees who's in the crew.
+- Every pilot sees who's in the crew.
 
 **Depends on:**
 
-- The connection between machines, which carries the code to the host's session.
+- [The connection](#the-connection), which carries the code to the session.
 
 **Open questions:**
 
 - Whether the EFB app can fill its box from the clipboard: the EFB runs inside the sim's panel, so Crosscheck's own app would read the clipboard when the EFB's box is selected (unverified).
 - Whether the profile IDE joins through the same session and code, making the Crosscheck session the editing session too, or the session points the IDE at a server of its own; either way has consequences for the relay and the protocol, settled later.
+
+### The connection
+
+The connection carries everything between the crew's machines, directly when it can and through our relay when it can't.
+
+**In v1:**
+
+- Machines connect directly when they can, and through our relay when they can't, as [01-aims](01-aims.md#relay-and-license) sets out.
+- Pilots can see which kind of connection they have, such as direct or relayed, in a design for later.
+- Every pilot sees the whole crew.
+
+**Not in v1:**
+
+- Pausing the flight when a pilot drops out, which wouldn't rescue a pilot whose sim restarted and doesn't suit flights on online networks such as VATSIM ([Ideas left out](ideas.md#ideas-left-out)).
+- Finding a second PC on the home network without a code, a Later pick.
+
+**Rules:**
+
+- No pilot owns the session.
+  The flying machine is its authority at every moment, and authority moves with control, so when the PF leaves, it passes to the PM along with control.
+- The session lives as long as any pilot is in it, and its code stays the same throughout.
+- Every change applies exactly once, whichever path carried it.
+- When the cheapest relay and the best one for flight data differ, flight data wins.
+- A short gap in the flying machine's data holds the following aircraft still, and it jumps to the flying machine's position when data returns, which is acceptable for v1.
+- When a pilot loses the connection, the others fly on without pausing.
+  The cut-off pilot's synced displays lock, and Crosscheck tells them they've lost the connection and offers to keep trying or to disconnect and take control of their own aircraft.
+- After 5 minutes cut off, the session ends for that pilot.
+  Our FS Copilot fork waits the same 5 minutes, which its notes call "long enough for a router reboot or a sim reload" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `DegradedTimeout`, and `record/pointer-forwarding/docs/13-pr-prep.md`).
+- Recovery is the app's job, and each part of Crosscheck recovers its own state within it.
+  The app tells whether a returning pilot's sim kept running or restarted, from session state it saves on the pilot's machine with an identifier for the sim's run.
+  If the sim kept running, pointer sync, state sync, and any later part each replay what the pilot missed, as our FS Copilot fork's pointer sync replays its held history in order (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
+  If the sim restarted, the cockpit can't be brought back in sync, so Crosscheck tells the pilot so and lets them rejoin anyway: flight-model sync puts them back in the aircraft's place, and changes sync from then on.
+
+**Depends on:**
+
+- The [take-control key](#take-control-key), for which machine is flying.
+- The [invite code](#invite-code), for who joins.
+
+**Open questions:**
+
+- Whether Crosscheck reconnects on its own after a drop, using the session state it saved.
+- Whether a cut-off pilot's switches can be blocked as well as their displays, which needs input blocking such as the masking that [soft takeover](ideas.md#soft-takeover-on-handover), a Soon pick, uses.
+- Whether missed changes replay as one history in the order they happened, or in a queue per part, which could replay a display press and a switch flipped after it in the wrong order.
+- How a late joiner catches up, which waits on the profile format.
+- How to soften a short gap, for the architecture to weigh: carry the aircraft on its last velocities for about a second and then ease it to the true position when data returns, have each packet carry the last few samples so one lost packet costs nothing, and send a copy through the relay only while the direct link is losing packets or switching paths.

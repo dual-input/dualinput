@@ -9,6 +9,22 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: A model attached through the aircraft's own files holds still in flight
+
+**Asked:** do GSX's seated passengers, attached through the Fenix's own `attached_objects.cfg` ([entry below](#2026-10-03-gsx-keeps-its-passengers-aboard-by-adding-its-model-to-the-aircrafts-own-attachments)), hold still in flight with nothing outside the sim moving them?
+
+**Expected:** yes, since the sim draws them as part of the aircraft.
+
+**Found:** in the Fenix A320 (`A:TITLE` `FenixA320 CFM SL`) at 218 to 244 kt and about 5,100 ft AGL, we set every `L:FSDT_GSX_PASSENGER_SEAT_*` to 1 through SimConnect, and the passengers showed and held still in their seats for the 11s the pilot watched.
+The only objects within 500m were the aircraft, the avatar's object, and `SEAT_DEFAULT_Pilot`, so no separate object carried the passengers for GSX's program to move.
+The process check matched `Couatl64_boot`, which stays after Couatl is quit from its tray, so whether GSX's own program was running is unknown, and with no object to move it couldn't have moved them.
+
+**Changed:** attaching through the aircraft's files is a measured way to keep a figure still in a flying aircraft, on aircraft whose package Crosscheck can edit.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p11's run](../../../experiments/areas/avatars/results/p11-fenix-attached-2026-10-03-06-12-41.txt), and a read-only listing of objects within 500m taken right after it.
+
 ## 2026-10-03: GSX keeps its passengers aboard by adding its model to the aircraft's own attachments
 
 **Asked:** how does GSX keep its seated passengers still in a flying aircraft, when the object we spawned from its files stayed behind ([entry below](#2026-10-03-the-sim-doesnt-carry-an-object-of-category-viewer-with-the-aircraft))?

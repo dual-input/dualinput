@@ -31,7 +31,7 @@ And does `SimConnect_CameraGet` still give the camera in the aircraft's frame wh
   The avatar stood a median 1.8m and 2.6m from the spot it touched, from 1.0m to 5.8m, so the pilot often clicks from beyond arm's reach.
 
 **Changed:** the hand reaches the aircraft's outside the same way it reaches the cockpit, with either referential.
-The figure's arm needs to reach several metres, or the figure to step closer.
+The figure's arm needs to reach several meters, or the figure to step closer.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 

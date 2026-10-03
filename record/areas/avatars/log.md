@@ -28,8 +28,11 @@ We didn't know whether the sim locks or hides the cursor during a lever drag.
   Its material is single-sided and partly emissive (`tools/sphere.mjs`), so the patches aren't its inside.
   Shadows from the knob and bezel, with a shadow map's ragged edge, are our guess (unverified).
 
+- The pilot found that the hand felt right, and that its 0.5s on the spot after a release was a little long.
+
 **Changed:** a held press follows the cursor's ray across the plane of the surface it first touched.
 A fresh cast stays useful only where the plane meets a curve or an edge.
+The hand leaves 0.25s after a release.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 

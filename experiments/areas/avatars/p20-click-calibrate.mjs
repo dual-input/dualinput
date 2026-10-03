@@ -22,7 +22,7 @@
  * surface it first touched, where the cursor's ray crosses it, so it follows a
  * drag across a panel seen from an angle; the probe also logs where a fresh
  * cast and a fixed distance from the eye would have put it. On release it
- * stays 0.5s, then goes back to rest.
+ * stays a moment (LINGER_MS), then goes back to rest.
  *
  * In the A2A Comanche, parked, the sim in front:
  *
@@ -82,7 +82,8 @@ const PULL_M = 0.03
 // p15: nose up and right wing down are both negative; lead 1 frame (p16).
 const SIGNS = [-1, -1]
 const LEAD = 1
-const LINGER_MS = { release: 500, wheel: 1000 }
+// The pilot found 0.5s after a release a little long (p20's second run).
+const LINGER_MS = { release: 250, wheel: 1000 }
 // A press shorter than TAP_MS is a tap unless the cursor moved DRAG_PX or the
 // mouse DRAG_COUNTS (its own units, finer than pixels), which make it a drag.
 const TAP_MS = 300

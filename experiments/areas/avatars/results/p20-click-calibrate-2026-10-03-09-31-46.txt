@@ -1,0 +1,22 @@
+p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere where the pilot presses, holds, and drags, on MSFS 2024
+2026-10-03T09:31:46.949Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.00001 kt
+  bksq-aircraft-baronpro, BaronProfessional_Pressurized_INT.gltf: 490,963 triangles
+  seat objects, but no model seat nodes to match them: the model's origin taken as SimConnect's reference point (p18)
+  at -0.146m forward, -0.249m right, 0.850m up of the reference point, fov 47.6°
+  no yellow balls: their spots come from the A2A Comanche's control map
+  left: 153 taps, 18 holds, 30 drags; right: 1 clicks, 2 held or moved to turn the view; 1 click outside the sim; nodes hit: Plane.001 ×3, RightVent, CoTestButton ×7, LANDING_GEAR_Light_Unsafe ×2, TabletGlass ×4, Yoke_L ×15, Cube.092 ×4, LANDING_GEAR_Switch_ParkingBrake, StandbyDoorSealAirSwitch ×2, Plane.047, HANDLING_RudderPedals_Brake_1_2, YokeControlLockOn, AirConditioningBlowerSwitch ×2, Yoke_R.002, Cube.024 ×3, Cube.045, ENGINE_Lever_Throttle_2, Sphere.008, Breaker_Nav1, PressurizationModeSwitch ×2, DoorSealModeSwitch, Cube.025 ×3, Cube.076, HANDLING_Indicator_ElevatorTrim ×2, DoorSealStandbyButton ×3, PressurizationTestButton, HANDLING_Light_Flaps_1, HANDLING_Lever_Flaps ×7, Circle.036 ×3, Yoke_R ×6, Cube.248 ×8, Cylinder.107 ×4, Cylinder.108 ×2, Cube.040 ×3, Cube.261 ×3, Cube.230 ×18, Cube.231 ×5, Cube.115 ×6, Cube.255 ×38, Cube.241 ×31, Cube.256 ×4, Cube.129 ×4, LeftVent, GyroSlavePanel, HsiPanel_L ×2, AttitudeIndicator_1
+  on Plane.001: 1.9s, the cursor moved up to 238px from where it pressed and the mouse 454 counts in all; the hand ended 10.3cm from where it started on the plane
+  on Plane.001: 10.8s, the cursor moved up to 1497px from where it pressed and the mouse 4104 counts in all; the hand ended 84.2cm from where it started on the plane
+  on RightVent: 0.3s, the cursor moved up to 29px from where it pressed and the mouse 41 counts in all; the hand ended 2.2cm from where it started on the plane
+  on TabletGlass: 2.2s, the cursor moved up to 638px from where it pressed and the mouse 982 counts in all; the hand ended 13.6cm from where it started on the plane
+  on Cube.092: 0.6s, the cursor moved up to 141px from where it pressed and the mouse 176 counts in all; the hand ended 13.5cm from where it started on the plane
+  on LANDING_GEAR_Switch_ParkingBrake: 0.4s, the cursor moved up to 181px from where it pressed and the mouse 204 counts in all; the hand ended 13.7cm from where it started on the plane
+  on Yoke_L: 0.3s, the cursor moved up to 73px from where it pressed and the mouse 85 counts in all; the hand ended 3.4cm from where it started on the plane
+  on Yoke_R.002: 2.6s, the cursor moved up to 564px from where it pressed and the mouse 869 counts in all; the hand ended 28.7cm from where it started on the plane
+  on Cube.024: 0.8s, the cursor moved up to 66px from where it pressed and the mouse 97 counts in all; the hand ended 4.0cm from where it started on the plane
+  on Cube.024: 0.3s, the cursor moved up to 58px from where it pressed and the mouse 97 counts in all; the hand ended 3.4cm from where it started on the plane
+  on Cube.045: 0.7s, the cursor moved up to 70px from where it pressed and the mouse 83 counts in all; the hand ended 5.2cm from where it started on the plane
+  on Cube.024: 0.6s, the cursor moved up to 158px from where it pressed and the mouse 170 counts in all; the hand ended 19.6cm from where it started on the plane

@@ -9,6 +9,40 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Aircraft mark their yoke grips with the same node names, and the yoke's own animations put them on a level wheel
+
+**Asked:** where on the yoke does the figure's free hand go, and can Crosscheck find that point in an aircraft's files instead of a profile author picking it?
+
+**Expected:** a profile author would pick a grip point by hand in the profile IDE.
+
+**Found:**
+
+- Both aircraft we read name their pilot's yoke and its two animations in `aircraft.cfg`, under `[VR]`: `yoke_node`, `yoke_anim_x`, and `yoke_anim_y` (read in bksq-aircraft-baronpro 0.1.1 and a2a-aircraft-pa24 2.1.3).
+- Under each one's pilot yoke, moving with it, sit three empty nodes: `HANDLING_Yoke_1_Hand_Left`, `HANDLING_Yoke_1_Hand_Right`, and `HANDLING_Yoke_1_Wheel_Center`.
+  Black Square's Bonanza Pro has the same hand nodes, and the iniBuilds L-1011 has them as well as `HANDLING_Yoke_2_Hand_Left` and `_Hand_Right` for its second yoke (read in bksq-aircraft-bonanzapro 0.1.1 and inibuilds-aircraft-l1011 1.0.8).
+  The SDK's [aircraft.cfg page](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/CFG_Files/aircraft_cfg.htm) doesn't mention them, so we don't know what reads them.
+- Posed by the model's own yoke animations at the middle of their travel, the two hand nodes sit level, either side of the wheel's center:
+
+  | Aircraft | Hands apart | Level within | Fore-aft travel | Roll, full left to full right |
+  | --- | --- | --- | --- | --- |
+  | Baron | 25.6cm | 0.0cm | 14.7cm | −85° to 85° |
+  | Comanche | 23.0cm | 0.3cm | 28.1cm | −69° to 74° |
+
+  `lib/animate.mjs` maps a frame to a time as the SDK documents it, the frame over the component's animation length times the glTF animation's own duration ([Animation XML Properties](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/Models/Animation_XML_Properties.htm)), which we haven't measured in the sim.
+- The Baron stores its yoke at frame 0 of both animations, rolled full left and pushed full forward.
+  In a run of p20 in the Baron 58P, where rays meet the model as the file stores it, rays hit the two yokes (`Yoke_L` and `Yoke_R`) on 21 of 204 presses.
+- What drives the yoke differs by aircraft.
+  The Baron's interior XML plays its animations from `(A:YOKE X POSITION WITH AP LINEAR, Percent)` and `(A:YOKE Y POSITION WITH AP, Percent)`, each halved and added to 50.
+  The Comanche's plays them from `(L:YokeBank_Anim,number)` and `(L:YokePitch_Anim,number)`, negated, halved, and added to 50.
+
+**Changed:** the figure's free hand can hold the yoke at an anchor the aircraft already has, posed from the variables that drive the yoke.
+A profile author needs to pick a grip only where an aircraft has no such nodes.
+The click ray needs the same posed yoke, or the yoke as the file stores it catches rays.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [tools/yoke.mjs](../../../experiments/areas/avatars/tools/yoke.mjs) prints each aircraft's anchors across the travel, from [lib/animate.mjs](../../../experiments/areas/avatars/lib/animate.mjs); the [Baron run](../../../experiments/areas/avatars/results/p20-click-calibrate-2026-10-03-09-31-46.txt).
+
 ## 2026-10-03: A quick, still right press is a click, and a held or moved one turns the view
 
 **Asked:** the sim's right button both clicks controls and, held, turns the view.

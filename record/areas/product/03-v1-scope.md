@@ -27,7 +27,7 @@ A pilot presses take-control and becomes the pilot in control at once.
 **Not in v1:**
 
 - A button to give control away.
-  The pilot in control gives control only by voice, through the voice phrases.
+  The pilot in control gives control only by voice, through the [voice phrases](#voice-phrases).
 - Choosing which crew member gets control when the pilot in control drops out, which crews beyond two would need: the copilot's seat, not the flight engineer's.
 
 **Rules:**
@@ -50,3 +50,45 @@ A pilot presses take-control and becomes the pilot in control at once.
 
 - Whether taking control takes a long press, so a pilot can't take it by brushing a button.
 - How the machines agree on which of two presses came first, which the architecture settles.
+
+### Voice phrases
+
+The pilot in control offers control by voice, and the other pilot takes it by answering within 5s.
+
+**In v1:**
+
+- An offer is "You have" followed by control, controls, the controls, the flight controls, the aircraft, or the airplane, and an answer is "I have" followed by any of the same.
+  Those are the endings regulators, militaries, and airlines use, with "You have …" and "I have …" the shape in every convention we found (documented: [FAA AC 61-115](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40455386&FileExtension=.PDF&FileName=FAA+AC+61_115_Positive+Exchange+of+Flight+Controls-Master.PDF), [Transport Canada TP 975](https://tc.canada.ca/sites/default/files/migrated/tp975e.pdf), [UK MAA RA 2309](https://assets.publishing.service.gov.uk/media/62454dcdd3bf7f32a7c01197/RA2309_Issue_8.pdf), [USAF AFMAN 11-248](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40445920&FileExtension=.PDF&FileName=Operations+-+Attachment+16+-+Excerpts+%E2%80%93+AFMAN+11-248+T-6+General+Flying-Master.PDF), [US Army TC 3-04.51](https://asktop.net/wp/download/5/tc3_04x51.pdf), and Airbus as quoted in [AAIB Bulletin 1/2013](https://assets.publishing.service.gov.uk/media/5423034de5274a1314000b7f/Airbus_A319-111_G-EZFV_01-13.pdf)).
+- "Your controls" also offers and "my controls" also answers, though we found them only on a blog (unverified).
+- English, recognized as well as the speech model manages with each pilot's accent.
+- Crosscheck listens whenever a session is syncing, with no push-to-talk key.
+
+**Not in v1:**
+
+- Taking control by voice without an offer.
+  Instructors do it in every convention that covers it, such as the FAA's "I have the flight controls", but the [take-control key](#take-control-key) covers it, and a misheard phrase can't move control.
+- "I've got it" and "you've got it", which AOPA warns against because nobody can tell who has the aircraft ([AOPA](https://www.aopa.org/news-and-media/all-news/2023/august/08/training-and-safety-tip-ive-got-it-youve-got-it-whos-got-it)).
+- Waiting for the FAA's third call, the offer repeated, which no other convention we found has.
+- Languages other than English.
+
+**Rules:**
+
+- Crosscheck hears each pilot only through their own microphone, so it always knows who spoke.
+  That's what tells an offer from an answer, since the two differ only in "you" and "I".
+- Only the pilot in control's offer counts, and it opens a 5s window.
+- The other pilot's answer inside the window passes control, and the endings needn't match: "You have control" answered with "I have the aircraft" passes it.
+- Every other phrase does nothing, including an answer outside a window and "I have control" from the pilot already in control.
+- When control passes by voice, the pilots hear the same recorded lines as with the take-control key.
+
+**Depends on:**
+
+- The [take-control key](#take-control-key)'s rules for what control covers and what each pilot hears.
+- Soft takeover, the same as the take-control key.
+
+**Open questions:**
+
+- Whether recognition is accurate enough with non-native English accents, the first thing to test.
+- Whether a phrase counts inside a longer sentence.
+  A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
+- How Crosscheck tells speech from noise before it listens for a phrase.
+  The intent is to run recognition only while the pilot's microphone is loud enough to be speech, and the architecture designs it.

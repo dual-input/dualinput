@@ -3,6 +3,34 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-03: ChasePlane's own API moves the pilot's camera to the copilot's seat by loading its CoPilot view
+
+**Asked:** with ChasePlane running, can Crosscheck move a pilot's camera to another seat through ChasePlane itself, since ChasePlane takes the camera back from a SimConnect client ([entry below](#2026-10-03-a-simconnect-client-moves-the-pilots-camera-to-the-copilots-seat-by-releasing-the-camera-into-the-aircrafts-copilot-view-unless-chaseplane-runs))?
+
+**Expected:** yes, since ChasePlane has a remote control of its own.
+
+**Found:**
+
+- ChasePlane 2026.39.1.16's bridge, the process `CP MSFS Bridge`, serves a web app, ChasePlane Remote, on port 8651, and a WebSocket API on port 8652, listening on every network interface.
+  Nobody documents the API.
+  ChasePlane Remote's script speaks it as JSON: an `api_connect` message with a client name, answered by `api_version` 2 and `initialized`, then `api_request` messages with a request ID, answered by `api_reply` (read in ChasePlane 2026.39.1.16, `http://localhost:8651/remote_assets/remote-ui.js`).
+  Its requests include `get_views`, `set_view_by_guid`, `set_camera_mode`, and `set_master_enabled`, and it sends `cam_set_position` and `cam_set_axis` as bare messages.
+- In the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, `get_views` returned 42 views, 22 of them inside, among them `CoPilot` and `Pilot`, imported from the aircraft's camera definitions.
+  Each view's position is an offset from the pilot's eye, with x pointing right: `CoPilot` sits 0.489m right of `Pilot`.
+- p05 sent `set_view_by_guid` with `CoPilot`, and SimConnect_CameraGet put the eye 0.236m right of the reference point, where the sim's own `CoPilot` definition put it in p04.
+  Over the next 10s the pilot looked around with the mouse through ChasePlane: the yaw went from −179° to 64° and the pitch from −11° to 62°, and the eye moved 2cm to 4cm with ChasePlane's head motion.
+- `cam_set_position`, sent with the `Pilot` view's position moved 0.499m right, left the eye at the `CoPilot` view's spot, within 4mm, and turned the look to 2° pitch and 6° yaw.
+  Whether that message moves the camera inside the cockpit, and what it expects, is unknown.
+- `set_view_by_guid` with `Pilot` brought the eye back to the left seat, within 1mm of where it started.
+
+**Changed:** with ChasePlane running, Crosscheck can seat a pilot through ChasePlane's API in any seat ChasePlane has a view for, and the pilot looks around through ChasePlane as usual.
+A seat with no view needs either `cam_set_position` worked out or a view created for it.
+The API is undocumented, so a ChasePlane update can change it.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** [p05's run](../../../experiments/areas/aircraft/results/p05-chaseplane-seat-2026-10-03-21-17-29.txt).
+
 ## 2026-10-03: A SimConnect client moves the pilot's camera to the copilot's seat by releasing the camera into the aircraft's copilot view, unless ChasePlane runs
 
 **Asked:** can Crosscheck move a pilot's cockpit camera to another seat, so it can seat the pilot itself rather than tell them to move?

@@ -1,0 +1,23 @@
+p05 · Moving the cockpit camera to another seat through ChasePlane's API, on MSFS 2024
+2026-10-03T21:17:29.424Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+ChasePlane 2026.39.1.16, API version 2
+TITLE "Black Square Baron 58P Professional N513LW"
+42 views, 22 inside; CoPilot at {"x":0.4888628438339739,"y":-0.04005675759168814,"z":0.008393063403125595,"pitch":-11.37104203381903,"yaw":0.40079337512404,"roll":0,"zoom":0.6209794878959656}; Pilot at {"x":7.214844222058758e-9,"y":0.0043536712161191815,"z":-0.019520387246905305,"pitch":-12.573,"yaw":0,"roll":0,"zoom":0.6974859797299282}
+Start: x 0.250m (left +), y 0.854m, z -0.143m, pitch 15°, yaw 10°
+1, after set_view_by_guid CoPilot: x -0.236m (left +), y 0.810m, z -0.115m, pitch 11°, yaw 0°, the mirrored seat
+2, 1s into the hold: x -0.236m (left +), y 0.811m, z -0.116m, pitch 11°, yaw 0°, the mirrored seat
+2, 2s into the hold: x -0.236m (left +), y 0.811m, z -0.116m, pitch 11°, yaw 0°, the mirrored seat
+2, 3s into the hold: x -0.245m (left +), y 0.812m, z -0.119m, pitch 7°, yaw 30°, the mirrored seat
+2, 4s into the hold: x -0.253m (left +), y 0.819m, z -0.127m, pitch -11°, yaw 64°, the mirrored seat
+2, 5s into the hold: x -0.217m (left +), y 0.816m, z -0.136m, pitch -3°, yaw -93°, the mirrored seat
+2, 6s into the hold: x -0.236m (left +), y 0.812m, z -0.155m, pitch 6°, yaw -179°, the mirrored seat
+2, 7s into the hold: x -0.253m (left +), y 0.812m, z -0.124m, pitch 8°, yaw 56°, the mirrored seat
+2, 8s into the hold: x -0.227m (left +), y 0.797m, z -0.131m, pitch 62°, yaw -63°, the mirrored seat
+2, 9s into the hold: x -0.234m (left +), y 0.813m, z -0.115m, pitch 5°, yaw -6°, the mirrored seat
+2, 10s into the hold: x -0.218m (left +), y 0.815m, z -0.125m, pitch -0°, yaw -60°, the mirrored seat
+3, after cam_set_position at x 0.499: x -0.238m (left +), y 0.814m, z -0.116m, pitch 2°, yaw 6°, the mirrored seat
+3, 2s later: x -0.238m (left +), y 0.814m, z -0.116m, pitch 2°, yaw 6°, the mirrored seat
+4, after set_view_by_guid Pilot: x 0.253m (left +), y 0.855m, z -0.144m, pitch 13°, yaw 0°, the starting seat
+
+Exceptions: none

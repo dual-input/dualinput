@@ -1,0 +1,11 @@
+p19 · The hand sphere on the control the pilot clicks, by casting the click's ray into the cockpit model, on MSFS 2024
+2026-10-03T08:13:37.491Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  PA24_250_INTERIOR_LOD00.gltf: 885 primitives, 650,660 triangles, read in 150ms; map 103 controls
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.000021 kt
+  the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point
+  SIMOBJECT at 0.010m forward, -0.303m right, 0.539m up, fov 1.062388 rad; the WORLD position is -0.033m forward, -0.003m right, -0.003m up from it, over 10 pairs
+  52 clicks and 0 wheel turns in the sim, 1 press outside it
+  named a mapped control, of 52 touches: 24 with mirror +, yaw +, pitch −, fov horizontal; 21 with mirror +, yaw +, pitch −, fov vertical; 17 with mirror −, yaw −, pitch −, fov horizontal; 16 with mirror +, yaw −, pitch −, fov horizontal; 16 with mirror −, yaw +, pitch −, fov horizontal; 15 with mirror +, yaw −, pitch −, fov vertical; the other 10 at most 11
+  with mirror +, yaw +, pitch −, fov horizontal: HANDLING_Yoke ×5, YOKE_EmblemL ×2, Cockpit_Walls ×4, BREAKER_beaconLight, FLOOR ×2, toe_brake_r, SWITCH_magnetos_ORLB ×5, Pushbutton_Starter ×5, LEVER_parking_brake ×2, MAIN_DASH ×3, SWITCH_LANDING_GEAR, throttle_base ×2, DASH_Decal_014, SWITCH_avionics_master ×5, GAUGE_suction_Glass, BlackPanel ×2, Headphone_Plugs, YOKE_EmblemR, LEVER_CABIN_VENTILATION_RIGHT ×3, door_seal ×3, FUEL_Switch_Pump_1 ×2

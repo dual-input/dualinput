@@ -9,6 +9,39 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: A click's ray cast into the cockpit model finds the control the pilot clicked, with no names, but the run couldn't pin down the field of view
+
+**Asked:** without any input event or variable name, can the hand go where the pilot clicks: the ray from the camera through the cursor, cast into the aircraft's interior model, and the hit point taken as the hand's position?
+
+**Expected:** hits on the controls clicked, once the ray's signs and field of view were right.
+p17's ray, built from the camera's WORLD pose, came out mirrored left to right, so p19 cast every click under all 16 combinations of screen mirror, yaw sign, pitch sign, and field of view taken as vertical or horizontal, and the sphere followed the combination that had named a mapped control most often.
+
+**Found:**
+
+- In the A2A Comanche, parked, the pilot clicked 52 times.
+  The interior model `PA24_250_INTERIOR_LOD00.gltf` reads as plain glTF, 650,660 triangles in 150ms, and a cast over it takes about 1ms.
+- `SimConnect_CameraGet`'s position in the `SIMOBJECT` referential was 0.010m forward, 0.303m left, and 0.539m up.
+  The Comanche's eyepoint plus its Pilot camera's `InitialXyz` give 0.011m, 0.305m, and 0.543m (read in a2a-aircraft-pa24 2.1.3, `cameras.cfg`).
+  So that referential gives the camera in the model's own space, to within 4mm.
+  The probe instead shifted the camera 3.3cm, from its `WORLD` position turned by heading alone, which ignores the parked aircraft's pitch.
+- The combination that the sphere followed for 40 clicks named the controls of an engine start, `SWITCH_magnetos_ORLB` and `Pushbutton_Starter`, five times each, and hit `FUEL_Switch_Pump_1` and `LEVER_CABIN_VENTILATION_RIGHT` on the control at the screen's left and right edges.
+  It took the screen's right as the model's −x, a camera yaw to the right as positive, a look down as positive pitch, and `CameraGet`'s field of view of 1.062 radians as horizontal.
+- That combination named a mapped control on only 24 of the 52 clicks, and fits after the run couldn't settle the field of view.
+  The Comanche's panel has controls close together on both sides, so a ray from almost any combination passes near some control, and a mirrored combination scored as well as the unmirrored one.
+- The misses fall where the model differs from what the pilot saw:
+  - the pilot's yoke and the copilot's yoke, at the pose the file stores, block rays to switches behind them; the model has a `Yoke_Right_Hider` component, and we don't know whether the copilot's yoke was hidden in the sim
+  - rays to the GPS units hit `BlackPanel`, because the GPS units are attachments with models of their own (`attachments/a2a/Gtn750` and the others), not part of the interior model
+  - rays to the throttle quadrant hit `throttle_base` and the dash behind the levers, which the file stores at one end of their travel
+- The pilot reported that "direct rays were better than rays cast to the far side of the cockpit".
+
+**Changed:** the hand can follow clicks through the model's geometry alone, so it doesn't depend on how an aircraft names its controls.
+Settling the field of view needs clicks whose target is known, which is p20's job.
+A cockpit's moving and hidden parts need their state from the sim, or they block and misplace hits.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p19's run](../../../experiments/areas/avatars/results/p19-click-hand-2026-10-03-08-13-37.txt), whose log has every click under all 16 combinations.
+
 ## 2026-10-03: The cockpit model's own space lines up with SimConnect's within 8mm, but the model's input event IDs aren't the names the sim lists
 
 **Asked:** can the hand sphere go to a control from the aircraft's model files alone: the control's node position in the interior glTF, tied to SimConnect's frame, and picked by the input event that changed?

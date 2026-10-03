@@ -180,3 +180,36 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
   A machine can take the flying machine's state only for entries with an absolute setter, since an increment sent at connect changes nothing useful, so the profile format answers it.
 - How Crosscheck recognizes its own writes on each channel, which the architecture settles.
   A `K:` event can carry a tag in its spare fifth value, which reaches every listener (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-reached-our-own-masking-group-and-the-777-ignored-re-sent-values)), while a variable write carries only the value.
+
+### Pointer sync
+
+A press or drag on a panel display travels to the other machine as the position the pointer went to, and the receiving display decides what's there, which reaches displays whose state Crosscheck can't read or write.
+
+**In v1:**
+
+- Presses and drags on the HTML displays the aircraft's profile names.
+- The pointer sync logic of our FS Copilot fork, carried over as it is, including the overlay while a peer's gesture replays and the lock on the following pilot's displays during a long outage (FS Copilot fork, `record/pointer-forwarding/docs/11-fsc-implementation-plan.md`).
+
+**Not in v1:**
+
+- The scroll wheel, hover, and long presses.
+- Showing which pilot is working which display, such as "FO on the MCDU".
+  [Avatar sync](ideas.md#avatar-sync) may show it, and if it doesn't, we'll look again later.
+- Displays drawn by WASM code, which need [WASM instrument sync](ideas.md#wasm-instrument-sync), a Later pick.
+
+**Rules:**
+
+- A gesture replays at the same position, as a fraction of the display's size, and the receiving display decides what it hits.
+  A peer's press sent that way drove the A220's ND to plan mode, and replayed drags work with a small drift in their timing (measured on MSFS 2024, 2026-09-17 and 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "A peer's press drove the real A220 ND, opted in by identifier alone" and "The drag drift candidate is real but small, and temporal not spatial").
+- A replayed press does what the pilot meant only when both displays show the same page, and Crosscheck doesn't check that they do, for the reason state sync doesn't detect drift.
+- During a long outage, the following pilot's synced displays lock, and taking control unlocks them (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
+
+**Depends on:**
+
+- Profiles, which name the displays.
+  A display's identifier can carry the livery, as the A220's `DisplayUnits|config=N324DU` does, so matching it is the profile format's job and comparing liveries is the [preflight match check](ideas.md#preflight-match-check)'s (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "The A220's DisplayUnits key carries the livery, and the profile names only Default").
+
+**Open questions:**
+
+- When both pilots type on one display at once, each machine may apply the keys in a different order (unverified, [08-06](../../learn/foundations/08-06-divergence-and-one-screen.md#unverified-claims)).
+- A display press that also changes a value state sync sends could apply twice, flipping a toggle back; we deal with it if a profile runs into it.

@@ -123,6 +123,19 @@ function eyes() {
 
 // ------------------------------------------------ the server
 
+// figure.json's layout: an object or array of plain values on one line, so a
+// saved change shows in a diff as the one part that changed.
+function format(value, indent = "") {
+  if (value === null || typeof value !== "object") return JSON.stringify(value)
+  const inner = indent + "  "
+  const list = Array.isArray(value)
+  const entries = list ? value.map((v) => [null, v]) : Object.entries(value)
+  const item = ([k, v]) => (k === null ? "" : `${JSON.stringify(k)}: `) + format(v, inner)
+  const [open, close] = list ? ["[", "]"] : ["{", "}"]
+  if (entries.every(([, v]) => v === null || typeof v !== "object")) return `${open} ${entries.map(item).join(", ")} ${close}`
+  return `${open}\n${entries.map((e) => inner + item(e)).join(",\n")}\n${indent}${close}`
+}
+
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json", ".gltf": "model/gltf+json", ".bin": "application/octet-stream" }
 
 function sendFile(res, base, rel) {
@@ -148,7 +161,7 @@ http
         req.on("data", (c) => (body += c))
         req.on("end", () => {
           const spec = JSON.parse(body)
-          fs.writeFileSync(path.join(HERE, "figure.json"), JSON.stringify(spec, null, 2) + "\n")
+          fs.writeFileSync(path.join(HERE, "figure.json"), format(spec) + "\n")
           console.log("figure.json saved")
           send(res, "text/plain", "saved")
         })

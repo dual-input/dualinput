@@ -7,12 +7,12 @@
   "legs": { "width": 0.16, "down": 0.05 },
   "arm": { "radius": 0.015 },
   "leg": { "radius": 0.018 },
-  "knee": { "fwd": 0.25, "up": 0.02, "arc": 0.28, "segments": 10 },
+  "knee": { "fwd": 0.188, "up": 0.033, "arc": 0.28, "segments": 10 },
   "hand": { "radius": 0.038 },
   "foot": { "radius": 0.045 },
   "rest": {
     "hand": { "fwd": 0.2, "right": 0.17, "up": 0.1 },
-    "leg": { "bend": 60, "shin": 0.05 }
+    "leg": { "bend": 44, "shin": 0.14 }
   },
   "material": { "roughness": 0.72, "lighten": 0.3 },
   "palette": [

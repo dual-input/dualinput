@@ -1,0 +1,20 @@
+p06 · Nudging the cockpit eye with the eyepoint key events, on MSFS 2024
+2026-10-03T21:33:51.782Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"
+Start: x 0.253m, y 0.855m, z -0.144m
+EYEPOINT_RIGHT: 10 events, -0.000m along x the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there
+  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+EYEPOINT_BACK: 10 events, 0.000m along z the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there
+  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+EYEPOINT_LEFT: 10 events, -0.000m along x the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there
+  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+EYEPOINT_FORWARD: 10 events, -0.000m along z the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there
+  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+EYEPOINT_UP: 10 events, -0.000m along y the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there
+  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+EYEPOINT_DOWN: 10 events, 0.000m along y the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there
+  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+End: x 0.253m, y 0.855m, z -0.144m, 0mm from the start
+
+Exceptions: none

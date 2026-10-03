@@ -1,0 +1,32 @@
+p04 Â· Moving the cockpit camera to another seat through SimConnect, on MSFS 2024
+2026-10-03T21:37:17.723Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"
+Start: x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°; camera NOT_ACQUIRED
+Camera definitions: "Pilot", "CoPilot", "LeftPanel", "RightPanel", "LeftSubpanel", "RightSubpanel", "ThrottleQuadrant", "Pedestal", "CircuitBreakerPanel", "EmergencyGearExtension", "CabinRearward", "CabinForward", "QuickView_L1", "QuickView_L2", "QuickView_L3", "QuickView_R1", "QuickView_R2", "QuickView_R3", "QuickView_Rear", "QuickView_Up", "FixedOnPlane_Tail", "FixedOnPlane_Left_Wing", "FixedOnPlane_Right_Wing", "FixedOnPlane_Belly", "FixedOnPlane_Flaps", "FixedOnPlane_Ailerons", "FixedOnPlane_Elevator", "FixedOnPlane_Rudder", "FixedOnPlane_LandingGear", "FixedOnPlane_Propeller", "PilotVR", "ShadowsQuality"
+A, after the definition "CoPilot": x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+A, after the definition "Pilot": x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+B, after the acquire: x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera ACQUIRED
+B, after the definition "CoPilot", holding the camera: x -0.236m (left +), y 0.811m, z -0.116m, pitch 11Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+B, after the set to the mirrored eye: x -0.205m (left +), y 0.832m, z -0.256m, pitch 11Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+B, 1s after the release: x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+B, 3s after the release: x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+C, 1s after the release into "CoPilot": x -0.282m (left +), y 0.788m, z -0.228m, pitch 14Â°, yaw 3Â°, neither seat; camera NOT_ACQUIRED
+C, 3s after the release into "CoPilot": x -0.284m (left +), y 0.788m, z -0.228m, pitch 14Â°, yaw 3Â°, neither seat; camera NOT_ACQUIRED
+C, 1s after the release into "Pilot": x 0.203m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+D, holding the camera at the mirrored eye with INTERACTION: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 1s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 2s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 3s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 4s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 5s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 6s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 7s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 8s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 9s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 10s into the hold: x -0.205m (left +), y 0.832m, z -0.256m, pitch 0Â°, yaw 0Â°, the mirrored seat; camera ACQUIRED
+D, 1s after the release: x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+After putting it back: x 0.205m (left +), y 0.832m, z -0.256m, pitch 15Â°, yaw 3Â°, the starting seat; camera NOT_ACQUIRED
+
+Status updates: NOT_ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; ACQUIRED; ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; ACQUIRED; ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED; NOT_ACQUIRED
+Exceptions: CAMERA_API (46) on camera set using definition CoPilot, parameter 4294967295; CAMERA_API (46) on camera set using definition Pilot, parameter 4294967295

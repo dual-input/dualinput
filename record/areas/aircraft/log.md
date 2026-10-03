@@ -3,6 +3,33 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-03: The eyepoint events don't move the cockpit eye, the pilot's own camera keys fire none of the legacy camera events, and a held camera doesn't take the mouse look
+
+**Asked:** with the sim's own camera, can Crosscheck put a pilot's eye at a point no camera view gives, such as a seat the profile defines?
+Releasing the camera into a view keeps the pilot's look, and releasing it anywhere else snaps it back ([entry below](#2026-10-03-a-simconnect-client-moves-the-pilots-camera-to-the-copilots-seat-by-releasing-the-camera-into-the-aircrafts-copilot-view-unless-chaseplane-runs)), so we tried nudging the eye from a view, and holding the camera with the flag that permits interactions.
+
+**Expected:** the legacy events `K:EYEPOINT_LEFT`, `_RIGHT`, `_FORWARD`, `_BACK`, `_UP`, and `_DOWN` would move the eye, since the pilot moves it with keys.
+
+**Found:** all three probes ran in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, with ChasePlane disabled.
+
+- p06 sent each of the six eyepoint events 10 times, 30ms apart, and `K:EYEPOINT_RESET` after each.
+  The sim raised no exception, and the eye didn't move by as much as 1mm.
+- p07 listened for 23 legacy camera events, the eyepoint, pan, view, and zoom events, while the pilot moved the eye with their own keys, Shift with W, A, S, and D.
+  The eye traveled 3.43m over 20s, as far as 0.43m right of where it started, and none of the 23 events fired.
+  So the sim moves the cockpit eye through input actions of its own, which SimConnect doesn't carry.
+  The pilot thinks they stopped at 0.43m themselves, so how far the eye can travel is unknown.
+- p04's step D held the camera at the mirror of the pilot's eye with `SimConnect_CameraEnableFlag` and `SIMCONNECT_CAMERA_FLAG_INTERACTION`, which the SDK describes only as "The add-on camera will permit interactions" ([SIMCONNECT_CAMERA_FLAG](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_CAMERA_FLAG.htm)).
+  For the 10s the pilot looked around with the mouse, the camera's pitch and yaw stayed at 0°.
+- That run started with the eye at 0.205m left and 0.256m back of the reference point, moved there by the pilot in p07, and releasing the camera into `Pilot` returned it there rather than to the view's own eye, at 0.253m left and 0.144m back.
+  So the sim may keep a pilot's move within each view (unverified).
+
+**Changed:** with the sim's own camera, Crosscheck can put a pilot only where a camera view is, unless it drives the look itself while it holds the camera, as ChasePlane does.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** [p06's run](../../../experiments/areas/aircraft/results/p06-eyepoint-nudge-2026-10-03-21-33-51.txt), [p07's run](../../../experiments/areas/aircraft/results/p07-camera-keys-2026-10-03-21-34-20.txt), and [p04's step D](../../../experiments/areas/aircraft/results/p04-camera-seat-2026-10-03-21-37-17.txt).
+p06's run at 21-32-42 stopped before sending anything, because ChasePlane held the camera.
+
 ## 2026-10-03: ChasePlane's own API moves the pilot's camera to the copilot's seat by loading its CoPilot view
 
 **Asked:** with ChasePlane running, can Crosscheck move a pilot's camera to another seat through ChasePlane itself, since ChasePlane takes the camera back from a SimConnect client ([entry below](#2026-10-03-a-simconnect-client-moves-the-pilots-camera-to-the-copilots-seat-by-releasing-the-camera-into-the-aircrafts-copilot-view-unless-chaseplane-runs))?

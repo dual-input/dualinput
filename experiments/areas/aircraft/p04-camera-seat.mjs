@@ -21,6 +21,10 @@
  *      whether the camera stays where we put it once we let go.
  *   C  SimConnect_CameraAcquire, then SimConnect_CameraRelease with the
  *      copilot's definition's name, then the same with the pilot's.
+ *   D  with --interaction: SimConnect_CameraAcquire, SimConnect_CameraSet to
+ *      the mirrored eye, and SimConnect_CameraEnableFlag with
+ *      SIMCONNECT_CAMERA_FLAG_INTERACTION, held for --hold seconds between the
+ *      beeps while the pilot looks around and clicks.
  *
  * Unattended, about 20s, seated in the cockpit; the view jumps between the
  * seats. On the way out, and on Ctrl+C, it releases the camera and puts it back
@@ -40,7 +44,7 @@
 import { startBeeper } from "../../tools/guide.mjs"
 import { Recorder, sleep } from "./lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "./lib/sim.mjs"
-import { CameraData, CameraDataMask, PositionReferential } from "node-simconnect"
+import { CameraData, CameraDataMask, CameraFlag, PositionReferential } from "node-simconnect"
 
 // SimConnect.h, SIMCONNECT_CAMERA_ACQUIRED_STATE.
 const ACQUIRED = { 0: "NOT_ACQUIRED", 1: "ACQUIRED", 2: "ACQUIRED_BY_OTHER", 3: "USER_DISABLED" }
@@ -48,6 +52,8 @@ const CLIENT = "CROSSCHECK p04-camera-seat"
 const SETTLE_MS = 1500
 const holdAt = process.argv.indexOf("--hold")
 const HOLD_S = holdAt > 0 ? Number(process.argv[holdAt + 1]) || 3 : 3
+// With --interaction, only D holds for --hold seconds, so the run has one window to look in.
+const C_HOLD_S = process.argv.includes("--interaction") ? 3 : HOLD_S
 
 const rec = new Recorder("p04-camera-seat", { area: "aircraft" })
 const sim = await Sim.connect(rec, { name: CLIENT })
@@ -81,7 +87,7 @@ async function getStatus() {
   return status ?? "no reply"
 }
 // CameraGet's Bank field carries the yaw (measured, record/areas/avatars/log.md).
-const show = (e) => (e ? `x ${e.x.toFixed(3)}m (left +), y ${e.y.toFixed(3)}m, z ${e.z.toFixed(3)}m${Number.isFinite(e.yaw) ? `, pitch ${e.pitch.toFixed(0)}°, yaw ${e.yaw.toFixed(0)}°` : ""}` : "no reply")
+const show = (e) => (e ? `x ${e.x.toFixed(3)}m (left +), y ${e.y.toFixed(3)}m, z ${e.z.toFixed(3)}m${Number.isFinite(e.yaw) ? `, pitch ${e.pitch.toFixed(0)}Â°, yaw ${e.yaw.toFixed(0)}Â°` : ""}` : "no reply")
 const side = (e, start) => (!e || !start ? "" : Math.abs(e.x + start.x) < 0.05 ? ", the mirrored seat" : Math.abs(e.x - start.x) < 0.05 ? ", the starting seat" : ", neither seat")
 async function step(label, start) {
   const e = await eye()
@@ -181,18 +187,18 @@ if (copilot) {
   await sleep(300)
   sim.send(`camera release into ${copilot}`, () => h.cameraRelease(copilot))
   acquired = false
-  if (HOLD_S > 3) beep(1000, 150)
+  if (C_HOLD_S > 3) beep(1000, 150)
   await sleep(1000)
   await step(`C, 1s after the release into ${JSON.stringify(copilot)}`, start)
   await sleep(2000)
   await step(`C, 3s after the release into ${JSON.stringify(copilot)}`, start)
   // --hold <s> keeps the pilot in the copilot's seat long enough to try the
   // mouse look and a head tracker there, read every second.
-  for (let s = 4; s <= HOLD_S; s++) {
+  for (let s = 4; s <= C_HOLD_S; s++) {
     await sleep(1000)
     await step(`C, ${s}s after the release into ${JSON.stringify(copilot)}`, start)
   }
-  if (HOLD_S > 3) beep(500, 600)
+  if (C_HOLD_S > 3) beep(500, 600)
   if (pilot) {
     sim.send("camera acquire", () => h.cameraAcquire(CLIENT))
     acquired = true
@@ -204,12 +210,36 @@ if (copilot) {
   }
 }
 
+// D: hold the camera at the mirrored eye with SIMCONNECT_CAMERA_FLAG_INTERACTION,
+// "The add-on camera will permit interactions" (MSFS 2024 SDK,
+// SIMCONNECT_CAMERA_FLAG), to see whether the pilot can still look around and
+// click while a client holds the camera. Only with --interaction.
+if (process.argv.includes("--interaction")) {
+  sim.send("camera acquire", () => h.cameraAcquire(CLIENT))
+  acquired = true
+  await sleep(300)
+  setEye(mirror)
+  sim.send("camera enable flag INTERACTION", () => h.cameraEnableFlag(CameraFlag.INTERACTION))
+  await sleep(SETTLE_MS)
+  await step("D, holding the camera at the mirrored eye with INTERACTION", start)
+  beep(1000, 150)
+  for (let s = 1; s <= HOLD_S; s++) {
+    await sleep(1000)
+    await step(`D, ${s}s into the hold`, start)
+  }
+  beep(500, 600)
+  sim.send("camera release into Pilot", () => h.cameraRelease(pilot ?? ""))
+  acquired = false
+  await sleep(1000)
+  await step("D, 1s after the release", start)
+}
+
 await cleanUp("done: putting the camera back")
 await step("After putting it back", start)
 
 const exceptions = rec.timeline.filter((e) => e.kind === "exception").map((e) => e.text)
 const text = [
-  "p04 · Moving the cockpit camera to another seat through SimConnect, on MSFS 2024",
+  "p04 Â· Moving the cockpit camera to another seat through SimConnect, on MSFS 2024",
   `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
   "",
   ...lines,

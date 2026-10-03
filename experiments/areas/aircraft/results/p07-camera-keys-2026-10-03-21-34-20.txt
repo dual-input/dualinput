@@ -1,0 +1,10 @@
+p07 · K: events heard while the pilot moves the cockpit eye with their keys, on MSFS 2024
+2026-10-03T21:34:20.017Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N513LW"
+
+Eye at the start: x 0.253m, y 0.855m, z -0.144m; at the end: x -0.061m, y 0.852m, z -0.141m
+Eye travel over 20s: 3.431m; range x -0.177 to 0.253, y 0.709 to 0.899, z -0.380 to 0.066
+
+Events heard: none
+Listened for: 23 events
+Exceptions: none

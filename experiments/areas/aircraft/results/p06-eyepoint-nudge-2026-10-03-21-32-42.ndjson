@@ -1,0 +1,5 @@
+{"t":1791063162361,"s":0.048,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791063162384,"s":0.071,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791063162384,"s":0.071,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791063162384,"s":0.071,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791063162385,"s":0.072,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}

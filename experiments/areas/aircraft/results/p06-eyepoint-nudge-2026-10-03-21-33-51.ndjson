@@ -1,0 +1,93 @@
+{"t":1791063231817,"s":0.035,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791063231836,"s":0.054,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791063231836,"s":0.054,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791063231836,"s":0.054,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791063231837,"s":0.055,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}
+{"t":1791063231903,"s":0.121,"kind":"eye","text":"Start: x 0.253m, y 0.855m, z -0.144m","eye":{"x":0.25308629763213253,"y":0.8545925749434901,"z":-0.1436801773946253}}
+{"t":1791063231936,"s":0.154,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063231980,"s":0.198,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232011,"s":0.229,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232042,"s":0.26,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232074,"s":0.292,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232105,"s":0.323,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232135,"s":0.353,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232166,"s":0.384,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232198,"s":0.416,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232229,"s":0.447,"kind":"send","text":"K:EYEPOINT_RIGHT  at priority highest, tagged","event":"EYEPOINT_RIGHT","values":[],"priority":1,"tagged":true}
+{"t":1791063232603,"s":0.821,"kind":"burst","text":"EYEPOINT_RIGHT ×10: x 0.253m, y 0.855m, z -0.144m, moved 0.0mm this burst","direction":"RIGHT","sent":10,"eye":{"x":0.25308693046172237,"y":0.8545926862542228,"z":-0.14368009146383962},"moved":1.5294940528270602e-7}
+{"t":1791063234637,"s":2.855,"kind":"direction","text":"EYEPOINT_RIGHT: 10 events, -0.000m along x the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there","direction":"RIGHT","sent":10,"along":-3.196854547748984e-8,"off":1.4957116258285596e-7,"step":1.5294940528270603e-8,"stopped":"didn't move","last":{"x":0.25308693046172237,"y":0.8545926862542228,"z":-0.14368009146383962},"held":{"x":0.25308685787780294,"y":0.8545925743295831,"z":-0.1436800928181095}}
+{"t":1791063234638,"s":2.856,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063235471,"s":3.689,"kind":"reset","text":"  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.2530869442028995,"y":0.8545925185427765,"z":-0.14368007071873373}}
+{"t":1791063235504,"s":3.722,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235549,"s":3.767,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235580,"s":3.798,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235611,"s":3.829,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235643,"s":3.861,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235674,"s":3.892,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235706,"s":3.924,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235737,"s":3.955,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235768,"s":3.986,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063235799,"s":4.017,"kind":"send","text":"K:EYEPOINT_BACK  at priority highest, tagged","event":"EYEPOINT_BACK","values":[],"priority":1,"tagged":true}
+{"t":1791063236172,"s":4.39,"kind":"burst","text":"EYEPOINT_BACK ×10: x 0.253m, y 0.855m, z -0.144m, moved 0.0mm this burst","direction":"BACK","sent":10,"eye":{"x":0.25308693216682776,"y":0.8545926250226372,"z":-0.1436800902330476},"moved":9.69301904421092e-8}
+{"t":1791063238180,"s":6.398,"kind":"direction","text":"EYEPOINT_BACK: 10 events, 0.000m along z the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there","direction":"BACK","sent":10,"along":2.4834981848798066e-8,"off":9.369463963169625e-8,"step":9.69301904421092e-9,"stopped":"didn't move","last":{"x":0.25308693216682776,"y":0.8545926250226372,"z":-0.1436800902330476},"held":{"x":0.25308693282363665,"y":0.8545925777652988,"z":-0.14368009538908005}}
+{"t":1791063238180,"s":6.398,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063239013,"s":7.231,"kind":"reset","text":"  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.2530869368219711,"y":0.8545926730796778,"z":-0.14368013746752495}}
+{"t":1791063239013,"s":7.231,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239046,"s":7.264,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239077,"s":7.295,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239109,"s":7.327,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239140,"s":7.358,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239172,"s":7.39,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239203,"s":7.421,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239234,"s":7.452,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239265,"s":7.483,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239296,"s":7.514,"kind":"send","text":"K:EYEPOINT_LEFT  at priority highest, tagged","event":"EYEPOINT_LEFT","values":[],"priority":1,"tagged":true}
+{"t":1791063239646,"s":7.864,"kind":"burst","text":"EYEPOINT_LEFT ×10: x 0.253m, y 0.855m, z -0.144m, moved 0.0mm this burst","direction":"LEFT","sent":10,"eye":{"x":0.25308692368366503,"y":0.854592684551887,"z":-0.1436801741638602},"moved":4.06306250279003e-8}
+{"t":1791063241680,"s":9.898,"kind":"direction","text":"EYEPOINT_LEFT: 10 events, -0.000m along x the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there","direction":"LEFT","sent":10,"along":-1.3138306054205628e-8,"off":3.8447790628121425e-8,"step":4.0630625027900295e-9,"stopped":"didn't move","last":{"x":0.25308692368366503,"y":0.854592684551887,"z":-0.1436801741638602},"held":{"x":0.2530869280484677,"y":0.8545926317603233,"z":-0.14368011528912916}}
+{"t":1791063241680,"s":9.898,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063242513,"s":10.731,"kind":"reset","text":"  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.2530868424474328,"y":0.8545925686435918,"z":-0.14368007947820371}}
+{"t":1791063242513,"s":10.731,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242544,"s":10.762,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242575,"s":10.793,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242606,"s":10.824,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242637,"s":10.855,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242668,"s":10.886,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242699,"s":10.917,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242730,"s":10.948,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242760,"s":10.978,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063242792,"s":11.01,"kind":"send","text":"K:EYEPOINT_FORWARD  at priority highest, tagged","event":"EYEPOINT_FORWARD","values":[],"priority":1,"tagged":true}
+{"t":1791063243146,"s":11.364,"kind":"burst","text":"EYEPOINT_FORWARD ×10: x 0.253m, y 0.855m, z -0.144m, moved 0.0mm this burst","direction":"FORWARD","sent":10,"eye":{"x":0.2530869068399749,"y":0.8545926539068132,"z":-0.14368016361129862},"moved":1.3599483100346658e-7}
+{"t":1791063245164,"s":13.382,"kind":"direction","text":"EYEPOINT_FORWARD: 10 events, -0.000m along z the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there","direction":"FORWARD","sent":10,"along":-8.413309490751253e-8,"off":1.068466957886154e-7,"step":1.3599483100346658e-8,"stopped":"didn't move","last":{"x":0.2530869068399749,"y":0.8545926539068132,"z":-0.14368016361129862},"held":{"x":0.2530869383768503,"y":0.8545926425807625,"z":-0.14368016773459996}}
+{"t":1791063245165,"s":13.383,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063245998,"s":14.216,"kind":"reset","text":"  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.25308689876573653,"y":0.854592597523937,"z":-0.1436801750636804}}
+{"t":1791063245998,"s":14.216,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246033,"s":14.251,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246064,"s":14.282,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246095,"s":14.313,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246125,"s":14.343,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246157,"s":14.375,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246188,"s":14.406,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246219,"s":14.437,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246250,"s":14.468,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246281,"s":14.499,"kind":"send","text":"K:EYEPOINT_UP  at priority highest, tagged","event":"EYEPOINT_UP","values":[],"priority":1,"tagged":true}
+{"t":1791063246633,"s":14.851,"kind":"burst","text":"EYEPOINT_UP ×10: x 0.253m, y 0.855m, z -0.144m, moved 0.0mm this burst","direction":"UP","sent":10,"eye":{"x":0.25308691847558973,"y":0.8545925629153343,"z":-0.14368008290834086},"moved":1.0039342757968449e-7}
+{"t":1791063248637,"s":16.855,"kind":"direction","text":"EYEPOINT_UP: 10 events, -0.000m along y the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there","direction":"UP","sent":10,"along":-3.4608602761387885e-8,"off":9.423950825477502e-8,"step":1.0039342757968448e-8,"stopped":"didn't move","last":{"x":0.25308691847558973,"y":0.8545925629153343,"z":-0.14368008290834086},"held":{"x":0.25308686529905916,"y":0.8545925989164891,"z":-0.14368017051291715}}
+{"t":1791063248637,"s":16.855,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063249470,"s":17.688,"kind":"reset","text":"  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.25308687851850586,"y":0.8545926185601309,"z":-0.1436800347339228}}
+{"t":1791063249471,"s":17.689,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249510,"s":17.728,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249542,"s":17.76,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249574,"s":17.792,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249604,"s":17.822,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249635,"s":17.853,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249666,"s":17.884,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249698,"s":17.916,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249729,"s":17.947,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063249760,"s":17.978,"kind":"send","text":"K:EYEPOINT_DOWN  at priority highest, tagged","event":"EYEPOINT_DOWN","values":[],"priority":1,"tagged":true}
+{"t":1791063250137,"s":18.355,"kind":"burst","text":"EYEPOINT_DOWN ×10: x 0.253m, y 0.855m, z -0.144m, moved 0.0mm this burst","direction":"DOWN","sent":10,"eye":{"x":0.2530868592714644,"y":0.8545925808319623,"z":-0.14368016585602114},"moved":1.3779284446110336e-7}
+{"t":1791063252174,"s":20.392,"kind":"direction","text":"EYEPOINT_DOWN: 10 events, 0.000m along y the expected way, 0mm off the axis, first burst 0.0mm an event; didn't move; 2s later still there","direction":"DOWN","sent":10,"along":3.772816858926831e-8,"off":1.3252717939947855e-7,"step":1.3779284446110336e-8,"stopped":"didn't move","last":{"x":0.2530868592714644,"y":0.8545925808319623,"z":-0.14368016585602114},"held":{"x":0.2530868910788445,"y":0.8545926172860184,"z":-0.14368015632841324}}
+{"t":1791063252175,"s":20.393,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063253008,"s":21.226,"kind":"reset","text":"  after K:EYEPOINT_RESET: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.2530869006026016,"y":0.8545925776893202,"z":-0.14368013293053647}}
+{"t":1791063253008,"s":21.226,"kind":"stop","text":"done: putting the eye back"}
+{"t":1791063253009,"s":21.227,"kind":"send","text":"K:EYEPOINT_RESET  at priority highest, tagged","event":"EYEPOINT_RESET","values":[],"priority":1,"tagged":true}
+{"t":1791063253846,"s":22.064,"kind":"eye","text":"End: x 0.253m, y 0.855m, z -0.144m, 0mm from the start","eye":{"x":0.25308693187059517,"y":0.8545926447521744,"z":-0.14368005511963314}}

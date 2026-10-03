@@ -41,9 +41,13 @@ const LVARS = ["L:FSDT_GSX_INTPAX_VISIBLE", ...Array.from({ length: ROWS }, (_, 
 const CAP_MS = 30 * 60_000
 const KT = 1.94384
 
+// Only Couatl64_MSFS2024 is GSX's program. Couatl64_boot stays running after
+// Couatl is quit from its tray, and the first run of this probe mistook it
+// for Couatl (experiments/areas/avatars/results/
+// p11-fenix-attached-2026-10-03-06-12-41.txt).
 function couatlRunning() {
   try {
-    return execFileSync("tasklist", ["/fo", "csv", "/nh"], { encoding: "utf8" }).split(/\r?\n/).some((l) => /^"Couatl/i.test(l))
+    return execFileSync("tasklist", ["/fo", "csv", "/nh"], { encoding: "utf8" }).split(/\r?\n/).some((l) => /^"Couatl64_MSFS/i.test(l))
   } catch {
     return null
   }

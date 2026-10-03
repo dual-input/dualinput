@@ -1,0 +1,9 @@
+p11 · GSX's attached passengers in a flying Fenix A320 with Couatl closed, on MSFS 2024
+2026-10-03T06:12:41.600Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  aircraft TITLE "FenixA320 CFM SL"
+  Couatl is RUNNING: quit it from its tray icon before you start
+  Couatl running at the start; 244 kt over the ground, 5107 ft AGL
+  set 187 L: variables to 1; 1 were nonzero before: L:FSDT_GSX_INTPAX_VISIBLE 1
+  Page Down after 11s; Couatl running at the end; 218 kt over the ground, 5740 ft AGL
+  put back 187 L: variables; all read back as saved

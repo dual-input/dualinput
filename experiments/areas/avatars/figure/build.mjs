@@ -5,6 +5,10 @@
  *   node experiments/areas/avatars/figure/build.mjs
  *   node experiments/areas/avatars/figure/build.mjs --no-color-animation
  *   node experiments/areas/avatars/figure/build.mjs --write-only
+ *   node experiments/areas/avatars/figure/build.mjs --write-only --set nose.length=0.3
+ *
+ * --set overrides one number of figure.json for this build only, without
+ * changing the file, so a test can make a change anyone can see at a glance.
  *
  * One SimObject, CROSSCHECK_Figure, a StaticObject as p17's hand sphere was.
  * Its joints read global L:CROSSCHECK_* variables, which p24 sets through
@@ -79,6 +83,15 @@ const write = (rel, text) => {
 }
 
 const spec = JSON.parse(fs.readFileSync(path.join(HERE, "figure.json"), "utf8"))
+process.argv.forEach((arg, i) => {
+  if (arg !== "--set") return
+  const [key, value] = (process.argv[i + 1] ?? "").split("=")
+  const keys = key.split(".")
+  const owner = keys.slice(0, -1).reduce((o, k) => o?.[k], spec)
+  if (!owner || typeof owner[keys.at(-1)] !== "number" || !Number.isFinite(Number(value))) die(`--set ${process.argv[i + 1]}: not a number in figure.json`)
+  owner[keys.at(-1)] = Number(value)
+  console.log(`--set ${key} = ${value} for this build only`)
+})
 const { json, bin } = buildGltf(spec, 0, { colorAnimation })
 const objectDir = `PackageSources/SimObjects/Misc/${TITLE}`
 json.buffers[0].uri = `${TITLE}.bin`
@@ -129,7 +142,8 @@ write(`PackageDefinitions/${NAME}.xml`, [
   `\t</Flags>`,
   `\t<AssetGroups>`,
   `\t\t<AssetGroup Name="${TITLE}">`,
-  `\t\t\t<Type Version="0">SimObject</Type>`,
+  // Version 1: the in-sim Project Editor offered to upgrade version 0 to it.
+  `\t\t\t<Type Version="1">SimObject</Type>`,
   `\t\t\t<Flags>`,
   `\t\t\t\t<FSXCompatibility>false</FSXCompatibility>`,
   `\t\t\t</Flags>`,

@@ -1,0 +1,10 @@
+p15 · Pitch and bank in the WASM module's placement, with the signs measured against the seat object, on MSFS 2024
+2026-10-03T07:03:58.831Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 4435 → 4451 in 0.5s)
+  aircraft TITLE "Cessna C152 Aerial Advertising", 116 kt; seats SEAT_C152_Pilot, SEAT_C152_Pax
+  pitch -12.1..15.5°, bank -28.6..34.9°; RMS error predicting the seat, this frame's pose: PP 1.779439m, PN 1.776697m, NP 1.761869m, NN 1.760621m; previous frame's pose: PP 0.084986m, PN 0.063923m, NP 0.061145m, NN 0.006366m; best NN from the previous frame, so nose up is −pitch and right wing down is −bank
+  offset, 0.75 frames: 1 press; 104 kt, pitch -18.4..36.0°, bank -0.9..24.2°; module wrote 242 frames with 0 errors
+  offset, 1 frame: 1 press; 98 kt, pitch -18.2..20.6°, bank -5.6..52.7°; module wrote 243 frames with 0 errors
+  offset, 1.25 frames: 1 press; 103 kt, pitch -6.6..12.9°, bank -23.9..8.9°; module wrote 241 frames with 0 errors
+  seat, 2 frames: 1 press; 117 kt, pitch -3.6..18.8°, bank -10.5..-1.0°; module wrote 243 frames with 0 errors

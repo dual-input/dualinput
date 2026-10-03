@@ -1,0 +1,5 @@
+p15 · Pitch and bank in the WASM module's placement, with the signs measured against the seat object, on MSFS 2024
+2026-10-03T07:03:50.396Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 4186 → 4202 in 0.5s)
+  aircraft TITLE "Cessna C152 Aerial Advertising", 113 kt; seats SEAT_C152_Pilot, SEAT_C152_Pax

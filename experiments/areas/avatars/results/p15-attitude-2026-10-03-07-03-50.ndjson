@@ -1,0 +1,10 @@
+{"t":1791011030427,"s":0.031,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791011030776,"s":0.38,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791011030776,"s":0.38,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791011030777,"s":0.381,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791011032608,"s":2.212,"kind":"module","text":"crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 4186 → 4202 in 0.5s)"}
+{"t":1791011032741,"s":2.345,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\", 113 kt; seats SEAT_C152_Pilot, SEAT_C152_Pax"}
+{"t":1791011035415,"s":5.019,"kind":"key","text":"SKIP, with claude in front","key":"SKIP","foreground":"claude"}
+{"t":1791011035416,"s":5.02,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791011035416,"s":5.02,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791011035417,"s":5.021,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}

@@ -9,6 +9,29 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Nose up and right wing down are negative, and turned by full attitude a WASM-written figure holds its seat
+
+**Asked:** with the seat offset turned by pitch and bank as well as heading, does a WASM-written figure hold its seat while the pilot rocks and pitches, and what are the signs of `A:PLANE PITCH DEGREES` and `A:PLANE BANK DEGREES`?
+The earlier runs turned the offset by heading only ([entry below](#2026-10-03-led-by-one-frame-a-wasm-written-figure-sits-in-the-seat-of-a-flying-aircraft-but-doesnt-hold-still)).
+
+**Expected:** the sim carries the seat object through pitch and roll itself, so the right signs would predict it closely.
+
+**Found:**
+
+- Over 12s with the pitch between −12° and 16° and the bank between −29° and 35°, the module (`crosscheck-p12-follow` 0.4.0) predicted `SEAT_C152_Pax` every frame from its parked offset, turned by heading, pitch, and bank under each of the four sign pairs.
+  Predicted from the previous frame's aircraft pose with both signs negative, its RMS error was 0.006m.
+  The other three pairs from the previous frame were 0.06m to 0.08m off, and all four from the current frame's pose were about 1.77m off.
+- So nose up is negative `A:PLANE PITCH DEGREES`, right wing down is negative `A:PLANE BANK DEGREES`, and the sim places the seat object from the previous frame's aircraft pose, turned about `A:PLANE LATITUDE`, `A:PLANE LONGITUDE`, and `A:PLANE ALTITUDE` by the usual heading, pitch, bank order.
+- Turned by those signs and carried on by a lead of the aircraft's change since the previous frame, position and attitude both, GSX's seated passenger held its seat through rocking and pitching best at 0.75 frames, nearly as well at 1 frame, and worse at 1.25 frames and on the seat object led by 2 frames, the pilot judged.
+  It still sat a little off the seat, which the pilot puts down to GSX's model rather than to the placement.
+- The module wrote every frame of every step with no error.
+
+**Changed:** a WASM module writing inside the sim's frame, turning by full attitude and leading by about 0.75 frames, holds a figure in its seat in a rocking aircraft well enough to build on, without editing the aircraft's files.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p15's run](../../../experiments/areas/avatars/results/p15-attitude-2026-10-03-07-03-58.txt); the pilot pressed Page Down in every step, so the presses don't separate them.
+
 ## 2026-10-03: Led by one frame, a WASM-written figure sits in the seat of a flying aircraft, but doesn't hold still
 
 **Asked:** where does a figure written from inside the sim's frame land in a flying aircraft's cabin, and can a lead put it in the seat?

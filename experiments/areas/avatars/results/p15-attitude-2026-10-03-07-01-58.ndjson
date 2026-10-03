@@ -1,0 +1,44 @@
+{"t":1791010918173,"s":0.047,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791010918589,"s":0.463,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791010918589,"s":0.463,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791010918590,"s":0.464,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791010920422,"s":2.296,"kind":"module","text":"crosscheck-p12-follow is running (L:CROSSCHECK_P12_ALIVE 826 → 842 in 0.5s)"}
+{"t":1791010920489,"s":2.363,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\", 110 kt; seats SEAT_C152_Pilot, SEAT_C152_Pax"}
+{"t":1791010942090,"s":23.964,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791010942091,"s":23.965,"kind":"write","text":"L:CROSSCHECK_P12_SEAT ← 50806785","object":0,"values":[50806785]}
+{"t":1791010942091,"s":23.965,"kind":"write","text":"L:CROSSCHECK_P12_CAL_FWD ← 0.1","object":0,"values":[0.1]}
+{"t":1791010942091,"s":23.965,"kind":"write","text":"L:CROSSCHECK_P12_CAL_RIGHT ← 0.21","object":0,"values":[0.21]}
+{"t":1791010942091,"s":23.965,"kind":"write","text":"L:CROSSCHECK_P12_CAL_UP ← -0.13","object":0,"values":[-0.13]}
+{"t":1791010942091,"s":23.965,"kind":"write","text":"L:CROSSCHECK_P12_CAL_RESET ← 1","object":0,"values":[1]}
+{"t":1791010954222,"s":36.096,"kind":"signs","text":"pitch -6.9..7.5°, bank -33.1..31.2°; RMS error predicting the seat, this frame's pose: PP 1.734834m, PN 1.738257m, NP 1.744026m, NN 1.742918m; previous frame's pose: PP 0.079915m, PN 0.026782m, NP 0.06955m, NN 0.006001m; best NN from the previous frame, so nose up is −pitch and right wing down is −bank","cal":{"CAL_NOW_PP":1.7348338356393587,"CAL_NOW_PN":1.7382571082195797,"CAL_NOW_NP":1.744025751284014,"CAL_NOW_NN":1.7429175536771908,"CAL_PREV_PP":0.07991490325018745,"CAL_PREV_PN":0.026782326298654725,"CAL_PREV_NP":0.06955001480502283,"CAL_PREV_NN":0.0060011808878036536},"best":{"key":"NN","from":"prev","err":0.0060011808878036536}}
+{"t":1791010960400,"s":42.274,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791010960424,"s":42.298,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 53067776","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791010960424,"s":42.298,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 53067776","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791010960424,"s":42.298,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 53067776","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791010960424,"s":42.298,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791010960424,"s":42.298,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}
+{"t":1791010960424,"s":42.298,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 53067776","object":0,"values":[53067776]}
+{"t":1791010960424,"s":42.298,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.1","object":0,"values":[0.1]}
+{"t":1791010960425,"s":42.299,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.21","object":0,"values":[0.21]}
+{"t":1791010960425,"s":42.299,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.83","object":0,"values":[-0.83]}
+{"t":1791010960425,"s":42.299,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791010960425,"s":42.299,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791010961456,"s":43.33,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791010961456,"s":43.33,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791010961456,"s":43.33,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.83","object":0,"values":[-0.83]}
+{"t":1791010969555,"s":51.429,"kind":"step","text":"offset, 0.75 frames: 0 presses; 88 kt, pitch -18.4..0.0°, bank -2.6..12.1°; module wrote 242 frames with 0 errors","step":"offset, 0.75 frames","presses":0}
+{"t":1791010969589,"s":51.463,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791010969589,"s":51.463,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791010969589,"s":51.463,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.83","object":0,"values":[-0.83]}
+{"t":1791010977656,"s":59.53,"kind":"step","text":"offset, 1 frame: 0 presses; 82 kt, pitch -28.5..14.4°, bank -14.8..16.7°; module wrote 242 frames with 0 errors","step":"offset, 1 frame","presses":0}
+{"t":1791010977689,"s":59.563,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1.25","object":0,"values":[1.25]}
+{"t":1791010977689,"s":59.563,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791010977690,"s":59.564,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.83","object":0,"values":[-0.83]}
+{"t":1791010985789,"s":67.663,"kind":"step","text":"offset, 1.25 frames: 0 presses; 97 kt, pitch -3.3..17.3°, bank -19.5..14.4°; module wrote 243 frames with 0 errors","step":"offset, 1.25 frames","presses":0}
+{"t":1791010985822,"s":67.696,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 2","object":0,"values":[2]}
+{"t":1791010985823,"s":67.697,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 3","object":0,"values":[3]}
+{"t":1791010985823,"s":67.697,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.7","object":0,"values":[-0.7]}
+{"t":1791010993889,"s":75.763,"kind":"step","text":"seat, 2 frames: 0 presses; 60 kt, pitch -46.2..12.5°, bank -15.8..14.3°; module wrote 242 frames with 0 errors","step":"seat, 2 frames","presses":0}
+{"t":1791010993890,"s":75.764,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791010993890,"s":75.764,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791010993890,"s":75.764,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}

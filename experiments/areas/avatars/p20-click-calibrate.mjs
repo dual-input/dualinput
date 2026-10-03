@@ -25,7 +25,9 @@
  * second run). On release it stays a moment (LINGER_MS), then goes back to
  * rest.
  *
- * In the A2A Comanche, parked, the sim in front:
+ * In any aircraft whose interior model lib/cockpit-files.mjs finds, parked,
+ * the sim in front; the yellow balls come only in the A2A Comanche, whose
+ * control map gives their spots:
  *
  *   balls     Page Down for the yellow balls below, Page Up to go straight to
  *             clicking.
@@ -60,16 +62,18 @@ import { InitPosition } from "node-simconnect"
 import { REPO } from "../../tools/results.mjs"
 import { SKIP, START, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { startMouse } from "../../tools/mouse.mjs"
-import { findPackage } from "../aircraft/lib/flights.mjs"
 import { Recorder, fmt, plural, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, Sim } from "../aircraft/lib/sim.mjs"
+import { cockpitFiles } from "./lib/cockpit-files.mjs"
 import { RAD, toBody, wrap } from "./lib/pose.mjs"
 import { MEASURED, fitK, fitProjection, rayThrough, rmsOf } from "./lib/pick.mjs"
 import { cast, crossPlane, loadCockpit } from "./lib/raycast.mjs"
 
-const PACKAGE = "a2a-aircraft-pa24"
-const MODEL = ["SimObjects", "Airplanes", "pa24-250", "common", "model", "PA24_250_INTERIOR_LOD00.gltf"]
+// The yellow balls sit on controls from the A2A Comanche's control map, so they
+// run only in that aircraft; clicking works in any aircraft whose model
+// cockpitFiles finds.
 const MAP = path.join(REPO, "experiments", "sim-sources", "avatars", "controls-pa24-250.json")
+const MAP_PACKAGE = "a2a-aircraft-pa24"
 const POS = [["PLANE LATITUDE", "degrees"], ["PLANE LONGITUDE", "degrees"], ["PLANE ALTITUDE", "feet"], ["PLANE HEADING DEGREES TRUE", "degrees"]]
 const SPHERE = "CROSSCHECK_HandSphere"
 // From the left wall across the panel to the right wall, then the overhead;
@@ -157,16 +161,6 @@ process.on("SIGINT", () => finish("Ctrl+C"))
 
 // ------------------------------------------------ setup
 
-if (!fs.existsSync(MAP)) {
-  console.error(`No control map at ${MAP}: run tools/controls.mjs first (see its header).`)
-  process.exit(1)
-}
-const map = JSON.parse(fs.readFileSync(MAP, "utf8"))
-const pkg = findPackage(PACKAGE)
-if (!pkg) { console.error(`${PACKAGE} isn't installed.`); process.exit(1) }
-const cockpit = loadCockpit([path.join(pkg, ...MODEL)])
-note("model", `${MODEL.at(-1)}: ${plural(cockpit.triangles, "triangle")}`)
-
 await sleep(1000)
 const m0 = await readModule(["ALIVE"])
 await sleep(500)
@@ -175,7 +169,13 @@ if (!(m0.ALIVE !== null && m1.ALIVE > m0.ALIVE)) { note("module", "crosscheck-p1
 const title = (await sim.readStrings(["TITLE"])).get("TITLE") ?? null
 const speed = await sim.readOne("GROUND VELOCITY", "knots")
 note("setup", `aircraft TITLE ${JSON.stringify(title)}, ${fmt(speed)} kt`)
-if (speed > 1) { note("calibrate", "moving: start the probe parked in the Comanche"); await finish("no calibration") }
+if (speed > 1) { note("calibrate", "moving: start the probe parked"); await finish("no calibration") }
+
+const files = title ? cockpitFiles(title) : null
+if (!files?.gltf) { note("model", `no interior model found for ${JSON.stringify(title)}`); await finish("no model") }
+const cockpit = loadCockpit([files.gltf])
+note("model", `${files.package}, ${path.basename(files.gltf)}: ${plural(cockpit.triangles, "triangle")}`)
+const map = files.package === MAP_PACKAGE && fs.existsSync(MAP) ? JSON.parse(fs.readFileSync(MAP, "utf8")) : null
 
 // ------------------------------------------------ the camera
 
@@ -208,11 +208,11 @@ for (const id of await sim.byType(1, 50, { timeoutMs: 2000 })) {
 // Model space to the aircraft's frame: forward = z, right = -x, up = y (p18),
 // plus the offset the seats give.
 const toFrame = (p) => ({ forward: p[2], right: -p[0], up: p[1] })
-const diffs = Object.keys(seatBody).filter((k) => map.seats[k]).map((k) => { const f = toFrame(map.seats[k].origin); return { forward: seatBody[k].forward - f.forward, right: seatBody[k].right - f.right, up: seatBody[k].up - f.up } })
+const diffs = Object.keys(seatBody).filter((k) => map?.seats[k]).map((k) => { const f = toFrame(map.seats[k].origin); return { forward: seatBody[k].forward - f.forward, right: seatBody[k].right - f.right, up: seatBody[k].up - f.up } })
 const offset = diffs.length
   ? { forward: diffs.reduce((s, d) => s + d.forward, 0) / diffs.length, right: diffs.reduce((s, d) => s + d.right, 0) / diffs.length, up: diffs.reduce((s, d) => s + d.up, 0) / diffs.length }
   : { forward: 0, right: 0, up: 0 }
-note("calibrate", diffs.length ? `the seats put the model's origin ${where(offset)} of SimConnect's reference point` : "no seat objects: the model's origin taken as SimConnect's reference point", { seatBody, offset })
+note("calibrate", diffs.length ? `the seats put the model's origin ${where(offset)} of SimConnect's reference point` : `${Object.keys(seatBody).length ? "seat objects, but no model seat nodes to match them" : "no seat objects"}: the model's origin taken as SimConnect's reference point (p18)`, { seatBody, offset })
 const modelToFrame = (p) => ({ forward: p[2] + offset.forward, right: -p[0] + offset.right, up: p[1] + offset.up })
 const frameToModel = (b) => [-(b.right - offset.right), b.up - offset.up, b.forward - offset.forward]
 // The camera's SIMOBJECT position is in the aircraft's frame already.
@@ -221,7 +221,9 @@ for (let i = 0; i < 40 && !cam; i++) await sleep(50)
 if (!cam) { note("camera", "SimConnect_CameraGet didn't answer"); await finish("no camera") }
 note("camera", `at ${where({ forward: cam.z, right: -cam.x, up: cam.y })} of the reference point, fov ${deg(cam.fov)}°`, { cam })
 
-const pilot = seatBody.PILOT_1 ?? modelToFrame(map.seats.PILOT_1?.origin ?? [0.3, -0.13, 0.12])
+// At rest the sphere sits 0.35m ahead of the pilot's seat and 0.25m up; with no
+// seat to go by, the seat is taken as 0.6m below the eye.
+const pilot = seatBody.PILOT_1 ?? (map?.seats.PILOT_1 ? modelToFrame(map.seats.PILOT_1.origin) : { forward: cam.z, right: -cam.x, up: cam.y - 0.6 })
 const rest = { forward: pilot.forward + 0.35, right: pilot.right, up: pilot.up + 0.25 }
 
 // ------------------------------------------------ the sphere
@@ -299,7 +301,8 @@ async function prepare(heading, instruction, changed, now) {
 }
 
 let first = [], zoomed = [], resized = []
-if (await prepare("Yellow balls", "Click the balls to check the ray, or skip them and go straight to clicking with the ray p20 measured.", () => true, () => "")) {
+if (!map) note("targets", "no yellow balls: their spots come from the A2A Comanche's control map")
+if (map && await prepare("Yellow balls", "Click the balls to check the ray, or skip them and go straight to clicking with the ray p20 measured.", () => true, () => "")) {
   console.log(`\n▶ Click the yellow balls\n  A small yellow ball sits on a spot in the cockpit, ${TARGETS.length} in turn. Click its center. Turn your view only as far as you need to see it. ${SKIP} skips one you can't see.`)
   first = await targets("first", TARGETS)
   const fov0 = first[0]?.cam.fov ?? cam.fov

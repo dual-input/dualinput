@@ -42,7 +42,7 @@ v1 has these whatever is picked, because they're the product rather than ideas:
 
 - flight-model sync, which keeps the aircraft's position, attitude, and velocity the same on every machine
 - the connection between machines
-- profiles, and the profile IDE we write them in
+- profiles, starting with the 58P's, written without the Crosscheck IDE, which is a Soon pick
 
 v1's aircraft is the pressurized 58P variant of the [Black Square Baron Pro](../aircraft/black-square-baron-pro/study.md).
 
@@ -62,13 +62,14 @@ The picks, picked on 2026-10-02:
   - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
   - The [notification banner](ideas.md#notification-banner), split from Crosscheck objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
+  - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Crosscheck IDE
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - [Seat awareness](ideas.md#seat-awareness)
-  - [Avatar sync](ideas.md#avatar-sync)
   - The profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
+  - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
   - [EventBus bridge](ideas.md#eventbus-bridge)
@@ -89,7 +90,7 @@ How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, 
 
 Produces: [03-v1-scope](03-v1-scope.md), written with the users from step 2 in mind.
 Exit: every v1 feature, and installing and updating Crosscheck, is agreed: what it does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
-Then a pass strings the features into one session, from installing Crosscheck to ending a flight, and scopes the gaps between them, such as rejoining after a dropped connection.
+Then a pass strings the features into one session, from installing Crosscheck to ending a flight, and scopes the gaps between them, such as rejoining after a dropped connection and switching seats before or during a flight.
 
 We take one feature at a time: we gather what the record establishes and what's open, discuss it, and run a sim probe where a decision needs data the record doesn't have.
 We scope control first, because which pilot is flying decides which machine flies the aircraft, then sync, then the session, then the remaining features, and installing and updating last.
@@ -110,6 +111,8 @@ Agreed:
 - Recording and bug reports, on 2026-10-03.
 - The EFB app and the notification banner, on 2026-10-03.
 - Installing and updating, on 2026-10-03.
+
+Still to scope: avatar sync, which moved into v1 on 2026-10-03.
 
 ## 5. What later features need from the core
 

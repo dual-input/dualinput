@@ -1,0 +1,671 @@
+{"t":1791005845122,"s":0.025,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791005845438,"s":0.341,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791005845438,"s":0.341,"kind":"system","text":"Pause_EX1 4 (active pause)","event":"Pause_EX1","data":4}
+{"t":1791005845438,"s":0.341,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791005846474,"s":1.377,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791005846770,"s":1.673,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\", 0 kt over the ground"}
+{"t":1791005848347,"s":3.25,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791005848404,"s":3.307,"kind":"write","text":"L:FSDT_GSX_INTPAX_VISIBLE ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1A ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1B ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1C ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1D ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1E ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1F ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2A ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2B ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2C ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2D ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2E ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2F ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3A ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3B ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3C ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3D ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3E ← 1","object":0,"values":[1]}
+{"t":1791005848405,"s":3.308,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3F ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4A ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4B ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4C ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4D ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4E ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4F ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5A ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5B ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5C ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5D ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5E ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5F ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6A ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6B ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6C ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6D ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6E ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6F ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7A ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7B ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7C ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7D ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7E ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7F ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8A ← 1","object":0,"values":[1]}
+{"t":1791005848406,"s":3.309,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8B ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8C ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8D ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8E ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8F ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9A ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9B ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9C ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9D ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9E ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9F ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10A ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10B ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10C ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10D ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10E ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10F ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11A ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11B ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11C ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11D ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11E ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11F ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12A ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12B ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12C ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12D ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12E ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12F ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13A ← 1","object":0,"values":[1]}
+{"t":1791005848407,"s":3.31,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13B ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13C ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13D ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13E ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13F ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14A ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14B ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14C ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14D ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14E ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14F ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15A ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15B ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15C ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15D ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15E ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15F ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16A ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16B ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16C ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16D ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16E ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16F ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17A ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17B ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17C ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17D ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17E ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17F ← 1","object":0,"values":[1]}
+{"t":1791005848408,"s":3.311,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18A ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18B ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18C ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18D ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18E ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18F ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19A ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19B ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19C ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19D ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19E ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19F ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20A ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20B ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20C ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20D ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20E ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20F ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21A ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21B ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21C ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21D ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21E ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21F ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22A ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22B ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22C ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22D ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22E ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22F ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23A ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23B ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23C ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23D ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23E ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23F ← 1","object":0,"values":[1]}
+{"t":1791005848409,"s":3.312,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24A ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24B ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24C ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24D ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24E ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24F ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25A ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25B ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25C ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25D ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25E ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25F ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26A ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26B ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26C ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26D ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26E ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26F ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27A ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27B ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27C ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27D ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27E ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27F ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28A ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28B ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28C ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28D ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28E ← 1","object":0,"values":[1]}
+{"t":1791005848410,"s":3.313,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28F ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29A ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29B ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29C ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29D ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29E ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29F ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30A ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30B ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30C ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30D ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30E ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30F ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31A ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31B ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31C ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31D ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31E ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31F ← 1","object":0,"values":[1]}
+{"t":1791005848411,"s":3.314,"kind":"lvars","text":"set 187 L: variables to 1; 187 were nonzero before"}
+{"t":1791005848447,"s":0.036,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848473,"s":0.062,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848506,"s":0.095,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848539,"s":0.128,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848577,"s":0.166,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848606,"s":0.195,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848606,"s":0.195,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848641,"s":0.23,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848675,"s":0.264,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848708,"s":0.297,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848742,"s":0.331,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848775,"s":0.364,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848809,"s":0.398,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848843,"s":0.432,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848877,"s":0.466,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848909,"s":0.498,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848941,"s":0.53,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005848975,"s":0.564,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849008,"s":0.597,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849041,"s":0.63,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849074,"s":0.663,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849108,"s":0.697,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849142,"s":0.731,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849175,"s":0.764,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849208,"s":0.797,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849241,"s":0.83,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849274,"s":0.863,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849308,"s":0.897,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849341,"s":0.93,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849374,"s":0.963,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849409,"s":0.997,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849441,"s":1.03,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849475,"s":1.064,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849508,"s":1.097,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849541,"s":1.13,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849575,"s":1.164,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849608,"s":1.197,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849608,"s":1.197,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849640,"s":1.229,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849673,"s":1.262,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849706,"s":1.295,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849742,"s":1.331,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849786,"s":1.375,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849819,"s":1.408,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849852,"s":1.441,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849886,"s":1.475,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849919,"s":1.508,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849950,"s":1.539,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005849986,"s":1.575,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850018,"s":1.607,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850051,"s":1.64,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850086,"s":1.675,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850118,"s":1.707,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850151,"s":1.74,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850184,"s":1.773,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850218,"s":1.807,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850252,"s":1.841,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850286,"s":1.875,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850318,"s":1.907,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850351,"s":1.94,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850384,"s":1.973,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850418,"s":2.007,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850452,"s":2.041,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850485,"s":2.074,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850517,"s":2.106,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850551,"s":2.14,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850586,"s":2.175,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850619,"s":2.208,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850619,"s":2.208,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850650,"s":2.239,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850685,"s":2.273,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850719,"s":2.308,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850752,"s":2.341,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850785,"s":2.374,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850818,"s":2.407,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850851,"s":2.44,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850885,"s":2.474,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850919,"s":2.508,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850952,"s":2.541,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005850985,"s":2.574,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851019,"s":2.608,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851051,"s":2.64,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851085,"s":2.674,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851119,"s":2.708,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851152,"s":2.741,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851186,"s":2.775,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851219,"s":2.808,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851252,"s":2.841,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851285,"s":2.874,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851319,"s":2.908,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851352,"s":2.941,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851385,"s":2.974,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851419,"s":3.008,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851451,"s":3.04,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851485,"s":3.074,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851521,"s":3.11,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851552,"s":3.141,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851585,"s":3.174,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851619,"s":3.208,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851620,"s":3.208,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851653,"s":3.242,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851685,"s":3.274,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851719,"s":3.308,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851752,"s":3.341,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851785,"s":3.374,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851818,"s":3.407,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851852,"s":3.441,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851886,"s":3.475,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851920,"s":3.509,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851952,"s":3.541,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005851985,"s":3.574,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852019,"s":3.608,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852052,"s":3.641,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852085,"s":3.674,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852119,"s":3.708,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852152,"s":3.741,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852185,"s":3.774,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852220,"s":3.809,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852255,"s":3.844,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852286,"s":3.875,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852320,"s":3.909,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852352,"s":3.941,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852385,"s":3.974,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852419,"s":4.008,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852452,"s":4.041,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852486,"s":4.075,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852516,"s":4.105,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852551,"s":4.14,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852585,"s":4.174,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852615,"s":4.204,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852615,"s":4.204,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852651,"s":4.24,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852682,"s":4.271,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852715,"s":4.304,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852748,"s":4.337,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852781,"s":4.37,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852815,"s":4.404,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852847,"s":4.436,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852880,"s":4.469,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852913,"s":4.502,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852947,"s":4.536,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005852980,"s":4.569,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853015,"s":4.604,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853047,"s":4.636,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853081,"s":4.67,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853113,"s":4.702,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853147,"s":4.736,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853180,"s":4.769,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853214,"s":4.802,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853247,"s":4.836,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853280,"s":4.869,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853313,"s":4.902,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853347,"s":4.936,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853380,"s":4.969,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853413,"s":5.002,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853446,"s":5.035,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853481,"s":5.07,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853513,"s":5.102,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853547,"s":5.136,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853580,"s":5.169,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853613,"s":5.202,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853614,"s":5.203,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853646,"s":5.235,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853681,"s":5.27,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853713,"s":5.302,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853747,"s":5.336,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853780,"s":5.369,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853813,"s":5.402,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853847,"s":5.436,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853880,"s":5.469,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853913,"s":5.502,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853947,"s":5.536,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005853980,"s":5.569,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854013,"s":5.602,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854047,"s":5.635,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854080,"s":5.669,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854113,"s":5.702,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854147,"s":5.736,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854180,"s":5.769,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854213,"s":5.802,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854247,"s":5.836,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854280,"s":5.869,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854313,"s":5.902,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854347,"s":5.936,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854380,"s":5.969,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854414,"s":6.003,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854446,"s":9.349,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791005854447,"s":6.036,"kind":"seats","text":"","forward":1.4823230436864607e-10,"right":-3.1414507094090065e-9,"up":0,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005854481,"s":6.07,"kind":"seats","text":"","forward":-1.3840778667117841,"right":0.02854782794552546,"up":-0.003669090416749532,"movedM":3.1449460052129335e-9,"speed":2.4372750911564514}
+{"t":1791005854515,"s":6.104,"kind":"seats","text":"","forward":-4.441412272261806,"right":0.09303335476581198,"up":-0.011103048679051427,"movedM":3.1449460052129335e-9,"speed":7.821103139065649}
+{"t":1791005854547,"s":6.136,"kind":"seats","text":"","forward":-6.461028510996783,"right":0.13674871910999453,"up":-0.015463397696284666,"movedM":3.1449460052129335e-9,"speed":10.77079265435644}
+{"t":1791005854585,"s":6.174,"kind":"seats","text":"","forward":-8.077078985722409,"right":0.1723716294097808,"up":-0.0186319549888809,"movedM":3.1449460052129335e-9,"speed":14.123982855148071}
+{"t":1791005854616,"s":6.205,"kind":"seats","text":"","forward":-9.693437763829937,"right":0.2085600771845928,"up":-0.02153423357155516,"movedM":3.1449460052129335e-9,"speed":17.009967284030875}
+{"t":1791005854616,"s":6.205,"kind":"seats","text":"","forward":-9.693437763829937,"right":0.2085600771845928,"up":-0.02153423357155516,"movedM":3.1449460052129335e-9,"speed":17.009967284030875}
+{"t":1791005854652,"s":6.241,"kind":"seats","text":"","forward":-11.310105444052665,"right":0.24529328351431356,"up":-0.024195008047067316,"movedM":3.1449460052129335e-9,"speed":19.77756182123997}
+{"t":1791005854685,"s":6.274,"kind":"seats","text":"","forward":-12.92709226809775,"right":0.28253019974888494,"up":-0.026636290075731813,"movedM":3.1449460052129335e-9,"speed":22.60520926402126}
+{"t":1791005854717,"s":6.306,"kind":"seats","text":"","forward":-14.544393949094054,"right":0.3202203922647895,"up":-0.028873551969552137,"movedM":3.1449460052129335e-9,"speed":25.52266505449892}
+{"t":1791005854748,"s":6.337,"kind":"seats","text":"","forward":-16.16201062464644,"right":0.3583097278977605,"up":-0.030922399093680726,"movedM":3.1449460052129335e-9,"speed":28.461236857766863}
+{"t":1791005854784,"s":6.373,"kind":"seats","text":"","forward":-17.779942623868934,"right":0.39674406866511536,"up":-0.032799733974987616,"movedM":3.1449460052129335e-9,"speed":31.146005689832826}
+{"t":1791005854815,"s":6.404,"kind":"seats","text":"","forward":-19.398191137847466,"right":0.4354614295107977,"up":-0.03451992382204298,"movedM":3.1449460052129335e-9,"speed":34.16035046966797}
+{"t":1791005854849,"s":6.438,"kind":"seats","text":"","forward":-21.016758618172418,"right":0.47438296174341943,"up":-0.03609053488244681,"movedM":3.1449460052129335e-9,"speed":36.945716491620985}
+{"t":1791005854882,"s":6.471,"kind":"seats","text":"","forward":-22.635653105868784,"right":0.5134254693063047,"up":-0.037510157408872695,"movedM":3.1449460052129335e-9,"speed":39.79169815630407}
+{"t":1791005854915,"s":6.504,"kind":"seats","text":"","forward":-24.254866980637427,"right":0.5525183664791804,"up":-0.03877817717108628,"movedM":3.1449460052129335e-9,"speed":42.713310775562285}
+{"t":1791005854949,"s":6.538,"kind":"seats","text":"","forward":-25.874411208717948,"right":0.5916000804012329,"up":-0.039899663499454986,"movedM":3.1449460052129335e-9,"speed":45.485369093928234}
+{"t":1791005854982,"s":6.571,"kind":"seats","text":"","forward":-27.4942774863412,"right":0.6306039969665482,"up":-0.04088403400561438,"movedM":3.1449460052129335e-9,"speed":48.41815116862864}
+{"t":1791005855015,"s":6.604,"kind":"seats","text":"","forward":-29.11447804959283,"right":0.6694500355696089,"up":-0.041735887344821095,"movedM":3.1449460052129335e-9,"speed":51.271435593236205}
+{"t":1791005855050,"s":6.639,"kind":"seats","text":"","forward":-30.735006398144158,"right":0.7080469553740167,"up":-0.04245089058292761,"movedM":3.1449460052129335e-9,"speed":51.68801209102125}
+{"t":1791005855081,"s":6.67,"kind":"seats","text":"","forward":-32.355869962280835,"right":0.7463174985625498,"up":-0.04302468900536078,"movedM":3.1449460052129335e-9,"speed":51.63351025257354}
+{"t":1791005855117,"s":6.706,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":48.28709572883062}
+{"t":1791005855146,"s":10.049,"kind":"system","text":"Pause_EX1 4 (active pause)","event":"Pause_EX1","data":4}
+{"t":1791005855148,"s":6.737,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":46.01634459573556}
+{"t":1791005855182,"s":6.771,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":43.395648253599866}
+{"t":1791005855215,"s":6.804,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":40.551650872084466}
+{"t":1791005855250,"s":6.839,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":37.91530914690819}
+{"t":1791005855283,"s":6.872,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":35.21060288834124}
+{"t":1791005855315,"s":6.904,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":32.50535306069447}
+{"t":1791005855349,"s":6.938,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":28.675665328582216}
+{"t":1791005855381,"s":6.97,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":27.13861124061801}
+{"t":1791005855415,"s":7.004,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":24.30506842939621}
+{"t":1791005855449,"s":7.038,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":21.60667900381797}
+{"t":1791005855482,"s":7.071,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":18.907739659717958}
+{"t":1791005855515,"s":7.104,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":16.20826581153715}
+{"t":1791005855549,"s":7.138,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":13.508241588891288}
+{"t":1791005855581,"s":7.17,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":10.825726316486925}
+{"t":1791005855616,"s":7.205,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":5.719500563709514}
+{"t":1791005855616,"s":7.205,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":5.719500563709514}
+{"t":1791005855648,"s":7.237,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":5.413951284846902}
+{"t":1791005855682,"s":7.271,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855715,"s":7.304,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855749,"s":7.338,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855781,"s":7.37,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855815,"s":7.404,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855848,"s":7.437,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855882,"s":7.471,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855915,"s":7.504,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855949,"s":7.538,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005855981,"s":7.57,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856015,"s":7.604,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856049,"s":7.638,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856081,"s":7.67,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856115,"s":7.704,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856148,"s":7.737,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856182,"s":7.771,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856215,"s":7.804,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856249,"s":7.838,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856282,"s":7.871,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856315,"s":7.904,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856349,"s":7.938,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856381,"s":7.97,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856417,"s":8.006,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856446,"s":11.349,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791005856448,"s":8.037,"kind":"seats","text":"","forward":-33.9770685944189,"right":0.7842062161429357,"up":-0.04346853976794191,"movedM":3.1449460052129335e-9,"speed":0}
+{"t":1791005856481,"s":8.07,"kind":"seats","text":"","forward":-37.2204827400415,"right":0.858620227107064,"up":-0.04413173046989868,"movedM":3.1449460052129335e-9,"speed":5.416140622578177}
+{"t":1791005856516,"s":8.105,"kind":"seats","text":"","forward":-38.842712265471015,"right":0.8949977942283116,"up":-0.044395232141459934,"movedM":3.1449460052129335e-9,"speed":8.583607728222098}
+{"t":1791005856548,"s":8.137,"kind":"seats","text":"","forward":-40.46528578252807,"right":0.930739633529253,"up":-0.04457824635525794,"movedM":3.1449460052129335e-9,"speed":10.834511277724589}
+{"t":1791005856580,"s":8.169,"kind":"seats","text":"","forward":-42.08819974808226,"right":0.965805180123029,"up":-0.04464666283636143,"movedM":3.1449460052129335e-9,"speed":13.54451394182346}
+{"t":1791005856613,"s":8.202,"kind":"seats","text":"","forward":-42.89979001466546,"right":0.9830809815904349,"up":-0.044628110251737234,"movedM":3.1449460052129335e-9,"speed":14.92464391596796}
+{"t":1791005856613,"s":8.202,"kind":"seats","text":"","forward":-43.305617857189596,"right":0.9916557865062199,"up":-0.04460453947260758,"movedM":3.1449460052129335e-9,"speed":15.603436356141266}
+{"t":1791005856646,"s":8.235,"kind":"seats","text":"","forward":-44.1173388840701,"right":1.0086804603714796,"up":-0.044527942057098334,"movedM":3.1449460052129335e-9,"speed":16.98953636268227}
+{"t":1791005856680,"s":8.269,"kind":"seats","text":"","forward":-46.147021939553426,"right":1.0505103065081762,"up":-0.04416222674034216,"movedM":3.1449460052129335e-9,"speed":20.32197472937206}
+{"t":1791005856713,"s":8.302,"kind":"seats","text":"","forward":-48.17725238671828,"right":1.0912584105548824,"up":-0.043546979143279534,"movedM":3.1449460052129335e-9,"speed":23.751665084950357}
+{"t":1791005856746,"s":8.335,"kind":"seats","text":"","forward":-49.39565176234835,"right":1.1151551078425914,"up":-0.04305229626115106,"movedM":3.1449460052129335e-9,"speed":25.789505537042025}
+{"t":1791005856780,"s":8.369,"kind":"seats","text":"","forward":-50.61424727740307,"right":1.1386228426479033,"up":-0.04245689721203417,"movedM":3.1449460052129335e-9,"speed":27.827658231895366}
+{"t":1791005856813,"s":8.402,"kind":"seats","text":"","forward":-53.45840880359322,"right":1.1917659667213751,"up":-0.04066600142291645,"movedM":3.1449460052129335e-9,"speed":32.58458031540376}
+{"t":1791005856847,"s":8.436,"kind":"seats","text":"","forward":-54.27122148386551,"right":1.2065583571780731,"up":-0.040054759770859164,"movedM":3.1449460052129335e-9,"speed":33.94401320080861}
+{"t":1791005856881,"s":8.47,"kind":"seats","text":"","forward":-55.89710808471867,"right":1.2356527225280587,"up":-0.038709291226851565,"movedM":3.1449460052129335e-9,"speed":36.60209111077423}
+{"t":1791005856913,"s":8.502,"kind":"seats","text":"","forward":-57.92995652451347,"right":1.2711210864806173,"up":-0.03680454280342201,"movedM":3.1449460052129335e-9,"speed":40.063193954835626}
+{"t":1791005856947,"s":8.536,"kind":"seats","text":"","forward":-59.149930183303304,"right":1.2919263454095198,"up":-0.03554194991676814,"movedM":3.1449460052129335e-9,"speed":42.103557366072266}
+{"t":1791005856980,"s":8.569,"kind":"seats","text":"","forward":-60.37010078322191,"right":1.3123871392371118,"up":-0.03418777631209086,"movedM":3.1449460052129335e-9,"speed":44.070541958122426}
+{"t":1791005857014,"s":8.603,"kind":"seats","text":"","forward":-63.217920756710434,"right":1.358963131308327,"up":-0.03069694039463648,"movedM":3.1449460052129335e-9,"speed":48.988973992743595}
+{"t":1791005857047,"s":8.636,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":51.543231939183265}
+{"t":1791005857094,"s":11.997,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791005857094,"s":8.683,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":44.99565823173767}
+{"t":1791005857114,"s":8.703,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":43.49078671897052}
+{"t":1791005857147,"s":8.736,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":40.70872091138057}
+{"t":1791005857180,"s":8.769,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":37.93538712315054}
+{"t":1791005857245,"s":8.834,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":34.610422324043554}
+{"t":1791005857256,"s":8.845,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":32.467939878131375}
+{"t":1791005857290,"s":8.879,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":28.94253568892551}
+{"t":1791005857323,"s":8.912,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":26.780367399747764}
+{"t":1791005857356,"s":8.945,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":24.710862323317166}
+{"t":1791005857395,"s":8.984,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":19.568414641723077}
+{"t":1791005857423,"s":9.012,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":18.360896628100726}
+{"t":1791005857457,"s":9.046,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":15.564771771083844}
+{"t":1791005857490,"s":9.079,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":11.987186003072251}
+{"t":1791005857523,"s":9.112,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":9.889703070768224}
+{"t":1791005857557,"s":9.146,"kind":"seats","text":"","forward":-64.84571499442981,"right":1.3849589762125678,"up":-0.02852499042299751,"movedM":3.1449460052129335e-9,"speed":7.757611081702921}
+{"t":1791005857565,"s":12.468,"kind":"stop","text":"Ctrl+C: restoring the L: variables and removing the object"}
+{"t":1791005857565,"s":12.468,"kind":"write","text":"L:FSDT_GSX_INTPAX_VISIBLE ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10F ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11A ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11B ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11C ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11D ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11E ← 1","object":0,"values":[1]}
+{"t":1791005857566,"s":12.469,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11F ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12A ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12B ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12C ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12D ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12E ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12F ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13A ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13B ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13C ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13D ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13E ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13F ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14A ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14B ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14C ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14D ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14E ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14F ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15A ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15B ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15C ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15D ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15E ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15F ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16A ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16B ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16C ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16D ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16E ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16F ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17A ← 1","object":0,"values":[1]}
+{"t":1791005857567,"s":12.47,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30B ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30C ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30D ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30E ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30F ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31A ← 1","object":0,"values":[1]}
+{"t":1791005857568,"s":12.471,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31B ← 1","object":0,"values":[1]}
+{"t":1791005857569,"s":12.472,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31C ← 1","object":0,"values":[1]}
+{"t":1791005857569,"s":12.472,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31D ← 1","object":0,"values":[1]}
+{"t":1791005857569,"s":12.472,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31E ← 1","object":0,"values":[1]}
+{"t":1791005857569,"s":12.472,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31F ← 1","object":0,"values":[1]}
+{"t":1791005857569,"s":12.472,"kind":"lvars","text":"put back 187 L: variables"}

@@ -18,6 +18,7 @@ The pilot has seen GSX's seated passengers sit still in a flying Fenix A320, GSX
 
 **Found:** we spawned `FSDT_Passengers_Seats_FNX_A320_01`, whose `A:CATEGORY` read `Viewer`, at a Cessna 152's position at 94 kt, and wrote nothing to it.
 In 20s it moved 0m over the ground while the aircraft flew 945m on, so the sim leaves it where it's put.
+In a second run started in active pause, the passengers showed once we set their `L:FSDT_GSX_PASSENGER_SEAT_*` variables and `L:FSDT_GSX_INTPAX_VISIBLE` to 1 through SimConnect, and when the pilot unpaused, they stayed where they were while the aircraft flew on.
 
 **Changed:** category Viewer isn't how GSX keeps its passengers with the aircraft, and how it does is still unknown.
 The route for our figure stays a WASM module writing inside the sim's frame.

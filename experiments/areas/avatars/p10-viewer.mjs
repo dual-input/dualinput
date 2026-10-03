@@ -84,10 +84,18 @@ async function setPassengers(on) {
     const v = await sim.read(LVARS.map((n) => [n, "number"]), { timeoutMs: 3000 })
     saved = new Map(LVARS.map((n) => [n, v.get(n) ?? 0]))
     for (const n of LVARS) sim.set([[n, "number"]], [1], { quiet: true, label: `set ${n}` })
-    rec.log("lvars", `set ${LVARS.length} L: variables to 1; ${[...saved.values()].filter((x) => x !== 0).length} were nonzero before`)
+    const nonzero = [...saved].filter(([, x]) => x !== 0)
+    rec.log("lvars", `set ${LVARS.length} L: variables to 1; ${nonzero.length} were nonzero before${nonzero.length && nonzero.length < 10 ? `: ${nonzero.map(([n, x]) => `${n} ${x}`).join(", ")}` : ""}`, { saved: Object.fromEntries(saved) })
   } else if (saved) {
     for (const [n, x] of saved) sim.set([[n, "number"]], [x], { quiet: true, label: `restore ${n}` })
-    rec.log("lvars", `put back ${saved.size} L: variables`)
+    // Read back before going on: in the first run the probe disconnected right
+    // after sending these, and none of them reached the sim
+    // (experiments/areas/avatars/results/p10-viewer-2026-10-03-05-37-25.ndjson,
+    // whose saved values were all 1).
+    await sleep(500)
+    const v = await sim.read(LVARS.map((n) => [n, "number"]), { timeoutMs: 3000 })
+    const off = [...saved].filter(([n, x]) => v.get(n) !== x).map(([n]) => n)
+    rec.log("lvars", `put back ${saved.size} L: variables; ${off.length ? `${off.length} read back wrong: ${off.slice(0, 5).join(", ")}` : "all read back as saved"}`, { off })
     saved = null
   }
 }
@@ -100,7 +108,7 @@ process.on("SIGINT", async () => {
   rec.log("stop", "Ctrl+C: restoring the L: variables and removing the object")
   await setPassengers(false)
   if (id !== null) sim.remove(id)
-  setTimeout(() => process.exit(0), 500)
+  setTimeout(() => process.exit(0), 1000)
 })
 
 async function ask(heading, instruction) {

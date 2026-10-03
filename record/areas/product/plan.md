@@ -105,6 +105,7 @@ Agreed:
 - The connection, on 2026-10-03.
 - The preflight match check, on 2026-10-03.
 - Traffic sync, on 2026-10-03.
+- Hearing ATC, on 2026-10-03.
 
 ## 5. What later features need from the core
 

@@ -373,3 +373,39 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 - How Crosscheck detects installed traffic packs, running injectors, and multiplayer: the installed packages and the running processes are candidates (unverified).
 - Whether Crosscheck can hide another source's traffic without removing it, such as by freezing it out of sight, which is untested and would leave ATC talking to aircraft nobody sees.
 - How our copies compare with BeyondATC's updated traffic.
+
+### Hearing ATC
+
+The ATC app's audio on the traffic host's machine plays on every other pilot's machine, so the whole crew hears ATC.
+
+**In v1:**
+
+- ATC apps that run as their own program, such as BeyondATC, captured by process and found by program name or picked from a list of programs playing audio, as our FS Copilot fork does (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Capturing" and "Choosing the ATC app").
+- Crosscheck plays the audio on the output device each pilot picks, with no window needed, so a pilot in VR hears it too.
+  Crosscheck's own sounds, such as the handover cues, play on the same device.
+
+**Not in v1:**
+
+- The sim's own ATC, which plays mixed with the rest of the sim's sound; pilots who share ATC turn it off.
+- The receiving pilot's COM volume or tuned frequency shaping the audio, which BeyondATC already does.
+- The host pilot's own transmissions, which the crew hears on Discord.
+
+**Rules:**
+
+- The traffic host is also the ATC host.
+- Turning the ATC app down in the host's Windows mixer doesn't turn it down for the crew.
+  Windows applies the mixer level before the capture, so the host divides it back out, up to +20dB, as our fork's did (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Stage 3: the audio path works on one machine").
+- ATC reaches the crew about 130ms after the app plays it, plus the network delay, well inside the 300ms at which a readback on Discord would overtake the call (same entry).
+- Crosscheck picks up an ATC app started after it, and attaches again when the app restarts (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Choosing the ATC app").
+
+**Depends on:**
+
+- The traffic host role in [traffic sync](#traffic-sync).
+- [The connection](#the-connection).
+
+**Open questions:**
+
+- Whether capture works on Windows 10, which our fork never tested.
+- Which ATC apps besides BeyondATC capture cleanly, since only BeyondATC was tried live.
+- An ATC app that injects no traffic, on one pilot's machine, alongside a traffic injector on another's would want two hosts; v1 treats that as too rare to support.
+- Whether Crosscheck follows Windows' default output device when a pilot switches headsets mid-session.

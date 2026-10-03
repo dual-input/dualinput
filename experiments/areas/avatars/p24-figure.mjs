@@ -35,6 +35,11 @@
  *
  *   node experiments/areas/avatars/figure/build.mjs     (with the sim closed)
  *   node experiments/areas/avatars/p24-figure.mjs
+ *   node experiments/areas/avatars/p24-figure.mjs --phases legs --no-wait
+ *
+ * --phases runs only the named phases after rest, which always runs:
+ * head, smoothness, lean, hands, legs, and color. --no-wait starts at once,
+ * for a check while the pilot's view is already on the copilot seat.
  */
 
 import fs from "node:fs"
@@ -69,6 +74,13 @@ const SIMOBJECT = 1
 const RAD = Math.PI / 180
 
 const POSE = [["PLANE LATITUDE", "degrees"], ["PLANE LONGITUDE", "degrees"], ["PLANE ALTITUDE", "feet"], ["PLANE HEADING DEGREES TRUE", "degrees"], ["PLANE PITCH DEGREES", "degrees"], ["PLANE BANK DEGREES", "degrees"]]
+
+const PHASES = ["head", "smoothness", "lean", "hands", "legs", "color"]
+const arg = (name) => { const i = process.argv.indexOf(name); return i < 0 ? null : process.argv[i + 1] ?? "" }
+const only = arg("--phases")?.split(",").map((s) => s.trim()).filter(Boolean) ?? PHASES
+const unknown = only.filter((p) => !PHASES.includes(p))
+if (unknown.length) { console.error(`unknown phase ${unknown.join(", ")}: the phases are ${PHASES.join(", ")}`); process.exit(1) }
+const wait = !process.argv.includes("--no-wait")
 
 const spec = JSON.parse(fs.readFileSync(new URL("./figure/figure.json", import.meta.url), "utf8"))
 const ALL = [...CHANNELS, colorChannel(spec)]
@@ -278,10 +290,15 @@ async function go(pose, moveMs, holdMs, name = null) {
 }
 const look = (l) => ({ ...base, look: { ...LOOK, ...l } })
 
-console.log(`\nBefore you start: in the Baron 58P, parked, in the left seat.\n\n▶ The figure\n  Turn your view to the copilot seat, keep the sim window uncovered, and press ${START}.\n  Then let go of the mouse and keep your head still for about a minute. ${SKIP} ends.`)
-const k = await keys.next()
-rec.log("key", `${k.key}${k.foreground ? `, with ${k.foreground} in front` : ""}`, k)
-if (k.key !== "START") await finish("Page Up")
+note("setup", `phases: rest, ${only.join(", ")}`)
+if (wait) {
+  console.log(`\nBefore you start: in the Baron 58P, parked, in the left seat.\n\n▶ The figure\n  Turn your view to the copilot seat, keep the sim window uncovered, and press ${START}.\n  Then let go of the mouse and keep your head still until the long beep. ${SKIP} ends.`)
+  const k = await keys.next()
+  rec.log("key", `${k.key}${k.foreground ? `, with ${k.foreground} in front` : ""}`, k)
+  if (k.key !== "START") await finish("Page Up")
+} else {
+  await sleep(1000)
+}
 
 const c = await cameraNow()
 note("camera", c ? `CameraGet in SIMOBJECT: ${where({ fwd: c.z, right: -c.x, up: c.y })} of the reference point, pitch ${fmt(c.pitch)}°, yaw ${fmt(c.yaw)}°, roll ${fmt(c.roll)}°, fov ${fmt(c.fov)}` : "CameraGet didn't answer", { cam: c })
@@ -292,52 +309,64 @@ phase("rest")
 const first = await go(base, 0, 1500, "rest")
 note("rest", first.error ? `screenshot failed: ${first.error}` : `screenshot ${first.width}×${first.height}, brightness ${first.brightness}${first.brightness < 3 ? ": black, so the capture can't see the sim (exclusive fullscreen?)" : ""}, ${first.red} red samples`)
 
-phase("head")
-await go(look({ yaw: 0 }), 1000, 700, "head-ahead")
-await go(look({ yaw: 60 }), 1000, 700, "head-right")
-await go(look({ pitch: 25 }), 1000, 700, "head-up")
-await go(look({ pitch: -30 }), 1000, 700, "head-down")
-await go(look({ roll: 25 }), 1000, 700, "head-roll-right")
-await go(look({ roll: -25 }), 1000, 700, "head-roll-left")
-await go(base, 800, 400)
-
-phase("smoothness")
-const ch = CHANNELS.find((x) => x.name === "HEAD_RIGHT")
-const width = (ch.max - ch.min) / FRAMES
-const whole = Math.round(frameOf(ch, base.eye.right))
-const smooth = []
-for (let i = 0; i <= 6; i++) {
-  const right = ch.min + (whole + i / 6) * width
-  smooth.push(await go({ ...base, eye: { ...base.eye, right } }, 0, 600, `smooth-${i}of6`))
+if (only.includes("head")) {
+  phase("head")
+  await go(look({ yaw: 0 }), 1000, 700, "head-ahead")
+  await go(look({ yaw: 60 }), 1000, 700, "head-right")
+  await go(look({ pitch: 25 }), 1000, 700, "head-up")
+  await go(look({ pitch: -30 }), 1000, 700, "head-down")
+  await go(look({ roll: 25 }), 1000, 700, "head-roll-right")
+  await go(look({ roll: -25 }), 1000, 700, "head-roll-left")
+  await go(base, 800, 400)
 }
-const xs = smooth.map((s) => s.redX)
-const steps = xs.slice(1).map((x, i) => +(x - xs[i]).toFixed(1))
-note("smoothness", `the head right by sixths of a frame (${(width * 100).toFixed(2)}cm a frame, from frame ${whole}): the red samples' center moved ${steps.join(", ")} px a step, from ${xs.map((x) => x.toFixed(1)).join(", ")}`, { steps, xs })
-await go(base, 300, 300)
 
-phase("lean")
-await go({ ...base, eye: { fwd: base.eye.fwd + 0.15, right: base.eye.right - 0.1, up: base.eye.up + 0.05 } }, 1200, 700, "lean")
-await go(base, 1000, 300)
+if (only.includes("smoothness")) {
+  phase("smoothness")
+  const ch = CHANNELS.find((x) => x.name === "HEAD_RIGHT")
+  const width = (ch.max - ch.min) / FRAMES
+  const whole = Math.round(frameOf(ch, base.eye.right))
+  const smooth = []
+  for (let i = 0; i <= 6; i++) {
+    const right = ch.min + (whole + i / 6) * width
+    smooth.push(await go({ ...base, eye: { ...base.eye, right } }, 0, 600, `smooth-${i}of6`))
+  }
+  const xs = smooth.map((s) => s.redX)
+  const steps = xs.slice(1).map((x, i) => +(x - xs[i]).toFixed(1))
+  note("smoothness", `the head right by sixths of a frame (${(width * 100).toFixed(2)}cm a frame, from frame ${whole}): the red samples' center moved ${steps.join(", ")} px a step, from ${xs.map((x) => x.toFixed(1)).join(", ")}`, { steps, xs })
+  await go(base, 300, 300)
+}
 
-phase("hands")
-const handR = fromSeat(nodes[HAND_R]), handL = fromSeat(nodes[HAND_L])
-note("hands", `right hand to ${HAND_R} at ${where(handR)} of the seat, left to ${HAND_L} at ${where(handL)}`)
-await go({ ...base, handR }, 1200, 800, "hand-right")
-await go({ ...base, handR, handL }, 1200, 800, "hands-both")
-await go(base, 1000, 300)
+if (only.includes("lean")) {
+  phase("lean")
+  await go({ ...base, eye: { fwd: base.eye.fwd + 0.15, right: base.eye.right - 0.1, up: base.eye.up + 0.05 } }, 1200, 700, "lean")
+  await go(base, 1000, 300)
+}
 
-phase("legs")
-await go({ ...base, footL: pedal(nodes[PEDAL_L]), footR: pedal(nodes[PEDAL_R]) }, 1500, 800, "feet-pedals")
-await go(base, 1500, 300)
+if (only.includes("hands")) {
+  phase("hands")
+  const handR = fromSeat(nodes[HAND_R]), handL = fromSeat(nodes[HAND_L])
+  note("hands", `right hand to ${HAND_R} at ${where(handR)} of the seat, left to ${HAND_L} at ${where(handL)}`)
+  await go({ ...base, handR }, 1200, 800, "hand-right")
+  await go({ ...base, handR, handL }, 1200, 800, "hands-both")
+  await go(base, 1000, 300)
+}
 
-phase("color")
-const reds = []
-for (let i = 1; i < spec.palette.length; i++) reds.push(await go({ ...base, color: i }, 0, 600, `color-${spec.palette[i].name}`))
-reds.push(await go({ ...base, color: 0.5 }, 0, 600, "color-red-blue-half"))
-await go({ ...base, color: 0 }, 0, 300)
-await go({ ...base, color: spec.palette.length - 1 }, 4000, 0)
-await go({ ...base, color: 0 }, 0, 600, "color-red-again")
-note("color", `red samples by palette entry: ${["red " + first.red, ...reds.map((s) => `${s.name.replace(/^color-/, "")} ${s.red}`)].join(", ")}; the figure's red reads only while it's red`)
+if (only.includes("legs")) {
+  phase("legs")
+  await go({ ...base, footL: pedal(nodes[PEDAL_L]), footR: pedal(nodes[PEDAL_R]) }, 1500, 800, "feet-pedals")
+  await go(base, 1500, 300, "feet-rest-again")
+}
+
+if (only.includes("color")) {
+  phase("color")
+  const reds = []
+  for (let i = 1; i < spec.palette.length; i++) reds.push(await go({ ...base, color: i }, 0, 600, `color-${spec.palette[i].name}`))
+  reds.push(await go({ ...base, color: 0.5 }, 0, 600, "color-red-blue-half"))
+  await go({ ...base, color: 0 }, 0, 300)
+  await go({ ...base, color: spec.palette.length - 1 }, 4000, 0)
+  await go({ ...base, color: 0 }, 0, 600, "color-red-again")
+  note("color", `red samples by palette entry: ${["red " + first.red, ...reds.map((s) => `${s.name.replace(/^color-/, "")} ${s.red}`)].join(", ")}; the figure's red reads only while it's red`)
+}
 
 beep(500, 600)
 await finish("the end of the phases")

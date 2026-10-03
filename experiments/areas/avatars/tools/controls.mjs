@@ -30,6 +30,7 @@ import fs from "node:fs"
 import path from "node:path"
 
 import { simSourcesDir } from "../../../tools/results.mjs"
+import { apply, readGltf } from "../lib/gltf.mjs"
 
 const [folder, xmlName, ...gltfNames] = process.argv.slice(2)
 if (!folder || !xmlName || !gltfNames.length) {
@@ -37,38 +38,16 @@ if (!folder || !xmlName || !gltfNames.length) {
   process.exit(1)
 }
 
-// Column-major 4x4 matrices, as glTF stores them.
-const ident = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
-function mul(a, b) {
-  const r = new Array(16).fill(0)
-  for (let c = 0; c < 4; c++) for (let rr = 0; rr < 4; rr++) for (let k = 0; k < 4; k++) r[c * 4 + rr] += a[k * 4 + rr] * b[c * 4 + k]
-  return r
-}
-function local(n) {
-  if (n.matrix) return n.matrix.slice()
-  const [tx, ty, tz] = n.translation ?? [0, 0, 0]
-  const [x, y, z, w] = n.rotation ?? [0, 0, 0, 1]
-  const [sx, sy, sz] = n.scale ?? [1, 1, 1]
-  const R = [1 - 2 * (y * y + z * z), 2 * (x * y + z * w), 2 * (x * z - y * w), 0, 2 * (x * y - z * w), 1 - 2 * (x * x + z * z), 2 * (y * z + x * w), 0, 2 * (x * z + y * w), 2 * (y * z - x * w), 1 - 2 * (x * x + y * y), 0, 0, 0, 0, 1]
-  return mul([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1], mul(R, [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1]))
-}
-const apply = (m, p) => [0, 1, 2].map((r) => m[12 + r] + m[r] * p[0] + m[4 + r] * p[1] + m[8 + r] * p[2])
 const round = (v) => v.map((x) => Math.round(x * 1000) / 1000)
 
 // Every node of every glTF, by lower-case name: where its origin is, and the
 // center of its mesh's bounds, if it has a mesh.
 const nodes = new Map()
 for (const name of gltfNames) {
-  const g = JSON.parse(fs.readFileSync(path.join(folder, name), "utf8"))
-  const list = g.nodes ?? []
-  const parent = new Array(list.length).fill(-1)
-  list.forEach((n, i) => (n.children ?? []).forEach((c) => (parent[c] = i)))
+  const { g, nodes: list, world } = readGltf(path.join(folder, name))
   list.forEach((n, i) => {
     if (!n.name || nodes.has(n.name.toLowerCase())) return
-    let m = ident()
-    const chain = []
-    for (let j = i; j !== -1; j = parent[j]) chain.unshift(j)
-    for (const j of chain) m = mul(m, local(list[j]))
+    const m = world[i]
     let center = null
     if (n.mesh !== undefined) {
       let lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity]

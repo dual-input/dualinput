@@ -136,7 +136,7 @@ Exit: the language, the frameworks, the core architecture, and the profile forma
 The profile format waits for the features, because they decide what it has to express, and it decides in turn whether a machine joining or reconnecting mid-flight can take the flying machine's state: only an entry with an absolute setter can be sent at connect.
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the profile IDE.
-The EFB app is panel code that runs under Coherent GT's Chrome 49 limits, so code it shares with the desktop app is compiled down for it, with the missing functions filled in, and it shares components and logic rather than the whole app, since it lives inside the EFB's own app framework.
+The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.
 The pilot starts the core whenever they want a shared cockpit; the EFB app, opened while the core isn't running, says so and offers to start it if a panel can (unverified).
 
 ## 8. v1 build plan

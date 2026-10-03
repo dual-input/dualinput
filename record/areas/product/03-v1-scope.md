@@ -477,5 +477,6 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 - How a missing pilot is asked for their part: their Crosscheck could offer the upload the next time it starts, once the server holds a report for a session they were in.
 - The session's ID, which every machine shares and which differs from the code, since a code can outlive a session once permanent codes come.
 - How long the server keeps reports, and how it limits junk uploads with no accounts, as fsc-editor's relay limits how fast one address can guess codes.
+- What the server runs on, which the architecture decides: a Cloudflare Worker is the candidate, with D1 for the reports and R2 for the recordings, since D1 caps a row at 2MB and a free database at 500MB ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)).
 - How big a flight's recording is, which decides how many flights each machine keeps.
 - What a minimal recording leaves out.

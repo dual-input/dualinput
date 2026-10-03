@@ -1,0 +1,15 @@
+p08 · An object written every frame in a moving cockpit, on MSFS 2024
+2026-10-03T05:11:58.876Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Setup:
+  aircraft TITLE "Cessna C152 Aerial Advertising", 88 kt over the ground, pitch -2.7°, bank -8.0°
+  avatar's object: -2.21m forward, -0.22m right, -0.18m up
+  beside the pilot: seat SEAT_C152_Pax, -2.20m forward, 0.23m right, -0.24m up
+
+The wand beside the pilot:
+  written where the aircraft is: 372 frames at 93 kt, lead 0ms; wand off its target by forward -1.60m (p95 2.01m), right 0.02m, up -0.06m, a lag of 33ms; attitude up to 4.7°; avatar's object at -2.30m forward, -0.19m right, -0.23m up, varying by p95 0.78m forward, 0.03m right, 0.04m up
+  written ahead by the lag: 372 frames at 95 kt, lead 33ms; wand off its target by forward -0.00m (p95 0.84m), right 0.01m, up 0.00m, a lag of 0ms; attitude up to 6.3°; avatar's object at -2.34m forward, -0.20m right, -0.15m up, varying by p95 0.44m forward, 0.01m right, 0.04m up
+
+The pointer: looking up read pitch 2.465692, looking right read yaw 21.115742; look around: 373 frames at 97 kt, lead 33ms; wand off its target by forward 0.00m (p95 0.88m), right 0.00m, up -0.00m, a lag of -0ms; attitude up to 3.2°; avatar's object at -2.40m forward, -0.19m right, -0.21m up, varying by p95 0.45m forward, 0.01m right, 0.05m up
+
+Exceptions: none

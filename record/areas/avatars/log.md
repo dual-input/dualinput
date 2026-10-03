@@ -9,6 +9,31 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Writes from outside the sim place an object in a moving cockpit but can't hold it still
+
+**Asked:** can a SimConnect client outside the sim keep an object fixed in the cockpit of a flying aircraft by writing its position every frame?
+
+**Expected:** the object would trail by the distance the aircraft covers while a write reaches the sim, and writing it that far ahead would cancel the trail.
+
+**Found:**
+
+- In a Cessna 152 at 88 to 97 kt and 31 to 32 frames a second, SimConnect reported the seat objects and the seated avatar's object about 2.3m behind the aircraft's reference point, against 0.10m ahead parked.
+  So it reports those objects about 50ms behind the aircraft in the same frame's data.
+- p08 aimed `Marshaller_Stick` at that in-flight reading of `SEAT_C152_Pax` and wrote it every frame, and the pilot saw it trail toward the tail.
+- p09 aimed it at the seat's parked position instead, and swept the lead from 0ms to 300ms, 5s a step.
+  The wand showed about where intended at the lowest leads, and the pilot saw it stutter and lag at every step.
+- Frame to frame, the wand's reading moved by a median of 0.5m to 0.8m (95th percentile about 2m), against 0.4m (0.8m to 1.2m) for the avatar's object, while the aircraft covered about 1.5m a frame.
+  Each 33ms of lead moved the wand's reading about 1.6m forward, and no lead steadied it.
+
+**Changed:** a figure in the cockpit of a flying aircraft can't be driven from outside the sim.
+A file read we did alongside found no SimConnect call, WASM API, or separate package that attaches an object to another developer's aircraft: every attach mechanism, such as `attached_objects.cfg`, `<ModelAttachments>`, and the `[PILOT]` section, is declared in the aircraft's own files ([attached_objects.cfg](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/CFG_Files/attached_objects.htm), [Model Attachments](https://docs.flightsimulator.com/msfs2024/html/3_Models_And_Textures/Model_Attachments.htm)).
+What's left is writing from inside the sim: a WASM module can set another object's variables with `fsVarsAVarSet`, which takes a target object (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Vars.h`), from `Update_StandAlone`, which an Asobo developer described as running after the sim's update and before model behaviors ([thread](https://devsupport.flightsimulator.com/t/update-standalone-and-when-it-gets-executed/15196)).
+Whether that holds a figure still is untested.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p08's run](../../../experiments/areas/avatars/results/p08-in-flight-2026-10-03-05-11-58.txt) and [p09's run](../../../experiments/areas/avatars/results/p09-lead-2026-10-03-05-18-42.txt).
+
 ## 2026-10-03: SimConnect_CameraGet includes a Tobii head tracker's rotation, and its position is in meters
 
 **Asked:** does a head tracker's movement show in `SimConnect_CameraGet`, and what are the axes and unit of its position?

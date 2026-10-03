@@ -229,10 +229,12 @@ Crosscheck reads where the avatar is and which way it faces, and on the other ma
   A GSX person walks when we write its animation frame every frame, and a seated one sits and moves on its own (same date, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)).
   So the figure would be a person Crosscheck ships as a SimObject built as GSX's are, which means building a modeled, animated character.
   On an aircraft with seat objects, the seated figure goes on the seat object of the other pilot's seat ([avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
+  In flight, an object written every frame from outside the sim stutters against the cockpit, and nothing outside another developer's aircraft can attach one to it, so the figure's position would be written by a WASM module inside the sim's frame, which is untested (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)).
   `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), and includes a Tobii head tracker's rotation (same date, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat and turns their head where they look.
-- **Open questions:** how a seated figure turns its head, since GSX's seated people play a fixed clip.
+- **Open questions:** whether a WASM module writing from `Update_StandAlone` holds a figure still in a flying aircraft.
+  How a seated figure turns its head, since GSX's seated people play a fixed clip.
   How Crosscheck seats the figure on an aircraft without seat objects.
 
 ## Interface

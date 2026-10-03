@@ -7,7 +7,30 @@ The sim's own people stay invisible when a SimConnect client spawns them.
 GSX's people show, and walk when we write their animation frame every frame.
 GSX's separate seated people move on their own, though they sit a seat's height too high on a seat object.
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
-Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-03: The cockpit model's own space lines up with SimConnect's within 8mm, but the model's input event IDs aren't the names the sim lists
+
+**Asked:** can the hand sphere go to a control from the aircraft's model files alone: the control's node position in the interior glTF, tied to SimConnect's frame, and picked by the input event that changed?
+
+**Expected:** the model's origin at SimConnect's reference point, and the input event IDs in the behavior XML matching the sim's list.
+
+**Found:**
+
+- In the A2A Comanche (a2a-aircraft-pa24 2.1.3), parked, `tools/controls.mjs` placed 103 of the 125 interactive components of `PA24_250_INTERIOR.xml` on a node of the interior glTF; the other 22 take their node from a template the tool doesn't expand.
+- The seat objects `SEAT_DEFAULT_Pilot` and `SEAT_DEFAULT_Copilot` sit on the model's nodes `PILOT_1` and `PILOT_2`.
+  Read through SimConnect, both sit where the model puts those nodes, with the model's +x to the left, y up, and z forward, once shifted by 0.008m forward, 0.001m right, and 0.007m up.
+  The two seats agree on that shift within 0.005m.
+- The Comanche's `reference_datum_position` is `0,0,0` (read in a2a-aircraft-pa24 2.1.3, `flight_model.cfg`), so this run can't tell whether SimConnect reports the model's origin or the reference datum.
+- None of the sim's 318 input events matched the map, so the sphere never moved.
+  The behavior XML names an input event by its component's ID, such as `SWITCH_avionics_master`, and the sim lists it with a suffix, such as `SWITCH_AVIONICS_MASTER_TOGGLE` or `SWITCH_BATTERY_MASTER_2STATES` (measured in the Comanche on 2026-10-01, [run-a2a-pa24-comanche-2026-10-01-18-20-15](../../../experiments/areas/aircraft/results/run-a2a-pa24-comanche-2026-10-01-18-20-15.ndjson)).
+
+**Changed:** a control's position comes from the model files to within a centimeter.
+Picking the control by input event name failed on this aircraft's naming alone, and an aircraft whose controls run on its own code may not use input events at all (unverified), so we're looking for a link that doesn't go through the developer's names.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p18's run](../../../experiments/areas/avatars/results/p18-hand-controls-2026-10-03-07-41-44.txt), and the mapper in [experiments/areas/avatars/tools/controls.mjs](../../../experiments/areas/avatars/tools/controls.mjs).
 
 ## 2026-10-03: A model of our own compiles from generated glTF, and its size and color follow variables of its own object
 

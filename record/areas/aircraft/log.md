@@ -3,6 +3,29 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-03: Camera views added to the per-user camera file don't show up after a flight restart or a new flight
+
+**Asked:** do camera views added to the sim's per-user camera file for an aircraft become views that SimConnect lists and a client can release the camera into, and does ChasePlane pick them up?
+If so, Crosscheck can add a view for each seat the profile defines, so a pilot can be seated where the aircraft has no view of its own.
+
+**Expected:** yes after the aircraft loads again, since the sim keeps a pilot's saved custom cameras there.
+
+**Found:** in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, with ChasePlane 2026.39.1.16:
+
+- The file is `%APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\bksq-aircraft-baronpropress\cameras.CFG` on a Steam install, last written 2025-11-02, and holds the pilot's four saved custom cameras, titled `2` to `5`, each with `SubCategory="Custom"`.
+- p08 backed up the file and added three views copied from the 58P's own `CoPilot` definition, at offsets from it no chance would produce: `Crosscheck: Test A` and `Crosscheck: Test B` with `SubCategory="Pilot"`, as `CoPilot` has, and `Crosscheck: Test C` with `"Custom"`.
+- Right after the write, after a flight restart, and after ending the flight and starting a new one with the 58P, SimConnect_EnumerateCameraDefinitions listed the same 32 definitions, none of them a test view or a saved custom camera, and ChasePlane's `get_views` listed the same 42 views, none of them either.
+- Releasing the camera by name into each test view and into the custom camera `2` put the eye at one spot for all four, 0.23m left of the reference point, 0.70m up, and 0.20m ahead, far from where any of them points.
+  So the sim takes a name it doesn't know and falls back to one fixed spot.
+- Whether a full sim restart loads the file, and whether the pilot's own key for loading custom camera 2 still reads it, is untested.
+
+**Changed:** within one sim run, the per-user camera file gives Crosscheck no way to add a view.
+The test views stay in the file until the sim's next start, which is the restart test, and p08's `--restore` then puts the backup back.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), whose open question on seats with no camera view this narrows.
+
+**Evidence:** p08's runs [right after the write](../../../experiments/areas/aircraft/results/p08-camera-file-2026-10-03-21-48-44.txt), [after the flight restart](../../../experiments/areas/aircraft/results/p08-camera-file-2026-10-03-21-52-01.txt), [after it, releasing by name](../../../experiments/areas/aircraft/results/p08-camera-file-2026-10-03-21-52-23.txt), and [after a new flight](../../../experiments/areas/aircraft/results/p08-camera-file-2026-10-03-21-55-12.txt).
+
 ## 2026-10-03: The eyepoint events don't move the cockpit eye, the pilot's own camera keys fire none of the legacy camera events, and a held camera doesn't take the mouse look
 
 **Asked:** with the sim's own camera, can Crosscheck put a pilot's eye at a point no camera view gives, such as a seat the profile defines?

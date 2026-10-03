@@ -1,0 +1,14 @@
+{"t":1791064512337,"s":0.044,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791064512339,"s":0.046,"kind":"file","text":"%APPDATA%\\Microsoft Flight Simulator 2024\\SimObjects\\Airplanes\\bksq-aircraft-baronpropress\\cameras.CFG holds Crosscheck: Test A, Crosscheck: Test B, Crosscheck: Test C"}
+{"t":1791064512358,"s":0.065,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791064512358,"s":0.065,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791064512358,"s":0.065,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791064513540,"s":1.247,"kind":"simconnect","text":"SimConnect lists 32 definitions; of the test views: none","definitions":["Pilot","CoPilot","LeftPanel","RightPanel","LeftSubpanel","RightSubpanel","ThrottleQuadrant","Pedestal","CircuitBreakerPanel","EmergencyGearExtension","CabinRearward","CabinForward","QuickView_L1","QuickView_L2","QuickView_L3","QuickView_R1","QuickView_R2","QuickView_R3","QuickView_Rear","QuickView_Up","FixedOnPlane_Tail","FixedOnPlane_Left_Wing","FixedOnPlane_Right_Wing","FixedOnPlane_Belly","FixedOnPlane_Flaps","FixedOnPlane_Ailerons","FixedOnPlane_Elevator","FixedOnPlane_Rudder","FixedOnPlane_LandingGear","FixedOnPlane_Propeller","PilotVR","ShadowsQuality"]}
+{"t":1791064513541,"s":1.248,"kind":"simconnect","text":"Of the pilot's saved custom cameras: none"}
+{"t":1791064513681,"s":1.388,"kind":"chaseplane","text":"ChasePlane lists 42 views; of the test views and the saved custom cameras: none"}
+{"t":1791064515533,"s":3.24,"kind":"eye","text":"CoPilot: eye at 0.236, 0.811, -0.116 (x right, y up, z forward)"}
+{"t":1791064517373,"s":5.08,"kind":"eye","text":"Custom camera \"2\": -0.464, -0.111, +0.317m from CoPilot, its file entry -0.509, -0.113, -0.488, off by 806mm"}
+{"t":1791064519206,"s":6.913,"kind":"eye","text":"Crosscheck: Test A: -0.464, -0.111, +0.317m from CoPilot, asked -0.100, +0.100, +0.100, off by 473mm","title":"Crosscheck: Test A","got":[-0.4638647278337159,-0.11101056920615959,0.317004807664111],"asked":[-0.1,0.1,0.1],"err":0.4733012645530851}
+{"t":1791064521016,"s":8.723,"kind":"eye","text":"Crosscheck: Test B: -0.464, -0.111, +0.317m from CoPilot, asked -0.245, -0.050, -1.200, off by 1534mm","title":"Crosscheck: Test B","got":[-0.4638694167302948,-0.11101068165843408,0.3170056769503322],"asked":[-0.245,-0.05,-1.2],"err":1.533927100209075}
+{"t":1791064522854,"s":10.561,"kind":"eye","text":"Crosscheck: Test C: -0.464, -0.111, +0.317m from CoPilot, asked -0.050, +0.050, -0.400, off by 843mm","title":"Crosscheck: Test C","got":[-0.4638751011612264,-0.11101083705401815,0.317006684875346],"asked":[-0.05,0.05,-0.4],"err":0.8433953255537908}
+{"t":1791064524696,"s":12.403,"kind":"eye","text":"Released back into Pilot"}

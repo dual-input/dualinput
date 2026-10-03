@@ -1,0 +1,8 @@
+{"t":1791064321455,"s":0.038,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791064321457,"s":0.04,"kind":"file","text":"%APPDATA%\\Microsoft Flight Simulator 2024\\SimObjects\\Airplanes\\bksq-aircraft-baronpropress\\cameras.CFG holds Crosscheck: Test A, Crosscheck: Test B, Crosscheck: Test C"}
+{"t":1791064321475,"s":0.058,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791064321475,"s":0.058,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791064321475,"s":0.058,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791064322670,"s":1.253,"kind":"simconnect","text":"SimConnect lists 32 definitions; of the test views: none","definitions":["Pilot","CoPilot","LeftPanel","RightPanel","LeftSubpanel","RightSubpanel","ThrottleQuadrant","Pedestal","CircuitBreakerPanel","EmergencyGearExtension","CabinRearward","CabinForward","QuickView_L1","QuickView_L2","QuickView_L3","QuickView_R1","QuickView_R2","QuickView_R3","QuickView_Rear","QuickView_Up","FixedOnPlane_Tail","FixedOnPlane_Left_Wing","FixedOnPlane_Right_Wing","FixedOnPlane_Belly","FixedOnPlane_Flaps","FixedOnPlane_Ailerons","FixedOnPlane_Elevator","FixedOnPlane_Rudder","FixedOnPlane_LandingGear","FixedOnPlane_Propeller","PilotVR","ShadowsQuality"]}
+{"t":1791064322670,"s":1.253,"kind":"simconnect","text":"Of the pilot's saved custom cameras: none"}
+{"t":1791064322781,"s":1.364,"kind":"chaseplane","text":"ChasePlane lists 42 views; of the test views and the saved custom cameras: none"}

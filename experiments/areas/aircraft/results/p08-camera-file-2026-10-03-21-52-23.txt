@@ -1,0 +1,15 @@
+p08 · Camera views added to the per-user camera file, on MSFS 2024
+2026-10-03T21:52:23.926Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+%APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\bksq-aircraft-baronpropress\cameras.CFG holds Crosscheck: Test A, Crosscheck: Test B, Crosscheck: Test C
+SimConnect lists 32 definitions; of the test views: none
+Of the pilot's saved custom cameras: none
+ChasePlane lists 42 views; of the test views and the saved custom cameras: none
+CoPilot: eye at 0.236, 0.811, -0.116 (x right, y up, z forward)
+Custom camera "2": -0.464, -0.111, +0.317m from CoPilot, its file entry -0.509, -0.113, -0.488, off by 806mm
+Crosscheck: Test A: -0.464, -0.111, +0.317m from CoPilot, asked -0.100, +0.100, +0.100, off by 473mm
+Crosscheck: Test B: -0.464, -0.111, +0.317m from CoPilot, asked -0.245, -0.050, -1.200, off by 1534mm
+Crosscheck: Test C: -0.464, -0.111, +0.317m from CoPilot, asked -0.050, +0.050, -0.400, off by 843mm
+Released back into Pilot
+
+Exceptions: none

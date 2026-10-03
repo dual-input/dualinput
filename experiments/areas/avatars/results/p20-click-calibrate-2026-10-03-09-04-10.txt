@@ -1,0 +1,9 @@
+p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere where the pilot presses, holds, and drags, on MSFS 2024
+2026-10-03T09:04:10.556Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  PA24_250_INTERIOR_LOD00.gltf: 650,660 triangles
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.000035 kt
+  the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point
+  at 0.009m forward, -0.302m right, 0.537m up of the reference point, fov 41.1°
+  left: 9 taps, 0 holds, 0 drags; right: 14 clicks, 2 held or moved to turn the view; 3 clicks outside the sim; nodes hit: Cockpit_Walls ×2, LEVER_Primer ×21

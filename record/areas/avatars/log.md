@@ -1,13 +1,36 @@
 # Avatars: log
 
 What our experiments found about showing one pilot's avatar on the other pilot's machine with MSFS multiplayer off, newest entry first.
-The avatar shows as a figure: a person-shaped object Crosscheck spawns and moves.
+The avatar shows as a figure: an object Crosscheck spawns and moves.
 SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR`, and `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not.
-The sim's own people stay invisible when a SimConnect client spawns them.
-GSX's people show, and walk when we write their animation frame every frame.
-GSX's separate seated people move on their own, though they sit a seat's height too high on a seat object.
-The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
+The sim's own people stay invisible when a SimConnect client spawns them, GSX's people show, and a model of our own compiles from generated glTF, with its size and color set per object while it runs.
+In a moving cockpit, a WASM module that writes the figure inside the sim's frame, turned by the aircraft's full attitude and led by 0.75 to 1 frame, holds it in its seat.
+The figure's hand goes where the pilot clicks: the ray from the eye through the cursor, cast into the aircraft's interior model, lands within 2mm with no calibration and no control names, and a held press glides along the surface it touched.
+The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-03: A quick, still right press is a click, and a held or moved one turns the view
+
+**Asked:** the sim's right button both clicks controls and, held, turns the view.
+Can the hand follow right clicks without following the view turns?
+And does a drag that glides on the touched surface's plane alone hold up over more presses?
+
+**Expected:** a right click would be short and still, and a view turn longer or moving, so a right press can be judged at its release.
+
+**Found:**
+
+- In the A2A Comanche, parked, the pilot pressed the right button 16 times in the last of three runs.
+  The 14 presses that came up within 300ms, with the cursor moving under 5px and the mouse under 20 counts, put the hand where they were pressed, 12 of them on `LEVER_Primer` alternating with left clicks and 2 on the left wall.
+  The other 2, held 395ms with 46 counts of mouse movement and 210ms with 34 counts, turned the view and brought no hand.
+- A right click's hand shows at its release, since only the release tells a click from a view turn.
+- Across the two runs before it, the pilot made 169 left presses, 84 of them drags.
+  In the first, which still logged a fresh cast at every move, drags on the pilot's yoke put the fresh cast 10cm to 16cm from the glide, because the yoke stood elsewhere in the sim than in the model, and drags on the radios' knobs and glass 0cm to 4.3cm.
+
+**Changed:** the hand follows both buttons: a left press at once and through its drag, and a right press at its release when it's quick and still.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p20's runs with [the fresh cast still logged](../../../experiments/areas/avatars/results/p20-click-calibrate-2026-10-03-08-58-04.txt), [the glide alone](../../../experiments/areas/avatars/results/p20-click-calibrate-2026-10-03-09-01-22.txt), and [right clicks](../../../experiments/areas/avatars/results/p20-click-calibrate-2026-10-03-09-04-10.txt).
 
 ## 2026-10-03: During a drag the cursor keeps moving, and gliding on the touched surface's plane keeps the hand on a lever where a fresh cast falls through
 

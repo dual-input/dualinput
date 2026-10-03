@@ -1,0 +1,21 @@
+p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere where the pilot presses, holds, and drags, on MSFS 2024
+2026-10-03T08:58:04.531Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  PA24_250_INTERIOR_LOD00.gltf: 650,660 triangles
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.00005 kt
+  the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point
+  at 0.011m forward, -0.303m right, 0.540m up of the reference point, fov 41.1°
+  78 presses in the sim (19 taps, 12 holds, 47 drags), 3 clicks outside it; nodes hit: WindowSupports ×2, RADIO1 ×4, RADIO1_Knob_Com1Inner ×2, RADIO2_Glass ×4, HANDLING_Yoke ×6, NS800_Body ×2, RADIO2 ×3, MAIN_DASH ×13, FLOOR ×7, Wheelwell ×6, LEVER_Throttle ×2, panel_small ×3, DASH_Decal_016 ×3, LEVER_Throttle_Button ×3, GAUGE_fuel_aux_Glass ×2, LEVER_Mixture_Rod, STEAMYGLASS_Main, RADIO1_Glass ×2, yoke_autopilot_plate, XPNDR_DECAL ×2, gps_cap3_, XPNDR ×4, KT76C_Function_Knob, LeftPocket, Cockpit_Walls ×5, Headphone_Plugs
+  on RADIO1_Knob_Com1Inner: 1.2s, the cursor moved up to 149px while the mouse moved 169 counts; the hand slid 5.8cm on the plane, and a fresh cast was 2.7cm from it (median)
+  on RADIO2_Glass: 0.5s, the cursor moved up to 116px while the mouse moved 152 counts; the hand slid 4.7cm on the plane, and a fresh cast was 0.0cm from it (median)
+  on RADIO1: 0.2s, the cursor moved up to 116px while the mouse moved 117 counts; the hand slid 5.5cm on the plane, and a fresh cast was 4.3cm from it (median)
+  on RADIO1: 0.2s, the cursor moved up to 116px while the mouse moved 123 counts; the hand slid 4.7cm on the plane, and a fresh cast was 0.0cm from it (median)
+  on HANDLING_Yoke: 0.3s, the cursor moved up to 144px while the mouse moved 139 counts; the hand slid 8.0cm on the plane, and a fresh cast was 10.3cm from it (median)
+  on HANDLING_Yoke: 0.3s, the cursor moved up to 161px while the mouse moved 156 counts; the hand slid 5.7cm on the plane, and a fresh cast was 12.7cm from it (median)
+  on RADIO2_Glass: 0.2s, the cursor moved up to 105px while the mouse moved 105 counts; the hand slid 4.0cm on the plane, and a fresh cast was 0.0cm from it (median)
+  on NS800_Body: 0.2s, the cursor moved up to 168px while the mouse moved 141 counts; the hand slid 6.9cm on the plane, and a fresh cast was 0.0cm from it (median)
+  on HANDLING_Yoke: 0.2s, the cursor moved up to 175px while the mouse moved 171 counts; the hand slid 6.0cm on the plane, and a fresh cast was 16.2cm from it (median)
+  on NS800_Body: 0.2s, the cursor moved up to 132px while the mouse moved 127 counts; the hand slid 5.4cm on the plane, and a fresh cast was 0.0cm from it (median)
+  on RADIO2_Glass: 0.1s, the cursor moved up to 74px while the mouse moved 74 counts; the hand slid 3.1cm on the plane, and a fresh cast was 0.0cm from it (median)
+  on RADIO2_Glass: 0.1s, the cursor moved up to 90px while the mouse moved 81 counts; the hand slid 3.7cm on the plane, and a fresh cast was 0.0cm from it (median)

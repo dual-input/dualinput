@@ -1,0 +1,21 @@
+p20 · The ray through the cursor fitted to clicks on known spots, and the hand sphere where the pilot presses, holds, and drags, on MSFS 2024
+2026-10-03T09:01:22.806Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  PA24_250_INTERIOR_LOD00.gltf: 650,660 triangles
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.000032 kt
+  the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point
+  at 0.008m forward, -0.304m right, 0.538m up of the reference point, fov 41.1°
+  91 presses in the sim (54 taps, 0 holds, 37 drags), 6 clicks outside it; nodes hit: Cockpit_Walls ×10, gps_cap_cap_temp, RADIO2, MAIN_DASH ×32, mixture_base, LEVER_Mixture_Rod ×2, DASH_ScrewDecal06a, LEVER_Mixture, panel_small ×3, Wheelwell ×2, LEVER_Throttle ×2, LEVER_Throttle_Button, LEVER_RPM_2, LEVER_Carb_Heat, LEVER_Primer ×2, YOKE_EmblemL, toe_brake_l ×8, MetalSheet, BREAKER_navCom1 ×3, RemoveBeforeFlightStarter ×5, toe_brake_r, pedal_r_link_screw_, panel_ceiling ×11, STEAMYGLASS_Main ×5
+  on Cockpit_Walls: 0.1s, the cursor moved up to 10px from where it pressed and the mouse 12 counts in all; the hand ended 0.2cm from where it started on the plane
+  on Cockpit_Walls: 0.6s, the cursor moved up to 183px from where it pressed and the mouse 218 counts in all; the hand ended 21.9cm from where it started on the plane
+  on gps_cap_cap_temp: 0.6s, the cursor moved up to 184px from where it pressed and the mouse 217 counts in all; the hand ended 9.2cm from where it started on the plane
+  on RADIO2: 0.5s, the cursor moved up to 202px from where it pressed and the mouse 245 counts in all; the hand ended 9.3cm from where it started on the plane
+  on MAIN_DASH: 0.8s, the cursor moved up to 82px from where it pressed and the mouse 155 counts in all; the hand ended 2.6cm from where it started on the plane
+  on MAIN_DASH: 0.6s, the cursor moved up to 9px from where it pressed and the mouse 16 counts in all; the hand ended 0.5cm from where it started on the plane
+  on MAIN_DASH: 1.1s, the cursor moved up to 492px from where it pressed and the mouse 509 counts in all; the hand ended 22.7cm from where it started on the plane
+  on LEVER_Mixture_Rod: 0.8s, the cursor moved up to 90px from where it pressed and the mouse 198 counts in all; the hand ended 2.6cm from where it started on the plane
+  on LEVER_Mixture_Rod: 1.0s, the cursor moved up to 190px from where it pressed and the mouse 548 counts in all; the hand ended 9.4cm from where it started on the plane
+  on DASH_ScrewDecal06a: 0.8s, the cursor moved up to 137px from where it pressed and the mouse 338 counts in all; the hand ended 2.7cm from where it started on the plane
+  on MAIN_DASH: 0.9s, the cursor moved up to 159px from where it pressed and the mouse 408 counts in all; the hand ended 3.3cm from where it started on the plane
+  on LEVER_Mixture: 1.7s, the cursor moved up to 196px from where it pressed and the mouse 494 counts in all; the hand ended 2.6cm from where it started on the plane

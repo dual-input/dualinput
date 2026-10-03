@@ -1,0 +1,22 @@
+p02 · Replaying a recorded flight into a frozen Baron 58P, replay, pose and levers only, on MSFS 2024
+2026-10-03T09:59:04.485Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N585RS"
+
+3605 frames compared, stopped early; each read is compared with the recording at the moment its frame was written.
+
+Variable: mean and largest difference from the recording; mean difference in the first and last fifth
+  AIRSPEED INDICATED: mean 12.178242, largest 22.077961; first fifth 6.355906, last fifth 13.440166 (recording ranged 0..163.043595)
+  VERTICAL SPEED: mean 354.405257, largest 1306.665847; first fifth 34.327371, last fifth 408.479911 (recording ranged -4232.758457..2681.993166)
+  PROP RPM:1: mean 16.039987, largest 349.268397; first fifth 71.956467, last fifth 2.516982 (recording ranged 1194.236173..2713.722437)
+  PROP RPM:2: mean 11.889567, largest 296.797868; first fifth 50.937747, last fifth 2.548781 (recording ranged 1169.032143..2713.601105)
+  ENG MANIFOLD PRESSURE:1: mean 0.25844, largest 5.255134; first fifth 1.28617, last fifth 0.001314 (recording ranged 13.223774..39.647176)
+  ENG MANIFOLD PRESSURE:2: mean 0.139524, largest 4.347874; first fifth 0.69127, last fifth 0.001327 (recording ranged 12.800912..39.643315)
+  ENG FUEL FLOW GPH:1: mean 0.117198, largest 1.415677; first fifth 0.40835, last fifth 0.02388 (recording ranged 2.178436..25.593836)
+  ENG FUEL FLOW GPH:2: mean 0.084754, largest 1.204889; first fifth 0.249088, last fifth 0.022538 (recording ranged 2.04432..25.59272)
+  RECIP ENG CYLINDER HEAD TEMPERATURE:1: mean 53.659189, largest 110.467557; first fifth 92.170298, last fifth 30.06799 (recording ranged 80.876116..184.0847)
+  L:BKSQ_CHT_1: mean 125.845051, largest 176.259304; first fifth 167.66702, last fifth 86.065693 (recording ranged 293.842697..400.450088)
+  L:BKSQ_CHT_2: mean 126.419319, largest 176.594293; first fifth 168.074666, last fifth 86.658418 (recording ranged 293.856305..400.278934)
+
+Flags while replaying: SIM ON GROUND 1/0, ENG COMBUSTION:1 1, ENG COMBUSTION:2 1, IS LATITUDE LONGITUDE FREEZE ON 1, IS ALTITUDE FREEZE ON 1, IS ATTITUDE FREEZE ON 1
+
+Exceptions: none

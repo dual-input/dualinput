@@ -1,0 +1,6 @@
+p02 · Replaying a recorded flight into a frozen Baron 58P, record, on MSFS 2024
+2026-10-03T09:45:01.014Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N585RS"
+
+Recorded 12794 frames over 414s.
+Replay it with: node experiments/areas/flight-model/p02-replay.mjs --replay

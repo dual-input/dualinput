@@ -1,0 +1,28 @@
+p02 · Replaying a recorded flight into a frozen Baron 58P, replay, on MSFS 2024
+2026-10-03T09:52:02.869Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N585RS"
+
+12771 frames compared; each read is compared with the recording at the moment its frame was written.
+
+Variable: mean and largest difference from the recording; mean difference in the first and last fifth
+  VELOCITY BODY X: mean 0.23546, largest 7.601519; first fifth 0.187351, last fifth 0.090346 (recording ranged -27.751143..38.045001)
+  VELOCITY BODY Y: mean 0.243383, largest 6.970882; first fifth 0.107147, last fifth 0.017961 (recording ranged -44.294105..16.257406)
+  VELOCITY BODY Z: mean 0.057383, largest 0.968093; first fifth 0.069916, last fifth 0.020374 (recording ranged -0.132443..351.918109)
+  ROTATION VELOCITY BODY X: mean 0.055937, largest 1.006649; first fifth 0.020733, last fifth 0.013792 (recording ranged -0.452431..0.382007)
+  ROTATION VELOCITY BODY Y: mean 0.085447, largest 1.107498; first fifth 0.049115, last fifth 0.179667 (recording ranged -0.356868..0.493969)
+  ROTATION VELOCITY BODY Z: mean 0.080311, largest 2.282461; first fifth 0.016189, last fifth 0.017393 (recording ranged -1.048391..0.923195)
+  AIRSPEED INDICATED: mean 0.904618, largest 3.153993; first fifth 0.694942, last fifth 0.896032 (recording ranged 0..197.900899)
+  VERTICAL SPEED: mean 8.878432, largest 145.982062; first fifth 7.529633, last fifth 0.395877 (recording ranged -6519.679496..3862.132041)
+  PROP RPM:1: mean 7.340224, largest 340.229671; first fifth 24.093206, last fifth 4.349386 (recording ranged 624.018715..2713.722457)
+  PROP RPM:2: mean 5.548636, largest 287.913346; first fifth 15.175743, last fifth 4.316135 (recording ranged 625.826686..2713.601219)
+  ENG MANIFOLD PRESSURE:1: mean 0.074044, largest 4.546048; first fifth 0.356605, last fifth 0.004263 (recording ranged 4.948678..39.762694)
+  ENG MANIFOLD PRESSURE:2: mean 0.04027, largest 3.788388; first fifth 0.187382, last fifth 0.004562 (recording ranged 4.948678..39.764661)
+  ENG FUEL FLOW GPH:1: mean 0.091084, largest 1.405819; first fifth 0.162868, last fifth 0.007733 (recording ranged 0.355994..25.59388)
+  ENG FUEL FLOW GPH:2: mean 0.078354, largest 1.100577; first fifth 0.10387, last fifth 0.007523 (recording ranged 0.355994..25.592761)
+  RECIP ENG CYLINDER HEAD TEMPERATURE:1: mean 21.424554, largest 105.033871; first fifth 58.529982, last fifth 6.194663 (recording ranged 80.876116..195.60882)
+  L:BKSQ_CHT_1: mean 53.574653, largest 167.794866; first fifth 133.623271, last fifth 11.128767 (recording ranged 293.842697..462.696156)
+  L:BKSQ_CHT_2: mean 53.914083, largest 167.984365; first fifth 134.07094, last fifth 11.296257 (recording ranged 293.856305..462.704082)
+
+Flags while replaying: SIM ON GROUND 1/0, ENG COMBUSTION:1 1, ENG COMBUSTION:2 1, IS LATITUDE LONGITUDE FREEZE ON 1, IS ALTITUDE FREEZE ON 1, IS ATTITUDE FREEZE ON 1
+
+Exceptions: none

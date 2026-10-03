@@ -9,6 +9,21 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Over three minutes of flying, leads of 0.75 and 1 frame both hold the figure, and what's left reads as inertia
+
+**Asked:** at length, which of the two best leads from p15 holds the seated figure better ([entry below](#2026-10-03-nose-up-and-right-wing-down-are-negative-and-turned-by-full-attitude-a-wasm-written-figure-holds-its-seat))?
+
+**Expected:** 0.75 frames, which looked best in 8s steps.
+
+**Found:** the pilot flew the C152 for about 3 minutes, from 111 kt down to 62 kt, with pitch from −13° to 15° and bank up to 32°, switching between 0.75 frames (36s in all) and 1 frame (136s) 12 times.
+Both held GSX's seated passenger well, and the slight lag left behind felt like the passenger's inertia rather than an error, the pilot reported.
+
+**Changed:** either lead serves, so the choice between them can wait for our own figure and wider flying.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p16's run](../../../experiments/areas/avatars/results/p16-ab-lead-2026-10-03-07-07-05.txt), whose log has each switch with the speed, pitch, and bank at that moment.
+
 ## 2026-10-03: Nose up and right wing down are negative, and turned by full attitude a WASM-written figure holds its seat
 
 **Asked:** with the seat offset turned by pitch and bank as well as heading, does a WASM-written figure hold its seat while the pilot rocks and pitches, and what are the signs of `A:PLANE PITCH DEGREES` and `A:PLANE BANK DEGREES`?

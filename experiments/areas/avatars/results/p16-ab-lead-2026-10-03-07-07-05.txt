@@ -1,0 +1,5 @@
+p16 · A/B of a 0.75-frame and a 1-frame lead for the WASM-written seated figure, on MSFS 2024
+2026-10-03T07:07:05.430Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Cessna C152 Aerial Advertising"; ended by Ctrl+C
+
+  A, 0.75 frames: 36s on; B, 1 frame: 136s on; 12 switches

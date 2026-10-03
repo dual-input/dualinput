@@ -1,0 +1,46 @@
+{"t":1791011225453,"s":0.023,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791011225835,"s":0.405,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791011225835,"s":0.405,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791011225835,"s":0.405,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791011227668,"s":2.238,"kind":"module","text":"crosscheck-p12-follow is running"}
+{"t":1791011227800,"s":2.37,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\"; beside the pilot: SEAT_C152_Pax"}
+{"t":1791011227868,"s":2.438,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 53067778","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791011227868,"s":2.438,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 53067778","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791011227868,"s":2.438,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 53067778","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791011227869,"s":2.439,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791011227869,"s":2.439,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 53067778","object":0,"values":[53067778]}
+{"t":1791011227870,"s":2.44,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.1","object":0,"values":[0.1]}
+{"t":1791011227870,"s":2.44,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← 0.21","object":0,"values":[0.21]}
+{"t":1791011227870,"s":2.44,"kind":"write","text":"L:CROSSCHECK_P12_UP ← -0.83","object":0,"values":[-0.83]}
+{"t":1791011227870,"s":2.44,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791011227870,"s":2.44,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791011227871,"s":2.441,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791011227871,"s":2.441,"kind":"lead","text":"A: 0.75 frames; 111 kt, pitch 0.8°, bank -6.8°","name":"A","lead":0.75}
+{"t":1791011227871,"s":2.441,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791011239483,"s":14.053,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791011239484,"s":14.054,"kind":"lead","text":"B: 1 frames; 114 kt, pitch 0.9°, bank -3.6°","name":"B","lead":1}
+{"t":1791011302440,"s":77.01,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791011302440,"s":77.01,"kind":"lead","text":"A: 0.75 frames; 104 kt, pitch -5.0°, bank 2.8°","name":"A","lead":0.75}
+{"t":1791011315645,"s":90.215,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791011315645,"s":90.215,"kind":"lead","text":"B: 1 frames; 91 kt, pitch 13.7°, bank -2.2°","name":"B","lead":1}
+{"t":1791011327862,"s":102.432,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791011327862,"s":102.432,"kind":"lead","text":"A: 0.75 frames; 94 kt, pitch 4.4°, bank -1.3°","name":"A","lead":0.75}
+{"t":1791011330652,"s":105.222,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791011330652,"s":105.222,"kind":"lead","text":"B: 1 frames; 100 kt, pitch 12.0°, bank -3.4°","name":"B","lead":1}
+{"t":1791011338306,"s":112.876,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791011338307,"s":112.877,"kind":"lead","text":"A: 0.75 frames; 88 kt, pitch 5.0°, bank -2.7°","name":"A","lead":0.75}
+{"t":1791011340252,"s":114.822,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791011340252,"s":114.822,"kind":"lead","text":"B: 1 frames; 89 kt, pitch 5.3°, bank -3.7°","name":"B","lead":1}
+{"t":1791011348661,"s":123.231,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791011348661,"s":123.231,"kind":"lead","text":"A: 0.75 frames; 81 kt, pitch 1.7°, bank 21.0°","name":"A","lead":0.75}
+{"t":1791011350798,"s":125.368,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791011350799,"s":125.369,"kind":"lead","text":"B: 1 frames; 84 kt, pitch 15.1°, bank 31.5°","name":"B","lead":1}
+{"t":1791011361106,"s":135.676,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791011386852,"s":161.422,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0.75","object":0,"values":[0.75]}
+{"t":1791011386853,"s":161.423,"kind":"lead","text":"A: 0.75 frames; 62 kt, pitch -12.6°, bank 14.5°","name":"A","lead":0.75}
+{"t":1791011391109,"s":165.679,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791011391110,"s":165.68,"kind":"lead","text":"B: 1 frames; 62 kt, pitch -12.7°, bank 5.0°","name":"B","lead":1}
+{"t":1791011395539,"s":170.109,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791011399651,"s":174.221,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791011399651,"s":174.221,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791011399652,"s":174.222,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}

@@ -292,3 +292,45 @@ The connection carries everything between the crew's machines, directly when it 
 - Whether missed changes replay as one history in the order they happened, or in a queue per part, which could replay a display press and a switch flipped after it in the wrong order.
 - How a late joiner catches up, which waits on the profile format.
 - How to soften a short gap, for the architecture to weigh: carry the aircraft on its last velocities for about a second and then ease it to the true position when data returns, have each packet carry the last few samples so one lost packet costs nothing, and send a copy through the relay only while the direct link is losing packets or switching paths.
+
+### Preflight match check
+
+Before a pilot starts flying, Crosscheck compares what each pilot has for the shared aircraft and lists what differs.
+
+**In v1:**
+
+- Joining and flying are two steps.
+  Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which installing and updating will scope.
+  Then the pilot starts flying, and sync starts with it.
+- Beside the control that starts flying, a list shows each difference as a warning or an error, in a design for later.
+- The comparison covers the aircraft's package, version, and variant, such as the Baron's 58P against its base model, and the livery.
+- The aircraft's version is also checked against the versions its profile covers.
+
+**Not in v1:**
+
+- Stopping a pilot from flying over a difference.
+- Detecting which licensed add-on an aircraft uses, such as the Baron choosing its GPS unit by the TDS license (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), which pilots sort out themselves.
+
+**Rules:**
+
+- No difference stops the flight.
+  An error says something will likely go wrong, and a warning says it might: a different aircraft version can be an error, and a different livery a warning.
+  A developer's update that fixes textures changes the version without touching anything Crosscheck syncs, and making a pilot spend 10 minutes updating for it would only get in the way.
+- An aircraft version the profile doesn't cover shows as a warning.
+- A difference that breaks one feature turns that feature off for the session and shows a warning, rather than an error for the whole flight.
+  For example, once avatar sync exists, if only one pilot's copy of an aircraft has a model it needs, avatar sync stays off.
+- The check runs again whenever either pilot's aircraft changes.
+
+**Depends on:**
+
+- Profiles, which say which aircraft versions they cover and what each feature needs.
+- [The connection](#the-connection), which admits the pilot to the session.
+
+**Open questions:**
+
+- What identifies a copy of an aircraft beyond its version string, since two pilots can run the iniBuilds L-1011's "1.0.8" from different stores with different files (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)).
+  Candidates are the folder it's installed in with its manifest's `export_type`, or a hash of its `layout.json`, which lists every file with its size and date; a streamed Marketplace copy has no `manifest.json` in its folder, and an experiment settles which works.
+- Which add-ons can be compared without work for each aircraft.
+  A package's manifest declares its dependencies, but optional add-ons go undeclared, as the Baron's GPS units do, so the profile could list the packages that matter.
+- Whether the check compares the scenery at the departure airport, since v1 doesn't support different scenery.
+- Whether each pilot starts flying on their own, or the crew starts together.

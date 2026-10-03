@@ -54,8 +54,9 @@ The picks, picked on 2026-10-02:
   - [Traffic sync](ideas.md#traffic-sync)
   - Hearing ATC, from [ATC sync](ideas.md#atc-sync)
   - Time, date, sim rate, and pause, from [Environment sync](ideas.md#environment-sync)
-  - [Flight setup by the host](ideas.md#flight-setup-by-the-host)
   - [Preflight match check](ideas.md#preflight-match-check)
+  - The two-step start, joining and then starting to fly, from [Pre-sync checklist](ideas.md#pre-sync-checklist), moved from Soon on 2026-10-03, because it's better built in from the start than added later
+  - [The PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map), if a probe finds a way to set the world map from outside the sim; it replaces flight setup by the host, which went to Ideas left out on 2026-10-03
   - The invite code, from [One-click invite](ideas.md#one-click-invite)
   - The take-control key, and voice phrases, both from [Voice handover](ideas.md#voice-handover)
   - All three kinds of [shared pointing](ideas.md#shared-pointing), each built rather than tried as fallbacks: in the 3D cockpit, on a switch, and on panel displays
@@ -67,7 +68,7 @@ The picks, picked on 2026-10-02:
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - [Seat awareness](ideas.md#seat-awareness)
   - [Avatar sync](ideas.md#avatar-sync)
-  - The profile's checklist and the two-step start, and state watching, all from [Pre-sync checklist](ideas.md#pre-sync-checklist)
+  - The profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
   - [EventBus bridge](ideas.md#eventbus-bridge)
@@ -80,6 +81,7 @@ The picks, picked on 2026-10-02:
   - The debrief timeline, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Automatic profile fetch, and the community profile registry, both from [Profile registry](ideas.md#profile-registry)
   - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
+  - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
 
 How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, is left to step 4, because it's a detail of the interface rather than a feature.
 
@@ -101,6 +103,7 @@ Agreed:
 - Pointer sync, on 2026-10-03.
 - The invite code, on 2026-10-03.
 - The connection, on 2026-10-03.
+- The preflight match check, on 2026-10-03.
 
 ## 5. What later features need from the core
 
@@ -120,6 +123,7 @@ Exit: each risk below has a log entry that answers it.
 - Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
   We expect it to hold, because on the 58P masking the throttle's key events also stopped the throttle's input event (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), but nobody has masked the mixture.
+- Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture

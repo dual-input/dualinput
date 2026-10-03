@@ -87,14 +87,13 @@ Time, date, sim rate, pause, and weather match on both machines.
 
 ## Session
 
-### Flight setup by the host
+### The PF's spot on the world map
 
-The host picks the aircraft, gate, panel state, time, and weather, and Crosscheck loads the same flight on both machines.
+When a pilot joins, Crosscheck sets their sim's world map to the airport and the gate or runway the PF is at, so the pilot starts the flight there themselves.
+It replaces having Crosscheck load the flight for everyone, which [Ideas left out](#ideas-left-out) explains, and gets most of the way there with none of the risk.
 
-- **Tech:** `SimConnect_FlightLoad` loads a flight file from inside a running flight, including one that names another aircraft (measured on MSFS 2024, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
-  MSFS 2024 1.8.16.0 crashed on 5 of about 30 such loads, including both loads of the Fenix A320 at a gate, and nothing we changed stopped it (same entry).
-- **Product:** ends the "which gate, and cold and dark?" exchange at the start of each session.
-- **Open questions:** what makes the sim crash on a load, how the host's choices become a flight file, and how to set a panel state on aircraft that keep their own, such as the iniBuilds A350, whose EFB applies one with `K:INIB.SET_PANELSTATE` (read in inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md)).
+- **Tech:** whether anything outside the sim can set the world map's departure is unknown.
+- **Next:** a probe that looks for a way to set the world map's departure from outside the sim.
 
 ### Preflight match check
 
@@ -338,5 +337,8 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
 - **Multiplayer kept on:** other players in the session would see the shared aircraft twice, and Crosscheck can't hide anything on their machines (unverified: nobody has looked from a third machine).
   In multiplayer each pilot also sees the other pilot's copy of the aircraft (unverified: from our FS Copilot sessions), and hiding that copy would fix only the two pilots' own view.
   [Avatar sync](#avatar-sync) gives the walkaround presence that keeping multiplayer on was for.
+- **Flight setup by the host:** Crosscheck would load the host's flight, aircraft, gate, and panel state on every machine through `SimConnect_FlightLoad`, which works, but MSFS 2024 1.8.16.0 crashed on 5 of about 30 such loads (measured on MSFS 2024, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
+  A crashed sim is the worst outcome a pilot can have, and what a load from outside does to the sim an hour into a flight is unknown, so the step it saves isn't worth it.
+  [The PF's spot on the world map](#the-pfs-spot-on-the-world-map) gets most of the way there instead.
 - **Pausing the flight when a pilot drops out:** a pilot whose sim restarted comes back with a fresh cockpit that a pause doesn't restore, and pausing doesn't suit flights on online networks such as VATSIM.
   The others fly on instead, as [03-v1-scope](03-v1-scope.md#the-connection) says.

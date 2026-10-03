@@ -136,7 +136,7 @@ Two PCs on the same home network find each other without a code, and the connect
 
 Control passes by the spoken exchange crews use:
 
-1. The pilot in control says "you have control", which opens a window of a few seconds.
+1. The pilot flying (PF), whose controls fly the aircraft, says "you have control", which opens a window of a few seconds.
 2. If another pilot says "I have control" inside the window, control passes to them.
 3. The first pilot's closing "you have control" changes nothing, so Crosscheck doesn't wait for it.
 
@@ -147,28 +147,36 @@ When control passes, [soft takeover](#soft-takeover-on-handover) starts.
 - **Tech:** each machine listens only to its own pilot's mic, so nothing has to work out who spoke.
   Each machine listens for a few fixed phrases rather than transcribing speech, which small local models can do on a CPU, though whether they're accurate enough is unverified.
   Windows lets Discord and Crosscheck capture the same mic at once.
-  Voice only completes a handover the pilot in control started, so control moves by mistake only if both machines mishear, in order, inside the window.
+  Voice only completes a handover the PF started, so control moves by mistake only if both machines mishear, in order, inside the window.
 - **Open questions:** accuracy with non-native English accents, which is the first thing to test.
   Which phrases to accept, since the FAA's exchange says "you have the flight controls" ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)) and crews elsewhere use others.
 
 ### Soft takeover on handover
 
-When control passes, the new pilot in control's hardware throttle can sit far from the aircraft's throttle, and the aircraft's throttle jumps to match it.
+When control passes, the new PF's hardware throttle can sit far from the aircraft's throttle, and the aircraft's throttle jumps to match it.
 Crosscheck ignores their axis until the lever crosses the aircraft's value, as MIDI controllers do in pickup mode, and shows where to move it.
 Trim wheels and flap and gear levers on hardware have the same mismatch.
 
 - **Tech:** masking the pilot's axis events holds them back from the sim on stock flight controls and on the PMDG 777 (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
   On an aircraft whose module asks for the same priority, such as the A2A PA-24, it works only if Crosscheck's masks are in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
 - **Product:** removes the thrust jump at handover.
+- **Open questions:** a first scoping pass on 2026-10-03 proposed these, for review when soft takeover is scoped:
+  - A lever picks up once it comes within a small tolerance of the aircraft's, rather than having to cross it, and a test on real hardware sets the tolerance.
+  - Pickup covers the new PF's throttles, propellers, and mixtures, each on its own, their trim where it's an axis, and either pilot's flap axis at any time.
+  - The yoke and rudder drive at once, because a yoke that waited to pick up could leave nobody flying the aircraft.
+  - Whenever the aircraft's lever moves away from a pilot's hardware lever, that lever picks up again.
+  - With pickup, the engine levers could be shared all the time rather than only the PF's: whichever pilot's picked-up lever moves drives the aircraft's lever, and the other pilot's drops out of pickup.
+  - How the new PF learns which levers haven't picked up was left open.
+  - Hardware switches that disagree with the aircraft's, such as a gear lever or a home cockpit panel's switches, are a separate problem, which [02-users](02-users.md#setups) names.
 
 ### Mixed flight controls
 
 Both pilots' hands reach the flight controls, as in a real cockpit.
-The flying machine is the pilot in control's, and the following machine is the other.
+The flying machine is the PF's, and the following machine is the pilot monitoring's (PM's).
 The following machine still freezes its aircraft and sets it from the flying machine's position, attitude, and velocity, as FS Copilot and YourControls do ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#prior-art)).
-What changes is that Crosscheck takes each pilot's yoke and throttle input before the sim acts on it, sends the other pilot's axes one way to the flying machine, and mixes them there with the pilot in control's, by a rule for each aircraft type.
+What changes is that Crosscheck takes each pilot's yoke and throttle input before the sim acts on it, sends the PM's axes one way to the flying machine, and mixes them there with the PF's, by a rule for each aircraft type.
 Where the type warns of dual input, Crosscheck does too: on an Airbus, the two sidesticks' inputs are added and a "DUAL INPUT" voice warns the crew (documented, secondary, in [01](../../learn/foundations/01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)).
-In FS Copilot and YourControls only the pilot in control's hardware reaches the sim, and this sends both pilots' hardware to it, so building it starts with a decision in `record/decisions/`.
+In FS Copilot and YourControls only the PF's hardware reaches the sim, and this sends both pilots' hardware to it, so building it starts with a decision in `record/decisions/`.
 
 - **Tech:**
   - Masking the axis events keeps them from the sim, and the block ends when the masking client dies (measured on MSFS 2024, 2026-10-01, [log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).

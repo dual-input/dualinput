@@ -10,50 +10,58 @@ This document scopes each feature [the plan](plan.md) puts in v1, one section pe
 Each section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Crosscheck does, not how: mechanisms are for the architecture, step 7, and screens and wording for a later pass.
 
-The pilot in control is the pilot whose yoke, rudder, toe brakes, engine levers, and trim drive the aircraft.
+The pilot flying (PF) is the pilot whose yoke, rudder, toe brakes, engine levers, and trim fly the aircraft, and the pilot monitoring (PM) is the other front-seat pilot.
+The flying machine is the PF's, and the following machine is the PM's.
 v1 sessions have two pilots, because crews beyond two are a Later pick.
 
 ## Control
 
 ### Take-control key
 
-A pilot presses take-control and becomes the pilot in control at once.
+A pilot presses take-control and becomes the PF at once, and their machine becomes the flying machine.
 
 **In v1:**
 
-- Taking control from a button in Crosscheck's app or its EFB app, a keyboard shortcut, or a button on the pilot's flight hardware.
-- The pilot maps that hardware button in Crosscheck, not in the sim's controls settings, so Crosscheck can tell a long press from a short one.
+- v1 flies the traditional way, as FS Copilot does: the following machine freezes its aircraft's position, altitude, and attitude, and takes the flying machine's values (read in the FS Copilot fork, `FsCopilot/Simulation/MasterSwitch.cs`, `FsCopilot/Simulation/Coordinator.cs`, and `FsCopilot.Bridge.Wasm/wasm_module.cpp`).
+- Taking control from a button in Crosscheck's app or its EFB app, a keyboard key, or a button on the pilot's flight hardware.
+- The pilot binds the key or hardware button in Crosscheck's settings, not the sim's, and chooses whether it takes a single press or a long press.
 
 **Not in v1:**
 
+- Soft takeover and masking, which are Soon picks in [the plan](plan.md).
 - A button to give control away.
-  The pilot in control gives control only by voice, through the [voice phrases](#voice-phrases).
-- Choosing which crew member gets control when the pilot in control drops out, which crews beyond two would need: the copilot's seat, not the flight engineer's.
+  The PF gives control only by voice, through the [voice phrases](#voice-phrases).
 
 **Rules:**
 
-- The host is in control when a session starts.
-- Any pilot can take control at any time, and it passes at once, without the pilot in control agreeing.
+- The host is the PF when a session starts.
+- Any pilot can take control at any time, and it passes at once, without the PF agreeing.
 - When two pilots press take-control at nearly the same moment, the earlier press wins, however small the gap.
-- Only the pilot in control's yoke, rudder, toe brakes, engine levers, and trim reach the aircraft.
+- The PF's yoke, rudder, toe brakes, engine levers, and trim fly the aircraft.
   The engine levers are the throttles, propellers, and mixtures.
+- The PM's hardware can't change the following aircraft's flight controls, engine levers, or trim for longer than it takes the flying machine's next values to arrive, so the following aircraft's engines and gauges match the flying machine's.
+  In FS Copilot a PM's throttle could spool up their own engine until the PF next moved theirs, because the flying machine sends a value only when it changes (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, and from our experience with FS Copilot).
+  The PM's mouse on those controls snaps back the same way (unverified, and not worth a probe).
 - Flaps and gear work from either pilot's hardware at any time.
+- At a handover, each of the aircraft's levers stays where it was until the new PF moves theirs, and then jumps to where their hardware is.
+  The aircraft itself doesn't jump or lose noticeable speed at a handover (from our experience with FS Copilot).
 - When control passes, the pilot who took it hears a recorded "you have control", and the pilot who lost it hears "they have control".
-- When the pilot in control's connection drops, control passes to the other pilot, who hears "you have control".
+- When the PF's connection drops, control passes to the PM, never to a flight engineer or a passenger, and the PM hears "you have control".
 
 **Depends on:**
 
-- [Soft takeover](#soft-takeover), so the new pilot's levers and trim don't jump the aircraft's to where their hardware sits.
-- Holding back the other pilot's hardware: masking holds back the Baron 58P's yoke and throttles (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), and its mixtures are a step 6 risk in [the plan](plan.md).
+- Flight-model sync, which the following machine's frozen aircraft takes its position, attitude, and velocity from.
+- State sync, for flaps and gear from either pilot.
 
 **Open questions:**
 
-- Whether taking control takes a long press, so a pilot can't take it by brushing a button.
 - How the machines agree on which of two presses came first, which the architecture settles.
+- An axis that fires events while nobody moves it jumps its lever as soon as control passes.
+  A dead zone set in MSFS stops that, since the axis fires no event inside one (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)), and whether pilots need more than that is unknown.
 
 ### Voice phrases
 
-The pilot in control offers control by voice, and the other pilot takes it by answering within 5s.
+The PF offers control by voice, and the PM takes it by answering within 5s.
 
 **In v1:**
 
@@ -75,15 +83,14 @@ The pilot in control offers control by voice, and the other pilot takes it by an
 
 - Crosscheck hears each pilot only through their own microphone, so it always knows who spoke.
   That's what tells an offer from an answer, since the two differ only in "you" and "I".
-- Only the pilot in control's offer counts, and it opens a 5s window.
-- The other pilot's answer inside the window passes control, and the endings needn't match: "You have control" answered with "I have the aircraft" passes it.
-- Every other phrase does nothing, including an answer outside a window and "I have control" from the pilot already in control.
+- Only the PF's offer counts, and it opens a 5s window.
+- The PM's answer inside the window passes control, and the endings needn't match: "You have control" answered with "I have the aircraft" passes it.
+- Every other phrase does nothing, including an answer outside a window and "I have control" from the PF.
 - When control passes by voice, the pilots hear the same recorded lines as with the take-control key.
 
 **Depends on:**
 
 - The [take-control key](#take-control-key)'s rules for what control covers and what each pilot hears.
-- [Soft takeover](#soft-takeover), the same as the take-control key.
 
 **Open questions:**
 
@@ -92,39 +99,3 @@ The pilot in control offers control by voice, and the other pilot takes it by an
   A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
 - How Crosscheck tells speech from noise before it listens for a phrase.
   The intent is to run recognition only while the pilot's microphone is loud enough to be speech, and the architecture designs it.
-
-### Soft takeover
-
-A pilot's hardware lever that sits away from the aircraft's lever does nothing until the pilot moves it to within a small tolerance of the aircraft's, so the aircraft's lever never jumps to where the hardware happens to sit.
-
-**In v1:**
-
-- The new pilot in control's throttles, propellers, and mixtures, each lever on its own, six on the 58P.
-- The new pilot in control's trim, where their trim is an axis.
-  A trim input that sends steps rather than a position has nothing to pick up.
-- Either pilot's flaps, where their flap lever is an axis, at any time, since flaps work from either pilot's hardware.
-
-**Not in v1:**
-
-- The yoke and rudder, which drive at once.
-  A spring-centered yoke usually sits near the aircraft's position anyway, and one that waited to pick up could leave nobody flying the aircraft.
-- Hardware switches whose position can disagree with the aircraft's, such as a gear lever or a home cockpit panel's switches.
-  [02-users](02-users.md#setups) names this problem for home cockpits, and no v1 feature solves it.
-
-**Rules:**
-
-- Each lever picks up on its own once it comes within the tolerance of the aircraft's lever, and until then the aircraft's lever stays where it was.
-- Every handover starts pickup, whether it came from the take-control key, the voice phrases, or a dropped connection.
-- Whenever the aircraft's lever moves away from a pilot's hardware lever, that lever has to pick up again.
-  For flaps that happens whenever the other pilot moves them.
-
-**Depends on:**
-
-- Holding back a lever that hasn't picked up, the same masking the [take-control key](#take-control-key) depends on.
-- Reading where a held-back lever is: a masked event still carries the lever's value, after the dead zone the pilot set in MSFS (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)).
-
-**Open questions:**
-
-- How large the tolerance is, which a test on real hardware settles.
-- How the new pilot learns which levers haven't picked up yet, and which way to move them.
-- Whether the pilot not in control can move the engine levers with the mouse, which would send the pilot in control's levers back to pickup.

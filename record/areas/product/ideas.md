@@ -249,6 +249,14 @@ In the cockpit, one hand holds the yoke and the other goes to whatever the pilot
   Outside, where the skin curves, it follows the ray cast afresh onto the aircraft.
 - On foot or in an external view, the hand goes where the pilot clicks on the aircraft's outside, the same way.
 
+Where the hands stop, as agreed with the pilot on 2026-10-03:
+
+- They need the aircraft's model files, so they don't work on aircraft that stream with the sim, such as the C152, or on Marketplace aircraft if their models are encrypted (unverified).
+- They need a click, so VR, hardware switches, and key bindings bring no hand.
+- Moving parts are posed only from code in the aircraft's own files, the yoke above all.
+  Parts that sim templates drive, such as the Baron's throttle, prop levers, and gear, and parts whose code keeps its own state, such as the Baron's wing flex, stay as the files store them, so the hand can land a few centimeters off them or inside the skin.
+- On foot, the hand reaches about 2m to 3m.
+
 - **Tech:**
   - **The avatar:** SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)).
   - **The figure:** the sim's own people stay invisible when a SimConnect client spawns them, while GSX's people show (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-a-gsx-person-shows-and-follows-where-we-write-it-and-the-sims-own-people-stay-invisible)).
@@ -284,26 +292,17 @@ In the cockpit, one hand holds the yoke and the other goes to whatever the pilot
     Which of the two routes ships: attaching through the aircraft's files holds the figure motionless but edits each aircraft package, and the WASM writer edits nothing, so it also covers stock aircraft such as the C152, where we measured it.
   - How Crosscheck seats the figure on an aircraft without seat objects.
   - Whether the figure's head and arms can turn and stretch through variables of its own object, as its size does (unverified).
-  - Where the cockpit model disagrees with the sim beyond the yoke.
-    The ray meets every other part where the glTF file stores it, so rays to the Comanche's throttle levers hit the dash behind them (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
-    The code that poses the yoke could pose every animated part the same way (unverified).
-    Attachments, such as the Comanche's GPS units, have models of their own, so rays aimed at them hit the panel behind (`BlackPanel` in the Comanche) unless Crosscheck loads those models too.
-  - Which aircraft the hand reaches.
+  - Whether Crosscheck loads attachments' models: the Comanche's GPS units have models of their own, so rays aimed at them hit the panel behind (`BlackPanel` in the Comanche) (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
+  - Which aircraft carry over.
     The eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
-    The C152, which streams with the sim, and Marketplace aircraft may have no model we can read (unverified).
     The ray has been measured against known spots only in the Comanche, and the yoke hand has run only in the Baron 58P.
     The Comanche plays its yoke from A2A's `L:YokeBank_Anim` and `L:YokePitch_Anim`, where the Baron plays its yoke from `A:YOKE X POSITION WITH AP LINEAR` and `A:YOKE Y POSITION WITH AP` (read in a2a-aircraft-pa24 2.1.3 and bksq-aircraft-baronpro 0.1.1, [avatars log](../avatars/log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
     The yoke hand runs whichever code the aircraft has, so it would pose the Comanche's yoke the same way (unverified).
-  - How the figure reaches what the pilot clicks outside: on foot, the pilot stood a median 1.8m to 2.6m from the spot, and up to 5.8m (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)), beyond an arm's reach, so the figure's arm stretches that far or the figure steps closer.
-  - Why the hand sometimes sits inside the exterior, on the wing among other places, which the pilot saw; the wing's flex animation, which keeps state of its own, stays as the file stores it, so the sim's flexed wing may lie off the model's (unverified).
-  - Whether, with the cockpit posed from its own code as the exterior is, a fresh cast would serve inside too, in place of the glide.
+  - What the figure does for a click beyond its 2m to 3m reach: on foot, the pilot stood a median 1.8m to 2.6m from the spot, and up to 5.8m (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
   - The rules are a left-seat pilot's with a yoke.
     A right-seat pilot would mirror them, a sidestick pilot never swaps hands, and a center stick probably stays in the right hand (unverified).
   - Whether, on the other pilot's machine, Crosscheck should hold each change that swaps hands for 0.3s before applying it, so the hands can pass the yoke as a person would.
     There Crosscheck applies the change itself, so it could let the free hand take the yoke, then send the tapping hand and move the switch, at the cost of 0.3s more delay on every change that swaps hands.
-  - A change with no click, from a hardware switch or a key binding, brings no hand.
-    The profile IDE could link each profile entry to a point in the model by having the author click the control during discovery, so the hand still reaches for it.
-  - VR has no cursor.
 
 ## Interface
 

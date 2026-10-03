@@ -2,7 +2,8 @@
  * Turns a pose into the figure's channel values. A pose is where the eye is
  * and where it looks, and the point each hand and foot reaches for, all from
  * the seat point in meters forward, right, and up, with angles in degrees.
- * A hand or foot with no point goes to its rest point in the spec.
+ * A hand with no point goes to its rest point in the spec, and a foot with
+ * none to the spec's rest bend and shin length.
  *
  * The head turns about the eye, so the nose points where the pilot looks from
  * where the pilot's camera is. The chest sits between the hips and the head,
@@ -92,17 +93,24 @@ export function solve(spec, pose) {
     v[`${name}_LEN`] = Math.max(0.02, len(d))
   }
 
+  // A foot with no point hangs straight down from the thigh at the spec's
+  // rest bend and shin length, wherever that puts it.
   const leg = (name, from, kneeAt, foot) => {
     const thigh = sub(kneeAt, from)
     const dir = unit(thigh)
     const length = Math.max(0.02, len(thigh))
-    const knee = add(from, mul(dir, length))
-    const w = sub(foot, knee)
+    const { up, right } = aim(name, dir)
+    v[`${name}_LEN`] = length
+    if (!foot) {
+      v[`${name}_ROLL`] = 0
+      v[`${name}_BEND`] = spec.rest.leg.bend
+      v[`${name}_SHIN`] = spec.rest.leg.shin
+      return
+    }
+    const w = sub(foot, add(from, mul(dir, length)))
     const along = dot(w, dir)
     const off = sub(w, mul(dir, along))
-    const { up, right } = aim(name, dir)
     v[`${name}_ROLL`] = len(off) > 1e-6 ? Math.atan2(dot(off, right), -dot(off, up)) * DEG : 0
-    v[`${name}_LEN`] = length
     const { bend, shin } = bendTo(along, len(off), spec.knee.arc, spec.knee.segments)
     v[`${name}_BEND`] = bend * DEG
     v[`${name}_SHIN`] = shin
@@ -110,7 +118,7 @@ export function solve(spec, pose) {
 
   arm("ARM_L", add(chest, a.shoulderL), pose.handL ?? rest(spec, "hand", -1))
   arm("ARM_R", add(chest, a.shoulderR), pose.handR ?? rest(spec, "hand", 1))
-  leg("LEG_L", a.legL, a.kneeL, pose.footL ?? rest(spec, "foot", -1))
-  leg("LEG_R", a.legR, a.kneeR, pose.footR ?? rest(spec, "foot", 1))
+  leg("LEG_L", a.legL, a.kneeL, pose.footL)
+  leg("LEG_R", a.legR, a.kneeR, pose.footR)
   return v
 }

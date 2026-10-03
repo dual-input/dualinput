@@ -288,8 +288,10 @@ for (const part of ["head", "nose", "chest", "hips", "shoulders", "legs", "arm",
   const f = dims.addFolder(part).close()
   for (const k of Object.keys(spec[part])) f.add(spec[part], k, ...range(k)).onChange(rebuild)
 }
-const restF = dims.addFolder("rest points").close()
-for (const part of ["hand", "foot"]) for (const k of ["fwd", "right", "up"]) restF.add(spec.rest[part], k, -0.6, 0.8, 0.005).name(`${part} ${k}`).onChange(update)
+const restF = dims.addFolder("rest").close()
+for (const k of ["fwd", "right", "up"]) restF.add(spec.rest.hand, k, -0.6, 0.8, 0.005).name(`hand ${k}`).onChange(update)
+restF.add(spec.rest.leg, "bend", 0, 150, 1).name("knee bend (°)").onChange(update)
+restF.add(spec.rest.leg, "shin", 0.02, 0.4, 0.005).name("shin (m)").onChange(update)
 const matF = dims.addFolder("material").close()
 matF.add(spec.material, "roughness", 0, 1, 0.01).onChange(recolor)
 matF.add(spec.material, "lighten", 0, 0.8, 0.01).name("chest lighten").onChange(recolor)

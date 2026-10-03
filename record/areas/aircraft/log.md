@@ -18,6 +18,7 @@ If so, Crosscheck can add a view for each seat the profile defines, so a pilot c
 - Releasing the camera by name into each test view and into the custom camera `2` put the eye at one spot for all four, 0.23m left of the reference point, 0.70m up, and 0.20m ahead, far from where any of them points.
   So the sim takes a name it doesn't know and falls back to one fixed spot.
 - Whether a full sim restart loads the file, and whether the pilot's own key for loading custom camera 2 still reads it, is untested.
+  The pilot hasn't used the sim's custom cameras since switching to ChasePlane, which fits the file's date.
 
 **Changed:** within one sim run, the per-user camera file gives Crosscheck no way to add a view.
 The test views stay in the file until the sim's next start, which is the restart test, and p08's `--restore` then puts the backup back.

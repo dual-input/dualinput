@@ -149,7 +149,7 @@ When control passes, [soft takeover](#soft-takeover-on-handover) starts.
   Windows lets Discord and Crosscheck capture the same mic at once.
   Voice only completes a handover the PF started, so control moves by mistake only if both machines mishear, in order, inside the window.
 - **Open questions:** accuracy with non-native English accents, which is the first thing to test.
-  Which phrases to accept, since the FAA's exchange says "you have the flight controls" ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)) and crews elsewhere use others.
+  [03-v1-scope](03-v1-scope.md#voice-phrases) settles which phrases v1 accepts, from the conventions regulators, militaries, and airlines document.
 
 ### Soft takeover on handover
 

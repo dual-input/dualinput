@@ -94,6 +94,7 @@ We scope control first, because which pilot is flying decides which machine flie
 Agreed:
 
 - The take-control key, on 2026-10-03.
+- The voice phrases, on 2026-10-03.
 
 ## 5. What later features need from the core
 
@@ -110,6 +111,7 @@ Exit: each risk below has a log entry that answers it.
 - Whether our own code can listen on `wt.eb.evt` ([EventBus bridge](ideas.md#eventbus-bridge)).
 - How much network delay mixed flight controls can take ([Mixed flight controls](ideas.md#mixed-flight-controls)).
 - What share of pilot pairs can't connect directly, which decides how much traffic the relay carries ([01-aims](01-aims.md#relay-and-license)).
+- Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
   We expect it to hold, because on the 58P masking the throttle's key events also stopped the throttle's input event (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), but nobody has masked the mixture.
 Steps 4 and 5 add to this list as they find risks.

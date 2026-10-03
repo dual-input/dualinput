@@ -45,7 +45,7 @@ A pilot presses take-control and becomes the PF at once, and their machine becom
 - Flaps and gear work from either pilot's hardware at any time.
 - At a handover, each of the aircraft's levers stays where it was until the new PF moves theirs, and then jumps to where their hardware is.
   The aircraft itself doesn't jump or lose noticeable speed at a handover (from our experience with FS Copilot).
-- When control passes, the pilot who took it hears a recorded "you have control", and the pilot who lost it hears "they have control".
+- When control passes, both pilots hear the control-passed cue that the [voice phrases](#voice-phrases) use, the pilot who took it hears a recorded "you have control", and the pilot who lost it hears "they have control".
 - When the PF's connection drops, control passes to the PM, never to a flight engineer or a passenger, and the PM hears "you have control".
 
 **Depends on:**
@@ -67,15 +67,17 @@ The PF offers control by voice, and the PM takes it by answering within 5s.
 
 - An offer is "You have" followed by control, controls, the controls, the flight controls, the aircraft, or the airplane, and an answer is "I have" followed by any of the same.
   Those are the endings regulators, militaries, and airlines use, with "You have …" and "I have …" the shape in every convention we found (documented: [FAA AC 61-115](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40455386&FileExtension=.PDF&FileName=FAA+AC+61_115_Positive+Exchange+of+Flight+Controls-Master.PDF), [Transport Canada TP 975](https://tc.canada.ca/sites/default/files/migrated/tp975e.pdf), [UK MAA RA 2309](https://assets.publishing.service.gov.uk/media/62454dcdd3bf7f32a7c01197/RA2309_Issue_8.pdf), [USAF AFMAN 11-248](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40445920&FileExtension=.PDF&FileName=Operations+-+Attachment+16+-+Excerpts+%E2%80%93+AFMAN+11-248+T-6+General+Flying-Master.PDF), [US Army TC 3-04.51](https://asktop.net/wp/download/5/tc3_04x51.pdf), and Airbus as quoted in [AAIB Bulletin 1/2013](https://assets.publishing.service.gov.uk/media/5423034de5274a1314000b7f/Airbus_A319-111_G-EZFV_01-13.pdf)).
-- "Your controls" also offers and "my controls" also answers, though we found them only on a blog (unverified).
-- English, recognized as well as the speech model manages with each pilot's accent.
+- "Your controls" also offers and "my controls" also answers, for pilots who hand over casually, though we found the pair only on a blog (unverified).
+- English, recognized as well as the recognizer manages with each pilot's accent.
 - Crosscheck listens whenever a session is syncing, with no push-to-talk key.
 
 **Not in v1:**
 
 - Taking control by voice without an offer.
   Instructors do it in every convention that covers it, such as the FAA's "I have the flight controls", but the [take-control key](#take-control-key) covers it, and a misheard phrase can't move control.
-- "I've got it" and "you've got it", which AOPA warns against because nobody can tell who has the aircraft ([AOPA](https://www.aopa.org/news-and-media/all-news/2023/august/08/training-and-safety-tip-ive-got-it-youve-got-it-whos-got-it)).
+- "You've got it" and "I've got it", which AOPA warns against because nobody can tell who has the aircraft ([AOPA](https://www.aopa.org/news-and-media/all-news/2023/august/08/training-and-safety-tip-ive-got-it-youve-got-it-whos-got-it)).
+- "Your airplane" and "my airplane", which pilots say casually (unverified).
+- Canceling an offer: it expires after 5s instead.
 - Waiting for the FAA's third call, the offer repeated, which no other convention we found has.
 - Languages other than English.
 
@@ -86,15 +88,19 @@ The PF offers control by voice, and the PM takes it by answering within 5s.
 - Only the PF's offer counts, and it opens a 5s window.
 - The PM's answer inside the window passes control, and the endings needn't match: "You have control" answered with "I have the aircraft" passes it.
 - Every other phrase does nothing, including an answer outside a window and "I have control" from the PF.
-- When control passes by voice, the pilots hear the same recorded lines as with the take-control key.
+- Both pilots hear a subtle cue when an offer opens a window, another when control passes, and a third when a window times out.
+  The control-passed cue is the same one the [take-control key](#take-control-key) plays, so pilots learn one sound for it.
+- A voice handover plays no recorded lines, because the pilots already hear each other say the phrases.
+- Audio never leaves the pilot's machine: the recognizer runs locally and answers fast.
+  It needn't be a model, but it isn't Windows' own speech recognition, which recognizes poorly (from our own use).
 
 **Depends on:**
 
-- The [take-control key](#take-control-key)'s rules for what control covers and what each pilot hears.
+- The [take-control key](#take-control-key)'s rules for what control covers.
 
 **Open questions:**
 
-- Whether recognition is accurate enough with non-native English accents, the first thing to test.
+- Whether a local recognizer is accurate enough with non-native English accents, the first thing to test, which a step 6 audio probe in [the plan](plan.md) answers.
 - Whether a phrase counts inside a longer sentence.
   A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
 - How Crosscheck tells speech from noise before it listens for a phrase.

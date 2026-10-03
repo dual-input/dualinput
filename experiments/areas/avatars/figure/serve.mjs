@@ -21,6 +21,8 @@ import http from "node:http"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { eyes } from "./cockpit.mjs"
+
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const DEV = path.join(HERE, "dev")
 const THREE = path.join(HERE, "..", "..", "..", "node_modules", "three")
@@ -98,27 +100,10 @@ function cockpitGltf(part) {
   return cache[part]
 }
 
-// Each camera's eye from cameras.cfg: [VIEWS] eyepoint, in feet forward,
-// right, and up from the reference datum, plus the camera's InitialXyz in
-// meters right, up, and forward. The pair matched SimConnect's camera within
-// 4mm in the Comanche (record/areas/avatars/log.md, 2026-10-03, p19).
-// Returned in the model's axes, +x left, +y up, +z forward.
-function eyes() {
-  const text = fs.readFileSync(path.join(SIMOBJECT, "cameras.cfg"), "utf8")
-  const nums = (s) => s.split(";")[0].split(",").map(Number)
-  const eyepoint = nums(text.match(/^\s*eyepoint\s*=\s*(.+)$/im)[1]).map((ft) => ft * 0.3048)
-  const out = {}
-  for (const block of text.split(/^\s*\[/m)) {
-    const title = block.match(/^\s*Title\s*=\s*"?([^"\r\n]+)"?/im)?.[1]?.trim()
-    const xyz = block.match(/^\s*InitialXyz\s*=\s*(.+)$/im)?.[1]
-    for (const [key, want] of Object.entries(AIRCRAFT.cameras)) {
-      if (title === want && xyz) {
-        const [x, y, z] = nums(xyz)
-        out[key] = [-(eyepoint[1] + x), eyepoint[2] + y, eyepoint[0] + z]
-      }
-    }
-  }
-  return out
+// Each camera's eye, in the model's axes for the page: +x left, +y up, +z forward.
+function modelEyes() {
+  const found = eyes(path.join(SIMOBJECT, "cameras.cfg"), AIRCRAFT.cameras)
+  return Object.fromEntries(Object.entries(found).map(([k, e]) => [k, [-e.right, e.up, e.fwd]]))
 }
 
 // ------------------------------------------------ the server
@@ -171,7 +156,7 @@ http
       if (url === "/app.js") return sendFile(res, DEV, "/app.js")
       if (url.startsWith("/figure/")) return sendFile(res, HERE, url.slice("/figure".length))
       if (url.startsWith("/three/")) return sendFile(res, THREE, url.slice("/three".length))
-      if (url === "/cockpit/info.json") return send(res, "application/json", JSON.stringify({ aircraft: AIRCRAFT.simObject, eyes: eyes() }))
+      if (url === "/cockpit/info.json") return send(res, "application/json", JSON.stringify({ aircraft: AIRCRAFT.simObject, eyes: modelEyes() }))
       const m = url.match(/^\/cockpit\/(int|ext)(?:\.gltf|\.(\d+)\.bin)$/)
       if (m) {
         const c = cockpitGltf(m[1])

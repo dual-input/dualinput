@@ -77,11 +77,18 @@ export function frameOf(ch, value) {
 }
 
 // The model XML's ANIM_CODE: the variable mapped onto the animation's frames.
-export function animCode(ch) {
+// The figure reads its own object's Z: variables (p17); `scope` "L" reads the
+// global L: variables instead, which a SimConnect client sets directly, as p11
+// set GSX's.
+export function animCode(ch, scope = "Z") {
   const num = (x) => String(+x.toFixed(6))
   const shift = ch.min < 0 ? ` ${num(-ch.min)} +` : ch.min > 0 ? ` ${num(ch.min)} -` : ""
-  return `(Z:${variable(ch)})${shift} ${num(FRAMES / (ch.max - ch.min))} * 0 max ${FRAMES} min`
+  return `(${scope}:${variable(ch)})${shift} ${num(FRAMES / (ch.max - ch.min))} * 0 max ${FRAMES} min`
 }
+
+// The palette as one more channel, its value a palette index: each color sits
+// on a frame of its own, and a fractional index blends the two around it.
+export const colorChannel = (spec) => ({ name: "COLOR", kind: "color", min: 0, max: spec.palette.length - 1 })
 
 // The points the model and solve.mjs share, forward, right, and up in meters:
 // the hips, the legs' anchors, and the knees from the seat point, and the
@@ -213,7 +220,14 @@ export function colors(spec, index) {
 
 // ------------------------------------------------ the model
 
-export function buildGltf(spec, colorIndex = 0) {
+// With colorAnimation, the model also carries colorChannel's animation: the
+// two materials' baseColorFactor through ASOBO_property_animation, the way
+// A2A's Aerostar animates a texture offset (a2a-aircraft-aerostar600,
+// EXTERIOR_LOD07.gltf, target "materials/4/extensions/ASOBO_material_UV_options/UVOffsetV").
+// Whether the sim accepts a base color as a target is untested. A glTF
+// animation needs at least one ordinary channel, so it also holds an empty
+// node still.
+export function buildGltf(spec, colorIndex = 0, { colorAnimation = false } = {}) {
   const P = packer()
   const geometry = (g) => ({ POSITION: P.floats(g.pos, "VEC3", true), NORMAL: P.floats(g.nrm, "VEC3"), indices: P.indices(g.idx) })
   const geo = { sphere: geometry(sphere()), stick: geometry(stick()), nose: geometry(nose(spec)) }
@@ -313,6 +327,31 @@ export function buildGltf(spec, colorIndex = 0) {
     return { name: variable(ch), samplers, channels }
   })
 
+  if (colorAnimation) {
+    const ch = colorChannel(spec)
+    const n = spec.palette.length
+    const input = P.keys(Array.from({ length: n }, (_, k) => (k * FRAMES) / (n - 1) / FPS))
+    const shades = spec.palette.map((_, k) => colors(spec, k))
+    const still = add(root, { name: "color_key" })
+    animations.push({
+      name: variable(ch),
+      samplers: [
+        { input, output: P.out(Array.from({ length: n }, () => [0, 0, 0]).flat(), "VEC3"), interpolation: "LINEAR" },
+        { input, output: P.out(shades.flatMap((s) => [...s.main, 1]), "VEC4"), interpolation: "LINEAR" },
+        { input, output: P.out(shades.flatMap((s) => [...s.light, 1]), "VEC4"), interpolation: "LINEAR" },
+      ],
+      channels: [{ sampler: 0, target: { node: still, path: "translation" } }],
+      extensions: {
+        ASOBO_property_animation: {
+          channels: [
+            { sampler: 1, target: "materials/0/pbrMetallicRoughness/baseColorFactor" },
+            { sampler: 2, target: "materials/1/pbrMetallicRoughness/baseColorFactor" },
+          ],
+        },
+      },
+    })
+  }
+
   const c = colors(spec, colorIndex)
   const material = (name, rgb) => ({
     name,
@@ -330,6 +369,7 @@ export function buildGltf(spec, colorIndex = 0) {
     accessors: P.accessors,
     bufferViews: P.bufferViews,
     buffers: [{ byteLength: bin.length }],
+    ...(colorAnimation ? { extensionsUsed: ["ASOBO_property_animation"] } : {}),
   }
   return { json, bin }
 }

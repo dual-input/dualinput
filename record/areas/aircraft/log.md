@@ -3,7 +3,7 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
-## 2026-10-03: The encrypted Phenom 300E lists seat objects for its pilots and passengers
+## 2026-10-03: Two partly encrypted aircraft list seat objects, the Phenom 300E for its pilots and passengers and the A380 for its pilots
 
 **Asked:** does the sim list seat objects through SimConnect for an aircraft whose model files are partly encrypted, so a figure can be seated where the cockpit model can't be loaded?
 The C152 and the A2A Comanche, whose files are readable, list theirs ([avatars log](../avatars/log.md#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
@@ -19,11 +19,15 @@ The C152 and the A2A Comanche, whose files are readable, list theirs ([avatars l
 The seated pilot's avatar object sat exactly on the pilot's seat.
 The package's readable files show only a passenger seat part, `fsreborn_phenom300e_seat_pax` ([files](fsreborn-phenom-300e/files.md)), so SimConnect shows more than the files did.
 
-**Changed:** a figure can sit in the right seat on an aircraft whose cockpit model can't be loaded, both pilots and every passenger, though it can't reach for controls without the model.
+With the iniBuilds A380 loaded, inibuilds-aircraft-a380 1.0.0, also a partly encrypted Marketplace package ([A380 study](inibuilds-a380/study.md)), the 4 objects within 50m included 2 seats, `SEAT_INI_A380_PILOT`, 21.96m ahead of the reference point, 0.53m left, and 6.32m up, and `SEAT_INI_A380_COPILOT`, 21.95m ahead, 0.50m right, and 6.32m up, with the seated avatar exactly on the pilot's.
+No passenger seats showed within 50m, which covers most of the cabin of a 73m aircraft.
+
+**Changed:** a figure can sit in the right seat on an aircraft whose cockpit model can't be loaded, though it can't reach for controls without the model.
+Which seats an aircraft lists varies: the Phenom lists every passenger seat and the A380 only the pilots'.
 
 **Affects:** the ideas [Seat awareness](../product/ideas.md#seat-awareness) and [Avatar sync](../product/ideas.md#avatar-sync).
 
-**Evidence:** [p03's run](../../../experiments/areas/aircraft/results/p03-seat-objects-2026-10-03-20-14-37.txt).
+**Evidence:** p03's runs on [the Phenom](../../../experiments/areas/aircraft/results/p03-seat-objects-2026-10-03-20-14-37.txt) and [the A380](../../../experiments/areas/aircraft/results/p03-seat-objects-2026-10-03-20-17-11.txt).
 
 ## 2026-10-01: Loading flights through SimConnect works, but the sim crashed on 5 of about 30 loads, so we canceled the unattended session
 

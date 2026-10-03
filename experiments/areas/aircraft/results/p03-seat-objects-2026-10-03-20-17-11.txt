@@ -1,0 +1,12 @@
+p03 · Seat objects for the loaded aircraft, through SimConnect, on MSFS 2024
+2026-10-03T20:17:11.817Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "A380-800 RR Basic"
+
+Objects within 50m: 4
+  object 32768: TITLE "", CATEGORY "CharacterSim", 21.96m forward, -0.53m right, 6.32m up, heading 89.419726°
+  object 2883584: TITLE "A380-800 RR Basic", CATEGORY "Airplane", -0.00m forward, 0.00m right, 0.00m up, heading 89.419726°
+  object 53690370: TITLE "SEAT_INI_A380_COPILOT", CATEGORY "SimpleObjectSim", 21.95m forward, 0.50m right, 6.32m up, heading 89.419726°
+  object 53706754: TITLE "SEAT_INI_A380_PILOT", CATEGORY "SimpleObjectSim", 21.96m forward, -0.53m right, 6.32m up, heading 89.419726°
+
+Seat objects: 2
+Exceptions: none

@@ -1,0 +1,10 @@
+{"t":1791058631846,"s":0.029,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791058631873,"s":0.056,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791058631873,"s":0.056,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791058631873,"s":0.056,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791058631875,"s":0.058,"kind":"aircraft","text":"TITLE \"A380-800 RR Basic\""}
+{"t":1791058631906,"s":0.089,"kind":"objects","text":"4 objects within 50m"}
+{"t":1791058631907,"s":0.09,"kind":"object","text":"object 32768: TITLE \"\", CATEGORY \"CharacterSim\", 21.96m forward, -0.53m right, 6.32m up, heading 89.419726°","id":32768,"title":"","category":"CharacterSim","body":{"forward":21.956313220950786,"right":-0.5282070115633622,"up":6.31706991865395}}
+{"t":1791058631939,"s":0.122,"kind":"object","text":"object 2883584: TITLE \"A380-800 RR Basic\", CATEGORY \"Airplane\", -0.00m forward, 0.00m right, 0.00m up, heading 89.419726°","id":2883584,"title":"A380-800 RR Basic","category":"Airplane","body":{"forward":-2.1278630550150897e-7,"right":5.725518972457577e-7,"up":1.7159392776875394e-7}}
+{"t":1791058631942,"s":0.125,"kind":"object","text":"object 53690370: TITLE \"SEAT_INI_A380_COPILOT\", CATEGORY \"SimpleObjectSim\", 21.95m forward, 0.50m right, 6.32m up, heading 89.419726°","id":53690370,"title":"SEAT_INI_A380_COPILOT","category":"SimpleObjectSim","body":{"forward":21.94930592899449,"right":0.49658354130498866,"up":6.321021945021138}}
+{"t":1791058631973,"s":0.156,"kind":"object","text":"object 53706754: TITLE \"SEAT_INI_A380_PILOT\", CATEGORY \"SimpleObjectSim\", 21.96m forward, -0.53m right, 6.32m up, heading 89.419726°","id":53706754,"title":"SEAT_INI_A380_PILOT","category":"SimpleObjectSim","body":{"forward":21.956333177358648,"right":-0.5282678830912279,"up":6.317039401075826}}

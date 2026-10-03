@@ -246,7 +246,7 @@ The host starts a session and gets a code, and the other pilot enters it to join
 **Open questions:**
 
 - Whether the EFB app can fill its box from the clipboard: the EFB runs inside the sim's panel, so Crosscheck's own app would read the clipboard when the EFB's box is selected (unverified).
-- Whether the profile IDE joins through the same session and code, making the Crosscheck session the editing session too, or the session points the IDE at a server of its own; either way has consequences for the relay and the protocol, settled later.
+- Whether the Crosscheck IDE joins through the same session and code, making the Crosscheck session the editing session too, or the session points the IDE at a server of its own; either way has consequences for the relay and the protocol, settled later.
 
 ### The connection
 
@@ -323,7 +323,8 @@ Before a pilot starts flying, Crosscheck compares what each pilot has for the sh
 
 **Depends on:**
 
-- Profiles, which say which aircraft versions they cover and what each feature needs.
+- Profiles, which say which aircraft versions they cover.
+  What a feature needs follows from what the profile references, such as the display identifiers pointer sync replays into, and Crosscheck checks each machine for those itself.
 - [The connection](#the-connection), which admits the pilot to the session.
 
 **Open questions:**

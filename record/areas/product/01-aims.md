@@ -21,6 +21,7 @@ When two choices are otherwise even, Crosscheck takes the one we'd want when fly
 - **Pilots join with a code and never make an account.**
 - **A pilot in VR can use everything Crosscheck offers during a flight without taking the headset off.**
 - **Crosscheck is free, and takes donations.**
+- **Every part of Crosscheck gets the same care from its first version,** the tools only we use included: no cut corners in code, interface, or copy, because an interface allowed to drift keeps drifting.
 
 ## Relay and license
 

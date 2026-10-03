@@ -26,7 +26,7 @@ Crosscheck would also show which pilot is working which display, such as "FO on 
 ### Bus bridge
 
 Crosscheck listens to the messages an aircraft's parts send each other on the CommBus and in client data areas, and to state-sharing calls its vendor built in, such as the A220's `A22X.Resync` below, and carries them to the other machine.
-A profile, the file that tells Crosscheck what to sync on one aircraft, names what to listen to, and the profile IDE, the tool authors build profiles in, finds those names.
+A profile, the file that tells Crosscheck what to sync on one aircraft, names what to listen to, and the [Crosscheck IDE](#crosscheck-ide), the tool authors build profiles in, finds those names.
 
 - **Tech:** reading the CommBus from panel JavaScript works, and what it yields depends on the aircraft.
   The Synaptic A220 puts its whole cockpit's state there, the A2A PA-24 doesn't use it, and the iniBuilds A350 uses it only between its modules, its electronic flight bag (EFB), and its printer (measured on MSFS 2024, 2026-09-28, and read in the aircraft's files, 2026-09-30, [CommBus log](../commbus/log.md)).
@@ -197,7 +197,7 @@ In FS Copilot and YourControls only the PF's hardware reaches the sim, and this 
 ### Seat awareness
 
 Each pilot has a seat, and their camera starts there.
-Where SimConnect shows no seat objects for an aircraft, the profile author moves the camera to each seat, and the profile IDE's "capture position" button saves it to the profile, relative to the aircraft, with the view direction.
+In the [Crosscheck IDE](#crosscheck-ide), the profile author places the avatar on each seat of the aircraft's own cockpit model and adjusts its pose, down to the length of its shins and the angle of its knees, which takes a minute a seat and may make detecting seats unnecessary.
 
 - **Tech:** MSFS 2024 aircraft can ship seat parts with their own navigation graphs.
   The A220 has `A220_Seat_Pilot` and `A220_Seat_Copilot` (read in synaptic-aircraft-a220 1.0.10, [files](../aircraft/synaptic-a220/files.md)), and the Phenom 300E has a passenger seat, `fsreborn_phenom300e_seat_pax` (read in fsreborn-aircraft-phenom300e 1.0.24, [files](../aircraft/fsreborn-phenom-300e/files.md)).
@@ -248,6 +248,7 @@ How the hands work, and where they stop, is in [the avatars' tentative decisions
   - **The hands:** measured in the A2A Comanche and the Black Square Baron 58P, inside and on foot outside; what they do, where they stop, and the findings behind each are in [the avatars' tentative decisions](../avatars/decisions.md).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat, turns their head where they look, and reaches for each switch, knob, and lever they click, so a pilot sees who did what as it happens.
+  With each entry's spot in the cockpit from the [Crosscheck IDE](#crosscheck-ide), the hand also reaches for a control the pilot changed without a click, such as a home cockpit's switch, a hardware flap lever, or a keyboard shortcut.
   When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
 - **Open questions:**
   - Whether Crosscheck should edit other developers' aircraft packages, as GSX does, which needs a decision in `record/decisions/`, and how its edit coexists with GSX's in the same file.
@@ -306,6 +307,18 @@ Pilots debrief with it, training groups use it for checkrides, and we use it to 
 
 - **Tech:** every change already passes through Crosscheck, so recording costs little, and the timeline viewer is the work.
 
+### Crosscheck IDE
+
+The Crosscheck IDE is where we, and after v1 the community, write profiles: it finds what an aircraft exposes, binds it, and checks the result against the live sim.
+It's built new from fsc-editor's design and record, so it carries none of FS Copilot's profile dialect or its other baggage.
+Besides finding names, it places things on the aircraft's own cockpit model, as our avatar dev page poses the figure: the avatar on each seat, adjusted down to the length of its shins and the angle of its knees, and each entry's spot in the cockpit, so the avatar of whoever changes an entry can reach out and touch it.
+
+- **Tech:** fsc-editor already finds variables by flipping a switch and showing what changed, shows each line's live value, runs a setter against the live sim, and reads an add-on's files into a report that starts a profile (fsc-editor, `docs/sim-vars/index.md`).
+  Our avatar work poses a figure of our own in the cockpit from variables, as its dev page sets them (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).
+- **Product:** it gets the same care as the apps pilots use, from its first version, because a tool whose interface is allowed to drift keeps drifting.
+- **Open questions:** whether the IDE joins through the Crosscheck session and its code, as [03-v1-scope](03-v1-scope.md#invite-code) asks.
+  A test of a profile across two machines, needed before the IDE exists, could be a quick tool on fsc-editor's relay.
+
 ### Profile registry
 
 Each profile is matched to aircraft package versions, and Crosscheck fetches the one that matches the installed aircraft.
@@ -316,7 +329,7 @@ The suggestion copies [DefinitelyTyped](https://github.com/DefinitelyTyped/Defin
 
 - One canonical profile per aircraft, in one public repository.
 - Changes arrive as pull requests, and each aircraft lists maintainers who review them.
-- The profile IDE opens the pull request, so authors never touch git.
+- The Crosscheck IDE opens the pull request, so authors never touch git.
 
 The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-exerciser tests the wire but not two aircraft staying in agreement ([08-06](../../learn/foundations/08-06-divergence-and-one-screen.md#detecting-divergence-and-correcting-it)).
 
@@ -327,11 +340,11 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
 - **Save and resume together:** few addons save and restore their own state, such as PMDG's panel states and the iniBuilds A350's autosaves (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md), and inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md)), and driving those from outside is unexplored.
 - **Basic sync for aircraft without a profile:** we judge that a starter profile generated from an aircraft's input events would give little that's usable on most aircraft (unverified: nobody has tried it).
 - **An activity feed for pilots:** one control can fire several events, as the PA-24's radio volume knob fired four input events in one turn ([03-03](../../learn/foundations/03-03-reading-and-writing.md#enumerating-vs-observing)), and a pilot can't read a feed of them.
-  It belongs in the profile IDE.
+  It belongs in the Crosscheck IDE.
 - **Shared checklists:** checklists depend on the aircraft, and on which airline's version a crew wants.
 - **Linked yokes on force-feedback hardware:** both pilots would need a force-feedback yoke, and few pilots own one (unverified).
 - **An intercom routed by the aircraft's audio panel:** Discord carries the pilots' voices already, and the intercom would mean building voice capture, transport, and playback, plus mapping each aircraft's audio panel, for value nobody has evaluated.
-- **Learn by demonstration in the profile IDE:** the IDE would list what changed when the author flipped a switch, and propose a profile entry.
+- **Learn by demonstration in the Crosscheck IDE:** the IDE would list what changed when the author flipped a switch, and propose a profile entry.
   We set it aside while we build the core product.
 - **Cockpit diff and resync:** we don't know how reliably Crosscheck can read an aircraft's state, and a resync prompt interrupts the pilots.
 - **Multiplayer kept on:** other players in the session would see the shared aircraft twice, and Crosscheck can't hide anything on their machines (unverified: nobody has looked from a third machine).

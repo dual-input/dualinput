@@ -106,6 +106,7 @@ Agreed:
 - Traffic sync, on 2026-10-03.
 - Hearing ATC, on 2026-10-03.
 - Time, date, sim rate, and pause, on 2026-10-03.
+- Recording and bug reports, on 2026-10-03.
 
 ## 5. What later features need from the core
 

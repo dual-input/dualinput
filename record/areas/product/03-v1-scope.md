@@ -442,3 +442,36 @@ The crew's sims share one clock: the same time of day, date, and simulation rate
 - What happens when an add-on puts one machine into a full pause: no pilot action raised one, but `K:PAUSE_SET` from SimConnect did, and SimConnect then sent no frame data until it cleared (measured, same date, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)).
 - Whether a frozen follower keeps up at a raised simulation rate, which a replay at 4x would show.
 - Whether the pause menu stops a flying aircraft, which our parked run couldn't show.
+
+## Tools
+
+### Recording and bug reports
+
+Every pilot's machine records its side of the session, and a bug report gathers the crew's recordings, so we can see the session as if we'd been there.
+
+**In v1:**
+
+- Every crew member's machine records what passes through Crosscheck: each synced change, each handover, and the connection's events.
+- Each machine keeps at least the whole flight, and more flights if recordings turn out small enough.
+- A bug report gathers every crew member's recording through the session, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.
+- A setting chooses full or minimal recording, and says that a minimal recording limits how far we can help.
+
+**Not in v1:**
+
+- The debrief timeline that plays a flight back, a Later pick in [the plan](plan.md).
+
+**Rules:**
+
+- Home-folder paths and Windows usernames are scrubbed from everything in a report, and pilots' display names stay.
+  A screenshot taken during our avatar work showed both a home folder's path and a person's name ([avatars log](../avatars/log.md#2026-10-03-a-probe-can-screenshot-the-sim-window-and-a-screenshot-can-show-a-home-folders-path-and-a-persons-name)).
+
+**Depends on:**
+
+- [The connection](#the-connection), which carries the other pilots' recordings to the one reporting.
+
+**Open questions:**
+
+- Where reports go, as a file the pilot sends us or as an upload to a server of ours; either way, sending one has to be easy.
+- How big a flight's recording is, which decides how many flights each machine keeps.
+- What a minimal recording leaves out.
+- How a report gets a crew member's recording after the session has ended and they've left.

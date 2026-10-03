@@ -1,0 +1,24 @@
+{"t":1791013304819,"s":0.03,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791013305270,"s":0.481,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791013305270,"s":0.481,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791013305270,"s":0.481,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791013307637,"s":2.848,"kind":"setup","text":"aircraft TITLE \"A2A Piper PA-24-250 Comanche\", 0.000026 kt; map 103 controls from pa24-250"}
+{"t":1791013309070,"s":4.281,"kind":"calibrate","text":"SEAT_DEFAULT_Pilot at 0.129m forward, -0.303m right, -0.128m up, model PILOT_1 0.305, -0.133, 0.121; SEAT_DEFAULT_Copilot at 0.128m forward, 0.303m right, -0.123m up, model PILOT_2 -0.303, -0.133, 0.121; offset 0.008m forward, 0.001m right, 0.007m up; the two seats disagree by 0.005m","seatBody":{"PILOT_1":{"title":"SEAT_DEFAULT_Pilot","forward":0.12920631643691527,"right":-0.30322951380488966,"up":-0.1276794508618812},"PILOT_2":{"title":"SEAT_DEFAULT_Copilot","forward":0.12810313985758714,"right":0.30345929760031853,"up":-0.1234832838696977}},"offset":{"forward":0.007654728147251211,"right":0.0011148918977144373,"up":0.0074186326342105535},"spread":0.004532552429104436}
+{"t":1791013309104,"s":4.315,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 68534272","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791013309104,"s":4.315,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 68534272","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791013309104,"s":4.315,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 68534272","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791013309104,"s":4.315,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 68534272","object":0,"values":[68534272]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 1","object":0,"values":[1]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_SCALE ← 30","object":0,"values":[30]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_COLOR ← 0","object":0,"values":[0]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_FWD ← 0.479206","object":0,"values":[0.47920631643691525]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_RIGHT ← -0.30323","object":0,"values":[-0.30322951380488966]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_UP ← 0.122321","object":0,"values":[0.1223205491381188]}
+{"t":1791013309105,"s":4.316,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 1","object":0,"values":[1]}
+{"t":1791013309137,"s":4.348,"kind":"controls","text":"318 input events in the sim, 0 of them in the map","watched":[]}
+{"t":1791013374929,"s":70.14,"kind":"touches","text":"0 input event changes from 0 controls: "}
+{"t":1791013374929,"s":70.14,"kind":"write","text":"L:CROSSCHECK_P12_MODE ← 0","object":0,"values":[0]}
+{"t":1791013374929,"s":70.14,"kind":"write","text":"L:CROSSCHECK_P12_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791013374929,"s":70.14,"kind":"write","text":"L:CROSSCHECK_P12_LEAD ← 0","object":0,"values":[0]}

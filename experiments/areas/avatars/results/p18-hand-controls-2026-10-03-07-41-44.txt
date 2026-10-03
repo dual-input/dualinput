@@ -1,0 +1,8 @@
+p18 · The hand sphere on the control the pilot operates, placed from the model files, on MSFS 2024
+2026-10-03T07:41:44.789Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.000026 kt; map 103 controls from pa24-250
+  SEAT_DEFAULT_Pilot at 0.129m forward, -0.303m right, -0.128m up, model PILOT_1 0.305, -0.133, 0.121; SEAT_DEFAULT_Copilot at 0.128m forward, 0.303m right, -0.123m up, model PILOT_2 -0.303, -0.133, 0.121; offset 0.008m forward, 0.001m right, 0.007m up; the two seats disagree by 0.005m
+  318 input events in the sim, 0 of them in the map
+  0 input event changes from 0 controls: 

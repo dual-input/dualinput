@@ -59,7 +59,6 @@ The picks, picked on 2026-10-02:
   - [The PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map), if a probe finds a way to set the world map from outside the sim; it replaces flight setup by the host, which went to Ideas left out on 2026-10-03
   - The invite code, from [One-click invite](ideas.md#one-click-invite)
   - The take-control key, and voice phrases, both from [Voice handover](ideas.md#voice-handover)
-  - All three kinds of [shared pointing](ideas.md#shared-pointing), each built rather than tried as fallbacks: in the 3D cockpit, on a switch, and on panel displays
   - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
 - **Soon:**

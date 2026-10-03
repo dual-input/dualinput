@@ -194,18 +194,6 @@ In FS Copilot and YourControls only the PF's hardware reaches the sim, and this 
 
 ## Presence
 
-### Shared pointing
-
-A pilot points at something in the cockpit and the other pilot sees it, tried in this order:
-
-1. A pointer in the 3D cockpit.
-2. If that can't be done, a highlight on the switch the pilot picks.
-3. If neither can, a pointer on panel displays, built on what [pointer sync](#pointer-sync) already reads.
-
-- **Tech:** the ray that puts the hand where a pilot clicks, under [Avatar sync](#avatar-sync), also gives a pointer in the 3D cockpit its spot, though it has been measured only in the A2A Comanche.
-  A hand that follows the cursor all the time isn't what a pilot does, so pointing would be something the pilot chooses to do, such as a laser pointer they switch on (our judgment from p17, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object)).
-  The sim's checklist highlight might serve the second (unverified).
-
 ### Seat awareness
 
 Each pilot has a seat, and their camera starts there.
@@ -273,6 +261,7 @@ How the hands work, and where they stop, is in [the avatars' tentative decisions
     The yoke hand runs whichever code the aircraft has, so it would pose the Comanche's yoke the same way (unverified).
   - What the figure does for a click beyond its 2m to 3m reach: on foot, the pilot stood a median 1.8m to 2.6m from the spot, and up to 5.8m (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
   - How the hands work with a sidestick or a center stick, since the rules are for a yoke, in either seat ([the avatars' tentative decisions](../avatars/decisions.md#the-hands-follow-a-pilots-habits-with-the-right-hand-on-the-yoke-in-the-right-seat)).
+  - Whether avatar sync works for a pilot in VR: whether Crosscheck can read a VR pilot's head and hands, and how the figure looks in a headset, to explore later.
     A sidestick pilot never swaps hands, and a center stick probably stays in the right hand (unverified).
   - Whether, on the other pilot's machine, Crosscheck should hold each change that swaps hands for 0.3s before applying it, so the hands can pass the yoke as a person would.
     There Crosscheck applies the change itself, so it could let the free hand take the yoke, then send the tapping hand and move the switch, at the cost of 0.3s more delay on every change that swaps hands.
@@ -343,5 +332,7 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
 - **Flight setup by the host:** Crosscheck would load the host's flight, aircraft, gate, and panel state on every machine through `SimConnect_FlightLoad`, which works, but MSFS 2024 1.8.16.0 crashed on 5 of about 30 such loads (measured on MSFS 2024, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
   A crashed sim is the worst outcome a pilot can have, and what a load from outside does to the sim an hour into a flight is unknown, so the step it saves isn't worth it.
   [The PF's spot on the world map](#the-pfs-spot-on-the-world-map) gets most of the way there instead.
+- **Shared pointing:** a pointer in the 3D cockpit, a highlight on a switch, or a pointer on a panel display, for showing the other pilot where to look.
+  [Avatar sync](#avatar-sync)'s hand reaches out and touches each switch and surface the pilot clicks, which shows the other pilot more than a pointer would, so we dropped pointing for it on 2026-10-03.
 - **Pausing the flight when a pilot drops out:** a pilot whose sim restarted comes back with a fresh cockpit that a pause doesn't restore, and pausing doesn't suit flights on online networks such as VATSIM.
   The others fly on instead, as [03-v1-scope](03-v1-scope.md#the-connection) says.

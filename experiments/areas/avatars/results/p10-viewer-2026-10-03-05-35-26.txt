@@ -1,0 +1,5 @@
+p10 · An object of category Viewer, spawned and not written, in a flying aircraft, on MSFS 2024
+2026-10-03T05:35:26.685Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Cessna C152 Aerial Advertising"
+
+  FSDT_Passengers_Seats_FNX_A320_01 (Viewer): 620 frames; -29.6m forward of the aircraft at the start, -974.4m at the end (111.4m right, 0.3m up); the object moved 0m over the ground in 20s at 97 kt

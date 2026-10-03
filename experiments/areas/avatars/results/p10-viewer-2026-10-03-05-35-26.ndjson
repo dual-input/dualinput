@@ -1,0 +1,1005 @@
+{"t":1791005726734,"s":0.049,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791005727083,"s":0.398,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791005727084,"s":0.399,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791005727084,"s":0.399,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791005728416,"s":1.731,"kind":"setup","text":"aircraft TITLE \"Cessna C152 Aerial Advertising\", 94 kt over the ground"}
+{"t":1791005738132,"s":11.447,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791005738217,"s":11.532,"kind":"write","text":"L:FSDT_GSX_INTPAX_VISIBLE ← 1","object":0,"values":[1]}
+{"t":1791005738217,"s":11.532,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1A ← 1","object":0,"values":[1]}
+{"t":1791005738217,"s":11.532,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1B ← 1","object":0,"values":[1]}
+{"t":1791005738217,"s":11.532,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1C ← 1","object":0,"values":[1]}
+{"t":1791005738217,"s":11.532,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1D ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1E ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1F ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2A ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2B ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2C ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2D ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2E ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2F ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3A ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3B ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3C ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3D ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3E ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3F ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4A ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4B ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4C ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4D ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4E ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4F ← 1","object":0,"values":[1]}
+{"t":1791005738218,"s":11.533,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5A ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5B ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5C ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5D ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5E ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5F ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6A ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6B ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6C ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6D ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6E ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6F ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7A ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7B ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7C ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7D ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7E ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7F ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8A ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8B ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8C ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8D ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8E ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8F ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9A ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9B ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9C ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9D ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9E ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9F ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10A ← 1","object":0,"values":[1]}
+{"t":1791005738219,"s":11.534,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10B ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10C ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10D ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10E ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10F ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11A ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11B ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11C ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11D ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11E ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11F ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12A ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12B ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12C ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12D ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12E ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12F ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13A ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13B ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13C ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13D ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13E ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13F ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14A ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14B ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14C ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14D ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14E ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14F ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15A ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15B ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15C ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15D ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15E ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15F ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16A ← 1","object":0,"values":[1]}
+{"t":1791005738220,"s":11.535,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16B ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16C ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16D ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16E ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16F ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17A ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17B ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17C ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17D ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17E ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17F ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18A ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18B ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18C ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18D ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18E ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18F ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19A ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19B ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19C ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19D ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19E ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19F ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20A ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20B ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20C ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20D ← 1","object":0,"values":[1]}
+{"t":1791005738221,"s":11.536,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20E ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20F ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21A ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21B ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21C ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21D ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21E ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21F ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22A ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22B ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22C ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22D ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22E ← 1","object":0,"values":[1]}
+{"t":1791005738222,"s":11.537,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22F ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23A ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23B ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23C ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23D ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23E ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23F ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24A ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24B ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24C ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24D ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24E ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24F ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25A ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25B ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25C ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25D ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25E ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25F ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26A ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26B ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26C ← 1","object":0,"values":[1]}
+{"t":1791005738223,"s":11.538,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26D ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26E ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26F ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27A ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27B ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27C ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27D ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27E ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27F ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28A ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28B ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28C ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28D ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28E ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28F ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29A ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29B ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29C ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29D ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29E ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29F ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30A ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30B ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30C ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30D ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30E ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30F ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31A ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31B ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31C ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31D ← 1","object":0,"values":[1]}
+{"t":1791005738224,"s":11.539,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31E ← 1","object":0,"values":[1]}
+{"t":1791005738225,"s":11.54,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31F ← 1","object":0,"values":[1]}
+{"t":1791005738225,"s":11.54,"kind":"lvars","text":"set 187 L: variables to 1; 1 were nonzero before"}
+{"t":1791005738260,"s":0.035,"kind":"seats","text":"","forward":-6.457903694124586,"right":0.13186803777536404,"up":-0.01239225694306515,"movedM":3.113963247675788e-9,"speed":47.75579425162638}
+{"t":1791005738285,"s":0.06,"kind":"seats","text":"","forward":-8.881141936325736,"right":0.18107057230950652,"up":-0.01576409839495791,"movedM":3.113963247675788e-9,"speed":49.80895489770396}
+{"t":1791005738319,"s":0.094,"kind":"seats","text":"","forward":-10.497091420817735,"right":0.21376363827584832,"up":-0.017630005098819675,"movedM":3.113963247675788e-9,"speed":48.28726907130802}
+{"t":1791005738351,"s":0.126,"kind":"seats","text":"","forward":-11.305206513887,"right":0.23007256818379407,"up":-0.018447214147360867,"movedM":3.113963247675788e-9,"speed":47.05908101165025}
+{"t":1791005738384,"s":0.159,"kind":"seats","text":"","forward":-12.921720268926235,"right":0.2626124216480532,"up":-0.019853057051028737,"movedM":3.113963247675788e-9,"speed":48.41181767962532}
+{"t":1791005738423,"s":0.198,"kind":"seats","text":"","forward":-15.347197653125255,"right":0.3112233236159625,"up":-0.021407765787590325,"movedM":3.113963247675788e-9,"speed":49.39051077231097}
+{"t":1791005738451,"s":0.226,"kind":"seats","text":"","forward":-16.155882852551997,"right":0.32737145020456015,"up":-0.02178373228970304,"movedM":3.113963247675788e-9,"speed":48.433697836085344}
+{"t":1791005738486,"s":0.261,"kind":"seats","text":"","forward":-17.77352915506168,"right":0.35957113371776916,"up":-0.0223208300043294,"movedM":3.113963247675788e-9,"speed":48.25147201472641}
+{"t":1791005738519,"s":0.294,"kind":"seats","text":"","forward":-20.20070484207586,"right":0.40752452154671914,"up":-0.02231758031002537,"movedM":3.113963247675788e-9,"speed":49.77228061356119}
+{"t":1791005738555,"s":0.33,"kind":"seats","text":"","forward":-21.81929791344163,"right":0.43916913644807387,"up":-0.021560243214180447,"movedM":3.113963247675788e-9,"speed":50.22812272053452}
+{"t":1791005738588,"s":0.363,"kind":"seats","text":"","forward":-23.438261971687222,"right":0.4705719281671019,"up":-0.020344311650673626,"movedM":3.113963247675788e-9,"speed":49.53341016648336}
+{"t":1791005738621,"s":0.396,"kind":"seats","text":"","forward":-25.057588120161455,"right":0.5017691758560687,"up":-0.018881172783227523,"movedM":3.113963247675788e-9,"speed":50.33923315877833}
+{"t":1791005738621,"s":0.396,"kind":"seats","text":"","forward":-25.057588120161455,"right":0.5017691758560687,"up":-0.018881172783227523,"movedM":3.113963247675788e-9,"speed":50.33923315877833}
+{"t":1791005738654,"s":0.429,"kind":"seats","text":"","forward":-26.67727071604365,"right":0.5327683185348508,"up":-0.017400326130935718,"movedM":3.113963247675788e-9,"speed":49.64296465341296}
+{"t":1791005738688,"s":0.463,"kind":"seats","text":"","forward":-28.297298828810774,"right":0.5635937403063309,"up":-0.016268401176063707,"movedM":3.113963247675788e-9,"speed":49.654238124419855}
+{"t":1791005738721,"s":0.496,"kind":"seats","text":"","forward":-29.917664852384423,"right":0.5942362797288965,"up":-0.01565344716455111,"movedM":3.113963247675788e-9,"speed":49.75274087063393}
+{"t":1791005738755,"s":0.53,"kind":"seats","text":"","forward":-31.538366539044862,"right":0.6247005733756748,"up":-0.01562544720992446,"movedM":3.113963247675788e-9,"speed":48.42996024528792}
+{"t":1791005738788,"s":0.563,"kind":"seats","text":"","forward":-33.159388494296884,"right":0.6549633083583366,"up":-0.016172112929624564,"movedM":3.113963247675788e-9,"speed":50.30546419300244}
+{"t":1791005738822,"s":0.597,"kind":"seats","text":"","forward":-34.78073224403674,"right":0.6849588066621983,"up":-0.017200529906968586,"movedM":3.113963247675788e-9,"speed":50.1567789834844}
+{"t":1791005738854,"s":0.629,"kind":"seats","text":"","forward":-36.4024032734201,"right":0.71462579735819,"up":-0.018639163933296368,"movedM":3.113963247675788e-9,"speed":50.42117032149418}
+{"t":1791005738887,"s":0.662,"kind":"seats","text":"","forward":-38.02439688437249,"right":0.743900845354533,"up":-0.020407045593679143,"movedM":3.113963247675788e-9,"speed":48.55804887799433}
+{"t":1791005738920,"s":0.695,"kind":"seats","text":"","forward":-39.646707108497225,"right":0.7727455537013075,"up":-0.022430985535657602,"movedM":3.113963247675788e-9,"speed":48.591631329768454}
+{"t":1791005738953,"s":0.728,"kind":"seats","text":"","forward":-41.26933674779932,"right":0.8011508344258989,"up":-0.024662508494135184,"movedM":3.113963247675788e-9,"speed":49.829057865749306}
+{"t":1791005738987,"s":0.762,"kind":"seats","text":"","forward":-42.89227892081077,"right":0.8291109812176245,"up":-0.027073146034909224,"movedM":3.113963247675788e-9,"speed":48.84742843109609}
+{"t":1791005739020,"s":0.795,"kind":"seats","text":"","forward":-44.51554207986175,"right":0.8566061780174934,"up":-0.0296422625500476,"movedM":3.113963247675788e-9,"speed":48.86673752557268}
+{"t":1791005739053,"s":0.828,"kind":"seats","text":"","forward":-46.13911575274932,"right":0.8835917721222195,"up":-0.0323426164890232,"movedM":3.113963247675788e-9,"speed":50.036018936222625}
+{"t":1791005739088,"s":0.863,"kind":"seats","text":"","forward":-47.76301410377682,"right":0.9100385280389887,"up":-0.035152030158917845,"movedM":3.113963247675788e-9,"speed":48.44794696682519}
+{"t":1791005739120,"s":0.895,"kind":"seats","text":"","forward":-49.38722065661471,"right":0.9359676820242342,"up":-0.038059255723983006,"movedM":3.113963247675788e-9,"speed":48.800684707824274}
+{"t":1791005739153,"s":0.928,"kind":"seats","text":"","forward":-51.011757652799645,"right":0.9614356562057118,"up":-0.04107983363195453,"movedM":3.113963247675788e-9,"speed":48.82460951764119}
+{"t":1791005739188,"s":0.963,"kind":"seats","text":"","forward":-52.6365849697712,"right":0.986514415869042,"up":-0.044260637050134756,"movedM":3.113963247675788e-9,"speed":48.67143537920725}
+{"t":1791005739220,"s":0.995,"kind":"seats","text":"","forward":-54.26172803061865,"right":1.0112410071203968,"up":-0.047624702387223806,"movedM":3.113963247675788e-9,"speed":48.762199874494804}
+{"t":1791005739254,"s":1.029,"kind":"seats","text":"","forward":-55.88717891258537,"right":1.0356307039983115,"up":-0.05116945531800338,"movedM":3.113963247675788e-9,"speed":48.6903397817669}
+{"t":1791005739287,"s":1.062,"kind":"seats","text":"","forward":-57.5129476362373,"right":1.0597040069230417,"up":-0.0548651325134706,"movedM":3.113963247675788e-9,"speed":48.78100255062733}
+{"t":1791005739320,"s":1.095,"kind":"seats","text":"","forward":-59.13902272347649,"right":1.083506428355939,"up":-0.058673490260482145,"movedM":3.113963247675788e-9,"speed":48.790325330656884}
+{"t":1791005739354,"s":1.129,"kind":"seats","text":"","forward":-60.76540675185151,"right":1.1070962786791085,"up":-0.06254935309023786,"movedM":3.113963247675788e-9,"speed":48.71827118205384}
+{"t":1791005739387,"s":1.162,"kind":"seats","text":"","forward":-62.39209773894603,"right":1.1305256077913342,"up":-0.06647130444336799,"movedM":3.113963247675788e-9,"speed":48.80886284661709}
+{"t":1791005739420,"s":1.195,"kind":"seats","text":"","forward":-64.01910022822287,"right":1.1538322755632358,"up":-0.07044961069683268,"movedM":3.113963247675788e-9,"speed":48.899746245202515}
+{"t":1791005739454,"s":1.229,"kind":"seats","text":"","forward":-65.64640905381476,"right":1.1770412458913313,"up":-0.07448303116169991,"movedM":3.113963247675788e-9,"speed":48.745953166713406}
+{"t":1791005739487,"s":1.262,"kind":"seats","text":"","forward":-67.27402791024933,"right":1.200218356803095,"up":-0.07856999880095282,"movedM":3.113963247675788e-9,"speed":48.645291200838074}
+{"t":1791005739519,"s":1.294,"kind":"seats","text":"","forward":-68.90193478659785,"right":1.2234720331505748,"up":-0.08272667067424555,"movedM":3.113963247675788e-9,"speed":48.764317852935335}
+{"t":1791005739553,"s":1.328,"kind":"seats","text":"","forward":-70.53015145171226,"right":1.2469029370909084,"up":-0.0869746341073962,"movedM":3.113963247675788e-9,"speed":48.77348871472516}
+{"t":1791005739587,"s":1.362,"kind":"seats","text":"","forward":-72.15865662200648,"right":1.2705821971118247,"up":-0.09133212478883215,"movedM":3.113963247675788e-9,"speed":48.78264150852426}
+{"t":1791005739621,"s":1.396,"kind":"seats","text":"","forward":-73.7874646799674,"right":1.2945416804522765,"up":-0.09581303096636402,"movedM":3.113963247675788e-9,"speed":48.68182858186481}
+{"t":1791005739621,"s":1.396,"kind":"seats","text":"","forward":-73.7874646799674,"right":1.2945416804522765,"up":-0.09581303096636402,"movedM":3.113963247675788e-9,"speed":48.68182858186481}
+{"t":1791005739655,"s":1.43,"kind":"seats","text":"","forward":-75.41657107623729,"right":1.3187990934144516,"up":-0.10041268598483767,"movedM":3.113963247675788e-9,"speed":48.77681518260576}
+{"t":1791005739688,"s":1.463,"kind":"seats","text":"","forward":-77.04597579487057,"right":1.3434155758015578,"up":-0.10511498983080164,"movedM":3.113963247675788e-9,"speed":48.81007211187428}
+{"t":1791005739719,"s":1.494,"kind":"seats","text":"","forward":-77.86079203785843,"right":1.355883367837535,"up":-0.10750033574352674,"movedM":3.113963247675788e-9,"speed":47.540145441742595}
+{"t":1791005739752,"s":1.527,"kind":"seats","text":"","forward":-80.30567520274337,"right":1.3940248382906724,"up":-0.11476506368332957,"movedM":3.113963247675788e-9,"speed":48.90984785601597}
+{"t":1791005739785,"s":1.56,"kind":"seats","text":"","forward":-81.52837107194378,"right":1.4135197636504877,"up":-0.11844046865057972,"movedM":3.113963247675788e-9,"speed":48.48127199859344}
+{"t":1791005739821,"s":1.596,"kind":"seats","text":"","forward":-83.56656823303973,"right":1.4465912037129627,"up":-0.12459212904019733,"movedM":3.113963247675788e-9,"speed":48.8225014501234}
+{"t":1791005739852,"s":1.627,"kind":"seats","text":"","forward":-84.78970298001548,"right":1.4667706562361502,"up":-0.12828269783032265,"movedM":3.113963247675788e-9,"speed":48.33722696378886}
+{"t":1791005739885,"s":1.66,"kind":"seats","text":"","forward":-86.01300817172779,"right":1.4872179341280543,"up":-0.13195989623414245,"movedM":3.113963247675788e-9,"speed":47.66421813323656}
+{"t":1791005739918,"s":1.693,"kind":"seats","text":"","forward":-87.64434620724167,"right":1.5149340545178376,"up":-0.13682883078660088,"movedM":3.113963247675788e-9,"speed":47.67314324728655}
+{"t":1791005739951,"s":1.726,"kind":"seats","text":"","forward":-89.68393505636362,"right":1.5503534158894112,"up":-0.1428548847559836,"movedM":3.113963247675788e-9,"speed":48.44538566450356}
+{"t":1791005739984,"s":1.759,"kind":"seats","text":"","forward":-90.49989931933715,"right":1.5647595703864994,"up":-0.145244675898222,"movedM":3.113963247675788e-9,"speed":47.087333915282734}
+{"t":1791005740018,"s":1.793,"kind":"seats","text":"","forward":-92.13205111499545,"right":1.593943342770686,"up":-0.14998244226034294,"movedM":3.113963247675788e-9,"speed":47.01738233227676}
+{"t":1791005740054,"s":1.829,"kind":"seats","text":"","forward":-94.98903724786474,"right":1.6460630952234112,"up":-0.1581230539262404,"movedM":3.113963247675788e-9,"speed":48.91066154840579}
+{"t":1791005740084,"s":1.859,"kind":"seats","text":"","forward":-96.21374399654846,"right":1.6688073830259,"up":-0.16155515977726245,"movedM":3.113963247675788e-9,"speed":48.48164462307697}
+{"t":1791005740118,"s":1.893,"kind":"seats","text":"","forward":-97.43861834969945,"right":1.691807118138982,"up":-0.16495828935635728,"movedM":3.113963247675788e-9,"speed":47.7267038988564}
+{"t":1791005740151,"s":1.926,"kind":"seats","text":"","forward":-98.66365995204471,"right":1.7150585695074128,"up":-0.16833739553283195,"movedM":3.113963247675788e-9,"speed":47.052599159154866}
+{"t":1791005740184,"s":1.959,"kind":"seats","text":"","forward":-101.1142420632948,"right":1.7622281016568593,"up":-0.17504485260911898,"movedM":3.113963247675788e-9,"speed":48.508913256717115}
+{"t":1791005740218,"s":1.993,"kind":"seats","text":"","forward":-102.33978423038864,"right":1.7860668871574532,"up":-0.178376203028841,"movedM":3.113963247675788e-9,"speed":47.8335278702348}
+{"t":1791005740251,"s":2.026,"kind":"seats","text":"","forward":-103.5654975353687,"right":1.8100202010057913,"up":-0.18169221248484246,"movedM":3.113963247675788e-9,"speed":47.23704769035147}
+{"t":1791005740285,"s":2.06,"kind":"seats","text":"","forward":-106.01743962048953,"right":1.8582117431485798,"up":-0.18828157113807428,"movedM":3.113963247675788e-9,"speed":48.53619613533409}
+{"t":1791005740317,"s":2.092,"kind":"seats","text":"","forward":-107.24366570613039,"right":1.8824368448946487,"up":-0.19155762715896674,"movedM":3.113963247675788e-9,"speed":49.1432511153433}
+{"t":1791005740351,"s":2.126,"kind":"seats","text":"","forward":-108.87889857087961,"right":1.9148476920221,"up":-0.19591042528985855,"movedM":3.113963247675788e-9,"speed":47.709579526269756}
+{"t":1791005740384,"s":2.159,"kind":"seats","text":"","forward":-110.92336713147881,"right":1.955449797976378,"up":-0.20131979010094367,"movedM":3.113963247675788e-9,"speed":49.00009869912038}
+{"t":1791005740418,"s":2.193,"kind":"seats","text":"","forward":-112.15027794702749,"right":1.9797684180570414,"up":-0.2045457980978874,"movedM":3.113963247675788e-9,"speed":47.88734350052854}
+{"t":1791005740451,"s":2.226,"kind":"seats","text":"","forward":-113.78642648161863,"right":2.012039830494146,"up":-0.20882139083892362,"movedM":3.113963247675788e-9,"speed":48.41721190122146}
+{"t":1791005740485,"s":2.26,"kind":"seats","text":"","forward":-115.42288178060213,"right":2.044097709589721,"up":-0.21306955135638675,"movedM":3.113963247675788e-9,"speed":49.02533974918797}
+{"t":1791005740518,"s":2.293,"kind":"seats","text":"","forward":-117.05964812669507,"right":2.0759247660474216,"up":-0.21729767398390104,"movedM":3.113963247675788e-9,"speed":49.034510660258725}
+{"t":1791005740551,"s":2.326,"kind":"seats","text":"","forward":-118.69672254483224,"right":2.107476591125355,"up":-0.2215148202557579,"movedM":3.113963247675788e-9,"speed":48.36364707660555}
+{"t":1791005740584,"s":2.359,"kind":"seats","text":"","forward":-120.33410283634757,"right":2.138671159669812,"up":-0.22572842477562555,"movedM":3.113963247675788e-9,"speed":49.73296260689528}
+{"t":1791005740618,"s":2.393,"kind":"seats","text":"","forward":-121.97179298836414,"right":2.169390943319115,"up":-0.22994061968330862,"movedM":3.113963247675788e-9,"speed":49.74224227900758}
+{"t":1791005740618,"s":2.393,"kind":"seats","text":"","forward":-122.3812642195278,"right":2.176981992246617,"up":-0.2309928809385456,"movedM":3.113963247675788e-9,"speed":50.42481425330935}
+{"t":1791005740652,"s":2.427,"kind":"seats","text":"","forward":-123.60979763188821,"right":2.1995221546054537,"up":-0.23414603853839108,"movedM":3.113963247675788e-9,"speed":47.8698430535131}
+{"t":1791005740685,"s":2.46,"kind":"seats","text":"","forward":-125.65774603167955,"right":2.2362986799885363,"up":-0.23938974485668368,"movedM":3.113963247675788e-9,"speed":49.69091718370014}
+{"t":1791005740719,"s":2.494,"kind":"seats","text":"","forward":-127.70618077239428,"right":2.2720932492093553,"up":-0.2446287099320729,"movedM":3.113963247675788e-9,"speed":51.14072780165563}
+{"t":1791005740752,"s":2.527,"kind":"seats","text":"","forward":-129.34527229560172,"right":2.300010961098131,"up":-0.24883004706903378,"movedM":3.113963247675788e-9,"speed":49.71167383772749}
+{"t":1791005740786,"s":2.561,"kind":"seats","text":"","forward":-130.98466899728666,"right":2.3272155790009634,"up":-0.2530485248063142,"movedM":3.113963247675788e-9,"speed":50.529249634080266}
+{"t":1791005740822,"s":2.597,"kind":"seats","text":"","forward":-132.62438196817664,"right":2.3536049161927224,"up":-0.25728219014685566,"movedM":3.113963247675788e-9,"speed":50.90029258207871}
+{"t":1791005740853,"s":2.628,"kind":"seats","text":"","forward":-134.26440765285471,"right":2.3790966611128113,"up":-0.26152515776955987,"movedM":3.113963247675788e-9,"speed":49.739220657724}
+{"t":1791005740888,"s":2.663,"kind":"seats","text":"","forward":-135.49463575499914,"right":2.397618910726294,"up":-0.26471059886419174,"movedM":3.113963247675788e-9,"speed":49.484729255031006}
+{"t":1791005740919,"s":2.694,"kind":"seats","text":"","forward":-137.13520811204606,"right":2.4215544130332063,"up":-0.268966943194512,"movedM":3.113963247675788e-9,"speed":49.755233521227034}
+{"t":1791005740952,"s":2.727,"kind":"seats","text":"","forward":-138.77608805835152,"right":2.444654041738268,"up":-0.2732427843433965,"movedM":3.113963247675788e-9,"speed":49.04426034089201}
+{"t":1791005740985,"s":2.76,"kind":"seats","text":"","forward":-140.00695702052644,"right":2.4614437556903965,"up":-0.2764686417912464,"movedM":3.113963247675788e-9,"speed":49.13750813265289}
+{"t":1791005741019,"s":2.794,"kind":"seats","text":"","forward":-141.64838398749183,"right":2.483097827410681,"up":-0.2807968132002876,"movedM":3.113963247675788e-9,"speed":49.059966743866234}
+{"t":1791005741051,"s":2.826,"kind":"seats","text":"","forward":-143.70058741432763,"right":2.5088711559109313,"up":-0.2862465850524186,"movedM":3.113963247675788e-9,"speed":49.86402174211976}
+{"t":1791005741085,"s":2.86,"kind":"seats","text":"","forward":-144.52160325589946,"right":2.5187573045921354,"up":-0.2884368351848345,"movedM":3.113963247675788e-9,"speed":48.50451462114086}
+{"t":1791005741118,"s":2.893,"kind":"seats","text":"","forward":-146.57448440458145,"right":2.542483273701208,"up":-0.2939450885964456,"movedM":3.113963247675788e-9,"speed":49.19770793261672}
+{"t":1791005741151,"s":2.926,"kind":"seats","text":"","forward":-148.6278400367272,"right":2.5649483734042917,"up":-0.2995209320904302,"movedM":3.113963247675788e-9,"speed":49.89115232715149}
+{"t":1791005741184,"s":2.959,"kind":"seats","text":"","forward":-149.44931299116888,"right":2.5736054011854463,"up":-0.3017763045995493,"movedM":3.113963247675788e-9,"speed":48.53085676199523}
+{"t":1791005741218,"s":2.993,"kind":"seats","text":"","forward":-151.09248410361616,"right":2.5903392956096454,"up":-0.3063354588441369,"movedM":3.113963247675788e-9,"speed":48.53959411759911}
+{"t":1791005741251,"s":3.026,"kind":"seats","text":"","forward":-153.55780467862644,"right":2.6138694413285535,"up":-0.31328877992772397,"movedM":3.113963247675788e-9,"speed":50.00141447201228}
+{"t":1791005741284,"s":3.059,"kind":"seats","text":"","forward":-154.37972844942922,"right":2.621285433529387,"up":-0.31563388850162705,"movedM":3.113963247675788e-9,"speed":47.95408437625828}
+{"t":1791005741318,"s":3.093,"kind":"seats","text":"","forward":-156.02379978789193,"right":2.6355233884586724,"up":-0.32036315841963114,"movedM":3.113963247675788e-9,"speed":47.27851116993468}
+{"t":1791005741352,"s":3.127,"kind":"seats","text":"","forward":-158.90163254463602,"right":2.6588072433789733,"up":-0.32878085925835876,"movedM":3.113963247675788e-9,"speed":49.263883586356265}
+{"t":1791005741384,"s":3.159,"kind":"seats","text":"","forward":-159.72403406196665,"right":2.665130179689868,"up":-0.3312243956337025,"movedM":3.113963247675788e-9,"speed":47.98180250214506}
+{"t":1791005741418,"s":3.193,"kind":"seats","text":"","forward":-161.36905404175715,"right":2.677364324205911,"up":-0.3361687928255291,"movedM":3.113963247675788e-9,"speed":48.23184082136352}
+{"t":1791005741451,"s":3.226,"kind":"seats","text":"","forward":-163.42573569663398,"right":2.691863631042665,"up":-0.3424512656861618,"movedM":3.113963247675788e-9,"speed":48.76689913539905}
+{"t":1791005741484,"s":3.259,"kind":"seats","text":"","forward":-164.6599589329445,"right":2.7001526654246533,"up":-0.3462693197510369,"movedM":3.113963247675788e-9,"speed":48.93697830162749}
+{"t":1791005741518,"s":3.293,"kind":"seats","text":"","forward":-166.3058422903882,"right":2.7107944319325554,"up":-0.3514097668883038,"movedM":3.113963247675788e-9,"speed":48.78184372855462}
+{"t":1791005741551,"s":3.326,"kind":"seats","text":"","forward":-168.36359888576467,"right":2.7236240044970685,"up":-0.35791810675313285,"movedM":3.113963247675788e-9,"speed":49.39601509313198}
+{"t":1791005741584,"s":3.359,"kind":"seats","text":"","forward":-169.59846307214437,"right":2.731156461278232,"up":-0.3618751297006638,"movedM":3.113963247675788e-9,"speed":49.40245145384295}
+{"t":1791005741618,"s":3.393,"kind":"seats","text":"","forward":-170.8334848982455,"right":2.7385928098052688,"up":-0.36587589973977996,"movedM":3.113963247675788e-9,"speed":48.72370334224197}
+{"t":1791005741618,"s":3.393,"kind":"seats","text":"","forward":-170.8334848982455,"right":2.7385928098052688,"up":-0.36587589973977996,"movedM":3.113963247675788e-9,"speed":48.72370334224197}
+{"t":1791005741651,"s":3.426,"kind":"seats","text":"","forward":-172.8922005127485,"right":2.750721866959111,"up":-0.37264604943506097,"movedM":3.113963247675788e-9,"speed":48.65302064469092}
+{"t":1791005741685,"s":3.46,"kind":"seats","text":"","forward":-174.53948181432048,"right":2.7601056039968768,"up":-0.3781523881354984,"movedM":3.113963247675788e-9,"speed":50.113494132888164}
+{"t":1791005741718,"s":3.493,"kind":"seats","text":"","forward":-175.77512663653334,"right":2.7669385746563364,"up":-0.38233122373497574,"movedM":3.113963247675788e-9,"speed":48.66766432370406}
+{"t":1791005741751,"s":3.526,"kind":"seats","text":"","forward":-178.2470455736467,"right":2.7802268364345935,"up":-0.3908075277084259,"movedM":3.113963247675788e-9,"speed":49.36499662525571}
+{"t":1791005741785,"s":3.56,"kind":"seats","text":"","forward":-179.89527739531485,"right":2.7889122005786504,"up":-0.39655219021614396,"movedM":3.113963247675788e-9,"speed":50.797974022678005}
+{"t":1791005741818,"s":3.593,"kind":"seats","text":"","forward":-180.71946390020574,"right":2.7932241878308446,"up":-0.3994561792628858,"movedM":3.113963247675788e-9,"speed":49.3776910606412}
+{"t":1791005741851,"s":3.626,"kind":"seats","text":"","forward":-182.78021539273544,"right":2.803904923629034,"up":-0.40682068607121513,"movedM":3.113963247675788e-9,"speed":48.70321692613742}
+{"t":1791005741884,"s":3.659,"kind":"seats","text":"","forward":-184.8413875253245,"right":2.8143434720356453,"up":-0.41433343148447166,"movedM":3.113963247675788e-9,"speed":50.768513513170774}
+{"t":1791005741918,"s":3.693,"kind":"seats","text":"","forward":-186.0782923640842,"right":2.820462092803922,"up":-0.4189070000588785,"movedM":3.113963247675788e-9,"speed":50.089816405812755}
+{"t":1791005741951,"s":3.726,"kind":"seats","text":"","forward":-188.1401306505173,"right":2.8305385147903905,"up":-0.42663758483474484,"movedM":3.113963247675788e-9,"speed":48.81107231713501}
+{"t":1791005741984,"s":3.759,"kind":"seats","text":"","forward":-189.78989092935973,"right":2.838615144503464,"up":-0.43292696793299185,"movedM":3.113963247675788e-9,"speed":50.10858399076577}
+{"t":1791005742018,"s":3.793,"kind":"seats","text":"","forward":-190.6148685120897,"right":2.8426829823977187,"up":-0.4361088196756369,"movedM":3.113963247675788e-9,"speed":48.823203951396174}
+{"t":1791005742051,"s":3.826,"kind":"seats","text":"","forward":-193.50279927095494,"right":2.8570981917986416,"up":-0.4474400770856297,"movedM":3.113963247675788e-9,"speed":50.12717974841699}
+{"t":1791005742085,"s":3.86,"kind":"seats","text":"","forward":-195.1534029229982,"right":2.865367040652984,"up":-0.45405208217720394,"movedM":3.113963247675788e-9,"speed":50.786661436580665}
+{"t":1791005742118,"s":3.893,"kind":"seats","text":"","forward":-195.5660927492845,"right":2.867422369466098,"up":-0.4557199235995177,"movedM":3.113963247675788e-9,"speed":47.974945426614276}
+{"t":1791005742151,"s":3.926,"kind":"seats","text":"","forward":-197.62978472687038,"right":2.877624314253694,"up":-0.4641442646939715,"movedM":3.113963247675788e-9,"speed":48.77574053931758}
+{"t":1791005742185,"s":3.96,"kind":"seats","text":"","forward":-199.6938734202207,"right":2.887759192352675,"up":-0.47270518360495956,"movedM":3.113963247675788e-9,"speed":50.15776275521553}
+{"t":1791005742218,"s":3.993,"kind":"seats","text":"","forward":-200.51961780576426,"right":2.8918136279866076,"up":-0.4761685049457734,"movedM":3.113963247675788e-9,"speed":49.475656918710776}
+{"t":1791005742251,"s":4.026,"kind":"seats","text":"","forward":-202.1712932098321,"right":2.8999631250560185,"up":-0.48317019643688114,"movedM":3.113963247675788e-9,"speed":48.797293111114854}
+{"t":1791005742284,"s":4.059,"kind":"seats","text":"","forward":-204.64927512555775,"right":2.912193987135254,"up":-0.4938710221736823,"movedM":3.113963247675788e-9,"speed":50.18180130380941}
+{"t":1791005742317,"s":4.092,"kind":"seats","text":"","forward":-205.47539489996814,"right":2.9161867613233596,"up":-0.49748391978238143,"movedM":3.113963247675788e-9,"speed":49.58193097674412}
+{"t":1791005742351,"s":4.126,"kind":"seats","text":"","forward":-207.1278208280291,"right":2.923947880084498,"up":-0.504762988357299,"movedM":3.113963247675788e-9,"speed":48.133543598309096}
+{"t":1791005742385,"s":4.16,"kind":"seats","text":"","forward":-209.60692009409766,"right":2.9351245783725233,"up":-0.5158066863275858,"movedM":3.113963247675788e-9,"speed":49.518326236280345}
+{"t":1791005742418,"s":4.193,"kind":"seats","text":"","forward":-210.84667652209998,"right":2.940590124270088,"up":-0.5213946961720384,"movedM":3.113963247675788e-9,"speed":50.210943871518346}
+{"t":1791005742451,"s":4.226,"kind":"seats","text":"","forward":-212.9132395400812,"right":2.949561304186517,"up":-0.5308301089616005,"movedM":3.113963247675788e-9,"speed":50.22066347480427}
+{"t":1791005742484,"s":4.259,"kind":"seats","text":"","forward":-214.5667598789816,"right":2.956588152105155,"up":-0.5385144848706503,"movedM":3.113963247675788e-9,"speed":49.541290949153804}
+{"t":1791005742518,"s":4.293,"kind":"seats","text":"","forward":-215.80705939882463,"right":2.961711488359825,"up":-0.5443697596810012,"movedM":3.113963247675788e-9,"speed":49.546969512384}
+{"t":1791005742552,"s":4.327,"kind":"seats","text":"","forward":-217.46099944194668,"right":2.9682821279288305,"up":-0.5523145524335341,"movedM":3.113963247675788e-9,"speed":48.7158326488598}
+{"t":1791005742584,"s":4.359,"kind":"seats","text":"","forward":-219.52875827204775,"right":2.9760275847313977,"up":-0.5624689798523541,"movedM":3.113963247675788e-9,"speed":49.56384632712603}
+{"t":1791005742618,"s":4.393,"kind":"seats","text":"","forward":-220.769588484503,"right":2.9804123415831043,"up":-0.5686726995194978,"movedM":3.113963247675788e-9,"speed":50.25692126798913}
+{"t":1791005742618,"s":4.393,"kind":"seats","text":"","forward":-220.769588484503,"right":2.9804123415831043,"up":-0.5686726995194978,"movedM":3.113963247675788e-9,"speed":48.08869152060104}
+{"t":1791005742651,"s":4.426,"kind":"seats","text":"","forward":-222.01054764506037,"right":2.984550386089211,"up":-0.5749510514421902,"movedM":3.113963247675788e-9,"speed":47.51202784571292}
+{"t":1791005742684,"s":4.459,"kind":"seats","text":"","forward":-224.4928465702863,"right":2.9919790620375153,"up":-0.5877364949291765,"movedM":3.113963247675788e-9,"speed":48.97976234158475}
+{"t":1791005742718,"s":4.493,"kind":"seats","text":"","forward":-225.7341866272948,"right":2.995238583607531,"up":-0.594259555487692,"movedM":3.113963247675788e-9,"speed":50.363101324325775}
+{"t":1791005742751,"s":4.526,"kind":"seats","text":"","forward":-226.97565393003035,"right":2.9981410660134316,"up":-0.6008803143912032,"movedM":3.113963247675788e-9,"speed":48.90878800807778}
+{"t":1791005742784,"s":4.559,"kind":"seats","text":"","forward":-229.45896505771668,"right":3.0026596352857524,"up":-0.6144144792279683,"movedM":3.113963247675788e-9,"speed":49.60739636314762}
+{"t":1791005742818,"s":4.593,"kind":"seats","text":"","forward":-230.70080722075298,"right":3.0042343510825873,"up":-0.6213197553423033,"movedM":3.113963247675788e-9,"speed":50.30082521318407}
+{"t":1791005742851,"s":4.626,"kind":"seats","text":"","forward":-231.94277454505595,"right":3.005375845561389,"up":-0.6283144906503508,"movedM":3.113963247675788e-9,"speed":49.61792580810078}
+{"t":1791005742885,"s":4.66,"kind":"seats","text":"","forward":-234.42707352794594,"right":3.0063812817496682,"up":-0.6425707291395724,"movedM":3.113963247675788e-9,"speed":50.96984680753611}
+{"t":1791005742917,"s":4.692,"kind":"seats","text":"","forward":-236.08352940048258,"right":3.0061074702657464,"up":-0.6523010385888993,"movedM":3.113963247675788e-9,"speed":51.012054098332804}
+{"t":1791005742951,"s":4.726,"kind":"seats","text":"","forward":-236.9118346262395,"right":3.0056694062114957,"up":-0.6572410486260178,"movedM":3.113963247675788e-9,"speed":49.638481506294475}
+{"t":1791005742984,"s":4.759,"kind":"seats","text":"","forward":-238.9828235701454,"right":3.003417765086425,"up":-0.6697851646561572,"movedM":3.113963247675788e-9,"speed":49.03987465676263}
+{"t":1791005743018,"s":4.793,"kind":"seats","text":"","forward":-241.0541358358396,"right":2.999084418920461,"up":-0.6825119551591091,"movedM":3.113963247675788e-9,"speed":50.34383896446853}
+{"t":1791005743051,"s":4.826,"kind":"seats","text":"","forward":-242.2970758349785,"right":2.9954597640612377,"up":-0.6902128628994982,"movedM":3.113963247675788e-9,"speed":48.971018871457794}
+{"t":1791005743084,"s":4.859,"kind":"seats","text":"","forward":-244.36889157664842,"right":2.987878058744542,"up":-0.7031795367019531,"movedM":3.113963247675788e-9,"speed":49.667907973767896}
+{"t":1791005743118,"s":4.893,"kind":"seats","text":"","forward":-246.02655598611065,"right":2.9804055298062053,"up":-0.7136848811802015,"movedM":3.113963247675788e-9,"speed":50.36327742785598}
+{"t":1791005743151,"s":4.926,"kind":"seats","text":"","forward":-246.85545687941305,"right":2.9761707542040767,"up":-0.7189832074551028,"movedM":3.113963247675788e-9,"speed":49.06990335741306}
+{"t":1791005743184,"s":4.959,"kind":"seats","text":"","forward":-248.9279065215945,"right":2.96381379883573,"up":-0.7323489296614033,"movedM":3.113963247675788e-9,"speed":48.99561891089849}
+{"t":1791005743217,"s":4.992,"kind":"seats","text":"","forward":-251.0006328762389,"right":2.948035676051475,"up":-0.7458380162663318,"movedM":3.113963247675788e-9,"speed":50.3817112984153}
+{"t":1791005743251,"s":5.026,"kind":"seats","text":"","forward":-252.24439355754268,"right":2.9361838103109648,"up":-0.7538991902380873,"movedM":3.113963247675788e-9,"speed":50.38612201979251}
+{"t":1791005743285,"s":5.06,"kind":"seats","text":"","forward":-253.9028748158934,"right":2.91709197552683,"up":-0.7645839567184074,"movedM":3.113963247675788e-9,"speed":49.58863104936175}
+{"t":1791005743318,"s":5.093,"kind":"seats","text":"","forward":-255.97615485929185,"right":2.887433379256393,"up":-0.7779581860836996,"movedM":3.113963247675788e-9,"speed":51.14248661339392}
+{"t":1791005743351,"s":5.126,"kind":"seats","text":"","forward":-257.2201955116716,"right":2.8662408997504514,"up":-0.7860536135852872,"movedM":3.113963247675788e-9,"speed":50.40258984329124}
+{"t":1791005743384,"s":5.159,"kind":"seats","text":"","forward":-258.46428020768496,"right":2.842579576221766,"up":-0.7942944762210878,"movedM":3.113963247675788e-9,"speed":48.33687645812813}
+{"t":1791005743417,"s":5.192,"kind":"seats","text":"","forward":-260.5378309023838,"right":2.7982967606586726,"up":-0.8086569247633784,"movedM":3.113963247675788e-9,"speed":49.805262699267054}
+{"t":1791005743451,"s":5.226,"kind":"seats","text":"","forward":-262.61144165939385,"right":2.748989987962659,"up":-0.824255098499229,"movedM":3.113963247675788e-9,"speed":51.10747154732943}
+{"t":1791005743484,"s":5.259,"kind":"seats","text":"","forward":-263.440893903394,"right":2.728200500766903,"up":-0.83098396134447,"movedM":3.113963247675788e-9,"speed":48.42993825340553}
+{"t":1791005743518,"s":5.293,"kind":"seats","text":"","forward":-265.0998008035921,"right":2.6855111467504997,"up":-0.8455809649377567,"movedM":3.113963247675788e-9,"speed":49.706094425243904}
+{"t":1791005743520,"s":16.835,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791005743555,"s":5.33,"kind":"seats","text":"","forward":-268.00288755449066,"right":2.609851722855879,"up":-0.8755550589653583,"movedM":3.113963247675788e-9,"speed":50.81399673497331}
+{"t":1791005743585,"s":5.36,"kind":"seats","text":"","forward":-268.4176137487812,"right":2.599111662659652,"up":-0.8803091935543322,"movedM":3.113963247675788e-9,"speed":49.04901353865005}
+{"t":1791005743619,"s":5.394,"kind":"seats","text":"","forward":-271.3207214334292,"right":2.5253408609560637,"up":-0.9163350216477779,"movedM":3.113963247675788e-9,"speed":51.08766404056779}
+{"t":1791005743619,"s":5.394,"kind":"seats","text":"","forward":-271.3207214334292,"right":2.5253408609560637,"up":-0.9163350216477779,"movedM":3.113963247675788e-9,"speed":51.08766404056779}
+{"t":1791005743653,"s":5.428,"kind":"seats","text":"","forward":-272.97970479104083,"right":2.4847068513032156,"up":-0.9384182040072989,"movedM":3.113963247675788e-9,"speed":50.27198909775033}
+{"t":1791005743689,"s":5.464,"kind":"seats","text":"","forward":-274.638734222573,"right":2.445625843237451,"up":-0.9609109577379991,"movedM":3.113963247675788e-9,"speed":50.09794629881213}
+{"t":1791005743719,"s":5.494,"kind":"seats","text":"","forward":-276.2978371508116,"right":2.4087966342152356,"up":-0.983374456064466,"movedM":3.113963247675788e-9,"speed":51.82373474704453}
+{"t":1791005743752,"s":5.527,"kind":"seats","text":"","forward":-277.9570196996613,"right":2.3752073682083505,"up":-1.0054881651983645,"movedM":3.113963247675788e-9,"speed":51.09603967947265}
+{"t":1791005743785,"s":5.56,"kind":"seats","text":"","forward":-279.6162863999904,"right":2.3460260416779306,"up":-1.0270205709549347,"movedM":3.113963247675788e-9,"speed":50.368143281572216}
+{"t":1791005743818,"s":5.593,"kind":"seats","text":"","forward":-281.27564041573095,"right":2.322416909595347,"up":-1.047837675133906,"movedM":3.113963247675788e-9,"speed":51.18991574028499}
+{"t":1791005743851,"s":5.626,"kind":"seats","text":"","forward":-282.5202103911823,"right":2.308878211763016,"up":-1.0629495814402141,"movedM":3.113963247675788e-9,"speed":50.44856317502742}
+{"t":1791005743885,"s":5.66,"kind":"seats","text":"","forward":-284.5946160426847,"right":2.2949467750494534,"up":-1.087195798554921,"movedM":3.113963247675788e-9,"speed":51.142041994362614}
+{"t":1791005743918,"s":5.693,"kind":"seats","text":"","forward":-286.2542344413983,"right":2.2921535171112453,"up":-1.1057988316281313,"movedM":3.113963247675788e-9,"speed":50.45324192276464}
+{"t":1791005743951,"s":5.726,"kind":"seats","text":"","forward":-287.08407983299844,"right":2.293744486012301,"up":-1.1148611435805,"movedM":3.113963247675788e-9,"speed":49.76339603376114}
+{"t":1791005743984,"s":5.759,"kind":"seats","text":"","forward":-288.32888769365275,"right":2.3000760353506706,"up":-1.1281875389909939,"movedM":3.113963247675788e-9,"speed":49.76517965814124}
+{"t":1791005744018,"s":5.793,"kind":"seats","text":"","forward":-290.40367093586747,"right":2.3216132204504305,"up":-1.1497951881278576,"movedM":3.113963247675788e-9,"speed":49.008829968409174}
+{"t":1791005744051,"s":5.826,"kind":"seats","text":"","forward":-292.0635910826735,"right":2.349028425171298,"up":-1.1666566237914842,"movedM":3.113963247675788e-9,"speed":49.08023786811838}
+{"t":1791005744084,"s":5.859,"kind":"seats","text":"","forward":-293.72358939840666,"right":2.385571432904044,"up":-1.1832379529883805,"movedM":3.113963247675788e-9,"speed":50.46535550490105}
+{"t":1791005744118,"s":5.893,"kind":"seats","text":"","forward":-294.9686679759464,"right":2.415509451560794,"up":-1.1955602815061397,"movedM":3.113963247675788e-9,"speed":49.77682357075857}
+{"t":1791005744151,"s":5.926,"kind":"seats","text":"","forward":-297.0439166936168,"right":2.4741991876279172,"up":-1.2159026341001344,"movedM":3.113963247675788e-9,"speed":48.724042895773586}
+{"t":1791005744184,"s":5.959,"kind":"seats","text":"","forward":-298.7041919423361,"right":2.532179545366944,"up":-1.232042522123178,"movedM":3.113963247675788e-9,"speed":50.476109075851}
+{"t":1791005744218,"s":5.993,"kind":"seats","text":"","forward":-300.36453574902913,"right":2.599327973294038,"up":-1.2481056119999274,"movedM":3.113963247675788e-9,"speed":48.48781095055828}
+{"t":1791005744251,"s":6.026,"kind":"seats","text":"","forward":-302.44007011378073,"right":2.694243811532104,"up":-1.268124661204877,"movedM":3.113963247675788e-9,"speed":49.267477991627565}
+{"t":1791005744285,"s":6.06,"kind":"seats","text":"","forward":-303.27031563014407,"right":2.735592112220047,"up":-1.2761268490918578,"movedM":3.113963247675788e-9,"speed":48.12419072643451}
+{"t":1791005744317,"s":6.092,"kind":"seats","text":"","forward":-305.34600544337917,"right":2.8471381836063188,"up":-1.2961381211410652,"movedM":3.113963247675788e-9,"speed":48.581620726975295}
+{"t":1791005744351,"s":6.126,"kind":"seats","text":"","forward":-307.42179624472726,"right":2.9695116280939544,"up":-1.3161605704814379,"movedM":3.113963247675788e-9,"speed":49.19839890494743}
+{"t":1791005744385,"s":6.16,"kind":"seats","text":"","forward":-309.0825033133603,"right":3.0744777562000962,"up":-1.3321809821399693,"movedM":3.113963247675788e-9,"speed":49.120882049209165}
+{"t":1791005744418,"s":6.193,"kind":"seats","text":"","forward":-310.3280782479391,"right":3.1570044118358993,"up":-1.3441935439384713,"movedM":3.113963247675788e-9,"speed":48.43292043928715}
+{"t":1791005744451,"s":6.226,"kind":"seats","text":"","forward":-312.819348322562,"right":3.330847962097266,"up":-1.3681999542981393,"movedM":3.113963247675788e-9,"speed":50.51384477866776}
+{"t":1791005744485,"s":6.26,"kind":"seats","text":"","forward":-314.06503971746,"right":3.421651882738189,"up":-1.3801927370297475,"movedM":3.113963247675788e-9,"speed":49.13441274426574}
+{"t":1791005744518,"s":6.293,"kind":"seats","text":"","forward":-314.8955246141652,"right":3.4834412297574175,"up":-1.3881840079572165,"movedM":3.113963247675788e-9,"speed":47.75364784528326}
+{"t":1791005744551,"s":6.326,"kind":"seats","text":"","forward":-316.9718221737696,"right":3.6415540344002864,"up":-1.4081472886683755,"movedM":3.113963247675788e-9,"speed":49.833887391336916}
+{"t":1791005744584,"s":6.359,"kind":"seats","text":"","forward":-318.63294991401483,"right":3.7708612030473887,"up":-1.4240969221452364,"movedM":3.113963247675788e-9,"speed":50.530065911782685}
+{"t":1791005744618,"s":6.393,"kind":"seats","text":"","forward":-320.2941685477484,"right":3.901788704033777,"up":-1.4400206394192971,"movedM":3.113963247675788e-9,"speed":49.92620895652608}
+{"t":1791005744618,"s":6.393,"kind":"seats","text":"","forward":-320.2941685477484,"right":3.901788704033777,"up":-1.4400206394192971,"movedM":3.113963247675788e-9,"speed":49.842998608265205}
+{"t":1791005744651,"s":6.426,"kind":"seats","text":"","forward":-321.9554898346252,"right":4.033694132809757,"up":-1.4559154937147665,"movedM":3.113963247675788e-9,"speed":49.847544124517945}
+{"t":1791005744685,"s":6.46,"kind":"seats","text":"","forward":-323.6169201663148,"right":4.165979998028689,"up":-1.4717801826455525,"movedM":3.113963247675788e-9,"speed":50.55720409253186}
+{"t":1791005744718,"s":6.493,"kind":"seats","text":"","forward":-324.86307080847564,"right":4.26508703113285,"up":-1.4836639196965553,"movedM":3.113963247675788e-9,"speed":49.8554945494137}
+{"t":1791005744751,"s":6.526,"kind":"seats","text":"","forward":-326.94014556339215,"right":4.429226174981039,"up":-1.5034572890777356,"movedM":3.113963247675788e-9,"speed":49.861164303310304}
+{"t":1791005744785,"s":6.56,"kind":"seats","text":"","forward":-329.0174221711839,"right":4.590765282446938,"up":-1.5232500575033505,"movedM":3.113963247675788e-9,"speed":50.572110717698315}
+{"t":1791005744820,"s":6.595,"kind":"seats","text":"","forward":-329.8483968554121,"right":4.654312558306714,"up":-1.531167382140584,"movedM":3.113963247675788e-9,"speed":48.20710370506165}
+{"t":1791005744851,"s":6.626,"kind":"seats","text":"","forward":-331.9260034210229,"right":4.809862738245357,"up":-1.550960446545353,"movedM":3.113963247675788e-9,"speed":49.18250486035726}
+{"t":1791005744887,"s":6.662,"kind":"seats","text":"","forward":-334.41947440881927,"right":4.989258188123159,"up":-1.5747180986492677,"movedM":3.113963247675788e-9,"speed":51.049301086674966}
+{"t":1791005744918,"s":6.693,"kind":"seats","text":"","forward":-334.83509097975775,"right":5.01829024358608,"up":-1.5786801562798534,"movedM":3.113963247675788e-9,"speed":48.390120044794955}
+{"t":1791005744951,"s":6.726,"kind":"seats","text":"","forward":-336.9133449163481,"right":5.159342658663633,"up":-1.5985110007857901,"movedM":3.113963247675788e-9,"speed":49.19564865282587}
+{"t":1791005744985,"s":6.76,"kind":"seats","text":"","forward":-338.99189374918086,"right":5.292880830268928,"up":-1.618388758289689,"movedM":3.113963247675788e-9,"speed":49.97677903253714}
+{"t":1791005745018,"s":6.793,"kind":"seats","text":"","forward":-340.23917945325303,"right":5.36900080008391,"up":-1.6303417926359671,"movedM":3.113963247675788e-9,"speed":49.896773068281405}
+{"t":1791005745052,"s":6.827,"kind":"seats","text":"","forward":-341.90241604537044,"right":5.465469543306369,"up":-1.6463078982410073,"movedM":3.113963247675788e-9,"speed":49.141113689880214}
+{"t":1791005745085,"s":6.86,"kind":"seats","text":"","forward":-343.98177181157627,"right":5.577648561496915,"up":-1.66631288320566,"movedM":3.113963247675788e-9,"speed":49.989879024493696}
+{"t":1791005745118,"s":6.893,"kind":"seats","text":"","forward":-345.22955455286126,"right":5.640394227929306,"up":-1.6783440269510141,"movedM":3.113963247675788e-9,"speed":50.6024358073687}
+{"t":1791005745152,"s":6.927,"kind":"seats","text":"","forward":-346.8934579446656,"right":5.718684837784451,"up":-1.6944241143324417,"movedM":3.113963247675788e-9,"speed":49.799097072665695}
+{"t":1791005745184,"s":6.959,"kind":"seats","text":"","forward":-348.5575890800898,"right":5.790823727380769,"up":-1.7105519678872145,"movedM":3.113963247675788e-9,"speed":49.91834785089792}
+{"t":1791005745218,"s":6.993,"kind":"seats","text":"","forward":-350.22195442968604,"right":5.856775898525655,"up":-1.7267345611643243,"movedM":3.113963247675788e-9,"speed":49.92259146718513}
+{"t":1791005745257,"s":7.032,"kind":"seats","text":"","forward":-352.71893822738264,"right":5.943921941975077,"up":-1.7511131635113932,"movedM":3.113963247675788e-9,"speed":50.91924123188563}
+{"t":1791005745288,"s":7.063,"kind":"seats","text":"","forward":-354.38388278430915,"right":5.994172734477161,"up":-1.7674323160197802,"movedM":3.113963247675788e-9,"speed":51.922709282437815}
+{"t":1791005745318,"s":7.093,"kind":"seats","text":"","forward":-355.2164419542892,"right":6.017012026241048,"up":-1.775611876082731,"movedM":3.113963247675788e-9,"speed":50.62809782061662}
+{"t":1791005745351,"s":7.126,"kind":"seats","text":"","forward":-356.4653887606803,"right":6.048522411802992,"up":-1.7879094033774259,"movedM":3.113963247675788e-9,"speed":49.24508488769842}
+{"t":1791005745384,"s":7.159,"kind":"seats","text":"","forward":-358.96365732093625,"right":6.1021525475299825,"up":-1.8126243653024654,"movedM":3.113963247675788e-9,"speed":50.027637032773285}
+{"t":1791005745418,"s":7.193,"kind":"seats","text":"","forward":-360.21297041789984,"right":6.124542004404617,"up":-1.8250528502906023,"movedM":3.113963247675788e-9,"speed":50.80983370751849}
+{"t":1791005745451,"s":7.226,"kind":"seats","text":"","forward":-361.8789023073278,"right":6.1500971079258875,"up":-1.8417065215519066,"movedM":3.113963247675788e-9,"speed":49.95127411286656}
+{"t":1791005745484,"s":7.259,"kind":"seats","text":"","forward":-363.5450383141571,"right":6.170947977495985,"up":-1.8584536583964415,"movedM":3.113963247675788e-9,"speed":48.81263787199644}
+{"t":1791005745518,"s":7.293,"kind":"seats","text":"","forward":-365.21137437099003,"right":6.187344796871628,"up":-1.875290746253742,"movedM":3.113963247675788e-9,"speed":50.65254190142191}
+{"t":1791005745552,"s":7.327,"kind":"seats","text":"","forward":-366.8779028510721,"right":6.19967559578248,"up":-1.8922106951089048,"movedM":3.113963247675788e-9,"speed":49.11522514990178}
+{"t":1791005745585,"s":7.36,"kind":"seats","text":"","forward":-368.9613163867281,"right":6.210083175360779,"up":-1.913478782128979,"movedM":3.113963247675788e-9,"speed":50.674450515406846}
+{"t":1791005745618,"s":7.393,"kind":"seats","text":"","forward":-370.6282357214063,"right":6.215003663425364,"up":-1.9305952348396227,"movedM":3.113963247675788e-9,"speed":50.66532786191927}
+{"t":1791005745619,"s":7.394,"kind":"seats","text":"","forward":-370.6282357214063,"right":6.215003663425364,"up":-1.9305952348396227,"movedM":3.113963247675788e-9,"speed":50.67832417756954}
+{"t":1791005745651,"s":7.426,"kind":"seats","text":"","forward":-371.4617544650313,"right":6.216500034284053,"up":-1.9391901050772802,"movedM":3.113963247675788e-9,"speed":49.36234522257846}
+{"t":1791005745685,"s":7.46,"kind":"seats","text":"","forward":-374.3793639530751,"right":6.217635376818436,"up":-1.9694839877518666,"movedM":3.113963247675788e-9,"speed":51.42100752793993}
+{"t":1791005745718,"s":7.493,"kind":"seats","text":"","forward":-375.6299063744342,"right":6.216457017007002,"up":-1.9825705210435307,"movedM":3.113963247675788e-9,"speed":50.67678987507376}
+{"t":1791005745752,"s":7.527,"kind":"seats","text":"","forward":-376.4636430360688,"right":6.2152037130667,"up":-1.9913283177817838,"movedM":3.113963247675788e-9,"speed":49.29115688818226}
+{"t":1791005745785,"s":7.56,"kind":"seats","text":"","forward":-378.965043853389,"right":6.2098317319872365,"up":-2.017755324538366,"movedM":3.113963247675788e-9,"speed":50.69719934740095}
+{"t":1791005745818,"s":7.593,"kind":"seats","text":"","forward":-380.63279710905323,"right":6.205634673973577,"up":-2.0354972278501138,"movedM":3.113963247675788e-9,"speed":50.68798112901884}
+{"t":1791005745851,"s":7.626,"kind":"seats","text":"","forward":-381.4667137961943,"right":6.20355700803222,"up":-2.0444064481263915,"movedM":3.113963247675788e-9,"speed":48.3980457437315}
+{"t":1791005745885,"s":7.66,"kind":"seats","text":"","forward":-383.96860885351293,"right":6.198076893066457,"up":-2.0713006975913095,"movedM":3.113963247675788e-9,"speed":49.4721757917611}
+{"t":1791005745918,"s":7.693,"kind":"seats","text":"","forward":-385.6366574383759,"right":6.195478484335098,"up":-2.089377639076254,"movedM":3.113963247675788e-9,"speed":50.698881012815264}
+{"t":1791005745952,"s":7.727,"kind":"seats","text":"","forward":-386.887746448485,"right":6.194244993517572,"up":-2.1030158382248203,"movedM":3.113963247675788e-9,"speed":49.15859282351006}
+{"t":1791005745984,"s":7.759,"kind":"seats","text":"","forward":-388.5559344240613,"right":6.193698849990369,"up":-2.1213056325946145,"movedM":3.113963247675788e-9,"speed":49.31676846719453}
+{"t":1791005746018,"s":7.793,"kind":"seats","text":"","forward":-390.64128158804266,"right":6.195269573335253,"up":-2.144333317091069,"movedM":3.113963247675788e-9,"speed":50.70943169585508}
+{"t":1791005746052,"s":7.827,"kind":"seats","text":"","forward":-391.4754523190546,"right":6.196758298644255,"up":-2.1535958528982526,"movedM":3.113963247675788e-9,"speed":49.16785614981756}
+{"t":1791005746085,"s":7.86,"kind":"seats","text":"","forward":-394.3951713226797,"right":6.206693091999568,"up":-2.186248413783926,"movedM":3.113963247675788e-9,"speed":51.464701358631594}
+{"t":1791005746118,"s":7.893,"kind":"seats","text":"","forward":-395.22941313407136,"right":6.211027230873043,"up":-2.195648863586953,"movedM":3.113963247675788e-9,"speed":50.0244987831769}
+{"t":1791005746151,"s":7.926,"kind":"seats","text":"","forward":-396.8979323428414,"right":6.221829781842558,"up":-2.2145533651336002,"movedM":3.113963247675788e-9,"speed":50.11131856496076}
+{"t":1791005746185,"s":7.96,"kind":"seats","text":"","forward":-398.98364019537826,"right":6.239349215854816,"up":-2.238385721999629,"movedM":3.113963247675788e-9,"speed":50.031848238504395}
+{"t":1791005746218,"s":7.993,"kind":"seats","text":"","forward":-400.6522655449456,"right":6.256518499916979,"up":-2.2576100443941605,"movedM":3.113963247675788e-9,"speed":50.0350480064136}
+{"t":1791005746252,"s":8.027,"kind":"seats","text":"","forward":-401.903768048908,"right":6.271261249127406,"up":-2.2721188540569934,"movedM":3.113963247675788e-9,"speed":48.539564124246375}
+{"t":1791005746286,"s":8.061,"kind":"seats","text":"","forward":-404.4068421298201,"right":6.3059195254891165,"up":-2.301365788069051,"movedM":3.113963247675788e-9,"speed":50.66003573329805}
+{"t":1791005746318,"s":8.093,"kind":"seats","text":"","forward":-405.24121937912605,"right":6.319070689765198,"up":-2.311181444273531,"movedM":3.113963247675788e-9,"speed":49.348979751041874}
+{"t":1791005746351,"s":8.126,"kind":"seats","text":"","forward":-406.9100013451531,"right":6.347825853824077,"up":-2.330916501147804,"movedM":3.113963247675788e-9,"speed":50.826074940689836}
+{"t":1791005746385,"s":8.159,"kind":"seats","text":"","forward":-408.1616106097526,"right":6.371536262487837,"up":-2.3458125379909904,"movedM":3.113963247675788e-9,"speed":48.74066585063506}
+{"t":1791005746418,"s":8.193,"kind":"seats","text":"","forward":-410.66488878225607,"right":6.424152440248804,"up":-2.3758673375934474,"movedM":3.113963247675788e-9,"speed":50.05332809149657}
+{"t":1791005746451,"s":8.226,"kind":"seats","text":"","forward":-412.3337854599704,"right":6.46268672730514,"up":-2.3960985707993046,"movedM":3.113963247675788e-9,"speed":51.445876704595506}
+{"t":1791005746485,"s":8.26,"kind":"seats","text":"","forward":-414.4199672211069,"right":6.51442416233661,"up":-2.4215984910503363,"movedM":3.113963247675788e-9,"speed":50.754633189424275}
+{"t":1791005746518,"s":8.293,"kind":"seats","text":"","forward":-415.2544603083583,"right":6.53623166157621,"up":-2.431862546828193,"movedM":3.113963247675788e-9,"speed":49.36619119078423}
+{"t":1791005746551,"s":8.326,"kind":"seats","text":"","forward":-417.34073072740375,"right":6.593500181432432,"up":-2.4576814887871072,"movedM":3.113963247675788e-9,"speed":50.84428483393003}
+{"t":1791005746585,"s":8.36,"kind":"seats","text":"","forward":-418.59251676936424,"right":6.629679373931054,"up":-2.473281914575414,"movedM":3.113963247675788e-9,"speed":49.30305480361094}
+{"t":1791005746618,"s":8.393,"kind":"seats","text":"","forward":-421.0961538564501,"right":6.705781229444142,"up":-2.5047421900632516,"movedM":3.113963247675788e-9,"speed":50.76563699856311}
+{"t":1791005746618,"s":8.393,"kind":"seats","text":"","forward":-421.0961538564501,"right":6.705781229444142,"up":-2.5047421900632516,"movedM":3.113963247675788e-9,"speed":50.76563699856311}
+{"t":1791005746651,"s":8.426,"kind":"seats","text":"","forward":-421.93072025792833,"right":6.73211484560926,"up":-2.5153074516738383,"movedM":3.113963247675788e-9,"speed":50.85170712296223}
+{"t":1791005746684,"s":8.459,"kind":"seats","text":"","forward":-423.59988749281325,"right":6.7858757346117216,"up":-2.5365525017275963,"movedM":3.113963247675788e-9,"speed":48.765381298679756}
+{"t":1791005746718,"s":8.493,"kind":"seats","text":"","forward":-425.68641693803846,"right":6.854704339490354,"up":-2.56330731010217,"movedM":3.113963247675788e-9,"speed":50.77272080175685}
+{"t":1791005746751,"s":8.526,"kind":"seats","text":"","forward":-426.93837788836333,"right":6.896774307324989,"up":-2.5794608208348766,"movedM":3.113963247675788e-9,"speed":50.07937080270214}
+{"t":1791005746785,"s":8.56,"kind":"seats","text":"","forward":-428.1903666703502,"right":6.9393742427619145,"up":-2.595689502677636,"movedM":3.113963247675788e-9,"speed":48.690672419440084}
+{"t":1791005746818,"s":8.593,"kind":"seats","text":"","forward":-430.69441692340035,"right":7.025831372577585,"up":-2.6283868338658514,"movedM":3.113963247675788e-9,"speed":50.08474249238383}
+{"t":1791005746852,"s":8.627,"kind":"seats","text":"","forward":-431.9464935726207,"right":7.069500161194924,"up":-2.6448637756842843,"movedM":3.113963247675788e-9,"speed":50.17009774341377}
+{"t":1791005746885,"s":8.66,"kind":"seats","text":"","forward":-433.198600672815,"right":7.113256072563473,"up":-2.6614297642068716,"movedM":3.113963247675788e-9,"speed":48.0821781713171}
+{"t":1791005746918,"s":8.693,"kind":"seats","text":"","forward":-435.28551270795333,"right":7.185787130535232,"up":-2.68924539095504,"movedM":3.113963247675788e-9,"speed":50.090962709319335}
+{"t":1791005746951,"s":8.726,"kind":"seats","text":"","forward":-436.95512272826363,"right":7.2430217089187465,"up":-2.711681619416482,"movedM":3.113963247675788e-9,"speed":50.09313145568469}
+{"t":1791005746984,"s":8.759,"kind":"seats","text":"","forward":-438.2073746538034,"right":7.285353545192322,"up":-2.728614037804395,"movedM":3.113963247675788e-9,"speed":50.094723994491474}
+{"t":1791005747018,"s":8.793,"kind":"seats","text":"","forward":-440.7119999093501,"right":7.368175775853842,"up":-2.76275055150746,"movedM":3.113963247675788e-9,"speed":50.09783036368328}
+{"t":1791005747051,"s":8.826,"kind":"seats","text":"","forward":-441.96436889257876,"right":7.408523380460508,"up":-2.7799565897318534,"movedM":3.113963247675788e-9,"speed":49.403781104933756}
+{"t":1791005747085,"s":8.86,"kind":"seats","text":"","forward":-443.6342580700359,"right":7.461074841491097,"up":-2.803045140010606,"movedM":3.113963247675788e-9,"speed":48.710108423419626}
+{"t":1791005747118,"s":8.893,"kind":"seats","text":"","forward":-445.3042246598791,"right":7.511987571491375,"up":-2.8263030696178393,"movedM":3.113963247675788e-9,"speed":50.10321097254994}
+{"t":1791005747151,"s":8.926,"kind":"seats","text":"","forward":-447.391794445331,"right":7.572770279362061,"up":-2.8556109625881114,"movedM":3.113963247675788e-9,"speed":50.105519869866754}
+{"t":1791005747184,"s":8.959,"kind":"seats","text":"","forward":-448.64440081264513,"right":7.60749347989028,"up":-2.8733163724386133,"movedM":3.113963247675788e-9,"speed":50.19052660105856}
+{"t":1791005747218,"s":8.993,"kind":"seats","text":"","forward":-449.8970557291987,"right":7.64086775810344,"up":-2.891109358863193,"movedM":3.113963247675788e-9,"speed":48.02104443045502}
+{"t":1791005747251,"s":9.026,"kind":"seats","text":"","forward":-452.40250103339554,"right":7.703569953722621,"up":-2.9269575345573866,"movedM":3.113963247675788e-9,"speed":50.80651673094834}
+{"t":1791005747285,"s":9.059,"kind":"seats","text":"","forward":-453.6552921989653,"right":7.732891916931578,"up":-2.945016893912209,"movedM":3.113963247675788e-9,"speed":50.11200421497672}
+{"t":1791005747318,"s":9.093,"kind":"seats","text":"","forward":-455.74337773819144,"right":7.778724219210403,"up":-2.9753242503132076,"movedM":3.113963247675788e-9,"speed":50.11400158298114}
+{"t":1791005747351,"s":9.126,"kind":"seats","text":"","forward":-456.9962881065456,"right":7.804340311068017,"up":-2.993638719455045,"movedM":3.113963247675788e-9,"speed":50.115149744287734}
+{"t":1791005747385,"s":9.16,"kind":"seats","text":"","forward":-458.24924479685137,"right":7.828460296155015,"up":-3.0120542912161063,"movedM":3.113963247675788e-9,"speed":50.199936594720256}
+{"t":1791005747418,"s":9.193,"kind":"seats","text":"","forward":-460.3376151830675,"right":7.8650873720876575,"up":-3.0429719776780004,"movedM":3.113963247675788e-9,"speed":49.422209578590525}
+{"t":1791005747451,"s":9.226,"kind":"seats","text":"","forward":-462.42612123897476,"right":7.897208559000006,"up":-3.0741661264680067,"movedM":3.113963247675788e-9,"speed":50.815767286735955}
+{"t":1791005747484,"s":9.259,"kind":"seats","text":"","forward":-463.679284207623,"right":7.914389811198305,"up":-3.09301516857731,"movedM":3.113963247675788e-9,"speed":50.90163336249068}
+{"t":1791005747518,"s":9.293,"kind":"seats","text":"","forward":-465.3502307164126,"right":7.9349692770006754,"up":-3.118308147718844,"movedM":3.113963247675788e-9,"speed":50.122177932604934}
+{"t":1791005747551,"s":9.326,"kind":"seats","text":"","forward":-467.4390170482748,"right":7.957088680796659,"up":-3.150193389440019,"movedM":3.113963247675788e-9,"speed":50.81973806963428}
+{"t":1791005747584,"s":9.359,"kind":"seats","text":"","forward":-468.6923402055007,"right":7.968485474884403,"up":-3.1694729183906443,"movedM":3.113963247675788e-9,"speed":50.82066176142482}
+{"t":1791005747618,"s":9.393,"kind":"seats","text":"","forward":-470.3634939956954,"right":7.981448498180924,"up":-3.1953543317034185,"movedM":3.113963247675788e-9,"speed":49.429776737199084}
+{"t":1791005747618,"s":9.393,"kind":"seats","text":"","forward":-470.3634939956954,"right":7.981448498180924,"up":-3.1953543317034185,"movedM":3.113963247675788e-9,"speed":49.429776737199084}
+{"t":1791005747651,"s":9.426,"kind":"seats","text":"","forward":-472.0347158295672,"right":7.991718571041673,"up":-3.221435871049677,"movedM":3.113963247675788e-9,"speed":50.12692898558821}
+{"t":1791005747685,"s":9.46,"kind":"seats","text":"","forward":-473.70600432361766,"right":7.99933544244044,"up":-3.2477103736283808,"movedM":3.113963247675788e-9,"speed":50.12800114520844}
+{"t":1791005747718,"s":9.493,"kind":"seats","text":"","forward":-475.37735496883073,"right":8.004559755631476,"up":-3.2741734340686754,"movedM":3.113963247675788e-9,"speed":50.129026167292665}
+{"t":1791005747751,"s":9.526,"kind":"seats","text":"","forward":-477.0487615553446,"right":8.00766802292054,"up":-3.300824369923648,"movedM":3.113963247675788e-9,"speed":49.43389543619598}
+{"t":1791005747785,"s":9.56,"kind":"seats","text":"","forward":-479.1380894898048,"right":8.008983643403383,"up":-3.3344096331752446,"movedM":3.113963247675788e-9,"speed":51.57554949760404}
+{"t":1791005747818,"s":9.593,"kind":"seats","text":"","forward":-479.97384081440293,"right":8.008792819405357,"up":-3.347929912442086,"movedM":3.113963247675788e-9,"speed":50.13162641333998}
+{"t":1791005747851,"s":9.626,"kind":"seats","text":"","forward":-482.48115771243977,"right":8.005765915266693,"up":-3.3887910849396796,"movedM":3.113963247675788e-9,"speed":50.132913959806984}
+{"t":1791005747884,"s":9.659,"kind":"seats","text":"","forward":-483.7348511179308,"right":8.002841900596962,"up":-3.4093881773589443,"movedM":3.113963247675788e-9,"speed":50.13352277518526}
+{"t":1791005747918,"s":9.693,"kind":"seats","text":"","forward":-484.9885654232245,"right":7.999019835681054,"up":-3.43009264119626,"movedM":3.113963247675788e-9,"speed":48.741707662157665}
+{"t":1791005747951,"s":9.726,"kind":"seats","text":"","forward":-487.9139689855987,"right":7.987360257649186,"up":-3.478808167689474,"movedM":3.113963247675788e-9,"speed":51.527823513726446}
+{"t":1791005747985,"s":9.76,"kind":"seats","text":"","forward":-489.58565766947345,"right":7.979521511888834,"up":-3.506903070249715,"movedM":3.113963247675788e-9,"speed":51.58049823447367}
+{"t":1791005748018,"s":9.793,"kind":"seats","text":"","forward":-490.00358247631607,"right":7.977473018698163,"up":-3.513956930397562,"movedM":3.113963247675788e-9,"speed":49.43997101508821}
+{"t":1791005748052,"s":9.827,"kind":"seats","text":"","forward":-492.093218414944,"right":7.966838456799053,"up":-3.5494085081939777,"movedM":3.113963247675788e-9,"speed":50.0196110720532}
+{"t":1791005748085,"s":9.86,"kind":"seats","text":"","forward":-494.18286765860444,"right":7.95555670566813,"up":-3.5851687914557866,"movedM":3.113963247675788e-9,"speed":50.845302064029255}
+{"t":1791005748118,"s":9.893,"kind":"seats","text":"","forward":-495.0187324033538,"right":7.950826937413495,"up":-3.5995594634743595,"movedM":3.113963247675788e-9,"speed":49.44162578207352}
+{"t":1791005748151,"s":9.926,"kind":"seats","text":"","forward":-497.1084108341657,"right":7.938479082338148,"up":-3.635752126514198,"movedM":3.113963247675788e-9,"speed":49.4422195982196}
+{"t":1791005748185,"s":9.96,"kind":"seats","text":"","forward":-499.19809308942075,"right":7.925813361306382,"up":-3.672253156179806,"movedM":3.113963247675788e-9,"speed":50.84669384817004}
+{"t":1791005748218,"s":9.993,"kind":"seats","text":"","forward":-500.03396592057834,"right":7.920784709516312,"up":-3.686941212410117,"movedM":3.113963247675788e-9,"speed":49.44295390073354}
+{"t":1791005748252,"s":10.027,"kind":"seats","text":"","forward":-502.54157785522386,"right":7.906156202937439,"up":-3.731317312146459,"movedM":3.113963247675788e-9,"speed":50.84745053479222}
+{"t":1791005748285,"s":10.06,"kind":"seats","text":"","forward":-504.21329892496686,"right":7.896965432325402,"up":-3.761173943142508,"movedM":3.113963247675788e-9,"speed":50.836489805978474}
+{"t":1791005748318,"s":10.093,"kind":"seats","text":"","forward":-505.0491552956354,"right":7.892536125697831,"up":-3.776186723043322,"movedM":3.113963247675788e-9,"speed":49.44395342199424}
+{"t":1791005748352,"s":10.127,"kind":"seats","text":"","forward":-507.9746411471184,"right":7.877490135218181,"up":-3.8291634920828725,"movedM":3.113963247675788e-9,"speed":50.8483056167114}
+{"t":1791005748385,"s":10.16,"kind":"seats","text":"","forward":-508.81048731577266,"right":7.87328452647165,"up":-3.8444174984200155,"movedM":3.113963247675788e-9,"speed":49.444466325393066}
+{"t":1791005748418,"s":10.193,"kind":"seats","text":"","forward":-510.06425117224785,"right":7.867100857455625,"up":-3.8673912691092633,"movedM":3.113963247675788e-9,"speed":50.14095681527983}
+{"t":1791005748452,"s":10.227,"kind":"seats","text":"","forward":-512.1538378601957,"right":7.857409958679796,"up":-3.905923249996189,"movedM":3.113963247675788e-9,"speed":49.44474498504886}
+{"t":1791005748484,"s":10.259,"kind":"seats","text":"","forward":-513.8254863524254,"right":7.850450360024979,"up":-3.9369688269031107,"movedM":3.113963247675788e-9,"speed":50.14121488139302}
+{"t":1791005748518,"s":10.293,"kind":"seats","text":"","forward":-515.0792059473063,"right":7.845780953286123,"up":-3.9603846936146705,"movedM":3.113963247675788e-9,"speed":50.1412585198507}
+{"t":1791005748551,"s":10.326,"kind":"seats","text":"","forward":-517.1687010328748,"right":7.8390076757343365,"up":-3.999660308225301,"movedM":3.113963247675788e-9,"speed":48.74847942747665}
+{"t":1791005748585,"s":10.36,"kind":"seats","text":"","forward":-518.8402718445702,"right":7.834274361121857,"up":-4.0312964159961915,"movedM":3.113963247675788e-9,"speed":48.74843905793179}
+{"t":1791005748618,"s":10.393,"kind":"seats","text":"","forward":-520.5118230715153,"right":7.829916057391358,"up":-4.063112730557512,"movedM":3.113963247675788e-9,"speed":50.8375686510935}
+{"t":1791005748618,"s":10.393,"kind":"seats","text":"","forward":-520.5118230715153,"right":7.829916057391358,"up":-4.063112730557512,"movedM":3.113963247675788e-9,"speed":50.8375686510935}
+{"t":1791005748651,"s":10.426,"kind":"seats","text":"","forward":-522.1833570190919,"right":7.825938738804581,"up":-4.095102037202951,"movedM":3.113963247675788e-9,"speed":50.224776277920725}
+{"t":1791005748684,"s":10.459,"kind":"seats","text":"","forward":-523.8548651177696,"right":7.822527506361354,"up":-4.127260247055615,"movedM":3.113963247675788e-9,"speed":49.527075423771834}
+{"t":1791005748717,"s":10.492,"kind":"seats","text":"","forward":-525.1084784926394,"right":7.8204000789839085,"up":-4.151488889429061,"movedM":3.113963247675788e-9,"speed":50.22452224231338}
+{"t":1791005748751,"s":10.526,"kind":"seats","text":"","forward":-526.779941978799,"right":7.818155326116056,"up":-4.183942009201466,"movedM":3.113963247675788e-9,"speed":49.44420627837148}
+{"t":1791005748784,"s":10.559,"kind":"seats","text":"","forward":-529.2870885298545,"right":7.815783904006025,"up":-4.232948168660451,"movedM":3.113963247675788e-9,"speed":50.223972368883544}
+{"t":1791005748817,"s":10.592,"kind":"seats","text":"","forward":-530.5406412555892,"right":7.814735261883499,"up":-4.257587186183145,"movedM":3.113963247675788e-9,"speed":50.921339245773126}
+{"t":1791005748851,"s":10.626,"kind":"seats","text":"","forward":-532.2120277772391,"right":7.813077757560137,"up":-4.2905627395332715,"movedM":3.113963247675788e-9,"speed":49.525865347042924}
+{"t":1791005748885,"s":10.66,"kind":"seats","text":"","forward":-534.719077470842,"right":7.80973940953001,"up":-4.3402590653609066,"movedM":3.113963247675788e-9,"speed":50.83562503642392}
+{"t":1791005748918,"s":10.693,"kind":"seats","text":"","forward":-535.1369160266361,"right":7.809119675405242,"up":-4.348570947270549,"movedM":3.113963247675788e-9,"speed":50.13912078080519}
+{"t":1791005748951,"s":10.726,"kind":"seats","text":"","forward":-537.226084369046,"right":7.805807863207264,"up":-4.39026380710767,"movedM":3.113963247675788e-9,"speed":48.82716876382706}
+{"t":1791005748985,"s":10.76,"kind":"seats","text":"","forward":-539.7330196435184,"right":7.801452248427097,"up":-4.4406386581096005,"movedM":3.113963247675788e-9,"speed":51.61675096934786}
+{"t":1791005749018,"s":10.793,"kind":"seats","text":"","forward":-540.5686493076641,"right":7.799994429739854,"up":-4.457539419615556,"movedM":3.113963247675788e-9,"speed":50.83405984395586}
+{"t":1791005749051,"s":10.826,"kind":"seats","text":"","forward":-541.8220763547032,"right":7.797794311768996,"up":-4.483015431180243,"movedM":3.113963247675788e-9,"speed":49.440845112592}
+{"t":1791005749084,"s":10.859,"kind":"seats","text":"","forward":-543.911074248653,"right":7.793911671139142,"up":-4.525853674528806,"movedM":3.113963247675788e-9,"speed":50.13650607804503}
+{"t":1791005749118,"s":10.892,"kind":"seats","text":"","forward":-545.5822269490969,"right":7.790454914051736,"up":-4.5605022709150775,"movedM":3.113963247675788e-9,"speed":50.917107768782884}
+{"t":1791005749151,"s":10.926,"kind":"seats","text":"","forward":-546.835564443208,"right":7.787747558601012,"up":-4.586729415163888,"movedM":3.113963247675788e-9,"speed":49.438940389067895}
+{"t":1791005749185,"s":10.96,"kind":"seats","text":"","forward":-549.7599140615384,"right":7.781963846454772,"up":-4.648811881087004,"movedM":3.113963247675788e-9,"speed":51.61279055979501}
+{"t":1791005749187,"s":22.502,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791005749218,"s":10.993,"kind":"seats","text":"","forward":-550.1776635601047,"right":7.781260351143999,"up":-4.657790241851634,"movedM":3.113963247675788e-9,"speed":49.43741571461492}
+{"t":1791005749251,"s":11.026,"kind":"seats","text":"","forward":-551.848624342259,"right":7.778754610798188,"up":-4.693988762421176,"movedM":3.113963247675788e-9,"speed":49.43655325548578}
+{"t":1791005749284,"s":11.059,"kind":"seats","text":"","forward":-554.3549527641077,"right":7.776011071284245,"up":-4.74915485761509,"movedM":3.113963247675788e-9,"speed":50.82788371815135}
+{"t":1791005749318,"s":11.093,"kind":"seats","text":"","forward":-555.1903676541424,"right":7.775266657485531,"up":-4.7677671907795025,"movedM":3.113963247675788e-9,"speed":50.10112969678964}
+{"t":1791005749351,"s":11.126,"kind":"seats","text":"","forward":-556.8611616037111,"right":7.773642755970428,"up":-4.805287713284145,"movedM":3.113963247675788e-9,"speed":50.12997058630599}
+{"t":1791005749385,"s":11.16,"kind":"seats","text":"","forward":-559.7849462444887,"right":7.769796433940826,"up":-4.871752006324952,"movedM":3.113963247675788e-9,"speed":51.480982926805524}
+{"t":1791005749418,"s":11.193,"kind":"seats","text":"","forward":-560.6202914720857,"right":7.768452960431489,"up":-4.890900168607373,"movedM":3.113963247675788e-9,"speed":50.097452546436884}
+{"t":1791005749452,"s":11.227,"kind":"seats","text":"","forward":-562.2909488893843,"right":7.765462453824682,"up":-4.929377320988639,"movedM":3.113963247675788e-9,"speed":48.622534212512136}
+{"t":1791005749485,"s":11.26,"kind":"seats","text":"","forward":-564.7968547425195,"right":7.759313399389953,"up":-4.987445235782863,"movedM":3.113963247675788e-9,"speed":50.20803939807493}
+{"t":1791005749518,"s":11.293,"kind":"seats","text":"","forward":-565.2144976335062,"right":7.757951093702616,"up":-4.997154579318943,"movedM":3.113963247675788e-9,"speed":50.12403033483065}
+{"t":1791005749552,"s":11.327,"kind":"seats","text":"","forward":-567.3026831803188,"right":7.749069383485448,"up":-5.045814869172664,"movedM":3.113963247675788e-9,"speed":50.12233627821248}
+{"t":1791005749585,"s":11.36,"kind":"seats","text":"","forward":-568.9731972478918,"right":7.739163539252814,"up":-5.0848864883588885,"movedM":3.113963247675788e-9,"speed":50.09079142875833}
+{"t":1791005749618,"s":11.393,"kind":"seats","text":"","forward":-570.6436745930818,"right":7.726881103589335,"up":-5.124119457827503,"movedM":3.113963247675788e-9,"speed":50.11945822670921}
+{"t":1791005749618,"s":11.393,"kind":"seats","text":"","forward":-570.6436745930818,"right":7.726881103589335,"up":-5.124119457827503,"movedM":3.113963247675788e-9,"speed":50.11945822670921}
+{"t":1791005749652,"s":11.427,"kind":"seats","text":"","forward":-572.7317088308404,"right":7.708177706287557,"up":-5.1734370941058305,"movedM":3.113963247675788e-9,"speed":50.73462535470719}
+{"t":1791005749685,"s":11.46,"kind":"seats","text":"","forward":-574.4020798144845,"right":7.69031140894603,"up":-5.213140709611709,"movedM":3.113963247675788e-9,"speed":50.732969956840385}
+{"t":1791005749718,"s":11.493,"kind":"seats","text":"","forward":-575.6548220559608,"right":7.675115965769976,"up":-5.243079167904055,"movedM":3.113963247675788e-9,"speed":50.821149050837235}
+{"t":1791005749751,"s":11.526,"kind":"seats","text":"","forward":-577.3250902383595,"right":7.65249093323294,"up":-5.283265151564887,"movedM":3.113963247675788e-9,"speed":50.8090893013941}
+{"t":1791005749785,"s":11.56,"kind":"seats","text":"","forward":-579.4128263699515,"right":7.620381305434307,"up":-5.334047217210372,"movedM":3.113963247675788e-9,"speed":51.55362484706747}
+{"t":1791005749818,"s":11.593,"kind":"seats","text":"","forward":-580.6654096230033,"right":7.59906502317952,"up":-5.3648754698942245,"movedM":3.113963247675788e-9,"speed":50.80522329129347}
+{"t":1791005749852,"s":11.627,"kind":"seats","text":"","forward":-582.75293866319,"right":7.560360113862117,"up":-5.416964102376428,"movedM":3.113963247675788e-9,"speed":49.9879494622657}
+{"t":1791005749886,"s":11.661,"kind":"seats","text":"","forward":-584.4228498994485,"right":7.526894908103117,"up":-5.459344020109155,"movedM":3.113963247675788e-9,"speed":51.45633939365623}
+{"t":1791005749918,"s":11.693,"kind":"seats","text":"","forward":-586.092648152588,"right":7.491454509391758,"up":-5.5024124119490265,"movedM":3.113963247675788e-9,"speed":51.49408836949466}
+{"t":1791005749954,"s":11.729,"kind":"seats","text":"","forward":-588.1797208736476,"right":7.4448569192982745,"up":-5.5573067277093156,"movedM":3.113963247675788e-9,"speed":49.89221881776163}
+{"t":1791005749984,"s":11.759,"kind":"seats","text":"","forward":-588.5971110782313,"right":7.435248099641484,"up":-5.568432128874406,"movedM":3.113963247675788e-9,"speed":48.09001625171624}
+{"t":1791005750018,"s":11.793,"kind":"seats","text":"","forward":-591.1012789527387,"right":7.3751596810392925,"up":-5.636205000674704,"movedM":3.113963247675788e-9,"speed":50.78990689426771}
+{"t":1791005750051,"s":11.826,"kind":"seats","text":"","forward":-592.3532563378567,"right":7.342864045376103,"up":-5.6706957455913765,"movedM":3.113963247675788e-9,"speed":50.17523801154678}
+{"t":1791005750085,"s":11.86,"kind":"seats","text":"","forward":-593.6051690215977,"right":7.3083368905775785,"up":-5.705511088116739,"movedM":3.113963247675788e-9,"speed":50.058487373400276}
+{"t":1791005750118,"s":11.893,"kind":"seats","text":"","forward":-595.6915588525709,"right":7.244800438880219,"up":-5.764046437548679,"movedM":3.113963247675788e-9,"speed":50.78113469942653}
+{"t":1791005750151,"s":11.926,"kind":"seats","text":"","forward":-597.777790061678,"right":7.172917277553211,"up":-5.822881443162361,"movedM":3.113963247675788e-9,"speed":50.776731522157014}
+{"t":1791005750184,"s":11.959,"kind":"seats","text":"","forward":-598.612235957325,"right":7.141829689219293,"up":-5.846427246828045,"movedM":3.113963247675788e-9,"speed":49.46546915493704}
+{"t":1791005750218,"s":11.993,"kind":"seats","text":"","forward":-600.6982359279905,"right":7.058557961888283,"up":-5.905199130596796,"movedM":3.113963247675788e-9,"speed":50.074252786893}
+{"t":1791005750251,"s":12.026,"kind":"seats","text":"","forward":-602.3669207041787,"right":6.986199113430899,"up":-5.952029240353487,"movedM":3.113963247675788e-9,"speed":49.45690822039831}
+{"t":1791005750284,"s":12.059,"kind":"seats","text":"","forward":-603.6183659052004,"right":6.928406823667984,"up":-5.9869935904031575,"movedM":3.113963247675788e-9,"speed":48.756929002687095}
+{"t":1791005750318,"s":12.093,"kind":"seats","text":"","forward":-605.7039721395624,"right":6.825320962975951,"up":-6.044899837995925,"movedM":3.113963247675788e-9,"speed":50.06217684860732}
+{"t":1791005750351,"s":12.126,"kind":"seats","text":"","forward":-607.3723319950514,"right":6.737206256648619,"up":-6.090831308703239,"movedM":3.113963247675788e-9,"speed":50.057944863158}
+{"t":1791005750385,"s":12.16,"kind":"seats","text":"","forward":-608.6235244435688,"right":6.668176795577324,"up":-6.125006359417249,"movedM":3.113963247675788e-9,"speed":48.74453694834422}
+{"t":1791005750418,"s":12.193,"kind":"seats","text":"","forward":-610.2916604566985,"right":6.57272087675986,"up":-6.170196515958107,"movedM":3.113963247675788e-9,"speed":49.35467044410447}
+{"t":1791005750451,"s":12.226,"kind":"seats","text":"","forward":-612.3766157071951,"right":6.44903053094049,"up":-6.226146311543183,"movedM":3.113963247675788e-9,"speed":49.43152676391811}
+{"t":1791005750484,"s":12.259,"kind":"seats","text":"","forward":-613.6274594450144,"right":6.373180386559795,"up":-6.259520802406987,"movedM":3.113963247675788e-9,"speed":48.812912133863605}
+{"t":1791005750517,"s":12.292,"kind":"seats","text":"","forward":-615.2950895356151,"right":6.270704699140936,"up":-6.303895153159823,"movedM":3.113963247675788e-9,"speed":48.726893596042395}
+{"t":1791005750551,"s":12.326,"kind":"seats","text":"","forward":-617.3793356931635,"right":6.1413986341276825,"up":-6.359221378362758,"movedM":3.113963247675788e-9,"speed":48.88432703660717}
+{"t":1791005750584,"s":12.359,"kind":"seats","text":"","forward":-618.629709549691,"right":6.064095028928904,"up":-6.392387348859623,"movedM":3.113963247675788e-9,"speed":50.027141218321525}
+{"t":1791005750618,"s":12.393,"kind":"seats","text":"","forward":-620.7133285659762,"right":5.938131061853994,"up":-6.447940029358075,"movedM":3.113963247675788e-9,"speed":49.32560385260803}
+{"t":1791005750618,"s":12.393,"kind":"seats","text":"","forward":-620.7133285659762,"right":5.938131061853994,"up":-6.447940029358075,"movedM":3.113963247675788e-9,"speed":49.32560385260803}
+{"t":1791005750651,"s":12.426,"kind":"seats","text":"","forward":-622.3798747696474,"right":5.841598496655934,"up":-6.493174730377003,"movedM":3.113963247675788e-9,"speed":50.01575772365026}
+{"t":1791005750684,"s":12.459,"kind":"seats","text":"","forward":-624.0460770771725,"right":5.749561953998011,"up":-6.539671275091277,"movedM":3.113963247675788e-9,"speed":50.79023733221469}
+{"t":1791005750718,"s":12.493,"kind":"seats","text":"","forward":-625.7118988920506,"right":5.661849758604774,"up":-6.58788191208553,"movedM":3.113963247675788e-9,"speed":50.00472520670985}
+{"t":1791005750751,"s":12.526,"kind":"seats","text":"","forward":-627.3773264460131,"right":5.577832039152156,"up":-6.638045340040883,"movedM":3.113963247675788e-9,"speed":49.3036959096746}
+{"t":1791005750785,"s":12.56,"kind":"seats","text":"","forward":-628.6261385329072,"right":5.5171843862220555,"up":-6.676930945258877,"movedM":3.113963247675788e-9,"speed":49.22664848911092}
+{"t":1791005750818,"s":12.593,"kind":"seats","text":"","forward":-630.7069823400192,"right":5.421476015234646,"up":-6.743927885052427,"movedM":3.113963247675788e-9,"speed":49.98583856467123}
+{"t":1791005750852,"s":12.627,"kind":"seats","text":"","forward":-632.3711928065844,"right":5.351307372618379,"up":-6.7992459136446435,"movedM":3.113963247675788e-9,"speed":50.592584880118515}
+{"t":1791005750885,"s":12.66,"kind":"seats","text":"","forward":-634.0349822484044,"right":5.288752995389586,"up":-6.85582941652296,"movedM":3.113963247675788e-9,"speed":49.93910712605596}
+{"t":1791005750918,"s":12.693,"kind":"seats","text":"","forward":-635.2825447780702,"right":5.247896320990947,"up":-6.898964447275787,"movedM":3.113963247675788e-9,"speed":49.271144949941366}
+{"t":1791005750952,"s":12.727,"kind":"seats","text":"","forward":-637.3612765054729,"right":5.193403309545943,"up":-6.971954752377953,"movedM":3.113963247675788e-9,"speed":50.56907821088053}
+{"t":1791005750985,"s":12.76,"kind":"seats","text":"","forward":-639.023767780818,"right":5.163593411254283,"up":-7.031154468574578,"movedM":3.113963247675788e-9,"speed":50.64245298301761}
+{"t":1791005751019,"s":12.794,"kind":"seats","text":"","forward":-640.6858153647213,"right":5.147483412847407,"up":-7.090920989396103,"movedM":3.113963247675788e-9,"speed":49.81819609698771}
+{"t":1791005751051,"s":12.826,"kind":"seats","text":"","forward":-642.3474157857679,"right":5.146387414315939,"up":-7.1511726114563094,"movedM":3.113963247675788e-9,"speed":49.93051835034903}
+{"t":1791005751086,"s":12.86,"kind":"seats","text":"","forward":-644.4237784113513,"right":5.167442770091782,"up":-7.227161314160648,"movedM":3.113963247675788e-9,"speed":51.26453901134998}
+{"t":1791005751118,"s":12.893,"kind":"seats","text":"","forward":-645.2541218567346,"right":5.18299397549589,"up":-7.257782938269932,"movedM":3.113963247675788e-9,"speed":49.14605389830842}
+{"t":1791005751151,"s":12.926,"kind":"seats","text":"","forward":-647.7444540249784,"right":5.254726591183896,"up":-7.3504725549066645,"movedM":3.113963247675788e-9,"speed":50.594484625300986}
+{"t":1791005751184,"s":12.959,"kind":"seats","text":"","forward":-648.9892131881677,"right":5.304934720410415,"up":-7.397297058888305,"movedM":3.113963247675788e-9,"speed":50.58708556434384}
+{"t":1791005751218,"s":12.993,"kind":"seats","text":"","forward":-650.2336984032324,"right":5.364311638222546,"up":-7.44447127938477,"movedM":3.113963247675788e-9,"speed":49.273518335034126}
+{"t":1791005751251,"s":13.026,"kind":"seats","text":"","forward":-652.3072425408591,"right":5.4822984140851645,"up":-7.523911744084244,"movedM":3.113963247675788e-9,"speed":49.87286247001415}
+{"t":1791005751285,"s":13.06,"kind":"seats","text":"","forward":-654.3800523300638,"right":5.620747431146754,"up":-7.6044598323362225,"movedM":3.113963247675788e-9,"speed":50.55966950409645}
+{"t":1791005751318,"s":13.093,"kind":"seats","text":"","forward":-655.2089778746969,"right":5.680870089292114,"up":-7.636996683625212,"movedM":3.113963247675788e-9,"speed":49.161261821806605}
+{"t":1791005751351,"s":13.126,"kind":"seats","text":"","forward":-657.2807966443725,"right":5.842533487099047,"up":-7.7189760587891385,"movedM":3.113963247675788e-9,"speed":49.84214135582814}
+{"t":1791005751385,"s":13.16,"kind":"seats","text":"","forward":-658.9377446137603,"right":5.984743538898044,"up":-7.784939365036235,"movedM":3.113963247675788e-9,"speed":50.525330212826695}
+{"t":1791005751418,"s":13.193,"kind":"seats","text":"","forward":-660.1801582987705,"right":6.100258849573379,"up":-7.83442925153303,"movedM":3.113963247675788e-9,"speed":49.131063393643394}
+{"t":1791005751451,"s":13.226,"kind":"seats","text":"","forward":-662.6642127117855,"right":6.355952602509774,"up":-7.932983402548592,"movedM":3.113963247675788e-9,"speed":50.586668890804404}
+{"t":1791005751485,"s":13.26,"kind":"seats","text":"","forward":-664.7334806496738,"right":6.594506999701423,"up":-8.014269939039584,"movedM":3.113963247675788e-9,"speed":51.18279580608941}
+{"t":1791005751518,"s":13.293,"kind":"seats","text":"","forward":-665.1472466353488,"right":6.6450289337370805,"up":-8.030401284426484,"movedM":3.113963247675788e-9,"speed":49.794527665364015}
+{"t":1791005751551,"s":13.326,"kind":"seats","text":"","forward":-667.2156481061,"right":6.911873034466737,"up":-8.110305755748424,"movedM":3.113963247675788e-9,"speed":49.86556332092327}
+{"t":1791005751584,"s":13.359,"kind":"seats","text":"","forward":-669.2833282164173,"right":7.203360075157946,"up":-8.188764463581862,"movedM":3.113963247675788e-9,"speed":50.46315298295862}
+{"t":1791005751618,"s":13.393,"kind":"seats","text":"","forward":-670.1101604910558,"right":7.3305472071083955,"up":-8.219678299231022,"movedM":3.113963247675788e-9,"speed":49.155522314747124}
+{"t":1791005751618,"s":13.393,"kind":"seats","text":"","forward":-670.1101604910558,"right":7.3305472071083955,"up":-8.219678299231022,"movedM":3.113963247675788e-9,"speed":49.155522314747124}
+{"t":1791005751651,"s":13.426,"kind":"seats","text":"","forward":-672.1766437767899,"right":7.672826004252784,"up":-8.29576722211372,"movedM":3.113963247675788e-9,"speed":49.7546180448591}
+{"t":1791005751684,"s":13.459,"kind":"seats","text":"","forward":-674.6554965328637,"right":8.108675174688017,"up":-8.384963617625381,"movedM":3.113963247675788e-9,"speed":50.51762909612084}
+{"t":1791005751717,"s":13.492,"kind":"seats","text":"","forward":-675.0685455061074,"right":8.183395484062316,"up":-8.399612802937591,"movedM":3.113963247675788e-9,"speed":49.82224412133771}
+{"t":1791005751751,"s":13.526,"kind":"seats","text":"","forward":-677.1334060900352,"right":8.56453419371178,"up":-8.471881625536975,"movedM":3.113963247675788e-9,"speed":49.03679307805553}
+{"t":1791005751784,"s":13.559,"kind":"seats","text":"","forward":-679.1976452015074,"right":8.957176325450064,"up":-8.54235809344849,"movedM":3.113963247675788e-9,"speed":50.41011623450348}
+{"t":1791005751818,"s":13.593,"kind":"seats","text":"","forward":-680.0231759710343,"right":9.117101145211109,"up":-8.569999992108992,"movedM":3.113963247675788e-9,"speed":48.9492430562305}
+{"t":1791005751851,"s":13.626,"kind":"seats","text":"","forward":-681.673965453304,"right":9.441433049025932,"up":-8.6242802395516,"movedM":3.113963247675788e-9,"speed":49.01546396729898}
+{"t":1791005751884,"s":13.659,"kind":"seats","text":"","forward":-684.1494866524205,"right":9.937878545225601,"up":-8.703018182320106,"movedM":3.113963247675788e-9,"speed":49.77906233968909}
+{"t":1791005751917,"s":13.692,"kind":"seats","text":"","forward":-684.9745045947666,"right":10.104960475172675,"up":-8.728516762469667,"movedM":3.113963247675788e-9,"speed":49.77564518837478}
+{"t":1791005751951,"s":13.726,"kind":"seats","text":"","forward":-686.6243253003415,"right":10.440955468921402,"up":-8.778296503403784,"movedM":3.113963247675788e-9,"speed":48.99517023483183}
+{"t":1791005751984,"s":13.759,"kind":"seats","text":"","forward":-689.0985264093836,"right":10.950502237724265,"up":-8.849582254154434,"movedM":3.113963247675788e-9,"speed":50.45201451855354}
+{"t":1791005752018,"s":13.793,"kind":"seats","text":"","forward":-689.9231249307518,"right":11.122029503381327,"up":-8.872366534431057,"movedM":3.113963247675788e-9,"speed":49.757207340588394}
+{"t":1791005752051,"s":13.826,"kind":"seats","text":"","forward":-691.572114122589,"right":11.468214387477644,"up":-8.916404335597914,"movedM":3.113963247675788e-9,"speed":48.287721154172864}
+{"t":1791005752084,"s":13.859,"kind":"seats","text":"","forward":-694.0451238060737,"right":11.994124920831325,"up":-8.978580508571362,"movedM":3.113963247675788e-9,"speed":49.052912173393416}
+{"t":1791005752117,"s":13.892,"kind":"seats","text":"","forward":-694.8693523917153,"right":12.170508715170172,"up":-8.998257525930606,"movedM":3.113963247675788e-9,"speed":49.74227134195939}
+{"t":1791005752151,"s":13.926,"kind":"seats","text":"","forward":-696.5176685339136,"right":12.524117325812881,"up":-9.035990349598292,"movedM":3.113963247675788e-9,"speed":48.964909050077296}
+{"t":1791005752185,"s":13.96,"kind":"seats","text":"","forward":-698.9898074158026,"right":13.056567645586824,"up":-9.088367851064653,"movedM":3.113963247675788e-9,"speed":49.64966525534181}
+{"t":1791005752218,"s":13.993,"kind":"seats","text":"","forward":-699.813767525996,"right":13.234956063245136,"up":-9.104655933479904,"movedM":3.113963247675788e-9,"speed":49.648015103988044}
+{"t":1791005752251,"s":14.026,"kind":"seats","text":"","forward":-701.4615755513382,"right":13.592771044023209,"up":-9.135445940737291,"movedM":3.113963247675788e-9,"speed":48.95500144117925}
+{"t":1791005752285,"s":14.06,"kind":"seats","text":"","forward":-704.3449582628182,"right":14.21953849552608,"up":-9.183571391475251,"movedM":3.113963247675788e-9,"speed":51.70870973554489}
+{"t":1791005752317,"s":14.092,"kind":"seats","text":"","forward":-705.1687304910183,"right":14.398495319801668,"up":-9.195959594073136,"movedM":3.113963247675788e-9,"speed":50.329659624725664}
+{"t":1791005752351,"s":14.126,"kind":"seats","text":"","forward":-706.8162172692253,"right":14.756346925794617,"up":-9.218874561984109,"movedM":3.113963247675788e-9,"speed":49.63821462575935}
+{"t":1791005752384,"s":14.159,"kind":"seats","text":"","forward":-708.8754760042209,"right":15.204175535350487,"up":-9.243936788756931,"movedM":3.113963247675788e-9,"speed":49.636850629929846}
+{"t":1791005752418,"s":14.193,"kind":"seats","text":"","forward":-710.1109805233892,"right":15.473571215536253,"up":-9.257016368475645,"movedM":3.113963247675788e-9,"speed":50.4100108215577}
+{"t":1791005752451,"s":14.226,"kind":"seats","text":"","forward":-711.7582609921851,"right":15.834110098724182,"up":-9.272133855539273,"movedM":3.113963247675788e-9,"speed":50.32567729028765}
+{"t":1791005752485,"s":14.26,"kind":"seats","text":"","forward":-713.817303513253,"right":16.286138173986956,"up":-9.287309668398754,"movedM":3.113963247675788e-9,"speed":50.976212090162754}
+{"t":1791005752518,"s":14.293,"kind":"seats","text":"","forward":-715.0526977748411,"right":16.55850800032283,"up":-9.294422445221983,"movedM":3.113963247675788e-9,"speed":50.32643151816486}
+{"t":1791005752551,"s":14.326,"kind":"seats","text":"","forward":-716.6998566842984,"right":16.923752923534096,"up":-9.301564075886693,"movedM":3.113963247675788e-9,"speed":50.32750752985537}
+{"t":1791005752585,"s":14.36,"kind":"seats","text":"","forward":-718.7587399084308,"right":17.384957394215633,"up":-9.306682613645487,"movedM":3.113963247675788e-9,"speed":50.980368830388215}
+{"t":1791005752618,"s":14.393,"kind":"seats","text":"","forward":-720.4057803335631,"right":17.75875189545377,"up":-9.307691439773144,"movedM":3.113963247675788e-9,"speed":51.072618394190435}
+{"t":1791005752618,"s":14.393,"kind":"seats","text":"","forward":-720.4057803335631,"right":17.75875189545377,"up":-9.307691439773144,"movedM":3.113963247675788e-9,"speed":51.072618394190435}
+{"t":1791005752651,"s":14.426,"kind":"seats","text":"","forward":-721.6410115143461,"right":18.042727376524624,"up":-9.306635080986807,"movedM":3.113963247675788e-9,"speed":50.33356373768285}
+{"t":1791005752684,"s":14.459,"kind":"seats","text":"","forward":-722.8761887227037,"right":18.330475431987793,"up":-9.304021705864562,"movedM":3.113963247675788e-9,"speed":48.26779072855334}
+{"t":1791005752718,"s":14.493,"kind":"seats","text":"","forward":-724.9346817237588,"right":18.819347938100464,"up":-9.296220154129706,"movedM":3.113963247675788e-9,"speed":50.35210769547401}
+{"t":1791005752751,"s":14.526,"kind":"seats","text":"","forward":-726.5813379833808,"right":19.219542655466455,"up":-9.286905846516175,"movedM":3.113963247675788e-9,"speed":50.3438865842488}
+{"t":1791005752784,"s":14.559,"kind":"seats","text":"","forward":-727.8162272931199,"right":19.525982840301367,"up":-9.278134967437184,"movedM":3.113963247675788e-9,"speed":48.27923108444681}
+{"t":1791005752818,"s":14.593,"kind":"seats","text":"","forward":-729.8741424291604,"right":20.05041768093588,"up":-9.26013386123138,"movedM":3.113963247675788e-9,"speed":50.43725970046125}
+{"t":1791005752851,"s":14.626,"kind":"seats","text":"","forward":-731.5202355490615,"right":20.48313012874479,"up":-9.242727113924435,"movedM":3.113963247675788e-9,"speed":50.358581066368}
+{"t":1791005752884,"s":14.659,"kind":"seats","text":"","forward":-732.7546562664434,"right":20.815682237504348,"up":-9.227954537597034,"movedM":3.113963247675788e-9,"speed":47.68500670235304}
+{"t":1791005752918,"s":14.693,"kind":"seats","text":"","forward":-734.8117337965107,"right":21.385322416765916,"up":-9.200157017034009,"movedM":3.113963247675788e-9,"speed":49.654898639743244}
+{"t":1791005752951,"s":14.726,"kind":"seats","text":"","forward":-736.457154675572,"right":21.853838584443054,"up":-9.175166483163624,"movedM":3.113963247675788e-9,"speed":49.688298514108915}
+{"t":1791005752985,"s":14.76,"kind":"seats","text":"","forward":-737.6910835730752,"right":22.212427590363802,"up":-9.154866978271903,"movedM":3.113963247675788e-9,"speed":48.31483314626573}
+{"t":1791005753018,"s":14.793,"kind":"seats","text":"","forward":-740.1584551479364,"right":22.951866875825033,"up":-9.110287169293985,"movedM":3.113963247675788e-9,"speed":50.4093232865415}
+{"t":1791005753051,"s":14.826,"kind":"seats","text":"","forward":-741.3917981991785,"right":23.335482739956092,"up":-9.085994992584107,"movedM":3.113963247675788e-9,"speed":49.711619431222616}
+{"t":1791005753084,"s":14.859,"kind":"seats","text":"","forward":-742.6248680029348,"right":23.72940685981831,"up":-9.060389739345553,"movedM":3.113963247675788e-9,"speed":48.419564061164245}
+{"t":1791005753118,"s":14.893,"kind":"seats","text":"","forward":-744.6793904947951,"right":24.40772242124541,"up":-9.014951096008934,"movedM":3.113963247675788e-9,"speed":49.729411988955896}
+{"t":1791005753151,"s":14.926,"kind":"seats","text":"","forward":-746.3225243529233,"right":24.967579974759587,"up":-8.976302787878012,"movedM":3.113963247675788e-9,"speed":49.738943596572405}
+{"t":1791005753184,"s":14.959,"kind":"seats","text":"","forward":-747.5546080143315,"right":25.396672364963024,"up":-8.946075077503286,"movedM":3.113963247675788e-9,"speed":48.44744035353796}
+{"t":1791005753218,"s":14.993,"kind":"seats","text":"","forward":-749.6075591598269,"right":26.129112004354056,"up":-8.89347492712741,"movedM":3.113963247675788e-9,"speed":49.06927362825964}
+{"t":1791005753251,"s":15.026,"kind":"seats","text":"","forward":-751.2494837465091,"right":26.729109780022384,"up":-8.849535913346235,"movedM":3.113963247675788e-9,"speed":49.769907764777905}
+{"t":1791005753284,"s":15.059,"kind":"seats","text":"","forward":-752.4807195990657,"right":27.185726718237902,"up":-8.81558781031273,"movedM":3.113963247675788e-9,"speed":49.77817504335915}
+{"t":1791005753317,"s":15.092,"kind":"seats","text":"","forward":-754.5324944189532,"right":27.956058891471514,"up":-8.75728254169169,"movedM":3.113963247675788e-9,"speed":49.87552529068685}
+{"t":1791005753351,"s":15.126,"kind":"seats","text":"","forward":-756.1737478036289,"right":28.578064085184735,"up":-8.709214560575992,"movedM":3.113963247675788e-9,"speed":49.80416710266254}
+{"t":1791005753384,"s":15.159,"kind":"seats","text":"","forward":-757.4046053169977,"right":29.047546423970118,"up":-8.672376372964315,"movedM":3.113963247675788e-9,"speed":49.81321117990047}
+{"t":1791005753418,"s":15.193,"kind":"seats","text":"","forward":-759.8660579571064,"right":29.99574296046444,"up":-8.596722339608283,"movedM":3.113963247675788e-9,"speed":50.5394707326928}
+{"t":1791005753451,"s":15.226,"kind":"seats","text":"","forward":-761.5069471141198,"right":30.631704485305818,"up":-8.544915297483234,"movedM":3.113963247675788e-9,"speed":50.53540468621922}
+{"t":1791005753484,"s":15.259,"kind":"seats","text":"","forward":-762.3274077530925,"right":30.94989204754563,"up":-8.518618605453304,"movedM":3.113963247675788e-9,"speed":49.851171247531475}
+{"t":1791005753520,"s":15.295,"kind":"seats","text":"","forward":-765.1992576109044,"right":32.061500048222115,"up":-8.424536630521072,"movedM":3.113963247675788e-9,"speed":51.134197739560285}
+{"t":1791005753553,"s":15.328,"kind":"seats","text":"","forward":-766.8405351059811,"right":32.694457266765426,"up":-8.369316748620484,"movedM":3.113963247675788e-9,"speed":51.87734414373582}
+{"t":1791005753584,"s":15.359,"kind":"seats","text":"","forward":-767.6612357031191,"right":33.01039342633004,"up":-8.341289745730622,"movedM":3.113963247675788e-9,"speed":50.58658557705121}
+{"t":1791005753618,"s":15.393,"kind":"seats","text":"","forward":-768.8923895232251,"right":33.48306914889065,"up":-8.29871735938478,"movedM":3.113963247675788e-9,"speed":48.52286326747987}
+{"t":1791005753618,"s":15.393,"kind":"seats","text":"","forward":-769.3028026346848,"right":33.640280016288045,"up":-8.28438112536815,"movedM":3.113963247675788e-9,"speed":49.21790279131318}
+{"t":1791005753651,"s":15.426,"kind":"seats","text":"","forward":-770.9446013397517,"right":34.26755495739036,"up":-8.226278425719553,"movedM":3.113963247675788e-9,"speed":49.923835860909605}
+{"t":1791005753684,"s":15.459,"kind":"seats","text":"","forward":-772.1760670912918,"right":34.73727458396121,"up":-8.181859593651021,"movedM":3.113963247675788e-9,"speed":49.934817781398834}
+{"t":1791005753718,"s":15.493,"kind":"seats","text":"","forward":-773.8180854604575,"right":35.364673946068365,"up":-8.121417475727363,"movedM":3.113963247675788e-9,"speed":49.195049182688614}
+{"t":1791005753751,"s":15.526,"kind":"seats","text":"","forward":-775.8705126446993,"right":36.15507259447776,"up":-8.043750284255502,"movedM":3.113963247675788e-9,"speed":49.96856608613464}
+{"t":1791005753784,"s":15.559,"kind":"seats","text":"","forward":-777.5121951355993,"right":36.796122841251076,"up":-7.979827757856416,"movedM":3.113963247675788e-9,"speed":50.67627552133294}
+{"t":1791005753817,"s":15.592,"kind":"seats","text":"","forward":-779.1534917386512,"right":37.447974347200784,"up":-7.914275632664809,"movedM":3.113963247675788e-9,"speed":50.083002685123105}
+{"t":1791005753851,"s":15.626,"kind":"seats","text":"","forward":-780.7943320904562,"right":38.11177446138686,"up":-7.847126286186351,"movedM":3.113963247675788e-9,"speed":50.01533969676809}
+{"t":1791005753884,"s":15.659,"kind":"seats","text":"","forward":-782.4346996724958,"right":38.78755449070337,"up":-7.778465278456042,"movedM":3.113963247675788e-9,"speed":50.72426564870439}
+{"t":1791005753917,"s":15.692,"kind":"seats","text":"","forward":-783.6646480729219,"right":39.30239542921737,"up":-7.72603652577817,"movedM":3.113963247675788e-9,"speed":49.35042111528602}
+{"t":1791005753952,"s":15.727,"kind":"seats","text":"","forward":-786.1236820760327,"right":40.35264226617676,"up":-7.618977636161617,"movedM":3.113963247675788e-9,"speed":51.42397521475244}
+{"t":1791005753985,"s":15.76,"kind":"seats","text":"","forward":-787.3527491974328,"right":40.888193947131185,"up":-7.5644442169114,"movedM":3.113963247675788e-9,"speed":49.32534096540042}
+{"t":1791005754018,"s":15.793,"kind":"seats","text":"","forward":-788.5815480113419,"right":41.42983392335526,"up":-7.509333879765577,"movedM":3.113963247675788e-9,"speed":48.705935702678225}
+{"t":1791005754051,"s":15.826,"kind":"seats","text":"","forward":-790.629131311103,"right":42.34234339108144,"up":-7.416438684807732,"movedM":3.113963247675788e-9,"speed":49.42080323907489}
+{"t":1791005754084,"s":15.859,"kind":"seats","text":"","forward":-792.2670264394922,"right":43.07730073101919,"up":-7.341414027348637,"movedM":3.113963247675788e-9,"speed":50.82626184886298}
+{"t":1791005754118,"s":15.893,"kind":"seats","text":"","forward":-793.9049384474928,"right":43.8135168518445,"up":-7.265958114565313,"movedM":3.113963247675788e-9,"speed":48.92385102897899}
+{"t":1791005754151,"s":15.926,"kind":"seats","text":"","forward":-795.5429027683708,"right":44.55039781317208,"up":-7.190181419718314,"movedM":3.113963247675788e-9,"speed":48.94120091265471}
+{"t":1791005754185,"s":15.96,"kind":"seats","text":"","forward":-797.1808357867862,"right":45.28945046646669,"up":-7.114132006359654,"movedM":3.113963247675788e-9,"speed":50.900061529381645}
+{"t":1791005754218,"s":15.993,"kind":"seats","text":"","forward":-798.8186217845105,"right":46.03260422668666,"up":-7.037843291671363,"movedM":3.113963247675788e-9,"speed":50.898490384657805}
+{"t":1791005754252,"s":16.027,"kind":"seats","text":"","forward":-800.4563017350356,"right":46.77906026068496,"up":-6.961409096265594,"movedM":3.113963247675788e-9,"speed":50.84745450885937}
+{"t":1791005754284,"s":16.059,"kind":"seats","text":"","forward":-802.0940154867529,"right":47.526436791893104,"up":-6.884955519788633,"movedM":3.113963247675788e-9,"speed":50.93571276536017}
+{"t":1791005754317,"s":16.092,"kind":"seats","text":"","forward":-803.3223974822627,"right":48.08633338186752,"up":-6.8276706158672065,"movedM":3.113963247675788e-9,"speed":50.33807789106069}
+{"t":1791005754351,"s":16.126,"kind":"seats","text":"","forward":-805.3700234716077,"right":49.01612737579421,"up":-6.732419406397282,"movedM":3.113963247675788e-9,"speed":50.277675231380236}
+{"t":1791005754384,"s":16.159,"kind":"seats","text":"","forward":-807.0087259004222,"right":49.75199150679032,"up":-6.656568355764123,"movedM":3.113963247675788e-9,"speed":50.29664923003129}
+{"t":1791005754418,"s":16.193,"kind":"seats","text":"","forward":-808.6487798495039,"right":50.46800922636561,"up":-6.581281940462594,"movedM":3.113963247675788e-9,"speed":50.29567474611465}
+{"t":1791005754451,"s":16.226,"kind":"seats","text":"","forward":-810.7015684000056,"right":51.32329845433469,"up":-6.488070310443137,"movedM":3.113963247675788e-9,"speed":51.03660832816165}
+{"t":1791005754484,"s":16.259,"kind":"seats","text":"","forward":-812.3458534507168,"right":51.978682228234106,"up":-6.413986192644371,"movedM":3.113963247675788e-9,"speed":51.056244908688825}
+{"t":1791005754518,"s":16.293,"kind":"seats","text":"","forward":-813.5799427301419,"right":52.458863445276734,"up":-6.358495603088868,"movedM":3.113963247675788e-9,"speed":49.70352952433571}
+{"t":1791005754552,"s":16.327,"kind":"seats","text":"","forward":-815.2258318373456,"right":53.09546432568328,"up":-6.28427034341531,"movedM":3.113963247675788e-9,"speed":49.69581657131065}
+{"t":1791005754585,"s":16.36,"kind":"seats","text":"","forward":-816.8714959925098,"right":53.73898388472139,"up":-6.209481965987173,"movedM":3.113963247675788e-9,"speed":50.41277840685938}
+{"t":1791005754618,"s":16.393,"kind":"seats","text":"","forward":-818.5166221578402,"right":54.39395850596691,"up":-6.1340302433926155,"movedM":3.113963247675788e-9,"speed":51.13018506372474}
+{"t":1791005754618,"s":16.393,"kind":"seats","text":"","forward":-818.5166221578402,"right":54.39395850596691,"up":-6.1340302433926155,"movedM":3.113963247675788e-9,"speed":51.13018506372474}
+{"t":1791005754651,"s":16.426,"kind":"seats","text":"","forward":-820.1612722395614,"right":55.05918303236842,"up":-6.057984546894672,"movedM":3.113963247675788e-9,"speed":50.451657687788014}
+{"t":1791005754685,"s":16.46,"kind":"seats","text":"","forward":-822.2167603229473,"right":55.89959401111514,"up":-5.962320924789163,"movedM":3.113963247675788e-9,"speed":51.17444675483994}
+{"t":1791005754718,"s":16.493,"kind":"seats","text":"","forward":-823.4501012591004,"right":56.40529761081399,"up":-5.904730688207932,"movedM":3.113963247675788e-9,"speed":50.49039527594896}
+{"t":1791005754752,"s":16.527,"kind":"seats","text":"","forward":-825.0948031934881,"right":57.0785467249612,"up":-5.82785327038486,"movedM":3.113963247675788e-9,"speed":50.48981682117115}
+{"t":1791005754785,"s":16.56,"kind":"seats","text":"","forward":-826.7399057944035,"right":57.7489867648232,"up":-5.750989636740002,"movedM":3.113963247675788e-9,"speed":50.52899797735428}
+{"t":1791005754818,"s":16.593,"kind":"seats","text":"","forward":-828.3855124103743,"right":58.415229460543515,"up":-5.674251862556166,"movedM":3.113963247675788e-9,"speed":50.54824919818666}
+{"t":1791005754851,"s":16.626,"kind":"seats","text":"","forward":-830.0317646577719,"right":59.07539321784793,"up":-5.5977514735501055,"movedM":3.113963247675788e-9,"speed":50.65187993473734}
+{"t":1791005754885,"s":16.66,"kind":"seats","text":"","forward":-832.0907283615516,"right":59.888985627968,"up":-5.502604448902266,"movedM":3.113963247675788e-9,"speed":51.96210924505507}
+{"t":1791005754918,"s":16.693,"kind":"seats","text":"","forward":-833.7389031374823,"right":60.52966386546399,"up":-5.426918938910888,"movedM":3.113963247675788e-9,"speed":51.331912807077714}
+{"t":1791005754951,"s":16.726,"kind":"seats","text":"","forward":-834.9755368785557,"right":61.005484448961795,"up":-5.370381798580307,"movedM":3.113963247675788e-9,"speed":50.624784098212}
+{"t":1791005754985,"s":16.76,"kind":"seats","text":"","forward":-836.624868676768,"right":61.63625848695074,"up":-5.29524148098574,"movedM":3.113963247675788e-9,"speed":50.62354247934513}
+{"t":1791005755019,"s":16.794,"kind":"seats","text":"","forward":-839.0997187586347,"right":62.57729563537788,"up":-5.1829883809481645,"movedM":3.113963247675788e-9,"speed":51.30378289254941}
+{"t":1791005755051,"s":16.826,"kind":"seats","text":"","forward":-839.924873592397,"right":62.88989786810981,"up":-5.145689182908749,"movedM":3.113963247675788e-9,"speed":49.979932012087176}
+{"t":1791005755085,"s":16.86,"kind":"seats","text":"","forward":-841.5754690508923,"right":63.51386212208331,"up":-5.071270409770408,"movedM":3.113963247675788e-9,"speed":50.67987666856763}
+{"t":1791005755118,"s":16.893,"kind":"seats","text":"","forward":-843.6391767999987,"right":64.2923631813959,"up":-4.978586295486148,"movedM":3.113963247675788e-9,"speed":51.42572752758251}
+{"t":1791005755151,"s":16.926,"kind":"seats","text":"","forward":-844.877576509094,"right":64.75962924663435,"up":-4.923155266969006,"movedM":3.113963247675788e-9,"speed":50.82230418116573}
+{"t":1791005755185,"s":16.96,"kind":"seats","text":"","forward":-846.116090336594,"right":65.22724392279093,"up":-4.8678682047079,"movedM":3.113963247675788e-9,"speed":50.04900122607697}
+{"t":1791005755218,"s":16.993,"kind":"seats","text":"","forward":-848.1805879421041,"right":66.00666918910377,"up":-4.776083219831707,"movedM":3.113963247675788e-9,"speed":50.77478642254893}
+{"t":1791005755252,"s":17.027,"kind":"seats","text":"","forward":-849.8329071058158,"right":66.62459600722508,"up":-4.703111078026586,"movedM":3.113963247675788e-9,"speed":49.94044636267152}
+{"t":1791005755285,"s":17.06,"kind":"seats","text":"","forward":-851.4864858690862,"right":67.22976916660588,"up":-4.63067967255025,"movedM":3.113963247675788e-9,"speed":50.791322595888694}
+{"t":1791005755318,"s":17.093,"kind":"seats","text":"","forward":-853.555539759746,"right":67.96472805099972,"up":-4.540878547547776,"movedM":3.113963247675788e-9,"speed":51.53847823026889}
+{"t":1791005755351,"s":17.126,"kind":"seats","text":"","forward":-854.7979736963089,"right":68.39581239450939,"up":-4.487296254932545,"movedM":3.113963247675788e-9,"speed":50.93344194985038}
+{"t":1791005755385,"s":17.16,"kind":"seats","text":"","forward":-856.4553853871582,"right":68.96339342927456,"up":-4.416030015513996,"movedM":3.113963247675788e-9,"speed":50.95170790854591}
+{"t":1791005755418,"s":17.193,"kind":"seats","text":"","forward":-858.1134622448111,"right":69.52635579910981,"up":-4.344811119791215,"movedM":3.113963247675788e-9,"speed":50.88491608806557}
+{"t":1791005755451,"s":17.226,"kind":"seats","text":"","forward":-860.1866654523834,"right":70.22765655328197,"up":-4.255658643468078,"movedM":3.113963247675788e-9,"speed":51.612136622301165}
+{"t":1791005755485,"s":17.26,"kind":"seats","text":"","forward":-861.4308171292184,"right":70.64834341285217,"up":-4.20203002135179,"movedM":3.113963247675788e-9,"speed":50.299679429191556}
+{"t":1791005755517,"s":17.292,"kind":"seats","text":"","forward":-863.5047123320059,"right":71.35019454164728,"up":-4.112337114467171,"movedM":3.113963247675788e-9,"speed":51.02808952580185}
+{"t":1791005755551,"s":17.326,"kind":"seats","text":"","forward":-864.748931078494,"right":71.77535841746209,"up":-4.058237078269543,"movedM":3.113963247675788e-9,"speed":50.95628217900281}
+{"t":1791005755584,"s":17.359,"kind":"seats","text":"","forward":-866.4072708108632,"right":72.35263713676284,"up":-3.985655682059366,"movedM":3.113963247675788e-9,"speed":51.05893493386383}
+{"t":1791005755617,"s":17.392,"kind":"seats","text":"","forward":-868.0648427783362,"right":72.94231073060973,"up":-3.912596790856344,"movedM":3.113963247675788e-9,"speed":49.74499755351058}
+{"t":1791005755618,"s":17.393,"kind":"seats","text":"","forward":-868.0648427783362,"right":72.94231073060973,"up":-3.912596790856344,"movedM":3.113963247675788e-9,"speed":49.66195081302058}
+{"t":1791005755651,"s":17.426,"kind":"seats","text":"","forward":-869.7219090244436,"right":73.54106186708282,"up":-3.8392043854579097,"movedM":3.113963247675788e-9,"speed":51.00862854580901}
+{"t":1791005755684,"s":17.459,"kind":"seats","text":"","forward":-871.3787288724899,"right":74.14573333104403,"up":-3.7656243976811865,"movedM":3.113963247675788e-9,"speed":51.111071002499074}
+{"t":1791005755717,"s":17.492,"kind":"seats","text":"","forward":-873.0355161128427,"right":74.75379341523393,"up":-3.6919823856948213,"movedM":3.113963247675788e-9,"speed":50.42033224011273}
+{"t":1791005755751,"s":17.526,"kind":"seats","text":"","forward":-874.6922895573045,"right":75.36496668628433,"up":-3.618343576966922,"movedM":3.113963247675788e-9,"speed":51.06019525957485}
+{"t":1791005755784,"s":17.559,"kind":"seats","text":"","forward":-875.9347995478823,"right":75.82602539092494,"up":-3.5631334078012267,"movedM":3.113963247675788e-9,"speed":51.15825257859618}
+{"t":1791005755818,"s":17.593,"kind":"seats","text":"","forward":-878.0055399904423,"right":76.59919510312477,"up":-3.4712100457581236,"movedM":3.113963247675788e-9,"speed":51.09421991823281}
+{"t":1791005755851,"s":17.626,"kind":"seats","text":"","forward":-879.6621781392422,"right":77.22032015106112,"up":-3.3978193212716374,"movedM":3.113963247675788e-9,"speed":51.196457443257444}
+{"t":1791005755884,"s":17.659,"kind":"seats","text":"","forward":-880.9047656071458,"right":77.68669339711067,"up":-3.3428902076913993,"movedM":3.113963247675788e-9,"speed":50.49998024895867}
+{"t":1791005755918,"s":17.693,"kind":"seats","text":"","forward":-883.3902579167874,"right":78.62035141427873,"up":-3.2333391955065367,"movedM":3.113963247675788e-9,"speed":51.23433843889611}
+{"t":1791005755951,"s":17.726,"kind":"seats","text":"","forward":-885.461718309872,"right":79.4004847074911,"up":-3.1423325511898716,"movedM":3.113963247675788e-9,"speed":52.58689622751775}
+{"t":1791005755984,"s":17.759,"kind":"seats","text":"","forward":-885.461718309872,"right":79.4004847074911,"up":-3.1423325511898716,"movedM":3.113963247675788e-9,"speed":49.75253240014134}
+{"t":1791005756018,"s":17.793,"kind":"seats","text":"","forward":-887.9473818778018,"right":80.34299598161641,"up":-3.0333695813425976,"movedM":3.113963247675788e-9,"speed":51.19481902890618}
+{"t":1791005756051,"s":17.826,"kind":"seats","text":"","forward":-889.6043658544097,"right":80.97579014704456,"up":-2.960864502571785,"movedM":3.113963247675788e-9,"speed":50.502218016568236}
+{"t":1791005756084,"s":17.859,"kind":"seats","text":"","forward":-890.8470834713028,"right":81.45217202577027,"up":-2.906574386712713,"movedM":3.113963247675788e-9,"speed":50.51447037759961}
+{"t":1791005756118,"s":17.893,"kind":"seats","text":"","forward":-892.9182594450442,"right":82.24931287460879,"up":-2.816264177133844,"movedM":3.113963247675788e-9,"speed":51.222723963998504}
+{"t":1791005756151,"s":17.926,"kind":"seats","text":"","forward":-894.5751698444762,"right":82.88992299754324,"up":-2.7441647655297867,"movedM":3.113963247675788e-9,"speed":51.26101781461837}
+{"t":1791005756184,"s":17.959,"kind":"seats","text":"","forward":-895.8178104943643,"right":83.37230840892522,"up":-2.6901686686334405,"movedM":3.113963247675788e-9,"speed":50.56328960706991}
+{"t":1791005756218,"s":17.993,"kind":"seats","text":"","forward":-897.8887820077023,"right":84.18011840444012,"up":-2.600326719778319,"movedM":3.113963247675788e-9,"speed":51.293921050513475}
+{"t":1791005756252,"s":18.027,"kind":"seats","text":"","forward":-900.3738986615406,"right":85.15445704596306,"up":-2.492837802269265,"movedM":3.113963247675788e-9,"speed":52.70813640639059}
+{"t":1791005756284,"s":18.059,"kind":"seats","text":"","forward":-900.7880986935633,"right":85.31716189154821,"up":-2.474966634342252,"movedM":3.113963247675788e-9,"speed":50.611837173992306}
+{"t":1791005756317,"s":18.092,"kind":"seats","text":"","forward":-902.859261917254,"right":86.1309465418073,"up":-2.3858399513713495,"movedM":3.113963247675788e-9,"speed":51.34300751426744}
+{"t":1791005756352,"s":18.127,"kind":"seats","text":"","forward":-905.3450839517836,"right":87.10725314407665,"up":-2.279444195203749,"movedM":3.113963247675788e-9,"speed":53.509815152257154}
+{"t":1791005756384,"s":18.159,"kind":"seats","text":"","forward":-905.7594056084575,"right":87.27020837954791,"up":-2.2617688774919946,"movedM":3.113963247675788e-9,"speed":51.37141337409928}
+{"t":1791005756417,"s":18.192,"kind":"seats","text":"","forward":-907.8310681388464,"right":88.08630831260137,"up":-2.1736519581899127,"movedM":3.113963247675788e-9,"speed":51.47738522468234}
+{"t":1791005756451,"s":18.226,"kind":"seats","text":"","forward":-909.4885072696862,"right":88.7402631404754,"up":-2.103502357535841,"movedM":3.113963247675788e-9,"speed":51.407656227176666}
+{"t":1791005756485,"s":18.26,"kind":"seats","text":"","forward":-911.1461433738019,"right":89.39414045573119,"up":-2.033703900617133,"movedM":3.113963247675788e-9,"speed":50.55844408751283}
+{"t":1791005756518,"s":18.293,"kind":"seats","text":"","forward":-912.3895735476078,"right":89.88374589388724,"up":-1.9816112618952448,"movedM":3.113963247675788e-9,"speed":49.15099121092645}
+{"t":1791005756551,"s":18.326,"kind":"seats","text":"","forward":-914.4624563035701,"right":90.69700242400978,"up":-1.89532154937643,"movedM":3.113963247675788e-9,"speed":50.03006421747851}
+{"t":1791005756585,"s":18.36,"kind":"seats","text":"","forward":-916.5359801227568,"right":91.50672218951365,"up":-1.8097194348080612,"movedM":3.113963247675788e-9,"speed":52.20756283915695}
+{"t":1791005756618,"s":18.393,"kind":"seats","text":"","forward":-917.3655649285522,"right":91.82965896941306,"up":-1.77567746052913,"movedM":3.113963247675788e-9,"speed":50.76998620545104}
+{"t":1791005756618,"s":18.393,"kind":"seats","text":"","forward":-917.7803969817173,"right":91.99090278878543,"up":-1.7587007097066192,"movedM":3.113963247675788e-9,"speed":51.48698294744139}
+{"t":1791005756651,"s":18.426,"kind":"seats","text":"","forward":-919.4400070083282,"right":92.6341846244776,"up":-1.6910992815805408,"movedM":3.113963247675788e-9,"speed":51.50261873891998}
+{"t":1791005756685,"s":18.46,"kind":"seats","text":"","forward":-921.5152623048932,"right":93.43347677263574,"up":-1.6073233435555827,"movedM":3.113963247675788e-9,"speed":52.25500163280318}
+{"t":1791005756718,"s":18.493,"kind":"seats","text":"","forward":-922.7608579959164,"right":93.9100546596186,"up":-1.5574637382216778,"movedM":3.113963247675788e-9,"speed":51.61968218019688}
+{"t":1791005756751,"s":18.526,"kind":"seats","text":"","forward":-924.006813209364,"right":94.38411318983628,"up":-1.5079197147740009,"movedM":3.113963247675788e-9,"speed":50.83122790311202}
+{"t":1791005756784,"s":18.559,"kind":"seats","text":"","forward":-926.4996209660274,"right":95.32646517819705,"up":-1.4097403494872645,"movedM":3.113963247675788e-9,"speed":52.996564743283706}
+{"t":1791005756817,"s":18.592,"kind":"seats","text":"","forward":-927.3307772069641,"right":95.63932987911005,"up":-1.377274485736937,"movedM":3.113963247675788e-9,"speed":50.861299350161936}
+{"t":1791005756851,"s":18.626,"kind":"seats","text":"","forward":-928.9934438681619,"right":96.26298400414407,"up":-1.312738662325532,"movedM":3.113963247675788e-9,"speed":49.5292919285236}
+{"t":1791005756884,"s":18.659,"kind":"seats","text":"","forward":-931.4884403923847,"right":97.19224742878856,"up":-1.2169508250904841,"movedM":3.113963247675788e-9,"speed":53.04304504754129}
+{"t":1791005756918,"s":18.693,"kind":"seats","text":"","forward":-932.3204205284528,"right":97.49986695805921,"up":-1.1853057460276017,"movedM":3.113963247675788e-9,"speed":49.414149887710366}
+{"t":1791005756953,"s":18.728,"kind":"seats","text":"","forward":-933.9849498066446,"right":98.11097633981137,"up":-1.12246511102807,"movedM":3.113963247675788e-9,"speed":51.431247416727835}
+{"t":1791005756984,"s":18.759,"kind":"seats","text":"","forward":-936.0667118277518,"right":98.86683673155994,"up":-1.0447627640908546,"movedM":3.113963247675788e-9,"speed":52.36926943607193}
+{"t":1791005757018,"s":18.793,"kind":"seats","text":"","forward":-937.7329958768869,"right":99.46516928083264,"up":-0.9832714352816461,"movedM":3.113963247675788e-9,"speed":51.64528674610322}
+{"t":1791005757051,"s":18.826,"kind":"seats","text":"","forward":-939.4001506928316,"right":100.05701321319452,"up":-0.9223858061814295,"movedM":3.113963247675788e-9,"speed":51.68258336408352}
+{"t":1791005757084,"s":18.859,"kind":"seats","text":"","forward":-941.4854576977419,"right":100.78647724499064,"up":-0.8471320424980874,"movedM":3.113963247675788e-9,"speed":52.504022042968714}
+{"t":1791005757118,"s":18.893,"kind":"seats","text":"","forward":-942.3200078894155,"right":101.07503753509548,"up":-0.8172842006778861,"movedM":3.113963247675788e-9,"speed":51.70732751434551}
+{"t":1791005757151,"s":18.926,"kind":"seats","text":"","forward":-943.9898068239506,"right":101.64695649404996,"up":-0.7579862714577313,"movedM":3.113963247675788e-9,"speed":51.00468258549427}
+{"t":1791005757184,"s":18.959,"kind":"seats","text":"","forward":-946.4961307346864,"right":102.4929148443415,"up":-0.6699059556070879,"movedM":3.113963247675788e-9,"speed":51.82822872674792}
+{"t":1791005757217,"s":18.992,"kind":"seats","text":"","forward":-947.332034634429,"right":102.77147980347695,"up":-0.6407504408479662,"movedM":3.113963247675788e-9,"speed":51.83501895578028}
+{"t":1791005757251,"s":19.026,"kind":"seats","text":"","forward":-949.0046468217002,"right":103.32248880214638,"up":-0.5827142237823486,"movedM":3.113963247675788e-9,"speed":51.0448607382936}
+{"t":1791005757284,"s":19.059,"kind":"seats","text":"","forward":-951.5158400975398,"right":104.13139416689978,"up":-0.4962450540956205,"movedM":3.113963247675788e-9,"speed":51.86834746065045}
+{"t":1791005757318,"s":19.093,"kind":"seats","text":"","forward":-952.3535586418275,"right":104.39593798814133,"up":-0.46754115185184275,"movedM":3.113963247675788e-9,"speed":51.07081953231297}
+{"t":1791005757351,"s":19.126,"kind":"seats","text":"","forward":-954.0298600750739,"right":104.91851579402504,"up":-0.410212020549662,"movedM":3.113963247675788e-9,"speed":51.8013591555941}
+{"t":1791005757385,"s":19.16,"kind":"seats","text":"","forward":-956.9648662215392,"right":105.82404560231811,"up":-0.30962125559395937,"movedM":3.113963247675788e-9,"speed":53.984635063226804}
+{"t":1791005757418,"s":19.193,"kind":"seats","text":"","forward":-957.8034919882712,"right":106.08333578990221,"up":-0.28071619608067266,"movedM":3.113963247675788e-9,"speed":52.5661123496886}
+{"t":1791005757451,"s":19.226,"kind":"seats","text":"","forward":-959.4806641721058,"right":106.60401871857493,"up":-0.22262929856773409,"movedM":3.113963247675788e-9,"speed":52.56068521190559}
+{"t":1791005757484,"s":19.259,"kind":"seats","text":"","forward":-961.5768677689687,"right":107.25982498111648,"up":-0.14947019254157204,"movedM":3.113963247675788e-9,"speed":51.8575966671794}
+{"t":1791005757518,"s":19.293,"kind":"seats","text":"","forward":-962.415233281573,"right":107.52399408760061,"up":-0.12003376513198818,"movedM":3.113963247675788e-9,"speed":51.86366056468252}
+{"t":1791005757551,"s":19.326,"kind":"seats","text":"","forward":-964.0917620443297,"right":108.05551808508238,"up":-0.06088672600906576,"movedM":3.113963247675788e-9,"speed":52.049194134471584}
+{"t":1791005757584,"s":19.359,"kind":"seats","text":"","forward":-966.6060744482768,"right":108.86053284221344,"up":0.02844326937741571,"movedM":3.113963247675788e-9,"speed":52.61274958064923}
+{"t":1791005757618,"s":19.393,"kind":"seats","text":"","forward":-967.4440572511844,"right":109.13086864808452,"up":0.058360173489033336,"movedM":3.113963247675788e-9,"speed":51.18012245823471}
+{"t":1791005757618,"s":19.393,"kind":"seats","text":"","forward":-967.4440572511844,"right":109.13086864808452,"up":0.058360173489033336,"movedM":3.113963247675788e-9,"speed":51.18012245823471}
+{"t":1791005757651,"s":19.426,"kind":"seats","text":"","forward":-969.5389001765634,"right":109.80972753460793,"up":0.1333646555310741,"movedM":3.113963247675788e-9,"speed":51.91414383120689}
+{"t":1791005757685,"s":19.46,"kind":"seats","text":"","forward":-972.0531578499329,"right":110.62422653853048,"up":0.22350605360233314,"movedM":3.113963247675788e-9,"speed":54.192390562096634}
+{"t":1791005757717,"s":19.492,"kind":"seats","text":"","forward":-972.4722842125781,"right":110.75964982095132,"up":0.2385276011451515,"movedM":3.113963247675788e-9,"speed":52.02124059512385}
+{"t":1791005757751,"s":19.526,"kind":"seats","text":"","forward":-974.9875754087476,"right":111.5699478930789,"up":0.32859845459126485,"movedM":3.113963247675788e-9,"speed":53.392031361195436}
+{"t":1791005757784,"s":19.559,"kind":"seats","text":"","forward":-976.2455270076126,"right":111.97401918664139,"up":0.37359452207824145,"movedM":3.113963247675788e-9,"speed":51.24033387084628}
+{"t":1791005757817,"s":19.592,"kind":"seats","text":"","forward":-977.5036329362543,"right":112.37782183235049,"up":0.41856893010444,"movedM":3.113963247675788e-9,"speed":51.969248528303645}
+{"t":1791005757851,"s":19.626,"kind":"seats","text":"","forward":-980.0202602044038,"right":113.18504505009446,"up":0.5084377884775925,"movedM":3.113963247675788e-9,"speed":53.42769024275139}
+{"t":1791005757884,"s":19.659,"kind":"seats","text":"","forward":-981.2787732167677,"right":113.58851552874114,"up":0.5533168328322463,"movedM":3.113963247675788e-9,"speed":51.274501605506195}
+{"t":1791005757917,"s":19.692,"kind":"seats","text":"","forward":-982.5374010566769,"right":113.99203941343967,"up":0.59815103678304,"movedM":3.113963247675788e-9,"speed":52.00390355006407}
+{"t":1791005757951,"s":19.726,"kind":"seats","text":"","forward":-984.6353997806397,"right":114.66446489445258,"up":0.6727502572800459,"movedM":3.113963247675788e-9,"speed":52.73937081710598}
+{"t":1791005757984,"s":19.759,"kind":"seats","text":"","forward":-986.314109760845,"right":115.20178910585855,"up":0.7322949860908397,"movedM":3.113963247675788e-9,"speed":50.67190437257807}
+{"t":1791005758017,"s":19.792,"kind":"seats","text":"","forward":-987.5733532258386,"right":115.60415619691742,"up":0.7768676187312227,"movedM":3.113963247675788e-9,"speed":51.402933690776024}
+{"t":1791005758051,"s":19.826,"kind":"seats","text":"","forward":-989.6725754184893,"right":116.2729945522068,"up":0.8509850482638395,"movedM":3.113963247675788e-9,"speed":52.05307445410142}
+{"t":1791005758084,"s":19.859,"kind":"seats","text":"","forward":-991.7726431847564,"right":116.93751159658262,"up":0.9248556837665911,"movedM":3.113963247675788e-9,"speed":52.067564442576206}
+{"t":1791005758118,"s":19.893,"kind":"seats","text":"","forward":-993.032946982121,"right":117.33541583410033,"up":0.9691080220441993,"movedM":3.113963247675788e-9,"speed":52.79807013419681}
+{"t":1791005758151,"s":19.926,"kind":"seats","text":"","forward":-994.7130548030468,"right":117.87016528025487,"up":1.0281526097220874,"movedM":3.113963247675788e-9,"speed":52.809846956877}
+{"t":1791005758184,"s":19.959,"kind":"seats","text":"","forward":-996.3923985689488,"right":118.41324698162765,"up":1.0872640715798663,"movedM":3.113963247675788e-9,"speed":51.377349289835614}
+{"t":1791005758218,"s":19.993,"kind":"seats","text":"","forward":-998.4906359883472,"right":119.10258260496698,"up":1.161021163003134,"movedM":3.113963247675788e-9,"speed":53.558646310593204}
+{"t":1791005758230,"s":31.545,"kind":"viewer","text":"FSDT_Passengers_Seats_FNX_A320_01 (Viewer): 620 frames; forward of the aircraft -29.6m at the start and -974.4m at the end, after the object itself moved 0m over the ground in 20s at 97 kt: left behind","category":"Viewer","frames":620,"startForward":-29.632406476247954,"endForward":-974.3653654341482,"endRight":111.37340583991487,"endUp":0.30690577638535255,"movedM":3.113963247675788e-9,"seconds":19.993,"speedKt":97.2172279708242}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_INTPAX_VISIBLE ← 1","object":0,"values":[1]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1A ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1B ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1C ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1D ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1E ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_1F ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2A ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2B ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2C ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2D ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2E ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_2F ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3A ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3B ← 0","object":0,"values":[0]}
+{"t":1791005758230,"s":31.545,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_3F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_4F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_5F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_6F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_7F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_8F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_9F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_10F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_11F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_12F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_13F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_14F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_15F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_16F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_17F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_18F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_19F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_20F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_21F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_22F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_23F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_24F ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25A ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25B ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25C ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25D ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25E ← 0","object":0,"values":[0]}
+{"t":1791005758231,"s":31.546,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_25F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26A ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26B ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26C ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26D ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26E ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_26F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27A ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27B ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27C ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27D ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27E ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_27F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28A ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28B ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28C ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28D ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28E ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_28F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29A ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29B ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29C ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29D ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29E ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_29F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30A ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30B ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30C ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30D ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30E ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_30F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31A ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31B ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31C ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31D ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31E ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"write","text":"L:FSDT_GSX_PASSENGER_SEAT_31F ← 0","object":0,"values":[0]}
+{"t":1791005758232,"s":31.547,"kind":"lvars","text":"put back 187 L: variables"}

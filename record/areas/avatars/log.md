@@ -9,6 +9,23 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: The sim doesn't carry an object of category Viewer with the aircraft
+
+**Asked:** does the sim carry GSX's per-aircraft seat object with the aircraft by itself?
+The pilot has seen GSX's seated passengers sit still in a flying Fenix A320, GSX's in-sim module does no per-frame writes, and the object's `sim.cfg` gives `category = Viewer`, which the SDK lists without explaining (read in fsdreamteam-gsx-pro 4.0.19, `modules/fsdt-msfs-bridge.wasm` and `SimObjects/GroundVehicles/FSDT_Passengers_Seats`).
+
+**Expected:** no prediction.
+
+**Found:** we spawned `FSDT_Passengers_Seats_FNX_A320_01`, whose `A:CATEGORY` read `Viewer`, at a Cessna 152's position at 94 kt, and wrote nothing to it.
+In 20s it moved 0m over the ground while the aircraft flew 945m on, so the sim leaves it where it's put.
+
+**Changed:** category Viewer isn't how GSX keeps its passengers with the aircraft, and how it does is still unknown.
+The route for our figure stays a WASM module writing inside the sim's frame.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p10's run](../../../experiments/areas/avatars/results/p10-viewer-2026-10-03-05-35-26.txt).
+
 ## 2026-10-03: Writes from outside the sim place an object in a moving cockpit but can't hold it still
 
 **Asked:** can a SimConnect client outside the sim keep an object fixed in the cockpit of a flying aircraft by writing its position every frame?

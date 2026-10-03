@@ -1,0 +1,11 @@
+p19 · The hand sphere on the control the pilot clicks, by casting the click's ray into the cockpit model, on MSFS 2024
+2026-10-03T08:26:59.582Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  PA24_250_INTERIOR_LOD00.gltf: 885 primitives, 650,660 triangles, read in 143ms; map 103 controls
+  aircraft TITLE "A2A Piper PA-24-250 Comanche", 0.000022 kt
+  the seats put the model's origin 0.008m forward, 0.001m right, 0.007m up of SimConnect's reference point
+  SIMOBJECT at 0.009m forward, -0.304m right, 0.540m up, fov 1.086213 rad; the WORLD position is -0.033m forward, -0.003m right, -0.003m up from it, over 10 pairs
+  38 clicks and 0 wheel turns in the sim, 49 presses outside it
+  named a mapped control, of 38 touches: 15 with mirror +, yaw +, pitch −, fov vertical; 11 with mirror +, yaw −, pitch −, fov vertical; 9 with mirror −, yaw +, pitch +, fov horizontal; 8 with mirror −, yaw −, pitch −, fov horizontal; 7 with mirror +, yaw +, pitch +, fov horizontal; 7 with mirror −, yaw +, pitch +, fov vertical; the other 10 at most 7
+  with mirror +, yaw +, pitch −, fov vertical: Cockpit_Walls ×6, KNOB_CabinVent1Nozzle ×2, LEVER_MIXTURE, toe_brake_l, RudderPedalL_Axis ×4, BREAKER_beaconLight ×2, BREAKER_navCom2, BREAKER_pitotHeat ×2, BREAKER_navLights, breaker_landing_gear_motor ×2, BREAKER_landingGearIndLights, BREAKER_stallWarning, Wheelwell ×2, FLOOR ×3, VC_Seat_CoPilot ×2, HeadphoneWire01, Door_Int ×3, Object002, KNOB_CabinVent2Nozzle ×2

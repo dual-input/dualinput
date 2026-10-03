@@ -120,6 +120,8 @@ p17's ray, built from the camera's WORLD pose, came out mirrored left to right, 
   - rays to the GPS units hit `BlackPanel`, because the GPS units are attachments with models of their own (`attachments/a2a/Gtn750` and the others), not part of the interior model
   - rays to the throttle quadrant hit `throttle_base` and the dash behind the levers, which the file stores at one end of their travel
 - The pilot reported that "direct rays were better than rays cast to the far side of the cockpit".
+- In a second run of 38 clicks, the combination that named the most mapped controls, 15, took the field of view as vertical, with the same signs: the rule p20 later measured ([entry above](#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
+  The next best named 11.
 
 **Changed:** the hand can follow clicks through the model's geometry alone, so it doesn't depend on how an aircraft names its controls.
 Settling the field of view needs clicks whose target is known, which is p20's job.
@@ -127,7 +129,7 @@ A cockpit's moving and hidden parts need their state from the sim, or they block
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 
-**Evidence:** [p19's run](../../../experiments/areas/avatars/results/p19-click-hand-2026-10-03-08-13-37.txt), whose log has every click under all 16 combinations.
+**Evidence:** p19's [first run](../../../experiments/areas/avatars/results/p19-click-hand-2026-10-03-08-13-37.txt) and [second run](../../../experiments/areas/avatars/results/p19-click-hand-2026-10-03-08-26-59.txt), whose logs have every click under all 16 combinations.
 
 ## 2026-10-03: The cockpit model's own space lines up with SimConnect's within 8mm, but the model's input event IDs aren't the names the sim lists
 

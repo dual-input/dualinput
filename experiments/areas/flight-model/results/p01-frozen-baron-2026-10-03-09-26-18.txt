@@ -1,0 +1,7 @@
+p01 · A frozen Baron 58P set the way a following machine would, on MSFS 2024
+2026-10-03T09:26:18.542Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N585RS"
+
+frozen, engine start: 926 frames in 29.9s, SIM ON GROUND 1, GEAR IS ON GROUND:0 1, GEAR IS ON GROUND:1 1, GEAR IS ON GROUND:2 1, IS LATITUDE LONGITUDE FREEZE ON 1, IS ALTITUDE FREEZE ON 1, IS ATTITUDE FREEZE ON 1, GENERAL ENG STARTER:1 0/1, ENG COMBUSTION:1 1/0, L:bksq_WheelChocks 0, L:bksq_controlLocks 0, PLANE ALT ABOVE GROUND 3.308872..3.308873, RECIP ENG COWL FLAP POSITION:1 0..0, GROUND VELOCITY 0.000256..0.101352, PROP RPM:1 -71.59842..1012.136046, read back against the frame's write: position up to 0.00m off, altitude 0.00 ft, pitch 0.00°, bank 0.00°, heading 0.00°; while the starter was engaged, 356 frames, bank up to 0.00° from what we wrote, 0 frames more than 0.05° off
+
+Exceptions: none

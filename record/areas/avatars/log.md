@@ -9,6 +9,29 @@ GSX's separate seated people move on their own, though they sit a seat's height 
 The probes are p01 to p06 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: A model of our own compiles from generated glTF, and its size and color follow variables of its own object
+
+**Asked:** can we build a model of our own, and change its size and color from outside the sim in real time, per object?
+
+**Expected:** size, since an animation can key scale; color only by switching between colored parts, since the SDK's behavior files we searched have no color template.
+
+**Found:**
+
+- `tools/sphere.mjs` writes a plain glTF 2.0 sphere: a node `hand_scale` with a scale animation `CROSSCHECK_Scale`, over four balls in red, green, blue, and yellow.
+  `fspackagetool` compiled it as a `SimObject` asset group in our probe package, adding `ASOBO_asset_optimized` with no errors, and the sim spawned it, `CROSSCHECK_HandSphere`, as a `StaticObject`.
+- Its model reads two variables of its own object: the scale animation's `ANIM_CODE` reads `(Z:CROSSCHECK_SCALE)`, and each ball's `VISIBILITY_CODE` compares `(L:1:CROSSCHECK_COLOR)` with its index.
+  The module set both every frame on the sphere alone, with `fsVarsZVarSet` and the sphere's object ID.
+- The pilot saw the color change every 1.5s and the size sweep up, and the module read `Z:CROSSCHECK_SCALE` back as written, with no errors.
+  So a model reads its object's own variables under both spellings, `Z:` and `L:1:`.
+- Placed 0.6m along the ray from the camera through the cursor, the sphere moved mirrored left to right and didn't sit on the controls the pilot clicked.
+  We set the ray aside, because a hand that follows the cursor all the time isn't what a pilot does.
+
+**Changed:** Crosscheck can build its own figure from generated glTF and drive its parts per object at runtime: position, size, and color, by switching between colored parts.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p17's run](../../../experiments/areas/avatars/results/p17-hand-2026-10-03-07-27-25.txt), and the sphere's sources in [experiments/areas/avatars/wasm](../../../experiments/areas/avatars/wasm).
+
 ## 2026-10-03: Over three minutes of flying, leads of 0.75 and 1 frame both hold the figure, and what's left reads as inertia
 
 **Asked:** at length, which of the two best leads from p15 holds the seated figure better ([entry below](#2026-10-03-nose-up-and-right-wing-down-are-negative-and-turned-by-full-attitude-a-wasm-written-figure-holds-its-seat))?

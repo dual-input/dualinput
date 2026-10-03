@@ -284,6 +284,7 @@ poseF.add({ rest: () => { hands.L = hands.R = null; update() } }, "rest").name("
 const dims = gui.addFolder("Dimensions (m)").close()
 const range = (k) =>
   k === "at" ? [0, 1, 0.01]
+  : k === "tip" ? [0.2, 1, 0.01]
   : k === "segments" ? [1, 16, 1]
   : ["up", "down", "back"].includes(k) ? [-0.3, 0.5, 0.001]
   : [0, 0.5, 0.001]

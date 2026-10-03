@@ -189,10 +189,27 @@ const arc = (z0, r, from, to, steps) =>
 
 const sphere = () => lathe(arc(0, 1, -Math.PI / 2, Math.PI / 2, 24), 40)
 const stick = (r, length) => lathe([{ z: 0, r, nr: 1, nz: 0 }, { z: length, r, nr: 1, nz: 0 }], 20)
+// The nose, from the head's center along +z: its full radius until it leaves
+// the head's surface, then a taper to `tip` times that radius, and a rounded
+// cap whose front is `length` beyond the surface. The cap starts where its
+// slope meets the taper's, so the two shade as one surface.
 function nose(spec) {
-  const r = spec.nose.radius
-  const tip = spec.head.radius + spec.nose.length - r
-  return lathe([{ z: 0, r, nr: 1, nz: 0 }, ...arc(tip, r, 0, Math.PI / 2, 8)], 24)
+  const R = spec.head.radius, r = spec.nose.radius, rt = r * (spec.nose.tip ?? 1)
+  const out = Math.sqrt(Math.max(0, R * R - r * r))
+  const center = R + spec.nose.length - rt
+  let slope = 0, end = { z: center, r: rt }
+  for (let i = 0; i < 3; i++) {
+    slope = Math.atan2(r - end.r, end.z - out)
+    end = { z: center + rt * Math.sin(slope), r: rt * Math.cos(slope) }
+  }
+  const side = { nr: Math.cos(slope), nz: Math.sin(slope) }
+  return lathe([
+    { z: 0, r, nr: 1, nz: 0 },
+    { z: out, r, nr: 1, nz: 0 },
+    { z: out, r, ...side },
+    { z: end.z, r: end.r, ...side },
+    ...arc(center, rt, slope, Math.PI / 2, 8),
+  ], 24)
 }
 
 // ------------------------------------------------ buffer

@@ -1,6 +1,6 @@
 {
   "head": { "radius": 0.1, "eyeForward": 0.06 },
-  "nose": { "radius": 0.038, "length": 0.099 },
+  "nose": { "radius": 0.038, "length": 0.099, "tip": 0.6 },
   "chest": { "radius": 0.134, "at": 0.48 },
   "hips": { "radius": 0.179, "up": 0.071, "back": -0.044 },
   "shoulders": { "width": 0.208, "down": -0.01 },

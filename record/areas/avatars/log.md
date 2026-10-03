@@ -9,6 +9,27 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: On the horn's surface the yoke hand looks right, and a thumb on the far horn must not take the yoke from the holding hand
+
+**Asked:** with the yoke hand moved onto the horn's surface, buttons on the pilot's own yoke pressed by a thumb, and the yoke handed over with an overlap, do the hands behave as a pilot's would?
+The overlap came from the pilot: someone moving an object from one hand to the other takes it with the new hand before letting go with the old.
+
+**Expected:** a pilot presses a yoke button with the thumb of the hand on that side, without letting go of the yoke.
+
+**Found:**
+
+- In the Black Square Baron 58P, parked, over two runs of p21, the pilot raised no fault with the yoke hand on the horn's surface, 3.1cm out from each grip node.
+- In the first run the pilot worked the left side of the panel: the left hand tapped 16 times, and the hands swapped 16 times, once for each tap.
+- In the second the pilot pressed buttons on the yoke: the left thumb pressed `HANDLING_Yoke_Push_AP_Disconect_1` and `YokeCwsButton_1` 6 times, and the right thumb pressed `YokeIdentButton_1` and `OatMapCompassLightButton_1` 6 times.
+  Each right-thumb press handed the yoke to the right hand, so the left hand let go after the 0.3s overlap, then took the yoke back as the press ended, a fault the pilot saw.
+  The probe now leaves the yoke with the hand holding it: during a press on the far horn, both hands are on the yoke.
+
+**Changed:** a thumb press on the yoke never moves the yoke from the hand holding it.
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p21's runs [with the hand on the surface](../../../experiments/areas/avatars/results/p21-yoke-hands-2026-10-03-10-25-24.txt) and [with thumbs](../../../experiments/areas/avatars/results/p21-yoke-hands-2026-10-03-10-30-11.txt).
+
 ## 2026-10-03: One hand holds the yoke through its whole travel, posed from the aircraft's own code, while the other taps and they swap by side
 
 **Asked:** can the figure's free hand hold the yoke's grip while the pilot moves the yoke, posed from the code the aircraft's own behavior XML plays the yoke with, while the other hand taps where the pilot clicks, the two swapping by which side of the wheel the click is on?

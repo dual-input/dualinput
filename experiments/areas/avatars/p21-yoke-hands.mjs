@@ -24,7 +24,7 @@
  *             in between: the hand that's free taps
  *   the yoke  a press on the pilot's own yoke, such as its autopilot
  *             disconnect, is a thumb: the hand on the button's side of the
- *             wheel holds the yoke and presses it, and the other hand stays
+ *             wheel presses it, and the hand holding the yoke keeps hold
  *   a swap    the hand taking the yoke grabs its grip first, and the other
  *             keeps hold 0.3s more before it lets go, both ways
  *   a drag    the tapping hand glides on the surface it touched (p20); no swap
@@ -414,11 +414,15 @@ function begin(m, c, label) {
   const node = hit?.chain[0] ?? "nothing"
   if (!hit) { console.log(`  ${label}: nothing`); return null }
   // On the pilot's own yoke, the thumb of the hand on that side presses it,
-  // holding the yoke; anywhere else, a hand taps and the other holds the yoke.
+  // and the hand already holding the yoke keeps hold, so a press on the far
+  // horn puts both hands on the yoke for a moment: handing the yoke to the
+  // pressing hand made the holding hand let go and take it back within half a
+  // second (p21's third run). Anywhere else, a hand taps and the other holds
+  // the yoke.
   const side = hit.point[0] - state.pose.wheel[0]
   const thumb = ownYoke.has(hit.node)
   const hand = thumb ? (side > 0 ? "left" : "right") : tapper(hit.point)
-  const yoke = thumb ? hand : other(hand)
+  const yoke = thumb ? state.yokeHand : other(hand)
   const swapped = yoke !== state.yokeHand
   if (swapped) stats.swaps++
   if (!state.yokeShown) stats.hiddenPresses++
@@ -430,7 +434,7 @@ function begin(m, c, label) {
   state.normal = hit.normal
   state.lingerUntil = 0
   draw()
-  const what = thumb ? `the ${hand} thumb presses it, holding the yoke` : `the ${hand} hand taps${state.yokeShown ? `, the ${yoke} holds the yoke` : ", the yoke hidden"}`
+  const what = thumb ? `the ${hand} thumb presses it${hand === yoke ? ", holding the yoke" : `, the ${yoke} hand keeping hold`}` : `the ${hand} hand taps${state.yokeShown ? `, the ${yoke} holds the yoke` : ", the yoke hidden"}`
   rec.log("press", `${label} at ${m.x}, ${m.y}: ${node}, ${(Math.abs(side) * 100).toFixed(1)}cm ${side > 0 ? "left" : "right"} of the wheel: ${what}${swapped ? " (swapped)" : ""}`, { mouse: m, cam: c, origin, dir, hit: { point: hit.point, normal: hit.normal, distance: hit.distance, chain: hit.chain }, hand, thumb, swapped, hidden, pose: { fx: state.pose.fx, fy: state.pose.fy } })
   console.log(`  ${label}: ${node}, ${thumb ? `${hand} thumb` : `${hand} hand`}${swapped ? " (swap)" : ""}`)
   return { hit, thumb }

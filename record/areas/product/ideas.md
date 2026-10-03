@@ -197,7 +197,13 @@ In FS Copilot and YourControls only the PF's hardware reaches the sim, and this 
 ### Seat awareness
 
 Each pilot has a seat, and their camera starts there.
-In the [Crosscheck IDE](#crosscheck-ide), the profile author places the avatar on each seat of the aircraft's own cockpit model and adjusts its pose, down to the length of its shins and the angle of its knees, which takes a minute a seat and may make detecting seats unnecessary.
+The profile author places each seat in the sim itself, from the [Crosscheck IDE](#crosscheck-ide), in a minute a seat:
+
+1. The easy way, tried first: the IDE seats the figure on each seat object SimConnect lists for the aircraft.
+2. Where the aircraft lists none and its cockpit model is readable, the author clicks the seat's cushion, and the figure spawns sitting there.
+3. Where the model can't be read either, the figure spawns where the camera is.
+4. The author then drags arrows on the figure in the sim to move and turn it, adjusts its legs and knees by handles of their own, and saves.
+   If arrows in the sim can't be done, the IDE offers its own controls, with the figure previewed in the sim.
 
 - **Tech:** MSFS 2024 aircraft can ship seat parts with their own navigation graphs.
   The A220 has `A220_Seat_Pilot` and `A220_Seat_Copilot` (read in synaptic-aircraft-a220 1.0.10, [files](../aircraft/synaptic-a220/files.md)), and the Phenom 300E has a passenger seat, `fsreborn_phenom300e_seat_pax` (read in fsreborn-aircraft-phenom300e 1.0.24, [files](../aircraft/fsreborn-phenom-300e/files.md)).
@@ -207,6 +213,7 @@ In the [Crosscheck IDE](#crosscheck-ide), the profile author places the avatar o
   On an aircraft whose model files are encrypted, such as a Marketplace package, the IDE can't load the cockpit model, so the avatar sits on the seat objects SimConnect lists and turns its head, without touching controls.
   The partly encrypted Phenom 300E lists both pilots' seats and its passenger seats, and the partly encrypted A380 only its two pilots', each with the seated avatar exactly on the pilot's (measured on MSFS 2024, 2026-10-03, [aircraft log](../aircraft/log.md#2026-10-03-two-partly-encrypted-aircraft-list-seat-objects-the-phenom-300e-for-its-pilots-and-passengers-and-the-a380-for-its-pilots)).
 - **Open questions:** how pilots switch seats, before and during a flight, which we'll come back to.
+  Whether arrows in the sim can be dragged: the ray through the cursor lands within 2mm ([avatars log](../avatars/log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)), and we know where the arrows are, so hitting them is our own arithmetic, but a click on an arrow also reaches the sim, so the IDE either keeps arrows clear of controls or holds the click back, which puts it in the pilot's input path, where CLAUDE.md's fail-open rules apply.
   Whether Crosscheck can place the camera at a seat.
   ChasePlane moves the sim's camera from a WASM module through Asobo's Camera API, `fsCameraAcquire` and `fsCameraSet` (read in p42-util-chaseplane 26.39.1, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), so a module of ours that sets the camera to a seat's position would settle it.
   Setting `A:CAMERA STATE` to 3, the chase camera, after a flight load didn't stick: with ChasePlane running it went straight back to 2, the cockpit (measured on MSFS 2024, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
@@ -314,7 +321,7 @@ Pilots debrief with it, training groups use it for checkrides, and we use it to 
 
 The Crosscheck IDE is where we, and after v1 the community, write profiles: it finds what an aircraft exposes, binds it, and checks the result against the live sim.
 It's built new from fsc-editor's design and record, so it carries none of FS Copilot's profile dialect or its other baggage.
-Besides finding names, it places things on the aircraft's own cockpit model, as our avatar dev page poses the figure: the avatar on each seat, adjusted down to the length of its shins and the angle of its knees, and each entry's spot in the cockpit, so the avatar of whoever changes an entry can reach out and touch it.
+Besides finding names, it places things in the sim through its live connection: the avatar on each seat, by the steps [Seat awareness](#seat-awareness) lists, and each entry's spot in the cockpit, so the avatar of whoever changes an entry can reach out and touch it.
 
 - **Tech:** fsc-editor already finds variables by flipping a switch and showing what changed, shows each line's live value, runs a setter against the live sim, and reads an add-on's files into a report that starts a profile (fsc-editor, `docs/sim-vars/index.md`).
   Our avatar work poses a figure of our own in the cockpit from variables, as its dev page sets them (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).

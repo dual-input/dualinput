@@ -1,0 +1,29 @@
+p22 · The hand on the aircraft's outside, where the pilot clicks in an external view or on foot, on MSFS 2024
+2026-10-03T11:18:41.149Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  aircraft TITLE "Black Square Baron 58P Professional N585RS", 0.000086 kt
+  bksq-aircraft-baronpro: exterior BaronProfessional_Pressurized_EXT.gltf, 479,609 triangles, read in 107ms
+  23 of 51 animations posed from their code, moving 117 nodes; not posed: staticCoverFlag_L, staticCoverFlag_R, staticCoverFlagRotation_L, staticCoverFlagRotation_R, staticCoverRope_L, staticCoverRope_R, WingFlex, Gear_L, Wheel_L, Gear_R, Wheel_R, WingBoots, StallWarningTab, PistonPropSpin_L, PistonBladePitch_L, CowlFlap_L, CowlFlap_R, PistonPropSpin_R, PistonBladePitch_R, Gear_C, NoseGearSteering, Wheel_C, pitotCoverRope, pitotCoverFlagRotation, pitotCoverFlag, EngineCoverFlag_L, EngineCoverFlag_R, BootsTail; 55 visibility codes run
+  skipped: the WORLD referential's angles taken as p22's first runs fitted them, heading = yaw and rise = -pitch
+  the nose at 0.00, 0.13, 2.97; the tail at -0.05, 1.90, -6.22; the left wingtip at 6.01, 0.78, -0.69; the right wingtip at -6.01, 0.78, -0.69; the top of the fin at 0.01, 2.12, -5.47
+  by world: RMS 77.42° (the nose 200cm, the tail 1130cm, the left wingtip 174cm, the right wingtip -548cm, the top of the fin 2902cm)
+  by simobject: RMS 77.38° (the nose 198cm, the tail 1129cm, the left wingtip 179cm, the right wingtip -550cm, the top of the fin 2904cm)
+  the clicks use the simobject referential
+  19 drags, 797 fresh casts: from the glide, a fresh cast was a median 15.5cm and at the 90th percentile 213.0cm, landing off the part first touched 537 times; a cast against that part alone, a median 6.4cm and at the 90th percentile 24.6cm, and it missed the part 529 times
+  on BaronNose, 0.2s, 4 fresh casts: from the glide a median 0.1cm, at most 0.3cm; off the part 0 times (BaronNose)
+  on BaronNose, 9.2s, 146 fresh casts: from the glide a median 14.8cm, at most 76.7cm; off the part 95 times (BaronNose, BaronNose.006, NoseDoor, Wings.031, Wings.032)
+  on BaronTurbochargedNacelle_R, 12.4s, 166 fresh casts: from the glide a median 19.4cm, at most 190.0cm; off the part 102 times (BaronTurbochargedNacelle_R, BaronTurbochargedNacelle_L.006, BaronEngineNacelle_L.006, EngineDetails_R, EngineInsides_R)
+  on Wings.041, 0.5s, 5 fresh casts: from the glide a median 0.0cm, at most 0.0cm; off the part 1 times (Wings.041, Wings.025)
+  on BaronTurbochargedNacelle_R, 4.3s, 68 fresh casts: from the glide a median 390.9cm, at most 747.6cm; off the part 58 times (BaronTurbochargedNacelle_R, EngineFairings_R, Wings.025, Wings.041, BaronWing_R)
+  on Winglets.002, 2.1s, 25 fresh casts: from the glide a median 0.8cm, at most 97.6cm; off the part 18 times (Winglets.002, Winglets_R, Wings.013, BaronWing_R)
+  on BaronWing_R, 0.4s, 5 fresh casts: from the glide a median 0.4cm, at most 0.7cm; off the part 0 times (BaronWing_R)
+  on BaronWing_R, 0.6s, 10 fresh casts: from the glide a median 11.0cm, at most 14.5cm; off the part 0 times (BaronWing_R)
+  on Aileron_R, 2.1s, 33 fresh casts: from the glide a median 4.0cm, at most 226.5cm; off the part 26 times (Aileron_R, BaronWing_R, Wings.007, Wings.041, Flap_R)
+  on Flap_R, 0.6s, 10 fresh casts: from the glide a median 0.3cm, at most 0.5cm; off the part 0 times (Flap_R)
+  on Wings.007, 0.5s, 9 fresh casts: from the glide a median 192.7cm, at most 289.4cm; off the part 9 times (Wings.041, Wings.008, BaronEngineNacelle_R)
+  on BaronEngineNacelle_R, 0.8s, 15 fresh casts: from the glide a median 4.2cm, at most 12.5cm; off the part 0 times (BaronEngineNacelle_R)
+  on CondenserScoop_R, 0.8s, 15 fresh casts: from the glide a median 1.1cm, at most 13.1cm; off the part 13 times (CondenserScoop_R, BaronTurbochargedNacelle_L.003, BaronTurbochargedNacelleWithAc_R, BaronEngineNacelle_R.010, BaronEngineNacelle_R)
+  on BaronEngineNacelle_R, 1.0s, 14 fresh casts: from the glide a median 2.1cm, at most 4.0cm; off the part 0 times (BaronEngineNacelle_R, EngineFairings_R)
+  on Wings.041, 0.4s, 4 fresh casts: from the glide a median 1.4cm, at most 2.5cm; off the part 1 times (Wings.041, EngineFairings_R)
+  20 presses outside: 19 hit the exterior; nodes: BaronNose ×2, BaronTurbochargedNacelle_R ×2, Wings.041 ×2, Winglets.002, nothing, BaronWing_R ×2, Aileron_R, Flap_R, Wings.007, BaronEngineNacelle_R ×2, CondenserScoop_R, Cylinder.137, BaronElevator_R, BaronRudder, BaronElevator_L; the avatar stood a median 2.18m from the spot (1.62m to 3.66m)

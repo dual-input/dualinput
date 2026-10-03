@@ -9,6 +9,31 @@ The figure's hand goes where the pilot clicks: the ray from the eye through the 
 The probes are p01 to p20 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
+## 2026-10-03: Outside, a drag should follow a fresh cast, since the plane of the first spot leaves curved skin
+
+**Asked:** on the aircraft's outside, where the skin curves, should the hand follow a drag by gliding on the plane of the spot first pressed, as inside (p20), or by casting the ray afresh onto the model?
+The question came from the pilot.
+
+**Expected:** a fresh cast would stay on the skin, and might jump from part to part.
+
+**Found:**
+
+- In the Black Square Baron 58P, on foot, the pilot made 19 drags across the nose, nacelles, wings, ailerons, and flaps, with a green ball gliding and a blue one following a fresh cast up to 20 times a second, the part being dragged posed again for each.
+- Over 797 fresh casts, the glide was a median 15.5cm from where the fresh cast met the skin, and 2.1m at the 90th percentile.
+  Over a turbocharged nacelle, the glide plane left the skin by a median 3.9m.
+- The fresh cast left the part first pressed on 537 of the 797 casts, onto the next panel of skin, such as from `BaronNose` to `NoseDoor` and `Wings.031`.
+  A cast against that part alone missed it on 529 casts, so it can't serve.
+- The pilot judged the fresh cast right with "no question".
+- The pilot also saw the hand inside the model in some areas, on the wing among them.
+  We haven't found why; the wing's flex animation stays as the file stores it (entry below), so where the sim flexes the wing, the hit may lie off its skin (unverified).
+
+**Changed:** outside, a drag follows a fresh cast onto the posed model.
+Inside it glides, because a fresh cast fell through a lever the model didn't pose; with the cockpit posed as the exterior is, a fresh cast may serve there too (unverified).
+
+**Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [p22's run with both balls](../../../experiments/areas/avatars/results/p22-exterior-hand-2026-10-03-11-18-41.txt), whose log has every fresh cast of each drag.
+
 ## 2026-10-03: On foot outside, the click ray lands within 1cm on the exterior, and the pilot clicks from up to 6m away
 
 **Asked:** can the hand follow clicks on the aircraft's outside, on the walkaround or in an external view, by casting the click's ray into the exterior model?

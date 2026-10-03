@@ -375,7 +375,12 @@ if (samples.length) {
   const cm = (k) => samples.map((x) => `${x.name} ${(Math.tan((x.off[k] ?? 90) * RAD) * x.range * 100).toFixed(0)}cm`).join(", ")
   const methods = ["world", "simobject"].filter((k) => samples.every((x) => k in x.off))
   for (const k of methods) note("targets", `by ${k}: RMS ${rms(k).toFixed(2)}° (${cm(k)})`)
-  method = methods.sort((a, b) => rms(a) - rms(b))[0] ?? method
+  // Clicks that weren't aimed at the balls choose nothing: in one run the
+  // pilot clicked through them, both referentials were off by 77°, and the
+  // worse one was chosen by 0.04°.
+  const best = methods.sort((a, b) => rms(a) - rms(b))[0]
+  if (best && rms(best) < 5) method = best
+  else note("targets", `no referential within 5° of the balls, so the clicks weren't aimed; the clicks use ${method}`)
 }
 note("method", `the clicks use the ${method} referential`)
 put(REST[0], COLOR.rest, SCALE.hand)

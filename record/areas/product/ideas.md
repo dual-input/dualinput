@@ -245,7 +245,9 @@ In the cockpit, one hand holds the yoke and the other goes to whatever the pilot
   Between clicks, the clicking hand hovers 5cm off its last spot.
   2s after the last click or drag is released, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
 - A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
-- A drag glides along the surface it first touched.
+- Inside, a drag glides along the surface it first touched.
+  Outside, where the skin curves, it follows the ray cast afresh onto the aircraft.
+- On foot or in an external view, the hand goes where the pilot clicks on the aircraft's outside, the same way.
 
 - **Tech:**
   - **The avatar:** SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR` (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame)).
@@ -270,6 +272,9 @@ In the cockpit, one hand holds the yoke and the other goes to whatever the pilot
     In the Baron 58P, the figure's hand stayed on the grip through 1,703 poses across the yoke's whole travel, with the yoke posed by those animations, which the aircraft's own behavior code plays from 3 variables (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
     The grip nodes sit inside the horns, so the hand goes on the horn's surface in front of each, 3.1cm out (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
     The click ray meets the posed yoke, and passes the parts the aircraft's own visibility code hides: the Baron 58P has 51 such codes, which read 18 `A:` and `L:` variables in all (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
+  - **Outside:** on foot, the click ray met the Baron 58P's exterior model within 1cm of known spots up to 11.3m away, by either of `SimConnect_CameraGet`'s referentials, `WORLD` turned into the aircraft's frame or `SIMOBJECT`, which stays in that frame on foot (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
+    The exterior posed 23 of its 51 animations from their own code; the gear, driven by sim templates, stayed as the file stores it.
+    Across curved skin, the plane of the first spot left the skin by a median 15.5cm and 2.1m at the 90th percentile, and the pilot judged a fresh cast right (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-outside-a-drag-should-follow-a-fresh-cast-since-the-plane-of-the-first-spot-leaves-curved-skin)).
   - **The rules above:** in the Baron 58P, 75 clicks and 40 drags took 9 swaps instead of one swap each, and the pilot found that the hands felt right (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
 - **Product:** a pilot sees the other pilot beside them on the walkaround, which FS Copilot's pilots never do: FS Copilot requires multiplayer off (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "What the receiving pilot has to do"), and with it off nothing shows the other pilot's avatar.
   In the cockpit, the other pilot sits in their seat, turns their head where they look, and reaches for each switch, knob, and lever they click, so a pilot sees who did what as it happens.
@@ -289,6 +294,9 @@ In the cockpit, one hand holds the yoke and the other goes to whatever the pilot
     The ray has been measured against known spots only in the Comanche, and the yoke hand has run only in the Baron 58P.
     The Comanche plays its yoke from A2A's `L:YokeBank_Anim` and `L:YokePitch_Anim`, where the Baron plays its yoke from `A:YOKE X POSITION WITH AP LINEAR` and `A:YOKE Y POSITION WITH AP` (read in a2a-aircraft-pa24 2.1.3 and bksq-aircraft-baronpro 0.1.1, [avatars log](../avatars/log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
     The yoke hand runs whichever code the aircraft has, so it would pose the Comanche's yoke the same way (unverified).
+  - How the figure reaches what the pilot clicks outside: on foot, the pilot stood a median 1.8m to 2.6m from the spot, and up to 5.8m (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)), beyond an arm's reach, so the figure's arm stretches that far or the figure steps closer.
+  - Why the hand sometimes sits inside the exterior, on the wing among other places, which the pilot saw; the wing's flex animation, which keeps state of its own, stays as the file stores it, so the sim's flexed wing may lie off the model's (unverified).
+  - Whether, with the cockpit posed from its own code as the exterior is, a fresh cast would serve inside too, in place of the glide.
   - The rules are a left-seat pilot's with a yoke.
     A right-seat pilot would mirror them, a sidestick pilot never swaps hands, and a center stick probably stays in the right hand (unverified).
   - Whether, on the other pilot's machine, Crosscheck should hold each change that swaps hands for 0.3s before applying it, so the hands can pass the yoke as a person would.

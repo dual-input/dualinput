@@ -328,7 +328,7 @@ These patterns are beyond the lint, so the `doc-reviewer` agent looks for them:
 - Put a callout box (`> **Note**`, GitHub alerts) only on an amendment pointer or on a warning that costs something if ignored.
 - Write paths with placeholders, never a real home folder: `%APPDATA%\Microsoft Flight Simulator 2024\`, `<user>`.
 - Quote sources briefly, and link to them or cite them as [Evidence](#evidence) says.
-  Don't copy SDK doc pages into the record, because the repository will be public.
+  Don't copy SDK doc pages into the record.
 
 ## Code comments
 

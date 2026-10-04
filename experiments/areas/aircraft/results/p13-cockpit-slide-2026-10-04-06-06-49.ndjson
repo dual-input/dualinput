@@ -1,0 +1,313 @@
+{"t":1791094009443,"s":0.039,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791094009459,"s":0.055,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791094009459,"s":0.055,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791094009459,"s":0.055,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791094009460,"s":0.056,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}
+{"t":1791094009495,"s":0.091,"kind":"chaseplane","text":"send {\"message\":\"api_connect\",\"payload\":{\"client_name\":\"CROSSCHECK p13-cockpit-slide\"}}","sent":{"message":"api_connect","payload":{"client_name":"CROSSCHECK p13-cockpit-slide"}}}
+{"t":1791094010004,"s":0.6,"kind":"chaseplane","text":"send {\"message\":\"api_request\",\"request_id\":\"set_master_enabled_1791094010004_qmbqh732x\",\"command\":\"set_master_enabled\",\"payload\":{\"enabled\":false}}","sent":{"message":"api_request","request_id":"set_master_enabled_1791094010004_qmbqh732x","command":"set_master_enabled","payload":{"enabled":false}}}
+{"t":1791094011517,"s":2.113,"kind":"chaseplane","text":"Turned ChasePlane off through its API"}
+{"t":1791094011569,"s":2.165,"kind":"eye","text":"Start: x -0.253, y 0.855, z -0.144m; camera NOT_ACQUIRED"}
+{"t":1791094011603,"s":2.199,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011604,"s":2.2,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_RIGHT, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":16,"index":2,"sent":"map K:COCKPIT_CAMERA_SLIDE_RIGHT"}
+{"t":1791094011636,"s":2.232,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":17,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094011658,"s":2.254,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011669,"s":2.265,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":18,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094011720,"s":2.316,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011736,"s":2.332,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":19,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094011775,"s":2.371,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011803,"s":2.399,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":20,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094011829,"s":2.425,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011836,"s":2.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":21,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094011891,"s":2.487,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011903,"s":2.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":22,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094011953,"s":2.549,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094011970,"s":2.566,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":23,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094012016,"s":2.612,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094012036,"s":2.632,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":24,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094012078,"s":2.674,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094012103,"s":2.699,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":25,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094012140,"s":2.736,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[],"priority":1,"tagged":false}
+{"t":1791094012169,"s":2.765,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2","exception":1,"name":"ERROR","sendId":26,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT "}
+{"t":1791094013036,"s":3.632,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_RIGHT, a (10 events, no value): 0mm right, -0mm up, -0mm forward"}
+{"t":1791094013037,"s":3.633,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013037,"s":3.633,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":28,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013094,"s":3.69,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013103,"s":3.699,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":29,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013157,"s":3.753,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013169,"s":3.765,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":30,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013220,"s":3.816,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013236,"s":3.832,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":31,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013281,"s":3.877,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013303,"s":3.899,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":32,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013344,"s":3.94,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013369,"s":3.965,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":33,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013407,"s":4.003,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013436,"s":4.032,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":34,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013469,"s":4.065,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013470,"s":4.066,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":35,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013531,"s":4.127,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013536,"s":4.132,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":36,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013594,"s":4.19,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094013603,"s":4.199,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":37,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094013655,"s":4.251,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[0],"priority":1,"tagged":false}
+{"t":1791094013669,"s":4.265,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 0, parameter 2","exception":1,"name":"ERROR","sendId":38,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 0"}
+{"t":1791094014470,"s":5.066,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_RIGHT, b (10 with value 1, then 0): -0mm right, 0mm up, 0mm forward"}
+{"t":1791094014470,"s":5.066,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[1],"priority":1,"tagged":false}
+{"t":1791094014503,"s":5.099,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2","exception":1,"name":"ERROR","sendId":40,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 1"}
+{"t":1791094015483,"s":6.079,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_RIGHT 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_RIGHT","values":[0],"priority":1,"tagged":false}
+{"t":1791094015503,"s":6.099,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 0, parameter 2","exception":1,"name":"ERROR","sendId":41,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_RIGHT 0"}
+{"t":1791094016303,"s":6.899,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_RIGHT, c (value 1 held 1s, then 0): -0mm right, -0mm up, 0mm forward; camera NOT_ACQUIRED; exceptions: NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_RIGHT, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT , parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 1, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_RIGHT 0, parameter 2"}
+{"t":1791094016336,"s":6.932,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016336,"s":6.932,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_LEFT, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":45,"index":2,"sent":"map K:COCKPIT_CAMERA_SLIDE_LEFT"}
+{"t":1791094016336,"s":6.932,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":46,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016388,"s":6.984,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016403,"s":6.999,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":47,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016451,"s":7.047,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016470,"s":7.066,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":48,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016514,"s":7.11,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016536,"s":7.132,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":49,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016576,"s":7.172,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016603,"s":7.199,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":50,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016639,"s":7.235,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016669,"s":7.265,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":51,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016701,"s":7.297,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016703,"s":7.299,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":52,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016763,"s":7.359,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016770,"s":7.366,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":53,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016826,"s":7.422,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016836,"s":7.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":54,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094016888,"s":7.484,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[],"priority":1,"tagged":false}
+{"t":1791094016903,"s":7.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2","exception":1,"name":"ERROR","sendId":55,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT "}
+{"t":1791094017770,"s":8.366,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_LEFT, a (10 events, no value): 0mm right, 0mm up, -0mm forward"}
+{"t":1791094017770,"s":8.366,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094017770,"s":8.366,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":57,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094017826,"s":8.422,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094017836,"s":8.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":58,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094017888,"s":8.484,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094017903,"s":8.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":59,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094017950,"s":8.546,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094017969,"s":8.565,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":60,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018012,"s":8.608,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094018036,"s":8.632,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":61,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018075,"s":8.671,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094018103,"s":8.699,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":62,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018137,"s":8.733,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094018169,"s":8.765,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":63,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018200,"s":8.796,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094018203,"s":8.799,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":64,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018263,"s":8.859,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094018270,"s":8.866,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":65,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018326,"s":8.922,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094018336,"s":8.932,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":66,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094018388,"s":8.984,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[0],"priority":1,"tagged":false}
+{"t":1791094018403,"s":8.999,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 0, parameter 2","exception":1,"name":"ERROR","sendId":67,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 0"}
+{"t":1791094019203,"s":9.799,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_LEFT, b (10 with value 1, then 0): -0mm right, 0mm up, 0mm forward"}
+{"t":1791094019203,"s":9.799,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[1],"priority":1,"tagged":false}
+{"t":1791094019203,"s":9.799,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2","exception":1,"name":"ERROR","sendId":69,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 1"}
+{"t":1791094020217,"s":10.813,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_LEFT 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_LEFT","values":[0],"priority":1,"tagged":false}
+{"t":1791094020236,"s":10.832,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 0, parameter 2","exception":1,"name":"ERROR","sendId":70,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_LEFT 0"}
+{"t":1791094021037,"s":11.633,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_LEFT, c (value 1 held 1s, then 0): 0mm right, 0mm up, -0mm forward; camera NOT_ACQUIRED; exceptions: NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_LEFT, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT , parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 1, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_LEFT 0, parameter 2"}
+{"t":1791094021070,"s":11.666,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021070,"s":11.666,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_FRONT, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":74,"index":2,"sent":"map K:COCKPIT_CAMERA_SLIDE_FRONT"}
+{"t":1791094021070,"s":11.666,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":75,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021126,"s":11.722,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021136,"s":11.732,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":76,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021189,"s":11.785,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021203,"s":11.799,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":77,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021251,"s":11.847,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021269,"s":11.865,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":78,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021313,"s":11.909,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021336,"s":11.932,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":79,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021376,"s":11.972,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021403,"s":11.999,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":80,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021439,"s":12.035,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021469,"s":12.065,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":81,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021501,"s":12.097,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021503,"s":12.099,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":82,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021563,"s":12.159,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021570,"s":12.166,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":83,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094021626,"s":12.222,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT  at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[],"priority":1,"tagged":false}
+{"t":1791094021636,"s":12.232,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2","exception":1,"name":"ERROR","sendId":84,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT "}
+{"t":1791094022503,"s":13.099,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_FRONT, a (10 events, no value): -0mm right, 0mm up, 0mm forward"}
+{"t":1791094022503,"s":13.099,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022504,"s":13.1,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":86,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022562,"s":13.158,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022570,"s":13.166,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":87,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022625,"s":13.221,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022636,"s":13.232,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":88,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022688,"s":13.284,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022703,"s":13.299,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":89,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022751,"s":13.347,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022769,"s":13.365,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":90,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022813,"s":13.409,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022836,"s":13.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":91,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022876,"s":13.472,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022903,"s":13.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":92,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094022938,"s":13.534,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094022970,"s":13.566,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":93,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094023000,"s":13.596,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094023003,"s":13.599,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":94,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094023062,"s":13.658,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094023070,"s":13.666,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":95,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094023125,"s":13.721,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[0],"priority":1,"tagged":false}
+{"t":1791094023136,"s":13.732,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 0, parameter 2","exception":1,"name":"ERROR","sendId":96,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 0"}
+{"t":1791094023970,"s":14.566,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_FRONT, b (10 with value 1, then 0): 0mm right, -0mm up, -0mm forward"}
+{"t":1791094023970,"s":14.566,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[1],"priority":1,"tagged":false}
+{"t":1791094023970,"s":14.566,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2","exception":1,"name":"ERROR","sendId":98,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 1"}
+{"t":1791094024984,"s":15.58,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_FRONT 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_FRONT","values":[0],"priority":1,"tagged":false}
+{"t":1791094025003,"s":15.599,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 0, parameter 2","exception":1,"name":"ERROR","sendId":99,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_FRONT 0"}
+{"t":1791094025803,"s":16.399,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_FRONT, c (value 1 held 1s, then 0): 0mm right, -0mm up, -0mm forward; camera NOT_ACQUIRED; exceptions: NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_FRONT, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT , parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 1, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_FRONT 0, parameter 2"}
+{"t":1791094025804,"s":16.4,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094025804,"s":16.4,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_BACK, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":103,"index":2,"sent":"map K:COCKPIT_CAMERA_SLIDE_BACK"}
+{"t":1791094025804,"s":16.4,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":104,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094025859,"s":16.455,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094025870,"s":16.466,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":105,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094025922,"s":16.518,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094025936,"s":16.532,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":106,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094025985,"s":16.581,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026003,"s":16.599,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":107,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094026046,"s":16.642,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026069,"s":16.665,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":108,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094026108,"s":16.704,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026136,"s":16.732,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":109,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094026170,"s":16.766,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026203,"s":16.799,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":110,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094026232,"s":16.828,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026236,"s":16.832,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":111,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094026295,"s":16.891,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026303,"s":16.899,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":112,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094026357,"s":16.953,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK  at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[],"priority":1,"tagged":false}
+{"t":1791094026370,"s":16.966,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2","exception":1,"name":"ERROR","sendId":113,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK "}
+{"t":1791094027236,"s":17.832,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_BACK, a (10 events, no value): -0mm right, 0mm up, 0mm forward"}
+{"t":1791094027236,"s":17.832,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027237,"s":17.833,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":115,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027295,"s":17.891,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027303,"s":17.899,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":116,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027357,"s":17.953,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027370,"s":17.966,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":117,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027420,"s":18.016,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027436,"s":18.032,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":118,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027483,"s":18.079,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027503,"s":18.099,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":119,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027545,"s":18.141,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027570,"s":18.166,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":120,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027607,"s":18.203,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027636,"s":18.232,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":121,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027670,"s":18.266,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027670,"s":18.266,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":122,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027733,"s":18.329,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027736,"s":18.332,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":123,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027795,"s":18.391,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094027803,"s":18.399,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":124,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094027858,"s":18.454,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[0],"priority":1,"tagged":false}
+{"t":1791094027870,"s":18.466,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 0, parameter 2","exception":1,"name":"ERROR","sendId":125,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 0"}
+{"t":1791094028703,"s":19.299,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_BACK, b (10 with value 1, then 0): 0mm right, -0mm up, -0mm forward"}
+{"t":1791094028703,"s":19.299,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 1 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[1],"priority":1,"tagged":false}
+{"t":1791094028703,"s":19.299,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2","exception":1,"name":"ERROR","sendId":127,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 1"}
+{"t":1791094029716,"s":20.312,"kind":"send","text":"K:COCKPIT_CAMERA_SLIDE_BACK 0 at priority highest","event":"COCKPIT_CAMERA_SLIDE_BACK","values":[0],"priority":1,"tagged":false}
+{"t":1791094029736,"s":20.332,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 0, parameter 2","exception":1,"name":"ERROR","sendId":128,"index":2,"sent":"K:COCKPIT_CAMERA_SLIDE_BACK 0"}
+{"t":1791094030537,"s":21.133,"kind":"move","text":"COCKPIT_CAMERA_SLIDE_BACK, c (value 1 held 1s, then 0): -0mm right, -0mm up, 0mm forward; camera NOT_ACQUIRED; exceptions: NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_SLIDE_BACK, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK , parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 1, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_SLIDE_BACK 0, parameter 2"}
+{"t":1791094030570,"s":21.166,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030570,"s":21.166,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_HEIGHT_INC, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":132,"index":2,"sent":"map K:COCKPIT_CAMERA_HEIGHT_INC"}
+{"t":1791094030570,"s":21.166,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":133,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094030635,"s":21.231,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030636,"s":21.232,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":134,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094030698,"s":21.294,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030703,"s":21.299,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":135,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094030760,"s":21.356,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030770,"s":21.366,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":136,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094030823,"s":21.419,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030836,"s":21.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":137,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094030886,"s":21.482,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030903,"s":21.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":138,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094030948,"s":21.544,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094030970,"s":21.566,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":139,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094031010,"s":21.606,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094031036,"s":21.632,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":140,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094031072,"s":21.668,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094031103,"s":21.699,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":141,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094031135,"s":21.731,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[],"priority":1,"tagged":false}
+{"t":1791094031136,"s":21.732,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2","exception":1,"name":"ERROR","sendId":142,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC "}
+{"t":1791094032036,"s":22.632,"kind":"move","text":"COCKPIT_CAMERA_HEIGHT_INC, a (10 events, no value): -0mm right, -0mm up, 0mm forward"}
+{"t":1791094032036,"s":22.632,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032037,"s":22.633,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":144,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032087,"s":22.683,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032103,"s":22.699,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":145,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032150,"s":22.746,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032169,"s":22.765,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":146,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032213,"s":22.809,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032236,"s":22.832,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":147,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032275,"s":22.871,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032303,"s":22.899,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":148,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032338,"s":22.934,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032370,"s":22.966,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":149,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032400,"s":22.996,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032403,"s":22.999,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":150,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032463,"s":23.059,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032470,"s":23.066,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":151,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032525,"s":23.121,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032536,"s":23.132,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":152,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032587,"s":23.183,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094032603,"s":23.199,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":153,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094032650,"s":23.246,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 0 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[0],"priority":1,"tagged":false}
+{"t":1791094032669,"s":23.265,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 0, parameter 2","exception":1,"name":"ERROR","sendId":154,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 0"}
+{"t":1791094033470,"s":24.066,"kind":"move","text":"COCKPIT_CAMERA_HEIGHT_INC, b (10 with value 1, then 0): 0mm right, 0mm up, -0mm forward"}
+{"t":1791094033470,"s":24.066,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[1],"priority":1,"tagged":false}
+{"t":1791094033470,"s":24.066,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2","exception":1,"name":"ERROR","sendId":156,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 1"}
+{"t":1791094034475,"s":25.071,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_INC 0 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_INC","values":[0],"priority":1,"tagged":false}
+{"t":1791094034503,"s":25.099,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 0, parameter 2","exception":1,"name":"ERROR","sendId":157,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_INC 0"}
+{"t":1791094035304,"s":25.9,"kind":"move","text":"COCKPIT_CAMERA_HEIGHT_INC, c (value 1 held 1s, then 0): -0mm right, 0mm up, 0mm forward; camera NOT_ACQUIRED; exceptions: NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_HEIGHT_INC, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC , parameter 2; ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 1, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_INC 0, parameter 2"}
+{"t":1791094035337,"s":25.933,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035337,"s":25.933,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_HEIGHT_DEC, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":161,"index":2,"sent":"map K:COCKPIT_CAMERA_HEIGHT_DEC"}
+{"t":1791094035337,"s":25.933,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":162,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035396,"s":25.992,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035403,"s":25.999,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":163,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035458,"s":26.054,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035470,"s":26.066,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":164,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035520,"s":26.116,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035537,"s":26.133,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":165,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035582,"s":26.178,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035603,"s":26.199,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":166,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035644,"s":26.24,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035670,"s":26.266,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":167,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035707,"s":26.303,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035736,"s":26.332,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":168,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035770,"s":26.366,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035803,"s":26.399,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":169,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035833,"s":26.429,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035836,"s":26.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":170,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094035895,"s":26.491,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC  at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[],"priority":1,"tagged":false}
+{"t":1791094035903,"s":26.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2","exception":1,"name":"ERROR","sendId":171,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC "}
+{"t":1791094036770,"s":27.366,"kind":"move","text":"COCKPIT_CAMERA_HEIGHT_DEC, a (10 events, no value): -0mm right, 0mm up, 0mm forward"}
+{"t":1791094036770,"s":27.366,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094036770,"s":27.366,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":173,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094036828,"s":27.424,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094036836,"s":27.432,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":174,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094036889,"s":27.485,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094036903,"s":27.499,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":175,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094036953,"s":27.549,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094036970,"s":27.566,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":176,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037015,"s":27.611,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094037036,"s":27.632,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":177,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037077,"s":27.673,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094037103,"s":27.699,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":178,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037139,"s":27.735,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094037170,"s":27.766,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":179,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037202,"s":27.798,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094037203,"s":27.799,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":180,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037264,"s":27.86,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094037270,"s":27.866,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":181,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037327,"s":27.923,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094037336,"s":27.932,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":182,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094037390,"s":27.986,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 0 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[0],"priority":1,"tagged":false}
+{"t":1791094037403,"s":27.999,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 0, parameter 2","exception":1,"name":"ERROR","sendId":183,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 0"}
+{"t":1791094038203,"s":28.799,"kind":"move","text":"COCKPIT_CAMERA_HEIGHT_DEC, b (10 with value 1, then 0): 0mm right, -0mm up, -0mm forward"}
+{"t":1791094038203,"s":28.799,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 1 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[1],"priority":1,"tagged":false}
+{"t":1791094038204,"s":28.8,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2","exception":1,"name":"ERROR","sendId":185,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 1"}
+{"t":1791094039216,"s":29.812,"kind":"send","text":"K:COCKPIT_CAMERA_HEIGHT_DEC 0 at priority highest","event":"COCKPIT_CAMERA_HEIGHT_DEC","values":[0],"priority":1,"tagged":false}
+{"t":1791094039236,"s":29.832,"kind":"exception","text":"ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 0, parameter 2","exception":1,"name":"ERROR","sendId":186,"index":2,"sent":"K:COCKPIT_CAMERA_HEIGHT_DEC 0"}
+{"t":1791094040037,"s":30.633,"kind":"move","text":"COCKPIT_CAMERA_HEIGHT_DEC, c (value 1 held 1s, then 0): -0mm right, 0mm up, 0mm forward; camera NOT_ACQUIRED; exceptions: NAME_UNRECOGNIZED (7) on map K:COCKPIT_CAMERA_HEIGHT_DEC, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC , parameter 2; ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 1, parameter 2; ERROR (1) on K:COCKPIT_CAMERA_HEIGHT_DEC 0, parameter 2"}
+{"t":1791094040070,"s":30.666,"kind":"eye","text":"Before cleanup: 0mm right, -0mm up, -0mm forward from the start"}
+{"t":1791094040070,"s":30.666,"kind":"stop","text":"done: handing the camera back into Pilot, ChasePlane back on"}
+{"t":1791094041386,"s":31.982,"kind":"chaseplane","text":"send {\"message\":\"api_request\",\"request_id\":\"set_master_enabled_1791094041386_e0viiy432\",\"command\":\"set_master_enabled\",\"payload\":{\"enabled\":true}}","sent":{"message":"api_request","request_id":"set_master_enabled_1791094041386_e0viiy432","command":"set_master_enabled","payload":{"enabled":true}}}
+{"t":1791094041386,"s":31.982,"kind":"chaseplane","text":"Turned ChasePlane back on"}

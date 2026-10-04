@@ -1,0 +1,16 @@
+{"t":1791094197522,"s":0.026,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791094197573,"s":0.077,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791094197573,"s":0.077,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791094197573,"s":0.077,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791094197574,"s":0.078,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}
+{"t":1791094197615,"s":0.119,"kind":"chaseplane","text":"send {\"message\":\"api_connect\",\"payload\":{\"client_name\":\"CROSSCHECK p14-camera-keys-sent\"}}","sent":{"message":"api_connect","payload":{"client_name":"CROSSCHECK p14-camera-keys-sent"}}}
+{"t":1791094198131,"s":0.635,"kind":"chaseplane","text":"send {\"message\":\"api_request\",\"request_id\":\"set_master_enabled_1791094198131_cs3o6w0du\",\"command\":\"set_master_enabled\",\"payload\":{\"enabled\":false}}","sent":{"message":"api_request","request_id":"set_master_enabled_1791094198131_cs3o6w0du","command":"set_master_enabled","payload":{"enabled":false}}}
+{"t":1791094199645,"s":2.149,"kind":"chaseplane","text":"Turned ChasePlane off through its API"}
+{"t":1791094199695,"s":2.199,"kind":"focus","text":"The sim window: OK in front"}
+{"t":1791094201588,"s":4.092,"kind":"move","text":"1, SendInput Shift+D: OK sent; the eye moved 330mm right, -0mm up, -1mm forward","label":"1, SendInput Shift+D","reply":"OK sent","before":{"x":-0.25308487243617356,"y":0.8545965157765547,"z":-0.14367913155072476},"after":{"x":0.07691977774973995,"y":0.8545961487012823,"z":-0.14421323147681228}}
+{"t":1791094202955,"s":5.459,"kind":"move","text":"2, PostMessage Shift+D to the sim window: OK posted; the eye moved 0mm right, 0mm up, -0mm forward","label":"2, PostMessage Shift+D to the sim window","reply":"OK posted","before":{"x":0.07691942414569157,"y":0.8545962946524105,"z":-0.14421309440022845},"after":{"x":0.07692553508895161,"y":0.8546006700173409,"z":-0.14421397486864077}}
+{"t":1791094204355,"s":6.859,"kind":"move","text":"3, SendInput Shift+A: OK sent; the eye moved -330mm right, 0mm up, 1mm forward","label":"3, SendInput Shift+A","reply":"OK sent","before":{"x":0.07692552908106326,"y":0.8546006771472324,"z":-0.1442140428304382},"after":{"x":-0.253085453934916,"y":0.8546037636456916,"z":-0.1436768099187194}}
+{"t":1791094204355,"s":6.859,"kind":"stop","text":"done: releasing Shift, D, and A, ChasePlane back on"}
+{"t":1791094204369,"s":6.873,"kind":"stop","text":"OK released"}
+{"t":1791094204369,"s":6.873,"kind":"chaseplane","text":"send {\"message\":\"api_request\",\"request_id\":\"set_master_enabled_1791094204369_c2qwzo51v\",\"command\":\"set_master_enabled\",\"payload\":{\"enabled\":true}}","sent":{"message":"api_request","request_id":"set_master_enabled_1791094204369_c2qwzo51v","command":"set_master_enabled","payload":{"enabled":true}}}
+{"t":1791094204369,"s":6.873,"kind":"chaseplane","text":"Turned ChasePlane back on"}

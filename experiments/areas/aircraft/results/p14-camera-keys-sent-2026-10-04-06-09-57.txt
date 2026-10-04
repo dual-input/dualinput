@@ -1,0 +1,12 @@
+p14 · Key presses a program sends, and the cockpit eye, on MSFS 2024
+2026-10-04T06:09:57.496Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"
+Turned ChasePlane off through its API
+The sim window: OK in front
+1, SendInput Shift+D: OK sent; the eye moved 330mm right, -0mm up, -1mm forward
+2, PostMessage Shift+D to the sim window: OK posted; the eye moved 0mm right, 0mm up, -0mm forward
+3, SendInput Shift+A: OK sent; the eye moved -330mm right, 0mm up, 1mm forward
+Turned ChasePlane back on
+
+Exceptions: none

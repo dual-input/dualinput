@@ -3,6 +3,44 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-04: Key presses a program sends move the cockpit eye, with the sim window in front, and leave the pilot their camera
+
+**Asked:** does pressing the pilot's own camera keys for them, from a program, move the cockpit eye, since SimConnect can't send the camera's slide actions ([entry below](#2026-10-04-simconnect-doesnt-know-the-sims-cockpit-camera-slide-actions-by-name))?
+
+**Expected:** `SendInput` would, as a real key press does, and window messages posted to the sim's window might not.
+
+**Found:**
+
+- The sim keeps each pilot's bindings per device as readable XML, one `inputprofile_<number>` per device in `<Steam>\userdata\<Steam account id>\2537590\remote\` on a Steam install.
+  The pilot's keyboard profile binds `KEY_COCKPIT_CAMERA_SLIDE_RIGHT` to D, `_LEFT` to A, `_FRONT` to W, `_BACK` to S, `KEY_COCKPIT_CAMERA_HEIGHT_INC` to E, and `_DEC` to Q, in a context named `COCKPIT_GLOBAL_CAMERA_TRANSLATE`, each key as a Windows virtual-key code (read on our development machine, 2026-10-04).
+  The default 2024 keyboard profile binds `_SLIDE_RIGHT` to left Shift and D, and lists axis actions too, `KEY_COCKPIT_CAMERA_TRANSLATION_X`, `_Y`, and `_Z` (read in the sim's `Packages\fs-input-profiles\InputProfiles\Categories\Transversal\Keyboard_2024_Transversal.xml`, and the pilot's profile).
+- In the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, with ChasePlane turned off through its API and the sim's window in front, p14 held Shift and D for 500ms with `SendInput`, by scan code: the eye moved 330mm right, and the camera stayed the sim's.
+- Posting the same key-down and key-up messages to the sim's window moved the eye by less than 1mm.
+- Shift and A, held 500ms with `SendInput`, moved the eye 330mm back left, to within 1mm of where it started.
+
+**Changed:** Crosscheck can slide a pilot's eye anywhere the sim's own camera keys reach, by pressing the keys the pilot bound, read from their profile, while the sim's window is in front, and the pilot keeps their camera; it can't do it with the window behind another, since the sim ignores posted messages.
+How far the eye can travel, how fast at a higher `COCKPIT CAMERA SPEED`, and how closely a feedback loop on `SimConnect_CameraGet` lands it are next.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** [p14's run](../../../experiments/areas/aircraft/results/p14-camera-keys-sent-2026-10-04-06-09-57.txt).
+
+## 2026-10-04: SimConnect doesn't know the sim's cockpit camera slide actions by name
+
+**Asked:** do the actions the pilot's camera keys trigger move the cockpit eye when a SimConnect client sends them?
+The sim's input profiles name them `KEY_COCKPIT_CAMERA_SLIDE_LEFT`, `_SLIDE_RIGHT`, `_SLIDE_FRONT`, `_SLIDE_BACK`, `KEY_COCKPIT_CAMERA_HEIGHT_INC`, and `_HEIGHT_DEC` (read in the sim's `Packages\fs-input-profiles`, `inputprofiles\*.xml`), and the SDK's event header doesn't list them (read in MSFS 2024 SDK 1.7.3, `MSFS_EventsEnum.h`).
+
+**Expected:** if SimConnect knew them, sending them would move the eye as the keys do.
+
+**Found:** p13 mapped each of the six without the `KEY_` prefix, as SimConnect names events, in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, with ChasePlane turned off through its API.
+SimConnect answered each mapping with `NAME_UNRECOGNIZED` (7), and each send with `ERROR` (1); sent as 10 bare events, as 10 with value 1 and then 0, and as one held for 1s, none moved the eye by 1mm.
+
+**Changed:** the cockpit camera's slide and height actions live in the sim's input system, outside the events SimConnect sends, so a client can't send them; pressing the pilot's own bound keys for them is the route left to try.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness).
+
+**Evidence:** [p13's run](../../../experiments/areas/aircraft/results/p13-cockpit-slide-2026-10-04-06-06-49.txt).
+
 ## 2026-10-04: COCKPIT CAMERA HEIGHT raises the cockpit eye and leaves the pilot their camera, and the cockpit save slots didn't seat the eye
 
 **Asked:** can the camera simvars move the pilot's cockpit eye, or save it to a slot and load it back, so Crosscheck can seat a pilot at any point and hand the camera back?

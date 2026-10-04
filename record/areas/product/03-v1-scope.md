@@ -444,6 +444,63 @@ The crew's sims share one clock: the same time of day, date, and simulation rate
 - Whether a frozen follower keeps up at a raised simulation rate, which a replay at 4x would show.
 - Whether the pause menu stops a flying aircraft, which our parked run couldn't show.
 
+## Presence
+
+### Avatar sync
+
+Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, looking where they look, reaching for what they change, and on foot beside them on the walkaround.
+
+**In v1:**
+
+- The figure is a few plain shapes that carry meaning by how they move, as the idea [Avatar sync](ideas.md#avatar-sync) describes, posed from variables of its own (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).
+- Seated, the figure's body sits on its seat as the profile tunes it, and its head goes where the pilot's camera is and turns where they look, so a lean shows, with the neck stretching to cover the difference.
+  `SimConnect_CameraGet` gives the camera's position and look, a head tracker's rotation included (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
+- The hands follow [the avatars' tentative decisions](../avatars/decisions.md): a hand goes where the pilot clicks or drags, found from the aircraft's own model, and the yoke hands follow a pilot's habits in either seat.
+- A hand also reaches for a change made without a click, such as a home cockpit's switch or a key binding, at the control's spot, which the profile holds.
+  A click tool records the spots: it walks the profile's entries, and the author clicks each control.
+  That reverses the tentative decision that only a click brings the hand.
+- On foot, the figure walks, runs, crouches, and idles as the pilot's avatar does, from the avatar's position, facing, ground speed, and `A:IS CROUCH`, which SimConnect reads every frame (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-the-avatars-own-object-id-gives-its-position-speed-and-facing-every-sim-frame); `A:IS CROUCH` switched between 0 and 1 while the pilot crouched, in [p01's results](../../../experiments/areas/avatars/results/p01-avatar-2026-10-02-21-05-51.txt)).
+- On foot, for a click within 2m to 3m, the arm extends to touch the spot, and for one farther, it extends to a maximum arm length and points at it.
+  The pilot clicked from a median 1.8m to 2.6m and up to 5.8m away (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
+- A pilot sees their own figure in an outside view too, on by default with a setting to turn it off, its hands see-through or left out.
+  To hide the sim's own avatar there, Crosscheck ships an avatar with nothing to show, which the pilot picks, as the [No Avatar](https://flightsim.to/addon/59715/no-aavatar) add-on does.
+- When a pilot's connection drops, their figure slumps in its seat and turns gray, and when they leave the session, it disappears.
+- When a pilot switches to an outside view, their figure stays seated, facing forward.
+- A WASM module places each figure inside the sim's frame, turned by the aircraft's attitude and led by up to a frame, which held our figure in the 58P's right seat at up to 185 kt GS (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
+  Crosscheck edits no other developer's package to hold it there.
+
+**Not in v1:**
+
+- Moving a pilot's camera to a seat for them, parked on 2026-10-04 ([Seat awareness](ideas.md#seat-awareness)).
+- Hands for a pilot in VR, whose clicks give no cursor place for the ray (unverified); their figure still sits and looks.
+- Sidesticks and center sticks, since the hand rules are for a yoke, and the 58P has yokes.
+- Passengers, a Later pick in [the plan](plan.md).
+- Instructions for picking Crosscheck's empty avatar, which come after v1, perhaps in Crosscheck's settings.
+
+**Rules:**
+
+- The profile holds every seat the aircraft has: its name, the figure's pose on the cushion, and the eye point.
+  The authoring tool seeds a seat from the seat objects SimConnect lists, then from the cockpit model's `PILOT_` nodes, then from a click on the cushion, and the author tunes it ([Seat awareness](ideas.md#seat-awareness)).
+  The 58P lists a seat object only for the pilot's seat, so its right seat starts from its model's `PILOT_1` node (measured on MSFS 2024, 2026-10-03, [aircraft log](../aircraft/log.md#2026-10-03-the-baron-58p-lists-only-its-pilots-seat-because-the-seat-objects-are-the-seats-in-each-aircrafts-navigation-graph)).
+- Each pilot moves to a seat themselves, with their own camera.
+- Crosscheck tells which seat a pilot is in from where their camera is: a pilot takes a free seat when their eye comes near it, and keeps it until they take another, through a walkaround too.
+- Nobody takes a seat another pilot holds.
+  When a pilot's eye is in a held seat, the [notification banner](#notification-banner) says so, such as "Occupied by James.", and asks them to move their camera to another seat.
+
+**Depends on:**
+
+- Profiles, for the seats and the control spots.
+- The [notification banner](#notification-banner), for the occupied-seat notice.
+- [The connection](#the-connection), which carries each pilot's camera, clicks, and avatar.
+
+**Open questions:**
+
+- How Crosscheck's empty avatar is built, and whether the pilot picks it in the sim's own avatar screen or Crosscheck can select it (unverified).
+- How long the arm reaches before it points.
+- Whether a dropped pilot's figure can turn see-through, through the material animation that colors it (unverified).
+- What makes some part of the figure miss a frame now and then in flight, which our test pilot saw in the 58P ([avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
+- Whether the figure's joints can follow variables of its own object, so one sim can draw several figures, which crews beyond two need (unverified, [Avatar sync](ideas.md#avatar-sync)).
+
 ## Interface
 
 ### EFB app

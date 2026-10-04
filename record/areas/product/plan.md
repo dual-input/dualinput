@@ -67,7 +67,7 @@ The picks, picked on 2026-10-02:
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
-  - [Seat awareness](ideas.md#seat-awareness)
+  - [Seat awareness](ideas.md#seat-awareness), except telling a pilot's seat from where their camera is, which avatar sync took into v1 on 2026-10-04
   - The profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
   - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
 - **Later:**
@@ -111,8 +111,9 @@ Agreed:
 - Recording and bug reports, on 2026-10-03.
 - The EFB app and the notification banner, on 2026-10-03.
 - Installing and updating, on 2026-10-03.
+- Avatar sync, on 2026-10-04.
 
-Still to scope: avatar sync, which moved into v1 on 2026-10-03.
+Every v1 feature is agreed, and the pass that strings them into one session is next.
 
 ## 5. What later features need from the core
 

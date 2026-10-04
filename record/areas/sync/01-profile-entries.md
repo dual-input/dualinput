@@ -159,7 +159,8 @@ events:
 
 - `watch` takes a `K:`, `H:`, `B:`, or `L:` name.
   A watched `L:` variable is a pulse: each rise from 0 counts as one occurrence.
-  Some aircraft use a variable that way instead of an event: the A350's cockpit sets command variables such as `L:INI_MASTER_WARNING_COMMAND` to 1, and its module acts on the 1 and clears it, and whether a reader outside the aircraft ever sees the 1 is unverified.
+  Some aircraft use a variable that way instead of an event: the A350's cockpit sets command variables such as `L:INI_MASTER_WARNING_COMMAND` to 1 (read in inibuilds-aircraft-a350 1.2.6, `A350_Interior.behavior.xml`), and its module acts on the 1 and clears it (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it)).
+  Whether a reader outside the aircraft ever sees the 1 is unverified (the A350 study's sim question 2).
 - `run` defaults to replaying what was watched, and otherwise uses the writer's names, `k`, `h`, `b`, and `l`.
 - `ignore` works as it does for a state entry.
 
@@ -167,8 +168,8 @@ Controls whose meaning is their sequence belong here, not under `state:`.
 The A380's refuel selector starts refueling only after AUTO, OFF, AUTO (documented: iniBuilds A380 manual 1.2, p. 28, as the [A380 study](../aircraft/inibuilds-a380/study.md) cites it; not measured), and catch-up, which writes each state entry once at its final value, would write only the final AUTO.
 
 Crosscheck catches a pulse by reading the variable once per frame, so a pulse the aircraft sets and clears within one frame is missed.
-Two kinds of pulse might be caught every time, and both are unverified: one written by panel JavaScript, which code Crosscheck injects into that panel could see, and one set by an input event, whose subscription reports changes.
-A powered A220's subscription reported the transitions of 11 latching switches, though 21 of its 464 input events also report at 4 Hz with no change (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong").
+Two kinds of pulse could be caught every time (unverified): one written by panel JavaScript, which code Crosscheck injects into that panel could see, and one set by an input event, whose subscription reports changes.
+A powered A220's subscription reported every transition of 11 latching switches (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong"), but nobody has tested a pulse shorter than a frame.
 So where a pulse moves something readable, such as a ticker that steps a heading, the entry reads the heading and writes through the pulse, and never depends on catching it.
 
 ## The writer API
@@ -183,8 +184,8 @@ A write function's writer returns actions as data, and the engine carries them o
 
 Because the engine sees each action, it can mark its own writes as echoes, pace them, put them in order with the rest of the session, cut a paced sequence short when a new value arrives for the same entry, and check every name against the sim when the profile loads.
 Authors write no calculator code.
-FS Copilot's profiles are built on it, with 1,863 literal and 6,720 JavaScript setters among their 26,533 entries (measured across those profiles, fsc-editor, `docs/sim-vars/build/v1-log.md`, 2026-08-25, "A setter is a script, and most entries do not have one"), but the engine can't pace, order, or recognize as its own a write hidden in calculator code, because it can't tell what the code writes.
-The engine can still use calculator code inside its own WASM module, where only it reaches, such as for `H:` events, which SimConnect's client events might not reach (unverified; firing an `H:` event from a SimConnect client and watching for it settles it).
+FS Copilot's profiles are built on it: 15,933 of their 26,533 entries, 60%, write through the calculator code the format generates, `<value> (>NAME, Units)`, beside 6,720 JavaScript, 2,017 prepended, and 1,863 literal setters (measured across those profiles, fsc-editor, `docs/sim-vars/build/v1-log.md`, 2026-08-25, "A setter is a script, and most entries do not have one"), but the engine can't pace, order, or recognize as its own a write hidden in calculator code, because it can't tell what the code writes.
+The engine can still use calculator code inside its own WASM module, where no profile's code runs, such as for `H:` events, which SimConnect's client events might not reach (unverified; firing an `H:` event from a SimConnect client and watching for it settles it).
 
 Write functions run in a sandbox with no file or network access, because profiles will come from the community, and the engine caps how large one entry and the whole state object can grow.
 Step 7's decisions in [the plan](../product/plan.md) set the limits.
@@ -195,7 +196,7 @@ Some facts belong to the aircraft, not to one control:
 
 - **Pacing:** how fast this aircraft takes stepped writes.
   The engine sends one step per frame unless the profile sets a slower pace for the aircraft, and an entry can set its own on its `inc` and `dec`.
-  Several aircraft read a command once per update.
+  An aircraft can read a command once per update of its own code, which can be every frame or slower.
   
   Whether the A350 counts two steps before one update as one is unverified in the sim.
   FS Copilot's A220 profile says a burst of heading increments collapses into one change (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`).
@@ -210,8 +211,8 @@ A profile gives no signal for when the aircraft has finished loading, because on
 ## What the IDE does with a profile
 
 - It shows the state object live, entry by entry.
-- It warns about an entry with both a readable `read` and a `default`, an `ignore` naming a readable state entry, and a pulsing `L:` variable or a toggle-only event under `state:`, which belong under `events:`.
-- It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which today exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
+- It warns about an entry with both a readable `read` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
+- It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which as of 2026-10-04 exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
   A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Crosscheck's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
 
 The IDE doesn't build entries by itself from what a click fires.

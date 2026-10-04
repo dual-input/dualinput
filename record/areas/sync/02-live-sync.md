@@ -65,7 +65,7 @@ In a session that isn't interrupted, every shared entry ends on the same value o
 
 Every state entry has something to read, so after writing, the receiving machine reads the entry back.
 
-1. It waits 500ms, a starting value, because some aircraft apply a write on a slower loop, such as the 2 Hz mixture block of the Baron 58TC and 58P.
+1. It waits 500ms, a starting value, because an aircraft can update the variable an entry reads on a slower loop than the one that takes the write, and step 6 of [the plan](../product/plan.md) measures how long studied aircraft take.
 2. If the value doesn't match, it writes again, up to a retry count still to set.
 3. If the value still doesn't match, it gives up on that entry and flags it.
 
@@ -89,7 +89,7 @@ A value written twice stays the same, so state entries that read a value can't d
 The risk is confined to events and shadow values: a duplicate fires an event entry's action a second time, and moves a shadow value one step too far.
 The engine filters, in this order:
 
-1. **The transport** gives every message an ID and applies it once, whether it came directly, through the relay, or both, and numbers what a reconnecting machine replays so the receiver drops what it already applied.
+1. **The transport** gives every message an ID, and the receiver applies each ID once, whether it came directly, through the relay, or both, and drops what a reconnecting machine replays that it already applied.
 2. **The input event double-fire.**
    On the A2A PA-24, the sim reported each input event twice: of 53 same-name, same-value pairs, 43 were 17ms to 21ms apart, 9 were 37ms to 40ms apart, and the 53rd, a course knob dragged through the same value, was a real repeat 261ms apart (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Stage 2 verified live. The double-fire is frame-locked, and tighter than measured.").
    fsc-editor read the clusters as roughly one and two frames, so the echo looks tied to frames (unverified; the second open question below settles it), and other aircraft are untested.
@@ -112,4 +112,4 @@ A pointer press that also changes a state entry applies once too: the stream car
 - How long to wait before reading back, how many retries before a flag, and how long an unused echo token lasts.
 - How to keep a `then` action or a write function's actions from doing harm when a retry repeats them.
 
-[The plan](../product/plan.md)'s step 6 lists the probes for the first four.
+[The plan](../product/plan.md)'s step 6 lists the probes for the first four, except the token's lifetime and aircraft other than the PA-24.

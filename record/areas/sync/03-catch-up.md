@@ -49,7 +49,7 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 
 Applying each entry once, at its final value, keeps the catching-up machine from running the PF's history: an APU the PF started, stopped, and started again starts once.
 
-The PF's order matters for an interlock that acts.
+The PF's order matters for an interlock: a control that acts once, when it's set, and only if another control is already set.
 Take a hypothetical aircraft whose APU master, written before the battery, tries to start the APU, fails, and leaves the switch reading on: the check finds no mismatch to retry, and the APU stays off.
 In the usual startup, the PF turned the battery on before the APU, so the PF's order puts the battery first.
 Which real aircraft behave like this is unverified, and one probe on an aircraft with an APU would show it.
@@ -58,16 +58,14 @@ How the order and the retries handle a battery switch, on that hypothetical airc
 
 | The PF's battery | What happens |
 | --- | --- |
-| Turned on, used, cycled off and on, ends on | The battery lands late. A write that needs power and reads back wrong, such as a radio frequency, fails once, and the next retry, with the battery on, lands it. A write that fails but reads back right, such as the APU master, stays failed, and nothing flags it. |
+| Turned on, used, cycled off and on, ends on | The battery lands late. A write that needs power and reads back wrong, such as a radio frequency, fails once, and the next retry, with the battery on, lands it. A write that fails but reads back right, such as the APU master, stays failed, and nothing flags it, a gap [Open questions](#open-questions) tracks. |
 | Turned on, used, then turned off, ends off | If the catching-up aircraft loaded cold and dark, its battery is off already and is skipped, so writes that need power fail on every retry, and Crosscheck flags them. |
-
-The first row's APU is a gap: an interlock that acts, after a battery cycled since it was used, can fail with nothing to show it.
 
 ## When preflight ends
 
 When the countdown ends, every other pilot's cockpit catches up state from the PF's, so pilots don't need matching cockpits to start.
 
-- Pilots other than the PF touch nothing in the cockpit during preflight, because catch-up sets only what the profile holds: a PM who switches a display to another page during preflight keeps that page after the PF's state arrives.
+- Pilots other than the PF touch nothing in the cockpit during preflight, as [preflight](../product/03-v1-scope.md#preflight)'s rules say, because catch-up sets only what the profile holds.
 - The PF works through a checklist of every `default` in the profile and touches nothing else, because each shadow value is right only if the PF's aircraft starts at its default ([01-profile-entries](01-profile-entries.md#keeping-a-shadow-value)).
 - A pilot's Ready is unavailable until their aircraft has settled ([below](#settling-after-a-load)), because a following machine's aircraft still restoring its saved state when the countdown ends would send its restored values as changes, right after the catch-up, and override the PF's.
 
@@ -81,7 +79,7 @@ A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a f
   So if a pilot presses a state control, then an event control, then another state control, the event still applies between the two.
 - Pointer presses that arrive while catch-up runs are dropped, because the displays never showed the state those presses were made on.
   Our fork's pointer sync follows a similar rule for a new session, "recovery replays, first contact does not" (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R04), and drops a press for a display that hasn't announced itself (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
-- When the PF's connection drops and the PM is catching up, the PM's catch-up stops before control passes to them, as [the take-control key](../product/03-v1-scope.md#take-control-key) says.
+- When the PF's connection drops and the PM is catching up, their catch-up stops first ([the take-control key](../product/03-v1-scope.md#take-control-key)).
 
 ## Settling after a load
 
@@ -101,7 +99,8 @@ An entry that changes more than 5 times since the load is one the aircraft drive
 
 A quiet window detects a pause, not a finish.
 fsc-editor's rule for knowing when an aircraft's variables had all appeared waited for two equal scans of the sim's `L:` name table.
-After a cold-and-dark load of an A2A aircraft, it stopped when the table held 3,963 of the 5,343 names it later held, 74%, and the 1,380 missing were the aircraft's own cockpit variables: the aircraft registered them in bursts with pauses between, and a duplicate aircraft-loaded event had made two scans equal by construction (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Re-enumeration stops on a pause, not on a finished table").
+After a cold-and-dark load of an A2A aircraft, it stopped when the table held 3,963 of the 5,343 names it later held, 74%.
+The aircraft registered the 1,380 missing cockpit variables in bursts with pauses between, and a duplicate aircraft-loaded event had also made two scans equal by construction (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Re-enumeration stops on a pause, not on a finished table").
 A Bonanza's last 3 of its 88 variables appeared 35s after load, 18s after the burst before (measured on MSFS 2024, 2026-08-27, same log, "The settle rule did not fail here, and one aircraft was two").
 Those are variables appearing, not restored values changing, so whether a restore also pauses longer than 15s is unverified, and the settle probe in [the plan](../product/plan.md)'s step 6 settles it.
 If it does, a 15s window can end between two bursts.
@@ -120,13 +119,13 @@ If it proves common, the fallback is a longer quiet window for late joins only, 
   - Replaying each change runs the aircraft's systems through the PF's whole history.
 - **Ordering state by when each entry first took its final value,** from the recording.
   For writes that read back wrong, it reaches the same result as the PF's last-change order in both battery cases above.
-  It would put the battery first in the first row, though, and so close the APU gap, which the comparison that dropped it on 2026-10-04 didn't weigh.
+  It would also put the battery first in the first row and close the APU gap, so it stays dropped only while no studied aircraft has such an interlock ([Open questions](#open-questions)).
 
 Replaying only the presses made while parked, for state that's mostly deterministic, such as typing a route into an FMS, stays a possible experiment for one aircraft.
 
 ## Open questions
 
 - Whether 15s, 15s, and 1.5 minutes fit real aircraft, and whether 5 changes tells a restore from an aircraft driving a control.
-- Whether any studied aircraft has an interlock that acts and fails while reading back right, which decides whether the gap above needs the first-final-value order.
+- Whether any studied aircraft has an interlock that fails while reading back right, which decides whether the gap above needs the first-final-value order.
 
 [The plan](../product/plan.md)'s step 6 lists the probe for the settle rule.

@@ -60,7 +60,7 @@ A pilot presses take-control and becomes the PF at once, and their machine becom
   The aircraft itself doesn't jump or lose noticeable speed at a handover (from our experience with FS Copilot).
 - When control passes, both pilots hear the control-passed cue that the [voice phrases](#voice-phrases) use, the pilot who took it hears a recorded "you have control", and the pilot who lost it hears "they have control".
 - When the PF's connection drops, control passes to the PM, never to a flight engineer or a passenger, and the PM hears "you have control".
-  If the PM is catching up, their catch-up stops first ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
+  If the PM is catching up, their catch-up stops first.
 
 **Depends on:**
 

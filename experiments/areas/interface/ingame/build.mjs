@@ -64,7 +64,56 @@ write("PackageSources/InGamePanels/crosscheck-p05.xml", `<?xml version="1.0" enc
 </SimBase.Document>
 `)
 
-write(`PackageSources/html_ui/Textures/Menu/toolbar/${ICON}.svg`, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M14 20 L32 10 L50 20 M14 44 L32 54 L50 44" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="32" r="6" fill="#ffffff"/></svg>\n`)
+// The toolbar inlines a panel's icon into its own document, so markup in the
+// icon runs there: an img with an empty src fails at once, and its onerror
+// appends our script to the toolbar's document, which can open panels. This is
+// Parallel 42's trick, published under MIT as parallel42/msfs-toolbar-interop
+// (read in p42-util-chaseplane 2026.39.1.16, HTML_UI/icons/toolbar/
+// P42_PANEL_CHASEPLANE.svg), with their img written as they write it. 2024
+// looks for icons in html_ui/icons/toolbar/; the 2020 template's
+// Textures/Menu/toolbar/ left the button blank (p05, 2026-10-04).
+write(`PackageSources/html_ui/icons/toolbar/${ICON}.svg`, `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <path d="M14 20 L32 10 L50 20 M14 44 L32 54 L50 44" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="6" fill="#ffffff"/>
+  <foreignObject>
+    <img src onerror="(function () { if (!window.CROSSCHECK_P05_INJECTED) { window.CROSSCHECK_P05_INJECTED = true; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = 'coui://html_ui/InGamePanels/${DIR}/p05-toolbar.js'; document.head.appendChild(script); } })()"></img>
+  </foreignObject>
+</svg>
+`)
+
+// Runs in the toolbar's document, and opens our panel once, since a call from
+// the toolbar's document opens panels (p05, 2026-10-04). A single call 3s
+// after a Build and Mount left the panel closed, so it waits until the
+// toolbar's own record lists the panel as closed, calls every 2s, and stops
+// once the panel is open or after a minute. It touches no input, so it has
+// nothing to fail open from.
+write(`PackageSources/html_ui/InGamePanels/${DIR}/p05-toolbar.js`, `// Written by experiments/areas/interface/ingame/build.mjs.
+(function () {
+  if (window.CROSSCHECK_P05_TOOLBAR) return;
+  var state = window.CROSSCHECK_P05_TOOLBAR = { loaded: Date.now(), calls: 0, ticks: 0, last: null, opened: null, error: null };
+  function panelState() {
+    var els = document.querySelectorAll("ui-resource-element");
+    for (var k = 0; k < els.length; k++) {
+      var m = els[k].manipulator;
+      var d = m && m.m_toolBarButtonData && m.m_toolBarButtonData.panelData;
+      if (d && d.id === "${PANEL_ID}") return d.state;
+    }
+    return null;
+  }
+  var timer = setInterval(function () {
+    var s = panelState();
+    state.last = s;
+    if (s && s !== "Invisible" && s !== "Unset") { state.opened = Date.now(); clearInterval(timer); return; }
+    if (++state.ticks > 30) { clearInterval(timer); return; }
+    if (s === "Invisible") {
+      try { Coherent.call("TOOLBAR_BUTTON_TOGGLE", "${PANEL_ID}", true); state.calls++; } catch (e) { state.error = String(e); }
+    }
+  }, 2000);
+})();
+`)
+const toolbarCheck = spawnSync(process.execPath, ["--check", path.join(OUT, "PackageSources", "html_ui", "InGamePanels", DIR, "p05-toolbar.js")], { stdio: "inherit" })
+if (toolbarCheck.status !== 0) { console.error("p05-toolbar.js doesn't parse."); process.exit(1) }
 
 write(`PackageSources/html_ui/InGamePanels/${DIR}/p05.html`, `<!DOCTYPE html>
 <html>

@@ -3,6 +3,56 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: Our toolbar icon loads a script of ours into the toolbar's document, and it opens our panel with no click
+
+**Asked:** can Crosscheck open its in-game panel by itself, from code we ship and control, with no click and no EFB app ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page))?
+The core can't make the call: `Coherent` exists only inside the sim's documents, and the inspector on port 19999, though it works with DevMode off (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), is a debugger we won't ship on.
+
+**Expected:** Parallel 42's add-ons run code in the toolbar's document, and the toolbar's document can open panels, so their way in would be ours too.
+
+**Found:** on MSFS 2024 SU6, in the Black Square Baron 58P, parked:
+
+- The toolbar's document loads a script from four add-ons' `InGamePanels` folders, such as `P42ChasePlane_worker.js` and FS Reborn's `toolbar_bridge.js`, and the sim's own files name none of them.
+- The way in is the panel's toolbar icon: the toolbar inlines the icon's SVG into its own document, and ChasePlane's icon holds `<img src onerror="…">`, whose handler appends ChasePlane's script to the toolbar's `<head>` (read in p42-util-chaseplane 2026.39.1.16, `HTML_UI/icons/toolbar/P42_PANEL_CHASEPLANE.svg`).
+  ChasePlane's overlay icon also opens the overlay from there, which is how it opens without a click.
+  Parallel 42 publish the method under MIT as [parallel42/msfs-toolbar-interop](https://github.com/parallel42/msfs-toolbar-interop).
+- Our blank toolbar button came from our icon's path: the 2020 template's `html_ui/Textures/Menu/toolbar/`, where 2024 looks in `html_ui/icons/toolbar/`.
+- p05's icon, at the 2024 path with the same `img` ([ingame/build.mjs](../../../experiments/areas/interface/ingame/build.mjs)), loaded our `p05-toolbar.js` into the toolbar's document straight after a Build and Mount, with no flight reload.
+- The script called `Coherent.call("TOOLBAR_BUTTON_TOGGLE", "PANEL_CROSSCHECK_P05", true)` 3s after loading, with no error.
+  After the first Build and Mount the panel stayed closed; after the next two the pilot saw it open by itself.
+- A Build and Mount gave the toolbar a fresh document, holding one copy of our script and none of the flags we had set in it, but the script it ran was the copy from the first build, so the toolbar's document keeps its first files as our panel's does.
+- Opened from code, from the toolbar's document or the EFB's, our 48-wide column sat at the left of the screen, not the right.
+
+**Changed:** Crosscheck can open its panel itself, from code in its own package, with no EFB app and no click.
+The trick isn't a sim feature: it rests on the toolbar inlining icon markup, which an update could stop.
+Why the first call left the panel closed is unknown; a script that calls until the toolbar lists the panel as open is built but hasn't run, because the sim kept serving the first copy.
+Putting the column back on the right when code opens it is untested.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) and the [EFB app](../product/03-v1-scope.md#efb-app) in the v1 scope.
+
+**Evidence:** inspector reads of the toolbar's document, the toolbar's own record of each panel's state, and the pilot's report; no run file.
+
+## 2026-10-04: Code in the EFB's document switches the EFB to another app, but no call we found puts the EFB on screen
+
+**Asked:** can a notice on our panel open the EFB on Crosscheck's own app, so the EFB app holds the controls and the panel only shows notices?
+
+**Expected:** the EFB is a toolbar panel, so the toolbar call would open it, and the EFB's code would have a way to pick an app.
+
+**Found:** on MSFS 2024 SU6, in the Black Square Baron 58P, parked, with GSX and iniJetways installed as stand-ins for our app:
+
+- The EFB is the toolbar panel `PANEL_EFB`, and its document, titled "Electronic Flight Bag", stays loaded while the EFB is closed.
+- `TOOLBAR_BUTTON_TOGGLE` for `PANEL_EFB` set the toolbar's record of it to `"Detached"` when called from our panel's document or the toolbar's, and back to `"Invisible"` when closed from the toolbar's; no EFB showed on screen in either case.
+  How Tab opens the EFB is untested.
+- The EFB opens an app through `efbViewService.openApp(name)`, which no global exposes, and an app is handed the EFB's bus, settings, notification manager, and onboarding manager, but not the view service (read in fs-base-efb, `html_ui/efb_ui/efb_os/efb_os.js`, `EFBViewService` and `Container.use`).
+- Pressing an app's button from code works: mouse events on GSX's dock button switched the EFB's view to `GSX_EFB`, and on IniJetways in the home page's app list to `MultiJetwayControllerApp`, while the EFB was closed.
+  The app list pages, so an app off its first page needs paging first.
+
+**Changed:** the hybrid, with notices on our panel and controls in an EFB app, would need a way to put the EFB on screen that we haven't found; switching it to our app once it's open is solved, by a trick.
+
+**Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** inspector reads and the screenshots taken after each call; no run file.
+
 ## 2026-10-04: An in-game panel's size is a percent of the screen's height, capped at 150% of it, so ours can't span a wide screen, though Parallel 42's panels do
 
 **Asked:** can p05's always-open panel ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)) cover the whole screen, as ChasePlane's overlay does, so its notices can go anywhere on it?

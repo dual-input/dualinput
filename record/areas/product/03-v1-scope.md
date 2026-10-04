@@ -236,8 +236,8 @@ It finds state a profile can't reach, exports it as values the profile watches, 
 
 - Plugins for aircraft, with one in v1, the 58P's.
   Some of the 58P's radio settings live only in its gauges' JavaScript, where no profile entry reaches: the ADF's modes and timers, the KAS 297B's armed vertical speed, and the radar's range and modes (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
-  The radios' knob-pulled states are mirrored to `L:` variables the gauges never read back, such as `L:COM_1_KNOB_PULLED`, so a profile can watch them, but setting one takes a write method or the gauge's own events (same study).
-  The plugin's first candidate job is to find them in the gauges' panel documents, export them as values that the 58P's profile syncs and [catch-up](../sync/03-catch-up.md) applies like any other entry, and register the write methods that set them, and its job is settled when the 58P's profile is written.
+  The KX 155B mirrors its knob-pulled state to `L:COM_1_KNOB_PULLED` and never reads it back (same study), so a profile can watch it, but setting it takes a write method; whether the other radios' knob-pulled variables are read back is unverified.
+  The plugin's first candidate job is to find the settings that live only in JavaScript in the gauges' panel documents, export them as values that the 58P's profile syncs and [catch-up](../sync/03-catch-up.md) applies like any other entry, and register the write methods that set them and the knob-pulled states, and its job is settled when the 58P's profile is written.
   The tablet's 15 saved settings need no plugin, because each mirrors an `L:` variable the profile syncs directly, such as `L:var_FrontArmrest` (same study).
   The profile's settings for following machines would keep each following machine's tablet from rolling failures of its own, if a failure rate of 0 stops the rolls (unverified, the Baron study's sim questions 3 and 7; [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft)).
 - Plugins ship with Crosscheck, in its installer and its Community package, and update with it, so every pilot in a crew runs the same plugins: pilots on different Crosscheck versions can't fly together ([installing and updating](#installing-and-updating)).
@@ -250,8 +250,8 @@ It finds state a profile can't reach, exports it as values the profile watches, 
 - Changing an aircraft's files, unless the 58P's plugin needs it.
 - The KNS-81's 10 waypoints, which the gauge keeps in its JavaScript, saves to the sim's DataStorage every 60s while it has power, and reads back only when it loads (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
   A plugin could sync them: its write method would write the PF's waypoints to the gauge's keys with the sim's `SetStoredData` (documented, as the Baron study cites it; not run, the study's sim question 11), then reload the gauge's panel document, which our FS Copilot fork did from the sim's inspector (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone"), though a reload from a plugin's own panel code is untried.
-  Or it would call the gauge's own `radioConfigLoad`, which nobody has tried either.
-  The KNS-81 sits alone in its panel document, `VCockpit13`, so a reload costs only its own JavaScript state: the displayed and used waypoint, the navigation mode, and the data entry mode, of which it mirrors only the waypoint number and the data entry mode to `L:` variables (same study).
+  Or it would call the gauge's own `radioConfigLoad` (read in bksq-aircraft-baronpro 0.1.1, `KNS81.js`), which we haven't traced to the waypoint load and nobody has tried either.
+  The KNS-81 sits alone in its panel document, `VCockpit13`, so a reload costs only its own JavaScript state: the displayed and used waypoint, the navigation mode, and the data entry mode, of which the study found the waypoint number and the data entry mode mirrored to `L:` variables (same study).
 
 **Rules:**
 

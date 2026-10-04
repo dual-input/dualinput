@@ -46,6 +46,55 @@ export const CARD_CSS = `
 }
 `
 
+// The banner: a strip a quarter as tall as the card, on its own pool of
+// objects, CROSSCHECK_P02_Slot00 and up, each with its own texture file. The
+// sim keeps a loaded texture until its object has been gone a while, between
+// 30s and 3.5 minutes (record/areas/interface/log.md, 2026-10-04), so each
+// notice goes into the slot unused longest (p05-banner.mjs).
+export const BANNER = {
+  width: 1024,
+  height: 256,
+  panel: { width: 0.16, height: 0.04 },
+  slots: 12,
+  texture: "CROSSCHECK_P02_BANNER.PNG",
+}
+
+export const slotTitle = (i) => `CROSSCHECK_P02_Slot${String(i).padStart(2, "0")}`
+
+export const BANNER_CSS = `
+.cb-banner {
+  position: absolute; left: 0; top: 0; width: ${BANNER.width}px; height: ${BANNER.height}px;
+  box-sizing: border-box; padding: 26px 40px 26px 34px;
+  border-radius: 34px; border: 3px solid rgba(160, 190, 255, 0.35);
+  background-color: rgba(12, 18, 30, 0.82);
+  color: #f2f5fa; font-family: "Roboto", "Segoe UI", sans-serif;
+  display: flex; flex-direction: row; align-items: center;
+}
+.cb-mark { width: 14px; align-self: stretch; border-radius: 7px; margin-right: 30px; }
+.cb-info { background-color: #6f9bff; }
+.cb-warning { background-color: #ffb732; }
+.cb-error { background-color: #ff5a4e; }
+.cb-ok { background-color: #3ccf7a; }
+.cb-text { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.cb-brand { font-size: 20px; letter-spacing: 5px; color: #9db8ff; font-weight: bold; }
+.cb-title { font-size: 50px; font-weight: bold; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cb-body { font-size: 30px; color: #c3cad6; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+`
+
+const escape = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+
+export function bannerMarkup({ severity = "info", title = "", body = "" }) {
+  return `
+<div class="cb-banner">
+  <div class="cb-mark cb-${severity}"></div>
+  <div class="cb-text">
+    <div class="cb-brand">CROSSCHECK</div>
+    <div class="cb-title">${escape(title)}</div>
+    ${body ? `<div class="cb-body">${escape(body)}</div>` : ""}
+  </div>
+</div>`
+}
+
 // A notice, for p04's rewrite test: a different picture of the same size, with
 // the time it was drawn, so a screenshot shows which copy the sim drew.
 export function noticeMarkup({ title, body, stamp }) {

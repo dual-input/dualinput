@@ -44,7 +44,8 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { CARD_CSS, HEIGHT, PANEL, WIDTH, cardMarkup } from "./card.mjs"
+import { BANNER, BANNER_CSS, CARD_CSS, HEIGHT, PANEL, WIDTH, bannerMarkup, cardMarkup, slotTitle } from "./card.mjs"
+import { drawPng, pngToDds } from "./render.mjs"
 import { writeKtx2 } from "./tools/ktx2.mjs"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
@@ -140,13 +141,13 @@ console.log(`exports OK: all ${REQUIRED.length} present`)
 // (experiments/areas/avatars/lib/pick.mjs). The eye sits CURVE_R behind the
 // origin, looking along +z, so the face points to -z, the texture's left edge
 // is +x, and every column is CURVE_R from the eye.
-function panelGltf(material, images) {
+function panelGltf(material, images, size = { width: PANEL_W, height: PANEL_H }) {
   const pos = [], nrm = [], uv = [], idx = []
-  const half = PANEL_W / 2 / CURVE_R
+  const half = size.width / 2 / CURVE_R
   for (let i = 0; i <= COLUMNS; i++) {
     const a = -half + (2 * half * i) / COLUMNS
     const x = -CURVE_R * Math.sin(a), z = CURVE_R * Math.cos(a) - CURVE_R
-    for (const [y, v] of [[PANEL_H / 2, 0], [-PANEL_H / 2, 1]]) {
+    for (const [y, v] of [[size.height / 2, 0], [-size.height / 2, 1]]) {
       pos.push(x, y, z)
       nrm.push(Math.sin(a), 0, -Math.cos(a))
       uv.push(i / COLUMNS, v)
@@ -252,6 +253,12 @@ const OBJECTS = [
   { title: "CROSSCHECK_P02_PaintViewer", folder: "GroundVehicles", category: "Viewer", material: paintMaterial, painting },
   { title: "CROSSCHECK_P02_PaintHuman", category: "Human", material: paintMaterial, painting },
   { title: "CROSSCHECK_P02_Aircraft", folder: "Airplanes", aircraft: true, material: paintMaterial, painting },
+  // The banner's pool, for p05-banner.mjs: each slot a strip of its own, with
+  // its own texture file that p05 writes a notice into before spawning it.
+  ...Array.from({ length: BANNER.slots }, (_, i) => ({
+    title: slotTitle(i), material: { ...bakedMaterial, name: "CROSSCHECK_P02_BANNER" },
+    images: [`../texture/${BANNER.texture}`], size: BANNER.panel, banner: true,
+  })),
 ]
 const folderOf = (o) => o.folder ?? "Misc"
 
@@ -315,7 +322,7 @@ fs.rmSync(path.join(OUT, "PackageSources", "SimObjects"), { recursive: true, for
 for (const o of OBJECTS) {
   const dir = `PackageSources/SimObjects/${folderOf(o)}/${o.title}`
   fs.rmSync(path.join(OUT, dir), { recursive: true, force: true })
-  const { json, bin } = panelGltf(o.material, o.images)
+  const { json, bin } = panelGltf(o.material, o.images, o.size)
   json.buffers[0].uri = `${o.title}.bin`
   write(`${dir}/model/${o.title}.gltf`, JSON.stringify(json, null, 1))
   write(`${dir}/model/${o.title}.bin`, bin)
@@ -527,10 +534,12 @@ console.log(`card rendered: ${fs.statSync(png).size} bytes`)
 // P42_FLASHLIGHT_BODY_ALBEDO.PNG.KTX2.json (read in p42-util-chaseplane
 // 2026.39.1.16), so each PNG gets a .PNG.json of the same form, for the
 // packager to find, with the date as a Windows FILETIME number.
+// The banner slots' placeholder, until p05 writes a notice over it.
+const bannerPng = drawPng({ css: BANNER_CSS, body: bannerMarkup({ severity: "info", title: "Banner slot", body: "p05 writes each notice into a free slot." }), width: BANNER.width, height: BANNER.height, name: "banner-placeholder" })
 for (const o of OBJECTS.filter((x) => x.images)) {
-  const to = path.join(OUT, "PackageSources", "SimObjects", folderOf(o), o.title, o.pngInModel ? "model" : "texture", CARD_PNG)
+  const to = path.join(OUT, "PackageSources", "SimObjects", folderOf(o), o.title, o.pngInModel ? "model" : "texture", o.banner ? BANNER.texture : CARD_PNG)
   fs.mkdirSync(path.dirname(to), { recursive: true })
-  fs.copyFileSync(png, to)
+  fs.copyFileSync(o.banner ? bannerPng : png, to)
   if (o.flags) {
     const date = ((BigInt(Math.floor(fs.statSync(to).mtimeMs)) + 11644473600000n) * 10000n).toString()
     fs.writeFileSync(`${to}.json`, `{"Version":2,"SourceFileDate":${date},"Flags":["FL_BITMAP_COMPRESSION","FL_BITMAP_MIPMAP"],"HasTransp":true}`)
@@ -549,9 +558,11 @@ const ddsBytes = fs.readFileSync(dds)
 // The DDS holds BGRA rows, top first, after its 128-byte header.
 const rgba = Buffer.from(ddsBytes.subarray(128))
 for (let i = 0; i < rgba.length; i += 4) { const b = rgba[i]; rgba[i] = rgba[i + 2]; rgba[i + 2] = b }
+const bannerDds = pngToDds(bannerPng)
 const READY = [
-  { group: "CROSSCHECK_P02_Baked_texture", object: "CROSSCHECK_P02_Baked", bytes: ddsBytes },
-  { group: "CROSSCHECK_P02_Baked2_texture", object: "CROSSCHECK_P02_Baked2", bytes: writeKtx2(rgba, WIDTH, HEIGHT) },
+  { group: "CROSSCHECK_P02_Baked_texture", object: "CROSSCHECK_P02_Baked", file: `${CARD_PNG}.KTX2`, bytes: ddsBytes },
+  { group: "CROSSCHECK_P02_Baked2_texture", object: "CROSSCHECK_P02_Baked2", file: `${CARD_PNG}.KTX2`, bytes: writeKtx2(rgba, WIDTH, HEIGHT) },
+  ...OBJECTS.filter((o) => o.banner).map((o) => ({ group: `${o.title}_texture`, object: o.title, file: `${BANNER.texture}.KTX2`, bytes: bannerDds })),
 ]
 fs.rmSync(path.join(OUT, "PackageSources", "Textures"), { recursive: true, force: true })
 // Package validation fails a KTX2 without its .KTX2.json, "Can't find
@@ -559,11 +570,11 @@ fs.rmSync(path.join(OUT, "PackageSources", "Textures"), { recursive: true, force
 // This one has the form of ChasePlane's, with no compression or mipmap flags,
 // since ours has neither.
 for (const r of READY) {
-  write(`PackageSources/Textures/${r.object}/${CARD_PNG}.KTX2`, r.bytes)
+  write(`PackageSources/Textures/${r.object}/${r.file}`, r.bytes)
   const date = ((BigInt(Date.now()) + 11644473600000n) * 10000n).toString()
-  write(`PackageSources/Textures/${r.object}/${CARD_PNG}.KTX2.json`, `{"Version":2,"SourceFileDate":${date},"Flags":[],"HasTransp":true}`)
+  write(`PackageSources/Textures/${r.object}/${r.file}.json`, `{"Version":2,"SourceFileDate":${date},"Flags":[],"HasTransp":true}`)
 }
-console.log(`ready-made card: ${READY.map((r) => `${r.object} ${r.bytes.length} bytes`).join(", ")}`)
+console.log(`ready-made textures: ${READY.length}, the card ${ddsBytes.length} bytes, each banner slot ${bannerDds.length} bytes`)
 
 // ------------------------------------------------ 5. the package definition
 

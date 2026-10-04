@@ -3,6 +3,21 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: A banner drawn on an object of ours smears in motion and is clipped behind the cockpit, so we parked it for an in-game panel
+
+**Asked:** how does a banner drawn on an object of ours, held 35cm ahead of the eye, look in use?
+
+**Expected:** like a pair of AR glasses, with a slight lag that reads as inertia.
+
+**Found:** the pilot, looking around the Black Square Baron 58P with the card and a banner up ([entries below](#2026-10-04-a-texture-we-write-ourselves-shows-on-our-panel-an-uncompressed-dds-shipped-by-a-copy-asset-group-with-its-ktx2json)), judged that its text smears while the view moves and that parts of the cockpit sometimes cut into it.
+The panel that had loaded the broken KTX2 at the end of the eviction run showed the missing-texture checkerboard on a later spawn, though its file then held a good DDS, so the sim kept that failed read too.
+
+**Changed:** the user parked the object route for the banner (2026-10-04) for a see-through in-game panel pinned to the right of the screen, which the sim draws in screen space and which takes clicks, so the banner can carry its own buttons again.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** the pilot's report; no run file.
+
 ## 2026-10-04: The sim lets go of a texture somewhere between 30s and 3.5 minutes after its object is removed
 
 **Asked:** does the sim ever let go of a loaded texture, so that a texture file can carry a new picture again ([entry below](#2026-10-04-a-picture-written-over-a-texture-file-before-the-sim-first-loads-it-shows-on-the-next-spawn-and-once-loaded-the-sim-keeps-it))?

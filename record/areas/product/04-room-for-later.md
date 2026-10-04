@@ -84,7 +84,7 @@ After a short outage, each channel replays its own missed messages, and the chan
 A plugin is code we ship for one aircraft or one add-on, and code that serves one product lives in a plugin, never in Crosscheck's own code ([03-v1-scope](03-v1-scope.md#plugins)).
 
 A plugin's first job is to find state the profile can't reach and export it as values, `plugin.state.<name>`, which the profile watches as it watches an `L:` variable ([01-profile-entries](../sync/01-profile-entries.md#watching-a-value)).
-For each value it can set, the plugin registers a write method, which shows up on the writer as `writer.plugin().<name>(value)`, so a plugin never calls the writer, and the engine calls its methods ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
+For each value it can set, the plugin registers a write method, which the engine calls as `writer.plugin().<name>(value)`; the plugin itself never calls the writer ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
 Live sync, read-back, the conflict rule, catch-up, pacing, and echo marking then cover a plugin's values and writes as they cover any entry, with no code of the plugin's.
 The 58P's plugin does that for the radio settings that live only in its gauges' JavaScript ([03-v1-scope](03-v1-scope.md#plugins)).
 
@@ -96,7 +96,7 @@ For what isn't a value, a plugin reaches every layer through hooks:
 - code inside the sim, in the aircraft's panels and in a WASM module ([below](#code-inside-the-sim))
 
 Where no hook reaches, a plugin reads the sim, the aircraft's panels, and the pilot's files directly, since we review every plugin, and it changes what Crosscheck watches only in its write methods ([03-v1-scope](03-v1-scope.md#plugins)).
-One aircraft's plugin runs per aircraft, and plugins for aircraft that share code share it through a library rather than a copy.
+Each aircraft has one plugin, and plugins for aircraft that share code share it through a library rather than a copy.
 
 These picks put their product-specific parts in plugins:
 
@@ -212,11 +212,11 @@ If both routes fail, the EFB app's messages pass through a panel that holds a We
 - **The debrief timeline** plays a flight back from the recording ([flight recorder and debrief](ideas.md#flight-recorder-and-debrief)).
   So the recording holds the flight model's track, the handovers, and every channel with its timing, in a format later versions of Crosscheck still read, and the crew's recordings merge by the session's ID and the vector clocks.
 - **Telemetry** sends the event v1 raises when a write never lands, the one that marks the recording and puts a notice on the banner ([02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)), carrying nothing that identifies the pilot ([telemetry](ideas.md#telemetry)).
-- **Plugin tests:** the recorder keeps every value a plugin exported and every write method Crosscheck called on it, so any flight flown with the plugin replays through it in a test, with no copy of the aircraft.
-  The plugin's author writes no test: they fly with recording on, as pilots do for [bug reports](03-v1-scope.md#recording-and-bug-reports).
-  Panel code that reaches into the aircraft directly, such as into the A220's Redux store, does work the recording doesn't see, and only flying it checks that.
+- **Plugin tests:** the recorder keeps every value a plugin exported and every write method Crosscheck called on it, so a test replays a recorded flight against the plugin's profile entries and checks what Crosscheck did with those values, with no copy of the aircraft.
+  The author writes no test: they fly with recording on, as pilots do for [bug reports](03-v1-scope.md#recording-and-bug-reports).
+  The plugin's own reads and writes into the aircraft's panels, such as into the A220's Redux store, run only in the sim, and only flying with the plugin checks them.
 
-**v1 builds** a versioned recording format with the flight model's samples, each channel recording itself, and each plugin's inputs and outputs, as [recording and bug reports](03-v1-scope.md#recording-and-bug-reports) scopes.
+**v1 builds** a versioned recording format with the flight model's samples, each channel recording itself, and each plugin's exported values and the write methods Crosscheck called on it, as [recording and bug reports](03-v1-scope.md#recording-and-bug-reports) scopes.
 
 ## By pick
 

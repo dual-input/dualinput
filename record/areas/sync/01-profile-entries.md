@@ -178,7 +178,7 @@ The A380's refuel selector starts refueling only after AUTO, OFF, AUTO (document
 Crosscheck catches a pulse by reading the variable once per frame, so a pulse the aircraft sets and clears within one frame is missed.
 Two kinds of pulse could be caught every time (unverified): one written by panel JavaScript, which code Crosscheck injects into that panel could see, and one set by an input event, whose subscription reports changes.
 A powered A220's subscription reported every transition of 11 latching switches (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong"), but nobody has tested a pulse shorter than a frame.
-So where a pulse moves something readable, such as a ticker that steps a heading, the entry reads the heading and writes through the pulse, and never depends on catching it.
+So where a pulse moves something readable, such as a ticker that steps a heading, the entry watches the heading and writes through the pulse, and never depends on catching it.
 
 ## The writer API
 

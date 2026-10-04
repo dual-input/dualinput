@@ -229,12 +229,14 @@ A press or drag on a panel display travels to the other machine as the position 
 
 ### Plugins
 
-A plugin is code we ship for one aircraft or one add-on, which finds state a profile can't reach, exports it as values the profile watches, and registers the write methods that set it, and reaches the rest through hooks into Crosscheck, so Crosscheck's own code never names a product.
+A plugin is code we ship for one aircraft or one add-on.
+It finds state a profile can't reach, exports it as values the profile watches, registers the write methods that set them, and reaches the rest through hooks into Crosscheck, so Crosscheck's own code never names a product.
 
 **In v1:**
 
 - Plugins for aircraft, with one in v1, the 58P's.
-  Some of the 58P's radio settings live only in its gauges' JavaScript, where no profile entry reaches: the knob-pulled states, the ADF's modes and timers, the KAS 297B's armed vertical speed, and the radar's range and modes (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
+  Some of the 58P's radio settings live only in its gauges' JavaScript, where no profile entry reaches: the ADF's modes and timers, the KAS 297B's armed vertical speed, and the radar's range and modes (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
+  The radios' knob-pulled states are mirrored to `L:` variables the gauges never read back, such as `L:COM_1_KNOB_PULLED`, so a profile can watch them, but setting one takes a write method or the gauge's own events (same study).
   The plugin's first candidate job is to find them in the gauges' panel documents, export them as values that the 58P's profile syncs and [catch-up](../sync/03-catch-up.md) applies like any other entry, and register the write methods that set them, and its job is settled when the 58P's profile is written.
   The tablet's 15 saved settings need no plugin, because each mirrors an `L:` variable the profile syncs directly, such as `L:var_FrontArmrest` (same study).
   The profile's settings for following machines would keep each following machine's tablet from rolling failures of its own, if a failure rate of 0 stops the rolls (unverified, the Baron study's sim questions 3 and 7; [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft)).
@@ -247,15 +249,18 @@ A plugin is code we ship for one aircraft or one add-on, which finds state a pro
 - Plugins delivered apart from a Crosscheck release.
 - Changing an aircraft's files, unless the 58P's plugin needs it.
 - The KNS-81's 10 waypoints, which the gauge keeps in its JavaScript, saves to the sim's DataStorage every 60s while it has power, and reads back only when it loads (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
-  A plugin could sync them: its write method would write the PF's waypoints to the gauge's keys with the sim's `SetStoredData` (documented, as the Baron study cites it; not run, the study's sim question 11), then reload the gauge's panel document, as our FS Copilot fork reloaded panel documents (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`), or call the gauge's own routine that loads its memory, which nobody has tried.
-  A reload also reloads every other gauge in that document, losing whatever state lives only in their JavaScript, and our panel bridge there.
+  A plugin could sync them: its write method would write the PF's waypoints to the gauge's keys with the sim's `SetStoredData` (documented, as the Baron study cites it; not run, the study's sim question 11), then reload the gauge's panel document, which our FS Copilot fork did from the sim's inspector (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone"), though a reload from a plugin's own panel code is untried.
+  Or it would call the gauge's own `radioConfigLoad`, which nobody has tried either.
+  The KNS-81 sits alone in its panel document, `VCockpit13`, so a reload costs only its own JavaScript state: the displayed and used waypoint, the navigation mode, and the data entry mode, of which it mirrors only the waypoint number and the data entry mode to `L:` variables (same study).
 
 **Rules:**
 
 - Code that serves one aircraft or add-on lives in a plugin, never in Crosscheck's own code, so dropping support for an aircraft means removing its plugin and its profile.
-- One aircraft's plugin runs per aircraft, alongside any add-on's plugin, and plugins for aircraft that share code, such as the `BlackSquareTablet.js` both the Baron Pro and the Bonanza Pro ship (read in both aircraft's studies), share it through a library they import rather than a copy.
+- Each aircraft has one plugin, which runs alongside any add-on's plugin, and plugins for aircraft that share code share it through a library they import rather than a copy.
+  Black Square's Baron Pro and Bonanza Pro each ship a tablet file named `BlackSquareTablet.js`, of 4,830 and 5,383 lines (read in bksq-aircraft-baronpro 0.1.1 and bksq-aircraft-bonanzapro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), [Bonanza study](../aircraft/black-square-bonanza-pro/study.md)), and how much code the two share is unverified.
 - A plugin may read the sim, the aircraft's panels, and the pilot's files directly, because we review every plugin.
-  It changes what Crosscheck watches only in the write methods it registers, which run only when Crosscheck calls them, by whatever means a write needs, such as DataStorage or a gauge's JavaScript ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)), because Crosscheck would see any other change as a pilot's and send it to the crew.
+  It changes what Crosscheck watches only in the write methods it registers, which run only when Crosscheck calls them, because Crosscheck would see any other change as a pilot's and send it to the crew.
+  A write method writes however the aircraft needs, such as into DataStorage or a gauge's JavaScript ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
 - Crosscheck turns off a plugin that fails for the rest of the session, the [notification banner](#notification-banner) says so, and the flight goes on.
 - A plugin changes an aircraft's files only on the pilot's machine, the pilot can turn such a plugin off in Crosscheck's settings, and Crosscheck never ships a file of another developer's ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
 
@@ -704,7 +709,7 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 **In v1:**
 
 - Every crew member's machine records what passes through Crosscheck: each synced change, each handover, and the connection's events.
-- The recording also keeps the flight model's samples, and every value each [plugin](#plugins) exported and every write method Crosscheck called on it, so a recorded flight replays through a plugin in its tests ([04-room-for-later](04-room-for-later.md#recording)).
+- The recording also keeps the flight model's samples, and every value each [plugin](#plugins) exported and every write method Crosscheck called on it, so a test can replay a recorded flight against the plugin's profile entries ([04-room-for-later](04-room-for-later.md#recording)).
 - The recording keeps each watch-only profile entry whose value differs between machines, with both values ([live sync](../sync/02-live-sync.md#values-not-events)).
 - Crosscheck marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - Each machine keeps at least the whole flight, and more flights if recordings turn out small enough.

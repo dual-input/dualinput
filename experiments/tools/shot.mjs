@@ -8,8 +8,10 @@
  * the sim window"), so the sim must be in a window or borderless, in front and
  * uncovered. Each shot is saved as a JPEG 1,200 pixels wide with the top 100
  * pixels cut off, because Devmode's Project Editor shows the home folder's path
- * in its title bar there (CLAUDE.md, Nothing personal in the tree). Look at a
- * shot before committing it.
+ * in its title bar there (CLAUDE.md, Nothing personal in the tree). It saves
+ * nothing unless the sim's window is in front, since a copy of the screen
+ * behind a minimized sim is whatever else is there. Look at a shot before
+ * committing it.
  *
  *   const shooter = startShooter(dir)
  *   const s = await shooter.shot("name")   // { file, width, height, brightness } or { error }
@@ -33,7 +35,12 @@ public static class CrosscheckShooter {
   [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr h, out RECT r);
   [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr h, ref POINT p);
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+  [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
   public static string Take(IntPtr h, string file) {
+    // The copy is of the screen, so with the sim minimized or behind another
+    // window it caught the desktop and a chat app's member list (p04,
+    // 2026-10-04): nothing is saved unless the sim's window is in front.
+    if (GetForegroundWindow() != h) return "ERR the sim isn't in front, so nothing was saved";
     RECT r; GetClientRect(h, out r); POINT o = new POINT(); ClientToScreen(h, ref o);
     int w = r.R - r.L, hh = r.B - r.T;
     if (w <= 0 || hh <= 0) return "ERR no client area";

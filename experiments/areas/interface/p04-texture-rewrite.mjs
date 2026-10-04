@@ -52,7 +52,11 @@ const CARD_DIR = path.join(PANEL_DIR, "build", "card")
 // that, to see whether the sim reads a texture file when it first needs it.
 // The notice is padded with zeros to that file's size, since layout.json lists
 // each file's size.
-const SLOT = process.argv.includes("--slot")
+const SLOT = process.argv.includes("--slot") || process.argv.includes("--evict")
+// --evict asks whether the sim ever lets a loaded texture go: it writes a new
+// stamp over Baked2's texture, which --slot loaded, and spawns it, first at
+// once, then after the panel has been gone 30s, then 120s, a screenshot each.
+const EVICT = process.argv.includes("--evict")
 const TITLE = SLOT ? "CROSSCHECK_P02_Baked2" : "CROSSCHECK_P02_Baked"
 const REL = `SimObjects/Misc/${TITLE}/TEXTURE/CROSSCHECK_P02_CARD.PNG.KTX2`
 const EDGE = ["C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Microsoft/Edge/Application/msedge.exe"].find((p) => fs.existsSync(p))
@@ -121,6 +125,21 @@ note("targets", `rewriting ${TARGETS.length} copies of the texture, ${original.l
 
 try {
   beep(1000, 150)
+  if (EVICT) {
+    for (const waitS of [0, 30, 120]) {
+      const stamp = new Date().toTimeString().slice(0, 8)
+      let notice = drawNotice(stamp)
+      notice = Buffer.concat([notice, Buffer.alloc(Math.max(0, original.length - notice.length))])
+      writeAll(notice)
+      note("rewrite", `wrote the notice drawn at ${stamp}; spawning ${waitS ? `after ${waitS}s more with the panel gone` : "at once"}`)
+      await sleep(waitS * 1000)
+      await spawn()
+      await sleep(3000)
+      await shot(`evict-after-${waitS}s-stamp-${stamp.replaceAll(":", "")}`)
+      await remove()
+    }
+    throw new Error("done")
+  }
   if (SLOT) {
     const stamp = new Date().toTimeString().slice(0, 8)
     let notice = drawNotice(stamp)

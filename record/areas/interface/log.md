@@ -3,6 +3,26 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: The sim lets go of a texture somewhere between 30s and 3.5 minutes after its object is removed
+
+**Asked:** does the sim ever let go of a loaded texture, so that a texture file can carry a new picture again ([entry below](#2026-10-04-a-picture-written-over-a-texture-file-before-the-sim-first-loads-it-shows-on-the-next-spawn-and-once-loaded-the-sim-keeps-it))?
+Every notice with new content, such as a seat that James holds now and Greg later, needs a texture the sim will read afresh.
+
+**Expected:** no prediction.
+
+**Found:** p04 wrote a notice stamped with the time over `CROSSCHECK_P02_Baked2`'s texture, which had loaded the 10:25:14 notice, and spawned the panel, three times:
+
+- After the panel had been gone about 3.5 minutes, since 10:25:22: the new notice, drawn at 10:29:02, showed.
+- After it had been gone 30s: the notice drawn at 10:29:07 didn't show, and the panel kept 10:29:02.
+- After 120s: no result, because the sim wasn't in front and the screenshot caught the desktop instead; the screenshot tool saves nothing in that case since ([shot.mjs](../../../experiments/tools/shot.mjs)).
+
+**Changed:** a texture file can carry a new picture once its panel has been gone long enough, between 30s and 3.5 minutes, so a banner can reuse a pool of texture files rather than spend one per notice for a whole flight.
+The exact time, and whether anything other than time lets a texture go, are untested.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** [p04's run from 08:29:02](../../../experiments/areas/interface/results/p04-texture-rewrite-2026-10-04-08-29-02.txt) and its first two screenshots.
+
 ## 2026-10-04: A picture written over a texture file before the sim first loads it shows on the next spawn, and once loaded the sim keeps it
 
 **Asked:** can the floating panel's picture change while the sim runs, by writing over its texture file, so that Crosscheck's app could draw any notice and the banner show it?

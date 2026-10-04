@@ -1,0 +1,3 @@
+# build.mjs writes everything under package/, and MSBuild its objects under build/.
+package/
+build/

@@ -1,0 +1,299 @@
+{"t":1791097520582,"s":0.043,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791097520968,"s":0.429,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791097520968,"s":0.429,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791097520968,"s":0.429,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791097522301,"s":1.762,"kind":"module","text":"crosscheck-p02-panel is running: ALIVE went from 1761 to 1780 in 0.6s"}
+{"t":1791097522334,"s":1.795,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}
+{"t":1791097522334,"s":1.795,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791097522335,"s":1.796,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_ERRORS ← 0","object":0,"values":[0]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_FRAMES ← 0","object":0,"values":[0]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_GAUGE_FRAMES ← 0","object":0,"values":[0]}
+{"t":1791097522336,"s":1.797,"kind":"write","text":"L:CROSSCHECK_P02_GAUGE_CLICKS ← 0","object":0,"values":[0]}
+{"t":1791097522369,"s":1.83,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 51331072","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791097522369,"s":1.83,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 51331072","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791097522369,"s":1.83,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 51331072","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791097522369,"s":1.83,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 51331072","object":0,"values":[51331072]}
+{"t":1791097522369,"s":1.83,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791097526434,"s":5.895,"kind":"gauge","text":"the gauge doesn't run: L:CROSSCHECK_P02_GAUGE_FRAMES read 0 then 0","g0":0,"g1":0}
+{"t":1791097531460,"s":10.921,"kind":"gauge","text":"the inspector lists 33 pages, none of them ours","titles":["atlas","Shared variables","mainUi","notifications","transition","VLivery01 - BksqBaronLiveryRegistration","Electronic Flight Bag","Mission Steps","Toolbar","notifications","VLogic","//42 CP Overlay (Reqd.)","//42 Flow","VCockpit100 - WeatherSquare4000_int","VCockpit99 - BlackSquareTablet","VCockpit98 - WTT2","VCockpit97 - WTT1","VCockpit96 - EDM760_1","VCockpit95 - KAS297B_1","VCockpit94 - bksq_wradar1","VCockpit93 - KNS81_1","VCockpit92 - KDI572R","VCockpit91 - AS330","VCockpit90 - KR87A","VCockpit89 - KX155B_2","VCockpit88 - KX155B_1","VCockpit87 - KLN90B","VCockpit86 - GNS_DISABLED","VCockpit85 - GNS_DISABLED","VCockpit84 - WasmInstrument","VCockpit83 - WasmInstrument","VCockpit82 - GTN650_INT_2","VCockpit81 - GTN750_INT"]}
+{"t":1791097531624,"s":11.085,"kind":"shot","text":"gauge: 01-gauge.jpg, brightness 54","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-05-20\\01-gauge.jpg","width":2401,"height":1360,"brightness":53.8}
+{"t":1791097532135,"s":11.596,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 51331073","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791097532135,"s":11.596,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 51331073","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791097532135,"s":11.596,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 51331073","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791097532135,"s":11.596,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 51331073","object":0,"values":[51331073]}
+{"t":1791097532135,"s":11.596,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791097534741,"s":14.202,"kind":"shot","text":"baked: 02-baked.jpg, brightness 68","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-05-20\\02-baked.jpg","width":2401,"height":1360,"brightness":67.6}
+{"t":1791097643384,"s":122.845,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791097643385,"s":122.846,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791097643494,"s":122.955,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791097643494,"s":122.955,"kind":"phase","text":"1: clicks"}
+{"t":1791097647332,"s":126.793,"kind":"click","text":"the card, at card pixel 166, 99","px":165.67824951351213,"py":98.76902755303186,"where":"the card","x":-0.212,"y":0.1706,"width":2401,"height":1360,"foreground":true}
+{"t":1791097647603,"s":127.064,"kind":"click","text":"the card, at card pixel 74, 117","px":73.87856798737778,"py":117.38106719676657,"where":"the card","x":-0.2695,"y":0.1515,"width":2401,"height":1360,"foreground":true}
+{"t":1791097647865,"s":127.326,"kind":"click","text":"the card, at card pixel 100, 255","px":100.40118809811844,"py":254.62441198419228,"where":"the card","x":-0.2528,"y":0.0015,"width":2401,"height":1360,"foreground":true}
+{"t":1791097648119,"s":127.58,"kind":"click","text":"the card, at card pixel 98, 375","px":97.69580837235685,"py":374.6406705700749,"where":"the card","x":-0.2545,"y":-0.1294,"width":2401,"height":1360,"foreground":true}
+{"t":1791097648355,"s":127.816,"kind":"click","text":"the card, at card pixel 134, 417","px":133.59851849372228,"py":416.90964941521236,"where":"the card","x":-0.232,"y":-0.175,"width":2401,"height":1360,"foreground":true}
+{"t":1791097648600,"s":128.061,"kind":"click","text":"the card, at card pixel 213, 435","px":212.76954129382688,"py":435.4359507767492,"where":"the card","x":-0.1828,"y":-0.1941,"width":2401,"height":1360,"foreground":true}
+{"t":1791097648801,"s":128.262,"kind":"click","text":"the card, at card pixel 248, 395","px":247.77858702291473,"py":394.94195714223133,"where":"the card","x":-0.1612,"y":-0.15,"width":2401,"height":1360,"foreground":true}
+{"t":1791097648994,"s":128.455,"kind":"click","text":"the card, at card pixel 241, 289","px":241.12284167654218,"py":288.6860161203445,"where":"the card","x":-0.1653,"y":-0.0353,"width":2401,"height":1360,"foreground":true}
+{"t":1791097649239,"s":128.7,"kind":"click","text":"the card, at card pixel 261, 167","px":261.2666538694891,"py":167.38607590791284,"where":"the card","x":-0.1529,"y":0.0956,"width":2401,"height":1360,"foreground":true}
+{"t":1791097649475,"s":128.936,"kind":"click","text":"the card, at card pixel 322, 96","px":322.4207136980998,"py":96.04636805524464,"where":"the card","x":-0.1154,"y":0.1721,"width":2401,"height":1360,"foreground":true}
+{"t":1791097649659,"s":129.12,"kind":"click","text":"the card, at card pixel 383, 71","px":382.5462618903259,"py":71.15600514599552,"where":"the card","x":-0.0787,"y":0.1985,"width":2401,"height":1360,"foreground":true}
+{"t":1791097649895,"s":129.356,"kind":"click","text":"the card, at card pixel 391, 183","px":390.7541712982719,"py":183.44431647314823,"where":"the card","x":-0.0737,"y":0.0779,"width":2401,"height":1360,"foreground":true}
+{"t":1791097650131,"s":129.592,"kind":"click","text":"the card, at card pixel 403, 241","px":403.0720801457725,"py":240.907130917853,"where":"the card","x":-0.0662,"y":0.0162,"width":2401,"height":1360,"foreground":true}
+{"t":1791097650385,"s":129.846,"kind":"click","text":"the card, at card pixel 407, 401","px":407.1795522320806,"py":401.25829099224546,"where":"the card","x":-0.0637,"y":-0.1559,"width":2401,"height":1360,"foreground":true}
+{"t":1791097650638,"s":130.099,"kind":"click","text":"the card, at card pixel 463, 444","px":463.26433271471683,"py":443.90690549809005,"where":"the card","x":-0.0296,"y":-0.2015,"width":2401,"height":1360,"foreground":true}
+{"t":1791097650832,"s":130.293,"kind":"click","text":"the card, at card pixel 585, 437","px":585.4180836761795,"py":436.95171731812457,"where":"the card","x":0.0446,"y":-0.1941,"width":2401,"height":1360,"foreground":true}
+{"t":1791097651068,"s":130.529,"kind":"click","text":"the card, at card pixel 550, 322","px":549.7066716421352,"py":321.84361327988074,"where":"the card","x":0.0229,"y":-0.0706,"width":2401,"height":1360,"foreground":true}
+{"t":1791097651286,"s":130.747,"kind":"click","text":"the card, at card pixel 562, 209","px":562.0524148535352,"py":209.37358078932928,"where":"the card","x":0.0304,"y":0.05,"width":2401,"height":1360,"foreground":true}
+{"t":1791097651505,"s":130.966,"kind":"click","text":"the card, at card pixel 566, 118","px":566.1670238751788,"py":117.52545340789607,"where":"the card","x":0.0329,"y":0.1485,"width":2401,"height":1360,"foreground":true}
+{"t":1791097651707,"s":131.168,"kind":"click","text":"the card, at card pixel 678, 36","px":678.3431434130075,"py":35.73088606543098,"where":"the card","x":0.1012,"y":0.2368,"width":2401,"height":1360,"foreground":true}
+{"t":1791097651935,"s":131.396,"kind":"click","text":"the card, at card pixel 784, 75","px":784.337536629399,"py":74.89867211794837,"where":"the card","x":0.1662,"y":0.1956,"width":2401,"height":1360,"foreground":true}
+{"t":1791097652153,"s":131.614,"kind":"click","text":"the card, at card pixel 765, 127","px":765.3349070732872,"py":126.5257243788605,"where":"the card","x":0.1545,"y":0.1397,"width":2401,"height":1360,"foreground":true}
+{"t":1791097652380,"s":131.841,"kind":"click","text":"the card, at card pixel 736, 263","px":735.5402724522276,"py":262.86809100072304,"where":"the card","x":0.1362,"y":-0.0074,"width":2401,"height":1360,"foreground":true}
+{"t":1791097652581,"s":132.042,"kind":"click","text":"the card, at card pixel 727, 371","px":727.3853887403341,"py":370.6638928416162,"where":"the card","x":0.1312,"y":-0.1235,"width":2401,"height":1360,"foreground":true}
+{"t":1791097652765,"s":132.226,"kind":"click","text":"Start flying, at card pixel 742, 420","px":742.3857922699783,"py":419.7623610153445,"where":"Start flying","x":0.1404,"y":-0.1765,"width":2401,"height":1360,"foreground":true}
+{"t":1791097652931,"s":132.392,"kind":"click","text":"Start flying, at card pixel 821, 435","px":820.7683291658286,"py":435.33164945391,"where":"Start flying","x":0.1887,"y":-0.1941,"width":2401,"height":1360,"foreground":true}
+{"t":1791097653116,"s":132.577,"kind":"click","text":"Start flying, at card pixel 901, 444","px":901.1139104813674,"py":443.7870267087323,"where":"Start flying","x":0.2387,"y":-0.2044,"width":2401,"height":1360,"foreground":true}
+{"t":1791097653299,"s":132.76,"kind":"click","text":"Start flying, at card pixel 933, 393","px":932.8238893901566,"py":393.45235113796036,"where":"Start flying","x":0.2586,"y":-0.15,"width":2401,"height":1360,"foreground":true}
+{"t":1791097653509,"s":132.97,"kind":"click","text":"the card, at card pixel 929, 255","px":928.8493151170537,"py":254.62501499327317,"where":"the card","x":0.2561,"y":0.0015,"width":2401,"height":1360,"foreground":true}
+{"t":1791097653868,"s":133.329,"kind":"click","text":"the card, at card pixel 943, 97","px":943.4624732984996,"py":97.15878881925474,"where":"the card","x":0.2653,"y":0.1735,"width":2401,"height":1360,"foreground":true}
+{"t":1791097654236,"s":133.697,"kind":"click","text":"the card, at card pixel 916, 60","px":915.6347972020217,"py":60.355138321916485,"where":"the card","x":0.2478,"y":0.2132,"width":2401,"height":1360,"foreground":true}
+{"t":1791097654752,"s":134.213,"kind":"click","text":"the card, at card pixel 920, 220","px":919.618107095235,"py":219.58080391543396,"where":"the card","x":0.2503,"y":0.0397,"width":2401,"height":1360,"foreground":true}
+{"t":1791097667035,"s":146.496,"kind":"phase","text":"1, clicks: 32 clicks with the field of view at 45.21479°: 4 on Start flying, 28 on the rest of the card, 0 off it; the gauge counted 0 presses","hits":[{"px":165.67824951351213,"py":98.76902755303186,"where":"the card","x":-0.212,"y":0.1706,"width":2401,"height":1360,"foreground":true},{"px":73.87856798737778,"py":117.38106719676657,"where":"the card","x":-0.2695,"y":0.1515,"width":2401,"height":1360,"foreground":true},{"px":100.40118809811844,"py":254.62441198419228,"where":"the card","x":-0.2528,"y":0.0015,"width":2401,"height":1360,"foreground":true},{"px":97.69580837235685,"py":374.6406705700749,"where":"the card","x":-0.2545,"y":-0.1294,"width":2401,"height":1360,"foreground":true},{"px":133.59851849372228,"py":416.90964941521236,"where":"the card","x":-0.232,"y":-0.175,"width":2401,"height":1360,"foreground":true},{"px":212.76954129382688,"py":435.4359507767492,"where":"the card","x":-0.1828,"y":-0.1941,"width":2401,"height":1360,"foreground":true},{"px":247.77858702291473,"py":394.94195714223133,"where":"the card","x":-0.1612,"y":-0.15,"width":2401,"height":1360,"foreground":true},{"px":241.12284167654218,"py":288.6860161203445,"where":"the card","x":-0.1653,"y":-0.0353,"width":2401,"height":1360,"foreground":true},{"px":261.2666538694891,"py":167.38607590791284,"where":"the card","x":-0.1529,"y":0.0956,"width":2401,"height":1360,"foreground":true},{"px":322.4207136980998,"py":96.04636805524464,"where":"the card","x":-0.1154,"y":0.1721,"width":2401,"height":1360,"foreground":true},{"px":382.5462618903259,"py":71.15600514599552,"where":"the card","x":-0.0787,"y":0.1985,"width":2401,"height":1360,"foreground":true},{"px":390.7541712982719,"py":183.44431647314823,"where":"the card","x":-0.0737,"y":0.0779,"width":2401,"height":1360,"foreground":true},{"px":403.0720801457725,"py":240.907130917853,"where":"the card","x":-0.0662,"y":0.0162,"width":2401,"height":1360,"foreground":true},{"px":407.1795522320806,"py":401.25829099224546,"where":"the card","x":-0.0637,"y":-0.1559,"width":2401,"height":1360,"foreground":true},{"px":463.26433271471683,"py":443.90690549809005,"where":"the card","x":-0.0296,"y":-0.2015,"width":2401,"height":1360,"foreground":true},{"px":585.4180836761795,"py":436.95171731812457,"where":"the card","x":0.0446,"y":-0.1941,"width":2401,"height":1360,"foreground":true},{"px":549.7066716421352,"py":321.84361327988074,"where":"the card","x":0.0229,"y":-0.0706,"width":2401,"height":1360,"foreground":true},{"px":562.0524148535352,"py":209.37358078932928,"where":"the card","x":0.0304,"y":0.05,"width":2401,"height":1360,"foreground":true},{"px":566.1670238751788,"py":117.52545340789607,"where":"the card","x":0.0329,"y":0.1485,"width":2401,"height":1360,"foreground":true},{"px":678.3431434130075,"py":35.73088606543098,"where":"the card","x":0.1012,"y":0.2368,"width":2401,"height":1360,"foreground":true},{"px":784.337536629399,"py":74.89867211794837,"where":"the card","x":0.1662,"y":0.1956,"width":2401,"height":1360,"foreground":true},{"px":765.3349070732872,"py":126.5257243788605,"where":"the card","x":0.1545,"y":0.1397,"width":2401,"height":1360,"foreground":true},{"px":735.5402724522276,"py":262.86809100072304,"where":"the card","x":0.1362,"y":-0.0074,"width":2401,"height":1360,"foreground":true},{"px":727.3853887403341,"py":370.6638928416162,"where":"the card","x":0.1312,"y":-0.1235,"width":2401,"height":1360,"foreground":true},{"px":742.3857922699783,"py":419.7623610153445,"where":"Start flying","x":0.1404,"y":-0.1765,"width":2401,"height":1360,"foreground":true},{"px":820.7683291658286,"py":435.33164945391,"where":"Start flying","x":0.1887,"y":-0.1941,"width":2401,"height":1360,"foreground":true},{"px":901.1139104813674,"py":443.7870267087323,"where":"Start flying","x":0.2387,"y":-0.2044,"width":2401,"height":1360,"foreground":true},{"px":932.8238893901566,"py":393.45235113796036,"where":"Start flying","x":0.2586,"y":-0.15,"width":2401,"height":1360,"foreground":true},{"px":928.8493151170537,"py":254.62501499327317,"where":"the card","x":0.2561,"y":0.0015,"width":2401,"height":1360,"foreground":true},{"px":943.4624732984996,"py":97.15878881925474,"where":"the card","x":0.2653,"y":0.1735,"width":2401,"height":1360,"foreground":true},{"px":915.6347972020217,"py":60.355138321916485,"where":"the card","x":0.2478,"y":0.2132,"width":2401,"height":1360,"foreground":true},{"px":919.618107095235,"py":219.58080391543396,"where":"the card","x":0.2503,"y":0.0397,"width":2401,"height":1360,"foreground":true}],"gaugeBefore":0,"gaugeAfter":0}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791097669011,"s":148.472,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791097669120,"s":148.581,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791097669120,"s":148.581,"kind":"phase","text":"2: locked, aircraft led 1 frame"}
+{"t":1791097669135,"s":148.596,"kind":"look","text":"","CAM_YAW":11.562414873243448,"CAM_PITCH":-5.495759317054905,"PANEL_YAW":11.562431948716371,"PANEL_PITCH":-5.49704253884522}
+{"t":1791097669368,"s":148.829,"kind":"look","text":"","CAM_YAW":11.562380722297597,"CAM_PITCH":-5.4916569346846655,"PANEL_YAW":11.562380722297597,"PANEL_PITCH":-5.4916569346846655}
+{"t":1791097669601,"s":149.062,"kind":"look","text":"","CAM_YAW":11.562380722297597,"CAM_PITCH":-5.486229922502267,"PANEL_YAW":11.562380722297597,"PANEL_PITCH":-5.486229922502267}
+{"t":1791097669835,"s":149.296,"kind":"look","text":"","CAM_YAW":11.562329495878823,"CAM_PITCH":-5.479582014005729,"PANEL_YAW":11.562329495878823,"PANEL_PITCH":-5.479582014005729}
+{"t":1791097670068,"s":149.529,"kind":"look","text":"","CAM_YAW":11.562295344932972,"CAM_PITCH":-5.471780230426282,"PANEL_YAW":11.562295344932972,"PANEL_PITCH":-5.471780230426282}
+{"t":1791097670273,"s":149.734,"kind":"phase","text":"2, locked, aircraft led 1 frame: 1s; the look ranged 11.562295° to 11.562415° in yaw and -5.495759° to -5.47178° in pitch, and the panel sat 0.000257° from the look on average"}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791097672486,"s":151.947,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791097672595,"s":152.056,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791097672595,"s":152.056,"kind":"phase","text":"3: locked, look led 1 frame too"}
+{"t":1791097672601,"s":152.062,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.3750160866810655,"PANEL_YAW":11.561869311883493,"PANEL_PITCH":-5.377385308549413}
+{"t":1791097672835,"s":152.296,"kind":"look","text":"","CAM_YAW":11.561835160937642,"CAM_PITCH":-5.370347652383361,"PANEL_YAW":11.561818085464717,"PANEL_PITCH":-5.369763671209325}
+{"t":1791097673068,"s":152.529,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.367135755926163,"PANEL_YAW":11.561869311883493,"PANEL_PITCH":-5.366734055425601}
+{"t":1791097673302,"s":152.763,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365382958630408,"PANEL_YAW":11.561852236410568,"PANEL_PITCH":-5.3652369633368995}
+{"t":1791097673535,"s":152.996,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.365163965690145,"PANEL_YAW":11.561886387356418,"PANEL_PITCH":-5.365236963336899}
+{"t":1791097673769,"s":153.23,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.3664420648385835,"PANEL_YAW":11.561920538302266,"PANEL_PITCH":-5.366734055425602}
+{"t":1791097674002,"s":153.463,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.3692893999488325,"PANEL_YAW":11.561835160937644,"PANEL_PITCH":-5.369800383476114}
+{"t":1791097674235,"s":153.696,"kind":"look","text":"","CAM_YAW":11.561920538302267,"CAM_PITCH":-5.373594126673233,"PANEL_YAW":11.561937613775193,"PANEL_PITCH":-5.374250251720378}
+{"t":1791097674469,"s":153.93,"kind":"look","text":"","CAM_YAW":11.561954689248116,"CAM_PITCH":-5.379170976130548,"PANEL_YAW":11.561988840193965,"PANEL_PITCH":-5.379972669584378}
+{"t":1791097674702,"s":154.163,"kind":"look","text":"","CAM_YAW":11.561988840193967,"CAM_PITCH":-5.38605153794569,"PANEL_YAW":11.561988840193967,"PANEL_PITCH":-5.387106802172457}
+{"t":1791097674935,"s":154.396,"kind":"look","text":"","CAM_YAW":11.562040066612742,"CAM_PITCH":-5.393940833323878,"PANEL_YAW":11.56207421755859,"PANEL_PITCH":-5.395103673030073}
+{"t":1791097675169,"s":154.63,"kind":"look","text":"","CAM_YAW":11.562040066612742,"CAM_PITCH":-5.402797881130092,"PANEL_YAW":11.56200591566689,"PANEL_PITCH":-5.4041400133019994}
+{"t":1791097675402,"s":154.863,"kind":"look","text":"","CAM_YAW":11.562125443977367,"CAM_PITCH":-5.412220127090125,"PANEL_YAW":11.562159594923216,"PANEL_PITCH":-5.413560124827916}
+{"t":1791097675635,"s":155.096,"kind":"look","text":"","CAM_YAW":11.562159594923218,"CAM_PITCH":-5.422167870729425,"PANEL_YAW":11.562193745869068,"PANEL_PITCH":-5.423613736399353}
+{"t":1791097675868,"s":155.329,"kind":"look","text":"","CAM_YAW":11.562209967568347,"CAM_PITCH":-5.432314116741479,"PANEL_YAW":11.562227043041272,"PANEL_PITCH":-5.433757421090466}
+{"t":1791097676102,"s":155.563,"kind":"look","text":"","CAM_YAW":11.562261193987121,"CAM_PITCH":-5.442441579733315,"PANEL_YAW":11.56229534493297,"PANEL_PITCH":-5.443846037381399}
+{"t":1791097676335,"s":155.796,"kind":"look","text":"","CAM_YAW":11.562278269460046,"CAM_PITCH":-5.452405971958718,"PANEL_YAW":11.562278269460046,"PANEL_PITCH":-5.453807441399039}
+{"t":1791097676569,"s":156.03,"kind":"look","text":"","CAM_YAW":11.562329495878823,"CAM_PITCH":-5.461886274526695,"PANEL_YAW":11.562329495878823,"PANEL_PITCH":-5.463213892546617}
+{"t":1791097676802,"s":156.263,"kind":"look","text":"","CAM_YAW":11.562346571351746,"CAM_PITCH":-5.470705756292475,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.4719240912856755}
+{"t":1791097677035,"s":156.496,"kind":"look","text":"","CAM_YAW":11.562380722297597,"CAM_PITCH":-5.478544679025533,"PANEL_YAW":11.562380722297597,"PANEL_PITCH":-5.479582014005728}
+{"t":1791097677269,"s":156.73,"kind":"look","text":"","CAM_YAW":11.562431948716371,"CAM_PITCH":-5.485444023860892,"PANEL_YAW":11.562449024189295,"PANEL_PITCH":-5.486372929588013}
+{"t":1791097677502,"s":156.963,"kind":"look","text":"","CAM_YAW":11.562414873243448,"CAM_PITCH":-5.4910503285090035,"PANEL_YAW":11.562380722297599,"PANEL_PITCH":-5.491835800263555}
+{"t":1791097677735,"s":157.196,"kind":"look","text":"","CAM_YAW":11.562431948716371,"CAM_PITCH":-5.495224427865527,"PANEL_YAW":11.562414873243446,"PANEL_PITCH":-5.495688026955442}
+{"t":1791097677969,"s":157.43,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.498076458730831,"PANEL_YAW":11.562431948716371,"PANEL_PITCH":-5.498361619128679}
+{"t":1791097678202,"s":157.663,"kind":"look","text":"","CAM_YAW":11.562431948716371,"CAM_PITCH":-5.499395112127467,"PANEL_YAW":11.562431948716371,"PANEL_PITCH":-5.49946640222693}
+{"t":1791097678435,"s":157.896,"kind":"look","text":"","CAM_YAW":11.562431948716371,"CAM_PITCH":-5.49918124182908,"PANEL_YAW":11.562431948716371,"PANEL_PITCH":-5.4990386616301565}
+{"t":1791097678669,"s":158.13,"kind":"look","text":"","CAM_YAW":11.562431948716371,"CAM_PITCH":-5.497399416229354,"PANEL_YAW":11.562449024189295,"PANEL_PITCH":-5.497007534125724}
+{"t":1791097678902,"s":158.363,"kind":"look","text":"","CAM_YAW":11.562414873243448,"CAM_PITCH":-5.494190081093094,"PANEL_YAW":11.562449024189299,"PANEL_PITCH":-5.4936193334105745}
+{"t":1791097679135,"s":158.596,"kind":"look","text":"","CAM_YAW":11.562363646824672,"CAM_PITCH":-5.489515243493043,"PANEL_YAW":11.562363646824672,"PANEL_PITCH":-5.488729771738492}
+{"t":1791097679368,"s":158.829,"kind":"look","text":"","CAM_YAW":11.562363646824672,"CAM_PITCH":-5.483479063814045,"PANEL_YAW":11.562380722297597,"PANEL_PITCH":-5.482550158086923}
+{"t":1791097679602,"s":159.063,"kind":"look","text":"","CAM_YAW":11.562278269460046,"CAM_PITCH":-5.476362433585714,"PANEL_YAW":11.562244118514196,"PANEL_PITCH":-5.475253381619233}
+{"t":1791097679835,"s":159.296,"kind":"look","text":"","CAM_YAW":11.562261193987121,"CAM_PITCH":-5.468161510826644,"PANEL_YAW":11.562244118514196,"PANEL_PITCH":-5.466907317340301}
+{"t":1791097680069,"s":159.53,"kind":"look","text":"","CAM_YAW":11.562209967568347,"CAM_PITCH":-5.4591230361206025,"PANEL_YAW":11.562209967568347,"PANEL_PITCH":-5.4577591327207156}
+{"t":1791097680302,"s":159.763,"kind":"look","text":"","CAM_YAW":11.562176670396143,"CAM_PITCH":-5.449494176938177,"PANEL_YAW":11.562176670396143,"PANEL_PITCH":-5.448055995231066}
+{"t":1791097680394,"s":159.855,"kind":"shot","text":"phase-3: 03-phase-3.jpg, brightness 91","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-05-20\\03-phase-3.jpg","width":2401,"height":1360,"brightness":90.8}
+{"t":1791097680635,"s":160.096,"kind":"look","text":"","CAM_YAW":11.562125443977367,"CAM_PITCH":-5.43505515703277,"PANEL_YAW":11.56214251945029,"PANEL_PITCH":-5.433577274851109}
+{"t":1791097680869,"s":160.33,"kind":"look","text":"","CAM_YAW":11.562074217558592,"CAM_PITCH":-5.424949892155736,"PANEL_YAW":11.562074217558592,"PANEL_PITCH":-5.423504880259455}
+{"t":1791097681102,"s":160.563,"kind":"look","text":"","CAM_YAW":11.562040066612742,"CAM_PITCH":-5.414970985778347,"PANEL_YAW":11.562022991139816,"PANEL_PITCH":-5.413559697941094}
+{"t":1791097681335,"s":160.796,"kind":"look","text":"","CAM_YAW":11.561971764721042,"CAM_PITCH":-5.405336150180398,"PANEL_YAW":11.561954689248116,"PANEL_PITCH":-5.404067442542068}
+{"t":1791097681569,"s":161.03,"kind":"look","text":"","CAM_YAW":11.561920538302267,"CAM_PITCH":-5.396337802835729,"PANEL_YAW":11.561886387356418,"PANEL_PITCH":-5.3951032461432495}
+{"t":1791097681802,"s":161.263,"kind":"look","text":"","CAM_YAW":11.561920538302267,"CAM_PITCH":-5.388161212625578,"PANEL_YAW":11.561937613775193,"PANEL_PITCH":-5.387033804525703}
+{"t":1791097682035,"s":161.496,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.380992075318003,"PANEL_YAW":11.561869311883493,"PANEL_PITCH":-5.380008954964345}
+{"t":1791097682269,"s":161.73,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.3750160866810655,"PANEL_YAW":11.561835160937642,"PANEL_PITCH":-5.374177254073624}
+{"t":1791097682502,"s":161.963,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.370347652383361,"PANEL_YAW":11.561869311883493,"PANEL_PITCH":-5.369763671209325}
+{"t":1791097682735,"s":162.196,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.367099043659374,"PANEL_YAW":11.561869311883493,"PANEL_PITCH":-5.366733628538779}
+{"t":1791097682969,"s":162.43,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365382958630408,"PANEL_YAW":11.561869311883493,"PANEL_PITCH":-5.3652369633368995}
+{"t":1791097683202,"s":162.663,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.36520025107011,"PANEL_YAW":11.561886387356418,"PANEL_PITCH":-5.36530953409683}
+{"t":1791097683435,"s":162.896,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.366515062485338,"PANEL_YAW":11.561920538302266,"PANEL_PITCH":-5.366807053072357}
+{"t":1791097683669,"s":163.13,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.369326112215622,"PANEL_YAW":11.56190346282934,"PANEL_PITCH":-5.369800810362938}
+{"t":1791097683902,"s":163.363,"kind":"look","text":"","CAM_YAW":11.561920538302267,"CAM_PITCH":-5.373594126673233,"PANEL_YAW":11.561937613775193,"PANEL_PITCH":-5.374286963987167}
+{"t":1791097684135,"s":163.596,"kind":"look","text":"","CAM_YAW":11.561937613775193,"CAM_PITCH":-5.379170976130548,"PANEL_YAW":11.561937613775193,"PANEL_PITCH":-5.3800456672311325}
+{"t":1791097684336,"s":163.797,"kind":"look","text":"","CAM_YAW":11.561988840193967,"CAM_PITCH":-5.384959988338958,"PANEL_YAW":11.562005915666893,"PANEL_PITCH":-5.385942681805793}
+{"t":1791097684569,"s":164.03,"kind":"look","text":"","CAM_YAW":11.562005915666893,"CAM_PITCH":-5.392777993617683,"PANEL_YAW":11.561988840193967,"PANEL_PITCH":-5.393940833323877}
+{"t":1791097684802,"s":164.263,"kind":"look","text":"","CAM_YAW":11.562057142085667,"CAM_PITCH":-5.401455748958185,"PANEL_YAW":11.562057142085667,"PANEL_PITCH":-5.402725737256985}
+{"t":1791097685035,"s":164.496,"kind":"look","text":"","CAM_YAW":11.562125443977367,"CAM_PITCH":-5.410807558592401,"PANEL_YAW":11.562159594923216,"PANEL_PITCH":-5.412147556330193}
+{"t":1791097685269,"s":164.73,"kind":"look","text":"","CAM_YAW":11.562159594923218,"CAM_PITCH":-5.420758290439464,"PANEL_YAW":11.562176670396143,"PANEL_PITCH":-5.422204582996214}
+{"t":1791097685502,"s":164.963,"kind":"look","text":"","CAM_YAW":11.562209967568347,"CAM_PITCH":-5.430907097772456,"PANEL_YAW":11.56224326474055,"PANEL_PITCH":-5.432350829008268}
+{"t":1791097685735,"s":165.196,"kind":"look","text":"","CAM_YAW":11.562244118514197,"CAM_PITCH":-5.441108839071517,"PANEL_YAW":11.562261193987123,"PANEL_PITCH":-5.442585440592709}
+{"t":1791097685969,"s":165.43,"kind":"look","text":"","CAM_YAW":11.562261193987121,"CAM_PITCH":-5.451040361011538,"PANEL_YAW":11.562244118514196,"PANEL_PITCH":-5.452442684225506}
+{"t":1791097686202,"s":165.663,"kind":"look","text":"","CAM_YAW":11.562312420405897,"CAM_PITCH":-5.460594514999917,"PANEL_YAW":11.562312420405897,"PANEL_PITCH":-5.461922559906661}
+{"t":1791097686435,"s":165.896,"kind":"look","text":"","CAM_YAW":11.562346571351746,"CAM_PITCH":-5.469487421299274,"PANEL_YAW":11.562380722297595,"PANEL_PITCH":-5.470741614785617}
+{"t":1791097686669,"s":166.13,"kind":"look","text":"","CAM_YAW":11.562380722297597,"CAM_PITCH":-5.477507344045338,"PANEL_YAW":11.562397797770522,"PANEL_PITCH":-5.478544679025534}
+{"t":1791097686902,"s":166.363,"kind":"look","text":"","CAM_YAW":11.562397797770522,"CAM_PITCH":-5.484515118133771,"PANEL_YAW":11.562380722297597,"PANEL_PITCH":-5.485515740847179}
+{"t":1791097687135,"s":166.596,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.490264856754452,"PANEL_YAW":11.562449024189297,"PANEL_PITCH":-5.491014470015861}
+{"t":1791097687369,"s":166.83,"kind":"look","text":"","CAM_YAW":11.562466099662222,"CAM_PITCH":-5.494796260381933,"PANEL_YAW":11.562466099662222,"PANEL_PITCH":-5.495367008064452}
+{"t":1791097687602,"s":167.063,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.4978625884324455,"PANEL_YAW":11.562431948716371,"PANEL_PITCH":-5.498219038929756}
+{"t":1791097687817,"s":167.278,"kind":"phase","text":"3, locked, look led 1 frame too: 15s; the look ranged 11.561835° to 11.562466° in yaw and -5.499395° to -5.365164° in pitch, and the panel sat 0.000934° from the look on average"}
+{"t":1791097690266,"s":169.727,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791097690266,"s":169.727,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0.25","object":0,"values":[0.25]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791097690267,"s":169.728,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791097690375,"s":169.836,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 2","object":0,"values":[2]}
+{"t":1791097690375,"s":169.836,"kind":"phase","text":"4: lazy, 0.25s"}
+{"t":1791097690402,"s":169.863,"kind":"look","text":"","CAM_YAW":11.562074217558592,"CAM_PITCH":-5.430726524646274,"PANEL_YAW":11.56209129303152,"PANEL_PITCH":-5.435163586285845}
+{"t":1791097690635,"s":170.096,"kind":"look","text":"","CAM_YAW":11.562022991139818,"CAM_PITCH":-5.420577290426459,"PANEL_YAW":11.562061645924185,"PANEL_PITCH":-5.426185207093647}
+{"t":1791097690870,"s":170.331,"kind":"look","text":"","CAM_YAW":11.561988840193967,"CAM_PITCH":-5.410771700099259,"PANEL_YAW":11.562036998398627,"PANEL_PITCH":-5.418911092493443}
+{"t":1791097691102,"s":170.563,"kind":"look","text":"","CAM_YAW":11.561954689248116,"CAM_PITCH":-5.4013831781982535,"PANEL_YAW":11.561998766548552,"PANEL_PITCH":-5.410281198735938}
+{"t":1791097691335,"s":170.796,"kind":"look","text":"","CAM_YAW":11.561920538302267,"CAM_PITCH":-5.392741708237717,"PANEL_YAW":11.561965893815385,"PANEL_PITCH":-5.401449878994331}
+{"t":1791097691569,"s":171.03,"kind":"look","text":"","CAM_YAW":11.561903462829342,"CAM_PITCH":-5.384886990692203,"PANEL_YAW":11.56193168064804,"PANEL_PITCH":-5.393039348960698}
+{"t":1791097691802,"s":171.263,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.378223714270033,"PANEL_YAW":11.561901392126254,"PANEL_PITCH":-5.385432070664222}
+{"t":1791097692035,"s":171.496,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.372828291712546,"PANEL_YAW":11.561885025794195,"PANEL_PITCH":-5.37890408960858}
+{"t":1791097692269,"s":171.73,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.368742131041586,"PANEL_YAW":11.561866500372526,"PANEL_PITCH":-5.373562482725896}
+{"t":1791097692502,"s":171.963,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.366150074251565,"PANEL_YAW":11.561859328832893,"PANEL_PITCH":-5.369561739129287}
+{"t":1791097692735,"s":172.196,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365090968043391,"PANEL_YAW":11.561850302476236,"PANEL_PITCH":-5.367010354889713}
+{"t":1791097692969,"s":172.43,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365528953923917,"PANEL_YAW":11.561850047133802,"PANEL_PITCH":-5.365944899293682}
+{"t":1791097693202,"s":172.663,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.367537456426724,"PANEL_YAW":11.561864727874932,"PANEL_PITCH":-5.366389810765004}
+{"t":1791097693436,"s":172.897,"kind":"look","text":"","CAM_YAW":11.561903462829342,"CAM_PITCH":-5.370931633557397,"PANEL_YAW":11.561877322284516,"PANEL_PITCH":-5.368352970418682}
+{"t":1791097693669,"s":173.13,"kind":"look","text":"","CAM_YAW":11.561920538302267,"CAM_PITCH":-5.375818207021719,"PANEL_YAW":11.561904451743542,"PANEL_PITCH":-5.371795500246446}
+{"t":1791097693902,"s":173.363,"kind":"look","text":"","CAM_YAW":11.561937613775193,"CAM_PITCH":-5.381975195671662,"PANEL_YAW":11.561925248279852,"PANEL_PITCH":-5.37661254445803}
+{"t":1791097694135,"s":173.596,"kind":"look","text":"","CAM_YAW":11.562005915666893,"CAM_PITCH":-5.3893974768653505,"PANEL_YAW":11.561961335150457,"PANEL_PITCH":-5.382733662496516}
+{"t":1791097694369,"s":173.83,"kind":"look","text":"","CAM_YAW":11.562040066612742,"CAM_PITCH":-5.397681215668106,"PANEL_YAW":11.56200216689173,"PANEL_PITCH":-5.389977868645362}
+{"t":1791097694602,"s":174.063,"kind":"look","text":"","CAM_YAW":11.562057142085667,"CAM_PITCH":-5.406822570098522,"PANEL_YAW":11.56203806392372,"PANEL_PITCH":-5.398198055131378}
+{"t":1791097694836,"s":174.297,"kind":"look","text":"","CAM_YAW":11.562125443977367,"CAM_PITCH":-5.41652698824864,"PANEL_YAW":11.562079783834776,"PANEL_PITCH":-5.407204227511091}
+{"t":1791097695069,"s":174.53,"kind":"look","text":"","CAM_YAW":11.562176670396143,"CAM_PITCH":-5.426539191798233,"PANEL_YAW":11.56213119920678,"PANEL_PITCH":-5.416764227421478}
+{"t":1791097695302,"s":174.763,"kind":"look","text":"","CAM_YAW":11.562192892095421,"CAM_PITCH":-5.43671318545379,"PANEL_YAW":11.562171016376137,"PANEL_PITCH":-5.426694552246382}
+{"t":1791097695536,"s":174.997,"kind":"look","text":"","CAM_YAW":11.562278269460046,"CAM_PITCH":-5.446724535229737,"PANEL_YAW":11.562221834719931,"PANEL_PITCH":-5.436726085713206}
+{"t":1791097695769,"s":175.23,"kind":"look","text":"","CAM_YAW":11.562295344932972,"CAM_PITCH":-5.456645811886003,"PANEL_YAW":11.562259021442317,"PANEL_PITCH":-5.446706568884247}
+{"t":1791097696002,"s":175.463,"kind":"look","text":"","CAM_YAW":11.562329495878823,"CAM_PITCH":-5.465795704052882,"PANEL_YAW":11.562293935492455,"PANEL_PITCH":-5.456363220800714}
+{"t":1791097696203,"s":175.664,"kind":"look","text":"","CAM_YAW":11.562363646824672,"CAM_PITCH":-5.47303357013898,"PANEL_YAW":11.562321893946423,"PANEL_PITCH":-5.464167179095068}
+{"t":1791097696435,"s":175.896,"kind":"look","text":"","CAM_YAW":11.562414873243448,"CAM_PITCH":-5.4806547805922445,"PANEL_YAW":11.562360901436767,"PANEL_PITCH":-5.472577989972025}
+{"t":1791097696669,"s":176.13,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.487087111243103,"PANEL_YAW":11.56239888724804,"PANEL_PITCH":-5.480059201279604}
+{"t":1791097696902,"s":176.363,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.492370689452931,"PANEL_YAW":11.562415707442659,"PANEL_PITCH":-5.486464420911562}
+{"t":1791097697135,"s":176.596,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.496222916144819,"PANEL_YAW":11.562433878970003,"PANEL_PITCH":-5.491635401186452}
+{"t":1791097697369,"s":176.83,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.498646779526527,"PANEL_YAW":11.562445569346613,"PANEL_PITCH":-5.495445117327013}
+{"t":1791097697602,"s":177.063,"kind":"look","text":"","CAM_YAW":11.562449024189297,"CAM_PITCH":-5.499502260720071,"PANEL_YAW":11.562446990786388,"PANEL_PITCH":-5.497802369765276}
+{"t":1791097697835,"s":177.296,"kind":"look","text":"","CAM_YAW":11.562431948716371,"CAM_PITCH":-5.498824791331771,"PANEL_YAW":11.56244154847976,"PANEL_PITCH":-5.498652460994135}
+{"t":1791097698069,"s":177.53,"kind":"look","text":"","CAM_YAW":11.562414873243448,"CAM_PITCH":-5.496650656741591,"PANEL_YAW":11.562433121199529,"PANEL_PITCH":-5.4979776252943635}
+{"t":1791097698160,"s":177.621,"kind":"shot","text":"phase-4: 04-phase-4.jpg, brightness 91","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-05-20\\04-phase-4.jpg","width":2401,"height":1360,"brightness":90.8}
+{"t":1791097698402,"s":177.863,"kind":"look","text":"","CAM_YAW":11.562397797770522,"CAM_PITCH":-5.490943179916399,"PANEL_YAW":11.56240489017441,"PANEL_PITCH":-5.494404178110728}
+{"t":1791097698635,"s":178.096,"kind":"look","text":"","CAM_YAW":11.562363646824672,"CAM_PITCH":-5.485336875268288,"PANEL_YAW":11.562380590206764,"PANEL_PITCH":-5.490167602461261}
+{"t":1791097698869,"s":178.33,"kind":"look","text":"","CAM_YAW":11.562295344932972,"CAM_PITCH":-5.478473388926071,"PANEL_YAW":11.562348573197717,"PANEL_PITCH":-5.48459295961038}
+{"t":1791097699102,"s":178.563,"kind":"look","text":"","CAM_YAW":11.562261193987121,"CAM_PITCH":-5.470598180813047,"PANEL_YAW":11.562308515457602,"PANEL_PITCH":-5.477821339741961}
+{"t":1791097699335,"s":178.796,"kind":"look","text":"","CAM_YAW":11.562227043041272,"CAM_PITCH":-5.461814557540411,"PANEL_YAW":11.562267694947076,"PANEL_PITCH":-5.470009991156115}
+{"t":1791097699569,"s":179.03,"kind":"look","text":"","CAM_YAW":11.562176670396143,"CAM_PITCH":-5.45229839647929,"PANEL_YAW":11.562230903661346,"PANEL_PITCH":-5.461325259800302}
+{"t":1791097699802,"s":179.263,"kind":"look","text":"","CAM_YAW":11.562159594923218,"CAM_PITCH":-5.442369435860207,"PANEL_YAW":11.562190938800303,"PANEL_PITCH":-5.451968919053428}
+{"t":1791097700035,"s":179.496,"kind":"look","text":"","CAM_YAW":11.562125443977367,"CAM_PITCH":-5.432133543615297,"PANEL_YAW":11.562145890216346,"PANEL_PITCH":-5.442130388554103}
+{"t":1791097700269,"s":179.73,"kind":"look","text":"","CAM_YAW":11.562057142085667,"CAM_PITCH":-5.422059441476351,"PANEL_YAW":11.562096114907616,"PANEL_PITCH":-5.43210984603125}
+{"t":1791097700502,"s":179.963,"kind":"look","text":"","CAM_YAW":11.562005915666893,"CAM_PITCH":-5.4120749855702615,"PANEL_YAW":11.562052001294365,"PANEL_PITCH":-5.422093032943104}
+{"t":1791097700736,"s":180.197,"kind":"look","text":"","CAM_YAW":11.561971764721042,"CAM_PITCH":-5.402652739610229,"PANEL_YAW":11.56201230006693,"PANEL_PITCH":-5.412302159374126}
+{"t":1791097700969,"s":180.43,"kind":"look","text":"","CAM_YAW":11.561937613775193,"CAM_PITCH":-5.3939045479439125,"PANEL_YAW":11.561975212630031,"PANEL_PITCH":-5.402986113931947}
+{"t":1791097701202,"s":180.663,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.3859422549189695,"PANEL_YAW":11.561939887321293,"PANEL_PITCH":-5.394296146162382}
+{"t":1791097701436,"s":180.897,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.379097978483794,"PANEL_YAW":11.561910435457003,"PANEL_PITCH":-5.3864969721216305}
+{"t":1791097701669,"s":181.13,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.373521129026479,"PANEL_YAW":11.561889023966193,"PANEL_PITCH":-5.379770490847303}
+{"t":1791097701902,"s":181.363,"kind":"look","text":"","CAM_YAW":11.561835160937642,"CAM_PITCH":-5.3692893999488325,"PANEL_YAW":11.561864672824926,"PANEL_PITCH":-5.374259295751643}
+{"t":1791097702135,"s":181.596,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.366478350218549,"PANEL_YAW":11.5618574347139,"PANEL_PITCH":-5.370063715959251}
+{"t":1791097702369,"s":181.83,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365090968043391,"PANEL_YAW":11.561849167178515,"PANEL_PITCH":-5.36727639665979}
+{"t":1791097702602,"s":182.063,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365382958630408,"PANEL_YAW":11.561853374230628,"PANEL_PITCH":-5.366002640446137}
+{"t":1791097702835,"s":182.296,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.367135755926163,"PANEL_YAW":11.561859469915458,"PANEL_PITCH":-5.366244284076025}
+{"t":1791097703069,"s":182.53,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.370384364650151,"PANEL_YAW":11.561872184914247,"PANEL_PITCH":-5.368004964171949}
+{"t":1791097703302,"s":182.763,"kind":"look","text":"","CAM_YAW":11.561903462829342,"CAM_PITCH":-5.375089084327819,"PANEL_YAW":11.561893207104742,"PANEL_PITCH":-5.371239799470338}
+{"t":1791097703535,"s":182.996,"kind":"look","text":"","CAM_YAW":11.561937613775193,"CAM_PITCH":-5.3810646460779346,"PANEL_YAW":11.56191853591687,"PANEL_PITCH":-5.375853641644013}
+{"t":1791097703769,"s":183.23,"kind":"look","text":"","CAM_YAW":11.561971764721042,"CAM_PITCH":-5.388270495652298,"PANEL_YAW":11.561953851685422,"PANEL_PITCH":-5.381800228024875}
+{"t":1791097704002,"s":183.463,"kind":"look","text":"","CAM_YAW":11.562005915666893,"CAM_PITCH":-5.39644708586245,"PANEL_YAW":11.561987188959836,"PANEL_PITCH":-5.3888850937824575}
+{"t":1791097704235,"s":183.696,"kind":"look","text":"","CAM_YAW":11.562074217558592,"CAM_PITCH":-5.40548129170026,"PANEL_YAW":11.562033630658817,"PANEL_PITCH":-5.396984055034345}
+{"t":1791097704469,"s":183.93,"kind":"look","text":"","CAM_YAW":11.562108368504443,"CAM_PITCH":-5.415007271158313,"PANEL_YAW":11.56207209908481,"PANEL_PITCH":-5.40586451800434}
+{"t":1791097704702,"s":184.163,"kind":"look","text":"","CAM_YAW":11.562176670396143,"CAM_PITCH":-5.425094606788775,"PANEL_YAW":11.562125589857551,"PANEL_PITCH":-5.4153742574371}
+{"t":1791097704936,"s":184.397,"kind":"look","text":"","CAM_YAW":11.562192892095421,"CAM_PITCH":-5.435307447145237,"PANEL_YAW":11.562167148941631,"PANEL_PITCH":-5.425261948423718}
+{"t":1791097705169,"s":184.63,"kind":"look","text":"","CAM_YAW":11.562244118514197,"CAM_PITCH":-5.445393075228407,"PANEL_YAW":11.562205817298342,"PANEL_PITCH":-5.435300512231269}
+{"t":1791097705402,"s":184.863,"kind":"look","text":"","CAM_YAW":11.562295344932972,"CAM_PITCH":-5.455244769332504,"PANEL_YAW":11.562251019347698,"PANEL_PITCH":-5.445294457261525}
+{"t":1791097705616,"s":185.077,"kind":"phase","text":"4, lazy, 0.25s: 15s; the look ranged 11.561835° to 11.562449° in yaw and -5.499502° to -5.365091° in pitch, and the panel sat 0.006426° from the look on average"}
+{"t":1791097708296,"s":187.757,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791097708296,"s":187.757,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0.5","object":0,"values":[0.5]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 10","object":0,"values":[10]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791097708297,"s":187.758,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791097708405,"s":187.866,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 2","object":0,"values":[2]}
+{"t":1791097708405,"s":187.866,"kind":"phase","text":"5: lazy, 0.5s once 10° away"}
+{"t":1791097708435,"s":187.896,"kind":"look","text":"","CAM_YAW":11.562312420405897,"CAM_PITCH":-5.481512823106727,"PANEL_YAW":11.562381273347563,"PANEL_PITCH":-5.490128126443348}
+{"t":1791097708669,"s":188.13,"kind":"look","text":"","CAM_YAW":11.562295344932972,"CAM_PITCH":-5.474071758892821,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097708902,"s":188.363,"kind":"look","text":"","CAM_YAW":11.562261193987121,"CAM_PITCH":-5.465616411587169,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097709135,"s":188.596,"kind":"look","text":"","CAM_YAW":11.562209967568347,"CAM_PITCH":-5.456394375547182,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097709369,"s":188.83,"kind":"look","text":"","CAM_YAW":11.562159594923218,"CAM_PITCH":-5.446688676736594,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097709602,"s":189.063,"kind":"look","text":"","CAM_YAW":11.562091293031518,"CAM_PITCH":-5.436497180721289,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097709835,"s":189.296,"kind":"look","text":"","CAM_YAW":11.562057142085667,"CAM_PITCH":-5.426358618672051,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097710069,"s":189.53,"kind":"look","text":"","CAM_YAW":11.562040066612742,"CAM_PITCH":-5.416273844362527,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097710302,"s":189.763,"kind":"look","text":"","CAM_YAW":11.561988840193967,"CAM_PITCH":-5.406568572438762,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097710535,"s":189.996,"kind":"look","text":"","CAM_YAW":11.561954689248116,"CAM_PITCH":-5.397536074148244,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097710769,"s":190.23,"kind":"look","text":"","CAM_YAW":11.561903462829342,"CAM_PITCH":-5.389252335345487,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097711002,"s":190.463,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.381938483404873,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097711236,"s":190.697,"kind":"look","text":"","CAM_YAW":11.561886387356417,"CAM_PITCH":-5.375745209374964,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097711469,"s":190.93,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.370931633557397,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097711702,"s":191.163,"kind":"look","text":"","CAM_YAW":11.561869311883493,"CAM_PITCH":-5.36746445877997,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097711935,"s":191.396,"kind":"look","text":"","CAM_YAW":11.561818085464717,"CAM_PITCH":-5.365528953923917,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097712169,"s":191.63,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.365090968043391,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097712402,"s":191.863,"kind":"look","text":"","CAM_YAW":11.561852236410568,"CAM_PITCH":-5.366150074251565,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097712636,"s":192.097,"kind":"look","text":"","CAM_YAW":11.561903462829342,"CAM_PITCH":-5.368851414068305,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}
+{"t":1791097712837,"s":192.298,"kind":"look","text":"","CAM_YAW":11.561903462829342,"CAM_PITCH":-5.372244737425333,"PANEL_YAW":11.562346571351746,"PANEL_PITCH":-5.480511773506497}

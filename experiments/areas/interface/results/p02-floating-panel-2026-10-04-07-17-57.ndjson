@@ -1,0 +1,54 @@
+{"t":1791098278011,"s":0.035,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791098278069,"s":0.093,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791098278069,"s":0.093,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791098278070,"s":0.094,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791098278702,"s":0.726,"kind":"module","text":"crosscheck-p02-panel is running: ALIVE went from 5858 to 5877 in 0.6s"}
+{"t":1791098278735,"s":0.759,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\""}
+{"t":1791098278736,"s":0.76,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791098278736,"s":0.76,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791098278736,"s":0.76,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_ERRORS ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_FRAMES ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_GAUGE_FRAMES ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_GAUGE_CLICKS ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_PAINT_FRAMES ← 0","object":0,"values":[0]}
+{"t":1791098278737,"s":0.761,"kind":"write","text":"L:CROSSCHECK_P02_PAINT_CAPTURES ← 0","object":0,"values":[0]}
+{"t":1791098278738,"s":0.762,"kind":"write","text":"L:CROSSCHECK_P02_PAINT_CLICKS ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 51331078","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791098283803,"s":5.827,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 51331078","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791098283803,"s":5.827,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 51331078","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 51331078","object":0,"values":[51331078]}
+{"t":1791098283803,"s":5.827,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791098292900,"s":14.924,"kind":"pages","text":"painted","titles":["atlas","Shared variables","mainUi","notifications","transition","VLivery01 - BksqBaronLiveryRegistration","Electronic Flight Bag","Mission Steps","Toolbar","notifications","VLogic","//42 CP Overlay (Reqd.)","//42 Flow","VCockpit160 - WeatherSquare4000_int","VCockpit159 - BlackSquareTablet","VCockpit158 - WTT2","VCockpit157 - WTT1","VCockpit156 - EDM760_1","VCockpit155 - KAS297B_1","VCockpit154 - bksq_wradar1","VCockpit153 - KNS81_1","VCockpit152 - KDI572R","VCockpit151 - AS330","VCockpit150 - KR87A","VCockpit149 - KX155B_2","VCockpit148 - KX155B_1","VCockpit147 - KLN90B","VCockpit146 - GNS_DISABLED","VCockpit145 - GNS_DISABLED","VCockpit144 - WasmInstrument","VCockpit143 - WasmInstrument","VCockpit142 - GTN650_INT_2","VCockpit141 - GTN750_INT","VLivery02 - CrosscheckP02Painting","VLivery03 - CrosscheckP02Painting","VLivery04 - CrosscheckP02Painting"]}
+{"t":1791098293043,"s":15.067,"kind":"shot","text":"painted: 01-painted.jpg, brightness 111","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-17-57\\01-painted.jpg","width":2401,"height":1360,"brightness":111.1}
+{"t":1791098296164,"s":18.188,"kind":"shot","text":"painted-3s-later: 02-painted-3s-later.jpg, brightness 111","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-17-57\\02-painted-3s-later.jpg","width":2401,"height":1360,"brightness":111}
+{"t":1791098301246,"s":23.27,"kind":"painting","text":"before: {\"title\":\"VLivery04 - CrosscheckP02Painting\",\"frames\":5,\"captures\":3,\"width\":1024,\"height\":512,\"data\":{\"__Type\":\"VLiveryPanelData\",\"sName\":\"VLivery04\",\"vDisplaySize\":{\"__Type\":\"Vec2\",\"x\":1024,\"y\":512},\"bVisible\":true,\"daLiveries\":[{\"__Type\":\"VLiveryData\",\"iGUId\":171,\"sContainer\":\"\",\"sUrl\":\"CrosscheckP02/painting.html\",\"vPosAndSize\":{\"__Type\":\"Vec4\",\"x\":0,\"y\":0,\"z\":1024,\"w\":512},\"templateName\":\"crosscheck-p02-painting-element\"}],\"bShowTailNumber\":false,\"uContainerID\":0}}","title":"VLivery04 - CrosscheckP02Painting","frames":5,"captures":3,"width":1024,"height":512,"data":{"__Type":"VLiveryPanelData","sName":"VLivery04","vDisplaySize":{"__Type":"Vec2","x":1024,"y":512},"bVisible":true,"daLiveries":[{"__Type":"VLiveryData","iGUId":171,"sContainer":"","sUrl":"CrosscheckP02/painting.html","vPosAndSize":{"__Type":"Vec4","x":0,"y":0,"z":1024,"w":512},"templateName":"crosscheck-p02-painting-element"}],"bShowTailNumber":false,"uContainerID":0}}
+{"t":1791098304308,"s":26.332,"kind":"painting","text":"3s after VLIVERY_DATA_LOADED: 5 frames, 3 redraws","title":"VLivery04 - CrosscheckP02Painting","frames":5,"captures":3,"width":1024,"height":512,"data":{"__Type":"VLiveryPanelData","sName":"VLivery04","vDisplaySize":{"__Type":"Vec2","x":1024,"y":512},"bVisible":true,"daLiveries":[{"__Type":"VLiveryData","iGUId":171,"sContainer":"","sUrl":"CrosscheckP02/painting.html","vPosAndSize":{"__Type":"Vec4","x":0,"y":0,"z":1024,"w":512},"templateName":"crosscheck-p02-painting-element"}],"bShowTailNumber":false,"uContainerID":0}}
+{"t":1791098304403,"s":26.427,"kind":"shot","text":"painted-live: 03-painted-live.jpg, brightness 111","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-17-57\\03-painted-live.jpg","width":2401,"height":1360,"brightness":111.1}
+{"t":1791098307508,"s":29.532,"kind":"shot","text":"painted-live-3s-later: 04-painted-live-3s-later.jpg, brightness 111","file":"<repo>\\experiments\\areas\\interface\\results\\p02-floating-panel-2026-10-04-07-17-57\\04-painted-live-3s-later.jpg","width":2401,"height":1360,"brightness":110.9}
+{"t":1791098307508,"s":29.532,"kind":"painted","text":"CROSSCHECK_P02_Painted: its document doesn't run: L:CROSSCHECK_P02_PAINT_FRAMES read 10 then 10; the inspector lists 36 pages, added since it appeared: \"VLivery04 - CrosscheckP02Painting\"; its own: \"VLivery02 - CrosscheckP02Painting\", \"VLivery03 - CrosscheckP02Painting\", \"VLivery04 - CrosscheckP02Painting\"; it had redrawn 2 times by the second screenshot; in its document, 5 frames and 3 redraws before VLIVERY_DATA_LOADED, 1024x512 pixels, the sim's data {\"__Type\":\"VLiveryPanelData\",\"sName\":\"VLivery04\",\"vDisplaySize\":{\"__Type\":\"Vec2\",\"x\":1024,\"y\":512},\"bVisible\":true,\"daLiveries\":[{\"__Type\":\"VLiveryData\",\"iGUId\":171,\"sContainer\":\"\",\"sUrl\":\"CrosscheckP02/painting.html\",\"vPosAndSize\":{\"__Type\":\"Vec4\",\"x\":0,\"y\":0,\"z\":1024,\"w\":512},\"templateName\":\"cross; 3s after VLIVERY_DATA_LOADED, 5 frames and 3 redraws"}
+{"t":1791098307509,"s":29.533,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791098307509,"s":29.533,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791098308136,"s":30.16,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791098308136,"s":30.16,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791098308940,"s":30.964,"kind":"module","text":"the module wrote the panel in 711 frames, with 0 errors"}

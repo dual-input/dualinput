@@ -1,0 +1,8 @@
+p02 · What an object of our own can show as a floating panel in front of the pilot's view, on MSFS 2024
+2026-10-04T07:17:23.868Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by the end of the surfaces
+
+  crosscheck-p02-panel is running: ALIVE went from 4835 to 4854 in 0.6s
+  TITLE "Black Square Baron 58P Professional N513LW"
+  CROSSCHECK_P02_Painted: its document doesn't run: L:CROSSCHECK_P02_PAINT_FRAMES read 1 then 1; the inspector lists 35 pages, added since it appeared: "VLivery03 - CrosscheckP02Painting"; its own: "VLivery02 - CrosscheckP02Painting", "VLivery03 - CrosscheckP02Painting"; it had redrawn 2 times by the second screenshot; the painting's document couldn't be driven: "CrosscheckP02Painting" matches 2 pages, so give an id:
+  the module wrote the panel in 521 frames, with 0 errors

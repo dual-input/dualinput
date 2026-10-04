@@ -1,0 +1,14 @@
+p11 · Which SubCategoryItem values let the camera hand back into a seat view, on MSFS 2024
+2026-10-04T05:44:02.843Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Mount order in the sim's report: bksq-aircraft-baronpro, zzz-crosscheck-seat-test
+SimConnect lists 37 definitions; of the seat views: Crosscheck: S1, Crosscheck: S2, Crosscheck: S3, Crosscheck: S4, Crosscheck: S5
+Crosscheck: S1 (LandingPilot): holding, -0.489, -0.100, -0.800m from CoPilot (asked -0.489, -0.100, -0.800, off by 0mm); released into it, -0.489, -0.100, -0.800m (off by 0mm), camera NOT_ACQUIRED: seated
+Crosscheck: S2 (LandingPilot): holding, +0.000, -0.100, -0.800m from CoPilot (asked +0.000, -0.100, -0.800, off by 0mm); released into it, -0.489, -0.100, -0.800m (off by 489mm), camera NOT_ACQUIRED: not seated
+Crosscheck: S3 (Crosscheck_S3): holding, -0.489, -0.150, -1.900m from CoPilot (asked -0.489, -0.150, -1.900, off by 0mm); released into it, -0.489, +0.044, -0.028m (off by 1882mm), camera NOT_ACQUIRED: not seated
+Crosscheck: S4 (CoPilot): holding, +0.000, -0.150, -1.900m from CoPilot (asked +0.000, -0.150, -1.900, off by 0mm); released into it, +0.000, -0.000, -0.000m (off by 1906mm), camera NOT_ACQUIRED: not seated
+Crosscheck: S5 (ClosePilot): holding, -0.245, +0.100, -0.400m from CoPilot (asked -0.245, +0.100, -0.400, off by 0mm); released into it, -0.245, +0.100, -0.400m (off by 0mm), camera NOT_ACQUIRED: seated
+Seated: Crosscheck: S1 (LandingPilot), Crosscheck: S5 (ClosePilot); not seated: Crosscheck: S2 (LandingPilot), Crosscheck: S3 (Crosscheck_S3), Crosscheck: S4 (CoPilot)
+Turned ChasePlane back on
+
+Exceptions: none

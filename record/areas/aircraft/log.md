@@ -3,6 +3,30 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-04: The camera hands back into one view per pilot item, the first that has it, so a package's seat views cover a handful of seats
+
+**Asked:** how many seat views can a package of ours give one aircraft, since an airliner has 180 seats and the camera hands back only into views with a pilot item ([entry below](#2026-10-04-a-community-package-of-ours-adds-a-seat-view-anywhere-in-the-aircraft-it-replaces-the-camera-file-when-it-mounts-after-the-aircrafts-the-sim-reads-it-at-start-and-a-free-pilot-item-lets-the-camera-hand-back-there))?
+Can views share an item, or use one of our own?
+
+**Expected:** unknown.
+
+**Found:** p11 installed one package, `zzz-crosscheck-seat-test`, `package_order_hint` `CUSTOM_SIMOBJECTS_PATCH`, holding the Black Square Baron 58P's camera file, bksq-aircraft-baronpro 0.1.1, with five seat views at five points in the cabin; the sim mounted it after the 58P's package and listed 37 definitions, the five among them.
+
+- Holding the camera, `SimConnect_CameraSetUsingCameraDefinition` put the eye on each of the five to the millimeter.
+- Releasing the camera into each, with the status `NOT_ACQUIRED` after every release:
+  - S1, `SubCategoryItem` `"LandingPilot"`: the eye stayed on S1.
+  - S2, also `"LandingPilot"`: the eye landed on S1, not S2.
+  - S3, `"Crosscheck_S3"`, an item of our own: the eye landed on the `Pilot` view.
+  - S4, `"CoPilot"`, which the 58P's own `CoPilot` view has: the eye landed on the 58P's `CoPilot`.
+  - S5, `"ClosePilot"`: the eye stayed on S5.
+
+**Changed:** releasing the camera into a view resolves by its pilot item, not its name, and reaches only the first view with that item, so a package's seat views give an aircraft one seat per pilot item it leaves free.
+The SDK lists `DefaultPilot`, `ClosePilot`, `LandingPilot`, `CoPilot`, `TrueCockpit`, and `PilotVR`, and `QuickView1` to `QuickView8`, which this run didn't try, so this route covers a handful of seats, not a cabin.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** [p11's run](../../../experiments/areas/aircraft/results/p11-seat-items-2026-10-04-05-44-02.txt).
+
 ## 2026-10-04: A Community package of ours adds a seat view anywhere in the aircraft: it replaces the camera file when it mounts after the aircraft's, the sim reads it at start, and a free pilot item lets the camera hand back there
 
 **Asked:** can a Community package of our own give an aircraft camera views by putting a `cameras.cfg` at the aircraft's own path, since the Camera API can't add one ([entry below](#2026-10-04-camerasetrelative6dof-puts-the-eye-at-any-point-but-holds-the-camera-and-a-camera-handed-back-into-a-view-returns-to-the-views-own-eye))?

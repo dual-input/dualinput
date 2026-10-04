@@ -1,0 +1,25 @@
+p12 · The cockpit camera's save slots, height, and move request, on MSFS 2024
+2026-10-04T06:04:10.771Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"
+Backed up the per-user camera file; before the run: per-user camera file written 04:44:04Z, 4 definitions: 5 at 0.496391, 0.025293, -2.050682; 3 at 0.533186, 0.068224, -0.509577; 2 at -0.013993, 0.087536, -0.497054; 4 at 0.019368, 0.049855, -2.025319
+Turned ChasePlane off through its API
+Start: x -0.176, y 0.855, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+S0, after saving slot 9 with the pilot's own camera: x -0.176, y 0.855, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+After S0: per-user camera file written 04:44:04Z, 4 definitions: 5 at 0.496391, 0.025293, -2.050682; 3 at 0.533186, 0.068224, -0.509577; 2 at -0.013993, 0.087536, -0.497054; 4 at 0.019368, 0.049855, -2.025319
+S1, holding the camera at the right seat: x 0.176, y 0.855, z -0.100m, 0mm from the right-seat point; camera ACQUIRED; state 7, view type 1 index 1, height 50%
+S1, after saving slot 8 while holding: x 0.176, y 0.855, z -0.100m, 0mm from the right-seat point; camera ACQUIRED; state 7, view type 1 index 1, height 50%
+S1, after the release: x -0.176, y 0.855, z -0.100m, 351mm from the right-seat point; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+After S1: per-user camera file written 04:44:04Z, 4 definitions: 5 at 0.496391, 0.025293, -2.050682; 3 at 0.533186, 0.068224, -0.509577; 2 at -0.013993, 0.087536, -0.497054; 4 at 0.019368, 0.049855, -2.025319
+L1, after K:VIEW_CAMERA_SELECT_8: x -0.176, y 0.855, z -0.100m, 351mm from the right-seat point; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+L2, after CAMERA VIEW TYPE AND INDEX 5 and 8: x -0.176, y 0.855, z -0.100m, 351mm from the right-seat point; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+H, after COCKPIT CAMERA HEIGHT 80%: x -0.176, y 0.945, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 79.99999237060547%
+  the eye moved 90mm up, -0mm right, -0mm forward
+H, after putting the height back: x -0.176, y 0.855, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+R, after CAMERA REQUEST ACTION 2: x -0.176, y 0.855, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+R, 3s after it: x -0.176, y 0.855, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+R, after CAMERA ACTION COCKPIT VIEW RESET: x -0.176, y 0.855, z -0.100m; camera NOT_ACQUIRED; state 2, view type 1 index 1, height 50%
+After the restore: per-user camera file written 06:04:34Z, 4 definitions: 5 at 0.496391, 0.025293, -2.050682; 3 at 0.533186, 0.068224, -0.509577; 2 at -0.013993, 0.087536, -0.497054; 4 at 0.019368, 0.049855, -2.025319
+End: x -0.253, y 0.854, z -0.143m; camera ACQUIRED_BY_OTHER; state 2, view type 1 index 1, height 50%
+
+Exceptions: none

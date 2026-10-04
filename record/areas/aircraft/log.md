@@ -3,6 +3,27 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-04: COCKPIT CAMERA HEIGHT raises the cockpit eye and leaves the pilot their camera, and the cockpit save slots didn't seat the eye
+
+**Asked:** can the camera simvars move the pilot's cockpit eye, or save it to a slot and load it back, so Crosscheck can seat a pilot at any point and hand the camera back?
+The settable ones include `CAMERA ACTION COCKPIT VIEW SAVE:index`, "This can be used to save a cockpit camera when the CAMERA STATE is set to 2 (Cockpit). The index value given is the save 'slot' that will be used, from 0 to 9", `CAMERA VIEW TYPE AND INDEX`, `CAMERA REQUEST ACTION`, whose 2 is "Move Active Camera", `CAMERA ACTION COCKPIT VIEW RESET`, and `COCKPIT CAMERA HEIGHT`, "the cockpit camera height modifier expressed as a percentage. Default is 50%" ([Camera Variables](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Camera_Variables.htm)); the events include `VIEW_CAMERA_SELECT_0` to `_9` (read in MSFS 2024 SDK 1.7.3, `MSFS_EventsEnum.h`).
+
+**Expected:** a slot saved while our client held the camera at the right seat would load back with the camera free.
+
+**Found:** p12 ran in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, with ChasePlane 2026.39.1.16 turned off through its API; `CAMERA STATE` read 2 and `CAMERA VIEW TYPE AND INDEX` 1 and 1 throughout, except 7 while our client held the camera.
+
+- Setting `COCKPIT CAMERA HEIGHT` from 50% to 80% raised the eye exactly 90mm, with no move sideways or fore and aft, and the camera stayed `NOT_ACQUIRED`; 50% put it back.
+- Setting `CAMERA ACTION COCKPIT VIEW SAVE:9` with the pilot's own camera, and `:8` while our client held the eye at the right seat, left the pilot's per-user camera file unchanged.
+- After the release, `K:VIEW_CAMERA_SELECT_8`, and then `CAMERA VIEW TYPE AND INDEX` set to 5 and 8, didn't move the eye.
+- `CAMERA REQUEST ACTION` 2, and then `CAMERA ACTION COCKPIT VIEW RESET`, didn't move the eye either, over 3s and 1.5s.
+
+**Changed:** among the camera simvars, only the height modifier moves the cockpit eye while leaving the pilot their camera, and only up and down.
+Where a slot save goes, if anywhere, and what loads a slot are unknown.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness).
+
+**Evidence:** [p12's run](../../../experiments/areas/aircraft/results/p12-camera-slots-2026-10-04-06-04-10.txt).
+
 ## 2026-10-04: The camera hands back into one view per pilot item, the first that has it, so a package's seat views cover a handful of seats
 
 **Asked:** how many seat views can a package of ours give one aircraft, since an airliner has 180 seats and the camera hands back only into views with a pilot item ([entry below](#2026-10-04-a-community-package-of-ours-adds-a-seat-view-anywhere-in-the-aircraft-it-replaces-the-camera-file-when-it-mounts-after-the-aircrafts-the-sim-reads-it-at-start-and-a-free-pilot-item-lets-the-camera-hand-back-there))?

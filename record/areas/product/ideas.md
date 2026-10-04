@@ -326,7 +326,7 @@ Pilots debrief with it, training groups use it for checkrides, and we use it to 
 
 ### Telemetry
 
-When Crosscheck sets a control on the other pilot's machine, reads it back, and still finds the wrong value after a few tries, it sends an event to a server of ours carrying only the aircraft's package and version, the profile's version, and the control.
+When Crosscheck sets a control on the other pilot's machine, reads it back, and still finds the wrong value after a few tries, it sends a server of ours an event carrying only the aircraft's package and version, the profile's version, and the control.
 This covers only controls whose profile entry Crosscheck can read, the limit that keeps [cockpit diff and resync](#ideas-left-out) out.
 A setting switches it on or off, and which way it starts is an open question below.
 It adds to the [bug reports](03-v1-scope.md#recording-and-bug-reports) pilots send, because telemetry finds the patterns across many flights, and a bug report explains one.
@@ -336,7 +336,7 @@ It adds to the [bug reports](03-v1-scope.md#recording-and-bug-reports) pilots se
 - **Open questions:**
   - Whether it starts off until a pilot turns it on, or on until a pilot turns it off.
     Each event reaches our server from the pilot's IP address, which the EU's General Data Protection Regulation (GDPR) counts as personal data, so the events are anonymous only if the server discards the address (unverified).
-    Whether the GDPR, or the EU's ePrivacy rules on reading data from a device, require asking the pilot first is a question for legal advice (unverified).
+    Legal advice settles whether the GDPR, or the EU's ePrivacy Directive on reading data from a device (unverified), requires asking the pilot first.
   - Which events to send beyond a control that never matched, chosen once Crosscheck syncs real flights and we see what fails.
 
 ### Crosscheck IDE

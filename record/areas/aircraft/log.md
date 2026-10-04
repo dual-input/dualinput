@@ -3,6 +3,24 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-04: A sim restart doesn't load camera views added to the per-user camera file either
+
+**Asked:** does a full sim restart load the three test views p08 added to the 58P's per-user camera file, which a flight restart and a new flight didn't ([entry below](#2026-10-03-camera-views-added-to-the-per-user-camera-file-dont-show-up-after-a-flight-restart-or-a-new-flight))?
+
+**Expected:** perhaps, if the sim reads the file only at startup.
+
+**Found:** with the sim started fresh and the Black Square Baron 58P loaded, SimConnect_EnumerateCameraDefinitions listed the same 32 definitions as before, and ChasePlane's `get_views` the same 42 views.
+Neither held a test view or one of the pilot's four saved custom cameras.
+ChasePlane held the camera, so p08 didn't release into the views, and the day before, an unknown name sent the eye to one fallback spot.
+p08 then put the backed-up file back, and it matched the backup byte for byte.
+
+**Changed:** the per-user camera file feeds neither SimConnect's camera definitions nor ChasePlane's views in this build, so it can't give a seat a view.
+Whether the sim reads the file for anything, such as the pilot's own key for loading a custom camera, is unknown.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness).
+
+**Evidence:** [p08's run after the restart](../../../experiments/areas/aircraft/results/p08-camera-file-2026-10-04-04-43-52.txt).
+
 ## 2026-10-03: Camera views added to the per-user camera file don't show up after a flight restart or a new flight
 
 **Asked:** do camera views added to the sim's per-user camera file for an aircraft become views that SimConnect lists and a client can release the camera into, and does ChasePlane pick them up?

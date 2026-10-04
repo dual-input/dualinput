@@ -219,8 +219,7 @@ The profile author places each seat in the sim itself, from the [Crosscheck IDE]
 - **Open questions:** how pilots switch seats, before and during a flight, which we'll come back to.
   Whether arrows in the sim can be dragged: the ray through the cursor lands within 2mm ([avatars log](../avatars/log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)), and we know where the arrows are, so hitting them is our own arithmetic, but a click on an arrow also reaches the sim, so the IDE either keeps arrows clear of controls or holds the click back, which puts it in the pilot's input path, where CLAUDE.md's fail-open rules apply.
   How Crosscheck puts a pilot in a seat that has no camera view.
-  The sim keeps a pilot's saved custom cameras per aircraft in a `cameras.CFG` of its own, outside any package, under `%APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\<aircraft>\` on a Steam install, so Crosscheck could add a view there for each seat, if the sim reads the file at load and a client can release the camera into one of its views.
-  SimConnect didn't list the 58P's four custom cameras from that file, and ChasePlane's views didn't include them either (unverified why), and a probe that adds a view and reloads the aircraft settles it.
+  Views added to the sim's per-user camera file for the aircraft showed up neither in SimConnect's camera definitions nor in ChasePlane's views, even after a sim restart (measured on MSFS 2024, 2026-10-04, [aircraft log](../aircraft/log.md#2026-10-04-a-sim-restart-doesnt-load-camera-views-added-to-the-per-user-camera-file-either)), so with the sim's own camera we know of no way.
   ChasePlane's API can change a view's position (`cam_set_axis`), so a ChasePlane view could be made for each seat (unverified).
 
 ### Join modes

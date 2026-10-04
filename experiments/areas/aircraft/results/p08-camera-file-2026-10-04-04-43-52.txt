@@ -1,0 +1,10 @@
+p08 · Camera views added to the per-user camera file, on MSFS 2024
+2026-10-04T04:43:52.512Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+%APPDATA%\Microsoft Flight Simulator 2024\SimObjects\Airplanes\bksq-aircraft-baronpropress\cameras.CFG holds Crosscheck: Test A, Crosscheck: Test B, Crosscheck: Test C
+SimConnect lists 32 definitions; of the test views: none
+Of the pilot's saved custom cameras: none
+ChasePlane lists 42 views; of the test views and the saved custom cameras: none
+Another client holds the camera (ChasePlane?), so no view was measured
+
+Exceptions: none

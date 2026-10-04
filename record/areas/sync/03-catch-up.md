@@ -8,7 +8,7 @@ Decides:     Which catch-up runs when, the order state applies in, what happens 
 
 A cockpit catches up in one of two ways.
 After a short outage with the sim still running, it replays the changes it missed, in order.
-After a late join, a sim restart, or the end of preflight, it takes the flying machine's state as it stands, applies each entry once in the order the PF last changed them, checks every write, and flags what never matches.
+After a late join, a sim restart, or the end of preflight, it takes the flying machine's state as it stands, applies each entry once in an order step 7 decides, checks every write, and flags what never matches.
 Events and pointer presses from before a catch-up began aren't recovered, so after a late join or a restart, a display's page, an FMS's contents, and anything else the profile can't read can differ.
 
 The flying machine is the PF's, and a following machine is any other pilot's.
@@ -40,7 +40,7 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 
 1. The flying machine sends its state object as it stands.
 2. The catching-up machine skips every entry its cockpit already matches.
-3. It applies each remaining entry once, at the PF's value, in the order the PF last changed them, which the stamps from [the conflict rule](02-live-sync.md#when-two-pilots-change-one-entry) record.
+3. It applies each remaining entry once, at the PF's value, in the order [below](#choosing-the-order).
    Entries the PF never changed since the aircraft loaded go first.
    Immediate writes go out in that order in one short burst, and stepped writes start in that order and run side by side, since each moves a different control.
    For a shadow value, the catching-up machine steps the control by the difference between the PF's shadow and its own, and its own shadow counts those steps as they land.
@@ -49,17 +49,23 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 
 Applying each entry once, at its final value, keeps the catching-up machine from running the PF's history: an APU the PF started, stopped, and started again starts once.
 
-The PF's order matters for an interlock: a control that acts once, when it's set, and only if another control is already set.
+## Choosing the order
+
+The order matters for an interlock: a control that acts once, when it's set, and only if another control is already set.
 Take a hypothetical aircraft whose APU master, written before the battery, tries to start the APU, fails, and leaves the switch reading on: the check finds no mismatch to retry, and the APU stays off.
-In the usual startup, the PF turned the battery on before the APU, so the PF's order puts the battery first.
 Which real aircraft behave like this is unverified, and one probe on an aircraft with an APU would show it.
 
-How the order and the retries handle a battery switch, on that hypothetical aircraft, where writes that need power don't land without it:
+Two orders were weighed, and we lean toward the second; the architecture decides between them at step 7 of [the plan](../product/plan.md):
 
-| The PF's battery | What happens |
-| --- | --- |
-| Turned on, used, cycled off and on, ends on | The battery lands late. A write that needs power and reads back wrong, such as a radio frequency, fails once, and the next retry, with the battery on, lands it. A write that fails but reads back right, such as the APU master, stays failed, and nothing flags it, a gap [Open questions](#open-questions) tracks. |
-| Turned on, used, then turned off, ends off | If the catching-up aircraft loaded cold and dark, its battery is off already and is skipped, so writes that need power fail on every retry, and Crosscheck flags them. |
+- **The order the PF last changed each entry**, which the stamps from [the conflict rule](02-live-sync.md#when-two-pilots-change-one-entry) already record, so it needs nothing more.
+- **The order each entry first took the value it holds now**, which needs the session's history, kept in the recording.
+
+Say the PF turned the battery on, then the APU master, then cycled the battery off and on.
+Both end on, and the battery's last change came after the APU's, so last-change order writes the APU master first, while the catching-up machine's battery is still off, and on the hypothetical aircraft the APU stays off with nothing flagged.
+The battery first took "on" before the APU did, so first-final-value order writes the battery first, and the APU starts.
+
+For a write that reads back wrong without power, such as a radio frequency, the two orders end the same way, because a retry lands it once the battery is on.
+If the PF's battery ends off, both orders skip it on a catching-up aircraft that loaded cold and dark, so writes that need power fail on every retry, and Crosscheck flags them.
 
 ## When preflight ends
 
@@ -118,15 +124,12 @@ If it proves common, the fallback is a longer quiet window for late joins only, 
     The A220 holds a Navigraph database at AIRAC 2609 in its work folder and a bundled one at 2503 in its package, and which one the FMS uses is unverified (read in synaptic-aircraft-a220 1.0.10, [A220 study](../aircraft/synaptic-a220/study.md)), so two machines with different work folders could type the same route into different databases.
   - The replay would have to start where the recording started, at the departure stand, then move the aircraft to the PF's position, which is the long-distance move [preflight](../product/03-v1-scope.md#preflight) asks pilots to avoid.
   - Replaying each change runs the aircraft's systems through the PF's whole history.
-- **Ordering state by when each entry first took its final value,** from the recording.
-  For writes that read back wrong, it reaches the same result as the PF's last-change order in both battery cases above.
-  It would also put the battery first in the first row and close the APU gap, so it stays dropped only while no studied aircraft has such an interlock ([Open questions](#open-questions)).
 
 Replaying only the presses made while parked, for state that's mostly deterministic, such as typing a route into an FMS, stays a possible experiment for one aircraft.
 
 ## Open questions
 
 - Whether 15s, 15s, and 1.5 minutes fit real aircraft, and whether 5 changes tells a restore from an aircraft driving a control.
-- Whether any studied aircraft has an interlock that fails while reading back right, which decides whether the gap above needs the first-final-value order.
+- Which [order](#choosing-the-order) catch-up applies state in, decided at step 7, and whether any studied aircraft has an interlock that fails while reading back right, which would settle it for first-final-value order.
 
 [The plan](../product/plan.md)'s step 6 lists the probe for the settle rule.

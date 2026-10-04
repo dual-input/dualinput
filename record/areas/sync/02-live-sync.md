@@ -55,7 +55,7 @@ An arriving change to a shared entry applies only if its stamp wins:
 
 Every machine compares the same two stamps by the same rules, so every machine picks the same winner, whatever order the messages arrived in.
 The pilot whose change lost sees their control move back a moment later.
-Entries that belong to the PF never conflict, because only the flying machine sends them, and their stamps serve [catch-up](03-catch-up.md#catching-up-state)'s order.
+Entries that belong to the PF never conflict, because only the flying machine sends them, and their stamps can order [catch-up](03-catch-up.md#choosing-the-order).
 
 Two pilots firing the same toggle event at once flip it twice and cancel, because an event carries no value to compare, and events stay best effort.
 

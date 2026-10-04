@@ -156,7 +156,7 @@ Steps 4 and 5 add to this list as they find risks.
 Produces: decisions in `record/decisions/`.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
 The profile format takes the shape [01-profile-entries](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.
-The decisions also pick whether each machine sends to every other directly or through the flying machine ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), and the sandbox that write functions run in, with its size limits.
+The decisions also pick whether each machine sends to every other directly or through the flying machine ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), the sandbox that write functions run in, with its size limits, and the order catch-up applies state in, where we lean toward first-final-value order ([catch-up](../sync/03-catch-up.md#choosing-the-order)).
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.

@@ -1,0 +1,8 @@
+p01 · What SimConnect_Text shows the pilot, on MSFS 2024
+2026-10-04T05:50:31.849Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+PRINT_WHITE for 6s: results DISPLAYED at 0.0s
+SCROLL_YELLOW for 8s: results QUEUED at 8.5s
+MENU for 15s: results DISPLAYED at 19.1s
+
+Exceptions: none

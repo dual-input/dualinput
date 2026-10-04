@@ -497,7 +497,8 @@ A banner floats in front of the pilot and moves with their view, like a pair of 
 
 **Open questions:**
 
-- How to draw text there, steadily, which a step 6 probe in [the plan](plan.md) answers: an object of our own whose model carries an HTML gauge, or the sim's own text display, `SimConnect_Text`, are the candidates.
+- How to draw text there, steadily, which a step 6 probe in [the plan](plan.md) answers: an object of our own whose model carries an HTML gauge is the candidate.
+  We dropped the sim's own text display, `SimConnect_Text`, which reported its texts as displayed while the pilot caught none of them, because the gauge gives us control of how a notice looks ([interface log](../interface/log.md#2026-10-04-simconnect_text-reports-its-texts-as-displayed-and-the-pilot-didnt-catch-any-of-them)).
 - Whether the banner can carry a button, such as "disconnect and take control", since catching a click on our own object is untested; if not, the action lives in the EFB app and the desktop app.
 
 ## Tools
@@ -573,6 +574,8 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 
 **Open questions:**
 
-- Whether the sim launches our helper from its `exe.xml` in MSFS 2024, and where that file lives for the Steam and Microsoft Store installs (unverified).
+- Where the Microsoft Store install keeps `exe.xml` (unverified).
+  The sim launches programs from it in MSFS 2024: on a Steam install it's `%APPDATA%\Microsoft Flight Simulator 2024\EXE.xml`, nine add-ons launch from ours, among them Fenix, GSX's Couatl, and ChasePlane, and ChasePlane's bridge started 79s and 102s after two sim starts (read and observed on our development machine, 2026-10-04).
+  ChasePlane also launches its manager from there with `--silent-update-latest`, so it updates itself at sim launch, though our updates wait for the sim to close.
 - How a package is disabled and re-enabled: a folder renamed with a suffix such as `.off` may not stop the sim mounting it, and moving it out of the Community folder does (unverified either way), which a probe across one sim restart settles.
 - How recent a last session has to be for the helper to warn.

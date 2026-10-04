@@ -1,0 +1,10 @@
+{"t":1791093031894,"s":0.045,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791093031910,"s":0.061,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791093031911,"s":0.062,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791093031911,"s":0.062,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791093031911,"s":0.062,"kind":"result","text":"PRINT_WHITE: DISPLAYED at 0.0s","id":9101,"data":65536}
+{"t":1791093038923,"s":7.074,"kind":"phase","text":"PRINT_WHITE for 6s: results DISPLAYED at 0.0s"}
+{"t":1791093040443,"s":8.594,"kind":"result","text":"SCROLL_YELLOW: QUEUED at 8.5s","id":9102,"data":65537}
+{"t":1791093049453,"s":17.604,"kind":"phase","text":"SCROLL_YELLOW for 8s: results QUEUED at 8.5s"}
+{"t":1791093050976,"s":19.127,"kind":"result","text":"MENU: DISPLAYED at 19.1s","id":9103,"data":65536}
+{"t":1791093066977,"s":35.128,"kind":"phase","text":"MENU for 15s: results DISPLAYED at 19.1s"}

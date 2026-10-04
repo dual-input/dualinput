@@ -17,7 +17,8 @@ Several ideas reach a point where changing an aircraft's own files would solve t
 - **Aircraft adapters:** state such as the A220's display formats lives where only code inside the aircraft reaches it ([Aircraft adapters](../areas/product/ideas.md#aircraft-adapters)).
 
 Licenses can forbid it.
-Just Flight sells the Black Square Baron, v1's aircraft, under a license that says, under "YOU MAY NOT", "modify or create derivative works based on the Data or any other part of the Software, except as permitted by law" (documented, [Baron study](../areas/aircraft/black-square-baron-pro/study.md#license)).
+Just Flight sells the Black Square Baron, v1's aircraft, under a license whose web page says, under "YOU MAY NOT", "modify or create derivative works based on the Data or any other part of the Software, except as permitted by law" (documented, [Baron study](../areas/aircraft/black-square-baron-pro/study.md#license)).
+The page carries no date, and we haven't seen the terms the installer shows (same section).
 The same aircraft's manual invites home cockpit builders to use its variables, and says "anything is possible with a little code" (same section).
 
 ## Options
@@ -35,14 +36,14 @@ Shipping a developer's file, changed or not, was never an option, because it red
 
 Option 3.
 The change happens only on the pilot's machine, to a product they bought, and it stays in a plugin, so removing the plugin removes it.
-The user decided it knowing that some licenses, the Baron's among them, forbid changing the product, and a legal reading, or asking a developer before we patch their aircraft, would settle that for each aircraft.
+The user kept this decision after being told of the Baron's clause on 2026-10-04, so a plugin needs neither a legal reading of a license nor the developer's agreement before it changes an aircraft's files.
 Crosscheck's own features hold avatars through our WASM module instead, as [avatar sync](../areas/product/03-v1-scope.md#avatar-sync) does (measured on MSFS 2024, 2026-10-03, [avatars log](../areas/avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
 Whether that module holds a Crosscheck object, such as a button on a window, still enough is unverified ([Crosscheck objects in the cockpit](../areas/product/ideas.md#crosscheck-objects-in-the-cockpit)).
 
 ## What it commits us to
 
 - A plugin's change applies only to the exact file it was made for, checked by the file's hash, and does nothing on any other version of the aircraft.
-- A pilot can turn off a plugin that changes their aircraft's files, in Crosscheck's settings, and the stock aircraft comes back at the next sim start, since the sim reads packages when it starts.
+- A pilot can turn off a plugin that changes their aircraft's files, in Crosscheck's settings, and the stock aircraft comes back at the next sim start, since the sim reads packages when it starts ([02-01](../learn/foundations/02-01-installs-and-packages.md)).
 - We write these changes ourselves, because making one takes a working knowledge of both the aircraft and Crosscheck that few profile authors will have.
 - The route we expect to use: while the sim is closed, Crosscheck copies the aircraft's file into an overlay folder in our Community package, changes the copy there, and lets the overlay mount after the aircraft's package.
   Nothing of the developer's changes on disk, and removing the overlay restores the stock aircraft.

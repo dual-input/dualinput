@@ -45,7 +45,8 @@ fcu_heading:
     set: L:var_fcuHeading
 ```
 
-A variable here is an `L:` or `A:` variable, an input event's `B:` value, an aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), or a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, which `write` can name too.
+A variable here is an `L:` or `A:` variable, an input event's `B:` value, or an aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)).
+`read` can also name a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, and `write` can name one too.
 
 When no variable shows the value, `read` counts the events that change it instead, and Crosscheck keeps the result as a shadow value: its own copy of a value the aircraft keeps out of sight.
 

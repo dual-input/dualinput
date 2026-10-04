@@ -237,9 +237,9 @@ A plugin is code we ship for one aircraft or one add-on, which finds state a pro
   The 58P's tablet keeps its 15 settings and each failure's state in the sim's DataStorage, and its KNS-81 keeps its 10 waypoints there, separately on each machine, where no profile entry reaches (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
   The sim's own `dataStorage.js` gives panel scripts `GetStoredData` and `SetStoredData` on `window.top.datastorage` (documented, as the Baron study cites it; not run, the study's sim question 11).
   The plugin's first candidate job is to export those keys as values, which the 58P's profile syncs and [catch-up](../sync/03-catch-up.md) applies like any other entry, and its job is settled when the 58P's profile is written.
-  The profile's settings for following machines, not the plugin, keep each following machine's tablet from rolling failures of its own ([01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft)).
+  The profile's settings for following machines would keep each following machine's tablet from rolling failures of its own, if a failure rate of 0 stops the rolls (unverified, the Baron study's sim questions 3 and 7; [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft)).
 - Plugins ship with Crosscheck, in its installer and its Community package, and update with it, so every pilot in a crew runs the same plugins: pilots on different Crosscheck versions can't fly together ([installing and updating](#installing-and-updating)).
-- A plugin says which aircraft it applies to, such as every variant of the Baron Pro, and Crosscheck runs it while one of them is loaded, so pilots never install or choose one.
+- A plugin says which aircraft it applies to, such as every variant of the Baron Pro, and Crosscheck runs it while one of them is loaded, so pilots never install a plugin or pick one to run, and can turn off only one that changes their aircraft's files.
 
 **Not in v1:**
 
@@ -262,7 +262,7 @@ A plugin is code we ship for one aircraft or one add-on, which finds state a pro
 **Open questions:**
 
 - Whether the tablet and the KNS-81 take a written key without a reload: the KNS-81 reads its waypoints from DataStorage only when it loads (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so the plugin's write may have to reach the running gauge too.
-- Where each part of a plugin runs, in the core, in the aircraft's panels, or in a WASM module, and what language plugins are written in, which step 7 of [the plan](plan.md) decides.
+- Where each part of a plugin runs, in Crosscheck's core, the program that owns the session ([EFB app](#efb-app)), in the aircraft's panels, or in a WASM module, and what language plugins are written in, which step 7 of [the plan](plan.md) decides.
 - Whether authors outside our team write plugins after v1, and what makes that easy.
 
 ## Session
@@ -462,7 +462,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 - When the traffic host changes, the new host removes the traffic it had injected before it starts, and the old host stops sending (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "One host, and it need not be the master").
 - A pilot who starts a pushback, from GSX, an ATC add-on such as BeyondATC, or the sim's own `K:TOGGLE_PUSHBACK`, takes control first and flies it.
   A pushback in a following machine's sim acts on an aircraft frozen to the flying machine's, so we expect it to move nothing (unverified).
-  The tug shows to the rest of the crew only when that pilot is also the traffic host, and only if traffic sync carries it: our fork listed and spawned GSX's tugs on a second instance, though nobody judged how they look when driven (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/02-open-questions.md`, Q07), and the tug of the sim's own pushback is untested.
+  The tug shows to the rest of the crew only when that pilot is also the traffic host, and only if traffic sync carries it: our fork listed and spawned GSX's tugs in a replay of a recorded session on one sim, though nobody judged how they look when driven (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · First visual replay; engines, pushback, ground vehicles", and `record/traffic-atc/docs/02-open-questions.md`, Q07).
   [Ground operations sync](ideas.md#ground-operations-sync), a Soon pick, replaces this rule.
 
 **Depends on:**
@@ -700,6 +700,7 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 - Every crew member's machine records what passes through Crosscheck: each synced change, each handover, and the connection's events.
 - The recording also keeps the flight model's samples, and every value each [plugin](#plugins) received and every action it returned, so a recorded flight replays through a plugin in its tests ([04-room-for-later](04-room-for-later.md#recording)).
+- It keeps each read-only profile entry whose value differs between machines, with both values ([live sync](../sync/02-live-sync.md#values-not-events)).
 - Crosscheck marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - Each machine keeps at least the whole flight, and more flights if recordings turn out small enough.
 - A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.

@@ -8,7 +8,7 @@ Decides:     What Crosscheck must allow for each Soon and Later pick, and what v
 
 v1 builds what each Soon and Later pick in [the plan](plan.md) needs from it, so no pick rebuilds part of v1, because v1 gives up features, never design ([01-aims](01-aims.md#aims)).
 That's channels that each declare how they travel, catch-up as a pipeline of steps, plugins and the hooks they use, hosts inside the sim that load modules by name, one table of roles, a session that holds passengers, one protocol for every client, a profile format with room to grow, and a versioned recording.
-The one need v1 doesn't build is the input layer, and v1 builds the two things it starts from.
+The one need v1 doesn't build is the input layer, and v1 builds the two things it starts from: a helper the sim launches, and a connection to the sim that comes up with no flight loaded.
 A pick can still need work of its own, which [By pick](#by-pick) names beside the sections it needs.
 
 Each section below names the picks that need it and ends with what v1 builds.
@@ -18,12 +18,13 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 ## Channels
 
 A channel is what one feature sends, or several features whose messages must apply in one order: its messages, how they travel, how they're recorded, and how a cockpit catches up on them.
-Adding a channel changes nothing for the others but the bandwidth, and removing one removes all of it.
+A channel that doesn't join the cockpit's shared order, which this section comes to below, changes nothing for the others but the bandwidth, and removing a channel removes all of it.
 
-v1 has five channels:
+v1 has six channels:
 
 | Channel | From | To | Needs |
 | --- | --- | --- | --- |
+| Session: joins, Ready, control, and the time, date, sim rate, and pause | Every machine | Every other | Every message, in order |
 | Cockpit: state, events, and pointer presses | Every machine | Every other | Every message, in causal order ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)) |
 | Flight model | The flying machine | Following machines | Only the newest sample ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)) |
 | Avatars | Every machine | Every other | The newest pose of each figure |
@@ -54,12 +55,13 @@ So each channel declares:
 The shared order is the causal order [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order) gives the cockpit's messages, so that a page key always lands before a press on the page it opened.
 A channel joins it when its messages must apply in order with the cockpit's, as a bus message that opens a page would.
 A channel that writes into the sim uses live sync's echo tokens ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
-Whether a topic the EventBus bridge republishes would go back out under `wt.eb.evt` from the receiving machine depends on how it's published, and the framework's own relay skips what came from its own bus (unverified, read in the A220's DisplayUnits bundle, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
+A topic the EventBus bridge publishes on the receiving machine with the `sync` flag would go back out under `wt.eb.evt`, as any synced topic does, while one handed in as another bus's package might not, since each bus publishes other buses' packages locally and skips its own (read in the A220's DisplayUnits bundle, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
+Which way the bridge can publish is unverified.
 
 Traffic sync's object mirroring and hearing ATC's capture by process are kinds of channel that any feature or plugin can open, and a GSX plugin would be built mostly from those two ([Plugins](ideas.md#plugins)).
 Traffic sync picks the objects it carries through a filter that a plugin can claim objects from, so when a GSX plugin carries GSX's vehicles, the crew doesn't see each one twice.
 
-**v1 builds** a transport in which each channel declares those four things, v1's five channels as separate channels, object mirroring and audio capture as channel kinds, and traffic sync's filter.
+**v1 builds** a transport in which each channel declares those four things, v1's six channels as separate channels, object mirroring and audio capture as channel kinds, and traffic sync's filter.
 
 ## A catch-up pipeline
 
@@ -70,7 +72,7 @@ Later picks add steps:
 
 - **Bus bridge:** a step that sends `A22X.Resync`, after which the A220 sent a full snapshot on each of the 29 CommBus channels that carry its changes ([CommBus log](../commbus/log.md#2026-09-28-a22xresync-returns-the-a220s-full-state-and-one-listener-hears-every-channel)).
 - **EventBus bridge:** a step that publishes `resync_request`, which has every synced topic sent again (read in the A220's DisplayUnits bundle, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
-- **Aircraft adapters:** a step in an adapter's plugin for state that isn't one value, such as loading a PMDG 777 panel state, which its CDU does by name through `CPageStateLoad`, though whether the 777 loads one mid-flight is untested ([aircraft adapters](ideas.md#aircraft-adapters)).
+- **Aircraft adapters:** a step in an adapter's plugin for state that isn't one value, such as loading a PMDG 777 panel state, which its CDU does by name (unverified), though whether the 777 loads one mid-flight is untested; loading one from the CDU in flight settles both ([aircraft adapters](ideas.md#aircraft-adapters)).
 
 After a short outage, each channel replays its own missed messages, and the channels in the cockpit's shared order replay together, as [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage) replays state changes, events, and presses in one sequence.
 
@@ -80,10 +82,10 @@ After a short outage, each channel replays its own missed messages, and the chan
 
 A plugin is code we ship for one aircraft or one add-on, and code that serves one product lives in a plugin, never in Crosscheck's own code ([03-v1-scope](03-v1-scope.md#plugins)).
 
-A plugin's first job is to find state the profile can't reach, not to sync it.
-It exports values, and the profile names each one as it names an `L:` variable ([01-profile-entries](../sync/01-profile-entries.md#reading-a-value)).
+A plugin's first job is to find state the profile can't reach and export it as values.
+The profile names each one as it names an `L:` variable ([01-profile-entries](../sync/01-profile-entries.md#reading-a-value)).
 Live sync, read-back, the conflict rule, and catch-up then cover a plugin's values as they cover any entry, with no code of the plugin's.
-The 58P's plugin exports its DataStorage keys that way ([03-v1-scope](03-v1-scope.md#plugins)).
+The 58P's plugin exports the 58P's DataStorage keys that way ([03-v1-scope](03-v1-scope.md#plugins)).
 
 For what isn't a value, a plugin reaches every layer through hooks:
 
@@ -92,7 +94,8 @@ For what isn't a value, a plugin reaches every layer through hooks:
 - steps in the catch-up pipeline
 - the writer, for every write to the sim
 - code inside the sim, in the aircraft's panels and in a WASM module ([below](#code-inside-the-sim))
-- direct access to the sim and the pilot's files, for whatever no hook reaches, since we review every plugin
+
+Where no hook reaches, a plugin reads the sim and the pilot's files directly, since we review every plugin, and still writes to the sim only through the writer ([03-v1-scope](03-v1-scope.md#plugins)).
 
 These picks put their product-specific parts in plugins:
 
@@ -118,9 +121,9 @@ v1 runs code inside the sim in two places, and both load what they run by name, 
 - **The panel bridge,** which v1 injects into the aircraft's panel documents for pointer sync, loads a module for each instrument a feature or a plugin names.
   The bus bridge, the EventBus bridge, and adapters such as the A220's each need a listener inside an instrument's document ([bus bridge](ideas.md#bus-bridge), [EventBus bridge](ideas.md#eventbus-bridge), [aircraft adapters](ideas.md#aircraft-adapters)).
   A syntax error in a panel file takes out the whole file, not one line, and one broken shared `VCockpit.js` once broke every instrument in the sim (FS Copilot fork, `record/conventions.md`), so the bridge loads each module from its own file, and one module's error reaches no other.
+  Later it also passes presses to displays drawn by WASM code, by sending mouse events to the display's canvas in its panel document: the iniBuilds A380's displays pressed at the position our fork sent that way, once told the mouse entered them (measured on MSFS 2024, 2026-09-23, FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not").
 - **The WASM module,** which places figures in v1 ([avatar sync](03-v1-scope.md#avatar-sync)), places objects of any kind.
   Later it places [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit) and the arrows the [Crosscheck IDE](ideas.md#seat-awareness) draws on a figure to place it.
-  It also passes presses to displays drawn by WASM code, such as the iniBuilds A380's, which press at the position we send once told the mouse entered them (measured on MSFS 2024, 2026-09-23, FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not").
 
 **v1 builds** both as hosts that load modules by name.
 
@@ -178,13 +181,15 @@ The network carries those figures too, so the avatar channel sends only what mov
 
 In v1 the desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([EFB app](03-v1-scope.md#efb-app)).
 A cockpit panel can hold a WebSocket to a program on the same PC (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q08 yes: a cockpit document can hold a WebSocket to loopback"), with the sim's developer mode off (FS Copilot fork, `record/pointer-forwarding/docs/06-open-questions.md`, Q08).
-If an EFB app can too, which nobody has tried, the EFB app speaks the same protocol as a browser, rather than reach Crosscheck through something only a sim panel has, such as `L:` variables, and a probe in step 6 of [the plan](plan.md) tries it.
+Nobody has tried a WebSocket from an EFB app, and a probe in step 6 of [the plan](plan.md) tries it.
+If it works, the EFB app speaks the same protocol as a browser, rather than reach Crosscheck through something only a sim panel has, such as `L:` variables.
 
 - **The tablet in a browser** is one more client on the same protocol, reached across the home network.
   The tablet loads the PC's address, which the desktop app shows as a QR code that also carries a token, so other devices on the network can't take control.
 - **The Crosscheck IDE** is one more client too, with commands of its own: discovering what an aircraft exposes, live values, running one entry's write, and reloading a profile mid-session.
 
 **v1 builds** one protocol that every client speaks, which can listen beyond the PC itself, off by default.
+If the EFB probe fails, the EFB app's messages pass through a cockpit panel that holds a WebSocket, and step 7 designs how.
 
 ## Profiles
 

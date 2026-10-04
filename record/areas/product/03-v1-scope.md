@@ -187,7 +187,7 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 - Crosscheck sends every change a pilot makes, and never a change it applied itself.
   The PM turns the beacon on, Crosscheck sets it on the PF's machine, and the PF's sim reports that the beacon changed: Crosscheck doesn't send that report back.
   If the PF turns the beacon off half a second later, that change goes through, where a guard that ignores reports for a while after each write would drop it, as one dropped two real pilot inputs in our FS Copilot work ([08-02](../../learn/foundations/08-02-echoes-and-initial-sync.md#echo-loops-and-suppressing-them)).
-- A change the aircraft makes on its own syncs like a pilot's, such as the Baron taking its chocks away once it moves.
+- A change the aircraft makes on its own syncs like a pilot's, such as the Baron taking its chocks away once it moves (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-the-barons-ground-contact-follows-the-written-altitude-and-its-own-physics-writes-dont-hold-against-ours)).
 - Until an aircraft has settled after a load, the changes it makes to itself don't sync: in preflight, Ready waits for it, and while a cockpit catches up, Crosscheck moves those changes back to the PF's state ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 
 **Depends on:**
@@ -334,7 +334,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 **Rules:**
 
 - A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
-- Pilots other than the PF touch nothing in the cockpit during preflight, and the banner's preflight summary says so, because catch-up sets only what the profile holds: a PM who switches a display to another page during preflight keeps that page after the PF's state arrives.
+- Pilots other than the PF touch nothing in the cockpit during preflight, because catch-up sets only what the profile holds: a PM who switches a display to another page during preflight keeps that page after the PF's state arrives.
   The PF touches nothing beyond the checklist.
 - Un-readying during the countdown cancels it, and the flight doesn't start until every pilot counted is ready again.
 - During preflight, a ready pilot un-readies before Leave session is available to them, so leaving cancels a running countdown, and a pilot who has left no longer counts.
@@ -611,7 +611,7 @@ A notice can carry one action of its own, such as Ready on the preflight summary
 - The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", and "You have control".
 - A notice when a synced control never matches after Crosscheck's retries, once per control per flight, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - While a pilot's cockpit catches up, a "Catching up..." notice saying that switches they move now will be reset ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
-- During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button.
+- During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button, and for pilots other than the PF, a line telling them to touch nothing in the cockpit.
 - Crosscheck opening the banner's panel itself when a flight loads, with no click from the pilot.
 
 **Not in v1:**

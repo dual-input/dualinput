@@ -18,7 +18,7 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 ## Channels
 
 A channel is what one feature sends, or several features whose messages must apply in one order: its messages, how they travel, how they're recorded, and how a cockpit catches up on them.
-A channel that doesn't join the cockpit's shared order, which this section comes to below, changes nothing for the others but the bandwidth, and removing a channel removes all of it.
+A channel that doesn't join the cockpit's shared order changes nothing for the others but the bandwidth, and removing a channel removes all of it.
 
 v1 has six channels:
 
@@ -182,6 +182,7 @@ The network carries those figures too, so the avatar channel sends only what mov
 In v1 the desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([EFB app](03-v1-scope.md#efb-app)).
 A cockpit panel can hold a WebSocket to a program on the same PC (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q08 yes: a cockpit document can hold a WebSocket to loopback"), with the sim's developer mode off (FS Copilot fork, `record/pointer-forwarding/docs/06-open-questions.md`, Q08).
 Nobody has tried a WebSocket from an EFB app, and a probe in step 6 of [the plan](plan.md) tries it.
+The Fenix's MSFS 2024 tablet app shows its web app from `http://localhost:8083` (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)), so an EFB app showing a page that a program on the same PC serves is a second route the probe tries.
 If it works, the EFB app speaks the same protocol as a browser, rather than reach Crosscheck through something only a sim panel has, such as `L:` variables.
 
 - **The tablet in a browser** is one more client on the same protocol, reached across the home network.
@@ -189,7 +190,8 @@ If it works, the EFB app speaks the same protocol as a browser, rather than reac
 - **The Crosscheck IDE** is one more client too, with commands of its own: discovering what an aircraft exposes, live values, running one entry's write, and reloading a profile mid-session.
 
 **v1 builds** one protocol that every client speaks, which can listen beyond the PC itself, off by default.
-If the EFB probe fails, the EFB app's messages pass through a cockpit panel that holds a WebSocket, and step 7 designs how.
+If both routes fail, the EFB app's messages pass through a panel that holds a WebSocket, and step 7 designs how.
+`L:` variables carried a click from our in-game panel to a stand-in we put into the EFB's document (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)), and the hop from an EFB app to a cockpit panel is unverified.
 
 ## Profiles
 

@@ -128,6 +128,7 @@ Done on 2026-10-04.
 Produces: [04-room-for-later](04-room-for-later.md).
 Exit: each Soon and Later pick says what Crosscheck must allow for it, such as a low-delay stream of the other pilot's axes for mixed flight controls.
 A pick gets only that much detail, so the architecture knows the future it has to leave room for.
+Done on 2026-10-04, which also added Plugins to v1 and two probes to step 6.
 
 ## 6. Probes that retire architecture risks
 
@@ -151,7 +152,7 @@ Exit: each risk below has a log entry that answers it.
 - Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at low frame rates (the PA-24 session's wasn't recorded), and whether a held key bound to a momentary input event repeats inside that window.
 - Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
 - Whether one sim draws several of our figures, each posed from variables of its own object, and what 2, 20, and 180 figures cost in frame time with every joint moving every frame, which decides how the avatars' module and channel are built ([04-room-for-later](04-room-for-later.md#people-beyond-the-crew)).
-- Whether an EFB app and the notification banner's in-game panel can each hold a WebSocket to a program on the same PC, as a cockpit panel can, which decides whether every client of Crosscheck speaks one protocol ([04-room-for-later](04-room-for-later.md#one-protocol-for-every-client)).
+- Whether an EFB app and the notification banner's in-game panel can each hold a WebSocket to a program on the same PC, as a cockpit panel can, or show a page that program serves, as the Fenix's tablet app does, which decides whether every client of Crosscheck speaks one protocol ([04-room-for-later](04-room-for-later.md#one-protocol-for-every-client)).
 
 The world map probe and the six after it, on stepped writes, settling, the double-fire, writes landing, figures, and WebSockets, make one batched sim session.
 Steps 4 and 5 add to this list as they find risks.

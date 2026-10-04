@@ -700,7 +700,7 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 - Every crew member's machine records what passes through Crosscheck: each synced change, each handover, and the connection's events.
 - The recording also keeps the flight model's samples, and every value each [plugin](#plugins) received and every action it returned, so a recorded flight replays through a plugin in its tests ([04-room-for-later](04-room-for-later.md#recording)).
-- It keeps each read-only profile entry whose value differs between machines, with both values ([live sync](../sync/02-live-sync.md#values-not-events)).
+- The recording keeps each read-only profile entry whose value differs between machines, with both values ([live sync](../sync/02-live-sync.md#values-not-events)).
 - Crosscheck marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - Each machine keeps at least the whole flight, and more flights if recordings turn out small enough.
 - A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.

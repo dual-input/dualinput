@@ -107,7 +107,7 @@ A pointer press that also changes a state entry applies once too: the stream car
 ## Open questions
 
 - Whether held keys repeat a momentary input event faster than the double-fire window: a momentary input event reports 0 every time (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong"), so if they do, the filter drops the real repeats as echoes.
-- Whether the double-fire stays within 3 frames at frame rates below the PA-24 session's, which wasn't recorded, and on aircraft other than the PA-24.
+- Whether the double-fire stays within 3 frames at low frame rates, and on aircraft other than the PA-24 (the PA-24 session's frame rate wasn't recorded).
 - Whether SimConnect applies the writes Crosscheck sends within one frame in the order it sent them.
 - How long to wait before reading back, how many retries before a flag, and how long an unused echo token lasts.
 - How to keep a `then` action or a write function's actions from doing harm when a retry repeats them.

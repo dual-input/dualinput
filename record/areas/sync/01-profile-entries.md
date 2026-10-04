@@ -217,7 +217,8 @@ A profile gives no signal for when the aircraft has finished loading, because on
 
 The IDE doesn't build entries by itself from what a click fires.
 fsc-editor tried that with its Activity view.
-A capture found 195 `L:` variables, mostly ambient, changing within 400ms of one knob turn (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "195 variables change within 400 ms of an interaction. Proximity alone cannot rank."), and the ranking built from it put the beacon's own variable first once and outside the top five another time, beaten by click sounds that move on every interaction (measured on MSFS 2024, 2026-08-24, same log, "The ranking's problem is companions, not ambient rate").
+A capture found 195 `L:` variables, mostly ambient, changing within 400ms of one knob turn (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "195 variables change within 400 ms of an interaction. Proximity alone cannot rank.").
+The Activity view's ranking put the beacon's own variable first in one capture and outside the top five in another, beaten by click sounds that move on every interaction (measured on MSFS 2024, 2026-08-24, same log, "The ranking's problem is companions, not ambient rate").
 
 ## Known limits
 

@@ -10,8 +10,9 @@ The ideas we turned down or set aside are under [Ideas left out](#ideas-left-out
 
 ### State sync with variables and events
 
-Each change to a switch, knob, or lever travels to the other machine as the variable or event behind it, as FS Copilot and YourControls do ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#prior-art)).
+Each change to a switch, knob, or lever travels to the other machine, as it does in FS Copilot and YourControls ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#prior-art)).
 The other ideas build on it.
+It's in v1, and its design is in the [sync area](../sync/01-profile-entries.md): a control's new value crosses the wire, and the receiving machine's own writer sets it, checks it, and catches it up after a drop.
 
 ### Pointer sync
 
@@ -53,6 +54,18 @@ The iniBuilds A380's displays pressed at the position we sent once we told the d
 The A350's module discards the position we send and presses wherever the receiving pilot's own cursor is on that display, so reaching it takes a patch to the module that nobody has written (read in inibuilds-aircraft-a350 1.2.6, `inibuilds-A350.wasm`, `GaugeInstance::DoCallback`; FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-24 — Read out of the A350's binary: the press position comes from the draw data, not the click").
 
 - **Next:** design how a production version does this, and find which aircraft's displays it reaches.
+
+### Aircraft adapters
+
+An adapter for one aircraft reaches state that no variable or event shows and puts it in Crosscheck's state for that aircraft, so a cockpit can catch up on it.
+The A220's display formats live in its DisplayUnits' Redux store (read in synaptic-aircraft-a220 1.0.10, `html_ui/Pages/VCockpit/Instruments/a22x/DisplayUnits/instrument.js`), and the PMDG 777 loads a panel-state file when a flight loads (unverified; loading a flight and comparing its cockpit with the package's `Config\PanelState\` files settles it).
+
+- **Tech:** our `VCockpit.js` override runs inside the A220's display documents, so a script there might reach the store at runtime without changing the aircraft's files, if the page can reach the store at all (unverified).
+  Writing into another developer's store can break what their code derives from it, so an adapter would copy narrow parts, such as the current display format.
+  The PMDG loads its panel-state file when the flight loads, and whether it loads one mid-flight is untested.
+  The [bus bridge](#bus-bridge) is a related route: the A220's `A22X.Resync` returns its full state over the CommBus.
+- **Product:** it reaches what [catch-up](../sync/03-catch-up.md#what-catch-up-doesnt-recover) can't, such as a display's page or an FMS's contents after a late join.
+- **Open questions:** whether an adapter may change another developer's package, which needs the decision in `record/decisions/` that [Crosscheck objects in the cockpit](#crosscheck-objects-in-the-cockpit) also waits on.
 
 ### Traffic sync
 

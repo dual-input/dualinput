@@ -84,6 +84,7 @@ The picks, picked on 2026-10-02:
   - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
   - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
   - [Telemetry](ideas.md#telemetry), picked on 2026-10-04
+  - [Aircraft adapters](ideas.md#aircraft-adapters), picked on 2026-10-04
 
 How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, is left to step 4, because it's a detail of the interface rather than a feature.
 
@@ -115,7 +116,8 @@ Agreed:
 - Avatar sync, on 2026-10-04.
 
 Every v1 feature is agreed, and so is the pass that strings them into one session, which added preflight on 2026-10-04.
-Step 4 stays open until the architecture, in step 7, settles one question: whether v1 can bring every cockpit to the PF's state when preflight ends ([state sync](03-v1-scope.md#state-sync)).
+The [sync design](../sync/01-profile-entries.md), agreed the same day, brings every cockpit to the PF's state when preflight ends, for every control the profile can read or count.
+Done on 2026-10-04.
 
 ## 5. What later features need from the core
 
@@ -140,13 +142,19 @@ Exit: each risk below has a log entry that answers it.
   The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 - How the notification banner's panel shows in VR, which tells us whether it meets v1's commitment to VR pilots; nobody has tried.
 - Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
+- How fast an aircraft takes stepped writes, which sets the [sync design](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft)'s default pace: the Synaptic A220's `K:HEADING_BUG_INC` sent 10 times in one frame and then once per frame, counting degrees (its study's sim question 5); two `L:INI_BARO1_INC_COMMAND` writes before one update of the iniBuilds A350, then one per update (its sim question 3); and 10 added to the Fenix's `L:E_FCU_HEADING` at once (its sim questions 1 and 2).
+- When an aircraft loaded cold stops restoring its own controls, which checks [catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 15s, 15s, and 1.5-minute settle rule: load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
+- Whether the input event double-fire stays within 3 frames well below 60 fps, and whether a held key bound to a momentary input event repeats faster than that, which checks [live sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)'s duplicate filter.
+- Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, and how long an aircraft takes to show a write, which set catch-up's order and live sync's read-back wait.
+These and the world map probe make one batched sim session.
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture
 
 Produces: decisions in `record/decisions/`.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
-The profile format waits for the features, because they decide what it has to express, and it decides in turn how a cockpit takes the flying machine's state at once, when preflight ends, when a late joiner arrives, and after a reconnect ([state sync](03-v1-scope.md#state-sync)).
+The profile format takes the shape the [sync design](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.
+The decisions also pick whether each machine sends to every other directly or through the flying machine's ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), the sandbox profile functions run in, and its size limits.
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.

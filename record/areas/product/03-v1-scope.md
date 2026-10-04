@@ -22,7 +22,7 @@ A v1 session runs in this order, and each step's rules are in the section it lin
 2. Crosscheck and the sim start in either order, and the host starts a session and shares its code, which the other pilots enter to join ([invite code](#invite-code)).
 3. Each pilot loads a flight at the PF's stand, which Crosscheck shows them, and once they're in it, Crosscheck moves their aircraft to the PF's position and holds every aircraft still for [preflight](#preflight).
 4. In preflight, each pilot works through the [preflight match check](#preflight-match-check)'s list, takes a seat ([avatar sync](#avatar-sync)), and clicks Ready.
-5. When every pilot is ready, a countdown ends preflight, and the aircraft is free to move.
+5. When every pilot is ready, a countdown ends preflight, every follower's cockpit takes the PF's state, and the aircraft is free to move.
 6. The crew flies, passing control by the [take-control key](#take-control-key) or the [voice phrases](#voice-phrases), with [notices](#notification-banner) for what needs their attention.
 7. A pilot who drops out reconnects or rejoins as a late joiner, and the others fly on ([the connection](#the-connection)).
 8. Each pilot leaves with Leave session, the session ends with the last, and each machine keeps its recording for a [bug report](#recording-and-bug-reports).
@@ -164,11 +164,14 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 **In v1:**
 
 - Every control, and every panel with a function in flying the aircraft, display units included, that the aircraft's profile names.
+- A cockpit that missed changes, or never had them, comes to the flying machine's state for every control the profile can read or count: when [preflight](#preflight) ends, when a pilot joins late, and after a reconnect ([catch-up](../sync/03-catch-up.md)).
+- Crosscheck checks that each write it makes lands, and when one never does, it marks the recording and shows a notice on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 
 **Not in v1:**
 
 - Telling pilots what on their aircraft doesn't sync, a Later pick in [the plan](plan.md), because we first learn what Crosscheck can sync.
-- Detecting and correcting cockpits that drift apart, because Crosscheck can't reliably read the state of most aircraft ([Ideas left out](ideas.md#ideas-left-out)).
+- Comparing whole cockpits through a flight to find ones that drifted apart, beyond checking each write, because Crosscheck can't reliably read the state of most aircraft ([Ideas left out](ideas.md#ideas-left-out)).
+- Catching up what the profile can't read or count, such as a display's page or an FMS's contents, which [aircraft adapters](ideas.md#aircraft-adapters), a Later pick, might reach.
 - The pilot's own MSFS EFB overlay.
 
 **Rules:**
@@ -176,24 +179,16 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 - The profile marks which of its entries belong to the PF: the aircraft's flight controls, toe brakes, engine levers, and trim, the categories the [take-control key](#take-control-key) names.
   Those reach the following machine from the flying machine.
   Everything else in the profile is shared: either pilot can change it, and the other cockpit follows.
-- When both pilots change the same thing at nearly the same moment, the flying machine decides which change stands, and both cockpits end in that state.
+- When both pilots change the same shared entry at nearly the same moment, both machines end on the same value: the later change when one pilot saw the other's, and the PF's when neither did ([live sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
 - Crosscheck sends every change a pilot makes, and never a change it applied itself.
   The PM turns the beacon on, Crosscheck sets it on the PF's machine, and the PF's sim reports that the beacon changed: Crosscheck doesn't send that report back.
   If the PF turns the beacon off half a second later, that change goes through, where a guard that ignores reports for a while after each write would drop it, as one dropped two real pilot inputs in our FS Copilot work ([08-02](../../learn/foundations/08-02-echoes-and-initial-sync.md#echo-loops-and-suppressing-them)).
-- A change the aircraft makes on its own syncs like a pilot's, such as the Baron taking its chocks away once it moves.
+- A change the aircraft makes on its own syncs like a pilot's, such as the Baron taking its chocks away once it moves, except while the aircraft is still settling after a load ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 
 **Depends on:**
 
-- Profiles, which name what syncs, how each entry is set, and which entries belong to the PF.
+- Profiles, which name what syncs, how each entry is set, and which entries belong to the PF ([profile entries](../sync/01-profile-entries.md)).
 - The [take-control key](#take-control-key), for which machine is flying.
-
-**Open questions:**
-
-- How a cockpit takes the flying machine's state at once, when [preflight](#preflight) ends, when a late joiner arrives, and after a reconnect.
-  A change-only setter can't do it, since an increment sent at connect changes nothing useful, so step 7 in [the plan](plan.md) settles it with the profile format and the core architecture.
-  The candidate is a state object per aircraft (proposed 2026-10-04), which Crosscheck fills by reading every profile entry it can read, and applies by running each entry's setter against it, so a setter that sees both the wanted and the local value can flip a toggle or step a knob only as far as needed.
-- How Crosscheck recognizes its own writes on each channel, which the architecture settles.
-  A `K:` event can carry a tag in its spare fifth value, which reaches every listener (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-reached-our-own-masking-group-and-the-777-ignored-re-sent-values)), while a variable write carries only the value.
 
 ### Pointer sync
 
@@ -215,7 +210,7 @@ A press or drag on a panel display travels to the other machine as the position 
 
 - A gesture replays at the same position, as a fraction of the display's size, and the receiving display decides what it hits.
   A peer's press sent that way drove the A220's ND to plan mode, and replayed drags work with a small drift in their timing (measured on MSFS 2024, 2026-09-17 and 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "A peer's press drove the real A220 ND, opted in by identifier alone" and "The drag drift candidate is real but small, and temporal not spatial").
-- A replayed press does what the pilot meant only when both displays show the same page, and Crosscheck doesn't check that they do, for the reason state sync doesn't detect drift.
+- A replayed press does what the pilot meant only when both displays show the same page, and Crosscheck can't check that they do, because a display's page is state no profile entry reads.
 - During a long outage, the following pilot's synced displays lock, and taking control unlocks them (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
 
 **Depends on:**
@@ -226,7 +221,6 @@ A press or drag on a panel display travels to the other machine as the position 
 **Open questions:**
 
 - When both pilots type on one display at once, each machine may apply the keys in a different order (unverified, [08-06](../../learn/foundations/08-06-divergence-and-one-screen.md#unverified-claims)).
-- A display press that also changes a value state sync sends could apply twice, flipping a toggle back; we deal with it if a profile runs into it.
 
 ## Session
 
@@ -292,8 +286,9 @@ The connection carries everything between the crew's machines, directly when it 
   Our FS Copilot fork waits the same 5 minutes, which its notes call "long enough for a router reboot or a sim reload" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `DegradedTimeout`, and `record/pointer-forwarding/docs/13-pr-prep.md`).
 - Recovery is the app's job, and each part of Crosscheck recovers its own state within it.
   The app tells whether a returning pilot's sim kept running or restarted, from session state it saves on the pilot's machine with an identifier for the sim's run.
-  If the sim kept running, Crosscheck reconnects the pilot with no action from them, from that saved state, and pointer sync, state sync, and any later part each replay what the pilot missed, as our FS Copilot fork's pointer sync replays its held history in order (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
-  If the sim restarted, the cockpit can't be brought back in sync, so once the pilot is in a flight again, Crosscheck tells them so and rejoins them with the code it remembers, as a [late joiner](#preflight): flight-model sync puts them back in the aircraft's place, and changes sync from then on.
+  If the sim kept running, Crosscheck reconnects the pilot with no action from them, from that saved state, and replays what they missed in the order it happened ([catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
+  If the sim restarted, Crosscheck rejoins the pilot once they're in a flight again, with the code it remembers, as a [late joiner](#preflight): flight-model sync puts them back in the aircraft's place, their cockpit catches up on every control the profile can read or count, and Crosscheck tells them that displays and anything else may differ.
+- When the PF's connection drops, control passes to a pilot who isn't catching up, and if the only other pilot is catching up, their catch-up stops and they take control ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
 - A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying as a pilot who loses the connection does: control passes to the PM if they were the PF, and the others get a notice.
   Once they're in a flight again, Crosscheck rejoins them as a late joiner.
 - A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app.
@@ -306,8 +301,6 @@ The connection carries everything between the crew's machines, directly when it 
 **Open questions:**
 
 - Whether a cut-off pilot's switches can be blocked as well as their displays, which needs input blocking such as the masking that [soft takeover](ideas.md#soft-takeover-on-handover), a Soon pick, uses.
-- Whether missed changes replay as one history in the order they happened, or in a queue per part, which could replay a display press and a switch flipped after it in the wrong order.
-- How a late joiner catches up, which [state sync](#state-sync)'s question on taking the flying machine's state at once answers.
 - How to soften a short gap, for the architecture to weigh: carry the aircraft on its last velocities for about a second and then ease it to the true position when data returns, have each packet carry the last few samples so one lost packet costs nothing, and send a copy through the relay only while the direct link is losing packets or switching paths.
 
 ### Preflight
@@ -324,7 +317,9 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 - When a joined pilot is in a flight, Crosscheck puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
 - Each pilot works through the [preflight match check](#preflight-match-check)'s list and clicks Ready.
 - When every pilot counted is ready, a 3s countdown runs, and when it ends, preflight ends: the aircraft is free to move, and the rest of sync starts.
-- Crosscheck asks pilots not to touch the cockpit during preflight, because state sync sends only changes made after preflight ends: if the PM turns the beacon on during preflight, the PF's beacon stays off for the flight.
+- When preflight ends, every follower's cockpit takes the PF's value for every control the profile can read or count ([catch-up](../sync/03-catch-up.md#when-preflight-ends)).
+- Pilots other than the PF touch nothing during preflight, because what the profile doesn't hold stays as each of them leaves it.
+  The PF works through a checklist of the profile's starting values, such as "FCU speed 80", and touches nothing else.
 
 **Not in v1:**
 
@@ -333,6 +328,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 **Rules:**
 
+- A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 - Un-readying during the countdown cancels it, and the flight doesn't start until every pilot counted is ready again.
 - During preflight, a ready pilot un-readies before Leave session is available to them, so leaving cancels a running countdown, and a pilot who has left no longer counts.
 - A pilot who drops out during preflight becomes unready and still counts, so by default the crew waits for them.
@@ -348,7 +344,6 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 **Open questions:**
 
-- Whether every cockpit can take the PF's state when preflight ends, which would retire the request not to touch the cockpit, and which [state sync](#state-sync)'s question on taking the flying machine's state at once answers.
 - What a joined pilot sees when the PF isn't in a flight yet, such as when the host started the session before the sim.
 - Whether Crosscheck can name the stand an aircraft is on, from SimConnect directly or by matching the aircraft's position against the airport's parking spots (unverified).
 - Whether anything outside the sim can point the world map at a spot, which the step 6 probe for [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) in [the plan](plan.md) answers.
@@ -606,6 +601,7 @@ A notice can carry one action of its own, such as Ready on the preflight summary
 **In v1:**
 
 - The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", and "You have control".
+- A notice when a synced control never matches after Crosscheck's retries, once per control per flight, such as "Couldn't sync the APU bleed. Please send a bug report after your flight." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button.
 - Crosscheck opening the banner's panel itself when a flight loads, with no click from the pilot.
 
@@ -648,6 +644,7 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 **In v1:**
 
 - Every crew member's machine records what passes through Crosscheck: each synced change, each handover, and the connection's events.
+- Crosscheck marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - Each machine keeps at least the whole flight, and more flights if recordings turn out small enough.
 - A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.
 - Each pilot uploads their own part to a server of ours, labeled with the session's ID, and the parts meet there, so a report works after the crew has gone: if something goes wrong on landing and everyone goes to bed, there's no live session the next morning.

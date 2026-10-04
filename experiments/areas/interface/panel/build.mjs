@@ -45,6 +45,7 @@ import path from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { CARD_CSS, HEIGHT, PANEL, WIDTH, cardMarkup } from "./card.mjs"
+import { writeKtx2 } from "./tools/ktx2.mjs"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const OUT = path.join(HERE, "package")
@@ -211,67 +212,108 @@ function panelGltf(material, images) {
 // The panel shouldn't throw a shadow on the cockpit or smear when the head turns.
 const noShadowNoBlur = { ASOBO_material_shadow_options: { noCastShadow: true }, ASOBO_material_disable_motion_blur: { enabled: true } }
 
-// The objects keep the four titles and asset groups the Project Editor first
-// built, and change what they carry from round to round: Build and Mount
-// builds a new asset group only once the project is reopened (p02).
+// Earlier rounds, all on StaticObjects in SimObjects/Misc: a gauge from the
+// object's own panel.cfg never ran; a material named $TabletScreen stayed
+// black; livery paintings opened their documents and drew nothing on the panel
+// in four variants (location exterior and interior, opaque, see-through, and
+// the Baron's registration material, and the calls RegistrationNumberLoaded
+// and VLIVERY_DATA_LOADED); and Build and Mount left the card's PNG out of the
+// package, from texture/ and from beside the model (record/areas/interface/
+// log.md, 2026-10-04).
 //
-// Earlier rounds: a gauge from the object's own panel.cfg never ran; the card
-// baked into a texture showed the missing-texture pattern, because the
-// packager left the PNG in texture/ out; a livery painting, location=exterior
-// on a see-through material, opened its document but drew nothing on the
-// panel; and a material named $TabletScreen stayed black.
-//
-// Round 1, livery paintings, which the sim opens on objects that aren't the
-// pilot's aircraft (p03), each a different guess at what makes one land:
-//   Gauge     location=exterior, an opaque material, and the call Asobo's live
-//             VDGS display makes, VLIVERY_DATA_LOADED with false (read in
-//             asobo-vliveries, pages/vlivery/paint/vdgs/vdgsdisplay.js)
-//   Painted   location=interior, the see-through material, and the Baron's
-//             call, RegistrationNumberLoaded, after each redraw
-//   Tablet    location=exterior, the Baron's registration material as its
-//             exterior model defines it (read in bksq-aircraft-baronpro 0.1.1,
-//             BaronProfessional_Base_EXT.gltf, $RegistrationNumberExt), and
-//             RegistrationNumberLoaded
-// and Baked, the card's PNG beside the model rather than in texture/.
+// Round 2, built by fspackagetool with the sim closed (--install):
+//   Baked, Baked2     the card's PNG in texture/, with and without a
+//                     texture.cfg, as the standalone packager takes it
+//   Paint*            the round-0 painting, location=exterior on the
+//                     see-through material with RegistrationNumberLoaded, on
+//                     objects of other categories, each in the folder its kind
+//                     ships in: the sim may bind a painting only on some
+//                     kinds. FSLTL's AI traffic paints its registrations
+//                     (read in fsltl-traffic-base, FSLTL_LJ25/panel/panel.cfg);
+//                     GSX's seat object is a Viewer in GroundVehicles, and
+//                     Aerosoft's VDGS a Human in Misc (read in
+//                     fsdreamteam-gsx-pro 4.0.19 and aerosoft-airport-edlp-paderborn)
+//   Aircraft          the same painting on a minimal aircraft of our own,
+//                     with no engines, which p02 spawns last in case it takes
+//                     the sim down
+const paintMaterial = { name: PAINT, doubleSided: true, alphaMode: "BLEND", pbrMetallicRoughness: { baseColorFactor: [1, 1, 1, 1], metallicFactor: 0, roughnessFactor: 1 }, extensions: noShadowNoBlur }
+const painting = { texture: PAINT, location: "exterior", capture: "registration" }
+const bakedMaterial = {
+  name: "CROSSCHECK_P02_CARD", doubleSided: true, alphaMode: "BLEND", emissiveFactor: [1, 1, 1], emissiveTexture: { index: 0 },
+  pbrMetallicRoughness: { baseColorTexture: { index: 0 }, baseColorFactor: [1, 1, 1, 1], metallicFactor: 0, roughnessFactor: 1 },
+  extensions: noShadowNoBlur,
+}
 const OBJECTS = [
-  {
-    title: "CROSSCHECK_P02_Gauge",
-    material: { name: "$CROSSCHECK_P02_PAINT_A", doubleSided: true, pbrMetallicRoughness: { baseColorFactor: [1, 1, 1, 1], metallicFactor: 0, roughnessFactor: 1 }, extensions: noShadowNoBlur },
-    painting: { texture: "$CROSSCHECK_P02_PAINT_A", location: "exterior", capture: "live" },
-  },
-  {
-    title: "CROSSCHECK_P02_Baked",
-    material: {
-      name: "CROSSCHECK_P02_CARD", doubleSided: true, alphaMode: "BLEND", emissiveFactor: [1, 1, 1], emissiveTexture: { index: 0 },
-      pbrMetallicRoughness: { baseColorTexture: { index: 0 }, baseColorFactor: [1, 1, 1, 1], metallicFactor: 0, roughnessFactor: 1 },
-      extensions: noShadowNoBlur,
-    },
-    images: [CARD_PNG],
-    pngInModel: true,
-  },
-  {
-    title: "CROSSCHECK_P02_Painted",
-    material: { name: PAINT, doubleSided: true, alphaMode: "BLEND", pbrMetallicRoughness: { baseColorFactor: [1, 1, 1, 1], metallicFactor: 0, roughnessFactor: 1 }, extensions: noShadowNoBlur },
-    painting: { texture: PAINT, location: "interior", capture: "registration" },
-  },
-  {
-    title: "CROSSCHECK_P02_Tablet",
-    material: {
-      name: "$CROSSCHECK_P02_PAINT_B", alphaMode: "BLEND",
-      pbrMetallicRoughness: { baseColorFactor: [0.8, 0.8, 0.8, 1], metallicFactor: 0, roughnessFactor: 0.5 },
-      extensions: {
-        ASOBO_material_blend_gbuffer: { emissiveBlendFactor: 0, metallicBlendFactor: 0, normalBlendFactor: 0, occlusionBlendFactor: 0, roughnessBlendFactor: 0 },
-        ASOBO_material_draw_order: { drawOrderOffset: 1 },
-        ASOBO_material_shadow_options: { noCastShadow: true },
-      },
-    },
-    painting: { texture: "$CROSSCHECK_P02_PAINT_B", location: "exterior", capture: "registration" },
-  },
+  { title: "CROSSCHECK_P02_Baked", material: bakedMaterial, images: [`../texture/${CARD_PNG}`], textureCfg: true, flags: true },
+  { title: "CROSSCHECK_P02_Baked2", material: bakedMaterial, images: [`../texture/${CARD_PNG}`], flags: true },
+  { title: "CROSSCHECK_P02_PaintStatic", material: paintMaterial, painting },
+  { title: "CROSSCHECK_P02_PaintBoat", folder: "Boats", category: "Boat", material: paintMaterial, painting },
+  { title: "CROSSCHECK_P02_PaintVehicle", folder: "GroundVehicles", category: "GroundVehicle", material: paintMaterial, painting },
+  { title: "CROSSCHECK_P02_PaintViewer", folder: "GroundVehicles", category: "Viewer", material: paintMaterial, painting },
+  { title: "CROSSCHECK_P02_PaintHuman", category: "Human", material: paintMaterial, painting },
+  { title: "CROSSCHECK_P02_Aircraft", folder: "Airplanes", aircraft: true, material: paintMaterial, painting },
 ]
+const folderOf = (o) => o.folder ?? "Misc"
+
+// A minimal aircraft for AI: the sections FSLTL's AI-only Learjet carries
+// (read in fsltl-traffic-base, FSLTL_LJ25), each cut to what an object that
+// never flies needs, with engine_type 2, no engine. Its values are ours.
+const AIRCRAFT_CFG = (title) => `[VERSION]
+major = 1
+minor = 0
+
+[GENERAL]
+atc_type = "CROSSCHECK"
+atc_model = "P02"
+Category = "airplane"
+editable = 0
+icao_type_designator = "ZZZZ"
+icao_engine_count = 0
+
+[FLTSIM.0]
+title = "${title}"
+model = ""
+panel = ""
+texture = ""
+sound = ""
+atc_id_enable = 0
+isairtraffic = 0
+isUserSelectable = 0
+ui_manufacturer = "Crosscheck"
+ui_type = "p02 panel"
+ui_variation = "probe"
+`
+const FLIGHT_MODEL_CFG = `[VERSION]
+major = 1
+minor = 0
+
+[WEIGHT_AND_BALANCE]
+max_gross_weight = 100
+empty_weight = 100
+reference_datum_position = 0, 0, 0
+empty_weight_CG_position = 0, 0, 0
+empty_weight_pitch_MOI = 10
+empty_weight_roll_MOI = 10
+empty_weight_yaw_MOI = 10
+empty_weight_coupled_MOI = 0
+
+[AIRPLANE_GEOMETRY]
+wing_area = 1
+wing_span = 1
+wing_root_chord = 1
+`
+const ENGINES_CFG = `[VERSION]
+major = 1
+minor = 0
+
+[GENERALENGINEDATA]
+engine_type = 2
+`
 
 const scaleCode = `(L:CROSSCHECK_P02_SCALE) ${SCALE_MIN} - ${SCALE_FRAMES / (SCALE_MAX - SCALE_MIN)} * 0 max ${SCALE_FRAMES} min`
+fs.rmSync(path.join(OUT, "PackageSources", "SimObjects"), { recursive: true, force: true })
 for (const o of OBJECTS) {
-  const dir = `PackageSources/SimObjects/Misc/${o.title}`
+  const dir = `PackageSources/SimObjects/${folderOf(o)}/${o.title}`
   fs.rmSync(path.join(OUT, dir), { recursive: true, force: true })
   const { json, bin } = panelGltf(o.material, o.images)
   json.buffers[0].uri = `${o.title}.bin`
@@ -299,7 +341,14 @@ for (const o of OBJECTS) {
     `</ModelInfo>`,
     ``,
   ].join("\n"))
-  write(`${dir}/sim.cfg`, `[VERSION]\nmajor=1\nminor=0\n\n[fltsim.0]\ntitle=${o.title}\nmodel=\n${o.panel || o.painting ? "panel=\n" : ""}texture=\n\n[General]\ncategory=StaticObject\n`)
+  if (o.aircraft) {
+    write(`${dir}/aircraft.cfg`, AIRCRAFT_CFG(o.title))
+    write(`${dir}/flight_model.cfg`, FLIGHT_MODEL_CFG)
+    write(`${dir}/engines.cfg`, ENGINES_CFG)
+  } else {
+    write(`${dir}/sim.cfg`, `[VERSION]\nmajor=1\nminor=0\n\n[fltsim.0]\ntitle=${o.title}\nmodel=\n${o.panel || o.painting ? "panel=\n" : ""}texture=\n\n[General]\ncategory=${o.category ?? "StaticObject"}\n`)
+  }
+  if (o.textureCfg) write(`${dir}/texture/texture.cfg`, `[fltsim]\n`)
   if (o.painting) {
     write(`${dir}/panel/panel.cfg`, [
       `[VERSION]`, `major=1`, `minor=0`, ``,
@@ -461,14 +510,60 @@ if (checkPainting.status !== 0) die("painting.js doesn't parse.")
 
 // ------------------------------------------------ 4. the baked card
 
-const cardHtml = path.join(OUT, "card", "card.html")
-write("card/card.html", `<!doctype html><html><head><meta charset="utf-8"><style>html, body { margin: 0; background: transparent; width: ${WIDTH}px; height: ${HEIGHT}px; overflow: hidden; }${CARD_CSS}</style></head><body>${cardMarkup()}</body></html>\n`)
-const baked = OBJECTS.find((o) => o.images)
-const png = path.join(OUT, "PackageSources", "SimObjects", "Misc", baked.title, baked.pngInModel ? "model" : "texture", CARD_PNG)
-fs.mkdirSync(path.dirname(png), { recursive: true })
+// The card's scratch files live outside the project folder: the sim's
+// package builder watches that folder and tries to reload an asset group for
+// every file that changes in it (p02, 2026-10-04).
+const CARD_DIR = path.join(HERE, "build", "card")
+fs.mkdirSync(CARD_DIR, { recursive: true })
+const cardHtml = path.join(CARD_DIR, "card.html")
+fs.writeFileSync(cardHtml, `<!doctype html><html><head><meta charset="utf-8"><style>html, body { margin: 0; background: transparent; width: ${WIDTH}px; height: ${HEIGHT}px; overflow: hidden; }${CARD_CSS}</style></head><body>${cardMarkup()}</body></html>\n`)
+const png = path.join(CARD_DIR, CARD_PNG)
 const shot = spawnSync(edge, ["--headless=new", "--disable-gpu", "--hide-scrollbars", "--default-background-color=00000000", `--window-size=${WIDTH},${HEIGHT}`, `--screenshot=${png}`, pathToFileURL(cardHtml).href], { stdio: "ignore", timeout: 60_000 })
 if (!fs.existsSync(png)) die(`Edge rendered no card (status ${shot.status}).`)
 console.log(`card rendered: ${fs.statSync(png).size} bytes`)
+// Both packagers left a lone PNG out without an error, though they took a
+// texture.cfg from the same folder (p02 rounds 1 and 2). Packaged textures
+// carry a flags file beside them, such as ChasePlane's
+// P42_FLASHLIGHT_BODY_ALBEDO.PNG.KTX2.json (read in p42-util-chaseplane
+// 2026.39.1.16), so each PNG gets a .PNG.json of the same form, for the
+// packager to find, with the date as a Windows FILETIME number.
+for (const o of OBJECTS.filter((x) => x.images)) {
+  const to = path.join(OUT, "PackageSources", "SimObjects", folderOf(o), o.title, o.pngInModel ? "model" : "texture", CARD_PNG)
+  fs.mkdirSync(path.dirname(to), { recursive: true })
+  fs.copyFileSync(png, to)
+  if (o.flags) {
+    const date = ((BigInt(Math.floor(fs.statSync(to).mtimeMs)) + 11644473600000n) * 10000n).toString()
+    fs.writeFileSync(`${to}.json`, `{"Version":2,"SourceFileDate":${date},"Flags":["FL_BITMAP_COMPRESSION","FL_BITMAP_MIPMAP"],"HasTransp":true}`)
+  }
+}
+
+// The flags file didn't help either (p02 round 2), so the card also ships
+// ready-made, through Copy asset groups, under the name the compiled model
+// points at, ..\TEXTURE\CROSSCHECK_P02_CARD.PNG.KTX2 (read in the build's
+// output): an uncompressed DDS under that name for Baked, and an uncompressed
+// KTX2 for Baked2 (tools/ktx2.mjs), to tell a refused name from a refused file.
+const dds = path.join(CARD_DIR, `${CARD_PNG}.DDS`)
+const conv = spawnSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(HERE, "tools", "png-to-dds.ps1"), "-In", png, "-Out", dds], { encoding: "utf8" })
+if (conv.status !== 0 || !fs.existsSync(dds)) die(`png-to-dds.ps1 failed: ${conv.stderr || conv.stdout}`)
+const ddsBytes = fs.readFileSync(dds)
+// The DDS holds BGRA rows, top first, after its 128-byte header.
+const rgba = Buffer.from(ddsBytes.subarray(128))
+for (let i = 0; i < rgba.length; i += 4) { const b = rgba[i]; rgba[i] = rgba[i + 2]; rgba[i + 2] = b }
+const READY = [
+  { group: "CROSSCHECK_P02_Baked_texture", object: "CROSSCHECK_P02_Baked", bytes: ddsBytes },
+  { group: "CROSSCHECK_P02_Baked2_texture", object: "CROSSCHECK_P02_Baked2", bytes: writeKtx2(rgba, WIDTH, HEIGHT) },
+]
+fs.rmSync(path.join(OUT, "PackageSources", "Textures"), { recursive: true, force: true })
+// Package validation fails a KTX2 without its .KTX2.json, "Can't find
+// associate json for ktx2 texture" (the sim's BuilderLogError.txt, 2026-10-04).
+// This one has the form of ChasePlane's, with no compression or mipmap flags,
+// since ours has neither.
+for (const r of READY) {
+  write(`PackageSources/Textures/${r.object}/${CARD_PNG}.KTX2`, r.bytes)
+  const date = ((BigInt(Date.now()) + 11644473600000n) * 10000n).toString()
+  write(`PackageSources/Textures/${r.object}/${CARD_PNG}.KTX2.json`, `{"Version":2,"SourceFileDate":${date},"Flags":[],"HasTransp":true}`)
+}
+console.log(`ready-made card: ${READY.map((r) => `${r.object} ${r.bytes.length} bytes`).join(", ")}`)
 
 // ------------------------------------------------ 5. the package definition
 
@@ -509,8 +604,19 @@ write(`PackageDefinitions/${NAME}.xml`, [
     `\t\t\t<Flags>`,
     `\t\t\t\t<FSXCompatibility>false</FSXCompatibility>`,
     `\t\t\t</Flags>`,
-    `\t\t\t<AssetDir>PackageSources\\SimObjects\\Misc\\${o.title}\\</AssetDir>`,
-    `\t\t\t<OutputDir>SimObjects\\Misc\\${o.title}\\</OutputDir>`,
+    `\t\t\t<AssetDir>PackageSources\\SimObjects\\${folderOf(o)}\\${o.title}\\</AssetDir>`,
+    `\t\t\t<OutputDir>SimObjects\\${folderOf(o)}\\${o.title}\\</OutputDir>`,
+    `\t\t</AssetGroup>`,
+  ]),
+  // Last, so they write after the models are compiled into the same folders.
+  ...READY.flatMap((r) => [
+    `\t\t<AssetGroup Name="${r.group}">`,
+    `\t\t\t<Type Version="0">Copy</Type>`,
+    `\t\t\t<Flags>`,
+    `\t\t\t\t<FSXCompatibility>false</FSXCompatibility>`,
+    `\t\t\t</Flags>`,
+    `\t\t\t<AssetDir>PackageSources\\Textures\\${r.object}\\</AssetDir>`,
+    `\t\t\t<OutputDir>SimObjects\\Misc\\${r.object}\\TEXTURE\\</OutputDir>`,
     `\t\t</AssetGroup>`,
   ]),
   `\t</AssetGroups>`,

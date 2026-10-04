@@ -56,11 +56,17 @@ const L = (n) => [`L:CROSSCHECK_P02_${n}`, "number"]
 // is (record/areas/avatars/log.md, p15 and p16).
 const LOCKED = { DIST: PANEL.radius, SCALE: 1, DOWN: 0, RIGHT: 0, LEAD: 1, CAM_LEAD: 0, LAZY_S: 0, DEAD_DEG: 0, ROLL: 0, SIGN_PITCH: -1, SIGN_BANK: -1 }
 // What each object carries this round: panel/build.mjs, OBJECTS.
+// Round 2; the aircraft goes last, in case spawning it takes the sim down.
+const ROUND_PAINTING = "exterior, see-through, RegistrationNumberLoaded"
 const SURFACES = {
-  gauge: { title: "CROSSCHECK_P02_Gauge", painting: "exterior, opaque, VLIVERY_DATA_LOADED false once" },
-  painted: { title: "CROSSCHECK_P02_Painted", painting: "interior, see-through, RegistrationNumberLoaded" },
-  tablet: { title: "CROSSCHECK_P02_Tablet", painting: "exterior, the Baron's registration material, RegistrationNumberLoaded" },
   baked: { title: "CROSSCHECK_P02_Baked" },
+  baked2: { title: "CROSSCHECK_P02_Baked2" },
+  static: { title: "CROSSCHECK_P02_PaintStatic", painting: `StaticObject, ${ROUND_PAINTING}` },
+  boat: { title: "CROSSCHECK_P02_PaintBoat", painting: `Boat, ${ROUND_PAINTING}` },
+  vehicle: { title: "CROSSCHECK_P02_PaintVehicle", painting: `GroundVehicle, ${ROUND_PAINTING}` },
+  viewer: { title: "CROSSCHECK_P02_PaintViewer", painting: `Viewer, ${ROUND_PAINTING}` },
+  human: { title: "CROSSCHECK_P02_PaintHuman", painting: `Human, ${ROUND_PAINTING}` },
+  aircraft: { title: "CROSSCHECK_P02_Aircraft", painting: `an aircraft of ours, ${ROUND_PAINTING}`, aircraft: true },
 }
 const arg = (flag) => { const i = process.argv.indexOf(flag); return i === -1 ? null : process.argv[i + 1] }
 const only = arg("--only")
@@ -114,7 +120,7 @@ process.on("SIGINT", () => finish("Ctrl+C"))
 
 // Spawned at the aircraft and frozen, then carried by the module, as p25
 // carries the figure.
-async function hold(title) {
+async function hold(title, { aircraft = false } = {}) {
   const v = await sim.read(POSE)
   const init = new InitPosition()
   Object.assign(init, { latitude: v.get("PLANE LATITUDE"), longitude: v.get("PLANE LONGITUDE"), altitude: v.get("PLANE ALTITUDE"), pitch: 0, bank: 0, heading: v.get("PLANE HEADING DEGREES TRUE"), onGround: false, airspeed: 0 })
@@ -124,6 +130,9 @@ async function hold(title) {
     return null
   }
   object = r.id
+  // An AI aircraft is flown by the sim's AI unless released, as p24 releases
+  // the figure (experiments/areas/avatars/p24-figure.mjs).
+  if (aircraft) sim.release(r.id)
   for (const e of ["FREEZE_LATITUDE_LONGITUDE_SET", "FREEZE_ALTITUDE_SET", "FREEZE_ATTITUDE_SET"]) sim.transmit(e, [1], { object: r.id, quiet: true })
   setModule({ ...LOCKED, OBJECT: r.id })
   setModule({ MODE: 1 })
@@ -164,7 +173,7 @@ async function surface(name) {
   const s = SURFACES[name]
   beep(1000, 150)
   const pagesBefore = (await listPages().catch(() => [])).map((p) => String(p.title ?? ""))
-  if ((await hold(s.title)) === null) return
+  if ((await hold(s.title, { aircraft: s.aircraft })) === null) return
   await sleep(3000)
   const facts = []
   if (s.painting) facts.push(`painting: ${s.painting}`)

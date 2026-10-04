@@ -3,6 +3,53 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: A texture we write ourselves shows on our panel: an uncompressed DDS, shipped by a Copy asset group with its .KTX2.json
+
+**Asked:** how does a texture get into a package of ours, when both packagers left our PNG out ([entry below](#2026-10-04-build-and-mount-loads-a-new-module-with-no-sim-restart-leaves-png-textures-out-and-a-program-can-click-it))?
+
+**Expected:** fspackagetool run with the sim closed would convert the PNG where the in-sim Build and Mount didn't.
+
+**Found:**
+
+- fspackagetool, run with the sim closed, also left the PNG out of `texture/`, while it took a `texture.cfg` from the same folder, and reported no error.
+- A `.PNG.json` of flags beside the PNG, in the form ChasePlane's built textures carry (read in p42-util-chaseplane 2026.39.1.16, `P42_FLASHLIGHT_BODY_ALBEDO.PNG.KTX2.json`), didn't make either packager take it.
+- The same DDS written straight into the mounted package after Build and Mount, under the name below and with a `layout.json` entry ([drop-texture.mjs](../../../experiments/areas/interface/panel/tools/drop-texture.mjs)), still showed the checkerboard on a fresh spawn; whether the sim fixes a package's files when it mounts it, or kept the texture it had already failed to find, is unknown.
+- The compiled model points at `..\TEXTURE\CROSSCHECK_P02_CARD.PNG.KTX2` whatever happens to the PNG, so we shipped files under that name through `Copy` asset groups, listed after the SimObject groups:
+  - Package validation refused both with "Can't find associate json for ktx2 texture" until each had a `.KTX2.json` beside it; we gave ours `{"Version":2,"SourceFileDate":…,"Flags":[],"HasTransp":true}`.
+  - An uncompressed 32-bit DDS, 1024x512 with alpha and one level ([png-to-dds.ps1](../../../experiments/areas/interface/panel/tools/png-to-dds.ps1)), showed the card on the panel, held 35cm ahead of the eye: see-through, its text sharp, and the cockpit and the hangar visible through it.
+  - An uncompressed KTX2 we wrote, sRGB RGBA8 with one level ([ktx2.mjs](../../../experiments/areas/interface/panel/tools/ktx2.mjs)), showed the missing-texture checkerboard, so the sim reads a texture by its contents rather than its name, and something in our KTX2 doesn't suit it.
+- The sim writes the package builder's errors, though not its warnings, to `%APPDATA%\Microsoft Flight Simulator 2024\BuilderLogError.txt`; the validation errors above came from it.
+- The builder watches the project's folder and tries to reload an asset group for every file that changes in it.
+
+**Changed:** a floating panel of ours can show a picture we make, without the sim's texture conversion.
+How to have the packager convert a PNG properly, compressed and with mipmaps, is still unknown, and a shipped banner wants it, since our uncompressed texture is 2MB.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope, and [panel/build.mjs](../../../experiments/areas/interface/panel/build.mjs).
+
+**Evidence:** p02's runs [for the DDS](../../../experiments/areas/interface/results/p02-floating-panel-2026-10-04-08-19-38.txt) and [the KTX2](../../../experiments/areas/interface/results/p02-floating-panel-2026-10-04-08-19-54.txt), each with its screenshot in the folder of the same name.
+
+## 2026-10-04: Livery paintings show on the pilot's own aircraft, and on none of six kinds of object we spawned
+
+**Asked:** does a livery painting land on objects of other kinds than a StaticObject ([entry below](#2026-10-04-a-livery-painting-on-an-object-of-our-own-opens-its-document-but-nothing-it-draws-reaches-the-objects-material))?
+
+**Expected:** on an aircraft at least, since FSLTL's AI traffic paints its registrations that way.
+
+**Found:** in the Black Square Baron 58P, parked:
+
+- p02 put the same painting, `location=exterior` on the see-through material with `RegistrationNumberLoaded`, on a StaticObject, a Boat, a GroundVehicle, a Viewer, a Human, and a minimal aircraft of our own with no engine, each in the folder its kind ships in.
+  Each spawned, the sim stayed up, and each opened its painting document, which redrew about once a second; none showed anything on its panel.
+- An AI copy of the Baron, held side-on 15m ahead, showed no side number, with the Baron's tablet option "Show Dynamic Registration" on.
+  Whether a copy has an `ATC ID` for the Baron's script to paint is unknown, so this doesn't settle AI aircraft.
+- The pilot's own Baron, seen from outside with that option on, showed "N513LW" in the painting's red, `0xA50000`, outlined in its `0xD0D0D0`, so paintings draw in this build, SunRise 12.2.282174.999.
+  The tablet's label for the option says it is "Still Awaiting Fix in SU4", and the pilot says this build is SU6.
+- The package builder warned of keys it doesn't know in our files: `[VERSION]` in a `panel.cfg`, `editable` in the aircraft's `[GENERAL]`, and `panel` in `[fltsim.0]` of a `sim.cfg`, so the sim doesn't recognize a panel on an object that isn't an aircraft, though it opened the paintings' documents.
+
+**Changed:** we stopped the painting route: we found no object we can spawn that shows one.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** [p02's run from 07:58:18](../../../experiments/areas/interface/results/p02-floating-panel-2026-10-04-07-58-18.txt) and its screenshots, and [p03's run from 08:05:18](../../../experiments/areas/interface/results/p03-ai-gauges-2026-10-04-08-05-18.txt), whose screenshot shows the copy; the screenshot of the pilot's own Baron wasn't kept.
+
 ## 2026-10-04: A livery painting on an object of our own opens its document, but nothing it draws reaches the object's material
 
 **Asked:** can an object of our own, held in front of the pilot's view, show HTML through a livery painting, the `[VPaintingNN]` kind of `panel.cfg` section the sim opened for an AI copy of the Baron ([entry below](#2026-10-04-an-ai-copy-of-the-pilots-aircraft-opens-its-livery-painting-and-none-of-its-cockpit-gauges))?

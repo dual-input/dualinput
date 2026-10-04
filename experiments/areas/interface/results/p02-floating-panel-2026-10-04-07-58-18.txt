@@ -1,0 +1,15 @@
+p02 · What an object of our own can show as a floating panel in front of the pilot's view, on MSFS 2024
+2026-10-04T07:58:18.486Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by the end of the surfaces
+
+  crosscheck-p02-panel is running: ALIVE went from 709 to 728 in 0.6s
+  TITLE "Black Square Baron 58P Professional N513LW"
+  CROSSCHECK_P02_Baked: the inspector lists 33 pages, none added since it appeared
+  CROSSCHECK_P02_Baked2: the inspector lists 33 pages, none added since it appeared
+  CROSSCHECK_P02_PaintStatic: painting: StaticObject, exterior, see-through, RegistrationNumberLoaded; the inspector lists 34 pages, added since it appeared: "VLivery02 - CrosscheckP02Painting"; its document, VLivery02 - CrosscheckP02Painting: 4 frames and 2 redraws at the first screenshot, 7 and 4 at the second
+  CROSSCHECK_P02_PaintBoat: painting: Boat, exterior, see-through, RegistrationNumberLoaded; the inspector lists 35 pages, added since it appeared: "VLivery03 - CrosscheckP02Painting"; its document, VLivery03 - CrosscheckP02Painting: 3 frames and 2 redraws at the first screenshot, 6 and 3 at the second
+  CROSSCHECK_P02_PaintVehicle: painting: GroundVehicle, exterior, see-through, RegistrationNumberLoaded; the inspector lists 36 pages, added since it appeared: "VLivery04 - CrosscheckP02Painting"; its document, VLivery04 - CrosscheckP02Painting: 4 frames and 2 redraws at the first screenshot, 6 and 3 at the second
+  CROSSCHECK_P02_PaintViewer: painting: Viewer, exterior, see-through, RegistrationNumberLoaded; the inspector lists 37 pages, added since it appeared: "VLivery05 - CrosscheckP02Painting"; its document, VLivery05 - CrosscheckP02Painting: 3 frames and 2 redraws at the first screenshot, 6 and 3 at the second
+  CROSSCHECK_P02_PaintHuman: painting: Human, exterior, see-through, RegistrationNumberLoaded; the inspector lists 38 pages, added since it appeared: "VLivery06 - CrosscheckP02Painting"; its document, VLivery06 - CrosscheckP02Painting: 3 frames and 2 redraws at the first screenshot, 6 and 3 at the second
+  CROSSCHECK_P02_Aircraft: painting: an aircraft of ours, exterior, see-through, RegistrationNumberLoaded; the inspector lists 39 pages, added since it appeared: "VLivery07 - CrosscheckP02Painting"; its document, VLivery07 - CrosscheckP02Painting: 4 frames and 2 redraws at the first screenshot, 7 and 4 at the second
+  the module wrote the panel in 4,520 frames, with 0 errors

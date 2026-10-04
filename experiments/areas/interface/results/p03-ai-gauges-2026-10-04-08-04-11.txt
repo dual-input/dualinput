@@ -1,0 +1,10 @@
+p03 · Whether an AI copy of the pilot's aircraft runs its panel gauges, on MSFS 2024
+2026-10-04T08:04:11.765Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  TITLE "Black Square Baron 58P Professional N513LW"
+  42 pages, 20 panel pages
+  the pilot looks 8° right of the nose
+  object 51331083, 15m ahead
+  43 pages, 20 panel pages; added: "VLivery11 - BksqBaronLiveryRegistration"
+  screenshot 01-copy-side-on.jpg
+  holding the copy for 30s

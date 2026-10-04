@@ -264,6 +264,7 @@ The product is Crosscheck, capitalized.
 
 Each of these usually marks a sentence written on autopilot.
 [prose-lint](../../scripts/prose-lint.mjs) reads this table and flags every hit outside code, quotation marks, and URLs, including inflected forms (`robustness`, `leveraged`).
+It checks Markdown, and the comments in JavaScript, TypeScript, and C++ files, where it also flags history such as "previously" or "no longer", which [Code comments](#code-comments) rules out.
 The fix is almost always to delete the word or say the concrete thing it stood in for.
 A flagged word doing real work can stay: "actually" correcting a belief the text just stated is fine.
 

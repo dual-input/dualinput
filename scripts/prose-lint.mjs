@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Mechanical prose checks from .claude/rules/writing.md.
+// Mechanical prose checks from .claude/rules/writing.md, on Markdown and on the comments in code.
 //
-//   node scripts/prose-lint.mjs <file.md>...   Lint whole files. Exits 1 if anything is found.
+//   node scripts/prose-lint.mjs <file>...      Lint whole files. Exits 1 if anything is found.
 //   node scripts/prose-lint.mjs --hook         Lint only what a Write or Edit just wrote, reading the
 //                                              PostToolUse payload on stdin. Findings reach the agent
 //                                              as context, and the edit itself is never blocked.
@@ -19,8 +19,15 @@ const TERMS_START = '<!-- prose-lint: terms -->'
 const TERMS_END = '<!-- prose-lint: end -->'
 const HOOK_MAX = 25
 const BANNED_HEADINGS = new Set(['overview', 'introduction', 'intro', 'summary', 'conclusion', 'conclusions'])
-// Plain entries in the table also catch these endings: robust → robustness, leverage → leveraged.
+// Plain entries in the table also catch these endings: `robust` → `robustness`, `leverage` → `leveraged`.
 const INFLECTIONS = '(?:s|es|d|ed|ing|ly|ness|al|ful)?'
+const CODE_FILE = /\.(?:[cm]?[jt]sx?|cpp|cc|h|hpp)$/i
+const SKIPPED = /(?:^|\/)node_modules\/|^\.claude\/worktrees\//
+// writing.md's Code comments rules out history, since git keeps it. The pattern comes from
+// Afterfund's prose-lint (AfterfundTech/afterfund, .claude/hooks/prose-lint.mjs), without its bare
+// "now" and "used to": the five such hits we checked in our probes' comments meant the moment the
+// code runs, a purpose ("used to tell"), or a variable named NOW.
+const HISTORY = /(?<![.\w])(?:previously|no longer|used to be|for now|we changed|was changed)(?![\w(])/gi
 
 function loadTerms() {
   const guide = readFileSync(GUIDE, 'utf8').replace(/\r\n/g, '\n')
@@ -56,10 +63,19 @@ function toRegex(term) {
   return new RegExp(`(?<![\\w'’])${body}${INFLECTIONS}(?![\\w'’])`, 'gi')
 }
 
-// Returns the lines the rules apply to, each tagged with the paragraph ("unit") it belongs to.
-// Front matter, code blocks, HTML comments, and the terms table are left out. Within a line,
-// `code` keeps only code spans masked, and `prose` also masks URLs and quoted text, because a
-// word in quotes is being mentioned rather than used.
+// Within a line, `code` keeps only code spans masked, and `prose` also masks link targets, URLs,
+// and quoted text, because a word in quotes is being mentioned rather than used.
+function maskLine(line) {
+  const code = line.replace(/(`+).*?\1/g, (m) => ' '.repeat(m.length))
+  const prose = code
+    .replace(/\]\([^)]*\)/g, (m) => ']' + ' '.repeat(m.length - 1))
+    .replace(/<https?:[^>]*>|https?:\/\/\S+/g, (m) => ' '.repeat(m.length))
+    .replace(/"[^"]*"|“[^”]*”/g, (m) => ' '.repeat(m.length))
+  return { code, prose }
+}
+
+// Returns the Markdown lines the rules apply to, each tagged with the paragraph ("unit") it
+// belongs to. Front matter, code blocks, HTML comments, and the terms table are left out.
 function scan(text) {
   const lines = text.split('\n')
   const out = []
@@ -122,37 +138,109 @@ function scan(text) {
     else if (listItem) prevKind = 'list'
     else if (!(prevKind === 'list' && indent >= 2)) prevKind = 'para'
     prevBlank = false
-    const code = line.replace(/(`+).*?\1/g, (m) => ' '.repeat(m.length))
-    const prose = code
-      .replace(/\]\([^)]*\)/g, (m) => ']' + ' '.repeat(m.length - 1))
-      .replace(/<https?:[^>]*>|https?:\/\/\S+/g, (m) => ' '.repeat(m.length))
-      .replace(/"[^"]*"|“[^”]*”/g, (m) => ' '.repeat(m.length))
-    out.push({ n: i + 1, code, prose, heading, unit })
+    out.push({ n: i + 1, ...maskLine(line), heading, unit })
   }
   return out
 }
 
+// Returns each line of comment text in a C-like file. Strings are skipped so a `//` inside one
+// isn't read as a comment, and regex literals aren't recognized. Taken from Afterfund's prose-lint.
+function scanComments(text) {
+  const out = []
+  let state = 'code'
+  let quote = ''
+  let buffer = ''
+  let n = 1
+  const flush = () => {
+    if (buffer.trim()) out.push({ n, raw: buffer })
+    buffer = ''
+  }
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    const next = text[i + 1]
+    if (c === '\n') {
+      flush()
+      n++
+      // A quote can't span lines unless it's a template literal, so a stray apostrophe costs one line at most.
+      if (state === 'line' || (state === 'string' && quote !== '`')) state = 'code'
+      continue
+    }
+    if (state === 'code') {
+      if (c === '/' && next === '/') {
+        state = 'line'
+        i++
+      } else if (c === '/' && next === '*') {
+        state = 'block'
+        i++
+      } else if (c === '"' || c === "'" || c === '`') {
+        state = 'string'
+        quote = c
+      }
+    } else if (state === 'string') {
+      if (c === '\\') i++
+      else if (c === quote) state = 'code'
+    } else if (state === 'line') {
+      buffer += c
+    } else if (state === 'block') {
+      if (c === '*' && next === '/') {
+        state = 'code'
+        i++
+      } else buffer += c
+    }
+  }
+  flush()
+  // Drop doc-comment gutters and tags before reading the prose.
+  return out.map(({ n, raw }) => ({ n, ...maskLine(raw.replace(/^\s*\*+/, '').replace(/^\s*[/!]\s?/, '').replace(/@\w+/g, '')) }))
+}
+
+function loadTermsInto(add) {
+  try {
+    return loadTerms()
+  } catch (error) {
+    add(1, error.message)
+    return []
+  }
+}
+
+function lintTerms(l, terms, add) {
+  for (const term of terms) {
+    for (const m of l.prose.matchAll(term.re)) add(l.n, `"${m[0]}": ${term.why}. Instead: ${term.instead}.`)
+  }
+  if (/[\p{L}\p{N})\]]!(?=\s|$)/u.test(l.prose)) add(l.n, 'Exclamation mark.')
+  const emoji = l.prose.match(/(?![©®™])\p{Extended_Pictographic}/u)
+  if (emoji) add(l.n, `Emoji ${emoji[0]}.`)
+}
+
 function lint(file, text, ranges) {
+  return CODE_FILE.test(file) ? lintCode(text, ranges) : lintMarkdown(file, text, ranges)
+}
+
+function lintCode(text, ranges) {
+  const findings = []
+  const add = (line, message) => findings.push({ line, message })
+  const inRange = (n) => !ranges || ranges.some(([s, e]) => n >= s && n <= e)
+  const terms = loadTermsInto(add)
+  for (const l of scanComments(text)) {
+    if (!inRange(l.n)) continue
+    lintTerms(l, terms, add)
+    for (const m of l.prose.matchAll(HISTORY)) {
+      add(l.n, `Comment "${m[0]}" tells the code's history, which git keeps. Say what holds, or delete it.`)
+    }
+  }
+  return findings.sort((a, b) => a.line - b.line)
+}
+
+function lintMarkdown(file, text, ranges) {
   const findings = []
   const add = (line, message) => findings.push({ line, message })
   const inRange = (first, last = first) => !ranges || ranges.some(([s, e]) => first <= e && last >= s)
-  let terms = []
-  try {
-    terms = loadTerms()
-  } catch (error) {
-    add(1, error.message)
-  }
+  const terms = loadTermsInto(add)
   const lines = scan(text)
   const slugCache = new Map()
 
   for (const l of lines) {
     if (!inRange(l.n)) continue
-    for (const term of terms) {
-      for (const m of l.prose.matchAll(term.re)) add(l.n, `"${m[0]}": ${term.why}. Instead: ${term.instead}.`)
-    }
-    if (/[\p{L}\p{N})\]]!(?=\s|$)/u.test(l.prose)) add(l.n, 'Exclamation mark.')
-    const emoji = l.prose.match(/(?![©®™])\p{Extended_Pictographic}/u)
-    if (emoji) add(l.n, `Emoji ${emoji[0]}.`)
+    lintTerms(l, terms, add)
     if (l.heading) {
       const title = l.prose.replace(/^#+\s*/, '').trim()
       if (title.endsWith('?')) add(l.n, 'Heading ends in a question mark. Name the content instead.')
@@ -285,16 +373,17 @@ function rangeOf(text, piece) {
 async function readStdin() {
   const chunks = []
   for await (const chunk of process.stdin) chunks.push(chunk)
-  return Buffer.concat(chunks).toString('utf8')
+  // Windows PowerShell puts a byte order mark in front of what it pipes.
+  return Buffer.concat(chunks).toString('utf8').replace(/^﻿/, '')
 }
 
 async function hook() {
   const payload = JSON.parse(await readStdin())
   const input = payload.tool_input || {}
   const file = input.file_path && resolve(input.file_path)
-  if (!file || !/\.md$/i.test(file) || !existsSync(file)) return null
-  const rel = relative(ROOT, file)
-  if (rel.startsWith('..') || isAbsolute(rel)) return null
+  if (!file || !(/\.md$/i.test(file) || CODE_FILE.test(file)) || !existsSync(file)) return null
+  const rel = relative(ROOT, file).replace(/\\/g, '/')
+  if (rel.startsWith('..') || isAbsolute(rel) || SKIPPED.test(rel)) return null
   const text = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')
   let ranges = null
   if (payload.tool_name !== 'Write') {
@@ -311,7 +400,7 @@ async function hook() {
   const lines = findings.slice(0, HOOK_MAX).map((f) => `  line ${f.line}: ${f.message}`)
   if (findings.length > HOOK_MAX) lines.push(`  and ${findings.length - HOOK_MAX} more`)
   return [
-    `prose-lint: ${count} in ${rel.replace(/\\/g, '/')}. The rules are in .claude/rules/writing.md. Fix each, or keep one on purpose.`,
+    `prose-lint: ${count} in ${rel}. The rules are in .claude/rules/writing.md. Fix each, or keep one on purpose.`,
     ...lines,
   ].join('\n')
 }
@@ -340,6 +429,6 @@ if (args[0] === '--hook') {
   }
   process.exitCode = total ? 1 : 0
 } else {
-  console.error('usage: node scripts/prose-lint.mjs <file.md>... | --hook')
+  console.error('usage: node scripts/prose-lint.mjs <file>... | --hook')
   process.exitCode = 2
 }

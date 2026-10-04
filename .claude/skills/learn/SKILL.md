@@ -12,7 +12,6 @@ If no course is given and `record/learn/` has only one, use it; if it has more, 
 If no part is given, take the lowest-numbered part in the course's `outline.md` whose heading doesn't link to a chapter yet, and tell the user which one you picked.
 
 Run each step's agent alone, and wait for its report before starting the next.
-If an agent type isn't available, which happens when its definition was added after the session started, run a general-purpose agent told to read `.claude/agents/<name>.md` and act as that agent.
 
 1. **Write.** Run the `chapter-writer` agent with the course and the part number.
 2. **Check the facts at full depth.** If any of the part is at full depth, run the `fact-checker` agent on those sections, and fix every failure it reports.

@@ -17,9 +17,12 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 - `.claude/rules/` holds the conventions agents follow, and Claude Code loads the files there on its own.
   `writing.md` is how everything agents write is written, and it loads into every session.
   `chapter-guide.md` is how a learning chapter is written, and it loads when a file in `record/learn/` is read.
-- `scripts/prose-lint.mjs` makes the mechanical checks from writing.md.
-  A hook runs it after every Markdown edit, and its findings come back to you as context.
+- `scripts/prose-lint.mjs` makes the mechanical checks from writing.md, on Markdown and on the comments in code.
+  A hook runs it after every edit, and its findings come back to you as context.
 - `.claude/agents/doc-reviewer.md` makes the judgment checks the lint can't.
+- `.claude/agents/code-reviewer.md` checks product code against its plan stage, its design doc, and the rules below.
+  If an agent in `.claude/agents/` isn't available as an agent type, which happens when its definition was added after the session started, run a general-purpose agent told to read that definition and act as that agent, in the background if its front matter says `background: true`.
+- `.claude/skills/resume/` picks up work on one area of `record/areas/` from its plan, its log, or both (`/resume <area>`).
 - `.claude/skills/learn/` writes one chapter of the learning material (`/learn <course> <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
 - `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft>`).
   Start a background subagent per aircraft and have it invoke the skill, because a study fills a whole context.
@@ -71,6 +74,23 @@ Every package in the Community folder shares these namespaces, and FS Copilot's 
 **Never delete as a side effect.**
 Deleting a file, or running `git checkout`, `restore`, `stash`, or `reset` on a path, is its own proposal: ask first, and say why.
 Uncommitted work these discard can't be recovered, so anything else that discards it, such as `git clean` or `Remove-Item`, is a proposal too.
+
+**Commit only the changes you made.**
+Other sessions edit files in this working tree too, so `git add -A` would put their unfinished work in your commit.
+Before you commit or rebase, run `git status --short`.
+Stage by explicit path, never with `git add -A` or `git add .`, and tell the user which changes you left out.
+If a change you didn't make is in a file you're about to edit, stop and ask.
+
+**Never create a merge commit.**
+A merge commit turns the history into a graph, which `git log` and `git bisect` read worse than a line.
+To bring a branch up to date, rebase it onto `origin/main`, and push a rebased branch with `--force-with-lease`.
+If the tree holds changes you didn't make, stop and ask before rebasing, because git won't rebase over them without a stash.
+Don't run `git merge`, or `git pull` without `--rebase`.
+The Claude desktop app's `sync_with_base_branch` tool merges too, so don't use it.
+
+**Ask before a code review.**
+After writing or substantially changing product code, ask the user whether to run the `code-reviewer` agent, because the user decides which changes are worth a review.
+Experiments get none.
 
 **Commit at any checkpoint without asking.**
 Until the repository goes public, commits are only checkpoints.

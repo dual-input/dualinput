@@ -39,7 +39,7 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 ## Catching up state
 
 1. The flying machine sends its state object as it stands.
-2. The catching-up machine skips every entry its cockpit already matches.
+2. The catching-up machine skips every entry its cockpit already matches, and every read-only entry, which it only compares.
 3. It applies each remaining entry once, at the PF's value, in the order [below](#choosing-the-order).
    Entries the PF never changed since the aircraft loaded go first.
    Immediate writes go out in that order in one short burst, and stepped writes start in that order and run side by side, since each moves a different control.
@@ -48,6 +48,8 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 5. It checks every write, retries what doesn't match, and flags what never does, as live sync does ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)).
 
 Applying each entry once, at its final value, keeps the catching-up machine from running the PF's history: an APU the PF started, stopped, and started again starts once.
+
+Catching up state is the first step of catch-up, and an aircraft's [plugin](../product/03-v1-scope.md#plugins) can add steps after it, such as copying the 58P's stored tablet settings, the first candidate job for its plugin ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
 
 ## Choosing the order
 

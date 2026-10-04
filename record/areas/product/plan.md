@@ -64,11 +64,11 @@ The picks, picked on 2026-10-02:
   - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
   - The [notification banner](ideas.md#notification-banner), split from Crosscheck objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
   - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Crosscheck IDE
+  - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Crosscheck's core from the first aircraft on
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
-  - [Seat awareness](ideas.md#seat-awareness), except telling a pilot's seat from where their camera is, which avatar sync took into v1 on 2026-10-04
   - The rest of the profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
   - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
 - **Later:**
@@ -77,7 +77,7 @@ The picks, picked on 2026-10-02:
   - [WASM instrument sync](ideas.md#wasm-instrument-sync)
   - The second pilot's mic reaching ATC, from [ATC sync](ideas.md#atc-sync)
   - Weather, from [Environment sync](ideas.md#environment-sync)
-  - Home-network discovery, and permanent codes, both from [One-click invite](ideas.md#one-click-invite)
+  - Home-network discovery, from [One-click invite](ideas.md#one-click-invite)
   - Crews beyond two, and passengers, both from [Join modes](ideas.md#join-modes)
   - The tablet in a browser, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet)
   - The debrief timeline, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
@@ -85,7 +85,9 @@ The picks, picked on 2026-10-02:
   - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
   - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
   - [Telemetry](ideas.md#telemetry), picked on 2026-10-04
-  - [Aircraft adapters](ideas.md#aircraft-adapters), picked on 2026-10-04
+
+On 2026-10-04, [aircraft adapters](ideas.md#aircraft-adapters), a Later pick, became plugins.
+[Seat awareness](ideas.md#seat-awareness) left Soon the same day: avatar sync took telling a pilot's seat into v1, the IDE pick places the seats, and moving a pilot's camera to a seat went to [Ideas left out](ideas.md#ideas-left-out), as did permanent codes.
 
 How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, is left to step 4, because it's a detail of the interface rather than a feature.
 
@@ -115,6 +117,7 @@ Agreed:
 - The EFB app and the notification banner, on 2026-10-03, and revised on 2026-10-04.
 - Installing and updating, on 2026-10-03.
 - Avatar sync, on 2026-10-04.
+- Plugins, on 2026-10-04, during step 5.
 
 Every v1 feature is agreed, and so is the pass that strings them into one session, which added preflight on 2026-10-04.
 The sync design that preflight's catch-up rests on, [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md), was agreed the same day.
@@ -122,7 +125,7 @@ Done on 2026-10-04.
 
 ## 5. What later features need from the core
 
-Produces: a design doc.
+Produces: [04-room-for-later](04-room-for-later.md).
 Exit: each Soon and Later pick says what the core must allow for it, such as a low-delay stream of the other pilot's axes for mixed flight controls.
 A pick gets only that much detail, so the architecture knows the future it has to leave room for.
 
@@ -147,8 +150,11 @@ Exit: each risk below has a log entry that answers it.
 - When an aircraft loaded cold stops restoring its own controls, which checks [catch-up's settle rule](../sync/03-catch-up.md#settling-after-a-load): load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
 - Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at low frame rates (the PA-24 session's wasn't recorded), and whether a held key bound to a momentary input event repeats inside that window.
 - Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
+- Whether one sim draws several of our figures, each posed from variables of its own object, and what 2, 20, and 180 figures cost in frame time with every joint moving every frame, which decides how the avatars' module and channel are built ([04-room-for-later](04-room-for-later.md#people-beyond-the-crew)).
+  v1 already draws two figures in each sim, and a full airliner's cabin of passengers would be 180, at 28 values each for the figure p24 posed ([avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).
+  It measures frame time, so the sim's window has to be in front.
 
-The world map probe and the four after it, on stepped writes, settling, the double-fire, and writes landing, make one batched sim session.
+The world map probe and the five after it, on stepped writes, settling, the double-fire, writes landing, and figures, make one batched sim session.
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture
@@ -157,6 +163,8 @@ Produces: decisions in `record/decisions/`.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
 The profile format takes the shape [01-profile-entries](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.
 The decisions also pick whether each machine sends to every other directly or through the flying machine ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), the sandbox that write functions run in, with its size limits, and the order catch-up applies state in, where we lean toward first-final-value order ([catch-up](../sync/03-catch-up.md#choosing-the-order)).
+They build in what [04-room-for-later](04-room-for-later.md) says v1 builds now, and pick where each part of a [plugin](03-v1-scope.md#plugins) runs and what language plugins are written in.
+The tooling includes one check that every file that runs in Coherent GT, experiments included, parses within the engine's measured limits, run in CI and after edits; before writing its rules, we look for Coherent GT's own documentation of its JavaScript and for rules others already maintain.
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.

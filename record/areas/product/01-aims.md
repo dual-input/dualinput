@@ -22,6 +22,8 @@ When two choices are otherwise even, Crosscheck takes the one we'd want when fly
 - **A pilot in VR can use everything Crosscheck offers during a flight without taking the headset off.**
 - **Crosscheck is free, and takes donations.**
 - **Every part of Crosscheck gets the same care from its first version,** the tools only we use included: no cut corners in code, interface, or copy, because an interface allowed to drift keeps drifting.
+- **v1 gives up features, never design.**
+  v1 is a line drawn to get a working version for a first flight, not a deadline, so any feature after it slots in without rebuilding what v1 built.
 
 ## Relay and license
 

@@ -51,13 +51,24 @@ Carrying that key between machines, limited to the topics that belong to the air
 
 Some displays drawn by WASM code can take a forwarded press.
 The iniBuilds A380's displays pressed at the position we sent once we told the display the mouse had entered it (measured on MSFS 2024, 2026-09-23, FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not").
-The A350's module discards the position we send and presses wherever the receiving pilot's own cursor is on that display, so reaching it takes a patch to the module that nobody has written (read in inibuilds-aircraft-a350 1.2.6, `inibuilds-A350.wasm`, `GaugeInstance::DoCallback`; FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-24 — Read out of the A350's binary: the press position comes from the draw data, not the click").
+The A350's module discards the position we send and presses wherever the receiving pilot's own cursor is on that display, so reaching it takes a patch to the module that nobody has written, which an A350 [plugin](#plugins) could make on the pilot's machine ([decision 001](../../decisions/001-changing-other-developers-packages.md)) (read in inibuilds-aircraft-a350 1.2.6, `inibuilds-A350.wasm`, `GaugeInstance::DoCallback`; FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-24 — Read out of the A350's binary: the press position comes from the draw data, not the click").
 
 - **Next:** design how a production version does this, and find which aircraft's displays it reaches.
 
+### Plugins
+
+A plugin is code we ship for one aircraft or one add-on, which reaches what a profile can't through hooks into Crosscheck, so Crosscheck's core never names a product.
+Its scope for v1, with one plugin for the 58P, is in [03-v1-scope](03-v1-scope.md#plugins), and what Crosscheck's core allows plugins is in [04-room-for-later](04-room-for-later.md#plugins).
+
+- **Tech:** a plugin for GSX could show GSX's ground vehicles and people on every machine and play its sound, as traffic sync and hearing ATC carry traffic and ATC, rather than have each machine's GSX run the same service.
+  Our fork listed and spawned 11 of 11 GSX vehicles (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/02-open-questions.md`, Q07), a GSX person walks when we write the animation variable of its own object (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)), and GSX's program, `Couatl64`, owns an audio session of its own (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Picking the ATC app: what the API allows").
+  With different GSX versions on two machines, the worst case is then a vehicle missing from one pilot's view, rather than a service that never runs.
+- **Open questions:** what the GSX plugin has to handle, left until we build it: two pilots calling the same service each on their own machine, taking GSX's objects over from traffic sync, the vehicles' own animations, and control passing during a pushback.
+
 ### Aircraft adapters
 
-An adapter for one aircraft reaches state that no variable or event shows and puts it in Crosscheck's state for that aircraft, so a cockpit can catch up on it.
+An adapter is a [plugin](#plugins) for one aircraft that reaches state no variable or event shows and puts it in Crosscheck's state for that aircraft, so a cockpit can catch up on it.
+As a plugin, it may change its aircraft's files on the pilot's machine ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
 The A220's display formats live in its DisplayUnits' Redux store (read in synaptic-aircraft-a220 1.0.10, `html_ui/Pages/VCockpit/Instruments/a22x/DisplayUnits/instrument.js`), and the PMDG 777 loads a panel-state file when a flight loads (unverified; loading a flight and comparing its cockpit with the package's `Config\PanelState\` files settles it).
 
 - **Tech:** code Crosscheck injects into the A220's display documents might reach the store at runtime without changing the aircraft's files (unverified; a panel probe that looks for the store from a DisplayUnits document settles it).
@@ -65,7 +76,6 @@ The A220's display formats live in its DisplayUnits' Redux store (read in synapt
   Whether the 777 loads a panel state mid-flight is untested, though its CDU loads one by name (unverified; loading one from the CDU in flight settles both).
   The [bus bridge](#bus-bridge) is a related route: the A220's `A22X.Resync` returns its full state over the CommBus.
 - **Product:** a late joiner's display pages and FMS would match the PF's, which [catch-up](../sync/03-catch-up.md) can't reach.
-- **Open questions:** whether an adapter may change another developer's package, which needs the decision in `record/decisions/` that [Crosscheck objects in the cockpit](#crosscheck-objects-in-the-cockpit) also waits on.
 
 ### Traffic sync
 
@@ -79,6 +89,8 @@ Pushback, jetways, the fuel truck, and GSX show on both machines, so both pilots
 
 - **Tech:** the sim's own services start from key events, such as `K:TOGGLE_JETWAY` and `K:TOGGLE_PUSHBACK`, and GSX is a separate addon with its own `L:FSDT_GSX_*` variables; the iniBuilds A350 uses both (read in inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md)).
   Showing the tug on the other machine is a [traffic sync](#traffic-sync) problem.
+  The sim's own services are the same on every aircraft, so they belong in Crosscheck's core, while GSX is one product, so it comes through a [plugin](#plugins).
+  Until then, the pilot whose sim runs a pushback flies it ([traffic sync](03-v1-scope.md#traffic-sync)).
 
 ### ATC sync
 
@@ -138,7 +150,6 @@ It's Crosscheck's own setup list, unlike the aircraft's checklists under [Ideas 
 A pilot invites the other with a short code to paste into Discord.
 When the other pilot copies the code and switches to Crosscheck, Crosscheck finds its own code on the clipboard and joins the session, so copying is the only step.
 Two PCs on the same home network find each other without a code, and the connection shows in plain words, such as "Direct, 38ms" (hypothetical).
-Later, a pilot could keep a permanent code, handed out first come, first served.
 
 - **Tech:** Discord shows `crosscheck://join/<code>` as plain text, and again as plain text when it's written as a Markdown link (tested in Discord, 2026-10-02).
   We think Discord makes only http and https links clickable, whichever apps are installed (unverified).
@@ -209,7 +220,7 @@ In FS Copilot and YourControls only the PF's hardware reaches the sim, and this 
 
 ### Seat awareness
 
-Each pilot has a seat, and their camera starts there.
+Each pilot has a seat.
 The profile author places each seat in the sim itself, from the [Crosscheck IDE](#crosscheck-ide), in a minute a seat:
 
 1. The easy way, tried first: the IDE seats the figure on each seat object SimConnect lists for the aircraft.
@@ -234,9 +245,7 @@ The profile author places each seat in the sim itself, from the [Crosscheck IDE]
     The Camera API has no call that adds a view, the per-user camera file's views reach neither SimConnect nor ChasePlane, and `SimConnect_CameraSetRelative6DOF` holds the camera and freezes the look (same date, [aircraft log](../aircraft/log.md#2026-10-04-camerasetrelative6dof-puts-the-eye-at-any-point-but-holds-the-camera-and-a-camera-handed-back-into-a-view-returns-to-the-views-own-eye)).
 - **Open questions:** how pilots switch seats, before and during a flight, which we'll come back to.
   Whether arrows in the sim can be dragged: the ray through the cursor lands within 2mm ([avatars log](../avatars/log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)), and we know where the arrows are, so hitting them is our own arithmetic, but a click on an arrow also reaches the sim, so the IDE either keeps arrows clear of controls or holds the click back, which puts it in the pilot's input path, where CLAUDE.md's fail-open rules apply.
-  Moving a pilot's camera to a seat is parked as of 2026-10-04: each pilot moves to their seat themselves, and Crosscheck tells which seat they took from where their camera is.
-  The lead for when it's picked up: SimConnect can't send the camera's slide actions, but pressing the keys the pilot bound for them, read from their input profile, slides the eye with the sim's window in front and leaves them their camera, and `COCKPIT CAMERA HEIGHT` sets the height (measured on MSFS 2024, 2026-10-04, [aircraft log](../aircraft/log.md#2026-10-04-key-presses-a-program-sends-move-the-cockpit-eye-with-the-sim-window-in-front-and-leave-the-pilot-their-camera)); `experiments/areas/aircraft/p15-seat-slide.mjs` is written to measure reach, speed, and precision, and hasn't run.
-  ChasePlane keeps its own copy of each aircraft's views, imported once ([aircraft log](../aircraft/log.md#2026-10-04-a-community-package-of-ours-adds-a-seat-view-anywhere-in-the-aircraft-it-replaces-the-camera-file-when-it-mounts-after-the-aircrafts-the-sim-reads-it-at-start-and-a-free-pilot-item-lets-the-camera-hand-back-there)), and its API can change a view's position (`cam_set_axis`), so ChasePlane pilots could be seated through it (unverified).
+  Moving a pilot's camera to a seat went to [Ideas left out](#ideas-left-out) on 2026-10-04: each pilot moves to their seat themselves, and Crosscheck tells which seat they took from where their camera is.
 
 ### Join modes
 
@@ -281,8 +290,6 @@ How the hands work, and where they stop, is in [the avatars' tentative decisions
   With each entry's spot in the cockpit from the [Crosscheck IDE](#crosscheck-ide), the hand also reaches for a control the pilot changed without a click, such as a home cockpit's switch, a hardware flap lever, or a keyboard shortcut.
   When a pilot's connection drops, their seated figure could slump in the seat, so the others see what happened.
 - **Open questions:**
-  - Whether Crosscheck should edit other developers' aircraft packages, as GSX does, which needs a decision in `record/decisions/`, and how its edit coexists with GSX's in the same file.
-    Which of the two routes ships: attaching through the aircraft's files holds the figure motionless but edits each aircraft package, and the WASM writer edits nothing, so it also covers stock aircraft such as the C152, where we measured it.
   - How Crosscheck seats the figure on an aircraft without seat objects.
   - Whether the figure's joints follow variables of its own object, as p17's size and color did, rather than the global `L:` variables p24 set, which can drive only one figure in a sim (unverified).
   - Whether Crosscheck loads attachments' models: the Comanche's GPS units have models of their own, so rays aimed at them hit the panel behind (`BlackPanel` in the Comanche) (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
@@ -326,7 +333,7 @@ Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches
   An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window shouldn't show.
   Whether predicting each frame from its actual frame time steadies it fully is unknown.
   A click's ray cast into the cockpit model finds the control the pilot clicked ([avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)), and whether it can find a click on one of our own objects is untested.
-- **Open questions:** whether Crosscheck edits other developers' aircraft packages, which needs a decision in `record/decisions/`.
+- **Open questions:** whether an object our WASM module writes can hold as still as a button fixed to a window needs, since Crosscheck's own features don't attach objects through an aircraft's files ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
 
 ## Tools
 
@@ -402,3 +409,8 @@ The analogy stops at testing: DefinitelyTyped's CI checks every change, and fsc-
   [Avatar sync](#avatar-sync)'s hand reaches out and touches each switch and surface the pilot clicks, which shows the other pilot more than a pointer would, so we dropped pointing for it on 2026-10-03.
 - **Pausing the flight when a pilot drops out:** a pilot whose sim restarted comes back with a fresh cockpit that a pause doesn't restore, and pausing doesn't suit flights on online networks such as VATSIM.
   The others fly on instead, as [03-v1-scope](03-v1-scope.md#the-connection) says.
+- **Permanent codes:** a code of a pilot's own, handed out first come, first served, needs an identity that outlasts a session, and nothing else in Crosscheck needs one, so we left it out on 2026-10-04.
+- **Moving a pilot's camera to their seat:** no route was clean, so we left it out on 2026-10-04.
+  Views a package of ours adds reach only a handful of seats per aircraft, and adding them means generating and managing each aircraft's camera file ([aircraft log](../aircraft/log.md#2026-10-04-the-camera-hands-back-into-one-view-per-pilot-item-the-first-that-has-it-so-a-packages-seat-views-cover-a-handful-of-seats)).
+  `SimConnect_CameraSetRelative6DOF` holds the camera and freezes the pilot's look ([aircraft log](../aircraft/log.md#2026-10-04-camerasetrelative6dof-puts-the-eye-at-any-point-but-holds-the-camera-and-a-camera-handed-back-into-a-view-returns-to-the-views-own-eye)), and pressing the pilot's own camera keys needs the sim's window in front ([aircraft log](../aircraft/log.md#2026-10-04-key-presses-a-program-sends-move-the-cockpit-eye-with-the-sim-window-in-front-and-leave-the-pilot-their-camera)).
+  Pilots set up their own views instead, with the sim's camera or ChasePlane, and Crosscheck tells their seat from where their camera is ([avatar sync](03-v1-scope.md#avatar-sync)).

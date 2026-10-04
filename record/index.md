@@ -19,4 +19,6 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/product/01-aims.md](areas/product/01-aims.md): who Crosscheck is for, what it aims at, what it won't do, and its relay and license commitments.
 - [areas/product/02-users.md](areas/product/02-users.md): the kinds of pilots Crosscheck is designed for, and the problems each runs into.
 - [areas/product/03-v1-scope.md](areas/product/03-v1-scope.md): what each v1 feature does, where v1 stops, and the rules for its behavior.
+- [areas/product/04-room-for-later.md](areas/product/04-room-for-later.md): what each feature after v1 needs from what v1 builds, and what v1 builds so it slots in without rework.
+- [decisions/001-changing-other-developers-packages.md](decisions/001-changing-other-developers-packages.md): Crosscheck's own features never change another developer's package, and an aircraft's plugin may, on the pilot's machine.
 - [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.

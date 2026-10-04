@@ -27,7 +27,7 @@ The split between reading and writing matches how profiles are already written: 
 | `name` | The control's name for people, used in the Crosscheck IDE, the preflight checklist, and notices |
 | `read` | Where the value comes from: a variable, or rules that count events into a shadow value |
 | `default` | A shadow value's starting value |
-| `write` | How to change the control: omitted, `set`, `toggle`, `inc` and `dec`, `then`, or a write function |
+| `write` | How to change the control: `set`, `toggle`, `inc` and `dec`, `then`, or a write function, and with no `write` the entry is read-only |
 | direction | Whether only the flying machine sends the entry, or any pilot's machine can |
 | `ignore` | The names this entry's action also fires, which Crosscheck ignores once afterward |
 
@@ -40,7 +40,9 @@ On each machine, the state object is all of an aircraft's state entries with the
 ```yaml
 fcu_heading:
   name: FCU heading
-  read: L:var_fcuHeading      # hypothetical name; write omitted, so Crosscheck writes the variable
+  read: L:var_fcuHeading      # hypothetical name
+  write:
+    set: L:var_fcuHeading
 ```
 
 A variable here is an `L:` or `A:` variable, an input event's `B:` value, or an aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)).
@@ -79,12 +81,15 @@ A shadow value is the last resort, because nothing can check it: a shadow that m
 
 | Form | When | What the engine does |
 | --- | --- | --- |
-| Omitted | The `read` variable can be written | Writes the variable |
-| `set: <event>` | One event takes the value | Sends it once |
+| `set: <variable or event>` | One variable or event takes the value | Writes the variable, or sends the event once |
 | `toggle: <event>` | The only write flips the control | Compares the wanted value with the local one, and flips only if they differ |
 | `inc` and `dec`, with `step`, `range`, and `wrap` | The control only steps | Turns the difference into steps, the shorter way round when `wrap` is true, and clamps at the ends of `range` when it's false |
 | `then: <action>` after another form | One action isn't enough | Runs the second action after the first |
 | A write function | Anything less regular | Runs the function and carries out the actions it returns |
+
+An entry with no `write` is read-only: Crosscheck reads it on every machine and compares the values, and never writes it.
+Crosscheck writes nothing an entry doesn't name under `write`, not even its `read` variable, so an entry that only reads stays read-only, which a later preflight checklist that ticks off a control once both cockpits agree on it would use ([04-room-for-later](../product/04-room-for-later.md#profiles)).
+Because a forgotten `write` would make an entry read-only without a word, the IDE lists every read-only entry.
 
 `toggle` is common enough to be built in.
 About 20 entries in FS Copilot's Synaptic A220 profile compare before they flip (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`).
@@ -210,7 +215,7 @@ A profile gives no signal for when the aircraft has finished loading, because on
 
 ## What the IDE does with a profile
 
-- It shows the state object live, entry by entry.
+- It shows the state object live, entry by entry, and lists the read-only entries.
 - It warns about an entry with both a readable `read` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
 - It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which as of 2026-10-04 exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
   A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Crosscheck's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
@@ -224,7 +229,7 @@ The Activity view's ranking put the beacon's own variable first in one capture a
 
 - State in display or FMS code has no entry.
   The A220's display formats live in its DisplayUnits' Redux store (read in synaptic-aircraft-a220 1.0.10, [A220 study](../aircraft/synaptic-a220/study.md)), and pointer sync carries presses on those displays while both show the same page.
-  [Aircraft adapters](../product/ideas.md#aircraft-adapters) are the Later path to that state.
+  An aircraft's [plugin](../product/03-v1-scope.md#plugins) is the path to that state, as an [aircraft adapter](../product/ideas.md#aircraft-adapters).
 - Values each aircraft computes from the same inputs, such as a managed speed, aren't synced, on the assumption that both machines run the same configuration and compute the same value.
 - A press whose action depends on how long it's held fits neither block, and the PA-24's JPI step button might be one (unverified, the [PA-24 study](../aircraft/a2a-pa24-comanche/study.md)'s sim question 9).
 - A rate knob fits no write form, because what it changes depends on how long it's held off center, not on a count of steps: the PMDG 777's baro knob `L:CABaroKnob` recenters after 0.5s (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), and reaching a value would need a loop that drives it and reads back until the machines agree.

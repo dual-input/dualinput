@@ -12,7 +12,7 @@ It says what Crosscheck does, not how: mechanisms are for the sync design in `re
 
 The pilot flying (PF) is the pilot whose yoke, rudder, toe brakes, engine levers, and trim fly the aircraft, and the pilot monitoring (PM) is the other front-seat pilot.
 The flying machine is the PF's, and the following machine is the PM's.
-v1 sessions have two pilots, because crews beyond two are a Later pick, but the design supports larger crews from the start, unless that costs much more work, so nothing gets rebuilt when they come.
+v1 sessions have two pilots, because crews beyond two are a Later pick, but the design supports larger crews from the start, so nothing gets rebuilt when they come ([01-aims](01-aims.md#aims)).
 
 ## A session from start to finish
 
@@ -174,7 +174,7 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 
 - Telling pilots what on their aircraft doesn't sync, a Later pick in [the plan](plan.md), because we first learn what Crosscheck can sync.
 - Comparing whole cockpits through a flight to find ones that drifted apart, beyond checking each write, because we don't know how reliably Crosscheck can read an aircraft's state, and a resync prompt interrupts the pilots ([Ideas left out](ideas.md#ideas-left-out)).
-- Catching up what the profile can't read or track, such as a display's page or an FMS's contents, which [aircraft adapters](ideas.md#aircraft-adapters), a Later pick, might reach.
+- Catching up what neither the profile nor the aircraft's [plugin](#plugins) reaches, such as a display's page or an FMS's contents.
 - Catching a restore that lands after Crosscheck judged the aircraft settled, which moves that control in every cockpit, the PF's included ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 - The pilot's own MSFS EFB overlay.
 
@@ -227,6 +227,43 @@ A press or drag on a panel display travels to the other machine as the position 
 
 - When both pilots type on one display at once, each machine may apply the keys in a different order (unverified, [08-06](../../learn/foundations/08-06-divergence-and-one-screen.md#unverified-claims)).
 
+### Plugins
+
+A plugin is code we ship for one aircraft or one add-on, which reaches what a profile can't through hooks into Crosscheck, so Crosscheck's core never names a product.
+
+**In v1:**
+
+- Plugins for aircraft, and one of them, for the 58P.
+  Its first candidate job: the 58P's tablet keeps its 15 settings and each failure's state in the sim's DataStorage, and its KNS-81 keeps its ten waypoints there, separately on each machine, where no profile entry reaches, while any panel script can read and write those keys through `window.top.datastorage` (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)).
+  The plugin would copy the PF's keys to each cockpit that catches up, and stop each following machine's tablet from rolling its own failures, since on every machine the tablet draws 102 to 112 failure times with `Math.random()` (same study).
+  Its job is settled when the 58P's profile is written.
+- Plugins ship with Crosscheck, in its installer and its Community package, and update with it, so every pilot in a crew runs the same plugins: pilots on different Crosscheck versions can't fly together ([installing and updating](#installing-and-updating)).
+- Crosscheck runs a plugin while its aircraft is loaded, as it picks the profile, and pilots never install or choose one.
+
+**Not in v1:**
+
+- Plugins for add-ons, such as one for GSX, which comes with [ground operations sync](ideas.md#ground-operations-sync), a Soon pick.
+- Plugins delivered apart from a Crosscheck release.
+- Changing an aircraft's files, unless the 58P's plugin needs it.
+
+**Rules:**
+
+- Code that serves one aircraft or add-on lives in a plugin, never in Crosscheck's core, so dropping support for an aircraft means removing its plugin and its profile.
+- A plugin writes to the sim only through Crosscheck's writer, never through a SimConnect client of its own, because Crosscheck would see a write it didn't make as a pilot's change and send it to the crew.
+- A plugin that fails is turned off for the rest of the session, the [notification banner](#notification-banner) says so, and the flight goes on.
+- A plugin changes an aircraft's files only on the pilot's machine, and Crosscheck never ships a file of another developer's ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
+
+**Depends on:**
+
+- Profiles: a plugin serves an aircraft that a profile describes.
+- [Catch-up](../sync/03-catch-up.md), which the 58P's plugin adds a step to.
+
+**Open questions:**
+
+- Whether the 58P's tablet takes copied keys without a reload (unverified).
+- Where each part of a plugin runs, in Crosscheck's core, in the aircraft's panels, or in a WASM module, and what language plugins are written in, which step 7 of [the plan](plan.md) decides.
+- Whether authors outside our team write plugins after v1, and what makes that easy.
+
 ## Session
 
 ### Invite code
@@ -243,7 +280,7 @@ The host starts a session and gets a code, and the other pilot enters it to join
 **Not in v1:**
 
 - Invite links, because Discord shows a `crosscheck://` link as plain text and an https redirect adds two prompts ([One-click invite](ideas.md#one-click-invite)).
-- Permanent codes, handed out first come, first served, a Later pick in [the plan](plan.md).
+- Permanent codes, left out on 2026-10-04 ([Ideas left out](ideas.md#ideas-left-out)).
 - Reading the clipboard at any other moment.
 - Host approval of each joiner.
 
@@ -421,6 +458,9 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
   Frozen and written every frame from samples at 2Hz, our fork's copies scored 0.17 median jitter against 0.56 for BeyondATC's own traffic, on one PC (measured on MSFS 2024, 2026-09-06, same log, "Jitter measured, not eyeballed"), and ran well between two machines (from our experience with FS Copilot).
   BeyondATC has since released an update for smoother AI traffic, which we haven't compared (reported by the user, 2026-10-03).
 - When the traffic host changes, the new host removes the traffic it had injected before it starts, and the old host stops sending (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "One host, and it need not be the master").
+- The pilot whose sim runs a pushback, from GSX, an ATC add-on such as BeyondATC, or the sim's own `K:TOGGLE_PUSHBACK`, flies it, and the tug shows to the rest of the crew when that pilot is also the traffic host.
+  A pushback in a following machine's sim acts on an aircraft frozen to the flying machine's, so we expect it to move nothing (unverified).
+  [Ground operations sync](ideas.md#ground-operations-sync), a Soon pick, replaces this rule.
 
 **Depends on:**
 
@@ -428,6 +468,9 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 - [The connection](#the-connection).
 
 **Open questions:**
+
+- Whether Crosscheck can tell that a pushback started in a following machine's sim, such as from `A:PUSHBACK STATE` on its frozen aircraft, so the [notification banner](#notification-banner) can tell that pilot to take control first (unverified).
+- Whether traffic sync carries the sim's own pushback tug, which BeyondATC's pushback may use (reported by the user, 2026-10-04, unverified).
 
 - Whether the traffic host is chosen by hand or taken automatically by whoever has traffic, perhaps as a setting with a default yet to pick.
 - How Crosscheck detects installed traffic packs, running injectors, and multiplayer: the installed packages and the running processes are candidates (unverified).
@@ -532,7 +575,7 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
 
 **Not in v1:**
 
-- Moving a pilot's camera to a seat for them, parked on 2026-10-04 ([Seat awareness](ideas.md#seat-awareness)).
+- Moving a pilot's camera to a seat for them, left out on 2026-10-04 ([Ideas left out](ideas.md#ideas-left-out)): pilots set up their own views, with the sim's camera or ChasePlane.
 - Hands for a pilot in VR, whose clicks give no cursor place for the ray (unverified); their figure still sits and looks.
 - Sidesticks and center sticks, since the hand rules are for a yoke, and the 58P has yokes.
 - Passengers, a Later pick in [the plan](plan.md).
@@ -562,7 +605,8 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
 - The default radii for taking and leaving a seat, which trying them in two or three cockpits settles.
 - Whether a dropped pilot's figure can turn see-through, through the material animation that colors it (unverified).
 - What makes some part of the figure miss a frame now and then in flight, which our test pilot saw in the 58P ([avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
-- Whether the figure's joints can follow variables of its own object, so one sim can draw several figures, which crews beyond two need (unverified, [Avatar sync](ideas.md#avatar-sync)).
+- Whether the figure's joints follow variables of its own object, so one sim can draw several figures, which v1 needs, since each sim draws the other pilot's figure and, in an outside view, the pilot's own.
+  p17's sphere took its size and color from variables of its own object (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object)), and a step 6 probe in [the plan](plan.md) settles the joints and what many figures cost.
 
 ## Interface
 
@@ -677,7 +721,7 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 **Open questions:**
 
 - How a missing pilot is asked for their part: their Crosscheck could offer the upload the next time it starts, once the server holds a report for a session they were in.
-- The session's ID, which every machine shares and which differs from the code, since a code can outlive a session once permanent codes come.
+- The session's ID, which every machine shares and which differs from the code, since six characters can come up again for a later session.
 - How long the server keeps reports, and how it limits junk uploads with no accounts, as fsc-editor's relay limits how fast one address can guess codes.
 - What the server runs on, which the architecture decides: a Cloudflare Worker is the candidate, with D1 for the reports and R2 for the recordings, since D1 caps a row at 2MB and a free database at 500MB ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)).
 - How big a flight's recording is, which decides how many flights each machine keeps.

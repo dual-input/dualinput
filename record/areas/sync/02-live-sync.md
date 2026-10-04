@@ -23,6 +23,8 @@ So how the PM changed the beacon doesn't matter: a click, a key binding, and a h
 An entry writes the cause, the variable the aircraft computes the control from, not a readout the aircraft displays, because the aircraft can rebuild the readout from the cause.
 On the Baron 58TC and 58P, the behavior XML rewrites `A:GENERAL ENG MIXTURE LEVER POSITION:n` from `L:BKSQ_MixtureLeverPosition_n` at 2 Hz (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so an entry that wrote the stock variable would see its write undone within half a second if the XML runs as read (unverified, the Baron study's sim question 5), and the mixture entry reads and writes the `L:` variable instead.
 
+A read-only entry, one with no `write`, crosses the wire too, and the receiving machine compares it with its own value instead of writing it ([01-profile-entries](01-profile-entries.md#writing-a-value)).
+
 ## One stream, in causal order
 
 State changes, events, and pointer presses travel in one stream.
@@ -74,7 +76,7 @@ A flag does two things, once per entry per flight:
 - The recording gets a marker carrying the entry, both machines' values, and the retries, the same kind of marker as the [EFB app](../product/03-v1-scope.md#efb-app)'s button that marks the moment for a [bug report](../product/03-v1-scope.md#recording-and-bug-reports).
 - The [notification banner](../product/03-v1-scope.md#notification-banner) shows a notice naming the entry, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app."
 
-A retry repeats the entry's write, which is safe for the forms that do only what's left: an omitted write and `set` write the value again, `toggle` compares before it flips, and `inc` and `dec` step only the remaining difference.
+A retry repeats the entry's write, which is safe for the forms that do only what's left: `set` writes the value again, `toggle` compares before it flips, and `inc` and `dec` step only the remaining difference.
 A retry also repeats a `then` action and a write function's actions, so those need to be safe to repeat, such as the L-1011's `H:FUEL`, which the flight engineer's script answers by re-reading the fuel panel's switches (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)), and that a repeat is harmless is unverified.
 
 Two cases get past the check:

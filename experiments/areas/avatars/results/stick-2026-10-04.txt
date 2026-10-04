@@ -1,0 +1,89 @@
+synaptic-aircraft-a220, A220_Cockpit_LOD00.gltf
+
+== CPT_STICK_HANDLE, node 799: CPT_STICK_HANDLE < CPT_YOKE_ROLL < CPT_YOKE_PITCH
+  under it: SIDE_STICK_DISCO_CPT (mesh)
+  under it: SIDE_STICK_TRIM_CPT (mesh)
+  under it: DECAL_Plane_063StickeDecal220_011_x (mesh)
+  under it: DECAL_Cockpit-Sidesticks_pttdECAL_x (mesh)
+  SIDE_STICK_ROLL_CPT moves CPT_YOKE_ROLL.translation, CPT_YOKE_ROLL.rotation, BONE_CPT_YOKE_ROLL_1.translation, BONE_CPT_YOKE_ROLL_1.rotation, BONE_CPT_YOKE_ROLL_2.translation, BONE_CPT_YOKE_ROLL_2.rotation
+  SIDE_STICK_PITCH_CPT moves CPT_YOKE_PITCH.rotation, SKEL_CPT_YOKE_PITCH_2.translation, SKEL_CPT_YOKE_PITCH_2.rotation, SKEL_CPT_YOKE_PITCH_1.translation, SKEL_CPT_YOKE_PITCH_1.rotation, SKEL_CPT_YOKE_PITCH_1.scale
+  mesh   0.096,   0.191,   0.110 m across
+  middle     : origin   0.825,   0.578,  12.644 | center   0.825,   0.544,  12.644 | top   0.825,   0.640,  12.644
+  roll start : origin   0.855,   0.575,  12.644 | center   0.848,   0.542,  12.644 | top   0.868,   0.635,  12.644 | top moved 4.2cm
+  roll end   : origin   0.796,   0.575,  12.644 | center   0.803,   0.542,  12.644 | top   0.783,   0.635,  12.644 | top moved 4.2cm
+  pitch start: origin   0.825,   0.568,  12.687 | center   0.825,   0.536,  12.677 | top   0.825,   0.626,  12.706 | top moved 6.3cm
+  pitch end  : origin   0.825,   0.576,  12.608 | center   0.825,   0.544,  12.616 | top   0.825,   0.636,  12.592 | top moved 5.3cm
+
+== FO_STICK_HANDLE, node 808: FO_STICK_HANDLE < FO_YOKE_ROLL < FO_YOKE_PITCH
+  under it: SIDE_STICK_DISCO_FO (mesh)
+  under it: SIDE_STICK_TRIM_FO (mesh)
+  under it: DECAL_Plane_063StickeDecal220_001_x (mesh)
+  under it: DECAL_Cockpit-Sidesticks_pttdECAL_001_x (mesh)
+  under it: DECAL_Plane_063StickeDecal220_002_x (mesh)
+  SIDE_STICK_ROLL_FO moves FO_YOKE_ROLL.translation, FO_YOKE_ROLL.rotation, BONE_FO_YOKE_ROLL_2.translation, BONE_FO_YOKE_ROLL_2.rotation, BONE_FO_YOKE_ROLL_1.translation, BONE_FO_YOKE_ROLL_1.rotation
+  SIDE_STICK_PITCH_FO moves FO_YOKE_PITCH.rotation, SKEL_FO_YOKE_PITCH_2.translation, SKEL_FO_YOKE_PITCH_2.rotation, SKEL_FO_YOKE_PITCH_1.translation, SKEL_FO_YOKE_PITCH_1.rotation, SKEL_FO_YOKE_PITCH_1.scale
+  mesh   0.096,   0.190,   0.110 m across
+  middle     : origin  -0.825,   0.578,  12.644 | center  -0.825,   0.545,  12.644 | top  -0.825,   0.640,  12.644
+  roll start : origin  -0.796,   0.575,  12.644 | center  -0.803,   0.542,  12.644 | top  -0.783,   0.635,  12.644 | top moved 4.2cm
+  roll end   : origin  -0.855,   0.575,  12.644 | center  -0.848,   0.542,  12.644 | top  -0.868,   0.635,  12.644 | top moved 4.2cm
+  pitch start: origin  -0.825,   0.568,  12.687 | center  -0.825,   0.536,  12.677 | top  -0.825,   0.626,  12.706 | top moved 6.3cm
+  pitch end  : origin  -0.825,   0.576,  12.608 | center  -0.825,   0.544,  12.616 | top  -0.825,   0.636,  12.592 | top moved 5.3cm
+ 
+fnx-aircraft-320, FNX_32X_Interior_Cockpit_LOD00.gltf
+
+== HANDLING_Yoke_1_Hand, node 2331: HANDLING_Yoke_1_Hand < Misc_Sidestick_Pitch_Captain_3 < Misc_Sidestick_Roll_Captain_3 < Skel_Cockpit
+  Misc_Sidestick_Roll_Captain moves Misc_Sidestick_Roll_Captain_3.rotation, Misc_Sidestick_Roll_Captain_2.rotation, Misc_Sidestick_Roll_Captain_1.rotation
+  Misc_Sidestick_Pitch_Captain moves Misc_Sidestick_Pitch_Captain_1.rotation, Misc_Sidestick_Pitch_Captain_2.rotation, Misc_Sidestick_Pitch_Captain_3.rotation
+  middle     : origin   0.852,  -0.274,   2.155
+  roll start : origin   0.881,  -0.271,   2.155 | top moved 2.9cm
+  roll end   : origin   0.824,  -0.283,   2.155 | top moved 2.9cm
+  pitch start: origin   0.854,  -0.283,   2.183 | top moved 3.0cm
+  pitch end  : origin   0.852,  -0.271,   2.125 | top moved 3.0cm
+
+== Misc_Sidestick_Pitch_Captain_3, node 2327: Misc_Sidestick_Pitch_Captain_3 < Misc_Sidestick_Roll_Captain_3 < Skel_Cockpit
+  under it: Misc_Sidestick_AP_Disconnect_Captain_Button (mesh)
+    under it: Misc_Sidestick_AP_Disconnect_Captain_Button_Mouse (mesh)
+  under it: Misc_Sidestick_Pitch_Captain_3_COLLISION (mesh)
+  under it: HANDLING_Yoke_1_Hand
+  Misc_Sidestick_Roll_Captain moves Misc_Sidestick_Roll_Captain_3.rotation, Misc_Sidestick_Roll_Captain_2.rotation, Misc_Sidestick_Roll_Captain_1.rotation
+  Misc_Sidestick_Pitch_Captain moves Misc_Sidestick_Pitch_Captain_1.rotation, Misc_Sidestick_Pitch_Captain_2.rotation, Misc_Sidestick_Pitch_Captain_3.rotation
+  mesh   0.100,   0.151,   0.155 m across
+  middle     : origin   0.888,  -0.438,   2.118 | center   0.858,  -0.293,   2.149 | top   0.845,  -0.218,   2.149
+  roll start : origin   0.888,  -0.438,   2.118 | center   0.884,  -0.290,   2.149 | top   0.884,  -0.214,   2.149 | top moved 3.9cm
+  roll end   : origin   0.888,  -0.438,   2.118 | center   0.833,  -0.300,   2.149 | top   0.807,  -0.229,   2.149 | top moved 3.9cm
+  pitch start: origin   0.888,  -0.438,   2.118 | center   0.859,  -0.300,   2.174 | top   0.846,  -0.227,   2.187 | top moved 3.9cm
+  pitch end  : origin   0.888,  -0.438,   2.118 | center   0.857,  -0.290,   2.122 | top   0.844,  -0.217,   2.109 | top moved 3.9cm
+
+== Misc_Sidestick_Pitch_FO_3, node 2337: Misc_Sidestick_Pitch_FO_3 < Misc_Sidestick_Roll_FO_3 < Skel_Cockpit
+  under it: Misc_Sidestick_AP_Disconnect_FO_Button (mesh)
+    under it: Misc_Sidestick_AP_Disconnect_FO_Button_Mouse (mesh)
+  Misc_Sidestick_Roll_FO moves Misc_Sidestick_Roll_FO_3.rotation, Misc_Sidestick_Roll_FO_2.rotation, Misc_Sidestick_Roll_FO_1.rotation
+  Misc_Sidestick_Pitch_FO moves Misc_Sidestick_Pitch_FO_1.rotation, Misc_Sidestick_Pitch_FO_2.rotation, Misc_Sidestick_Pitch_FO_3.rotation
+  mesh   0.107,   0.157,   0.155 m across
+  middle     : origin  -0.888,  -0.438,   2.118 | center  -0.866,  -0.294,   2.149 | top  -0.866,  -0.215,   2.149
+  roll start : origin  -0.888,  -0.438,   2.118 | center  -0.841,  -0.300,   2.149 | top  -0.827,  -0.223,   2.149 | top moved 3.9cm
+  roll end   : origin  -0.888,  -0.438,   2.118 | center  -0.891,  -0.292,   2.149 | top  -0.905,  -0.215,   2.149 | top moved 3.9cm
+  pitch start: origin  -0.888,  -0.438,   2.118 | center  -0.866,  -0.301,   2.173 | top  -0.866,  -0.224,   2.187 | top moved 3.9cm
+  pitch end  : origin  -0.888,  -0.438,   2.118 | center  -0.866,  -0.291,   2.123 | top  -0.866,  -0.214,   2.109 | top moved 3.9cm
+ 
+inibuilds-aircraft-a350, A350_Cockpit_LOD00.gltf
+
+== CPT_JOY_HANDLE, node 1596: CPT_JOY_HANDLE < CPT_JOY_HELPER_ROLL < CPT_JOY_HELPER_PITCH < SKEL_JOYSTICK_CPT < A359_Cockpit
+  SIDE_STICK_ROLL_CPT moves CPT_JOY_HELPER_ROLL.rotation
+  SIDE_STICK_PITCH_CPT moves CPT_JOY_HELPER_PITCH.rotation
+  mesh   0.075,   0.139,   0.139 m across
+  middle     : origin   0.833,  -0.161,   1.039 | center   0.828,  -0.099,   1.072 | top   0.822,  -0.030,   1.072
+  roll start : origin   0.864,  -0.166,   1.039 | center   0.886,  -0.108,   1.072 | top   0.909,  -0.042,   1.072 | top moved 8.8cm
+  roll end   : origin   0.814,  -0.165,   1.039 | center   0.794,  -0.107,   1.072 | top   0.770,  -0.041,   1.072 | top moved 5.3cm
+  pitch start: origin   0.833,  -0.167,   1.064 | center   0.828,  -0.120,   1.115 | top   0.822,  -0.055,   1.139 | top moved 7.2cm
+  pitch end  : origin   0.833,  -0.164,   1.015 | center   0.828,  -0.095,   1.024 | top   0.822,  -0.030,   1.000 | top moved 7.2cm
+
+== FO_JOY_HANDLE, node 1589: FO_JOY_HANDLE < FO_JOY_HELPER_ROLL < FO_JOY_HELPER_PITCH < SKEL_JOYSTICK_FO < A359_Cockpit
+  SIDE_STICK_ROLL_FO moves FO_JOY_HELPER_ROLL.rotation
+  SIDE_STICK_PITCH_FO moves FO_JOY_HELPER_PITCH.rotation
+  mesh   0.075,   0.139,   0.139 m across
+  middle     : origin  -0.833,  -0.161,   1.039 | center  -0.828,  -0.099,   1.072 | top  -0.822,  -0.030,   1.072
+  roll start : origin  -0.815,  -0.165,   1.039 | center  -0.794,  -0.107,   1.072 | top  -0.770,  -0.041,   1.072 | top moved 5.3cm
+  roll end   : origin  -0.864,  -0.166,   1.039 | center  -0.886,  -0.108,   1.072 | top  -0.909,  -0.042,   1.072 | top moved 8.8cm
+  pitch start: origin  -0.833,  -0.167,   1.064 | center  -0.828,  -0.120,   1.115 | top  -0.822,  -0.055,   1.139 | top moved 7.2cm
+  pitch end  : origin  -0.833,  -0.164,   1.015 | center  -0.828,  -0.095,   1.024 | top  -0.822,  -0.030,   1.000 | top moved 7.2cm

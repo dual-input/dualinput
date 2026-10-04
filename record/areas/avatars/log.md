@@ -7,8 +7,60 @@ The sim's own people stay invisible when a SimConnect client spawns them, GSX's 
 A figure of our own, balls and sticks whose joints are animations that read variables, poses in the cockpit as our dev page poses it, and one variable changes its color.
 In a moving cockpit, a WASM module that writes the figure inside the sim's frame, turned by the aircraft's full attitude and led by 0.75 to 1 frame, holds it in its seat.
 The figure's hand goes where the pilot clicks: the ray from the eye through the cursor, cast into the aircraft's interior model, lands within 2mm with no calibration and no control names, and a held press glides along the surface it touched.
+A sidestick's grip moves with its own animations as a yoke does, though of the three sidestick airliners we could read, only the Fenix marks where the hand goes.
 The probes are p01 to p25 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
-Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-04: Of the three sidestick airliners we could read, only the Fenix marks a grip, and each stick's grip moves with its own two animations
+
+**Asked:** does the Synaptic A220's sidestick carry what our yoke hand holds, a `[VR]` section and `HANDLING_` hand nodes, and can the figure hold a sidestick as it holds a yoke?
+Then the same for the other aircraft installed on our development machine.
+
+**Expected:** sidesticks would carry hand nodes like the yokes' `HANDLING_Yoke_1_Hand_Left` and `_Right`, which we take to be for the sim's VR hands (unverified).
+
+**Found:**
+
+- No sim ran: two tools read the files of 12 aircraft packages, synaptic-aircraft-a220 1.0.10, fnx-aircraft-320 and fnx-aircraft-319-321 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-a380 1.0.0, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, fsreborn-aircraft-phenom300e 1.0.24, a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, and bksq-aircraft-bonanzapro 0.1.1.
+- The A380 and the Phenom 300E come from the Marketplace and ship their files as `.fsc`, which we can't read, so neither has a `.cfg` or a glTF to check.
+  The Fenix A319 and A321 package's 28 models have no hand or stick nodes.
+- The rest mark their controls this way:
+
+  | Aircraft | Controls | `[VR]` section | Hand nodes |
+  | --- | --- | --- | --- |
+  | Synaptic A220 | sidesticks | none | none |
+  | Fenix A320 | sidesticks | none | `HANDLING_Yoke_1_Hand`, on the captain's stick only |
+  | iniBuilds A350 | sidesticks | every key empty | none |
+  | iniBuilds L-1011 | yokes | names `CPT_JOY_HANDLE`, the A350's stick grip, which no L-1011 model has | `HANDLING_Yoke_1_Hand_Left`, `_Right`, and the same for `Yoke_2` |
+  | PMDG 777-300ER | yokes | none | none |
+  | A2A Aerostar 600 | yokes | none | none |
+  | A2A Comanche, Black Square Baron and Bonanza | yokes | names the yoke and its two animations | `HANDLING_Yoke_1_Hand_Left`, `_Right`, and `_Wheel_Center` |
+
+- Each stick's grip is a mesh that the stick's roll and pitch animations turn, so a point fixed in the grip's own frame follows the stick.
+  Posed at the start, middle, and end of each animation, the top of each grip moves this far from where it sits at the middle frame:
+
+  | Aircraft | Grip nodes | Grip size | Side to side | Fore and aft | What drives the animations |
+  | --- | --- | --- | --- | --- | --- |
+  | Synaptic A220 | `CPT_STICK_HANDLE`, `FO_STICK_HANDLE` | 10 × 19 × 11cm | 4.2cm each way | 6.3cm and 5.3cm | `L:A22X L Sidestick X` and `Y`, as `(L:A22X L Sidestick X, Percent) neg 2 / 50 +` in `Sidestick.xml` |
+  | Fenix A320 | `Misc_Sidestick_Pitch_Captain_3`, `Misc_Sidestick_Pitch_FO_3` | 10 × 15 × 16cm | 3.9cm each way | 3.9cm each way | `L:N_FC_SIDESTICK_CAPT_PITCH` and `_BANK`, -1000 to 1000 ([Fenix study](../aircraft/fenix-a320-family/study.md)), through Fenix's `FNX32X_Interact_Sidestick_Template` |
+  | iniBuilds A350 | `CPT_JOY_HANDLE`, `FO_JOY_HANDLE` | 8 × 14 × 14cm | 8.8cm and 5.3cm | 7.2cm each way | compiled code in the behavior file's `<Strings>` table ([A350 study](../aircraft/inibuilds-a350/study.md)) |
+
+  The A220's code centers its stick at the middle frame.
+  We haven't read the Fenix's or the A350's code, so their middle frame may not be the stick's center, which the A350's uneven 8.8cm and 5.3cm suggest (unverified).
+- The Fenix's `HANDLING_Yoke_1_Hand` sits under the captain's grip, `Misc_Sidestick_Pitch_Captain_3`, 2.1cm from the middle of the grip's mesh, within its bounds, as the yokes' hand nodes sit inside their horns.
+  Its name has no `_Left` or `_Right`, so the names the yoke rule looks for don't find it.
+  The first officer's stick repeats the captain's pivots with `_FO` for `_Captain`, but has no hand node.
+- Nothing moves the A220's first officer's stick: its animations read `L:A22X R Sidestick X` and `Y`, which nothing wrote in that run (measured on MSFS 2024, 2026-10-04, [entry above](#2026-10-04-in-the-a220s-right-seat-the-figures-right-hand-held-the-first-officers-sidestick-and-nothing-moved-that-stick)).
+- `lib/cockpit-files.mjs` finds a part's animation code in a `<UseTemplate>` block that holds an `ANIM_CODE`.
+  The Fenix's sidestick blocks name a template and a variable instead, and the A350's code sits in the compiled `<Strings>` table, so for those two our copy of the model can't pose the stick yet.
+
+**Changed:** the figure can hold a sidestick as it holds a yoke, by a point fixed in the grip's frame and posed from the stick's own animations.
+Only the Fenix marks that point, and only on the captain's stick, so elsewhere it comes from the grip's mesh or from the profile author.
+Posing the Fenix's and the A350's sticks needs the template expanded and the compiled strings resolved.
+The hand rules still need a sidestick version, since a pilot holds the stick with the outboard hand and never hands it to the other.
+
+**Affects:** [the avatars' tentative decisions](decisions.md), whose grip rule names only yoke nodes and whose hand rules leave sidesticks out, and the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** [tools/grips.mjs](../../../experiments/areas/avatars/tools/grips.mjs) and its [run](../../../experiments/areas/avatars/results/grips-2026-10-04.txt), and [tools/stick.mjs](../../../experiments/areas/avatars/tools/stick.mjs) and its [run](../../../experiments/areas/avatars/results/stick-2026-10-04.txt).
 
 ## 2026-10-03: In the right seat, the figure's hands followed the yoke rules with the right hand on the yoke, and the module held it in its seat at up to 185 kt GS
 

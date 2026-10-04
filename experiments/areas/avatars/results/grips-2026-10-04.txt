@@ -1,0 +1,81 @@
+
+== synaptic-aircraft-a220 1.0.10
+  SimObjects/Airplanes/Synaptic_A220/attachments/inibuilds/Part_Interior_A223_Cockpit/model/A220_Cockpit_LOD00.gltf
+    stick nodes: CPT_STICK_HANDLE, SIDE_STICK_DISCO_CPT, SIDE_STICK_TRIM_CPT, FO_SIDESTICK_BOOT, CPT_SIDESTICK_BOOT, FO_STICK_HANDLE, SIDE_STICK_DISCO_FO, SIDE_STICK_TRIM_FO
+    stick animations: SIDE_STICK_DISCO_FO, SIDE_STICK_DISCO_CPT, SIDE_STICK_TRIM_CPT, SIDE_STICK_TRIM_FO, SIDE_STICK_ROLL_FO, SIDE_STICK_PITCH_FO, SIDE_STICK_ROLL_CPT, SIDE_STICK_PITCH_CPT
+
+== fnx-aircraft-320 2.4.0.4720
+  SimObjects/Airplanes/FNX_32X/attachments/fnx/Part_Interior_Cockpit/model/FNX_32X_Interior_Cockpit_LOD00.gltf
+    hand nodes: HANDLING_Yoke_1_Hand
+    stick nodes: Breaker_N16_STICK_LOCK, Breaker_N16_STICK_LOCK_Mouse, Misc_Sidestick_Roll_Captain_1, Misc_Sidestick_Pitch_Captain_1, Misc_Sidestick_Roll_Captain_2, Misc_Sidestick_Pitch_Captain_2, Misc_Sidestick_Roll_Captain_3, Misc_Sidestick_Pitch_Captain_3, Misc_Sidestick_AP_Disconnect_Captain_Button, Misc_Sidestick_AP_Disconnect_Captain_Button_Mouse, Misc_Sidestick_Pitch_Captain_3_COLLISION, Misc_Sidestick_Roll_FO_1, Misc_Sidestick_Pitch_FO_1, Misc_Sidestick_Roll_FO_2, Misc_Sidestick_Pitch_FO_2, Misc_Sidestick_Roll_FO_3, Misc_Sidestick_Pitch_FO_3, Misc_Sidestick_AP_Disconnect_FO_Button, Misc_Sidestick_AP_Disconnect_FO_Button_Mouse
+    stick animations: Misc_Sidestick_Pitch_Captain, Misc_Sidestick_Roll_Captain, Misc_Sidestick_Roll_FO, Misc_Sidestick_Pitch_FO, Misc_Sidestick_AP_Disconnect_FO_Button, Misc_Sidestick_AP_Disconnect_Captain_Button, Breaker_N16_STICK_LOCK
+
+== fnx-aircraft-319-321 2.4.0.4720
+  no hand or stick nodes in 28 models
+
+== inibuilds-aircraft-a350 1.2.6
+  [VR] in SimObjects/Airplanes/A350/common/config/aircraft.cfg: yoke_anim_x = "" | yoke_anim_y = "" | yoke_node = "" | yoke_collision_mesh = ""
+  SimObjects/Airplanes/A350/attachments/inibuilds/Part_Interior_A350_Cockpit/model/A350_Cockpit_LOD00.gltf
+    stick nodes: SKEL_FO_JOY_HELPER, SKEL_JOYSTICK_FO, FO_JOY_HELPER_PITCH, FO_JOY_HELPER_ROLL, FO_JOY_HANDLE, SIDE_STICK_DISCO_FO, SIDE_STICK_PEW_FO, JOYSTICK_FO_RUBBER, SKEL_JOYSTICK_CPT, CPT_JOY_HELPER_PITCH, CPT_JOY_HELPER_ROLL, CPT_JOY_HANDLE, SIDE_STICK_DISCO_CPT, SIDE_STICK_PEW_CPT, JOYSTICK_CPT_RUBBER
+    stick animations: SIDE_STICK_ROLL_CPT, SIDE_STICK_PITCH_CPT, SIDE_STICK_PITCH_FO, SIDE_STICK_ROLL_FO, SIDE_STICK_DISCO_FO, SIDE_STICK_DISCO_CPT
+
+== inibuilds-aircraft-a380 1.0.0
+  no glTF on disk
+
+== inibuilds-aircraft-l1011 1.0.8
+  [VR] in SimObjects/Airplanes/inibuilds-l1011/common/config/aircraft.cfg: yoke_anim_x = "CPT_JOYSTICK_PITCH" | yoke_anim_y = "CPT_JOYSTICK_ROLL" | yoke_node = "CPT_JOY_HANDLE" | yoke_collision_mesh = "CPT_JOY_HANDLE_COLLISION"
+  SimObjects/Airplanes/inibuilds-l1011/attachments/inibuilds/Part_L1011_Cockpit_Panel/model/L1011_COCKPIT_LOD00.gltf
+    hand nodes: HANDLING_Yoke_2_Hand_Left, HANDLING_Yoke_2_Hand_Right, HANDLING_Yoke_1_Hand_Left, HANDLING_Yoke_1_Hand_Right
+
+== pmdg-aircraft-77w 2.4.143
+  no hand or stick nodes in 35 models
+
+== fsreborn-aircraft-phenom300e 1.0.24
+  no glTF on disk
+
+== a2a-aircraft-aerostar600 1.0.6
+  SimObjects/Airplanes/aerostar600/common/model/EXTERIOR_LOD00.gltf
+    stick nodes: SKEL_OilInspectionStick_Left, OIL_CHECK_STICK_Left, SKEL_OilInspectionStick_Left_Handle, OIL_CHECK_STICK_Left_Handle, SKEL_OilInspectionStick_OilBottom_Left, SKEL_OilInspectionStick_OilTop_Left, SKEL_OilInspectionStick_Right, SKEL_OilInspectionStick_Right_Handle, OIL_CHECK_STICK_Right_Handle, OIL_CHECK_STICK_Right, SKEL_OilInspectionStick_OilTop_Right, SKEL_OilInspectionStick_OilBottom_Right, SKEL_OilInspectionStick_Left_EXT, SKEL_OilInspectionStick_OilBottom_Left_EXT, SKEL_OilInspectionStick_OilTop_Left_EXT, SKEL_OilInspectionStick_Left_Handle_EXT, SKEL_OilInspectionStick_Right_EXT, SKEL_OilInspectionStick_Right_Handle_EXT, SKEL_OilInspectionStick_OilTop_Right_EXT, SKEL_OilInspectionStick_OilBottom_Right_EXT
+    stick animations: ANIM_OIL_CHECK_Stick_Left, ANIM_OIL_CHECK_Stick_Right
+
+== a2a-aircraft-pa24 2.1.3
+  [VR] in SimObjects/Airplanes/pa24-250/common/config/aircraft.cfg: yoke_anim_x = HANDLING_YOKE_Lever_StickLR | yoke_anim_y	= HANDLING_YOKE_Lever_StickForeAft | yoke_node = HANDLING_Yoke
+  SimObjects/Airplanes/pa24-250/attachments/a2a/Registration/model/REGISTRATION_LOD00.gltf
+    stick nodes: SKEL_OilInspectionStick, SKEL_OilInspectionStick_OilBottom, SKEL_OilInspectionStick_OilTop
+    stick animations: ANIM_OilInspectionStick
+  SimObjects/Airplanes/pa24-250/common/model/PA24_250_INTERIOR_LOD00.gltf
+    hand nodes: HANDLING_Yoke_1_Wheel_Center, HANDLING_Yoke_1_Hand_Left, HANDLING_Yoke_1_Hand_Right
+    stick animations: HANDLING_YOKE_Lever_StickLR, HANDLING_YOKE_Lever_StickForeAft
+  SimObjects/Airplanes/pa24-250/common/model/PA24_250_LOD00.gltf
+    stick nodes: SKEL_OilInspectionStick, SKEL_OilInspectionStick_OilBottom, SKEL_OilInspectionStick_OilTop, OilCheckStick
+    stick animations: ANIM_OilInspectionStick
+
+== bksq-aircraft-baronpro 0.1.1
+  [VR] in SimObjects/Airplanes/bksq-aircraft-baronpro/aircraft.cfg: yoke_anim_x = "HANDLING_YOKE_Lever_StickLR" | yoke_anim_y = "HANDLING_YOKE_Lever_StickForeAft" | yoke_node = "HANDLING_Yoke_1" | yoke_collision_mesh = "HANDLING_Yoke_1_Colision"
+  [VR] in SimObjects/Airplanes/bksq-aircraft-baronpropress/aircraft.cfg: yoke_anim_x = "HANDLING_YOKE_Lever_StickLR" | yoke_anim_y = "HANDLING_YOKE_Lever_StickForeAft" | yoke_node = "HANDLING_Yoke_1" | yoke_collision_mesh = "HANDLING_Yoke_1_Colision"
+  [VR] in SimObjects/Airplanes/bksq-aircraft-baronproturbo/aircraft.cfg: yoke_anim_x = "HANDLING_YOKE_Lever_StickLR" | yoke_anim_y = "HANDLING_YOKE_Lever_StickForeAft" | yoke_node = "HANDLING_Yoke_1" | yoke_collision_mesh = "HANDLING_Yoke_1_Colision"
+  SimObjects/Airplanes/bksq-aircraft-baronpro/model.base/BaronProfessional_Base_INT.gltf
+    hand nodes: HANDLING_Yoke_1_Hand_Left, HANDLING_Yoke_1_Hand_Right, HANDLING_Yoke_1_Wheel_Center
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+  SimObjects/Airplanes/bksq-aircraft-baronpro/model.base/BaronProfessional_Base_INT_LOD.gltf
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+  SimObjects/Airplanes/bksq-aircraft-baronpropress/model.press/BaronProfessional_Pressurized_INT.gltf
+    hand nodes: HANDLING_Yoke_1_Hand_Left, HANDLING_Yoke_1_Hand_Right, HANDLING_Yoke_1_Wheel_Center
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+  SimObjects/Airplanes/bksq-aircraft-baronpropress/model.press/BaronProfessional_Pressurized_INT_LOD.gltf
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+
+== bksq-aircraft-bonanzapro 0.1.1
+  [VR] in SimObjects/Airplanes/bksq-aircraft-bonanzapro/aircraft.cfg: yoke_anim_x = "HANDLING_YOKE_Lever_StickLR" | yoke_anim_y = "HANDLING_YOKE_Lever_StickForeAft" | yoke_node = "HANDLING_Yoke_1" | yoke_collision_mesh = "HANDLING_Yoke_1_Colision"
+  [VR] in SimObjects/Airplanes/bksq-aircraft-bonanzaproturbine/aircraft.cfg: yoke_anim_x = "HANDLING_YOKE_Lever_StickLR" | yoke_anim_y = "HANDLING_YOKE_Lever_StickForeAft" | yoke_node = "HANDLING_Yoke_1" | yoke_collision_mesh = "HANDLING_Yoke_1_Colision"
+  [VR] in SimObjects/Airplanes/bksq-aircraft-bonanzaproturbo/aircraft.cfg: yoke_anim_x = "HANDLING_YOKE_Lever_StickLR" | yoke_anim_y = "HANDLING_YOKE_Lever_StickForeAft" | yoke_node = "HANDLING_Yoke_1" | yoke_collision_mesh = "HANDLING_Yoke_1_Colision"
+  SimObjects/Airplanes/bksq-aircraft-bonanzapro/model.base/BonanzaProfessional_Base_INT.gltf
+    hand nodes: HANDLING_Yoke_1_Hand_Left, HANDLING_Yoke_1_Hand_Right, HANDLING_Yoke_1_Wheel_Center
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+  SimObjects/Airplanes/bksq-aircraft-bonanzapro/model.base/BonanzaProfessional_Base_INT_LOD.gltf
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+  SimObjects/Airplanes/bksq-aircraft-bonanzaproturbine/model.turbine/BonanzaProfessional_Turbine_INT.gltf
+    hand nodes: HANDLING_Yoke_1_Hand_Left, HANDLING_Yoke_1_Hand_Right, HANDLING_Yoke_1_Wheel_Center
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR
+  SimObjects/Airplanes/bksq-aircraft-bonanzaproturbine/model.turbine/BonanzaProfessional_Turbine_INT_LOD.gltf
+    stick animations: HANDLING_yoke_Lever_StickForeAft, HANDLING_YOKE_LEVER_StickLR

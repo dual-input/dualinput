@@ -326,14 +326,18 @@ Pilots debrief with it, training groups use it for checkrides, and we use it to 
 
 ### Telemetry
 
-Crosscheck sends non-identifying events to a server of ours, such as a synced control that never matched after its retries, with the aircraft, the profile's version, and the control, and a setting turns it off.
-It adds to the marker the recording gets and the banner's notice for such a control, which still asks the pilot for a bug report: telemetry finds the patterns across many flights, and a bug report explains one.
+When Crosscheck sets a control on the other pilot's machine, reads it back, and still finds the wrong value after a few tries, it sends an event to a server of ours carrying only the aircraft's package and version, the profile's version, and the control.
+This covers only controls whose profile entry Crosscheck can read, the limit that keeps [cockpit diff and resync](#ideas-left-out) out.
+A setting switches it on or off, and which way it starts is an open question below.
+It adds to the [bug reports](03-v1-scope.md#recording-and-bug-reports) pilots send, because telemetry finds the patterns across many flights, and a bug report explains one.
 
-- **Tech:** the server the v1 scope plans for [bug reports](03-v1-scope.md#recording-and-bug-reports) could take these events too, and Sentry is a candidate for crash reports.
-- **Product:** we learn which aircraft and profiles fail without waiting for a pilot to report it.
+- **Tech:** the server the v1 scope plans for bug reports could take these events too, or a hosted error-tracking service such as [Sentry](https://sentry.io/) could, which would also catch Crosscheck's own crashes.
+- **Product:** a profile that fails on many pilots' flights gets fixed even when none of them files a bug report.
 - **Open questions:**
-  - Whether it's off until a pilot turns it on, or on with a setting to turn it off: the EU's GDPR generally asks consent for telemetry an app doesn't need to work, unless the data is anonymous, and an IP address counts as personal data (unverified, and a question for legal advice).
-  - What to record, decided once the engine exists.
+  - Whether it starts off until a pilot turns it on, or on until a pilot turns it off.
+    Each event reaches our server from the pilot's IP address, which the EU's General Data Protection Regulation (GDPR) counts as personal data, so the events are anonymous only if the server discards the address (unverified).
+    Whether the GDPR, or the EU's ePrivacy rules on reading data from a device, require asking the pilot first is a question for legal advice (unverified).
+  - Which events to send beyond a control that never matched, chosen once Crosscheck syncs real flights and we see what fails.
 
 ### Crosscheck IDE
 

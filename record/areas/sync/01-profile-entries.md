@@ -13,7 +13,8 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 
 An author writes what they can find in the aircraft's files: where a control's value can be read, and what changes it.
 The engine decides how to sync it, so an author never has to know, for example, that an absolute setter beats a toggle.
-Field names that do something are verbs, such as `read`, `write`, `watch`, and `ignore`.
+Field names that do something are verbs, such as `watch`, `write`, and `ignore`.
+`watch` names what Crosscheck observes in both blocks: a value under `state:`, and an occurrence under `events:`.
 
 This document fixes the shape of the profile format.
 Its syntax and file layout are step 7's decision in [the plan](../product/plan.md), so every example below is a sketch.
@@ -25,36 +26,37 @@ The split between reading and writing matches how profiles are already written: 
 | Field | What it says |
 | --- | --- |
 | `name` | The control's name for people, used in the Crosscheck IDE, the preflight checklist, and notices |
-| `read` | Where the value comes from: a variable, or rules that count events into a shadow value |
+| `watch` | Where the value comes from: a variable, a plugin's value, or rules that count events into a shadow value |
 | `default` | A shadow value's starting value |
-| `write` | How to change the control: `set`, `toggle`, `inc` and `dec`, `then`, or a write function, and with no `write` the entry is read-only |
+| `write` | How to change the control: `set`, `toggle`, `inc` and `dec`, `then`, or a write function, and with no `write` the entry is watch-only |
 | direction | Whether only the flying machine sends the entry, or any pilot's machine can |
 | `ignore` | The names this entry's action also fires, which Crosscheck ignores once afterward |
 
 On each machine, the state object is all of an aircraft's state entries with their current values.
 
-### Reading a value
+### Watching a value
 
-`read` names a variable when the control's value is one:
+`watch` names a variable when the control's value is one:
 
 ```yaml
 fcu_heading:
   name: FCU heading
-  read: L:var_fcuHeading      # hypothetical name
+  watch: L:var_fcuHeading      # hypothetical name
   write:
     set: L:var_fcuHeading
 ```
 
 A variable here is an `L:` or `A:` variable, an input event's `B:` value, or an aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)).
-`read` can also name a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, and `write` can name one too.
+`watch` can also name a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, as `plugin.state.<name>`, which the plugin finds where no variable shows it, such as in a gauge's JavaScript.
+`set:` can name the same value, and calls the write method of that name that the plugin registers ([the writer API](#the-writer-api)).
 
-When no variable shows the value, `read` counts the events that change it instead, and Crosscheck keeps the result as a shadow value: its own copy of a value the aircraft keeps out of sight.
+When no variable shows the value, `watch` counts the events that change it instead, and Crosscheck keeps the result as a shadow value: its own copy of a value the aircraft keeps out of sight.
 
 ```yaml
 speed:
   name: FCU speed
   default: 80
-  read:
+  watch:
     on: K:SOME_AC_SPEED_INC, increment(1)      # hypothetical event names
     on: K:SOME_AC_SPEED_DEC, decrement(1)
   write:
@@ -82,15 +84,15 @@ A shadow value is the last resort, because nothing can check it: a shadow that m
 
 | Form | When | What the engine does |
 | --- | --- | --- |
-| `set: <variable or event>` | One variable or event takes the value | Writes the variable, or sends the event once |
+| `set: <variable, event, or plugin value>` | One variable, event, or plugin value takes the value | Writes the variable, sends the event once, or calls the plugin's write method |
 | `toggle: <event>` | The only write flips the control | Compares the wanted value with the local one, and flips only if they differ |
 | `inc` and `dec`, with `step`, `range`, and `wrap` | The control only steps | Turns the difference into steps, the shorter way round when `wrap` is true, and clamps at the ends of `range` when it's false |
 | `then: <action>` after another form | One action isn't enough | Runs the second action after the first |
 | A write function | Anything less regular | Runs the function and carries out the actions it returns |
 
-An entry with no `write` is read-only: Crosscheck reads it on every machine and compares the values, and never writes it.
-Crosscheck never falls back to writing an entry's `read` variable.
-The rest of the pre-sync checklist, a Soon pick, uses read-only entries to tick off a control once both cockpits agree on it ([04-room-for-later](../product/04-room-for-later.md#profiles)).
+An entry with no `write` is watch-only: Crosscheck watches it on every machine and compares the values, and never writes it.
+Crosscheck never falls back to writing an entry's `watch` variable.
+The rest of the pre-sync checklist, a Soon pick, uses watch-only entries to tick off a control once both cockpits agree on it ([04-room-for-later](../product/04-room-for-later.md#profiles)).
 
 `toggle` is common enough to be built in.
 About 20 entries in FS Copilot's Synaptic A220 profile compare before they flip (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`).
@@ -103,7 +105,7 @@ The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL`, 
 ```yaml
 fuel_pump_1_1:
   name: Fuel pump 1-1
-  read: L:SWITCH_FUEL_PUMP_1_1
+  watch: L:SWITCH_FUEL_PUMP_1_1
   write:
     set: L:SWITCH_FUEL_PUMP_1_1
     then: H:FUEL
@@ -187,6 +189,11 @@ A write function's writer returns actions as data, and the engine carries them o
 - `b(name, value)` for an input event
 - `h(name)` for an `H:` event
 - paced sequences, such as `writer.repeat(delta).every(1, 'frame').k('SOME_EVENT')` or `.every(40, 'ms')`, with TypeScript types for the units
+- `plugin()` for the write methods the aircraft's plugin registers, such as `writer.plugin().radar_range(value)` (hypothetical), and `plugin('<id>')` for an add-on's plugin
+
+A plugin never calls the writer: it registers its write methods, and they run only when the engine calls them, so a write into a gauge's JavaScript or into DataStorage is an action the engine sees like any other.
+A write method may be a setter for one of the plugin's values, under the value's name, or an action of its own with arguments, such as loading a panel state by name.
+It has to be safe to repeat, because a retry repeats it ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)).
 
 Because the engine sees each action, it can mark its own writes as echoes, pace them, put them in order with the rest of the session, cut a paced sequence short when a new value arrives for the same entry, and check every name against the sim when the profile loads.
 Authors write no calculator code.
@@ -216,8 +223,8 @@ A profile gives no signal for when the aircraft has finished loading, because on
 
 ## What the IDE does with a profile
 
-- It shows the state object live, entry by entry, and lists the read-only entries, because a forgotten `write` makes an entry read-only without a word.
-- It warns about an entry with both a readable `read` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
+- It shows the state object live, entry by entry, and lists the watch-only entries, because a forgotten `write` makes an entry watch-only without a word.
+- It warns about an entry with both a readable `watch` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
 - It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which as of 2026-10-04 exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
   A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Crosscheck's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
 

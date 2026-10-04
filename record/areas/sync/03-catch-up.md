@@ -39,7 +39,7 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 ## Catching up state
 
 1. The flying machine sends its state object as it stands.
-2. The catching-up machine skips every entry its cockpit already matches, and every read-only entry, which it only compares.
+2. The catching-up machine skips every entry its cockpit already matches, and every watch-only entry, which it only compares.
 3. It applies each remaining entry once, at the PF's value, in the order [below](#choosing-the-order).
    Entries the PF never changed since the aircraft loaded go first.
    Immediate writes go out in that order in one short burst, and stepped writes start in that order and run side by side, since each moves a different control.

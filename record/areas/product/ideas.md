@@ -58,7 +58,7 @@ Reaching it takes a patch to the module that nobody has written, which an A350 [
 
 ### Plugins
 
-A plugin is code we ship for one aircraft or one add-on, which finds state a profile can't reach and exports it as values the profile syncs, and reaches the rest through hooks into Crosscheck, so Crosscheck's own code never names a product.
+A plugin is code we ship for one aircraft or one add-on, which finds state a profile can't reach, exports it as values the profile watches, and registers the write methods that set it, and reaches the rest through hooks into Crosscheck, so Crosscheck's own code never names a product.
 Its scope for v1, with one plugin for the 58P, is in [03-v1-scope](03-v1-scope.md#plugins), and what Crosscheck builds for plugins is in [04-room-for-later](04-room-for-later.md#plugins).
 
 - **Tech:** a plugin for GSX could show GSX's ground vehicles and people on every machine and play its sound, as traffic sync and hearing ATC carry traffic and ATC, rather than have each machine's GSX run the same service.

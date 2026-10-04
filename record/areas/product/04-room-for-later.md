@@ -70,7 +70,8 @@ v1 needs others: a late joiner also takes the PF's time of day, date, and simula
 Each step says where it runs relative to the others, such as after state so the battery is on, and how it checks that it landed.
 Later picks add steps:
 
-- **Bus bridge:** a step that sends `A22X.Resync`, after which the A220 sent a full snapshot on each of the 29 CommBus channels that carry its changes ([CommBus log](../commbus/log.md#2026-09-28-a22xresync-returns-the-a220s-full-state-and-one-listener-hears-every-channel)).
+- **Bus bridge:** a bridge that forwards whole CommBus messages needs a step that sends `A22X.Resync`, after which the A220 sent a full snapshot on each of the 29 CommBus channels that carry its changes ([CommBus log](../commbus/log.md#2026-09-28-a22xresync-returns-the-a220s-full-state-and-one-listener-hears-every-channel)).
+  An A220 plugin that uses `A22X.Resync` only to read the fields its profile needs, and exports those, needs no step, since its values are ordinary entries.
 - **EventBus bridge:** a step that publishes `resync_request`, which has every synced topic sent again (read in the A220's DisplayUnits bundle, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
 - **Aircraft adapters:** a step in an adapter's plugin for state that isn't one value, such as loading a PMDG 777 panel state, which its CDU does by name (unverified), though whether the 777 loads one mid-flight is untested; loading one from the CDU in flight settles both ([aircraft adapters](ideas.md#aircraft-adapters)).
 
@@ -82,20 +83,20 @@ After a short outage, each channel replays its own missed messages, and the chan
 
 A plugin is code we ship for one aircraft or one add-on, and code that serves one product lives in a plugin, never in Crosscheck's own code ([03-v1-scope](03-v1-scope.md#plugins)).
 
-A plugin's first job is to find state the profile can't reach and export it as values.
-The profile names each one as it names an `L:` variable ([01-profile-entries](../sync/01-profile-entries.md#reading-a-value)).
-Live sync, read-back, the conflict rule, and catch-up then cover a plugin's values as they cover any entry, with no code of the plugin's.
-The 58P's plugin exports the 58P's DataStorage keys that way ([03-v1-scope](03-v1-scope.md#plugins)).
+A plugin's first job is to find state the profile can't reach and export it as values, `plugin.state.<name>`, which the profile watches as it watches an `L:` variable ([01-profile-entries](../sync/01-profile-entries.md#watching-a-value)).
+For each value it can set, the plugin registers a write method, which shows up on the writer as `writer.plugin().<name>(value)`, so a plugin never calls the writer, and the engine calls its methods ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
+Live sync, read-back, the conflict rule, catch-up, pacing, and echo marking then cover a plugin's values and writes as they cover any entry, with no code of the plugin's.
+The 58P's plugin does that for the radio settings that live only in its gauges' JavaScript ([03-v1-scope](03-v1-scope.md#plugins)).
 
 For what isn't a value, a plugin reaches every layer through hooks:
 
 - moments in a session, such as an aircraft loading, preflight ending, and control passing
 - channels of its own, of the kinds above
 - steps in the catch-up pipeline
-- the writer, for every write to the sim
 - code inside the sim, in the aircraft's panels and in a WASM module ([below](#code-inside-the-sim))
 
-Where no hook reaches, a plugin reads the sim and the pilot's files directly, since we review every plugin, and still writes to the sim only through the writer ([03-v1-scope](03-v1-scope.md#plugins)).
+Where no hook reaches, a plugin reads the sim, the aircraft's panels, and the pilot's files directly, since we review every plugin, and it changes what Crosscheck watches only in its write methods ([03-v1-scope](03-v1-scope.md#plugins)).
+One aircraft's plugin runs per aircraft, and plugins for aircraft that share code share it through a library rather than a copy.
 
 These picks put their product-specific parts in plugins:
 
@@ -112,7 +113,7 @@ Two plugins then never fight over one mechanism, and every mechanism keeps the f
 
 v1's own features are built on the hooks plugins use, so the hooks carry more than the 58P plugin's work from the first release, and a later feature is one more module on them.
 
-**v1 builds** plugin values in the profile, the hooks, v1's features on them, and the 58P's plugin.
+**v1 builds** plugin values and write methods in the profile and the writer, the hooks, v1's features on them, and the 58P's plugin.
 
 ## Code inside the sim
 
@@ -195,23 +196,23 @@ If both routes fail, the EFB app's messages pass through a panel that holds a We
 
 ## Profiles
 
-- **Read-only entries:** an entry with no `write` is read on every machine and compared, never written ([01-profile-entries](../sync/01-profile-entries.md#writing-a-value)).
+- **Watch-only entries:** an entry with no `write` is watched on every machine and compared, never written ([01-profile-entries](../sync/01-profile-entries.md#writing-a-value)).
   The rest of the [pre-sync checklist](ideas.md#pre-sync-checklist) uses them to tick off a control once both cockpits agree on it, and [what doesn't sync](ideas.md#what-doesnt-sync) uses them to name a control nobody can sync.
-- **Plugin values:** a profile names a value a plugin exports as it names a variable ([Plugins](#plugins)).
+- **Plugin values:** a profile watches a value a plugin exports, and sets it through the plugin's write method, as it would a variable ([Plugins](#plugins)).
 - **Requests:** a third direction beside the PF's entries and shared ones ([01-profile-entries](../sync/01-profile-entries.md#choosing-who-sends)), for an action any pilot asks for and only the flying machine carries out, such as a pushback ([ground operations sync](ideas.md#ground-operations-sync)).
   The input layer keeps the asking pilot's own sim from acting on it.
 - **A profile's identity:** each profile carries its version and a hash of its contents.
   In v1 the [preflight match check](03-v1-scope.md#preflight-match-check) compares them, and once profiles come from a [registry](ideas.md#profile-registry), the same hash tells a pilot's Crosscheck which profile to fetch.
 - **New blocks:** the format takes blocks beyond `state:` and `events:`, such as the checklist's items or the controls that don't sync, each with its reason.
 
-**v1 builds** read-only entries, plugin values, a direction field with room for a third value, profile hashes the match check compares, and a format that takes new blocks.
+**v1 builds** watch-only entries, plugin values, a direction field with room for a third value, profile hashes the match check compares, and a format that takes new blocks.
 
 ## Recording
 
 - **The debrief timeline** plays a flight back from the recording ([flight recorder and debrief](ideas.md#flight-recorder-and-debrief)).
   So the recording holds the flight model's track, the handovers, and every channel with its timing, in a format later versions of Crosscheck still read, and the crew's recordings merge by the session's ID and the vector clocks.
 - **Telemetry** sends the event v1 raises when a write never lands, the one that marks the recording and puts a notice on the banner ([02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)), carrying nothing that identifies the pilot ([telemetry](ideas.md#telemetry)).
-- **Plugin tests:** the recorder keeps every value a plugin received and every action it returned, so any flight flown with the plugin replays through it in a test, with no copy of the aircraft.
+- **Plugin tests:** the recorder keeps every value a plugin exported and every write method Crosscheck called on it, so any flight flown with the plugin replays through it in a test, with no copy of the aircraft.
   The plugin's author writes no test: they fly with recording on, as pilots do for [bug reports](03-v1-scope.md#recording-and-bug-reports).
   Panel code that reaches into the aircraft directly, such as into the A220's Redux store, does work the recording doesn't see, and only flying it checks that.
 

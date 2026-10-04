@@ -45,7 +45,7 @@ fcu_heading:
     set: L:var_fcuHeading
 ```
 
-A variable here is an `L:` or `A:` variable, an input event's `B:` value, or an aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)).
+A variable here is an `L:` or `A:` variable, an input event's `B:` value, an aircraft's own client data, such as the PMDG 777's battery switch `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), or a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, which `write` can name too.
 
 When no variable shows the value, `read` counts the events that change it instead, and Crosscheck keeps the result as a shadow value: its own copy of a value the aircraft keeps out of sight.
 
@@ -88,8 +88,8 @@ A shadow value is the last resort, because nothing can check it: a shadow that m
 | A write function | Anything less regular | Runs the function and carries out the actions it returns |
 
 An entry with no `write` is read-only: Crosscheck reads it on every machine and compares the values, and never writes it.
-Crosscheck writes nothing an entry doesn't name under `write`, not even its `read` variable, so an entry that only reads stays read-only, which a later preflight checklist that ticks off a control once both cockpits agree on it would use ([04-room-for-later](../product/04-room-for-later.md#profiles)).
-Because a forgotten `write` would make an entry read-only without a word, the IDE lists every read-only entry.
+Crosscheck never falls back to writing an entry's `read` variable.
+The rest of the pre-sync checklist, a Soon pick, uses read-only entries to tick off a control once both cockpits agree on it ([04-room-for-later](../product/04-room-for-later.md#profiles)).
 
 `toggle` is common enough to be built in.
 About 20 entries in FS Copilot's Synaptic A220 profile compare before they flip (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`).
@@ -215,7 +215,7 @@ A profile gives no signal for when the aircraft has finished loading, because on
 
 ## What the IDE does with a profile
 
-- It shows the state object live, entry by entry, and lists the read-only entries.
+- It shows the state object live, entry by entry, and lists the read-only entries, because a forgotten `write` makes an entry read-only without a word.
 - It warns about an entry with both a readable `read` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
 - It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which as of 2026-10-04 exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
   A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Crosscheck's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).

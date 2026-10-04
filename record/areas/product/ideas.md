@@ -51,18 +51,20 @@ Carrying that key between machines, limited to the topics that belong to the air
 
 Some displays drawn by WASM code can take a forwarded press.
 The iniBuilds A380's displays pressed at the position we sent once we told the display the mouse had entered it (measured on MSFS 2024, 2026-09-23, FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-23 — The A380 presses where we say once the display is told the mouse entered it; the A350 does not").
-The A350's module discards the position we send and presses wherever the receiving pilot's own cursor is on that display, so reaching it takes a patch to the module that nobody has written, which an A350 [plugin](#plugins) could make on the pilot's machine ([decision 001](../../decisions/001-changing-other-developers-packages.md)) (read in inibuilds-aircraft-a350 1.2.6, `inibuilds-A350.wasm`, `GaugeInstance::DoCallback`; FS Copilot fork, `record/wasm-pointer/docs/log.md`, "2026-09-24 — Read out of the A350's binary: the press position comes from the draw data, not the click").
+The A350's display ignores the position we send and presses wherever the receiving pilot's own cursor is on that display (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 — A WASM gauge presses whatever the REAL cursor hovers, ignoring the coordinates we send").
+Reaching it takes a patch to the module that nobody has written, which an A350 [plugin](#plugins) could make on the pilot's machine ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
 
 - **Next:** design how a production version does this, and find which aircraft's displays it reaches.
 
 ### Plugins
 
-A plugin is code we ship for one aircraft or one add-on, which reaches what a profile can't through hooks into Crosscheck, so Crosscheck's core never names a product.
-Its scope for v1, with one plugin for the 58P, is in [03-v1-scope](03-v1-scope.md#plugins), and what Crosscheck's core allows plugins is in [04-room-for-later](04-room-for-later.md#plugins).
+A plugin is code we ship for one aircraft or one add-on, which finds state a profile can't reach and exports it as values the profile syncs, and reaches the rest through hooks into Crosscheck, so Crosscheck's own code never names a product.
+Its scope for v1, with one plugin for the 58P, is in [03-v1-scope](03-v1-scope.md#plugins), and what Crosscheck builds for plugins is in [04-room-for-later](04-room-for-later.md#plugins).
 
 - **Tech:** a plugin for GSX could show GSX's ground vehicles and people on every machine and play its sound, as traffic sync and hearing ATC carry traffic and ATC, rather than have each machine's GSX run the same service.
-  Our fork listed and spawned 11 of 11 GSX vehicles (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/02-open-questions.md`, Q07), a GSX person walks when we write the animation variable of its own object (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)), and GSX's program, `Couatl64`, owns an audio session of its own (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Picking the ATC app: what the API allows").
-  With different GSX versions on two machines, the worst case is then a vehicle missing from one pilot's view, rather than a service that never runs.
+  Our fork listed and spawned 11 of 11 ground vehicles, GSX's tugs, fuel trucks, and catering and Asobo's baggage carts, though nobody judged how they look when driven (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · First visual replay; engines, pushback, ground vehicles").
+  A GSX person walks when we write the animation variable of its own object (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)), and GSX's program, `Couatl64`, owns an audio session of its own (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Picking the ATC app: what the API allows").
+  With different GSX versions on two machines, we expect the worst case to be a vehicle missing from one pilot's view, rather than a service that never runs (unverified).
 - **Open questions:** what the GSX plugin has to handle, left until we build it: two pilots calling the same service each on their own machine, taking GSX's objects over from traffic sync, the vehicles' own animations, and control passing during a pushback.
 
 ### Aircraft adapters
@@ -89,8 +91,8 @@ Pushback, jetways, the fuel truck, and GSX show on both machines, so both pilots
 
 - **Tech:** the sim's own services start from key events, such as `K:TOGGLE_JETWAY` and `K:TOGGLE_PUSHBACK`, and GSX is a separate addon with its own `L:FSDT_GSX_*` variables; the iniBuilds A350 uses both (read in inibuilds-aircraft-a350 1.2.6, [A350 study](../aircraft/inibuilds-a350/study.md)).
   Showing the tug on the other machine is a [traffic sync](#traffic-sync) problem.
-  The sim's own services are the same on every aircraft, so they belong in Crosscheck's core, while GSX is one product, so it comes through a [plugin](#plugins).
-  Until then, the pilot whose sim runs a pushback flies it ([traffic sync](03-v1-scope.md#traffic-sync)).
+  The sim's own services are the same on every aircraft, so they belong in Crosscheck's own code, while GSX is one product, so it comes through a [plugin](#plugins).
+  Until ground operations sync is built, [traffic sync](03-v1-scope.md#traffic-sync) sets who flies a pushback.
 
 ### ATC sync
 
@@ -330,10 +332,9 @@ A pilot sees them whether or not the EFB is open, and a click on one opens Cross
 Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches without a tablet, such as a take-control button the pilot puts above the glareshield or sticks to a window.
 
 - **Tech:** an object attached through the aircraft's own files holds still in flight, as GSX's seated passengers did at up to 244 kt, but that means editing each aircraft package (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
-  An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window shouldn't show.
-  Whether predicting each frame from its actual frame time steadies it fully is unknown.
+  An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window mustn't show.
   A click's ray cast into the cockpit model finds the control the pilot clicked ([avatars log](../avatars/log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)), and whether it can find a click on one of our own objects is untested.
-- **Open questions:** whether an object our WASM module writes can hold as still as a button fixed to a window needs, since Crosscheck's own features don't attach objects through an aircraft's files ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
+- **Open questions:** whether predicting each frame from its actual frame time holds an object our WASM module writes as still as a button fixed to a window needs, since Crosscheck's own features don't attach objects through an aircraft's files ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
 
 ## Tools
 

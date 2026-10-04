@@ -49,7 +49,7 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 
 Applying each entry once, at its final value, keeps the catching-up machine from running the PF's history: an APU the PF started, stopped, and started again starts once.
 
-Catching up state is the first step of catch-up, and an aircraft's [plugin](../product/03-v1-scope.md#plugins) can add steps after it, such as copying the 58P's stored tablet settings, the first candidate job for its plugin ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
+Catching up state is one step of catch-up, and an aircraft's [plugin](../product/03-v1-scope.md#plugins) can add steps after it, such as one that sends the A220's `A22X.Resync` for its full state ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
 
 ## Choosing the order
 

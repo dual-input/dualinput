@@ -24,6 +24,7 @@ An entry writes the cause, the variable the aircraft computes the control from, 
 On the Baron 58TC and 58P, the behavior XML rewrites `A:GENERAL ENG MIXTURE LEVER POSITION:n` from `L:BKSQ_MixtureLeverPosition_n` at 2 Hz (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so an entry that wrote the stock variable would see its write undone within half a second if the XML runs as read (unverified, the Baron study's sim question 5), and the mixture entry reads and writes the `L:` variable instead.
 
 A read-only entry, one with no `write`, crosses the wire too, and the receiving machine compares it with its own value instead of writing it ([01-profile-entries](01-profile-entries.md#writing-a-value)).
+In v1 a mismatch goes in the recording, and the rest of the pre-sync checklist, a Soon pick, acts on it ([04-room-for-later](../product/04-room-for-later.md#profiles)).
 
 ## One stream, in causal order
 

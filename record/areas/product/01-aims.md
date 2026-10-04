@@ -23,7 +23,7 @@ When two choices are otherwise even, Crosscheck takes the one we'd want when fly
 - **Crosscheck is free, and takes donations.**
 - **Every part of Crosscheck gets the same care from its first version,** the tools only we use included: no cut corners in code, interface, or copy, because an interface allowed to drift keeps drifting.
 - **v1 gives up features, never design.**
-  v1 is a line drawn to get a working version for a first flight, not a deadline, so any feature after it slots in without rebuilding what v1 built.
+  v1 is the set of features for a first flight, and it builds what later features need from it, so any feature after v1 slots in without rebuilding what v1 built ([04-room-for-later](04-room-for-later.md)).
 
 ## Relay and license
 

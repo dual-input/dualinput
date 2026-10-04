@@ -64,7 +64,7 @@ The picks, picked on 2026-10-02:
   - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
   - The [notification banner](ideas.md#notification-banner), split from Crosscheck objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
   - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Crosscheck IDE
-  - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Crosscheck's core from the first aircraft on
+  - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Crosscheck's own code from the first aircraft on
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
@@ -85,9 +85,9 @@ The picks, picked on 2026-10-02:
   - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
   - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
   - [Telemetry](ideas.md#telemetry), picked on 2026-10-04
+  - [Aircraft adapters](ideas.md#aircraft-adapters), picked on 2026-10-04, each built as a plugin
 
-On 2026-10-04, [aircraft adapters](ideas.md#aircraft-adapters), a Later pick, became plugins.
-[Seat awareness](ideas.md#seat-awareness) left Soon the same day: avatar sync took telling a pilot's seat into v1, the IDE pick places the seats, and moving a pilot's camera to a seat went to [Ideas left out](ideas.md#ideas-left-out), as did permanent codes.
+[Seat awareness](ideas.md#seat-awareness) left Soon on 2026-10-04: avatar sync took telling a pilot's seat into v1, the IDE pick places the seats, and moving a pilot's camera to a seat went to [Ideas left out](ideas.md#ideas-left-out), as did permanent codes.
 
 How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, is left to step 4, because it's a detail of the interface rather than a feature.
 
@@ -151,10 +151,9 @@ Exit: each risk below has a log entry that answers it.
 - Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at low frame rates (the PA-24 session's wasn't recorded), and whether a held key bound to a momentary input event repeats inside that window.
 - Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
 - Whether one sim draws several of our figures, each posed from variables of its own object, and what 2, 20, and 180 figures cost in frame time with every joint moving every frame, which decides how the avatars' module and channel are built ([04-room-for-later](04-room-for-later.md#people-beyond-the-crew)).
-  v1 already draws two figures in each sim, and a full airliner's cabin of passengers would be 180, at 28 values each for the figure p24 posed ([avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).
-  It measures frame time, so the sim's window has to be in front.
+- Whether an EFB app and the notification banner's in-game panel can each hold a WebSocket to a program on the same PC, as a cockpit panel can, which decides whether every client of Crosscheck speaks one protocol ([04-room-for-later](04-room-for-later.md#one-protocol-for-every-client)).
 
-The world map probe and the five after it, on stepped writes, settling, the double-fire, writes landing, and figures, make one batched sim session.
+The world map probe and the six after it, on stepped writes, settling, the double-fire, writes landing, figures, and WebSockets, make one batched sim session.
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture

@@ -3,6 +3,33 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: A click on a notice in our panel opens the EFB onto another app, whether the EFB was open or closed
+
+**Asked:** can a notice on our panel open the EFB onto a given app, after the toolbar's calls put nothing on screen ([entry below](#2026-10-04-code-in-the-efbs-document-switches-the-efb-to-another-app-but-no-call-we-found-puts-the-efb-on-screen))?
+
+**Expected:** the sim's own flow events would do it, since its interface opens the EFB onto a page with `LaunchFlowEvent("UI_EFB_OPEN", "")` and `LaunchFlowEvent("UI_EFB_OPEN_PAGE", "", "<app>", "<page>")` (read in fs-base-ui, `html_ui/Global/pkg/base.bundle.js`, and fs-base-efb-app-atlas, `AtlasApp.js`).
+
+**Found:** on MSFS 2024 SU6, in the Black Square Baron 58P, parked, with GSX standing in for our app:
+
+- With the EFB opened by Tab, the toolbar still listed `PANEL_EFB` as `"Invisible"`; the only change we found was the EFB's action bar losing the class `panel-ui-actions--hidden`, which it carries exactly while the EFB is closed.
+- Neither the flow events above nor ChasePlane's `document.querySelector("ui-panel").m_listener.setPanelOpened(id, true)` did anything to the EFB, run in our panel's document or the toolbar's.
+- `Coherent.call("TOGGLE_EFB")`, the call behind the toolbar's `ToolBarListener.toggleEFB` (read in fs-base-ui, `html_ui/Global/lib.js`), opens and closes the EFB from our panel's document and from the EFB's own.
+- The EFB's document hears `OPEN_BY_KEY(app, page, args)` from the sim and opens that app (read in fs-base-efb, `html_ui/efb_ui/efb_os/efb_os.js`), so the sim has some way to open the EFB onto an app, which we haven't found.
+- The chain, installed through the inspector, with a stand-in for our EFB app in the EFB's document:
+  1. A click on the notice raises `L:CROSSCHECK_P05_EFB_APP`.
+  2. The stand-in, polling it every 200ms, calls `TOGGLE_EFB` only if the action bar says the EFB is closed, then presses GSX's dock button.
+  3. With the EFB open on Atlas, it stayed open and switched to GSX; with it closed after the pilot left it on Atlas, it opened onto GSX.
+  4. GSX's button was pressed 73ms to 240ms after each of five clicks.
+- A first version that called `TOGGLE_EFB` from the panel closed an open EFB, as a toggle does.
+- ChasePlane keeps its full-screen overlay closed in VR, reading `globalVars.vrMode` in the toolbar's document (read in p42-util-chaseplane 2026.39.1.16, `HTML_UI/icons/toolbar/P42_PANEL_CHASEPLANE_OVERLAY.svg`).
+
+**Changed:** the hybrid works: notices on our panel, and a click on one opens our EFB app, whatever state the EFB is in.
+It rests on two things only measured with code installed through the inspector: our EFB app's code running while the EFB is closed, and pressing our app's button, which may be off the dock and off the app list's first page.
+
+**Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** inspector reads, the screenshots after each call, and the pilot's report; no run file.
+
 ## 2026-10-04: Our toolbar icon loads a script of ours into the toolbar's document, and it opens our panel with no click
 
 **Asked:** can Crosscheck open its in-game panel by itself, from code we ship and control, with no click and no EFB app ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page))?

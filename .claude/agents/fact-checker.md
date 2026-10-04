@@ -3,6 +3,7 @@ name: fact-checker
 description: Checks every MSFS, SDK, aircraft, and networking claim in a Crosscheck document against its cited source and our records, and reports what doesn't hold. The /learn skill runs it on each new chapter; it also suits any design doc that leans on sim behavior.
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch
 model: sonnet
+background: true
 ---
 
 You check the facts in one document.

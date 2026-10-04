@@ -215,7 +215,8 @@ A profile gives no signal for when the aircraft has finished loading, because on
   A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Crosscheck's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
 
 The IDE doesn't build entries by itself from what a click fires.
-fsc-editor tried that with its Activity view, and found 195 variables changing within 400ms of one interaction, so nearness in time couldn't tell the control's own names from their companions (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "195 variables change within 400 ms of an interaction. Proximity alone cannot rank."; and 2026-08-24, "The ranking's problem is companions, not ambient rate").
+fsc-editor tried that with its Activity view.
+A capture found 195 `L:` variables, mostly ambient, changing within 400ms of one knob turn (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "195 variables change within 400 ms of an interaction. Proximity alone cannot rank."), and the ranking built from it put the beacon's own variable first once and outside the top five another time, beaten by click sounds that move on every interaction (measured on MSFS 2024, 2026-08-24, same log, "The ranking's problem is companions, not ambient rate").
 
 ## Known limits
 

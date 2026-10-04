@@ -86,7 +86,8 @@ A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a f
 ## Settling after a load
 
 An aircraft that has just loaded goes on changing its own controls for a while.
-The sim saves 40 of the Baron's `L:` variables with the flight and restores them at load, and the Baron's own timers finish restoring its settings about 25s after load by the code, which nobody has measured (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 2).
+The SDK documents that the sim saves the 40 `L:` variables in the Baron's `systems.cfg [LocalVars]` with the flight and restores them at load, though developers reported it failing on some MSFS 2024 builds (documented, as the [Baron study](../aircraft/black-square-baron-pro/study.md) cites it; unverified for this aircraft).
+The Baron's own timers finish restoring its settings about 25s after load by the code, which nobody has measured (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 2).
 
 A restore that lands after catch-up looks like the pilot changing those controls.
 

@@ -75,7 +75,7 @@ A flag does two things, once per entry per flight:
 - The [notification banner](../product/03-v1-scope.md#notification-banner) shows a notice naming the entry, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app."
 
 A retry repeats the entry's write, which is safe for the forms that do only what's left: an omitted write and `set` write the value again, `toggle` compares before it flips, and `inc` and `dec` step only the remaining difference.
-A retry also repeats a `then` action and a write function's actions, so those need to be safe to repeat, such as the L-1011's `H:FUEL`, which by its name tells the flight engineer's script to look at the switches again (unverified).
+A retry also repeats a `then` action and a write function's actions, so those need to be safe to repeat, such as the L-1011's `H:FUEL`, which the flight engineer's script answers by re-reading the fuel panel's switches (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md)), and that a repeat is harmless is unverified.
 
 Two cases get past the check:
 
@@ -107,7 +107,7 @@ A pointer press that also changes a state entry applies once too: the stream car
 ## Open questions
 
 - Whether held keys repeat a momentary input event faster than the double-fire window: a momentary input event reports 0 every time (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong"), so if they do, the filter drops the real repeats as echoes.
-- Whether the double-fire stays within 3 frames at frame rates well below 60 fps, and on aircraft other than the PA-24.
+- Whether the double-fire stays within 3 frames at frame rates below the PA-24 session's, which wasn't recorded, and on aircraft other than the PA-24.
 - Whether SimConnect applies the writes Crosscheck sends within one frame in the order it sent them.
 - How long to wait before reading back, how many retries before a flag, and how long an unused echo token lasts.
 - How to keep a `then` action or a write function's actions from doing harm when a retry repeats them.

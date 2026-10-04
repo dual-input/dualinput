@@ -3,6 +3,25 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: A picture written over a texture file before the sim first loads it shows on the next spawn, and once loaded the sim keeps it
+
+**Asked:** can the floating panel's picture change while the sim runs, by writing over its texture file, so that Crosscheck's app could draw any notice and the banner show it?
+
+**Expected:** a fresh spawn would read the file again.
+
+**Found:** in the Black Square Baron 58P, parked, p04 wrote a notice, "You've lost the connection", stamped with the time it was drawn, as an uncompressed DDS of the same size over the texture file in both copies of the package, the one Build and Mount mounted and the one in Community:
+
+- Over the card's texture, which the panel had loaded: the panel kept showing the card, 1s and 5s after the write while it was up, and after it was removed and spawned again 4s later.
+- Over `CROSSCHECK_P02_Baked2`'s texture, which had never loaded, since the sim had refused our KTX2 there ([entry below](#2026-10-04-a-texture-we-write-ourselves-shows-on-our-panel-an-uncompressed-dds-shipped-by-a-copy-asset-group-with-its-ktx2json)), padded with zeros to that file's size: the first spawn after the write showed the notice with its stamp, 10:25:14, written 1.5s before the spawn.
+- The package builder logged no error during either run.
+
+**Changed:** the sim reads a texture file the first time it needs it, sees a mounted file's new contents, and doesn't keep a failed load, but keeps a loaded texture after its object is removed.
+So a banner can show a picture the app draws while the sim runs, once per texture file; whether a loaded texture is ever let go, which would let a file be used again, is untested.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** p04's runs [over the loaded texture](../../../experiments/areas/interface/results/p04-texture-rewrite-2026-10-04-08-24-19.txt) and [over the one never loaded](../../../experiments/areas/interface/results/p04-texture-rewrite-2026-10-04-08-25-14.txt), each with its screenshots in the folder of the same name.
+
 ## 2026-10-04: A texture we write ourselves shows on our panel: an uncompressed DDS, shipped by a Copy asset group with its .KTX2.json
 
 **Asked:** how does a texture get into a package of ours, when both packagers left our PNG out ([entry below](#2026-10-04-build-and-mount-loads-a-new-module-with-no-sim-restart-leaves-png-textures-out-and-a-program-can-click-it))?

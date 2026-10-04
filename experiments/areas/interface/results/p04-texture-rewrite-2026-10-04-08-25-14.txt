@@ -1,0 +1,9 @@
+p04 · Whether rewriting the floating panel's texture file changes its picture, on MSFS 2024
+2026-10-04T08:25:14.329Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+  rewriting 2 copies of the texture, 2097348 bytes each: package\Packages\crosscheck-p02-panel\SimObjects\Misc\CROSSCHECK_P02_Baked2\TEXTURE\CROSSCHECK_P02_CARD.PNG.KTX2, ..\..\..\..\..\..\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community\crosscheck-p02-panel\SimObjects\Misc\CROSSCHECK_P02_Baked2\TEXTURE\CROSSCHECK_P02_CARD.PNG.KTX2
+  wrote the notice drawn at 10:25:14 over CROSSCHECK_P02_Baked2's texture, which never loaded, padded to 2097348 bytes, before spawning it
+  wrote the card back
+  BuilderLogError.txt didn't change during the run
+
+Read the screenshots: 1 the card; 2 and 3 after the rewrite with the panel up; 4 after a fresh spawn.

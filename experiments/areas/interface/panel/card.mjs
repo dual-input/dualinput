@@ -46,6 +46,18 @@ export const CARD_CSS = `
 }
 `
 
+// A notice, for p04's rewrite test: a different picture of the same size, with
+// the time it was drawn, so a screenshot shows which copy the sim drew.
+export function noticeMarkup({ title, body, stamp }) {
+  return `
+<div class="cc-card">
+  <div class="cc-head"><div class="cc-brand">CROSSCHECK</div><div class="cc-pill">NOTICE</div></div>
+  <div class="cc-title">${title}</div>
+  <div class="cc-rows"><div class="cc-row"><div class="cc-dot cc-warning"></div><div>${body}</div></div></div>
+  <div class="cc-foot"><div>Drawn at ${stamp}</div></div>
+</div>`
+}
+
 export function cardMarkup({ live = false, opaque = false } = {}) {
   return `
 <div class="cc-card${opaque ? " cc-opaque" : ""}">

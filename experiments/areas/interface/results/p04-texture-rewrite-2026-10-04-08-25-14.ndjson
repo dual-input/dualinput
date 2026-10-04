@@ -1,0 +1,28 @@
+{"t":1791102314383,"s":0.054,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791102314416,"s":0.087,"kind":"targets","text":"rewriting 2 copies of the texture, 2097348 bytes each: package\\Packages\\crosscheck-p02-panel\\SimObjects\\Misc\\CROSSCHECK_P02_Baked2\\TEXTURE\\CROSSCHECK_P02_CARD.PNG.KTX2, ..\\..\\..\\..\\..\\..\\AppData\\Roaming\\Microsoft Flight Simulator 2024\\Packages\\Community\\crosscheck-p02-panel\\SimObjects\\Misc\\CROSSCHECK_P02_Baked2\\TEXTURE\\CROSSCHECK_P02_CARD.PNG.KTX2"}
+{"t":1791102315814,"s":1.485,"kind":"rewrite","text":"wrote the notice drawn at 10:25:14 over CROSSCHECK_P02_Baked2's texture, which never loaded, padded to 2097348 bytes, before spawning it"}
+{"t":1791102315832,"s":1.503,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791102315832,"s":1.503,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791102315832,"s":1.503,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791102315866,"s":1.537,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 51331091","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102315866,"s":1.537,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 51331091","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102315866,"s":1.537,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 51331091","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102315866,"s":1.537,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791102315866,"s":1.537,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 51331091","object":0,"values":[51331091]}
+{"t":1791102315867,"s":1.538,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791102319008,"s":4.679,"kind":"shot","text":"slot-spawned: 01-slot-spawned.jpg, brightness 62","file":"<repo>\\experiments\\areas\\interface\\results\\p04-texture-rewrite-2026-10-04-08-25-14\\01-slot-spawned.jpg","width":2401,"height":1360,"brightness":61.7}
+{"t":1791102322112,"s":7.783,"kind":"shot","text":"slot-spawned-3s-later: 02-slot-spawned-3s-later.jpg, brightness 62","file":"<repo>\\experiments\\areas\\interface\\results\\p04-texture-rewrite-2026-10-04-08-25-14\\02-slot-spawned-3s-later.jpg","width":2401,"height":1360,"brightness":61.6}
+{"t":1791102322114,"s":7.785,"kind":"restore","text":"wrote the card back"}
+{"t":1791102322114,"s":7.785,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791102322114,"s":7.785,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791102323117,"s":8.788,"kind":"builder","text":"BuilderLogError.txt didn't change during the run"}

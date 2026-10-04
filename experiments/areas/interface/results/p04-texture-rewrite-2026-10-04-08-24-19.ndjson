@@ -1,0 +1,49 @@
+{"t":1791102259644,"s":0.04,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791102259677,"s":0.073,"kind":"targets","text":"rewriting 2 copies of the texture, 2097280 bytes each: package\\Packages\\crosscheck-p02-panel\\SimObjects\\Misc\\CROSSCHECK_P02_Baked\\TEXTURE\\CROSSCHECK_P02_CARD.PNG.KTX2, ..\\..\\..\\..\\..\\..\\AppData\\Roaming\\Microsoft Flight Simulator 2024\\Packages\\Community\\crosscheck-p02-panel\\SimObjects\\Misc\\CROSSCHECK_P02_Baked\\TEXTURE\\CROSSCHECK_P02_CARD.PNG.KTX2"}
+{"t":1791102259698,"s":0.094,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791102259698,"s":0.094,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791102259699,"s":0.095,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791102259732,"s":0.128,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 51331089","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102259733,"s":0.129,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 51331089","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102259733,"s":0.129,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 51331089","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102259733,"s":0.129,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791102259733,"s":0.129,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 51331089","object":0,"values":[51331089]}
+{"t":1791102259734,"s":0.13,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791102262880,"s":3.276,"kind":"shot","text":"1-card: 01-1-card.jpg, brightness 62","file":"<repo>\\experiments\\areas\\interface\\results\\p04-texture-rewrite-2026-10-04-08-24-19\\01-1-card.jpg","width":2401,"height":1360,"brightness":62.3}
+{"t":1791102264525,"s":4.921,"kind":"rewrite","text":"wrote the notice drawn at 10:24:22 over the texture, 2097280 bytes, with the panel up"}
+{"t":1791102265624,"s":6.02,"kind":"shot","text":"2-rewritten-1s: 02-2-rewritten-1s.jpg, brightness 62","file":"<repo>\\experiments\\areas\\interface\\results\\p04-texture-rewrite-2026-10-04-08-24-19\\02-2-rewritten-1s.jpg","width":2401,"height":1360,"brightness":62}
+{"t":1791102269728,"s":10.124,"kind":"shot","text":"3-rewritten-5s: 03-3-rewritten-5s.jpg, brightness 63","file":"<repo>\\experiments\\areas\\interface\\results\\p04-texture-rewrite-2026-10-04-08-24-19\\03-3-rewritten-5s.jpg","width":2401,"height":1360,"brightness":62.6}
+{"t":1791102269728,"s":10.124,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791102269728,"s":10.124,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"send","text":"K:FREEZE_LATITUDE_LONGITUDE_SET 1 at priority highest, tagged to object 51331090","event":"FREEZE_LATITUDE_LONGITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102270765,"s":11.161,"kind":"send","text":"K:FREEZE_ALTITUDE_SET 1 at priority highest, tagged to object 51331090","event":"FREEZE_ALTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102270765,"s":11.161,"kind":"send","text":"K:FREEZE_ATTITUDE_SET 1 at priority highest, tagged to object 51331090","event":"FREEZE_ATTITUDE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_DIST ← 0.35","object":0,"values":[0.35]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_SCALE ← 1","object":0,"values":[1]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_DOWN ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_RIGHT ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_LEAD ← 1","object":0,"values":[1]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_CAM_LEAD ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_LAZY_S ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_DEAD_DEG ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_ROLL ← 0","object":0,"values":[0]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_PITCH ← -1","object":0,"values":[-1]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_SIGN_BANK ← -1","object":0,"values":[-1]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 51331090","object":0,"values":[51331090]}
+{"t":1791102270765,"s":11.161,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 1","object":0,"values":[1]}
+{"t":1791102273859,"s":14.255,"kind":"shot","text":"4-respawned: 04-4-respawned.jpg, brightness 63","file":"<repo>\\experiments\\areas\\interface\\results\\p04-texture-rewrite-2026-10-04-08-24-19\\04-4-respawned.jpg","width":2401,"height":1360,"brightness":62.6}
+{"t":1791102273859,"s":14.255,"kind":"respawn","text":"removed the panel and spawned it again"}
+{"t":1791102273861,"s":14.257,"kind":"restore","text":"wrote the card back"}
+{"t":1791102273861,"s":14.257,"kind":"write","text":"L:CROSSCHECK_P02_MODE ← 0","object":0,"values":[0]}
+{"t":1791102273861,"s":14.257,"kind":"write","text":"L:CROSSCHECK_P02_OBJECT ← 0","object":0,"values":[0]}
+{"t":1791102274874,"s":15.27,"kind":"builder","text":"BuilderLogError.txt didn't change during the run"}

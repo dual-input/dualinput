@@ -296,18 +296,18 @@ That makes the interface a client of Crosscheck's app on whichever screen it run
 
 ### Notification banner
 
-A banner floats in front of the pilot and moves with their view, like a pair of AR glasses, for every notice Crosscheck has: "James is in the pause menu", latency trouble, lost packets, a lost connection.
-A pilot sees it whether or not the EFB is open, in VR as on a monitor.
+Crosscheck's notices, such as "James is in the pause menu", latency trouble, lost packets, and a lost connection, slide in at the side of the screen.
+A pilot sees them whether or not the EFB is open, and a click on one opens Crosscheck's EFB app at what it's about.
 
-- **Tech:** `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)), so a banner can be placed in front of the view.
-  How to draw text there is unknown: candidates are an object of our own whose model carries an HTML gauge, and the sim's own text display from SimConnect, `SimConnect_Text`.
-  An object written every frame by a WASM module holds its place with a slight lag that reads as inertia on a seated figure ([avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), and how steady a banner locked to a moving view would look is untested.
-- **Open questions:** whether a banner can carry a button, such as "disconnect and take control", since catching a click on our own object is untested.
+- **Tech:** a see-through in-game panel of ours, kept open, takes clicks and slides notices in and out (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and a script its toolbar icon puts into the sim's toolbar opened it with no click after two of three Build and Mounts (same date, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+  With GSX standing in for our EFB app, a click on a notice opened the EFB onto GSX, whether the EFB was open or closed, though only from a stand-in we put into the EFB's document through the sim's inspector (same date, [interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
+  A banner on an object of ours, held in front of the pilot's view, smeared in motion and was sometimes cut into by the cockpit (judged by the pilot in MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-banner-drawn-on-an-object-of-ours-smears-in-motion-and-is-clipped-behind-the-cockpit-so-we-parked-it-for-an-in-game-panel)).
+  The pilot caught none of three `SimConnect_Text` texts, though the sim reported two as displayed (same date, [interface log](../interface/log.md#2026-10-04-simconnect_text-reports-its-texts-as-displayed-and-the-pilot-didnt-catch-any-of-them)).
+- **Open questions:** how the panel shows in VR, and whether clicks on its empty part reach the cockpit.
 
 ### Crosscheck objects in the cockpit
 
 Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches without a tablet, such as a take-control button the pilot puts above the glareshield or sticks to a window.
-The first of them, the [notification banner](#notification-banner), is its own idea.
 
 - **Tech:** an object attached through the aircraft's own files holds still in flight, as GSX's seated passengers did at up to 244 kt, but that means editing each aircraft package (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-attached-through-the-aircrafts-own-files-holds-still-in-flight)).
   An object a WASM module writes every frame holds its place with a lead of about 0.75 frames, and what's left reads as inertia on a seated person (measured, same date, [avatars log](../avatars/log.md#2026-10-03-over-three-minutes-of-flying-leads-of-075-and-1-frame-both-hold-the-figure-and-whats-left-reads-as-inertia)), which a button fixed to a window shouldn't show.

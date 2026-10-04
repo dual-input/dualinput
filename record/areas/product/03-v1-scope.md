@@ -302,7 +302,7 @@ Before a pilot starts flying, Crosscheck compares what each pilot has for the sh
 - Joining and flying are two steps.
   Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which installing and updating will scope.
   Then the pilot starts flying, and sync starts with it.
-- Beside the control that starts flying, a list shows each difference as a warning or an error, in a design for later.
+- Beside each control that starts flying, the differences show, in a design for later: as a list of warnings and errors in the EFB app, and as counts on the [notification banner](#notification-banner)'s summary.
 - The comparison covers the aircraft's package, version, and variant, such as the Baron's 58P against its base model, and the livery.
 - The aircraft's version is also checked against the versions its profile covers.
 
@@ -512,6 +512,8 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 - An app of its own, built on the sim's EFB framework, not the desktop app reused.
   Shipping EFB apps are written that way: A2A's tablet is TSX bundled by esbuild on Asobo's EFB API and the MSFS Avionics Framework, and it registers with `Efb.use` (read in a2a-aircraft-aerostar600 1.0.6, `A2ATabletApp.js`).
 - What a pilot needs during a flight: the take-control button, the crew and the connection's state, starting to fly with the list of warnings and errors, the box for an invite code, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
+- Opening onto what a notice on the [notification banner](#notification-banner) is about when the pilot clicks the notice anywhere but on its action, whether the EFB was open on another app or closed.
+  With GSX standing in for our app, a click on a notice opened a closed EFB onto GSX, and switched an open one to it without closing it (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 - A button that brings the desktop app to the front while Crosscheck's core is running.
 - How it looks is for a design later.
 
@@ -534,29 +536,48 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 - Whether the EFB app can start the core when it isn't running, since a panel may not be allowed to start a program.
 - Whether the EFB can fill its code box from the clipboard, as the [invite code](#invite-code) section asks.
+- Whether a click on a notice opens our app when it's off the EFB's dock and the first page of its app list, and whether our app's code runs while the EFB is closed, which a step 6 probe in [the plan](plan.md) answers.
 
 ### Notification banner
 
-A banner floats in front of the pilot and moves with their view, like a pair of AR glasses, and shows Crosscheck's notices whether or not the EFB is open.
+Crosscheck's notices slide in at the right of the screen, on a see-through in-game panel, the kind of window the sim's toolbar opens, so the pilot sees them whether or not the EFB is open.
+A notice can carry one action of its own, such as Start flying on the summary, and a click anywhere else on it opens the [EFB app](#efb-app) at what the notice is about.
 
 **In v1:**
 
-- The banner, in VR as on a monitor, for notices such as "James is in the pause menu" and "You've lost the connection".
-- Notices that other features add, such as trouble with the connection, as each is scoped.
+- The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", "You have control", and "Occupied by James.".
+- Before the pilot starts flying, a summary of who has joined and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Start flying button.
+- Crosscheck opening the banner's panel itself when a flight loads, with no click from the pilot.
 
 **Not in v1:**
 
+- The rest of Crosscheck's controls, which live in the EFB app.
+- A banner that floats in front of the pilot's view on an object of ours, like a pair of AR glasses: its text smeared while the view moved, and parts of the cockpit sometimes cut into it (judged by the pilot in MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-banner-drawn-on-an-object-of-ours-smears-in-motion-and-is-clipped-behind-the-cockpit-so-we-parked-it-for-an-in-game-panel)).
 - Crosscheck's other objects in the cockpit, such as a take-control button stuck to a window, a Later pick.
+
+**Rules:**
+
+- The banner shows before the pilot starts flying, and after that only when something needs their attention, such as a seat that's taken, a lost connection, a PF who dropped out, or control passing to them.
+- Between notices the panel draws nothing, because the sim blurs whatever lies behind the pixels a panel paints (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
+- A notice that asks the pilot to act says where: on the notice, in the EFB app, or in the desktop app.
 
 **Depends on:**
 
-- Where the pilot looks: `SimConnect_CameraGet` gives it, whether ChasePlane drives the camera or not (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not)).
+- A script that Crosscheck's toolbar icon puts into the sim's toolbar, which opened the banner's panel with no click after two of three Build and Mounts (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+  It's Parallel 42's trick, not a sim feature: the toolbar runs markup it finds in an icon, and an update could stop that.
+- The [EFB app](#efb-app), which a click on a notice opens.
 
 **Open questions:**
 
-- How to draw text there, steadily, which a step 6 probe in [the plan](plan.md) answers: an object of our own whose model carries an HTML gauge is the candidate.
-  We dropped the sim's own text display, `SimConnect_Text`, which reported its texts as displayed while the pilot caught none of them, because the gauge gives us control of how a notice looks ([interface log](../interface/log.md#2026-10-04-simconnect_text-reports-its-texts-as-displayed-and-the-pilot-didnt-catch-any-of-them)).
-- Whether the banner can carry a button, such as "disconnect and take control", since catching a click on our own object is untested; if not, the action lives in the EFB app and the desktop app.
+- Whether the toolbar script opens the panel at every flight load: we've seen it run only after a Build and Mount, and it left the panel closed after the first of three, for a reason we don't know (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+  A script that retries until the toolbar lists the panel as open is built and hasn't run.
+- How long a notice stays, and how notices come and go.
+- Which further notices v1 needs, such as connection trouble short of a drop.
+- How the banner looks and reads in VR, which nobody has tried, since our development machine has no headset.
+  ChasePlane closes its own full-screen overlay when the toolbar's `globalVars.vrMode` is set (read in p42-util-chaseplane 2026.39.1.16, `HTML_UI/icons/toolbar/P42_PANEL_CHASEPLANE_OVERLAY.svg`), which suggests a panel like ours may not work in VR (unverified).
+- Whether clicks on the panel's empty part reach the cockpit beneath it, which nobody has tried.
+  If they don't, the full-height column blocks that part of the cockpit for the whole flight, and reporting only the notice's rectangle with `UPDATE_PANEL_RECT` might let them through (unverified, [interface log](../interface/log.md#2026-10-04-an-in-game-panels-size-is-a-percent-of-the-screens-height-capped-at-150-of-it-so-ours-cant-span-a-wide-screen-though-parallel-42s-panels-do)).
+- How to keep the panel on the right when Crosscheck opens it: opened from code, it sat at the left of the screen (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
 
 ## Tools
 

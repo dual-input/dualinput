@@ -109,7 +109,7 @@ Agreed:
 - Hearing ATC, on 2026-10-03.
 - Time, date, sim rate, and pause, on 2026-10-03.
 - Recording and bug reports, on 2026-10-03.
-- The EFB app and the notification banner, on 2026-10-03.
+- The EFB app and the notification banner, on 2026-10-03, and revised on 2026-10-04.
 - Installing and updating, on 2026-10-03.
 - Avatar sync, on 2026-10-04.
 
@@ -133,7 +133,10 @@ Exit: each risk below has a log entry that answers it.
 - Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
   We expect it to hold, because on the 58P masking the throttle's key events also stopped the throttle's input event (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), but nobody has masked the mixture.
-- How to show a banner of text that moves with the pilot's view, steadily, in VR as on a monitor, which decides whether the [notification banner](ideas.md#notification-banner) works as v1 needs.
+- Whether a click on a [notification banner](03-v1-scope.md#notification-banner) notice opens Crosscheck's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
+  The probe fills the EFB with far more apps than its dock and the first page of its app list hold.
+  The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
+- How the notification banner's panel shows in VR, which tells us whether it meets v1's commitment to VR pilots; nobody has tried.
 - Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
 Steps 4 and 5 add to this list as they find risks.
 

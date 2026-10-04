@@ -1,0 +1,11 @@
+p10 · Camera views from a Community package of our own that shadows the 58P's cameras.cfg, on MSFS 2024
+2026-10-04T05:20:51.183Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Installed in Community: aaa-crosscheck-camera-test hint "CUSTOM_SIMOBJECTS_PATCH", zzz-crosscheck-camera-test hint "CUSTOM_SIMOBJECTS_PATCH"
+Mount order in the sim's report: aaa-crosscheck-camera-test, bksq-aircraft-baronpro, zzz-crosscheck-camera-test
+SimConnect lists 33 definitions; of the test views: Crosscheck: ZZZ
+ChasePlane's views with Crosscheck in the name: none
+Crosscheck: ZZZ: -0.489, +0.044, -0.028m from CoPilot, asked -0.245, -0.050, -1.200, off by 1201mm
+Turned ChasePlane back on
+
+Exceptions: none

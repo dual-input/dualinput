@@ -3,6 +3,38 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-04: A Community package of ours adds a seat view anywhere in the aircraft: it replaces the camera file when it mounts after the aircraft's, the sim reads it at start, and a free pilot item lets the camera hand back there
+
+**Asked:** can a Community package of our own give an aircraft camera views by putting a `cameras.cfg` at the aircraft's own path, since the Camera API can't add one ([entry below](#2026-10-04-camerasetrelative6dof-puts-the-eye-at-any-point-but-holds-the-camera-and-a-camera-handed-back-into-a-view-returns-to-the-views-own-eye))?
+And does the sim's root `Cameras.CFG` add views?
+
+**Expected:** a package that mounts after the aircraft's would replace the file, as a z-named texture pack replaces the PMDG 777's textures.
+
+**Found:** p10 built two packages on this machine from the installed Black Square Baron 58P's `cameras.cfg`, bksq-aircraft-baronpro 0.1.1, each the whole file with one test view appended: `aaa-crosscheck-camera-test` with "Crosscheck: AAA" and `zzz-crosscheck-camera-test` with "Crosscheck: ZZZ", 1.2m behind the copilot's view, in the cabin.
+It also appended "Crosscheck: ROOT" to the root `Cameras.CFG` in the sim's AppData folder.
+
+- The sim mounts packages in groups by the manifest's `package_order_hint`, and alphabetically within a group, as its running-session report lists them (`AsoboReport-RunningSession.txt`, `[FlightSimulator_Packages]`): empty hints, then `UI_PATCH`, `PANEL_PATCH`, `CUSTOM_INSTRUMENT`, `SIMOBJECTS_PATCH`, `CUSTOM_SIMOBJECTS`, `CUSTOM_SIMOBJECTS_PATCH`, `CUSTOM_MODELLIB_PATCH`, `CUSTOM_AIRPORT`, among others.
+  The 58P's package has `CUSTOM_SIMOBJECTS_PATCH`, and the HUES texture pack, `zhues_pmdg777_rev`, sits right after `pmdg-aircraft-77w` in `CUSTOM_SIMOBJECTS`.
+- With empty hints, both test packages mounted long before the 58P's, and SimConnect_EnumerateCameraDefinitions listed the 58P's 32 views and neither test view.
+- With both set to `CUSTOM_SIMOBJECTS_PATCH`, the sim mounted `aaa`, then `bksq-aircraft-baronpro`, then `zzz`, and listed 33 views: the 58P's 32 and "Crosscheck: ZZZ", without "Crosscheck: AAA".
+  So the package that mounts last replaces the whole file; the files don't merge, or AAA's view, with its own name and Guid, would show too.
+- "Crosscheck: ROOT" never showed, in either boot.
+- ChasePlane's `get_views` listed neither test view.
+- Holding the camera, `SimConnect_CameraSetUsingCameraDefinition` put the eye on "Crosscheck: ZZZ" to the millimeter, and on the 58P's own `CabinForward` too.
+  Releasing the camera into a view handed it back there only for `Pilot` and `CoPilot`, whose `SubCategoryItem` are `"DefaultPilot"` and `"CoPilot"`; `CabinForward`, `CabinRearward`, and "Crosscheck: ZZZ", each `"None"`, put the eye at `Pilot`'s.
+- p10 then moved ZZZ 0.3m up and gave it `SubCategoryItem` `"LandingPilot"`, one of the SDK's pilot items the 58P leaves unused, in the installed package, without restarting the sim; after a new flight, holding the camera put the eye where ZZZ was at boot, so the sim reads the file at its start and not at a flight's.
+- After a sim restart, holding the camera put the eye on the moved ZZZ to the millimeter, and releasing the camera into ZZZ left it there, 1.2m behind the copilot's view, with the status `NOT_ACQUIRED`.
+  Over the next 10s the pilot looked around with the mouse, the yaw going from −150° to 59°, and the eye stayed within 1mm of where the release put it.
+
+**Changed:** with the sim's own camera, Crosscheck can seat a pilot at any point in the aircraft, with their look as usual: a package of its own copies the aircraft's camera file and appends a view with a pilot item the aircraft leaves free, it mounts after the aircraft's package by its `package_order_hint` and name, and it's written before the sim starts.
+That copies another developer's file onto the pilot's machine and shadows it, which needs a decision.
+How many seats this covers turns on whether several views can share an item, since the SDK lists `ClosePilot`, `LandingPilot`, and `TrueCockpit` besides the 58P's `DefaultPilot`, `CoPilot`, and `PilotVR`.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), the [installing and updating](../product/03-v1-scope.md#installing-and-updating) scope, whose `VCockpit.js` check meets the same mount order, and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** p10's runs [with empty hints](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-14-39.txt), [with `CUSTOM_SIMOBJECTS_PATCH`](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-20-51.txt), [after the move and a new flight](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-26-13.txt), and [after the restart, with `"LandingPilot"`](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-30-05.txt).
+The reads of `CabinForward` and `CabinRearward` came from a one-off script between the second and third runs, which released into `Pilot`, `CoPilot`, `CabinForward`, `CabinRearward`, and "Crosscheck: ZZZ" in turn: the eye landed at x −0.253m, y 0.855m, z −0.144m (x right, from the reference point) for all but `CoPilot`, at 0.236m, 0.811m, −0.116m; holding, `CabinForward` put it at 0.227m, 0.661m, −2.107m and ZZZ at −0.009m, 0.761m, −1.316m.
+
 ## 2026-10-04: CameraSetRelative6DOF puts the eye at any point but holds the camera, and a camera handed back into a view returns to the view's own eye
 
 **Asked:** can Crosscheck put a pilot's eye at a point no camera view gives and hand the camera back, so the pilot keeps their look?

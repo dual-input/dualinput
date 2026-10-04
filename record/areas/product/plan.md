@@ -83,6 +83,7 @@ The picks, picked on 2026-10-02:
   - Automatic profile fetch, and the community profile registry, both from [Profile registry](ideas.md#profile-registry)
   - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
   - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
+  - [Telemetry](ideas.md#telemetry), picked on 2026-10-04
 
 How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, is left to step 4, because it's a detail of the interface rather than a feature.
 

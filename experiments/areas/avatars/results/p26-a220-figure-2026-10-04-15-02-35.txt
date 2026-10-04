@@ -1,0 +1,15 @@
+p26 · The figure in the Synaptic A220's right seat: hands by the pilot's clicks with the right hand on the first officer's sidestick at rest, head by the pilot's look, held in its seat by the module, on MSFS 2024
+2026-10-04T15:02:35.046Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by the 60-minute cap
+
+  aircraft TITLE "A220-300", 0.000302 kt
+  synaptic-aircraft-a220 1.0.10: A220_Cockpit_LOD00.gltf and A220_Cockpit_Static_LOD00.gltf, 2,038,717 triangles
+  the first officer's stick is 8 nodes under FO_YOKE_PITCH, posed by SIDE_STICK_ROLL_FO and SIDE_STICK_PITCH_FO
+  the seat point at -0.495, 0.461, 12.337 in the model, under the copilot's eye, at SKEL_FO_SEAT's side; the copilot's eye at -0.471, 1.139, 12.275
+  the hand sits on FO_STICK_HANDLE's surface, 3.8cm from the grip's middle toward the copilot's eye
+  the camera is 0.8cm from cameras.cfg's Pilot eye (0.504, 1.135, 12.272 against 0.509, 1.139, 12.276); within a few centimeters, if the view is the Pilot view, means the model's space is SimConnect's
+  CROSSCHECK_Figure: object 51462144, placed by the module on the seat point every frame, led by 1 frame
+  the module wrote the figure in 0 frames, with 0 errors
+  the left hand tapped 143 times and the right hand 32 times, 46 drags; the right thumb pressed the first officer's stick 4 times; the hands went home after 18 sessions; 60 right presses turned the view; 127 clicks outside the sim
+  the stick variables ranged L:A22X L Sidestick X -0.270036 to 0.156992, L:A22X L Sidestick Y -0.25203 to 0.689739, L:A22X R Sidestick X 0 to 0, L:A22X R Sidestick Y 0 to 0
+  the middle of the view met the cockpit on 6,443 looks and nothing on 11166; the aircraft reached 0 kt over the run

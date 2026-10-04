@@ -1,0 +1,16 @@
+p27 · The figure in the iniBuilds A350's right seat, or the A380's with the A350's cockpit standing in: hands by the pilot's clicks, the right hand on the first officer's sidestick at rest, head by the pilot's look, held in its seat by the module, on MSFS 2024
+2026-10-04T16:28:31.473Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Ended by Page Up
+
+  a released hand stays 150ms on the spot, then hovers 1.5cm off it for 500ms before going home
+  aircraft TITLE "A350-900 (Default Cabin)", 0.000228 kt
+  inibuilds-aircraft-a350 1.2.6 as the A350-900: A350_Cockpit_LOD00.gltf, A350_Cockpit_Static_LOD00.gltf, A350_Cockpit_SST_LOD00.gltf, 2,563,959 triangles
+  the camera is 173.3cm from cameras.cfg's Pilot eye (-1.137, 1.992, 25.239 against 0.516, 1.832, 25.737); within a few centimeters, if the view is the Pilot view, means the files' frame is SimConnect's; the cockpit hangs at AP_A359_Cockpit, 0.000, 1.418, 25.026
+  the copilot's eye at -0.516, 1.832, 25.737, the pilot's mirrored; the seat point at -0.516, 1.154, 25.799
+  the hand sits on FO_JOY_HANDLE's surface, 3.0cm from the grip's middle toward the copilot's eye
+  the first officer's grip at -0.796, 1.361, 26.055 in the aircraft's space, 4 nodes of stick
+  CROSSCHECK_Figure: object 48054278, placed by the module on the seat point every frame, led by 1 frame; at latitude -0.902276°, heading 169.556323°, it gets the seat as +14.0cm forward and +3.0cm right of the true offset, for WGS 84
+  a released hand stays 150ms on the spot, then hovers 1.5cm off it for 500ms before going home
+  the module wrote the figure in 48,629 frames, with 0 errors
+  the left hand tapped 68 times and the right hand 28 times, 34 drags; the right thumb pressed the first officer's stick 0 times; 0 presses met nothing in the cockpit; the hands went home after 38 sessions; 11 right presses turned the view; 18 clicks outside the sim
+  the middle of the view met the cockpit on 2,070 looks and nothing on 0; the aircraft reached 0 kt over the run

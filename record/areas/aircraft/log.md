@@ -44,6 +44,8 @@ It also appended "Crosscheck: ROOT" to the root `Cameras.CFG` in the sim's AppDa
   So the package that mounts last replaces the whole file; the files don't merge, or AAA's view, with its own name and Guid, would show too.
 - "Crosscheck: ROOT" never showed, in either boot.
 - ChasePlane's `get_views` listed neither test view.
+  ChasePlane keeps each aircraft's views as JSON files of its own, one per view, in `%APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\p42-util-chaseplane\work\aircraft\<aircraft>\onboard\`, each position an offset from a cockpit anchor, `anchor_at_save`, which for the 58P is the pilot's eye `CameraGet` reads.
+  The 58P's were written the day before, so ChasePlane imported the aircraft's views once and reads its own copies since (read in ChasePlane 2026.39.1.16's work folder; whether it reads our shadowed file when it first imports an aircraft is untested).
 - Holding the camera, `SimConnect_CameraSetUsingCameraDefinition` put the eye on "Crosscheck: ZZZ" to the millimeter, and on the 58P's own `CabinForward` too.
   Releasing the camera into a view handed it back there only for `Pilot` and `CoPilot`, whose `SubCategoryItem` are `"DefaultPilot"` and `"CoPilot"`; `CabinForward`, `CabinRearward`, and "Crosscheck: ZZZ", each `"None"`, put the eye at `Pilot`'s.
 - p10 then moved ZZZ 0.3m up and gave it `SubCategoryItem` `"LandingPilot"`, one of the SDK's pilot items the 58P leaves unused, in the installed package, without restarting the sim; after a new flight, holding the camera put the eye where ZZZ was at boot, so the sim reads the file at its start and not at a flight's.

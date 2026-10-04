@@ -324,6 +324,17 @@ Pilots debrief with it, training groups use it for checkrides, and we use it to 
 
 - **Tech:** every change already passes through Crosscheck, so recording costs little, and the timeline viewer is the work.
 
+### Telemetry
+
+Crosscheck sends non-identifying events to a server of ours, such as a synced control that never matched after its retries, with the aircraft, the profile's version, and the control, and a setting turns it off.
+It adds to the marker the recording gets and the banner's notice for such a control, which still asks the pilot for a bug report: telemetry finds the patterns across many flights, and a bug report explains one.
+
+- **Tech:** the server the v1 scope plans for [bug reports](03-v1-scope.md#recording-and-bug-reports) could take these events too, and Sentry is a candidate for crash reports.
+- **Product:** we learn which aircraft and profiles fail without waiting for a pilot to report it.
+- **Open questions:**
+  - Whether it's off until a pilot turns it on, or on with a setting to turn it off: the EU's GDPR generally asks consent for telemetry an app doesn't need to work, unless the data is anonymous, and an IP address counts as personal data (unverified, and a question for legal advice).
+  - What to record, decided once the engine exists.
+
 ### Crosscheck IDE
 
 The Crosscheck IDE is where we, and after v1 the community, write profiles: it finds what an aircraft exposes, binds it, and checks the result against the live sim.

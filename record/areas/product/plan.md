@@ -56,6 +56,7 @@ The picks, picked on 2026-10-02:
   - Time, date, sim rate, and pause, from [Environment sync](ideas.md#environment-sync)
   - [Preflight match check](ideas.md#preflight-match-check)
   - The two-step start, joining and then starting to fly, from [Pre-sync checklist](ideas.md#pre-sync-checklist), moved from Soon on 2026-10-03, because it's better built in from the start than added later
+  - The PF's checklist of the profile's starting values, from [Pre-sync checklist](ideas.md#pre-sync-checklist), moved from Soon on 2026-10-04, because [catch-up](../sync/03-catch-up.md#when-preflight-ends) is right only if the PF's aircraft starts at them
   - [The PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map), if a probe finds a way to set the world map from outside the sim; it replaces flight setup by the host, which went to Ideas left out on 2026-10-03
   - The invite code, from [One-click invite](ideas.md#one-click-invite)
   - The take-control key, and voice phrases, both from [Voice handover](ideas.md#voice-handover)
@@ -68,7 +69,7 @@ The picks, picked on 2026-10-02:
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - [Seat awareness](ideas.md#seat-awareness), except telling a pilot's seat from where their camera is, which avatar sync took into v1 on 2026-10-04
-  - The profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
+  - The rest of the profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
   - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
@@ -116,7 +117,7 @@ Agreed:
 - Avatar sync, on 2026-10-04.
 
 Every v1 feature is agreed, and so is the pass that strings them into one session, which added preflight on 2026-10-04.
-The [sync design](../sync/01-profile-entries.md), agreed the same day, brings every cockpit to the PF's state when preflight ends, for every control the profile can read or count.
+The sync design that preflight's catch-up rests on, [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md), was agreed the same day.
 Done on 2026-10-04.
 
 ## 5. What later features need from the core
@@ -142,19 +143,20 @@ Exit: each risk below has a log entry that answers it.
   The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 - How the notification banner's panel shows in VR, which tells us whether it meets v1's commitment to VR pilots; nobody has tried.
 - Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
-- How fast an aircraft takes stepped writes, which sets the [sync design](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft)'s default pace: the Synaptic A220's `K:HEADING_BUG_INC` sent 10 times in one frame and then once per frame, counting degrees (its study's sim question 5); two `L:INI_BARO1_INC_COMMAND` writes before one update of the iniBuilds A350, then one per update (its sim question 3); and 10 added to the Fenix's `L:E_FCU_HEADING` at once (its sim questions 1 and 2).
-- When an aircraft loaded cold stops restoring its own controls, which checks [catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 15s, 15s, and 1.5-minute settle rule: load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
-- Whether the input event double-fire stays within 3 frames well below 60 fps, and whether a held key bound to a momentary input event repeats faster than that, which checks [live sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)'s duplicate filter.
-- Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, and how long an aircraft takes to show a write, which set catch-up's order and live sync's read-back wait.
-These and the world map probe make one batched sim session.
+- How fast an aircraft takes stepped writes, which checks the default pace in [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft): send the Synaptic A220's `K:HEADING_BUG_INC` 10 times in one frame, then once per frame, and count the degrees the bug moves (its study's sim question 5); write `L:INI_BARO1_INC_COMMAND` twice before one update of the iniBuilds A350, then once per update (its sim question 3); and add 10 to the Fenix's `L:E_FCU_HEADING` at once (its sim questions 1 and 2).
+- When an aircraft loaded cold stops restoring its own controls, which checks [catch-up's settle rule](../sync/03-catch-up.md#settling-after-a-load): load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
+- Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at frame rates well below 60 fps, and whether a held key bound to a momentary input event repeats inside that window.
+- Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
+
+The world map probe and the four after it, on stepped writes, settling, the double-fire, and writes landing, make one batched sim session.
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture
 
 Produces: decisions in `record/decisions/`.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
-The profile format takes the shape the [sync design](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.
-The decisions also pick whether each machine sends to every other directly or through the flying machine's ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), the sandbox profile functions run in, and its size limits.
+The profile format takes the shape [01-profile-entries](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.
+The decisions also pick whether each machine sends to every other directly or through the flying machine ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), and the sandbox that write functions run in, with its size limits.
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.

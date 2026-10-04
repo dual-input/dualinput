@@ -12,7 +12,7 @@ The ideas we turned down or set aside are under [Ideas left out](#ideas-left-out
 
 Each change to a switch, knob, or lever travels to the other machine, as it does in FS Copilot and YourControls ([01](../../learn/foundations/01-prior-art-and-crew-practice.md#prior-art)).
 The other ideas build on it.
-It's in v1, and its design is in the [sync area](../sync/01-profile-entries.md): a control's new value crosses the wire, and the receiving machine's own writer sets it, checks it, and catches it up after a drop.
+Its design is in [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md): a control's new value crosses the wire, and the receiving machine sets it the way its aircraft needs, reads it back, and brings the cockpit up to date after a drop.
 
 ### Pointer sync
 
@@ -60,11 +60,11 @@ The A350's module discards the position we send and presses wherever the receivi
 An adapter for one aircraft reaches state that no variable or event shows and puts it in Crosscheck's state for that aircraft, so a cockpit can catch up on it.
 The A220's display formats live in its DisplayUnits' Redux store (read in synaptic-aircraft-a220 1.0.10, `html_ui/Pages/VCockpit/Instruments/a22x/DisplayUnits/instrument.js`), and the PMDG 777 loads a panel-state file when a flight loads (unverified; loading a flight and comparing its cockpit with the package's `Config\PanelState\` files settles it).
 
-- **Tech:** our `VCockpit.js` override runs inside the A220's display documents, so a script there might reach the store at runtime without changing the aircraft's files, if the page can reach the store at all (unverified).
+- **Tech:** code Crosscheck injects into the A220's display documents might reach the store at runtime without changing the aircraft's files (unverified; a panel probe that looks for the store from a DisplayUnits document settles it).
   Writing into another developer's store can break what their code derives from it, so an adapter would copy narrow parts, such as the current display format.
-  The PMDG loads its panel-state file when the flight loads, and whether it loads one mid-flight is untested.
+  Whether the 777 loads a panel state mid-flight is untested, though its CDU loads one by name (unverified; loading one from the CDU in flight settles both).
   The [bus bridge](#bus-bridge) is a related route: the A220's `A22X.Resync` returns its full state over the CommBus.
-- **Product:** it reaches what [catch-up](../sync/03-catch-up.md#what-catch-up-doesnt-recover) can't, such as a display's page or an FMS's contents after a late join.
+- **Product:** a late joiner's display pages and FMS would match the PF's, which [catch-up](../sync/03-catch-up.md) can't reach.
 - **Open questions:** whether an adapter may change another developer's package, which needs the decision in `record/decisions/` that [Crosscheck objects in the cockpit](#crosscheck-objects-in-the-cockpit) also waits on.
 
 ### Traffic sync
@@ -130,8 +130,8 @@ A later version would watch the aircraft's state and tick an item off once both 
 It's Crosscheck's own setup list, unlike the aircraft's checklists under [Ideas left out](#ideas-left-out), and it covers the cockpit's state, where the [preflight match check](#preflight-match-check) covers packages and liveries.
 
 - **Product:** serves the joiner and the first-time host in [02-users](02-users.md#roles-in-every-session), who can't tell why two machines differ.
-- **Open questions:** when sync starts, whether Crosscheck copies everything it can set from one pilot's cockpit to the others, which would leave the checklist only what it can't set.
-  What happens to a change a pilot makes after connecting but before sync starts.
+- **Tech:** when preflight ends, every other cockpit takes the PF's value for every entry the profile can read or track ([03-catch-up](../sync/03-catch-up.md#when-preflight-ends)), so the checklist v1 needs holds only the starting values of the controls Crosscheck tracks by counting.
+  A change a pilot other than the PF makes before then stays only if the profile doesn't hold that control.
 
 ### One-click invite
 

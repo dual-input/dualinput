@@ -6,13 +6,26 @@ Depends on:  01-aims.md, 02-users.md, and the v1 picks in plan.md
 Decides:     The scope of every v1 feature.
 ```
 
-This document scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
-Each section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
+This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
+Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Crosscheck does, not how: mechanisms are for the architecture, step 7, and screens and wording for a later pass.
 
 The pilot flying (PF) is the pilot whose yoke, rudder, toe brakes, engine levers, and trim fly the aircraft, and the pilot monitoring (PM) is the other front-seat pilot.
 The flying machine is the PF's, and the following machine is the PM's.
 v1 sessions have two pilots, because crews beyond two are a Later pick, but the design supports larger crews from the start, unless that costs much more work, so nothing gets rebuilt when they come.
+
+## A session from start to finish
+
+A v1 session runs in this order, and each step's rules are in the section it links to.
+
+1. Each pilot installs Crosscheck once, with its Community package ([installing and updating](#installing-and-updating)).
+2. Crosscheck and the sim start in either order, and the host starts a session and shares its code, which the other pilots enter to join ([invite code](#invite-code)).
+3. Each pilot loads a flight at the PF's stand, which Crosscheck shows them, and once they're in it, Crosscheck moves their aircraft to the PF's position and holds every aircraft still for [preflight](#preflight).
+4. In preflight, each pilot works through the [preflight match check](#preflight-match-check)'s list, takes a seat ([avatar sync](#avatar-sync)), and clicks Ready.
+5. When every pilot is ready, a countdown ends preflight, and the aircraft is free to move.
+6. The crew flies, passing control by the [take-control key](#take-control-key) or the [voice phrases](#voice-phrases), with [notices](#notification-banner) for what needs their attention.
+7. A pilot who drops out reconnects or rejoins as a late joiner, and the others fly on ([the connection](#the-connection)).
+8. Each pilot leaves with Leave session, the session ends with the last, and each machine keeps its recording for a [bug report](#recording-and-bug-reports).
 
 ## Control
 
@@ -176,8 +189,9 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 
 **Open questions:**
 
-- Joining or reconnecting mid-flight.
-  A machine can take the flying machine's state only for entries with an absolute setter, since an increment sent at connect changes nothing useful, so the profile format answers it.
+- How a cockpit takes the flying machine's state at once, when [preflight](#preflight) ends, when a late joiner arrives, and after a reconnect.
+  A change-only setter can't do it, since an increment sent at connect changes nothing useful, so step 7 in [the plan](plan.md) settles it with the profile format and the core architecture.
+  The candidate is a state object per aircraft (proposed 2026-10-04), which Crosscheck fills by reading every profile entry it can read, and applies by running each entry's setter against it, so a setter that sees both the wanted and the local value can flip a toggle or step a knob only as far as needed.
 - How Crosscheck recognizes its own writes on each channel, which the architecture settles.
   A `K:` event can carry a tag in its spare fifth value, which reaches every listener (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-a-value-sent-back-at-10000001-reached-our-own-masking-group-and-the-777-ignored-re-sent-values)), while a variable write carries only the value.
 
@@ -225,6 +239,7 @@ The host starts a session and gets a code, and the other pilot enters it to join
 - The code is six characters from the 30-character alphabet fsc-editor uses, which leaves out I, L, O, U, 0, and 1, because codes are read aloud and typed by someone looking at a sim (read in fsc-editor, `src/shared/remote-connect.ts`, `CODE_ALPHABET`, and `docs/remote-connect.md`, "The code").
 - When the pilot selects the box for the code, Crosscheck fills it from the clipboard if the clipboard holds a code, and joins at once.
 - The code belongs to the session, not to any pilot's machine, and lasts until the last pilot leaves, so it doesn't change when control passes, and a pilot who dropped out rejoins with the same code.
+- Crosscheck and the sim start in either order: a host can start a session, and a pilot can enter a code, before the sim runs, and Crosscheck attaches to the sim whenever it starts.
 
 **Not in v1:**
 
@@ -235,7 +250,7 @@ The host starts a session and gets a code, and the other pilot enters it to join
 
 **Rules:**
 
-- The code alone admits a pilot, as it does in fsc-editor, where the relay limits how fast one address can guess codes and the host sees how many peers are connected (read in fsc-editor, `docs/remote-connect.md`, "The code").
+- The code admits a pilot with no approval from the host, as it does in fsc-editor, where the relay limits how fast one address can guess codes and the host sees how many peers are connected (read in fsc-editor, `docs/remote-connect.md`, "The code").
   It's a game among friends, and confirming each joiner would get in the way.
 - Every pilot sees who's in the crew.
 
@@ -277,8 +292,11 @@ The connection carries everything between the crew's machines, directly when it 
   Our FS Copilot fork waits the same 5 minutes, which its notes call "long enough for a router reboot or a sim reload" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `DegradedTimeout`, and `record/pointer-forwarding/docs/13-pr-prep.md`).
 - Recovery is the app's job, and each part of Crosscheck recovers its own state within it.
   The app tells whether a returning pilot's sim kept running or restarted, from session state it saves on the pilot's machine with an identifier for the sim's run.
-  If the sim kept running, pointer sync, state sync, and any later part each replay what the pilot missed, as our FS Copilot fork's pointer sync replays its held history in order (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
-  If the sim restarted, the cockpit can't be brought back in sync, so Crosscheck tells the pilot so and lets them rejoin anyway: flight-model sync puts them back in the aircraft's place, and changes sync from then on.
+  If the sim kept running, Crosscheck reconnects the pilot with no action from them, from that saved state, and pointer sync, state sync, and any later part each replay what the pilot missed, as our FS Copilot fork's pointer sync replays its held history in order (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
+  If the sim restarted, the cockpit can't be brought back in sync, so once the pilot is in a flight again, Crosscheck tells them so and rejoins them with the code it remembers, as a [late joiner](#preflight): flight-model sync puts them back in the aircraft's place, and changes sync from then on.
+- A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying as a pilot who loses the connection does: control passes to the PM if they were the PF, and the others get a notice.
+  Once they're in a flight again, Crosscheck rejoins them as a late joiner.
+- A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app.
 
 **Depends on:**
 
@@ -287,22 +305,61 @@ The connection carries everything between the crew's machines, directly when it 
 
 **Open questions:**
 
-- Whether Crosscheck reconnects on its own after a drop, using the session state it saved.
 - Whether a cut-off pilot's switches can be blocked as well as their displays, which needs input blocking such as the masking that [soft takeover](ideas.md#soft-takeover-on-handover), a Soon pick, uses.
 - Whether missed changes replay as one history in the order they happened, or in a queue per part, which could replay a display press and a switch flipped after it in the wrong order.
-- How a late joiner catches up, which waits on the profile format.
+- How a late joiner catches up, which [state sync](#state-sync)'s question on taking the flying machine's state at once answers.
 - How to soften a short gap, for the architecture to weigh: carry the aircraft on its last velocities for about a second and then ease it to the true position when data returns, have each packet carry the last few samples so one lost packet costs nothing, and send a copy through the relay only while the direct link is losing packets or switching paths.
 
-### Preflight match check
+### Preflight
 
-Before a pilot starts flying, Crosscheck compares what each pilot has for the shared aircraft and lists what differs.
+From the moment a joined pilot is in a flight until the crew starts flying, every aircraft in the crew holds still at the PF's position, and the crew starts together once everyone is ready.
 
 **In v1:**
 
 - Joining and flying are two steps.
-  Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which installing and updating will scope.
-  Then the pilot starts flying, and sync starts with it.
-- Beside each control that starts flying, the differences show, in a design for later: as a list of warnings and errors in the EFB app, and as counts on the [notification banner](#notification-banner)'s summary.
+  Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which [installing and updating](#installing-and-updating) scopes.
+- Once a pilot has joined, and until they're in a flight, they see where the PF is, such as "James is at EGLL stand X12".
+  If the step 6 probe finds a way to set the world map from outside the sim, a Go to button points the world map at that spot and selects the stand.
+- Each pilot loads their flight at the PF's stand, because moving an aircraft across the world makes the sim load new scenery there, which can stall it or fill its video memory (unverified; a probe that moves a parked aircraft to an airport on another continent settles it).
+- When a joined pilot is in a flight, Crosscheck puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
+- Each pilot works through the [preflight match check](#preflight-match-check)'s list and clicks Ready.
+- When every pilot counted is ready, a 3s countdown runs, and when it ends, preflight ends: the aircraft is free to move, and the rest of sync starts.
+- Crosscheck asks pilots not to touch the cockpit during preflight, because state sync sends only changes made after preflight ends: if the PM turns the beacon on during preflight, the PF's beacon stays off for the flight.
+
+**Not in v1:**
+
+- Warning a pilot who spawned far from the PF before Crosscheck moves them to the PF's position, which risks the scenery load above.
+- Loading a pilot's flight at the PF's stand for them: the pilot loads it from the world map, and Crosscheck moves their aircraft only once they're in it.
+
+**Rules:**
+
+- Un-readying during the countdown cancels it, and the flight doesn't start until every pilot counted is ready again.
+- During preflight, a ready pilot un-readies before Leave session is available to them, so leaving cancels a running countdown, and a pilot who has left no longer counts.
+- A pilot who drops out during preflight becomes unready and still counts, so by default the crew waits for them.
+  Any pilot who's ready can choose Go without, such as "Go without James", which takes James out of the count.
+- A pilot who drops out and comes back before preflight ends is back in preflight, unready, and clicks Ready again.
+- A late joiner, who joins after preflight ended or comes back after the crew went without them, skips Ready: once they're in a flight, Crosscheck puts their aircraft at the flying machine's position, and sync starts.
+
+**Depends on:**
+
+- [Flight-model sync](#flight-model-sync), which puts each joined pilot's aircraft at the PF's position and holds it there; preflight also holds the PF's own aircraft.
+- The [preflight match check](#preflight-match-check), for the list each pilot works through.
+- [The connection](#the-connection), for who drops out.
+
+**Open questions:**
+
+- Whether every cockpit can take the PF's state when preflight ends, which would retire the request not to touch the cockpit, and which [state sync](#state-sync)'s question on taking the flying machine's state at once answers.
+- What a joined pilot sees when the PF isn't in a flight yet, such as when the host started the session before the sim.
+- Whether Crosscheck can name the stand an aircraft is on, from SimConnect directly or by matching the aircraft's position against the airport's parking spots (unverified).
+- Whether anything outside the sim can point the world map at a spot, which the step 6 probe for [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) in [the plan](plan.md) answers.
+
+### Preflight match check
+
+During [preflight](#preflight), and when a late joiner is in a flight, Crosscheck compares what each pilot has for the shared aircraft and lists what differs.
+
+**In v1:**
+
+- The differences show beside each Ready button, as a list of warnings and errors in the EFB app and as counts on the [notification banner](#notification-banner)'s summary, and how they look is for a later design.
 - The comparison covers the aircraft's package, version, and variant, such as the Baron's 58P against its base model, and the livery.
 - The aircraft's version is also checked against the versions its profile covers.
 
@@ -325,7 +382,7 @@ Before a pilot starts flying, Crosscheck compares what each pilot has for the sh
 
 - Profiles, which say which aircraft versions they cover.
   What a feature needs follows from what the profile references, such as the display identifiers pointer sync replays into, and Crosscheck checks each machine for those itself.
-- [The connection](#the-connection), which admits the pilot to the session.
+- [Preflight](#preflight), whose join step admits the pilot and during which the check runs.
 
 **Open questions:**
 
@@ -334,7 +391,6 @@ Before a pilot starts flying, Crosscheck compares what each pilot has for the sh
 - Which add-ons can be compared without work for each aircraft.
   A package's manifest declares its dependencies, but optional add-ons go undeclared, as the Baron's GPS units do, so the profile could list the packages that matter.
 - Whether the check compares the scenery at the departure airport, since v1 doesn't support different scenery.
-- Whether each pilot starts flying on their own, or the crew starts together.
 
 ## Around the aircraft
 
@@ -347,7 +403,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 - A traffic host, the pilot whose sim has the traffic, in a role of its own, separate from control, as in our FS Copilot fork (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "One host, and it need not be the master").
 - Aircraft and ground vehicles, GSX's tugs, fuel trucks, and catering among them, accepting that ground vehicles may show issues in v1.
 - A radius as a setting, up to the SDK's 200km cap, which is the default (FS Copilot fork, same file, "Reading").
-- In the start-flying list, the traffic sources a receiving pilot should turn off, the traffic packs that differ from the host's, and a warning when multiplayer is on, each where Crosscheck can detect it.
+- In the [preflight match check](#preflight-match-check)'s list, the traffic sources a receiving pilot should turn off, the traffic packs that differ from the host's, and a warning when multiplayer is on, each where Crosscheck can detect it.
 
 **Not in v1:**
 
@@ -357,7 +413,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 
 - A receiving pilot runs the same traffic packs as the host and no others, and the same scenery.
   With other packs, aircraft go missing or fall back to generic models, and a frozen object isn't clamped to the ground, so with other scenery it floats or sinks (FS Copilot fork, same file, "Model matching"; measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Baseline: BeyondATC's own traffic scores 0.56").
-  Two groups of FS Copilot testers missed this and flew with airliners missing (from our experience with FS Copilot), which is why the start-flying list names packs one by one.
+  Two groups of FS Copilot testers missed this and flew with airliners missing (from our experience with FS Copilot), which is why the [preflight match check](#preflight-match-check)'s list names packs one by one.
 - The copies move smoothly.
   Frozen and written every frame from samples at 2Hz, our fork's copies scored 0.17 median jitter against 0.56 for BeyondATC's own traffic, on one PC (measured on MSFS 2024, 2026-09-06, same log, "Jitter measured, not eyeballed"), and ran well between two machines (from our experience with FS Copilot).
   BeyondATC has since released an update for smoother AI traffic, which we haven't compared (reported by the user, 2026-10-03).
@@ -365,7 +421,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 
 **Depends on:**
 
-- The [preflight match check](#preflight-match-check)'s start-flying list.
+- The [preflight match check](#preflight-match-check)'s list.
 - [The connection](#the-connection).
 
 **Open questions:**
@@ -418,7 +474,8 @@ The crew's sims share one clock: the same time of day, date, and simulation rate
 **In v1:**
 
 - When any pilot turns active pause on or off, every machine follows.
-- The PF's time of day, date, and simulation rate reach every machine, when a pilot starts flying and whenever the PF changes them, and a following pilot who changes one gets it put back.
+- The PF's time of day, date, and simulation rate reach every machine when [preflight](#preflight) ends, when a late joiner is in a flight, and whenever the PF changes them.
+  Crosscheck puts back any change another pilot makes to one of them.
 - When the PF opens the sim's pause menu, the [notification banner](#notification-banner) tells the rest of the crew, such as "James is in the pause menu", so a frozen aircraft has a reason.
 
 **Not in v1:**
@@ -466,6 +523,7 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
   To hide the sim's own avatar there, Crosscheck ships an avatar with nothing to show, which the pilot picks, as the [No Avatar](https://flightsim.to/addon/59715/no-aavatar) add-on does.
 - When a pilot's connection drops, their figure slumps in its seat and turns gray, and when they leave the session, it disappears.
 - When a pilot switches to an outside view, their figure stays seated, facing forward.
+- A pilot whose camera moves around inside the aircraft, in no seat, shows as a head floating at their camera.
 - A WASM module places each figure inside the sim's frame, turned by the aircraft's attitude and led by up to a frame, which held our figure in the 58P's right seat at up to 185 kt GS (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
   Crosscheck edits no other developer's package to hold it there.
 
@@ -483,20 +541,22 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
   The authoring tool seeds a seat from the seat objects SimConnect lists, then from the cockpit model's `PILOT_` nodes, then from a click on the cushion, and the author tunes it ([Seat awareness](ideas.md#seat-awareness)).
   The 58P lists a seat object only for the pilot's seat, so its right seat starts from its model's `PILOT_1` node (measured on MSFS 2024, 2026-10-03, [aircraft log](../aircraft/log.md#2026-10-03-the-baron-58p-lists-only-its-pilots-seat-because-the-seat-objects-are-the-seats-in-each-aircrafts-navigation-graph)).
 - Each pilot moves to a seat themselves, with their own camera.
-- Crosscheck tells which seat a pilot is in from where their camera is: a pilot takes a free seat when their eye comes near it, and keeps it until they take another, through a walkaround too.
-- Nobody takes a seat another pilot holds.
-  When a pilot's eye is in a held seat, the [notification banner](#notification-banner) says so, such as "Occupied by James.", and asks them to move their camera to another seat.
+- Crosscheck tells which seat a pilot is in from their camera's position: a pilot takes a free seat when their camera comes within a take radius of its eye point, and leaves it when the camera moves past a wider leave radius, such as on a walkaround or a trip down the cabin.
+  The leave radius keeps a pilot in their seat when they lean toward a side window or the panel, and a profile can set its own radii for an aircraft where the defaults misjudge a seat.
+- A pilot holds one seat, so taking a free seat leaves the one they held.
+- Nobody takes a seat another pilot holds, and a pilot whose camera is in one sees that pilot's figure there.
+  Two pilots swap seats by one leaving theirs first, down the cabin or, in a two-seater, out to the tail and back.
 
 **Depends on:**
 
 - Profiles, for the seats and the control spots.
-- The [notification banner](#notification-banner), for the occupied-seat notice.
 - [The connection](#the-connection), which carries each pilot's camera, clicks, and avatar.
 
 **Open questions:**
 
 - How Crosscheck's empty avatar is built, and whether the pilot picks it in the sim's own avatar screen or Crosscheck can select it (unverified).
 - How long the arm reaches before it points.
+- The default radii for taking and leaving a seat, which trying them in two or three cockpits settles.
 - Whether a dropped pilot's figure can turn see-through, through the material animation that colors it (unverified).
 - What makes some part of the figure miss a frame now and then in flight, which our test pilot saw in the 58P ([avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
 - Whether the figure's joints can follow variables of its own object, so one sim can draw several figures, which crews beyond two need (unverified, [Avatar sync](ideas.md#avatar-sync)).
@@ -511,7 +571,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 - An app of its own, built on the sim's EFB framework, not the desktop app reused.
   Shipping EFB apps are written that way: A2A's tablet is TSX bundled by esbuild on Asobo's EFB API and the MSFS Avionics Framework, and it registers with `Efb.use` (read in a2a-aircraft-aerostar600 1.0.6, `A2ATabletApp.js`).
-- What a pilot needs during a flight: the take-control button, the crew and the connection's state, starting to fly with the list of warnings and errors, the box for an invite code, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
+- What a pilot needs during a flight: the take-control button, the crew and the connection's state, the Ready button beside the match check's warnings and errors, Go without for each pilot who drops out during [preflight](#preflight), the box for an invite code, Leave session, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
 - Opening onto what a notice on the [notification banner](#notification-banner) is about when the pilot clicks the notice anywhere but on its action, whether the EFB was open on another app or closed.
   With GSX standing in for our app, a click on a notice opened a closed EFB onto GSX, and switched an open one to it without closing it (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 - A button that brings the desktop app to the front while Crosscheck's core is running.
@@ -541,12 +601,12 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 ### Notification banner
 
 Crosscheck's notices slide in at the right of the screen, on a see-through in-game panel, the kind of window the sim's toolbar opens, so the pilot sees them whether or not the EFB is open.
-A notice can carry one action of its own, such as Start flying on the summary, and a click anywhere else on it opens the [EFB app](#efb-app) at what the notice is about.
+A notice can carry one action of its own, such as Ready on the preflight summary, and a click anywhere else on it opens the [EFB app](#efb-app) at what the notice is about.
 
 **In v1:**
 
-- The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", "You have control", and "Occupied by James.".
-- Before the pilot starts flying, a summary of who has joined and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Start flying button.
+- The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", and "You have control".
+- During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button.
 - Crosscheck opening the banner's panel itself when a flight loads, with no click from the pilot.
 
 **Not in v1:**
@@ -557,7 +617,7 @@ A notice can carry one action of its own, such as Start flying on the summary, a
 
 **Rules:**
 
-- The banner shows before the pilot starts flying, and after that only when something needs their attention, such as a seat that's taken, a lost connection, a PF who dropped out, or control passing to them.
+- The banner shows during preflight, and after that only when something needs the pilot's attention, such as a lost connection, a PF who dropped out, or control passing to them.
 - Between notices the panel draws nothing, because the sim blurs whatever lies behind the pixels a panel paints (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
 - A notice that asks the pilot to act says where: on the notice, in the EFB app, or in the desktop app.
 
@@ -648,7 +708,7 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 
 **Depends on:**
 
-- The [preflight match check](#preflight-match-check)'s check of Crosscheck's own version when a pilot joins.
+- [Preflight](#preflight)'s join step, which runs the version check before it admits a pilot.
 
 **Open questions:**
 

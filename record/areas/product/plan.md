@@ -113,7 +113,8 @@ Agreed:
 - Installing and updating, on 2026-10-03.
 - Avatar sync, on 2026-10-04.
 
-Every v1 feature is agreed, and the pass that strings them into one session is next.
+Every v1 feature is agreed, and so is the pass that strings them into one session, which added preflight on 2026-10-04.
+Step 4 stays open until the architecture, in step 7, settles one question: whether v1 can bring every cockpit to the PF's state when preflight ends ([state sync](03-v1-scope.md#state-sync)).
 
 ## 5. What later features need from the core
 
@@ -144,7 +145,7 @@ Steps 4 and 5 add to this list as they find risks.
 
 Produces: decisions in `record/decisions/`.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
-The profile format waits for the features, because they decide what it has to express, and it decides in turn whether a machine joining or reconnecting mid-flight can take the flying machine's state: only an entry with an absolute setter can be sent at connect.
+The profile format waits for the features, because they decide what it has to express, and it decides in turn how a cockpit takes the flying machine's state at once, when preflight ends, when a late joiner arrives, and after a reconnect ([state sync](03-v1-scope.md#state-sync)).
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.

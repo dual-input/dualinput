@@ -1,11 +1,11 @@
 # Screen recordings of runs show the terminal, and with it the home folder's
 # path, which can't go in the tree (CLAUDE.md, Nothing personal in the tree).
 results/*.mp4
-# p24's screenshots of the sim window. The full PNGs show the home folder's
-# path in Devmode's title bars, and any of them can show a name, such as the
-# license holder on the GTN's start screen. Add a cropped JPEG with git add -f
-# only after reading it.
-results/p24-figure-*/
+# p24's screenshots of the sim window go in as JPEGs. Its four earlier runs'
+# shots are uncropped and show the home folder's path in Devmode's Project
+# Editor tab, which the user allowed on 2026-10-04 (CLAUDE.md, Nothing personal
+# in the tree). A full-size PNG stays out.
+results/p24-figure-*/*.png
 # A record too big to commit, kept on the machine that ran it; a filtered copy
 # under the plain name goes in instead.
 results/*.full.ndjson

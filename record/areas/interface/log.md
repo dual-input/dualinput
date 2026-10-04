@@ -3,6 +3,68 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-04: An in-game panel's size is a percent of the screen's height, capped at 150% of it, so ours can't span a wide screen, though Parallel 42's panels do
+
+**Asked:** can p05's always-open panel ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)) cover the whole screen, as ChasePlane's overlay does, so its notices can go anywhere on it?
+
+**Expected:** `defaultWidth="100"` and `defaultHeight="100"` would fill the screen, since the template's sizes are percents of the screen.
+
+**Found:** in a 2,401 by 1,360 window, p05's definition gave these pages, measured through the inspector:
+
+| `defaultWidth` | `defaultHeight` | `defaultTop`, `defaultRight` | Page | Where |
+| --- | --- | --- | --- | --- |
+| 22 | 42 | 22, 1 | not measured | the right |
+| 100 | 100 | 0, 0 | 1,360 by 1,360 | the left |
+| 1000 | 100 | 0, 0 | 2,040 by 1,360 | the left |
+| 48 | 100 | 0, 0 | 665 by 1,360 | the right |
+
+- So width counts in percents of the screen's height, about, and the sim caps it at 150% of the height.
+  Why the two wide panels sat at the left, with `defaultRight="0"`, is unknown.
+- ChasePlane's overlay and Parallel 42's Flow each report a page and an `ingame-ui` box of 2,401 by 1,360, the whole window.
+  Their `ingame-ui` carries our attributes plus the classes `no-header no-background collapsible`, `min-width="5"`, and `min-height="5"`, and the toolbar's page lists both, and ours, in the state `"Detached"`.
+- Their compiled definitions, such as `InGamePanels/p42-util-chaseplane-overlay.spb`, are in a binary format we couldn't read, so how they reach the full width is unknown.
+- Each Parallel 42 package ships `html_ui/pages/ToolBar/toolbar_interop.js`, a file in the sim's toolbar folder that the sim itself doesn't ship, so its code runs in the toolbar's page: ChasePlane's `window.p42_chaseplane_core` lives there, and their scripts wait on the events `TOOLBAR_READY`, `TOOLBAR_CONNECTED`, and `toolbar_attached` (read in p42-util-chaseplane 2026.39.1.16 and p42-util-flow-pro 26.33.5).
+- Flow ships a second panel for VR, `PANEL_FLOW_VR`, named "//42 Flow - Popout", which the toolbar lists as `"Invisible"`.
+- The sim's frame script tells the sim the frame's rectangle with `Coherent.trigger("UPDATE_PANEL_RECT", this.panelID, rect.left, rect.right, rect.top, bottom)` (read in fs-base-ui 0.1.10, `html_ui/templates/ingameUi/ingameUi.js`).
+
+**Changed:** p05 uses the full-height column 48 wide on the right, which is where the scope puts notices.
+Full screen would take guessed definition attributes, each costing a Build and Mount, or Parallel 42's toolbar file, through which we found no size call.
+Whether clicks on the column's clear part reach the cockpit is untested; if they don't, reporting only the card's rectangle with `UPDATE_PANEL_RECT` might let them through (unverified).
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope, and [ingame/build.mjs](../../../experiments/areas/interface/ingame/build.mjs).
+
+**Evidence:** [the three pages' sizes and attributes](../../../experiments/areas/interface/results/p05-ingame-panel-sizes-2026-10-04.txt), read with the column live; the 100 and 1000 widths weren't saved.
+
+## 2026-10-04: An in-game panel of ours takes clicks, and opens from code in the toolbar's and the EFB's pages, but not in a cockpit page
+
+**Asked:** can an in-game panel of ours, see-through and pinned to the right of the screen, show the pre-flight card, take clicks on its Start flying button, and open without the pilot clicking the toolbar?
+
+**Expected:** see-through and clicks, yes, since ChasePlane's overlay is such a panel; opening from code, no prediction.
+
+**Found:** in the Black Square Baron 58P, parked, on MSFS 2024 SU6, SunRise 12.2.282174.999:
+
+- p05's package ([ingame/build.mjs](../../../experiments/areas/interface/ingame/build.mjs)) copies the format of a working MSFS 2020 template (bymaximus/msfs2020-toolbar-window-template): a `SimBase.Document Type="InGamePanels"` compiled by an `SPB` asset group, and its page by a `Copy` group.
+  The Project Editor asked for an order hint before it built, and we gave it `UI_PATCH`.
+- Build and Mount mounted it with the sim running, and the toolbar listed "Crosscheck", with a blank square where our icon should be.
+- Opened from the toolbar, it sat on the right, see-through around the card.
+  The page's `vh` counts the panel's own height, not the screen's, so the first column, 42% of the screen's height, drew everything 2.4 times too small.
+- The panel counted 4 presses of Start flying into `L:CROSSCHECK_P05_CLICKS` before we drove it from code, which we take to be the pilot's.
+- `Coherent.call("TOOLBAR_BUTTON_TOGGLE", "PANEL_CROSSCHECK_P05", open)` opened and closed the panel when run in the toolbar's page and in the "Electronic Flight Bag" page, and did nothing in the Baron's tablet page or in `VLogic`; `mainUi` has no `Coherent` to call it with.
+- Closing the panel destroyed its page, and opening it made a new one.
+- An open panel kept serving its first `p05.js` after a Build and Mount, and after closing and opening it, until `location.reload(true)` through the inspector.
+- Kept open, the page slid the card and six notices in and out with CSS transitions, driven through `window.CROSSCHECK_P05` from the inspector, and a screenshot showed the card and a notice with sharp text.
+- The sim blurs whatever lies behind the panel's painted pixels: under a see-through pink layer, the instruments showed as a smooth blur, not tinted pink.
+  A pink background on the page's `html` element never showed, and a full-size element of the page did.
+
+**Changed:** the banner can be an in-game panel with its own buttons, left open, that shows and hides its elements by CSS without toggling the panel.
+Crosscheck's EFB app could open it, since the EFB's page can; whether the app's code runs while the EFB is closed is untested.
+The panel must paint nothing outside its elements, or it blurs that part of the cockpit.
+Clicks through its clear part, outside views, VR, and the icon are untested.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner) and the EFB app in the v1 scope.
+
+**Evidence:** inspector sessions run by hand; no run file, and the screenshots weren't kept.
+
 ## 2026-10-04: A banner drawn on an object of ours smears in motion and is clipped behind the cockpit, so we parked it for an in-game panel
 
 **Asked:** how does a banner drawn on an object of ours, held 35cm ahead of the eye, look in use?

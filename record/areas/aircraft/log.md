@@ -3,7 +3,33 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
-## 2026-10-04: A sim restart doesn't load camera views added to the per-user camera file either
+## 2026-10-04: CameraSetRelative6DOF puts the eye at any point but holds the camera, and a camera handed back into a view returns to the view's own eye
+
+**Asked:** can Crosscheck put a pilot's eye at a point no camera view gives and hand the camera back, so the pilot keeps their look?
+The Camera API has no call that adds a view at runtime (read in MSFS 2024 SDK 1.7.3, `SimConnect.h` and `WASM/include/MSFS/MSFS_Camera.h`).
+`SimConnect_CameraSetRelative6DOF` moves the user's camera relative to the aircraft's eyepoint, and SDK 1.6.9 fixed it after it "ignored position parameters and put camera at the center of the SimObject, not the eyepoint" ([release notes](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/Release_Notes.htm)).
+
+**Expected:** it would move the eye without taking the camera, with `SIMCONNECT_CAMERA_IGNORE_FIELD` (`FLT_MAX`), which `SimConnect.h` describes as "Used to tell the Camera API to NOT modify the value in this part of the argument", for pitch, bank, and heading.
+
+**Found:** p09 ran in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, with ChasePlane 2026.39.1.16 turned off through its API's `set_master_enabled` for each run and back on at its end.
+
+- `CameraSetRelative6DOF` put the eye exactly where asked, relative to an eyepoint 0.259m left of the reference point, 0.610m up, and 0.107m behind it, 0.245m below where the `Pilot` view puts the eye.
+  A delta of 0.489m right landed 0.489m right, and (0.2, 0.1, −1.2)m landed on it to the millimeter, in the cabin; the eye stayed at each point.
+- It also took the camera: `SimConnect_CameraGetStatus` read `ACQUIRED_BY_OTHER` with ChasePlane off, pitch and yaw read 0°, and the pilot's mouse didn't move the view over 10s.
+  Our client's acquire then left the status `ACQUIRED_BY_OTHER`, and its release into `Pilot` raised `CAMERA_API` (46).
+  Turning ChasePlane back on freed the camera each time; what frees it with no ChasePlane is untested.
+  Asobo wrote that the old call "will be the same as using the acquire call and set position/rotation in EYEPOINT mode" ([Camera API Discussion](https://devsupport.flightsimulator.com/t/camera-api-discussion/17193)).
+- With our client holding the camera, `SimConnect_CameraSet` to the right seat followed by a release into `Pilot` put the eye back at `Pilot`'s own eye, so the view doesn't keep a position a client set.
+  `CameraSetRelative6DOF` while our client held the camera took it from our client the same way.
+
+**Changed:** with the sim's own camera, a client can put the eye at any point only while it holds the camera, which freezes the pilot's look, and `CameraSetRelative6DOF` holds it in a way our client can't undo.
+Crosscheck must not call it for a pilot without ChasePlane until we know what frees the camera.
+
+**Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
+
+**Evidence:** p09's runs [placing the eye](../../../experiments/areas/aircraft/results/p09-relative-6dof-2026-10-04-04-56-23.txt), [handing back after it](../../../experiments/areas/aircraft/results/p09-relative-6dof-2026-10-04-04-58-28.txt), and [moving while holding, then handing back](../../../experiments/areas/aircraft/results/p09-relative-6dof-2026-10-04-04-59-44.txt).
+
+## 2026-10-04: After a sim restart too, views added to the per-user camera file reach neither SimConnect's camera list nor ChasePlane's
 
 **Asked:** does a full sim restart load the three test views p08 added to the 58P's per-user camera file, which a flight restart and a new flight didn't ([entry below](#2026-10-03-camera-views-added-to-the-per-user-camera-file-dont-show-up-after-a-flight-restart-or-a-new-flight))?
 
@@ -14,8 +40,8 @@ Neither held a test view or one of the pilot's four saved custom cameras.
 ChasePlane held the camera, so p08 didn't release into the views, and the day before, an unknown name sent the eye to one fallback spot.
 p08 then put the backed-up file back, and it matched the backup byte for byte.
 
-**Changed:** the per-user camera file feeds neither SimConnect's camera definitions nor ChasePlane's views in this build, so it can't give a seat a view.
-Whether the sim reads the file for anything, such as the pilot's own key for loading a custom camera, is unknown.
+**Changed:** a view added to that file isn't one a SimConnect client can release the camera into, or one ChasePlane loads.
+Whether the sim itself reads the file, such as for the pilot's own key that loads a custom camera, is untested, and add-ons may rely on it.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness).
 

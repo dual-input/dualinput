@@ -1,0 +1,12 @@
+p09 · Moving the eye while holding the camera, then releasing into the view (--handback2), on MSFS 2024
+2026-10-04T04:59:44.023Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"; camera ACQUIRED_BY_OTHER
+Turned ChasePlane 2026.39.1.16 off through its API; camera NOT_ACQUIRED
+Start: x -0.253m (right +), y 0.855m, z -0.144m, pitch 13°, yaw 0°
+V1, CameraSet while holding: after the acquire ACQUIRED; moved to x 0.236m (right +), y 0.855m, z -0.144m, pitch 0°, yaw 0° (0mm from the right-seat point); released into Pilot: x -0.253m (right +), y 0.855m, z -0.144m, pitch 13°, yaw 0° (489mm); camera NOT_ACQUIRED
+V2, CameraSetRelative6DOF while holding: after the acquire ACQUIRED; moved to x 0.236m (right +), y 0.854m, z -0.143m, pitch 0°, yaw 0° (1mm from the right-seat point); released into Pilot: x 0.236m (right +), y 0.854m, z -0.143m, pitch 0°, yaw 0° (1mm); camera ACQUIRED_BY_OTHER
+Turned ChasePlane back on; camera ACQUIRED_BY_OTHER
+End: x 0.236m (right +), y 0.854m, z -0.143m, pitch 0°, yaw 0°, 489mm from the start; camera ACQUIRED_BY_OTHER
+
+Exceptions: CAMERA_API (46) on camera release into Pilot, parameter 4294967295; CAMERA_API (46) on camera set to the starting eye, parameter 4294967295; CAMERA_API (46) on camera release into Pilot, parameter 4294967295

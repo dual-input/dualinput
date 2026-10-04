@@ -1,0 +1,16 @@
+p09 · Moving the cockpit eye with SimConnect_CameraSetRelative6DOF, on MSFS 2024
+2026-10-04T04:56:23.665Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+TITLE "Black Square Baron 58P Professional N513LW"; camera ACQUIRED_BY_OTHER
+Turned ChasePlane 2026.39.1.16 off through its API; camera NOT_ACQUIRED
+Start: x -0.253m (right +), y 0.855m, z -0.144m, pitch 13°, yaw 0°
+1, the eyepoint, delta (0, 0, 0): x -0.259m (right +), y 0.610m, z -0.107m, pitch 0°, yaw 0°; 2s later held
+2, the right seat, delta (0.489, 0, 0): x 0.230m (right +), y 0.610m, z -0.107m, pitch 0°, yaw 0°; 2s later held
+  moved 0.489m right, -0.000m up, 0.000m forward of the eyepoint; camera ACQUIRED_BY_OTHER
+3, the hold: pitch 0° to 0°, yaw 0° to 0°, the eye at most 0mm from where step 2 put it
+4, a point in the cabin, delta (0.2, 0.1, -1.2): x -0.059m (right +), y 0.710m, z -1.307m, pitch 0°, yaw 0°; 2s later held
+  0.200m right, 0.100m up, -1.200m forward of the eyepoint
+Turned ChasePlane back on; camera ACQUIRED_BY_OTHER
+5, back: x -0.253m (right +), y 0.855m, z -0.144m, pitch 0°, yaw 0°, 0mm from the start; camera ACQUIRED_BY_OTHER
+
+Exceptions: none

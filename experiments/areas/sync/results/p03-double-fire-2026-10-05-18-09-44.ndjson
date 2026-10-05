@@ -1,0 +1,116 @@
+{"t":1791223785114,"s":0.75,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791223785144,"s":0.78,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791223785148,"s":0.784,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791223785151,"s":0.787,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791223785177,"s":0.813,"kind":"state","text":"FlightLoaded state %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","flight":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":false}
+{"t":1791223785211,"s":0.847,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\microsoft-pilatus-pc6\\presets\\microsoft\\pc-6_gauge_wheels\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\microsoft-pilatus-pc6\\presets\\microsoft\\pc-6_gauge_wheels\\config\\aircraft.CFG","signal":false}
+{"t":1791223786083,"s":1.719,"kind":"state","text":"position 47.449169, -122.304069, 389 ft, on ground 1","lat":47.44916938891772,"lon":-122.30406936111133,"altFt":389.01001136759754,"onGround":1}
+{"t":1791223786083,"s":1.719,"kind":"state","text":"LIVERY FOLDER \"GAUGE_WHEELS_01\"","liveryFolder":"GAUGE_WHEELS_01"}
+{"t":1791223786083,"s":1.719,"kind":"state","text":"LIVERY NAME \"Classic Wheels #1\"","liveryName":"Classic Wheels #1"}
+{"t":1791223786084,"s":1.72,"kind":"state","text":"TITLE \"Pilatus PC-6 Gauge Wheels\"","title":"Pilatus PC-6 Gauge Wheels"}
+{"t":1791223786624,"s":2.26,"kind":"prompt","text":"Load the A2A PA-24 Comanche, anywhere, and Page Down when you're in the cockpit."}
+{"t":1791223791300,"s":6.936,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\streamedpackages\\fs24-microsoft-aircraft-pilatus-pc6\\content\\simobjects\\airplanes\\microsoft-pilatus-pc6\\presets\\microsoft\\pc-6_gauge_wheels\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\streamedpackages\\fs24-microsoft-aircraft-pilatus-pc6\\content\\simobjects\\airplanes\\microsoft-pilatus-pc6\\presets\\microsoft\\pc-6_gauge_wheels\\config\\aircraft.cfg","signal":true}
+{"t":1791223793196,"s":8.832,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\microsoft-pilatus-pc6\\presets\\microsoft\\pc-6_gauge_wheels\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\microsoft-pilatus-pc6\\presets\\microsoft\\pc-6_gauge_wheels\\config\\aircraft.CFG","signal":true}
+{"t":1791223826056,"s":41.692,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1791223826057,"s":41.693,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791223826057,"s":41.693,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791223826111,"s":41.747,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1791223827240,"s":42.876,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1791223849606,"s":65.242,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791223852204,"s":67.84,"kind":"flow","text":"FLIGHT_END","flow":"FLIGHT_END","id":15,"file":"","signal":false}
+{"t":1791223857565,"s":73.201,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1791223857565,"s":73.201,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1791223857908,"s":73.544,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1791223857908,"s":73.544,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791223858413,"s":74.049,"kind":"state","text":"SIM ON GROUND 1 → 0","onGround":0}
+{"t":1791223858413,"s":74.049,"kind":"state","text":"position 0.000000, 0.000017, 53820 ft, on ground 0","lat":0,"lon":0.00001742129128956548,"altFt":53819.5512426181,"onGround":0}
+{"t":1791223858413,"s":74.049,"kind":"state","text":"LIVERY FOLDER \"N8351P\"","liveryFolder":"N8351P"}
+{"t":1791223858413,"s":74.049,"kind":"state","text":"LIVERY NAME \"N8351P\"","liveryName":"N8351P"}
+{"t":1791223858414,"s":74.05,"kind":"state","text":"TITLE \"A2A Piper PA-24-250 Comanche\"","title":"A2A Piper PA-24-250 Comanche"}
+{"t":1791223860530,"s":76.166,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1791223860530,"s":76.166,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1791223860773,"s":76.409,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1791223860781,"s":76.417,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1791223860841,"s":76.477,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791223860841,"s":76.477,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791223860841,"s":76.477,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1791223860842,"s":76.478,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1791223860842,"s":76.478,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1791223860842,"s":76.478,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1791223861663,"s":77.299,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791223861678,"s":77.314,"kind":"state","text":"SIM ON GROUND 0 → 1","onGround":1}
+{"t":1791223861678,"s":77.314,"kind":"state","text":"position 47.449646, -122.303737, 388 ft, on ground 1","lat":47.44964569444975,"lon":-122.3037373888888,"altFt":388.3200117296434,"onGround":1}
+{"t":1791223861832,"s":77.468,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1791223861833,"s":77.469,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791223871888,"s":87.524,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1791223871889,"s":87.525,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.CFG","signal":true}
+{"t":1791223883173,"s":98.809,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1791223883174,"s":98.81,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791223883174,"s":98.81,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791223883174,"s":98.81,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1791223884356,"s":99.992,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1791223893269,"s":108.905,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791223894611,"s":110.247,"kind":"inputs","text":"318 input events on A2A Piper PA-24-250 Comanche"}
+{"t":1791223894613,"s":110.249,"kind":"prompt","text":"At your usual frame rate, click about 10 switches once each, about a second apart. Page Down when done."}
+{"t":1791223907565,"s":123.201,"kind":"input","text":"usual SWITCH_BATTERY_MASTER_2STATES 1 at frame 402","phase":"usual","name":"SWITCH_BATTERY_MASTER_2STATES","value":1,"frame":402}
+{"t":1791223907598,"s":123.234,"kind":"input","text":"usual SWITCH_BATTERY_MASTER_2STATES 1 at frame 403","phase":"usual","name":"SWITCH_BATTERY_MASTER_2STATES","value":1,"frame":403}
+{"t":1791223910032,"s":125.668,"kind":"input","text":"usual SWITCH_LIGHT_LANDING_L_2STATES 1 at frame 479","phase":"usual","name":"SWITCH_LIGHT_LANDING_L_2STATES","value":1,"frame":479}
+{"t":1791223910064,"s":125.7,"kind":"input","text":"usual SWITCH_LIGHT_LANDING_L_2STATES 1 at frame 480","phase":"usual","name":"SWITCH_LIGHT_LANDING_L_2STATES","value":1,"frame":480}
+{"t":1791223910998,"s":126.634,"kind":"input","text":"usual SWITCH_LIGHT_LANDING_R_2STATES 1 at frame 509","phase":"usual","name":"SWITCH_LIGHT_LANDING_R_2STATES","value":1,"frame":509}
+{"t":1791223911031,"s":126.667,"kind":"input","text":"usual SWITCH_LIGHT_LANDING_R_2STATES 1 at frame 510","phase":"usual","name":"SWITCH_LIGHT_LANDING_R_2STATES","value":1,"frame":510}
+{"t":1791223911998,"s":127.634,"kind":"input","text":"usual SWITCH_LIGHT_STROBE_2STATES 0 at frame 540","phase":"usual","name":"SWITCH_LIGHT_STROBE_2STATES","value":0,"frame":540}
+{"t":1791223912031,"s":127.667,"kind":"input","text":"usual SWITCH_LIGHT_STROBE_2STATES 0 at frame 541","phase":"usual","name":"SWITCH_LIGHT_STROBE_2STATES","value":0,"frame":541}
+{"t":1791223912931,"s":128.567,"kind":"input","text":"usual SWITCH_LIGHT_BEACON_2STATES 1 at frame 569","phase":"usual","name":"SWITCH_LIGHT_BEACON_2STATES","value":1,"frame":569}
+{"t":1791223912965,"s":128.601,"kind":"input","text":"usual SWITCH_LIGHT_BEACON_2STATES 1 at frame 570","phase":"usual","name":"SWITCH_LIGHT_BEACON_2STATES","value":1,"frame":570}
+{"t":1791223913865,"s":129.501,"kind":"input","text":"usual SWITCH_PITOT_HEAT_2STATES 1 at frame 598","phase":"usual","name":"SWITCH_PITOT_HEAT_2STATES","value":1,"frame":598}
+{"t":1791223913897,"s":129.533,"kind":"input","text":"usual SWITCH_PITOT_HEAT_2STATES 1 at frame 599","phase":"usual","name":"SWITCH_PITOT_HEAT_2STATES","value":1,"frame":599}
+{"t":1791223914798,"s":130.434,"kind":"input","text":"usual SWITCH_AP_MASTER_2STATES 1 at frame 627","phase":"usual","name":"SWITCH_AP_MASTER_2STATES","value":1,"frame":627}
+{"t":1791223914830,"s":130.466,"kind":"input","text":"usual SWITCH_AP_MASTER_2STATES 1 at frame 628","phase":"usual","name":"SWITCH_AP_MASTER_2STATES","value":1,"frame":628}
+{"t":1791223916032,"s":131.668,"kind":"input","text":"usual ELECTRICAL_CIRCUIT_36 0 at frame 665","phase":"usual","name":"ELECTRICAL_CIRCUIT_36","value":0,"frame":665}
+{"t":1791223916032,"s":131.668,"kind":"input","text":"usual ELECTRICAL_CIRCUIT_37 0 at frame 665","phase":"usual","name":"ELECTRICAL_CIRCUIT_37","value":0,"frame":665}
+{"t":1791223922150,"s":137.786,"kind":"phase","text":"usual: 31.0 sim frames a second over 27.5s"}
+{"t":1791223922150,"s":137.786,"kind":"prompt","text":"Cap the frame rate near 20 frames a second. Page Down when it's capped."}
+{"t":1791223923208,"s":138.844,"kind":"input","text":"between SWITCH_BATTERY_MASTER_2STATES 0 at frame 887","phase":"between","name":"SWITCH_BATTERY_MASTER_2STATES","value":0,"frame":887}
+{"t":1791223923269,"s":138.905,"kind":"input","text":"between SWITCH_BATTERY_MASTER_2STATES 0 at frame 888","phase":"between","name":"SWITCH_BATTERY_MASTER_2STATES","value":0,"frame":888}
+{"t":1791223924768,"s":140.404,"kind":"input","text":"between SWITCH_LIGHT_LANDING_R_2STATES 0 at frame 935","phase":"between","name":"SWITCH_LIGHT_LANDING_R_2STATES","value":0,"frame":935}
+{"t":1791223924801,"s":140.437,"kind":"input","text":"between SWITCH_LIGHT_LANDING_R_2STATES 0 at frame 936","phase":"between","name":"SWITCH_LIGHT_LANDING_R_2STATES","value":0,"frame":936}
+{"t":1791223925834,"s":141.47,"kind":"input","text":"between SWITCH_LIGHT_LANDING_L_2STATES 0 at frame 968","phase":"between","name":"SWITCH_LIGHT_LANDING_L_2STATES","value":0,"frame":968}
+{"t":1791223925868,"s":141.505,"kind":"input","text":"between SWITCH_LIGHT_LANDING_L_2STATES 0 at frame 969","phase":"between","name":"SWITCH_LIGHT_LANDING_L_2STATES","value":0,"frame":969}
+{"t":1791223926535,"s":142.171,"kind":"input","text":"between SWITCH_LIGHT_BEACON_2STATES 0 at frame 989","phase":"between","name":"SWITCH_LIGHT_BEACON_2STATES","value":0,"frame":989}
+{"t":1791223926567,"s":142.203,"kind":"input","text":"between SWITCH_LIGHT_BEACON_2STATES 0 at frame 990","phase":"between","name":"SWITCH_LIGHT_BEACON_2STATES","value":0,"frame":990}
+{"t":1791223927167,"s":142.803,"kind":"input","text":"between SWITCH_PITOT_HEAT_2STATES 0 at frame 1009","phase":"between","name":"SWITCH_PITOT_HEAT_2STATES","value":0,"frame":1009}
+{"t":1791223927201,"s":142.837,"kind":"input","text":"between SWITCH_PITOT_HEAT_2STATES 0 at frame 1010","phase":"between","name":"SWITCH_PITOT_HEAT_2STATES","value":0,"frame":1010}
+{"t":1791223927868,"s":143.504,"kind":"input","text":"between SWITCH_AP_MASTER_2STATES 0 at frame 1031","phase":"between","name":"SWITCH_AP_MASTER_2STATES","value":0,"frame":1031}
+{"t":1791223927900,"s":143.536,"kind":"input","text":"between SWITCH_AP_MASTER_2STATES 0 at frame 1032","phase":"between","name":"SWITCH_AP_MASTER_2STATES","value":0,"frame":1032}
+{"t":1791223930338,"s":145.974,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791223930382,"s":146.018,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791223936186,"s":151.822,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791223936203,"s":151.839,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791223945368,"s":161.004,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791223945410,"s":161.046,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791223964712,"s":180.348,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791223964729,"s":180.365,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791223970147,"s":185.783,"kind":"prompt","text":"With the frame rate capped near 20 fps, click the same switches once each, a second apart. Page Down when done."}
+{"t":1791223974863,"s":190.499,"kind":"input","text":"capped SWITCH_BATTERY_MASTER_2STATES 1 at frame 2283","phase":"capped","name":"SWITCH_BATTERY_MASTER_2STATES","value":1,"frame":2283}
+{"t":1791223974912,"s":190.548,"kind":"input","text":"capped SWITCH_BATTERY_MASTER_2STATES 1 at frame 2284","phase":"capped","name":"SWITCH_BATTERY_MASTER_2STATES","value":1,"frame":2284}
+{"t":1791223976813,"s":192.449,"kind":"input","text":"capped SWITCH_LIGHT_LANDING_L_2STATES 1 at frame 2324","phase":"capped","name":"SWITCH_LIGHT_LANDING_L_2STATES","value":1,"frame":2324}
+{"t":1791223976863,"s":192.499,"kind":"input","text":"capped SWITCH_LIGHT_LANDING_L_2STATES 1 at frame 2325","phase":"capped","name":"SWITCH_LIGHT_LANDING_L_2STATES","value":1,"frame":2325}
+{"t":1791223977563,"s":193.199,"kind":"input","text":"capped SWITCH_LIGHT_LANDING_R_2STATES 1 at frame 2339","phase":"capped","name":"SWITCH_LIGHT_LANDING_R_2STATES","value":1,"frame":2339}
+{"t":1791223977613,"s":193.249,"kind":"input","text":"capped SWITCH_LIGHT_LANDING_R_2STATES 1 at frame 2340","phase":"capped","name":"SWITCH_LIGHT_LANDING_R_2STATES","value":1,"frame":2340}
+{"t":1791223978563,"s":194.199,"kind":"input","text":"capped SWITCH_LIGHT_STROBE_2STATES 1 at frame 2360","phase":"capped","name":"SWITCH_LIGHT_STROBE_2STATES","value":1,"frame":2360}
+{"t":1791223978613,"s":194.249,"kind":"input","text":"capped SWITCH_LIGHT_STROBE_2STATES 1 at frame 2361","phase":"capped","name":"SWITCH_LIGHT_STROBE_2STATES","value":1,"frame":2361}
+{"t":1791223979463,"s":195.099,"kind":"input","text":"capped SWITCH_LIGHT_BEACON_2STATES 1 at frame 2379","phase":"capped","name":"SWITCH_LIGHT_BEACON_2STATES","value":1,"frame":2379}
+{"t":1791223979512,"s":195.148,"kind":"input","text":"capped SWITCH_LIGHT_BEACON_2STATES 1 at frame 2380","phase":"capped","name":"SWITCH_LIGHT_BEACON_2STATES","value":1,"frame":2380}
+{"t":1791223980463,"s":196.099,"kind":"input","text":"capped SWITCH_PITOT_HEAT_2STATES 1 at frame 2400","phase":"capped","name":"SWITCH_PITOT_HEAT_2STATES","value":1,"frame":2400}
+{"t":1791223980512,"s":196.148,"kind":"input","text":"capped SWITCH_PITOT_HEAT_2STATES 1 at frame 2401","phase":"capped","name":"SWITCH_PITOT_HEAT_2STATES","value":1,"frame":2401}
+{"t":1791223981464,"s":197.1,"kind":"input","text":"capped SWITCH_AP_MASTER_2STATES 1 at frame 2421","phase":"capped","name":"SWITCH_AP_MASTER_2STATES","value":1,"frame":2421}
+{"t":1791223981513,"s":197.149,"kind":"input","text":"capped SWITCH_AP_MASTER_2STATES 1 at frame 2422","phase":"capped","name":"SWITCH_AP_MASTER_2STATES","value":1,"frame":2422}
+{"t":1791223985079,"s":200.715,"kind":"phase","text":"capped: 21.0 sim frames a second over 14.9s"}
+{"t":1791223985079,"s":200.715,"kind":"prompt","text":"Hold a key bound to a momentary control, such as the starter, for 3s, twice; then hold the mouse on a momentary button for 3s. Page Down when done."}
+{"t":1791224130722,"s":346.358,"kind":"input","text":"held PUSHBUTTON_STARTER_2STATES 1 at frame 5464","phase":"held","name":"PUSHBUTTON_STARTER_2STATES","value":1,"frame":5464}
+{"t":1791224133122,"s":348.758,"kind":"input","text":"held PUSHBUTTON_STARTER_2STATES 0 at frame 5515","phase":"held","name":"PUSHBUTTON_STARTER_2STATES","value":0,"frame":5515}
+{"t":1791224134621,"s":350.257,"kind":"input","text":"held PUSHBUTTON_STARTER_2STATES 1 at frame 5546","phase":"held","name":"PUSHBUTTON_STARTER_2STATES","value":1,"frame":5546}
+{"t":1791224137571,"s":353.207,"kind":"input","text":"held PUSHBUTTON_STARTER_2STATES 0 at frame 5608","phase":"held","name":"PUSHBUTTON_STARTER_2STATES","value":0,"frame":5608}
+{"t":1791224140022,"s":355.658,"kind":"input","text":"held PUSHBUTTON_STARTER_2STATES 1 at frame 5660","phase":"held","name":"PUSHBUTTON_STARTER_2STATES","value":1,"frame":5660}
+{"t":1791224140073,"s":355.709,"kind":"input","text":"held PUSHBUTTON_STARTER_2STATES 1 at frame 5661","phase":"held","name":"PUSHBUTTON_STARTER_2STATES","value":1,"frame":5661}
+{"t":1791224144773,"s":360.409,"kind":"phase","text":"held: 20.4 sim frames a second over 159.7s"}

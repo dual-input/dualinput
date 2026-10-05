@@ -1,0 +1,26 @@
+p03-double-fire, started 2026-10-05T18:09:44.364Z
+Filter: a report with the same name and value as one from the last 3 frames, but never one more than 200ms after it, is dropped as an echo.
+
+== usual: 31.0 fps; 16 reports, 7 same-name, same-value pairs, 7 inside the filter
+   pairs by frames apart: 1: 7
+   SWITCH_BATTERY_MASTER_2STATES 1: 33ms, 1 frame, inside
+   SWITCH_LIGHT_LANDING_L_2STATES 1: 32ms, 1 frame, inside
+   SWITCH_LIGHT_LANDING_R_2STATES 1: 33ms, 1 frame, inside
+   SWITCH_LIGHT_STROBE_2STATES 0: 33ms, 1 frame, inside
+   SWITCH_LIGHT_BEACON_2STATES 1: 34ms, 1 frame, inside
+   SWITCH_PITOT_HEAT_2STATES 1: 32ms, 1 frame, inside
+   SWITCH_AP_MASTER_2STATES 1: 32ms, 1 frame, inside
+
+== capped: 21.0 fps; 14 reports, 7 same-name, same-value pairs, 7 inside the filter
+   pairs by frames apart: 1: 7
+   SWITCH_BATTERY_MASTER_2STATES 1: 49ms, 1 frame, inside
+   SWITCH_LIGHT_LANDING_L_2STATES 1: 50ms, 1 frame, inside
+   SWITCH_LIGHT_LANDING_R_2STATES 1: 50ms, 1 frame, inside
+   SWITCH_LIGHT_STROBE_2STATES 1: 50ms, 1 frame, inside
+   SWITCH_LIGHT_BEACON_2STATES 1: 49ms, 1 frame, inside
+   SWITCH_PITOT_HEAT_2STATES 1: 49ms, 1 frame, inside
+   SWITCH_AP_MASTER_2STATES 1: 49ms, 1 frame, inside
+
+== held: 20.4 fps; 6 reports, 1 same-name, same-value pair, 1 inside the filter
+   pairs by frames apart: 1: 1
+   PUSHBUTTON_STARTER_2STATES 1: 51ms, 1 frame, inside

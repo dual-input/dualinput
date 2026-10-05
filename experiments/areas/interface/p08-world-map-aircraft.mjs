@@ -82,8 +82,14 @@ const INSTALL = `(function () {
     };
     p.results = [];
     p.handles = [];
+    // p07 listened both ways and found the departure; p08 with only the first
+    // heard nothing in 4s (results/p08-world-map-aircraft-2026-10-05-19-31-33.txt).
+    var onResults = function (uid, list) { if (uid === "CROSSCHECK_P08") p.results.push(list); };
+    try { p.handles.push(engine.on("ResultsUpdated", onResults)); } catch (e) {}
     try {
-      p.handles.push(engine.on("ResultsUpdated", function (uid, list) { if (uid === "CROSSCHECK_P08") p.results.push(list); }));
+      p.handles.push(engine.on("EVENT_FROM_VIEW_LISTENER", function (name, ev, uid, list) {
+        if (ev === "ResultsUpdated") onResults(uid, list);
+      }));
     } catch (e) {}
   }
   return { engine: typeof engine, loader: typeof window._globalDataLoader };

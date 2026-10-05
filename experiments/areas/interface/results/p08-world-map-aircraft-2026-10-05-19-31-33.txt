@@ -1,0 +1,6 @@
+p08-world-map-aircraft, started 2026-10-05T19:31:33.375Z
+
+- The airport search found no KSEA, so no departure was set.
+- Before: currentAircraft is ok, Airbus A380-800.
+- setAircraftForConfigurator("134||12") resolved; currentAircraft changed to Airbus A220-300.
+- saveVariationId("16442315337606401108:1"), the livery Air Canada A220-300: resolved; currentAircraft changed to Airbus A220-300.

@@ -5,6 +5,7 @@
  *   node experiments/areas/sync/p01-guided-load.mjs
  *   node experiments/areas/sync/p01-guided-load.mjs --from 5      resume at the 5th load
  *   node experiments/areas/sync/p01-guided-load.mjs --only synaptic-a220
+ *   node experiments/areas/sync/p01-guided-load.mjs --loads 7,1,1   these LOADS, in this order
  *
  * For each load in LOADS, in order, the probe:
  *   1. names the aircraft, its place in the list, and whether Flow Pro's
@@ -30,7 +31,7 @@
  * after notification groups at priority 1 were left behind (run.mjs, connect).
  * fsc-editor streams L: variables through its link across aircraft changes a
  * pilot makes from the menu (fsc-editor, docs/sim-vars/build/v1-log.md,
- * "2026-08-24 â€” Re-enumeration stops on a pause, not on a finished table").
+ * "2026-08-24 — Re-enumeration stops on a pause, not on a finished table").
  */
 
 import { AIRCRAFT } from "../aircraft/lib/aircraft.mjs"
@@ -75,7 +76,7 @@ const LOADS = [
 // start state we've seen, and the original goes back afterwards.
 const STOCK_WRITES = [
   {
-    label: "K:HEADING_BUG_SET â†’ A:AUTOPILOT HEADING LOCK DIR",
+    label: "K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR",
     read: ["AUTOPILOT HEADING LOCK DIR", "degrees"],
     values: [93, 271],
     tolerance: 0.5,
@@ -85,7 +86,7 @@ const STOCK_WRITES = [
     // [0] is millibars times 16 and [1] the altimeter's index (MSFS 2024 SDK,
     // Aircraft Instrumentation Events, KOHLSMAN_SET, as
     // record/learn/foundations/03-02-events-and-other-namespaces.md cites it).
-    label: "K:KOHLSMAN_SET â†’ A:KOHLSMAN SETTING MB:1",
+    label: "K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1",
     read: ["KOHLSMAN SETTING MB:1", "millibars"],
     values: [1001, 1027],
     tolerance: 0.1,
@@ -128,8 +129,16 @@ const flag = (name) => {
 }
 const FROM = Number(flag("--from") ?? 1)
 const ONLY = flag("--only")
+const PICK = flag("--loads")
 
-const loads = LOADS.map((l, i) => ({ ...l, n: i + 1, a: AIRCRAFT[l.id] }))
+const picked = PICK
+  ? PICK.split(",").map((s) => {
+    const l = LOADS[Number(s) - 1]
+    if (!l) throw new Error(`no load ${s}: LOADS has ${LOADS.length}`)
+    return l
+  })
+  : LOADS
+const loads = picked.map((l, i) => ({ ...l, n: i + 1, a: AIRCRAFT[l.id] }))
   .filter((l) => l.n >= FROM && (!ONLY || l.id === ONLY))
 for (const l of loads) if (!l.a) throw new Error(`no aircraft ${l.id} in aircraft/lib/aircraft.mjs`)
 
@@ -144,13 +153,13 @@ let keys = null
 let beep = () => {}
 let say = () => {}
 
-const names = new Map() // L: id â†’ "L:name"
-const lastL = new Map() // L: id â†’ its last streamed value
+const names = new Map() // L: id → "L:name"
+const lastL = new Map() // L: id → its last streamed value
 const events = [] // { t, name, data }, the sim's system and flow events
 const curatedA = new Set(SETTLE_A.map(([n]) => n))
 
 // One load: every value that moved after the first Page Down, as
-// key â†’ { kind, name, first, last, appearedT, before: { n, times }, after: { n, times } },
+// key → { kind, name, first, last, appearedT, before: { n, times }, after: { n, times } },
 // with "before" and "after" the second Page Down.
 function newLoadState(load) {
   return { load, t1: null, t2: null, tEnd: null, entries: new Map() }
@@ -367,12 +376,15 @@ async function press(prompt, { timeoutMs = null } = {}) {
   return k
 }
 
-async function oneLoad(load, i, total) {
+// Asks for a change to Flow Pro's auto-click only where the setting differs from
+// the load before, since the pilot left it as that one asked.
+async function oneLoad(load, i, total, before) {
   const head = `${i}/${total} aircraft`
   const name = load.label ?? load.a.name
-  const flow = load.flowPro ? "on" : "OFF (turn Flow Pro's auto-click off now)"
+  const turn = before && before.flowPro !== load.flowPro
+  const flow = load.flowPro ? (turn ? "ON (turn Flow Pro's auto-click back on now)" : "on") : (turn || !before ? "OFF (turn Flow Pro's auto-click off now)" : "off")
   beep(880, 150)
-  say(`Aircraft ${i} of ${total}: ${name}. Flow Pro auto-click ${load.flowPro ? "on" : "off. Turn it off now"}.`)
+  say(`Aircraft ${i} of ${total}: ${name}. Flow Pro auto-click ${load.flowPro ? (turn ? "on. Turn it back on now" : "on") : (turn || !before ? "off. Turn it off now" : "off")}.`)
   const k1 = await press(`[${head}] Load ${name} parked, from Free flight. Flow Pro auto-click: ${flow}. Page Down the moment you click Fly; Page Up skips this aircraft.`)
   if (k1.key !== "START") { say("Skipped."); return { load: { n: load.n, id: load.id }, skipped: true } }
 
@@ -463,7 +475,7 @@ function report() {
     for (const v of r.verdicts) {
       for (const [set, x] of [["all", v.all], ["switches", v.switches]]) {
         lines.push(`   from ${v.from} (+${secs(v.t0Ms)}), ${set}: settled at ${secs(x.atMs)} by ${x.why}; ${x.counted} counted, ${x.excluded} noisy; ${x.late.length} moved after`)
-        for (const l of x.late.slice(0, 25)) lines.push(`      late: ${l.name} at ${l.afterMs.map(secs).join(", ")}; ${fmt(l.first)} â†’ ${fmt(l.last)}`)
+        for (const l of x.late.slice(0, 25)) lines.push(`      late: ${l.name} at ${l.afterMs.map(secs).join(", ")}; ${fmt(l.first)} → ${fmt(l.last)}`)
         if (x.late.length > 25) lines.push(`      and ${x.late.length - 25} more in the NDJSON's load record`)
       }
     }
@@ -519,7 +531,7 @@ async function main() {
 
   for (const [i, load] of loads.entries()) {
     if (run.stopping || sim.gone) break
-    run.results.push(await oneLoad(load, i + 1, loads.length))
+    run.results.push(await oneLoad(load, i + 1, loads.length, loads[i - 1] ?? null))
   }
   await finish(run.stopping ? "stopped" : "every load done")
 }

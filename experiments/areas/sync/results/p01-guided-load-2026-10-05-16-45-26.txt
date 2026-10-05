@@ -1,0 +1,25 @@
+p01-guided-load, started 2026-10-05T16:45:26.494Z
+Settle rule: 15s with no counted change, counted from 15s after load, or 90s at most; a value with more than 5 changes since load stops counting.
+"all" is every L: variable fsc-editor-link streams, plus the stock values below; "switches" is SETTLE_A in aircraft/lib/load.mjs plus the aircraft's settleL in aircraft/lib/aircraft.mjs.
+Stock values every frame: ELECTRICAL MASTER BATTERY:1, AVIONICS MASTER SWITCH, LIGHT BEACON, LIGHT NAV, LIGHT STROBE, LIGHT LANDING, BRAKE PARKING POSITION, GENERAL ENG COMBUSTION:1, FLAPS HANDLE INDEX, COM ACTIVE FREQUENCY:1, TRANSPONDER CODE:1, LIGHT TAXI, GENERAL ENG COMBUSTION:2, GENERAL ENG COMBUSTION:3, GENERAL ENG COMBUSTION:4, GENERAL ENG RPM:1, TURB ENG N1:1, GEAR HANDLE POSITION, COM STANDBY FREQUENCY:1, NAV ACTIVE FREQUENCY:1, FUEL TOTAL QUANTITY, ELECTRICAL MAIN BUS VOLTAGE, APU PCT RPM, EXTERNAL POWER ON:1, SIM ON GROUND, GROUND VELOCITY, CAMERA STATE.
+A value first seen after Fly, such as an L: variable registered during the load, counts as appeared, not changed.
+
+== 1 black-square-baron-pro, Flow Pro auto-click on
+   loaded: Black Square Baron 58P Professional N513LW (%APPDATA%\microsoft flight simulator 2024\packages\community\bksq-aircraft-baronpro\simobjects\airplanes\bksq-aircraft-baronpropress\aircraft.cfg)
+   Ready to fly pressed 16.8s after Fly; 31.0 fps afterwards
+   events from Fly: 3.1s AircraftLoaded bksq-aircraft-baronpropress\aircraft.cfg; 13.9s flow FLIGHT_START; 13.9s flow FLT_LOAD; 13.9s flow FLT_LOADED; 13.9s flow RTC_START; 15.9s PositionChanged 0; 16.0s View 2; 16.0s flow TELEPORT_START; 16.0s flow TELEPORT_DONE; 16.0s flow FLT_LOAD; 16.0s flow FLT_LOADED; 16.0s flow RTC_END
+   739 values moved, 227 appeared (the last 31.9s after Fly); the L: table held 5240 names
+   from the first Page Down, clicking Fly (+0.0s), all: settled at 62.5s by quiet; 586 counted, 153 noisy; 0 moved after
+   from the first Page Down, clicking Fly (+0.0s), switches: settled at 31.4s by quiet; 5 counted, 0 noisy; 0 moved after
+   from the first load event (+3.1s), all: settled at 59.4s by quiet; 560 counted, 152 noisy; 0 moved after
+   from the first load event (+3.1s), switches: settled at 30.0s by quiet; 5 counted, 0 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+16.8s), all: settled at 45.7s by quiet; 87 counted, 145 noisy; 2 moved after
+      late: L:var_cabinTemperatureSetPoint at 65.7s, 68.7s; 0 → 80.599001
+      late: L:test_StElmosFire_temp at 65.9s, 68.9s; 0 → 0.174797
+   from the second Page Down, Ready to fly (+16.8s), switches: settled at 30.0s by quiet; 0 counted, 0 noisy; 0 moved after
+   order, two data-definition writes of L:CROSSCHECK_P01_ORDER: second won 20/20, first 0, neither 0
+   order, two K:HEADING_BUG_SET events: second won 10/10, first 0, neither 0
+   show, K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR: 93 in 8ms (1 frame, 1 write); 271 in 34ms (2 frames, 1 write); restored 0, was 0
+   show, K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1: 1001 in 17ms (1 frame, 1 write); 1027 in 25ms (1 frame, 1 write); restored 1013.25, was 1013.25
+   show, L:CROSSCHECK_P01_SHOW by data definition: 3 in 12ms (1 frame, 1 write); 7 in 2ms (1 frame, 1 write); restored 0, was 0
+   show, L:var_FrontArmrest by data definition: 0 in 16ms (1 frame, 1 write); 1 in 27ms (1 frame, 1 write); restored 100, was 100

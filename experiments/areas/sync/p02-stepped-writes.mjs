@@ -113,7 +113,7 @@ function makeContext() {
       const now = await sim.readOne(name, "number")
       if (typeof now !== "number") { rec.log("warn", `${name} didn't read, so nothing was added`); return }
       c.setL(name, now + d)
-      rec.log("add", `${name} ${fmt(now)} â†’ ${fmt(now + d)}`)
+      rec.log("add", `${name} ${fmt(now)} → ${fmt(now + d)}`)
     },
     everyFrame: (n, fn) => new Promise((resolve) => {
       let i = 0
@@ -160,7 +160,7 @@ async function observe(label, act, stock) {
   }
   const moved = [...byName.values()].sort((a, b) => Number(a.moving) - Number(b.moving) || a.ms[0] - b.ms[0])
   const quiet = moved.filter((e) => !e.moving)
-  rec.log("moved", `${label}: ${quiet.map((e) => `${e.name} ${fmt(e.first)} â†’ ${fmt(e.last)} (${plural(e.n, "change")}, first +${e.ms[0]}ms)`).join("; ") || "nothing that was still before"}${moved.length > quiet.length ? `; ${moved.length - quiet.length} already moving` : ""}`, { label, actMs: tActed - t0, moved })
+  rec.log("moved", `${label}: ${quiet.map((e) => `${e.name} ${fmt(e.first)} → ${fmt(e.last)} (${plural(e.n, "change")}, first +${e.ms[0]}ms)`).join("; ") || "nothing that was still before"}${moved.length > quiet.length ? `; ${moved.length - quiet.length} already moving` : ""}`, { label, actMs: tActed - t0, moved })
   return { label, actMs: tActed - t0, moved }
 }
 
@@ -215,7 +215,7 @@ function report(all) {
     for (const s of r.results) {
       lines.push(`   ${s.label} (acted in ${s.actMs}ms):`)
       const quiet = s.moved.filter((e) => !e.moving)
-      for (const e of quiet.slice(0, 30)) lines.push(`      ${e.name} ${fmt(e.first)} â†’ ${fmt(e.last)}, ${plural(e.n, "change")} at ${e.ms.map((m) => `+${m}ms`).join(" ")}`)
+      for (const e of quiet.slice(0, 30)) lines.push(`      ${e.name} ${fmt(e.first)} → ${fmt(e.last)}, ${plural(e.n, "change")} at ${e.ms.map((m) => `+${m}ms`).join(" ")}`)
       if (quiet.length > 30) lines.push(`      and ${quiet.length - 30} more`)
       if (!quiet.length) lines.push("      nothing that was still before")
       const moving = s.moved.length - quiet.length

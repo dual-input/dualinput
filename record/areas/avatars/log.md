@@ -12,7 +12,7 @@ Many figures, each posed from its own object's variables, cost about 18µs a fra
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
-## 2026-10-05: Each figure poses from its own object's variables, costs frame time in view and almost none out of view, and costs nothing to write
+## 2026-10-05: Each figure poses from its own object's variables, and costs frame time in view and almost none out of view
 
 **Asked:** does one sim draw many of our figures, each posed from variables of its own object, and what do 2, 20, and 180 cost in frame time with every joint moving every frame ([the plan](../product/plan.md)'s step 6; [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew))?
 Then, where's the ceiling, and what does a figure out of view or hidden behind the aircraft cost?
@@ -24,7 +24,8 @@ p28 spawned it through SimConnect on a grid of 40 a row, 1.5m apart, ahead of or
 Each frame rate is a 10s average, with the frame rate uncapped and frame generation off unless the setup says otherwise:
 
 - The figures stood in poses and colors of their own, at 20 and at 180, so each follows its own object's variables.
-- Writing costs nothing we could measure: "written, still" matched "not written" at every count, up to 28,000 `Z:` values a frame.
+- In the PA-24 runs, writing cost nothing we could measure: "written, still" matched "not written" within 0.7ms of frame time at every count, either way, up to 28,000 `Z:` values a frame.
+  In the A380 with traffic moving, "written, still" ran 2.2ms slower at 400 figures and 4.8ms slower at 1,000, but within 0.8ms at 180, 600, and 800, which reads as the traffic's noise (unverified).
 - The figures' cost, in the A2A PA-24 on EGLL runway 27R, looking forward at them:
 
   | Figures | Not written | Written, still | Moving |
@@ -38,7 +39,7 @@ Each frame rate is a 10s average, with the frame rate uncapped and frame generat
   A still figure in view adds 16µs to 21µs to the frame, and moving every joint adds 10µs to 16µs more.
 - Where the figures stood against the camera, in frame time added by 1,000 figures, or by 800 in the PA-24:
 
-  | Setup | Still | Moving |
+  | Setup | Not written | Moving |
   | --- | --- | --- |
   | PA-24, figures ahead, looking forward | +14.7ms | +26.8ms |
   | PA-24, figures ahead, looking backward | +1.1ms | +1.8ms |
@@ -47,13 +48,13 @@ Each frame rate is a 10s average, with the frame rate uncapped and frame generat
   | A380, figures behind, looking backward through the aircraft from its cockpit | +13.0ms | +25.1ms |
 
   The A380's frame rate was about 21 fps with no figures, so a figure costs the same time whatever else the sim draws.
-  Behind the aircraft and looking forward, every count stayed within about 1ms, the noise of a 10s average with traffic moving.
+  Behind the aircraft and looking forward, every count stayed within about 3ms of none, the noise of a 10s average with traffic moving.
 - The `L:` name table held 6,517 names before and after 1,000 figures, so `Z:` variables don't add to it.
 - With the frame rate capped at 30 fps, 180 moving figures held 31.0 fps, so a cap hides the cost below it.
 
 **Changed:** the sim skips drawing, and most animating, for figures outside the view, but draws figures hidden inside it almost in full.
-So a cabin of passengers behind a pilot looking forward costs little, and the same pilot looking back at a closed cockpit door pays for the whole cabin: in the A380, 180 figures cost 3.4ms standing still and 7.2ms moving.
-The cost is drawing and animating changed joints, not our writes, so a passenger feature saves by changing fewer joints less often and drawing less: a lower update rate, fewer figures moving at once, a lighter model, and a seated level of detail without legs, kept for aisle seats, since a seat map says who sits there and anyone not seated shows as a head alone (user, 2026-10-05).
+So a cabin of passengers behind a pilot looking forward costs little, and the same pilot looking back at a closed cockpit door pays for most of the cabin: hidden figures cost about 80% of what they cost in view, and in the A380, 180 figures in view cost 3.4ms standing still and 7.2ms moving.
+The cost is drawing and animating changed joints, and in the PA-24 runs not our writes, so a passenger feature saves by changing fewer joints less often and drawing less: a lower update rate, fewer figures moving at once, a lighter model, and a seated level of detail without legs, kept for aisle seats, since a seat map says who sits there and anyone not seated shows as a head alone (user, 2026-10-05).
 Those wait for the passenger feature.
 
 **Affects:** [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew).

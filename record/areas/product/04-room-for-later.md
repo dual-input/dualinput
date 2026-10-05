@@ -167,13 +167,15 @@ Passengers send almost nothing and can take more delay (unverified, [join modes]
 Each sim draws a figure for every person in the session, its own pilot's included in an outside view, so in v1 each sim draws two ([avatar sync](03-v1-scope.md#avatar-sync)).
 The figure our p24 probe posed is 27 joints and a color, 28 values, set as global `L:` variables (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).
 A model's animations name the variables they read, so with global variables every copy of the figure would take the same pose (unverified).
-Variables of each figure's own object avoid that, with one model for every figure: 180 copies of a figure whose joints read `Z:` variables of their own object stood in poses and colors of their own (measured on MSFS 2024, 2026-10-05, [avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-costs-frame-time-in-view-and-almost-none-out-of-view-and-costs-nothing-to-write)).
+Variables of each figure's own object avoid that, with one model for every figure: 180 copies of a figure whose joints read `Z:` variables of their own object stood in poses and colors of their own (measured on MSFS 2024, 2026-10-05, [avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-and-costs-frame-time-in-view-and-almost-none-out-of-view)).
 
 A cabin of 180 passengers is 5,040 values to write every frame.
 As variables of each figure's own object they share 28 names, and they don't add to the sim's `L:` name table, which held 6,517 names before and after 1,000 figures (same log entry).
-Writing them costs nothing measurable, up to 28,000 values a frame (same log entry).
+Writing them cost nothing measurable in the PA-24 runs, up to 28,000 values a frame.
+In the A380 with traffic moving, written figures ran 2.2ms and 4.8ms slower than unwritten ones at 400 and 1,000, but not at 180, 600, or 800, which reads as the traffic's noise (unverified, same log entry).
 Drawing a figure in view costs about 16µs to 21µs of frame time, and moving all its joints 10µs to 16µs more, while a figure out of view costs almost nothing, and one hidden behind the aircraft but in the view costs nearly as much as one in sight (same log entry).
-So a cabin of 180 behind a pilot looking forward costs little, and the same cabin costs about 3.4ms of frame time standing still and 7.2ms moving once the pilot looks back toward it, even at a closed cockpit door (measured in the iniBuilds A380, same log entry).
+So a cabin of 180 behind a pilot looking forward costs little.
+In plain view in the iniBuilds A380, 180 figures cost about 3.4ms of frame time standing still and 7.2ms moving, and figures hidden behind the aircraft's own body, as a cabin is behind a closed cockpit door, cost about 80% of what they cost in view, at 600 and 1,000 figures (same log entry).
 The network carries those figures too, so the avatar channel sends only what moved, at a lower rate for passengers, and at full rate only for the figures near a pilot's camera.
 
 **v1 builds** a member list in which each member is crew or a passenger, vector clocks that hold only members who send, figures posed from their own objects' variables, and an avatar channel whose rate can differ by figure.
@@ -235,7 +237,7 @@ An EFB app loaded the sim's way, rather than code in the EFB's document, is untr
 | The second pilot's mic reaching ATC, from [ATC sync](ideas.md#atc-sync) | [Channels](#channels), [roles](#roles), [plugins](#plugins) | In v1 a pilot's microphone never leaves their machine ([voice phrases](03-v1-scope.md#voice-phrases)), and this sends it when the pilot chooses, by a means still open |
 | Weather, from [environment sync](ideas.md#environment-sync) | [Channels](#channels), [roles](#roles) | How to set the weather from outside the sim, which is unknown |
 | Home-network discovery, from [one-click invite](ideas.md#one-click-invite) | | Joining from a session found on the home network as well as from a code |
-| Crews beyond two, and passengers, from [join modes](ideas.md#join-modes) | [People beyond the crew](#people-beyond-the-crew), [roles](#roles), [channels](#channels) | A lighter figure for passengers, such as a seated one without legs, since a figure in view costs frame time ([avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-costs-frame-time-in-view-and-almost-none-out-of-view-and-costs-nothing-to-write)) |
+| Crews beyond two, and passengers, from [join modes](ideas.md#join-modes) | [People beyond the crew](#people-beyond-the-crew), [roles](#roles), [channels](#channels) | A lighter figure for passengers, such as a seated one without legs, since a figure in view costs frame time ([avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-and-costs-frame-time-in-view-and-almost-none-out-of-view)) |
 | The tablet in a browser, from [Crosscheck's interface](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet) | [One protocol](#one-protocol-for-every-client) | |
 | The debrief timeline, from [flight recorder and debrief](ideas.md#flight-recorder-and-debrief) | [Recording](#recording) | The viewer |
 | Automatic profile fetch, and the community registry, from [profile registry](ideas.md#profile-registry) | [Profiles](#profiles), [channels](#channels) | |

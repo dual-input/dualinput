@@ -43,7 +43,7 @@ Flow Pro clicks the menu's Start and Free Flight buttons on this machine, so the
 - Flow Pro ships `cookedcomps/{3A799C8C-BED8-48DE-B7D4-D30472668E33}.html`, which is fs-base-ui's start page component, 2,666 bytes there and 3,128 in Flow Pro's.
   Flow Pro's copy is the stock markup plus a hidden `<svg><foreignObject><img src onerror="…">`, whose handler appends a script from Flow Pro's `InGamePanels` folder to the document's `<head>`, the trick [our toolbar icon](#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click) uses (read in p42-util-flow-pro 26.33.5).
 - It copies three more of fs-base-ui's components the same way: a nameplate, a HUD waypoint, and a shortcut button.
-- On this machine Flow Pro clicks the menu's Start and Free Flight buttons and selects the departure, as it advertises, so its script runs in the menu.
+- The user has seen Flow Pro click the menu's Start and Free Flight buttons and select the departure on our machine, as its [product page](https://parallel42.com/products/flow-pro) advertises, so its script runs in the menu.
 
 **Changed:** a script of ours can reach the menu's document the same way, so the world map's requests need no inspector, which is unverified for a package of our own.
 It costs two things: two packages that copy the same component load one copy, so ours must copy one that no add-on we know copies; and our copy hides the sim's own, so it has to follow each sim update that changes that component.
@@ -69,7 +69,7 @@ It costs two things: two packages that copy the same component load one copy, so
 | An A380 cockpit panel, `VCockpit126 - iniFAPa380` | yes | 200 | yes |
 
 - Code in a document connected from origin `coui://html_ui`, and the served page's own script from `http://127.0.0.1:47806`.
-- All five finished within 0.6s.
+- All five finished within 0.7s.
 
 **Changed:** every kind of client, an EFB app, an in-game panel, and a cockpit panel, can talk to the core over one loopback WebSocket, or show a page the core serves.
 What we haven't run is an EFB app loaded the sim's way, rather than code in the EFB's document, and an in-game panel of our own, rather than two of Parallel 42's.

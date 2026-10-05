@@ -46,7 +46,7 @@ On the A350 the heading syncs as one write to `L:INI_HEADING_DIAL`, and `A:AUTOP
 | iniBuilds A350 | `L:INI_BARO1_DEC_COMMAND` = 1 every 150ms, 11 times | 11 hPa, every one |
 | Fenix A320 | `L:S_OH_ELEC_BAT1` = 1 | `L:A320_Sound:Battery_bus_1` and `L:A320_Sound:Battery_connected` went to 1, and `L:I_OH_ELEC_BAT2_L` lit, 1.2s later |
 | Fenix A320 | `L:S_MIP_CLOCK_CHR` +1, 1s, +1; +3; +1; +2 | the counter took each write as one jump, 0, 2, 5, 6, 8 |
-| Fenix A320 | `L:E_FCU_HEADING` +1, then +10 at once | the FCU heading went from 360 to 001, then to 011, 255ms and 203ms after each write |
+| Fenix A320 | `L:E_FCU_HEADING` +1, then +10 at once | `L:N_FCU_HEADING` went from 0, the 360 the pilot set, to 1, then to 11, 255ms and 203ms after each write |
 | Fenix A320 | `L:S_FCU_HEADING` −1, then +1 | the −1 dashed the heading, as a push does; the +1 changed nothing |
 
 - The A350's baro commands moved 1 hPa each, with no acceleration, unlike its heading knob ([entry above](#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it)).
@@ -91,7 +91,7 @@ Whether a +1 on the Fenix's push-pull counter pulls the knob, or does nothing on
 
 **Expected:** no source either way.
 
-**Found:** on seven loads, the Black Square Baron 58P, A2A PA-24, Synaptic A220, Fenix A320, iniBuilds A350, and PMDG 777-300ER, each tested 2 minutes after Ready to fly, with hands off:
+**Found:** on 10 loads of six aircraft, the Black Square Baron 58P four times, the Fenix A320 twice, and the A2A PA-24, Synaptic A220, iniBuilds A350, and PMDG 777-300ER once each, each tested 2 minutes after Ready to fly, with hands off:
 
 - Two data-definition writes of `L:CROSSCHECK_P01_ORDER` sent back to back: the second won 20 of 20 on every aircraft.
 - Two `K:HEADING_BUG_SET` events back to back: the second won 10 of 10 on the Baron, PA-24, Fenix, and 777.
@@ -101,14 +101,15 @@ Whether a +1 on the Fenix's push-pull counter pulls the knob, or does nothing on
   | Write | Read | Showed |
   | --- | --- | --- |
   | `K:HEADING_BUG_SET` 93 and 271 | `A:AUTOPILOT HEADING LOCK DIR` | 2ms to 34ms, 1 or 2 frames, on every aircraft but the A220, where it never did |
-  | `K:KOHLSMAN_SET` 1001 and 1027 hPa | `A:KOHLSMAN SETTING MB:1` | 2ms to 34ms, 1 frame, on all seven |
+  | `K:KOHLSMAN_SET` 1001 and 1027 hPa | `A:KOHLSMAN SETTING MB:1` | 2ms to 34ms, 1 frame, on every load |
   | `L:CROSSCHECK_P01_SHOW` by data definition | itself | 3ms to 34ms, 1 or 2 frames |
   | the Baron's `L:var_FrontArmrest` by data definition | itself | 4ms to 34ms, 1 or 2 frames |
 
-- No write needed a retry.
+- Every write that landed did so on its first try; the A220's heading write, which it ignores, didn't land after 3 retries 500ms apart.
 
-**Changed:** the order catch-up applies in can rely on SimConnect keeping the order of writes sent together.
-A write shows within 2 frames where the aircraft takes it at all, so [live sync's 500ms read-back wait](02-live-sync.md#checking-that-a-write-landed) has room even for the slowest display we saw, the Fenix's FCU heading at 255ms.
+**Changed:** SimConnect keeps the order of two writes to one variable sent together; whether an aircraft sees writes to two different variables in the order sent, which an interlock turns on, is untested.
+A write shows within 2 frames where the aircraft takes it at all, so [live sync's 500ms read-back wait](02-live-sync.md#checking-that-a-write-landed) has room for an entry that reads the variable it writes.
+A readout the aircraft computes can take longer, such as the Fenix's battery lamp at 1.2s ([entry above](#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
 
 **Affects:** [02-live-sync](02-live-sync.md#checking-that-a-write-landed) and [03-catch-up](03-catch-up.md#choosing-the-order).
 
@@ -122,7 +123,7 @@ A write shows within 2 frames where the aircraft takes it at all, so [live sync'
 
 - 4 of 15 loads from the world map put the pilot in the flight with no aircraft, and the pilot loaded again: the PA-24's, the A350's, and the 777's first tries, and one Baron load.
 - Each of the four had two `AircraftLoaded` events, 1.0s to 2.0s and then 6.4s to 14.3s after `FlightLoaded`, and the three we recorded through registered 0 to 4 new `L:` names.
-- Each of the 11 loads that worked had one `AircraftLoaded`, 1.4s to 52.9s after `FlightLoaded`, and the three retries registered 1,002 to 1,960 new names.
+- Each of the 11 loads that worked had one `AircraftLoaded`, 1.4s to 52.9s after `FlightLoaded`, and the three retries registered 1,002 to 1,964 new names.
 - The sim's `L:` name table held 6,792 names when the run started and 15,538 after six aircraft, and loading one again added none; a name stays until the sim restarts.
 - Restart, from the pause menu, loads the aircraft again: `AircraftLoaded` fires, and the Baron registered 6 new names.
 
@@ -156,15 +157,15 @@ The rule counts from "load", so which moment is that?
 - Counted from Ready, the rule called the switches settled at 30.0s on every aircraft, its floor of 15s and then 15s quiet, so 30.0s says only that they stopped within 15s.
 - Every value the stream carried settled 30.0s to 45.6s after Ready, with these changes after the verdict:
   - cosmetic or drifting: the PA-24's `L:BlinkingOffset` timers and `L:AmbientVisibility`, the Baron's `L:AS1000_Warnings_WarningIndex` and `L:var_scaledMaximumMixturePosition_1` and `_2`, the A350's `L:ECAM_IS_STS_CLEARABLE`, and the 777's `L:yokes_Fore_Aft`;
-  - aircraft state: the Fenix's ground power, `L:B_CONFIG_GPU`, `L:I_OH_ELEC_EXT_PWR_U`, `L:A320_Ground_Power_Anim`, and `L:A320_Sound:GPU_State`, and its four `INSIDE_LOCK` door variables, 46s to 54s after Ready, each flipping and flipping back.
+  - aircraft state: the Fenix's ground power, `L:B_CONFIG_GPU`, `L:I_OH_ELEC_EXT_PWR_U`, `L:A320_Ground_Power_Anim`, and `L:A320_Sound:GPU_State`, and its four `INSIDE_LOCK` door variables, each flipping 10s to 22s after Ready and flipping back 46s to 54s after it.
 - Counted from Fly, a second load fooled the rule: from the A350's second `FlightLoaded`, it called the aircraft settled at 30.0s, 37s before Ready, with 354 values changing after, because nothing changes behind the loading screen.
 - The Baron's last switch change came 20s to 23s after Fly, near the 25s its code gives.
 - Loading the Baron again changed little: every value settled 45.6s after Ready on the first load after the sim started, 44.9s on a later load, and 44.8s after a Restart.
-- The pilot's press at Fly came 22.1s and 13.3s after the sim's `FlightLoaded` on two loads, so `p01-markers.mjs` times every load from the sim's markers instead, and p01 records from the sim's `FlightLoaded`.
+- The pilot's press at Fly came 22.1s after the Fenix's `FlightLoaded` and 13.3s after the 777's first one, so `p01-markers.mjs` times every load from the sim's markers instead, and p01 records from the sim's `FlightLoaded`.
 
 **Changed:** catch-up counts settling from the sim's `RTC_END`, when Ready to fly is clicked, not from Fly.
 The switches were done within 15s of Ready on every aircraft, so a rule with a lower floor would cut the wait, which is a design question.
-The only real state after the verdict was the Fenix's ground power and doors, which flipped and came back.
+The only real state after the verdict was the Fenix's ground power and doors flipping back.
 
 **Affects:** [03-catch-up](03-catch-up.md#settling-after-a-load), and the Baron study's sim question 2.
 

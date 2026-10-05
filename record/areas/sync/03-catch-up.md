@@ -95,13 +95,14 @@ A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a f
 
 An aircraft that has just loaded goes on changing its own controls for a while.
 "Load" here is the moment the pilot clicks Ready to fly, not Fly, the world map's button that starts the loading.
-The MSFS 2024 SDK documents that the sim saves the 40 `L:` variables in the Baron's `systems.cfg [LocalVars]` with the flight and restores them at load ([systems.cfg](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/CFG_Files/systems_cfg.htm)).
+The MSFS 2024 SDK documents that the sim saves the 40 `L:` variables in the Baron's `systems.cfg [LocalVars]` to a `state.cfg` file when a flight exits, and sets them from it the next time the aircraft is used ([systems.cfg](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/CFG_Files/systems_cfg.htm)).
 Developers reported it failing on some MSFS 2024 builds, and Asobo said on 2026-02-26 that it would investigate (unverified, [Persistent Local Vars not working on MSFS2024?](https://devsupport.flightsimulator.com/t/persistent-local-vars-localvars-in-system-cfg-not-working-on-msfs2024/17492)).
 The Baron's code finishes restoring its settings about 25s after its timers start (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 2), and in the sim its last switch changed 20s to 23s after Fly, 1.9s to 6.4s after Ready to fly (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
 
 A restore that lands after catch-up looks like the pilot changing those controls.
 
-The sim sends Ready to fly as the flow event `RTC_END` to a client subscribed with [SimConnect_SubscribeToFlowEvent](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_SubscribeToFlowEvent.htm) (measured on MSFS 2024, 2026-10-05, same log entry).
+The sim marks Ready to fly with the flow event `SIMCONNECT_FLOW_EVENT_RTC_END` (documented in the MSFS 2024 SDK's `SimConnect.h`), sent to a client subscribed with [SimConnect_SubscribeToFlowEvent](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_SubscribeToFlowEvent.htm).
+Our client got it as the button was clicked, by the pilot or by Flow Pro, and again for each load when a flight loaded twice, so the last one marks the load the pilot flies (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
 Counted from Fly, the rule can run out behind the loading screen, where nothing changes: the A350's second load took 67s from Fly to Ready to fly, so the rule called it settled 37s before Ready, with 354 values still to change (same log entry).
 
 So an aircraft counts as settled at whichever comes first:
@@ -119,7 +120,7 @@ The aircraft registered the 1,380 missing cockpit variables in bursts with pause
 A Bonanza's last 3 of its 88 variables appeared 35s after load, 18s after the burst before (measured on MSFS 2024, 2026-08-27, same log, "The settle rule did not fail here, and one aircraft was two").
 Those are variables appearing, not restored values changing.
 Restored values didn't pause that long: on six studied aircraft, loaded from the menu, the switches made their last change 1.6s to 12.1s after Ready to fly, so the rule called every aircraft's switches settled at its 30s floor (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
-The only aircraft state that changed after the rule's verdict was the Fenix's ground power and its door locks, 46s to 54s after Ready to fly, and each flipped and came back (same log entry).
+The only aircraft state that changed after the rule's verdict was the Fenix's ground power and its door locks: each flipped 10s to 22s after Ready to fly and flipped back 46s to 54s after it, so only the return came after the verdict (same log entry).
 A restore that does come after a window closes syncs like a pilot's change: it carries the newest stamp, wins, and moves that control in every cockpit, the PF's included, and the check can't catch it, because it isn't a mismatch.
 That's the trade we chose (user, 2026-10-04): a fast join every time, with an occasional control moving on its own soon after a rejoin, over a slow join every time.
 If it proves common, the fallback is a longer quiet window for late joins only, where the risk is.

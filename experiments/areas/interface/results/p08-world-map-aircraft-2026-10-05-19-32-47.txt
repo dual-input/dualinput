@@ -1,0 +1,8 @@
+p08-world-map-aircraft, started 2026-10-05T19:32:47.816Z
+
+- Departure set first, as p07 does: KSEA, stand GATE N 17 -- GATE MEDIUM.
+- Before: currentAircraft is ok, Airbus A220-300.
+- setAircraftForConfigurator("134||4") resolved; currentAircraft didn't change.
+- saveVariationId("16442315337606401108:1"), the livery Air Canada A220-300: resolved; currentAircraft didn't change.
+- launchFlight started the flight: the sim's FlightLoaded came 0.7s after it.
+- In the cockpit: TITLE "A220-300", LIVERY NAME "Air Canada A220-300"; AircraftLoaded inibuilds\a220-300\config\aircraft.cfg.

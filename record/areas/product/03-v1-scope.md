@@ -379,6 +379,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 - Warning a pilot who spawned far from the PF before Crosscheck moves them to the PF's position, which risks the scenery load above.
 - Loading a pilot's flight at the PF's stand for them: the pilot loads it from the world map, and Crosscheck moves their aircraft only once they're in it.
+  The world map's own requests can choose the aircraft and livery and start the flight ([interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), but getting the whole chain right would add days to v1's build, so it stays out (user, 2026-10-05).
 
 **Rules:**
 

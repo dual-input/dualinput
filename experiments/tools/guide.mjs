@@ -85,14 +85,17 @@ export function startKeys() {
 }
 
 // Windows' own speech synthesizer, so a pilot inside the sim hears a prompt
-// they can't read; one line of text per prompt, spoken in order.
-const SPEAK_PS = `
+// they can't read; one line of text per prompt, spoken in order. rate runs from
+// -10 to 10, 0 being normal speed (System.Speech, SpeechSynthesizer.Rate); the
+// user asked for 1.5 times normal, and 4 is our guess at it, judged by ear.
+const speakPs = (rate) => `
 Add-Type -AssemblyName System.Speech
 $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$s.Rate = ${Math.max(-10, Math.min(10, Math.round(rate)))}
 while (($line = [Console]::In.ReadLine()) -ne $null) { $s.Speak($line) }`
 
-export function startSpeaker() {
-  const ps = powershell(SPEAK_PS, ["pipe", "ignore", "ignore"])
+export function startSpeaker({ rate = 0 } = {}) {
+  const ps = powershell(speakPs(rate), ["pipe", "ignore", "ignore"])
   process.on("exit", () => { try { ps.kill() } catch { /* gone */ } })
   return (text) => { try { ps.stdin.write(`${text.replace(/[\r\n]+/g, " ")}\n`) } catch { /* no voice is no failure */ } }
 }

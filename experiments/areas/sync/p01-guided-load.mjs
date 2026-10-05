@@ -502,7 +502,7 @@ async function main() {
   process.on("SIGINT", () => { run.stopping = true; finish("interrupted") })
   keys = await startKeys()
   beep = startBeeper()
-  say = startSpeaker()
+  say = startSpeaker({ rate: 4 })
   sim = await Sim.connect(rec, { name: "CROSSCHECK p01 guided load" })
   sim.track()
   sim.onLost((w) => { run.stopping = true; rec.log("stop", `stopping: ${w}`) })

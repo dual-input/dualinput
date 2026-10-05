@@ -46,7 +46,7 @@ async function main() {
   rec.open()
   const keys = await startKeys()
   const beep = startBeeper()
-  const say = startSpeaker({ rate: 4 })
+  const say = startSpeaker()
   const sim = await Sim.connect(rec, { name: "CROSSCHECK p03 double-fire" })
   sim.track()
   await sleep(1500)

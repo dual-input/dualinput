@@ -230,7 +230,7 @@ async function main() {
   rec.open()
   keys = await startKeys()
   beep = startBeeper()
-  say = startSpeaker({ rate: 4 })
+  say = startSpeaker()
   sim = await Sim.connect(rec, { name: "CROSSCHECK p02 stepped writes" })
   sim.track()
   link = new Link(sim)

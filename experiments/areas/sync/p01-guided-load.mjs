@@ -15,7 +15,7 @@
  *      and the sim's load events;
  *   3. waits for a second Page Down, when Ready to fly is clicked, by the pilot
  *      or by Flow Pro;
- *   4. asks for hands off the cockpit for 3 minutes from that press;
+ *   4. asks for hands off the cockpit for 2 minutes from that press;
  *   5. measures the frame rate for 10s, then runs the write tests, which put
  *      back every value they change;
  *   6. asks for the next aircraft.
@@ -30,7 +30,7 @@
  * after notification groups at priority 1 were left behind (run.mjs, connect).
  * fsc-editor streams L: variables through its link across aircraft changes a
  * pilot makes from the menu (fsc-editor, docs/sim-vars/build/v1-log.md,
- * "2026-08-24 — Re-enumeration stops on a pause, not on a finished table").
+ * "2026-08-24 â€” Re-enumeration stops on a pause, not on a finished table").
  */
 
 import { AIRCRAFT } from "../aircraft/lib/aircraft.mjs"
@@ -44,7 +44,9 @@ import { startBeeper, startKeys, startSpeaker } from "../../tools/guide.mjs"
 // Catch-up's settle rule, as 03-catch-up states it.
 const RULE = { firstQuietFromMs: 15_000, quietMs: 15_000, capMs: 90_000, noisyChanges: 5 }
 
-const HANDS_OFF_MS = 180_000
+// The Baron's latest restore came about 52s after Ready to fly, in a runway
+// start (experiments/areas/sync/results/p01-guided-load-2026-10-05-16-45-26.txt).
+const HANDS_OFF_MS = 120_000
 const READY_TIMEOUT_MS = 15 * 60_000
 const RESCAN_MS = 5_000
 // Change times kept per value, before and after the Ready press. A value past
@@ -52,24 +54,20 @@ const RESCAN_MS = 5_000
 // 6 changes after any candidate moment.
 const KEEP_TIMES = 30
 
-// Flow Pro's auto-click stays on for every load but the last two, which repeat
-// two aircraft from earlier with it off, so any difference it makes shows on
-// the same aircraft (agreed with the user, 2026-10-05).
+// One aircraft for each way of loading its state that our studies found, and
+// the last load repeats the first with Flow Pro's auto-click off, so any
+// difference the click makes shows on the same aircraft (agreed with the user,
+// 2026-10-05). The Bonanza, Aerostar, L-1011, A380, and Phenom 300E share a
+// developer's way of loading with one of these, or added nothing beside them.
 const BARON_58P = "Black Square Baron 58P (Baron Pro, pressurized)"
 const LOADS = [
   { id: "black-square-baron-pro", label: BARON_58P, flowPro: true },
   { id: "a2a-pa24-comanche", flowPro: true },
-  { id: "black-square-bonanza-pro", flowPro: true },
-  { id: "a2a-aerostar-600", flowPro: true },
   { id: "synaptic-a220", flowPro: true },
   { id: "fenix-a320-family", flowPro: true },
   { id: "inibuilds-a350", flowPro: true },
-  { id: "inibuilds-l1011", flowPro: true },
   { id: "pmdg-777-300er", flowPro: true },
-  { id: "inibuilds-a380", flowPro: true },
-  { id: "fsreborn-phenom-300e", flowPro: true },
   { id: "black-square-baron-pro", label: BARON_58P, flowPro: false },
-  { id: "synaptic-a220", flowPro: false },
 ]
 
 // Writes every aircraft gets, each through a stock name, so an aircraft that
@@ -77,7 +75,7 @@ const LOADS = [
 // start state we've seen, and the original goes back afterwards.
 const STOCK_WRITES = [
   {
-    label: "K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR",
+    label: "K:HEADING_BUG_SET â†’ A:AUTOPILOT HEADING LOCK DIR",
     read: ["AUTOPILOT HEADING LOCK DIR", "degrees"],
     values: [93, 271],
     tolerance: 0.5,
@@ -87,7 +85,7 @@ const STOCK_WRITES = [
     // [0] is millibars times 16 and [1] the altimeter's index (MSFS 2024 SDK,
     // Aircraft Instrumentation Events, KOHLSMAN_SET, as
     // record/learn/foundations/03-02-events-and-other-namespaces.md cites it).
-    label: "K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1",
+    label: "K:KOHLSMAN_SET â†’ A:KOHLSMAN SETTING MB:1",
     read: ["KOHLSMAN SETTING MB:1", "millibars"],
     values: [1001, 1027],
     tolerance: 0.1,
@@ -146,13 +144,13 @@ let keys = null
 let beep = () => {}
 let say = () => {}
 
-const names = new Map() // L: id → "L:name"
-const lastL = new Map() // L: id → its last streamed value
+const names = new Map() // L: id â†’ "L:name"
+const lastL = new Map() // L: id â†’ its last streamed value
 const events = [] // { t, name, data }, the sim's system and flow events
 const curatedA = new Set(SETTLE_A.map(([n]) => n))
 
 // One load: every value that moved after the first Page Down, as
-// key → { kind, name, first, last, appearedT, before: { n, times }, after: { n, times } },
+// key â†’ { kind, name, first, last, appearedT, before: { n, times }, after: { n, times } },
 // with "before" and "after" the second Page Down.
 function newLoadState(load) {
   return { load, t1: null, t2: null, tEnd: null, entries: new Map() }
@@ -385,7 +383,7 @@ async function oneLoad(load, i, total) {
   const k2 = await press(`[${head}] Recording. Page Down when Ready to fly is clicked, by you or Flow Pro.`, { timeoutMs: READY_TIMEOUT_MS })
   state.t2 = k2.key === "START" ? k2.t : Date.now()
   beep(1200, 120)
-  say("Hands off for three minutes.")
+  say("Hands off for two minutes.")
 
   const loaded = events.find((ev) => ev.name === "AircraftLoaded" && ev.t >= state.t1)
   const path = typeof loaded?.data === "string" ? loaded.data : sim.live.aircraft
@@ -465,7 +463,7 @@ function report() {
     for (const v of r.verdicts) {
       for (const [set, x] of [["all", v.all], ["switches", v.switches]]) {
         lines.push(`   from ${v.from} (+${secs(v.t0Ms)}), ${set}: settled at ${secs(x.atMs)} by ${x.why}; ${x.counted} counted, ${x.excluded} noisy; ${x.late.length} moved after`)
-        for (const l of x.late.slice(0, 25)) lines.push(`      late: ${l.name} at ${l.afterMs.map(secs).join(", ")}; ${fmt(l.first)} → ${fmt(l.last)}`)
+        for (const l of x.late.slice(0, 25)) lines.push(`      late: ${l.name} at ${l.afterMs.map(secs).join(", ")}; ${fmt(l.first)} â†’ ${fmt(l.last)}`)
         if (x.late.length > 25) lines.push(`      and ${x.late.length - 25} more in the NDJSON's load record`)
       }
     }
@@ -504,7 +502,7 @@ async function main() {
   process.on("SIGINT", () => { run.stopping = true; finish("interrupted") })
   keys = await startKeys()
   beep = startBeeper()
-  say = startSpeaker({ rate: 4 })
+  say = startSpeaker()
   sim = await Sim.connect(rec, { name: "CROSSCHECK p01 guided load" })
   sim.track()
   sim.onLost((w) => { run.stopping = true; rec.log("stop", `stopping: ${w}`) })

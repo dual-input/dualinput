@@ -1,0 +1,67 @@
+p01-guided-load, started 2026-10-05T17:50:58.749Z
+Settle rule: 15s with no counted change, counted from 15s after load, or 90s at most; a value with more than 5 changes since load stops counting.
+"all" is every L: variable fsc-editor-link streams, plus the stock values below; "switches" is SETTLE_A in aircraft/lib/load.mjs plus the aircraft's settleL in aircraft/lib/aircraft.mjs.
+Stock values every frame: ELECTRICAL MASTER BATTERY:1, AVIONICS MASTER SWITCH, LIGHT BEACON, LIGHT NAV, LIGHT STROBE, LIGHT LANDING, BRAKE PARKING POSITION, GENERAL ENG COMBUSTION:1, FLAPS HANDLE INDEX, COM ACTIVE FREQUENCY:1, TRANSPONDER CODE:1, LIGHT TAXI, GENERAL ENG COMBUSTION:2, GENERAL ENG COMBUSTION:3, GENERAL ENG COMBUSTION:4, GENERAL ENG RPM:1, TURB ENG N1:1, GEAR HANDLE POSITION, COM STANDBY FREQUENCY:1, NAV ACTIVE FREQUENCY:1, FUEL TOTAL QUANTITY, ELECTRICAL MAIN BUS VOLTAGE, APU PCT RPM, EXTERNAL POWER ON:1, SIM ON GROUND, GROUND VELOCITY, CAMERA STATE.
+A value first seen after Fly, such as an L: variable registered during the load, counts as appeared, not changed.
+
+== 1 fenix-a320-family, Flow Pro auto-click on
+   loaded: FenixA320 CFM SL (%APPDATA%\microsoft flight simulator 2024\packages\community\fnx-aircraft-320\simobjects\airplanes\fnx_32x\presets\fnx\fnx_320_cfm_sl\config\aircraft.cfg)
+   Ready to fly pressed 19.1s after Fly; 31.0 fps afterwards
+   by the sim's markers: FlightLoaded 0.2s and RTC_END 18.9s from the first press, so Ready 18.7s after Fly; 0 reloads before it; recording from 0.0s
+   events from the first press: 0.0s SimStop 0; 0.0s Sim 0; 0.2s FlightLoaded CustomFlight\CustomFlight.FLT; 0.2s PositionChanged 0; 0.2s flow FLT_LOAD; 0.2s flow FLT_LOADED; 0.2s flow FLT_LOAD; 0.2s flow FLT_LOADED; 0.2s flow TELEPORT_START; 0.2s flow TELEPORT_DONE; 1.1s SimStart 0; 1.1s Sim 1; 9.1s AircraftLoaded config\aircraft.cfg; 17.7s flow FLIGHT_START; 17.7s flow FLT_LOAD; 17.7s flow FLT_LOADED; 17.7s flow RTC_START; 18.9s flow RTC_END; 21.4s View 2
+   1414 values moved, 0 appeared; the L: table held 15544 names
+   from Fly, by the sim's last FlightLoaded (+0.2s), all: settled at 55.9s by quiet; 1355 counted, 59 noisy; 8 moved after
+      late: L:A320_Ground_Power_Anim at 64.6s; 0 → 0
+      late: L:A320_Sound:GPU_State at 64.6s; 0 → 0
+      late: L:B_CONFIG_GPU at 64.7s; 0 → 0
+      late: L:I_OH_ELEC_EXT_PWR_U at 64.6s; 0 → 0
+      late: L:S_EXT_DOOR_L1_INSIDE_LOCK at 73.1s; 0 → 0
+      late: L:S_EXT_DOOR_R2_INSIDE_LOCK at 68.1s; 0 → 0
+      late: L:S_EXT_DOOR_R1_INSIDE_LOCK at 69.1s; 0 → 0
+      late: L:S_EXT_DOOR_L2_INSIDE_LOCK at 71.1s; 0 → 0
+   from Fly, by the sim's last FlightLoaded (+0.2s), switches: settled at 45.7s by quiet; 10 counted, 1 noisy; 0 moved after
+   from the first Page Down, clicking Fly (+0.0s), all: settled at 56.1s by quiet; 1355 counted, 59 noisy; 8 moved after
+      late: L:A320_Ground_Power_Anim at 64.8s; 0 → 0
+      late: L:A320_Sound:GPU_State at 64.8s; 0 → 0
+      late: L:B_CONFIG_GPU at 64.9s; 0 → 0
+      late: L:I_OH_ELEC_EXT_PWR_U at 64.8s; 0 → 0
+      late: L:S_EXT_DOOR_L1_INSIDE_LOCK at 73.3s; 0 → 0
+      late: L:S_EXT_DOOR_R2_INSIDE_LOCK at 68.3s; 0 → 0
+      late: L:S_EXT_DOOR_R1_INSIDE_LOCK at 69.3s; 0 → 0
+      late: L:S_EXT_DOOR_L2_INSIDE_LOCK at 71.3s; 0 → 0
+   from the first Page Down, clicking Fly (+0.0s), switches: settled at 45.9s by quiet; 10 counted, 1 noisy; 0 moved after
+   from the sim running (+1.1s), all: settled at 55.0s by quiet; 1342 counted, 57 noisy; 8 moved after
+      late: L:A320_Ground_Power_Anim at 63.7s; 0 → 0
+      late: L:A320_Sound:GPU_State at 63.7s; 0 → 0
+      late: L:B_CONFIG_GPU at 63.8s; 0 → 0
+      late: L:I_OH_ELEC_EXT_PWR_U at 63.7s; 0 → 0
+      late: L:S_EXT_DOOR_L1_INSIDE_LOCK at 72.2s; 0 → 0
+      late: L:S_EXT_DOOR_R2_INSIDE_LOCK at 67.2s; 0 → 0
+      late: L:S_EXT_DOOR_R1_INSIDE_LOCK at 68.2s; 0 → 0
+      late: L:S_EXT_DOOR_L2_INSIDE_LOCK at 70.2s; 0 → 0
+   from the sim running (+1.1s), switches: settled at 44.9s by quiet; 7 counted, 0 noisy; 0 moved after
+   from Ready to fly, by the sim's last RTC_END (+18.9s), all: settled at 37.2s by quiet; 855 counted, 53 noisy; 8 moved after
+      late: L:A320_Ground_Power_Anim at 45.9s; 0 → 0
+      late: L:A320_Sound:GPU_State at 45.9s; 0 → 0
+      late: L:B_CONFIG_GPU at 46.0s; 0 → 0
+      late: L:I_OH_ELEC_EXT_PWR_U at 45.9s; 0 → 0
+      late: L:S_EXT_DOOR_L1_INSIDE_LOCK at 54.4s; 0 → 0
+      late: L:S_EXT_DOOR_R2_INSIDE_LOCK at 49.4s; 0 → 0
+      late: L:S_EXT_DOOR_R1_INSIDE_LOCK at 50.4s; 0 → 0
+      late: L:S_EXT_DOOR_L2_INSIDE_LOCK at 52.4s; 0 → 0
+   from Ready to fly, by the sim's last RTC_END (+18.9s), switches: settled at 30.0s by quiet; 7 counted, 0 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+19.1s), all: settled at 36.9s by quiet; 852 counted, 53 noisy; 8 moved after
+      late: L:A320_Ground_Power_Anim at 45.6s; 0 → 0
+      late: L:A320_Sound:GPU_State at 45.6s; 0 → 0
+      late: L:B_CONFIG_GPU at 45.8s; 0 → 0
+      late: L:I_OH_ELEC_EXT_PWR_U at 45.6s; 0 → 0
+      late: L:S_EXT_DOOR_L1_INSIDE_LOCK at 54.2s; 0 → 0
+      late: L:S_EXT_DOOR_R2_INSIDE_LOCK at 49.2s; 0 → 0
+      late: L:S_EXT_DOOR_R1_INSIDE_LOCK at 50.2s; 0 → 0
+      late: L:S_EXT_DOOR_L2_INSIDE_LOCK at 52.2s; 0 → 0
+   from the second Page Down, Ready to fly (+19.1s), switches: settled at 30.0s by quiet; 7 counted, 0 noisy; 0 moved after
+   order, two data-definition writes of L:CROSSCHECK_P01_ORDER: second won 20/20, first 0, neither 0
+   order, two K:HEADING_BUG_SET events: second won 10/10, first 0, neither 0
+   show, K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR: 93 in 16ms (1 frame, 1 write); 271 in 32ms (1 frame, 1 write); restored 0, was 0
+   show, K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1: 1001 in 13ms (1 frame, 1 write); 1027 in 6ms (1 frame, 1 write); restored 1013.25, was 1013.25
+   show, L:CROSSCHECK_P01_SHOW by data definition: 3 in 18ms (1 frame, 1 write); 7 in 33ms (2 frames, 1 write); restored 0, was 0

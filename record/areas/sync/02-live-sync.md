@@ -68,7 +68,8 @@ In a session that isn't interrupted, every shared entry ends on the same value o
 
 Every state entry has something to read, so after writing, the receiving machine reads the entry back.
 
-1. It waits 500ms, a starting value, because an aircraft can update the variable an entry reads on a slower loop than the one that takes the write, and step 6 of [the plan](../product/plan.md) measures how long studied aircraft take.
+1. It waits 500ms, a starting value, because an aircraft can update the variable an entry reads on a slower loop than the one that takes the write.
+   On six studied aircraft a write showed within 2 frames, and the slowest readout we saw, the Fenix's FCU heading, followed a write to its counter after 255ms (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
 2. If the value doesn't match, it writes again, up to a retry count still to set.
 3. If the value still doesn't match, it gives up on that entry and flags it.
 
@@ -95,7 +96,8 @@ The engine filters, in this order:
 1. **The transport** gives every message an ID, and the receiver applies each ID once, whether it came directly, through the relay, or both, and drops what a reconnecting machine replays that it already applied.
 2. **The input event double-fire.**
    On the A2A PA-24, the sim reported each input event twice: of 53 same-name, same-value pairs, 43 were 17ms to 21ms apart, 9 were 37ms to 40ms apart, and the 53rd, a course knob dragged through the same value, was a real repeat 261ms apart (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Stage 2 verified live. The double-fire is frame-locked, and tighter than measured.").
-   fsc-editor read the clusters as roughly one and two frames, so the echo looks tied to frames (unverified; the second open question below settles it), and other aircraft are untested.
+   The echo is tied to frames: on the PA-24 the second report came exactly one frame after the first, 32ms to 34ms apart at 31 fps and 49ms to 51ms at 21 fps, and a key or button held down reported one press and one release, with no repeats (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-pa-24s-double-fire-comes-one-frame-apart-at-31-and-21-fps-and-a-held-key-doesnt-repeat)).
+   Other aircraft are untested.
    So the engine drops a report with the same name and value as one from the last 3 frames, but never one more than 200ms after it, because at a low frame rate 3 frames could reach the 261ms repeat.
 3. **Our own writes.**
    For a state entry, an incoming read that equals the value Crosscheck just wrote is its own write.
@@ -109,10 +111,6 @@ A pointer press that also changes a state entry applies once too: the stream car
 
 ## Open questions
 
-- Whether held keys repeat a momentary input event faster than the double-fire window: a momentary input event reports 0 every time (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong"), so if they do, the filter drops the real repeats as echoes.
-- Whether the double-fire stays within 3 frames at low frame rates, and on aircraft other than the PA-24 (the PA-24 session's frame rate wasn't recorded).
-- Whether SimConnect applies the writes Crosscheck sends within one frame in the order it sent them.
-- How long to wait before reading back, how many retries before a flag, and how long an unused echo token lasts.
+- Whether the double-fire stays within 3 frames on aircraft other than the PA-24, and below 21 fps; at 5 fps one frame reaches the 200ms cap.
+- How many retries before a flag, since no write in the step 6 session needed one, and how long an unused echo token lasts.
 - How to keep a `then` action or a write function's actions from doing harm when a retry repeats them.
-
-[The plan](../product/plan.md)'s step 6 lists the probes for the first four, except the token's lifetime and aircraft other than the PA-24.

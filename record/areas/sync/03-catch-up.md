@@ -43,6 +43,7 @@ Crosscheck's replay does the same for every kind of change, with the longer cap,
 3. It applies each remaining entry once, at the PF's value, in the order [below](#choosing-the-order).
    Entries the PF never changed since the aircraft loaded go first.
    Immediate writes go out in that order in one short burst, and stepped writes start in that order and run side by side, since each moves a different control.
+   SimConnect applies a burst in the order sent: of two writes to one variable sent in one frame, the second won on every try on six studied aircraft (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
    For a shadow value, the catching-up machine steps the control by the difference between the PF's shadow and its own, and its own shadow counts those steps as they land.
 4. A write function runs again when an entry it read lands, so a transponder function that skipped while the battery was off runs once the battery is on.
 5. It checks every write, retries what doesn't match, and flags what never does, as live sync does ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)).
@@ -94,9 +95,12 @@ A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a f
 An aircraft that has just loaded goes on changing its own controls for a while.
 The MSFS 2024 SDK documents that the sim saves the 40 `L:` variables in the Baron's `systems.cfg [LocalVars]` with the flight and restores them at load ([systems.cfg](https://docs.flightsimulator.com/msfs2024/html/5_Content_Configuration/CFG_Files/systems_cfg.htm)).
 Developers reported it failing on some MSFS 2024 builds, and Asobo said on 2026-02-26 that it would investigate (unverified, [Persistent Local Vars not working on MSFS2024?](https://devsupport.flightsimulator.com/t/persistent-local-vars-localvars-in-system-cfg-not-working-on-msfs2024/17492)).
-The Baron's own timers finish restoring its settings about 25s after load by the code, which nobody has measured (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 2).
+The Baron's own timers finish restoring its settings about 25s after load by the code (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), sim question 2), and its last switch changed 20s to 23s after Fly (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
 
 A restore that lands after catch-up looks like the pilot changing those controls.
+
+"Load" is the moment the pilot clicks Ready to fly, which the sim reports to every SimConnect client as the flow event `RTC_END`.
+Counted from Fly instead, a quiet window can close behind the loading screen, where nothing changes: an A350 whose flight loaded a second time counted as settled 37s before Ready to fly, with 354 values still to change (same log entry).
 
 So an aircraft counts as settled at whichever comes first:
 
@@ -111,9 +115,10 @@ fsc-editor's rule for knowing when an aircraft's variables had all appeared wait
 After a cold-and-dark load of an A2A aircraft, it stopped when the table held 3,963 of the 5,343 names it later held, 74%.
 The aircraft registered the 1,380 missing cockpit variables in bursts with pauses between, and a duplicate aircraft-loaded event had also made two scans equal by construction (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Re-enumeration stops on a pause, not on a finished table").
 A Bonanza's last 3 of its 88 variables appeared 35s after load, 18s after the burst before (measured on MSFS 2024, 2026-08-27, same log, "The settle rule did not fail here, and one aircraft was two").
-Those are variables appearing, not restored values changing, so whether a restore also pauses longer than 15s is unverified, and the settle probe in [the plan](../product/plan.md)'s step 6 settles it.
-If it does, a 15s window can end between two bursts.
-Then the late restore syncs like a pilot's change: it carries the newest stamp, wins, and moves that control in every cockpit, the PF's included, and the check can't catch it, because it isn't a mismatch.
+Those are variables appearing, not restored values changing.
+Restored values didn't pause that long: on six studied aircraft, loaded from the menu, the switches made their last change 1.6s to 12.1s after Ready to fly, so the rule's switches settled at its 30s floor every time (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
+The one piece of aircraft state that changed after the rule's verdict was the Fenix's ground power and door locks, 46s to 54s after Ready to fly, and each flipped and came back (same log entry).
+A restore that does come after a window closes syncs like a pilot's change: it carries the newest stamp, wins, and moves that control in every cockpit, the PF's included, and the check can't catch it, because it isn't a mismatch.
 That's the trade we chose (user, 2026-10-04): a fast join every time, with an occasional control moving on its own soon after a rejoin, over a slow join every time.
 If it proves common, the fallback is a longer quiet window for late joins only, where the risk is.
 
@@ -131,7 +136,5 @@ Replaying only the presses made while parked, for state that's mostly determinis
 
 ## Open questions
 
-- Whether 15s, 15s, and 1.5 minutes fit real aircraft, and whether 5 changes tells a restore from an aircraft driving a control.
+- Whether the rule's 30s floor can come down, since every studied aircraft's switches were done within 15s of Ready to fly, and whether 5 changes tells a restore from an aircraft driving a control.
 - Which [order](#choosing-the-order) catch-up applies state in, decided at step 7, and whether any studied aircraft has an interlock that fails while reading back right, which would settle it for first-final-value order.
-
-[The plan](../product/plan.md)'s step 6 lists the probe for the settle rule.

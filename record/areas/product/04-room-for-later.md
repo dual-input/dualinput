@@ -167,13 +167,13 @@ Passengers send almost nothing and can take more delay (unverified, [join modes]
 Each sim draws a figure for every person in the session, its own pilot's included in an outside view, so in v1 each sim draws two ([avatar sync](03-v1-scope.md#avatar-sync)).
 The figure our p24 probe posed is 27 joints and a color, 28 values, set as global `L:` variables (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-our-own-figure-poses-in-the-sim-from-its-variables-plays-between-frames-smoothly-and-changes-color-through-asobo_property_animation)).
 A model's animations name the variables they read, so with global variables every copy of the figure would take the same pose (unverified).
-Variables of each figure's own object would avoid that, with one model for every figure (unverified for joints).
-Our p17 probe's sphere took its size from `Z:CROSSCHECK_SCALE`, which our module set on that sphere alone with `fsVarsZVarSet` (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object)).
+Variables of each figure's own object avoid that, with one model for every figure: 180 copies of a figure whose joints read `Z:` variables of their own object stood in poses and colors of their own (measured on MSFS 2024, 2026-10-05, [avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-costs-frame-time-in-view-and-almost-none-out-of-view-and-costs-nothing-to-write)).
 
-A cabin of 180 passengers would be 5,040 values to write every frame.
-As global `L:` variables they'd be 5,040 names, and the sim's `L:` name table has held 5,343 in one fsc-editor session (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Re-enumeration stops on a pause, not on a finished table").
-As variables of each figure's own object they'd share 28 names, unless object variables add to that table ([open questions](#open-questions)).
-Nobody has measured writing 5,040 values every frame or drawing 180 figures, and the figure probe in step 6 of [the plan](plan.md) measures both, and whether object variables pose joints.
+A cabin of 180 passengers is 5,040 values to write every frame.
+As variables of each figure's own object they share 28 names, and they don't add to the sim's `L:` name table, which held 6,517 names before and after 1,000 figures (same log entry).
+Writing them costs nothing measurable, up to 28,000 values a frame.
+Drawing a figure in view costs about 16µs to 21µs of frame time, and moving all its joints 10µs to 16µs more, while a figure out of view costs almost nothing, and one hidden behind the aircraft but in the view costs nearly as much as one in sight (same log entry).
+So 180 passengers seen from the flight deck looking forward cost little, and the same cabin looked at cost about 3.4ms of frame time standing still and 7.2ms moving.
 The network carries those figures too, so the avatar channel sends only what moved, at a lower rate for passengers, and at full rate only for the figures near a pilot's camera.
 
 **v1 builds** a member list in which each member is crew or a passenger, vector clocks that hold only members who send, figures posed from their own objects' variables, and an avatar channel whose rate can differ by figure.
@@ -182,17 +182,16 @@ The network carries those figures too, so the avatar channel sends only what mov
 
 In v1 the desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([EFB app](03-v1-scope.md#efb-app)).
 A cockpit panel can hold a WebSocket to a program on the same PC (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q08 yes: a cockpit document can hold a WebSocket to loopback"), with the sim's developer mode off (FS Copilot fork, `record/pointer-forwarding/docs/06-open-questions.md`, Q08).
-Nobody has tried a WebSocket from an EFB app, and a probe in step 6 of [the plan](plan.md) tries it.
-The Fenix's MSFS 2024 tablet app shows its web app from `http://localhost:8083` (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)), so an EFB app showing a page that a program on the same PC serves is a second route the probe tries.
-If it works, the EFB app speaks the same protocol as a browser, rather than reach Crosscheck through something only a sim panel has, such as `L:` variables.
+The Fenix's MSFS 2024 tablet app shows its web app from `http://localhost:8083` (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)), which is a second route.
+Both routes work from the documents the other clients live in: code in the EFB's document, standing in for an EFB app's, held a WebSocket to a program on the same PC, made HTTP requests to it, and showed a page it served, whose own WebSocket connected back, and so did code in the toolbar's document and in two in-game panels (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
+So the EFB app speaks the same protocol as a browser, rather than reach Crosscheck through something only a sim panel has, such as `L:` variables.
 
 - **The tablet in a browser** is one more client on the same protocol, reached across the home network.
   The tablet loads the PC's address, which the desktop app shows as a QR code that also carries a token, so other devices on the network can't take control.
 - **The Crosscheck IDE** is one more client too, with commands of its own: discovering what an aircraft exposes, live values, running one entry's write, and reloading a profile mid-session.
 
 **v1 builds** one protocol that every client speaks, which can listen beyond the PC itself, off by default.
-If both routes fail, the EFB app's messages pass through a panel that holds a WebSocket, and step 7 designs how.
-`L:` variables carried a click from our in-game panel to a stand-in we put into the EFB's document (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)), and the hop from an EFB app to a cockpit panel is unverified.
+An EFB app loaded the sim's way, rather than code in the EFB's document, is untried, and so is an in-game panel of our own.
 
 ## Profiles
 
@@ -234,14 +233,10 @@ If both routes fail, the EFB app's messages pass through a panel that holds a We
 | The second pilot's mic reaching ATC, from [ATC sync](ideas.md#atc-sync) | [Channels](#channels), [roles](#roles), [plugins](#plugins) | In v1 a pilot's microphone never leaves their machine ([voice phrases](03-v1-scope.md#voice-phrases)), and this sends it when the pilot chooses, by a means still open |
 | Weather, from [environment sync](ideas.md#environment-sync) | [Channels](#channels), [roles](#roles) | How to set the weather from outside the sim, which is unknown |
 | Home-network discovery, from [one-click invite](ideas.md#one-click-invite) | | Joining from a session found on the home network as well as from a code |
-| Crews beyond two, and passengers, from [join modes](ideas.md#join-modes) | [People beyond the crew](#people-beyond-the-crew), [roles](#roles), [channels](#channels) | The figure probe in step 6 |
+| Crews beyond two, and passengers, from [join modes](ideas.md#join-modes) | [People beyond the crew](#people-beyond-the-crew), [roles](#roles), [channels](#channels) | A lighter figure for passengers, such as a seated one without legs, since a figure in view costs frame time ([avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-costs-frame-time-in-view-and-almost-none-out-of-view-and-costs-nothing-to-write)) |
 | The tablet in a browser, from [Crosscheck's interface](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet) | [One protocol](#one-protocol-for-every-client) | |
 | The debrief timeline, from [flight recorder and debrief](ideas.md#flight-recorder-and-debrief) | [Recording](#recording) | The viewer |
 | Automatic profile fetch, and the community registry, from [profile registry](ideas.md#profile-registry) | [Profiles](#profiles), [channels](#channels) | |
 | [What doesn't sync](ideas.md#what-doesnt-sync) | [Profiles](#profiles) | |
 | [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit) | [Code inside the sim](#code-inside-the-sim) | A way to hold back a click on one ([input layer](#an-input-layer)), and whether an object our WASM module writes holds still enough, since [decision 001](../../decisions/001-changing-other-developers-packages.md) rules out attaching it through the aircraft's files |
 | [Telemetry](ideas.md#telemetry) | [Recording](#recording) | A server, which could be the one bug reports use |
-
-## Open questions
-
-- Whether variables of an object, such as `Z:CROSSCHECK_SCALE`, add to the sim's `L:` name table, which the figure probe can check.

@@ -12,7 +12,7 @@ Many figures, each posed from its own object's variables, cost about 18µs a fra
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
 
-## 2026-10-05: Each figure poses from its own object's variables, and costs about 18µs a frame in view, almost nothing out of view, and nothing to write
+## 2026-10-05: Each figure poses from its own object's variables, costs frame time in view and almost none out of view, and costs nothing to write
 
 **Asked:** does one sim draw many of our figures, each posed from variables of its own object, and what do 2, 20, and 180 cost in frame time with every joint moving every frame ([the plan](../product/plan.md)'s step 6; [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew))?
 Then, where's the ceiling, and what does a figure out of view or hidden behind the aircraft cost?

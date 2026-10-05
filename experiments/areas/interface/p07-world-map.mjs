@@ -20,6 +20,13 @@
  * The inspector lists the menu's document as mainUi, which has engine but no
  * Coherent (measured on MSFS 2024, 2026-10-04, record/areas/interface/log.md).
  *
+ * A package can put a script into mainUi: Flow Pro ships its own copy of
+ * fs-base-ui's start page component, cookedcomps/{3A799C8C-BED8-48DE-B7D4-
+ * D30472668E33}.html, with a hidden <img src onerror> that appends a script of
+ * its own to the document (read in p42-util-flow-pro 26.33.5), the trick our
+ * toolbar icon used (record/areas/interface/log.md, 2026-10-04). So what this
+ * probe does from the inspector in mainUi is what a script we ship could do.
+ *
  * The pilot opens Free flight's world map. The probe, through the inspector:
  *   1. lists every document the world map has, and what each can reach;
  *   2. in mainUi, searches for the airport and selects it as the departure,
@@ -27,7 +34,7 @@
  *      the airport's world location;
  *   3. selects a stand by its ID, and reads the departure back;
  *   4. in the first other document that has engine, selects a second stand,
- *      which says whether a document we can ship code into does as well;
+ *      which says whether code outside mainUi can do it too;
  *   5. takes a screenshot of the world map.
  * The pilot then clicks Fly, and the probe reads the flight file's
  * [Departure] section and the aircraft's position. Nothing it adds stays in
@@ -153,30 +160,41 @@ async function waitFor(insp, test, ms = 5000) {
 
 // ---------------------------------------------------------------- the steps
 
+// Two ways to send a view listener's event: wrapped, as the sim's own
+// ViewListener.trigger does (read in lib.js), and bare, by the event's own name,
+// in case the sim takes those too.
+const FORMS = [
+  ["wrapped", (ev, ...args) => ["EVENT_TO_VIEW_LISTENER", "JS_LISTENER_AIRPORT_SEARCH", ev, ...args]],
+  ["bare", (ev, ...args) => [ev, ...args]],
+]
+
 async function setAirport(insp) {
-  await insp.evaluate("window.CROSSCHECK_P07.results.length = 0")
-  const sent = await trigger(insp, ["EVENT_TO_VIEW_LISTENER", "JS_LISTENER_AIRPORT_SEARCH", "AIRPORT_INPUT_TEXT", UID, AIRPORT, "ON_DEPARTURE_AIRPORT_SELECTED"])
-  rec.log("search", `AIRPORT_INPUT_TEXT ${AIRPORT}: ${sent}`)
-  let list = null
-  for (let i = 0; i < 40 && !list; i++) {
-    await sleep(100)
-    const r = await insp.evaluate("window.CROSSCHECK_P07.results")
-    if (r && r.length) list = r[r.length - 1]
-  }
-  if (!list) {
-    find(`The airport search answered nothing in 4s through EVENT_TO_VIEW_LISTENER.`)
-  } else {
+  for (const [form, wrap] of FORMS) {
+    await insp.evaluate("window.CROSSCHECK_P07.results.length = 0")
+    const sent = await trigger(insp, wrap("AIRPORT_INPUT_TEXT", UID, AIRPORT, "ON_DEPARTURE_AIRPORT_SELECTED"))
+    rec.log("search", `AIRPORT_INPUT_TEXT ${AIRPORT}, ${form}: ${sent}`)
+    let list = null
+    for (let i = 0; i < 40 && !list; i++) {
+      await sleep(100)
+      const r = await insp.evaluate("window.CROSSCHECK_P07.results")
+      if (r && r.length) list = r[r.length - 1]
+    }
+    if (!list) {
+      find(`The airport search, sent ${form}, answered nothing in 4s.`)
+      continue
+    }
     const hit = list.find((x) => x.ICAO === AIRPORT) ?? null
     rec.log("search", `${list.length} results; ${hit ? `${AIRPORT} at index ${hit.index}, database ${hit.database}` : `none is ${AIRPORT}`}`, { first: list.slice(0, 5) })
-    if (hit) {
-      const r = await trigger(insp, ["EVENT_TO_VIEW_LISTENER", "JS_LISTENER_AIRPORT_SEARCH", "ON_DEPARTURE_AIRPORT_SELECTED", hit.index, hit.database])
-      rec.log("search", `ON_DEPARTURE_AIRPORT_SELECTED: ${r}`)
+    if (!hit) continue
+    for (const [selForm, selWrap] of FORMS) {
+      const r = await trigger(insp, selWrap("ON_DEPARTURE_AIRPORT_SELECTED", hit.index, hit.database))
+      rec.log("search", `ON_DEPARTURE_AIRPORT_SELECTED, ${selForm}: ${r}`)
       const w = await waitFor(insp, (s) => s.isAirport && s.taxis > 0)
       if (w.ok) {
-        find(`The airport search set the departure to ${AIRPORT} in ${w.ms}ms: ${w.sum.taxis} stands, ${w.sum.runways} runways.`)
+        find(`The airport search, sent ${form}, and the selection, sent ${selForm}, set the departure to ${AIRPORT} in ${w.ms}ms: ${w.sum.taxis} stands, ${w.sum.runways} runways.`)
         return w
       }
-      find(`After ON_DEPARTURE_AIRPORT_SELECTED, the departure didn't become ${AIRPORT} in 5s: ${JSON.stringify(w.sum)}`)
+      find(`After ON_DEPARTURE_AIRPORT_SELECTED, sent ${selForm}, the departure didn't become ${AIRPORT} in 5s: ${JSON.stringify(w.sum)}`)
     }
   }
 

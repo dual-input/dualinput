@@ -5,6 +5,7 @@
  * 1 and 2.
  *
  *   node experiments/areas/sync/p02-stepped-writes.mjs [--only synaptic-a220]
+ *   node experiments/areas/sync/p02-stepped-writes.mjs --only fenix-a320-family --from-step 6
  *
  * For each aircraft the pilot loads it as the prompt says and presses Page
  * Down; the probe then runs that aircraft's steps with hands off the cockpit.
@@ -74,7 +75,10 @@ const AIRCRAFT_STEPS = [
       { label: "L:S_MIP_CLOCK_CHR + 1", run: (c) => c.addL("L:S_MIP_CLOCK_CHR", 1) },
       { label: "L:S_MIP_CLOCK_CHR + 2 at once", run: (c) => c.addL("L:S_MIP_CLOCK_CHR", 2) },
       // Sim question 2: the FCU needs power, which the pilot sets up.
-      { pilot: "Power the Fenix so the FCU shows a heading, and set the heading to 360 by hand. Page Down when it reads 360." },
+      // The first run's heading steps fell inside the FCU's power-up, when its
+      // AP lights and dashed displays flipped 9 times in 3s (results/p02-
+      // stepped-writes-2026-10-05-19-37-47.txt), so the pilot waits it out.
+      { pilot: "Power the Fenix so the FCU shows a heading, and set the heading to 360 by hand. Wait until the FCU stops flashing, then Page Down." },
       { label: "L:E_FCU_HEADING + 1", run: (c) => c.addL("L:E_FCU_HEADING", 1) },
       { label: "L:E_FCU_HEADING + 10 at once", run: (c) => c.addL("L:E_FCU_HEADING", 10) },
       { label: "L:S_FCU_HEADING - 1", run: (c) => c.addL("L:S_FCU_HEADING", -1) },
@@ -85,6 +89,9 @@ const AIRCRAFT_STEPS = [
 
 const args = process.argv.slice(2)
 const ONLY = args.includes("--only") ? args[args.indexOf("--only") + 1] : null
+// --from-step N starts each aircraft at its Nth step, counting the pilot's, so
+// the Fenix's heading steps can run alone: --only fenix-a320-family --from-step 6.
+const FROM_STEP = args.includes("--from-step") ? Number(args[args.indexOf("--from-step") + 1]) : 1
 const plan = AIRCRAFT_STEPS.filter((a) => !ONLY || a.id === ONLY)
 
 // ---------------------------------------------------------------- recording
@@ -188,7 +195,7 @@ async function oneAircraft(a, i, total) {
   rec.log("fps", `${fps.fps === null ? "no" : fps.fps.toFixed(1)} sim frames a second`, fps)
   const c = makeContext()
   const results = []
-  for (const step of a.steps) {
+  for (const step of a.steps.slice(FROM_STEP - 1)) {
     if (step.pilot) {
       beep(880, 150)
       say(step.pilot)

@@ -1,0 +1,75 @@
+p01-guided-load, started 2026-10-05T17:29:24.782Z
+Settle rule: 15s with no counted change, counted from 15s after load, or 90s at most; a value with more than 5 changes since load stops counting.
+"all" is every L: variable fsc-editor-link streams, plus the stock values below; "switches" is SETTLE_A in aircraft/lib/load.mjs plus the aircraft's settleL in aircraft/lib/aircraft.mjs.
+Stock values every frame: ELECTRICAL MASTER BATTERY:1, AVIONICS MASTER SWITCH, LIGHT BEACON, LIGHT NAV, LIGHT STROBE, LIGHT LANDING, BRAKE PARKING POSITION, GENERAL ENG COMBUSTION:1, FLAPS HANDLE INDEX, COM ACTIVE FREQUENCY:1, TRANSPONDER CODE:1, LIGHT TAXI, GENERAL ENG COMBUSTION:2, GENERAL ENG COMBUSTION:3, GENERAL ENG COMBUSTION:4, GENERAL ENG RPM:1, TURB ENG N1:1, GEAR HANDLE POSITION, COM STANDBY FREQUENCY:1, NAV ACTIVE FREQUENCY:1, FUEL TOTAL QUANTITY, ELECTRICAL MAIN BUS VOLTAGE, APU PCT RPM, EXTERNAL POWER ON:1, SIM ON GROUND, GROUND VELOCITY, CAMERA STATE.
+A value first seen after Fly, such as an L: variable registered during the load, counts as appeared, not changed.
+
+== 1 black-square-baron-pro, Flow Pro auto-click off
+   loaded: Black Square Baron 58P Professional N513LW (%APPDATA%\microsoft flight simulator 2024\packages\community\bksq-aircraft-baronpro\simobjects\airplanes\bksq-aircraft-baronpropress\aircraft.cfg)
+   Ready to fly pressed 22.2s after Fly; 31.0 fps afterwards
+   events from Fly: 1.5s SimStop 0; 1.5s Sim 0; 1.5s FlightLoaded CustomFlight\CustomFlight.FLT; 1.6s PositionChanged 0; 1.6s flow FLT_LOAD; 1.6s flow FLT_LOADED; 1.6s flow FLT_LOAD; 1.6s flow FLT_LOADED; 1.6s flow TELEPORT_START; 1.6s flow TELEPORT_DONE; 2.3s Pause_EX1 0; 2.5s SimStart 0; 2.5s Sim 1; 8.1s AircraftLoaded bksq-aircraft-baronpropress\aircraft.cfg; 19.3s flow FLIGHT_START; 19.3s flow FLT_LOAD; 19.3s flow FLT_LOADED; 19.3s flow RTC_START; 21.9s flow RTC_END; 24.0s View 2
+   838 values moved, 0 appeared; the L: table held 15538 names
+   from the first Page Down, clicking Fly (+0.0s), all: settled at 51.7s by quiet; 726 counted, 112 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 52.2s; 5 → 6
+   from the first Page Down, clicking Fly (+0.0s), switches: settled at 39.1s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the first load event (+1.5s), all: settled at 50.1s by quiet; 726 counted, 112 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 50.7s; 5 → 6
+   from the first load event (+1.5s), switches: settled at 37.5s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the sim running (+2.5s), all: settled at 49.2s by quiet; 724 counted, 110 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 49.7s; 5 → 6
+   from the sim running (+2.5s), switches: settled at 36.5s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+22.2s), all: settled at 64.6s by quiet; 53 counted, 100 noisy; 4 moved after
+      late: L:BKSQ_MANIFOLD_PRESSURE_1 at 94.7s, 97.8s; 29.790772 → 29.788574
+      late: L:BKSQ_MANIFOLD_PRESSURE_2 at 94.7s, 97.8s; 29.790772 → 29.788574
+      late: L:var_scaledMaximumMixturePosition_1 at 94.8s, 98.2s; 100 → 80.737192
+      late: L:var_scaledMaximumMixturePosition_2 at 94.8s, 98.2s; 100 → 80.737192
+   from the second Page Down, Ready to fly (+22.2s), switches: settled at 30.0s by quiet; 1 counted, 0 noisy; 0 moved after
+   order, two data-definition writes of L:CROSSCHECK_P01_ORDER: second won 20/20, first 0, neither 0
+   order, two K:HEADING_BUG_SET events: second won 10/10, first 0, neither 0
+   show, K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR: 93 in 8ms (1 frame, 1 write); 271 in 33ms (2 frames, 1 write); restored 0, was 0
+   show, K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1: 1001 in 18ms (1 frame, 1 write); 1027 in 34ms (1 frame, 1 write); restored 1013.25, was 1013.25
+   show, L:CROSSCHECK_P01_SHOW by data definition: 3 in 11ms (1 frame, 1 write); 7 in 4ms (1 frame, 1 write); restored 0, was 0
+   show, L:var_FrontArmrest by data definition: 0 in 17ms (1 frame, 1 write); 1 in 33ms (2 frames, 1 write); restored 100, was 100
+
+== 2 black-square-baron-pro, Flow Pro auto-click on
+   loaded: Black Square Baron 58P Professional N513LW (%APPDATA%\microsoft flight simulator 2024\packages\community\bksq-aircraft-baronpro\simobjects\airplanes\bksq-aircraft-baronpropress\aircraft.cfg)
+   Ready to fly pressed 17.8s after Fly; 31.0 fps afterwards
+   events from Fly: 5.3s AircraftLoaded bksq-aircraft-baronpropress\aircraft.cfg; 16.3s flow FLIGHT_START; 16.3s flow FLT_LOAD; 16.3s flow FLT_LOADED; 16.3s flow RTC_START; 17.5s flow RTC_END; 19.0s View 2
+   824 values moved, 0 appeared; the L: table held 15538 names
+   from the first Page Down, clicking Fly (+0.0s), all: settled at 36.8s by quiet; 713 counted, 111 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 47.5s; 0 → 6
+   from the first Page Down, clicking Fly (+0.0s), switches: settled at 34.4s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the first load event (+5.3s), all: settled at 31.5s by quiet; 558 counted, 111 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 42.1s; 0 → 6
+   from the first load event (+5.3s), switches: settled at 30.0s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+17.8s), all: settled at 44.6s by quiet; 47 counted, 102 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+17.8s), switches: settled at 30.0s by quiet; 1 counted, 0 noisy; 0 moved after
+   order, two data-definition writes of L:CROSSCHECK_P01_ORDER: second won 20/20, first 0, neither 0
+   order, two K:HEADING_BUG_SET events: second won 10/10, first 0, neither 0
+   show, K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR: 93 in 13ms (1 frame, 1 write); 271 in 23ms (1 frame, 1 write); restored 0, was 0
+   show, K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1: 1001 in 9ms (1 frame, 1 write); 1027 in 2ms (1 frame, 1 write); restored 1013.25, was 1013.25
+   show, L:CROSSCHECK_P01_SHOW by data definition: 3 in 18ms (1 frame, 1 write); 7 in 33ms (1 frame, 1 write); restored 0, was 0
+   show, L:var_FrontArmrest by data definition: 0 in 13ms (1 frame, 1 write); 1 in 4ms (1 frame, 1 write); restored 100, was 100
+
+== 3 black-square-baron-pro, Flow Pro auto-click on
+   loaded: Black Square Baron 58P Professional N513LW (%APPDATA%\microsoft flight simulator 2024\packages\community\bksq-aircraft-baronpro\simobjects\airplanes\bksq-aircraft-baronpropress\aircraft.cfg)
+   Ready to fly pressed 16.3s after Fly; 31.0 fps afterwards
+   events from Fly: 0.7s SimStop 0; 0.7s Sim 0; 0.8s FlightLoaded CustomFlight\CustomFlight.FLT; 0.8s PositionChanged 0; 0.9s flow FLIGHT_END; 0.9s flow FLT_LOAD; 0.9s flow FLT_LOADED; 0.9s flow TELEPORT_START; 0.9s flow TELEPORT_DONE; 6.1s Pause_EX1 0; 6.3s SimStart 0; 6.3s Sim 1; 12.2s AircraftLoaded bksq-aircraft-baronpropress\aircraft.cfg; 13.2s flow FLIGHT_START; 13.2s flow FLT_LOAD; 13.2s flow FLT_LOADED; 13.2s flow RTC_START; 14.3s flow RTC_END; 20.7s View 2
+   830 values moved, 6 appeared (the last 23.0s after Fly); the L: table held 15544 names
+   from the first Page Down, clicking Fly (+0.0s), all: settled at 40.5s by quiet; 719 counted, 111 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 44.2s; 6 → 6
+   from the first Page Down, clicking Fly (+0.0s), switches: settled at 35.8s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the first load event (+0.8s), all: settled at 39.7s by quiet; 719 counted, 111 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 43.4s; 6 → 6
+   from the first load event (+0.8s), switches: settled at 35.0s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the sim running (+6.3s), all: settled at 34.5s by quiet; 454 counted, 109 noisy; 1 moved after
+      late: L:AS1000_Warnings_WarningIndex at 37.8s; 6 → 6
+   from the sim running (+6.3s), switches: settled at 30.0s by quiet; 3 counted, 0 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+16.3s), all: settled at 42.8s by quiet; 70 counted, 105 noisy; 0 moved after
+   from the second Page Down, Ready to fly (+16.3s), switches: settled at 30.0s by quiet; 3 counted, 0 noisy; 0 moved after
+   order, two data-definition writes of L:CROSSCHECK_P01_ORDER: second won 20/20, first 0, neither 0
+   order, two K:HEADING_BUG_SET events: second won 10/10, first 0, neither 0
+   show, K:HEADING_BUG_SET → A:AUTOPILOT HEADING LOCK DIR: 93 in 4ms (1 frame, 1 write); 271 in 2ms (1 frame, 1 write); restored 0, was 0
+   show, K:KOHLSMAN_SET → A:KOHLSMAN SETTING MB:1: 1001 in 12ms (1 frame, 1 write); 1027 in 22ms (1 frame, 1 write); restored 1013.25, was 1013.25
+   show, L:CROSSCHECK_P01_SHOW by data definition: 3 in 3ms (1 frame, 1 write); 7 in 33ms (1 frame, 1 write); restored 0, was 0
+   show, L:var_FrontArmrest by data definition: 0 in 13ms (1 frame, 1 write); 1 in 22ms (1 frame, 1 write); restored 100, was 100

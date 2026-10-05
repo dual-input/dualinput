@@ -1,0 +1,14 @@
+p28-many-figures, started 2026-10-05T19:13:17.517Z
+Setup: A380 on EGLL 27R, Beyond ATC traffic, looking backward, figures behind, aircraft body in between
+Grid: 40 figures a row, the first row 50m behind the aircraft's reference point
+
+no figures: 22.3 fps, 0 Z: writes in the module's last frame
+600 figures, moving: 16.7 fps, 16800 Z: writes in the module's last frame
+600 figures, written, still: 18.6 fps, 16800 Z: writes in the module's last frame
+600 figures, not written: 18.6 fps, 0 Z: writes in the module's last frame
+1000 figures, moving: 14.3 fps, 28000 Z: writes in the module's last frame
+1000 figures, written, still: 17.3 fps, 28000 Z: writes in the module's last frame
+1000 figures, not written: 17.3 fps, 0 Z: writes in the module's last frame
+
+Poses of their own: not asked
+L: table: 10516 names before, 10516 after

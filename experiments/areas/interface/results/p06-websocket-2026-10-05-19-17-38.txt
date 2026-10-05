@@ -1,0 +1,46 @@
+p06-websocket, 2026-10-05T19:17:38.287Z
+
+the EFB (page 9): {"ws":"open","wsEcho":"echo: hello from the EFB","xhr":"status 200: crosscheck p06","iframe":"loaded","errors":[]}
+in-game panel or toolbar: Toolbar (page 11): {"ws":"open","wsEcho":"echo: hello from in-game panel or toolbar: Toolbar","xhr":"status 200: crosscheck p06","iframe":"loaded","errors":[]}
+in-game panel or toolbar: //42 CP Overlay (Reqd.) (page 78): {"ws":"open","wsEcho":"echo: hello from in-game panel or toolbar: //42 CP Overlay (Reqd.)","xhr":"status 200: crosscheck p06","iframe":"loaded","errors":[]}
+in-game panel or toolbar: //42 Flow (page 79): {"ws":"open","wsEcho":"echo: hello from in-game panel or toolbar: //42 Flow","xhr":"status 200: crosscheck p06","iframe":"loaded","errors":[]}
+cockpit control: VCockpit126 - iniFAPa380 (page 53): {"ws":"open","wsEcho":"echo: hello from cockpit control: VCockpit126 - iniFAPa380","xhr":"status 200: crosscheck p06","iframe":"loaded","errors":[]}
+
+Server log:
+19:17:26.736 serving on 127.0.0.1:47806
+19:17:31.790 38 documents: atlas | Shared variables | mainUi | notifications | transition | Electronic Flight Bag | Mission Steps | Toolbar | notifications | VLivery01 - A350Printer | VLivery02 - A350Printer | VLogic | VCockpit126 - iniFAPa380 | VCockpit125 - WasmInstrument | VCockpit124 - iniEfbA380Ext_2 | VCockpit123 - iniEfbA380Ext_1 | VCockpit122 - WasmInstrument | VCockpit121 - WasmInstrument | VCockpit120 - WasmInstrument | VCockpit119 - WasmInstrument | VCockpit118 - WasmInstrument | VCockpit117 - WasmInstrument | VCockpit116 - WasmInstrument | VCockpit115 - WasmInstrument | VCockpit114 - iniEfbA380Int_2 | VCockpit113 - iniEfbA380Int_1 | VCockpit112 - WasmInstrument | VCockpit111 - WasmInstrument | VCockpit110 - WasmInstrument | VCockpit109 - WasmInstrument | VCockpit108 - WasmInstrument | VCockpit107 - WasmInstrument | VCockpit106 - WasmInstrument - crashReportA380 | VCockpit105 - WasmInstrument | VCockpit104 - WasmInstrument - crashReportA380 | VCockpit103 - WasmInstrument - WasmInstrument | //42 CP Overlay (Reqd.) | //42 Flow
+19:17:31.874 the EFB: "started"
+19:17:31.923 HTTP GET /ping from the EFB (origin coui://html_ui)
+19:17:31.926 HTTP GET /page from the EFB (origin none)
+19:17:31.934 WebSocket from the EFB (origin coui://html_ui)
+19:17:31.978 in-game panel or toolbar: Toolbar: "started"
+19:17:31.995 WebSocket the EFB said: hello from the EFB
+19:17:32.022 HTTP GET /ping from in-game panel or toolbar: Toolbar (origin coui://html_ui)
+19:17:32.022 HTTP GET /page from in-game panel or toolbar: Toolbar (origin none)
+19:17:32.038 WebSocket from the EFB (iframe) (origin http://127.0.0.1:47806)
+19:17:32.039 WebSocket from in-game panel or toolbar: Toolbar (origin coui://html_ui)
+19:17:32.078 in-game panel or toolbar: //42 CP Overlay (Reqd.): "started"
+19:17:32.079 WebSocket the EFB (iframe) said: hello from the iframe
+19:17:32.079 WebSocket in-game panel or toolbar: Toolbar said: hello from in-game panel or toolbar: Toolbar
+19:17:32.120 HTTP GET /ping from in-game panel or toolbar: //42 CP Overlay (Reqd.) (origin coui://html_ui)
+19:17:32.121 HTTP GET /page from in-game panel or toolbar: //42 CP Overlay (Reqd.) (origin none)
+19:17:32.137 WebSocket from in-game panel or toolbar: Toolbar (iframe) (origin http://127.0.0.1:47806)
+19:17:32.138 WebSocket from in-game panel or toolbar: //42 CP Overlay (Reqd.) (origin coui://html_ui)
+19:17:32.175 in-game panel or toolbar: //42 Flow: "started"
+19:17:32.178 WebSocket in-game panel or toolbar: Toolbar (iframe) said: hello from the iframe
+19:17:32.179 WebSocket in-game panel or toolbar: //42 CP Overlay (Reqd.) said: hello from in-game panel or toolbar: //42 CP Overlay (Reqd.)
+19:17:32.218 HTTP GET /ping from in-game panel or toolbar: //42 Flow (origin coui://html_ui)
+19:17:32.219 HTTP GET /page from in-game panel or toolbar: //42 Flow (origin none)
+19:17:32.225 WebSocket from in-game panel or toolbar: //42 CP Overlay (Reqd.) (iframe) (origin http://127.0.0.1:47806)
+19:17:32.225 WebSocket from in-game panel or toolbar: //42 Flow (origin coui://html_ui)
+19:17:32.275 cockpit control: VCockpit126 - iniFAPa380: "started"
+19:17:32.285 WebSocket in-game panel or toolbar: //42 CP Overlay (Reqd.) (iframe) said: hello from the iframe
+19:17:32.286 WebSocket in-game panel or toolbar: //42 Flow said: hello from in-game panel or toolbar: //42 Flow
+19:17:32.316 HTTP GET /ping from cockpit control: VCockpit126 - iniFAPa380 (origin coui://html_ui)
+19:17:32.317 HTTP GET /page from cockpit control: VCockpit126 - iniFAPa380 (origin none)
+19:17:32.333 WebSocket from in-game panel or toolbar: //42 Flow (iframe) (origin http://127.0.0.1:47806)
+19:17:32.335 WebSocket from cockpit control: VCockpit126 - iniFAPa380 (origin coui://html_ui)
+19:17:32.373 WebSocket in-game panel or toolbar: //42 Flow (iframe) said: hello from the iframe
+19:17:32.375 WebSocket cockpit control: VCockpit126 - iniFAPa380 said: hello from cockpit control: VCockpit126 - iniFAPa380
+19:17:32.430 WebSocket from cockpit control: VCockpit126 - iniFAPa380 (iframe) (origin http://127.0.0.1:47806)
+19:17:32.490 WebSocket cockpit control: VCockpit126 - iniFAPa380 (iframe) said: hello from the iframe

@@ -1,0 +1,7 @@
+p07-world-map, started 2026-10-05T18:02:58.341Z
+
+- Before: the world map's departure was .
+- The airport search, sent wrapped, and the selection, sent wrapped, set the departure to KSEA in 553ms: 145 stands, 6 runways.
+- From mainUi, setDepartureTaxiIndex selected stand GATE N 17 -- GATE MEDIUM (ID 38) in 28ms.
+- From atlas, setDepartureTaxiIndex selected stand PARKING 140 -- RAMP CARGO in 36ms, as mainUi read it.
+- After Fly: the aircraft is at 47.456141, -122.303398, heading 180.0 true; the flight file's [Departure]; ICAO=KSEA; GateName=PARKING; GateNumber=140; GateSuffix=NONE; RunwayNumber=16; RunwayDesignator=L.

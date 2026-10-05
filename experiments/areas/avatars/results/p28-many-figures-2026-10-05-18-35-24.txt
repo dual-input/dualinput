@@ -1,0 +1,27 @@
+p28-many-figures, started 2026-10-05T18:35:24.520Z
+
+no figures: 53.3 fps, 0 Z: writes in the module's last frame
+2 figures, moving: 53.6 fps, 56 Z: writes in the module's last frame
+2 figures, written, still: 52.9 fps, 56 Z: writes in the module's last frame
+2 figures, not written: 53.8 fps, 0 Z: writes in the module's last frame
+20 figures, moving: 52.2 fps, 560 Z: writes in the module's last frame
+20 figures, written, still: 53.0 fps, 560 Z: writes in the module's last frame
+20 figures, not written: 52.8 fps, 0 Z: writes in the module's last frame
+180 figures, moving: 41.1 fps, 5040 Z: writes in the module's last frame
+180 figures, written, still: 44.5 fps, 5040 Z: writes in the module's last frame
+180 figures, not written: 44.3 fps, 0 Z: writes in the module's last frame
+400 figures, moving: 32.2 fps, 11200 Z: writes in the module's last frame
+400 figures, written, still: 37.4 fps, 11200 Z: writes in the module's last frame
+400 figures, not written: 37.4 fps, 0 Z: writes in the module's last frame
+600 figures, moving: 26.1 fps, 16800 Z: writes in the module's last frame
+600 figures, written, still: 32.8 fps, 16800 Z: writes in the module's last frame
+600 figures, not written: 32.8 fps, 0 Z: writes in the module's last frame
+800 figures, moving: 22.1 fps, 22400 Z: writes in the module's last frame
+800 figures, written, still: 30.2 fps, 22400 Z: writes in the module's last frame
+800 figures, not written: 30.4 fps, 0 Z: writes in the module's last frame
+1000 figures, moving: 19.5 fps, 28000 Z: writes in the module's last frame
+1000 figures, written, still: 28.1 fps, 28000 Z: writes in the module's last frame
+1000 figures, not written: 28.4 fps, 0 Z: writes in the module's last frame
+
+Poses of their own: yes
+L: table: 6517 names before, 6517 after

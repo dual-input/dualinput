@@ -3,6 +3,81 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-05: Code in the menu's document sets the world map's departure, stand, aircraft, and livery, and starts the flight
+
+**Asked:** can anything outside the sim set the world map's departure ([the plan](../product/plan.md)'s step 6), which decides whether [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map) is in v1?
+Then the aircraft, its livery, and Fly.
+
+**Expected:** none of SimConnect's documented functions sets the world map, and no add-on we know sets a stand.
+The world map's own code makes each change as a request to its store: picking a stand sends `Et.game.currentFlight.setDepartureTaxiIndex.request(`${taxi.ID}`)`, and the store's `request()` is `engine.call("requestData", path, arg)` (read in fs-base-ui 0.1.10, `html_ui/Global/pkg/base.bundle.js`, `FreeflightPlanCombobox`, and `html_ui/Global/lib.js`, `GlobalDataListener.request`).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, from Free flight's world map, with code the inspector ran in the menu's document, `mainUi`, which has `engine` and the store but no `Coherent`:
+
+- The departure airport: the airport search's events, sent as `engine.trigger("EVENT_TO_VIEW_LISTENER", "JS_LISTENER_AIRPORT_SEARCH", "AIRPORT_INPUT_TEXT", <uid>, "KSEA", "ON_DEPARTURE_AIRPORT_SELECTED")`, came back as `ResultsUpdated` with 4 results, and `ON_DEPARTURE_AIRPORT_SELECTED` with the result's index and database set KSEA in 553ms, with its 145 stands and 6 runways in `game/currentFlight/gameFlight/departure`.
+- The stand: `game/currentFlight/setDepartureTaxiIndex` with the stand's `ID`, not its place in the list, selected GATE N 17 in 28ms.
+  The same request from the document of Atlas, the EFB's map app, then selected PARKING 140 in 36ms.
+  8 of the world map's 14 documents have `engine` and the store, the toolbar's among them, and the EFB's has `engine` but not the store.
+- After Fly, the flight file's `[Departure]` read `GateName=PARKING; GateNumber=140`, and the aircraft stood at a cargo ramp.
+- The aircraft: `game/aircraft/configurator/setAircraftForConfigurator` with `"<aircraftId>||<variationIndex>"`, taken from `game/aircraft/aircraftList`, changed `game/aircraft/currentAircraft` from the A380 to the A220-300 within 1s, and the world map showed the A220.
+  The list is read the way the world map's list fetcher reads it: `requestArrayElements` answers with its length, 138, and each entry is at `game/aircraft/aircraftList/<index>`.
+- The livery: `game/aircraft/configurator/saveVariationId` with an id from `game/aircraft/configurator/liveries`, 12 for the A220, set Air Canada's.
+- Fly: `game/currentFlight/launchFlight` with `""` started the flight, with `FlightLoaded` 0.7s later, and SimConnect then read `TITLE` "A220-300" and `LIVERY NAME` "Air Canada A220-300", at KSEA gate N 17.
+- With no departure set, `launchFlight` brought up the sim's "Unexpected error" dialog, "You cannot launch this flight and enter the sim.", and Start flight stays disabled.
+- The search results reached p07, which listened on both `ResultsUpdated` and `EVENT_FROM_VIEW_LISTENER`, and not p08's first version, which listened on `ResultsUpdated` alone, so they come through `EVENT_FROM_VIEW_LISTENER`, or both.
+
+**Changed:** Crosscheck can put a joining pilot at the PF's airport and stand, in the PF's aircraft and livery, and start the flight, from a script in the menu's document.
+Flow Pro clicks the menu's Start and Free Flight buttons on this machine, so the path from the sim starting to Ready to fly could run with no clicks, which nobody has run as one chain; it gets probed and scoped when the feature is built (user, 2026-10-05).
+
+**Affects:** [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map).
+
+**Evidence:** `results/p07-world-map-2026-10-05-18-02-58` and `results/p08-world-map-aircraft-2026-10-05-19-29-24` (no departure), `-19-31-33` (the aircraft and livery), and `-19-32-47` (the whole chain), each `.txt`, `.ndjson`, and a folder of screenshots.
+
+## 2026-10-05: A package reaches the menu's document by shipping its own copy of one of the sim's UI components
+
+**Asked:** p07 and p08 ran through the inspector, which we won't ship on, so how would a script of ours get into the menu's document?
+
+**Expected:** a DevSupport moderator wrote on 2025-03-12 that MSFS 2024 can't override the base sim's HTML ([thread](https://devsupport.flightsimulator.com/t/can-html-instruments-be-overridden-as-per-the-docs-in-msfs-2024/13488)), though our `VCockpit.js` override works ([02-01-installs-and-packages](../../learn/foundations/02-01-installs-and-packages.md)).
+
+**Found:** no sim ran:
+
+- Flow Pro ships `cookedcomps/{3A799C8C-BED8-48DE-B7D4-D30472668E33}.html`, which is fs-base-ui's start page component, 2,666 bytes there and 3,128 in Flow Pro's.
+  Flow Pro's copy is the stock markup plus a hidden `<svg><foreignObject><img src onerror="…">`, whose handler appends a script from Flow Pro's `InGamePanels` folder to the document's `<head>`, the trick [our toolbar icon](#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click) uses (read in p42-util-flow-pro 26.33.5).
+- It copies three more of fs-base-ui's components the same way: a nameplate, a HUD waypoint, and a shortcut button.
+- On this machine Flow Pro clicks the menu's Start and Free Flight buttons and selects the departure, as it advertises, so its script runs in the menu.
+
+**Changed:** a script of ours can reach the menu's document the same way, so the world map's requests need no inspector, which is unverified for a package of our own.
+It costs two things: two packages that copy the same component load one copy, so ours must copy one that no add-on we know copies; and our copy hides the sim's own, so it has to follow each sim update that changes that component.
+
+**Affects:** [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map).
+
+**Evidence:** the two packages' files, read 2026-10-05.
+
+## 2026-10-05: An EFB app, the toolbar, and in-game panels each reach a program on the same PC by WebSocket and HTTP, and can show a page it serves
+
+**Asked:** can an EFB app and the notification banner's in-game panel each hold a WebSocket to a program on the same PC, as a cockpit panel can, or show a page that program serves, as the Fenix's tablet app does ([the plan](../product/plan.md)'s step 6; [04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client))?
+
+**Expected:** yes, since a cockpit document can hold a WebSocket to loopback (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q08 yes: a cockpit document can hold a WebSocket to loopback").
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the iniBuilds A380 on EGLL runway 27R, p06 served a page and a WebSocket endpoint on 127.0.0.1:47806, and code the inspector ran in each document, standing in for an app's, tried three things:
+
+| Document | WebSocket, with the echo back | HTTP request | A hidden iframe of the served page, whose own WebSocket connected back |
+| --- | --- | --- | --- |
+| The EFB's, "Electronic Flight Bag" | yes | 200 | yes |
+| The toolbar's | yes | 200 | yes |
+| Flow Pro's in-game panel | yes | 200 | yes |
+| ChasePlane's overlay panel | yes | 200 | yes |
+| An A380 cockpit panel, `VCockpit126 - iniFAPa380` | yes | 200 | yes |
+
+- Code in a document connected from origin `coui://html_ui`, and the served page's own script from `http://127.0.0.1:47806`.
+- All five finished within 0.6s.
+
+**Changed:** every kind of client, an EFB app, an in-game panel, and a cockpit panel, can talk to the core over one loopback WebSocket, or show a page the core serves.
+What we haven't run is an EFB app loaded the sim's way, rather than code in the EFB's document, and an in-game panel of our own, rather than two of Parallel 42's.
+
+**Affects:** [04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client).
+
+**Evidence:** `results/p06-websocket-2026-10-05-19-17-38.txt`.
+
 ## 2026-10-04: A click on a notice in our panel opens the EFB onto another app, whether the EFB was open or closed
 
 **Asked:** can a notice on our panel open the EFB onto a given app, after the toolbar's calls put nothing on screen ([entry below](#2026-10-04-code-in-the-efbs-document-switches-the-efb-to-another-app-but-no-call-we-found-puts-the-efb-on-screen))?

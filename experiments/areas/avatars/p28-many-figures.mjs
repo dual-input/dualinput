@@ -48,7 +48,9 @@ const NOTE = arg("--note")
 const MEASURE_MS = 10_000
 const SPACING_M = 1.5
 const PER_ROW = 40
-const FIRST_ROW_M = 10
+// Meters from the aircraft's reference point to the first row; --ahead moves
+// it past a long aircraft's nose.
+const FIRST_ROW_M = Number(arg("--ahead") ?? 10)
 
 const rec = new Recorder("p28-many-figures", { area: "avatars" })
 const POSE = [["PLANE LATITUDE", "degrees"], ["PLANE LONGITUDE", "degrees"], ["PLANE ALTITUDE", "feet"], ["PLANE HEADING DEGREES TRUE", "degrees"], ["PLANE PITCH DEGREES", "degrees"], ["PLANE BANK DEGREES", "degrees"]]

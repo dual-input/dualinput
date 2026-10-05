@@ -171,9 +171,9 @@ Variables of each figure's own object avoid that, with one model for every figur
 
 A cabin of 180 passengers is 5,040 values to write every frame.
 As variables of each figure's own object they share 28 names, and they don't add to the sim's `L:` name table, which held 6,517 names before and after 1,000 figures (same log entry).
-Writing them costs nothing measurable, up to 28,000 values a frame.
+Writing them costs nothing measurable, up to 28,000 values a frame (same log entry).
 Drawing a figure in view costs about 16µs to 21µs of frame time, and moving all its joints 10µs to 16µs more, while a figure out of view costs almost nothing, and one hidden behind the aircraft but in the view costs nearly as much as one in sight (same log entry).
-So 180 passengers seen from the flight deck looking forward cost little, and the same cabin looked at cost about 3.4ms of frame time standing still and 7.2ms moving.
+So a cabin of 180 behind a pilot looking forward costs little, and the same cabin costs about 3.4ms of frame time standing still and 7.2ms moving once the pilot looks back toward it, even at a closed cockpit door (measured in the iniBuilds A380, same log entry).
 The network carries those figures too, so the avatar channel sends only what moved, at a lower rate for passengers, and at full rate only for the figures near a pilot's camera.
 
 **v1 builds** a member list in which each member is crew or a passenger, vector clocks that hold only members who send, figures posed from their own objects' variables, and an avatar channel whose rate can differ by figure.
@@ -183,7 +183,9 @@ The network carries those figures too, so the avatar channel sends only what mov
 In v1 the desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([EFB app](03-v1-scope.md#efb-app)).
 A cockpit panel can hold a WebSocket to a program on the same PC (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q08 yes: a cockpit document can hold a WebSocket to loopback"), with the sim's developer mode off (FS Copilot fork, `record/pointer-forwarding/docs/06-open-questions.md`, Q08).
 The Fenix's MSFS 2024 tablet app shows its web app from `http://localhost:8083` (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)), which is a second route.
-Both routes work from the documents the other clients live in: code in the EFB's document, standing in for an EFB app's, held a WebSocket to a program on the same PC, made HTTP requests to it, and showed a page it served, whose own WebSocket connected back, and so did code in the toolbar's document and in two in-game panels (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
+Both routes work from the documents the other clients would live in (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
+Code run in the EFB's document, standing in for an EFB app, held a WebSocket to a program on the same PC, got answers to HTTP requests, and loaded a page the program served in a hidden iframe, whose own WebSocket connected back.
+Code in the toolbar's document and in Flow Pro's and ChasePlane's in-game panels did the same.
 So the EFB app speaks the same protocol as a browser, rather than reach Crosscheck through something only a sim panel has, such as `L:` variables.
 
 - **The tablet in a browser** is one more client on the same protocol, reached across the home network.

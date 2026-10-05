@@ -69,7 +69,8 @@ In a session that isn't interrupted, every shared entry ends on the same value o
 Every state entry has something to read, so after writing, the receiving machine reads the entry back.
 
 1. It waits 500ms, a starting value, because an aircraft can update the variable an entry reads on a slower loop than the one that takes the write.
-   On six studied aircraft a write showed within 2 frames, and the slowest readout we saw, the Fenix's FCU heading, followed a write to its counter after 255ms (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
+   On six studied aircraft, a variable or event we wrote showed in the value we read within 2 frames (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
+   A readout the aircraft computes from a write takes longer: the Fenix's FCU heading followed a write to `L:E_FCU_HEADING` after 203ms to 255ms (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
 2. If the value doesn't match, it writes again, up to a retry count still to set.
 3. If the value still doesn't match, it gives up on that entry and flags it.
 
@@ -96,7 +97,7 @@ The engine filters, in this order:
 1. **The transport** gives every message an ID, and the receiver applies each ID once, whether it came directly, through the relay, or both, and drops what a reconnecting machine replays that it already applied.
 2. **The input event double-fire.**
    On the A2A PA-24, the sim reported each input event twice: of 53 same-name, same-value pairs, 43 were 17ms to 21ms apart, 9 were 37ms to 40ms apart, and the 53rd, a course knob dragged through the same value, was a real repeat 261ms apart (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Stage 2 verified live. The double-fire is frame-locked, and tighter than measured.").
-   The echo is tied to frames: on the PA-24 the second report came exactly one frame after the first, 32ms to 34ms apart at 31 fps and 49ms to 51ms at 21 fps, and a key or button held down reported one press and one release, with no repeats (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-pa-24s-double-fire-comes-one-frame-apart-at-31-and-21-fps-and-a-held-key-doesnt-repeat)).
+   The double-fire is tied to frames: on the PA-24, 7 of 9 clicks at 31 fps reported twice, each second report exactly one frame after the first, 32ms to 34ms apart at 31 fps and 49ms to 51ms at 21 fps, and a key or button held down reported one press and one release, with no repeats (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-pa-24s-double-fire-comes-one-frame-apart-at-31-and-21-fps-and-a-held-key-doesnt-repeat)).
    Other aircraft are untested.
    So the engine drops a report with the same name and value as one from the last 3 frames, but never one more than 200ms after it, because at a low frame rate 3 frames could reach the 261ms repeat.
 3. **Our own writes.**
@@ -111,6 +112,6 @@ A pointer press that also changes a state entry applies once too: the stream car
 
 ## Open questions
 
-- Whether the double-fire stays within 3 frames on aircraft other than the PA-24, and below 21 fps; at 5 fps one frame reaches the 200ms cap.
-- How many retries before a flag, since no write in the step 6 session needed one, and how long an unused echo token lasts.
+- Whether the double-fire stays within 3 frames on aircraft other than the PA-24, and below 21 fps; below 5 fps one frame lasts longer than the 200ms cap, so the filter would let the second report through.
+- How many retries before a flag, since no write in our 2026-10-05 tests needed one (measured on MSFS 2024, [sync log](log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)), and how long an unused echo token lasts.
 - How to keep a `then` action or a write function's actions from doing harm when a retry repeats them.

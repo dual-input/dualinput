@@ -66,8 +66,9 @@ speed:
 
 A rule can also count a variable's change, which covers counters whose value means nothing on its own.
 The Fenix's `L:E_FCU_HEADING` adds 1 for every detent of the heading knob (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md)).
-The Fenix's systems program acts on the change: a jump of 10 in the counter moved the FCU heading 10 degrees (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)), so writing the PF's counter value on the PM would jump the PM's heading by the gap between the two counters.
-Where the heading itself can be read, the counter belongs under `write`, as the way to step it.
+The Fenix's systems program, `FenixSystem.exe`, which runs outside the sim, acts on the change: a jump of 10 in the counter moved the FCU heading 10 degrees (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
+So writing the PF's counter value on a following machine would move that machine's heading by the gap between the two counters.
+Where the heading itself can be read, the entry watches the heading and writes the counter, adding the whole difference in one write.
 Where it can't, a rule counts the counter's changes into a shadow heading.
 
 ### Keeping a shadow value
@@ -211,10 +212,12 @@ Some facts belong to the aircraft, not to one control:
   The engine sends one step per frame unless the profile sets a slower pace for the aircraft, and an entry can set its own on its `inc` and `dec`.
   An aircraft can read a command once per update of its own code, which can be every frame or slower.
   
-  The A350 takes one command every 2 frames: two baro commands in one frame moved the baro 1 hPa, and ten sent once a frame moved it 5 (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
+  The A350 takes at most one command every 2 frames: two baro commands in one frame moved the baro 1 hPa, and ten sent once a frame moved it 5 hPa (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
   So the A350's profile paces its commands at 2 frames or more.
-  Its heading knob also accelerates, moving further for each command when they come fast, so a heading syncs as one write to `L:INI_HEADING_DIAL`, which the A350 keeps, rather than as steps (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it)).
-  FS Copilot's A220 profile says a burst of heading increments collapses into one change (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`), and the stock heading events didn't reach the A220's FCP at all, one at a time or ten in a burst (measured, same entry as the A350's commands).
+  Its heading knob also accelerates: ten up commands, one every 2 frames, moved the dial 30 degrees, so a heading syncs as one write to `L:INI_HEADING_DIAL`, which holds a written value, rather than as steps (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it)).
+  Whether slower commands step 1 degree each is untested.
+  On the A220, `K:HEADING_BUG_INC` sent through SimConnect moved nothing, once a frame or ten in one frame, so its autopilot targets sync through the flight control panel's (FCP's) own controls, whose pace is untested (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
+  FS Copilot's A220 profile, whose dropped setter sent the same event as calculator code, says a burst collapses into one change (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`), so the route an event takes may decide whether the A220 acts on it (unverified).
 - **Transport:** which call an event needs on this aircraft.
   For the yoke's masked axis events, the PMDG 777's module drops one sent with SimConnect's `_EX1` call and acts on the same event sent with the legacy call (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)), and its other events are untested.
 - **Following machines' settings:** values Crosscheck sets on every following machine while the session runs, so only one machine runs something each machine would otherwise run for itself.

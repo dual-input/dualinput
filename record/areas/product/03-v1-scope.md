@@ -364,7 +364,8 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 - Joining and flying are two steps.
   Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which [installing and updating](#installing-and-updating) scopes.
 - Once a pilot has joined, and until they're in a flight, they see where the PF is, such as "James is at EGLL stand X12".
-  A Go to button points the world map at that spot and selects the stand, through the world map's own requests (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
+  A Go to button points the world map at that spot and selects the stand, through the world map's own requests, which set the departure and stand when code we ran through the sim's inspector made them (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
+  Shipping that code in a copy of one of the sim's UI components is unverified for our package ([interface log](../interface/log.md#2026-10-05-a-package-reaches-the-menus-document-by-shipping-its-own-copy-of-one-of-the-sims-ui-components)), and so is naming the PF's stand once they've moved (the open questions below).
 - Each pilot loads their flight at the PF's stand, because moving an aircraft across the world makes the sim load new scenery there, which can stall it or fill its video memory (unverified; a probe that moves a parked aircraft to an airport on another continent settles it).
 - When a joined pilot is in a flight, Crosscheck puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
 - Each pilot works through the [preflight match check](#preflight-match-check)'s list and clicks Ready.
@@ -402,7 +403,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 - What a joined pilot sees when the PF isn't in a flight yet, such as when the host started the session before the sim.
 - Whether Crosscheck can name the stand an aircraft is on, from SimConnect directly or by matching the aircraft's position against the airport's parking spots (unverified).
-  The flight file's `[Departure]` names the stand a flight loaded at, such as `GateName=PARKING; GateNumber=140` (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), which holds only until the PF moves.
+  The `[Departure]` section of `CustomFlight.FLT`, the flight file the sim names in `FlightLoaded`, names the stand a flight loaded at, such as `GateName=PARKING; GateNumber=140` (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), which holds only until the PF moves.
 
 ### Preflight match check
 
@@ -617,8 +618,6 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
 - The default radii for taking and leaving a seat, which trying them in two or three cockpits settles.
 - Whether a dropped pilot's figure can turn see-through, through the material animation that colors it (unverified).
 - What makes some part of the figure miss a frame now and then in flight, which our test pilot saw in the 58P ([avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
-- Whether the figure's joints follow variables of its own object, so one sim can draw several figures, which v1 needs, since each sim draws the other pilot's figure and, in an outside view, the pilot's own.
-  p17's sphere took its size and color from variables of its own object (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object)), and a step 6 probe in [the plan](plan.md) settles the joints and what many figures cost.
 
 ## Interface
 

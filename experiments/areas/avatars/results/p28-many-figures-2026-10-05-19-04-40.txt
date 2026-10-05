@@ -1,0 +1,29 @@
+p28-many-figures, started 2026-10-05T19:04:40.049Z
+Setup: A380 on EGLL 27R, Beyond ATC traffic, looking forward, figures behind
+Grid: 40 figures a row, the first row 50m behind the aircraft's reference point
+
+no figures: 21.6 fps, 0 Z: writes in the module's last frame
+2 figures, moving: 20.9 fps, 56 Z: writes in the module's last frame
+2 figures, written, still: 21.7 fps, 56 Z: writes in the module's last frame
+2 figures, not written: 21.7 fps, 0 Z: writes in the module's last frame
+20 figures, moving: 21.6 fps, 560 Z: writes in the module's last frame
+20 figures, written, still: 21.4 fps, 560 Z: writes in the module's last frame
+20 figures, not written: 21.7 fps, 0 Z: writes in the module's last frame
+180 figures, moving: 21.5 fps, 5040 Z: writes in the module's last frame
+180 figures, written, still: 21.8 fps, 5040 Z: writes in the module's last frame
+180 figures, not written: 22.0 fps, 0 Z: writes in the module's last frame
+400 figures, moving: 20.2 fps, 11200 Z: writes in the module's last frame
+400 figures, written, still: 21.2 fps, 11200 Z: writes in the module's last frame
+400 figures, not written: 21.2 fps, 0 Z: writes in the module's last frame
+600 figures, moving: 21.1 fps, 16800 Z: writes in the module's last frame
+600 figures, written, still: 21.3 fps, 16800 Z: writes in the module's last frame
+600 figures, not written: 21.4 fps, 0 Z: writes in the module's last frame
+800 figures, moving: 20.9 fps, 22400 Z: writes in the module's last frame
+800 figures, written, still: 21.3 fps, 22400 Z: writes in the module's last frame
+800 figures, not written: 21.3 fps, 0 Z: writes in the module's last frame
+1000 figures, moving: 21.1 fps, 28000 Z: writes in the module's last frame
+1000 figures, written, still: 21.3 fps, 28000 Z: writes in the module's last frame
+1000 figures, not written: 21.0 fps, 0 Z: writes in the module's last frame
+
+Poses of their own: not asked
+L: table: 10516 names before, 10516 after

@@ -1,0 +1,19 @@
+p01-markers, from experiments/areas/sync/results/p01-guided-load-2026-10-05-16-54-34.ndjson
+
+| Load | Fly press vs FlightLoaded | Ready press vs RTC_END | Reloads | Ready after Fly | Missing before recording | All, from Fly | Switches, from Fly | All, from Ready | Switches, from Ready |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 black-square-baron-pro | +0.8s | +0.6s | 0 | 17.6s | 0.8s | 63.2s | 36.6s | 45.6s | 30.0s |
+| 2 a2a-pa24-comanche | -29.5s | +0.3s | 1 | 17.2s | none | 52.5s, 5 late | 33.7s | 36.6s, 5 late | 30.0s |
+| 3 synaptic-a220 | +1.9s | +0.3s | 0 | 16.0s | 1.9s | 44.5s | 34.5s | 30.0s | 30.0s |
+| 4 fenix-a320-family | +22.1s | +4.6s | 0 | 18.3s | 22.1s | 90.0s (cap), 4 late | 48.0s | 90.0s (cap) | 30.0s |
+| 5 inibuilds-a350 | -79.6s | +3.4s | 1 | 67.2s | none | 30.0s, 354 late | 30.0s, 3 late | 39.7s, 1 late | 30.0s |
+| 6 pmdg-777-300er | -25.8s | +1.4s | 1 | 19.0s | none | 52.0s, 1 late | 36.9s | 35.2s, 1 late | 30.0s |
+
+2 a2a-pa24-comanche, from Fly, all: 5 late: L:AmbientVisibility at 100.6s; L:Blinking2Offset at 63.3s; L:Blinking4Offset at 64.6s; L:BlinkingOffset at 65.4s; L:Blinking3Offset at 66.6s
+2 a2a-pa24-comanche, from Ready, all: 5 late: L:AmbientVisibility at 83.4s; L:Blinking2Offset at 46.1s; L:Blinking4Offset at 47.4s; L:BlinkingOffset at 48.2s; L:Blinking3Offset at 49.5s
+4 fenix-a320-family, from Fly, all: 4 late: L:N_ELEC_VOLT_BAT_1 at 102.6s; L:p42_cp_interactive_ui at 98.0s, 99.9s; L:p42_cp_states_mouse_capture_type at 98.0s, 99.7s; L:p42_cp_states_mouse_capture_hide at 98.0s, 99.7s
+5 inibuilds-a350, from Fly, all: 354 late: A:ELECTRICAL MASTER BATTERY:1 at 61.5s, 66.1s, 71.5s; A:AVIONICS MASTER SWITCH at 61.5s, 66.1s, 71.5s; A:COM STANDBY FREQUENCY:1 at 66.1s; A:FUEL TOTAL QUANTITY at 64.6s; L:p42_cp_load_camera_defs at 73.0s; L:p42_cp_load_views_lib at 73.0s; L:p42_cp_load_groups_lib at 73.0s; L:FSDT_GSX_COUATL_STARTED at 55.9s; …
+5 inibuilds-a350, from Fly, switches: 3 late: A:ELECTRICAL MASTER BATTERY:1 at 61.5s, 66.1s, 71.5s; A:AVIONICS MASTER SWITCH at 61.5s, 66.1s, 71.5s; L:INI_LOAD_ON_GPU at 66.1s, 66.1s
+5 inibuilds-a350, from Ready, all: 1 late: L:ECAM_IS_STS_CLEARABLE at 59.1s, 59.2s
+6 pmdg-777-300er, from Fly, all: 1 late: L:yokes_Fore_Aft at 63.9s, 82.9s
+6 pmdg-777-300er, from Ready, all: 1 late: L:yokes_Fore_Aft at 45.0s, 64.0s

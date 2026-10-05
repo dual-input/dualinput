@@ -11,9 +11,9 @@
  *   1. names the aircraft, its place in the list, and whether Flow Pro's
  *      auto-click is on for it; the pilot presses Page Down as they click Fly
  *      in Free flight, or Page Up to skip the aircraft;
- *   2. records from that press every L: variable that moves, through
- *      fsc-editor-link's stream, the stock values in TIMELINE_A every frame,
- *      and the sim's load events;
+ *   2. records, from the sim's FlightLoaded or that press, whichever comes
+ *      first, every L: variable that moves, through fsc-editor-link's stream,
+ *      the stock values in TIMELINE_A every frame, and the sim's load events;
  *   3. waits for a second Page Down, when Ready to fly is clicked, by the pilot
  *      or by Flow Pro;
  *   4. asks for hands off the cockpit for 2 minutes from that press;
@@ -21,9 +21,10 @@
  *      back every value they change;
  *   6. asks for the next aircraft.
  * The report applies catch-up's settle rule (record/areas/sync/03-catch-up.md,
- * "Settling after a load") to every load, timed from each candidate moment of
- * "loaded", over every value and over a short list of switches, and lists what
- * moved after the rule called the aircraft settled.
+ * "Settling after a load"; lib/settle.mjs) to every load, timed from each
+ * candidate moment of "loaded", the sim's markers first and the presses as a
+ * check on them, over every value and over a short list of switches, and lists
+ * what moved after the rule called the aircraft settled.
  *
  * The connection stays open across loads, as a crew member's Crosscheck would.
  * It subscribes to no K: events: the crashes in
@@ -41,9 +42,7 @@ import { Recorder, fmt, plural, repoRelative, scrub, secs, sleep } from "../airc
 import { TIMELINE_A } from "../aircraft/lib/probes.mjs"
 import { Sim } from "../aircraft/lib/sim.mjs"
 import { startBeeper, startKeys, startSpeaker } from "../../tools/guide.mjs"
-
-// Catch-up's settle rule, as 03-catch-up states it.
-const RULE = { firstQuietFromMs: 15_000, quietMs: 15_000, capMs: 90_000, noisyChanges: 5 }
+import { RULE, markers, settleVerdict } from "./lib/settle.mjs"
 
 // The Baron's latest restore came about 52s after Ready to fly, in a runway
 // start (experiments/areas/sync/results/p01-guided-load-2026-10-05-16-45-26.txt).
@@ -158,11 +157,13 @@ const lastL = new Map() // L: id → its last streamed value
 const events = [] // { t, name, data }, the sim's system and flow events
 const curatedA = new Set(SETTLE_A.map(([n]) => n))
 
-// One load: every value that moved after the first Page Down, as
+// One load: every value that moved after recording started, as
 // key → { kind, name, first, last, appearedT, before: { n, times }, after: { n, times } },
-// with "before" and "after" the second Page Down.
+// with "before" and "after" the second Page Down. tArm is when the probe asked
+// for the aircraft, and recording starts at the sim's first FlightLoaded after
+// it, or at the first Page Down if that comes first.
 function newLoadState(load) {
-  return { load, t1: null, t2: null, tEnd: null, entries: new Map() }
+  return { load, tArm: Date.now(), tStart: null, t1: null, t2: null, tEnd: null, entries: new Map(), markers: null }
 }
 
 // before is undefined for a value seen for the first time, such as an L:
@@ -182,7 +183,7 @@ function noteChange(state, key, kind, name, before, value, t) {
   if (bucket.times.length < KEEP_TIMES) bucket.times.push(t)
 }
 
-const recording = () => (run.current && run.current.t1 !== null && run.current.tEnd === null ? run.current : null)
+const recording = () => (run.current && run.current.tStart !== null && run.current.tEnd === null ? run.current : null)
 
 function startRecording() {
   sim.watch([...TIMELINE_A, ["CAMERA STATE", "number"]], {
@@ -193,7 +194,11 @@ function startRecording() {
       if (state) noteChange(state, `A:${name}`, "A", `A:${name}`, before, v, t)
     },
   })
-  sim.systemHandlers.add((name, data) => events.push({ t: Date.now(), name, data }))
+  sim.systemHandlers.add((name, data) => {
+    const t = Date.now()
+    events.push({ t, name, data })
+    if (name === "FlightLoaded" && run.current && run.current.tStart === null) run.current.tStart = t
+  })
   sim.flowHandlers.add((name) => events.push({ t: Date.now(), name: `flow ${name}`, data: null }))
 }
 
@@ -208,55 +213,22 @@ function onValues(values, t) {
 
 // ---------------------------------------------------------------- the settle rule
 
-// When the rule calls the aircraft settled, timed from t0, over the entries
-// keep() accepts: { atMs, why, counted, excluded, late }. A change counts while
-// its entry has changed at most noisyChanges times since t0; the aircraft has
-// settled once no counted change came for quietMs, counted from
-// firstQuietFromMs, or at capMs. late lists the entries that never turned
-// noisy and changed after the verdict.
-function settleVerdict(state, t0, keep) {
-  const changes = []
-  const perEntry = new Map()
-  for (const [key, e] of state.entries) {
-    if (!keep(e)) continue
-    const times = [...e.before.times, ...e.after.times].filter((t) => t > t0).sort((a, b) => a - b)
-    if (!times.length) continue
-    // Past KEEP_TIMES a bucket stops keeping times, so an overflowing value is
-    // treated as noisy for every moment its lost changes could fall after.
-    const overflow = (e.before.n > KEEP_TIMES && t0 < state.t2) || e.after.n > KEEP_TIMES
-    perEntry.set(key, { e, times, overflow })
-    times.forEach((t, i) => changes.push({ key, t, i }))
-  }
-  changes.sort((a, b) => a.t - b.t)
-  let lastCounted = t0
-  let settledAt = null
-  for (const c of changes) {
-    const candidate = Math.max(t0 + RULE.firstQuietFromMs, lastCounted) + RULE.quietMs
-    if (c.t >= candidate) { settledAt = candidate; break }
-    if (c.i < RULE.noisyChanges && !perEntry.get(c.key).overflow) lastCounted = c.t
-  }
-  if (settledAt === null) {
-    const candidate = Math.max(t0 + RULE.firstQuietFromMs, lastCounted) + RULE.quietMs
-    if (candidate <= state.tEnd) settledAt = candidate
-  }
-  let atMs = settledAt === null ? null : settledAt - t0
-  let why = "quiet"
-  if (atMs === null || atMs > RULE.capMs) { atMs = RULE.capMs; why = "cap" }
-  const all = [...perEntry.values()]
-  const noisy = (p) => p.times.length > RULE.noisyChanges || p.overflow
-  const late = all
-    .filter((p) => !noisy(p) && p.times.some((t) => t - t0 > atMs))
-    .map((p) => ({ name: p.e.name, afterMs: p.times.filter((t) => t - t0 > atMs).map((t) => t - t0), first: p.e.first, last: p.e.last }))
-  return { atMs, why, counted: all.filter((p) => !noisy(p)).length, excluded: all.filter(noisy).length, late }
-}
+const verdict = (state, t0, keep) =>
+  settleVerdict({ entries: state.entries, t0, t2: state.t2, tEnd: state.tEnd, keep, keepTimes: KEEP_TIMES })
 
+// The sim's markers come first: a pilot's press can land seconds late, and on
+// 2026-10-05 one came 22s after the sim's FlightLoaded (results/p01-guided-load-
+// 2026-10-05-16-54-34.ndjson, the Fenix). The presses stay as a check on them.
 function candidates(state) {
-  const after = events.filter((ev) => ev.t >= state.t1)
-  const first = (test) => after.find(test)?.t ?? null
+  const m = markers(events, { from: state.tArm, readyBy: state.t2 + 10_000 })
+  state.markers = m
+  const from = m.fly ?? state.t1
+  const first = (test) => events.find((ev) => ev.t >= from && test(ev))?.t ?? null
   return [
+    ["Fly, by the sim's last FlightLoaded", m.fly],
     ["the first Page Down, clicking Fly", state.t1],
-    ["the first load event", first((ev) => ["FlightLoaded", "AircraftLoaded", "flow FLT_LOADED"].includes(ev.name))],
     ["the sim running", first((ev) => (ev.name === "Sim" && ev.data === 1) || ev.name === "SimStart")],
+    ["Ready to fly, by the sim's last RTC_END", m.ready],
     ["the second Page Down, Ready to fly", state.t2],
   ].filter(([, t]) => t !== null && t <= state.tEnd)
 }
@@ -385,19 +357,20 @@ async function oneLoad(load, i, total, before) {
   const flow = load.flowPro ? (turn ? "ON (turn Flow Pro's auto-click back on now)" : "on") : (turn || !before ? "OFF (turn Flow Pro's auto-click off now)" : "off")
   beep(880, 150)
   say(`Aircraft ${i} of ${total}: ${name}. Flow Pro auto-click ${load.flowPro ? (turn ? "on. Turn it back on now" : "on") : (turn || !before ? "off. Turn it off now" : "off")}.`)
-  const k1 = await press(`[${head}] Load ${name} parked, from Free flight. Flow Pro auto-click: ${flow}. Page Down the moment you click Fly; Page Up skips this aircraft.`)
-  if (k1.key !== "START") { say("Skipped."); return { load: { n: load.n, id: load.id }, skipped: true } }
-
   const state = newLoadState(load)
-  state.t1 = k1.t
   run.current = state
+  const k1 = await press(`[${head}] Load ${name} parked, from Free flight. Flow Pro auto-click: ${flow}. Page Down the moment you click Fly; Page Up skips this aircraft.`)
+  if (k1.key !== "START") { run.current = null; say("Skipped."); return { load: { n: load.n, id: load.id }, skipped: true } }
+
+  state.t1 = k1.t
+  if (state.tStart === null) state.tStart = k1.t
   beep(1200, 120)
   const k2 = await press(`[${head}] Recording. Page Down when Ready to fly is clicked, by you or Flow Pro.`, { timeoutMs: READY_TIMEOUT_MS })
   state.t2 = k2.key === "START" ? k2.t : Date.now()
   beep(1200, 120)
   say("Hands off for two minutes.")
 
-  const loaded = events.find((ev) => ev.name === "AircraftLoaded" && ev.t >= state.t1)
+  const loaded = events.find((ev) => ev.name === "AircraftLoaded" && ev.t >= state.tStart)
   const path = typeof loaded?.data === "string" ? loaded.data : sim.live.aircraft
   const matched = path ? load.a.folders.some((f) => path.toLowerCase().includes(`\\${f.toLowerCase()}\\`)) : null
   rec.log("aircraft", `${sim.live.title ?? "no title yet"}; ${path ?? "no AircraftLoaded path"}${matched === false ? `; not one of ${load.id}'s folders` : ""}`, { title: sim.live.title, path, matched })
@@ -428,9 +401,16 @@ async function oneLoad(load, i, total, before) {
 function summarize(state, extra) {
   const verdicts = candidates(state).map(([from, t0]) => ({
     from, t0Ms: t0 - state.t1,
-    all: settleVerdict(state, t0, () => true),
-    switches: settleVerdict(state, t0, switchesOf(state)),
+    all: verdict(state, t0, () => true),
+    switches: verdict(state, t0, switchesOf(state)),
   }))
+  const m = state.markers
+  const marked = {
+    flyMs: m.fly === null ? null : m.fly - state.t1,
+    readyMs: m.ready === null ? null : m.ready - state.t1,
+    reloads: m.reloads,
+    recordingFromMs: state.tStart - state.t1,
+  }
   const entries = [...state.entries.values()].map((e) => ({
     kind: e.kind, name: e.name, first: e.first, last: e.last,
     appearedMs: e.appearedT === null ? null : e.appearedT - state.t1,
@@ -443,7 +423,8 @@ function summarize(state, extra) {
     load: { n: state.load.n, id: state.load.id, flowPro: state.load.flowPro },
     ...extra,
     readyMs: state.t2 - state.t1,
-    events: events.filter((ev) => ev.t >= state.t1 && ev.t <= state.tEnd).map((ev) => ({ ms: ev.t - state.t1, name: ev.name, data: ev.data })),
+    marked,
+    events: events.filter((ev) => ev.t >= state.tStart && ev.t <= state.tEnd).map((ev) => ({ ms: ev.t - state.t1, name: ev.name, data: ev.data })),
     lNames: names.size,
     moved: moved.length,
     appeared: appeared.length,
@@ -470,7 +451,9 @@ function report() {
     lines.push(`== ${r.load.n} ${r.load.id}, Flow Pro auto-click ${r.load.flowPro ? "on" : "off"}`)
     lines.push(`   loaded: ${r.title ?? "?"} (${r.path ?? "no AircraftLoaded path"})${r.matched === false ? "; NOT the asked-for aircraft" : ""}`)
     lines.push(`   Ready to fly pressed ${secs(r.readyMs)} after Fly; ${r.fps?.fps ? `${r.fps.fps.toFixed(1)} fps afterwards` : "no frame rate"}`)
-    lines.push(`   events from Fly: ${r.events.map((e) => `${secs(e.ms)} ${e.name}${e.data !== null && e.data !== undefined ? ` ${typeof e.data === "string" ? e.data.split("\\").slice(-2).join("\\") : e.data}` : ""}`).join("; ") || "none"}`)
+    const mk = r.marked
+    lines.push(`   by the sim's markers: ${mk.flyMs === null ? "no FlightLoaded" : `FlightLoaded ${secs(mk.flyMs)}`} and ${mk.readyMs === null ? "no RTC_END" : `RTC_END ${secs(mk.readyMs)}`} from the first press, so Ready ${mk.flyMs !== null && mk.readyMs !== null ? secs(mk.readyMs - mk.flyMs) : "?"} after Fly; ${plural(mk.reloads, "reload")} before it; recording from ${secs(mk.recordingFromMs)}`)
+    lines.push(`   events from the first press: ${r.events.map((e) => `${secs(e.ms)} ${e.name}${e.data !== null && e.data !== undefined ? ` ${typeof e.data === "string" ? e.data.split("\\").slice(-2).join("\\") : e.data}` : ""}`).join("; ") || "none"}`)
     lines.push(`   ${r.moved} values moved, ${r.appeared} appeared${r.lastAppearedMs !== null ? ` (the last ${secs(r.lastAppearedMs)} after Fly)` : ""}; the L: table held ${r.lNames} names`)
     for (const v of r.verdicts) {
       for (const [set, x] of [["all", v.all], ["switches", v.switches]]) {

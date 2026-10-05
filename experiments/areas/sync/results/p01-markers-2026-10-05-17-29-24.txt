@@ -1,0 +1,12 @@
+p01-markers, from experiments/areas/sync/results/p01-guided-load-2026-10-05-17-29-24.ndjson
+
+| Load | Fly press vs FlightLoaded | Ready press vs RTC_END | Reloads | Ready after Fly | Missing before recording | All, from Fly | Switches, from Fly | All, from Ready | Switches, from Ready |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 black-square-baron-pro (Flow Pro off) | -1.5s | +0.3s | 0 | 20.3s | none | 50.1s, 1 late | 37.5s | 30.0s, 3 late | 30.0s |
+| 2 black-square-baron-pro | +1.3s | +0.3s | 0 | 18.9s | 1.3s | 38.1s, 1 late | 35.8s | 44.9s | 30.0s |
+| 3 black-square-baron-pro | -0.8s | +2.0s | 0 | 13.5s | none | 39.7s, 1 late | 35.0s | 44.8s | 30.0s |
+
+1 black-square-baron-pro, from Fly, all: 1 late: L:AS1000_Warnings_WarningIndex at 50.7s
+1 black-square-baron-pro, from Ready, all: 3 late: L:var_scaledMaximumMixturePosition_1 at 95.1s, 98.5s; L:var_scaledMaximumMixturePosition_2 at 95.1s, 98.5s; L:AS1000_Warnings_WarningIndex at 30.4s
+2 black-square-baron-pro, from Fly, all: 1 late: L:AS1000_Warnings_WarningIndex at 48.8s
+3 black-square-baron-pro, from Fly, all: 1 late: L:AS1000_Warnings_WarningIndex at 43.4s

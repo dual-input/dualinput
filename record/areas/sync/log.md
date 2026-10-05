@@ -34,7 +34,7 @@ On the A350 the heading syncs as one write to `L:INI_HEADING_DIAL`, and `A:AUTOP
 
 **Expected:** only the heading event reaches the A220's module and the A350 counts two commands before one update as one (both unverified), and how the Fenix reads a counter that jumps couldn't be told.
 
-**Found:** each aircraft powered at a gate, reading every `L:` variable that moved and the stock values each step names, in the 3s after each step:
+**Found:** each aircraft powered at a gate, every write sent from our own SimConnect client, reading every `L:` variable that moved and the stock values each step names, in the 3s after each step:
 
 | Aircraft | Write | What moved |
 | --- | --- | --- |

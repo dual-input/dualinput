@@ -36,7 +36,7 @@
 import { AIRCRAFT } from "../aircraft/lib/aircraft.mjs"
 import { Link } from "../aircraft/lib/link.mjs"
 import { SETTLE_A } from "../aircraft/lib/load.mjs"
-import { Recorder, fmt, plural, repoRelative, secs, sleep } from "../aircraft/lib/out.mjs"
+import { Recorder, fmt, plural, repoRelative, scrub, secs, sleep } from "../aircraft/lib/out.mjs"
 import { TIMELINE_A } from "../aircraft/lib/probes.mjs"
 import { Sim } from "../aircraft/lib/sim.mjs"
 import { startBeeper, startKeys, startSpeaker } from "../../tools/guide.mjs"
@@ -484,7 +484,9 @@ async function finish(why) {
   if (run.finished) return
   run.finished = true
   rec.log("stop", why)
-  const text = report()
+  // The records are scrubbed as they're made, and the report, built from the
+  // results, is scrubbed here: the aircraft's path runs through the home folder.
+  const text = scrub(report())
   rec.writeReport(text)
   console.log("\n" + text)
   console.log(`saved ${repoRelative(rec.files.txt)}`)

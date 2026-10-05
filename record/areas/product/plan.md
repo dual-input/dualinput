@@ -57,7 +57,7 @@ The picks, picked on 2026-10-02:
   - [Preflight match check](ideas.md#preflight-match-check)
   - The two-step start, joining and then starting to fly, from [Pre-sync checklist](ideas.md#pre-sync-checklist), moved from Soon on 2026-10-03, because it's better built in from the start than added later
   - The PF's checklist of the profile's starting values, from [Pre-sync checklist](ideas.md#pre-sync-checklist), moved from Soon on 2026-10-04, because [catch-up](../sync/03-catch-up.md#when-preflight-ends) is right only if the PF's aircraft starts at them
-  - [The PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map), if a probe finds a way to set the world map from outside the sim; it replaces flight setup by the host, which went to Ideas left out on 2026-10-03
+  - [The PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map), picked if a probe found a way to set the world map from outside the sim, which step 6's did on 2026-10-05; it replaces flight setup by the host, which went to Ideas left out on 2026-10-03
   - The invite code, from [One-click invite](ideas.md#one-click-invite)
   - The take-control key, and voice phrases, both from [Voice handover](ideas.md#voice-handover)
   - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
@@ -147,14 +147,21 @@ Exit: each risk below has a log entry that answers it.
   The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
 - How the notification banner's panel shows in VR, which tells us whether it meets v1's commitment to VR pilots; nobody has tried.
 - Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
+  Answered on 2026-10-05: [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight).
 - How fast an aircraft takes stepped writes, which checks the default pace in [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft): send the Synaptic A220's `K:HEADING_BUG_INC` 10 times in one frame, then once per frame, and count the degrees the bug moves (its study's sim question 5); write `L:INI_BARO1_INC_COMMAND` twice before one update of the iniBuilds A350, then once per update (its sim question 3); and add 10 to the Fenix's `L:E_FCU_HEADING` at once (its sim questions 1 and 2).
+  Answered on 2026-10-05: [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents), and for the A350's heading, [sync log](../sync/log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it).
 - When an aircraft loaded cold stops restoring its own controls, which checks [catch-up's settle rule](../sync/03-catch-up.md#settling-after-a-load): load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
+  Answered on 2026-10-05, from every change for 2 minutes after Ready to fly: [sync log](../sync/log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads).
 - Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at low frame rates (the PA-24 session's wasn't recorded), and whether a held key bound to a momentary input event repeats inside that window.
+  Answered on 2026-10-05 for the PA-24: [sync log](../sync/log.md#2026-10-05-the-pa-24s-double-fire-comes-one-frame-apart-at-31-and-21-fps-and-a-held-key-doesnt-repeat).
 - Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
+  Answered on 2026-10-05: [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames).
 - Whether one sim draws several of our figures, each posed from variables of its own object, and what 2, 20, and 180 figures cost in frame time with every joint moving every frame, which decides how the avatars' module and channel are built ([04-room-for-later](04-room-for-later.md#people-beyond-the-crew)).
+  Answered on 2026-10-05, up to 1,000 figures: [avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-costs-frame-time-in-view-and-almost-none-out-of-view-and-costs-nothing-to-write).
 - Whether an EFB app and the notification banner's in-game panel can each hold a WebSocket to a program on the same PC, as a cockpit panel can, or show a page that program serves, as the Fenix's tablet app does, which decides whether every client of Crosscheck speaks one protocol ([04-room-for-later](04-room-for-later.md#one-protocol-for-every-client)).
+  Answered on 2026-10-05: [interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves).
 
-The world map probe and the six after it, on stepped writes, settling, the double-fire, writes landing, figures, and WebSockets, make one batched sim session.
+The world map probe and the six after it, on stepped writes, settling, the double-fire, writes landing, figures, and WebSockets, made one batched sim session, on 2026-10-05.
 Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture

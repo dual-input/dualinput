@@ -120,8 +120,10 @@ Time, date, sim rate, pause, and weather match on both machines.
 When a pilot joins, Crosscheck sets their sim's world map to the airport and the gate or runway the PF is at, so the pilot starts the flight there themselves.
 It replaces having Crosscheck load the flight for everyone, which [Ideas left out](#ideas-left-out) explains, and gets most of the way there with none of the risk.
 
-- **Tech:** whether anything outside the sim can set the world map's departure is unknown.
-- **Next:** a probe that looks for a way to set the world map's departure from outside the sim.
+- **Tech:** a script in the menu's document makes the world map's own requests: the airport search sets the departure, `setDepartureTaxiIndex` the stand, `setAircraftForConfigurator` the aircraft, `saveVariationId` the livery, and `launchFlight` starts the flight, which loaded at the stand it was given (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
+  A package can put a script there by shipping its own copy of one of the sim's UI components, as Flow Pro does (read, [interface log](../interface/log.md#2026-10-05-a-package-reaches-the-menus-document-by-shipping-its-own-copy-of-one-of-the-sims-ui-components)), which is unverified for ours.
+  Flow Pro also clicks the menu's Start and Free Flight buttons, so the whole path from the sim starting to Ready to fly could run with no clicks, through the world map's own Fly rather than `SimConnect_FlightLoad`; nobody has run it as one chain.
+- **Next:** probe the whole chain and scope it when the feature is built (user, 2026-10-05).
 
 ### Preflight match check
 

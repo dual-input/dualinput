@@ -1,0 +1,15 @@
+p28-many-figures, started 2026-10-05T18:18:00.205Z
+
+no figures: 31.0 fps, 0 Z: writes in the module's last frame
+2 figures, moving: 31.0 fps, 56 Z: writes in the module's last frame
+2 figures, written, still: 31.0 fps, 56 Z: writes in the module's last frame
+2 figures, not written: 31.0 fps, 0 Z: writes in the module's last frame
+20 figures, moving: 31.0 fps, 560 Z: writes in the module's last frame
+20 figures, written, still: 31.0 fps, 560 Z: writes in the module's last frame
+20 figures, not written: 30.8 fps, 0 Z: writes in the module's last frame
+180 figures, moving: 31.0 fps, 5040 Z: writes in the module's last frame
+180 figures, written, still: 30.9 fps, 5040 Z: writes in the module's last frame
+180 figures, not written: 31.0 fps, 0 Z: writes in the module's last frame
+
+Poses of their own: yes
+L: table: 4737 names before, 8342 after

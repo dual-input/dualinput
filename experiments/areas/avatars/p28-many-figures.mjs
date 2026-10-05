@@ -8,6 +8,7 @@
  *   node experiments/areas/avatars/p28-many-figures.mjs
  *   node experiments/areas/avatars/p28-many-figures.mjs --counts 200,400,600,800
  *   node experiments/areas/avatars/p28-many-figures.mjs --counts 400,800 --no-ask --note "camera turned around"
+ *   node experiments/areas/avatars/p28-many-figures.mjs --ahead 50 --behind     the grid 50m behind instead
  *
  * Ctrl+C takes the figures out and writes the report with every measurement
  * finished so far.
@@ -49,8 +50,11 @@ const MEASURE_MS = 10_000
 const SPACING_M = 1.5
 const PER_ROW = 40
 // Meters from the aircraft's reference point to the first row; --ahead moves
-// it past a long aircraft's nose.
+// it past a long aircraft's nose, or with --behind, past its tail.
 const FIRST_ROW_M = Number(arg("--ahead") ?? 10)
+// --behind puts the grid behind the aircraft, so a camera looking forward has
+// the figures out of view.
+const SIDE = process.argv.includes("--behind") ? -1 : 1
 
 const rec = new Recorder("p28-many-figures", { area: "avatars" })
 const POSE = [["PLANE LATITUDE", "degrees"], ["PLANE LONGITUDE", "degrees"], ["PLANE ALTITUDE", "feet"], ["PLANE HEADING DEGREES TRUE", "degrees"], ["PLANE PITCH DEGREES", "degrees"], ["PLANE BANK DEGREES", "degrees"]]
@@ -110,9 +114,10 @@ async function main() {
     if (run.stopping) return
     while (ids.length < n && !run.stopping) {
       const i = ids.length
-      const at = offset(ac, FIRST_ROW_M + Math.floor(i / PER_ROW) * SPACING_M * 2, ((i % PER_ROW) - (PER_ROW - 1) / 2) * SPACING_M)
+      const at = offset(ac, SIDE * (FIRST_ROW_M + Math.floor(i / PER_ROW) * SPACING_M * 2), ((i % PER_ROW) - (PER_ROW - 1) / 2) * SPACING_M)
       const init = new InitPosition()
-      Object.assign(init, { latitude: at.lat, longitude: at.lon, altitude: ac.alt, pitch: 0, bank: 0, heading: (ac.hdg + 180) % 360, onGround: true, airspeed: 0 })
+      // Every figure faces the aircraft.
+      Object.assign(init, { latitude: at.lat, longitude: at.lon, altitude: ac.alt, pitch: 0, bank: 0, heading: (ac.hdg + (SIDE > 0 ? 180 : 0)) % 360, onGround: true, airspeed: 0 })
       const r = await sim.spawn(TITLE, "", init)
       if (r.id === undefined) { rec.log("warn", `figure ${i + 1} not created: ${r.error}`); break }
       sim.release(r.id)
@@ -174,6 +179,7 @@ async function finish(why) {
 
   const lines = [`p28-many-figures, started ${new Date(rec.started).toISOString()}${why === "interrupted" ? ", stopped with Ctrl+C" : ""}`]
   if (NOTE) lines.push(`Setup: ${NOTE}`)
+  lines.push(`Grid: ${PER_ROW} figures a row, the first row ${FIRST_ROW_M}m ${SIDE > 0 ? "ahead of" : "behind"} the aircraft's reference point`)
   lines.push("")
   for (const r of run.results) lines.push(`${r.label}: ${r.fps === null ? "no" : r.fps.toFixed(1)} fps${r.writes !== undefined && r.writes !== null ? `, ${r.writes} Z: writes in the module's last frame` : ""}${r.errors ? `, ${r.errors} errors` : ""}`)
   lines.push("", `Poses of their own: ${run.poses === null ? "not asked" : run.poses ? "yes" : "no, one pose for all"}`)

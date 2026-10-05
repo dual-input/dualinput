@@ -8,8 +8,57 @@ A figure of our own, balls and sticks whose joints are animations that read vari
 In a moving cockpit, a WASM module that writes the figure inside the sim's frame, turned by the aircraft's full attitude and led by 0.75 to 1 frame, holds it in its seat.
 The figure's hand goes where the pilot clicks: the ray from the eye through the cursor, cast into the aircraft's interior model, lands within 2mm with no calibration and no control names, and a held press glides along the surface it touched.
 A sidestick's grip moves with its own animations as a yoke does, though of the three sidestick airliners we could read, only the Fenix marks where the hand goes.
-The probes are p01 to p25 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
-Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-02 and 2026-10-03, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+Many figures, each posed from its own object's variables, cost about 18µs a frame each in view and almost nothing out of view.
+The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
+Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-05: Each figure poses from its own object's variables, and costs about 18µs a frame in view, almost nothing out of view, and nothing to write
+
+**Asked:** does one sim draw many of our figures, each posed from variables of its own object, and what do 2, 20, and 180 cost in frame time with every joint moving every frame ([the plan](../product/plan.md)'s step 6; [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew))?
+Then, where's the ceiling, and what does a figure out of view or hidden behind the aircraft cost?
+
+**Expected:** joints would follow object variables as [p17's sphere's size and color did](#2026-10-03-a-model-of-our-own-compiles-from-generated-gltf-and-its-size-and-color-follow-variables-of-its-own-object), and nobody had measured the cost.
+
+**Found:** `CROSSCHECK_FigureZ` is p24's figure with every joint and its color read from `Z:` variables of its own object.
+p28 spawned it through SimConnect on a grid of 40 a row, 1.5m apart, ahead of or behind the aircraft, froze each one, and a WASM module wrote all 28 of every figure's `Z:` variables every frame, moving every joint ("moving"), holding a pose of its own ("written, still"), or writing nothing ("not written").
+Each frame rate is a 10s average, with the frame rate uncapped and frame generation off unless the setup says otherwise:
+
+- The figures stood in poses and colors of their own, at 20 and at 180, so each follows its own object's variables.
+- Writing costs nothing we could measure: "written, still" matched "not written" at every count, up to 28,000 `Z:` values a frame.
+- The figures' cost, in the A2A PA-24 on EGLL runway 27R, looking forward at them:
+
+  | Figures | Not written | Written, still | Moving |
+  | --- | --- | --- | --- |
+  | 0 | 53.3 fps, 18.8ms | | |
+  | 180 | 44.3 fps | 44.5 fps | 41.1 fps |
+  | 400 | 37.4 fps | 37.4 fps | 32.2 fps |
+  | 800 | 30.4 fps | 30.2 fps | 22.1 fps |
+  | 1,000 | 28.4 fps | 28.1 fps | 19.5 fps |
+
+  A still figure in view adds 16µs to 21µs to the frame, and moving every joint adds 10µs to 16µs more.
+- Where the figures stood against the camera, in frame time added by 1,000 figures, or by 800 in the PA-24:
+
+  | Setup | Still | Moving |
+  | --- | --- | --- |
+  | PA-24, figures ahead, looking forward | +14.7ms | +26.8ms |
+  | PA-24, figures ahead, looking backward | +1.1ms | +1.8ms |
+  | iniBuilds A380 with Beyond ATC injecting traffic, figures ahead, looking forward | +16.3ms | +34.6ms |
+  | A380, figures behind, looking forward | +1.3ms | +1.1ms |
+  | A380, figures behind, looking backward through the aircraft from its cockpit | +13.0ms | +25.1ms |
+
+  The A380's frame rate was about 21 fps with no figures, so a figure costs the same time whatever else the sim draws.
+  Behind the aircraft and looking forward, every count stayed within about 1ms, the noise of a 10s average with traffic moving.
+- The `L:` name table held 6,517 names before and after 1,000 figures, so `Z:` variables don't add to it.
+- With the frame rate capped at 30 fps, 180 moving figures held 31.0 fps, so a cap hides the cost below it.
+
+**Changed:** the sim skips drawing, and most animating, for figures outside the view, but draws figures hidden inside it almost in full.
+So a cabin of passengers behind a pilot looking forward costs little, and the same pilot looking back at a closed cockpit door pays for the whole cabin: in the A380, 180 figures cost 3.4ms standing still and 7.2ms moving.
+The cost is drawing and animating changed joints, not our writes, so a passenger feature saves by changing fewer joints less often and drawing less: a lower update rate, fewer figures moving at once, a lighter model, and a seated level of detail without legs, kept for aisle seats, since a seat map says who sits there and anyone not seated shows as a head alone (user, 2026-10-05).
+Those wait for the passenger feature.
+
+**Affects:** [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew).
+
+**Evidence:** `experiments/areas/avatars/results/p28-many-figures-2026-10-05-18-18-00` (capped at 30 fps, the PA-24 at KSEA), `-18-32-07`, `-18-35-24`, `-18-46-28`, and `-18-49-45` (the PA-24 on EGLL 27R), and `-18-57-34`, `-19-04-40`, and `-19-13-17` (the A380), each `.txt` and `.ndjson`; each report states its setup and grid.
 
 ## 2026-10-04: Of the three sidestick airliners we could read, only the Fenix marks a grip, and each stick's grip moves with its own two animations
 

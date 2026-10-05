@@ -1,0 +1,16 @@
+p28-many-figures, started 2026-10-05T18:32:07.778Z
+Setup: PA-24 on EGLL 27R, camera facing forward (2, 20, 180 run)
+
+no figures: 52.4 fps, 0 Z: writes in the module's last frame
+2 figures, moving: 52.5 fps, 56 Z: writes in the module's last frame
+2 figures, written, still: 52.7 fps, 56 Z: writes in the module's last frame
+2 figures, not written: 51.9 fps, 0 Z: writes in the module's last frame
+20 figures, moving: 51.1 fps, 560 Z: writes in the module's last frame
+20 figures, written, still: 50.8 fps, 560 Z: writes in the module's last frame
+20 figures, not written: 49.2 fps, 0 Z: writes in the module's last frame
+180 figures, moving: 39.3 fps, 5040 Z: writes in the module's last frame
+180 figures, written, still: 42.4 fps, 5040 Z: writes in the module's last frame
+180 figures, not written: 43.1 fps, 0 Z: writes in the module's last frame
+
+Poses of their own: yes
+L: table: 5075 names before, 6517 after

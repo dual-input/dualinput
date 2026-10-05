@@ -1,4 +1,5 @@
 p28-many-figures, started 2026-10-05T18:35:24.520Z
+Setup: PA-24 on EGLL 27R, camera facing forward
 
 no figures: 53.3 fps, 0 Z: writes in the module's last frame
 2 figures, moving: 53.6 fps, 56 Z: writes in the module's last frame

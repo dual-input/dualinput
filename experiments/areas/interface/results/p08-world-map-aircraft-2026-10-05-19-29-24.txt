@@ -1,0 +1,5 @@
+p08-world-map-aircraft, started 2026-10-05T19:29:24.899Z
+
+- Before: currentAircraft is ok, Airbus A380-800.
+- game/aircraft/aircraftList held no list (ok), so no aircraft was picked.
+- No FlightLoaded followed launchFlight before the pilot's Page Up.

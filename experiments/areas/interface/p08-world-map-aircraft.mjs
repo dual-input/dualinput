@@ -24,6 +24,8 @@
  *
  * The pilot opens Free flight's world map and presses Page Down. The probe,
  * through the inspector in mainUi:
+ *   0. sets the departure, --airport (default KSEA) and a stand, as p07 does,
+ *      since the sim refuses launchFlight without one;
  *   1. reads game/aircraft/currentAircraft and the aircraft list, and finds the
  *      aircraft whose name holds --aircraft (default "a220");
  *   2. sends setAircraftForConfigurator for it and reads currentAircraft back,
@@ -48,6 +50,7 @@ import { startShooter } from "../../tools/shot.mjs"
 const args = process.argv.slice(2)
 const flag = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null }
 const WANT = (flag("--aircraft") ?? "a220").toLowerCase()
+const AIRPORT = (flag("--airport") ?? "KSEA").toUpperCase()
 const LAUNCH = !args.includes("--no-launch")
 
 const rec = new Recorder("p08-world-map-aircraft", { area: "interface" })
@@ -77,11 +80,24 @@ const INSTALL = `(function () {
       try { return { state: d ? "ok" : "no data", value: d ? JSON.parse(JSON.stringify(d.value)) : null }; }
       catch (e) { return { state: "unreadable", error: String(e) }; }
     };
+    p.results = [];
+    p.handles = [];
+    try {
+      p.handles.push(engine.on("ResultsUpdated", function (uid, list) { if (uid === "CROSSCHECK_P08") p.results.push(list); }));
+    } catch (e) {}
   }
   return { engine: typeof engine, loader: typeof window._globalDataLoader };
 })()`
 
-const CLEAN = `(function () { window.CROSSCHECK_P08 = undefined; return "cleaned"; })()`
+const CLEAN = `(function () {
+  var p = window.CROSSCHECK_P08;
+  if (p) for (var i = 0; i < p.handles.length; i++) { try { p.handles[i].clear(); } catch (e) {} }
+  window.CROSSCHECK_P08 = undefined;
+  return "cleaned";
+})()`
+
+const trigger = (insp, triggerArgs) =>
+  insp.evaluate(`(function () { try { engine.trigger.apply(engine, ${JSON.stringify(triggerArgs)}); return "sent"; } catch (e) { return "threw: " + e; } })()`)
 
 async function call(insp, key, name, callArgs, ms = 5000) {
   await insp.evaluate(`window.CROSSCHECK_P08.call(${JSON.stringify(key)}, ${JSON.stringify(name)}, ${JSON.stringify(callArgs)})`)
@@ -114,10 +130,49 @@ async function readList(insp, path) {
   const range = await call(insp, `range:${path}`, "requestArrayElements", [path, 0, 400])
   rec.data("store", `${path}: requestArrayElements ${range.state}`, { path, range })
   if (arrayIn(range.value)) return { state: "requestArrayElements", list: arrayIn(range.value), raw: range.value }
+  // requestArrayElements answers with the list's length, and the entries are
+  // then at path/0, path/1, and so on, as the world map's own list fetcher
+  // reads them (read in lib.js, fetchWithoutCache and getElement).
+  if (typeof range.value === "number") {
+    const list = []
+    for (let i = 0; i < Math.min(range.value, 400); i++) list.push((await get(insp, `${path}/${i}`)).value)
+    const brief = (x) => (x && typeof x === "object" ? { aircraftId: x.aircraftId, variationIndex: x.variationIndex, variationId: x.variationId, id: x.id, displayName: x.displayName, variation: x.variation, name: x.name, creator: x.creator } : x)
+    rec.data("store", `${path}: ${list.length} entries`, { path, list: list.map(brief) })
+    return { state: `${range.value} entries`, list, raw: range.value }
+  }
   let g = await get(insp, path)
   if (!arrayIn(g.value)) { await request(insp, path, ""); await sleep(300); g = await get(insp, path) }
   rec.data("store", `${path}: ${g.state}`, { path, value: g.value })
   return { state: g.state, list: arrayIn(g.value), raw: g.value }
+}
+
+// The departure p07 set, by the same calls (results/p07-world-map-2026-10-05-
+// 18-02-58.txt): Start flight stays disabled without one, and launchFlight
+// sent anyway brings up the sim's "Unexpected error" dialog (2026-10-05,
+// results/p08-world-map-aircraft-2026-10-05-19-29-24.txt).
+async function setDeparture(insp) {
+  await insp.evaluate("window.CROSSCHECK_P08.results.length = 0")
+  await trigger(insp, ["EVENT_TO_VIEW_LISTENER", "JS_LISTENER_AIRPORT_SEARCH", "AIRPORT_INPUT_TEXT", "CROSSCHECK_P08", AIRPORT, "ON_DEPARTURE_AIRPORT_SELECTED"])
+  let list = null
+  for (let i = 0; i < 40 && !list; i++) {
+    await sleep(100)
+    const r = await insp.evaluate("window.CROSSCHECK_P08.results")
+    if (r && r.length) list = r[r.length - 1]
+  }
+  const hit = list ? list.find((x) => x.ICAO === AIRPORT) : null
+  if (!hit) return find(`The airport search found no ${AIRPORT}, so no departure was set.`)
+  await trigger(insp, ["EVENT_TO_VIEW_LISTENER", "JS_LISTENER_AIRPORT_SEARCH", "ON_DEPARTURE_AIRPORT_SELECTED", hit.index, hit.database])
+  let dep = null
+  for (let i = 0; i < 30; i++) {
+    await sleep(150)
+    dep = (await get(insp, "game/currentFlight/gameFlight/departure")).value
+    if (dep && JSON.stringify(dep.worldLocation ?? {}).includes(`"${AIRPORT}"`) && (dep.worldLocation.airportInfos?.taxis ?? []).length) break
+  }
+  const taxis = dep?.worldLocation?.airportInfos?.taxis ?? []
+  if (!taxis.length) return find(`${AIRPORT} was selected, but its stands didn't arrive.`)
+  const stand = taxis[Math.floor(taxis.length / 2)]
+  await request(insp, "game/currentFlight/setDepartureTaxiIndex", String(stand.ID))
+  find(`Departure set first, as p07 does: ${AIRPORT}, stand ${stand.name}.`)
 }
 
 const label = (x) => (x ? x.displayName ?? x.name ?? x.title ?? x.variation ?? JSON.stringify(x).slice(0, 80) : "none")
@@ -144,6 +199,8 @@ async function main() {
   const insp = new Inspector(main.id)
   await insp.open()
   rec.log("reach", `mainUi: ${JSON.stringify(await insp.evaluate(INSTALL))}`)
+
+  await setDeparture(insp)
 
   const before = await get(insp, "game/aircraft/currentAircraft")
   rec.data("store", "currentAircraft before", { value: before.value })

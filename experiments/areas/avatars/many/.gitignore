@@ -1,0 +1,10 @@
+# Build output: the module, fspackagetool's package and scratch, MSBuild's objects.
+build/
+Packages/
+PackagesMetadata/
+_PackageInt/
+PackageSources/
+# Written by build.mjs from figure/model.mjs at build time.
+src/channels.h
+PackageDefinitions/
+project.xml

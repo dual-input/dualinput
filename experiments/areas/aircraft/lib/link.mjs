@@ -69,7 +69,9 @@ export class Link {
 
   onOut(bytes) {
     const msg = parseMessage(bytes.toString("utf8"))
-    if (!msg || msg.kind !== "exec") return
+    if (!msg) return
+    if (msg.kind === "names" || msg.kind === "values" || msg.kind === "hello") return this.onStream(msg)
+    if (msg.kind !== "exec") return
     for (const line of msg.lines) {
       const r = parseExec(line)
       const fn = r && this.waiting.get(r.token)
@@ -112,6 +114,63 @@ export class Link {
     // looked. 30ms is two frames at 60 fps (unmeasured margin).
     await sleep(30)
     return r
+  }
+
+  // Every L: variable in the sim, by the module's own stream: after `start` it
+  // sends the names it enumerated, then, 15 times a second, every value that
+  // moved by more than 1e-6 since its last read; `rescan` appends names
+  // registered since, without re-reporting values (fsc-editor,
+  // link/src/module.cpp, k_interval_seconds and k_deadband, and the `start` and
+  // `rescan` commands). onNames gets [{ id, name }], onValues [{ id, value }]
+  // with the arrival time, and onHello { version, protocol, count }.
+  stream({ onNames = null, onValues = null, onHello = null } = {}) {
+    this.attach()
+    this.handlers = { onNames, onValues, onHello }
+    this.command("start")
+    return {
+      rescan: () => this.command("rescan", { quiet: true }),
+      stop: () => { this.handlers = null; return this.command("stop") },
+    }
+  }
+
+  onStream(msg) {
+    const h = this.handlers
+    if (!h) return
+    const t = Date.now()
+    if (msg.kind === "hello") {
+      const [version, protocol, count] = (msg.lines[0] ?? "").split(" ")
+      h.onHello?.({ version, protocol: Number(protocol), count: Number(count) }, t)
+      return
+    }
+    const out = []
+    for (const line of msg.lines) {
+      const space = line.indexOf(" ")
+      if (space <= 0) continue
+      const id = Number(line.slice(0, space))
+      if (!Number.isInteger(id) || id < 0) continue
+      if (msg.kind === "names") out.push({ id, name: line.slice(space + 1) })
+      else {
+        const value = Number(line.slice(space + 1))
+        if (Number.isFinite(value)) out.push({ id, value })
+      }
+    }
+    if (msg.kind === "names") h.onNames?.(out, t)
+    else h.onValues?.(out, t)
+  }
+
+  // A bare command, such as `start`, through the same queue as exec, because
+  // the command area holds one command at a time.
+  command(line, { quiet = false } = {}) {
+    const run = this.queue.then(async () => {
+      this.attach()
+      const payload = Buffer.alloc(LINK_AREA_BYTES)
+      payload.write(line, 0, "utf8")
+      this.sim.send(`link ${line}`, () => this.sim.handle.setClientData(this.cmd.id, this.cmd.def, 0, 0, LINK_AREA_BYTES, payload))
+      if (!quiet) this.rec.log("link", `sent ${line}`)
+      await sleep(30)
+    })
+    this.queue = run.catch(() => {})
+    return run
   }
 
   fire(name, value = null) {

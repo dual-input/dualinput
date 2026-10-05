@@ -5,6 +5,7 @@
  *   const k = await keys.next()          { key: "START" | "SKIP", foreground, t }
  *   const stop = keys.listen((k) => …)   every press, without waiting for one
  *   const beep = startBeeper(); beep(1000, 100)
+ *   const say = startSpeaker(); say("Aircraft 3 of 13")
  *
  * Page Down starts a step and Page Up skips it. End is out, because it toggles
  * the outside camera on our development machine. The keys are read globally,
@@ -81,6 +82,19 @@ export function startKeys() {
       if (waiter) { const w = waiter; waiter = null; w(k) }
     })
   })
+}
+
+// Windows' own speech synthesizer, so a pilot inside the sim hears a prompt
+// they can't read; one line of text per prompt, spoken in order.
+const SPEAK_PS = `
+Add-Type -AssemblyName System.Speech
+$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+while (($line = [Console]::In.ReadLine()) -ne $null) { $s.Speak($line) }`
+
+export function startSpeaker() {
+  const ps = powershell(SPEAK_PS, ["pipe", "ignore", "ignore"])
+  process.on("exit", () => { try { ps.kill() } catch { /* gone */ } })
+  return (text) => { try { ps.stdin.write(`${text.replace(/[\r\n]+/g, " ")}\n`) } catch { /* no voice is no failure */ } }
 }
 
 export function startBeeper() {

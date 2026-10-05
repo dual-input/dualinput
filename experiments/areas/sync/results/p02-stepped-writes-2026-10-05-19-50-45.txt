@@ -1,0 +1,25 @@
+p02-stepped-writes, started 2026-10-05T19:50:45.382Z
+Each step lists what moved in the 3s after it acted; a value already moving in the 2s before is counted apart.
+
+== fenix-a320-family, 31.0 fps
+   L:E_FCU_HEADING + 1 (acted in 22ms):
+      L:E_FCU_HEADING -63 → -62, 1 change at +121ms
+      L:N_FCU_HEADING 0 → 1, 1 change at +255ms
+      L:N_STANDBY_DDRMI_DME1 101.372368 → 101.372369, 1 change at +1055ms
+      (30 already moving)
+   L:E_FCU_HEADING + 10 at once (acted in 4ms):
+      L:E_FCU_HEADING -62 → -52, 1 change at +70ms
+      L:N_STANDBY_DDRMI_DME2 100.832671 → 100.83267, 1 change at +137ms
+      L:N_FCU_HEADING 1 → 11, 1 change at +203ms
+      L:N_STANDBY_DDRMI_DME1 101.372369 → 101.372368, 1 change at +337ms
+      L:N_STANDBY_DDRMI_COMPASS 79.837419 → 79.83742, 1 change at +1004ms
+      L:N_STANDBY_COMPASS 79.837819 → 79.83782, 1 change at +1470ms
+      (28 already moving)
+   L:S_FCU_HEADING - 1 (acted in 20ms):
+      L:S_FCU_HEADING -2 → -3, 1 change at +53ms
+      L:B_FCU_HEADING_DASHED 0 → 1, 1 change at +187ms
+      (30 already moving)
+   L:S_FCU_HEADING + 1 (acted in 13ms):
+      L:S_FCU_HEADING -3 → -2, 1 change at +79ms
+      L:N_STANDBY_DDRMI_DME2 100.83267 → 100.832669, 1 change at +2479ms
+      (28 already moving)

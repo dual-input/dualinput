@@ -34,7 +34,7 @@
 
 namespace
 {
-const int MAX_FIGURES = 200;
+const int MAX_FIGURES = 1000;
 
 HANDLE h_sim = 0;
 FsUnitId u_number;

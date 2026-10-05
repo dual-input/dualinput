@@ -6,6 +6,7 @@
  * "People beyond the crew").
  *
  *   node experiments/areas/avatars/p28-many-figures.mjs
+ *   node experiments/areas/avatars/p28-many-figures.mjs --counts 200,400,600,800
  *
  * Needs crosscheck-p28-figures in Community (many/build.mjs, with the sim
  * closed), and the sim's window in front, because a sim in the background
@@ -13,8 +14,9 @@
  *
  * In any aircraft, parked, looking forward from the cockpit:
  *   1. the frame rate with no figures;
- *   2. for 2, 20, and 180 figures, spawned on a grid 10m to 40m ahead of the
- *      aircraft and frozen there: the frame rate with the module moving every
+ *   2. for 2, 20, and 180 figures, or the counts --counts gives, spawned on a
+ *      grid from 10m ahead of the aircraft and frozen there: the frame rate
+ *      with the module moving every
  *      joint every frame, then writing every joint without moving it, then
  *      writing nothing;
  *   3. the pilot says whether the figures stand in poses of their own (Page
@@ -33,10 +35,12 @@ import { Sim } from "../aircraft/lib/sim.mjs"
 import { startBeeper, startKeys, startSpeaker } from "../../tools/guide.mjs"
 
 const TITLE = "CROSSCHECK_FigureZ"
-const COUNTS = [2, 20, 180]
+// The module poses at most 1,000 (many/src/figures.cpp, MAX_FIGURES).
+const countsArg = process.argv.indexOf("--counts")
+const COUNTS = countsArg >= 0 ? process.argv[countsArg + 1].split(",").map(Number) : [2, 20, 180]
 const MEASURE_MS = 10_000
 const SPACING_M = 1.5
-const PER_ROW = 20
+const PER_ROW = 40
 const FIRST_ROW_M = 10
 
 const rec = new Recorder("p28-many-figures", { area: "avatars" })

@@ -3,6 +3,117 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-06: Code in the menu's document tells which page is up, and nothing we found takes the menu home without the sim in front
+
+**Asked:** a Join that starts wherever the pilot is needs to know which page is up, and on a page outside its path, could it first bring the menu home?
+
+**Expected:** the page components on screen name the page, and `SHOW_WORLDMAP_HOMEPAGE`, the flow event the start screen's Start button sends (read in fs-base-ui 0.1.10, `html_ui/Global/pkg/base.bundle.js`, `StartPageManipulator.setButtons`), might take the menu home from any page.
+A flow event is the sim's own: the menu's code sends one by name to the native state machine that decides which screen comes next, with `engine.trigger("LAUNCH_FLOW_EVENT_FROM_VIEW", ...)` (read in `html_ui/Global/lib.js`, `LaunchFlowEvent`).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, through the inspector in mainUi, standing in for our script there ([entry below](#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)):
+
+- The master page tells the main menu from a flight: `MasterPage` in the menu, and `MasterPage_InGame` in a flight, with `MasterPage_Pause` on top while the pause menu is open.
+- The large page components on screen name the page: `Startpage`, `Homepage`, `FreeFlightPage` for the world map, `OptionsPage` for Settings, `InstallPage` for the first-boot setup, and `Career_ConfirmationPage` for Ready to fly.
+- `SHOW_WORLDMAP_HOMEPAGE`, sent as the Start button sends it, left the main menu's Settings and the pause menu's as they were for 10s.
+- The menu has no Home button: its bar holds profile, notifications, settings, the marketplace, communications, and friends.
+  Its back is the input action `KEY_MENU_SR_BACK`, whose button in the menu's input bar has a callback that leaves it to the sim (read in `base.bundle.js` and `lib.js`), and SimConnect refused `MENU_SR_BACK` and `KEY_MENU_SR_BACK` with `NAME_UNRECOGNIZED`.
+- Escape, pressed into the sim's window after our code brought it to the front, took Settings to the home page in one press.
+
+**Changed:** a Join can read where the pilot is, and on a page outside its path it shows the pilot an error rather than trying to get home: Escape works only with the sim in front, which is too fragile to count on (user, 2026-10-06).
+A part of the core that knows where the sim is, which features read, is proposed in [the plan](../product/plan.md)'s step 7.
+
+**Affects:** the idea [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map).
+
+**Evidence:** `results/p12-menu-navigate.ndjson`; the back and Escape tests ran from scratch scripts, with no run file.
+
+## 2026-10-06: Our copy of BlurPage brings our script into the menu from the first screen, and from there it runs the whole join to Ready to fly
+
+**Asked:** p07 and p08 set the world map through the inspector ([entry below](#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
+Can a package of ours put that code into the menu's documents, which was unverified for ours ([entry below](#2026-10-05-a-package-reaches-the-menus-document-by-shipping-its-own-copy-of-one-of-the-sims-ui-components))?
+And from a closed sim, can that code run the whole join: Start, Free flight, the departure, stand, aircraft, and livery, Fly, and Ready to fly ([the plan](../product/plan.md)'s step 6)?
+
+**Expected:** our toolbar icon's script, since the toolbar's document is one of the world map's documents with the store (same entry); if not, our own copy of one of the sim's UI components, as Flow Pro ships.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, with crosscheck-p10-menu, whose script polls p10 on 127.0.0.1 and runs the steps p10 sends, as Crosscheck's core would:
+
+- In the menu, the toolbar's document draws no panel buttons, so on the first visit our icon's script loaded nowhere.
+  It loaded during a flight and stayed in the toolbar's document back in the menu, but there the airport search answered nothing, sent as it was or after the script registered the search's listener itself.
+- Our EFB app runs in the menu ([entry below](#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)), but the EFB's document isn't allowed the world map's requests: `engine.call` refused `requestData` and `requestArrayElements` with "NoSuchMethod: requestData not bound", and `engine.trigger("requestData", ...)` changed nothing, while the same request from the toolbar's document changed the aircraft.
+- No script in the menu can read a UI component: an XHR for `coui://cookedcomps/` errored, and the inspector listed none among mainUi's resources.
+  The sim's own copies are files in its install folder, `Packages/fs-base-ui/cookedcomps/{GUID}.html` and `.json`, under `steamapps/common/Limitless` on Steam, and Flow Pro's copy of the start page has older element ids than the sim's today, so a copy shipped once falls behind the sim's updates.
+- Our copy of MenuBarPage, `{37E4C836-61EF-469A-BDF6-DB44BAAE15B5}`, made from the stock file with a hidden `<svg><foreignObject><img src onerror>` before its last closing tag, as Flow Pro's has, put our script into mainUi on the first menu visit, and the script set KSEA, the stand PARKING 294 -- RAMP GA MEDIUM, and the Baron 58P in 1,747ms.
+  In the run before, a minute earlier, the airport search answered nothing, for a reason we didn't find.
+- p11 listed every component mainUi loads: 21 on the start screen, 18 of them also on the home page and the world map.
+  None is a divider, spacer, or decoration of its own, since those are plain elements inside components.
+  BlurPage, `{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}`, is the smallest: 973 bytes, with a 142-byte `.json` and no animations, exposed children, or states, placed by MasterPage itself.
+  The only Community package that copies any of the 18 is Flow Pro, with the start page and the shortcut block.
+- With only our copy of BlurPage installed, p10 ran the whole join from a closed sim, with nobody at it:
+
+  | From the launch | Step |
+  | --- | --- |
+  | 0s | Steam asked to start the sim |
+  | 132.1s | our script in mainUi, with the start screen up |
+  | 133.0s | pressed Start |
+  | 134.4s | pressed Free flight, on the home page |
+  | 141.5s | KSEA, PARKING 294 -- RAMP GA MEDIUM, the Baron 58P, and its livery N515MR |
+  | 142.2s | `launchFlight` |
+  | 142.4s | `FlightLoaded` |
+  | 163.9s | the Ready to fly button up |
+  | 164.5s | pressed Ready to fly, and `RTC_END` at once |
+
+  The loaded flight's `TITLE` was "Black Square Baron 58P Professional N515MR".
+- Our script pressed each button with mouse events at its center, found by the names its page exposes, as the menu's own code finds them: the start page's `Button_Start`, the home page's `Tiles` and their `FreeflightButton`, and `Career_ConfirmationPage`'s `ReadyButton`, the career page that free flight reuses for Ready to fly.
+  Element names mislead: on the start screen the element named `TileButton_Start` is Accessibility, and a press by that name opened the first-boot accessibility setup.
+- After Ready to fly, the sim put the pilot in walkaround mode beside the aircraft, its default; an option to start in the cockpit may exist (unverified).
+
+**Changed:**
+
+- Crosscheck's way into the menu is a copy of BlurPage, because it's the smallest component loaded from the first screen and the plainest, with nothing a mod would change (user, 2026-10-06).
+- The core makes the copy on the pilot's machine from the sim's own file, at install, at each start, and before it launches the sim, whenever the stock file's hash differs from the one the copy was made from, so the copy never falls behind a sim update.
+- There's no fallback: if BlurPage is gone, no longer placed by MasterPage, or copied by another package, the core writes no copy, and a button that needs the menu, such as Go to, is unavailable and says why, until we pick another component deliberately (user, 2026-10-06).
+- A Join starts from wherever the pilot is, so it reads where the sim is, takes the next step from there, confirms each step arrived, and shows the pilot an error when a step fails or the page is one it doesn't know (user, 2026-10-06; [entry above](#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
+  Ready to fly is the flight's start, not a seat in the cockpit.
+- Loading a pilot's flight for them stays out of v1 ([03-v1-scope](../product/03-v1-scope.md#preflight)).
+
+What we haven't run: the Microsoft Store edition, whose install folder may not be readable; whether a sim update can change `fs-base-ui` while the sim boots, after the core's check; and a Join from anywhere but a closed sim.
+
+**Affects:** [preflight](../product/03-v1-scope.md#preflight)'s Go to button, and the idea [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map).
+
+**Evidence:**
+
+- The toolbar's script: `results/p10-menu-package-2026-10-06-17-55-26` and `-18-20-50`.
+- The MenuBarPage copy: `-18-33-40` and `-18-34-11`.
+- The press by element name: `-18-48-39.ndjson`.
+- The join to `FlightLoaded`, with two copies: `-18-56-13`.
+- The BlurPage join: `-19-37-47`, and the Ready to fly press, `results/p10-ready-2026-10-06-19-11-16`.
+- The component list: `results/p11-menu-components-2026-10-06-19-28-51.txt` and the three `.json` beside it.
+
+The EFB's document and the XHR were tried from scratch scripts, with no run file.
+
+## 2026-10-06: Our EFB app's own code opens the EFB onto it, wherever it sits in a crowded EFB, and runs while the EFB is closed
+
+**Asked:** a click on a notice opens our EFB app ([entry below](#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)), but that chain ran from a stand-in put into the EFB's document through the inspector, pressing GSX's button on the dock.
+Does it work when our app is on neither the dock nor the first page of the app list, and does the app's own code run while the EFB is closed ([the plan](../product/plan.md)'s step 6)?
+
+**Expected:** the EFB's document opens an app when it hears `OPEN_BY_KEY(app, page, args)` (read in fs-base-efb, `html_ui/efb_ui/efb_os/efb_os.js`), and the sim's `engine.trigger` calls the document's own handlers before it reaches the sim (read in mainUi's `coui://html_UI/JS/AsoboCoherent.js`), so our app's code could fire it.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P, with crosscheck-p09-efb: one app of ours, "ZZ Crosscheck P09", and 48 filler apps, each registered with `window.EFB_API.use` in the shape of the EFB API's App and AppView (read in fsdreamteam-gsx-efb, `GSX_EFB.js.map`, efb_api 1.0.3), with p09 playing the core over HTTP on 127.0.0.1:
+
+- The EFB installed our 49 among 61 apps in all, and drew our app nowhere in its document, while "Filler 01" was there.
+- Our app's code ran from the sim's start, in the menu and in the flight, and polled every 333ms with the EFB closed and never opened.
+- Our app's own code ran `Coherent.call("TOGGLE_EFB")` if the EFB was closed, then `engine.trigger("OPEN_BY_KEY", "ZzCrosscheckP09", "", "")`, and the EFB opened onto our app from each state:
+  - closed and never opened: the app's view reported onOpen and onResume 640ms after p09 sent the steps;
+  - open on another app: onResume after 385ms;
+  - closed after use, with our app still the EFB's current one: the view got the page key and showed, with no onResume, since closing the EFB doesn't pause the app on screen.
+- The view drew black, because our app never loaded its stylesheet, as Navigraph's does in `install()`.
+
+**Changed:** a click on a notice opens Crosscheck's EFB app wherever the app sits in the EFB, from the app's own code, with no button to find and no list to page through.
+The click reaches the app through the core, and an EFB app loaded the sim's way reaches the core on 127.0.0.1 by HTTP, as code in the EFB's document did ([entry below](#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
+
+**Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
+
+**Evidence:** `results/p09-crowded-efb-2026-10-06-18-17-46`, `.txt`, `.ndjson`, and a folder of screenshots.
+
 ## 2026-10-05: Code in the menu's document sets the world map's departure, stand, aircraft, and livery, and starts the flight
 
 **Asked:** can anything outside the sim set the world map's departure ([the plan](../product/plan.md)'s step 6), which decides whether [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map) is in v1?

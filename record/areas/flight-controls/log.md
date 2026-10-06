@@ -1,11 +1,38 @@
 # Flight controls: log
 
 What our experiments found about keeping a pilot's own flight controls out of the sim, newest entry first.
-A SimConnect client's mask at 10,000,000 blocks the pilot's hardware input and gives it back when the client dies.
+A SimConnect client's mask at 10,000,000 blocks the pilot's hardware input bound in MSFS, input events included, and gives it back when the client dies; a tool such as SPAD.neXt that sets the aircraft's input event itself gets past it.
 Two groups can't share a priority, so on an aircraft whose module asks for the same one, the group that registers first is ahead.
 A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777's own yoke takes it only when it's sent with the legacy `SimConnect_TransmitClientEvent`.
 The probe is [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), and its raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
-Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-01, with the yoke and throttle on our development machine.
+Every entry was measured on MSFS 2024 SunRise 12.2.282174.999, on the date in its heading, with the hardware on our development machine.
+
+## 2026-10-06: Masking holds back a mixture lever bound in MSFS, and not one SPAD.neXt drives, because SPAD.neXt sets the input event itself
+
+**Asked:** does masking hold back the Black Square Baron 58P's mixture lever, which the Baron takes through its own input event, `BKSQ_TurbochargedMixtureController_1` ([the plan](../product/plan.md)'s step 6)?
+Soft takeover depends on it.
+
+**Expected:** yes for a lever bound in MSFS.
+The mixture's input event binds every `MIXTURE*` key event and axis, `AXIS_MIXTURE1_SET` among them (read in bksq-aircraft-baronpro 0.1.1, `BaronProfessional_Templates.xml`), and Asobo's throttle input event binds `AXIS_THROTTLE#_SET` the same way (read in MSFS 2024 SDK 1.7.3, `ModelBehaviorDefs/Asobo/Common/Inputs/Engine_Inputs.xml`), which masking stopped on the Baron ([entry below](#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
+
+**Found:** in the 58P, engines off, with p01's mask at 10,000,000 and our development machine's hardware mixture lever, in three runs that differed only in where the lever was bound:
+
+| Lever bound in | What reached the Baron | With the mask |
+| --- | --- | --- |
+| MSFS, "MIXTURE 1/2 AXIS (-100 to 100%)" | `K:AXIS_MIXTURE1_SET`, from −16,384 to 16,384, 73 times in 5s, and the input event | The masker got all 118 events, the input event fired 0 times, and `L:BKSQ_MixtureLeverPosition_1` moved 0% of its free range; cleared, it moved 90% again |
+| SPAD.neXt | The input event alone, 82 times in 5s, and none of the 24 mixture key events p01 listens to | Nothing to mask |
+| Both | `K:AXIS_MIXTURE1_SET` 122 times in 5s, and the input event | The masker got 104 of 105 events, and still the input event fired 106 times and the lever moved its full range |
+
+SimConnect refused `MIXTURE_AXIS_SET_EX1`, `MIXTURE1_AXIS_SET_EX1`, and `MIXTURE2_AXIS_SET_EX1` with `NAME_UNRECOGNIZED`, though the Baron's input events bind them.
+
+**Changed:** a masked key event never reaches an input event that binds it, for the mixture as for the throttle, so masking holds back levers bound in MSFS on the Baron.
+A lever SPAD.neXt drives reaches the input event with no key event, so no SimConnect mask holds it back, and with both bindings, SPAD.neXt's path still gets through.
+Soft takeover has to handle those pilots another way, such as noticing a lever that moves with no key event and telling the pilot.
+Whether FSUIPC or AAO set input events the way SPAD.neXt does is unverified.
+
+**Affects:** the ideas [soft takeover](../product/ideas.md#soft-takeover-on-handover) and [mixed flight controls](../product/ideas.md#mixed-flight-controls).
+
+**Evidence:** `results/p01-mask-2026-10-06-18-15-07` (MSFS), `-18-12-56` (SPAD.neXt), and `-18-07-02` (both), each `.txt` and `.ndjson`.
 
 ## 2026-10-01: Inside a dead zone set in MSFS, the axis fires no event
 

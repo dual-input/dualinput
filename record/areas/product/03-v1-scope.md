@@ -365,7 +365,8 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
   Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which [installing and updating](#installing-and-updating) scopes.
 - Once a pilot has joined, and until they're in a flight, they see where the PF is, such as "James is at EGLL stand X12".
   A Go to button points the world map at that spot and selects the stand, through the world map's own requests, which set the departure and stand when code we ran through the sim's inspector made them (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
-  Shipping that code in a copy of one of the sim's UI components is unverified for our package ([interface log](../interface/log.md#2026-10-05-a-package-reaches-the-menus-document-by-shipping-its-own-copy-of-one-of-the-sims-ui-components)), and so is naming the PF's stand once they've moved (the open questions below).
+  Crosscheck's script reaches the menu's document through a copy of the sim's BlurPage component, which the core makes on the pilot's machine from the sim's own file and remakes after each sim update, and from there our script set the departure, stand, and aircraft (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
+  Naming the PF's stand once they've moved is open (the open questions below).
 - Each pilot loads their flight at the PF's stand, because moving an aircraft across the world makes the sim load new scenery there, which can stall it or fill its video memory (unverified; a probe that moves a parked aircraft to an airport on another continent settles it).
 - When a joined pilot is in a flight, Crosscheck puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
 - Each pilot works through the [preflight match check](#preflight-match-check)'s list and clicks Ready.
@@ -379,11 +380,13 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 - Warning a pilot who spawned far from the PF before Crosscheck moves them to the PF's position, which risks the scenery load above.
 - Loading a pilot's flight at the PF's stand for them: the pilot loads it from the world map, and Crosscheck moves their aircraft only once they're in it.
-  The world map's own requests can choose the aircraft and livery and start the flight ([interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), but getting the whole chain right would add days to v1's build, so it stays out (user, 2026-10-05).
+  The world map's own requests can choose the aircraft and livery and start the flight ([interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), and from a closed sim our script ran the whole join to Ready to fly with nobody at the sim ([interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)), but getting it right from wherever a pilot starts would add days to v1's build, so it stays out (user, 2026-10-05).
 
 **Rules:**
 
 - A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
+- The Go to button is unavailable, and says why, on a page it can't work from and when the core can't make its copy of BlurPage: the sim lacks it, MasterPage no longer places it, or another package copies it.
+  Crosscheck then waits for us to pick another component deliberately, rather than falling back to one by itself (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
 - Pilots other than the PF touch nothing in the cockpit during preflight, because catch-up sets only what the profile holds: a PM who switches a display to another page during preflight keeps that page after the PF's state arrives.
   The PF touches nothing beyond the checklist.
 - Un-readying during the countdown cancels it, and the flight doesn't start until every pilot counted is ready again.
@@ -632,7 +635,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
   Shipping EFB apps are written that way: A2A's tablet is TSX bundled by esbuild on Asobo's EFB API and the MSFS Avionics Framework, and it registers with `Efb.use` (read in a2a-aircraft-aerostar600 1.0.6, `A2ATabletApp.js`).
 - What a pilot needs during a flight: the take-control button, the crew and the connection's state, the Ready button beside the match check's warnings and errors, Go without for each pilot who drops out during [preflight](#preflight), the box for an invite code, Leave session, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
 - Opening onto what a notice on the [notification banner](#notification-banner) is about when the pilot clicks the notice anywhere but on its action, whether the EFB was open on another app or closed.
-  With GSX standing in for our app, a click on a notice opened a closed EFB onto GSX, and switched an open one to it without closing it (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
+  The app's own code does it, and runs while the EFB is closed: it opens the EFB if it's closed and fires `OPEN_BY_KEY` with its own name, which opened a crowded EFB onto our app from every state, with our app on neither the dock nor the first page of the app list (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
 - A button that brings the desktop app to the front while Crosscheck's core is running.
 - How it looks is for a design later.
 
@@ -655,7 +658,6 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 - Whether the EFB app can start the core when it isn't running, since a panel may not be allowed to start a program.
 - Whether the EFB can fill its code box from the clipboard, as the [invite code](#invite-code) section asks.
-- Whether a click on a notice opens our app when it's off the EFB's dock and the first page of its app list, and whether our app's code runs while the EFB is closed, which a step 6 probe in [the plan](plan.md) answers.
 
 ### Notification banner
 

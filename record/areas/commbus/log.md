@@ -1,9 +1,41 @@
 # CommBus: log
 
-What our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, newest entry first.
-Reading it works, and how much it yields depends on the aircraft: the Synaptic A220 puts its whole cockpit's state on the CommBus, the A2A PA-24 doesn't use the CommBus at all, and the iniBuilds A350 uses it only for traffic between its two modules and its EFB and printer.
+What our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, and the avionics framework's `wt.eb.evt`, newest entry first.
+Reading the CommBus works, and how much it yields depends on the aircraft: the Synaptic A220 puts its whole cockpit's state on the CommBus, the A2A PA-24 doesn't use the CommBus at all, and the iniBuilds A350 uses it only for traffic between its two modules and its EFB and printer.
+Our own code hears `wt.eb.evt` and can publish there.
 The probes are in [experiments/areas/commbus](../../../experiments/areas/commbus), and their raw output is in [experiments/areas/commbus/results](../../../experiments/areas/commbus/results).
 The entries of 2026-09-28 were measured on MSFS 2024 that day, with FS Copilot's bridge installed, which is why every panel also registered `FSC_CLIENT_EVENT`.
+
+## 2026-10-06: Our own code hears `wt.eb.evt` from the EFB's document, and the G3000 acts on a package it sends
+
+**Asked:** can our own code listen on `wt.eb.evt`, the key Working Title avionics share their synced EventBus topics under, which is [the plan](../product/plan.md)'s step 6 question for the [EventBus bridge](../product/ideas.md#eventbus-bridge) and the Phenom 300E study's sim question 11?
+And can it publish there, as another bus?
+
+**Expected:** a listener of our own, registered with `RegisterGenericDataListener`, would hear the package each bus sends once a frame, `{ busId, packagedId, data: [{ topic, data, isCached }] }`, because the framework's buses hear each other that way and skip only their own `busId` (read in synaptic-aircraft-a220 1.0.10, `DisplayUnits/instrument.js`, the EventBus's generic data sync).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the FSReborn Phenom 300E with its avionics on, with listeners p04 put through the inspector into three documents, in two runs:
+
+- The MFD's document, `VCockpit03 - WTG3000_MFD`, heard 4 buses, and the EFB's, "Electronic Flight Bag", all 5 of the G3000's: 8 to 16 packages in 10s while idle in the MFD's, and 13 to 28 in the EFB's.
+  A listener doesn't hear packages sent from its own document, so the MFD's missed the MFD's own bus.
+- The toolbar's document has no `RegisterGenericDataListener`.
+- What the pilot did arrived as topics:
+  - a map range as `usersetting_sync_cross_mapRangeIndex_1`, with a value such as `{ value: 11, syncTime: <ms> }`;
+  - a pane's command as `display_pane_view_event`, such as `{ displayPaneIndex: 2, eventType: "display_pane_map_range_dec" }`;
+  - a page change as `usersetting_sync_cross_displayPaneView_1` and its neighbors;
+  - the checklist's state as `checklist_pane_selected_*` topics;
+  - an added waypoint as seven `fplsync_` topics, such as `fplsync_fplLegChange` and `fplsync_fplCalculated`.
+- A package sent from our listener with our own `busId`, carrying `event_bus` and `resync_request` as a new bus does, had the buses send their cached topics: sent from the EFB's document, 306 distinct topics reached the EFB's listener and 26 the MFD's in the next 5s, and sent from the MFD's, 29 and 26.
+  Why the MFD's listener heard so few after the EFB's request is unexplained.
+- The zoom-in step's `display_pane_view_event`, sent again from the EFB's listener, moved the MFD's Navigation Map from 25 NM to 15 NM within 1.5s, in the screenshots before and after.
+  The first run's replay was sent from the MFD's document after a zoom on the PFD, whose pane showed the checklist by then, so it showed nothing either way.
+
+**Changed:** our code can listen on `wt.eb.evt` and publish there as another bus, and the avionics act on what it publishes.
+A bridge's listener belongs in a document that holds none of the avionics' buses, such as the EFB app's, where it hears all of them and its packages reach all of them; one inside an instrument's document misses that instrument's bus.
+Settings carry a `syncTime`, and whether a bus drops a setting older than its own is untested, so a bridge stamps the time it sends.
+
+**Affects:** the idea [EventBus bridge](../product/ideas.md#eventbus-bridge); [04-room-for-later](../product/04-room-for-later.md#channels), on which way the bridge publishes, and its [code inside the sim](../product/04-room-for-later.md#code-inside-the-sim), on where the listener runs; and the Phenom study's sim question 11.
+
+**Evidence:** `results/p04-eventbus-2026-10-06-18-24-26` and `-18-28-36`, each `.txt`, `.ndjson`, and a folder of screenshots.
 
 ## 2026-09-30: The PA-24 keeps some of its state in stock `A:` variables
 

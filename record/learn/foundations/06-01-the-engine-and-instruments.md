@@ -180,7 +180,7 @@ Its six instrument bundles draw and hold no aircraft state: the aircraft's syste
 
 **What it changes for Crosscheck.**
 In framework avionics, state such as a display page or a map range can live only in JavaScript objects and bus topics inside the instruments, where SimConnect can't reach it (unverified for any particular aircraft).
-Synced topics cross between documents on a sim channel with a known key, so whether Crosscheck's panel code could listen on `wt.eb.evt` and read them is an open question.
+Synced topics cross between documents on a sim channel with a known key, and code of ours can listen on it: a listener in the EFB's document heard all five of a G3000's buses under `wt.eb.evt`, and a package it sent moved the MFD's map (measured on MSFS 2024, 2026-10-06, [CommBus log](../../areas/commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends)).
 
 **Traps.**
 
@@ -228,9 +228,6 @@ Synced topics cross between documents on a sim channel with a known key, so whet
   Watching `document.body`'s `quality` attribute and each document's page ID through the inspector, while changing views, popping out a display, and changing aircraft, would settle both.
 - **Whether MSFS 2024 delays loading a panel document until its screen is in view.**
   Listing the inspector's pages right after a flight loads, before looking around the cockpit, and again afterward, would settle it.
-- **Whether panel code can read synced Avionics Framework topics.**
-  The sync key is in the code [7], and nothing outside the framework has listened to it.
-  Registering a generic data listener on `wt.eb.evt` in a G1000 NXi document and logging what arrives while the pilot changes a page would settle it.
 - **Whether a SimConnect client can send an `H:` event.**
   The framework's documentation says so [22], and [03-03](03-03-reading-and-writing.md#which-namespace-can-be-read-written-or-listed-from-where) found no call for it.
   Mapping an `H:` name with `SimConnect_MapClientEventToSimEvent`, transmitting it, and logging `onInteractionEvent` in a panel would settle it.

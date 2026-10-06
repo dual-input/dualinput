@@ -133,9 +133,10 @@ Done on 2026-10-04, which also added Plugins to v1 and two probes to step 6.
 ## 6. Probes that retire architecture risks
 
 Produces: entries in the logs of the areas the probes belong to.
-Exit: each risk below has a log entry that answers it.
+Exit: each risk below has a log entry that answers it, or is deferred with a reason.
 
 - Whether a CommBus message carried to the other machine changes that aircraft's state ([Bus bridge](ideas.md#bus-bridge)).
+  Deferred until we look at the bus bridge again, after v1 (user, 2026-10-06).
 - Whether our own code can listen on `wt.eb.evt` ([EventBus bridge](ideas.md#eventbus-bridge)).
   Answered on 2026-10-06: [CommBus log](../commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends).
 - How much network delay mixed flight controls can take ([Mixed flight controls](ideas.md#mixed-flight-controls)).
@@ -143,16 +144,16 @@ Exit: each risk below has a log entry that answers it.
   Answered on 2026-10-06 from research, not measurement: [network log](../network/log.md#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month).
 - Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
-  We expect it to hold, because on the 58P masking the throttle's key events also stopped the throttle's input event (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), but nobody has masked the mixture.
-  Answered on 2026-10-06: [flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself).
+  Answered on 2026-10-06: masking holds back a lever bound in MSFS and not one SPAD.neXt drives, so soft takeover needs another way for those pilots ([flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
 - Whether a click on a [notification banner](03-v1-scope.md#notification-banner) notice opens Crosscheck's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
   The probe fills the EFB with far more apps than its dock and the first page of its app list hold.
   The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
   Answered on 2026-10-06: [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed).
 - How the notification banner's panel shows in VR, which tells us whether it meets v1's commitment to VR pilots; nobody has tried.
+  Deferred until we have a headset to try it with (user, 2026-10-06).
 - Whether anything outside the sim can set the world map's departure, which decides whether [the PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map) is in v1.
   Answered on 2026-10-05 through the sim's inspector: [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight).
-  A package of ours puts that code there through a copy of the sim's BlurPage component, answered on 2026-10-06 along with the whole join from a closed sim: [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly).
+  Whether a package of ours can put that code there was answered on 2026-10-06, through a copy of the sim's BlurPage component, in a run from a closed sim to Ready to fly: [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly).
 - How fast an aircraft takes stepped writes, which checks the default pace in [01-profile-entries](../sync/01-profile-entries.md#what-a-profile-says-once-per-aircraft): send the Synaptic A220's `K:HEADING_BUG_INC` 10 times in one frame, then once per frame, and count the degrees the bug moves (its study's sim question 5); write `L:INI_BARO1_INC_COMMAND` twice before one update of the iniBuilds A350, then once per update (its sim question 3); and add 10 to the Fenix's `L:E_FCU_HEADING` at once (its sim questions 1 and 2).
   Answered on 2026-10-05: [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents), and for the A350's heading, [sync log](../sync/log.md#2026-10-05-the-a350s-stock-heading-is-an-output-of-its-module-and-its-dial-takes-a-value-written-straight-into-it).
 - When an aircraft loaded cold stops restoring its own controls, which checks [catch-up's settle rule](../sync/03-catch-up.md#settling-after-a-load): load each studied aircraft and log every variable it changes, every 250ms for 3 minutes; the Baron's sim question 2 is part of it.
@@ -182,12 +183,12 @@ The tooling includes one check that every file that runs in Coherent GT, experim
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.
 The pilot starts the core whenever they want a shared cockpit; the EFB app, opened while the core isn't running, says so and offers to start it if a panel can (unverified).
-
-A part of the core we call sim awareness, proposed on 2026-10-06 (user), knows where the sim is: not running, starting, on which menu page, loading, at Ready to fly, or in a flight with which aircraft.
-It combines the sim's process, SimConnect's system and flow events, and the page our script in the menu reports, and it reports a page it doesn't know as unknown rather than guessing.
-It reports state and knows nothing of features: a feature that depends on the sim's state reads it there instead of watching the sim itself, and decides on its own what to do with it, as Join would gray itself out away from the pages it starts from ([interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
 The architecture lets a Crosscheck developer run a whole session on one machine: two cores, each with its own ports and identity, and a stand-in for the second pilot's sim, as fsc-exerciser does and as the FS Copilot fork's two-instance bench did (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
 Whether a second MSFS, with its own Crosscheck, can run in a virtual machine on the same PC is open, and a probe settles it.
+
+Step 7 also decides sim awareness, a part of the core proposed on 2026-10-06 (user) that reports whether the sim is closed, starting, in the menu and on which page, loading, at Ready to fly, or in a flight and with which aircraft.
+It reports state only and knows nothing of features: a feature that depends on the sim's state reads it there instead of watching the sim itself, and decides on its own what to do with it, as preflight's Go to button is unavailable on a page it can't work from ([03-v1-scope](03-v1-scope.md#preflight); [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
+Its sources are the sim's process, SimConnect's system and flow events, and the page our script in the menu reports, and it reports a page it doesn't know as unknown rather than guessing.
 
 ## 8. v1 build plan
 

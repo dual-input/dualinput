@@ -177,6 +177,10 @@ The tooling includes one check that every file that runs in Coherent GT, experim
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.
 The pilot starts the core whenever they want a shared cockpit; the EFB app, opened while the core isn't running, says so and offers to start it if a panel can (unverified).
+
+A part of the core we call sim awareness, proposed on 2026-10-06 (user), knows where the sim is: not running, starting, on which menu page, loading, at Ready to fly, or in a flight with which aircraft.
+It combines the sim's process, SimConnect's system and flow events, and the page our script in the menu reports, and it reports a page it doesn't know as unknown rather than guessing.
+Features read it instead of watching the sim themselves, and each states where it works, so a button such as Join grays itself out elsewhere and says why, including when our way into the menu is missing.
 The architecture lets a Crosscheck developer run a whole session on one machine: two cores, each with its own ports and identity, and a stand-in for the second pilot's sim, as fsc-exerciser does and as the FS Copilot fork's two-instance bench did (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
 Whether a second MSFS, with its own Crosscheck, can run in a virtual machine on the same PC is open, and a probe settles it.
 

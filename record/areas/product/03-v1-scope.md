@@ -658,6 +658,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 **Open questions:**
 
 - Whether the EFB app can start the core when it isn't running, since a panel may not be allowed to start a program.
+  The split [the plan](plan.md)'s step 7 leans toward, a watcher that starts the core with the sim, would leave the core running whenever the EFB app is.
 - Whether the EFB app can fill its code box from the clipboard, as the [invite code](#invite-code) section asks.
 
 ### Notification banner

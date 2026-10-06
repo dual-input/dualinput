@@ -184,9 +184,18 @@ The tooling includes one check that every file that runs in Coherent GT, experim
 
 The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
 The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.
-The pilot starts the core whenever they want a shared cockpit; the EFB app, opened while the core isn't running, says so and offers to start it if a panel can (unverified).
 The architecture lets a Crosscheck developer run a whole session on one machine: two cores, each with its own ports and identity, and a stand-in for the second pilot's sim, as fsc-exerciser does and as the FS Copilot fork's two-instance bench did (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
 Whether a second MSFS, with its own Crosscheck, can run in a virtual machine on the same PC is open, and a probe settles it.
+
+On 2026-10-06 we leaned toward TypeScript throughout, with Electron only for the windows people look at, and toward running Crosscheck as two processes (user):
+
+- **A watcher,** which starts with Windows, for the pilot's own account and as a setting, and does only this: it notices the sim's process starting and stopping, from the operating system rather than SimConnect; keeps our copy of BlurPage current by watching the sim's own file; applies a plugin's changes to an aircraft's files before the sim boots; installs Crosscheck's updates while the sim is closed, which takes over the helpers [installing and updating](03-v1-scope.md#installing-and-updating) describes; and starts the core.
+- **The core,** a plain Node process with no Electron, which starts with the sim and runs as long as it does, out of sight, with the desktop app and the EFB app as its clients.
+
+A core that's running when the sim starts has its masks registered before any aircraft's module, which decided who got the pilot's input on the PA-24 ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
+It also lets a pilot who started the sim with no plan to fly together start or join a session later, from the EFB app.
+An idle Node process took 29 MB of memory and no measurable CPU, and Electron 43's own executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, with Node 22.23.1).
+Whether the core can claim its masking priority at sim start without holding back the pilot's controls until a session wants them is unverified, and a probe settles it.
 
 Step 7 also decides sim awareness, a part of the core proposed on 2026-10-06 (user) that reports whether the sim is closed, starting, in the menu and on which page, loading, at Ready to fly, or in a flight and with which aircraft.
 It reports state only and knows nothing of features: a feature that depends on the sim's state reads it there instead of watching the sim itself, and decides on its own what to do with it, as preflight's Go to button is unavailable on a page it can't work from ([03-v1-scope](03-v1-scope.md#preflight); [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).

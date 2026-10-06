@@ -7,6 +7,37 @@ A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777
 The probe is [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), and its raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999, on the date in its heading, with the hardware on our development machine.
 
+## 2026-10-06: A pilot's own pitch and roll input was flyable 150ms late and not 300ms late, in the Baron at cruise
+
+**Asked:** how much network delay can mixed flight controls take ([the plan](../product/plan.md)'s step 6)?
+With mixed controls, the PM's input reaches the flying machine one network delay late, and the aircraft's motion comes back one more late, behind the following machine's display buffer, which is 400ms in FS Copilot's design ([03-v1-scope](../product/03-v1-scope.md#flight-model-sync)).
+So the PM flies a control loop late by twice the one-way delay plus the buffer.
+
+**Expected:** no prediction.
+
+**Found:** in the 58P in cruise, at about 3,650 ft and 168 kt with the autopilot off, p02 masked the yoke's `K:AXIS_ELEVATOR_SET` and `K:AXIS_AILERONS_SET` at 10,000,000 and sent each value back after a delay at 10,001,000.
+With no delay, the masker sent back all 289 events it got, and the yoke followed.
+The pilot flew six steps of about 50s each, a hold, a 60° turn, and a hold, at delays in an order they weren't told, 700, 1,000, 500, 0, 300, and 150ms, and judged each:
+
+| Added delay | The pilot's verdict | Altitude off the step's start, largest / RMS |
+| --- | --- | --- |
+| 0ms | flyable | 16 / 10.5 ft |
+| 150ms | flyable | 55 / 36 ft |
+| 300ms | not flyable | 69 / 36 ft |
+| 500ms | not flyable | 145 / 90 ft |
+| 700ms | not flyable | 62 / 35 ft |
+| 1,000ms | not flyable | 157 / 99 ft |
+
+The probe's counts of vertical speed and yoke reversals read 0 at every delay because of a bug in counting them, and with no samples saved, neither they nor the 0s for overshooting the target heading can be checked.
+
+**Changed:** for this pilot in this aircraft, a PM flying through mixed controls needs the whole extra loop delay near 150ms.
+Twice a one-way delay plus a 400ms buffer is far past that, so the PM's view would need a much shorter buffer and a partner nearby, or the PM's input applied on their own machine first.
+This is one pilot, one run, and one light twin; an airliner, slower to respond, may tolerate more (unverified).
+
+**Affects:** the idea [mixed flight controls](../product/ideas.md#mixed-flight-controls).
+
+**Evidence:** `results/p02-input-delay-2026-10-06-20-42-49`, `.txt` and `.ndjson`.
+
 ## 2026-10-06: Masking holds back a mixture lever bound in MSFS, and not one SPAD.neXt drives, because SPAD.neXt sets the input event itself
 
 **Asked:** does masking hold back the Black Square Baron 58P's mixture lever, which the Baron takes through its own input event, `BKSQ_TurbochargedMixtureController_1` ([the plan](../product/plan.md)'s step 6)?

@@ -140,6 +140,7 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
 - Whether our own code can listen on `wt.eb.evt` ([EventBus bridge](ideas.md#eventbus-bridge)).
   Answered on 2026-10-06: [CommBus log](../commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends).
 - How much network delay mixed flight controls can take ([Mixed flight controls](ideas.md#mixed-flight-controls)).
+  Answered on 2026-10-06, for one pilot in a light twin: [flight-controls log](../flight-controls/log.md#2026-10-06-a-pilots-own-pitch-and-roll-input-was-flyable-150ms-late-and-not-300ms-late-in-the-baron-at-cruise).
 - What share of pilot pairs can't connect directly, which decides how much traffic the relay carries ([01-aims](01-aims.md#relay-and-license)).
   Answered on 2026-10-06 from research, not measurement: [network log](../network/log.md#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month).
 - Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.

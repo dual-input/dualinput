@@ -192,6 +192,10 @@ On 2026-10-06 we leaned toward TypeScript throughout, with Electron only for the
 - **A watcher,** which starts with Windows, for the pilot's own account and as a setting, and does only this: it notices the sim's process starting and stopping, from the operating system rather than SimConnect; keeps our copy of BlurPage current by watching the sim's own file; applies a plugin's changes to an aircraft's files before the sim boots; installs Crosscheck's updates while the sim is closed, which takes over the helpers [installing and updating](03-v1-scope.md#installing-and-updating) describes; and starts the core.
 - **The core,** a plain Node process with no Electron, which starts with the sim and runs as long as it does, out of sight, with the desktop app and the EFB app as its clients.
 
+The watcher records its own CPU and memory use, and shows it over the last day, or since the PC started, when the pilot opens it from the tray icon, chooses to quit it, or finds its setting.
+Beside the numbers it says what it does for the pilot and what quitting costs, in concrete terms, such as Go to staying off after a sim update until Crosscheck runs again.
+It asks once per quit, gives Quit and Keep running equal weight, and a choice to turn it off stays off (user, 2026-10-06).
+
 A core that's running when the sim starts has its masks registered before any aircraft's module, which decided who got the pilot's input on the PA-24 ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
 It also lets a pilot who started the sim with no plan to fly together start or join a session later, from the EFB app.
 An idle Node process took 29 MB of memory and no measurable CPU, and Electron 43's own executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, with Node 22.23.1).

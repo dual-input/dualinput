@@ -283,7 +283,7 @@ const SCRIPT = `// Written by experiments/areas/interface/menu/build.mjs.
     return null;
   }
   function screen() {
-    return { start: !!named("Startpage"), home: !!named("Homepage") && !!named("Home_TileRegular_Freeflight"), menuBar: !!named("MenuBarPage") };
+    return { start: !!named("Startpage"), home: !!named("Homepage") && !!named("Home_TileRegular_Freeflight"), menuBar: !!named("MenuBarPage"), ready: !!exposed(["Career_ConfirmationPage", "ReadyButton"]) };
   }
   // A button by the names a page exposes, the way the page's own code takes
   // it, such as this.elt.getExposedChild("Button_Start") (read in base.bundle.js,

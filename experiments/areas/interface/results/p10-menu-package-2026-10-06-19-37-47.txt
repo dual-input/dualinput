@@ -1,0 +1,19 @@
+p10-menu-package --join, started 2026-10-06T19:37:47.225Z
+Asked for KSEA, a stand matching /PARKING/i, Black Square Baron 58P Professional, and the livery after the first
+
+Timeline from the launch:
+  0.0s Steam asked to start the sim
+  132.1s our script in mainUi, loaded by its cookedcomp 8b92bb9a-4176-4f1a-a9ce-cb1195c4e952
+  132.3s the start screen's Start button is up
+  133.0s pressed Start: {"found":true,"name":"TileButton_Start_Special","x":2158,"y":1232,"target":"UI-RESOURCE-ELEMENT TileButton_Start_Special"}
+  133.6s the home page is up
+  134.4s pressed Free flight: {"found":true,"name":"Home_TileRegular_Freeflight","x":721,"y":839,"target":"UI-RESOURCE-ELEMENT Home_TileRegular_Freeflight"}
+  134.8s the home page closed
+  141.5s set KSEA, PARKING 294 -- RAMP GA MEDIUM, Black Square Baron 58P Professional, livery N515MR
+  142.2s launchFlight: {"ok":true,"value":true}
+  142.4s FlightLoaded
+  163.9s the Ready to fly button is up
+  164.5s pressed Ready to fly, try 1: {"found":true,"name":"TextButton_Large_Special_Ready","x":2163,"y":1294,"target":"UI-RESOURCE-ELEMENT TextButton_Large_Special_Ready"}
+  164.5s RTC_END after press 1: in the cockpit
+
+- Loaded: TITLE "Black Square Baron 58P Professional N515MR", LIVERY NAME "".

@@ -369,15 +369,30 @@ async function joinFlow() {
 
   let sim = null
   for (let i = 0; !sim && i < 12; i++) { try { sim = await Sim.connect(rec, { name: "CROSSCHECK p10 join" }) } catch { await sleep(5000) } }
-  const seen = { flightLoaded: null }
+  const seen = { flightLoaded: null, rtcEnd: null }
   sim?.systemHandlers.add((name) => { if (name === "FlightLoaded" && seen.flightLoaded === null) seen.flightLoaded = Date.now() })
+  // RTC_END is the sim's own Ready to fly (record/areas/sync/log.md, 2026-10-05).
+  sim?.flowHandlers.add((name) => { if (name === "RTC_END" && seen.rtcEnd === null) seen.rtcEnd = Date.now() })
   const l = await ask(main.id, { op: "launch" }, "launch")
   mark(`launchFlight: ${JSON.stringify(l?.detail ?? null)}`)
   const loaded = await until(() => seen.flightLoaded, 4 * 60_000, 250)
   mark(loaded ? "FlightLoaded" : "no FlightLoaded in 4 minutes")
   if (loaded) {
+    // Ready to fly: Career_ConfirmationPage's exposed ReadyButton (p10-ready,
+    // 2026-10-06). The button can be up before the flight has finished
+    // loading, so p10 presses it every 5s until the sim's RTC_END.
+    const up = await until(async () => (await screen())?.ready, 4 * 60_000)
+    mark(up ? "the Ready to fly button is up" : "no Ready to fly button in 4 minutes")
+    let tries = 0
+    for (let i = 1; up && !seen.rtcEnd && i <= 36 && !aborted; i++) {
+      tries = i
+      const p = await ask(main.id, { op: "press", path: ["Career_ConfirmationPage", "ReadyButton"] }, "press")
+      if (i === 1 || !p?.detail?.result?.found) mark(`pressed Ready to fly, try ${i}: ${JSON.stringify(p?.detail?.result ?? null)}`)
+      await until(() => seen.rtcEnd, 5000, 100)
+    }
+    mark(seen.rtcEnd ? `RTC_END after press ${tries}: in the cockpit` : `no RTC_END after ${tries} presses`)
     await sleep(3000)
-    await shooter.shot("flight-loaded").then((x) => rec.log("shot", x.error ?? repoRelative(x.file)))
+    await shooter.shot("cockpit").then((x) => rec.log("shot", x.error ?? repoRelative(x.file)))
     const v = await sim.readStrings(["TITLE", "LIVERY NAME"]).catch(() => null)
     find(`Loaded: TITLE ${JSON.stringify(v?.get("TITLE") ?? null)}, LIVERY NAME ${JSON.stringify(v?.get("LIVERY NAME") ?? null)}.`)
   }

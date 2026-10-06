@@ -1,0 +1,11 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-06T18:15:07.491Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N513LW", study black-square-baron-pro
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+
+mixture: masked AXIS_MIXTURE1_SET, THROTTLE1_AXIS_SET_EX1
+  free: baseline · heard AXIS_MIXTURE1_SET ×73 -16384..16384, THROTTLE1_AXIS_SET_EX1 ×26 -5888..-5856, THROTTLE1_SET ×26 5248..5264 · input events ENGINE_THROTTLE_1 ×38 32.03125..32.128906, BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×75 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380497, GENERAL ENG THROTTLE LEVER POSITION:1 32.03125..32.128906
+  masked: blocked (L:BKSQ_MixtureLeverPosition_1 at 0% of the free range) · heard AXIS_MIXTURE1_SET ×118 -16384..16384, THROTTLE1_AXIS_SET_EX1 ×24 -5888..-5856 · masker got AXIS_MIXTURE1_SET ×118 -16384..16384, THROTTLE1_AXIS_SET_EX1 ×24 -5888..-5856 · input events none · values none moved · as expected
+  cleared: moved (L:BKSQ_MixtureLeverPosition_1 at 90% of the free range) · heard AXIS_MIXTURE1_SET ×129 -10816..16384, THROTTLE1_AXIS_SET_EX1 ×19 -5888..-5856, THROTTLE1_SET ×19 5248..5264 · masker got none · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×137 1699.21875..10000, ENGINE_THROTTLE_1 ×28 32.03125..32.128906 · values L:BKSQ_MixtureLeverPosition_1 0.099609..1, GENERAL ENG MIXTURE LEVER POSITION:1 9.164988..89.380455, GENERAL ENG THROTTLE LEVER POSITION:1 32.03125..32.128906 · as expected
+
+Exceptions: NAME_UNRECOGNIZED (7) on map K:MIXTURE_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE_AXIS_SET_EX1 to group 10, parameter 2; NAME_UNRECOGNIZED (7) on map K:MIXTURE1_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE1_AXIS_SET_EX1 to group 10, parameter 2; NAME_UNRECOGNIZED (7) on map K:MIXTURE2_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE2_AXIS_SET_EX1 to group 10, parameter 2

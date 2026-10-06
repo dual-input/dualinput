@@ -131,13 +131,22 @@ const CLEAN = `(function () {
 
 // ---------------------------------------------------------------- main
 
-const STEPS = [
+const ALL_STEPS = [
   { name: "idle", say: "Hands off for ten seconds.", ms: 10_000, auto: true },
   { name: "zoom in", say: "Zoom the M F D's map in by one step, when you hear the beep.", ms: 8000 },
   { name: "zoom out", say: "Zoom the M F D's map back out by one step, when you hear the beep.", ms: 8000 },
   { name: "page", say: "Open another page on the M F D, when you hear the beep.", ms: 8000 },
   { name: "waypoint", say: "Add a waypoint to the flight plan. Press Page Down when you're done.", ms: 120_000, untilKey: true },
 ]
+// --steps "idle,zoom in,zoom out" runs only those; idle and zoom in always run,
+// since steps 6 and 7 need them.
+const STEPS = opt("--steps") ? ALL_STEPS.filter((s) => s.auto || s.name === "zoom in" || opt("--steps").split(",").map((x) => x.trim()).includes(s.name)) : ALL_STEPS
+
+// Where steps 6 and 7 send from. A listener hears no package sent from its own
+// document: the MFD's heard 4 of the G3000's 5 buses and the EFB's all 5
+// (measured on MSFS 2024, 2026-10-06, results/p04-eventbus-2026-10-06-18-24-26),
+// and a zoom-in sent again from the MFD's document left the MFD's map as it was.
+const SEND_FROM = opt("--send-from") ?? "display"
 
 async function main() {
   rec.open()
@@ -216,33 +225,40 @@ async function main() {
   // Topics that changed in a step and not while idle, as heard by the display.
   const idle = new Set(Object.keys(results.idle.docs[0]?.topics ?? {}))
   const fresh = (name) => Object.keys(results[name].docs[0]?.topics ?? {}).filter((t) => !idle.has(t))
-  for (const name of ["zoom in", "zoom out", "page", "waypoint"]) {
+  for (const name of ["zoom in", "zoom out", "page", "waypoint"].filter((n) => results[n])) {
     const f = fresh(name)
     find(`New in "${name}", heard by the display: ${f.length} topics${f.length ? `: ${f.slice(0, 25).join(", ")}${f.length > 25 ? ", ..." : ""}` : ""}.`)
   }
 
+  const sender = docs.find((d) => d.role.toLowerCase() === SEND_FROM.toLowerCase()) ?? docs[0]
+
   // 6. A resync request from our listener.
   say("Hands off.")
   await all(SET_PHASE("resync"))
-  const sent = await docs[0].insp.evaluate(SEND(JSON.stringify([{ topic: "event_bus", data: "resync_request", isCached: false }])))
+  const sent = await sender.insp.evaluate(SEND(JSON.stringify([{ topic: "event_bus", data: "resync_request", isCached: false }])))
   await sleep(5000)
   await all(SET_PHASE("after"))
   const resync = await all(SUMMARY("resync"))
-  find(`resync_request sent from the display's listener (${sent}): in 5s, ${docs.map((d, i) => `${d.role} heard ${resync[i]?.packages ?? 0} packages, ${Object.keys(resync[i]?.topics ?? {}).length} topics`).join("; ")}.`)
+  find(`resync_request sent from the ${sender.role}'s listener (${sent}): in 5s, ${docs.map((d, i) => `${d.role} heard ${resync[i]?.packages ?? 0} packages, ${Object.keys(resync[i]?.topics ?? {}).length} topics`).join("; ")}.`)
 
-  // 7. The zoom-in topics, sent again after the pilot zoomed back out.
-  const items = await docs[0].insp.evaluate(LAST("zoom in", fresh("zoom in")))
+  // 7. The zoom-in topics, sent again after the pilot zoomed back out, with the
+  // values the sender's own listener heard.
+  // A setting arrives as { value, syncTime }, and a bus that keeps the newest
+  // write would drop one older than the pilot's zoom out, so it goes with
+  // syncTime set to now (results/p04-eventbus-2026-10-06-18-24-26.ndjson).
+  const heard = await sender.insp.evaluate(LAST("zoom in", fresh("zoom in")))
+  const items = heard.map((x) => (x.data && typeof x.data === "object" && "syncTime" in x.data ? { ...x, data: { ...x.data, syncTime: Date.now() } } : x))
   if (!items.length) {
     find("No topics from the zoom-in step to send again.")
   } else {
     const before = await shooter.shot("before-replay")
     rec.log("shot", before.error ?? `saved ${repoRelative(before.file)}`)
-    const r = await docs[0].insp.evaluate(SEND(JSON.stringify(items)))
+    const r = await sender.insp.evaluate(SEND(JSON.stringify(items)))
     await sleep(1500)
     const after = await shooter.shot("after-replay")
     rec.log("shot", after.error ?? `saved ${repoRelative(after.file)}`)
     rec.data("replay", "sent", { items })
-    find(`Sent the zoom-in step's ${items.length} topics again from the display's listener (${r}): ${items.map((x) => x.topic).slice(0, 15).join(", ")}${items.length > 15 ? ", ..." : ""}. Compare the screenshots before and after.`)
+    find(`Sent the zoom-in step's ${items.length} topics again from the ${sender.role}'s listener (${r}): ${items.map((x) => `${x.topic} ${JSON.stringify(x.data).slice(0, 60)}`).slice(0, 15).join(", ")}${items.length > 15 ? ", ..." : ""}. Compare the screenshots before and after.`)
   }
 
   return finish(docs, shooter, sim)

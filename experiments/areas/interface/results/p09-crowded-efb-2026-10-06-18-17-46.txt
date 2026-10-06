@@ -1,0 +1,12 @@
+p09-crowded-efb, started 2026-10-06T18:17:46.234Z
+210 polls in all
+
+- Aircraft: Black Square Baron 58P Professional N513LW.
+- Our app's first poll came -0.3s after p09 started, with the EFB closed; no installed event yet.
+- With the EFB closed, before anyone opened it: 30 polls in 10s, a median 333ms apart and at most 337ms; the app saw the EFB as {"closed":30}.
+- App icons in the EFB's document: 0, 0 of them on screen; ours not drawn; 0 filler icons.
+- Our app's name in the document: 0 places, 0 on screen; filler 01's: 1.
+- Closed, never opened, OPEN_BY_KEY with the internal name, by engine.trigger: our app's view reported onOpen and onResume 640ms after the steps went out, with the EFB open; the EFB was closed and the app toggled it; handlePageKeyAction got {"key":"","args":""}.
+- Open on another app, OPEN_BY_KEY with the internal name, by engine.trigger: our app's view reported onResume 385ms after the steps went out, with the EFB open; the EFB was open and wasn't toggled; handlePageKeyAction got {"key":"","args":""}.
+- With the EFB closed after use: 9 polls in 3s, a median 333ms apart; the app saw the EFB as {"closed":9}.
+- Closed after use, OPEN_BY_KEY with the internal name, by engine.trigger: our app's view reported nothing; the EFB was closed and the app toggled it; handlePageKeyAction got {"key":"","args":""}.

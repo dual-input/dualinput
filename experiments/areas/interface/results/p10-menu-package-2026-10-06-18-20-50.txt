@@ -1,0 +1,9 @@
+p10-menu-package, started 2026-10-06T18:20:50.119Z
+Asked for KSEA, a stand matching /PARKING/i, and Embraer Phenom 300E
+
+- Copies of our script polling p10: 1, in "Toolbar" by its toolbar icon (engine object, store object).
+- Through the inspector, our script is in 1 of 10 documents: "Toolbar" (toolbar icon).
+- mainUi had loaded 0 UI components from cookedcomps/; saved 0 to experiments/sim-sources/menu/cookedcomps/, 0 of them ones Flow Pro copies.
+- From "Toolbar": the departure wasn't set ("not set"); no stand; no aircraft change; done in 9367ms.
+- The airport search: search: "no results in 4s"; search after registering the listener: "no results in 4s".
+- mainUi reads back: {"taxiIndex":-1,"airport":false,"aircraft":"Black Square Baron 58P Professional"}.

@@ -1,0 +1,30 @@
+{"t":1791310850130,"s":0.011,"kind":"server","text":"listening on 127.0.0.1:47810"}
+{"t":1791310850626,"s":0.507,"kind":"hello","text":"from \"Toolbar\" (coui://html_UI/Global/Panel.html), loaded by toolbar icon: engine object, Coherent object, _globalDataLoader object","title":"Toolbar","href":"coui://html_UI/Global/Panel.html","via":"toolbar icon","engine":"object","coherent":"object","loader":"object","registerViewListener":"function","id":398396322}
+{"t":1791310850838,"s":0.719,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791310850839,"s":0.72,"kind":"sim","text":"connected"}
+{"t":1791310850840,"s":0.721,"kind":"prompt","text":"Open Free flight's world map, leave everything alone, sim in front, Page Down."}
+{"t":1791310850854,"s":0.735,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791310850855,"s":0.736,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791310850855,"s":0.736,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791310850888,"s":0.769,"kind":"state","text":"FlightLoaded state %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","flight":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":false}
+{"t":1791310850921,"s":0.802,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\bksq-aircraft-baronpropress\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\bksq-aircraft-baronpropress\\aircraft.CFG","signal":false}
+{"t":1791310851092,"s":0.973,"kind":"state","text":"LIVERY FOLDER \"\"","liveryFolder":""}
+{"t":1791310851092,"s":0.973,"kind":"state","text":"LIVERY NAME \"\"","liveryName":""}
+{"t":1791310851092,"s":0.973,"kind":"state","text":"TITLE \"Black Square Baron 58P Professional N513LW\"","title":"Black Square Baron 58P Professional N513LW"}
+{"t":1791310851093,"s":0.974,"kind":"state","text":"position -0.902290, -89.618923, 50 ft, on ground 1","lat":-0.9022902798471775,"lon":-89.61892302265383,"altFt":49.57493943237568,"onGround":1}
+{"t":1791310861727,"s":11.608,"kind":"finding","text":"Copies of our script polling p10: 1, in \"Toolbar\" by its toolbar icon (engine object, store object)."}
+{"t":1791310867424,"s":17.305,"kind":"scan","text":"10 documents; our script in 1: [{\"title\":\"Toolbar\",\"id\":398396322,\"via\":\"toolbar icon\",\"polls\":234,\"loaded\":1791310006171}]","pages":["atlas","Shared variables","mainUi","notifications","transition","VLivery01 - BksqBaronLiveryRegistration","Electronic Flight Bag","Mission Steps","Toolbar","notifications"],"reached":[{"title":"Toolbar","id":398396322,"via":"toolbar icon","polls":234,"loaded":1791310006171}]}
+{"t":1791310867424,"s":17.305,"kind":"finding","text":"Through the inspector, our script is in 1 of 10 documents: \"Toolbar\" (toolbar icon)."}
+{"t":1791310867491,"s":17.372,"kind":"components","text":"0 saved","saved":[]}
+{"t":1791310867491,"s":17.372,"kind":"finding","text":"mainUi had loaded 0 UI components from cookedcomps/; saved 0 to experiments/sim-sources/menu/cookedcomps/, 0 of them ones Flow Pro copies."}
+{"t":1791310867524,"s":17.405,"kind":"before","text":"mainUi's departure before: {\"taxiIndex\":-1,\"icao\":null}"}
+{"t":1791310867524,"s":17.405,"kind":"tell","text":"goto to copy 398396322: {\"op\":\"goto\",\"airport\":\"KSEA\",\"stand\":\"PARKING\",\"aircraft\":\"Embraer Phenom 300E\",\"launch\":false}"}
+{"t":1791310867690,"s":17.605,"kind":"script","text":"goto: {\"cmd\":{\"seq\":2,\"to\":398396322,\"op\":\"goto\",\"airport\":\"KSEA\",\"stand\":\"PARKING\",\"aircraft\":\"Embraer Phenom 300E\",\"launch\":false},\"info\":{\"title\":\"Toolbar\",\"href\":\"coui://html_UI/Global/Panel.html\",\"via\":\"toolbar icon\",\"engine\":\"object\",\"coherent\":\"object\",\"loader\":\"object\",\"registerViewListener\":\"function\"}}","step":"goto","detail":{"cmd":{"seq":2,"to":398396322,"op":"goto","airport":"KSEA","stand":"PARKING","aircraft":"Embraer Phenom 300E","launch":false},"info":{"title":"Toolbar","href":"coui://html_UI/Global/Panel.html","via":"toolbar icon","engine":"object","coherent":"object","loader":"object","registerViewListener":"function"}},"id":398396322}
+{"t":1791310871857,"s":21.771,"kind":"script","text":"search: \"no results in 4s\"","step":"search","detail":"no results in 4s","id":398396322}
+{"t":1791310877057,"s":26.971,"kind":"script","text":"search after registering the listener: \"no results in 4s\"","step":"search after registering the listener","detail":"no results in 4s","id":398396322}
+{"t":1791310877057,"s":26.972,"kind":"script","text":"departure: \"not set\"","step":"departure","detail":"not set","id":398396322}
+{"t":1791310877057,"s":26.972,"kind":"script","text":"done: {\"ok\":false,\"ms\":9367}","step":"done","detail":{"ok":false,"ms":9367},"id":398396322}
+{"t":1791310877250,"s":27.131,"kind":"finding","text":"From \"Toolbar\": the departure wasn't set (\"not set\"); no stand; no aircraft change; done in 9367ms."}
+{"t":1791310877250,"s":27.131,"kind":"finding","text":"The airport search: search: \"no results in 4s\"; search after registering the listener: \"no results in 4s\"."}
+{"t":1791310877257,"s":27.138,"kind":"finding","text":"mainUi reads back: {\"taxiIndex\":-1,\"airport\":false,\"aircraft\":\"Black Square Baron 58P Professional\"}."}
+{"t":1791310878178,"s":28.059,"kind":"shot","text":"saved experiments/areas/interface/results/p10-menu-package-2026-10-06-18-20-50/01-world-map.jpg"}

@@ -29,8 +29,16 @@
  *      in the cockpit.
  *
  * The aircraft defaults to the Black Square Baron 58P, the next probe's.
+ *
+ * With --join, and the sim closed, p10 runs the whole join with nobody at the
+ * sim: it starts the sim through Steam, waits for our script in mainUi, presses
+ * the start screen's Start and the home page's Free flight, sets the
+ * departure, stand, aircraft, and livery (--livery <text>, or the second one),
+ * starts the flight, and times each step from the launch. Page Up stops it.
+ * Flow Pro's own automatic Start has to be off, or it presses Start first.
  */
 
+import { execFileSync, spawn } from "node:child_process"
 import { createServer } from "node:http"
 import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
@@ -49,6 +57,8 @@ const AIRPORT = opt("--airport") ?? "KSEA"
 const STAND = opt("--stand") ?? "PARKING"
 const AIRCRAFT = opt("--aircraft") ?? "Black Square Baron 58P Professional"
 const LAUNCH = !argv.includes("--no-launch")
+// --join: text to match in the livery's entry; without it, the second livery.
+const LIVERY = opt("--livery") ?? ""
 const DEPARTURE = "game/currentFlight/gameFlight/departure"
 
 // The components Flow Pro copies, which ours must not (read in
@@ -173,7 +183,13 @@ async function main() {
   const beep = startBeeper()
   const say = startSpeaker()
   const shooter = startShooter(join(dirname(rec.files.txt), `p10-menu-package-${rec.when}`))
-  const sim = await Sim.connect(rec, { name: "CROSSCHECK p10 menu package" })
+  // Started with the sim, before SimConnect listens, so p10 hears our script's
+  // first hellos: it tries again every 5s for 3 minutes.
+  let sim = null
+  for (let i = 0; !sim; i++) {
+    try { sim = await Sim.connect(rec, { name: "CROSSCHECK p10 menu package" }) } catch (e) { if (i >= 36) throw e; await sleep(5000) }
+  }
+  rec.log("sim", "connected")
   sim.track()
 
   beep(880, 150)
@@ -259,7 +275,134 @@ async function main() {
   process.exit(0)
 }
 
-main().catch(async (e) => {
+// ---------------------------------------------------------------- --join
+
+// The whole join from a closed sim, as Crosscheck's Join button would run it:
+// launch the sim through Steam, wait for our script in mainUi, press Start,
+// press Free flight, set the departure, stand, aircraft, and livery, and start
+// the flight. Each step is timed from the launch.
+async function joinFlow() {
+  rec.open()
+  await new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, "127.0.0.1", resolve) })
+  const say = startSpeaker()
+  const keys = await startKeys()
+  let aborted = false
+  keys.listen((k) => { if (k.key === "SKIP") { aborted = true; rec.log("key", "Page Up: stopping") } })
+  const shooter = startShooter(join(dirname(rec.files.txt), `p10-menu-package-${rec.when}`))
+  const running = () => /"FlightSimulator2024\.exe"/i.test(execFileSync("tasklist", ["/fo", "csv", "/nh"], { encoding: "utf8" }))
+  if (running()) {
+    find("The sim was already running; --join starts from a closed sim, so nothing ran.")
+    return endJoin(shooter, null)
+  }
+
+  const t0 = Date.now()
+  const marks = []
+  const mark = (what) => { const s = (Date.now() - t0) / 1000; marks.push(`${s.toFixed(1)}s ${what}`); rec.log("mark", `${s.toFixed(1)}s ${what}`) }
+  // The first --join run ended with no report and no error in its log, so
+  // whatever ends a run writes the timeline it has.
+  const bail = (why) => { rec.log("stop", why); find(`Stopped: ${why}.`); endJoin(shooter, null, marks) }
+  process.on("SIGINT", () => bail("Ctrl+C"))
+  process.on("uncaughtException", (e) => bail(`uncaught ${e.stack ?? e}`))
+  process.on("unhandledRejection", (e) => bail(`unhandled rejection ${e?.stack ?? e}`))
+  const launch = () => spawn("cmd.exe", ["/c", "start", "", "steam://rungameid/2537590"], { detached: true, stdio: "ignore" }).unref()
+  launch()
+  mark("Steam asked to start the sim")
+  say("Starting the sim. Hands off; Page Up stops.")
+  // Steam can ignore a launch sent soon after the sim last exited, so ask again.
+  await sleep(30_000)
+  if (!running()) { launch(); mark("asked again: no sim process after 30s") }
+
+  const until = async (test, ms, every = 1000) => {
+    const end = Date.now() + ms
+    while (Date.now() < end && !aborted) { const v = await test(); if (v) return v; await sleep(every) }
+    return null
+  }
+  const after = (id, step, t) => reports.find((r) => r.id === id && r.step === step && r.at >= t)
+  const ask = async (id, cmd, step, ms = 4000) => { const t = Date.now(); tell(id, cmd); return until(() => after(id, step, t), ms, 150) }
+
+  const main = await until(() => [...copies.values()].find((c) => c.info && /mainUI\.html/i.test(c.info.href) && c.info.loader === "object"), 10 * 60_000)
+  if (!main) { find("Our script never said hello from mainUi in 10 minutes."); return endJoin(shooter, null, marks) }
+  mark(`our script in mainUi, loaded by its ${main.info.via}`)
+
+  const screen = async () => (await ask(main.id, { op: "screen" }, "screen"))?.detail ?? null
+  let s = await until(async () => { const x = await screen(); return x && (x.start || x.home) ? x : null }, 5 * 60_000)
+  if (!s) { find("Neither the start screen's button nor the home page's Free flight tile showed in 5 minutes."); return endJoin(shooter, null, marks) }
+  mark(s.start ? "the start screen's Start button is up" : "the home page is up, with no start screen")
+  await shooter.shot("start-screen").then((x) => rec.log("shot", x.error ?? repoRelative(x.file)))
+
+  if (s.start && !s.home) {
+    const p = await ask(main.id, { op: "press", path: ["Startpage", "Button_Start"] }, "press")
+    mark(`pressed Start: ${JSON.stringify(p?.detail?.result ?? null)}`)
+    s = await until(async () => { const x = await screen(); return x && x.home ? x : null }, 15_000)
+    // Start's own flow event, only while the start screen is still up: sent
+    // from another screen it does nothing useful (p10, 2026-10-06).
+    if (!s && (await screen())?.start) {
+      const f = await ask(main.id, { op: "flow", args: ["SHOW_WORLDMAP_HOMEPAGE", "StartPageManipulator"] }, "flow")
+      mark(`the press didn't reach the home page in 15s; sent the Start button's flow event by ${f?.detail?.via ?? "?"}`)
+      s = await until(async () => { const x = await screen(); return x && x.home ? x : null }, 30_000)
+    }
+    if (!s) { find("The home page didn't come up after Start."); return endJoin(shooter, null, marks) }
+    mark("the home page is up")
+  }
+  await shooter.shot("home").then((x) => rec.log("shot", x.error ?? repoRelative(x.file)))
+
+  const ff = await ask(main.id, { op: "press", path: ["Homepage", "Tiles", "FreeflightButton"] }, "press")
+  mark(`pressed Free flight: ${JSON.stringify(ff?.detail?.result ?? null)}`)
+  const left = await until(async () => { const x = await screen(); return x && !x.home ? x : null }, 20_000)
+  mark(left ? "the home page closed" : "the home page stayed up for 20s")
+  await sleep(3000)
+
+  let done = null
+  for (let i = 1; i <= 6 && !aborted; i++) {
+    const t = Date.now()
+    tell(main.id, { op: "goto", airport: AIRPORT, stand: STAND, aircraft: AIRCRAFT, livery: LIVERY, launch: false })
+    done = await until(() => after(main.id, "done", t) ?? after(main.id, "failed", t), 45_000, 200)
+    if (done?.detail?.ok) break
+    rec.log("goto", `try ${i}: ${JSON.stringify(done?.detail ?? null)}; again in 4s`)
+    await sleep(4000)
+  }
+  const step = (name) => [...reports].reverse().find((r) => r.id === main.id && r.step === name)
+  if (!done?.detail?.ok) { find("The world map's requests didn't all go through in 6 tries."); return endJoin(shooter, null, marks) }
+  mark(`set ${AIRPORT}, ${step("stand")?.detail?.name}, ${step("aircraft")?.detail?.after}, livery ${step("livery")?.detail?.variation ?? "?"}`)
+  rec.log("livery", JSON.stringify(step("livery")?.detail ?? null))
+  await shooter.shot("world-map").then((x) => rec.log("shot", x.error ?? repoRelative(x.file)))
+
+  let sim = null
+  for (let i = 0; !sim && i < 12; i++) { try { sim = await Sim.connect(rec, { name: "CROSSCHECK p10 join" }) } catch { await sleep(5000) } }
+  const seen = { flightLoaded: null }
+  sim?.systemHandlers.add((name) => { if (name === "FlightLoaded" && seen.flightLoaded === null) seen.flightLoaded = Date.now() })
+  const l = await ask(main.id, { op: "launch" }, "launch")
+  mark(`launchFlight: ${JSON.stringify(l?.detail ?? null)}`)
+  const loaded = await until(() => seen.flightLoaded, 4 * 60_000, 250)
+  mark(loaded ? "FlightLoaded" : "no FlightLoaded in 4 minutes")
+  if (loaded) {
+    await sleep(3000)
+    await shooter.shot("flight-loaded").then((x) => rec.log("shot", x.error ?? repoRelative(x.file)))
+    const v = await sim.readStrings(["TITLE", "LIVERY NAME"]).catch(() => null)
+    find(`Loaded: TITLE ${JSON.stringify(v?.get("TITLE") ?? null)}, LIVERY NAME ${JSON.stringify(v?.get("LIVERY NAME") ?? null)}.`)
+  }
+  return endJoin(shooter, sim, marks)
+}
+
+async function endJoin(shooter, sim, marks = []) {
+  startSpeaker()("Done.")
+  const text = scrub([`p10-menu-package --join, started ${new Date(rec.started).toISOString()}`, `Asked for ${AIRPORT}, a stand matching /${STAND}/i, ${AIRCRAFT}, and the livery ${LIVERY ? `matching "${LIVERY}"` : "after the first"}`, "", "Timeline from the launch:", ...marks.map((m) => `  ${m}`), "", ...findings.map((f) => `- ${f}`)].join("\n"))
+  rec.writeReport(text)
+  console.log("\n" + text)
+  console.log(`saved ${repoRelative(rec.files.txt)}`)
+  shooter.close()
+  sim?.close()
+  server.close()
+  await rec.close()
+  process.exit(0)
+}
+
+if (argv.includes("--join")) joinFlow().catch(async (e) => {
+  rec.log("error", e.stack ?? String(e))
+  await rec.close()
+  process.exit(1)
+})
+else main().catch(async (e) => {
   rec.log("error", e.stack ?? String(e))
   await rec.close()
   process.exit(1)

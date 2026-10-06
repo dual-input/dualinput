@@ -1,0 +1,16 @@
+p10-menu-package --join, started 2026-10-06T18:56:13.586Z
+Asked for KSEA, a stand matching /PARKING/i, Black Square Baron 58P Professional, and the livery after the first
+
+Timeline from the launch:
+  0.0s Steam asked to start the sim
+  128.2s our script in mainUi, loaded by its cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5
+  128.7s the start screen's Start button is up
+  129.3s pressed Start: {"found":true,"name":"TileButton_Start_Special","x":2158,"y":1232,"target":"UI-RESOURCE-ELEMENT TileButton_Start_Special"}
+  130.1s the home page is up
+  130.8s pressed Free flight: {"found":true,"name":"Home_TileRegular_Freeflight","x":721,"y":839,"target":"UI-RESOURCE-ELEMENT Home_TileRegular_Freeflight"}
+  131.4s the home page closed
+  137.8s set KSEA, PARKING 294 -- RAMP GA MEDIUM, Black Square Baron 58P Professional, livery N515MR
+  138.5s launchFlight: {"ok":true,"value":true}
+  138.8s FlightLoaded
+
+- Loaded: TITLE "Black Square Baron 58P Professional N515MR", LIVERY NAME "".

@@ -1,0 +1,18 @@
+{"t":1791309326748,"s":0.013,"kind":"server","text":"listening on 127.0.0.1:47810"}
+{"t":1791309327759,"s":1.024,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791309327760,"s":1.025,"kind":"sim","text":"connected"}
+{"t":1791309327761,"s":1.026,"kind":"prompt","text":"Open Free flight's world map, leave everything alone, sim in front, Page Down."}
+{"t":1791309327841,"s":1.106,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791309327842,"s":1.107,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791309327842,"s":1.107,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791309328344,"s":1.609,"kind":"state","text":"LIVERY NAME \"Emirates 'A6-EXA'\"","liveryName":"Emirates 'A6-EXA'"}
+{"t":1791309328344,"s":1.609,"kind":"state","text":"TITLE \"A350-900 (Default Cabin)\"","title":"A350-900 (Default Cabin)"}
+{"t":1791309328344,"s":1.609,"kind":"state","text":"position -0.000000, 90.000323, 233 ft, on ground 0","lat":-2.1556893808986427e-7,"lon":90.00032277330374,"altFt":233.3942316438406,"onGround":0}
+{"t":1791309328345,"s":1.61,"kind":"state","text":"LIVERY FOLDER \"A359_EMIRATES_EXA\"","liveryFolder":"A359_EMIRATES_EXA"}
+{"t":1791309330941,"s":4.206,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\A350\\presets\\inibuilds\\A350-900_Default_Cabin\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\A350\\presets\\inibuilds\\A350-900_Default_Cabin\\config\\aircraft.CFG","signal":false}
+{"t":1791309337092,"s":10.357,"kind":"finding","text":"Copies of our script polling p10: 0."}
+{"t":1791309344751,"s":18.016,"kind":"scan","text":"13 documents; our script in 0: []","pages":["atlas","Shared variables","mainUi","notifications","transition","VLivery01 - A350Printer","VLivery02 - A350Printer","Electronic Flight Bag","Mission Steps","Toolbar","notifications","//42 Flow","//42 CP Overlay (Reqd.)"],"reached":[]}
+{"t":1791309344752,"s":18.017,"kind":"finding","text":"Through the inspector, our script is in 0 of 13 documents."}
+{"t":1791309344949,"s":18.214,"kind":"components","text":"0 saved","saved":[]}
+{"t":1791309344949,"s":18.214,"kind":"finding","text":"mainUi had loaded 0 UI components from cookedcomps/; saved 0 to experiments/sim-sources/menu/cookedcomps/, 0 of them ones Flow Pro copies."}
+{"t":1791309344949,"s":18.214,"kind":"finding","text":"No copy of our script runs in a document with the store, so nothing was set."}

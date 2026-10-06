@@ -1,0 +1,16 @@
+{"t":1791310376760,"s":0.029,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791310377244,"s":0.513,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791310377244,"s":0.513,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791310377245,"s":0.514,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791310377577,"s":0.846,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\", study black-square-baron-pro","title":"Black Square Baron 58P Professional N513LW","key":"black-square-baron-pro"}
+{"t":1791310377611,"s":0.88,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":49,"index":2,"sent":"map K:MIXTURE_AXIS_SET_EX1 for group 10"}
+{"t":1791310377611,"s":0.88,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":50,"index":2,"sent":"add K:MIXTURE_AXIS_SET_EX1 to group 10"}
+{"t":1791310377611,"s":0.88,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE1_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":51,"index":2,"sent":"map K:MIXTURE1_AXIS_SET_EX1 for group 10"}
+{"t":1791310377611,"s":0.88,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE1_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":52,"index":2,"sent":"add K:MIXTURE1_AXIS_SET_EX1 to group 10"}
+{"t":1791310377611,"s":0.88,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE2_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":53,"index":2,"sent":"map K:MIXTURE2_AXIS_SET_EX1 for group 10"}
+{"t":1791310377611,"s":0.88,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE2_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":54,"index":2,"sent":"add K:MIXTURE2_AXIS_SET_EX1 to group 10"}
+{"t":1791310377627,"s":0.896,"kind":"inputs","text":"127 input events listed; watching 5 whose names match /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER|MIXTURE/i","listed":127,"watched":["ENGINE_THROTTLE_1","ENGINE_THROTTLE_2","BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1","BKSQ_TURBOCHARGEDMIXTURECONTROLLER_2","HANDLING_ELEVATORTRIM_1"]}
+{"t":1791310377644,"s":0.913,"kind":"check","text":"L:bksq_controlLocks reads 0","lock":"L:bksq_controlLocks","value":0}
+{"t":1791310385084,"s":8.353,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791310390098,"s":13.367,"kind":"phase","text":"mixture free: baseline · heard none · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×82 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380449","control":"mixture","phase":"free","expect":null,"verdict":{"word":"baseline"},"heard":{},"masker":{},"inputs":{"BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1":{"n":82,"min":0,"max":10000,"last":8504.399061203}}}
+{"t":1791310390099,"s":13.368,"kind":"plan","text":"mixture: no maskable K: event heard, so nothing to mask"}

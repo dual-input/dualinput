@@ -1,0 +1,9 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-06T18:12:56.731Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N513LW", study black-square-baron-pro
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+
+mixture: masked nothing
+  free: baseline · heard none · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×82 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380449
+
+Exceptions: NAME_UNRECOGNIZED (7) on map K:MIXTURE_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE_AXIS_SET_EX1 to group 10, parameter 2; NAME_UNRECOGNIZED (7) on map K:MIXTURE1_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE1_AXIS_SET_EX1 to group 10, parameter 2; NAME_UNRECOGNIZED (7) on map K:MIXTURE2_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE2_AXIS_SET_EX1 to group 10, parameter 2

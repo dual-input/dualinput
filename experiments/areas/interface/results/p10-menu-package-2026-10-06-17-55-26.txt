@@ -1,0 +1,7 @@
+p10-menu-package, started 2026-10-06T17:55:26.735Z
+Asked for KSEA, a stand matching /PARKING/i, and Black Square Baron 58P Professional
+
+- Copies of our script polling p10: 0.
+- Through the inspector, our script is in 0 of 13 documents.
+- mainUi had loaded 0 UI components from cookedcomps/; saved 0 to experiments/sim-sources/menu/cookedcomps/, 0 of them ones Flow Pro copies.
+- No copy of our script runs in a document with the store, so nothing was set.

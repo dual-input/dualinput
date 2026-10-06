@@ -1,0 +1,642 @@
+{"t":1791310507526,"s":0.035,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791310507978,"s":0.487,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791310507979,"s":0.488,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791310507979,"s":0.488,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791310508278,"s":0.787,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\", study black-square-baron-pro","title":"Black Square Baron 58P Professional N513LW","key":"black-square-baron-pro"}
+{"t":1791310508311,"s":0.82,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":49,"index":2,"sent":"map K:MIXTURE_AXIS_SET_EX1 for group 10"}
+{"t":1791310508311,"s":0.82,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":50,"index":2,"sent":"add K:MIXTURE_AXIS_SET_EX1 to group 10"}
+{"t":1791310508311,"s":0.82,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE1_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":51,"index":2,"sent":"map K:MIXTURE1_AXIS_SET_EX1 for group 10"}
+{"t":1791310508312,"s":0.821,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE1_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":52,"index":2,"sent":"add K:MIXTURE1_AXIS_SET_EX1 to group 10"}
+{"t":1791310508312,"s":0.821,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE2_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":53,"index":2,"sent":"map K:MIXTURE2_AXIS_SET_EX1 for group 10"}
+{"t":1791310508312,"s":0.821,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE2_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":54,"index":2,"sent":"add K:MIXTURE2_AXIS_SET_EX1 to group 10"}
+{"t":1791310508327,"s":0.836,"kind":"inputs","text":"127 input events listed; watching 5 whose names match /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER|MIXTURE/i","listed":127,"watched":["ENGINE_THROTTLE_1","ENGINE_THROTTLE_2","BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1","BKSQ_TURBOCHARGEDMIXTURECONTROLLER_2","HANDLING_ELEVATORTRIM_1"]}
+{"t":1791310508344,"s":0.853,"kind":"check","text":"L:bksq_controlLocks reads 0","lock":"L:bksq_controlLocks","value":0}
+{"t":1791310508847,"s":1.356,"kind":"key","text":"START, with claude in front","key":"START","foreground":"claude"}
+{"t":1791310510678,"s":3.187,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15131, not ours","event":"AXIS_MIXTURE1_SET","data":[15131,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510679,"s":3.188,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510679,"s":3.188,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510711,"s":3.22,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13814, not ours","event":"AXIS_MIXTURE1_SET","data":[13814,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510711,"s":3.22,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510711,"s":3.22,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510745,"s":3.254,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12111, not ours","event":"AXIS_MIXTURE1_SET","data":[12111,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510778,"s":3.287,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10473, not ours","event":"AXIS_MIXTURE1_SET","data":[10473,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510811,"s":3.32,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9252, not ours","event":"AXIS_MIXTURE1_SET","data":[9252,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510845,"s":3.354,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8192, not ours","event":"AXIS_MIXTURE1_SET","data":[8192,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510878,"s":3.387,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7196, not ours","event":"AXIS_MIXTURE1_SET","data":[7196,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510912,"s":3.421,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5879, not ours","event":"AXIS_MIXTURE1_SET","data":[5879,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510944,"s":3.453,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4273, not ours","event":"AXIS_MIXTURE1_SET","data":[4273,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310510978,"s":3.487,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2956, not ours","event":"AXIS_MIXTURE1_SET","data":[2956,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511012,"s":3.521,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1606, not ours","event":"AXIS_MIXTURE1_SET","data":[1606,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511045,"s":3.554,"kind":"key","text":"K:AXIS_MIXTURE1_SET 321, not ours","event":"AXIS_MIXTURE1_SET","data":[321,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511078,"s":3.587,"kind":"key","text":"K:AXIS_MIXTURE1_SET -864, not ours","event":"AXIS_MIXTURE1_SET","data":[-864,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511111,"s":3.62,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2240, not ours","event":"AXIS_MIXTURE1_SET","data":[-2240,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511145,"s":3.654,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4032, not ours","event":"AXIS_MIXTURE1_SET","data":[-4032,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511178,"s":3.687,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5472, not ours","event":"AXIS_MIXTURE1_SET","data":[-5472,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511211,"s":3.72,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6784, not ours","event":"AXIS_MIXTURE1_SET","data":[-6784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511245,"s":3.754,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8288, not ours","event":"AXIS_MIXTURE1_SET","data":[-8288,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511278,"s":3.787,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9824, not ours","event":"AXIS_MIXTURE1_SET","data":[-9824,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511311,"s":3.82,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10816, not ours","event":"AXIS_MIXTURE1_SET","data":[-10816,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511345,"s":3.854,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12192, not ours","event":"AXIS_MIXTURE1_SET","data":[-12192,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511378,"s":3.887,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13088, not ours","event":"AXIS_MIXTURE1_SET","data":[-13088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511411,"s":3.92,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14048, not ours","event":"AXIS_MIXTURE1_SET","data":[-14048,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511445,"s":3.954,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15072, not ours","event":"AXIS_MIXTURE1_SET","data":[-15072,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511478,"s":3.987,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15936, not ours","event":"AXIS_MIXTURE1_SET","data":[-15936,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511512,"s":4.021,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16384, not ours","event":"AXIS_MIXTURE1_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511545,"s":4.054,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511545,"s":4.054,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511578,"s":4.087,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511578,"s":4.087,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511678,"s":4.187,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511678,"s":4.187,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511711,"s":4.22,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511711,"s":4.22,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511878,"s":4.387,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15488, not ours","event":"AXIS_MIXTURE1_SET","data":[-15488,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511911,"s":4.42,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14272, not ours","event":"AXIS_MIXTURE1_SET","data":[-14272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511945,"s":4.454,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12448, not ours","event":"AXIS_MIXTURE1_SET","data":[-12448,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511978,"s":4.487,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10688, not ours","event":"AXIS_MIXTURE1_SET","data":[-10688,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511978,"s":4.487,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310511978,"s":4.487,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512011,"s":4.52,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8896, not ours","event":"AXIS_MIXTURE1_SET","data":[-8896,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512011,"s":4.52,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512012,"s":4.521,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512045,"s":4.554,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6912, not ours","event":"AXIS_MIXTURE1_SET","data":[-6912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512078,"s":4.587,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5024, not ours","event":"AXIS_MIXTURE1_SET","data":[-5024,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512111,"s":4.62,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3264, not ours","event":"AXIS_MIXTURE1_SET","data":[-3264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512145,"s":4.654,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1088, not ours","event":"AXIS_MIXTURE1_SET","data":[-1088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512178,"s":4.687,"kind":"key","text":"K:AXIS_MIXTURE1_SET 482, not ours","event":"AXIS_MIXTURE1_SET","data":[482,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512178,"s":4.687,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512178,"s":4.687,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512211,"s":4.72,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2313, not ours","event":"AXIS_MIXTURE1_SET","data":[2313,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512212,"s":4.721,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512212,"s":4.721,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512245,"s":4.754,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3887, not ours","event":"AXIS_MIXTURE1_SET","data":[3887,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512278,"s":4.787,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5526, not ours","event":"AXIS_MIXTURE1_SET","data":[5526,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512311,"s":4.82,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7003, not ours","event":"AXIS_MIXTURE1_SET","data":[7003,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512345,"s":4.854,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8481, not ours","event":"AXIS_MIXTURE1_SET","data":[8481,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512378,"s":4.887,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9702, not ours","event":"AXIS_MIXTURE1_SET","data":[9702,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512378,"s":4.887,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512378,"s":4.887,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512411,"s":4.92,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10987, not ours","event":"AXIS_MIXTURE1_SET","data":[10987,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512412,"s":4.921,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512412,"s":4.921,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512445,"s":4.954,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12465, not ours","event":"AXIS_MIXTURE1_SET","data":[12465,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512478,"s":4.987,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13621, not ours","event":"AXIS_MIXTURE1_SET","data":[13621,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512511,"s":5.02,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14745, not ours","event":"AXIS_MIXTURE1_SET","data":[14745,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512512,"s":5.021,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512512,"s":5.021,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512545,"s":5.054,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512545,"s":5.054,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512545,"s":5.054,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512711,"s":5.22,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512711,"s":5.22,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512745,"s":5.254,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512745,"s":5.254,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512811,"s":5.32,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512811,"s":5.32,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512845,"s":5.354,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310512845,"s":5.354,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513011,"s":5.52,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16095, not ours","event":"AXIS_MIXTURE1_SET","data":[16095,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513044,"s":5.553,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15195, not ours","event":"AXIS_MIXTURE1_SET","data":[15195,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513045,"s":5.554,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513045,"s":5.554,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513078,"s":5.587,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14264, not ours","event":"AXIS_MIXTURE1_SET","data":[14264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513078,"s":5.587,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513078,"s":5.587,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513111,"s":5.62,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13364, not ours","event":"AXIS_MIXTURE1_SET","data":[13364,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513145,"s":5.654,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11983, not ours","event":"AXIS_MIXTURE1_SET","data":[11983,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513178,"s":5.687,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10794, not ours","event":"AXIS_MIXTURE1_SET","data":[10794,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513211,"s":5.72,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9509, not ours","event":"AXIS_MIXTURE1_SET","data":[9509,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513245,"s":5.754,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8160, not ours","event":"AXIS_MIXTURE1_SET","data":[8160,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513278,"s":5.787,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6843, not ours","event":"AXIS_MIXTURE1_SET","data":[6843,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513311,"s":5.82,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5365, not ours","event":"AXIS_MIXTURE1_SET","data":[5365,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513345,"s":5.854,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3470, not ours","event":"AXIS_MIXTURE1_SET","data":[3470,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513378,"s":5.887,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1831, not ours","event":"AXIS_MIXTURE1_SET","data":[1831,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513412,"s":5.921,"kind":"key","text":"K:AXIS_MIXTURE1_SET 289, not ours","event":"AXIS_MIXTURE1_SET","data":[289,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513445,"s":5.954,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1152, not ours","event":"AXIS_MIXTURE1_SET","data":[-1152,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513445,"s":5.954,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513445,"s":5.954,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513478,"s":5.987,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2528, not ours","event":"AXIS_MIXTURE1_SET","data":[-2528,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513478,"s":5.987,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513478,"s":5.987,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513511,"s":6.02,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3904, not ours","event":"AXIS_MIXTURE1_SET","data":[-3904,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513512,"s":6.021,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513512,"s":6.021,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513545,"s":6.054,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5440, not ours","event":"AXIS_MIXTURE1_SET","data":[-5440,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513545,"s":6.054,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513545,"s":6.054,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513578,"s":6.087,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6624, not ours","event":"AXIS_MIXTURE1_SET","data":[-6624,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513611,"s":6.12,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7744, not ours","event":"AXIS_MIXTURE1_SET","data":[-7744,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513645,"s":6.154,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8992, not ours","event":"AXIS_MIXTURE1_SET","data":[-8992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513678,"s":6.187,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10112, not ours","event":"AXIS_MIXTURE1_SET","data":[-10112,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513711,"s":6.22,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10912, not ours","event":"AXIS_MIXTURE1_SET","data":[-10912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513745,"s":6.254,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12032, not ours","event":"AXIS_MIXTURE1_SET","data":[-12032,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513778,"s":6.287,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12448, not ours","event":"AXIS_MIXTURE1_SET","data":[-12448,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513778,"s":6.287,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513778,"s":6.287,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513812,"s":6.321,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12864, not ours","event":"AXIS_MIXTURE1_SET","data":[-12864,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513812,"s":6.321,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513812,"s":6.321,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513845,"s":6.354,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12960, not ours","event":"AXIS_MIXTURE1_SET","data":[-12960,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310513848,"s":6.357,"kind":"phase","text":"mixture free: baseline · heard AXIS_MIXTURE1_SET ×73 -16384..16384, THROTTLE1_AXIS_SET_EX1 ×26 -5888..-5856, THROTTLE1_SET ×26 5248..5264 · input events ENGINE_THROTTLE_1 ×38 32.03125..32.128906, BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×75 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380497, GENERAL ENG THROTTLE LEVER POSITION:1 32.03125..32.128906","control":"mixture","phase":"free","expect":null,"verdict":{"word":"baseline"},"heard":{"AXIS_MIXTURE1_SET":{"n":73,"min":-16384,"max":16384,"last":-12960},"THROTTLE1_AXIS_SET_EX1":{"n":26,"min":-5888,"max":-5856,"last":-5856},"THROTTLE1_SET":{"n":26,"min":5248,"max":5264,"last":5264}},"masker":{},"inputs":{"ENGINE_THROTTLE_1":{"n":38,"min":32.03125,"max":32.12890625,"last":32.12890625},"BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1":{"n":75,"min":0,"max":10000,"last":1044.921875}}}
+{"t":1791310513878,"s":6.387,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13024, not ours","event":"AXIS_MIXTURE1_SET","data":[-13024,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514030,"s":6.539,"kind":"masker","text":"open: SunRise 12.2.282174.999, SimConnect 12.2.0.0","maskerKind":"open","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791310514048,"s":6.557,"kind":"masker","text":"system: Sim 1 (running)","maskerKind":"system","event":"Sim","data":1}
+{"t":1791310514048,"s":6.557,"kind":"masker","text":"system: Pause_EX1 0 (none)","maskerKind":"system","event":"Pause_EX1","data":0}
+{"t":1791310514048,"s":6.557,"kind":"masker","text":"system: View 2 (cockpit virtual)","maskerKind":"system","event":"View","data":2}
+{"t":1791310514082,"s":6.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12992, not ours","event":"AXIS_MIXTURE1_SET","data":[-12992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514083,"s":6.592,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12992","name":"AXIS_MIXTURE1_SET","value":-12992,"ours":null}
+{"t":1791310514115,"s":6.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12736, not ours","event":"AXIS_MIXTURE1_SET","data":[-12736,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514116,"s":6.625,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12736","name":"AXIS_MIXTURE1_SET","value":-12736,"ours":null}
+{"t":1791310514149,"s":6.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12032, not ours","event":"AXIS_MIXTURE1_SET","data":[-12032,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514149,"s":6.658,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12032","name":"AXIS_MIXTURE1_SET","value":-12032,"ours":null}
+{"t":1791310514182,"s":6.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10944, not ours","event":"AXIS_MIXTURE1_SET","data":[-10944,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514182,"s":6.691,"kind":"masker got","text":"AXIS_MIXTURE1_SET -10944","name":"AXIS_MIXTURE1_SET","value":-10944,"ours":null}
+{"t":1791310514215,"s":6.724,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9920, not ours","event":"AXIS_MIXTURE1_SET","data":[-9920,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514216,"s":6.725,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9920","name":"AXIS_MIXTURE1_SET","value":-9920,"ours":null}
+{"t":1791310514249,"s":6.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8352, not ours","event":"AXIS_MIXTURE1_SET","data":[-8352,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514249,"s":6.758,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8352","name":"AXIS_MIXTURE1_SET","value":-8352,"ours":null}
+{"t":1791310514282,"s":6.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6912, not ours","event":"AXIS_MIXTURE1_SET","data":[-6912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514282,"s":6.791,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6912","name":"AXIS_MIXTURE1_SET","value":-6912,"ours":null}
+{"t":1791310514316,"s":6.825,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5504, not ours","event":"AXIS_MIXTURE1_SET","data":[-5504,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514316,"s":6.825,"kind":"masker got","text":"AXIS_MIXTURE1_SET -5504","name":"AXIS_MIXTURE1_SET","value":-5504,"ours":null}
+{"t":1791310514349,"s":6.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4160, not ours","event":"AXIS_MIXTURE1_SET","data":[-4160,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514349,"s":6.858,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4160","name":"AXIS_MIXTURE1_SET","value":-4160,"ours":null}
+{"t":1791310514382,"s":6.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2752, not ours","event":"AXIS_MIXTURE1_SET","data":[-2752,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514382,"s":6.891,"kind":"masker got","text":"AXIS_MIXTURE1_SET -2752","name":"AXIS_MIXTURE1_SET","value":-2752,"ours":null}
+{"t":1791310514415,"s":6.924,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1344, not ours","event":"AXIS_MIXTURE1_SET","data":[-1344,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514416,"s":6.925,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1344","name":"AXIS_MIXTURE1_SET","value":-1344,"ours":null}
+{"t":1791310514449,"s":6.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 321, not ours","event":"AXIS_MIXTURE1_SET","data":[321,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514449,"s":6.958,"kind":"masker got","text":"AXIS_MIXTURE1_SET 321","name":"AXIS_MIXTURE1_SET","value":321,"ours":null}
+{"t":1791310514482,"s":6.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1639, not ours","event":"AXIS_MIXTURE1_SET","data":[1639,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514482,"s":6.991,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1639","name":"AXIS_MIXTURE1_SET","value":1639,"ours":null}
+{"t":1791310514515,"s":7.024,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2891, not ours","event":"AXIS_MIXTURE1_SET","data":[2891,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514515,"s":7.024,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514516,"s":7.025,"kind":"masker got","text":"AXIS_MIXTURE1_SET 2891","name":"AXIS_MIXTURE1_SET","value":2891,"ours":null}
+{"t":1791310514516,"s":7.025,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310514535,"s":7.044,"kind":"masker","text":"ready: masking AXIS_MIXTURE1_SET, THROTTLE1_AXIS_SET_EX1 at priority 10000000","maskerKind":"ready","events":["AXIS_MIXTURE1_SET","THROTTLE1_AXIS_SET_EX1"]}
+{"t":1791310514549,"s":7.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4305, not ours","event":"AXIS_MIXTURE1_SET","data":[4305,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514549,"s":7.058,"kind":"masker got","text":"AXIS_MIXTURE1_SET 4305","name":"AXIS_MIXTURE1_SET","value":4305,"ours":null}
+{"t":1791310514549,"s":7.058,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514549,"s":7.058,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310514582,"s":7.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5526, not ours","event":"AXIS_MIXTURE1_SET","data":[5526,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514583,"s":7.092,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5526","name":"AXIS_MIXTURE1_SET","value":5526,"ours":null}
+{"t":1791310514616,"s":7.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6843, not ours","event":"AXIS_MIXTURE1_SET","data":[6843,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514616,"s":7.125,"kind":"masker got","text":"AXIS_MIXTURE1_SET 6843","name":"AXIS_MIXTURE1_SET","value":6843,"ours":null}
+{"t":1791310514649,"s":7.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8417, not ours","event":"AXIS_MIXTURE1_SET","data":[8417,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514649,"s":7.158,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8417","name":"AXIS_MIXTURE1_SET","value":8417,"ours":null}
+{"t":1791310514682,"s":7.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9605, not ours","event":"AXIS_MIXTURE1_SET","data":[9605,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514682,"s":7.191,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9605","name":"AXIS_MIXTURE1_SET","value":9605,"ours":null}
+{"t":1791310514715,"s":7.224,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10923, not ours","event":"AXIS_MIXTURE1_SET","data":[10923,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514716,"s":7.225,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10923","name":"AXIS_MIXTURE1_SET","value":10923,"ours":null}
+{"t":1791310514749,"s":7.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12336, not ours","event":"AXIS_MIXTURE1_SET","data":[12336,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514749,"s":7.258,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12336","name":"AXIS_MIXTURE1_SET","value":12336,"ours":null}
+{"t":1791310514782,"s":7.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13493, not ours","event":"AXIS_MIXTURE1_SET","data":[13493,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514782,"s":7.291,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13493","name":"AXIS_MIXTURE1_SET","value":13493,"ours":null}
+{"t":1791310514816,"s":7.325,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14585, not ours","event":"AXIS_MIXTURE1_SET","data":[14585,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514816,"s":7.325,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514816,"s":7.325,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14585","name":"AXIS_MIXTURE1_SET","value":14585,"ours":null}
+{"t":1791310514816,"s":7.325,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310514849,"s":7.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16191, not ours","event":"AXIS_MIXTURE1_SET","data":[16191,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514849,"s":7.358,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16191","name":"AXIS_MIXTURE1_SET","value":16191,"ours":null}
+{"t":1791310514849,"s":7.358,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514849,"s":7.358,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310514882,"s":7.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310514882,"s":7.391,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16384","name":"AXIS_MIXTURE1_SET","value":16384,"ours":null}
+{"t":1791310515216,"s":7.725,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15709, not ours","event":"AXIS_MIXTURE1_SET","data":[15709,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515216,"s":7.725,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15709","name":"AXIS_MIXTURE1_SET","value":15709,"ours":null}
+{"t":1791310515249,"s":7.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14392, not ours","event":"AXIS_MIXTURE1_SET","data":[14392,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515249,"s":7.758,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14392","name":"AXIS_MIXTURE1_SET","value":14392,"ours":null}
+{"t":1791310515282,"s":7.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13300, not ours","event":"AXIS_MIXTURE1_SET","data":[13300,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515282,"s":7.791,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13300","name":"AXIS_MIXTURE1_SET","value":13300,"ours":null}
+{"t":1791310515315,"s":7.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11790, not ours","event":"AXIS_MIXTURE1_SET","data":[11790,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515316,"s":7.825,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11790","name":"AXIS_MIXTURE1_SET","value":11790,"ours":null}
+{"t":1791310515349,"s":7.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10280, not ours","event":"AXIS_MIXTURE1_SET","data":[10280,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515350,"s":7.859,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10280","name":"AXIS_MIXTURE1_SET","value":10280,"ours":null}
+{"t":1791310515382,"s":7.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8642, not ours","event":"AXIS_MIXTURE1_SET","data":[8642,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515382,"s":7.891,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8642","name":"AXIS_MIXTURE1_SET","value":8642,"ours":null}
+{"t":1791310515415,"s":7.924,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7036, not ours","event":"AXIS_MIXTURE1_SET","data":[7036,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515415,"s":7.924,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515416,"s":7.925,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7036","name":"AXIS_MIXTURE1_SET","value":7036,"ours":null}
+{"t":1791310515416,"s":7.925,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310515449,"s":7.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4947, not ours","event":"AXIS_MIXTURE1_SET","data":[4947,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515449,"s":7.958,"kind":"masker got","text":"AXIS_MIXTURE1_SET 4947","name":"AXIS_MIXTURE1_SET","value":4947,"ours":null}
+{"t":1791310515482,"s":7.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3181, not ours","event":"AXIS_MIXTURE1_SET","data":[3181,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515482,"s":7.991,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515482,"s":7.991,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3181","name":"AXIS_MIXTURE1_SET","value":3181,"ours":null}
+{"t":1791310515483,"s":7.992,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310515516,"s":8.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1414, not ours","event":"AXIS_MIXTURE1_SET","data":[1414,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515516,"s":8.025,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1414","name":"AXIS_MIXTURE1_SET","value":1414,"ours":null}
+{"t":1791310515549,"s":8.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET -288, not ours","event":"AXIS_MIXTURE1_SET","data":[-288,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515549,"s":8.058,"kind":"masker got","text":"AXIS_MIXTURE1_SET -288","name":"AXIS_MIXTURE1_SET","value":-288,"ours":null}
+{"t":1791310515582,"s":8.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1824, not ours","event":"AXIS_MIXTURE1_SET","data":[-1824,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515582,"s":8.091,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1824","name":"AXIS_MIXTURE1_SET","value":-1824,"ours":null}
+{"t":1791310515616,"s":8.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3712, not ours","event":"AXIS_MIXTURE1_SET","data":[-3712,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515616,"s":8.125,"kind":"masker got","text":"AXIS_MIXTURE1_SET -3712","name":"AXIS_MIXTURE1_SET","value":-3712,"ours":null}
+{"t":1791310515649,"s":8.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4992, not ours","event":"AXIS_MIXTURE1_SET","data":[-4992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515649,"s":8.158,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4992","name":"AXIS_MIXTURE1_SET","value":-4992,"ours":null}
+{"t":1791310515682,"s":8.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6240, not ours","event":"AXIS_MIXTURE1_SET","data":[-6240,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515682,"s":8.191,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6240","name":"AXIS_MIXTURE1_SET","value":-6240,"ours":null}
+{"t":1791310515715,"s":8.224,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7328, not ours","event":"AXIS_MIXTURE1_SET","data":[-7328,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515716,"s":8.225,"kind":"masker got","text":"AXIS_MIXTURE1_SET -7328","name":"AXIS_MIXTURE1_SET","value":-7328,"ours":null}
+{"t":1791310515749,"s":8.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8640, not ours","event":"AXIS_MIXTURE1_SET","data":[-8640,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515749,"s":8.258,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515749,"s":8.258,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8640","name":"AXIS_MIXTURE1_SET","value":-8640,"ours":null}
+{"t":1791310515749,"s":8.258,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310515782,"s":8.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9760, not ours","event":"AXIS_MIXTURE1_SET","data":[-9760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515782,"s":8.291,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515782,"s":8.291,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9760","name":"AXIS_MIXTURE1_SET","value":-9760,"ours":null}
+{"t":1791310515782,"s":8.291,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310515816,"s":8.325,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10784, not ours","event":"AXIS_MIXTURE1_SET","data":[-10784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515816,"s":8.325,"kind":"masker got","text":"AXIS_MIXTURE1_SET -10784","name":"AXIS_MIXTURE1_SET","value":-10784,"ours":null}
+{"t":1791310515849,"s":8.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12160, not ours","event":"AXIS_MIXTURE1_SET","data":[-12160,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515849,"s":8.358,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12160","name":"AXIS_MIXTURE1_SET","value":-12160,"ours":null}
+{"t":1791310515882,"s":8.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13024, not ours","event":"AXIS_MIXTURE1_SET","data":[-13024,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515882,"s":8.391,"kind":"masker got","text":"AXIS_MIXTURE1_SET -13024","name":"AXIS_MIXTURE1_SET","value":-13024,"ours":null}
+{"t":1791310515916,"s":8.425,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13856, not ours","event":"AXIS_MIXTURE1_SET","data":[-13856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515916,"s":8.425,"kind":"masker got","text":"AXIS_MIXTURE1_SET -13856","name":"AXIS_MIXTURE1_SET","value":-13856,"ours":null}
+{"t":1791310515949,"s":8.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14464, not ours","event":"AXIS_MIXTURE1_SET","data":[-14464,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515949,"s":8.458,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14464","name":"AXIS_MIXTURE1_SET","value":-14464,"ours":null}
+{"t":1791310515982,"s":8.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14848, not ours","event":"AXIS_MIXTURE1_SET","data":[-14848,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310515982,"s":8.491,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14848","name":"AXIS_MIXTURE1_SET","value":-14848,"ours":null}
+{"t":1791310516016,"s":8.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14880, not ours","event":"AXIS_MIXTURE1_SET","data":[-14880,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516016,"s":8.525,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14880","name":"AXIS_MIXTURE1_SET","value":-14880,"ours":null}
+{"t":1791310516016,"s":8.525,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310516016,"s":8.525,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516049,"s":8.558,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516049,"s":8.558,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310516115,"s":8.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14848, not ours","event":"AXIS_MIXTURE1_SET","data":[-14848,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516115,"s":8.624,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14848","name":"AXIS_MIXTURE1_SET","value":-14848,"ours":null}
+{"t":1791310516149,"s":8.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14176, not ours","event":"AXIS_MIXTURE1_SET","data":[-14176,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516149,"s":8.658,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14176","name":"AXIS_MIXTURE1_SET","value":-14176,"ours":null}
+{"t":1791310516182,"s":8.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12896, not ours","event":"AXIS_MIXTURE1_SET","data":[-12896,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516182,"s":8.691,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12896","name":"AXIS_MIXTURE1_SET","value":-12896,"ours":null}
+{"t":1791310516215,"s":8.724,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11456, not ours","event":"AXIS_MIXTURE1_SET","data":[-11456,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516216,"s":8.725,"kind":"masker got","text":"AXIS_MIXTURE1_SET -11456","name":"AXIS_MIXTURE1_SET","value":-11456,"ours":null}
+{"t":1791310516249,"s":8.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9472, not ours","event":"AXIS_MIXTURE1_SET","data":[-9472,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516249,"s":8.758,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9472","name":"AXIS_MIXTURE1_SET","value":-9472,"ours":null}
+{"t":1791310516282,"s":8.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7392, not ours","event":"AXIS_MIXTURE1_SET","data":[-7392,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516282,"s":8.791,"kind":"masker got","text":"AXIS_MIXTURE1_SET -7392","name":"AXIS_MIXTURE1_SET","value":-7392,"ours":null}
+{"t":1791310516315,"s":8.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5376, not ours","event":"AXIS_MIXTURE1_SET","data":[-5376,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516316,"s":8.825,"kind":"masker got","text":"AXIS_MIXTURE1_SET -5376","name":"AXIS_MIXTURE1_SET","value":-5376,"ours":null}
+{"t":1791310516349,"s":8.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3360, not ours","event":"AXIS_MIXTURE1_SET","data":[-3360,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516349,"s":8.858,"kind":"masker got","text":"AXIS_MIXTURE1_SET -3360","name":"AXIS_MIXTURE1_SET","value":-3360,"ours":null}
+{"t":1791310516382,"s":8.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1280, not ours","event":"AXIS_MIXTURE1_SET","data":[-1280,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516382,"s":8.891,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1280","name":"AXIS_MIXTURE1_SET","value":-1280,"ours":null}
+{"t":1791310516416,"s":8.925,"kind":"key","text":"K:AXIS_MIXTURE1_SET 675, not ours","event":"AXIS_MIXTURE1_SET","data":[675,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516416,"s":8.925,"kind":"masker got","text":"AXIS_MIXTURE1_SET 675","name":"AXIS_MIXTURE1_SET","value":675,"ours":null}
+{"t":1791310516416,"s":8.925,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310516416,"s":8.925,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516449,"s":8.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3373, not ours","event":"AXIS_MIXTURE1_SET","data":[3373,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516449,"s":8.958,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516449,"s":8.958,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3373","name":"AXIS_MIXTURE1_SET","value":3373,"ours":null}
+{"t":1791310516449,"s":8.958,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310516482,"s":8.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5333, not ours","event":"AXIS_MIXTURE1_SET","data":[5333,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516482,"s":8.991,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5333","name":"AXIS_MIXTURE1_SET","value":5333,"ours":null}
+{"t":1791310516516,"s":9.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7164, not ours","event":"AXIS_MIXTURE1_SET","data":[7164,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516516,"s":9.025,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7164","name":"AXIS_MIXTURE1_SET","value":7164,"ours":null}
+{"t":1791310516549,"s":9.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8834, not ours","event":"AXIS_MIXTURE1_SET","data":[8834,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516549,"s":9.058,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8834","name":"AXIS_MIXTURE1_SET","value":8834,"ours":null}
+{"t":1791310516582,"s":9.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10441, not ours","event":"AXIS_MIXTURE1_SET","data":[10441,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516582,"s":9.091,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10441","name":"AXIS_MIXTURE1_SET","value":10441,"ours":null}
+{"t":1791310516616,"s":9.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12079, not ours","event":"AXIS_MIXTURE1_SET","data":[12079,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516616,"s":9.125,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12079","name":"AXIS_MIXTURE1_SET","value":12079,"ours":null}
+{"t":1791310516649,"s":9.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13782, not ours","event":"AXIS_MIXTURE1_SET","data":[13782,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516649,"s":9.158,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13782","name":"AXIS_MIXTURE1_SET","value":13782,"ours":null}
+{"t":1791310516682,"s":9.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14874, not ours","event":"AXIS_MIXTURE1_SET","data":[14874,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516682,"s":9.191,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14874","name":"AXIS_MIXTURE1_SET","value":14874,"ours":null}
+{"t":1791310516716,"s":9.225,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16095, not ours","event":"AXIS_MIXTURE1_SET","data":[16095,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516716,"s":9.225,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16095","name":"AXIS_MIXTURE1_SET","value":16095,"ours":null}
+{"t":1791310516749,"s":9.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516749,"s":9.258,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16384","name":"AXIS_MIXTURE1_SET","value":16384,"ours":null}
+{"t":1791310516749,"s":9.258,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310516749,"s":9.258,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516782,"s":9.291,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516782,"s":9.291,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310516949,"s":9.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14938, not ours","event":"AXIS_MIXTURE1_SET","data":[14938,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516949,"s":9.458,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14938","name":"AXIS_MIXTURE1_SET","value":14938,"ours":null}
+{"t":1791310516982,"s":9.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13493, not ours","event":"AXIS_MIXTURE1_SET","data":[13493,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310516982,"s":9.491,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13493","name":"AXIS_MIXTURE1_SET","value":13493,"ours":null}
+{"t":1791310517016,"s":9.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11694, not ours","event":"AXIS_MIXTURE1_SET","data":[11694,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517016,"s":9.525,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11694","name":"AXIS_MIXTURE1_SET","value":11694,"ours":null}
+{"t":1791310517049,"s":9.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9316, not ours","event":"AXIS_MIXTURE1_SET","data":[9316,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517049,"s":9.558,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9316","name":"AXIS_MIXTURE1_SET","value":9316,"ours":null}
+{"t":1791310517082,"s":9.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7389, not ours","event":"AXIS_MIXTURE1_SET","data":[7389,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517082,"s":9.591,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7389","name":"AXIS_MIXTURE1_SET","value":7389,"ours":null}
+{"t":1791310517115,"s":9.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5590, not ours","event":"AXIS_MIXTURE1_SET","data":[5590,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517116,"s":9.625,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5590","name":"AXIS_MIXTURE1_SET","value":5590,"ours":null}
+{"t":1791310517149,"s":9.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3695, not ours","event":"AXIS_MIXTURE1_SET","data":[3695,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517149,"s":9.658,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3695","name":"AXIS_MIXTURE1_SET","value":3695,"ours":null}
+{"t":1791310517182,"s":9.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1767, not ours","event":"AXIS_MIXTURE1_SET","data":[1767,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517182,"s":9.691,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1767","name":"AXIS_MIXTURE1_SET","value":1767,"ours":null}
+{"t":1791310517216,"s":9.725,"kind":"key","text":"K:AXIS_MIXTURE1_SET -96, not ours","event":"AXIS_MIXTURE1_SET","data":[-96,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517216,"s":9.725,"kind":"masker got","text":"AXIS_MIXTURE1_SET -96","name":"AXIS_MIXTURE1_SET","value":-96,"ours":null}
+{"t":1791310517249,"s":9.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2336, not ours","event":"AXIS_MIXTURE1_SET","data":[-2336,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517249,"s":9.758,"kind":"masker got","text":"AXIS_MIXTURE1_SET -2336","name":"AXIS_MIXTURE1_SET","value":-2336,"ours":null}
+{"t":1791310517282,"s":9.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4448, not ours","event":"AXIS_MIXTURE1_SET","data":[-4448,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517282,"s":9.791,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4448","name":"AXIS_MIXTURE1_SET","value":-4448,"ours":null}
+{"t":1791310517315,"s":9.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6464, not ours","event":"AXIS_MIXTURE1_SET","data":[-6464,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517315,"s":9.824,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6464","name":"AXIS_MIXTURE1_SET","value":-6464,"ours":null}
+{"t":1791310517349,"s":9.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8640, not ours","event":"AXIS_MIXTURE1_SET","data":[-8640,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517349,"s":9.858,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8640","name":"AXIS_MIXTURE1_SET","value":-8640,"ours":null}
+{"t":1791310517382,"s":9.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10688, not ours","event":"AXIS_MIXTURE1_SET","data":[-10688,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517382,"s":9.891,"kind":"masker got","text":"AXIS_MIXTURE1_SET -10688","name":"AXIS_MIXTURE1_SET","value":-10688,"ours":null}
+{"t":1791310517416,"s":9.925,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12704, not ours","event":"AXIS_MIXTURE1_SET","data":[-12704,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517416,"s":9.925,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12704","name":"AXIS_MIXTURE1_SET","value":-12704,"ours":null}
+{"t":1791310517449,"s":9.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15072, not ours","event":"AXIS_MIXTURE1_SET","data":[-15072,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517449,"s":9.958,"kind":"masker got","text":"AXIS_MIXTURE1_SET -15072","name":"AXIS_MIXTURE1_SET","value":-15072,"ours":null}
+{"t":1791310517482,"s":9.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16384, not ours","event":"AXIS_MIXTURE1_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517482,"s":9.991,"kind":"masker got","text":"AXIS_MIXTURE1_SET -16384","name":"AXIS_MIXTURE1_SET","value":-16384,"ours":null}
+{"t":1791310517682,"s":10.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16352, not ours","event":"AXIS_MIXTURE1_SET","data":[-16352,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517682,"s":10.191,"kind":"masker got","text":"AXIS_MIXTURE1_SET -16352","name":"AXIS_MIXTURE1_SET","value":-16352,"ours":null}
+{"t":1791310517716,"s":10.225,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14048, not ours","event":"AXIS_MIXTURE1_SET","data":[-14048,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517716,"s":10.225,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14048","name":"AXIS_MIXTURE1_SET","value":-14048,"ours":null}
+{"t":1791310517749,"s":10.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11872, not ours","event":"AXIS_MIXTURE1_SET","data":[-11872,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517749,"s":10.258,"kind":"masker got","text":"AXIS_MIXTURE1_SET -11872","name":"AXIS_MIXTURE1_SET","value":-11872,"ours":null}
+{"t":1791310517782,"s":10.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9440, not ours","event":"AXIS_MIXTURE1_SET","data":[-9440,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517782,"s":10.291,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9440","name":"AXIS_MIXTURE1_SET","value":-9440,"ours":null}
+{"t":1791310517816,"s":10.325,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6784, not ours","event":"AXIS_MIXTURE1_SET","data":[-6784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517816,"s":10.325,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6784","name":"AXIS_MIXTURE1_SET","value":-6784,"ours":null}
+{"t":1791310517849,"s":10.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3776, not ours","event":"AXIS_MIXTURE1_SET","data":[-3776,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517849,"s":10.358,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517849,"s":10.358,"kind":"masker got","text":"AXIS_MIXTURE1_SET -3776","name":"AXIS_MIXTURE1_SET","value":-3776,"ours":null}
+{"t":1791310517849,"s":10.358,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310517882,"s":10.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1312, not ours","event":"AXIS_MIXTURE1_SET","data":[-1312,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517882,"s":10.391,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1312","name":"AXIS_MIXTURE1_SET","value":-1312,"ours":null}
+{"t":1791310517915,"s":10.424,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1060, not ours","event":"AXIS_MIXTURE1_SET","data":[1060,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517916,"s":10.425,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1060","name":"AXIS_MIXTURE1_SET","value":1060,"ours":null}
+{"t":1791310517916,"s":10.425,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517916,"s":10.425,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310517949,"s":10.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3534, not ours","event":"AXIS_MIXTURE1_SET","data":[3534,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517949,"s":10.458,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3534","name":"AXIS_MIXTURE1_SET","value":3534,"ours":null}
+{"t":1791310517982,"s":10.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5879, not ours","event":"AXIS_MIXTURE1_SET","data":[5879,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310517982,"s":10.491,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5879","name":"AXIS_MIXTURE1_SET","value":5879,"ours":null}
+{"t":1791310518016,"s":10.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8674, not ours","event":"AXIS_MIXTURE1_SET","data":[8674,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518016,"s":10.525,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8674","name":"AXIS_MIXTURE1_SET","value":8674,"ours":null}
+{"t":1791310518049,"s":10.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10858, not ours","event":"AXIS_MIXTURE1_SET","data":[10858,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518049,"s":10.558,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10858","name":"AXIS_MIXTURE1_SET","value":10858,"ours":null}
+{"t":1791310518082,"s":10.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12979, not ours","event":"AXIS_MIXTURE1_SET","data":[12979,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518083,"s":10.592,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12979","name":"AXIS_MIXTURE1_SET","value":12979,"ours":null}
+{"t":1791310518116,"s":10.625,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14553, not ours","event":"AXIS_MIXTURE1_SET","data":[14553,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518116,"s":10.625,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14553","name":"AXIS_MIXTURE1_SET","value":14553,"ours":null}
+{"t":1791310518149,"s":10.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16063, not ours","event":"AXIS_MIXTURE1_SET","data":[16063,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518149,"s":10.658,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16063","name":"AXIS_MIXTURE1_SET","value":16063,"ours":null}
+{"t":1791310518182,"s":10.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518183,"s":10.692,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16384","name":"AXIS_MIXTURE1_SET","value":16384,"ours":null}
+{"t":1791310518349,"s":10.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15966, not ours","event":"AXIS_MIXTURE1_SET","data":[15966,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518349,"s":10.858,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15966","name":"AXIS_MIXTURE1_SET","value":15966,"ours":null}
+{"t":1791310518382,"s":10.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14296, not ours","event":"AXIS_MIXTURE1_SET","data":[14296,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518382,"s":10.891,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14296","name":"AXIS_MIXTURE1_SET","value":14296,"ours":null}
+{"t":1791310518416,"s":10.925,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12882, not ours","event":"AXIS_MIXTURE1_SET","data":[12882,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518416,"s":10.925,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12882","name":"AXIS_MIXTURE1_SET","value":12882,"ours":null}
+{"t":1791310518449,"s":10.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10473, not ours","event":"AXIS_MIXTURE1_SET","data":[10473,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518449,"s":10.958,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10473","name":"AXIS_MIXTURE1_SET","value":10473,"ours":null}
+{"t":1791310518482,"s":10.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8320, not ours","event":"AXIS_MIXTURE1_SET","data":[8320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518482,"s":10.991,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8320","name":"AXIS_MIXTURE1_SET","value":8320,"ours":null}
+{"t":1791310518515,"s":11.024,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5911, not ours","event":"AXIS_MIXTURE1_SET","data":[5911,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518516,"s":11.025,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5911","name":"AXIS_MIXTURE1_SET","value":5911,"ours":null}
+{"t":1791310518549,"s":11.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3502, not ours","event":"AXIS_MIXTURE1_SET","data":[3502,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518549,"s":11.058,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3502","name":"AXIS_MIXTURE1_SET","value":3502,"ours":null}
+{"t":1791310518582,"s":11.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1060, not ours","event":"AXIS_MIXTURE1_SET","data":[1060,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518582,"s":11.091,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1060","name":"AXIS_MIXTURE1_SET","value":1060,"ours":null}
+{"t":1791310518616,"s":11.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1280, not ours","event":"AXIS_MIXTURE1_SET","data":[-1280,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518616,"s":11.125,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1280","name":"AXIS_MIXTURE1_SET","value":-1280,"ours":null}
+{"t":1791310518649,"s":11.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4480, not ours","event":"AXIS_MIXTURE1_SET","data":[-4480,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518649,"s":11.158,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4480","name":"AXIS_MIXTURE1_SET","value":-4480,"ours":null}
+{"t":1791310518682,"s":11.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7008, not ours","event":"AXIS_MIXTURE1_SET","data":[-7008,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518683,"s":11.192,"kind":"masker got","text":"AXIS_MIXTURE1_SET -7008","name":"AXIS_MIXTURE1_SET","value":-7008,"ours":null}
+{"t":1791310518716,"s":11.225,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9792, not ours","event":"AXIS_MIXTURE1_SET","data":[-9792,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518716,"s":11.225,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9792","name":"AXIS_MIXTURE1_SET","value":-9792,"ours":null}
+{"t":1791310518749,"s":11.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12384, not ours","event":"AXIS_MIXTURE1_SET","data":[-12384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518749,"s":11.258,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12384","name":"AXIS_MIXTURE1_SET","value":-12384,"ours":null}
+{"t":1791310518782,"s":11.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14976, not ours","event":"AXIS_MIXTURE1_SET","data":[-14976,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518782,"s":11.291,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518782,"s":11.291,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14976","name":"AXIS_MIXTURE1_SET","value":-14976,"ours":null}
+{"t":1791310518782,"s":11.291,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310518816,"s":11.325,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16384, not ours","event":"AXIS_MIXTURE1_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518816,"s":11.325,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518816,"s":11.325,"kind":"masker got","text":"AXIS_MIXTURE1_SET -16384","name":"AXIS_MIXTURE1_SET","value":-16384,"ours":null}
+{"t":1791310518816,"s":11.325,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310518949,"s":11.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15328, not ours","event":"AXIS_MIXTURE1_SET","data":[-15328,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518949,"s":11.458,"kind":"masker got","text":"AXIS_MIXTURE1_SET -15328","name":"AXIS_MIXTURE1_SET","value":-15328,"ours":null}
+{"t":1791310518982,"s":11.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12352, not ours","event":"AXIS_MIXTURE1_SET","data":[-12352,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310518982,"s":11.491,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12352","name":"AXIS_MIXTURE1_SET","value":-12352,"ours":null}
+{"t":1791310519016,"s":11.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8928, not ours","event":"AXIS_MIXTURE1_SET","data":[-8928,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519016,"s":11.525,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8928","name":"AXIS_MIXTURE1_SET","value":-8928,"ours":null}
+{"t":1791310519049,"s":11.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4224, not ours","event":"AXIS_MIXTURE1_SET","data":[-4224,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519049,"s":11.558,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4224","name":"AXIS_MIXTURE1_SET","value":-4224,"ours":null}
+{"t":1791310519082,"s":11.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET -448, not ours","event":"AXIS_MIXTURE1_SET","data":[-448,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519082,"s":11.591,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519082,"s":11.591,"kind":"masker got","text":"AXIS_MIXTURE1_SET -448","name":"AXIS_MIXTURE1_SET","value":-448,"ours":null}
+{"t":1791310519082,"s":11.591,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310519115,"s":11.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3116, not ours","event":"AXIS_MIXTURE1_SET","data":[3116,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519116,"s":11.625,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519116,"s":11.625,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3116","name":"AXIS_MIXTURE1_SET","value":3116,"ours":null}
+{"t":1791310519116,"s":11.625,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310519149,"s":11.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6554, not ours","event":"AXIS_MIXTURE1_SET","data":[6554,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519149,"s":11.658,"kind":"masker got","text":"AXIS_MIXTURE1_SET 6554","name":"AXIS_MIXTURE1_SET","value":6554,"ours":null}
+{"t":1791310519182,"s":11.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9670, not ours","event":"AXIS_MIXTURE1_SET","data":[9670,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519182,"s":11.691,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9670","name":"AXIS_MIXTURE1_SET","value":9670,"ours":null}
+{"t":1791310519216,"s":11.725,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12754, not ours","event":"AXIS_MIXTURE1_SET","data":[12754,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519216,"s":11.725,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519216,"s":11.725,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12754","name":"AXIS_MIXTURE1_SET","value":12754,"ours":null}
+{"t":1791310519216,"s":11.725,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310519249,"s":11.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15613, not ours","event":"AXIS_MIXTURE1_SET","data":[15613,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519249,"s":11.758,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519249,"s":11.758,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15613","name":"AXIS_MIXTURE1_SET","value":15613,"ours":null}
+{"t":1791310519249,"s":11.758,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310519282,"s":11.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519282,"s":11.791,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16384","name":"AXIS_MIXTURE1_SET","value":16384,"ours":null}
+{"t":1791310519416,"s":11.925,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519416,"s":11.925,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310519449,"s":11.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14167, not ours","event":"AXIS_MIXTURE1_SET","data":[14167,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519449,"s":11.958,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519449,"s":11.958,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14167","name":"AXIS_MIXTURE1_SET","value":14167,"ours":null}
+{"t":1791310519449,"s":11.958,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5856","name":"THROTTLE1_AXIS_SET_EX1","value":-5856,"ours":null}
+{"t":1791310519482,"s":11.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11533, not ours","event":"AXIS_MIXTURE1_SET","data":[11533,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519482,"s":11.991,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11533","name":"AXIS_MIXTURE1_SET","value":11533,"ours":null}
+{"t":1791310519516,"s":12.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8834, not ours","event":"AXIS_MIXTURE1_SET","data":[8834,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519516,"s":12.025,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8834","name":"AXIS_MIXTURE1_SET","value":8834,"ours":null}
+{"t":1791310519516,"s":12.025,"kind":"masker got","text":"THROTTLE1_AXIS_SET_EX1 -5888","name":"THROTTLE1_AXIS_SET_EX1","value":-5888,"ours":null}
+{"t":1791310519516,"s":12.025,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519539,"s":12.048,"kind":"phase","text":"mixture masked: blocked (L:BKSQ_MixtureLeverPosition_1 at 0% of the free range) · heard AXIS_MIXTURE1_SET ×118 -16384..16384, THROTTLE1_AXIS_SET_EX1 ×24 -5888..-5856 · masker got AXIS_MIXTURE1_SET ×118 -16384..16384, THROTTLE1_AXIS_SET_EX1 ×24 -5888..-5856 · input events none · values none moved","control":"mixture","phase":"masked","expect":"blocked","verdict":{"word":"blocked","name":"L:BKSQ_MixtureLeverPosition_1","ratio":0},"heard":{"AXIS_MIXTURE1_SET":{"n":118,"min":-16384,"max":16384,"last":8834},"THROTTLE1_AXIS_SET_EX1":{"n":24,"min":-5888,"max":-5856,"last":-5888}},"masker":{"AXIS_MIXTURE1_SET":{"n":118,"min":-16384,"max":16384,"last":8834},"THROTTLE1_AXIS_SET_EX1":{"n":24,"min":-5888,"max":-5856,"last":-5888}},"inputs":{}}
+{"t":1791310519539,"s":12.048,"kind":"masker","text":"cleared: cleared the mask group: the observer asked","maskerKind":"cleared","why":"the observer asked"}
+{"t":1791310519549,"s":12.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5879, not ours","event":"AXIS_MIXTURE1_SET","data":[5879,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519549,"s":12.058,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519549,"s":12.058,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519582,"s":12.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2345, not ours","event":"AXIS_MIXTURE1_SET","data":[2345,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519616,"s":12.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1312, not ours","event":"AXIS_MIXTURE1_SET","data":[-1312,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519649,"s":12.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5760, not ours","event":"AXIS_MIXTURE1_SET","data":[-5760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519682,"s":12.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9088, not ours","event":"AXIS_MIXTURE1_SET","data":[-9088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519715,"s":12.224,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12000, not ours","event":"AXIS_MIXTURE1_SET","data":[-12000,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519749,"s":12.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13664, not ours","event":"AXIS_MIXTURE1_SET","data":[-13664,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519782,"s":12.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14080, not ours","event":"AXIS_MIXTURE1_SET","data":[-14080,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519849,"s":12.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13120, not ours","event":"AXIS_MIXTURE1_SET","data":[-13120,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519858,"s":12.367,"kind":"masker","text":"exited (code 0)","code":0,"signal":null}
+{"t":1791310519882,"s":12.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9760, not ours","event":"AXIS_MIXTURE1_SET","data":[-9760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519916,"s":12.425,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5888, not ours","event":"AXIS_MIXTURE1_SET","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519949,"s":12.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1984, not ours","event":"AXIS_MIXTURE1_SET","data":[-1984,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310519982,"s":12.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2024, not ours","event":"AXIS_MIXTURE1_SET","data":[2024,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520016,"s":12.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5815, not ours","event":"AXIS_MIXTURE1_SET","data":[5815,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520049,"s":12.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10216, not ours","event":"AXIS_MIXTURE1_SET","data":[10216,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520082,"s":12.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13525, not ours","event":"AXIS_MIXTURE1_SET","data":[13525,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520115,"s":12.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16320, not ours","event":"AXIS_MIXTURE1_SET","data":[16320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520149,"s":12.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520315,"s":12.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16127, not ours","event":"AXIS_MIXTURE1_SET","data":[16127,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520349,"s":12.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14617, not ours","event":"AXIS_MIXTURE1_SET","data":[14617,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520382,"s":12.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13011, not ours","event":"AXIS_MIXTURE1_SET","data":[13011,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520415,"s":12.924,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10890, not ours","event":"AXIS_MIXTURE1_SET","data":[10890,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520449,"s":12.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7678, not ours","event":"AXIS_MIXTURE1_SET","data":[7678,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520482,"s":12.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5108, not ours","event":"AXIS_MIXTURE1_SET","data":[5108,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520516,"s":13.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2345, not ours","event":"AXIS_MIXTURE1_SET","data":[2345,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520516,"s":13.025,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520516,"s":13.025,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520549,"s":13.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET -352, not ours","event":"AXIS_MIXTURE1_SET","data":[-352,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520549,"s":13.058,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520549,"s":13.058,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520582,"s":13.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2560, not ours","event":"AXIS_MIXTURE1_SET","data":[-2560,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520616,"s":13.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4608, not ours","event":"AXIS_MIXTURE1_SET","data":[-4608,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520649,"s":13.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5824, not ours","event":"AXIS_MIXTURE1_SET","data":[-5824,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520682,"s":13.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5888, not ours","event":"AXIS_MIXTURE1_SET","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520749,"s":13.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5760, not ours","event":"AXIS_MIXTURE1_SET","data":[-5760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520782,"s":13.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4416, not ours","event":"AXIS_MIXTURE1_SET","data":[-4416,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520815,"s":13.324,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2496, not ours","event":"AXIS_MIXTURE1_SET","data":[-2496,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520849,"s":13.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET 321, not ours","event":"AXIS_MIXTURE1_SET","data":[321,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520882,"s":13.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2956, not ours","event":"AXIS_MIXTURE1_SET","data":[2956,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520915,"s":13.424,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5783, not ours","event":"AXIS_MIXTURE1_SET","data":[5783,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520949,"s":13.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8577, not ours","event":"AXIS_MIXTURE1_SET","data":[8577,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310520982,"s":13.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11180, not ours","event":"AXIS_MIXTURE1_SET","data":[11180,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521015,"s":13.524,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13782, not ours","event":"AXIS_MIXTURE1_SET","data":[13782,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521049,"s":13.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521049,"s":13.558,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521049,"s":13.558,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521083,"s":13.592,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521083,"s":13.592,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521315,"s":13.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14745, not ours","event":"AXIS_MIXTURE1_SET","data":[14745,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521349,"s":13.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12689, not ours","event":"AXIS_MIXTURE1_SET","data":[12689,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521382,"s":13.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10023, not ours","event":"AXIS_MIXTURE1_SET","data":[10023,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521415,"s":13.924,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7228, not ours","event":"AXIS_MIXTURE1_SET","data":[7228,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521449,"s":13.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3309, not ours","event":"AXIS_MIXTURE1_SET","data":[3309,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521482,"s":13.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET 0, not ours","event":"AXIS_MIXTURE1_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521516,"s":14.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2976, not ours","event":"AXIS_MIXTURE1_SET","data":[-2976,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521549,"s":14.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5632, not ours","event":"AXIS_MIXTURE1_SET","data":[-5632,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521582,"s":14.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7808, not ours","event":"AXIS_MIXTURE1_SET","data":[-7808,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521615,"s":14.124,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9664, not ours","event":"AXIS_MIXTURE1_SET","data":[-9664,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521649,"s":14.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10752, not ours","event":"AXIS_MIXTURE1_SET","data":[-10752,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521682,"s":14.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10784, not ours","event":"AXIS_MIXTURE1_SET","data":[-10784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521715,"s":14.224,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10816, not ours","event":"AXIS_MIXTURE1_SET","data":[-10816,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521749,"s":14.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10720, not ours","event":"AXIS_MIXTURE1_SET","data":[-10720,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521782,"s":14.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8992, not ours","event":"AXIS_MIXTURE1_SET","data":[-8992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521815,"s":14.324,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6528, not ours","event":"AXIS_MIXTURE1_SET","data":[-6528,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521849,"s":14.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2944, not ours","event":"AXIS_MIXTURE1_SET","data":[-2944,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521882,"s":14.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET 97, not ours","event":"AXIS_MIXTURE1_SET","data":[97,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521915,"s":14.424,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3309, not ours","event":"AXIS_MIXTURE1_SET","data":[3309,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521949,"s":14.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6361, not ours","event":"AXIS_MIXTURE1_SET","data":[6361,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310521982,"s":14.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9252, not ours","event":"AXIS_MIXTURE1_SET","data":[9252,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522016,"s":14.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11790, not ours","event":"AXIS_MIXTURE1_SET","data":[11790,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522016,"s":14.525,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522016,"s":14.525,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522049,"s":14.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14360, not ours","event":"AXIS_MIXTURE1_SET","data":[14360,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522049,"s":14.558,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522049,"s":14.558,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522082,"s":14.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15741, not ours","event":"AXIS_MIXTURE1_SET","data":[15741,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522115,"s":14.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16223, not ours","event":"AXIS_MIXTURE1_SET","data":[16223,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522149,"s":14.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16255, not ours","event":"AXIS_MIXTURE1_SET","data":[16255,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522216,"s":14.725,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15259, not ours","event":"AXIS_MIXTURE1_SET","data":[15259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522249,"s":14.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13557, not ours","event":"AXIS_MIXTURE1_SET","data":[13557,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522282,"s":14.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11661, not ours","event":"AXIS_MIXTURE1_SET","data":[11661,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522315,"s":14.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9509, not ours","event":"AXIS_MIXTURE1_SET","data":[9509,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522349,"s":14.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7164, not ours","event":"AXIS_MIXTURE1_SET","data":[7164,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522382,"s":14.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4562, not ours","event":"AXIS_MIXTURE1_SET","data":[4562,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522416,"s":14.925,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1831, not ours","event":"AXIS_MIXTURE1_SET","data":[1831,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522449,"s":14.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1600, not ours","event":"AXIS_MIXTURE1_SET","data":[-1600,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522482,"s":14.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4064, not ours","event":"AXIS_MIXTURE1_SET","data":[-4064,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522482,"s":14.991,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522482,"s":14.991,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522516,"s":15.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6176, not ours","event":"AXIS_MIXTURE1_SET","data":[-6176,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522516,"s":15.025,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522516,"s":15.025,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522549,"s":15.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7648, not ours","event":"AXIS_MIXTURE1_SET","data":[-7648,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522582,"s":15.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8512, not ours","event":"AXIS_MIXTURE1_SET","data":[-8512,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522616,"s":15.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8576, not ours","event":"AXIS_MIXTURE1_SET","data":[-8576,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522682,"s":15.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7744, not ours","event":"AXIS_MIXTURE1_SET","data":[-7744,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522715,"s":15.224,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5856, not ours","event":"AXIS_MIXTURE1_SET","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522749,"s":15.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3520, not ours","event":"AXIS_MIXTURE1_SET","data":[-3520,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522782,"s":15.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET -896, not ours","event":"AXIS_MIXTURE1_SET","data":[-896,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522816,"s":15.325,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1992, not ours","event":"AXIS_MIXTURE1_SET","data":[1992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522849,"s":15.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5558, not ours","event":"AXIS_MIXTURE1_SET","data":[5558,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522882,"s":15.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8288, not ours","event":"AXIS_MIXTURE1_SET","data":[8288,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522915,"s":15.424,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10923, not ours","event":"AXIS_MIXTURE1_SET","data":[10923,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522949,"s":15.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13460, not ours","event":"AXIS_MIXTURE1_SET","data":[13460,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310522982,"s":15.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15452, not ours","event":"AXIS_MIXTURE1_SET","data":[15452,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523016,"s":15.525,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523082,"s":15.591,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523082,"s":15.591,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523115,"s":15.624,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523115,"s":15.624,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523182,"s":15.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14842, not ours","event":"AXIS_MIXTURE1_SET","data":[14842,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523215,"s":15.724,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12914, not ours","event":"AXIS_MIXTURE1_SET","data":[12914,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523249,"s":15.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9541, not ours","event":"AXIS_MIXTURE1_SET","data":[9541,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523282,"s":15.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6779, not ours","event":"AXIS_MIXTURE1_SET","data":[6779,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523315,"s":15.824,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3823, not ours","event":"AXIS_MIXTURE1_SET","data":[3823,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523349,"s":15.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET 643, not ours","event":"AXIS_MIXTURE1_SET","data":[643,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523382,"s":15.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2368, not ours","event":"AXIS_MIXTURE1_SET","data":[-2368,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523382,"s":15.891,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523382,"s":15.891,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523416,"s":15.925,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5312, not ours","event":"AXIS_MIXTURE1_SET","data":[-5312,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523416,"s":15.925,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523417,"s":15.926,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523449,"s":15.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8128, not ours","event":"AXIS_MIXTURE1_SET","data":[-8128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523483,"s":15.992,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9600, not ours","event":"AXIS_MIXTURE1_SET","data":[-9600,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523515,"s":16.024,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9728, not ours","event":"AXIS_MIXTURE1_SET","data":[-9728,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523549,"s":16.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9760, not ours","event":"AXIS_MIXTURE1_SET","data":[-9760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523582,"s":16.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9536, not ours","event":"AXIS_MIXTURE1_SET","data":[-9536,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523582,"s":16.091,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523582,"s":16.091,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523616,"s":16.125,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7680, not ours","event":"AXIS_MIXTURE1_SET","data":[-7680,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523616,"s":16.125,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523616,"s":16.125,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523649,"s":16.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4672, not ours","event":"AXIS_MIXTURE1_SET","data":[-4672,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523682,"s":16.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1792, not ours","event":"AXIS_MIXTURE1_SET","data":[-1792,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523716,"s":16.225,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1382, not ours","event":"AXIS_MIXTURE1_SET","data":[1382,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523749,"s":16.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4176, not ours","event":"AXIS_MIXTURE1_SET","data":[4176,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523749,"s":16.258,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523749,"s":16.258,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523782,"s":16.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7003, not ours","event":"AXIS_MIXTURE1_SET","data":[7003,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523782,"s":16.291,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523782,"s":16.291,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523815,"s":16.324,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9573, not ours","event":"AXIS_MIXTURE1_SET","data":[9573,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523849,"s":16.358,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12625, not ours","event":"AXIS_MIXTURE1_SET","data":[12625,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523882,"s":16.391,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14264, not ours","event":"AXIS_MIXTURE1_SET","data":[14264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523916,"s":16.425,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15420, not ours","event":"AXIS_MIXTURE1_SET","data":[15420,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523949,"s":16.458,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16030, not ours","event":"AXIS_MIXTURE1_SET","data":[16030,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310523982,"s":16.491,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16063, not ours","event":"AXIS_MIXTURE1_SET","data":[16063,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524049,"s":16.558,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15516, not ours","event":"AXIS_MIXTURE1_SET","data":[15516,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524082,"s":16.591,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14071, not ours","event":"AXIS_MIXTURE1_SET","data":[14071,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524115,"s":16.624,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12015, not ours","event":"AXIS_MIXTURE1_SET","data":[12015,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524149,"s":16.658,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9541, not ours","event":"AXIS_MIXTURE1_SET","data":[9541,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524182,"s":16.691,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7132, not ours","event":"AXIS_MIXTURE1_SET","data":[7132,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524216,"s":16.725,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4337, not ours","event":"AXIS_MIXTURE1_SET","data":[4337,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524249,"s":16.758,"kind":"key","text":"K:AXIS_MIXTURE1_SET 707, not ours","event":"AXIS_MIXTURE1_SET","data":[707,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524282,"s":16.791,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1824, not ours","event":"AXIS_MIXTURE1_SET","data":[-1824,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524316,"s":16.825,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4128, not ours","event":"AXIS_MIXTURE1_SET","data":[-4128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524349,"s":16.858,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5632, not ours","event":"AXIS_MIXTURE1_SET","data":[-5632,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524350,"s":16.859,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524350,"s":16.859,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524382,"s":16.891,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6272, not ours","event":"AXIS_MIXTURE1_SET","data":[-6272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524382,"s":16.891,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5856, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524382,"s":16.891,"kind":"key","text":"K:THROTTLE1_SET 5264, not ours","event":"THROTTLE1_SET","data":[5264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524416,"s":16.925,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6304, not ours","event":"AXIS_MIXTURE1_SET","data":[-6304,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524449,"s":16.958,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6272, not ours","event":"AXIS_MIXTURE1_SET","data":[-6272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524482,"s":16.991,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5408, not ours","event":"AXIS_MIXTURE1_SET","data":[-5408,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524516,"s":17.025,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3680, not ours","event":"AXIS_MIXTURE1_SET","data":[-3680,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524549,"s":17.058,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1376, not ours","event":"AXIS_MIXTURE1_SET","data":[-1376,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524582,"s":17.091,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1317, not ours","event":"AXIS_MIXTURE1_SET","data":[1317,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524615,"s":17.124,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4209, not ours","event":"AXIS_MIXTURE1_SET","data":[4209,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524649,"s":17.158,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7517, not ours","event":"AXIS_MIXTURE1_SET","data":[7517,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524682,"s":17.191,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10376, not ours","event":"AXIS_MIXTURE1_SET","data":[10376,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524716,"s":17.225,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13203, not ours","event":"AXIS_MIXTURE1_SET","data":[13203,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524749,"s":17.258,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15163, not ours","event":"AXIS_MIXTURE1_SET","data":[15163,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524782,"s":17.291,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524849,"s":17.358,"kind":"key","text":"K:THROTTLE1_AXIS_SET_EX1 -5888, not ours","event":"THROTTLE1_AXIS_SET_EX1","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524849,"s":17.358,"kind":"key","text":"K:THROTTLE1_SET 5248, not ours","event":"THROTTLE1_SET","data":[5248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310524869,"s":17.378,"kind":"phase","text":"mixture cleared: moved (L:BKSQ_MixtureLeverPosition_1 at 90% of the free range) · heard AXIS_MIXTURE1_SET ×129 -10816..16384, THROTTLE1_AXIS_SET_EX1 ×19 -5888..-5856, THROTTLE1_SET ×19 5248..5264 · masker got none · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×137 1699.21875..10000, ENGINE_THROTTLE_1 ×28 32.03125..32.128906 · values L:BKSQ_MixtureLeverPosition_1 0.099609..1, GENERAL ENG MIXTURE LEVER POSITION:1 9.164988..89.380455, GENERAL ENG THROTTLE LEVER POSITION:1 32.03125..32.128906","control":"mixture","phase":"cleared","expect":"moved","verdict":{"word":"moved","name":"L:BKSQ_MixtureLeverPosition_1","ratio":0.900390625},"heard":{"AXIS_MIXTURE1_SET":{"n":129,"min":-10816,"max":16384,"last":16384},"THROTTLE1_AXIS_SET_EX1":{"n":19,"min":-5888,"max":-5856,"last":-5888},"THROTTLE1_SET":{"n":19,"min":5248,"max":5264,"last":5248}},"masker":{},"inputs":{"BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1":{"n":137,"min":1699.21875,"max":10000,"last":10000},"ENGINE_THROTTLE_1":{"n":28,"min":32.03125,"max":32.12890625,"last":32.03125}}}

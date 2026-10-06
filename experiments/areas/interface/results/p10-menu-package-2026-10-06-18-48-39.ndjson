@@ -1,0 +1,39 @@
+{"t":1791312520339,"s":0.914,"kind":"mark","text":"0.0s Steam asked to start the sim"}
+{"t":1791312652933,"s":133.508,"kind":"hello","text":"from \"mainUi\" (coui://html_UI/Global/mainUI.html), loaded by cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5: engine object, Coherent undefined, _globalDataLoader object","title":"mainUi","href":"coui://html_UI/Global/mainUI.html","via":"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5","engine":"object","coherent":"undefined","loader":"object","registerViewListener":"undefined","id":906916986}
+{"t":1791312653527,"s":134.102,"kind":"mark","text":"133.2s our script in mainUi, loaded by its cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5"}
+{"t":1791312653527,"s":134.102,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312653662,"s":134.268,"kind":"script","text":"screen: {\"start\":true,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":true,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312653838,"s":134.413,"kind":"mark","text":"133.5s the start screen's Start button is up"}
+{"t":1791312653885,"s":134.46,"kind":"shot","text":"ERR the sim isn't in front, so nothing was saved"}
+{"t":1791312653885,"s":134.46,"kind":"tell","text":"press to copy 906916986: {\"op\":\"press\",\"name\":\"TileButton_Start\"}"}
+{"t":1791312654260,"s":134.867,"kind":"script","text":"press: {\"name\":\"TileButton_Start\",\"result\":{\"found\":true,\"x\":1699,\"y\":1232,\"target\":\"UI-RESOURCE-ELEMENT TileButton_Start\",\"traits\":[\"animations\",\"visualStates\",\"focusable\",\"clickable\",\"deactivable\",\"sound\",\"screenReader\"]},\"after\":{\"start\":true,\"home\":false,\"menuBar\":false}}","step":"press","detail":{"name":"TileButton_Start","result":{"found":true,"x":1699,"y":1232,"target":"UI-RESOURCE-ELEMENT TileButton_Start","traits":["animations","visualStates","focusable","clickable","deactivable","sound","screenReader"]},"after":{"start":true,"home":false,"menuBar":false}},"id":906916986}
+{"t":1791312654351,"s":134.926,"kind":"mark","text":"134.0s pressed Start: {\"found\":true,\"x\":1699,\"y\":1232,\"target\":\"UI-RESOURCE-ELEMENT TileButton_Start\",\"traits\":[\"animations\",\"visualStates\",\"focusable\",\"clickable\",\"deactivable\",\"sound\",\"screenReader\"]}"}
+{"t":1791312654352,"s":134.927,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312654839,"s":135.447,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312655985,"s":136.56,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312656095,"s":136.703,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312657154,"s":137.729,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312657313,"s":137.911,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312658481,"s":139.056,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312659090,"s":139.696,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312660272,"s":140.847,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312660853,"s":141.461,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312661902,"s":142.477,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312662054,"s":142.662,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312663220,"s":143.795,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312663854,"s":144.462,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312665009,"s":145.584,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312665054,"s":145.662,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312666173,"s":146.748,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312666255,"s":146.862,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312667339,"s":147.914,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312667421,"s":148.028,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312668507,"s":149.082,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312668587,"s":149.195,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312669675,"s":150.25,"kind":"tell","text":"flow to copy 906916986: {\"op\":\"flow\",\"args\":[\"SHOW_WORLDMAP_HOMEPAGE\",\"StartPageManipulator\"]}"}
+{"t":1791312669787,"s":150.395,"kind":"script","text":"flow: {\"args\":[\"SHOW_WORLDMAP_HOMEPAGE\",\"StartPageManipulator\"],\"via\":\"engine.trigger\"}","step":"flow","detail":{"args":["SHOW_WORLDMAP_HOMEPAGE","StartPageManipulator"],"via":"engine.trigger"},"id":906916986}
+{"t":1791312669830,"s":150.405,"kind":"mark","text":"149.5s the press didn't reach the home page in 15s; sent the Start button's flow event by engine.trigger"}
+{"t":1791312669830,"s":150.405,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312670387,"s":150.995,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}
+{"t":1791312671463,"s":152.038,"kind":"tell","text":"screen to copy 906916986: {\"op\":\"screen\"}"}
+{"t":1791312671587,"s":152.195,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":906916986}

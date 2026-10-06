@@ -1,0 +1,17 @@
+p04-eventbus, started 2026-10-06T18:24:26.486Z
+
+- Aircraft: FSReborn Phenom 300E Manchester Interior.
+- display ("VCockpit03 - WTG3000_MFD"): listener ready.
+- EFB ("Electronic Flight Bag"): listener ready.
+- toolbar ("Toolbar"): no listener: undefined.
+- idle, 10.0s: display 16 packages from 4 buses, 8 topics, 13.8 KB; EFB 28 packages from 5 buses, 10 topics, 17.5 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- zoom in, 8.0s: display 15 packages from 4 buses, 10 topics, 10.5 KB; EFB 23 packages from 5 buses, 12 topics, 13.2 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- zoom out, 8.0s: display 49 packages from 4 buses, 12 topics, 25.3 KB; EFB 68 packages from 5 buses, 18 topics, 31.7 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- page, 8.0s: display 10 packages from 4 buses, 16 topics, 7.1 KB; EFB 14 packages from 5 buses, 18 topics, 8.9 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- waypoint, 16.1s: display 15 packages from 4 buses, 16 topics, 12.7 KB; EFB 25 packages from 5 buses, 27 topics, 15.7 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- New in "zoom in", heard by the display: 2 topics: usersetting_sync_cross_mapRangeIndex_1, display_pane_view_event.
+- New in "zoom out", heard by the display: 4 topics: display_pane_view_event, change_display_pane_select_left, usersetting_sync_cross_mapRangeIndex_1, usersetting_sync_cross_displayPaneMapPointerActive_1.
+- New in "page", heard by the display: 8 topics: usersetting_sync_cross_displayPaneDesignatedView_1, usersetting_sync_cross_displayPaneView_1, checklist_pane_selected_group_index_1, checklist_pane_selected_list_index_1, checklist_pane_selected_branch_stack_1, checklist_pane_selected_item_index_1, usersetting_sync_cross_displayPaneHalfSizeOnly_1, display_pane_comm_map_hovered_waypoint_icao_1.
+- New in "waypoint", heard by the display: 8 topics: display_pane_view_event, fplsync_fplOriginDestChanged, fplsync_fplProcDetailsChanged, fplsync_fplActiveLegChange, fplsync_fplSegmentChange, fplsync_fplCalculatePended, fplsync_fplLegChange, fplsync_fplCalculated.
+- resync_request sent from the display's listener (sent): in 5s, display heard 7 packages, 26 topics; EFB heard 11 packages, 29 topics; toolbar heard 0 packages, 0 topics.
+- Sent the zoom-in step's 2 topics again from the display's listener (sent): usersetting_sync_cross_mapRangeIndex_1, display_pane_view_event. Compare the screenshots before and after.

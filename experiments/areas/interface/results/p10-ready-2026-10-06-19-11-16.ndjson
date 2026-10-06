@@ -1,0 +1,18 @@
+{"t":1791313876400,"s":0.041,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791313876419,"s":0.06,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791313876419,"s":0.06,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791313876419,"s":0.06,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791313876452,"s":0.093,"kind":"state","text":"FlightLoaded state %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","flight":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":false}
+{"t":1791313876485,"s":0.126,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\bksq-aircraft-baronpropress\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\bksq-aircraft-baronpropress\\aircraft.CFG","signal":false}
+{"t":1791313876692,"s":0.333,"kind":"hello","text":"Toolbar (toolbar icon)","title":"Toolbar","href":"coui://html_UI/Global/Panel.html","via":"toolbar icon","engine":"object","coherent":"object","loader":"object","registerViewListener":"function","id":969837349}
+{"t":1791313876692,"s":0.333,"kind":"hello","text":"mainUi (cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5)","title":"mainUi","href":"coui://html_UI/Global/mainUI.html","via":"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5","engine":"object","coherent":"undefined","loader":"object","registerViewListener":"undefined","id":471478270}
+{"t":1791313876808,"s":0.449,"kind":"finding","text":"Our script answered from mainUi, loaded by its cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5."}
+{"t":1791313876841,"s":0.482,"kind":"state","text":"LIVERY NAME \"\"","liveryName":""}
+{"t":1791313876841,"s":0.482,"kind":"state","text":"TITLE \"Black Square Baron 58P Professional N515MR\"","title":"Black Square Baron 58P Professional N515MR"}
+{"t":1791313876841,"s":0.482,"kind":"state","text":"LIVERY FOLDER \"\"","liveryFolder":""}
+{"t":1791313876841,"s":0.482,"kind":"state","text":"position 47.436504, -122.303901, 388 ft, on ground 1","lat":47.436503861076616,"lon":-122.30390061111049,"altFt":388.2225179578864,"onGround":1}
+{"t":1791313877207,"s":0.883,"kind":"script","text":"screen: {\"start\":false,\"home\":false,\"menuBar\":false}","step":"screen","detail":{"start":false,"home":false,"menuBar":false},"id":471478270}
+{"t":1791313877207,"s":0.883,"kind":"script","text":"press: {\"path\":[\"Career_ConfirmationPage\",\"ReadyButton\"],\"result\":{\"found\":true,\"name\":\"TextButton_Large_Special_Ready\",\"x\":2163,\"y\":1294,\"target\":\"UI-RESOURCE-ELEMENT TextButton_Large_Special_Ready\"},\"after\":{\"start\":false,\"home\":false,\"menuBar\":false}}","step":"press","detail":{"path":["Career_ConfirmationPage","ReadyButton"],"result":{"found":true,"name":"TextButton_Large_Special_Ready","x":2163,"y":1294,"target":"UI-RESOURCE-ELEMENT TextButton_Large_Special_Ready"},"after":{"start":false,"home":false,"menuBar":false}},"id":471478270}
+{"t":1791313877277,"s":0.918,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1791313877415,"s":1.056,"kind":"finding","text":"Pressed Career_ConfirmationPage → ReadyButton: {\"found\":true,\"name\":\"TextButton_Large_Special_Ready\",\"x\":2163,\"y\":1294,\"target\":\"UI-RESOURCE-ELEMENT TextButton_Large_Special_Ready\"}."}
+{"t":1791313885417,"s":9.058,"kind":"finding","text":"The sim's RTC_END came 0.5s after p10-ready told our script to press."}

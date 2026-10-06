@@ -1,0 +1,5 @@
+p10-ready, started 2026-10-06T19:11:16.359Z
+
+- Our script answered from mainUi, loaded by its cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5.
+- Pressed Career_ConfirmationPage → ReadyButton: {"found":true,"name":"TextButton_Large_Special_Ready","x":2163,"y":1294,"target":"UI-RESOURCE-ELEMENT TextButton_Large_Special_Ready"}.
+- The sim's RTC_END came 0.5s after p10-ready told our script to press.

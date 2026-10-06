@@ -1,0 +1,42 @@
+{"t":1791311620285,"s":0.011,"kind":"server","text":"listening on 127.0.0.1:47810"}
+{"t":1791311621002,"s":0.728,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791311621003,"s":0.729,"kind":"sim","text":"connected"}
+{"t":1791311621004,"s":0.73,"kind":"prompt","text":"Open Free flight's world map, leave everything alone, sim in front, Page Down."}
+{"t":1791311621004,"s":0.73,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791311621005,"s":0.731,"kind":"system","text":"Pause_EX1 1 (full pause)","event":"Pause_EX1","data":1}
+{"t":1791311621005,"s":0.731,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791311621069,"s":0.795,"kind":"system","text":"Pause_EX1 1 (full pause)","event":"Pause_EX1","data":1}
+{"t":1791311624401,"s":4.127,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1791311624402,"s":4.128,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1791311624404,"s":4.13,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1791311624406,"s":4.132,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1791311624406,"s":4.132,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1791311624410,"s":4.136,"kind":"system","text":"Pause_EX1 9 (full pause + sim pause)","event":"Pause_EX1","data":9}
+{"t":1791311624622,"s":4.348,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1791311624623,"s":4.349,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791311624733,"s":4.459,"kind":"state","text":"LIVERY NAME \"FSReborn Nine Hotel\"","liveryName":"FSReborn Nine Hotel"}
+{"t":1791311624733,"s":4.459,"kind":"state","text":"LIVERY FOLDER \"FSREBORN_NINEHOTEL\"","liveryFolder":"FSREBORN_NINEHOTEL"}
+{"t":1791311624733,"s":4.459,"kind":"state","text":"TITLE \"FSReborn Phenom 300E Manchester Interior\"","title":"FSReborn Phenom 300E Manchester Interior"}
+{"t":1791311624733,"s":4.459,"kind":"state","text":"position -0.000000, 90.000323, 220 ft, on ground 1","lat":-2.1556893808986427e-7,"lon":90.00032277330374,"altFt":219.79423173920804,"onGround":1}
+{"t":1791311624904,"s":4.63,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791311625034,"s":4.76,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791311625371,"s":5.097,"kind":"hello","text":"from \"mainUi\" (coui://html_UI/Global/mainUI.html), loaded by cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5: engine object, Coherent undefined, _globalDataLoader object","title":"mainUi","href":"coui://html_UI/Global/mainUI.html","via":"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5","engine":"object","coherent":"undefined","loader":"object","registerViewListener":"undefined","id":746025400}
+{"t":1791311627838,"s":7.564,"kind":"state","text":"SIM ON GROUND 1 → 0","onGround":0}
+{"t":1791311629334,"s":9.06,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\official2024\\steam\\fsreborn-aircraft-phenom300e\\simobjects\\airplanes\\fsreborn_phenom300e\\presets\\fsreborn\\phenom300e_manchester\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\official2024\\steam\\fsreborn-aircraft-phenom300e\\simobjects\\airplanes\\fsreborn_phenom300e\\presets\\fsreborn\\phenom300e_manchester\\config\\aircraft.cfg","signal":true}
+{"t":1791311629334,"s":9.06,"kind":"state","text":"AircraftLoaded state SimObjects\\Airplanes\\fsreborn_phenom300e\\presets\\fsreborn\\phenom300e_manchester\\config\\aircraft.CFG","aircraft":"SimObjects\\Airplanes\\fsreborn_phenom300e\\presets\\fsreborn\\phenom300e_manchester\\config\\aircraft.CFG","signal":true}
+{"t":1791311630032,"s":9.758,"kind":"finding","text":"Copies of our script polling p10: 1, in \"mainUi\" by its cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5 (engine object, store object)."}
+{"t":1791311630800,"s":10.526,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791311635707,"s":15.433,"kind":"scan","text":"11 documents; our script in 1: [{\"title\":\"mainUi\",\"id\":746025400,\"via\":\"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5\",\"polls\":17,\"loaded\":1791311625315}]","pages":["atlas","Shared variables","mainUi","notifications","transition","Electronic Flight Bag","Mission Steps","Toolbar","notifications","//42 Flow","//42 CP Overlay (Reqd.)"],"reached":[{"title":"mainUi","id":746025400,"via":"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5","polls":17,"loaded":1791311625315}]}
+{"t":1791311635708,"s":15.434,"kind":"finding","text":"Through the inspector, our script is in 1 of 11 documents: \"mainUi\" (cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5)."}
+{"t":1791311635770,"s":15.496,"kind":"components","text":"0 saved","saved":[]}
+{"t":1791311635770,"s":15.496,"kind":"finding","text":"mainUi had loaded 0 UI components from cookedcomps/; saved 0 to experiments/sim-sources/menu/cookedcomps/, 0 of them ones Flow Pro copies."}
+{"t":1791311635801,"s":15.527,"kind":"before","text":"mainUi's departure before: {\"taxiIndex\":-1,\"icao\":null}"}
+{"t":1791311635801,"s":15.527,"kind":"tell","text":"goto to copy 746025400: {\"op\":\"goto\",\"airport\":\"KSEA\",\"stand\":\"PARKING\",\"aircraft\":\"Black Square Baron 58P Professional\",\"launch\":false}"}
+{"t":1791311636201,"s":15.96,"kind":"script","text":"goto: {\"cmd\":{\"seq\":1,\"to\":746025400,\"op\":\"goto\",\"airport\":\"KSEA\",\"stand\":\"PARKING\",\"aircraft\":\"Black Square Baron 58P Professional\",\"launch\":false},\"info\":{\"title\":\"mainUi\",\"href\":\"coui://html_UI/Global/mainUI.html\",\"via\":\"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5\",\"engine\":\"object\",\"coherent\":\"undefined\",\"loader\":\"object\",\"registerViewListener\":\"undefined\"}}","step":"goto","detail":{"cmd":{"seq":1,"to":746025400,"op":"goto","airport":"KSEA","stand":"PARKING","aircraft":"Black Square Baron 58P Professional","launch":false},"info":{"title":"mainUi","href":"coui://html_UI/Global/mainUI.html","via":"cookedcomp 37e4c836-61ef-469a-bdf6-db44baae15b5","engine":"object","coherent":"undefined","loader":"object","registerViewListener":"undefined"}},"id":746025400}
+{"t":1791311640361,"s":20.12,"kind":"script","text":"search: \"no results in 4s\"","step":"search","detail":"no results in 4s","id":746025400}
+{"t":1791311640361,"s":20.121,"kind":"script","text":"departure: \"not set\"","step":"departure","detail":"not set","id":746025400}
+{"t":1791311640362,"s":20.188,"kind":"script","text":"done: {\"ok\":false,\"ms\":4161}","step":"done","detail":{"ok":false,"ms":4161},"id":746025400}
+{"t":1791311640483,"s":20.209,"kind":"finding","text":"From \"mainUi\": the departure wasn't set (\"not set\"); no stand; no aircraft change; done in 4161ms."}
+{"t":1791311640483,"s":20.209,"kind":"finding","text":"The airport search: search: \"no results in 4s\"."}
+{"t":1791311640494,"s":20.22,"kind":"finding","text":"mainUi reads back: {\"taxiIndex\":-1,\"airport\":false,\"aircraft\":\"Embraer Phenom 300E\"}."}
+{"t":1791311641419,"s":21.145,"kind":"shot","text":"saved experiments/areas/interface/results/p10-menu-package-2026-10-06-18-33-40/01-world-map.jpg"}

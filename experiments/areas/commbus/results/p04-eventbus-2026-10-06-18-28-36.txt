@@ -1,0 +1,13 @@
+p04-eventbus, started 2026-10-06T18:28:36.757Z
+
+- Aircraft: FSReborn Phenom 300E Manchester Interior.
+- display ("VCockpit03 - WTG3000_MFD"): listener ready.
+- EFB ("Electronic Flight Bag"): listener ready.
+- toolbar ("Toolbar"): no listener: no RegisterGenericDataListener.
+- idle, 10.0s: display 8 packages from 4 buses, 8 topics, 6.9 KB; EFB 13 packages from 5 buses, 10 topics, 8.7 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- zoom in, 8.0s: display 9 packages from 4 buses, 9 topics, 6.9 KB; EFB 15 packages from 5 buses, 12 topics, 8.8 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- zoom out, 8.0s: display 5 packages from 4 buses, 9 topics, 3.5 KB; EFB 10 packages from 5 buses, 12 topics, 4.5 KB; toolbar 0 packages from 0 buses, 0 topics, 0.0 KB.
+- New in "zoom in", heard by the display: 1 topics: display_pane_view_event.
+- New in "zoom out", heard by the display: 1 topics: display_pane_view_event.
+- resync_request sent from the EFB's listener (sent): in 5s, display heard 9 packages, 26 topics; EFB heard 12 packages, 306 topics; toolbar heard 0 packages, 0 topics.
+- Sent the zoom-in step's 1 topics again from the EFB's listener (sent): display_pane_view_event {"displayPaneIndex":2,"eventType":"display_pane_map_range_de. Compare the screenshots before and after.

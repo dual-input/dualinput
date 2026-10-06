@@ -1,0 +1,11 @@
+p01 · Masking a pilot's own flight-control input on MSFS 2024
+2026-10-06T18:07:02.334Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Aircraft: TITLE "Black Square Baron 58P Professional N513LW", study black-square-baron-pro
+Mask priority 10000000, re-send priorities 10000001, 10001000, 100000000, 1900000000, 2000000000, 5s phases
+
+mixture: masked AXIS_MIXTURE1_SET
+  free: baseline · heard AXIS_MIXTURE1_SET ×122 -16384..16384 · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×124 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380598
+  masked: moved (L:BKSQ_MixtureLeverPosition_1 at 100% of the free range) · heard AXIS_MIXTURE1_SET ×105 -16384..16384 · masker got AXIS_MIXTURE1_SET ×104 -16384..16384 · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×106 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.409044 · expected blocked
+  cleared: moved (L:BKSQ_MixtureLeverPosition_1 at 100% of the free range) · heard AXIS_MIXTURE1_SET ×100 -16384..16384 · masker got none · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×102 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380598 · as expected
+
+Exceptions: NAME_UNRECOGNIZED (7) on map K:MIXTURE_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE_AXIS_SET_EX1 to group 10, parameter 2; NAME_UNRECOGNIZED (7) on map K:MIXTURE1_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE1_AXIS_SET_EX1 to group 10, parameter 2; NAME_UNRECOGNIZED (7) on map K:MIXTURE2_AXIS_SET_EX1 for group 10, parameter 2; UNRECOGNIZED_ID (3) on add K:MIXTURE2_AXIS_SET_EX1 to group 10, parameter 2

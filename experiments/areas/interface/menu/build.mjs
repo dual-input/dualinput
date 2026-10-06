@@ -5,7 +5,7 @@
  * p10 tells it to, and two ways for a package to put it into the menu's
  * documents.
  *
- *   node experiments/areas/interface/menu/build.mjs [--cookedcomp <guid>] [--no-install]
+ *   node experiments/areas/interface/menu/build.mjs [--cookedcomp <guid>[,<guid>]] [--no-install]
  *
  * The way in that always ships is our toolbar icon: the toolbar inlines a
  * panel's icon SVG into its own document, so an <img src onerror> in the icon
@@ -19,10 +19,15 @@
  * --cookedcomp <guid> adds the second way, Flow Pro's: our own copy of one of
  * fs-base-ui's UI components, with the same <img src onerror> added (read in
  * p42-util-flow-pro 26.33.5, cookedcomps/{3A799C8C-...}.html; same log, "A
- * package reaches the menu's document"). It copies the stock component that
- * p10 saved from the menu into experiments/sim-sources/menu/cookedcomps/, so
- * run p10 once first. Pick a component that no other package copies, because
- * two copies of one component load only one.
+ * package reaches the menu's document"). It copies the stock component from
+ * the sim's install folder. Pick a component that no other package copies,
+ * because two copies of one component load only one, and one that the menu
+ * shows where the script is needed: MenuBarPage,
+ * {37E4C836-61EF-469A-BDF6-DB44BAAE15B5}, which reached mainUi on the first
+ * menu visit (p10, 2026-10-06), and the start screen's button, TileButton_Start,
+ * {AB166825-B19B-4425-8E08-00C3B322976A}, for the screen before it (read in
+ * fs-base-ui 0.1.10, html_ui/Global/pkg/base.bundle.js, the page GUIDs, and
+ * cookedcomps/{3A799C8C-...}.html).
  *
  * The script touches no input and does nothing until p10 answers its polls on
  * 127.0.0.1:47810, so it has nothing to fail open from; it stops polling an
@@ -39,7 +44,6 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
-const REPO = path.resolve(HERE, "..", "..", "..", "..")
 const NAME = "crosscheck-p10-menu"
 const PANEL_ID = "PANEL_CROSSCHECK_P10"
 const DIR = "CrosscheckP10"
@@ -49,11 +53,25 @@ const SDK = process.env.MSFS_SDK ?? process.env.MSFS2024_SDK ?? "C:/MSFS 2024 SD
 const PACKAGE_TOOL = path.join(SDK, "Tools", "bin", "fspackagetool.exe")
 const OUT = path.join(HERE, "package")
 const BUILT = path.join(OUT, "Packages", NAME)
-const STOCK = path.join(REPO, "experiments", "sim-sources", "menu", "cookedcomps")
+// The sim's own copies of its UI components are files in its install folder,
+// Packages/fs-base-ui/cookedcomps/, named {GUID}.html and .json with the GUID
+// in capitals; MSFS 2024 on Steam installs to steamapps/common/Limitless.
+// No script in the menu can read them: an XHR for coui://cookedcomps/ errors,
+// and the inspector lists none among mainUi's resources (2026-10-06).
+function stockDir() {
+  const vdf = "C:/Program Files (x86)/Steam/steamapps/libraryfolders.vdf"
+  const libraries = fs.existsSync(vdf) ? [...fs.readFileSync(vdf, "utf8").matchAll(/"path"\s+"([^"]+)"/g)].map((m) => m[1].replace(/\\\\/g, "/")) : []
+  for (const lib of libraries) {
+    const dir = path.join(lib, "steamapps", "common", "Limitless", "Packages", "fs-base-ui", "cookedcomps")
+    if (fs.existsSync(dir)) return dir
+  }
+  return null
+}
 
 const argv = process.argv.slice(2)
 const opt = (name) => { const i = argv.indexOf(name); return i === -1 ? null : argv[i + 1] ?? null }
-const cookedcomp = opt("--cookedcomp")?.replace(/[{}]/g, "").toLowerCase() ?? null
+// One GUID, or several separated by commas.
+const cookedcomps = (opt("--cookedcomp") ?? "").split(",").map((g) => g.replace(/[{}\s]/g, "").toLowerCase()).filter(Boolean)
 
 const die = (why) => { console.error(`\n${why}`); process.exit(1) }
 
@@ -253,6 +271,81 @@ const SCRIPT = `// Written by experiments/areas/interface/menu/build.mjs.
     });
   }
 
+  // The menu's screens, by the names their components give their buttons
+  // (read in fs-base-ui 0.1.10, cookedcomps/{3A799C8C-...}.html, the start
+  // page, and {D4E935FB-...}.html, the home page's tiles).
+  function named(name) {
+    var els = document.querySelectorAll('[name="' + name + '"]');
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.width > 2 && r.height > 2 && r.bottom > 0 && r.right > 0) return els[i];
+    }
+    return null;
+  }
+  function screen() {
+    return { start: !!named("Startpage"), home: !!named("Homepage") && !!named("Home_TileRegular_Freeflight"), menuBar: !!named("MenuBarPage") };
+  }
+  // A button by the names a page exposes, the way the page's own code takes
+  // it, such as this.elt.getExposedChild("Button_Start") (read in base.bundle.js,
+  // StartPageManipulator). Element names mislead: on the start screen the one
+  // named TileButton_Start is Accessibility, and Start is
+  // TileButton_Start_Special (p10, 2026-10-06; cookedcomps/{3A799C8C-...}.json,
+  // exposedChildren).
+  function exposed(path) {
+    var el = named(path[0]);
+    for (var i = 1; el && i < path.length; i++) el = typeof el.getExposedChild === "function" ? el.getExposedChild(path[i]) : null;
+    return el || null;
+  }
+  // Mouse events at the button's center, on whatever element is on top there,
+  // as a pilot's click would land.
+  function press(path) {
+    var el = exposed(path);
+    if (!el) return { found: false };
+    var r = el.getBoundingClientRect();
+    var x = r.left + r.width / 2, y = r.top + r.height / 2;
+    var target = document.elementFromPoint(x, y) || el;
+    var types = ["mouseover", "mousedown", "mouseup", "click"];
+    for (var i = 0; i < types.length; i++) {
+      var ev = document.createEvent("MouseEvents");
+      ev.initMouseEvent(types[i], true, true, window, 1, x, y, x, y, false, false, false, false, 0, null);
+      target.dispatchEvent(ev);
+    }
+    return { found: true, name: el.getAttribute("name"), x: Math.round(x), y: Math.round(y), target: target.tagName + (target.getAttribute("name") ? " " + target.getAttribute("name") : "") };
+  }
+  // The Start button's own handler sends this flow event (read in base.bundle.js,
+  // StartPageManipulator.setButtons), and LaunchFlowEvent is
+  // engine.trigger("LAUNCH_FLOW_EVENT_FROM_VIEW", ...) (read in Global/lib.js).
+  function flow(args) {
+    if (typeof LaunchFlowEvent === "function") { LaunchFlowEvent.apply(null, args); return "LaunchFlowEvent"; }
+    engine.trigger.apply(engine, ["LAUNCH_FLOW_EVENT_FROM_VIEW"].concat(args));
+    return "engine.trigger";
+  }
+
+  function readList(path, max) {
+    return call("requestArrayElements", [path, 0, max]).then(function (r) {
+      var n = r.ok && typeof r.value === "number" ? r.value : 0;
+      var list = [];
+      for (var i = 0; i < Math.min(n, max); i++) list.push(get(path + "/" + i));
+      return { reply: r, list: list };
+    });
+  }
+
+  function pickLivery(match) {
+    return readList("game/aircraft/configurator/liveries", 100).then(function (l) {
+      var pick = null;
+      for (var i = 0; match && i < l.list.length; i++) if (l.list[i] && JSON.stringify(l.list[i]).toLowerCase().indexOf(match.toLowerCase()) >= 0) { pick = l.list[i]; break; }
+      if (!pick && l.list.length > 1) pick = l.list[1];
+      if (!pick) { report("livery", { entries: l.list.length, picked: null }); return true; }
+      return call("requestData", ["game/aircraft/configurator/saveVariationId", String(pick.id)]).then(function (r) {
+        return wait(800).then(function () {
+          var now = get("game/aircraft/currentAircraft");
+          report("livery", { entries: l.list.length, picked: JSON.stringify(pick).slice(0, 300), call: r, variation: now && (now.variationDisplayName || now.variation) });
+          return true;
+        });
+      });
+    });
+  }
+
   function goto(cmd) {
     var t0 = Date.now();
     report("goto", { cmd: cmd, info: info() });
@@ -283,6 +376,9 @@ const SCRIPT = `// Written by experiments/areas/interface/menu/build.mjs.
         });
       });
     }).then(function (ok) {
+      if (!ok || cmd.livery === undefined || cmd.livery === null) return ok;
+      return pickLivery(cmd.livery);
+    }).then(function (ok) {
       if (!ok || !cmd.launch) return ok;
       return call("requestData", ["game/currentFlight/launchFlight", ""]).then(function (r) { report("launch", r); return true; });
     }).then(function (ok) { report("done", { ok: ok, ms: Date.now() - t0 }); }, function (e) { report("failed", String(e)); });
@@ -300,6 +396,9 @@ const SCRIPT = `// Written by experiments/areas/interface/menu/build.mjs.
           if (cmds[i].seq <= S.seq) continue;
           S.seq = cmds[i].seq;
           if (cmds[i].op === "goto") goto(cmds[i]);
+          else if (cmds[i].op === "screen") report("screen", screen());
+          else if (cmds[i].op === "press") report("press", { path: cmds[i].path, result: press(cmds[i].path), after: screen() });
+          else if (cmds[i].op === "flow") report("flow", { args: cmds[i].args, via: flow(cmds[i].args) });
           else if (cmds[i].op === "launch") call("requestData", ["game/currentFlight/launchFlight", ""]).then(function (r) { report("launch", r); });
           else if (cmds[i].op === "hello") post("/hello", info());
         }
@@ -318,18 +417,21 @@ check(write(`PackageSources/html_ui/InGamePanels/${DIR}/p10-menu.js`, SCRIPT))
 // ---------------------------------------------------------------- Flow Pro's way, optional
 
 let cookedcompGroup = ""
-if (cookedcomp) {
-  const html = path.join(STOCK, `{${cookedcomp}}.html`)
-  const json = path.join(STOCK, `{${cookedcomp}}.json`)
-  if (!fs.existsSync(html)) die(`No stock copy of {${cookedcomp}} in ${STOCK}: run p10 with the sim in the menu first.`)
+const STOCK = cookedcomps.length ? stockDir() : null
+if (cookedcomps.length && !STOCK) die("No fs-base-ui/cookedcomps under any Steam library's steamapps/common/Limitless.")
+for (const cookedcomp of cookedcomps) {
+  const name = `{${cookedcomp.toUpperCase()}}`
+  const html = path.join(STOCK, `${name}.html`)
+  const json = path.join(STOCK, `${name}.json`)
+  if (!fs.existsSync(html)) die(`No stock ${name}.html in ${STOCK}.`)
   const stock = fs.readFileSync(html, "utf8")
   const tag = `<svg style="display:none"><foreignObject><img src onerror="${loader(`cookedcomp ${cookedcomp}`)}"></img></foreignObject></svg>`
   // Before the component's last closing tag, so it sits inside its root
   // element, as Flow Pro's hidden svg does.
   const at = stock.lastIndexOf("</")
   if (at < 0) die(`{${cookedcomp}}.html has no closing tag to put ours before.`)
-  write(`PackageSources/cookedcomps/{${cookedcomp}}.html`, stock.slice(0, at) + tag + stock.slice(at))
-  if (fs.existsSync(json)) fs.copyFileSync(json, path.join(OUT, "PackageSources", "cookedcomps", `{${cookedcomp}}.json`))
+  write(`PackageSources/cookedcomps/${name}.html`, stock.slice(0, at) + tag + stock.slice(at))
+  if (fs.existsSync(json)) fs.copyFileSync(json, path.join(OUT, "PackageSources", "cookedcomps", `${name}.json`))
   cookedcompGroup = `
 		<AssetGroup Name="cookedcomps">
 			<Type>Copy</Type>

@@ -1,0 +1,490 @@
+{"t":1791310022360,"s":0.026,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791310022810,"s":0.476,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791310022810,"s":0.476,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791310022810,"s":0.476,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791310023143,"s":0.809,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N513LW\", study black-square-baron-pro","title":"Black Square Baron 58P Professional N513LW","key":"black-square-baron-pro"}
+{"t":1791310023176,"s":0.842,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":49,"index":2,"sent":"map K:MIXTURE_AXIS_SET_EX1 for group 10"}
+{"t":1791310023177,"s":0.843,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":50,"index":2,"sent":"add K:MIXTURE_AXIS_SET_EX1 to group 10"}
+{"t":1791310023177,"s":0.843,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE1_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":51,"index":2,"sent":"map K:MIXTURE1_AXIS_SET_EX1 for group 10"}
+{"t":1791310023177,"s":0.843,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE1_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":52,"index":2,"sent":"add K:MIXTURE1_AXIS_SET_EX1 to group 10"}
+{"t":1791310023177,"s":0.843,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:MIXTURE2_AXIS_SET_EX1 for group 10, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":53,"index":2,"sent":"map K:MIXTURE2_AXIS_SET_EX1 for group 10"}
+{"t":1791310023177,"s":0.843,"kind":"exception","text":"UNRECOGNIZED_ID (3) on add K:MIXTURE2_AXIS_SET_EX1 to group 10, parameter 2","exception":3,"name":"UNRECOGNIZED_ID","sendId":54,"index":2,"sent":"add K:MIXTURE2_AXIS_SET_EX1 to group 10"}
+{"t":1791310023193,"s":0.859,"kind":"inputs","text":"127 input events listed; watching 5 whose names match /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER|MIXTURE/i","listed":127,"watched":["ENGINE_THROTTLE_1","ENGINE_THROTTLE_2","BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1","BKSQ_TURBOCHARGEDMIXTURECONTROLLER_2","HANDLING_ELEVATORTRIM_1"]}
+{"t":1791310023210,"s":0.876,"kind":"check","text":"L:bksq_controlLocks reads 0","lock":"L:bksq_controlLocks","value":0}
+{"t":1791310041344,"s":19.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15516, not ours","event":"AXIS_MIXTURE1_SET","data":[15516,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041377,"s":19.043,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14360, not ours","event":"AXIS_MIXTURE1_SET","data":[14360,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041411,"s":19.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13300, not ours","event":"AXIS_MIXTURE1_SET","data":[13300,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041444,"s":19.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11854, not ours","event":"AXIS_MIXTURE1_SET","data":[11854,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041477,"s":19.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10312, not ours","event":"AXIS_MIXTURE1_SET","data":[10312,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041511,"s":19.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8867, not ours","event":"AXIS_MIXTURE1_SET","data":[8867,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041544,"s":19.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8320, not ours","event":"AXIS_MIXTURE1_SET","data":[8320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041578,"s":19.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7774, not ours","event":"AXIS_MIXTURE1_SET","data":[7774,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041611,"s":19.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7485, not ours","event":"AXIS_MIXTURE1_SET","data":[7485,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041644,"s":19.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7421, not ours","event":"AXIS_MIXTURE1_SET","data":[7421,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041677,"s":19.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7453, not ours","event":"AXIS_MIXTURE1_SET","data":[7453,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041711,"s":19.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7485, not ours","event":"AXIS_MIXTURE1_SET","data":[7485,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041744,"s":19.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8449, not ours","event":"AXIS_MIXTURE1_SET","data":[8449,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041778,"s":19.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9284, not ours","event":"AXIS_MIXTURE1_SET","data":[9284,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041811,"s":19.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10184, not ours","event":"AXIS_MIXTURE1_SET","data":[10184,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041844,"s":19.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11147, not ours","event":"AXIS_MIXTURE1_SET","data":[11147,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041878,"s":19.544,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12529, not ours","event":"AXIS_MIXTURE1_SET","data":[12529,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041911,"s":19.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13750, not ours","event":"AXIS_MIXTURE1_SET","data":[13750,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041944,"s":19.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14842, not ours","event":"AXIS_MIXTURE1_SET","data":[14842,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310041977,"s":19.643,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16095, not ours","event":"AXIS_MIXTURE1_SET","data":[16095,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310042011,"s":19.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310059922,"s":37.588,"kind":"key","text":"START, with claude in front","key":"START","foreground":"claude"}
+{"t":1791310060145,"s":37.811,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16159, not ours","event":"AXIS_MIXTURE1_SET","data":[16159,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060178,"s":37.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15870, not ours","event":"AXIS_MIXTURE1_SET","data":[15870,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060211,"s":37.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15420, not ours","event":"AXIS_MIXTURE1_SET","data":[15420,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060244,"s":37.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14617, not ours","event":"AXIS_MIXTURE1_SET","data":[14617,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060279,"s":37.945,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13910, not ours","event":"AXIS_MIXTURE1_SET","data":[13910,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060311,"s":37.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13011, not ours","event":"AXIS_MIXTURE1_SET","data":[13011,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060344,"s":38.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12079, not ours","event":"AXIS_MIXTURE1_SET","data":[12079,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060378,"s":38.044,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10987, not ours","event":"AXIS_MIXTURE1_SET","data":[10987,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060411,"s":38.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10344, not ours","event":"AXIS_MIXTURE1_SET","data":[10344,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060444,"s":38.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9830, not ours","event":"AXIS_MIXTURE1_SET","data":[9830,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060477,"s":38.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9188, not ours","event":"AXIS_MIXTURE1_SET","data":[9188,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060511,"s":38.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8642, not ours","event":"AXIS_MIXTURE1_SET","data":[8642,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060544,"s":38.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8353, not ours","event":"AXIS_MIXTURE1_SET","data":[8353,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060578,"s":38.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7839, not ours","event":"AXIS_MIXTURE1_SET","data":[7839,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060611,"s":38.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7485, not ours","event":"AXIS_MIXTURE1_SET","data":[7485,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060644,"s":38.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7260, not ours","event":"AXIS_MIXTURE1_SET","data":[7260,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060677,"s":38.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6971, not ours","event":"AXIS_MIXTURE1_SET","data":[6971,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060711,"s":38.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6682, not ours","event":"AXIS_MIXTURE1_SET","data":[6682,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060744,"s":38.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6232, not ours","event":"AXIS_MIXTURE1_SET","data":[6232,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060777,"s":38.443,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6008, not ours","event":"AXIS_MIXTURE1_SET","data":[6008,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060811,"s":38.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5847, not ours","event":"AXIS_MIXTURE1_SET","data":[5847,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060844,"s":38.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5751, not ours","event":"AXIS_MIXTURE1_SET","data":[5751,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060877,"s":38.543,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5654, not ours","event":"AXIS_MIXTURE1_SET","data":[5654,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060911,"s":38.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5590, not ours","event":"AXIS_MIXTURE1_SET","data":[5590,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060944,"s":38.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5526, not ours","event":"AXIS_MIXTURE1_SET","data":[5526,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310060977,"s":38.643,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5365, not ours","event":"AXIS_MIXTURE1_SET","data":[5365,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061011,"s":38.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5044, not ours","event":"AXIS_MIXTURE1_SET","data":[5044,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061044,"s":38.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4690, not ours","event":"AXIS_MIXTURE1_SET","data":[4690,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061077,"s":38.743,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4209, not ours","event":"AXIS_MIXTURE1_SET","data":[4209,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061111,"s":38.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3630, not ours","event":"AXIS_MIXTURE1_SET","data":[3630,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061144,"s":38.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3116, not ours","event":"AXIS_MIXTURE1_SET","data":[3116,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061178,"s":38.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2570, not ours","event":"AXIS_MIXTURE1_SET","data":[2570,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061211,"s":38.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2345, not ours","event":"AXIS_MIXTURE1_SET","data":[2345,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061244,"s":38.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2153, not ours","event":"AXIS_MIXTURE1_SET","data":[2153,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061278,"s":38.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1799, not ours","event":"AXIS_MIXTURE1_SET","data":[1799,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061311,"s":38.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1349, not ours","event":"AXIS_MIXTURE1_SET","data":[1349,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061344,"s":39.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1092, not ours","event":"AXIS_MIXTURE1_SET","data":[1092,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061377,"s":39.043,"kind":"key","text":"K:AXIS_MIXTURE1_SET 675, not ours","event":"AXIS_MIXTURE1_SET","data":[675,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061411,"s":39.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 193, not ours","event":"AXIS_MIXTURE1_SET","data":[193,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061444,"s":39.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET -512, not ours","event":"AXIS_MIXTURE1_SET","data":[-512,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061477,"s":39.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1088, not ours","event":"AXIS_MIXTURE1_SET","data":[-1088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061511,"s":39.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1920, not ours","event":"AXIS_MIXTURE1_SET","data":[-1920,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061544,"s":39.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2592, not ours","event":"AXIS_MIXTURE1_SET","data":[-2592,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061578,"s":39.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3328, not ours","event":"AXIS_MIXTURE1_SET","data":[-3328,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061611,"s":39.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4032, not ours","event":"AXIS_MIXTURE1_SET","data":[-4032,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061645,"s":39.311,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4800, not ours","event":"AXIS_MIXTURE1_SET","data":[-4800,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061678,"s":39.344,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5504, not ours","event":"AXIS_MIXTURE1_SET","data":[-5504,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061711,"s":39.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6336, not ours","event":"AXIS_MIXTURE1_SET","data":[-6336,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061745,"s":39.411,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6752, not ours","event":"AXIS_MIXTURE1_SET","data":[-6752,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061778,"s":39.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7200, not ours","event":"AXIS_MIXTURE1_SET","data":[-7200,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061811,"s":39.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7744, not ours","event":"AXIS_MIXTURE1_SET","data":[-7744,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061845,"s":39.511,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8352, not ours","event":"AXIS_MIXTURE1_SET","data":[-8352,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061878,"s":39.544,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8928, not ours","event":"AXIS_MIXTURE1_SET","data":[-8928,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061911,"s":39.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9504, not ours","event":"AXIS_MIXTURE1_SET","data":[-9504,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061944,"s":39.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9888, not ours","event":"AXIS_MIXTURE1_SET","data":[-9888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310061977,"s":39.643,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10496, not ours","event":"AXIS_MIXTURE1_SET","data":[-10496,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062011,"s":39.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10816, not ours","event":"AXIS_MIXTURE1_SET","data":[-10816,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062044,"s":39.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11392, not ours","event":"AXIS_MIXTURE1_SET","data":[-11392,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062077,"s":39.743,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12096, not ours","event":"AXIS_MIXTURE1_SET","data":[-12096,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062111,"s":39.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12672, not ours","event":"AXIS_MIXTURE1_SET","data":[-12672,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062144,"s":39.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13088, not ours","event":"AXIS_MIXTURE1_SET","data":[-13088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062177,"s":39.843,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13664, not ours","event":"AXIS_MIXTURE1_SET","data":[-13664,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062211,"s":39.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14496, not ours","event":"AXIS_MIXTURE1_SET","data":[-14496,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062244,"s":39.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15296, not ours","event":"AXIS_MIXTURE1_SET","data":[-15296,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310062278,"s":39.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16384, not ours","event":"AXIS_MIXTURE1_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063011,"s":40.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15680, not ours","event":"AXIS_MIXTURE1_SET","data":[-15680,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063044,"s":40.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15232, not ours","event":"AXIS_MIXTURE1_SET","data":[-15232,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063078,"s":40.744,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14880, not ours","event":"AXIS_MIXTURE1_SET","data":[-14880,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063111,"s":40.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14176, not ours","event":"AXIS_MIXTURE1_SET","data":[-14176,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063144,"s":40.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13472, not ours","event":"AXIS_MIXTURE1_SET","data":[-13472,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063177,"s":40.843,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12640, not ours","event":"AXIS_MIXTURE1_SET","data":[-12640,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063211,"s":40.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11904, not ours","event":"AXIS_MIXTURE1_SET","data":[-11904,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063244,"s":40.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11040, not ours","event":"AXIS_MIXTURE1_SET","data":[-11040,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063278,"s":40.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10432, not ours","event":"AXIS_MIXTURE1_SET","data":[-10432,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063311,"s":40.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9856, not ours","event":"AXIS_MIXTURE1_SET","data":[-9856,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063344,"s":41.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9504, not ours","event":"AXIS_MIXTURE1_SET","data":[-9504,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063377,"s":41.043,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8992, not ours","event":"AXIS_MIXTURE1_SET","data":[-8992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063411,"s":41.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8736, not ours","event":"AXIS_MIXTURE1_SET","data":[-8736,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063444,"s":41.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8320, not ours","event":"AXIS_MIXTURE1_SET","data":[-8320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063477,"s":41.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7872, not ours","event":"AXIS_MIXTURE1_SET","data":[-7872,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063511,"s":41.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7296, not ours","event":"AXIS_MIXTURE1_SET","data":[-7296,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063544,"s":41.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6912, not ours","event":"AXIS_MIXTURE1_SET","data":[-6912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063577,"s":41.243,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6528, not ours","event":"AXIS_MIXTURE1_SET","data":[-6528,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063611,"s":41.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6080, not ours","event":"AXIS_MIXTURE1_SET","data":[-6080,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063644,"s":41.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5472, not ours","event":"AXIS_MIXTURE1_SET","data":[-5472,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063677,"s":41.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4992, not ours","event":"AXIS_MIXTURE1_SET","data":[-4992,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063711,"s":41.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4224, not ours","event":"AXIS_MIXTURE1_SET","data":[-4224,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063744,"s":41.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3616, not ours","event":"AXIS_MIXTURE1_SET","data":[-3616,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063777,"s":41.443,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3072, not ours","event":"AXIS_MIXTURE1_SET","data":[-3072,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063811,"s":41.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2592, not ours","event":"AXIS_MIXTURE1_SET","data":[-2592,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063844,"s":41.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1984, not ours","event":"AXIS_MIXTURE1_SET","data":[-1984,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063878,"s":41.544,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1440, not ours","event":"AXIS_MIXTURE1_SET","data":[-1440,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063911,"s":41.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET -800, not ours","event":"AXIS_MIXTURE1_SET","data":[-800,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063944,"s":41.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET -256, not ours","event":"AXIS_MIXTURE1_SET","data":[-256,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310063977,"s":41.643,"kind":"key","text":"K:AXIS_MIXTURE1_SET 321, not ours","event":"AXIS_MIXTURE1_SET","data":[321,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064011,"s":41.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET 835, not ours","event":"AXIS_MIXTURE1_SET","data":[835,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064044,"s":41.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1639, not ours","event":"AXIS_MIXTURE1_SET","data":[1639,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064077,"s":41.743,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2377, not ours","event":"AXIS_MIXTURE1_SET","data":[2377,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064111,"s":41.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3213, not ours","event":"AXIS_MIXTURE1_SET","data":[3213,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064145,"s":41.811,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3823, not ours","event":"AXIS_MIXTURE1_SET","data":[3823,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064178,"s":41.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4562, not ours","event":"AXIS_MIXTURE1_SET","data":[4562,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064211,"s":41.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5204, not ours","event":"AXIS_MIXTURE1_SET","data":[5204,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064244,"s":41.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5847, not ours","event":"AXIS_MIXTURE1_SET","data":[5847,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064278,"s":41.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6425, not ours","event":"AXIS_MIXTURE1_SET","data":[6425,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064311,"s":41.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7260, not ours","event":"AXIS_MIXTURE1_SET","data":[7260,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064344,"s":42.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7742, not ours","event":"AXIS_MIXTURE1_SET","data":[7742,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064378,"s":42.044,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8417, not ours","event":"AXIS_MIXTURE1_SET","data":[8417,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064411,"s":42.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8931, not ours","event":"AXIS_MIXTURE1_SET","data":[8931,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064444,"s":42.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9477, not ours","event":"AXIS_MIXTURE1_SET","data":[9477,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064478,"s":42.144,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10055, not ours","event":"AXIS_MIXTURE1_SET","data":[10055,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064511,"s":42.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10698, not ours","event":"AXIS_MIXTURE1_SET","data":[10698,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064544,"s":42.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11115, not ours","event":"AXIS_MIXTURE1_SET","data":[11115,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064578,"s":42.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11726, not ours","event":"AXIS_MIXTURE1_SET","data":[11726,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064611,"s":42.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12368, not ours","event":"AXIS_MIXTURE1_SET","data":[12368,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064644,"s":42.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12882, not ours","event":"AXIS_MIXTURE1_SET","data":[12882,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064677,"s":42.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13364, not ours","event":"AXIS_MIXTURE1_SET","data":[13364,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064711,"s":42.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13878, not ours","event":"AXIS_MIXTURE1_SET","data":[13878,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064744,"s":42.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14360, not ours","event":"AXIS_MIXTURE1_SET","data":[14360,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064778,"s":42.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14810, not ours","event":"AXIS_MIXTURE1_SET","data":[14810,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064811,"s":42.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15324, not ours","event":"AXIS_MIXTURE1_SET","data":[15324,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064844,"s":42.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15998, not ours","event":"AXIS_MIXTURE1_SET","data":[15998,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064877,"s":42.543,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310064933,"s":42.599,"kind":"phase","text":"mixture free: baseline · heard AXIS_MIXTURE1_SET ×122 -16384..16384 · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×124 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380598","control":"mixture","phase":"free","expect":null,"verdict":{"word":"baseline"},"heard":{"AXIS_MIXTURE1_SET":{"n":122,"min":-16384,"max":16384,"last":16384}},"masker":{},"inputs":{"BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1":{"n":124,"min":0,"max":10000,"last":10000}}}
+{"t":1791310065128,"s":42.794,"kind":"masker","text":"open: SunRise 12.2.282174.999, SimConnect 12.2.0.0","maskerKind":"open","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791310065144,"s":42.81,"kind":"masker","text":"system: Sim 1 (running)","maskerKind":"system","event":"Sim","data":1}
+{"t":1791310065144,"s":42.81,"kind":"masker","text":"system: Pause_EX1 0 (none)","maskerKind":"system","event":"Pause_EX1","data":0}
+{"t":1791310065144,"s":42.81,"kind":"masker","text":"system: View 2 (cockpit virtual)","maskerKind":"system","event":"View","data":2}
+{"t":1791310065578,"s":43.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16063, not ours","event":"AXIS_MIXTURE1_SET","data":[16063,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065578,"s":43.244,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16063","name":"AXIS_MIXTURE1_SET","value":16063,"ours":null}
+{"t":1791310065611,"s":43.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15549, not ours","event":"AXIS_MIXTURE1_SET","data":[15549,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065611,"s":43.277,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15549","name":"AXIS_MIXTURE1_SET","value":15549,"ours":null}
+{"t":1791310065635,"s":43.301,"kind":"masker","text":"ready: masking AXIS_MIXTURE1_SET at priority 10000000","maskerKind":"ready","events":["AXIS_MIXTURE1_SET"]}
+{"t":1791310065645,"s":43.311,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14970, not ours","event":"AXIS_MIXTURE1_SET","data":[14970,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065645,"s":43.311,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14970","name":"AXIS_MIXTURE1_SET","value":14970,"ours":null}
+{"t":1791310065677,"s":43.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14585, not ours","event":"AXIS_MIXTURE1_SET","data":[14585,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065678,"s":43.344,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14585","name":"AXIS_MIXTURE1_SET","value":14585,"ours":null}
+{"t":1791310065711,"s":43.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14135, not ours","event":"AXIS_MIXTURE1_SET","data":[14135,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065711,"s":43.377,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14135","name":"AXIS_MIXTURE1_SET","value":14135,"ours":null}
+{"t":1791310065744,"s":43.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13557, not ours","event":"AXIS_MIXTURE1_SET","data":[13557,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065744,"s":43.41,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13557","name":"AXIS_MIXTURE1_SET","value":13557,"ours":null}
+{"t":1791310065778,"s":43.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13043, not ours","event":"AXIS_MIXTURE1_SET","data":[13043,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065778,"s":43.444,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13043","name":"AXIS_MIXTURE1_SET","value":13043,"ours":null}
+{"t":1791310065811,"s":43.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12561, not ours","event":"AXIS_MIXTURE1_SET","data":[12561,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065811,"s":43.477,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12561","name":"AXIS_MIXTURE1_SET","value":12561,"ours":null}
+{"t":1791310065844,"s":43.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11886, not ours","event":"AXIS_MIXTURE1_SET","data":[11886,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065844,"s":43.51,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11886","name":"AXIS_MIXTURE1_SET","value":11886,"ours":null}
+{"t":1791310065877,"s":43.543,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11276, not ours","event":"AXIS_MIXTURE1_SET","data":[11276,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065878,"s":43.544,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11276","name":"AXIS_MIXTURE1_SET","value":11276,"ours":null}
+{"t":1791310065911,"s":43.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10858, not ours","event":"AXIS_MIXTURE1_SET","data":[10858,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065911,"s":43.577,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10858","name":"AXIS_MIXTURE1_SET","value":10858,"ours":null}
+{"t":1791310065944,"s":43.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10280, not ours","event":"AXIS_MIXTURE1_SET","data":[10280,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065944,"s":43.61,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10280","name":"AXIS_MIXTURE1_SET","value":10280,"ours":null}
+{"t":1791310065977,"s":43.643,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9862, not ours","event":"AXIS_MIXTURE1_SET","data":[9862,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310065978,"s":43.644,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9862","name":"AXIS_MIXTURE1_SET","value":9862,"ours":null}
+{"t":1791310066011,"s":43.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9348, not ours","event":"AXIS_MIXTURE1_SET","data":[9348,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066011,"s":43.677,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9348","name":"AXIS_MIXTURE1_SET","value":9348,"ours":null}
+{"t":1791310066044,"s":43.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8802, not ours","event":"AXIS_MIXTURE1_SET","data":[8802,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066045,"s":43.711,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8802","name":"AXIS_MIXTURE1_SET","value":8802,"ours":null}
+{"t":1791310066078,"s":43.744,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8417, not ours","event":"AXIS_MIXTURE1_SET","data":[8417,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066078,"s":43.744,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8417","name":"AXIS_MIXTURE1_SET","value":8417,"ours":null}
+{"t":1791310066111,"s":43.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7646, not ours","event":"AXIS_MIXTURE1_SET","data":[7646,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066111,"s":43.777,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7646","name":"AXIS_MIXTURE1_SET","value":7646,"ours":null}
+{"t":1791310066144,"s":43.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7228, not ours","event":"AXIS_MIXTURE1_SET","data":[7228,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066144,"s":43.81,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7228","name":"AXIS_MIXTURE1_SET","value":7228,"ours":null}
+{"t":1791310066178,"s":43.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6682, not ours","event":"AXIS_MIXTURE1_SET","data":[6682,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066178,"s":43.844,"kind":"masker got","text":"AXIS_MIXTURE1_SET 6682","name":"AXIS_MIXTURE1_SET","value":6682,"ours":null}
+{"t":1791310066211,"s":43.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5975, not ours","event":"AXIS_MIXTURE1_SET","data":[5975,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066211,"s":43.877,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5975","name":"AXIS_MIXTURE1_SET","value":5975,"ours":null}
+{"t":1791310066244,"s":43.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5429, not ours","event":"AXIS_MIXTURE1_SET","data":[5429,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066245,"s":43.911,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5429","name":"AXIS_MIXTURE1_SET","value":5429,"ours":null}
+{"t":1791310066278,"s":43.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4690, not ours","event":"AXIS_MIXTURE1_SET","data":[4690,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066278,"s":43.944,"kind":"masker got","text":"AXIS_MIXTURE1_SET 4690","name":"AXIS_MIXTURE1_SET","value":4690,"ours":null}
+{"t":1791310066311,"s":43.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3984, not ours","event":"AXIS_MIXTURE1_SET","data":[3984,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066311,"s":43.977,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3984","name":"AXIS_MIXTURE1_SET","value":3984,"ours":null}
+{"t":1791310066345,"s":44.011,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2988, not ours","event":"AXIS_MIXTURE1_SET","data":[2988,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066345,"s":44.011,"kind":"masker got","text":"AXIS_MIXTURE1_SET 2988","name":"AXIS_MIXTURE1_SET","value":2988,"ours":null}
+{"t":1791310066378,"s":44.044,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2249, not ours","event":"AXIS_MIXTURE1_SET","data":[2249,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066378,"s":44.044,"kind":"masker got","text":"AXIS_MIXTURE1_SET 2249","name":"AXIS_MIXTURE1_SET","value":2249,"ours":null}
+{"t":1791310066411,"s":44.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1478, not ours","event":"AXIS_MIXTURE1_SET","data":[1478,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066411,"s":44.077,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1478","name":"AXIS_MIXTURE1_SET","value":1478,"ours":null}
+{"t":1791310066444,"s":44.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET 707, not ours","event":"AXIS_MIXTURE1_SET","data":[707,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066444,"s":44.11,"kind":"masker got","text":"AXIS_MIXTURE1_SET 707","name":"AXIS_MIXTURE1_SET","value":707,"ours":null}
+{"t":1791310066477,"s":44.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET 0, not ours","event":"AXIS_MIXTURE1_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066478,"s":44.144,"kind":"masker got","text":"AXIS_MIXTURE1_SET 0","name":"AXIS_MIXTURE1_SET","value":0,"ours":null}
+{"t":1791310066511,"s":44.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET -960, not ours","event":"AXIS_MIXTURE1_SET","data":[-960,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066511,"s":44.177,"kind":"masker got","text":"AXIS_MIXTURE1_SET -960","name":"AXIS_MIXTURE1_SET","value":-960,"ours":null}
+{"t":1791310066544,"s":44.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1760, not ours","event":"AXIS_MIXTURE1_SET","data":[-1760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066544,"s":44.21,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1760","name":"AXIS_MIXTURE1_SET","value":-1760,"ours":null}
+{"t":1791310066578,"s":44.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2592, not ours","event":"AXIS_MIXTURE1_SET","data":[-2592,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066578,"s":44.244,"kind":"masker got","text":"AXIS_MIXTURE1_SET -2592","name":"AXIS_MIXTURE1_SET","value":-2592,"ours":null}
+{"t":1791310066611,"s":44.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3488, not ours","event":"AXIS_MIXTURE1_SET","data":[-3488,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066611,"s":44.277,"kind":"masker got","text":"AXIS_MIXTURE1_SET -3488","name":"AXIS_MIXTURE1_SET","value":-3488,"ours":null}
+{"t":1791310066644,"s":44.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4448, not ours","event":"AXIS_MIXTURE1_SET","data":[-4448,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066644,"s":44.31,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4448","name":"AXIS_MIXTURE1_SET","value":-4448,"ours":null}
+{"t":1791310066677,"s":44.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5216, not ours","event":"AXIS_MIXTURE1_SET","data":[-5216,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066678,"s":44.344,"kind":"masker got","text":"AXIS_MIXTURE1_SET -5216","name":"AXIS_MIXTURE1_SET","value":-5216,"ours":null}
+{"t":1791310066711,"s":44.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6208, not ours","event":"AXIS_MIXTURE1_SET","data":[-6208,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066711,"s":44.377,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6208","name":"AXIS_MIXTURE1_SET","value":-6208,"ours":null}
+{"t":1791310066744,"s":44.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6784, not ours","event":"AXIS_MIXTURE1_SET","data":[-6784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066745,"s":44.411,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6784","name":"AXIS_MIXTURE1_SET","value":-6784,"ours":null}
+{"t":1791310066778,"s":44.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7296, not ours","event":"AXIS_MIXTURE1_SET","data":[-7296,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066778,"s":44.444,"kind":"masker got","text":"AXIS_MIXTURE1_SET -7296","name":"AXIS_MIXTURE1_SET","value":-7296,"ours":null}
+{"t":1791310066811,"s":44.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7872, not ours","event":"AXIS_MIXTURE1_SET","data":[-7872,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066811,"s":44.477,"kind":"masker got","text":"AXIS_MIXTURE1_SET -7872","name":"AXIS_MIXTURE1_SET","value":-7872,"ours":null}
+{"t":1791310066844,"s":44.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8480, not ours","event":"AXIS_MIXTURE1_SET","data":[-8480,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066844,"s":44.51,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8480","name":"AXIS_MIXTURE1_SET","value":-8480,"ours":null}
+{"t":1791310066878,"s":44.544,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9088, not ours","event":"AXIS_MIXTURE1_SET","data":[-9088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066878,"s":44.544,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9088","name":"AXIS_MIXTURE1_SET","value":-9088,"ours":null}
+{"t":1791310066911,"s":44.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9760, not ours","event":"AXIS_MIXTURE1_SET","data":[-9760,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066911,"s":44.577,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9760","name":"AXIS_MIXTURE1_SET","value":-9760,"ours":null}
+{"t":1791310066944,"s":44.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10528, not ours","event":"AXIS_MIXTURE1_SET","data":[-10528,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066944,"s":44.61,"kind":"masker got","text":"AXIS_MIXTURE1_SET -10528","name":"AXIS_MIXTURE1_SET","value":-10528,"ours":null}
+{"t":1791310066978,"s":44.644,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11104, not ours","event":"AXIS_MIXTURE1_SET","data":[-11104,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310066978,"s":44.644,"kind":"masker got","text":"AXIS_MIXTURE1_SET -11104","name":"AXIS_MIXTURE1_SET","value":-11104,"ours":null}
+{"t":1791310067011,"s":44.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11776, not ours","event":"AXIS_MIXTURE1_SET","data":[-11776,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067011,"s":44.677,"kind":"masker got","text":"AXIS_MIXTURE1_SET -11776","name":"AXIS_MIXTURE1_SET","value":-11776,"ours":null}
+{"t":1791310067044,"s":44.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12320, not ours","event":"AXIS_MIXTURE1_SET","data":[-12320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067044,"s":44.71,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12320","name":"AXIS_MIXTURE1_SET","value":-12320,"ours":null}
+{"t":1791310067077,"s":44.743,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12896, not ours","event":"AXIS_MIXTURE1_SET","data":[-12896,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067078,"s":44.744,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12896","name":"AXIS_MIXTURE1_SET","value":-12896,"ours":null}
+{"t":1791310067111,"s":44.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13632, not ours","event":"AXIS_MIXTURE1_SET","data":[-13632,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067111,"s":44.777,"kind":"masker got","text":"AXIS_MIXTURE1_SET -13632","name":"AXIS_MIXTURE1_SET","value":-13632,"ours":null}
+{"t":1791310067144,"s":44.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14432, not ours","event":"AXIS_MIXTURE1_SET","data":[-14432,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067144,"s":44.81,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14432","name":"AXIS_MIXTURE1_SET","value":-14432,"ours":null}
+{"t":1791310067177,"s":44.843,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15136, not ours","event":"AXIS_MIXTURE1_SET","data":[-15136,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067178,"s":44.844,"kind":"masker got","text":"AXIS_MIXTURE1_SET -15136","name":"AXIS_MIXTURE1_SET","value":-15136,"ours":null}
+{"t":1791310067211,"s":44.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15712, not ours","event":"AXIS_MIXTURE1_SET","data":[-15712,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067211,"s":44.877,"kind":"masker got","text":"AXIS_MIXTURE1_SET -15712","name":"AXIS_MIXTURE1_SET","value":-15712,"ours":null}
+{"t":1791310067244,"s":44.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16384, not ours","event":"AXIS_MIXTURE1_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310067244,"s":44.91,"kind":"masker got","text":"AXIS_MIXTURE1_SET -16384","name":"AXIS_MIXTURE1_SET","value":-16384,"ours":null}
+{"t":1791310068078,"s":45.744,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16064, not ours","event":"AXIS_MIXTURE1_SET","data":[-16064,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068078,"s":45.744,"kind":"masker got","text":"AXIS_MIXTURE1_SET -16064","name":"AXIS_MIXTURE1_SET","value":-16064,"ours":null}
+{"t":1791310068111,"s":45.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15264, not ours","event":"AXIS_MIXTURE1_SET","data":[-15264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068111,"s":45.777,"kind":"masker got","text":"AXIS_MIXTURE1_SET -15264","name":"AXIS_MIXTURE1_SET","value":-15264,"ours":null}
+{"t":1791310068144,"s":45.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14784, not ours","event":"AXIS_MIXTURE1_SET","data":[-14784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068145,"s":45.811,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14784","name":"AXIS_MIXTURE1_SET","value":-14784,"ours":null}
+{"t":1791310068177,"s":45.843,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14048, not ours","event":"AXIS_MIXTURE1_SET","data":[-14048,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068178,"s":45.844,"kind":"masker got","text":"AXIS_MIXTURE1_SET -14048","name":"AXIS_MIXTURE1_SET","value":-14048,"ours":null}
+{"t":1791310068211,"s":45.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13408, not ours","event":"AXIS_MIXTURE1_SET","data":[-13408,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068211,"s":45.877,"kind":"masker got","text":"AXIS_MIXTURE1_SET -13408","name":"AXIS_MIXTURE1_SET","value":-13408,"ours":null}
+{"t":1791310068244,"s":45.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12800, not ours","event":"AXIS_MIXTURE1_SET","data":[-12800,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068244,"s":45.91,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12800","name":"AXIS_MIXTURE1_SET","value":-12800,"ours":null}
+{"t":1791310068278,"s":45.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12096, not ours","event":"AXIS_MIXTURE1_SET","data":[-12096,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068279,"s":45.945,"kind":"masker got","text":"AXIS_MIXTURE1_SET -12096","name":"AXIS_MIXTURE1_SET","value":-12096,"ours":null}
+{"t":1791310068311,"s":45.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11232, not ours","event":"AXIS_MIXTURE1_SET","data":[-11232,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068311,"s":45.977,"kind":"masker got","text":"AXIS_MIXTURE1_SET -11232","name":"AXIS_MIXTURE1_SET","value":-11232,"ours":null}
+{"t":1791310068344,"s":46.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10272, not ours","event":"AXIS_MIXTURE1_SET","data":[-10272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068344,"s":46.01,"kind":"masker got","text":"AXIS_MIXTURE1_SET -10272","name":"AXIS_MIXTURE1_SET","value":-10272,"ours":null}
+{"t":1791310068377,"s":46.043,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9568, not ours","event":"AXIS_MIXTURE1_SET","data":[-9568,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068378,"s":46.044,"kind":"masker got","text":"AXIS_MIXTURE1_SET -9568","name":"AXIS_MIXTURE1_SET","value":-9568,"ours":null}
+{"t":1791310068411,"s":46.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8864, not ours","event":"AXIS_MIXTURE1_SET","data":[-8864,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068411,"s":46.077,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8864","name":"AXIS_MIXTURE1_SET","value":-8864,"ours":null}
+{"t":1791310068444,"s":46.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8128, not ours","event":"AXIS_MIXTURE1_SET","data":[-8128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068444,"s":46.11,"kind":"masker got","text":"AXIS_MIXTURE1_SET -8128","name":"AXIS_MIXTURE1_SET","value":-8128,"ours":null}
+{"t":1791310068477,"s":46.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7392, not ours","event":"AXIS_MIXTURE1_SET","data":[-7392,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068478,"s":46.144,"kind":"masker got","text":"AXIS_MIXTURE1_SET -7392","name":"AXIS_MIXTURE1_SET","value":-7392,"ours":null}
+{"t":1791310068511,"s":46.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6784, not ours","event":"AXIS_MIXTURE1_SET","data":[-6784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068511,"s":46.177,"kind":"masker got","text":"AXIS_MIXTURE1_SET -6784","name":"AXIS_MIXTURE1_SET","value":-6784,"ours":null}
+{"t":1791310068544,"s":46.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5888, not ours","event":"AXIS_MIXTURE1_SET","data":[-5888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068544,"s":46.21,"kind":"masker got","text":"AXIS_MIXTURE1_SET -5888","name":"AXIS_MIXTURE1_SET","value":-5888,"ours":null}
+{"t":1791310068578,"s":46.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5120, not ours","event":"AXIS_MIXTURE1_SET","data":[-5120,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068578,"s":46.244,"kind":"masker got","text":"AXIS_MIXTURE1_SET -5120","name":"AXIS_MIXTURE1_SET","value":-5120,"ours":null}
+{"t":1791310068611,"s":46.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4384, not ours","event":"AXIS_MIXTURE1_SET","data":[-4384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068611,"s":46.277,"kind":"masker got","text":"AXIS_MIXTURE1_SET -4384","name":"AXIS_MIXTURE1_SET","value":-4384,"ours":null}
+{"t":1791310068644,"s":46.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3616, not ours","event":"AXIS_MIXTURE1_SET","data":[-3616,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068644,"s":46.31,"kind":"masker got","text":"AXIS_MIXTURE1_SET -3616","name":"AXIS_MIXTURE1_SET","value":-3616,"ours":null}
+{"t":1791310068678,"s":46.344,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2880, not ours","event":"AXIS_MIXTURE1_SET","data":[-2880,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068678,"s":46.344,"kind":"masker got","text":"AXIS_MIXTURE1_SET -2880","name":"AXIS_MIXTURE1_SET","value":-2880,"ours":null}
+{"t":1791310068711,"s":46.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2240, not ours","event":"AXIS_MIXTURE1_SET","data":[-2240,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068711,"s":46.377,"kind":"masker got","text":"AXIS_MIXTURE1_SET -2240","name":"AXIS_MIXTURE1_SET","value":-2240,"ours":null}
+{"t":1791310068744,"s":46.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1504, not ours","event":"AXIS_MIXTURE1_SET","data":[-1504,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068744,"s":46.41,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1504","name":"AXIS_MIXTURE1_SET","value":-1504,"ours":null}
+{"t":1791310068777,"s":46.443,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1056, not ours","event":"AXIS_MIXTURE1_SET","data":[-1056,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068778,"s":46.444,"kind":"masker got","text":"AXIS_MIXTURE1_SET -1056","name":"AXIS_MIXTURE1_SET","value":-1056,"ours":null}
+{"t":1791310068811,"s":46.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET -544, not ours","event":"AXIS_MIXTURE1_SET","data":[-544,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068811,"s":46.477,"kind":"masker got","text":"AXIS_MIXTURE1_SET -544","name":"AXIS_MIXTURE1_SET","value":-544,"ours":null}
+{"t":1791310068844,"s":46.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET -32, not ours","event":"AXIS_MIXTURE1_SET","data":[-32,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068844,"s":46.51,"kind":"masker got","text":"AXIS_MIXTURE1_SET -32","name":"AXIS_MIXTURE1_SET","value":-32,"ours":null}
+{"t":1791310068877,"s":46.543,"kind":"key","text":"K:AXIS_MIXTURE1_SET 354, not ours","event":"AXIS_MIXTURE1_SET","data":[354,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068878,"s":46.544,"kind":"masker got","text":"AXIS_MIXTURE1_SET 354","name":"AXIS_MIXTURE1_SET","value":354,"ours":null}
+{"t":1791310068912,"s":46.578,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1060, not ours","event":"AXIS_MIXTURE1_SET","data":[1060,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068912,"s":46.578,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1060","name":"AXIS_MIXTURE1_SET","value":1060,"ours":null}
+{"t":1791310068944,"s":46.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1574, not ours","event":"AXIS_MIXTURE1_SET","data":[1574,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068944,"s":46.61,"kind":"masker got","text":"AXIS_MIXTURE1_SET 1574","name":"AXIS_MIXTURE1_SET","value":1574,"ours":null}
+{"t":1791310068978,"s":46.644,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2153, not ours","event":"AXIS_MIXTURE1_SET","data":[2153,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310068978,"s":46.644,"kind":"masker got","text":"AXIS_MIXTURE1_SET 2153","name":"AXIS_MIXTURE1_SET","value":2153,"ours":null}
+{"t":1791310069011,"s":46.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2699, not ours","event":"AXIS_MIXTURE1_SET","data":[2699,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069011,"s":46.677,"kind":"masker got","text":"AXIS_MIXTURE1_SET 2699","name":"AXIS_MIXTURE1_SET","value":2699,"ours":null}
+{"t":1791310069044,"s":46.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3438, not ours","event":"AXIS_MIXTURE1_SET","data":[3438,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069045,"s":46.711,"kind":"masker got","text":"AXIS_MIXTURE1_SET 3438","name":"AXIS_MIXTURE1_SET","value":3438,"ours":null}
+{"t":1791310069078,"s":46.744,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4080, not ours","event":"AXIS_MIXTURE1_SET","data":[4080,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069078,"s":46.744,"kind":"masker got","text":"AXIS_MIXTURE1_SET 4080","name":"AXIS_MIXTURE1_SET","value":4080,"ours":null}
+{"t":1791310069111,"s":46.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4947, not ours","event":"AXIS_MIXTURE1_SET","data":[4947,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069111,"s":46.777,"kind":"masker got","text":"AXIS_MIXTURE1_SET 4947","name":"AXIS_MIXTURE1_SET","value":4947,"ours":null}
+{"t":1791310069145,"s":46.811,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5494, not ours","event":"AXIS_MIXTURE1_SET","data":[5494,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069145,"s":46.811,"kind":"masker got","text":"AXIS_MIXTURE1_SET 5494","name":"AXIS_MIXTURE1_SET","value":5494,"ours":null}
+{"t":1791310069178,"s":46.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6168, not ours","event":"AXIS_MIXTURE1_SET","data":[6168,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069178,"s":46.844,"kind":"masker got","text":"AXIS_MIXTURE1_SET 6168","name":"AXIS_MIXTURE1_SET","value":6168,"ours":null}
+{"t":1791310069211,"s":46.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6843, not ours","event":"AXIS_MIXTURE1_SET","data":[6843,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069211,"s":46.877,"kind":"masker got","text":"AXIS_MIXTURE1_SET 6843","name":"AXIS_MIXTURE1_SET","value":6843,"ours":null}
+{"t":1791310069244,"s":46.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7325, not ours","event":"AXIS_MIXTURE1_SET","data":[7325,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069244,"s":46.91,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7325","name":"AXIS_MIXTURE1_SET","value":7325,"ours":null}
+{"t":1791310069278,"s":46.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7774, not ours","event":"AXIS_MIXTURE1_SET","data":[7774,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069278,"s":46.944,"kind":"masker got","text":"AXIS_MIXTURE1_SET 7774","name":"AXIS_MIXTURE1_SET","value":7774,"ours":null}
+{"t":1791310069311,"s":46.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8610, not ours","event":"AXIS_MIXTURE1_SET","data":[8610,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069311,"s":46.977,"kind":"masker got","text":"AXIS_MIXTURE1_SET 8610","name":"AXIS_MIXTURE1_SET","value":8610,"ours":null}
+{"t":1791310069344,"s":47.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9124, not ours","event":"AXIS_MIXTURE1_SET","data":[9124,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069344,"s":47.01,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9124","name":"AXIS_MIXTURE1_SET","value":9124,"ours":null}
+{"t":1791310069378,"s":47.044,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9605, not ours","event":"AXIS_MIXTURE1_SET","data":[9605,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069378,"s":47.044,"kind":"masker got","text":"AXIS_MIXTURE1_SET 9605","name":"AXIS_MIXTURE1_SET","value":9605,"ours":null}
+{"t":1791310069411,"s":47.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10184, not ours","event":"AXIS_MIXTURE1_SET","data":[10184,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069411,"s":47.077,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10184","name":"AXIS_MIXTURE1_SET","value":10184,"ours":null}
+{"t":1791310069445,"s":47.111,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10730, not ours","event":"AXIS_MIXTURE1_SET","data":[10730,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069445,"s":47.111,"kind":"masker got","text":"AXIS_MIXTURE1_SET 10730","name":"AXIS_MIXTURE1_SET","value":10730,"ours":null}
+{"t":1791310069478,"s":47.144,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11212, not ours","event":"AXIS_MIXTURE1_SET","data":[11212,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069478,"s":47.144,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11212","name":"AXIS_MIXTURE1_SET","value":11212,"ours":null}
+{"t":1791310069511,"s":47.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11951, not ours","event":"AXIS_MIXTURE1_SET","data":[11951,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069511,"s":47.177,"kind":"masker got","text":"AXIS_MIXTURE1_SET 11951","name":"AXIS_MIXTURE1_SET","value":11951,"ours":null}
+{"t":1791310069544,"s":47.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12625, not ours","event":"AXIS_MIXTURE1_SET","data":[12625,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069544,"s":47.21,"kind":"masker got","text":"AXIS_MIXTURE1_SET 12625","name":"AXIS_MIXTURE1_SET","value":12625,"ours":null}
+{"t":1791310069578,"s":47.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13236, not ours","event":"AXIS_MIXTURE1_SET","data":[13236,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069578,"s":47.244,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13236","name":"AXIS_MIXTURE1_SET","value":13236,"ours":null}
+{"t":1791310069611,"s":47.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13685, not ours","event":"AXIS_MIXTURE1_SET","data":[13685,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069611,"s":47.277,"kind":"masker got","text":"AXIS_MIXTURE1_SET 13685","name":"AXIS_MIXTURE1_SET","value":13685,"ours":null}
+{"t":1791310069644,"s":47.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14264, not ours","event":"AXIS_MIXTURE1_SET","data":[14264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069644,"s":47.31,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14264","name":"AXIS_MIXTURE1_SET","value":14264,"ours":null}
+{"t":1791310069678,"s":47.344,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14745, not ours","event":"AXIS_MIXTURE1_SET","data":[14745,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069678,"s":47.344,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14745","name":"AXIS_MIXTURE1_SET","value":14745,"ours":null}
+{"t":1791310069711,"s":47.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15388, not ours","event":"AXIS_MIXTURE1_SET","data":[15388,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069711,"s":47.377,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15388","name":"AXIS_MIXTURE1_SET","value":15388,"ours":null}
+{"t":1791310069744,"s":47.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16095, not ours","event":"AXIS_MIXTURE1_SET","data":[16095,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069745,"s":47.411,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16095","name":"AXIS_MIXTURE1_SET","value":16095,"ours":null}
+{"t":1791310069778,"s":47.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310069778,"s":47.444,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16384","name":"AXIS_MIXTURE1_SET","value":16384,"ours":null}
+{"t":1791310070544,"s":48.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16223, not ours","event":"AXIS_MIXTURE1_SET","data":[16223,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070544,"s":48.21,"kind":"masker got","text":"AXIS_MIXTURE1_SET 16223","name":"AXIS_MIXTURE1_SET","value":16223,"ours":null}
+{"t":1791310070577,"s":48.243,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15806, not ours","event":"AXIS_MIXTURE1_SET","data":[15806,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070578,"s":48.244,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15806","name":"AXIS_MIXTURE1_SET","value":15806,"ours":null}
+{"t":1791310070611,"s":48.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15259, not ours","event":"AXIS_MIXTURE1_SET","data":[15259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070611,"s":48.277,"kind":"masker got","text":"AXIS_MIXTURE1_SET 15259","name":"AXIS_MIXTURE1_SET","value":15259,"ours":null}
+{"t":1791310070644,"s":48.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14649, not ours","event":"AXIS_MIXTURE1_SET","data":[14649,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070644,"s":48.31,"kind":"phase","text":"mixture masked: moved (L:BKSQ_MixtureLeverPosition_1 at 100% of the free range) · heard AXIS_MIXTURE1_SET ×105 -16384..16384 · masker got AXIS_MIXTURE1_SET ×104 -16384..16384 · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×106 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.409044","control":"mixture","phase":"masked","expect":"blocked","verdict":{"word":"moved","name":"L:BKSQ_MixtureLeverPosition_1","ratio":1},"heard":{"AXIS_MIXTURE1_SET":{"n":105,"min":-16384,"max":16384,"last":14649}},"masker":{"AXIS_MIXTURE1_SET":{"n":104,"min":-16384,"max":16384,"last":15259}},"inputs":{"BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1":{"n":106,"min":0,"max":10000,"last":9657.86874294281}}}
+{"t":1791310070645,"s":48.311,"kind":"masker got","text":"AXIS_MIXTURE1_SET 14649","name":"AXIS_MIXTURE1_SET","value":14649,"ours":null}
+{"t":1791310070645,"s":48.311,"kind":"masker","text":"cleared: cleared the mask group: the observer asked","maskerKind":"cleared","why":"the observer asked"}
+{"t":1791310070677,"s":48.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14135, not ours","event":"AXIS_MIXTURE1_SET","data":[14135,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070711,"s":48.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13460, not ours","event":"AXIS_MIXTURE1_SET","data":[13460,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070744,"s":48.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12914, not ours","event":"AXIS_MIXTURE1_SET","data":[12914,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070777,"s":48.443,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12111, not ours","event":"AXIS_MIXTURE1_SET","data":[12111,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070811,"s":48.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11340, not ours","event":"AXIS_MIXTURE1_SET","data":[11340,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070844,"s":48.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10633, not ours","event":"AXIS_MIXTURE1_SET","data":[10633,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070878,"s":48.544,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9959, not ours","event":"AXIS_MIXTURE1_SET","data":[9959,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070911,"s":48.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8995, not ours","event":"AXIS_MIXTURE1_SET","data":[8995,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070944,"s":48.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8128, not ours","event":"AXIS_MIXTURE1_SET","data":[8128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310070963,"s":48.629,"kind":"masker","text":"exited (code 0)","code":0,"signal":null}
+{"t":1791310070978,"s":48.644,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7421, not ours","event":"AXIS_MIXTURE1_SET","data":[7421,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071011,"s":48.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6811, not ours","event":"AXIS_MIXTURE1_SET","data":[6811,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071044,"s":48.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6136, not ours","event":"AXIS_MIXTURE1_SET","data":[6136,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071078,"s":48.744,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5461, not ours","event":"AXIS_MIXTURE1_SET","data":[5461,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071111,"s":48.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4819, not ours","event":"AXIS_MIXTURE1_SET","data":[4819,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071144,"s":48.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4369, not ours","event":"AXIS_MIXTURE1_SET","data":[4369,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071178,"s":48.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3952, not ours","event":"AXIS_MIXTURE1_SET","data":[3952,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071211,"s":48.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3598, not ours","event":"AXIS_MIXTURE1_SET","data":[3598,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071244,"s":48.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3405, not ours","event":"AXIS_MIXTURE1_SET","data":[3405,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071278,"s":48.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2827, not ours","event":"AXIS_MIXTURE1_SET","data":[2827,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071311,"s":48.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2249, not ours","event":"AXIS_MIXTURE1_SET","data":[2249,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071344,"s":49.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1574, not ours","event":"AXIS_MIXTURE1_SET","data":[1574,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071377,"s":49.043,"kind":"key","text":"K:AXIS_MIXTURE1_SET 964, not ours","event":"AXIS_MIXTURE1_SET","data":[964,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071411,"s":49.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 321, not ours","event":"AXIS_MIXTURE1_SET","data":[321,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071444,"s":49.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET -416, not ours","event":"AXIS_MIXTURE1_SET","data":[-416,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071477,"s":49.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1088, not ours","event":"AXIS_MIXTURE1_SET","data":[-1088,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071511,"s":49.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1888, not ours","event":"AXIS_MIXTURE1_SET","data":[-1888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071544,"s":49.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2752, not ours","event":"AXIS_MIXTURE1_SET","data":[-2752,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071578,"s":49.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3520, not ours","event":"AXIS_MIXTURE1_SET","data":[-3520,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071611,"s":49.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4288, not ours","event":"AXIS_MIXTURE1_SET","data":[-4288,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071644,"s":49.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4960, not ours","event":"AXIS_MIXTURE1_SET","data":[-4960,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071678,"s":49.344,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5792, not ours","event":"AXIS_MIXTURE1_SET","data":[-5792,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071711,"s":49.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6624, not ours","event":"AXIS_MIXTURE1_SET","data":[-6624,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071745,"s":49.411,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7648, not ours","event":"AXIS_MIXTURE1_SET","data":[-7648,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071778,"s":49.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8608, not ours","event":"AXIS_MIXTURE1_SET","data":[-8608,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071811,"s":49.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9536, not ours","event":"AXIS_MIXTURE1_SET","data":[-9536,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071844,"s":49.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10144, not ours","event":"AXIS_MIXTURE1_SET","data":[-10144,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071877,"s":49.543,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10784, not ours","event":"AXIS_MIXTURE1_SET","data":[-10784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071911,"s":49.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11552, not ours","event":"AXIS_MIXTURE1_SET","data":[-11552,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071944,"s":49.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12320, not ours","event":"AXIS_MIXTURE1_SET","data":[-12320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310071978,"s":49.644,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12832, not ours","event":"AXIS_MIXTURE1_SET","data":[-12832,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310072011,"s":49.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13216, not ours","event":"AXIS_MIXTURE1_SET","data":[-13216,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310072044,"s":49.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13888, not ours","event":"AXIS_MIXTURE1_SET","data":[-13888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310072078,"s":49.744,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14688, not ours","event":"AXIS_MIXTURE1_SET","data":[-14688,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310072111,"s":49.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15616, not ours","event":"AXIS_MIXTURE1_SET","data":[-15616,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310072144,"s":49.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16384, not ours","event":"AXIS_MIXTURE1_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073144,"s":50.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET -16128, not ours","event":"AXIS_MIXTURE1_SET","data":[-16128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073178,"s":50.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15776, not ours","event":"AXIS_MIXTURE1_SET","data":[-15776,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073211,"s":50.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15424, not ours","event":"AXIS_MIXTURE1_SET","data":[-15424,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073244,"s":50.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET -15136, not ours","event":"AXIS_MIXTURE1_SET","data":[-15136,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073278,"s":50.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14848, not ours","event":"AXIS_MIXTURE1_SET","data":[-14848,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073311,"s":50.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET -14464, not ours","event":"AXIS_MIXTURE1_SET","data":[-14464,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073344,"s":51.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13984, not ours","event":"AXIS_MIXTURE1_SET","data":[-13984,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073377,"s":51.043,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13568, not ours","event":"AXIS_MIXTURE1_SET","data":[-13568,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073411,"s":51.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET -13184, not ours","event":"AXIS_MIXTURE1_SET","data":[-13184,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073444,"s":51.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12736, not ours","event":"AXIS_MIXTURE1_SET","data":[-12736,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073477,"s":51.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET -12224, not ours","event":"AXIS_MIXTURE1_SET","data":[-12224,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073511,"s":51.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET -11712, not ours","event":"AXIS_MIXTURE1_SET","data":[-11712,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073545,"s":51.211,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10944, not ours","event":"AXIS_MIXTURE1_SET","data":[-10944,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073578,"s":51.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET -10432, not ours","event":"AXIS_MIXTURE1_SET","data":[-10432,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073611,"s":51.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9984, not ours","event":"AXIS_MIXTURE1_SET","data":[-9984,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073645,"s":51.311,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9568, not ours","event":"AXIS_MIXTURE1_SET","data":[-9568,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073677,"s":51.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET -9024, not ours","event":"AXIS_MIXTURE1_SET","data":[-9024,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073711,"s":51.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET -8576, not ours","event":"AXIS_MIXTURE1_SET","data":[-8576,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073744,"s":51.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7872, not ours","event":"AXIS_MIXTURE1_SET","data":[-7872,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073778,"s":51.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET -7296, not ours","event":"AXIS_MIXTURE1_SET","data":[-7296,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073811,"s":51.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6784, not ours","event":"AXIS_MIXTURE1_SET","data":[-6784,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073844,"s":51.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET -6080, not ours","event":"AXIS_MIXTURE1_SET","data":[-6080,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073878,"s":51.544,"kind":"key","text":"K:AXIS_MIXTURE1_SET -5312, not ours","event":"AXIS_MIXTURE1_SET","data":[-5312,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073911,"s":51.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET -4640, not ours","event":"AXIS_MIXTURE1_SET","data":[-4640,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073944,"s":51.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET -3648, not ours","event":"AXIS_MIXTURE1_SET","data":[-3648,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310073977,"s":51.643,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2848, not ours","event":"AXIS_MIXTURE1_SET","data":[-2848,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074011,"s":51.677,"kind":"key","text":"K:AXIS_MIXTURE1_SET -2144, not ours","event":"AXIS_MIXTURE1_SET","data":[-2144,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074044,"s":51.71,"kind":"key","text":"K:AXIS_MIXTURE1_SET -1376, not ours","event":"AXIS_MIXTURE1_SET","data":[-1376,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074077,"s":51.743,"kind":"key","text":"K:AXIS_MIXTURE1_SET -800, not ours","event":"AXIS_MIXTURE1_SET","data":[-800,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074111,"s":51.777,"kind":"key","text":"K:AXIS_MIXTURE1_SET -32, not ours","event":"AXIS_MIXTURE1_SET","data":[-32,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074144,"s":51.81,"kind":"key","text":"K:AXIS_MIXTURE1_SET 450, not ours","event":"AXIS_MIXTURE1_SET","data":[450,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074178,"s":51.844,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1092, not ours","event":"AXIS_MIXTURE1_SET","data":[1092,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074211,"s":51.877,"kind":"key","text":"K:AXIS_MIXTURE1_SET 1767, not ours","event":"AXIS_MIXTURE1_SET","data":[1767,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074244,"s":51.91,"kind":"key","text":"K:AXIS_MIXTURE1_SET 2410, not ours","event":"AXIS_MIXTURE1_SET","data":[2410,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074278,"s":51.944,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3020, not ours","event":"AXIS_MIXTURE1_SET","data":[3020,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074311,"s":51.977,"kind":"key","text":"K:AXIS_MIXTURE1_SET 3823, not ours","event":"AXIS_MIXTURE1_SET","data":[3823,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074344,"s":52.01,"kind":"key","text":"K:AXIS_MIXTURE1_SET 4787, not ours","event":"AXIS_MIXTURE1_SET","data":[4787,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074378,"s":52.044,"kind":"key","text":"K:AXIS_MIXTURE1_SET 5558, not ours","event":"AXIS_MIXTURE1_SET","data":[5558,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074411,"s":52.077,"kind":"key","text":"K:AXIS_MIXTURE1_SET 6393, not ours","event":"AXIS_MIXTURE1_SET","data":[6393,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074444,"s":52.11,"kind":"key","text":"K:AXIS_MIXTURE1_SET 7325, not ours","event":"AXIS_MIXTURE1_SET","data":[7325,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074477,"s":52.143,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8128, not ours","event":"AXIS_MIXTURE1_SET","data":[8128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074511,"s":52.177,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9156, not ours","event":"AXIS_MIXTURE1_SET","data":[9156,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074544,"s":52.21,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10344, not ours","event":"AXIS_MIXTURE1_SET","data":[10344,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074577,"s":52.243,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11340, not ours","event":"AXIS_MIXTURE1_SET","data":[11340,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074611,"s":52.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12400, not ours","event":"AXIS_MIXTURE1_SET","data":[12400,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074644,"s":52.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13236, not ours","event":"AXIS_MIXTURE1_SET","data":[13236,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074677,"s":52.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13782, not ours","event":"AXIS_MIXTURE1_SET","data":[13782,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074711,"s":52.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14328, not ours","event":"AXIS_MIXTURE1_SET","data":[14328,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074744,"s":52.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14938, not ours","event":"AXIS_MIXTURE1_SET","data":[14938,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074778,"s":52.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15613, not ours","event":"AXIS_MIXTURE1_SET","data":[15613,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074811,"s":52.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16127, not ours","event":"AXIS_MIXTURE1_SET","data":[16127,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310074844,"s":52.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16384, not ours","event":"AXIS_MIXTURE1_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075578,"s":53.244,"kind":"key","text":"K:AXIS_MIXTURE1_SET 16320, not ours","event":"AXIS_MIXTURE1_SET","data":[16320,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075611,"s":53.277,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15998, not ours","event":"AXIS_MIXTURE1_SET","data":[15998,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075644,"s":53.31,"kind":"key","text":"K:AXIS_MIXTURE1_SET 15259, not ours","event":"AXIS_MIXTURE1_SET","data":[15259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075677,"s":53.343,"kind":"key","text":"K:AXIS_MIXTURE1_SET 14585, not ours","event":"AXIS_MIXTURE1_SET","data":[14585,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075711,"s":53.377,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13910, not ours","event":"AXIS_MIXTURE1_SET","data":[13910,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075744,"s":53.41,"kind":"key","text":"K:AXIS_MIXTURE1_SET 13139, not ours","event":"AXIS_MIXTURE1_SET","data":[13139,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075778,"s":53.444,"kind":"key","text":"K:AXIS_MIXTURE1_SET 12368, not ours","event":"AXIS_MIXTURE1_SET","data":[12368,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075811,"s":53.477,"kind":"key","text":"K:AXIS_MIXTURE1_SET 11372, not ours","event":"AXIS_MIXTURE1_SET","data":[11372,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075844,"s":53.51,"kind":"key","text":"K:AXIS_MIXTURE1_SET 10569, not ours","event":"AXIS_MIXTURE1_SET","data":[10569,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075877,"s":53.543,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9862, not ours","event":"AXIS_MIXTURE1_SET","data":[9862,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075911,"s":53.577,"kind":"key","text":"K:AXIS_MIXTURE1_SET 9124, not ours","event":"AXIS_MIXTURE1_SET","data":[9124,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075944,"s":53.61,"kind":"key","text":"K:AXIS_MIXTURE1_SET 8160, not ours","event":"AXIS_MIXTURE1_SET","data":[8160,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791310075965,"s":53.631,"kind":"phase","text":"mixture cleared: moved (L:BKSQ_MixtureLeverPosition_1 at 100% of the free range) · heard AXIS_MIXTURE1_SET ×100 -16384..16384 · masker got none · input events BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1 ×102 0..10000 · values L:BKSQ_MixtureLeverPosition_1 0..1, GENERAL ENG MIXTURE LEVER POSITION:1 0..89.380598","control":"mixture","phase":"cleared","expect":"moved","verdict":{"word":"moved","name":"L:BKSQ_MixtureLeverPosition_1","ratio":1},"heard":{"AXIS_MIXTURE1_SET":{"n":100,"min":-16384,"max":16384,"last":8160}},"masker":{},"inputs":{"BKSQ_TURBOCHARGEDMIXTURECONTROLLER_1":{"n":102,"min":0,"max":10000,"last":7490.234375}}}

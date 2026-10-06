@@ -114,7 +114,7 @@ The PF offers control by voice, and the PM takes it by answering within 5s.
 
 **Open questions:**
 
-- Whether a local recognizer is accurate enough with non-native English accents, the first thing to test, which a step 6 audio probe in [the plan](plan.md) answers.
+- Whether a local recognizer is accurate enough with non-native English accents, the first thing to test once it's built, when we calibrate it with our own voices ([the plan](plan.md)'s step 6).
 - Whether a phrase counts inside a longer sentence.
   A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
 - How Crosscheck tells speech from noise before it listens for a phrase.

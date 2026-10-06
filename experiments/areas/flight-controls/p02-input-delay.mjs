@@ -160,14 +160,24 @@ const rms = (xs) => (xs.length ? Math.sqrt(xs.reduce((s, x) => s + x * x, 0) / x
 const maxAbs = (xs) => (xs.length ? Math.max(...xs.map(Math.abs)) : null)
 
 // Direction changes of a series whose swing between turning points is at
-// least `min`, per minute.
+// least `min`, per minute. Until the first swing it keeps the high and the low
+// apart: the first version tracked one extreme both ways, never found a first
+// swing, and counted 0 in every step of the run of 2026-10-06 20-42-49.
 function reversals(series, min, ms) {
-  let n = 0, dir = 0, ext = series[0]
+  if (!series.length) return null
+  let n = 0, dir = 0, hi = series[0], lo = series[0], ext = series[0]
   for (const v of series) {
-    if (dir >= 0 && v > ext) ext = v
-    else if (dir <= 0 && v < ext) ext = v
-    if (dir >= 0 && ext - v >= min) { if (dir > 0) n++; dir = -1; ext = v }
-    else if (dir <= 0 && v - ext >= min) { if (dir < 0) n++; dir = 1; ext = v }
+    if (dir === 0) {
+      hi = Math.max(hi, v)
+      lo = Math.min(lo, v)
+      if (hi - v >= min) { dir = -1; ext = v } else if (v - lo >= min) { dir = 1; ext = v }
+    } else if (dir > 0) {
+      if (v > ext) ext = v
+      else if (ext - v >= min) { n++; dir = -1; ext = v }
+    } else {
+      if (v < ext) ext = v
+      else if (v - ext >= min) { n++; dir = 1; ext = v }
+    }
   }
   return ms > 0 ? n / (ms / 60_000) : null
 }
@@ -215,7 +225,11 @@ async function observer() {
         yokeX: got.get("YOKE X POSITION"), yokeY: got.get("YOKE Y POSITION"),
       }
       latest = x
-      if (current) current.samples.push({ ...x, phase: current.phase })
+      if (current) {
+        current.samples.push({ ...x, phase: current.phase })
+        // Every sample goes into the .ndjson, so a step can be analyzed again.
+        rec.data("sample", "", { delay: current.delay ?? null, phase: current.phase, ...x })
+      }
     },
   })
 

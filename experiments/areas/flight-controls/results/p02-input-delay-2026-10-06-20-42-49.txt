@@ -1,0 +1,17 @@
+p02 · How late a pilot's own pitch and roll input can reach the aircraft
+2026-10-06T20:42:49.491Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0
+Aircraft: TITLE "Black Square Baron 58P Professional N515MR"
+Mask at 10000000, values sent back at 10001000; steps flown in the order 700, 1000, 500, 0, 300, 150
+- The yoke fired AXIS_AILERONS_SET ×92, AXIS_ELEVATOR_SET ×94.
+- Check at no delay: the masker got 289 events and sent 289 back; the yoke moved 19.4% in pitch and 4.8% in roll.
+
+Columns: altitude off the step's start, largest / RMS, ft; heading past the target in the turn's direction, deg; heading off the target while holding after the turn, largest / RMS, deg; vertical speed reversals a minute, at least 300 fpm apart; yoke reversals a minute, at least 5% apart; largest bank, deg.
+delay   verdict      altitude ft      overshoot  after deg      VS rev/m  yoke rev/m bank
+0ms     flyable      16.4 / 10.5      0          12.6 / 9.2     0         0         23.8
+150ms   flyable      55.2 / 36.1      0          7 / 6.2        0         0         28.1
+300ms   not flyable  68.9 / 36.1      0          6.1 / 4.8      0         0         23.9
+500ms   not flyable  144.6 / 89.5     0          12.3 / 11.2    0         0         28.2
+700ms   not flyable  62.1 / 35.3      0          14.4 / 9.2     0         0         36.9
+1000ms  not flyable  157.4 / 99.3     0          8.6 / 6        0         0         22.8
+
+Note, added 2026-10-06 after the run: the VS rev/m and yoke rev/m columns are wrong. The counting function tracked one extreme both ways, never found a first swing, and returned 0 for every step; the run saved no samples, so they can't be recomputed. The overshoot column's 0s can't be checked for the same reason.

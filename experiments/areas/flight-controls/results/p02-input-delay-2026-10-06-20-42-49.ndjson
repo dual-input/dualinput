@@ -1,0 +1,220 @@
+{"t":1791319369520,"s":0.029,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791319369904,"s":0.413,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791319369905,"s":0.414,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791319369905,"s":0.414,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791319370273,"s":0.782,"kind":"aircraft","text":"TITLE \"Black Square Baron 58P Professional N515MR\""}
+{"t":1791319371304,"s":1.813,"kind":"check","text":"on ground 0, autopilot 0, 167.847824 kt, 3648.842405 ft"}
+{"t":1791319446972,"s":77.481,"kind":"key","text":"K:AXIS_AILERONS_SET -212, not ours","event":"AXIS_AILERONS_SET","data":[-212,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319446972,"s":77.481,"kind":"key","text":"K:AXIS_ELEVATOR_SET -58, not ours","event":"AXIS_ELEVATOR_SET","data":[-58,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447005,"s":77.514,"kind":"key","text":"K:AXIS_AILERONS_SET -218, not ours","event":"AXIS_AILERONS_SET","data":[-218,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447038,"s":77.547,"kind":"key","text":"K:AXIS_AILERONS_SET -219, not ours","event":"AXIS_AILERONS_SET","data":[-219,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447038,"s":77.547,"kind":"key","text":"K:AXIS_ELEVATOR_SET -64, not ours","event":"AXIS_ELEVATOR_SET","data":[-64,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447072,"s":77.581,"kind":"key","text":"K:AXIS_ELEVATOR_SET -70, not ours","event":"AXIS_ELEVATOR_SET","data":[-70,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447105,"s":77.614,"kind":"key","text":"K:AXIS_AILERONS_SET -222, not ours","event":"AXIS_AILERONS_SET","data":[-222,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447138,"s":77.647,"kind":"key","text":"K:AXIS_AILERONS_SET -240, not ours","event":"AXIS_AILERONS_SET","data":[-240,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447138,"s":77.647,"kind":"key","text":"K:AXIS_ELEVATOR_SET -72, not ours","event":"AXIS_ELEVATOR_SET","data":[-72,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447171,"s":77.68,"kind":"key","text":"K:AXIS_AILERONS_SET -264, not ours","event":"AXIS_AILERONS_SET","data":[-264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447171,"s":77.68,"kind":"key","text":"K:AXIS_ELEVATOR_SET -44, not ours","event":"AXIS_ELEVATOR_SET","data":[-44,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447205,"s":77.714,"kind":"key","text":"K:AXIS_ELEVATOR_SET -20, not ours","event":"AXIS_ELEVATOR_SET","data":[-20,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447238,"s":77.747,"kind":"key","text":"K:AXIS_AILERONS_SET -257, not ours","event":"AXIS_AILERONS_SET","data":[-257,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447238,"s":77.747,"kind":"key","text":"K:AXIS_ELEVATOR_SET 28, not ours","event":"AXIS_ELEVATOR_SET","data":[28,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447271,"s":77.78,"kind":"key","text":"K:AXIS_AILERONS_SET -265, not ours","event":"AXIS_AILERONS_SET","data":[-265,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447271,"s":77.78,"kind":"key","text":"K:AXIS_ELEVATOR_SET 36, not ours","event":"AXIS_ELEVATOR_SET","data":[36,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447305,"s":77.814,"kind":"key","text":"K:AXIS_AILERONS_SET -272, not ours","event":"AXIS_AILERONS_SET","data":[-272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447305,"s":77.814,"kind":"key","text":"K:AXIS_ELEVATOR_SET 40, not ours","event":"AXIS_ELEVATOR_SET","data":[40,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447338,"s":77.847,"kind":"key","text":"K:AXIS_AILERONS_SET -291, not ours","event":"AXIS_AILERONS_SET","data":[-291,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447338,"s":77.847,"kind":"key","text":"K:AXIS_ELEVATOR_SET 42, not ours","event":"AXIS_ELEVATOR_SET","data":[42,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447371,"s":77.88,"kind":"key","text":"K:AXIS_AILERONS_SET -315, not ours","event":"AXIS_AILERONS_SET","data":[-315,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447371,"s":77.88,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16, not ours","event":"AXIS_ELEVATOR_SET","data":[16,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447405,"s":77.914,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6, not ours","event":"AXIS_ELEVATOR_SET","data":[6,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447472,"s":77.981,"kind":"key","text":"K:AXIS_AILERONS_SET -304, not ours","event":"AXIS_AILERONS_SET","data":[-304,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447505,"s":78.014,"kind":"key","text":"K:AXIS_AILERONS_SET -278, not ours","event":"AXIS_AILERONS_SET","data":[-278,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447538,"s":78.047,"kind":"key","text":"K:AXIS_AILERONS_SET -267, not ours","event":"AXIS_AILERONS_SET","data":[-267,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447571,"s":78.08,"kind":"key","text":"K:AXIS_AILERONS_SET -248, not ours","event":"AXIS_AILERONS_SET","data":[-248,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447605,"s":78.114,"kind":"key","text":"K:AXIS_AILERONS_SET -235, not ours","event":"AXIS_AILERONS_SET","data":[-235,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447605,"s":78.114,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447638,"s":78.147,"kind":"key","text":"K:AXIS_AILERONS_SET -220, not ours","event":"AXIS_AILERONS_SET","data":[-220,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447638,"s":78.147,"kind":"key","text":"K:AXIS_ELEVATOR_SET -26, not ours","event":"AXIS_ELEVATOR_SET","data":[-26,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447671,"s":78.18,"kind":"key","text":"K:AXIS_AILERONS_SET -190, not ours","event":"AXIS_AILERONS_SET","data":[-190,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447671,"s":78.18,"kind":"key","text":"K:AXIS_ELEVATOR_SET -34, not ours","event":"AXIS_ELEVATOR_SET","data":[-34,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447706,"s":78.215,"kind":"key","text":"K:AXIS_AILERONS_SET -147, not ours","event":"AXIS_AILERONS_SET","data":[-147,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447706,"s":78.215,"kind":"key","text":"K:AXIS_ELEVATOR_SET -32, not ours","event":"AXIS_ELEVATOR_SET","data":[-32,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447738,"s":78.247,"kind":"key","text":"K:AXIS_AILERONS_SET -115, not ours","event":"AXIS_AILERONS_SET","data":[-115,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447738,"s":78.247,"kind":"key","text":"K:AXIS_ELEVATOR_SET -36, not ours","event":"AXIS_ELEVATOR_SET","data":[-36,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447771,"s":78.28,"kind":"key","text":"K:AXIS_AILERONS_SET -96, not ours","event":"AXIS_AILERONS_SET","data":[-96,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447771,"s":78.28,"kind":"key","text":"K:AXIS_ELEVATOR_SET -46, not ours","event":"AXIS_ELEVATOR_SET","data":[-46,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447805,"s":78.314,"kind":"key","text":"K:AXIS_AILERONS_SET -97, not ours","event":"AXIS_AILERONS_SET","data":[-97,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447805,"s":78.314,"kind":"key","text":"K:AXIS_ELEVATOR_SET -48, not ours","event":"AXIS_ELEVATOR_SET","data":[-48,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447838,"s":78.347,"kind":"key","text":"K:AXIS_AILERONS_SET -98, not ours","event":"AXIS_AILERONS_SET","data":[-98,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447838,"s":78.347,"kind":"key","text":"K:AXIS_ELEVATOR_SET -34, not ours","event":"AXIS_ELEVATOR_SET","data":[-34,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447871,"s":78.38,"kind":"key","text":"K:AXIS_AILERONS_SET -92, not ours","event":"AXIS_AILERONS_SET","data":[-92,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447871,"s":78.38,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8, not ours","event":"AXIS_ELEVATOR_SET","data":[-8,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447905,"s":78.414,"kind":"key","text":"K:AXIS_AILERONS_SET -43, not ours","event":"AXIS_AILERONS_SET","data":[-43,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447905,"s":78.414,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2, not ours","event":"AXIS_ELEVATOR_SET","data":[-2,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447938,"s":78.447,"kind":"key","text":"K:AXIS_AILERONS_SET 0, not ours","event":"AXIS_AILERONS_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319447938,"s":78.447,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448238,"s":78.747,"kind":"key","text":"K:AXIS_AILERONS_SET -49, not ours","event":"AXIS_AILERONS_SET","data":[-49,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448238,"s":78.747,"kind":"key","text":"K:AXIS_ELEVATOR_SET -64, not ours","event":"AXIS_ELEVATOR_SET","data":[-64,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448271,"s":78.78,"kind":"key","text":"K:AXIS_AILERONS_SET -54, not ours","event":"AXIS_AILERONS_SET","data":[-54,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448271,"s":78.78,"kind":"key","text":"K:AXIS_ELEVATOR_SET -68, not ours","event":"AXIS_ELEVATOR_SET","data":[-68,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448305,"s":78.814,"kind":"key","text":"K:AXIS_AILERONS_SET -25, not ours","event":"AXIS_AILERONS_SET","data":[-25,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448305,"s":78.814,"kind":"key","text":"K:AXIS_ELEVATOR_SET -32, not ours","event":"AXIS_ELEVATOR_SET","data":[-32,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448338,"s":78.847,"kind":"key","text":"K:AXIS_AILERONS_SET -9, not ours","event":"AXIS_AILERONS_SET","data":[-9,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448338,"s":78.847,"kind":"key","text":"K:AXIS_ELEVATOR_SET -10, not ours","event":"AXIS_ELEVATOR_SET","data":[-10,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448371,"s":78.88,"kind":"key","text":"K:AXIS_AILERONS_SET -6, not ours","event":"AXIS_AILERONS_SET","data":[-6,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448371,"s":78.88,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8, not ours","event":"AXIS_ELEVATOR_SET","data":[-8,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448405,"s":78.914,"kind":"key","text":"K:AXIS_AILERONS_SET -3, not ours","event":"AXIS_AILERONS_SET","data":[-3,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448405,"s":78.914,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2, not ours","event":"AXIS_ELEVATOR_SET","data":[-2,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448438,"s":78.947,"kind":"key","text":"K:AXIS_AILERONS_SET 0, not ours","event":"AXIS_AILERONS_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448438,"s":78.947,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448871,"s":79.38,"kind":"key","text":"K:AXIS_AILERONS_SET -1, not ours","event":"AXIS_AILERONS_SET","data":[-1,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448871,"s":79.38,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448938,"s":79.447,"kind":"key","text":"K:AXIS_AILERONS_SET -14, not ours","event":"AXIS_AILERONS_SET","data":[-14,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448938,"s":79.447,"kind":"key","text":"K:AXIS_ELEVATOR_SET -12, not ours","event":"AXIS_ELEVATOR_SET","data":[-12,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448971,"s":79.48,"kind":"key","text":"K:AXIS_AILERONS_SET -32, not ours","event":"AXIS_AILERONS_SET","data":[-32,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319448971,"s":79.48,"kind":"key","text":"K:AXIS_ELEVATOR_SET -30, not ours","event":"AXIS_ELEVATOR_SET","data":[-30,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449005,"s":79.514,"kind":"key","text":"K:AXIS_AILERONS_SET -39, not ours","event":"AXIS_AILERONS_SET","data":[-39,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449005,"s":79.514,"kind":"key","text":"K:AXIS_ELEVATOR_SET -36, not ours","event":"AXIS_ELEVATOR_SET","data":[-36,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449038,"s":79.547,"kind":"key","text":"K:AXIS_AILERONS_SET -41, not ours","event":"AXIS_AILERONS_SET","data":[-41,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449038,"s":79.547,"kind":"key","text":"K:AXIS_ELEVATOR_SET -34, not ours","event":"AXIS_ELEVATOR_SET","data":[-34,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449071,"s":79.58,"kind":"key","text":"K:AXIS_AILERONS_SET -45, not ours","event":"AXIS_AILERONS_SET","data":[-45,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449072,"s":79.581,"kind":"key","text":"K:AXIS_ELEVATOR_SET -38, not ours","event":"AXIS_ELEVATOR_SET","data":[-38,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449105,"s":79.614,"kind":"key","text":"K:AXIS_AILERONS_SET -66, not ours","event":"AXIS_AILERONS_SET","data":[-66,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449105,"s":79.614,"kind":"key","text":"K:AXIS_ELEVATOR_SET -50, not ours","event":"AXIS_ELEVATOR_SET","data":[-50,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449138,"s":79.647,"kind":"key","text":"K:AXIS_AILERONS_SET -80, not ours","event":"AXIS_AILERONS_SET","data":[-80,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449138,"s":79.647,"kind":"key","text":"K:AXIS_ELEVATOR_SET -62, not ours","event":"AXIS_ELEVATOR_SET","data":[-62,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449171,"s":79.68,"kind":"key","text":"K:AXIS_AILERONS_SET -97, not ours","event":"AXIS_AILERONS_SET","data":[-97,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449171,"s":79.68,"kind":"key","text":"K:AXIS_ELEVATOR_SET -78, not ours","event":"AXIS_ELEVATOR_SET","data":[-78,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449205,"s":79.714,"kind":"key","text":"K:AXIS_AILERONS_SET -105, not ours","event":"AXIS_AILERONS_SET","data":[-105,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449205,"s":79.714,"kind":"key","text":"K:AXIS_ELEVATOR_SET -96, not ours","event":"AXIS_ELEVATOR_SET","data":[-96,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449238,"s":79.747,"kind":"key","text":"K:AXIS_AILERONS_SET -110, not ours","event":"AXIS_AILERONS_SET","data":[-110,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449238,"s":79.747,"kind":"key","text":"K:AXIS_ELEVATOR_SET -112, not ours","event":"AXIS_ELEVATOR_SET","data":[-112,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449271,"s":79.78,"kind":"key","text":"K:AXIS_AILERONS_SET -115, not ours","event":"AXIS_AILERONS_SET","data":[-115,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449271,"s":79.78,"kind":"key","text":"K:AXIS_ELEVATOR_SET -122, not ours","event":"AXIS_ELEVATOR_SET","data":[-122,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449304,"s":79.813,"kind":"key","text":"K:AXIS_AILERONS_SET -117, not ours","event":"AXIS_AILERONS_SET","data":[-117,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449305,"s":79.814,"kind":"key","text":"K:AXIS_ELEVATOR_SET -134, not ours","event":"AXIS_ELEVATOR_SET","data":[-134,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449371,"s":79.88,"kind":"key","text":"K:AXIS_AILERONS_SET -115, not ours","event":"AXIS_AILERONS_SET","data":[-115,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449371,"s":79.88,"kind":"key","text":"K:AXIS_ELEVATOR_SET -132, not ours","event":"AXIS_ELEVATOR_SET","data":[-132,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449638,"s":80.147,"kind":"key","text":"K:AXIS_AILERONS_SET -119, not ours","event":"AXIS_AILERONS_SET","data":[-119,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449638,"s":80.147,"kind":"key","text":"K:AXIS_ELEVATOR_SET -134, not ours","event":"AXIS_ELEVATOR_SET","data":[-134,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449671,"s":80.18,"kind":"key","text":"K:AXIS_AILERONS_SET -125, not ours","event":"AXIS_AILERONS_SET","data":[-125,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449671,"s":80.18,"kind":"key","text":"K:AXIS_ELEVATOR_SET -138, not ours","event":"AXIS_ELEVATOR_SET","data":[-138,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449705,"s":80.214,"kind":"key","text":"K:AXIS_AILERONS_SET -132, not ours","event":"AXIS_AILERONS_SET","data":[-132,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449705,"s":80.214,"kind":"key","text":"K:AXIS_ELEVATOR_SET -142, not ours","event":"AXIS_ELEVATOR_SET","data":[-142,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449738,"s":80.247,"kind":"key","text":"K:AXIS_AILERONS_SET -139, not ours","event":"AXIS_AILERONS_SET","data":[-139,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449738,"s":80.247,"kind":"key","text":"K:AXIS_ELEVATOR_SET -146, not ours","event":"AXIS_ELEVATOR_SET","data":[-146,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449771,"s":80.28,"kind":"key","text":"K:AXIS_AILERONS_SET -144, not ours","event":"AXIS_AILERONS_SET","data":[-144,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449771,"s":80.28,"kind":"key","text":"K:AXIS_ELEVATOR_SET -148, not ours","event":"AXIS_ELEVATOR_SET","data":[-148,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449805,"s":80.314,"kind":"key","text":"K:AXIS_AILERONS_SET -145, not ours","event":"AXIS_AILERONS_SET","data":[-145,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449871,"s":80.38,"kind":"key","text":"K:AXIS_AILERONS_SET -151, not ours","event":"AXIS_AILERONS_SET","data":[-151,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449871,"s":80.38,"kind":"key","text":"K:AXIS_ELEVATOR_SET -152, not ours","event":"AXIS_ELEVATOR_SET","data":[-152,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449905,"s":80.414,"kind":"key","text":"K:AXIS_AILERONS_SET -154, not ours","event":"AXIS_AILERONS_SET","data":[-154,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449905,"s":80.414,"kind":"key","text":"K:AXIS_ELEVATOR_SET -154, not ours","event":"AXIS_ELEVATOR_SET","data":[-154,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449971,"s":80.48,"kind":"key","text":"K:AXIS_AILERONS_SET -155, not ours","event":"AXIS_AILERONS_SET","data":[-155,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319449971,"s":80.48,"kind":"key","text":"K:AXIS_ELEVATOR_SET -156, not ours","event":"AXIS_ELEVATOR_SET","data":[-156,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450005,"s":80.514,"kind":"key","text":"K:AXIS_ELEVATOR_SET -158, not ours","event":"AXIS_ELEVATOR_SET","data":[-158,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450071,"s":80.58,"kind":"key","text":"K:AXIS_AILERONS_SET -162, not ours","event":"AXIS_AILERONS_SET","data":[-162,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450071,"s":80.58,"kind":"key","text":"K:AXIS_ELEVATOR_SET -162, not ours","event":"AXIS_ELEVATOR_SET","data":[-162,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450105,"s":80.614,"kind":"key","text":"K:AXIS_AILERONS_SET -169, not ours","event":"AXIS_AILERONS_SET","data":[-169,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450105,"s":80.614,"kind":"key","text":"K:AXIS_ELEVATOR_SET -166, not ours","event":"AXIS_ELEVATOR_SET","data":[-166,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450172,"s":80.681,"kind":"key","text":"K:AXIS_AILERONS_SET -171, not ours","event":"AXIS_AILERONS_SET","data":[-171,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450438,"s":80.947,"kind":"key","text":"K:AXIS_AILERONS_SET -174, not ours","event":"AXIS_AILERONS_SET","data":[-174,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450438,"s":80.947,"kind":"key","text":"K:AXIS_ELEVATOR_SET -168, not ours","event":"AXIS_ELEVATOR_SET","data":[-168,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450471,"s":80.98,"kind":"key","text":"K:AXIS_AILERONS_SET -175, not ours","event":"AXIS_AILERONS_SET","data":[-175,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450505,"s":81.014,"kind":"key","text":"K:AXIS_AILERONS_SET -173, not ours","event":"AXIS_AILERONS_SET","data":[-173,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450505,"s":81.014,"kind":"key","text":"K:AXIS_ELEVATOR_SET -160, not ours","event":"AXIS_ELEVATOR_SET","data":[-160,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450538,"s":81.047,"kind":"key","text":"K:AXIS_AILERONS_SET -169, not ours","event":"AXIS_AILERONS_SET","data":[-169,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450538,"s":81.047,"kind":"key","text":"K:AXIS_ELEVATOR_SET -104, not ours","event":"AXIS_ELEVATOR_SET","data":[-104,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450571,"s":81.08,"kind":"key","text":"K:AXIS_AILERONS_SET -149, not ours","event":"AXIS_AILERONS_SET","data":[-149,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450571,"s":81.08,"kind":"key","text":"K:AXIS_ELEVATOR_SET 68, not ours","event":"AXIS_ELEVATOR_SET","data":[68,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450605,"s":81.114,"kind":"key","text":"K:AXIS_ELEVATOR_SET 150, not ours","event":"AXIS_ELEVATOR_SET","data":[150,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450638,"s":81.147,"kind":"key","text":"K:AXIS_AILERONS_SET -170, not ours","event":"AXIS_AILERONS_SET","data":[-170,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450638,"s":81.147,"kind":"key","text":"K:AXIS_ELEVATOR_SET 356, not ours","event":"AXIS_ELEVATOR_SET","data":[356,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450671,"s":81.18,"kind":"key","text":"K:AXIS_AILERONS_SET -116, not ours","event":"AXIS_AILERONS_SET","data":[-116,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450671,"s":81.18,"kind":"key","text":"K:AXIS_ELEVATOR_SET 496, not ours","event":"AXIS_ELEVATOR_SET","data":[496,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450705,"s":81.214,"kind":"key","text":"K:AXIS_AILERONS_SET -88, not ours","event":"AXIS_AILERONS_SET","data":[-88,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450705,"s":81.214,"kind":"key","text":"K:AXIS_ELEVATOR_SET 632, not ours","event":"AXIS_ELEVATOR_SET","data":[632,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450738,"s":81.247,"kind":"key","text":"K:AXIS_AILERONS_SET -96, not ours","event":"AXIS_AILERONS_SET","data":[-96,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450738,"s":81.247,"kind":"key","text":"K:AXIS_ELEVATOR_SET 776, not ours","event":"AXIS_ELEVATOR_SET","data":[776,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450771,"s":81.28,"kind":"key","text":"K:AXIS_AILERONS_SET -113, not ours","event":"AXIS_AILERONS_SET","data":[-113,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450771,"s":81.28,"kind":"key","text":"K:AXIS_ELEVATOR_SET 912, not ours","event":"AXIS_ELEVATOR_SET","data":[912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450805,"s":81.314,"kind":"key","text":"K:AXIS_AILERONS_SET -124, not ours","event":"AXIS_AILERONS_SET","data":[-124,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450805,"s":81.314,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1104, not ours","event":"AXIS_ELEVATOR_SET","data":[1104,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450838,"s":81.347,"kind":"key","text":"K:AXIS_AILERONS_SET -135, not ours","event":"AXIS_AILERONS_SET","data":[-135,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450838,"s":81.347,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1362, not ours","event":"AXIS_ELEVATOR_SET","data":[1362,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450871,"s":81.38,"kind":"key","text":"K:AXIS_AILERONS_SET -160, not ours","event":"AXIS_AILERONS_SET","data":[-160,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450871,"s":81.38,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1666, not ours","event":"AXIS_ELEVATOR_SET","data":[1666,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450904,"s":81.413,"kind":"key","text":"K:AXIS_AILERONS_SET -172, not ours","event":"AXIS_AILERONS_SET","data":[-172,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450905,"s":81.414,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1862, not ours","event":"AXIS_ELEVATOR_SET","data":[1862,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450938,"s":81.447,"kind":"key","text":"K:AXIS_AILERONS_SET -193, not ours","event":"AXIS_AILERONS_SET","data":[-193,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450938,"s":81.447,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2064, not ours","event":"AXIS_ELEVATOR_SET","data":[2064,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450971,"s":81.48,"kind":"key","text":"K:AXIS_AILERONS_SET -207, not ours","event":"AXIS_AILERONS_SET","data":[-207,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319450971,"s":81.48,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2190, not ours","event":"AXIS_ELEVATOR_SET","data":[2190,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451005,"s":81.514,"kind":"key","text":"K:AXIS_AILERONS_SET -216, not ours","event":"AXIS_AILERONS_SET","data":[-216,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451005,"s":81.514,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2232, not ours","event":"AXIS_ELEVATOR_SET","data":[2232,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451038,"s":81.547,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2238, not ours","event":"AXIS_ELEVATOR_SET","data":[2238,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451138,"s":81.647,"kind":"key","text":"K:AXIS_AILERONS_SET -215, not ours","event":"AXIS_AILERONS_SET","data":[-215,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451138,"s":81.647,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2190, not ours","event":"AXIS_ELEVATOR_SET","data":[2190,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451171,"s":81.68,"kind":"key","text":"K:AXIS_AILERONS_SET -213, not ours","event":"AXIS_AILERONS_SET","data":[-213,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451171,"s":81.68,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2140, not ours","event":"AXIS_ELEVATOR_SET","data":[2140,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451205,"s":81.714,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2134, not ours","event":"AXIS_ELEVATOR_SET","data":[2134,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451238,"s":81.747,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2124, not ours","event":"AXIS_ELEVATOR_SET","data":[2124,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451272,"s":81.781,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2118, not ours","event":"AXIS_ELEVATOR_SET","data":[2118,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451305,"s":81.814,"kind":"key","text":"K:AXIS_AILERONS_SET -211, not ours","event":"AXIS_AILERONS_SET","data":[-211,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451305,"s":81.814,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2000, not ours","event":"AXIS_ELEVATOR_SET","data":[2000,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451338,"s":81.847,"kind":"key","text":"K:AXIS_AILERONS_SET -198, not ours","event":"AXIS_AILERONS_SET","data":[-198,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451338,"s":81.847,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1730, not ours","event":"AXIS_ELEVATOR_SET","data":[1730,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451371,"s":81.88,"kind":"key","text":"K:AXIS_AILERONS_SET -179, not ours","event":"AXIS_AILERONS_SET","data":[-179,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451371,"s":81.88,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1308, not ours","event":"AXIS_ELEVATOR_SET","data":[1308,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451405,"s":81.914,"kind":"key","text":"K:AXIS_AILERONS_SET -136, not ours","event":"AXIS_AILERONS_SET","data":[-136,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451405,"s":81.914,"kind":"key","text":"K:AXIS_ELEVATOR_SET 880, not ours","event":"AXIS_ELEVATOR_SET","data":[880,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451438,"s":81.947,"kind":"key","text":"K:AXIS_AILERONS_SET -66, not ours","event":"AXIS_AILERONS_SET","data":[-66,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451438,"s":81.947,"kind":"key","text":"K:AXIS_ELEVATOR_SET 418, not ours","event":"AXIS_ELEVATOR_SET","data":[418,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451472,"s":81.981,"kind":"key","text":"K:AXIS_AILERONS_SET -14, not ours","event":"AXIS_AILERONS_SET","data":[-14,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451472,"s":81.981,"kind":"key","text":"K:AXIS_ELEVATOR_SET 82, not ours","event":"AXIS_ELEVATOR_SET","data":[82,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451505,"s":82.014,"kind":"key","text":"K:AXIS_AILERONS_SET 0, not ours","event":"AXIS_AILERONS_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451505,"s":82.014,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451605,"s":82.114,"kind":"key","text":"K:AXIS_AILERONS_SET -64, not ours","event":"AXIS_AILERONS_SET","data":[-64,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451605,"s":82.114,"kind":"key","text":"K:AXIS_ELEVATOR_SET -140, not ours","event":"AXIS_ELEVATOR_SET","data":[-140,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451638,"s":82.147,"kind":"key","text":"K:AXIS_AILERONS_SET -103, not ours","event":"AXIS_AILERONS_SET","data":[-103,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451638,"s":82.147,"kind":"key","text":"K:AXIS_ELEVATOR_SET -262, not ours","event":"AXIS_ELEVATOR_SET","data":[-262,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451671,"s":82.18,"kind":"key","text":"K:AXIS_AILERONS_SET -115, not ours","event":"AXIS_AILERONS_SET","data":[-115,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451671,"s":82.18,"kind":"key","text":"K:AXIS_ELEVATOR_SET -458, not ours","event":"AXIS_ELEVATOR_SET","data":[-458,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451705,"s":82.214,"kind":"key","text":"K:AXIS_AILERONS_SET -41, not ours","event":"AXIS_AILERONS_SET","data":[-41,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451705,"s":82.214,"kind":"key","text":"K:AXIS_ELEVATOR_SET -796, not ours","event":"AXIS_ELEVATOR_SET","data":[-796,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451738,"s":82.247,"kind":"key","text":"K:AXIS_AILERONS_SET -26, not ours","event":"AXIS_AILERONS_SET","data":[-26,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451738,"s":82.247,"kind":"key","text":"K:AXIS_ELEVATOR_SET -836, not ours","event":"AXIS_ELEVATOR_SET","data":[-836,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451771,"s":82.28,"kind":"key","text":"K:AXIS_AILERONS_SET -36, not ours","event":"AXIS_AILERONS_SET","data":[-36,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451771,"s":82.28,"kind":"key","text":"K:AXIS_ELEVATOR_SET -846, not ours","event":"AXIS_ELEVATOR_SET","data":[-846,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451805,"s":82.314,"kind":"key","text":"K:AXIS_AILERONS_SET -37, not ours","event":"AXIS_AILERONS_SET","data":[-37,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451805,"s":82.314,"kind":"key","text":"K:AXIS_ELEVATOR_SET -836, not ours","event":"AXIS_ELEVATOR_SET","data":[-836,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451838,"s":82.347,"kind":"key","text":"K:AXIS_ELEVATOR_SET -822, not ours","event":"AXIS_ELEVATOR_SET","data":[-822,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451871,"s":82.38,"kind":"key","text":"K:AXIS_ELEVATOR_SET -820, not ours","event":"AXIS_ELEVATOR_SET","data":[-820,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791319451892,"s":82.401,"kind":"finding","text":"The yoke fired AXIS_AILERONS_SET ×92, AXIS_ELEVATOR_SET ×94."}
+{"t":1791319452057,"s":82.566,"kind":"masker","text":"open: SunRise 12.2.282174.999, SimConnect 12.2.0.0"}
+{"t":1791319452074,"s":82.583,"kind":"masker","text":"system: Sim 1 (running)"}
+{"t":1791319452074,"s":82.583,"kind":"masker","text":"system: Pause_EX1 0 (none)"}
+{"t":1791319452074,"s":82.583,"kind":"masker","text":"system: View 2 (cockpit virtual)"}
+{"t":1791319452562,"s":83.071,"kind":"masker","text":"ready: masking AXIS_AILERONS_SET, AXIS_ELEVATOR_SET at 10000000, sending back at 10001000 after 0ms"}
+{"t":1791319457570,"s":88.079,"kind":"masker","text":"counts: got 289, sent 289"}
+{"t":1791319457875,"s":88.384,"kind":"finding","text":"Check at no delay: the masker got 289 events and sent 289 back; the yoke moved 19.4% in pitch and 4.8% in roll."}
+{"t":1791319457875,"s":88.384,"kind":"masker","text":"delay: delay 700ms"}
+{"t":1791319458175,"s":88.684,"kind":"step","text":"step 1: 700ms","delay":700}
+{"t":1791319510117,"s":140.626,"kind":"result","text":"700ms: not flyable","delay":700,"verdict":"not flyable","analysis":{"altMax":62.08853625817983,"altRms":35.278896953506134,"overshoot":0,"afterRms":9.162723076456672,"afterMax":14.4027432508733,"vsRev":0,"yokeRev":0,"bankMax":36.9307335225778}}
+{"t":1791319510117,"s":140.626,"kind":"masker","text":"delay: delay 1000ms"}
+{"t":1791319510421,"s":140.93,"kind":"step","text":"step 2: 1000ms","delay":1000}
+{"t":1791319560687,"s":191.196,"kind":"result","text":"1000ms: not flyable","delay":1000,"verdict":"not flyable","analysis":{"altMax":157.37832685786088,"altRms":99.2518420161123,"overshoot":0,"afterRms":6.043645215227325,"afterMax":8.567753872471371,"vsRev":0,"yokeRev":0,"bankMax":22.787132070275593}}
+{"t":1791319560688,"s":191.197,"kind":"masker","text":"delay: delay 500ms"}
+{"t":1791319560992,"s":191.501,"kind":"step","text":"step 3: 500ms","delay":500}
+{"t":1791319630477,"s":260.986,"kind":"result","text":"500ms: not flyable","delay":500,"verdict":"not flyable","analysis":{"altMax":144.63882852488177,"altRms":89.45133773544053,"overshoot":0,"afterRms":11.177701590544432,"afterMax":12.31760410664424,"vsRev":0,"yokeRev":0,"bankMax":28.165252234766662}}
+{"t":1791319630477,"s":260.986,"kind":"masker","text":"delay: delay 0ms"}
+{"t":1791319630777,"s":261.286,"kind":"step","text":"step 4: 0ms","delay":0}
+{"t":1791319682965,"s":313.474,"kind":"result","text":"0ms: flyable","delay":0,"verdict":"flyable","analysis":{"altMax":16.436739062404286,"altRms":10.516942325339244,"overshoot":0,"afterRms":9.163400406242992,"afterMax":12.602676581253263,"vsRev":0,"yokeRev":0,"bankMax":23.8448410478794}}
+{"t":1791319682966,"s":313.475,"kind":"masker","text":"delay: delay 300ms"}
+{"t":1791319683272,"s":313.781,"kind":"step","text":"step 5: 300ms","delay":300}
+{"t":1791319733596,"s":364.105,"kind":"result","text":"300ms: not flyable","delay":300,"verdict":"not flyable","analysis":{"altMax":68.94874496761577,"altRms":36.06800081856728,"overshoot":0,"afterRms":4.84187944759119,"afterMax":6.071784144157164,"vsRev":0,"yokeRev":0,"bankMax":23.882371193151105}}
+{"t":1791319733596,"s":364.105,"kind":"masker","text":"delay: delay 150ms"}
+{"t":1791319733900,"s":364.409,"kind":"step","text":"step 6: 150ms","delay":150}
+{"t":1791319785665,"s":416.174,"kind":"result","text":"150ms: flyable","delay":150,"verdict":"flyable","analysis":{"altMax":55.174550610346614,"altRms":36.05231102877388,"overshoot":0,"afterRms":6.189728000878173,"afterMax":6.986109624056553,"vsRev":0,"yokeRev":0,"bankMax":28.065493422932605}}
+{"t":1791319785665,"s":416.174,"kind":"masker","text":"cleared: the observer asked"}
+{"t":1791319785976,"s":416.485,"kind":"masker","text":"exited (code 0)"}

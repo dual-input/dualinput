@@ -1,0 +1,353 @@
+{
+ "screen": "worldmap",
+ "at": "2026-10-06T19:28:51.175Z",
+ "href": "coui://html_UI/Global/mainUI.html",
+ "components": {
+  "{7DA60FBA-EF32-48F2-974D-F8BEA35337A4}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "MasterPage"
+   ]
+  },
+  "{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "BlurPage"
+   ]
+  },
+  "{0CAE343C-E00A-415D-8E53-9FB4686C8575}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "TitlePage"
+   ]
+  },
+  "{482410A0-93BD-4A42-A9F0-9365B9351231}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Title_h1"
+   ]
+  },
+  "{51CFE5E5-C6A3-45F2-9AB7-10BF0B43401B}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Tag"
+   ]
+  },
+  "{5108D804-6B76-4A21-9699-109E35B0D0FC}": {
+   "instances": 4,
+   "visible": 3,
+   "names": [
+    "Search",
+    "Search_Departure",
+    "Search_Arrival"
+   ]
+  },
+  "{996A0E75-BA4D-4EB4-BD27-683B1013B42C}": {
+   "instances": 4,
+   "visible": 3,
+   "names": [
+    "Search_Input"
+   ]
+  },
+  "{A50009B8-CD65-40B0-8985-A62F9EB4AA7E}": {
+   "instances": 11,
+   "visible": 2,
+   "names": [
+    "Shortcutblock",
+    "Shortcutblock_Left",
+    "Shortcutblock_Right",
+    "Shortcutblock_Focus"
+   ]
+  },
+  "{46DCD434-46E3-478F-8557-0AC650079C62}": {
+   "instances": 11,
+   "visible": 1,
+   "names": [
+    "Shortcut"
+   ]
+  },
+  "{6149200B-EEBF-4D1B-8E49-BA9F6F6853A3}": {
+   "instances": 11,
+   "visible": 0,
+   "names": [
+    "Gauge_Circular_Hold"
+   ]
+  },
+  "{4DA5F24F-8B9F-4157-8700-19F5E06B68E9}": {
+   "instances": 7,
+   "visible": 1,
+   "names": [
+    "IconButton_Squared_Close",
+    "IconButton_Squared_Reverse",
+    "IconButton_Squared_Left",
+    "IconButton_Squared_Right"
+   ]
+  },
+  "{2AA977F3-F6AD-4E23-ACA2-DF716905A4EC}": {
+   "instances": 8,
+   "visible": 0,
+   "names": [
+    "Scroll"
+   ]
+  },
+  "{BFB56241-2BDB-48A4-B83B-89D1112C136C}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "FreeFlightPage"
+   ]
+  },
+  "{55540AB1-3241-470E-A3DD-4810E19D94AA}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "FreeFlight_AircraftButton"
+   ]
+  },
+  "{22A5C1B8-F31C-4B69-B626-77D9DC908F16}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Marketplace_Tile_New"
+   ]
+  },
+  "{8406F730-FDC7-4622-A5A2-79FD1498532D}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "FreeFlight_Plan"
+   ]
+  },
+  "{3321B59E-EA1D-4C72-8D69-3F1BB530437C}": {
+   "instances": 3,
+   "visible": 2,
+   "names": [
+    "Dropdown_RunwayDeparture",
+    "Dropdown_RunwayArrival",
+    "Dropdown_Navigation"
+   ]
+  },
+  "{C35EA4E9-4643-4AF4-9929-22FC49058FF7}": {
+   "instances": 8,
+   "visible": 0,
+   "names": [
+    "Dropdownlistitem"
+   ]
+  },
+  "{0C572351-A276-4660-9087-4E895A75F2D4}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "TextButton_Icon_FlightConditions"
+   ]
+  },
+  "{4184A8D9-3696-4E7B-ABA7-82DC5616F35B}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "Flight_Conditions_History_Widget"
+   ]
+  },
+  "{61CEA223-D59C-43C1-8278-821CFBA63C96}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Toggleelement_Live"
+   ]
+  },
+  "{F277E623-6EC9-4247-83F9-CFA37D9F59FE}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Flight_Conditions_History_Timeline"
+   ]
+  },
+  "{ED80C5E1-70B6-4787-B99A-3FEAE4299019}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Gauge_Pointer"
+   ]
+  },
+  "{B3236A66-A832-4601-A9F0-F3E0BB124BDE}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "Sliderelement"
+   ]
+  },
+  "{7FC56ABC-1BCE-4B56-8C6D-E3729D972C73}": {
+   "instances": 2,
+   "visible": 0,
+   "names": [
+    "Roundediconbutton_Less",
+    "Roundediconbutton_More"
+   ]
+  },
+  "{4C532BC9-16C9-4038-AAB6-38A203CA81CB}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "FreeFlight_Traffic"
+   ]
+  },
+  "{83CEE1FA-3BB8-449D-ADEA-18BC00862F8F}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Social_Avatar"
+   ]
+  },
+  "{98687DB7-ABEE-49A8-BE3E-175CDAE3DDA9}": {
+   "instances": 6,
+   "visible": 0,
+   "names": [
+    "Separator",
+    "Separator_1",
+    "Separator_2",
+    "Separator_3",
+    "Separator_4"
+   ]
+  },
+  "{4EC0A8C7-3C76-46C5-87CB-BB074DC12AFB}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "FreeFlight_Runways"
+   ]
+  },
+  "{B3646052-B1D6-44DA-854F-F3C6301FE03C}": {
+   "instances": 2,
+   "visible": 0,
+   "names": [
+    "TextTab_Runways",
+    "TextTab_Frequencies"
+   ]
+  },
+  "{DE89E6EE-F1B8-4EB2-9485-0A523C5A0F0F}": {
+   "instances": 3,
+   "visible": 0,
+   "names": [
+    "Notification",
+    "Notification_Icon"
+   ]
+  },
+  "{8B1BF43B-C021-4753-9440-C48680AFC5B2}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "FreeFlight_Runways_Listitem"
+   ]
+  },
+  "{2BF83928-3BEF-4932-89C7-94DFAB171E26}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Loading"
+   ]
+  },
+  "{18790BAC-6BA6-45F1-A5B0-4719AAA02CAB}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "TextButton_Small_Traffic"
+   ]
+  },
+  "{52B808F0-FFFB-4181-9821-4E91DF38B3D6}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "Worldmap_Filters"
+   ]
+  },
+  "{A623B64B-B8F9-452B-B114-61E7E0146AB5}": {
+   "instances": 3,
+   "visible": 3,
+   "names": [
+    "IconButton_Light_Legend",
+    "IconButton_Light_Filters",
+    "IconButton_Light_Layers"
+   ]
+  },
+  "{FD1054FD-3278-44C0-AE63-BB52A0AE5951}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "TextButton_Large_EFB"
+   ]
+  },
+  "{6DD9B0E4-AB28-45B1-822F-D651D183A0BE}": {
+   "instances": 2,
+   "visible": 2,
+   "names": [
+    "Shortcut"
+   ]
+  },
+  "{500A9A09-183B-4EF1-BCB3-9D21FC8C33E2}": {
+   "instances": 3,
+   "visible": 3,
+   "names": [
+    "Shortcut_Key"
+   ]
+  },
+  "{A5C8A26B-C8CD-453C-8BB4-936125623502}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "TextButton_Large_Special_Fly"
+   ]
+  },
+  "{37E4C836-61EF-469A-BDF6-DB44BAAE15B5}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "MenuBarPage"
+   ]
+  },
+  "{BB6E8FF7-F94E-411A-B488-E7C68F9B8A0F}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "MenuBar"
+   ]
+  },
+  "{B21769A8-A7B9-42C9-98FA-1FE2B2703DDD}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "MenuBar_ProfileButton"
+   ]
+  },
+  "{92B1D933-362A-41E6-951B-D185776FB7FF}": {
+   "instances": 5,
+   "visible": 5,
+   "names": [
+    "IconButton_MenuBar_Notifications",
+    "IconButton_MenuBar_Friends",
+    "IconButton_MenuBar_Communications",
+    "IconButton_MenuBar_Market",
+    "IconButton_MenuBar_Settings"
+   ]
+  },
+  "{E93007FC-1ABE-41F7-B0B1-07FAB0E328A8}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "MenuBar_Communications"
+   ]
+  },
+  "{E7613F41-1B21-404D-ACA4-1946587570CA}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "OnBoarding_Card_Touchpoint"
+   ]
+  }
+ },
+ "total": 122
+}

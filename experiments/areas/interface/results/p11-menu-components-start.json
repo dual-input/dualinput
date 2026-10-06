@@ -1,0 +1,160 @@
+{
+ "screen": "start",
+ "at": "2026-10-06T19:28:13.426Z",
+ "href": "coui://html_UI/Global/mainUI.html",
+ "components": {
+  "{7DA60FBA-EF32-48F2-974D-F8BEA35337A4}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "MasterPage"
+   ]
+  },
+  "{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "BlurPage"
+   ]
+  },
+  "{0CAE343C-E00A-415D-8E53-9FB4686C8575}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "TitlePage"
+   ]
+  },
+  "{482410A0-93BD-4A42-A9F0-9365B9351231}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Title_h1"
+   ]
+  },
+  "{51CFE5E5-C6A3-45F2-9AB7-10BF0B43401B}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Tag"
+   ]
+  },
+  "{5108D804-6B76-4A21-9699-109E35B0D0FC}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Search"
+   ]
+  },
+  "{996A0E75-BA4D-4EB4-BD27-683B1013B42C}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Search_Input"
+   ]
+  },
+  "{A50009B8-CD65-40B0-8985-A62F9EB4AA7E}": {
+   "instances": 6,
+   "visible": 0,
+   "names": [
+    "Shortcutblock",
+    "Shortcutblock_Focus"
+   ]
+  },
+  "{46DCD434-46E3-478F-8557-0AC650079C62}": {
+   "instances": 6,
+   "visible": 0,
+   "names": [
+    "Shortcut"
+   ]
+  },
+  "{6149200B-EEBF-4D1B-8E49-BA9F6F6853A3}": {
+   "instances": 6,
+   "visible": 0,
+   "names": [
+    "Gauge_Circular_Hold"
+   ]
+  },
+  "{4DA5F24F-8B9F-4157-8700-19F5E06B68E9}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "IconButton_Squared_Close"
+   ]
+  },
+  "{2AA977F3-F6AD-4E23-ACA2-DF716905A4EC}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "Scroll"
+   ]
+  },
+  "{37E4C836-61EF-469A-BDF6-DB44BAAE15B5}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "MenuBarPage"
+   ]
+  },
+  "{BB6E8FF7-F94E-411A-B488-E7C68F9B8A0F}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "MenuBar"
+   ]
+  },
+  "{B21769A8-A7B9-42C9-98FA-1FE2B2703DDD}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "MenuBar_ProfileButton"
+   ]
+  },
+  "{92B1D933-362A-41E6-951B-D185776FB7FF}": {
+   "instances": 5,
+   "visible": 0,
+   "names": [
+    "IconButton_MenuBar_Notifications",
+    "IconButton_MenuBar_Friends",
+    "IconButton_MenuBar_Communications",
+    "IconButton_MenuBar_Market",
+    "IconButton_MenuBar_Settings"
+   ]
+  },
+  "{E93007FC-1ABE-41F7-B0B1-07FAB0E328A8}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "MenuBar_Communications"
+   ]
+  },
+  "{E7613F41-1B21-404D-ACA4-1946587570CA}": {
+   "instances": 1,
+   "visible": 0,
+   "names": [
+    "OnBoarding_Card_Touchpoint"
+   ]
+  },
+  "{3A799C8C-BED8-48DE-B7D4-D30472668E33}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "Startpage"
+   ]
+  },
+  "{AB166825-B19B-4425-8E08-00C3B322976A}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "TileButton_Start"
+   ]
+  },
+  "{DD95F626-D3E0-467D-B562-8B50E9606CB5}": {
+   "instances": 1,
+   "visible": 1,
+   "names": [
+    "TileButton_Start_Special"
+   ]
+  }
+ },
+ "total": 40
+}

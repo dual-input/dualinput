@@ -1,0 +1,62 @@
+p11-menu-components, 2026-10-06T19:28:51.539Z
+Screens: home (25 components, 2026-10-06T19:28:33.857Z); start (21 components, 2026-10-06T19:28:13.426Z); worldmap (46 components, 2026-10-06T19:28:51.175Z)
+Stock: fs-base-ui cookedcomps, 871 components. Community copies found: 6.
+Columns: instances and visible ones per screen; bytes of the stock .html and .json; kids, the components it places; anim, exp, st: its animations, exposed children, and visual states; placed, how many stock components place it; copied by, Community packages that ship a copy.
+Sorted: on all of home, start, worldmap first, then leaves (no kids), then smallest.
+
+GUID                                  name                                 screens       inst  vis   html  json  kids anim exp  st  placed  copied by
+8B92BB9A-4176-4F1A-A9CE-CB1195C4E952 BlurPage                             home+start+worldmap1/1/10/0/0  973   142    0   0   0   0      4  -
+6149200B-EEBF-4D1B-8E49-BA9F6F6853A3 Gauge_Circular                       home+start+worldmap4/6/110/0/0 2134  1341    0   0   4   2      9  -
+51CFE5E5-C6A3-45F2-9AB7-10BF0B43401B Tag                                  home+start+worldmap1/1/10/0/0 3064  2222    0   0   2   3      6  -
+92B1D933-362A-41E6-951B-D185776FB7FF IconButton_MenuBar                   home+start+worldmap5/5/55/0/5 3811  4336    0   1   1   7      2  -
+4DA5F24F-8B9F-4157-8700-19F5E06B68E9 IconButton_Squared                   home+start+worldmap1/1/70/0/1 4349  5732    0   1   4  10     38  -
+2AA977F3-F6AD-4E23-ACA2-DF716905A4EC Scroll                               home+start+worldmap1/1/80/0/0 6017  5215    0   0   1  10      1  -
+B21769A8-A7B9-42C9-98FA-1FE2B2703DDD MenuBar_ProfileButton                home+start+worldmap1/1/11/0/110873 12850    0   2   5  10      1  -
+7DA60FBA-EF32-48F2-974D-F8BEA35337A4 MasterPage                           home+start+worldmap1/1/11/1/1 1602   289    3   0   3   0      0  -
+E93007FC-1ABE-41F7-B0B1-07FAB0E328A8 MenuBar_Communications               home+start+worldmap1/1/11/0/1 3005   455    2   0   2   1      1  -
+37E4C836-61EF-469A-BDF6-DB44BAAE15B5 MenuBarPage                          home+start+worldmap1/1/11/0/1 2144  1981    2   2   3   3      2  -
+0CAE343C-E00A-415D-8E53-9FB4686C8575 TitlePage                            home+start+worldmap1/1/10/0/0 3920  1408    2   2   2   2      1  -
+5108D804-6B76-4A21-9699-109E35B0D0FC Search                               home+start+worldmap1/1/40/0/3 3921  2613    2   1   6   3     19  -
+46DCD434-46E3-478F-8557-0AC650079C62 Shortcut                             home+start+worldmap4/6/111/0/1 4142  3055    1   0   6   4      3  -
+996A0E75-BA4D-4EB4-BD27-683B1013B42C Search_Input                         home+start+worldmap1/1/40/0/3 4375  5244    1   1   1  10      1  -
+A50009B8-CD65-40B0-8985-A62F9EB4AA7E Shortcutblock                        home+start+worldmap4/6/111/0/2 5204  5626    1   1   5   9     45  p42-util-flow-pro
+482410A0-93BD-4A42-A9F0-9365B9351231 Title_h1                             home+start+worldmap1/1/10/0/0 8590  2561    1   0   6   4     57  -
+BB6E8FF7-F94E-411A-B488-E7C68F9B8A0F MenuBar                              home+start+worldmap1/1/11/0/111581  3414    4   0   7   8      1  -
+E7613F41-1B21-404D-ACA4-1946587570CA OnBoarding_Card                      home+start+worldmap1/1/10/0/014988 16640    1   3   9  10      2  -
+22A5C1B8-F31C-4B69-B626-77D9DC908F16 Marketplace_Tile_New                 home+worldmap1/1  0/0   1750   307    0   0   1   0     15  -
+98687DB7-ABEE-49A8-BE3E-175CDAE3DDA9 Separator                            worldmap     6    0      765   608    0   0   2   0     70  -
+2BF83928-3BEF-4932-89C7-94DFAB171E26 Loading                              worldmap     1    0     1197   858    0   1   2   0     39  -
+83CEE1FA-3BB8-449D-ADEA-18BC00862F8F Social_Avatar                        worldmap     1    0     1201   855    0   0   1   2      4  -
+500A9A09-183B-4EF1-BCB3-9D21FC8C33E2 Shortcut_Key                         worldmap     3    3     3083   823    0   0   2   1      1  -
+DE89E6EE-F1B8-4EB2-9485-0A523C5A0F0F Notification_Icon                    worldmap     3    0     2588  2591    0   1   1   0     13  -
+61CEA223-D59C-43C1-8278-821CFBA63C96 Toggleelement                        worldmap     1    0     3237  3929    0   0   1   9     13  -
+A623B64B-B8F9-452B-B114-61E7E0146AB5 IconButton_Light                     worldmap     3    3     3108  4512    0   1   4   7      4  -
+8B1BF43B-C021-4753-9440-C48680AFC5B2 FreeFlight_Runways_Listitem          worldmap     1    0     3904  4873    0   1   3   7      1  -
+0C572351-A276-4660-9087-4E895A75F2D4 TextButton_Icon_FlightConditions     worldmap     1    1     5389  5245    0   1   3   6      1  -
+FD1054FD-3278-44C0-AE63-BB52A0AE5951 TextButton_Large                     worldmap     1    1     4997  5962    0   1   3   8     45  -
+7FC56ABC-1BCE-4B56-8C6D-E3729D972C73 IconButton_Rounded                   worldmap     2    0     3836  7528    0   1   3  12      4  -
+C35EA4E9-4643-4AF4-9929-22FC49058FF7 Dropdownlistitem                     worldmap     8    0     6075  5487    0   1   4  10      0  -
+A5C8A26B-C8CD-453C-8BB4-936125623502 TextButton_Large_Special             worldmap     1    1     4846  7177    0   1   2   9     41  -
+3321B59E-EA1D-4C72-8D69-3F1BB530437C Dropdown                             worldmap     3    2     6793 10978    0   1   8  11     22  -
+596B60AB-A123-4B1A-823B-CCB54E9D7DB2 Home_TileMarket                      home         1    1    10965 10397    0   2   4   8      1  -
+3DA47786-7C28-4935-BA3B-CA9B67E21A77 Home_TileCareer                      home         1    1    13989 11701    0   1   4  11      1  -
+682EA93F-BF19-4760-B807-2F43C4FBA587 Home_TileRegular                     home         4    4    14169 13129    0   1   7  10      1  -
+8B710761-A9EB-4007-B3BC-5149D49F5E6D Homepage                             home         1    1     1611   603    2   1   2   0      0  -
+6DD9B0E4-AB28-45B1-822F-D651D183A0BE Shortcut_Action                      worldmap     2    2     1230  2054    1   0   1   0      0  -
+3A799C8C-BED8-48DE-B7D4-D30472668E33 Startpage                            start        1    1     2666  1152    2   1   2   1      0  p42-util-flow-pro
+D4E935FB-C8F7-43CC-9072-3D80CDFB62CC Home_Tiles                           home         1    1     4772   476    3   0   6   0      1  -
+B49C7D7F-EB1B-473B-ABDE-7C5760EAB8CA Home_TileEvent                       home         1    0     5602  2056    1   1   4   2      1  -
+4EC0A8C7-3C76-46C5-87CB-BB074DC12AFB FreeFlight_Runways                   worldmap     1    0     8893  1318    6   0  10   1      2  -
+B3646052-B1D6-44DA-854F-F3C6301FE03C TextTab                              worldmap     2    0     5140  5273    1   1   2   9     10  -
+ED80C5E1-70B6-4787-B99A-3FEAE4299019 Gauge_Pointer                        worldmap     1    0     6148  4506    1   0   3  10      1  -
+52B808F0-FFFB-4181-9821-4E91DF38B3D6 Worldmap_Filters                     worldmap     1    1     7173  3750    2   0  10   4      2  -
+DD95F626-D3E0-467D-B562-8B50E9606CB5 TileButton_Start_Special             start        1    1     6083  6502    1   1   2   8      1  -
+AB166825-B19B-4425-8E08-00C3B322976A TileButton_Start                     start        1    1     6075  6660    1   1   2   8      1  -
+BFB56241-2BDB-48A4-B83B-89D1112C136C FreeFlightPage                       worldmap     1    1    11495  3461   11   2  16   6      0  -
+4184A8D9-3696-4E7B-ABA7-82DC5616F35B Flight_Conditions_History_Widget     worldmap     1    1     9883  5197    3   0   5   9      3  -
+18790BAC-6BA6-45F1-A5B0-4719AAA02CAB TextButton_Small                     worldmap     1    0     6872  9396    2   1   5  17     58  -
+B3236A66-A832-4601-A9F0-F3E0BB124BDE Sliderelement                        worldmap     1    1     7803  9044    1   1   4  10      8  -
+8406F730-FDC7-4622-A5A2-79FD1498532D FreeFlight_Plan                      worldmap     1    1    20142  1734    3   0  10   2      1  -
+55540AB1-3241-470E-A3DD-4810E19D94AA FreeFlight_AircraftButton            worldmap     1    1    11816 10194    1   1   6  14      2  -
+4C532BC9-16C9-4038-AAB6-38A203CA81CB FreeFlight_Traffic                   worldmap     1    0    19113  2930    2   0  11   3      2  -
+F277E623-6EC9-4247-83F9-CFA37D9F59FE Flight_Conditions_History_Timeline   worldmap     1    0    56059  2401    1   0  13   2      2  -

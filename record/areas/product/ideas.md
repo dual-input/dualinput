@@ -227,6 +227,8 @@ In FS Copilot and YourControls only the PF's hardware reaches the sim, and this 
   - A masked event carries the value after the pilot's dead zone set in MSFS, so that setting survives ([log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)); whether the sensitivity curve does is unmeasured.
   - The PM flies a loop late by twice the one-way network delay plus the following machine's display buffer, and a pilot whose own pitch and roll input reached the Baron 150ms late found it flyable, and 300ms late not (measured on MSFS 2024, 2026-10-06, [flight-controls log](../flight-controls/log.md#2026-10-06-a-pilots-own-pitch-and-roll-input-was-flyable-150ms-late-and-not-300ms-late-in-the-baron-at-cruise)).
     With FS Copilot's 400ms buffer alone past that, a PM flying through mixed controls would need a much shorter buffer and a partner nearby, or their input applied on their own machine first.
+  - Flying through that lag looks unworkable: pilots would feel even 100ms, and an Airbus is as sensitive (judged by the user, 2026-10-06).
+- **Next:** reconsider after v1 what else the idea could serve, since flying with both pilots' inputs mixed looks out of reach (user, 2026-10-06).
 - **Product:** an exact dual-input warning, and a second pair of hands on the controls.
 
 ## Presence

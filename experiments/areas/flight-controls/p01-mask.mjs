@@ -11,9 +11,13 @@
  * Nobody in our records has measured it.
  *
  * One aircraft per run, with someone at the controls. For pitch, then
- * throttle, you press Page Down once (read globally, so the sim stays in front)
- * and keep moving that control until the long low beep, about a minute for
- * pitch and 30s for throttle. The probe steps
+ * throttle, then mixture, you press Page Down once (read globally, so the sim
+ * stays in front) and keep moving that control until the long low beep, about
+ * a minute for pitch and 30s for the others. --controls mixture runs only the
+ * mixture, which the Black Square Baron takes through its own input events,
+ * BKSQ_TurbochargedMixtureController_1 and _2, bound to every MIXTURE* key
+ * event (record/areas/aircraft/black-square-baron-pro/study.md); soft takeover
+ * needs masking to hold those back too. The probe steps
  * through the phases by itself, 5s each, with a short beep at each:
  *
  *   free     Nothing masked: which K: events and input events the control
@@ -63,7 +67,7 @@
  * travel. Events near ±4,000 mean they carry the raw axis; events near 0, or
  * none, mean they carry the value after MSFS's dead zone.
  *
- *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--reload] [--legacy]
+ *   node experiments/areas/flight-controls/p01-mask.mjs [--aircraft <study folder>] [--controls pitch,throttle,mixture] [--reload] [--legacy]
  *   node experiments/areas/flight-controls/p01-mask.mjs --masks-first <study folder>
  *   node experiments/areas/flight-controls/p01-mask.mjs --deadzone
  *
@@ -113,20 +117,31 @@ const CAP_MS = 10 * 60_000
 const RELOAD_CAP_MS = 30 * 60_000
 const SCALE = 0.5
 
-// Every name is in MSFS 2024 SDK 1.7.3, WASM/include/MSFS/Types/MSFS_EventsEnum.h.
+// Every name is in MSFS 2024 SDK 1.7.3, WASM/include/MSFS/Types/MSFS_EventsEnum.h,
+// except the three MIXTURE…_AXIS_SET_EX1, which the header leaves out and the
+// Black Square Baron's mixture input events bind (read in bksq-aircraft-baronpro
+// 0.1.1, BaronProfessional_Templates.xml, BKSQ_TurbochargedMixtureController_1).
 const CANDIDATES = [
   "AXIS_ELEVATOR_SET", "ELEVATOR_SET",
   "AXIS_THROTTLE_SET", "AXIS_THROTTLE1_SET", "AXIS_THROTTLE2_SET",
   "THROTTLE_AXIS_SET_EX1", "THROTTLE1_AXIS_SET_EX1", "THROTTLE2_AXIS_SET_EX1",
   "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET",
   "THROTTLE_FULL", "THROTTLE_CUT", "THROTTLE_INCR", "THROTTLE_DECR",
+  "AXIS_MIXTURE_SET", "AXIS_MIXTURE1_SET", "AXIS_MIXTURE2_SET",
+  "MIXTURE_AXIS_SET_EX1", "MIXTURE1_AXIS_SET_EX1", "MIXTURE2_AXIS_SET_EX1",
+  "MIXTURE_SET", "MIXTURE1_SET", "MIXTURE2_SET",
+  "MIXTURE_RICH", "MIXTURE_LEAN", "MIXTURE_INCR", "MIXTURE_DECR", "MIXTURE_INCR_SMALL", "MIXTURE_DECR_SMALL",
+  "MIXTURE1_RICH", "MIXTURE1_LEAN", "MIXTURE1_INCR", "MIXTURE1_DECR", "MIXTURE1_INCR_SMALL", "MIXTURE1_DECR_SMALL",
+  "MIXTURE2_RICH", "MIXTURE2_LEAN", "MIXTURE2_INCR", "MIXTURE2_DECR", "MIXTURE2_INCR_SMALL", "MIXTURE2_DECR_SMALL",
 ]
 
 // Events an aircraft's own module may send to move the sim's surfaces and
 // levers, such as K:ELEVATOR_SET (unverified for any one aircraft), and the normally aspirated Baron's
-// Flight controls and autoflight). Masking one would cut the module's output,
-// so the probe listens for them and never masks them.
-const OUTPUTS = new Set(["ELEVATOR_SET", "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET"])
+
+// K:MIXTURE1_SET, which its mixture input event sends from the pilot's input
+// (read in BaronProfessional_Templates.xml). Masking one would cut the
+// module's output, so the probe listens for them and never masks them.
+const OUTPUTS = new Set(["ELEVATOR_SET", "THROTTLE_SET", "THROTTLE1_SET", "THROTTLE2_SET", "MIXTURE_SET", "MIXTURE1_SET", "MIXTURE2_SET"])
 
 const isAxis = (name) => name.includes("AXIS")
 
@@ -149,6 +164,11 @@ const CONTROLS = {
     how: "from idle to full and back",
     stock: [["GENERAL ENG THROTTLE LEVER POSITION:1", "percent"]],
   },
+  mixture: {
+    label: "Mixture: engine 1's lever, with your hardware lever or the mixture keys, not the mouse",
+    how: "from rich to lean and back",
+    stock: [["GENERAL ENG MIXTURE LEVER POSITION:1", "percent"]],
+  },
 }
 
 // Each aircraft's own variables for the pilot's input, unverified for an
@@ -162,6 +182,10 @@ const LOCAL = {
   "synaptic-a220": { pitch: ["L:A22X L Sidestick Y"], throttle: ["L:A22X Throttle L Raw", "L:A22X Throttle 1 TLA"] },
   "pmdg-777-300er": { pitch: ["L:yokes_Fore_Aft"] },
   "fenix-a320-family": { pitch: ["L:N_FC_SIDESTICK_CAPT_PITCH"] },
+  // On the 58TC and 58P the lever is L:BKSQ_MixtureLeverPosition_1, and the
+  // XML writes the stock variable from it at 2 Hz (record/areas/aircraft/
+  // black-square-baron-pro/study.md, Throttles, propellers, and mixture).
+  "black-square-baron-pro": { mixture: ["L:BKSQ_MixtureLeverPosition_1"] },
 }
 
 // Black Square's control lock clamps the elevator and ailerons to ±1% while
@@ -172,7 +196,16 @@ const CONTROL_LOCKS = {
   "black-square-bonanza-pro": "L:bksq_controlLocks",
 }
 
-const INPUT_EVENT_NAMES = /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER/i
+const INPUT_EVENT_NAMES = /THROTTLE|ELEV|YOKE|STICK|PITCH|LEVER|MIXTURE/i
+
+// --masks-first masks only pitch and throttle events, so only those count there.
+const MASKS_FIRST_CONTROLS = ["pitch", "throttle"]
+const chosenControls = () => {
+  const list = opt("--controls")?.split(",").map((s) => s.trim()).filter(Boolean) ?? Object.keys(CONTROLS)
+  const unknown = list.filter((c) => !CONTROLS[c])
+  if (unknown.length) throw new Error(`--controls: no control ${unknown.join(", ")}; there are ${Object.keys(CONTROLS).join(", ")}`)
+  return list
+}
 
 // ---------------------------------------------------------------- statistics
 
@@ -453,6 +486,7 @@ async function observer() {
   const maskEvents = {}
   const legacy = argv.includes("--legacy")
   const sweep = legacy ? RESEND_SWEEP.filter((p) => p !== MASK_PRIORITY + 1) : RESEND_SWEEP
+  const controls = target ? MASKS_FIRST_CONTROLS : legacy ? ["pitch"] : chosenControls()
 
   async function ask(heading, instruction) {
     console.log(`\n▶ ${heading}\n  ${instruction}\n  ${START} to start, ${SKIP} to skip.`)
@@ -637,7 +671,7 @@ async function observer() {
   async function masksFirst() {
     const a = AIRCRAFT[key]
     if (!a) return rec.log("error", `--masks-first: no aircraft ${JSON.stringify(key)} in experiments/areas/aircraft/lib/aircraft.mjs`)
-    for (const control of Object.keys(CONTROLS)) maskEvents[control] = MASKS_FIRST
+    for (const control of MASKS_FIRST_CONTROLS) maskEvents[control] = MASKS_FIRST
     if (title === a.title) return rec.log("error", `--masks-first: ${a.name} is already loaded; load another aircraft, such as the ${NEUTRAL.name}, and run again`)
     try {
       sim.track()
@@ -655,7 +689,7 @@ async function observer() {
     const cleared = await captureAll("cleared")
     beep(500, 600)
     console.log("  Stop.")
-    for (const control of Object.keys(CONTROLS)) {
+    for (const control of MASKS_FIRST_CONTROLS) {
       for (const r of [
         { control, phase: masked.phase, expect: "blocked", window: masked, verdict: verdict(masked, cleared, control) },
         { control, phase: cleared.phase, expect: null, window: cleared, verdict: { word: "baseline" } },
@@ -690,7 +724,7 @@ async function observer() {
   } else if (argv.includes("--deadzone")) {
     await deadzone()
   } else {
-    for (const control of legacy ? ["pitch"] : Object.keys(CONTROLS)) await run(control)
+    for (const control of controls) await run(control)
     if (argv.includes("--reload")) await reload()
   }
   await finish()
@@ -705,7 +739,7 @@ async function observer() {
       `Mask priority ${MASK_PRIORITY}, re-send priorities ${sweep.join(", ")}${legacy ? " by the legacy SimConnect_TransmitClientEvent" : ""}, ${PHASE_MS / 1000}s phases`,
       ...(target ? [`Mode: masks installed with TITLE ${JSON.stringify(title)} loaded, before ${AIRCRAFT[key]?.name ?? key} loaded through SimConnect`] : []),
     ]
-    for (const control of Object.keys(CONTROLS)) {
+    for (const control of controls) {
       const rs = results.filter((r) => r.control === control)
       lines.push("", `${control}: masked ${maskEvents[control]?.join(", ") || "nothing"}`)
       if (!rs.length) lines.push("  not run")

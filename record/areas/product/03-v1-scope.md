@@ -388,7 +388,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 **Rules:**
 
 - If the PF's aircraft isn't on the ground when the session starts, there's no preflight: the crew flies at once, and every other pilot joins as a late joiner (user, 2026-10-08).
-  Holding the PF still in the air would go wrong, because a frozen aircraft keeps integrating its velocities: a parked Baron, frozen and written 5 ft up, had its `A:VELOCITY BODY Z` climb from 0 to 68 ft/s in 4s (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
+  Holding the PF still in the air would go wrong, because a frozen aircraft keeps integrating its velocities: a parked Baron, frozen and written 5 ft up, had its `A:VELOCITY BODY Z` climb from 0 to 68 ft/s in 4s (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)), and skipping preflight is simpler than finding out whether writing every velocity each frame would hold them (user, 2026-10-08).
 - A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 - The Go to button is unavailable, and says why, on any page but the main menu's home page and Free flight's world map, or when Crosscheck has no copy of BlurPage installed: a sim update removes BlurPage or stops MasterPage placing it, or another package copies it.
   Crosscheck tries no other component, so the button stays unavailable until a Crosscheck release picks one (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
@@ -411,6 +411,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 **Open questions:**
 
 - What a joined pilot sees when the PF isn't in a flight yet, such as when the host started the session before the sim.
+- Where a pilot joining an airborne PF loads their flight, since there's no stand for Go to, and whether moving their aircraft to the PF's position stalls the sim (unverified; the probe that moves a parked aircraft to another continent settles it).
 - Whether Crosscheck can name the stand an aircraft is on, from SimConnect directly or by matching the aircraft's position against the airport's parking spots (unverified).
   The `[Departure]` section of `CustomFlight.FLT`, the flight file the sim names in `FlightLoaded`, names the stand a flight loaded at, such as `GateName=PARKING; GateNumber=140` (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), which holds only until the PF moves.
 
@@ -762,8 +763,9 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 - An "install when the sim is closed" option: if Crosscheck is open when the sim exits, it updates itself then, and if it was closed first, a helper does it.
 - A helper that the sim launches warns, in a Windows notification early in the sim's load, that a waiting update will need a sim restart, so the pilot can close the sim before waiting for it to load.
   It warns only a pilot who has flown with Crosscheck lately, judged by the date of their last session, and stays quiet for one who hasn't used it in a while.
-- When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app, the EFB app, and the preflight list each show a notice, such as "Conflict: another mod (mod-name) overrides a sim file Crosscheck overrides. You may experience issues. [Learn more]", with nothing shown while the sim starts (user, 2026-10-08).
-  Only one override can win the mount order, and a losing Crosscheck quietly breaks pointer sync ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
+- When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app and the EFB app each show a warning, such as "Conflict: another mod (mod-name) overrides a sim file Crosscheck overrides. You may experience issues. [Learn more]", and the [preflight match check](#preflight-match-check)'s list shows it as one, rather than a Windows notification as the sim starts (user, 2026-10-08).
+  The SDK says the package mounted later wins (documented, [02-01](../../learn/foundations/02-01-installs-and-packages.md)), so only one override runs, though nobody has installed two and watched (unverified, [01](../../learn/foundations/01-prior-art-and-crew-practice.md#unverified-claims)); installing FS Copilot's package beside ours and reading which `VCockpit.js` a panel loaded settles it.
+  A losing Crosscheck's panel bridge never loads, so pointer sync and every module a feature or plugin names in a panel stop, with no error.
   The desktop app offers to disable the other package, which takes a sim restart if the sim is running, and Crosscheck says so.
 
 **Not in v1:**
@@ -787,4 +789,5 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
   The sim launches programs from it in MSFS 2024: on a Steam install it's `%APPDATA%\Microsoft Flight Simulator 2024\EXE.xml`, nine add-ons launch from ours, among them Fenix, GSX's Couatl, and ChasePlane, and ChasePlane's bridge started 79s and 102s after two sim starts (read and observed on our development machine, 2026-10-04).
   ChasePlane also launches its manager from there with `--silent-update-latest`, so it updates itself at sim launch, though our updates wait for the sim to close.
 - How a package is disabled and re-enabled: a folder renamed with a suffix such as `.off` may not stop the sim mounting it, and moving it out of the Community folder does (unverified either way), which a probe across one sim restart settles.
+  How disabling squares with [decision 001](../../decisions/001-changing-other-developers-packages.md), under which Crosscheck's own features never change another developer's package, turns on what disabling does on disk: moving a folder out of the Community folder leaves the package's files as they were, and whether that counts as changing it is the decision's to answer.
 - How recent a last session has to be for the helper to warn.

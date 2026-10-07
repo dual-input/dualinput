@@ -360,12 +360,13 @@ A pilot sees them whether or not the EFB is open, and a click on one opens Cross
 
 ### Component health
 
-Crosscheck's core watches each of Crosscheck's components, from the watcher and the apps to the code in the sim and the relay, and the desktop app shows each one's state as a status indicator, in its footer, its settings, or both (user, 2026-10-08).
+When one of Crosscheck's components has trouble, from the watcher and the apps to the code in the sim and the relay, the pilot can see which one, such as "the panel bridge is red", and the trouble lands in Crosscheck's logs and recording, so a bug report the pilot sends us shows what happened (user, 2026-10-08).
+What matters is that the answer is there when something stops working, not a row of indicators (user, 2026-10-08).
 
 - **Tech:** the core is the hub most components already report to ([architecture's spine](../architecture/01-spine.md#components)).
-  The WASM module hears from the core every second in a session ([architecture's spine](../architecture/01-spine.md#what-moves-them)), and FS Copilot's app re-sent its state to every panel every 2s, so a panel could take silence to mean the app was gone (read in the FS Copilot fork, `FsCopilot/Connection/PanelServer.cs`), so silence from a component is something the core can name.
+  The WASM module hears from the core every second in a session ([architecture's spine](../architecture/01-spine.md#what-moves-them)), and FS Copilot's app re-sent its state to every panel every 2s, so a panel could take silence to mean the app was gone (read in the FS Copilot fork, `FsCopilot/Connection/PanelServer.cs`), so silence from a component is something the core can name and log.
   Another package's `VCockpit.js` override winning the mount order would show as a panel bridge that never connects ([installing and updating](03-v1-scope.md#installing-and-updating)).
-- **Open questions:** what counts as healthy for each component, and whether the EFB app shows the indicators too, for a pilot in VR.
+- **Open questions:** what counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature.
 
 ### Crosscheck objects in the cockpit
 

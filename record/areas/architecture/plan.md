@@ -86,10 +86,10 @@ Its answer goes in `01-spine.md`, in this area.
 `01-spine.md` takes up step 7's paragraphs after its exit, from the headless core proposed on 2026-10-03 to sim awareness, and once the user agrees to it, step 7 links to it in their place.
 Exit: the user agrees to `01-spine.md`.
 Waits on 1.1, 1.2, 1.3, and 1.4.
-Raised elsewhere: by 1.1, whether profiles reach pilots apart from Crosscheck's releases, to place with the part that designs profiles and updates ([01-spine](01-spine.md#left-to-later-nodes)).
-Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started within 1.5 minutes of a load, to place with the part that owns sync ([01-spine](01-spine.md#left-to-later-nodes)).
-Raised elsewhere: by 1.1, whether the WASM module runs calculator code for the profile engine, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-to-later-nodes)).
-Raised elsewhere: by 1.1.2, how each module in a panel or the sim tears itself down, to place with the parts that design the panel bridge and plugins ([01-spine](01-spine.md#left-to-later-nodes)).
+Raised elsewhere: by 1.1, whether profiles reach pilots apart from Crosscheck's releases, to place with the part that designs profiles and updates ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1, whether the WASM module runs calculator code for the profile engine, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1.2, how each module in a panel or the sim tears itself down, to place with the parts that design the panel bridge and plugins ([01-spine](01-spine.md#left-open)).
 
 ## 1.1 Components
 
@@ -131,8 +131,8 @@ The spine can't draw the boundaries between parts, or set the conventions they s
 It reads 1.1's answer, then the [interface](../interface/log.md) and [CommBus](../commbus/log.md) logs, and the foundations chapters on the ways to reach the sim: [04-01](../../learn/foundations/04-01-connection-and-data.md), [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
-Raised elsewhere: by 1.1, how the core knows each component is alive and working, the watcher, the apps, the code in the sim, and the relay, so the apps can show each one's status ([ideas](../product/ideas.md#component-health); user, 2026-10-08).
-Raised elsewhere: by 1.1.2, how the core tells the components in the sim that a session started and ended ([01-spine](01-spine.md#left-to-later-nodes)).
+Raised elsewhere: by 1.1, how the core knows each component is alive and working, the watcher, the apps, the code in the sim, and the relay, so a component in trouble is plain to the pilot and lands in the logs and the recording ([ideas](../product/ideas.md#component-health); user, 2026-10-08).
+Raised elsewhere: by 1.1.2, how the core tells the components in the sim that a session started and ended ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the WASM module hears from the core every second on every machine in a session, so it can undo our state in the sim when the core stops ([01-spine](01-spine.md#what-moves-them)).
 Raised elsewhere: by 1.1, how a panel finds its own core when two cores run on one machine, since FS Copilot's panels try ports 9020 to 9024 and connect to the first that answers, one reason its test bench must not run beside a live sim (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
 

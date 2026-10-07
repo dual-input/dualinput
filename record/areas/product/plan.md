@@ -175,7 +175,7 @@ Steps 4 and 5 add to this list as they find risks.
 
 ## 7. Tech stack and architecture
 
-Produces: decisions in `record/decisions/`.
+Produces: decisions in `record/decisions/`, and the design docs the [architecture plan](../architecture/plan.md)'s nodes name.
 The work runs as a tree of questions in [the architecture plan](../architecture/plan.md), which says where it stands.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
 The profile format takes the shape [01-profile-entries](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.

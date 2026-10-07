@@ -17,31 +17,33 @@ To work a node:
 
 1. Before proposing anything for the node, read in full each document in `record/` that bears on its question, starting with those the node lists, and search the prior work that [CLAUDE.md](../../../CLAUDE.md#prior-work) lists for anything on the question.
    You'll know what the record establishes and where it's silent.
-2. If the node can't be answered from that, propose to the user the questions that have to be answered first, each as a child with what the node can't settle without it.
+2. If the node can't be answered from that, propose to the user the questions that have to be answered first, each as a child with what the node can't settle without it, and where a node elsewhere in the tree already asks one of them, propose naming that node instead.
    You'll have a list the user can agree to one child at a time.
 3. For each child the user agrees to, add it as a node, and put its number in the parent's `Waits on` line.
-   You'll see the child as a `##` section, and its number in the parent's `Waits on` line.
-4. If the node has children, once they're done, walk each step of [a session from start to finish](../product/03-v1-scope.md#a-session-from-start-to-finish), and at each step check that the children's answers together do what that step's linked section requires.
-   Wherever one answer needs something another doesn't give, reopen the child that has to change, as [Reopening a node](#reopening-a-node) says.
+   You'll see the child as a `##` section and its number in the parent's `Waits on` line, and by the rule above, the work moves to the first open child.
+4. If the node has a `Waits on` line, once every node it names is done, walk each step of [a session from start to finish](../product/03-v1-scope.md#a-session-from-start-to-finish), and at each step check that those nodes' answers together do what that step's linked section requires.
+   Wherever one answer needs something another doesn't give, reopen the node that has to change, as [Reopening a node](#reopening-a-node) says.
    You're done with this step when the whole session walks through the answers with nothing reopened.
 5. Write the node's answer in the document it names.
 6. Once the node's `Exit:` has happened and its answer meets [When a node is done](#when-a-node-is-done), add `Done on <YYYY-MM-DD>.` under its `Exit:` line, and number the tentative decisions its children settled, as [Where answers go](#where-answers-go) says.
    You'll see the `Done on` line, and the next open node is where the work stands.
 
 When working one node turns up something another node has to settle, add it under that node on a line that starts `Raised elsewhere:` and names the node it came from.
+That node's answer settles each such line before it's marked done, and a line added under a done node reopens it, as [Reopening a node](#reopening-a-node) says.
 If no node covers it, propose a new node for it, as step 2 says.
 
-The tree's root is step 7, a node whose question is step 7's exit and whose children are the top-level nodes, worked by the same steps.
-When every top-level node is done and step 7's exit needs more, propose the next top-level node, as step 2 does.
-When it needs no more, check the top-level answers as step 4 does, number their tentative decisions as [Where answers go](#where-answers-go) says, and mark step 7 done in [the product plan](../product/plan.md#7-tech-stack-and-architecture).
+The tree's root is step 7 of the product plan: its question is step 7's exit, and its children are the top-level nodes.
+When every top-level node is done and their answers don't yet give each decision step 7's exit names, propose the next top-level node, as step 2 does.
+When they do, check the top-level answers as step 4 does, number their tentative decisions as [Where answers go](#where-answers-go) says, and mark step 7 done in [the product plan](../product/plan.md#7-tech-stack-and-architecture).
 
 ## When a node is done
 
-A node is marked done only when both of these hold:
+A node is marked done only when all of these hold:
 
 - Every claim its answer rests on is measured, is read in files and doesn't turn on which code path runs, or is knowledge that [Evidence](../../../.claude/rules/writing.md#evidence) lets go unmarked.
   A documented or unverified claim needs a child that settles it, such as a read, a search of our prior work, or a probe in `experiments/`, proposed as step 2 says.
 - Every choice the answer leaves open can be made later inside one part of Crosscheck without changing another, as the core's WebSocket library could be if no client sees it (a hypothetical example).
+- Its answer settles each `Raised elsewhere:` line under it.
 
 ## Where answers go
 
@@ -50,6 +52,7 @@ An answer goes in one of these documents, never in this plan:
 - a design doc in the area the answer belongs to, such as `record/areas/network/`
 - a reference, beside what it describes
 - a tentative decision in this area's `decisions.md`
+- an entry in the log of the area the finding belongs to, for a child that's a read, a search, or a probe, which the parent's answer cites
 
 This plan holds each node's question, its status, and its `Raised elsewhere:` lines.
 
@@ -59,8 +62,9 @@ A child that serves two nodes gets its decisions numbered when the last of them 
 
 ## Reopening a node
 
-A finding that contradicts a done node reopens it, along with every node whose answer rests on that node's answer.
+A done node reopens when a finding contradicts it, or when its parent's step 4 finds that a sibling needs something its answer doesn't give, and so does every node whose answer rests on its answer.
 In each one, replace the `Done on` line with `Reopened on <YYYY-MM-DD>, by <link to the finding, or the node whose answer needs the change>.`
+When the node is marked done again, each numbered decision its new answer changes gets a reversing decision, as [Decisions](../../../.claude/rules/writing.md#decisions) says.
 
 ## 1 The spine
 
@@ -68,7 +72,7 @@ Question: what does every other part of Crosscheck rest on?
 It covers:
 
 - the processes Crosscheck runs as
-- how its components talk to each other: the core, the desktop app, the EFB app, our WASM module, and the panels
+- how its components talk to each other, on one machine and between machines: the core, the desktop app, the EFB app, our WASM module, the panels, plugins, the relay, and the report server
 - the conventions they share
 - the language
 - the boundaries between its parts
@@ -76,7 +80,7 @@ It covers:
 Step 7 can't decide a language, frameworks, or a core architecture without it, and every node after it assumes its answer.
 It reads [01-aims](../product/01-aims.md), [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), and the sync design docs: [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md).
 Its answer goes in `01-spine.md`, in this area.
-When `01-spine.md` is agreed, the leanings in step 7 move into it, and step 7 links to it in their place.
+`01-spine.md` takes up step 7's paragraphs after its exit, from the headless core proposed on 2026-10-03 to sim awareness, and once the user agrees to it, step 7 links to it in their place.
 Exit: the user agrees to `01-spine.md`.
 Waits on 1.1, 1.2, 1.3, and 1.4.
 

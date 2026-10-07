@@ -72,7 +72,7 @@ Question: what does every other part of Crosscheck rest on?
 It covers:
 
 - the processes Crosscheck runs as
-- how its components talk to each other, on one machine and between machines: the watcher, the core, the desktop app, the EFB app, our WASM module, the panels, plugins, the relay, and the report server
+- how its components talk to each other, on one machine and between machines: the watcher, the core, the desktop app, the EFB app, our WASM module, the panels, the relay, and the report server, and the plugins' code, which may run inside several of them
 - the conventions they share
 - the language
 - the boundaries between its parts
@@ -91,7 +91,7 @@ Waits on 1.1, 1.2, 1.3, and 1.4.
 
 Question: what components does Crosscheck run, where does each run, and what does each own?
 The spine can't draw a link without its endpoints, and v1's features name endpoints beyond the watcher, the core, and the core's clients that step 7 leans toward.
-Pilots bind the take-control key in Crosscheck's settings rather than the sim's ([03-v1-scope](../product/03-v1-scope.md#take-control-key)), so a component of ours reads it, and the record doesn't say which, nor where each part of a plugin runs ([03-v1-scope](../product/03-v1-scope.md#plugins)).
+Pilots bind the take-control key in Crosscheck's settings rather than the sim's ([03-v1-scope](../product/03-v1-scope.md#take-control-key)), so one of our components has to catch the press of that key or hardware button, and the record doesn't say which, nor which components a plugin's code runs in ([03-v1-scope](../product/03-v1-scope.md#plugins)).
 It reads what node 1 reads, then the area logs, starting with [interface](../interface/log.md), [avatars](../avatars/log.md) with its [decisions](../avatars/decisions.md), [flight-controls](../flight-controls/log.md), and [flight-model](../flight-model/log.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
@@ -107,7 +107,7 @@ Exit: the user agrees to that section.
 ## 1.3 Language and toolchains
 
 Question: what language and toolchain does each component's runtime take?
-The spine can't pick a language until it knows the runtimes the components run in, and they differ: Node and Electron, which step 7 leans toward, Coherent GT, the sim's WASM, and whatever the local speech recognizer and ATC audio capture run in, which the record leaves open ([03-v1-scope](../product/03-v1-scope.md#voice-phrases)).
+The spine can't pick a language until it knows the runtimes the components run in, and they differ: Coherent GT, the sim's WASM, Node and Electron if step 7's lean holds, and whatever the local speech recognizer and ATC audio capture run in, which the record leaves open ([voice phrases](../product/03-v1-scope.md#voice-phrases), [hearing ATC](../product/03-v1-scope.md#hearing-atc)).
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
@@ -115,9 +115,11 @@ Exit: the user agrees to that section.
 ## 1.4 Shared conventions
 
 Question: what conventions does every component share?
-The spine can't draw the boundaries between parts until it knows the form of what every message between components carries, beyond the exchanges 1.2 names, such as its IDs and its times.
+1.2 says which components exchange what, and the spine also can't draw the boundaries between parts until it knows the form of the fields every message carries, such as its IDs and its times.
 The record leaves two of these to step 7 by name: the form of a pilot ID ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)) and of a session ID ([03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)).
-The sync design implies more, such as the message ID a receiver applies once whether it came directly or through the relay, and how time is given, since the duplicate filter's window is 3 frames and at most 200ms, and a write's pace is given as `every(1, 'frame')` or `every(40, 'ms')` ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice), [01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
+The sync design implies others.
+One is the ID that lets a receiver apply a message once when it arrives directly, through the relay, or both ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
+Another is the form of a time, because the sync design gives times in both frames and milliseconds: the duplicate filter's window is 3 frames and at most 200ms, and a write's pace is `every(1, 'frame')` or `every(40, 'ms')` ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice), [01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
 It reads 1.2's answer, then the foundations chapters [08-01](../../learn/foundations/08-01-replication-models-and-authority.md), [08-03](../../learn/foundations/08-03-ordering-and-classes-of-data.md), [08-05](../../learn/foundations/08-05-position-and-clocks.md), [09-05](../../learn/foundations/09-05-versions-and-security.md), and [09-06](../../learn/foundations/09-06-connection-lifecycle.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.

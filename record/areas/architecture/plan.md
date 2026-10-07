@@ -86,6 +86,10 @@ Its answer goes in `01-spine.md`, in this area.
 `01-spine.md` takes up step 7's paragraphs after its exit, from the headless core proposed on 2026-10-03 to sim awareness, and once the user agrees to it, step 7 links to it in their place.
 Exit: the user agrees to `01-spine.md`.
 Waits on 1.1, 1.2, 1.3, and 1.4.
+Raised elsewhere: by 1.1, whether profiles reach pilots apart from Crosscheck's releases, to place with the part that designs profiles and updates ([01-spine](01-spine.md#left-to-later-nodes)).
+Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started within 1.5 minutes of a load, to place with the part that owns sync ([01-spine](01-spine.md#left-to-later-nodes)).
+Raised elsewhere: by 1.1, whether the WASM module runs calculator code for the profile engine, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-to-later-nodes)).
+Raised elsewhere: by 1.1.2, how each module in a panel or the sim tears itself down, to place with the parts that design the panel bridge and plugins ([01-spine](01-spine.md#left-to-later-nodes)).
 
 ## 1.1 Components
 

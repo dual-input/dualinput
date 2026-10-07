@@ -387,6 +387,8 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 **Rules:**
 
+- If the PF's aircraft isn't on the ground when the session starts, there's no preflight: the crew flies at once, and every other pilot joins as a late joiner (user, 2026-10-08).
+  Holding the PF still in the air would go wrong, because a frozen aircraft keeps integrating its velocities: a parked Baron, frozen and written 5 ft up, had its `A:VELOCITY BODY Z` climb from 0 to 68 ft/s in 4s (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
 - A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 - The Go to button is unavailable, and says why, on any page but the main menu's home page and Free flight's world map, or when Crosscheck has no copy of BlurPage installed: a sim update removes BlurPage or stops MasterPage placing it, or another package copies it.
   Crosscheck tries no other component, so the button stays unavailable until a Crosscheck release picks one (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
@@ -760,8 +762,9 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 - An "install when the sim is closed" option: if Crosscheck is open when the sim exits, it updates itself then, and if it was closed first, a helper does it.
 - A helper that the sim launches warns, in a Windows notification early in the sim's load, that a waiting update will need a sim restart, so the pilot can close the sim before waiting for it to load.
   It warns only a pilot who has flown with Crosscheck lately, judged by the date of their last session, and stays quiet for one who hasn't used it in a while.
-- At launch, before anything else, Crosscheck names any Community package that overrides `VCockpit.js`, such as FS Copilot's or YourControls', and offers to disable it, since only one override can win the mount order and a losing Crosscheck quietly breaks pointer sync ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
-  If the sim is running, disabling it takes a sim restart, and Crosscheck says so.
+- When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app, the EFB app, and the preflight list each show a notice, such as "Conflict: another mod (mod-name) overrides a sim file Crosscheck overrides. You may experience issues. [Learn more]", with nothing shown while the sim starts (user, 2026-10-08).
+  Only one override can win the mount order, and a losing Crosscheck quietly breaks pointer sync ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
+  The desktop app offers to disable the other package, which takes a sim restart if the sim is running, and Crosscheck says so.
 
 **Not in v1:**
 

@@ -358,6 +358,15 @@ A pilot sees them whether or not the EFB is open, and a click on one opens Cross
   The pilot caught none of three `SimConnect_Text` texts, though the sim reported two as displayed (same date, [interface log](../interface/log.md#2026-10-04-simconnect_text-reports-its-texts-as-displayed-and-the-pilot-didnt-catch-any-of-them)).
 - **Open questions:** how the panel shows in VR, and whether clicks on its empty part reach the cockpit.
 
+### Component health
+
+Crosscheck's core watches each of Crosscheck's components, from the watcher and the apps to the code in the sim and the relay, and the desktop app shows each one's state as a status indicator, in its footer, its settings, or both (user, 2026-10-08).
+
+- **Tech:** the core is the hub most components already report to ([architecture's spine](../architecture/01-spine.md#components)).
+  The WASM module hears from the core every second in a session ([architecture's spine](../architecture/01-spine.md#what-moves-them)), and FS Copilot's app re-sent its state to every panel every 2s, so a panel could take silence to mean the app was gone (read in the FS Copilot fork, `FsCopilot/Connection/PanelServer.cs`), so silence from a component is something the core can name.
+  Another package's `VCockpit.js` override winning the mount order would show as a panel bridge that never connects ([installing and updating](03-v1-scope.md#installing-and-updating)).
+- **Open questions:** what counts as healthy for each component, and whether the EFB app shows the indicators too, for a pilot in VR.
+
 ### Crosscheck objects in the cockpit
 
 Crosscheck places objects of its own in the cockpit, which a pilot in VR reaches without a tablet, such as a take-control button the pilot puts above the glareshield or sticks to a window.

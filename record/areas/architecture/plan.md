@@ -100,6 +100,7 @@ It reads what node 1 reads, then the area logs, starting with [interface](../int
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.1.1 and 1.1.2.
+Done on 2026-10-08.
 
 ## 1.1.1 Masking priority at sim start
 
@@ -130,6 +131,7 @@ The spine can't draw the boundaries between parts, or set the conventions they s
 It reads 1.1's answer, then the [interface](../interface/log.md) and [CommBus](../commbus/log.md) logs, and the foundations chapters on the ways to reach the sim: [04-01](../../learn/foundations/04-01-connection-and-data.md), [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Raised elsewhere: by 1.1, how the core knows each component is alive and working, the watcher, the apps, the code in the sim, and the relay, so the apps can show each one's status ([ideas](../product/ideas.md#component-health); user, 2026-10-08).
 Raised elsewhere: by 1.1.2, how the core tells the components in the sim that a session started and ended ([01-spine](01-spine.md#left-to-later-nodes)).
 Raised elsewhere: by 1.1.2, how the WASM module hears from the core every second on every machine in a session, so it can undo our state in the sim when the core stops ([01-spine](01-spine.md#what-moves-them)).
 Raised elsewhere: by 1.1, how a panel finds its own core when two cores run on one machine, since FS Copilot's panels try ports 9020 to 9024 and connect to the first that answers, one reason its test bench must not run beside a live sim (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").

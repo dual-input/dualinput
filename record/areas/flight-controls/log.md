@@ -24,6 +24,7 @@ Every entry was measured on MSFS 2024 SunRise 12.2.282174.999, on the date in it
 - Once group A was cleared, `L:ElevatorInput` moved from −100 to 100 again.
 - Group B was to do the same holding the throttle's own axis event, not maskable, but the throttle, bound to MSFS's "THROTTLE 1 AXIS", fired no `K:AXIS_THROTTLE1_SET`: `L:Throttle1Position` moved from 0.3 to 97.8 while our listener heard none, so group B's test didn't run.
   On 2026-10-01 the same aircraft's throttle fired `K:AXIS_THROTTLE1_SET` ([entry below](#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), so something between the two runs changed the event, perhaps the binding (unverified); which event this binding fires, the probe didn't listen for.
+  We didn't run group B again, because group A answers the question, and the core doesn't need to hear the axes before a session (user, 2026-10-07).
 
 **Changed:** the core can take its masking priority when it connects, as the sim starts, by holding a group open with an event it only listens to, and add the axes it masks when a session needs them, ahead of an aircraft that loads later, with nothing held back until then.
 SimConnect answered before the main menu loaded its aircraft, so a core that connects as soon as it can gets in ahead of the menu's aircraft too, in this one run.

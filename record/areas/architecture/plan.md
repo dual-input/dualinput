@@ -106,6 +106,7 @@ A probe settles it: register an empty notification group at 10,000,000 before th
 It reads the [flight-controls log](../flight-controls/log.md), the foundations chapter [04-02](../../learn/foundations/04-02-events.md), and the probe [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs).
 Its answer goes in an entry in the flight-controls log, which the tentative decision [The core starts with every sim run](decisions.md#the-core-starts-with-every-sim-run) and 1.1's section of `01-spine.md` cite.
 Exit: a flight-controls log entry answers the question.
+Done on 2026-10-07.
 
 ## 1.1.2 Components with no session
 

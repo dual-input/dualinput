@@ -9,7 +9,7 @@ argument-hint: <area>
 The area is $ARGUMENTS, a folder under `record/areas/`.
 If no area is given, list the folders in `record/areas/`, with the date of each one's newest log entry, or "no log" where it has none, and ask which one.
 
-1. If the area has a `plan.md`, read it: the first stage that has an "Exit:" line and no "Done on" line under it is where the work stands.
+1. If the area has a `plan.md`, read it: the first stage that has an "Exit:" line, no "Done on" line under it, and no "Waits on" line naming a stage that isn't done, is where the work stands.
    If every such stage is done, say so and go on from the log.
    If it has no plan, say so and go on from the log, because an experiment needs no plan.
 2. If the area has a `log.md`, read it from the top until you know what the last session found and what it left unverified, which is usually one to three entries.

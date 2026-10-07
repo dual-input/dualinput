@@ -25,7 +25,7 @@ The kind decides who reads it and what shape it takes.
 | Plan               | `record/areas/<area>/plan.md`                                            | know what's being built and where it stands                                            |
 | Log                | `record/areas/<area>/log.md`                                             | know what was found                                                                    |
 | Decision           | `record/decisions/NNN-<slug>.md`                                         | know why one option won                                                                |
-| Tentative decisions | `record/areas/<area>/decisions.md`                                      | know what an area's experiments have settled for now, and on what findings             |
+| Tentative decisions | `record/areas/<area>/decisions.md`                                      | know what an area's experiments or design work have settled for now, and on what findings |
 | Reference          | beside what it describes                                                 | look one thing up                                                                      |
 | Outline            | `record/learn/<course>/outline.md`                                       | know what a course covers, in what order and depth, and which parts have a chapter     |
 | Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
@@ -70,8 +70,9 @@ Once made, a decision isn't edited, except to add a blockquote at the top naming
 The reversing decision says what it reverses and links back.
 
 When an area's experiments settle a question before any product design does, the answer goes in the area's `decisions.md` as a tentative decision, because a numbered decision can't be edited and these change with each probe.
-Each one gives what was decided, the findings behind it with links into the log, and what it leaves out, if anything, and it's edited in place as findings arrive.
+Each one gives what was decided, the findings behind it with links to where each was found, and what it leaves out, if anything, and it's edited in place as findings arrive.
 A product design confirms each one as a decision in `record/decisions/`, changes it, or drops it, and the tentative one links to the result.
+Design work that settles a question for now writes a tentative decision too, as a node of the [architecture plan](../../record/areas/architecture/plan.md) does, and that plan's [Where answers go](../../record/areas/architecture/plan.md#where-answers-go) says when each one gets its number.
 
 ### Reference
 

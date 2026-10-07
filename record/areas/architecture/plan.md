@@ -62,7 +62,7 @@ A child that serves two nodes gets its decisions numbered when the last of them 
 A finding that contradicts a done node reopens it, along with every node whose answer rests on that node's answer.
 In each one, replace the `Done on` line with `Reopened on <YYYY-MM-DD>, by <link to the finding, or the node whose answer needs the change>.`
 
-## 1. The spine
+## 1 The spine
 
 Question: what does every other part of Crosscheck rest on?
 It covers:
@@ -78,3 +78,38 @@ It reads [01-aims](../product/01-aims.md), [03-v1-scope](../product/03-v1-scope.
 Its answer goes in `01-spine.md`, in this area.
 When `01-spine.md` is agreed, the leanings in step 7 move into it, and step 7 links to it in their place.
 Exit: the user agrees to `01-spine.md`.
+Waits on 1.1, 1.2, 1.3, and 1.4.
+
+## 1.1 Components
+
+Question: what components does Crosscheck run, where does each run, and what does each own?
+The spine can't draw a link without its endpoints, and v1's features name more of them than the core and its clients that step 7 leans toward.
+Some have no home yet, such as whatever reads the take-control key, which pilots bind in Crosscheck's settings rather than the sim's ([03-v1-scope](../product/03-v1-scope.md#take-control-key)), and the record leaves open where each part of a plugin runs ([03-v1-scope](../product/03-v1-scope.md#plugins)).
+It reads what node 1 reads, then the area logs, starting with [interface](../interface/log.md), [avatars](../avatars/log.md) with its [decisions](../avatars/decisions.md), [flight-controls](../flight-controls/log.md), and [flight-model](../flight-model/log.md).
+Its answer goes in its own section of `01-spine.md`.
+Exit: the user agrees to that section.
+
+## 1.2 Communication
+
+Question: how do those components communicate?
+The spine can't draw the boundaries between parts, or set the conventions they share, until it knows which components exchange what, and by what means.
+It reads 1.1's answer, then the [interface](../interface/log.md) and [CommBus](../commbus/log.md) logs, and the foundations chapters on the ways to reach the sim: [04-01](../../learn/foundations/04-01-connection-and-data.md), [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md).
+Its answer goes in its own section of `01-spine.md`.
+Exit: the user agrees to that section.
+
+## 1.3 Language and toolchains
+
+Question: what language and toolchain does each component's runtime take?
+The spine can't pick a language until it knows the runtimes the components run in, and they differ: Node, Electron, Coherent GT, the sim's WASM, and whatever native code audio capture and speech recognition need.
+It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
+Its answer goes in its own section of `01-spine.md`.
+Exit: the user agrees to that section.
+
+## 1.4 Shared conventions
+
+Question: what conventions does every component share?
+The spine can't fix where one part ends and the next begins until the parts agree on what crosses between them.
+Step 7 owes two of these by name, the form of a pilot ID ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)) and of a session ID ([03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)), and the sync design docs imply more, such as the message ID every transport filters duplicates by, and time given in both frames and milliseconds.
+It reads 1.2's answer, then the foundations chapters [08-01](../../learn/foundations/08-01-replication-models-and-authority.md), [08-03](../../learn/foundations/08-03-ordering-and-classes-of-data.md), [08-05](../../learn/foundations/08-05-position-and-clocks.md), [09-05](../../learn/foundations/09-05-versions-and-security.md), and [09-06](../../learn/foundations/09-06-connection-lifecycle.md).
+Its answer goes in its own section of `01-spine.md`.
+Exit: the user agrees to that section.

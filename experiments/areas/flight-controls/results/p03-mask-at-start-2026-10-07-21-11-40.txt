@@ -1,0 +1,15 @@
+p03 · Masking priority taken as the sim starts, on MSFS 2024
+2026-10-07T21:11:40.127Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+Started the sim through Steam; the holder's groups went in, then the observer connected with TITLE null
+Aircraft loaded after the groups went in: 9s %APPDATA%\microsoft flight simulator 2024\packages\community\a2a-aircraft-pa24\simobjects\airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg; 381s %APPDATA%\microsoft flight simulator 2024\packages\community\a2a-aircraft-pa24\simobjects\airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg
+TITLE after Ready to fly "A2A Piper PA-24-250 Comanche"
+Groups asking for 10000000: A held open by K:SIM_RATE_INCR, B listening to K:AXIS_THROTTLE1_SET, C empty; 5s phases
+
+pitch free, group A not masking: L:ElevatorInput -0.073247..100 · the hardware's events heard at the highest priority ×45 (11 past ±6000) · group A heard ×0 (0 past ±6000) none
+pitch masked by group A: L:ElevatorInput 100 · the hardware's events heard at the highest priority ×88 (46 past ±6000) · group A heard ×88 (46 past ±6000) -16384..16384
+pitch cleared: L:ElevatorInput -100..100 · the hardware's events heard at the highest priority ×102 (62 past ±6000) · group A heard ×0 (0 past ±6000) none
+
+group A: ahead of Accu-Sim: it heard the hardware and held the control still (L:ElevatorInput at 0% of its free range)
+group B: not run
+
+Exceptions: observer: UNRECOGNIZED_ID (3) on read 1 values, parameter 3; holder: UNRECOGNIZED_ID (3) on group C (12) priority 10000000, no events, parameter 1; holder: UNRECOGNIZED_ID (3) on clear group A, parameter 1

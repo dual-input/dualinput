@@ -3,9 +3,34 @@
 What our experiments found about keeping a pilot's own flight controls out of the sim, newest entry first.
 A SimConnect client's mask at 10,000,000 blocks the pilot's hardware input bound in MSFS, input events included, and gives it back when the client dies; a tool such as SPAD.neXt that sets the aircraft's input event itself gets past it.
 Two groups can't share a priority, so on an aircraft whose module asks for the same one, the group that registers first is ahead.
+A group that takes its priority as the sim starts, held open by an event it only listens to, keeps its place, and masks ahead of Accu-Sim once it adds the axis.
 A value sent back at half reaches the sim from 10,001,000 down, and the PMDG 777's own yoke takes it only when it's sent with the legacy `SimConnect_TransmitClientEvent`.
-The probe is [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), and its raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
+The probes are [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs), [p02-input-delay.mjs](../../../experiments/areas/flight-controls/p02-input-delay.mjs), and [p03-mask-at-start.mjs](../../../experiments/areas/flight-controls/p03-mask-at-start.mjs), and their raw output is in [experiments/areas/flight-controls/results](../../../experiments/areas/flight-controls/results).
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999, on the date in its heading, with the hardware on our development machine.
+
+## 2026-10-07: A group that takes its priority as the sim starts, held open by an event it only listens to, masks ahead of Accu-Sim once it adds the axis
+
+**Asked:** can Crosscheck's core take its masking priority as the sim starts, ahead of an aircraft's own module, without holding back the pilot's controls until a session wants to mask ([architecture plan](../architecture/plan.md#111-masking-priority-at-sim-start), node 1.1.1)?
+
+**Expected:** no prediction for a group that masks nothing at first.
+
+**Found:** p03 started before the sim, asked Steam to start it, and registered its groups the moment SimConnect answered; the pilot then loaded the A2A PA-24 parked from the world map:
+
+- Asking 10,000,000 for a group with no events in it failed: the sim answered `SetNotificationGroupPriority` with `UNRECOGNIZED_ID`.
+- Group A, holding `K:SIM_RATE_INCR` as an event it listens to and doesn't mask, took its priority with no error.
+- The sim sent `AircraftLoaded` for the PA-24 9s after our groups went in, when the main menu loaded it, and again 381s after, for the flight.
+- With the pilot moving the yoke and the axis not in group A, `L:ElevatorInput` moved from −0.07 to 100, so Accu-Sim took the input.
+- Once `K:AXIS_ELEVATOR_SET` was added to group A, maskable, after Ready to fly, group A heard all 88 elevator events that our listener at the highest priority heard, 46 of them past ±6,000 and up to ±16,384, and `L:ElevatorInput` held at 100, 0% of its free range.
+- Once group A was cleared, `L:ElevatorInput` moved from −100 to 100 again.
+- Group B was to do the same holding the throttle's own axis event, not maskable, but the throttle, bound to MSFS's "THROTTLE 1 AXIS", fired no `K:AXIS_THROTTLE1_SET`: `L:Throttle1Position` moved from 0.3 to 97.8 while our listener heard none, so group B's test didn't run.
+  On 2026-10-01 the same aircraft's throttle fired `K:AXIS_THROTTLE1_SET` ([entry below](#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), so something between the two runs changed the event, perhaps the binding (unverified); which event this binding fires, the probe didn't listen for.
+
+**Changed:** the core can take its masking priority when it connects, as the sim starts, by holding a group open with an event it only listens to, and add the axes it masks when a session needs them, ahead of an aircraft that loads later, with nothing held back until then.
+SimConnect answered before the main menu loaded its aircraft, so a core that connects as soon as it can gets in ahead of the menu's aircraft too, in this one run.
+
+**Affects:** the tentative decision [The core starts with every sim run](../architecture/decisions.md#the-core-starts-with-every-sim-run), and [node 1.1.1](../architecture/plan.md#111-masking-priority-at-sim-start) of the architecture plan.
+
+**Evidence:** `results/p03-mask-at-start-2026-10-07-21-11-40`, `.txt` and `.ndjson`.
 
 ## 2026-10-06: A pilot's own pitch and roll input was flyable 150ms late and not 300ms late, in the Baron at cruise
 

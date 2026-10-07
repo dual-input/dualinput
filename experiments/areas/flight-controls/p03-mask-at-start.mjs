@@ -76,7 +76,7 @@ import { fileURLToPath } from "node:url"
 
 import { SKIP, START, encode, startBeeper, startKeys } from "../../tools/guide.mjs"
 import { AIRCRAFT } from "../aircraft/lib/aircraft.mjs"
-import { Recorder, fmt, sleep } from "../aircraft/lib/out.mjs"
+import { Recorder, fmt, scrub, sleep } from "../aircraft/lib/out.mjs"
 import { NODE_SIMCONNECT, PRIORITY, Sim } from "../aircraft/lib/sim.mjs"
 
 const SELF = fileURLToPath(import.meta.url)
@@ -396,7 +396,8 @@ async function observer() {
     "p03 · Masking priority taken as the sim starts, on MSFS 2024",
     `${new Date(rec.started).toISOString()}, ${sim.version}, node-simconnect ${NODE_SIMCONNECT}`,
     `${launched ? "Started the sim through Steam" : "Waited for a sim started elsewhere"}; the holder's groups went in, then the observer connected with TITLE ${JSON.stringify(titleAtStart)}`,
-    `Aircraft loaded after the groups went in: ${loads.map((l) => `${Math.round((l.t - readyAt) / 1000)}s ${l.file}`).join("; ") || "none seen"}`,
+    // The sim's paths carry the home folder, which the tree mustn't (CLAUDE.md).
+    `Aircraft loaded after the groups went in: ${loads.map((l) => `${Math.round((l.t - readyAt) / 1000)}s ${scrub(l.file)}`).join("; ") || "none seen"}`,
     `TITLE after Ready to fly ${JSON.stringify(title)}`,
     `Groups asking for ${MASK_PRIORITY}: A held open by K:${ANCHOR}, B listening to K:${THROTTLE}, C empty; ${PHASE_MS / 1000}s phases`,
     "",

@@ -1,0 +1,563 @@
+{"t":1791407685877,"s":185.75,"kind":"holder","text":"open: SunRise 12.2.282174.999, SimConnect 12.2.0.0","holderKind":"open","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791407685943,"s":185.816,"kind":"holder","text":"system: Sim 1 (running)","holderKind":"system","event":"Sim","data":1}
+{"t":1791407685943,"s":185.816,"kind":"holder","text":"system: Pause_EX1 1 (full pause)","holderKind":"system","event":"Pause_EX1","data":1}
+{"t":1791407685943,"s":185.816,"kind":"holder","text":"system: View 0 (none)","holderKind":"system","event":"View","data":0}
+{"t":1791407685943,"s":185.816,"kind":"holder","text":"exception: UNRECOGNIZED_ID (3) on group C (12) priority 10000000, no events, parameter 1","holderKind":"exception","exception":3,"name":"UNRECOGNIZED_ID","sendId":17,"index":1,"sent":"group C (12) priority 10000000, no events"}
+{"t":1791407686049,"s":185.922,"kind":"holder","text":"system: Pause_EX1 1 (full pause)","holderKind":"system","event":"Pause_EX1","data":1}
+{"t":1791407686383,"s":186.256,"kind":"holder","text":"ready: groups in: A held open by K:SIM_RATE_INCR, B listening to K:AXIS_THROTTLE1_SET, C empty, each asking for 10000000","holderKind":"ready"}
+{"t":1791407686609,"s":186.482,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791407687009,"s":186.882,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791407687009,"s":186.882,"kind":"system","text":"Pause_EX1 1 (full pause)","event":"Pause_EX1","data":1}
+{"t":1791407687009,"s":186.882,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791407687342,"s":187.215,"kind":"exception","text":"UNRECOGNIZED_ID (3) on read 1 values, parameter 3","exception":3,"name":"UNRECOGNIZED_ID","sendId":12,"index":3,"sent":"read 1 values"}
+{"t":1791407687342,"s":187.215,"kind":"start","text":"TITLE when the observer connected null, 1s after the holder's groups went in","title":null}
+{"t":1791407689592,"s":189.465,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1791407689592,"s":189.465,"kind":"holder","text":"system: SimStop 0","holderKind":"system","event":"SimStop","data":0}
+{"t":1791407689592,"s":189.465,"kind":"holder","text":"system: Sim 0 (not running)","holderKind":"system","event":"Sim","data":0}
+{"t":1791407689593,"s":189.466,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1791407689594,"s":189.467,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1791407689595,"s":189.468,"kind":"holder","text":"system: PositionChanged 0","holderKind":"system","event":"PositionChanged","data":0}
+{"t":1791407689596,"s":189.469,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1791407689597,"s":189.47,"kind":"holder","text":"flow: TELEPORT_START","holderKind":"flow","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1791407689597,"s":189.47,"kind":"holder","text":"flow: TELEPORT_DONE","holderKind":"flow","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1791407689597,"s":189.47,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1791407689747,"s":189.62,"kind":"system","text":"Pause_EX1 9 (full pause + sim pause)","event":"Pause_EX1","data":9}
+{"t":1791407689747,"s":189.62,"kind":"holder","text":"system: Pause_EX1 9 (full pause + sim pause)","holderKind":"system","event":"Pause_EX1","data":9}
+{"t":1791407689906,"s":189.779,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1791407689907,"s":189.78,"kind":"holder","text":"system: SimStart 0","holderKind":"system","event":"SimStart","data":0}
+{"t":1791407689907,"s":189.78,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791407689907,"s":189.78,"kind":"holder","text":"system: Sim 1 (running)","holderKind":"system","event":"Sim","data":1}
+{"t":1791407690222,"s":190.095,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791407690222,"s":190.095,"kind":"holder","text":"system: Pause_EX1 8 (sim pause)","holderKind":"system","event":"Pause_EX1","data":8}
+{"t":1791407690347,"s":190.22,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791407690347,"s":190.22,"kind":"holder","text":"system: Pause_EX1 0 (none)","holderKind":"system","event":"Pause_EX1","data":0}
+{"t":1791407695095,"s":194.968,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1791407695095,"s":194.968,"kind":"holder","text":"system: AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","holderKind":"system","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1791407696094,"s":195.967,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1791407696095,"s":195.968,"kind":"holder","text":"system: Pause_EX1 8 (sim pause)","holderKind":"system","event":"Pause_EX1","data":8}
+{"t":1791408059935,"s":559.808,"kind":"system","text":"SimStop 0","event":"SimStop","data":0}
+{"t":1791408059936,"s":559.809,"kind":"holder","text":"system: SimStop 0","holderKind":"system","event":"SimStop","data":0}
+{"t":1791408059936,"s":559.809,"kind":"holder","text":"system: Sim 0 (not running)","holderKind":"system","event":"Sim","data":0}
+{"t":1791408059936,"s":559.809,"kind":"system","text":"Sim 0 (not running)","event":"Sim","data":0}
+{"t":1791408060188,"s":560.061,"kind":"system","text":"FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1791408060188,"s":560.061,"kind":"holder","text":"system: FlightLoaded %APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","holderKind":"system","event":"FlightLoaded","file":"%APPDATA%\\Microsoft Flight Simulator 2024\\MISSIONS\\Custom\\CustomFlight\\CustomFlight.FLT","signal":true}
+{"t":1791408060193,"s":560.066,"kind":"system","text":"PositionChanged 0","event":"PositionChanged","data":0}
+{"t":1791408060193,"s":560.066,"kind":"holder","text":"system: PositionChanged 0","holderKind":"system","event":"PositionChanged","data":0}
+{"t":1791408060237,"s":560.11,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791408060237,"s":560.11,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791408060238,"s":560.111,"kind":"flow","text":"FLT_LOAD CustomFlight.FLT","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1791408060238,"s":560.111,"kind":"holder","text":"flow: FLT_LOAD apron.flt","holderKind":"flow","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791408060238,"s":560.111,"kind":"holder","text":"flow: FLT_LOADED apron.flt","holderKind":"flow","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791408060238,"s":560.111,"kind":"holder","text":"flow: FLT_LOAD CustomFlight.FLT","holderKind":"flow","flow":"FLT_LOAD","id":1,"file":"CustomFlight.FLT","signal":false}
+{"t":1791408060238,"s":560.111,"kind":"holder","text":"flow: FLT_LOADED CustomFlight.FLT","holderKind":"flow","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1791408060238,"s":560.111,"kind":"holder","text":"flow: TELEPORT_START","holderKind":"flow","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1791408060238,"s":560.111,"kind":"holder","text":"flow: TELEPORT_DONE","holderKind":"flow","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1791408060238,"s":560.111,"kind":"flow","text":"FLT_LOADED CustomFlight.FLT","flow":"FLT_LOADED","id":2,"file":"CustomFlight.FLT","signal":true}
+{"t":1791408060239,"s":560.112,"kind":"flow","text":"TELEPORT_START","flow":"TELEPORT_START","id":3,"file":"","signal":false}
+{"t":1791408060239,"s":560.112,"kind":"flow","text":"TELEPORT_DONE","flow":"TELEPORT_DONE","id":4,"file":"","signal":false}
+{"t":1791408060946,"s":560.819,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791408060951,"s":560.824,"kind":"holder","text":"system: Pause_EX1 0 (none)","holderKind":"system","event":"Pause_EX1","data":0}
+{"t":1791408061156,"s":561.029,"kind":"system","text":"SimStart 0","event":"SimStart","data":0}
+{"t":1791408061157,"s":561.03,"kind":"holder","text":"system: SimStart 0","holderKind":"system","event":"SimStart","data":0}
+{"t":1791408061158,"s":561.031,"kind":"holder","text":"system: Sim 1 (running)","holderKind":"system","event":"Sim","data":1}
+{"t":1791408061158,"s":561.031,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791408067130,"s":567.003,"kind":"system","text":"Pause_EX1 1 (full pause)","event":"Pause_EX1","data":1}
+{"t":1791408067131,"s":567.004,"kind":"holder","text":"system: Pause_EX1 1 (full pause)","holderKind":"system","event":"Pause_EX1","data":1}
+{"t":1791408067164,"s":567.037,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791408067164,"s":567.037,"kind":"holder","text":"system: Pause_EX1 0 (none)","holderKind":"system","event":"Pause_EX1","data":0}
+{"t":1791408067431,"s":567.304,"kind":"system","text":"AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1791408067431,"s":567.304,"kind":"holder","text":"system: AircraftLoaded %APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","holderKind":"system","event":"AircraftLoaded","file":"%APPDATA%\\microsoft flight simulator 2024\\packages\\community\\a2a-aircraft-pa24\\simobjects\\airplanes\\pa24-250\\presets\\a2a\\pa24-250\\config\\aircraft.cfg","signal":true}
+{"t":1791408076672,"s":576.545,"kind":"flow","text":"FLIGHT_START","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1791408076672,"s":576.545,"kind":"flow","text":"FLT_LOAD apron.flt","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791408076672,"s":576.545,"kind":"holder","text":"flow: FLIGHT_START","holderKind":"flow","flow":"FLIGHT_START","id":14,"file":"","signal":false}
+{"t":1791408076672,"s":576.545,"kind":"holder","text":"flow: FLT_LOAD apron.flt","holderKind":"flow","flow":"FLT_LOAD","id":1,"file":"apron.flt","signal":false}
+{"t":1791408076673,"s":576.546,"kind":"holder","text":"flow: FLT_LOADED apron.flt","holderKind":"flow","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791408076673,"s":576.546,"kind":"holder","text":"flow: RTC_START","holderKind":"flow","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1791408076673,"s":576.546,"kind":"flow","text":"FLT_LOADED apron.flt","flow":"FLT_LOADED","id":2,"file":"apron.flt","signal":true}
+{"t":1791408076673,"s":576.546,"kind":"flow","text":"RTC_START","flow":"RTC_START","id":10,"file":"","signal":false}
+{"t":1791408080242,"s":580.115,"kind":"flow","text":"RTC_END","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1791408080243,"s":580.116,"kind":"holder","text":"flow: RTC_END","holderKind":"flow","flow":"RTC_END","id":11,"file":"","signal":false}
+{"t":1791408080377,"s":580.25,"kind":"system","text":"Pause_EX1 1 (full pause)","event":"Pause_EX1","data":1}
+{"t":1791408080377,"s":580.25,"kind":"holder","text":"system: Pause_EX1 1 (full pause)","holderKind":"system","event":"Pause_EX1","data":1}
+{"t":1791408080408,"s":580.281,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791408080408,"s":580.281,"kind":"holder","text":"system: Pause_EX1 0 (none)","holderKind":"system","event":"Pause_EX1","data":0}
+{"t":1791408083103,"s":582.976,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1791408083103,"s":582.976,"kind":"holder","text":"system: View 2 (cockpit virtual)","holderKind":"system","event":"View","data":2}
+{"t":1791408100710,"s":600.583,"kind":"loaded","text":"Ready to fly 20s ago, TITLE \"A2A Piper PA-24-250 Comanche\"","title":"A2A Piper PA-24-250 Comanche"}
+{"t":1791408103965,"s":603.838,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791408104844,"s":604.717,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2, not ours","event":"AXIS_ELEVATOR_SET","data":[-2,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408105078,"s":604.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4, not ours","event":"AXIS_ELEVATOR_SET","data":[-4,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408105178,"s":605.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET -6, not ours","event":"AXIS_ELEVATOR_SET","data":[-6,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408105311,"s":605.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4, not ours","event":"AXIS_ELEVATOR_SET","data":[-4,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408105378,"s":605.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2, not ours","event":"AXIS_ELEVATOR_SET","data":[-2,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408105444,"s":605.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4, not ours","event":"AXIS_ELEVATOR_SET","data":[-4,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408105678,"s":605.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -6, not ours","event":"AXIS_ELEVATOR_SET","data":[-6,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408106811,"s":606.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2, not ours","event":"AXIS_ELEVATOR_SET","data":[-2,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408106845,"s":606.718,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408106911,"s":606.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET -12, not ours","event":"AXIS_ELEVATOR_SET","data":[-12,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408106978,"s":606.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8, not ours","event":"AXIS_ELEVATOR_SET","data":[-8,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107011,"s":606.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4, not ours","event":"AXIS_ELEVATOR_SET","data":[-4,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107144,"s":607.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8, not ours","event":"AXIS_ELEVATOR_SET","data":[-8,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107178,"s":607.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET -10, not ours","event":"AXIS_ELEVATOR_SET","data":[-10,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107245,"s":607.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107344,"s":607.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6, not ours","event":"AXIS_ELEVATOR_SET","data":[6,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107378,"s":607.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12, not ours","event":"AXIS_ELEVATOR_SET","data":[12,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107578,"s":607.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10, not ours","event":"AXIS_ELEVATOR_SET","data":[10,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408107611,"s":607.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108011,"s":607.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10, not ours","event":"AXIS_ELEVATOR_SET","data":[10,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108044,"s":607.917,"kind":"key","text":"K:AXIS_ELEVATOR_SET 18, not ours","event":"AXIS_ELEVATOR_SET","data":[18,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108078,"s":607.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET 26, not ours","event":"AXIS_ELEVATOR_SET","data":[26,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108111,"s":607.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET 40, not ours","event":"AXIS_ELEVATOR_SET","data":[40,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108144,"s":608.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET 68, not ours","event":"AXIS_ELEVATOR_SET","data":[68,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108178,"s":608.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET 128, not ours","event":"AXIS_ELEVATOR_SET","data":[128,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108211,"s":608.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET 316, not ours","event":"AXIS_ELEVATOR_SET","data":[316,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108245,"s":608.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET 632, not ours","event":"AXIS_ELEVATOR_SET","data":[632,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108278,"s":608.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1106, not ours","event":"AXIS_ELEVATOR_SET","data":[1106,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108311,"s":608.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1714, not ours","event":"AXIS_ELEVATOR_SET","data":[1714,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108344,"s":608.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2304, not ours","event":"AXIS_ELEVATOR_SET","data":[2304,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108378,"s":608.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET 3118, not ours","event":"AXIS_ELEVATOR_SET","data":[3118,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108411,"s":608.284,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4066, not ours","event":"AXIS_ELEVATOR_SET","data":[4066,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108445,"s":608.318,"kind":"key","text":"K:AXIS_ELEVATOR_SET 5120, not ours","event":"AXIS_ELEVATOR_SET","data":[5120,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108478,"s":608.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET 5944, not ours","event":"AXIS_ELEVATOR_SET","data":[5944,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108511,"s":608.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6884, not ours","event":"AXIS_ELEVATOR_SET","data":[6884,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108545,"s":608.418,"kind":"key","text":"K:AXIS_ELEVATOR_SET 7818, not ours","event":"AXIS_ELEVATOR_SET","data":[7818,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108578,"s":608.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET 8686, not ours","event":"AXIS_ELEVATOR_SET","data":[8686,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108611,"s":608.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET 9638, not ours","event":"AXIS_ELEVATOR_SET","data":[9638,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108645,"s":608.518,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10466, not ours","event":"AXIS_ELEVATOR_SET","data":[10466,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108678,"s":608.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET 11532, not ours","event":"AXIS_ELEVATOR_SET","data":[11532,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108711,"s":608.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12746, not ours","event":"AXIS_ELEVATOR_SET","data":[12746,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108745,"s":608.618,"kind":"key","text":"K:AXIS_ELEVATOR_SET 13944, not ours","event":"AXIS_ELEVATOR_SET","data":[13944,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108778,"s":608.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14920, not ours","event":"AXIS_ELEVATOR_SET","data":[14920,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108812,"s":608.685,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15832, not ours","event":"AXIS_ELEVATOR_SET","data":[15832,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108845,"s":608.718,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408108968,"s":608.841,"kind":"phase","text":"pitch free, group A not masking: L:ElevatorInput -0.073247..100 · the hardware's events heard at the highest priority ×45 (11 past ±6000) · group A heard ×0 (0 past ±6000) none","control":"pitch","phase":"free, group A not masking","group":"A","heard":{"n":45,"hardware":11,"min":-12,"max":16384},"holder":{"n":0,"hardware":0,"min":null,"max":null},"value":{"n":46,"hardware":0,"min":-0.07324665812122322,"max":100}}
+{"t":1791408108969,"s":608.842,"kind":"holder","text":"masking: group A masks K:AXIS_ELEVATOR_SET","holderKind":"masking","group":"A"}
+{"t":1791408109444,"s":609.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15980, not ours","event":"AXIS_ELEVATOR_SET","data":[15980,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109445,"s":609.318,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 15980, not ours","event":"AXIS_ELEVATOR_SET","data":[15980,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109445,"s":609.318,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 15980","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":15980,"ours":null}
+{"t":1791408109478,"s":609.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14206, not ours","event":"AXIS_ELEVATOR_SET","data":[14206,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109478,"s":609.351,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 14206, not ours","event":"AXIS_ELEVATOR_SET","data":[14206,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109478,"s":609.351,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 14206","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":14206,"ours":null}
+{"t":1791408109511,"s":609.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10914, not ours","event":"AXIS_ELEVATOR_SET","data":[10914,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109512,"s":609.385,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 10914, not ours","event":"AXIS_ELEVATOR_SET","data":[10914,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109512,"s":609.385,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 10914","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":10914,"ours":null}
+{"t":1791408109545,"s":609.418,"kind":"key","text":"K:AXIS_ELEVATOR_SET 7010, not ours","event":"AXIS_ELEVATOR_SET","data":[7010,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109545,"s":609.418,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 7010, not ours","event":"AXIS_ELEVATOR_SET","data":[7010,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109545,"s":609.418,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 7010","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":7010,"ours":null}
+{"t":1791408109578,"s":609.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4750, not ours","event":"AXIS_ELEVATOR_SET","data":[4750,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109578,"s":609.451,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 4750, not ours","event":"AXIS_ELEVATOR_SET","data":[4750,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109578,"s":609.451,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 4750","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":4750,"ours":null}
+{"t":1791408109611,"s":609.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2822, not ours","event":"AXIS_ELEVATOR_SET","data":[2822,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109611,"s":609.484,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 2822, not ours","event":"AXIS_ELEVATOR_SET","data":[2822,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109611,"s":609.484,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 2822","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":2822,"ours":null}
+{"t":1791408109644,"s":609.517,"kind":"key","text":"K:AXIS_ELEVATOR_SET 966, not ours","event":"AXIS_ELEVATOR_SET","data":[966,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109645,"s":609.518,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 966, not ours","event":"AXIS_ELEVATOR_SET","data":[966,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109645,"s":609.518,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 966","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":966,"ours":null}
+{"t":1791408109678,"s":609.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109678,"s":609.551,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109678,"s":609.551,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 0","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":0,"ours":null}
+{"t":1791408109711,"s":609.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET -356, not ours","event":"AXIS_ELEVATOR_SET","data":[-356,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109711,"s":609.584,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -356, not ours","event":"AXIS_ELEVATOR_SET","data":[-356,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109711,"s":609.584,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -356","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-356,"ours":null}
+{"t":1791408109744,"s":609.617,"kind":"key","text":"K:AXIS_ELEVATOR_SET -442, not ours","event":"AXIS_ELEVATOR_SET","data":[-442,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109745,"s":609.618,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -442, not ours","event":"AXIS_ELEVATOR_SET","data":[-442,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109745,"s":609.618,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -442","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-442,"ours":null}
+{"t":1791408109778,"s":609.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1187, not ours","event":"AXIS_ELEVATOR_SET","data":[-1187,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109778,"s":609.651,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1187, not ours","event":"AXIS_ELEVATOR_SET","data":[-1187,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109778,"s":609.651,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1187","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1187,"ours":null}
+{"t":1791408109811,"s":609.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1975, not ours","event":"AXIS_ELEVATOR_SET","data":[-1975,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109812,"s":609.685,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1975, not ours","event":"AXIS_ELEVATOR_SET","data":[-1975,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109812,"s":609.685,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1975","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1975,"ours":null}
+{"t":1791408109845,"s":609.718,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2949, not ours","event":"AXIS_ELEVATOR_SET","data":[-2949,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109845,"s":609.718,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -2949, not ours","event":"AXIS_ELEVATOR_SET","data":[-2949,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109845,"s":609.718,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -2949","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-2949,"ours":null}
+{"t":1791408109878,"s":609.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4193, not ours","event":"AXIS_ELEVATOR_SET","data":[-4193,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109878,"s":609.751,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -4193, not ours","event":"AXIS_ELEVATOR_SET","data":[-4193,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109878,"s":609.751,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -4193","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-4193,"ours":null}
+{"t":1791408109911,"s":609.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET -5831, not ours","event":"AXIS_ELEVATOR_SET","data":[-5831,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109911,"s":609.784,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -5831, not ours","event":"AXIS_ELEVATOR_SET","data":[-5831,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109911,"s":609.784,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -5831","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-5831,"ours":null}
+{"t":1791408109944,"s":609.817,"kind":"key","text":"K:AXIS_ELEVATOR_SET -7682, not ours","event":"AXIS_ELEVATOR_SET","data":[-7682,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109945,"s":609.818,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -7682, not ours","event":"AXIS_ELEVATOR_SET","data":[-7682,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109945,"s":609.818,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -7682","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-7682,"ours":null}
+{"t":1791408109978,"s":609.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET -9428, not ours","event":"AXIS_ELEVATOR_SET","data":[-9428,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109978,"s":609.851,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -9428, not ours","event":"AXIS_ELEVATOR_SET","data":[-9428,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408109978,"s":609.851,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -9428","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-9428,"ours":null}
+{"t":1791408110011,"s":609.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -11843, not ours","event":"AXIS_ELEVATOR_SET","data":[-11843,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110011,"s":609.884,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -11843, not ours","event":"AXIS_ELEVATOR_SET","data":[-11843,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110012,"s":609.885,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -11843","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-11843,"ours":null}
+{"t":1791408110045,"s":609.918,"kind":"key","text":"K:AXIS_ELEVATOR_SET -14223, not ours","event":"AXIS_ELEVATOR_SET","data":[-14223,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110045,"s":609.918,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -14223, not ours","event":"AXIS_ELEVATOR_SET","data":[-14223,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110045,"s":609.918,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -14223","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-14223,"ours":null}
+{"t":1791408110078,"s":609.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16138, not ours","event":"AXIS_ELEVATOR_SET","data":[-16138,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110078,"s":609.951,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -16138, not ours","event":"AXIS_ELEVATOR_SET","data":[-16138,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110078,"s":609.951,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -16138","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-16138,"ours":null}
+{"t":1791408110111,"s":609.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110111,"s":609.984,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110111,"s":609.984,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -16384","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-16384,"ours":null}
+{"t":1791408110578,"s":610.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15846, not ours","event":"AXIS_ELEVATOR_SET","data":[-15846,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110579,"s":610.452,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -15846, not ours","event":"AXIS_ELEVATOR_SET","data":[-15846,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110579,"s":610.452,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -15846","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-15846,"ours":null}
+{"t":1791408110611,"s":610.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET -14853, not ours","event":"AXIS_ELEVATOR_SET","data":[-14853,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110611,"s":610.484,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -14853, not ours","event":"AXIS_ELEVATOR_SET","data":[-14853,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110611,"s":610.484,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -14853","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-14853,"ours":null}
+{"t":1791408110644,"s":610.517,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13233, not ours","event":"AXIS_ELEVATOR_SET","data":[-13233,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110645,"s":610.518,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -13233, not ours","event":"AXIS_ELEVATOR_SET","data":[-13233,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110645,"s":610.518,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -13233","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-13233,"ours":null}
+{"t":1791408110678,"s":610.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -11197, not ours","event":"AXIS_ELEVATOR_SET","data":[-11197,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110678,"s":610.551,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -11197, not ours","event":"AXIS_ELEVATOR_SET","data":[-11197,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110678,"s":610.551,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -11197","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-11197,"ours":null}
+{"t":1791408110711,"s":610.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET -9192, not ours","event":"AXIS_ELEVATOR_SET","data":[-9192,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110711,"s":610.584,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -9192, not ours","event":"AXIS_ELEVATOR_SET","data":[-9192,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110711,"s":610.584,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -9192","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-9192,"ours":null}
+{"t":1791408110745,"s":610.618,"kind":"key","text":"K:AXIS_ELEVATOR_SET -6374, not ours","event":"AXIS_ELEVATOR_SET","data":[-6374,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110745,"s":610.618,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -6374, not ours","event":"AXIS_ELEVATOR_SET","data":[-6374,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110745,"s":610.618,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -6374","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-6374,"ours":null}
+{"t":1791408110778,"s":610.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2963, not ours","event":"AXIS_ELEVATOR_SET","data":[-2963,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110778,"s":610.651,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -2963, not ours","event":"AXIS_ELEVATOR_SET","data":[-2963,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110778,"s":610.651,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -2963","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-2963,"ours":null}
+{"t":1791408110811,"s":610.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET 200, not ours","event":"AXIS_ELEVATOR_SET","data":[200,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110811,"s":610.684,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 200, not ours","event":"AXIS_ELEVATOR_SET","data":[200,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110811,"s":610.684,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 200","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":200,"ours":null}
+{"t":1791408110845,"s":610.718,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1578, not ours","event":"AXIS_ELEVATOR_SET","data":[1578,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110845,"s":610.718,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 1578, not ours","event":"AXIS_ELEVATOR_SET","data":[1578,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110845,"s":610.718,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 1578","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":1578,"ours":null}
+{"t":1791408110878,"s":610.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2264, not ours","event":"AXIS_ELEVATOR_SET","data":[2264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110878,"s":610.751,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 2264, not ours","event":"AXIS_ELEVATOR_SET","data":[2264,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110878,"s":610.751,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 2264","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":2264,"ours":null}
+{"t":1791408110911,"s":610.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET 3718, not ours","event":"AXIS_ELEVATOR_SET","data":[3718,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110911,"s":610.784,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 3718, not ours","event":"AXIS_ELEVATOR_SET","data":[3718,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110911,"s":610.784,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 3718","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":3718,"ours":null}
+{"t":1791408110944,"s":610.817,"kind":"key","text":"K:AXIS_ELEVATOR_SET 5720, not ours","event":"AXIS_ELEVATOR_SET","data":[5720,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110945,"s":610.818,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 5720, not ours","event":"AXIS_ELEVATOR_SET","data":[5720,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110945,"s":610.818,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 5720","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":5720,"ours":null}
+{"t":1791408110978,"s":610.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET 7056, not ours","event":"AXIS_ELEVATOR_SET","data":[7056,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110978,"s":610.851,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 7056, not ours","event":"AXIS_ELEVATOR_SET","data":[7056,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408110978,"s":610.851,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 7056","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":7056,"ours":null}
+{"t":1791408111011,"s":610.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET 8256, not ours","event":"AXIS_ELEVATOR_SET","data":[8256,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111012,"s":610.885,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 8256, not ours","event":"AXIS_ELEVATOR_SET","data":[8256,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111012,"s":610.885,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 8256","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":8256,"ours":null}
+{"t":1791408111044,"s":610.917,"kind":"key","text":"K:AXIS_ELEVATOR_SET 9444, not ours","event":"AXIS_ELEVATOR_SET","data":[9444,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111044,"s":610.917,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 9444, not ours","event":"AXIS_ELEVATOR_SET","data":[9444,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111045,"s":610.918,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 9444","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":9444,"ours":null}
+{"t":1791408111078,"s":610.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10888, not ours","event":"AXIS_ELEVATOR_SET","data":[10888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111078,"s":610.951,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 10888, not ours","event":"AXIS_ELEVATOR_SET","data":[10888,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111078,"s":610.951,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 10888","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":10888,"ours":null}
+{"t":1791408111112,"s":610.985,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12898, not ours","event":"AXIS_ELEVATOR_SET","data":[12898,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111112,"s":610.985,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 12898, not ours","event":"AXIS_ELEVATOR_SET","data":[12898,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111112,"s":610.985,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 12898","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":12898,"ours":null}
+{"t":1791408111144,"s":611.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14994, not ours","event":"AXIS_ELEVATOR_SET","data":[14994,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111144,"s":611.017,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 14994, not ours","event":"AXIS_ELEVATOR_SET","data":[14994,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111144,"s":611.017,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 14994","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":14994,"ours":null}
+{"t":1791408111178,"s":611.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111178,"s":611.051,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111179,"s":611.052,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 16384","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":16384,"ours":null}
+{"t":1791408111778,"s":611.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16086, not ours","event":"AXIS_ELEVATOR_SET","data":[16086,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111778,"s":611.651,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 16086, not ours","event":"AXIS_ELEVATOR_SET","data":[16086,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111778,"s":611.651,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 16086","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":16086,"ours":null}
+{"t":1791408111811,"s":611.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14202, not ours","event":"AXIS_ELEVATOR_SET","data":[14202,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111811,"s":611.684,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 14202, not ours","event":"AXIS_ELEVATOR_SET","data":[14202,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111811,"s":611.684,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 14202","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":14202,"ours":null}
+{"t":1791408111844,"s":611.717,"kind":"key","text":"K:AXIS_ELEVATOR_SET 9912, not ours","event":"AXIS_ELEVATOR_SET","data":[9912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111845,"s":611.718,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 9912, not ours","event":"AXIS_ELEVATOR_SET","data":[9912,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111845,"s":611.718,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 9912","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":9912,"ours":null}
+{"t":1791408111878,"s":611.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET 5520, not ours","event":"AXIS_ELEVATOR_SET","data":[5520,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111878,"s":611.751,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 5520, not ours","event":"AXIS_ELEVATOR_SET","data":[5520,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111878,"s":611.751,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 5520","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":5520,"ours":null}
+{"t":1791408111911,"s":611.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1062, not ours","event":"AXIS_ELEVATOR_SET","data":[1062,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111911,"s":611.784,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 1062, not ours","event":"AXIS_ELEVATOR_SET","data":[1062,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111911,"s":611.784,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 1062","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":1062,"ours":null}
+{"t":1791408111944,"s":611.817,"kind":"key","text":"K:AXIS_ELEVATOR_SET -354, not ours","event":"AXIS_ELEVATOR_SET","data":[-354,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111945,"s":611.818,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -354, not ours","event":"AXIS_ELEVATOR_SET","data":[-354,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111945,"s":611.818,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -354","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-354,"ours":null}
+{"t":1791408111978,"s":611.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET -594, not ours","event":"AXIS_ELEVATOR_SET","data":[-594,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111978,"s":611.851,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -594, not ours","event":"AXIS_ELEVATOR_SET","data":[-594,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408111978,"s":611.851,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -594","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-594,"ours":null}
+{"t":1791408112011,"s":611.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -780, not ours","event":"AXIS_ELEVATOR_SET","data":[-780,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112011,"s":611.884,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -780, not ours","event":"AXIS_ELEVATOR_SET","data":[-780,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112011,"s":611.884,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -780","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-780,"ours":null}
+{"t":1791408112045,"s":611.918,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1211, not ours","event":"AXIS_ELEVATOR_SET","data":[-1211,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112045,"s":611.918,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1211, not ours","event":"AXIS_ELEVATOR_SET","data":[-1211,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112045,"s":611.918,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1211","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1211,"ours":null}
+{"t":1791408112078,"s":611.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1279, not ours","event":"AXIS_ELEVATOR_SET","data":[-1279,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112078,"s":611.951,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1279, not ours","event":"AXIS_ELEVATOR_SET","data":[-1279,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112078,"s":611.951,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1279","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1279,"ours":null}
+{"t":1791408112111,"s":611.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1275, not ours","event":"AXIS_ELEVATOR_SET","data":[-1275,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112112,"s":611.985,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1275, not ours","event":"AXIS_ELEVATOR_SET","data":[-1275,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112112,"s":611.985,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1275","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1275,"ours":null}
+{"t":1791408112144,"s":612.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1259, not ours","event":"AXIS_ELEVATOR_SET","data":[-1259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112144,"s":612.017,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1259, not ours","event":"AXIS_ELEVATOR_SET","data":[-1259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112145,"s":612.018,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1259","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1259,"ours":null}
+{"t":1791408112178,"s":612.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1419, not ours","event":"AXIS_ELEVATOR_SET","data":[-1419,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112178,"s":612.051,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1419, not ours","event":"AXIS_ELEVATOR_SET","data":[-1419,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112178,"s":612.051,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1419","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1419,"ours":null}
+{"t":1791408112211,"s":612.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1985, not ours","event":"AXIS_ELEVATOR_SET","data":[-1985,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112211,"s":612.084,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1985, not ours","event":"AXIS_ELEVATOR_SET","data":[-1985,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112211,"s":612.084,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1985","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1985,"ours":null}
+{"t":1791408112245,"s":612.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET -3057, not ours","event":"AXIS_ELEVATOR_SET","data":[-3057,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112245,"s":612.118,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -3057, not ours","event":"AXIS_ELEVATOR_SET","data":[-3057,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112245,"s":612.118,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -3057","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-3057,"ours":null}
+{"t":1791408112278,"s":612.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET -5313, not ours","event":"AXIS_ELEVATOR_SET","data":[-5313,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112278,"s":612.151,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -5313, not ours","event":"AXIS_ELEVATOR_SET","data":[-5313,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112278,"s":612.151,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -5313","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-5313,"ours":null}
+{"t":1791408112311,"s":612.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8284, not ours","event":"AXIS_ELEVATOR_SET","data":[-8284,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112311,"s":612.184,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -8284, not ours","event":"AXIS_ELEVATOR_SET","data":[-8284,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112311,"s":612.184,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -8284","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-8284,"ours":null}
+{"t":1791408112344,"s":612.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13409, not ours","event":"AXIS_ELEVATOR_SET","data":[-13409,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112345,"s":612.218,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -13409, not ours","event":"AXIS_ELEVATOR_SET","data":[-13409,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112345,"s":612.218,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -13409","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-13409,"ours":null}
+{"t":1791408112378,"s":612.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112378,"s":612.251,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112378,"s":612.251,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -16384","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-16384,"ours":null}
+{"t":1791408112878,"s":612.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16158, not ours","event":"AXIS_ELEVATOR_SET","data":[-16158,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112878,"s":612.751,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -16158, not ours","event":"AXIS_ELEVATOR_SET","data":[-16158,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112878,"s":612.751,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -16158","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-16158,"ours":null}
+{"t":1791408112911,"s":612.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15586, not ours","event":"AXIS_ELEVATOR_SET","data":[-15586,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112912,"s":612.785,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -15586, not ours","event":"AXIS_ELEVATOR_SET","data":[-15586,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112912,"s":612.785,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -15586","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-15586,"ours":null}
+{"t":1791408112945,"s":612.818,"kind":"key","text":"K:AXIS_ELEVATOR_SET -14359, not ours","event":"AXIS_ELEVATOR_SET","data":[-14359,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112945,"s":612.818,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -14359, not ours","event":"AXIS_ELEVATOR_SET","data":[-14359,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112945,"s":612.818,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -14359","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-14359,"ours":null}
+{"t":1791408112978,"s":612.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET -12345, not ours","event":"AXIS_ELEVATOR_SET","data":[-12345,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112978,"s":612.851,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -12345, not ours","event":"AXIS_ELEVATOR_SET","data":[-12345,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408112978,"s":612.851,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -12345","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-12345,"ours":null}
+{"t":1791408113011,"s":612.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -10138, not ours","event":"AXIS_ELEVATOR_SET","data":[-10138,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113012,"s":612.885,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -10138, not ours","event":"AXIS_ELEVATOR_SET","data":[-10138,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113012,"s":612.885,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -10138","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-10138,"ours":null}
+{"t":1791408113044,"s":612.917,"kind":"key","text":"K:AXIS_ELEVATOR_SET -7604, not ours","event":"AXIS_ELEVATOR_SET","data":[-7604,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113045,"s":612.918,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -7604, not ours","event":"AXIS_ELEVATOR_SET","data":[-7604,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113045,"s":612.918,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -7604","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-7604,"ours":null}
+{"t":1791408113078,"s":612.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET -5125, not ours","event":"AXIS_ELEVATOR_SET","data":[-5125,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113078,"s":612.951,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -5125, not ours","event":"AXIS_ELEVATOR_SET","data":[-5125,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113078,"s":612.951,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -5125","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-5125,"ours":null}
+{"t":1791408113111,"s":612.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1627, not ours","event":"AXIS_ELEVATOR_SET","data":[-1627,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113111,"s":612.984,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET -1627, not ours","event":"AXIS_ELEVATOR_SET","data":[-1627,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113111,"s":612.984,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET -1627","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":-1627,"ours":null}
+{"t":1791408113144,"s":613.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET 82, not ours","event":"AXIS_ELEVATOR_SET","data":[82,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113144,"s":613.017,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 82, not ours","event":"AXIS_ELEVATOR_SET","data":[82,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113144,"s":613.017,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 82","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":82,"ours":null}
+{"t":1791408113178,"s":613.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1178, not ours","event":"AXIS_ELEVATOR_SET","data":[1178,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113178,"s":613.051,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 1178, not ours","event":"AXIS_ELEVATOR_SET","data":[1178,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113178,"s":613.051,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 1178","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":1178,"ours":null}
+{"t":1791408113211,"s":613.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1820, not ours","event":"AXIS_ELEVATOR_SET","data":[1820,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113212,"s":613.085,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 1820, not ours","event":"AXIS_ELEVATOR_SET","data":[1820,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113212,"s":613.085,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 1820","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":1820,"ours":null}
+{"t":1791408113245,"s":613.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2272, not ours","event":"AXIS_ELEVATOR_SET","data":[2272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113245,"s":613.118,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 2272, not ours","event":"AXIS_ELEVATOR_SET","data":[2272,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113246,"s":613.119,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 2272","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":2272,"ours":null}
+{"t":1791408113278,"s":613.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2372, not ours","event":"AXIS_ELEVATOR_SET","data":[2372,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113278,"s":613.151,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 2372, not ours","event":"AXIS_ELEVATOR_SET","data":[2372,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113278,"s":613.151,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 2372","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":2372,"ours":null}
+{"t":1791408113311,"s":613.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2508, not ours","event":"AXIS_ELEVATOR_SET","data":[2508,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113311,"s":613.184,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 2508, not ours","event":"AXIS_ELEVATOR_SET","data":[2508,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113311,"s":613.184,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 2508","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":2508,"ours":null}
+{"t":1791408113345,"s":613.218,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2970, not ours","event":"AXIS_ELEVATOR_SET","data":[2970,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113345,"s":613.218,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 2970, not ours","event":"AXIS_ELEVATOR_SET","data":[2970,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113345,"s":613.218,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 2970","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":2970,"ours":null}
+{"t":1791408113378,"s":613.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET 3608, not ours","event":"AXIS_ELEVATOR_SET","data":[3608,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113378,"s":613.251,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 3608, not ours","event":"AXIS_ELEVATOR_SET","data":[3608,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113378,"s":613.251,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 3608","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":3608,"ours":null}
+{"t":1791408113412,"s":613.285,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4622, not ours","event":"AXIS_ELEVATOR_SET","data":[4622,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113412,"s":613.285,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 4622, not ours","event":"AXIS_ELEVATOR_SET","data":[4622,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113412,"s":613.285,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 4622","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":4622,"ours":null}
+{"t":1791408113444,"s":613.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6064, not ours","event":"AXIS_ELEVATOR_SET","data":[6064,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113445,"s":613.318,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 6064, not ours","event":"AXIS_ELEVATOR_SET","data":[6064,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113445,"s":613.318,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 6064","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":6064,"ours":null}
+{"t":1791408113478,"s":613.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET 7930, not ours","event":"AXIS_ELEVATOR_SET","data":[7930,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113478,"s":613.351,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 7930, not ours","event":"AXIS_ELEVATOR_SET","data":[7930,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113478,"s":613.351,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 7930","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":7930,"ours":null}
+{"t":1791408113511,"s":613.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10052, not ours","event":"AXIS_ELEVATOR_SET","data":[10052,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113511,"s":613.384,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 10052, not ours","event":"AXIS_ELEVATOR_SET","data":[10052,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113511,"s":613.384,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 10052","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":10052,"ours":null}
+{"t":1791408113544,"s":613.417,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12962, not ours","event":"AXIS_ELEVATOR_SET","data":[12962,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113545,"s":613.418,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 12962, not ours","event":"AXIS_ELEVATOR_SET","data":[12962,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113545,"s":613.418,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 12962","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":12962,"ours":null}
+{"t":1791408113578,"s":613.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15636, not ours","event":"AXIS_ELEVATOR_SET","data":[15636,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113578,"s":613.451,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 15636, not ours","event":"AXIS_ELEVATOR_SET","data":[15636,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113578,"s":613.451,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 15636","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":15636,"ours":null}
+{"t":1791408113611,"s":613.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113612,"s":613.485,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408113612,"s":613.485,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 16384","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":16384,"ours":null}
+{"t":1791408114111,"s":613.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16276, not ours","event":"AXIS_ELEVATOR_SET","data":[16276,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114112,"s":613.985,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 16276, not ours","event":"AXIS_ELEVATOR_SET","data":[16276,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114112,"s":613.985,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 16276","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":16276,"ours":null}
+{"t":1791408114145,"s":614.018,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15294, not ours","event":"AXIS_ELEVATOR_SET","data":[15294,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114145,"s":614.018,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 15294, not ours","event":"AXIS_ELEVATOR_SET","data":[15294,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114145,"s":614.018,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 15294","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":15294,"ours":null}
+{"t":1791408114178,"s":614.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12978, not ours","event":"AXIS_ELEVATOR_SET","data":[12978,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114178,"s":614.051,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 12978, not ours","event":"AXIS_ELEVATOR_SET","data":[12978,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114178,"s":614.051,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 12978","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":12978,"ours":null}
+{"t":1791408114211,"s":614.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET 9818, not ours","event":"AXIS_ELEVATOR_SET","data":[9818,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114211,"s":614.084,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 9818, not ours","event":"AXIS_ELEVATOR_SET","data":[9818,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114212,"s":614.085,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 9818","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":9818,"ours":null}
+{"t":1791408114245,"s":614.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6644, not ours","event":"AXIS_ELEVATOR_SET","data":[6644,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114245,"s":614.118,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 6644, not ours","event":"AXIS_ELEVATOR_SET","data":[6644,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114245,"s":614.118,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 6644","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":6644,"ours":null}
+{"t":1791408114278,"s":614.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4032, not ours","event":"AXIS_ELEVATOR_SET","data":[4032,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114279,"s":614.152,"kind":"holder key","text":"K:AXIS_ELEVATOR_SET 4032, not ours","event":"AXIS_ELEVATOR_SET","data":[4032,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114279,"s":614.152,"kind":"got","text":"group A K:AXIS_ELEVATOR_SET 4032","quiet":true,"group":"A","name":"AXIS_ELEVATOR_SET","value":4032,"ours":null}
+{"t":1791408114279,"s":614.152,"kind":"phase","text":"pitch masked by group A: L:ElevatorInput 100 · the hardware's events heard at the highest priority ×88 (46 past ±6000) · group A heard ×88 (46 past ±6000) -16384..16384","control":"pitch","phase":"masked by group A","group":"A","heard":{"n":88,"hardware":46,"min":-16384,"max":16384},"holder":{"n":88,"hardware":46,"min":-16384,"max":16384},"value":{"n":1,"hardware":0,"min":100,"max":100}}
+{"t":1791408114280,"s":614.153,"kind":"holder","text":"cleared: cleared group A","holderKind":"cleared","group":"A"}
+{"t":1791408114311,"s":614.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1080, not ours","event":"AXIS_ELEVATOR_SET","data":[1080,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114344,"s":614.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET -98, not ours","event":"AXIS_ELEVATOR_SET","data":[-98,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114378,"s":614.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET -660, not ours","event":"AXIS_ELEVATOR_SET","data":[-660,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114411,"s":614.284,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1040, not ours","event":"AXIS_ELEVATOR_SET","data":[-1040,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114444,"s":614.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1403, not ours","event":"AXIS_ELEVATOR_SET","data":[-1403,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114478,"s":614.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1777, not ours","event":"AXIS_ELEVATOR_SET","data":[-1777,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114511,"s":614.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2259, not ours","event":"AXIS_ELEVATOR_SET","data":[-2259,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114544,"s":614.417,"kind":"key","text":"K:AXIS_ELEVATOR_SET -3331, not ours","event":"AXIS_ELEVATOR_SET","data":[-3331,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114578,"s":614.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4573, not ours","event":"AXIS_ELEVATOR_SET","data":[-4573,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114611,"s":614.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET -6462, not ours","event":"AXIS_ELEVATOR_SET","data":[-6462,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114645,"s":614.518,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8666, not ours","event":"AXIS_ELEVATOR_SET","data":[-8666,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114678,"s":614.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -11115, not ours","event":"AXIS_ELEVATOR_SET","data":[-11115,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114711,"s":614.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13683, not ours","event":"AXIS_ELEVATOR_SET","data":[-13683,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114744,"s":614.617,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15318, not ours","event":"AXIS_ELEVATOR_SET","data":[-15318,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408114778,"s":614.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115178,"s":615.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16352, not ours","event":"AXIS_ELEVATOR_SET","data":[-16352,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115211,"s":615.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16070, not ours","event":"AXIS_ELEVATOR_SET","data":[-16070,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115245,"s":615.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15169, not ours","event":"AXIS_ELEVATOR_SET","data":[-15169,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115278,"s":615.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13117, not ours","event":"AXIS_ELEVATOR_SET","data":[-13117,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115311,"s":615.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET -10703, not ours","event":"AXIS_ELEVATOR_SET","data":[-10703,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115344,"s":615.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET -7208, not ours","event":"AXIS_ELEVATOR_SET","data":[-7208,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115378,"s":615.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET -3463, not ours","event":"AXIS_ELEVATOR_SET","data":[-3463,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115412,"s":615.285,"kind":"key","text":"K:AXIS_ELEVATOR_SET -286, not ours","event":"AXIS_ELEVATOR_SET","data":[-286,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115444,"s":615.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET 216, not ours","event":"AXIS_ELEVATOR_SET","data":[216,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115478,"s":615.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET 444, not ours","event":"AXIS_ELEVATOR_SET","data":[444,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115512,"s":615.385,"kind":"key","text":"K:AXIS_ELEVATOR_SET 334, not ours","event":"AXIS_ELEVATOR_SET","data":[334,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115545,"s":615.418,"kind":"key","text":"K:AXIS_ELEVATOR_SET 304, not ours","event":"AXIS_ELEVATOR_SET","data":[304,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115578,"s":615.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET 506, not ours","event":"AXIS_ELEVATOR_SET","data":[506,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115611,"s":615.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET 978, not ours","event":"AXIS_ELEVATOR_SET","data":[978,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115645,"s":615.518,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2250, not ours","event":"AXIS_ELEVATOR_SET","data":[2250,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115678,"s":615.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4150, not ours","event":"AXIS_ELEVATOR_SET","data":[4150,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115711,"s":615.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6628, not ours","event":"AXIS_ELEVATOR_SET","data":[6628,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115744,"s":615.617,"kind":"key","text":"K:AXIS_ELEVATOR_SET 9550, not ours","event":"AXIS_ELEVATOR_SET","data":[9550,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115778,"s":615.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET 11870, not ours","event":"AXIS_ELEVATOR_SET","data":[11870,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115811,"s":615.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14300, not ours","event":"AXIS_ELEVATOR_SET","data":[14300,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115845,"s":615.718,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15938, not ours","event":"AXIS_ELEVATOR_SET","data":[15938,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408115878,"s":615.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116344,"s":616.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16242, not ours","event":"AXIS_ELEVATOR_SET","data":[16242,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116378,"s":616.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15648, not ours","event":"AXIS_ELEVATOR_SET","data":[15648,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116411,"s":616.284,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14292, not ours","event":"AXIS_ELEVATOR_SET","data":[14292,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116444,"s":616.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET 11654, not ours","event":"AXIS_ELEVATOR_SET","data":[11654,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116478,"s":616.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET 8366, not ours","event":"AXIS_ELEVATOR_SET","data":[8366,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116511,"s":616.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6226, not ours","event":"AXIS_ELEVATOR_SET","data":[6226,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116545,"s":616.418,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4230, not ours","event":"AXIS_ELEVATOR_SET","data":[4230,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116578,"s":616.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2478, not ours","event":"AXIS_ELEVATOR_SET","data":[2478,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116611,"s":616.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET 652, not ours","event":"AXIS_ELEVATOR_SET","data":[652,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116644,"s":616.517,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116678,"s":616.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -138, not ours","event":"AXIS_ELEVATOR_SET","data":[-138,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116711,"s":616.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET -500, not ours","event":"AXIS_ELEVATOR_SET","data":[-500,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116744,"s":616.617,"kind":"key","text":"K:AXIS_ELEVATOR_SET -806, not ours","event":"AXIS_ELEVATOR_SET","data":[-806,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116778,"s":616.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1158, not ours","event":"AXIS_ELEVATOR_SET","data":[-1158,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116811,"s":616.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1841, not ours","event":"AXIS_ELEVATOR_SET","data":[-1841,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116844,"s":616.717,"kind":"key","text":"K:AXIS_ELEVATOR_SET -3053, not ours","event":"AXIS_ELEVATOR_SET","data":[-3053,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116878,"s":616.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4743, not ours","event":"AXIS_ELEVATOR_SET","data":[-4743,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116911,"s":616.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET -7140, not ours","event":"AXIS_ELEVATOR_SET","data":[-7140,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116945,"s":616.818,"kind":"key","text":"K:AXIS_ELEVATOR_SET -9604, not ours","event":"AXIS_ELEVATOR_SET","data":[-9604,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408116978,"s":616.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13055, not ours","event":"AXIS_ELEVATOR_SET","data":[-13055,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117011,"s":616.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16006, not ours","event":"AXIS_ELEVATOR_SET","data":[-16006,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117045,"s":616.918,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117211,"s":617.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16362, not ours","event":"AXIS_ELEVATOR_SET","data":[-16362,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117245,"s":617.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117311,"s":617.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16338, not ours","event":"AXIS_ELEVATOR_SET","data":[-16338,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117344,"s":617.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16336, not ours","event":"AXIS_ELEVATOR_SET","data":[-16336,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117378,"s":617.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16278, not ours","event":"AXIS_ELEVATOR_SET","data":[-16278,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117411,"s":617.284,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16200, not ours","event":"AXIS_ELEVATOR_SET","data":[-16200,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117445,"s":617.318,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15860, not ours","event":"AXIS_ELEVATOR_SET","data":[-15860,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117478,"s":617.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15209, not ours","event":"AXIS_ELEVATOR_SET","data":[-15209,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117511,"s":617.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13993, not ours","event":"AXIS_ELEVATOR_SET","data":[-13993,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117545,"s":617.418,"kind":"key","text":"K:AXIS_ELEVATOR_SET -12085, not ours","event":"AXIS_ELEVATOR_SET","data":[-12085,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117578,"s":617.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET -10204, not ours","event":"AXIS_ELEVATOR_SET","data":[-10204,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117611,"s":617.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET -7438, not ours","event":"AXIS_ELEVATOR_SET","data":[-7438,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117645,"s":617.518,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4363, not ours","event":"AXIS_ELEVATOR_SET","data":[-4363,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117678,"s":617.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1150, not ours","event":"AXIS_ELEVATOR_SET","data":[-1150,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117711,"s":617.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117745,"s":617.618,"kind":"key","text":"K:AXIS_ELEVATOR_SET 422, not ours","event":"AXIS_ELEVATOR_SET","data":[422,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117778,"s":617.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET 534, not ours","event":"AXIS_ELEVATOR_SET","data":[534,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117811,"s":617.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1056, not ours","event":"AXIS_ELEVATOR_SET","data":[1056,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117844,"s":617.717,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1520, not ours","event":"AXIS_ELEVATOR_SET","data":[1520,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117878,"s":617.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1976, not ours","event":"AXIS_ELEVATOR_SET","data":[1976,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117911,"s":617.784,"kind":"key","text":"K:AXIS_ELEVATOR_SET 2798, not ours","event":"AXIS_ELEVATOR_SET","data":[2798,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117945,"s":617.818,"kind":"key","text":"K:AXIS_ELEVATOR_SET 4270, not ours","event":"AXIS_ELEVATOR_SET","data":[4270,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408117978,"s":617.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6288, not ours","event":"AXIS_ELEVATOR_SET","data":[6288,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118011,"s":617.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET 8610, not ours","event":"AXIS_ELEVATOR_SET","data":[8610,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118045,"s":617.918,"kind":"key","text":"K:AXIS_ELEVATOR_SET 10510, not ours","event":"AXIS_ELEVATOR_SET","data":[10510,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118078,"s":617.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12816, not ours","event":"AXIS_ELEVATOR_SET","data":[12816,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118111,"s":617.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET 15050, not ours","event":"AXIS_ELEVATOR_SET","data":[15050,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118144,"s":618.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16270, not ours","event":"AXIS_ELEVATOR_SET","data":[16270,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118178,"s":618.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16384, not ours","event":"AXIS_ELEVATOR_SET","data":[16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118644,"s":618.517,"kind":"key","text":"K:AXIS_ELEVATOR_SET 16132, not ours","event":"AXIS_ELEVATOR_SET","data":[16132,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118678,"s":618.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET 14896, not ours","event":"AXIS_ELEVATOR_SET","data":[14896,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118711,"s":618.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET 12436, not ours","event":"AXIS_ELEVATOR_SET","data":[12436,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118744,"s":618.617,"kind":"key","text":"K:AXIS_ELEVATOR_SET 9232, not ours","event":"AXIS_ELEVATOR_SET","data":[9232,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118778,"s":618.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET 6126, not ours","event":"AXIS_ELEVATOR_SET","data":[6126,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118812,"s":618.685,"kind":"key","text":"K:AXIS_ELEVATOR_SET 3332, not ours","event":"AXIS_ELEVATOR_SET","data":[3332,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118844,"s":618.717,"kind":"key","text":"K:AXIS_ELEVATOR_SET 1476, not ours","event":"AXIS_ELEVATOR_SET","data":[1476,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408118878,"s":618.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119011,"s":618.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -324, not ours","event":"AXIS_ELEVATOR_SET","data":[-324,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119044,"s":618.917,"kind":"key","text":"K:AXIS_ELEVATOR_SET -532, not ours","event":"AXIS_ELEVATOR_SET","data":[-532,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119078,"s":618.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET -770, not ours","event":"AXIS_ELEVATOR_SET","data":[-770,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119112,"s":618.985,"kind":"key","text":"K:AXIS_ELEVATOR_SET -1621, not ours","event":"AXIS_ELEVATOR_SET","data":[-1621,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119145,"s":619.018,"kind":"key","text":"K:AXIS_ELEVATOR_SET -3261, not ours","event":"AXIS_ELEVATOR_SET","data":[-3261,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119178,"s":619.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET -4671, not ours","event":"AXIS_ELEVATOR_SET","data":[-4671,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119211,"s":619.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET -6490, not ours","event":"AXIS_ELEVATOR_SET","data":[-6490,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119245,"s":619.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET -8940, not ours","event":"AXIS_ELEVATOR_SET","data":[-8940,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119278,"s":619.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET -11619, not ours","event":"AXIS_ELEVATOR_SET","data":[-11619,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119311,"s":619.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15143, not ours","event":"AXIS_ELEVATOR_SET","data":[-15143,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119344,"s":619.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16384, not ours","event":"AXIS_ELEVATOR_SET","data":[-16384,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119478,"s":619.351,"kind":"key","text":"K:AXIS_ELEVATOR_SET -16100, not ours","event":"AXIS_ELEVATOR_SET","data":[-16100,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119511,"s":619.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15652, not ours","event":"AXIS_ELEVATOR_SET","data":[-15652,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119545,"s":619.418,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15598, not ours","event":"AXIS_ELEVATOR_SET","data":[-15598,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119578,"s":619.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15620, not ours","event":"AXIS_ELEVATOR_SET","data":[-15620,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119579,"s":619.452,"kind":"phase","text":"pitch cleared: L:ElevatorInput -100..100 · the hardware's events heard at the highest priority ×102 (62 past ±6000) · group A heard ×0 (0 past ±6000) none","control":"pitch","phase":"cleared","group":"A","heard":{"n":102,"hardware":62,"min":-16384,"max":16384},"holder":{"n":0,"hardware":0,"min":null,"max":null},"value":{"n":103,"hardware":0,"min":-100,"max":100}}
+{"t":1791408119612,"s":619.485,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15628, not ours","event":"AXIS_ELEVATOR_SET","data":[-15628,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119645,"s":619.518,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15608, not ours","event":"AXIS_ELEVATOR_SET","data":[-15608,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119678,"s":619.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15606, not ours","event":"AXIS_ELEVATOR_SET","data":[-15606,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119711,"s":619.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15600, not ours","event":"AXIS_ELEVATOR_SET","data":[-15600,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119778,"s":619.651,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15560, not ours","event":"AXIS_ELEVATOR_SET","data":[-15560,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119811,"s":619.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15444, not ours","event":"AXIS_ELEVATOR_SET","data":[-15444,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119845,"s":619.718,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15280, not ours","event":"AXIS_ELEVATOR_SET","data":[-15280,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119878,"s":619.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET -15013, not ours","event":"AXIS_ELEVATOR_SET","data":[-15013,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119912,"s":619.785,"kind":"key","text":"K:AXIS_ELEVATOR_SET -14617, not ours","event":"AXIS_ELEVATOR_SET","data":[-14617,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119944,"s":619.817,"kind":"key","text":"K:AXIS_ELEVATOR_SET -14127, not ours","event":"AXIS_ELEVATOR_SET","data":[-14127,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408119978,"s":619.851,"kind":"key","text":"K:AXIS_ELEVATOR_SET -13189, not ours","event":"AXIS_ELEVATOR_SET","data":[-13189,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120011,"s":619.884,"kind":"key","text":"K:AXIS_ELEVATOR_SET -11439, not ours","event":"AXIS_ELEVATOR_SET","data":[-11439,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120044,"s":619.917,"kind":"key","text":"K:AXIS_ELEVATOR_SET -9358, not ours","event":"AXIS_ELEVATOR_SET","data":[-9358,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120078,"s":619.951,"kind":"key","text":"K:AXIS_ELEVATOR_SET -7674, not ours","event":"AXIS_ELEVATOR_SET","data":[-7674,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120111,"s":619.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET -5197, not ours","event":"AXIS_ELEVATOR_SET","data":[-5197,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120144,"s":620.017,"kind":"key","text":"K:AXIS_ELEVATOR_SET -2583, not ours","event":"AXIS_ELEVATOR_SET","data":[-2583,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120178,"s":620.051,"kind":"key","text":"K:AXIS_ELEVATOR_SET -554, not ours","event":"AXIS_ELEVATOR_SET","data":[-554,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120211,"s":620.084,"kind":"key","text":"K:AXIS_ELEVATOR_SET -194, not ours","event":"AXIS_ELEVATOR_SET","data":[-194,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120245,"s":620.118,"kind":"key","text":"K:AXIS_ELEVATOR_SET -168, not ours","event":"AXIS_ELEVATOR_SET","data":[-168,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120278,"s":620.151,"kind":"key","text":"K:AXIS_ELEVATOR_SET -116, not ours","event":"AXIS_ELEVATOR_SET","data":[-116,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120311,"s":620.184,"kind":"key","text":"K:AXIS_ELEVATOR_SET -100, not ours","event":"AXIS_ELEVATOR_SET","data":[-100,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120344,"s":620.217,"kind":"key","text":"K:AXIS_ELEVATOR_SET -116, not ours","event":"AXIS_ELEVATOR_SET","data":[-116,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120377,"s":620.25,"kind":"key","text":"K:AXIS_ELEVATOR_SET -240, not ours","event":"AXIS_ELEVATOR_SET","data":[-240,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120411,"s":620.284,"kind":"key","text":"K:AXIS_ELEVATOR_SET -342, not ours","event":"AXIS_ELEVATOR_SET","data":[-342,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120444,"s":620.317,"kind":"key","text":"K:AXIS_ELEVATOR_SET -366, not ours","event":"AXIS_ELEVATOR_SET","data":[-366,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120477,"s":620.35,"kind":"key","text":"K:AXIS_ELEVATOR_SET -346, not ours","event":"AXIS_ELEVATOR_SET","data":[-346,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120511,"s":620.384,"kind":"key","text":"K:AXIS_ELEVATOR_SET -282, not ours","event":"AXIS_ELEVATOR_SET","data":[-282,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120544,"s":620.417,"kind":"key","text":"K:AXIS_ELEVATOR_SET -240, not ours","event":"AXIS_ELEVATOR_SET","data":[-240,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120578,"s":620.451,"kind":"key","text":"K:AXIS_ELEVATOR_SET -178, not ours","event":"AXIS_ELEVATOR_SET","data":[-178,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120611,"s":620.484,"kind":"key","text":"K:AXIS_ELEVATOR_SET -106, not ours","event":"AXIS_ELEVATOR_SET","data":[-106,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120644,"s":620.517,"kind":"key","text":"K:AXIS_ELEVATOR_SET -92, not ours","event":"AXIS_ELEVATOR_SET","data":[-92,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120678,"s":620.551,"kind":"key","text":"K:AXIS_ELEVATOR_SET -34, not ours","event":"AXIS_ELEVATOR_SET","data":[-34,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120711,"s":620.584,"kind":"key","text":"K:AXIS_ELEVATOR_SET 0, not ours","event":"AXIS_ELEVATOR_SET","data":[0,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120744,"s":620.617,"kind":"key","text":"K:AXIS_ELEVATOR_SET -12, not ours","event":"AXIS_ELEVATOR_SET","data":[-12,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120777,"s":620.65,"kind":"key","text":"K:AXIS_ELEVATOR_SET -18, not ours","event":"AXIS_ELEVATOR_SET","data":[-18,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408120811,"s":620.684,"kind":"key","text":"K:AXIS_ELEVATOR_SET -26, not ours","event":"AXIS_ELEVATOR_SET","data":[-26,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408132378,"s":632.251,"kind":"key","text":"K:AXIS_ELEVATOR_SET -24, not ours","event":"AXIS_ELEVATOR_SET","data":[-24,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408133111,"s":632.984,"kind":"key","text":"K:AXIS_ELEVATOR_SET -26, not ours","event":"AXIS_ELEVATOR_SET","data":[-26,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408133307,"s":633.18,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791408138312,"s":638.185,"kind":"phase","text":"throttle listening, group B not masking: L:Throttle1Position 7.391357..92.306519 · the hardware's events heard at the highest priority ×0 (0 past ±6000) · group B heard ×0 (0 past ±6000) none","control":"throttle","phase":"listening, group B not masking","group":"B","heard":{"n":0,"hardware":0,"min":null,"max":null},"holder":{"n":0,"hardware":0,"min":null,"max":null},"value":{"n":128,"hardware":0,"min":7.391357421875,"max":92.3065185546875}}
+{"t":1791408194614,"s":694.487,"kind":"key","text":"K:AXIS_ELEVATOR_SET -28, not ours","event":"AXIS_ELEVATOR_SET","data":[-28,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408198818,"s":698.691,"kind":"key","text":"START, with FlightSimulator2024 in front","key":"START","foreground":"FlightSimulator2024"}
+{"t":1791408203824,"s":703.697,"kind":"phase","text":"throttle listening, group B not masking: L:Throttle1Position 0.302124..97.81189 · the hardware's events heard at the highest priority ×0 (0 past ±6000) · group B heard ×0 (0 past ±6000) none","control":"throttle","phase":"listening, group B not masking","group":"B","heard":{"n":0,"hardware":0,"min":null,"max":null},"holder":{"n":0,"hardware":0,"min":null,"max":null},"value":{"n":130,"hardware":0,"min":0.3021240234375,"max":97.8118896484375}}
+{"t":1791408203878,"s":703.751,"kind":"key","text":"K:AXIS_ELEVATOR_SET -26, not ours","event":"AXIS_ELEVATOR_SET","data":[-26,0,0,0,0],"ex1":false,"ours":null}
+{"t":1791408215389,"s":715.262,"kind":"key","text":"SKIP, with claude in front","key":"SKIP","foreground":"claude"}
+{"t":1791408215390,"s":715.263,"kind":"skip","text":"throttle"}
+{"t":1791408215390,"s":715.263,"kind":"holder","text":"cleared: cleared group A","holderKind":"cleared","group":"A"}
+{"t":1791408215390,"s":715.263,"kind":"holder","text":"cleared: cleared group B","holderKind":"cleared","group":"B"}
+{"t":1791408215390,"s":715.263,"kind":"holder","text":"quit: the observer asked","holderKind":"quit"}
+{"t":1791408215420,"s":715.293,"kind":"holder","text":"exception: UNRECOGNIZED_ID (3) on clear group A, parameter 1","holderKind":"exception","exception":3,"name":"UNRECOGNIZED_ID","sendId":21,"index":1,"sent":"clear group A"}
+{"t":1791408215702,"s":715.575,"kind":"holder","text":"exited (code 0)"}

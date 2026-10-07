@@ -12,6 +12,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Because:**
   - A mask registered before the A2A PA-24 loaded got ahead of the aircraft's own, and one registered after it loaded didn't ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
     A core that starts after the flight loads couldn't hold back input on such an aircraft for soft takeover or mixed flight controls ([04-room-for-later](../product/04-room-for-later.md#an-input-layer)).
+  - A group that took its priority as the sim started, held open by an event it only listened to, masked the PA-24's elevator ahead of Accu-Sim once the axis was added after the flight loaded, and held nothing back until then; SimConnect answered before the main menu loaded its aircraft ([flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)).
   - The watcher takes over the helpers the sim would launch ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), so it, rather than a helper the sim launches, starts the core early enough.
   - Code in the sim reaches a program on the PC only if that program is already listening on 127.0.0.1 ([interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)), and we found no way for a panel to start one (unverified).
     A start button in the EFB app would need the watcher to listen and start the core, which is more than the watcher should do (user, 2026-10-07).
@@ -19,7 +20,6 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - The desktop app's start covers a host who starts a session before the sim runs ([invite code](../product/03-v1-scope.md#invite-code)).
 - **Leaves out:**
   - what the core and the other components do while no session runs, which [node 1.1.2](plan.md#112-components-with-no-session) designs
-  - whether the core can take its masking priority at sim start without holding back the pilot's controls, which [node 1.1.1](plan.md#111-masking-priority-at-sim-start) probes
   - a pilot who has quit the watcher or turned it off, which [step 7](../product/plan.md#7-tech-stack-and-architecture) allows, so that nothing starts the core with the sim until they open the desktop app
   - when the core exits
 

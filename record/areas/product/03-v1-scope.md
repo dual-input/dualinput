@@ -366,7 +366,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 - Once a pilot has joined, and until they're in a flight, they see where the PF is, such as "James is at EGLL stand X12".
   A Go to button points the world map at that spot and selects the stand, with the world map's own requests, made by a script of ours that a copy of the sim's BlurPage component brings into the menu's document.
   From a closed sim, that script set the departure, stand, and aircraft (measured on MSFS 2024, 2026-10-06, [interface log, 2026-10-06](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)), and a flight started after those requests loaded at the stand they set (measured on MSFS 2024, 2026-10-05, [interface log, 2026-10-05](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
-  The watcher makes the copy from the sim's own file and remakes it after each sim update ([architecture's tentative decisions](../architecture/decisions.md#the-watcher-keeps-the-blurpage-copy-current)).
+  Crosscheck makes the copy from the sim's own file, and makes it again whenever that file changes ([architecture's tentative decisions](../architecture/decisions.md#the-watcher-keeps-the-blurpage-copy-current)).
   Naming the PF's stand once they've moved is open (the open questions below).
 - Each pilot loads their flight at the PF's stand, because moving an aircraft across the world makes the sim load new scenery there, which can stall it or fill its video memory (unverified; a probe that moves a parked aircraft to an airport on another continent settles it).
 - When a joined pilot is in a flight, Crosscheck puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
@@ -386,7 +386,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 **Rules:**
 
 - A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
-- The Go to button is unavailable, and says why, on any page but the main menu's home page and Free flight's world map, or when the watcher can't make its copy of BlurPage: a sim update removes BlurPage or stops MasterPage placing it, or another package copies it.
+- The Go to button is unavailable, and says why, on any page but the main menu's home page and Free flight's world map, or when Crosscheck has no copy of BlurPage installed: a sim update removes BlurPage or stops MasterPage placing it, or another package copies it.
   Crosscheck tries no other component, so the button stays unavailable until a Crosscheck release picks one (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
 - Pilots other than the PF touch nothing in the cockpit during preflight, because catch-up sets only what the profile holds: a PM who switches a display to another page during preflight keeps that page after the PF's state arrives.
   The PF touches nothing beyond the checklist.

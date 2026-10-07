@@ -15,11 +15,9 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 
 ## The clicking pilot's machine finds the point, and the other machine only draws it
 
-- **Decided:** the desktop app on the clicking pilot's machine reads the models, the camera, and the cursor, and finds each hand's point.
+- **Decided:** on the clicking pilot's machine, Crosscheck's core reads the models, the camera, and the cursor, and finds each hand's point ([architecture's tentative decisions](../architecture/decisions.md#the-core-works-out-where-the-figures-hand-goes), 2026-10-07).
   The other machine receives the points, relative to the aircraft, and its WASM module places the figure there every frame.
 - **Because:** both pilots fly the same aircraft package, so a point relative to the aircraft means the same on both machines, and the other machine then needs no model files and no posing.
-- **Changed:** the core, not the desktop app, finds the point ([architecture's tentative decisions](../architecture/decisions.md#the-core-works-out-where-the-figures-hand-goes), 2026-10-07).
-
 ## The ray needs no calibration
 
 - **Decided:** the ray comes from `SimConnect_CameraGet`'s `WORLD` referential and the cursor's place in the sim window, inside and out, by measured rules:

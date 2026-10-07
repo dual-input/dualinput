@@ -171,16 +171,15 @@ Two PCs on the same home network find each other without a code, and the connect
 
 ### Telling the crew a sim crashed
 
-When a pilot's sim crashes, the rest of the crew learns that it crashed, such as "James's sim crashed. Crosscheck brings him back once it's running again", rather than seeing a dropped connection, because Crosscheck's core runs outside the sim and outlives it (user, 2026-10-07).
-In a game that keeps its session inside itself, a crash takes the session with it (user, 2026-10-07).
+When a pilot's sim crashes, the rest of the crew learns that it crashed, such as "James's sim crashed. Crosscheck rejoins him once he's back in a flight.", rather than seeing a dropped connection (user, 2026-10-07).
 On the machine that crashed, the desktop app comes up with a Rejoin button, which starts the sim and puts the pilot back in the flight where the aircraft is, in the air if it's flying (user, 2026-10-07).
 
 - **Tech:** the core is a process of its own that starts with the sim ([architecture's tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), and while a session is held it stays up after the sim closes ([architecture's spine](../architecture/01-spine.md#what-moves-them)), so it can tell the crew.
   The watcher notices the sim's process ending from the operating system ([the plan](plan.md#7-tech-stack-and-architecture)).
-- **Product:** the crew knows to wait for a pilot whose sim is restarting, and how long that takes, rather than wondering whether the connection will come back.
+  In each of the 5 crashes in our records, our harness's SimConnect connection closed with no quit message before it, and Windows logged `FlightSimulator2024.exe` faulting with exception 0xc0000005 (measured on MSFS 2024, 2026-10-01, [crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv) and the run reports it names).
+- **Product:** the crew knows to wait for a pilot whose sim is restarting, rather than wondering whether the connection will come back.
 - **Open questions:** how the core tells a crash from a pilot closing the sim or going back to the main menu.
-  SimConnect sends a quit message when the sim closes (read in node-simconnect 4.2.0, its `quit` event), and whether it sends one when the sim crashes is unverified; the process's exit code is another signal, also unverified.
-  Our records hold 5 crashes, each with exception 0xc0000005 ([aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)), and none noted what SimConnect sent.
+  The SDK documents a quit message when the sim closes ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md)), and whether a normal close sends it before the connection closes is unmeasured; closing the sim once with a client attached settles it.
   Whether Rejoin can start a flight in the air, from the menu's script or another way, is untested.
 - **Next:** a probe of starting a flight in the air, when we look into Rejoin (user, 2026-10-07).
 
@@ -215,9 +214,10 @@ Trim wheels and flap and gear levers on hardware have the same mismatch.
   On an aircraft whose module asks for the same priority, such as the A2A PA-24, it works only if Crosscheck's masks are in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
   Masking holds back the Black Square Baron's mixture, which the Baron takes through its own input event, when the lever is bound in MSFS (measured on MSFS 2024, 2026-10-06, [flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
   It doesn't when SPAD.neXt drives the lever, because SPAD.neXt sets the input event itself and sends no key event to mask (same entry), so soft takeover needs another way to hold back a lever driven by a tool that sets input events.
-  The pilot's own tool can hold it back: while Crosscheck masks, it sets `L:CROSSCHECK_MASKING_ACTIVE` to 1, and the pilot gives each binding in SPAD.neXt or MobiFlight a condition that disables it while the variable is 1 (user, 2026-10-07).
+  The pilot's own tool could hold it back (user, 2026-10-07): while the core holds back a lever, it sets a variable for that lever to 1, such as a hypothetical `L:CROSSCHECK_HOLD_THROTTLE_1`, and the pilot gives that lever's binding in SPAD.neXt or MobiFlight a condition that disables it while the variable is 1.
+  It takes a variable for each lever, not one for all, because one flag on every binding would also switch off a yoke or rudder bound in the tool while a throttle waits to pick up.
   That both tools, and others such as FSUIPC and Axis and Ohs, can make a binding wait on an `L:` variable is unverified, and the tools' documentation or a binding tried in each settles it.
-  An `L:` variable outlives the program that set it, so the WASM module sets it back to 0 when the core stops, as it unfreezes the aircraft ([architecture's spine](../architecture/01-spine.md#what-moves-them)).
+  An `L:` variable is global to the sim and keeps its value after the program that set it is gone, until the sim exits ([03-01](../../learn/foundations/03-01-units-and-variables.md)), so the WASM module sets each one back to 0 when it stops hearing from the core ([architecture's spine](../architecture/01-spine.md#what-moves-them)).
 - **Product:** removes the thrust jump at handover.
 - **Open questions:** a first scoping pass on 2026-10-03 proposed these, for review when soft takeover is scoped:
   - A lever picks up once it comes within a small tolerance of the aircraft's, rather than having to cross it, and a test on real hardware sets the tolerance.

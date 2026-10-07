@@ -42,7 +42,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## Our WASM module writes the following aircraft
 
-- **Decided:** on a following machine, our WASM module freezes the aircraft, writes the flying machine's pose and velocities inside the sim's frame, and unfreezes the aircraft within about 1s once the core stops writing, as [flight-model sync](../product/03-v1-scope.md#flight-model-sync) requires.
+- **Decided:** our WASM module holds every machine's aircraft still in [preflight](../product/03-v1-scope.md#preflight), and on a following machine freezes the aircraft and writes the flying machine's pose and velocities inside the sim's frame.
+  When it hasn't heard from the core for 1s, on any machine in a session, it unfreezes the aircraft, as [flight-model sync](../product/03-v1-scope.md#flight-model-sync) requires, and clears every variable of ours that holds something back ([01-spine](01-spine.md#what-moves-them)).
   Settled in node 1.1 by the user, 2026-10-07.
 - **Because:**
   - Written from outside the sim each frame, the pose and velocities held on a parked Baron ([flight-model log](../flight-model/log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)), but an object written from outside stuttered in a moving cockpit, and one written from inside the sim's frame didn't ([avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)).

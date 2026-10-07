@@ -95,6 +95,27 @@ Pilots bind the take-control key in Crosscheck's settings rather than the sim's 
 It reads what node 1 reads, then the area logs, starting with [interface](../interface/log.md), [avatars](../avatars/log.md) with its [decisions](../avatars/decisions.md), [flight-controls](../flight-controls/log.md), and [flight-model](../flight-model/log.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Waits on 1.1.1 and 1.1.2.
+
+## 1.1.1 Masking priority at sim start
+
+Question: can the core take its masking priority when the sim starts, ahead of any aircraft's module, without holding back the pilot's controls until a session asks it to?
+1.1 can't say what the core does from the moment the sim starts without it.
+On the A2A PA-24, our masks got ahead of the aircraft's only when they were registered before it loaded ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)), and soft takeover and mixed flight controls, both Soon picks, need that place on such aircraft ([04-room-for-later](../product/04-room-for-later.md#an-input-layer)).
+A probe settles it: register an empty notification group at 10,000,000 before the PA-24 loads, add maskable events to it after the aircraft loads, and see whether our group still sits ahead of the aircraft's.
+It reads the [flight-controls log](../flight-controls/log.md), the foundations chapter [04-02](../../learn/foundations/04-02-events.md), and the probe [p01-mask.mjs](../../../experiments/areas/flight-controls/p01-mask.mjs).
+Its answer goes in an entry in the flight-controls log, which 1.1's section of `01-spine.md` cites.
+Exit: a flight-controls log entry answers the question.
+
+## 1.1.2 Components with no session
+
+Question: what does each component do while no session runs, and what moves it into a session and back?
+1.1 can't say what each component owns until it says when.
+The core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)), and a pilot may fly the Baron every day and with a crew once a week, so with no session nothing should load a profile, run a plugin, or watch the cockpit (user, 2026-10-07).
+That doesn't come for free: FS Copilot's app opened its relay link and its rendezvous registration at launch, session or not (read in the FS Copilot fork, `FsCopilot/Program.cs`, `BuildAvaloniaApp`), and fsc-editor's module streams the sim's `L:` values until the sim exits, because the app never sends it the `stop` command it has (read in fsc-editor, `link/src/module.cpp`).
+It reads 1.1's answer and the tentative decisions, the session sections of [03-v1-scope](../product/03-v1-scope.md#session), and sim awareness in step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture).
+Its answer goes in its own section of `01-spine.md`.
+Exit: the user agrees to that section.
 
 ## 1.2 Communication
 
@@ -103,6 +124,7 @@ The spine can't draw the boundaries between parts, or set the conventions they s
 It reads 1.1's answer, then the [interface](../interface/log.md) and [CommBus](../commbus/log.md) logs, and the foundations chapters on the ways to reach the sim: [04-01](../../learn/foundations/04-01-connection-and-data.md), [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Raised elsewhere: by 1.1, how a panel finds its own core when two cores run on one machine, since FS Copilot's panels try ports 9020 to 9024 and connect to the first that answers, one reason its test bench must not run beside a live sim (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
 
 ## 1.3 Language and toolchains
 
@@ -111,6 +133,7 @@ The spine can't pick a language until it knows the runtimes the components run i
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Raised elsewhere: by 1.1, whether the core's native code for Windows input and audio runs in the core's own process or in a process the core supervises, since a crash in native code inside the core's process would end the pilot's session ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
 
 ## 1.4 Shared conventions
 
@@ -123,3 +146,4 @@ Another is the form of a time, because the sync design gives times in both frame
 It reads 1.2's answer, then the foundations chapters [08-01](../../learn/foundations/08-01-replication-models-and-authority.md), [08-03](../../learn/foundations/08-03-ordering-and-classes-of-data.md), [08-05](../../learn/foundations/08-05-position-and-clocks.md), [09-05](../../learn/foundations/09-05-versions-and-security.md), and [09-06](../../learn/foundations/09-06-connection-lifecycle.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Raised elsewhere: by 1.1, what a pilot's identity is across a core restart, since FS Copilot made a restarted app "a new peer in every respect" (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03), while [the connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine.

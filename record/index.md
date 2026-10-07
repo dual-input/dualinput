@@ -25,3 +25,4 @@ Documentation people write for other people lives in `docs/` instead.
 - [decisions/001-changing-other-developers-packages.md](decisions/001-changing-other-developers-packages.md): Crosscheck's own features never change another developer's package, and an aircraft's plugin may, on the pilot's machine.
 - [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.
 - [areas/architecture/plan.md](areas/architecture/plan.md): how we design Crosscheck's v1 architecture, as a tree of questions that goes a level deeper only when the work shows a need, and where each question stands.
+- [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes have settled for now, and on what findings.

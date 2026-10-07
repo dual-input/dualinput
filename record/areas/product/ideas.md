@@ -169,6 +169,18 @@ Two PCs on the same home network find each other without a code, and the connect
 - **Open questions:** whether Crosscheck joins as soon as it finds a code or asks first, since an old code can sit on the clipboard from an earlier session.
   Whether Discord's own join invitations, which games send through Rich Presence, are open to an app that isn't a game.
 
+### Telling the crew a sim crashed
+
+When a pilot's sim crashes, the rest of the crew learns that it crashed, such as "James's sim crashed. Crosscheck brings him back once it's running again", rather than seeing a dropped connection, because Crosscheck's core runs outside the sim and outlives it (user, 2026-10-07).
+In a game that keeps its session inside itself, a crash takes the session with it (user, 2026-10-07).
+
+- **Tech:** the core is a process of its own that starts with the sim ([architecture's tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), and while a session is held it stays up after the sim closes ([architecture's spine](../architecture/01-spine.md#what-moves-them)), so it can tell the crew.
+  The watcher notices the sim's process ending from the operating system ([the plan](plan.md#7-tech-stack-and-architecture)).
+- **Product:** the crew knows to wait for a pilot whose sim is restarting, and how long that takes, rather than wondering whether the connection will come back.
+- **Open questions:** how the core tells a crash from a pilot closing the sim or going back to the main menu.
+  SimConnect sends a quit message when the sim closes (read in node-simconnect 4.2.0, its `quit` event), and whether it sends one when the sim crashes is unverified; the process's exit code is another signal, also unverified.
+  Our records hold 5 crashes, each with exception 0xc0000005 ([aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)), and none noted what SimConnect sent.
+
 ## Control
 
 ### Voice handover
@@ -200,6 +212,9 @@ Trim wheels and flap and gear levers on hardware have the same mismatch.
   On an aircraft whose module asks for the same priority, such as the A2A PA-24, it works only if Crosscheck's masks are in place before the aircraft loads ([log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
   Masking holds back the Black Square Baron's mixture, which the Baron takes through its own input event, when the lever is bound in MSFS (measured on MSFS 2024, 2026-10-06, [flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
   It doesn't when SPAD.neXt drives the lever, because SPAD.neXt sets the input event itself and sends no key event to mask (same entry), so soft takeover needs another way to hold back a lever driven by a tool that sets input events.
+  The pilot's own tool can hold it back: while Crosscheck masks, it sets `L:CROSSCHECK_MASKING_ACTIVE` to 1, and the pilot gives each binding in SPAD.neXt or MobiFlight a condition that disables it while the variable is 1 (user, 2026-10-07).
+  That both tools, and others such as FSUIPC and Axis and Ohs, can make a binding wait on an `L:` variable is unverified, and the tools' documentation or a binding tried in each settles it.
+  An `L:` variable outlives the program that set it, so the WASM module sets it back to 0 when the core stops, as it unfreezes the aircraft ([architecture's spine](../architecture/01-spine.md#what-moves-them)).
 - **Product:** removes the thrust jump at handover.
 - **Open questions:** a first scoping pass on 2026-10-03 proposed these, for review when soft takeover is scoped:
   - A lever picks up once it comes within a small tolerance of the aircraft's, rather than having to cross it, and a test on real hardware sets the tolerance.

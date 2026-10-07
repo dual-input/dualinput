@@ -173,6 +173,7 @@ Two PCs on the same home network find each other without a code, and the connect
 
 When a pilot's sim crashes, the rest of the crew learns that it crashed, such as "James's sim crashed. Crosscheck brings him back once it's running again", rather than seeing a dropped connection, because Crosscheck's core runs outside the sim and outlives it (user, 2026-10-07).
 In a game that keeps its session inside itself, a crash takes the session with it (user, 2026-10-07).
+On the machine that crashed, the desktop app comes up with a Rejoin button, which starts the sim and puts the pilot back in the flight where the aircraft is, in the air if it's flying (user, 2026-10-07).
 
 - **Tech:** the core is a process of its own that starts with the sim ([architecture's tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), and while a session is held it stays up after the sim closes ([architecture's spine](../architecture/01-spine.md#what-moves-them)), so it can tell the crew.
   The watcher notices the sim's process ending from the operating system ([the plan](plan.md#7-tech-stack-and-architecture)).
@@ -180,6 +181,8 @@ In a game that keeps its session inside itself, a crash takes the session with i
 - **Open questions:** how the core tells a crash from a pilot closing the sim or going back to the main menu.
   SimConnect sends a quit message when the sim closes (read in node-simconnect 4.2.0, its `quit` event), and whether it sends one when the sim crashes is unverified; the process's exit code is another signal, also unverified.
   Our records hold 5 crashes, each with exception 0xc0000005 ([aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)), and none noted what SimConnect sent.
+  Whether Rejoin can start a flight in the air, from the menu's script or another way, is untested.
+- **Next:** a probe of starting a flight in the air, when we look into Rejoin (user, 2026-10-07).
 
 ## Control
 

@@ -65,6 +65,7 @@ The picks, picked on 2026-10-02:
   - The [notification banner](ideas.md#notification-banner), split from Crosscheck objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
   - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Crosscheck IDE
   - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Crosscheck's own code from the first aircraft on
+  - The crew's notice that a pilot's sim crashed, from [Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed), picked on 2026-10-07, and free to move to Soon if telling a crash from a quit proves hard (user)
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1

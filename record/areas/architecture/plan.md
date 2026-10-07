@@ -117,6 +117,7 @@ Our earlier apps did otherwise: FS Copilot's app opened its relay link and its r
 It reads the tentative decisions 1.1 has settled ([decisions](decisions.md)), the session sections of [03-v1-scope](../product/03-v1-scope.md#session), and sim awareness in step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Done on 2026-10-07.
 
 ## 1.2 Communication
 

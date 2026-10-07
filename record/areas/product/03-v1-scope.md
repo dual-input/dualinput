@@ -341,6 +341,8 @@ The connection carries everything between the crew's machines, directly when it 
   The app tells whether a returning pilot's sim kept running or restarted, from session state it saves on the pilot's machine with an identifier for the sim's run.
   If the sim kept running, Crosscheck reconnects the pilot with no action from them, from that saved state, and replays what they missed in the order it happened ([catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
   If the sim restarted, Crosscheck rejoins the pilot once they're in a flight again, with the code it remembers, as a [late joiner](#preflight): flight-model sync puts them back in the aircraft's place, their cockpit catches up on every control the profile can read or track, and Crosscheck tells them that their displays' pages, their FMS, and anything else the profile can't read may differ from the PF's.
+- When a pilot's sim crashes, their core stays up, and the others' notice says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Crosscheck brings him back once it's running again" ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
+  How the core tells a crash from a pilot closing the sim is open (same entry).
 - A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying as a pilot who loses the connection does: control passes to the PM if they were the PF, and the others get a notice.
   Once they're in a flight again, Crosscheck rejoins them as a late joiner.
 - A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app.

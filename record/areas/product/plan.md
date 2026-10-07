@@ -176,6 +176,7 @@ Steps 4 and 5 add to this list as they find risks.
 ## 7. Tech stack and architecture
 
 Produces: decisions in `record/decisions/`.
+The work runs as a tree of questions in [the architecture plan](../architecture/plan.md), which says where it stands.
 Exit: the language, the frameworks, the core architecture, and the profile format each have a decision.
 The profile format takes the shape [01-profile-entries](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout.
 The decisions also pick whether each machine sends to every other directly or through the flying machine ([live sync](../sync/02-live-sync.md#one-stream-in-causal-order)), the sandbox that write functions run in, with its size limits, and the order catch-up applies state in, where we lean toward first-final-value order ([catch-up](../sync/03-catch-up.md#choosing-the-order)).

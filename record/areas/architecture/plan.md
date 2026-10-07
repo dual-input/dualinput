@@ -72,10 +72,13 @@ Question: what does every other part of Crosscheck rest on?
 It covers:
 
 - the processes Crosscheck runs as
-- how its components talk to each other, on one machine and between machines: the core, the desktop app, the EFB app, our WASM module, the panels, plugins, the relay, and the report server
+- how its components talk to each other, on one machine and between machines: the watcher, the core, the desktop app, the EFB app, our WASM module, the panels, plugins, the relay, and the report server
 - the conventions they share
 - the language
 - the boundaries between its parts
+
+A component is something that runs on its own, such as a process, a document in the sim, or a WASM module.
+A part is a piece of Crosscheck's design that a later node works on, such as the sync engine, and it may live in one component or span several.
 
 Step 7 can't decide a language, frameworks, or a core architecture without it, and every node after it assumes its answer.
 It reads [01-aims](../product/01-aims.md), [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), and the sync design docs: [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md).
@@ -87,8 +90,8 @@ Waits on 1.1, 1.2, 1.3, and 1.4.
 ## 1.1 Components
 
 Question: what components does Crosscheck run, where does each run, and what does each own?
-The spine can't draw a link without its endpoints, and v1's features name more of them than the core and its clients that step 7 leans toward.
-Some have no home yet, such as whatever reads the take-control key, which pilots bind in Crosscheck's settings rather than the sim's ([03-v1-scope](../product/03-v1-scope.md#take-control-key)), and the record leaves open where each part of a plugin runs ([03-v1-scope](../product/03-v1-scope.md#plugins)).
+The spine can't draw a link without its endpoints, and v1's features name endpoints beyond the watcher, the core, and the core's clients that step 7 leans toward.
+Pilots bind the take-control key in Crosscheck's settings rather than the sim's ([03-v1-scope](../product/03-v1-scope.md#take-control-key)), so a component of ours reads it, and the record doesn't say which, nor where each part of a plugin runs ([03-v1-scope](../product/03-v1-scope.md#plugins)).
 It reads what node 1 reads, then the area logs, starting with [interface](../interface/log.md), [avatars](../avatars/log.md) with its [decisions](../avatars/decisions.md), [flight-controls](../flight-controls/log.md), and [flight-model](../flight-model/log.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
@@ -104,7 +107,7 @@ Exit: the user agrees to that section.
 ## 1.3 Language and toolchains
 
 Question: what language and toolchain does each component's runtime take?
-The spine can't pick a language until it knows the runtimes the components run in, and they differ: Node, Electron, Coherent GT, the sim's WASM, and whatever native code audio capture and speech recognition need.
+The spine can't pick a language until it knows the runtimes the components run in, and they differ: Node and Electron, which step 7 leans toward, Coherent GT, the sim's WASM, and whatever the local speech recognizer and ATC audio capture run in, which the record leaves open ([03-v1-scope](../product/03-v1-scope.md#voice-phrases)).
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
@@ -112,8 +115,9 @@ Exit: the user agrees to that section.
 ## 1.4 Shared conventions
 
 Question: what conventions does every component share?
-The spine can't fix where one part ends and the next begins until the parts agree on what crosses between them.
-Step 7 owes two of these by name, the form of a pilot ID ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)) and of a session ID ([03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)), and the sync design docs imply more, such as the message ID every transport filters duplicates by, and time given in both frames and milliseconds.
+The spine can't draw the boundaries between parts until it knows the form of what every message between components carries, beyond the exchanges 1.2 names, such as its IDs and its times.
+The record leaves two of these to step 7 by name: the form of a pilot ID ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)) and of a session ID ([03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)).
+The sync design implies more, such as the message ID a receiver applies once whether it came directly or through the relay, and how time is given, since the duplicate filter's window is 3 frames and at most 200ms, and a write's pace is given as `every(1, 'frame')` or `every(40, 'ms')` ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice), [01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
 It reads 1.2's answer, then the foundations chapters [08-01](../../learn/foundations/08-01-replication-models-and-authority.md), [08-03](../../learn/foundations/08-03-ordering-and-classes-of-data.md), [08-05](../../learn/foundations/08-05-position-and-clocks.md), [09-05](../../learn/foundations/09-05-versions-and-security.md), and [09-06](../../learn/foundations/09-06-connection-lifecycle.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.

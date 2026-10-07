@@ -72,7 +72,8 @@ The reversing decision says what it reverses and links back.
 When an area's experiments settle a question before any product design does, the answer goes in the area's `decisions.md` as a tentative decision, because a numbered decision can't be edited and these change with each probe.
 Each one gives what was decided, the findings behind it with links to where each was found, and what it leaves out, if anything, and it's edited in place as findings arrive.
 A product design confirms each one as a decision in `record/decisions/`, changes it, or drops it, and the tentative one links to the result.
-Design work that settles a question for now writes a tentative decision too, as a node of the [architecture plan](../../record/areas/architecture/plan.md) does, and that plan's [Where answers go](../../record/areas/architecture/plan.md#where-answers-go) says when each one gets its number.
+Design work that settles a question before the design it belongs to is done writes a tentative decision too, because the rest of that design can still change the answer.
+The finished design is the product design that confirms it: for a node of the [architecture plan](../../record/areas/architecture/plan.md), that's its parent, at the point that plan's [Where answers go](../../record/areas/architecture/plan.md#where-answers-go) names.
 
 ### Reference
 

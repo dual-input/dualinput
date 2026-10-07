@@ -171,7 +171,8 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
 
 The world map probe and the six after it, on stepped writes, settling, the double-fire, writes landing, figures, and WebSockets, made one batched sim session, on 2026-10-05.
 The probes on `wt.eb.evt`, the Baron's mixture, the crowded EFB, and the world map from our package made a second, on 2026-10-06.
-Steps 4 and 5 add to this list as they find risks.
+Done on 2026-10-07: every risk above has a log entry that answers it, or is deferred with a reason.
+A probe that step 7's work needs becomes a node of [the architecture plan](../architecture/plan.md).
 
 ## 7. Tech stack and architecture
 

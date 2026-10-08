@@ -16,9 +16,12 @@
  *
  *   node experiments/areas/interface/p15-links-coverage.mjs
  *
- * With a flight loaded and crosscheck-p13-links in Community (links/build.mjs).
- * It runs steps 1 to 3 by itself, then beeps and asks the pilot to go to the
- * main menu, waits until the inspector lists no cockpit panel, and runs step 4.
+ * With crosscheck-p13-links in Community (links/build.mjs), it starts wherever
+ * the sim is, and waits for the sim if it isn't up yet. At the main menu it
+ * runs step 4 first, then beeps and asks the pilot to load any aircraft,
+ * parked, and goes on 15s after Ready to fly. In a flight it runs steps 2 and
+ * 3, beeps and asks the pilot to go to the main menu, waits until the
+ * inspector lists no cockpit panel, and runs step 4 there if it hasn't yet.
  *
  * The CommBus code is p14's (p14-commbus-pages.mjs): the sim's
  * RegisterCommBusListener, after loading Services/CommBus.js where a page has
@@ -49,6 +52,7 @@ const HELLO_EVERY_MS = 500
 const LISTEN_MS = 6_000
 const GONE_WAIT_MS = 6_000
 const MENU_WAIT_MS = 10 * 60_000
+const SETTLE_MS = 15_000
 const PANEL_ID = "PANEL_CROSSCHECK_P13"
 
 const rec = new Recorder("p15-links-coverage", { area: "interface" })
@@ -156,6 +160,27 @@ async function inPage(page, expression) {
 
 const run = { sim: null, asks: [], commbus: { flight: [], menu: [] }, gone: [] }
 
+async function connectWhenUp() {
+  const t0 = Date.now()
+  for (;;) {
+    try {
+      return await Sim.connect(rec, { name: "CROSSCHECK p15 links coverage" })
+    } catch (e) {
+      if (Date.now() - t0 > MENU_WAIT_MS) throw e
+      await sleep(1000)
+    }
+  }
+}
+
+async function waitFor(test, ms) {
+  const t0 = Date.now()
+  while (Date.now() - t0 < ms) {
+    try { if (test(await listPages())) return true } catch { /* the inspector comes up with the sim */ }
+    await sleep(1000)
+  }
+  return false
+}
+
 async function commbusIn(when, pages) {
   const hello = setInterval(() => {
     if (!run.sim.gone) run.sim.send(`call ${HELLO}`, () => run.sim.handle.callCommBusEvent(HELLO, CommBusBroadcastTo.JS, JSON.stringify({ at: Date.now() })))
@@ -210,16 +235,33 @@ async function main() {
   const n = sockets.find((s) => s.kind === "node")
   find(`Node ${process.version}'s built-in WebSocket sent ${n ? (n.origin ? `the Origin ${n.origin}` : "no Origin") : "nothing the server saw"}.`)
 
-  const sim = run.sim = await Sim.connect(rec, { name: "CROSSCHECK p15 links coverage" })
+  console.log("\n▶ Start MSFS if it isn't running. The probe waits for it.")
+  const sim = run.sim = await connectWhenUp()
   sim.handle.on("commBusEvent", (e) => { run.asks.push(e.data); rec.data("ask", `${ASK}: ${e.data}`, { data: e.data }) })
   sim.send(`subscribe ${ASK}`, () => sim.handle.subscribeToCommBusEvent(ASK_EVENT_ID, ASK))
   const flows = []
-  sim.flowHandlers.add((name) => flows.push({ name, at: Date.now() }))
+  let lastReady = 0
+  sim.flowHandlers.add((name) => { flows.push({ name, at: Date.now() }); if (name === "RTC_END") lastReady = Date.now() })
+  const listed = await waitFor((now) => now.some((p) => /mainUi/i.test(String(p.title))), MENU_WAIT_MS)
+  if (!listed) throw new Error("the inspector never listed mainUi; has the sim finished starting?")
+  await sleep(5000)
+
+  // ------------------------------------------------ 4, first, from the main menu
+
+  let pages = await listPages()
+  if (!pages.some(cockpit)) {
+    run.commbus.menu = await commbusIn("menu", pages)
+    beep(880, 150)
+    say("Load any aircraft, parked, and click Ready to fly.")
+    console.log("\n▶ Load any aircraft, parked, from the world map, and click Ready to fly.\n  The probe goes on by itself 15s after Ready to fly.")
+    lastReady = 0
+    while (!lastReady || Date.now() - lastReady < SETTLE_MS) await sleep(500)
+    pages = await listPages()
+    if (!pages.some(cockpit)) throw new Error("no cockpit panels listed after Ready to fly")
+  }
 
   // ------------------------------------------------ 2. the CommBus in a flight
 
-  let pages = await listPages()
-  if (!pages.some(cockpit)) throw new Error("no cockpit panels listed; load a flight first")
   run.commbus.flight = await commbusIn("flight", pages)
 
   // ------------------------------------------------ 3. sockets when a page goes away
@@ -271,7 +313,8 @@ async function main() {
 
   // ------------------------------------------------ 4. the CommBus in the main menu
 
-  if (goneAt) {
+  if (run.commbus.menu.length) rec.log("menu", "the main menu was tried at the start")
+  else if (goneAt) {
     await sleep(5000)
     run.commbus.menu = await commbusIn("menu", await listPages())
   } else find("The cockpit never went away, so the main menu wasn't tried.")

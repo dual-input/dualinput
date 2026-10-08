@@ -162,7 +162,7 @@ The spine can't pick a language until it knows the runtimes the components run i
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
-Waits on 1.3.1, 1.3.2, and 1.3.3.
+Waits on 1.3.1, 1.3.2, 1.3.3, 1.3.4, 1.3.5, and 1.3.6.
 Raised elsewhere: by 1.1, whether the core's native code for Windows input and audio runs in the core's own process or in a process the core supervises, since a crash in native code inside the core's process takes the core down, and the pilot out of the session until the core restarts ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
 
 ## 1.3.1 The watcher's runtime
@@ -201,6 +201,36 @@ It reads the [tentative decisions](decisions.md) on the take-control input and t
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
 Done on 2026-10-08.
+
+## 1.3.4 A Rust SimConnect client
+
+Question: does a Rust program using the SDK's own SimConnect library, through bindings generated from its headers, connect to MSFS 2024, call the sim's pages and hear them over the CommBus, follow the sim's system events, and trade data slots with our Rust module?
+1.3 can't take Rust for the core without it.
+Every SimConnect finding so far came through node-simconnect, which implements the protocol again in JavaScript ([01-spine](01-spine.md#the-core-and-the-desktop-app)), and a Rust core would call `SimConnect.dll` instead ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)).
+A probe settles it, at the main menu: connect, call mainUi over the CommBus and hear its answer, subscribe to a system event and to the flow events, and write a data slot of the p03 module and read its echo.
+It reads [04-01](../../learn/foundations/04-01-connection-and-data.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), the interface log's [2026-10-08 entries](../interface/log.md), and the probes p13 to p15.
+Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
+
+## 1.3.5 An embedded engine for plugins and write functions
+
+Question: what do QuickJS and V8, embedded in a Rust program, cost to start, hold idle, and call, running a plugin and 100 profile write functions compiled from TypeScript, and do their memory and time limits stop a runaway script without taking the program down?
+1.3 can't choose the core's language without it.
+Plugin code runs only in the core, in TypeScript (user, 2026-10-08), and step 7 asks for a sandbox, with size limits, for the profile's write functions ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), so a core in either language runs them in an engine with limits: Node's own `vm` module "is not a security mechanism" (documented, [Node.js vm](https://nodejs.org/api/vm.html)).
+A probe settles it, with no sim: compile a small plugin and 100 write functions with esbuild, run them in QuickJS through rquickjs and in V8 through a Rust binding, call the write functions as every frame at 60 frames a second would, and break each limit on purpose; Node's `vm` module runs the same code as a baseline.
+It reads [01-profile-entries](../sync/01-profile-entries.md#the-writer-api) and the [plugins](../product/03-v1-scope.md#plugins) section of 03-v1-scope.
+Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
+
+## 1.3.6 Tauri for the desktop app
+
+Question: what does a Tauri 2 window cost in memory against an Electron window showing the same page, and what `Origin` does a WebSocket send from a Tauri page and from Tauri's Rust side?
+1.3 can't take Tauri for the desktop app without it.
+The core accepts a WebSocket only with `Origin` `coui://html_ui` or none, and the desktop app connects from Electron's main process because a page in its window sends one ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps)).
+A probe settles it, with no sim: open each window for 60s and record the memory of all its processes, as p01 did, and connect each way to a WebSocket server that logs the `Origin`, as p16 did.
+It reads [p01](../../../experiments/areas/architecture/p01-tray-runtimes.mjs) and [p16](../../../experiments/areas/interface/p16-client-origin.mjs).
+Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
 
 ## 1.4 Shared conventions
 

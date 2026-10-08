@@ -90,7 +90,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 - **Decided:** the core announces its port and whether a session runs on the CommBus every 2s, and at once when a session starts or ends, and a page in the sim that hears it opens a WebSocket to the core on 127.0.0.1.
   The CommBus carries only those announcements, and the core listens on a port Windows picks.
-  Settled in node 1.2 by the user, 2026-10-08; the announcement every 2s, in place of a page asking, on the finding below.
+  Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
   - In the main menu, 13 of the 14 pages heard a SimConnect client's CommBus calls, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 30 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
     A page asking is less sure: a call the toolbar's page made before its listener reported ready never arrived (same entry).
@@ -104,16 +104,16 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - A CommBus call reaches every page listening on its name, so carrying the session over it would have every page sort every message, while a socket in each of 16 cockpit panels cost no frame time we could measure (same entry).
 - **Leaves out:**
   - a sim update that changes how mainUi takes view listeners' events, which its route rests on (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`)
-  - the CommBus's limits for a SimConnect client, which nobody has measured and an announcement every 2s doesn't approach
+  - the CommBus's limits for a SimConnect client, which nobody has measured; our probes' 12 or 13 calls to each page all arrived ([interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel))
 
 ## Every client sends the core a message every 2s
 
 - **Decided:** every page and the desktop app send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s.
   Settled in node 1.2 by the user, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels.
 - **Because:**
-  - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+  - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' were still open as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
   - FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
-- **Leaves out:** how long the sim keeps a socket open after its page is gone, past 35s.
+- **Leaves out:** how long the sim keeps a socket open after its page is gone, past 23s.
 
 ## Cockpit panels connect only in a session, and only the ones in use stay
 
@@ -126,12 +126,13 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## The core accepts a WebSocket only from the sim's pages and our own apps
 
-- **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from Electron's Node side.
+- **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from Electron's main process.
   Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
-  - Every page in the sim sent `coui://html_ui` (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)), and the WebSocket client in Node 22.23.1, and in Electron 43.4.0 run as Node and as its main process, sent none (measured on our development machine, 2026-10-08, [p16's results](../../../experiments/areas/interface/results/p16-client-origin-2026-10-08-15-13-38.txt)).
+  - Every page in the sim sent `coui://html_ui` (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)), and the WebSocket client in Node 22.23.1, and in Electron 43.4.0 run as Node and as its main process, sent none (measured on our development machine, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
     A page in the desktop app's window is a browser page, and RFC 6455 has a browser send an `Origin` ([RFC 6455](https://www.rfc-editor.org/rfc/rfc6455#section-4.1), section 4.1).
-  - Any page in a browser on the PC can open a WebSocket to 127.0.0.1 ([06-04](../../learn/foundations/06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost), its traps), unless the browser asks the pilot first, as Chrome may for the local network (unverified, as of 2026-10-08), so without the check, a page the pilot happens to have open could join them to a stranger's session or take control of their aircraft.
+  - Any page in a browser on the PC can open a WebSocket to 127.0.0.1 ([06-04](../../learn/foundations/06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost), its traps), so without the check, a page the pilot happens to have open could join them to a stranger's session or take control of their aircraft.
+    Chrome may ask the pilot first for the local network (unverified, as of 2026-10-08), and the check doesn't rely on it.
 - **Leaves out:**
   - a web page the pilot wants to connect, which a one-time approval or a token could let in later ([01-spine](01-spine.md#left-open))
   - a program on the PC, which can send any `Origin` and could do worse anyway

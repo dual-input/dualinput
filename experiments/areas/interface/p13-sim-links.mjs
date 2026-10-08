@@ -7,12 +7,30 @@
  *   node experiments/areas/interface/links/build.mjs      once, with the sim closed
  *   node experiments/areas/interface/p13-sim-links.mjs
  *
+ *   node experiments/areas/interface/p13-sim-links.mjs --in-flight
+ *       with a flight already loaded: skips the menu and the load, and starts
+ *       at the flight's page test
+ *
  * It runs the design it checks (user, 2026-10-08): the core listens on a port
  * Windows picks and announces it in an L: variable, and a cockpit panel
  * connects only while a session flag is 1. So the probe serves a WebSocket
  * endpoint on a port Windows picks, and writes it to L:CROSSCHECK_P13_PORT
  * through SimConnect, which our harness has done for reads and never for
  * writes (experiments/areas/aircraft/lib/sim.mjs).
+ *
+ * The first run found that the menu's page, mainUi, has no SimVar, simvar, or
+ * Coherent, so it can't read the variable, and that a flight load reset it to
+ * 0 (results/p13-sim-links-2026-10-08-13-39-22.txt). So the page test also
+ * tries the CommBus as the way a page asks the core for its port: the probe
+ * subscribes to CROSSCHECK_P13_ASK and calls CROSSCHECK_P13_HELLO with the
+ * port every 500ms, through SimConnect's CommBus calls, which our records
+ * have never run (record/learn/foundations/04-01-connection-and-data.md,
+ * Traps). A page with CommBus.js registers its listener with
+ * RegisterCommBusListener; mainUi has neither CommBus.js nor Coherent, so
+ * there the test registers the view listener on engine, the way common.js's
+ * RegisterViewListenerT does on Coherent (read in fs-base-ui, html_ui/JS/
+ * common.js and Services/CommBus.js). It runs in every page but the cockpit
+ * panels, and in one of those as a control.
  *
  * Phases, each started by the sim's own state:
  *   1. The main menu. Once SimConnect answers and the inspector lists mainUi,
@@ -23,13 +41,16 @@
  *      writing it again, which is whether a value survives a flight load. It
  *      opens our panel, crosscheck-p13-links's, from the toolbar's document,
  *      and runs the page test in every page again.
- *   3. Frame time. The pilot looks forward from the cockpit with the sim in
- *      front and presses Page Down. It puts a poller in every cockpit panel
+ *   3. Frame time. The pilot turns the frame rate cap off, looks forward from
+ *      the cockpit with the sim in front, and presses Page Down. The first run
+ *      read 31.0 fps in every window under a 30 fps cap, which hides any cost
+ *      below it, as it did for our figures (record/areas/avatars/log.md,
+ *      2026-10-05). It puts a poller in every cockpit panel
  *      that reads L:CROSSCHECK_P13_SESSION every 500ms and holds a socket
  *      while it's 1, then measures 10s windows: nothing of ours; pollers only;
  *      sockets, idle; sockets with a 200-byte state message to each every 2s,
  *      as FS Copilot's app renews its panels (FS Copilot fork,
- *      record/pointer-forwarding/docs/13-pr-prep.md, Â§8, StateRenewal); and
+ *      record/pointer-forwarding/docs/13-pr-prep.md, §8, StateRenewal); and
  *      sockets with 30 messages a second to each, as an upper bound. The four
  *      with ours run twice, and nothing of ours closes the run.
  * At the end it takes the pollers out, closes our panel, and writes both
@@ -47,13 +68,20 @@
 import { createHash } from "node:crypto"
 import { createServer } from "node:http"
 
+import { CommBusBroadcastTo } from "node-simconnect"
+
 import { Recorder, plural, repoRelative, sleep } from "../aircraft/lib/out.mjs"
 import { Sim } from "../aircraft/lib/sim.mjs"
 import { Inspector, listPages } from "../../tools/inspector.mjs"
 import { START, SKIP, startBeeper, startKeys, startSpeaker } from "../../tools/guide.mjs"
 
+const IN_FLIGHT = process.argv.includes("--in-flight")
 const PORT_VAR = "L:CROSSCHECK_P13_PORT"
 const SESSION_VAR = "L:CROSSCHECK_P13_SESSION"
+const ASK = "CROSSCHECK_P13_ASK"
+const HELLO = "CROSSCHECK_P13_HELLO"
+const ASK_EVENT_ID = 7_013
+const HELLO_EVERY_MS = 500
 const PANEL_ID = "PANEL_CROSSCHECK_P13"
 const SIM_PROCESS = "FlightSimulator2024"
 const CONNECT_RETRY_MS = 1_000
@@ -161,8 +189,35 @@ function setMode(mode) {
 
 // Runs in Coherent GT: no arrow functions, optional chaining, or ??
 // (CLAUDE.md, "Before writing code that runs in a panel").
-const TEST = (label, fallbackPort) => `(function () {
-  var r = window.CROSSCHECK_P13_TEST = { label: ${JSON.stringify(label)}, simVar: typeof SimVar, nativeSimvar: typeof simvar, coherent: typeof Coherent, engine: typeof engine, webSocket: typeof WebSocket, viaSimVar: null, viaNative: null, port: null, portFrom: null, ws: "not tried", echo: null, errors: [] };
+const TEST = (label, fallbackPort, withCommBus) => `(function () {
+  var r = window.CROSSCHECK_P13_TEST = { label: ${JSON.stringify(label)}, simVar: typeof SimVar, nativeSimvar: typeof simvar, coherent: typeof Coherent, engine: typeof engine, webSocket: typeof WebSocket, viaSimVar: null, viaNative: null, port: null, portFrom: null, ws: "not tried", echo: null, errors: [],
+    commBus: "not tried", cbVia: null, cbReady: false, cbAsked: false, cbAskOk: null, cbHeard: 0, cbLast: null };
+  if (${withCommBus ? "true" : "false"}) {
+    try {
+      r.cbOnHello = function (data) { r.cbHeard++; r.cbLast = String(data).slice(0, 80); };
+      var ask = function () {
+        try {
+          var p = r.cbCall("COMM_BUS_SIMCONNECT_CALLBACK", ${JSON.stringify(ASK)}, JSON.stringify({ from: r.label }));
+          r.cbAsked = true;
+          if (p && p.then) p.then(function () { r.cbAskOk = true; }, function (e) { r.cbAskOk = false; r.errors.push("ask rejected: " + JSON.stringify(e)); });
+        } catch (e) { r.errors.push("ask: " + e.message); }
+      };
+      if (typeof RegisterCommBusListener !== "undefined") {
+        var l = r.cb = RegisterCommBusListener(function () { r.cbReady = true; setTimeout(ask, 0); });
+        l.on(${JSON.stringify(HELLO)}, r.cbOnHello);
+        r.cbCall = function (n, a, b) { return l.call(n, a, b); };
+        r.cbVia = "RegisterCommBusListener";
+        r.commBus = "registered";
+      } else if (typeof engine !== "undefined") {
+        r.cbHandle = engine.on(${JSON.stringify(HELLO)}, r.cbOnHello);
+        r.cbCall = function (n, a, b) { return engine.call(n, a, b); };
+        engine.trigger("ADD_VIEW_LISTENER", "JS_LISTENER_COMM_BUS", window.location.pathname);
+        r.cbVia = "engine";
+        r.commBus = "registered";
+        setTimeout(ask, 1000);
+      } else r.commBus = "no API";
+    } catch (e) { r.commBus = "threw"; r.errors.push("commbus: " + e.message); }
+  }
   try { if (typeof SimVar !== "undefined" && SimVar.GetSimVarValue) r.viaSimVar = SimVar.GetSimVarValue(${JSON.stringify(PORT_VAR)}, "number"); } catch (e) { r.errors.push("SimVar: " + e.message); }
   try { if (typeof simvar !== "undefined" && simvar.getValue) r.viaNative = simvar.getValue(${JSON.stringify(PORT_VAR)}, "number", ""); } catch (e) { r.errors.push("simvar: " + e.message); }
   if (r.viaSimVar) { r.port = r.viaSimVar; r.portFrom = "SimVar"; }
@@ -183,8 +238,14 @@ const TEST = (label, fallbackPort) => `(function () {
 const TEST_READ = `(function () {
   var r = window.CROSSCHECK_P13_TEST;
   if (!r) return null;
-  var out = { label: r.label, simVar: r.simVar, nativeSimvar: r.nativeSimvar, coherent: r.coherent, engine: r.engine, webSocket: r.webSocket, viaSimVar: r.viaSimVar, viaNative: r.viaNative, port: r.port, portFrom: r.portFrom, ws: r.ws, echo: r.echo, errors: r.errors };
+  var out = { label: r.label, simVar: r.simVar, nativeSimvar: r.nativeSimvar, coherent: r.coherent, engine: r.engine, webSocket: r.webSocket, viaSimVar: r.viaSimVar, viaNative: r.viaNative, port: r.port, portFrom: r.portFrom, ws: r.ws, echo: r.echo, errors: r.errors,
+    commBus: r.commBus, cbVia: r.cbVia, cbReady: r.cbReady, cbAsked: r.cbAsked, cbAskOk: r.cbAskOk, cbHeard: r.cbHeard, cbLast: r.cbLast };
   try { if (r.socket) r.socket.close(); } catch (e) {}
+  // Removes only our handler: the page's own CommBus listeners keep theirs
+  // (record/areas/commbus/log.md, 2026-09-28, "A script that arrives after a
+  // panel loaded can list every CommBus name the panel registered").
+  try { if (r.cb && r.cbOnHello) r.cb.off(${JSON.stringify(HELLO)}, r.cbOnHello); } catch (e) {}
+  try { if (r.cbHandle && r.cbHandle.clear) r.cbHandle.clear(); } catch (e) {}
   window.CROSSCHECK_P13_TEST = undefined;
   return out;
 })()`
@@ -248,12 +309,21 @@ async function testPages(when) {
   const pages = await listPages()
   rec.log("pages", `${when}: ${plural(pages.length, "page")}: ${pages.map(label).join(" | ")}`, { when, pages: pages.map((p) => ({ id: p.id, title: p.title, url: p.url })) })
   const started = []
+  const hello = setInterval(() => {
+    if (!run.sim || run.sim.gone) return
+    run.sim.send(`call ${HELLO}`, () => run.sim.handle.callCommBusEvent(HELLO, CommBusBroadcastTo.JS, JSON.stringify({ port: server.port, at: Date.now() })))
+  }, HELLO_EVERY_MS)
+  let controlled = false
   for (const p of pages) {
-    const r = await inPage(p, TEST(`${when}: ${label(p)}`, server.port))
+    const cockpit = /^VCockpit/i.test(String(p.title))
+    const withCommBus = !cockpit || !controlled
+    if (cockpit && withCommBus) controlled = true
+    const r = await inPage(p, TEST(`${when}: ${label(p)}`, server.port, withCommBus))
     if (r.ok) started.push(p)
     else rec.log("page", `${when}: ${label(p)}: couldn't run: ${r.error}`)
   }
   await sleep(TEST_WAIT_MS)
+  clearInterval(hello)
   const rows = []
   for (const p of started) {
     const r = await inPage(p, TEST_READ)
@@ -266,7 +336,7 @@ async function testPages(when) {
 
 // ---------------------------------------------------------------- the run
 
-const run = { sim: null, cockpit: [], pollers: false, finished: false, menu: [], flight: [], frames: [], reads: {} }
+const run = { sim: null, cockpit: [], pollers: false, finished: false, menu: [], flight: [], frames: [], reads: {}, asks: [] }
 
 async function connectWhenUp() {
   const t0 = Date.now()
@@ -311,10 +381,17 @@ async function main() {
   server.port = http.address().port
   rec.log("serve", `serving on 127.0.0.1:${server.port}, a port Windows picked`)
 
-  console.log("\nâ–¶ Start MSFS if it isn't running, and leave it at the main menu. The probe waits for it.")
+  console.log(IN_FLIGHT
+    ? "\n▶ With a flight loaded, the probe starts at the flight's page test."
+    : "\n▶ Start MSFS if it isn't running, and leave it at the main menu. The probe waits for it.")
   const sim = run.sim = await connectWhenUp()
+  sim.handle.on("commBusEvent", (e) => {
+    run.asks.push({ at: Date.now(), eventId: e.eventId, data: e.data })
+    rec.log("commbus", `${ASK} from SimConnect's CommBus: ${e.data}`, { eventId: e.eventId, data: e.data })
+  })
+  sim.send(`subscribe ${ASK}`, () => sim.handle.subscribeToCommBusEvent(ASK_EVENT_ID, ASK))
   const main = await waitForPage((p) => /mainUi/i.test(String(p.title)) || /mainUI\.html/i.test(String(p.url)), CONNECT_CAP_MS, "mainUi")
-  if (!main) throw new Error("the inspector never listed mainUi; is the sim at the main menu?")
+  if (!main) throw new Error("the inspector never listed mainUi; has the sim finished starting?")
   await sleep(3000)
 
   // ------------------------------------------------ 1. the main menu
@@ -322,27 +399,29 @@ async function main() {
   sim.write(PORT_VAR, "number", server.port, { label: `write ${PORT_VAR}` })
   sim.write(SESSION_VAR, "number", 0, { label: `write ${SESSION_VAR}` })
   await sleep(1000)
-  const back = await readPort("in the menu, after the write")
+  const back = await readPort(IN_FLIGHT ? "in the flight, after the write" : "in the menu, after the write")
   find(back === server.port
-    ? `In the main menu, SimConnect wrote ${PORT_VAR} = ${server.port} and read it back.`
-    : `In the main menu, SimConnect wrote ${PORT_VAR} = ${server.port} and read back ${back}.`)
-  run.menu = await testPages("menu")
+    ? `SimConnect wrote ${PORT_VAR} = ${server.port} and read it back.`
+    : `SimConnect wrote ${PORT_VAR} = ${server.port} and read back ${back}.`)
+  if (!IN_FLIGHT) run.menu = await testPages("menu")
 
   // ------------------------------------------------ 2. a flight
 
-  beep(880, 150)
-  say("Load any aircraft, parked, and click Ready to fly.")
-  console.log("\nâ–¶ Load any aircraft, parked, from the world map, and click Ready to fly.\n  The probe goes on by itself 15s after Ready to fly.")
-  let lastReady = 0
-  sim.flowHandlers.add((name) => { if (name === "RTC_END") lastReady = Date.now() })
-  while (!lastReady || Date.now() - lastReady < SETTLE_MS) await sleep(500)
+  let kept = server.port
+  if (!IN_FLIGHT) {
+    beep(880, 150)
+    say("Load any aircraft, parked, and click Ready to fly.")
+    console.log("\n▶ Load any aircraft, parked, from the world map, and click Ready to fly.\n  The probe goes on by itself 15s after Ready to fly.")
+    let lastReady = 0
+    sim.flowHandlers.add((name) => { if (name === "RTC_END") lastReady = Date.now() })
+    while (!lastReady || Date.now() - lastReady < SETTLE_MS) await sleep(500)
+    kept = await readPort("in the flight, before any write")
+    find(kept === server.port
+      ? `After a flight load, ${PORT_VAR} still held ${kept}, written in the menu.`
+      : `After a flight load, ${PORT_VAR} read ${kept}, not the ${server.port} written in the menu.`)
+  }
   const title = (await sim.readStrings(["TITLE"])).get("TITLE") ?? null
-  rec.log("loaded", `Ready to fly ${SETTLE_MS / 1000}s ago, TITLE ${JSON.stringify(title)}`, { title })
-
-  const kept = await readPort("in the flight, before any write")
-  find(kept === server.port
-    ? `After a flight load, ${PORT_VAR} still held ${kept}, written in the menu.`
-    : `After a flight load, ${PORT_VAR} read ${kept}, not the ${server.port} written in the menu.`)
+  rec.log("loaded", `TITLE ${JSON.stringify(title)}`, { title })
   if (kept !== server.port) {
     sim.write(PORT_VAR, "number", server.port, { label: `write ${PORT_VAR} again` })
     await sleep(1000)
@@ -358,7 +437,7 @@ async function main() {
   if (!ours) {
     beep(880, 150)
     say("Open Crosscheck P13 from the toolbar, then press Page Down.")
-    console.log(`\nâ–¶ Our panel didn't open from code. Open "Crosscheck P13", the toolbar button marked 13, then press ${START}.`)
+    console.log(`\n▶ Our panel didn't open from code. Open "Crosscheck P13", the toolbar button marked 13, then press ${START}.`)
     await keys.next()
     ours = await waitForPage((p) => /CrosscheckP13/i.test(String(p.url)), 10_000, "page of our panel")
   }
@@ -372,8 +451,8 @@ async function main() {
   if (!run.cockpit.length) { find("No cockpit panels listed, so no frame time was measured."); return finish("done") }
   for (;;) {
     beep(800, 150)
-    say("Look forward from the cockpit, keep the sim in front, hands off, and press Page Down.")
-    console.log(`\nâ–¶ Look forward from the cockpit, keep the sim in front, and take your hands off.\n  ${START} to measure, about 2 minutes; ${SKIP} to skip.`)
+    say("Turn the frame rate cap off, look forward from the cockpit, keep the sim in front, hands off, and press Page Down.")
+    console.log(`\n▶ Turn the frame rate cap off, look forward from the cockpit, keep the sim in front, and take your hands off.\n  ${START} to measure, about 2 minutes; ${SKIP} to skip.`)
     const k = await keys.next()
     rec.log("key", `${k.key}, with ${k.foreground} in front`, k)
     if (k.key !== "START") { find("Frame time skipped."); return finish("done") }
@@ -403,6 +482,10 @@ async function main() {
   }
 
   await measure("nothing of ours")
+  // A 30 fps cap read 31.0 here, through SimConnect's sim frames, in the first
+  // run and in p28's (record/areas/avatars/log.md, 2026-10-05).
+  const first = run.frames[0]?.fps
+  if (first && first > 30.5 && first < 31.5) find(`The first window read ${first.toFixed(1)} fps, which is what a 30 fps cap reads, so the frame rate may still be capped.`)
   for (const p of run.cockpit) {
     const r = await inPage(p, POLLER(label(p)))
     if (!r.ok) rec.log("poller", `${label(p)}: ${r.error}`)
@@ -460,7 +543,9 @@ async function finish(how) {
   for (const s of server.sockets) { clearInterval(s.timer); s.socket.destroy() }
   http.close()
 
-  const kinds = (rows) => rows.map((r) => `- ${r.page}: SimVar ${r.simVar}, simvar ${r.nativeSimvar}, Coherent ${r.coherent}, engine ${r.engine}, WebSocket ${r.webSocket}; read ${r.viaSimVar ?? "-"} by SimVar and ${r.viaNative ?? "-"} by simvar; socket to the port from ${r.portFrom ?? "-"}: ${r.ws}${r.echo ? `, echo "${r.echo}"` : ""}${r.errors?.length ? `; errors: ${r.errors.join("; ")}` : ""}${r.error ? `; couldn't read: ${r.error}` : ""}`)
+  const commBus = (r) => r.commBus === "not tried" || r.commBus === undefined ? ""
+    : `; CommBus ${r.commBus}${r.cbVia ? ` by ${r.cbVia}` : ""}, ready ${r.cbReady}, asked ${r.cbAsked}${r.cbAskOk === null ? "" : `, ask ${r.cbAskOk ? "resolved" : "rejected"}`}, heard ${r.cbHeard} hello${r.cbHeard === 1 ? "" : "s"}${r.cbLast ? ` (last ${r.cbLast})` : ""}`
+  const kinds = (rows) => rows.map((r) => `- ${r.page}: SimVar ${r.simVar}, simvar ${r.nativeSimvar}, Coherent ${r.coherent}, engine ${r.engine}, WebSocket ${r.webSocket}; read ${r.viaSimVar ?? "-"} by SimVar and ${r.viaNative ?? "-"} by simvar; socket to the port from ${r.portFrom ?? "-"}: ${r.ws}${r.echo ? `, echo "${r.echo}"` : ""}${commBus(r)}${r.errors?.length ? `; errors: ${r.errors.join("; ")}` : ""}${r.error ? `; couldn't read: ${r.error}` : ""}`)
   const origins = [...new Set(server.connects.filter((c) => c.kind === "test").map((c) => `${c.from.replace(/^(menu|flight): /, "")}: ${c.origin}`))]
   const lines = [
     `p13-sim-links, ${new Date(rec.started).toISOString()}, ${how}`,
@@ -479,6 +564,9 @@ async function finish(how) {
     "",
     "Origins the server saw, by page:",
     ...(origins.length ? origins.map((o) => `- ${o}`) : ["- none"]),
+    "",
+    `${ASK} calls that reached the probe through SimConnect's CommBus:`,
+    ...(run.asks.length ? run.asks.map((a) => `- ${a.data}`) : ["- none"]),
     "",
     `Frame time, ${MEASURE_MS / 1000}s windows, ${plural(run.cockpit.length, "cockpit panel")}:`,
     ...(run.frames.length ? run.frames.map((f) => `- ${f.name}: ${f.fps ? `${f.fps.toFixed(1)} fps, ${f.frameMs.toFixed(2)}ms a frame, longest gap ${Math.round(f.maxGapMs)}ms` : "no frames"}, ${plural(f.sockets, "socket")}`) : ["- not measured"]),

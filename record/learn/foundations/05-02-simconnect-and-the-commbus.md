@@ -86,6 +86,39 @@ A module's call reaches only the platforms in its `broadcastTo` flags [11]:
 The SDK recommends JSON for the string, and says "All calls are asynchronous" [9].
 None of the three APIs has a call that reads an earlier message [9] [10] [11], so a listener that registers late has missed what came before.
 
+A SimConnect client and the sim's pages reach each other over it, in both directions.
+On 2026-10-08 a probe that was a SimConnect client called `SimConnect_CallCommBusEvent` for JavaScript every 500ms, and subscribed with `SimConnect_SubscribeToCommBusEvent` to a name each page called [18] [19].
+In the main menu, 13 of the 14 pages heard the calls and reached the subscription.
+In a flight in the A2A PA-24, 30 of the 31 pages heard them, all 16 of its cockpit panels among them, and 29 reached the subscription [19].
+A page's call back is `COMM_BUS_SIMCONNECT_CALLBACK` with an event name and a text, made on its listener where it has one and on `engine` where it has none [18] [19].
+
+What a page has decides how it listens, and a page without `Coherent` hears the calls through the sim's own view-listener mechanism, not through the CommBus API [18]:
+
+| Page has | It listens through | Pages |
+| --- | --- | --- |
+| The sim's `common.js` | `RegisterCommBusListener`, after loading the sim's `Services/CommBus.js` where the page hasn't | The EFB, the cockpit panels, our in-game panel, and the toolbar in a flight, among others |
+| `engine` but no `Coherent` | `ADD_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, then `EVENT_FROM_VIEW_LISTENER` | mainUi, the main menu's own page, and the menu's atlas, notifications, Shared variables, Mission Steps, and toolbar pages |
+
+A sketch of the second route, from the probe:
+
+```js
+engine.on("EVENT_FROM_VIEW_LISTENER", function (listener, name) {
+  if (String(listener).toUpperCase() === "JS_LISTENER_COMM_BUS" && name === "CROSSCHECK_P15_HELLO") {
+    // the client's call arrived
+  }
+});
+engine.trigger("ADD_VIEW_LISTENER", "JS_LISTENER_COMM_BUS", window.location.pathname);
+```
+
+A call arrives on that route as an `EVENT_FROM_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, never as an event of its own name, so a page that listens for the name alone hears nothing [18].
+The sim's own page code takes events this way (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`) [18].
+
+Two pages broke the pattern [19]:
+
+- A page named `transition` heard no call, and the sim rejected its call back: "COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."
+- The toolbar's page in a flight heard 13 calls, but its listener still hadn't reported ready about 7s after it registered, and the one call it made 1.5s in never reached the probe or settled.
+  In an earlier run its listener reported ready and its call arrived [18].
+
 FS Copilot uses the CommBus between its panel hook and its module, to carry clicks on a display and `H:` events.
 The module relays them to and from the app through two client data areas of 512 bytes [2] [12]:
 
@@ -114,6 +147,7 @@ Whether `A:KOHLSMAN SETTING MB` follows it is unverified ([07](07-aircraft-speci
 **What it changes for Crosscheck.**
 Some aircraft keep state only on the CommBus, and a Crosscheck module could register for the same names to read it, but it receives only calls whose sender set the WASM flag.
 The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a module can't read the A220's channels, and Crosscheck has to read them from panel JavaScript (unverified).
+A SimConnect client can call into all but one of the pages we use, and a page's call back can be lost before its listener reports ready, as the toolbar's was [19].
 
 **Traps.**
 
@@ -121,7 +155,10 @@ The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a m
   We trust the header, which spells the flags `FsCommBusBroadcast_JS` and so on.
 - A module doesn't hear its own calls unless it adds `FsCommBusBroadcast_WasmSelfCall` [11].
 - FS Copilot's module drops a message from JavaScript longer than 512 bytes, and logs nothing [2].
-- Our A220 notes say SimConnect can't see its CommBus traffic, and the SDK documents SimConnect clients subscribing; [04-01](04-01-connection-and-data.md#what-it-is) covers the disagreement.
+- The route into a page without `Coherent` is the sim's own page code, not a call of the JavaScript Communication API [10] [18], so a sim update could change it.
+- A SimConnect client receives only calls whose sender set `FsCommBusBroadcast_SimConnect` [11].
+  Our A220 notes say SimConnect can't see its CommBus traffic [15], and no client has subscribed to one of its channels (unverified).
+  The SDK's claim that SimConnect clients and JavaScript exchange CommBus events holds for the events our probe sent [18] [19].
 
 ## Sources
 
@@ -142,15 +179,17 @@ The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a m
 15. Documented in our record, read from the aircraft's files: fsc-editor, `docs/aircraft/synaptic-a220.md`, sections "Architecture — the thing to remember", "THE ALTIMETER PROBLEM", and "CommBus channels".
 
 17. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
+18. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-54-50.txt` and `p14-commbus-pages-2026-10-08-14-05-05.txt`.
+19. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel), "A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel", with the output in `experiments/areas/interface/results/p15-links-coverage-2026-10-08-14-54-27.txt`.
 
 ## Unverified claims
 
 - **One `SimConnect_CallDispatch` call is enough in an MSFS 2024 module.**
   FS Copilot's module relies on it, and our only support is a 2021 forum post about MSFS 2020 [2] [5].
   A module that calls it once in `module_init` and counts client data deliveries over a minute of the app writing every 200ms would settle it.
-- **A module can't read the A220's CommBus channels.**
+- **A module or a SimConnect client can't read the A220's CommBus channels.**
   Nobody has measured which flags the module's calls set.
-  Registering for `A22X.L ADS Data` in a module and logging what arrives while the pilot turns the altimeter knob would settle it.
+  Registering for `A22X.L ADS Data` in a module, and subscribing to it with `SimConnect_SubscribeToCommBusEvent` from a client, and logging what arrives in both while the pilot turns the altimeter knob would settle it.
 - **In MSFS 2024, a gauge module gets no `SimStart` or `SimStop`.**
   The report is from MSFS 2020 [8].
   Subscribing to both from a gauge module and from a standalone module through one flight would settle it.

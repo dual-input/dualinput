@@ -55,8 +55,9 @@ Every request needs an ID scheme that routes its replies and its exceptions back
 - A binding that reimplements the protocol has only the calls its authors wrote.
   fsc-editor checked that node-simconnect 4.2.0 had the input event calls before it adopted the library [10].
 - The managed wrapper delivers only an `int` in `dwData` unless the client registers a struct for the definition with `RegisterDataDefineStruct` [8].
-- The SDK documents SimConnect clients exchanging CommBus events with JavaScript and WASM, and a module's CommBus call reaches SimConnect clients by default [2] [12], while our A220 notes say SimConnect can't see its CommBus traffic ([03-03](03-03-reading-and-writing.md#which-namespace-can-be-read-written-or-listed-from-where)).
-  We lean to the SDK, but nothing in our records has tried the SimConnect CommBus calls.
+- A SimConnect client exchanges CommBus events with JavaScript, as the SDK documents [2] [12]: on 2026-10-08, a client's `SimConnect_CallCommBusEvent` for JavaScript reached listeners in 30 of the 31 pages open in a flight, and a page's call to `COMM_BUS_SIMCONNECT_CALLBACK` reached the client's `SimConnect_SubscribeToCommBusEvent` subscription from 29 of them [33] [34].
+  node-simconnect 4.2.0 has both calls [34], and [05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm) covers what each page needs to hear them.
+  Whether a client sees the A220's own channels, which our A220 notes say it can't ([03-03](03-03-reading-and-writing.md#which-namespace-can-be-read-written-or-listed-from-where)), nobody has tried.
 
 ## Connecting
 
@@ -230,10 +231,13 @@ A switch position written once stays written, but anything the simulation drives
 30. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_physics` and `apply_control`.
 31. Measured on MSFS 2024, 2026-09-06: FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Baseline: BeyondATC's own traffic scores 0.56; visual confirmation of the fix".
 32. Documented in our record: fsc-editor, `docs/sim-vars/10-probe.md`, section "Cause versus symptom", whose reading of the line is an inference, not a measurement.
+33. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-54-50.txt` and `p14-commbus-pages-2026-10-08-14-05-05.txt`.
+34. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel), "A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel", with the output in `experiments/areas/interface/results/p15-links-coverage-2026-10-08-14-54-27.txt`, from a probe that called node-simconnect 4.2.0's `callCommBusEvent` and `subscribeToCommBusEvent`.
 
 ## Unverified claims
 
-- **Which of the SDK and [03-03](03-03-reading-and-writing.md) is right about SimConnect and the CommBus.**
+- **Whether a SimConnect client can read the A220's CommBus channels.**
+  A CommBus call reaches only the platforms in its flags [2], and which flags the A220's module sets is unverified ([05-02](05-02-simconnect-and-the-commbus.md#unverified-claims)).
   Subscribing a SimConnect client to one of the A220's CommBus events with `SimConnect_SubscribeToCommBusEvent` would settle it.
 - **Who writes `SimConnect_Port_IPv4` on a machine with only MSFS 2024.**
   Deleting the value, starting MSFS 2024, and reading the registry again would settle it.

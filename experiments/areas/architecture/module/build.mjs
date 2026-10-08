@@ -2,9 +2,9 @@
  * Builds p03's Rust module in three variants with Navigraph's cargo-msfs,
  * compares each with fsc-editor's module built by the SDK's MSBuild toolset, and
  * packages each in a package of its own, with our own manifest.json and
- * layout.json and no fspackagetool. A package gets one standalone module: with
- * two in one package's modules folder, the sim compiled and ran only the first
- * (measured on MSFS 2024, 2026-10-08, p03's second run).
+ * layout.json and no fspackagetool. Whether the sim runs two standalone modules
+ * from one package is unverified: p03's first run tried it, but its second
+ * module was a build the sim refused even alone.
  *
  *   node experiments/areas/architecture/module/build.mjs [--install]
  *

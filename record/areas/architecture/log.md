@@ -5,7 +5,7 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
 
 ## 2026-10-08: A standalone module built from Rust with cargo-msfs, and packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client, once its SimConnect handle is 64 bits wide
 
-**Asked:** does a standalone module built from Rust with Navigraph's cargo-msfs, and packaged by our own script, load on MSFS 2024, leave its version in a data slot, tick every frame, and read a data slot the core writes (node 1.3.2)?
+**Asked:** does a standalone module built from Rust with Navigraph's cargo-msfs, and packaged by our own script, load on MSFS 2024, leave its version in a data slot, run its update every frame, and read a data slot the core writes (node 1.3.2)?
 
 **Expected:** yes, since cargo-msfs builds Rust crates for MSFS 2024 and the Synaptic A220's Rust module runs on it.
 
@@ -15,28 +15,32 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
   Each build after that took about 1s.
   Installing cargo-msfs itself compiled Binaryen's C++, with Visual Studio on this PC.
 - The module exported every function the sim calls in a standalone module, the five allocator functions from the SDK's own C library among them, and lacked the toolset's `GetSimConnectVersion` export and its custom sections.
-- With SimConnect's `HANDLE` declared as a 32-bit pointer, `SimConnect_Open` returned `S_OK` and a handle cut to 32 bits, and every call after it returned `E_FAIL`, −2147467259, without sending anything.
+- With SimConnect's `HANDLE` declared as a 32-bit pointer, `SimConnect_Open` returned `S_OK` and a handle cut to 32 bits, the first call after it returned `E_FAIL`, −2147467259, `SimConnect_GetLastSentPacketID` then gave 0, and the module's slots never appeared.
+  The module recorded only the first failing call of the eight after `SimConnect_Open`.
   The SDK declares `HANDLE` 64 bits wide in a module (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_WindowsTypes.h`, `typedef unsigned long long HANDLE`).
 - With `HANDLE` as a 64-bit integer, every call returned `S_OK`.
-  The module's slot held its version, `module_init` had run once, it counted 681 frames in 5.00s, 136 a second at the main menu, and a value the probe wrote to the module's input slot came back in its output slot within 0.5s.
+  The module's slot held its version, `module_init` had run once, `Update_StandAlone` ran 681 times in 5.00s, 136 a second at the main menu, and a value the probe wrote to the module's input slot came back in its output slot within 0.5s.
+  Nobody read the sim's frame rate beside it, so that it ran once a frame rests on the SDK and the forum ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#lifecycle-init-per-frame-update-deinit)).
 - A second build linked with the SDK's `MSFS_WasmVersions.a`, which the SDK's toolset links into every module, ran the same, so the module needs none of its version exports.
 - Linked by Rust's linker, `MSFS_WasmVersions.a` brought along a `StackSizesSection` that covers only its own three functions, and the sim refused the module: the WASM Debug window showed `FAILED` and "The module is not scheduled" (seen by the user), and the sim compiled no DLL.
   With that section removed, the module ran.
-- With two modules in one package's `modules` folder, the sim compiled and ran only the first.
+- The first boot put two modules in one package's `modules` folder, the plain build first and the one linked with `MSFS_WasmVersions.a` second, and only the first ran.
+  The second was the build the sim refused in a package of its own in each later boot, so the run doesn't show whether the sim runs a second module from one package (unverified).
+  Building both of the working variants into one package, and reading both modules' counters, would settle it.
 - The sim compiled each module into `WASM\MSFS2024`, and the WASM Debug window showed each `READY`, with a release WASM build compiled to a debug DLL, which it flagged as "Incoherent build types" (seen by the user).
   It showed the same for `crosscheck-p12-follow`, our C++ probe module built with the SDK's MSBuild toolset, so the debug DLL comes from the sim, not from cargo-msfs or Rust.
 
-**Changed:** our WASM module can be Rust, built by cargo-msfs, which fetches the SDK from Asobo's public download at build time, so a CI runner can build the module and we store nothing of the SDK.
-Bindings written by hand have to follow the SDK's headers for every type, because a wrong width compiles, loads, and fails without an error; bindings generated from the headers, as FlyByWire's msfs-rs generates them with bindgen, rule that out.
-A package holds one standalone module.
+**Changed:** our WASM module can be Rust, built by cargo-msfs, which fetches the SDK from the SDK site's public download at build time, so we store nothing of the SDK.
+Bindings written by hand have to follow the SDK's headers for every type, because a binding with a wrong width compiles and loads, and nothing reports the mistake until the sim's calls fail; bindings generated from the headers, as FlyByWire's msfs-rs generates them with bindgen, rule that out.
+Until two modules in one package are tried, each standalone module gets a package of its own.
 
-What we haven't run: the module in a flight, and a build on a CI runner.
+What we haven't run: the module in a flight, a build on a CI runner, which would need a C++ compiler for cargo-msfs's own install, and two working modules in one package.
 
-**Affects:** node 1.3's answer; and the foundations chapter [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), which says no hosted build server can produce a module, because the SDK has no unattended install and `fspackagetool` runs the game, and that `MSFS_WasmVersions.a` marks a module as an MSFS 2024 module, while ours, without it, was compiled into `WASM\MSFS2024` and ticked every frame.
+**Affects:** node 1.3's answer; and the foundations chapter [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), which says no hosted build server can produce a module, because the SDK has no unattended install and `fspackagetool` runs the game, and that `MSFS_WasmVersions.a` marks a module as an MSFS 2024 module, while ours, without it, was compiled into `WASM\MSFS2024` and its update ran 136 times a second.
 
 **Evidence:** `results/p03-rust-module-2026-10-08-17-44-49.txt`, `-17-54-02.txt`, `-17-59-24.txt`, and `-18-04-12.txt`, each with its `.ndjson`, and `results/p03-build-2026-10-08-18-05-07.txt`.
 
-## 2026-10-08: A Rust program captures one process's audio, plays on a device it picks by name, and reads the keyboard and flight hardware through Raw Input in sink mode, and builds with Visual Studio's linker
+## 2026-10-08: A Rust program captures one process's audio, plays on a device it looks up by name, and receives keyboard and HID input through Raw Input in sink mode, and builds with Visual Studio's linker
 
 **Asked:** can a Rust program do the native work the core's helper would do, which is to capture one process's audio through WASAPI's process loopback, capture a microphone, play on an output device it picks, and read input through Raw Input in sink mode, and does it build without Visual Studio (node 1.3.3)?
 
@@ -44,21 +48,22 @@ What we haven't run: the module in a flight, and a build on a CI runner.
 
 **Found:** on our development machine, Windows 10.0.26200, with p02's helper built by rustc 1.95.0 on `wasapi` 0.25.0 and `windows-sys` 0.59.0:
 
-- One copy played a 440Hz tone at −26dBFS peak on "Speakers (Focusrite USB Audio)", which it found by name among the output devices.
+- One copy played a 440Hz tone at −26dBFS peak on "Speakers (Focusrite USB Audio)", the default output device, which it looked up by that name among the output devices; it didn't try a device other than the default.
   A second copy captured the first's process tree through process loopback at 48,000 frames a second, and read −29.0dBFS RMS and −26.0dBFS peak each second, the tone's own level.
-- The default input device gave 48,000 frames a second at about −65dBFS RMS, a quiet room.
+- The default input device, "Analogue 1 + 2 (Focusrite USB Audio)", gave 48,000 frames a second at about −65dBFS RMS; whether a microphone was connected to it is untested, and the three devices named as microphones weren't tried.
 - Registered in sink mode for keyboards, joysticks, and gamepads, the helper received all three presses and releases of F24 that another copy sent, from device 0, which marks input a program sent, while its own window never had the focus.
-  In the same 4s it received about 1,450 HID reports from three devices nobody touched, the flight hardware on this PC.
+  In the same 4s it received 1,447 HID reports from four devices nobody touched, which nothing identified.
 - The build for the default target, x86_64-pc-windows-msvc, linked with Visual Studio 2022's linker, in 17s, to 238,592 bytes.
 - The build for x86_64-pc-windows-gnu failed.
   With the target added to the MSVC toolchain, rustc found no `dlltool.exe`.
-  With Rust's GNU toolchain, 1.99.0, its own `dlltool.exe` failed at `CreateProcess`, because it calls an assembler that Rust doesn't ship.
+  With Rust's GNU toolchain, 1.99.0, its own `dlltool.exe` failed at `CreateProcess`, which we take to be the assembler it calls and Rust doesn't ship (unverified).
   The `windows` crates need it to build their import libraries.
+  The probe's saved output says only that the GNU build wasn't there; these two failures were read in the build's console.
 
 **Changed:** Rust does each job the helper needs, through crates that already wrap them.
-On Windows, the helper's build takes a C toolchain besides Rust: Visual Studio's Build Tools for the MSVC target, or a full MinGW for the GNU target, which we haven't tried.
+On Windows, the helper's build takes a C toolchain besides Rust: the MSVC target linked with Visual Studio 2022's linker, and rustup documents Visual Studio's Build Tools as enough ([rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)); a full MinGW for the GNU target is untried.
 
-What we haven't run: Raw Input with the sim in front, which the take-control input's [tentative decision](decisions.md#the-core-catches-the-take-control-key-and-buttons) leaves open; a key a person pressed rather than one a program sent; and which devices the HID reports came from.
+What we haven't run: Raw Input with the sim in front, which the take-control input's [tentative decision](decisions.md#the-core-catches-the-take-control-key-and-buttons) leaves open; a key a person pressed rather than one a program sent; which devices the HID reports came from; a microphone; and an output device other than the default.
 
 **Affects:** node 1.3's answer, and the tentative decisions on [the take-control input](decisions.md#the-core-catches-the-take-control-key-and-buttons) and [the audio](decisions.md#the-core-runs-crosschecks-audio).
 

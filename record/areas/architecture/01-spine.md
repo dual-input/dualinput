@@ -243,6 +243,7 @@ The core reaches the sim through node-simconnect, which implements SimConnect's 
 At version 4.2.0 (read in `experiments/package.json`), it ran every SimConnect call our probes have needed on MSFS 2024: data definitions and requests, client events and masking groups, system and flow events, AI objects with liveries, input events, data slots, the camera, flight loads, `SimConnect_CallCommBusEvent`, and `SimConnect_SubscribeToCommBusEvent`.
 Those probes are behind the [aircraft](../aircraft/log.md), [flight-controls](../flight-controls/log.md), [avatars](../avatars/log.md), [sync](../sync/log.md), and [interface](../interface/log.md) logs, from 2026-10-01 to 2026-10-08, with the CommBus calls on 2026-10-08 ([interface log][coverage]) and the data slots with our own module the same day ([architecture log][module]).
 A binding that implements the protocol again has only the calls its authors wrote ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), so when Crosscheck needs a call node-simconnect lacks, we add it to node-simconnect.
+Packaged in fsc-editor's app, its registry read failed, and it then used port 2048 without an error, until fsc-editor shipped the scripts that read runs outside the app's archive ([04-01](../../learn/foundations/04-01-connection-and-data.md#connecting)).
 
 fsc-editor ships an Electron app packaged by electron-builder (read in fsc-editor, `electron-builder.yml`), and the desktop app is built the same way.
 
@@ -250,24 +251,25 @@ fsc-editor ships an Electron app packaged by electron-builder (read in fsc-edito
 
 Code that runs in Coherent GT is written in TypeScript and compiled to the syntax the engine parses, as the vendors' own code is: the A220's DisplayUnits bundle spells `??` out the long way ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), and A2A's tablet is TSX that esbuild bundles ([EFB app](../product/03-v1-scope.md#efb-app)).
 Step 7's check that every file run in Coherent GT parses within the engine's measured limits runs on the compiled output ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+Compiling doesn't fill in the built-ins Coherent GT lacks, such as `Object.fromEntries`, whose calls throw when they run, and a parse check doesn't see them ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), so the build also fills them in or rejects their use, as step 7 has the missing functions filled in for code shared with the desktop app.
 
-Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ticked every frame, and traded data slots with a SimConnect client at the main menu, and nobody has run it in a flight (measured on MSFS 2024, 2026-10-08, [architecture log][module]).
+Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ran its update about 136 times a second, and traded data slots with a SimConnect client at the main menu, and nobody has run it in a flight (measured on MSFS 2024, 2026-10-08, [architecture log][module]).
 
-- cargo-msfs fetches the SDK from Asobo's public download and unpacks it without running the installer, so the repository holds none of the SDK (same entry).
-  A CI runner with a C++ compiler for cargo-msfs's own install, which compiles Binaryen's C++, could build the module, which no run has tried.
+- cargo-msfs fetches the SDK from the SDK site's public download, `sdk.flightsimulator.com`, and unpacks it without running the installer (read in [navigraph/cargo-msfs](https://github.com/navigraph/cargo-msfs), `src/sdk.rs`, on 2026-10-08), so the repository holds none of the SDK.
+  A CI runner with a C++ compiler for cargo-msfs's own install, which compiles Binaryen's C++, could build the module, which no run has tried ([architecture log][module]).
 - The module's bindings to the sim are generated from the SDK's headers, as FlyByWire's msfs-rs generates them with bindgen (read in [msfs-rs](https://github.com/flybywiresim/msfs-rs), `msfs/build.rs`, on 2026-10-08), because a binding with a wrong type compiles and loads, and nothing reports the mistake until the sim's calls fail.
-  Bindings written by hand gave SimConnect's `HANDLE` 32 bits where the SDK gives it 64, and every call after `SimConnect_Open` returned `E_FAIL` (same entry).
-- Our package holds one standalone module, since the sim ran only the first of two in one package (same entry).
+  Bindings written by hand gave SimConnect's `HANDLE` 32 bits where the SDK gives it 64, the first call after `SimConnect_Open` returned `E_FAIL`, and the module's slots never appeared (same entry).
+- Each standalone module gets a package of its own until two working modules in one package are tried (same entry).
 
 ### The helper
 
 The core's native code runs in the helper, a Rust program the core starts, and starts again if it exits ([tentative decisions](decisions.md#the-cores-native-code-runs-in-a-helper-it-starts)).
 A crash in native code inside the core's process would take the core down, and the pilot out of the session until the watcher restarted the core and they rejoined, while a crash in the helper costs the take-control input, the figure's hand, and the audio only until the core restarts it.
 
-- Our probes already work this way: one starts a C# program that reads the mouse through Raw Input, and reads its reports line by line from its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
-- A Rust build captured another process's audio through process loopback at that audio's own level, played on an output device it found by name, and captured the microphone.
-  Registered for Raw Input in sink mode, with its own window never in front, it received F24 presses and releases that another program sent, and about 1,450 reports in 4s from the flight hardware (measured on our development machine, 2026-10-08, [architecture log][helper]).
-- Its build on Windows needs the linker in Visual Studio's Build Tools: Rust's GNU target, which avoids them, failed without a full MinGW ([architecture log][helper]).
+- Our probes already work this way: one starts PowerShell, which compiles C# that reads the mouse through Raw Input, and reads its reports line by line from its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
+- A Rust build captured another process's audio through process loopback at that audio's own level, played on the default output device after looking it up by name, and captured the default input device, a Focusrite input, though whether a microphone was on it is untested.
+  Registered for Raw Input in sink mode, with its own window never in front, it received F24 presses and releases that another program sent, and 1,447 HID reports in 4s from four devices nothing identified (measured on our development machine, 2026-10-08, [architecture log][helper]).
+- Its build linked with Visual Studio 2022's linker, and rustup documents Visual Studio's Build Tools as enough ([rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)); Rust's GNU target failed with Rust's own tools, and with a full MinGW is untried ([architecture log][helper]).
 - The speech recognizer runs in it, and the recognizer is chosen when the voice phrases are built ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
 
 ### The watcher
@@ -280,10 +282,10 @@ A tray icon alone cost 1.0 MB of private working set, the figure Task Manager's 
 Plugins are TypeScript, and the changes they make to aircraft files are data the watcher applies ([tentative decisions](decisions.md#plugins-are-typescript-and-their-file-changes-are-data)).
 
 - A plugin's code runs in the core, or as modules the panel bridge loads in the aircraft's cockpit panels, compiled like our own panel code.
-- It can't add code to the WASM module: our package holds one module ([architecture log][module]), so a plugin's code there would be compiled into Crosscheck's own module, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)).
-  What a plugin needs done inside the sim's frame is a mechanism of our module that the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, so Crosscheck's own code owns the mechanism and the plugin the policy (same section).
-- A plugin's logic inside the frame goes in calculator code our module runs, and logic beyond what calculator code expresses is [left out](decisions.md#plugins-are-typescript-and-their-file-changes-are-data), since no v1 plugin needs it.
-  The one call that runs calculator code, `execute_calculator_code`, is deprecated in SDK 1.7.3 with no replacement, and still worked on MSFS 2024 on 2026-08-25 ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)).
+- A plugin adds no code to the WASM module (user, 2026-10-08).
+  What a plugin needs done inside the sim's frame is a mechanism of our module that the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, so Crosscheck's own code owns the mechanism and the plugin the policy, and code that serves one product stays out of Crosscheck's own module ([04-room-for-later](../product/04-room-for-later.md#plugins)).
+- A plugin's logic inside the frame goes in calculator code our module runs, and logic beyond what calculator code expresses is [left out](decisions.md#plugins-are-typescript-and-their-file-changes-are-data), since no v1 plugin is known to need it.
+  The one call that runs calculator code, `execute_calculator_code`, is deprecated in SDK 1.7.3 with no replacement ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)), and FS Copilot's module makes every write to the aircraft through it (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_physics`), which we've flown with on MSFS 2024 (from our experience with FS Copilot).
 - The watcher applies file changes before the sim boots, usually while the core isn't running, and as a Rust program it runs no TypeScript, so a plugin's changes are files and patches the watcher reads, not code it runs.
 
 ### Messages between TypeScript and Rust
@@ -291,7 +293,7 @@ Plugins are TypeScript, and the changes they make to aircraft files are data the
 The messages that cross between TypeScript and Rust, through the data slots and the helper's standard input and output, need one definition both sides are checked against ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)), which is node 1.4's to settle.
 
 [module]: log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide
-[helper]: log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-picks-by-name-and-reads-the-keyboard-and-flight-hardware-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker
+[helper]: log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker
 [tray]: log.md#2026-10-08-a-tray-icon-alone-costs-10-mb-of-memory-in-rust-16-mb-in-net-native-aot-51-mb-in-winforms-and-397-mb-over-three-processes-in-electron
 
 ## Left open

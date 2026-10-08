@@ -756,6 +756,9 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 ### Installing and updating
 
+> **Note**
+> The helper the sim launches, below, is the watcher's job in [the architecture's spine](../architecture/01-spine.md#components) ([the plan](plan.md#7-tech-stack-and-architecture), user, 2026-10-06), and the spine's helper is the core's process for Windows input and audio.
+
 One installer puts Crosscheck's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
 
 **In v1:**

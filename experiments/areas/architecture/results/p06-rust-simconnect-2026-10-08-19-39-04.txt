@@ -1,0 +1,88 @@
+p06-rust-simconnect, 2026-10-08T19:38:49.627Z
+OPEN SunRise 12.2 build 282174.999, SimConnect 12.2
+
+- subscribe 1sec 0
+- subscribe flow events 0
+- subscribe CROSSCHECK_P06_ASK 0
+- map CROSSCHECK_P03A_OUT 0
+- define OUT 0
+- map CROSSCHECK_P03A_IN 0
+- define IN 0
+- request OUT every second 0
+
+"1sec" events: 15 over 14.8s
+Flow events: 0
+Exceptions: none
+
+CommBus: mainUi setup started; the client called CROSSCHECK_P06_HELLO 10 times (0 returned)
+  mainUi heard 10 and answered 10
+  the client got 10 CROSSCHECK_P06_ASK, the first: {"echo":"{\"n\":1,\"at\":1791488335700}"}
+
+Data slots: 15 reads of CROSSCHECK_P03A_OUT; the first [magic ours, version 1, inits 1, frame 4266, echo 0]
+  wrote 2192069536 to CROSSCHECK_P03A_IN (WROTE in 2192069536 0); the module echoed it
+  frames between the first and last reads: 2134
+
+Everything the client printed:
+  +0.00s CALL subscribe 1sec 0
+  +0.00s CALL subscribe flow events 0
+  +0.00s CALL subscribe CROSSCHECK_P06_ASK 0
+  +0.00s CALL map CROSSCHECK_P03A_OUT 0
+  +0.00s CALL define OUT 0
+  +0.00s CALL map CROSSCHECK_P03A_IN 0
+  +0.00s CALL define IN 0
+  +0.00s CALL request OUT every second 0
+  +0.00s READY
+  +0.03s OPEN SunRise 12.2 build 282174.999, SimConnect 12.2
+  +0.63s OUT 1345540691 1 1 4266 0
+  +0.63s EVENT 1 data 0
+  +1.62s OUT 1345540691 1 1 4418 0
+  +1.62s EVENT 1 data 0
+  +2.63s OUT 1345540691 1 1 4570 0
+  +2.63s EVENT 1 data 0
+  +3.62s OUT 1345540691 1 1 4722 0
+  +3.62s EVENT 1 data 0
+  +4.62s OUT 1345540691 1 1 4874 0
+  +4.62s EVENT 1 data 0
+  +5.62s OUT 1345540691 1 1 5026 0
+  +5.62s EVENT 1 data 0
+  +6.08s CALLED bus 0
+  +6.10s COMMBUS 2 {"echo":"{\"n\":1,\"at\":1791488335700}"}
+  +6.58s CALLED bus 0
+  +6.61s COMMBUS 2 {"echo":"{\"n\":2,\"at\":1791488336209}"}
+  +6.62s OUT 1345540691 1 1 5179 0
+  +6.62s EVENT 1 data 0
+  +7.09s CALLED bus 0
+  +7.12s COMMBUS 2 {"echo":"{\"n\":3,\"at\":1791488336717}"}
+  +7.60s CALLED bus 0
+  +7.63s COMMBUS 2 {"echo":"{\"n\":4,\"at\":1791488337229}"}
+  +7.63s OUT 1345540691 1 1 5331 0
+  +7.63s EVENT 1 data 0
+  +8.11s CALLED bus 0
+  +8.13s COMMBUS 2 {"echo":"{\"n\":5,\"at\":1791488337731}"}
+  +8.62s CALLED bus 0
+  +8.62s OUT 1345540691 1 1 5483 0
+  +8.62s EVENT 1 data 0
+  +8.64s COMMBUS 2 {"echo":"{\"n\":6,\"at\":1791488338243}"}
+  +9.13s CALLED bus 0
+  +9.15s COMMBUS 2 {"echo":"{\"n\":7,\"at\":1791488338756}"}
+  +9.63s OUT 1345540691 1 1 5636 0
+  +9.63s EVENT 1 data 0
+  +9.65s CALLED bus 0
+  +9.67s COMMBUS 2 {"echo":"{\"n\":8,\"at\":1791488339271}"}
+  +10.16s CALLED bus 0
+  +10.18s COMMBUS 2 {"echo":"{\"n\":9,\"at\":1791488339783}"}
+  +10.62s OUT 1345540691 1 1 5787 0
+  +10.62s EVENT 1 data 0
+  +10.67s CALLED bus 0
+  +10.69s COMMBUS 2 {"echo":"{\"n\":10,\"at\":1791488340294}"}
+  +11.63s OUT 1345540691 1 1 5941 0
+  +11.63s EVENT 1 data 0
+  +12.20s WROTE in 2192069536 0
+  +12.63s OUT 1345540691 1 1 6094 2192069536
+  +12.63s EVENT 1 data 0
+  +13.62s OUT 1345540691 1 1 6247 2192069536
+  +13.62s EVENT 1 data 0
+  +14.63s OUT 1345540691 1 1 6400 2192069536
+  +14.63s EVENT 1 data 0
+  +14.82s CLOSED
+  +14.83s EXITED 0

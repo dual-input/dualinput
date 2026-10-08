@@ -211,6 +211,7 @@ A probe settles it, at the main menu: connect, call mainUi over the CommBus and 
 It reads [04-01](../../learn/foundations/04-01-connection-and-data.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), the interface log's [2026-10-08 entries](../interface/log.md), and the probes p13 to p15.
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-08.
 
 ## 1.3.5 An embedded engine for plugins and write functions
 

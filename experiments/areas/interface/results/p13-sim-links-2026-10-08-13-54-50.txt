@@ -1,0 +1,109 @@
+p13-sim-links, 2026-10-08T13:54:50.809Z, done
+Sim: SunRise 12.2.282174.999, SimConnect 12.2.0.0. Served on 127.0.0.1:52672.
+
+Findings:
+- SimConnect wrote L:CROSSCHECK_P13_PORT = 52672 and read it back.
+- Our panel's page: Crosscheck P13, coui://html_UI/InGamePanels/CrosscheckP13/p13.html.
+- The pollers in 16 of 16 cockpit panels got 11,653 of the 11,653 messages the probe sent, with 0 that didn't parse.
+
+SimConnect's reads of L:CROSSCHECK_P13_PORT: {"in the flight, after the write":52672}
+
+In the main menu:
+- not run
+
+In a flight:
+- atlas: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: atlas"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- Shared variables: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: Shared variables"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- mainUi: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: mainUi"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- notifications: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: notifications"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- transition: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: transition"; CommBus registered by engine, ready false, asked true, ask rejected, heard 0 hellos; errors: ask rejected: [{"first":"NoSuchMethod","second":"COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."}]
+- VLivery01 - LiveryRegistration: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VLivery01 - LiveryRegistration"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- Electronic Flight Bag: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: Electronic Flight Bag"; CommBus registered by RegisterCommBusListener, ready true, asked true, ask resolved, heard 12 hellos (last {"port":52672,"at":1791467729574})
+- Mission Steps: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: Mission Steps"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- Toolbar: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: Toolbar"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- notifications: SimVar undefined, simvar undefined, Coherent undefined, engine object, WebSocket function; read - by SimVar and - by simvar; socket to the port from the probe: open, echo "echo: hello from flight: notifications"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- VLivery03 - LiveryRegistration: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VLivery03 - LiveryRegistration"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- VLivery02 - LiveryRegistration: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VLivery02 - LiveryRegistration"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- VCockpit37 - GTN650_INT_2: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit37 - GTN650_INT_2"; CommBus registered by RegisterCommBusListener, ready true, asked true, ask resolved, heard 11 hellos (last {"port":52672,"at":1791467729574})
+- VCockpit36 - WasmInstrument: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit36 - WasmInstrument"
+- VCockpit35 - WasmInstrument: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit35 - WasmInstrument"
+- VCockpit34 - WTT2: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit34 - WTT2"
+- VCockpit33 - WTT1: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit33 - WTT1"
+- VCockpit32 - GTN750_INT: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit32 - GTN750_INT"
+- VCockpit31 - GNS_DISABLED: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit31 - GNS_DISABLED"
+- VCockpit30 - GNS_DISABLED_2: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit30 - GNS_DISABLED_2"
+- VCockpit29 - GNS_DISABLED_1: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit29 - GNS_DISABLED_1"
+- VCockpit28 - KLN90B: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit28 - KLN90B"
+- VCockpit27 - KLN90B: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit27 - KLN90B"
+- VCockpit26 - AS5_a2amod_2: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit26 - AS5_a2amod_2"
+- VCockpit25 - AS5_a2amod_1: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit25 - AS5_a2amod_1"
+- VCockpit24 - WasmInstrument: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit24 - WasmInstrument"
+- VCockpit23 - WasmInstrument: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit23 - WasmInstrument"
+- VCockpit22 - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VCockpit22 - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument"
+- VLogic: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: VLogic"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- //42 CP Overlay (Reqd.): SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: //42 CP Overlay (Reqd.)"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- //42 Flow: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: //42 Flow"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+- Crosscheck P13: SimVar object, simvar object, Coherent object, engine object, WebSocket function; read 52672 by SimVar and 52672 by simvar; socket to the port from SimVar: open, echo "echo: hello from flight: Crosscheck P13"; CommBus registered by engine, ready false, asked true, ask resolved, heard 0 hellos
+
+Origins the server saw, by page:
+- atlas: coui://html_ui
+- Shared variables: coui://html_ui
+- mainUi: coui://html_ui
+- notifications: coui://html_ui
+- transition: coui://html_ui
+- VLivery01 - LiveryRegistration: coui://html_ui
+- Electronic Flight Bag: coui://html_ui
+- Mission Steps: coui://html_ui
+- Toolbar: coui://html_ui
+- VLivery03 - LiveryRegistration: coui://html_ui
+- VLivery02 - LiveryRegistration: coui://html_ui
+- VCockpit37 - GTN650_INT_2: coui://html_ui
+- VCockpit36 - WasmInstrument: coui://html_ui
+- VCockpit35 - WasmInstrument: coui://html_ui
+- VCockpit34 - WTT2: coui://html_ui
+- VCockpit33 - WTT1: coui://html_ui
+- VCockpit32 - GTN750_INT: coui://html_ui
+- VCockpit31 - GNS_DISABLED: coui://html_ui
+- VCockpit30 - GNS_DISABLED_2: coui://html_ui
+- VCockpit29 - GNS_DISABLED_1: coui://html_ui
+- VCockpit28 - KLN90B: coui://html_ui
+- VCockpit27 - KLN90B: coui://html_ui
+- VCockpit26 - AS5_a2amod_2: coui://html_ui
+- VCockpit25 - AS5_a2amod_1: coui://html_ui
+- VCockpit24 - WasmInstrument: coui://html_ui
+- VCockpit23 - WasmInstrument: coui://html_ui
+- VCockpit22 - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument: coui://html_ui
+- VLogic: coui://html_ui
+- //42 CP Overlay (Reqd.): coui://html_ui
+- //42 Flow: coui://html_ui
+- Crosscheck P13: coui://html_ui
+
+CROSSCHECK_P13_ASK calls that reached the probe through SimConnect's CommBus:
+- {"from":"flight: Electronic Flight Bag"}
+- {"from":"flight: VCockpit37 - GTN650_INT_2"}
+- {"from":"flight: atlas"}
+- {"from":"flight: Shared variables"}
+- {"from":"flight: mainUi"}
+- {"from":"flight: notifications"}
+- {"from":"flight: VLivery01 - LiveryRegistration"}
+- {"from":"flight: Mission Steps"}
+- {"from":"flight: Toolbar"}
+- {"from":"flight: notifications"}
+- {"from":"flight: VLivery03 - LiveryRegistration"}
+- {"from":"flight: VLivery02 - LiveryRegistration"}
+- {"from":"flight: VLogic"}
+- {"from":"flight: //42 CP Overlay (Reqd.)"}
+- {"from":"flight: //42 Flow"}
+- {"from":"flight: Crosscheck P13"}
+
+Frame time, 10s windows, 16 cockpit panels:
+- nothing of ours: 81.6 fps, 12.25ms a frame, longest gap 18ms, 0 sockets
+- round 1: pollers, no sockets: 83.3 fps, 12.00ms a frame, longest gap 15ms, 0 sockets
+- round 1: sockets, idle: 82.8 fps, 12.07ms a frame, longest gap 17ms, 16 sockets
+- round 1: sockets, a message every 2s: 83.1 fps, 12.03ms a frame, longest gap 15ms, 16 sockets
+- round 1: sockets, 30 messages a second: 82.8 fps, 12.07ms a frame, longest gap 15ms, 16 sockets
+- round 2: pollers, no sockets: 83.0 fps, 12.05ms a frame, longest gap 15ms, 0 sockets
+- round 2: sockets, idle: 82.9 fps, 12.06ms a frame, longest gap 16ms, 16 sockets
+- round 2: sockets, a message every 2s: 83.3 fps, 12.01ms a frame, longest gap 16ms, 16 sockets
+- round 2: sockets, 30 messages a second: 83.0 fps, 12.05ms a frame, longest gap 15ms, 16 sockets
+- nothing of ours, again: 82.8 fps, 12.07ms a frame, longest gap 19ms, 0 sockets

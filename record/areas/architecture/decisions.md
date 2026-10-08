@@ -78,7 +78,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 ## Every link between our components ends at the core
 
 - **Decided:** no two of Crosscheck's components talk to each other directly, apart from the watcher downloading updates from the release host: each talks to the core, and the core passes on what another needs.
-  Apart from the handshake through which the sim's pages find the core ([below](#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)), the core uses the CommBus and `L:` variables only to reach the aircraft's state and the per-lever hold flags that other tools might read (unverified, [ideas](../product/ideas.md#soft-takeover-on-handover)).
+  Apart from the announcements through which the sim's pages find the core and learn whether a session runs ([below](#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)), the core uses the CommBus and `L:` variables only to reach the aircraft's state and the per-lever hold flags that other tools might read (unverified, [ideas](../product/ideas.md#soft-takeover-on-handover)).
   Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
   - Each of v1's features needs only links that end at the core: a click on a notice in the banner panel, for one, opens the EFB onto our app by way of the core ([01-spine](01-spine.md#communication)).
@@ -88,29 +88,31 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## The sim's pages find the core over the CommBus and talk to it over a WebSocket
 
-- **Decided:** a page in the sim asks over the CommBus, the core answers with its port and whether a session runs, and the page opens a WebSocket to the core on 127.0.0.1.
-  The CommBus carries only that handshake and the session's start and end, and the core listens on a port Windows picks.
-  Settled in node 1.2 by the user, 2026-10-08.
+- **Decided:** the core announces its port and whether a session runs on the CommBus every 2s, and at once when a session starts or ends, and a page in the sim that hears it opens a WebSocket to the core on 127.0.0.1.
+  The CommBus carries only those announcements, and the core listens on a port Windows picks.
+  Settled in node 1.2 by the user, 2026-10-08; the announcement every 2s, in place of a page asking, on the finding below.
 - **Because:**
-  - In the main menu, 13 of the 14 pages asked over the CommBus and heard the answer, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 29 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
-    Every page held a WebSocket to a program on the PC ([interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)).
+  - In the main menu, 13 of the 14 pages heard a SimConnect client's CommBus calls, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 30 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+    A page asking is less sure: a call the toolbar's page made before its listener reported ready never arrived (same entry).
+  - Every page held a WebSocket to a program on the PC ([interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)).
   - An `L:` variable couldn't carry the port: the menu's page can't read one, and a flight load reset ours to 0 (same entry).
-  - Only a SimConnect client of the pilot's sim can answer on its CommBus, so the core needs no fixed port that another program could take first, and a development core attached to a stand-in sim never reaches the real sim's pages.
+  - The CommBus joins modules, panel JavaScript, and SimConnect clients ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), so among programs outside the sim, only a SimConnect client of the pilot's sim can call on its CommBus.
+    The core needs no fixed port that another program could take first, and a development core attached to a stand-in sim can't reach the real sim's pages, which no run has tried.
     FS Copilot's panels scan ports 9020 to 9024 and take whichever instance answers first, one of the three reasons its test bench can't run beside a live sim (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
   - FS Copilot refused to announce its port over its CommBus path, because a bus that's down would take the WebSocket with it (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "4.2 Port discovery: range scan 9020–9024").
     That path ran through its WASM module; ours runs through the core's own SimConnect connection, without which the core has no sim to serve.
   - A CommBus call reaches every page listening on its name, so carrying the session over it would have every page sort every message, while a socket in each of 16 cockpit panels cost no frame time we could measure (same entry).
 - **Leaves out:**
   - a sim update that changes how mainUi takes view listeners' events, which its route rests on (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`)
-  - the CommBus's limits for a SimConnect client, which nobody has measured and the handshake doesn't approach
+  - the CommBus's limits for a SimConnect client, which nobody has measured and an announcement every 2s doesn't approach
 
 ## Every client sends the core a message every 2s
 
 - **Decided:** every page and the desktop app send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s.
-  Settled in node 1.2, 2026-10-08, by the measurement below.
+  Proposed in node 1.2, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels.
 - **Because:**
-  - A page's socket doesn't close when the page goes away: our banner panel's stayed open 35s after the panel closed, and a cockpit panel's 23s after it reloaded (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
-  - FS Copilot's panels take 8s without their app's 2s renewal to mean the app is gone (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS`), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
+  - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+  - FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
 - **Leaves out:** how long the sim keeps a socket open after its page is gone, past 35s.
 
 ## Cockpit panels connect only in a session, and only the ones in use stay
@@ -120,17 +122,19 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Because:**
   - With no session, nothing watches the cockpit ([01-spine](01-spine.md#components-with-no-session)).
   - The exchange is cheap: one per panel at a session's start, 20 on the Baron, whose cockpit has 20 panels ([interface log](../interface/log.md#2026-10-04-an-ai-copy-of-the-pilots-aircraft-opens-its-livery-painting-and-none-of-its-cockpit-gauges)).
-  - A first message from every panel tells the core the panel bridge loaded at all, which it doesn't when another package's `VCockpit.js` override wins ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+  - A first message from every panel tells the core the panel bridge loaded at all, which it doesn't when another package's `VCockpit.js` override wins ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) or our own bridge fails to parse ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)).
 
 ## The core accepts a WebSocket only from the sim's pages and our own apps
 
 - **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from Electron's Node side.
   Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
-  - Every page in the sim sent `coui://html_ui`, and Node v22.23.1's built-in WebSocket sent none (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
-    A page in the desktop app's window would send an `Origin`, as a browser does.
-  - Any page in a browser on the PC can open a WebSocket to 127.0.0.1 ([06-04](../../learn/foundations/06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost), its traps), so without the check, a page the pilot happens to have open could join them to a stranger's session or take control of their aircraft.
-- **Leaves out:** a web page the pilot wants to connect, which a one-time approval or a token could let in later ([01-spine](01-spine.md#left-open)); and a program on the PC, which can send any `Origin` and could do worse anyway.
+  - Every page in the sim sent `coui://html_ui` (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)), and the WebSocket client in Node 22.23.1, and in Electron 43.4.0 run as Node and as its main process, sent none (measured on our development machine, 2026-10-08, [p16's results](../../../experiments/areas/interface/results/p16-client-origin-2026-10-08-15-13-38.txt)).
+    A page in the desktop app's window is a browser page, and RFC 6455 has a browser send an `Origin` ([RFC 6455](https://www.rfc-editor.org/rfc/rfc6455#section-4.1), section 4.1).
+  - Any page in a browser on the PC can open a WebSocket to 127.0.0.1 ([06-04](../../learn/foundations/06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost), its traps), unless the browser asks the pilot first, as Chrome may for the local network (unverified, as of 2026-10-08), so without the check, a page the pilot happens to have open could join them to a stranger's session or take control of their aircraft.
+- **Leaves out:**
+  - a web page the pilot wants to connect, which a one-time approval or a token could let in later ([01-spine](01-spine.md#left-open))
+  - a program on the PC, which can send any `Origin` and could do worse anyway
 
 ## Apps outside the sim find the core through a port file
 

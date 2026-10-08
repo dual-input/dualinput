@@ -1,0 +1,5 @@
+p16-client-origin, 2026-10-08T15:13:38.033Z
+
+- this Node: Node 22.23.1 as Node sent no Origin
+- Electron as Node: Electron 43.4.0 (Node 24.18.1) as Node sent no Origin
+- Electron's main process: Electron 43.4.0 (Node 24.18.1) browser sent no Origin

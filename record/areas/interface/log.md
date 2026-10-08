@@ -11,28 +11,29 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 
 **Found:** on MSFS 2024 SunRise 12.2.282174.999, with crosscheck-p13-links installed, p15 started at the main menu, ran in the A2A PA-24 parked, then watched the pilot leave for the main menu:
 
-- No page's socket closed when its page went away: no close frame came and no connection ended.
-  - Our banner panel's stayed open for the 35s left in the run after the toolbar's page closed the panel, which destroys its page ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
-  - `VCockpit37 - GNS_DISABLED`'s stayed open for the 23s left after the panel ran `location.reload()`.
+- None of the 18 sockets the probe watched closed when its page went away: no close frame came and no connection ended.
+  - `VCockpit37 - GNS_DISABLED`'s stayed open for the 23s left in the run after the panel ran `location.reload()`.
   - All 16 cockpit panels' were still open when the run ended, 11s after the prompt to leave the flight, as the inspector stopped listing cockpit panels; the sim sent `FLIGHT_END` and `BACK_TO_MAIN_MENU` 4s after the prompt.
+  - Our banner panel's stayed open for the 35s left after the toolbar's page toggled the panel closed, which destroyed its page in an [earlier run](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page); this run didn't check that the page was gone.
 - Node v22.23.1's built-in WebSocket sent no `Origin`, and its socket sent a close frame and ended as soon as it closed.
+  p16, run the same day with no sim, found the same for Electron 43.4.0, run as Node and as its main process.
 - In the main menu, 13 of the 14 pages heard the probe's CommBus calls, 12 of 12, and reached its subscription, and "transition" again couldn't call `COMM_BUS_SIMCONNECT_CALLBACK`.
   mainUi, the toolbar, and the EFB were among the 13: the toolbar has no `Coherent` in the menu, so it took the calls as mainUi does, and the EFB loaded the sim's `Services/CommBus.js` first.
 - In the flight, 29 of 31 pages did both, all 16 cockpit panels among them, each hearing 12 or 13 calls.
-  The toolbar heard 13, but its listener hadn't reported ready 1.5s after it registered, and the call it made then never reached the probe or settled; in p14 its listener reported ready, and its call arrived.
-  The pages that asked before ready through `engine`, as mainUi does, all reached the probe.
+  The toolbar heard 13, but its listener still hadn't reported ready when the probe read it, about 7s after it registered, and the one call it made 1.5s in never reached the probe or settled; in p14 its listener reported ready, and its call arrived.
+  The pages that called before ready through `engine`, as mainUi does, all reached the probe but "transition".
 
 **Changed:**
 
 - The core can't take a socket's close to mean its page went away, so it has to hear from each page and close a socket that falls silent.
-- A page asks over the CommBus once its listener reports ready, and asks again until it hears an answer.
-- An app that connects through Node's built-in WebSocket passes an `Origin` check that lets through a connection with none.
+- A page can't count on calling the core over the CommBus, while every page we use heard the core's calls, so the core announces itself to pages rather than waiting for them to ask.
+- An app that connects through Node's or Electron's built-in WebSocket passes an `Origin` check that lets through a connection with none.
 
 What we haven't run: how long the sim keeps a socket open after its page is gone, past 35s.
 
 **Affects:** node 1.2's answer in [01-spine](../architecture/01-spine.md#communication); and the foundations chapter [06-04](../../learn/foundations/06-04-websockets-to-localhost.md), which expects a socket to drop when its document reloads.
 
-**Evidence:** `results/p15-links-coverage-2026-10-08-14-54-27.txt` and `.ndjson`.
+**Evidence:** `results/p15-links-coverage-2026-10-08-14-54-27.txt` and `.ndjson`, and `results/p16-client-origin-2026-10-08-15-13-38.txt`.
 
 ## 2026-10-08: Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one
 

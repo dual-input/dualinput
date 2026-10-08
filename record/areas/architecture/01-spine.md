@@ -126,7 +126,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 | EFB app and menu script, and core | WebSocket, found through the CommBus, whether or not a session runs | The EFB's controls and state, Go to, and which menu page is up | The same, and a first message naming the component and its version |
 | Toolbar script and core | The same, while a session runs | The banner's opening | The same |
 | Banner panel and core | The same, while the panel is open | Notices, and a click on one | The same |
-| Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile or a plugin names | Pointer presses, `H:` events, plugin modules' traffic, and the locks' renewals | The same; no panel's first message ever arriving means another package's `VCockpit.js` won |
+| Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile or a plugin names | Pointer presses, `H:` events, plugin modules' traffic, and the locks' renewals | The same; no panel's first message ever arriving means our panel bridge didn't load, as when another package's `VCockpit.js` wins |
 | Core and WASM module | Data slots, one for each kind of message | The session's state and a counter, the pose and velocities, the figures' poses, and the module's version | A counter the module writes every second |
 | Core and other machines | The network, [below](#between-machines) | The six channels of [04-room-for-later](../product/04-room-for-later.md#channels), invite codes, and reports | For the node that designs how the cores reach each other |
 | Watcher and release host | HTTPS | Updates | Not needed |
@@ -136,23 +136,21 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 The core listens on 127.0.0.1, on a port Windows picks.
 A page in the sim learns the port over the CommBus, and an app outside it from a file ([tentative decisions](decisions.md#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)).
 
-A page asks with `COMM_BUS_SIMCONNECT_CALLBACK`, which reaches the core's `SimConnect_SubscribeToCommBusEvent` subscription, and the core answers with `SimConnect_CallCommBusEvent` for JavaScript, giving its port and whether a session runs.
-In the main menu, 13 of the 14 pages did both, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 29 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log][coverage]); our own in-game panel did both in an earlier flight ([interface log][links]).
-Of the pages that didn't, "transition", none of ours, can't make the call, and the toolbar's page made it before its listener reported ready, and it never arrived.
-mainUi and the menu's toolbar page have no `Coherent`, so our script there triggers `ADD_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS` and takes the answer as `EVENT_FROM_VIEW_LISTENER`, the way mainUi's own view listeners take events (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`).
+The core calls `SimConnect_CallCommBusEvent` for JavaScript every 2s, and at once when a session starts or ends, with its port and whether a session runs, and a page that hears it opens a WebSocket to that port.
+The page doesn't ask, and the core's next announcement reaches a page that loaded before the core, as the EFB app's code runs from the sim's start ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
+In the main menu, 13 of the 14 pages heard a SimConnect client's calls, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 30 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log][coverage]); our own in-game panel heard them in an earlier flight ([interface log][links]).
+The page that heard nothing, "transition", runs none of our code.
+A page can also call the core through the CommBus, but a call the toolbar's page made before its listener reported ready never arrived ([interface log][coverage]), so nothing depends on a page calling.
+mainUi and the menu's toolbar page have no `Coherent`, so our script there triggers `ADD_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS` and takes the core's calls as `EVENT_FROM_VIEW_LISTENER`, the way mainUi's own view listeners take events (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`).
 That route rests on the sim's own page code rather than on the SDK's CommBus API ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), so a sim update could change it, as it could the BlurPage copy.
 In a page that has the sim's `common.js` but not its `Services/CommBus.js`, such as the toolbar's in a flight and our banner's, our script loads `CommBus.js` and listens through `RegisterCommBusListener`.
 An `L:` variable can't carry the port: mainUi can't read one, and a flight load reset ours to 0 ([interface log][links]).
 
-The core announces itself on the CommBus when it comes up, so a page already listening connects at once, and a page also asks again every 2s until it hears an answer.
-The repeat covers a page that loaded before the core, as the EFB app's code runs from the sim's start ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)), and a call lost like the toolbar's.
+The CommBus joins modules, panel JavaScript, and SimConnect clients ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), so among programs outside the sim, only a SimConnect client of the pilot's sim can call on its CommBus, and a development core attached to a stand-in sim can't reach the real sim's pages, which no run has tried.
 
-Only a SimConnect client of the pilot's sim can answer on its CommBus, so a development core attached to a stand-in sim never reaches the real sim's pages.
-
-The CommBus carries this handshake and the session's start and end, and nothing else, for three reasons:
+The CommBus carries these announcements and nothing else, for two reasons:
 
 - A CommBus call reaches every page listening on its name, so each page would sort the whole session's traffic, as every panel did on FS Copilot's CommBus path (documented in the FS Copilot fork, `record/pointer-forwarding/docs/04-transport.md`, "What exists").
-- The CommBus has no way to say who's listening, so the core couldn't tell which pages are still there (read in MSFS 2024 SDK 1.7.3, `MSFS_CommBus.h` and `SimConnect.h`, whose CommBus calls register or subscribe, call, and unregister).
 - Its limits for a SimConnect client are unmeasured.
 
 The core writes its port and process ID to a file in its data folder, and one core runs for each data folder: a core that finds the file naming a core that's still running exits ([tentative decisions](decisions.md#apps-outside-the-sim-find-the-core-through-a-port-file)).
@@ -168,13 +166,13 @@ So a pilot's PC runs one core, and a development core with a data folder of its 
 
 The core announces a session's start and end on the CommBus and on every socket.
 
-A page's socket doesn't close when the page goes away: our banner panel's stayed open 35s after the panel closed, and a cockpit panel's 23s after it reloaded ([interface log][coverage]).
-So each page sends the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, as FS Copilot's panels take 8s without their app's 2s renewal to mean the app is gone (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS`).
+A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
+So each page sends the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, as FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog).
 
-A socket in each of the PA-24's 16 cockpit panels cost no frame time we could measure: uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame, and the windows with our sockets idle, taking a message every 2s, or taking 30 messages a second each read 12.00ms to 12.07ms (measured on MSFS 2024, 2026-10-08, [interface log][links]).
+A socket in each of the PA-24's 16 cockpit panels cost no frame time we could measure: uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame, and the windows with our sockets idle, taking a message every 2s, or taking 30 messages a second each read 12.01ms to 12.07ms (measured on MSFS 2024, 2026-10-08, [interface log][links]).
 
-The core accepts a WebSocket only when its `Origin` is `coui://html_ui`, which every page sent, or missing, which Node's built-in client sends ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps)).
-So the desktop app connects from Electron's Node side, since a page in its window would send an `Origin` as a browser does.
+The core accepts a WebSocket only when its `Origin` is `coui://html_ui`, which every page sent, or missing, which the WebSocket client in Node 22.23.1 and in Electron 43.4.0's main process send ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps)).
+So the desktop app connects from Electron's main process, since a page in its window is a browser page, which sends an `Origin`.
 
 ### The WASM module
 
@@ -203,8 +201,11 @@ The watcher alone talks to the release host, over HTTPS.
 How the cores reach each other is for a top-level node after node 1 (user, 2026-10-08): the topology, the transport, getting through home routers, the relay, and encryption.
 
 Two findings go to it.
-A Cloudflare Worker accepts no inbound TCP connection and opens outbound TCP only (documented, [Workers TCP sockets](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/), as of 2026-10-08), and our FS Copilot record lists Workers among the platforms that can't take inbound UDP (documented in the FS Copilot fork, `record/self-hosted-relay/docs/02-hosting-choice.md`), so fsc-editor's Worker relay, which routes its sessions over WebSocket, carries them over TCP.
-Cloudflare's Realtime TURN service relays UDP (documented, [TURN](https://developers.cloudflare.com/realtime/turn/), as of 2026-10-08), at $0.05 a GB sent from Cloudflare to the client, after 1,000 GB free each month (documented, [Realtime pricing](https://developers.cloudflare.com/realtime/sfu/platform/pricing/), as of 2026-10-08), and its pages describe it for WebRTC clients, so whether another client can use it is unverified.
+A Cloudflare Worker takes HTTP requests, WebSocket upgrades among them, and Cloudflare's docs say it can't take an inbound TCP connection (documented, [Workers TCP sockets](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/), as of 2026-10-08), though a Cloudflare post of 2026-08-03 announces inbound TCP through Spectrum in a private beta, and names UDP only as a goal (documented, [gRPC on Workers](https://blog.cloudflare.com/grpc-workers/)).
+So a Worker can't relay UDP as of 2026-10-08, which our FS Copilot record also says, without a source (FS Copilot fork, `record/self-hosted-relay/docs/02-hosting-choice.md`), and fsc-editor's Worker relay carries its sessions over WebSocket, on TCP.
+Cloudflare's Realtime TURN service doesn't relay TCP ([TURN FAQ](https://developers.cloudflare.com/realtime/turn/faq/), which says it doesn't implement RFC 6062), so it relays UDP, as TURN does without RFC 6062 ([RFC 8656](https://www.rfc-editor.org/rfc/rfc8656)).
+It charges $0.05 a GB sent from Cloudflare to the client ([TURN](https://developers.cloudflare.com/realtime/turn/)), after 1,000 GB free each month ([Realtime pricing](https://developers.cloudflare.com/realtime/sfu/platform/pricing/)), each documented as of 2026-10-08.
+Its pages describe it for WebRTC clients, so whether a client that isn't WebRTC, such as a core with a UDP transport of its own, can use it is unverified, and asking Cloudflare's TURN for a relay from such a client settles it.
 
 ### How the core knows a component is alive
 

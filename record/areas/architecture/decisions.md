@@ -56,24 +56,22 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## The core catches the take-control key and buttons
 
-- **Decided:** the core reads the pilot's keyboard and flight hardware itself, through Windows' input APIs, with native code where Node has no API, and doesn't map the input through SimConnect.
-  Settled in node 1.1 by the user, 2026-10-07.
+- **Decided:** the core reads the pilot's keyboard and flight hardware itself, through Windows' input APIs, with native code where Node has no API, which runs in the helper the core starts ([below](#the-cores-native-code-runs-in-a-helper-it-starts)), and doesn't map the input through SimConnect.
+  Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3, 2026-10-08.
 - **Because:**
   - Pilots bind the key or a hardware button in Crosscheck's settings, as a single press or a long press ([take-control key](../product/03-v1-scope.md#take-control-key)), so Crosscheck needs each press and release.
   - Electron's `globalShortcut` reports no release (documented in fsc-editor, `docs/sim-vars/08-marks.md`), and it lives in the desktop app, which is optional.
   - SimConnect's input mapping takes an event for the press and one for the release (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`, `SimConnect_MapInputEventToClientEvent_EX1`), and the user ruled it out as a hack (user, 2026-10-07).
-- **Leaves out:** whether Raw Input in sink mode delivers a keyboard key's and a flight-hardware button's presses and releases with the sim in front, which only the mouse has shown ([mouse.mjs](../../../experiments/tools/mouse.mjs)); and whether the native code runs in the core's own process or in a process the core supervises, which node 1.3 settles.
+- **Leaves out:** whether Raw Input in sink mode delivers a keyboard key's and a flight-hardware button's presses and releases with the sim in front: with another window in front, it delivered a key a program sent and reports from the flight hardware ([architecture log](log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-picks-by-name-and-reads-the-keyboard-and-flight-hardware-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker)).
 
 ## The core runs Crosscheck's audio
 
-- **Decided:** the core captures the pilot's microphone and runs the speech recognizer, captures the ATC app's audio by process, and plays ATC and Crosscheck's own sounds on the device the pilot picks, with native code where Node has no API, so the desktop app stays optional.
-  Settled in node 1.1 by the user, 2026-10-07.
+- **Decided:** the core captures the pilot's microphone and runs the speech recognizer, captures the ATC app's audio by process, and plays ATC and Crosscheck's own sounds on the device the pilot picks, with native code where Node has no API, in the helper the core starts ([below](#the-cores-native-code-runs-in-a-helper-it-starts)), so the desktop app stays optional.
+  Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3, 2026-10-08.
 - **Because:**
   - ATC and the handover cues play with no window open, so a pilot in VR hears them ([hearing ATC](../product/03-v1-scope.md#hearing-atc)).
   - FS Copilot's desktop process captures the ATC app by process with WASAPI's process loopback and plays it back (read in the FS Copilot fork, `FsCopilot/Audio/`), and the fork's `tools/AtcAudio` captured BeyondATC that way in a live flight (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 3: the audio path works on one machine — Q10, Q12, Q13 settled").
-- **Leaves out:**
-  - the choice of recognizer, which the voice phrases' build researches and tests ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks))
-  - whether the native code runs in the core's own process or in a process the core supervises, which node 1.3 settles
+- **Leaves out:** the choice of recognizer, which the voice phrases' build researches and tests ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
 
 ## Every link between our components ends at the core
 
@@ -156,3 +154,37 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - FS Copilot's app writes its module's control slot every 200ms (read in the FS Copilot fork, `FsCopilot/Connection/SimClient.cs`, the constructor), and its module unfreezes after 1s with none, which we've flown with ([our WASM module writes the following aircraft](#our-wasm-module-writes-the-following-aircraft)).
   - Whether two writes to one slot in one frame both arrive is unmeasured ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)), so no two kinds of message share a slot.
   - A slot keeps its last value after its writer stops (documented, same chapter), so only a counter that moves tells the core the module is still running.
+
+## Crosscheck is written in TypeScript and Rust
+
+- **Decided:** the core, the desktop app, the code in Coherent GT, and the backend are TypeScript, and the watcher, the helper, and the WASM module are Rust ([01-spine](01-spine.md#language-and-toolchains)).
+  The WASM module is built with Navigraph's cargo-msfs and packaged by our own script, with bindings generated from the SDK's headers.
+  Settled in node 1.3 by the user, 2026-10-08.
+- **Because:**
+  - Node, Electron, and Coherent GT run JavaScript, and the core and its clients speak one protocol ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)).
+  - The user wanted one language for native code rather than C++ for the module and C# for the helper (user, 2026-10-08), and Rust did each job our probes asked of it ([architecture log](log.md)):
+    - a standalone module built by cargo-msfs ran on MSFS 2024 and traded data slots with a SimConnect client
+    - a helper captured one process's audio, played on a device it picked, captured the microphone, and read input through Raw Input in sink mode
+    - a tray icon alone cost 1.0 MB of memory, against 39.7 MB in Electron's main process
+  - node-simconnect 4.2.0, which has no native code, ran every SimConnect call our probes have needed ([01-spine](01-spine.md#the-core-and-the-apps)).
+- **Leaves out:** the relay's language, and the choices that stay inside one part ([01-spine](01-spine.md#left-open)).
+
+## The core's native code runs in a helper it starts
+
+- **Decided:** the core's native code, for Raw Input, the microphone, ATC capture, playback, and the speech recognizer, runs in the helper, a program the core starts in a session and while the desktop app binds a key or lists the output devices, starts again if it exits, and talks to over the helper's standard input and output.
+  Settled in node 1.3 by the user, 2026-10-08.
+- **Because:**
+  - A crash in native code inside the core's process would take the core down, and the pilot out of the session until the core restarted ([architecture plan](plan.md#13-language-and-toolchains)), while the core restarts a helper that crashes, and the session goes on.
+  - Our probes read Raw Input from a program they start, line by line over its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
+- **Leaves out:** the messages on the pipe, whose definition shared between TypeScript and Rust is node 1.4's.
+
+## Plugins are TypeScript, and their file changes are data
+
+- **Decided:** a plugin's code is TypeScript, run in the core or in an aircraft's panels, and drives mechanisms of our WASM module for anything inside the sim's frame, such as writing given variables every frame, running given calculator code, or placing an object.
+  The changes a plugin makes to an aircraft's files are files and patches that the watcher applies.
+  Settled in node 1.3 by the user, 2026-10-08.
+- **Because:**
+  - A module reaches only the functions the sim gives it ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#gauge-vs-standalone-modules-and-the-sandbox)), and the sim ran only one standalone module of the two in one package ([architecture log](log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide)), so a plugin can't add code to ours.
+  - Crosscheck's own code owns each mechanism, and a plugin owns the policy ([04-room-for-later](../product/04-room-for-later.md#plugins)).
+  - The watcher, a Rust program, applies file changes before the sim boots, usually while the core isn't running ([01-spine](01-spine.md#components-with-no-session)).
+- **Leaves out:** a plugin that needs logic inside the frame beyond what calculator code expresses; none in v1 does, since the 58P's plugin works in its gauges' JavaScript and in the core ([plugins](../product/03-v1-scope.md#plugins)).

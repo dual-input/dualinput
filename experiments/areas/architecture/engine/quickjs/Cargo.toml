@@ -1,0 +1,8 @@
+[package]
+name = "p04-quickjs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p04-common = { path = "../common" }
+rquickjs = "=0.14.0"

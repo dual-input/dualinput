@@ -222,6 +222,7 @@ A probe settles it, with no sim: compile a small plugin and 100 write functions 
 It reads [01-profile-entries](../sync/01-profile-entries.md#the-writer-api) and the [plugins](../product/03-v1-scope.md#plugins) section of 03-v1-scope.
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-08.
 
 ## 1.3.6 Tauri for the desktop app
 

@@ -3,6 +3,43 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-08: Embedded in Rust, QuickJS runs 100 write functions a frame in 75µs, idles under 1 MB, and holds its memory and time limits, while V8's memory limit failed until TurboFan was off
+
+**Asked:** what do QuickJS and V8, embedded in a Rust program, cost to start, hold idle, and call, running a plugin and 100 profile write functions compiled from TypeScript, and do their memory and time limits stop a runaway script without taking the program down (node 1.3.5)?
+
+**Expected:** both engines well under a millisecond a frame, and both limits holding in both engines.
+
+**Found:** on our development machine, Windows 10.0.26200, with p04's hosts built by rustc 1.95.0: QuickJS-ng 0.16.2 through rquickjs 0.14.0, V8 15.2.124.1 through the `v8` crate 152.2.0, and Node v22.23.1's `vm` module as a baseline.
+A hypothetical plugin, 100 write functions, and runaway scripts were compiled from TypeScript by esbuild 0.28.2.
+Each frame called all 100 write functions, each crossing once into a host function, 60 times a second for 10s.
+Limits were 64 MB of memory and 100ms of time.
+Other builds were running on the machine, so the p99 and CPU figures are noisy; the means of two runs agreed within about 10%.
+
+| Engine | Startup in the process | Memory idle, private working set and working set | A frame of 100 calls, mean and p99 | CPU, share of one core |
+| --- | --- | --- | --- | --- |
+| QuickJS | 1.7ms | 0.9 MB and 5.2 MB | 75µs and 155µs | 0.55% |
+| V8 | 5.5ms | 3.4 MB and 13.1 MB | 81µs and 221µs | 0.76% |
+| V8 with `--no-turbofan` | 5.7ms | 3.4 MB and 13.1 MB | 87µs and 336µs | 0.74% |
+| Node `vm` | 2.4ms | 12.1 MB and 37.4 MB | 82µs and 300µs | 0.92% |
+
+- In every engine, all 60,000 calls arrived and their checksums matched.
+- QuickJS's memory limit stopped endless allocation in 88ms with "InternalError: out of memory", and its interrupt handler stopped an endless loop at 100ms; the host caught both and ran the next 10 frames correctly.
+- V8's watchdog stopped an endless loop in 104ms through `TerminateExecution`.
+  Its near-heap-limit callback asked for termination 17 times while endless allocation went on, and the process died at the 1 GB cap with "Fatal JavaScript out of memory".
+  With `--no-turbofan`, the same callback stopped the allocation in 50ms, and the host ran on; with `--no-maglev` alone it still failed, so code TurboFan compiled missed the termination.
+- V8's heap limit doesn't count ArrayBuffers: 256 MB of them passed the 64 MB limit until the host gave V8 an allocator that counted them.
+- Node's `vm` stopped an endless loop with its `timeout`, after 114ms, but has no memory limit: under `--max-old-space-size=64`, endless allocation ended the whole process, while a worker thread with `resourceLimits` ended alone and the main thread ran on.
+- Endless recursion ended with a RangeError in every engine, and every host ran on.
+
+**Changed:** either engine runs a profile's write functions every frame for under 0.1ms, so the engine's cost doesn't decide the core's language.
+QuickJS held both limits as built, with the smallest footprint; V8 holds its memory limit only with TurboFan off and with an allocator that counts ArrayBuffers; Node's `vm` holds no memory limit, so a Node core would sandbox write functions in a worker thread or an embedded engine.
+
+What we haven't run: a real profile's write functions and a real plugin, and the engines inside a core that's doing everything else at the same time.
+
+**Affects:** node 1.3's answer, and the sandbox for write functions in [step 7 of the product plan](../product/plan.md#7-tech-stack-and-architecture).
+
+**Evidence:** `results/p04-embedded-engine-2026-10-08-20-01-09.txt` and `-20-03-54.txt`.
+
 ## 2026-10-08: A Tauri 2 window takes 72.3 MB of memory over seven processes against Electron's 66.5 MB over four, its program is 8.0 MB against 347.4 MB, and its Rust side's WebSocket sends no Origin
 
 **Asked:** what does a Tauri 2 window cost in memory against an Electron window showing the same page, and what `Origin` does a WebSocket send from a Tauri page and from Tauri's Rust side (node 1.3.6)?

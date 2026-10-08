@@ -1,0 +1,111 @@
+p04-embedded-engine, 2026-10-08T20:03:50.945Z
+Windows 10.0.26200, 16 logical processors; rustc 1.95.0 (59807616e 2026-04-14), MSVC target
+Crates: rquickjs 0.14.0 (rquickjs-sys 0.14.0, QuickJS-ng 0.16.2); v8 152.2.0 (V8 15.2.124.1-rusty); windows-sys 0.59.0
+esbuild 0.28.2; Node v22.23.1 (V8 12.4.254.21-node.56)
+Bundles: ES2020 IIFEs from engine/ts/: plugin.js 1965 bytes, writers.js 13469 bytes, runaway.js 1588 bytes.
+Frames: 600 at 60Hz; each frame calls all 100 write functions, and each call crosses into one host function (the writer's k, l, b, or h).
+Limits: 64 MB of memory (QuickJS's whole runtime; V8's heap, and V8's ArrayBuffers through a counting allocator) and 100ms of time per frame or runaway call; the memory runaways get 10s, so only the memory limit can stop them.
+Each Rust host runs in a Windows job capped at 1 GB of committed memory, and Node's allocation runaways run under p04-capped's same cap, so a limit that fails ends the process instead of filling the machine.
+CPU: the process's cycle count over the frames (QueryProcessCycleTime, all threads), at 3.95 GHz, as a share of one core. Other builds may have been running on this machine, so CPU and timings can be noisy.
+
+engine                        spawn to ready ms  startup ms  WS MB  private WS MB  private bytes MB  frame mean us  frame p99 us  CPU % of a core
+----------------------------  -----------------  ----------  -----  -------------  ----------------  -------------  ------------  ---------------
+QuickJS-ng (rquickjs)                      26.7        1.74    5.2            0.9               1.1           75.1         155.3             0.55
+V8 (v8 crate), as built                    30.6        5.50   13.1            3.4               6.8           81.2         220.5             0.76
+V8 (v8 crate), --no-turbofan               30.9        5.73   13.1            3.4               6.8           86.6         336.0             0.74
+Node vm (baseline)                         69.7        2.40   37.4           12.1              17.4           82.4         300.2             0.92
+
+startup ms is measured inside the process, from before the engine's first call to the three bundles evaluated; spawn to ready adds the process's own start. Memory is the host process alone, 5s after READY.
+
+Limits
+- QuickJS-ng (rquickjs):
+  - loop: stopped after 100.4ms (InternalError: interrupted); the 10 frames after it ran and matched
+  - buffers: stopped after 14.3ms (InternalError: out of memory); the 10 frames after it ran and matched
+  - recursion: stopped after 0.6ms (RangeError: Maximum call stack size exceeded); the 10 frames after it ran and matched
+  - alloc: stopped after 87.9ms (InternalError: out of memory); the 10 frames after it ran and matched
+- V8 (v8 crate), as built:
+  - loop: stopped after 103.7ms (terminated by the host); the 10 frames after it ran and matched
+  - buffers: stopped after 15.3ms (RangeError: Array buffer allocation failed); the 10 frames after it ran and matched; near-heap-limit callback ran 1 time; allocator refused 4 buffers
+  - recursion: stopped after 1.7ms (RangeError: Maximum call stack size exceeded); the 10 frames after it ran and matched
+  - alloc: the process ENDED during it, exit 0x80000003: # Fatal JavaScript out of memory: CALL_AND_RETRY_LAST; near-heap-limit callback ran 17 times, watchdog fired 1 time
+- V8 (v8 crate), --no-turbofan:
+  - loop: stopped after 112.0ms (terminated by the host); the 10 frames after it ran and matched
+  - buffers: stopped after 14.3ms (RangeError: Array buffer allocation failed); the 10 frames after it ran and matched; near-heap-limit callback ran 1 time; allocator refused 4 buffers
+  - recursion: stopped after 1.5ms (RangeError: Maximum call stack size exceeded); the 10 frames after it ran and matched
+  - alloc: stopped after 50.0ms (terminated by the host); the 10 frames after it ran and matched; near-heap-limit callback ran 1 time
+- Node vm (baseline):
+  - loop: stopped after 113.8ms (ERR_SCRIPT_EXECUTION_TIMEOUT: Script execution timed out after 100ms); the 10 frames after it ran and matched
+  - buffers: NOT stopped after 53.7ms (returned 256); the 10 frames after it ran and matched
+  - recursion: stopped after 1.6ms (RangeError: Maximum call stack size exceeded); the 10 frames after it ran and matched
+- Node vm, alloc, in a process started with --max-old-space-size=64: the process ENDED, exit 134: FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+- Node worker thread with resourceLimits { maxOldGenerationSizeMb: 64 }, alloc: stopped after 106.0ms (ERR_WORKER_OUT_OF_MEMORY: Worker terminated due to reaching memory limit: JS heap out of memory); the 10 frames after it ran and matched
+
+V8 with the 64 MB heap limit and V8's default ArrayBuffer allocator (no counting allocator), allocBuffers(256):
+  returned 256 after 52.2ms; V8's external memory 256 MB; private bytes 6.32 MB before, 264.61 MB after
+
+V8 watchdog armed for 20ms, 512 MB heap, no near-heap-limit callback (if termination never lands, V8 ends the process at the heap limit):
+  - as built, keep new Array(1024), as allocForever: process ENDED, exit 0x80000003: # Fatal JavaScript out of memory: Reached heap limit / v8::base::FatalOOM [0x0x7ff7f8554fba+58]
+  - as built, keep new Array(1024), no fill: process ENDED, exit 0x80000003: # Fatal JavaScript out of memory: CALL_AND_RETRY_LAST / v8::base::FatalOOM [0x0x7ff7f8554fba+58]
+  - as built, keep new Array(16).fill: terminated by the host after 33.6ms, heap 37.46 MB
+  - as built, keep an array literal: terminated by the host after 24.4ms, heap 16.42 MB
+  - as built, keep strings: terminated by the host after 25.1ms, heap 29.7 MB
+  - as built, keep nothing, new Array(1024).fill: terminated by the host after 1298.8ms, heap 1.22 MB
+  - --no-turbofan, keep new Array(1024), as allocForever: terminated by the host after 36.7ms, heap 64.52 MB
+  - --no-turbofan, keep new Array(1024), no fill: terminated by the host after 22.8ms, heap 35.13 MB
+  - --no-turbofan, keep new Array(16).fill: terminated by the host after 32.3ms, heap 37.5 MB
+  - --no-turbofan, keep an array literal: terminated by the host after 23.3ms, heap 22.23 MB
+  - --no-turbofan, keep strings: terminated by the host after 32.1ms, heap 45.17 MB
+  - --no-turbofan, keep nothing, new Array(1024).fill: terminated by the host after 26.7ms, heap 0.46 MB
+
+Details
+- QuickJS-ng (rquickjs), exit 0
+  - OS, idle: working set 5.2 MB, private working set 0.9 MB, private bytes 1.1 MB
+  - CPU over the frames: 55.0ms of cycles in 9993.5ms
+  - READY {"engine":"QuickJS-ng","version":"0.16.2","startup_ms":1.7386000000000001,"runtime_and_context_ms":0.3147,"eval_plugin_ms":0.30610000000000004,"eval_writers_ms":0.9114,"eval_runaway_ms":0.1899,"heap":{"malloc_mb":0.25,"used_mb":0.2},"memory":{"working_set_mb":5.14,"private_mb":1.15,"peak_working_set_mb":5.14}}
+  - IDLE {"working_set_mb":5.17,"private_mb":1.15,"peak_working_set_mb":5.17}
+  - PLUGIN {"ok":true,"range_nm":40,"tilt_deg":-15,"exports_us":1.3773,"write_us":1.2867}
+  - FRAMES {"frames":600,"mean_us":75.05183333333332,"p50_us":69.6,"p99_us":155.3,"max_us":222.20000000000002,"first_us":79.3,"wall_ms":9983.5754,"tick_cpu_ms":0,"tick_cpu_percent":0,"late_frames":0,"errors":0,"sink":{"calls":60000,"sum":1686825.0000000005,"name_bytes":1039848},"last_error":"","heap":{"malloc_mb":0.25,"used_mb":0.21},"memory":{"working_set_mb":5.26,"private_mb":1.15,"peak_working_set_mb":5.26}}
+  - CHECK {"calls":1000,"sum":-52944,"name_bytes":17327}
+  - DONE {"working_set_mb":7.15,"private_mb":3.14,"peak_working_set_mb":70.48}
+  - TEST {"test":"loop","threw":true,"error":"InternalError: interrupted","ms":100.38510000000001,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"malloc_mb":0.25,"used_mb":0.21},"memory":{"working_set_mb":5.27,"private_mb":1.15,"peak_working_set_mb":5.27}}
+  - TEST {"test":"buffers","threw":true,"error":"InternalError: out of memory","ms":14.273599999999998,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"malloc_mb":0.25,"used_mb":0.21},"memory":{"working_set_mb":5.43,"private_mb":1.31,"peak_working_set_mb":68.64}}
+  - TEST {"test":"recursion","threw":true,"error":"RangeError: Maximum call stack size exceeded","ms":0.6201,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"malloc_mb":0.25,"used_mb":0.21},"memory":{"working_set_mb":6.45,"private_mb":2.34,"peak_working_set_mb":68.64}}
+  - TEST {"test":"alloc","threw":true,"error":"InternalError: out of memory","ms":87.8729,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"malloc_mb":0.25,"used_mb":0.21},"memory":{"working_set_mb":7.15,"private_mb":3.14,"peak_working_set_mb":70.48}}
+- V8 (v8 crate), as built, exit 0x80000003
+  - OS, idle: working set 13.1 MB, private working set 3.4 MB, private bytes 6.8 MB
+  - CPU over the frames: 75.9ms of cycles in 9995.8ms
+  - READY {"engine":"V8","version":"15.2.124.1-rusty","startup_ms":5.5024999999999995,"platform_ms":1.3837000000000002,"isolate_and_context_ms":2.4086,"eval_plugin_ms":0.6301,"eval_writers_ms":0.9108999999999999,"eval_runaway_ms":0.1685,"heap":{"used_mb":0.66,"total_mb":1,"limit_mb":64,"external_mb":0},"memory":{"working_set_mb":13.04,"private_mb":6.81,"peak_working_set_mb":13.04}}
+  - IDLE {"working_set_mb":13.05,"private_mb":6.81,"peak_working_set_mb":13.05}
+  - PLUGIN {"ok":true,"range_nm":40,"tilt_deg":-15,"exports_us":0.6708000000000001,"write_us":0.5667}
+  - FRAMES {"frames":600,"mean_us":81.2443333333333,"p50_us":71.4,"p99_us":220.5,"max_us":1122.8,"first_us":741.9,"wall_ms":9984.138700000001,"tick_cpu_ms":46.875,"tick_cpu_percent":0.46949467959614777,"late_frames":0,"errors":0,"sink":{"calls":60000,"sum":1686825.0000000005,"name_bytes":1039848},"last_error":"","heap":{"used_mb":1.7,"total_mb":3,"limit_mb":64,"external_mb":0},"memory":{"working_set_mb":18.21,"private_mb":10.81,"peak_working_set_mb":22.51}}
+  - CHECK {"calls":1000,"sum":-52944,"name_bytes":17327}
+  - TEST {"test":"loop","threw":true,"error":"terminated by the host","ms":103.7142,"watchdog_fired":true,"heap_limit_hits":0,"buffer_refusals":0,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.82,"total_mb":1.5,"limit_mb":64,"external_mb":0},"memory":{"working_set_mb":20.04,"private_mb":9.05,"peak_working_set_mb":22.51}}
+  - TEST {"test":"buffers","threw":true,"error":"RangeError: Array buffer allocation failed","ms":15.339500000000001,"watchdog_fired":false,"heap_limit_hits":1,"buffer_refusals":4,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.81,"total_mb":1.5,"limit_mb":70,"external_mb":0},"memory":{"working_set_mb":20.44,"private_mb":9.41,"peak_working_set_mb":84.71}}
+  - TEST {"test":"recursion","threw":true,"error":"RangeError: Maximum call stack size exceeded","ms":1.7348999999999999,"watchdog_fired":false,"heap_limit_hits":0,"buffer_refusals":0,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.81,"total_mb":1.5,"limit_mb":70,"external_mb":0},"memory":{"working_set_mb":21.42,"private_mb":10.39,"peak_working_set_mb":84.71}}
+- V8 (v8 crate), --no-turbofan, exit 0
+  - OS, idle: working set 13.1 MB, private working set 3.4 MB, private bytes 6.8 MB
+  - CPU over the frames: 74.2ms of cycles in 9993.3ms
+  - READY {"engine":"V8","version":"15.2.124.1-rusty","startup_ms":5.727399999999999,"platform_ms":1.4453999999999998,"isolate_and_context_ms":2.4258,"eval_plugin_ms":0.5645,"eval_writers_ms":0.8652,"eval_runaway_ms":0.426,"heap":{"used_mb":0.66,"total_mb":1,"limit_mb":64,"external_mb":0},"memory":{"working_set_mb":13.05,"private_mb":6.83,"peak_working_set_mb":13.05}}
+  - IDLE {"working_set_mb":13.07,"private_mb":6.83,"peak_working_set_mb":13.07}
+  - PLUGIN {"ok":true,"range_nm":40,"tilt_deg":-15,"exports_us":0.837,"write_us":0.5838}
+  - FRAMES {"frames":600,"mean_us":86.64666666666663,"p50_us":70.8,"p99_us":336,"max_us":1352.3999999999999,"first_us":636.1999999999999,"wall_ms":9983.9503,"tick_cpu_ms":0,"tick_cpu_percent":0,"late_frames":0,"errors":0,"sink":{"calls":60000,"sum":1686825.0000000005,"name_bytes":1039848},"last_error":"","heap":{"used_mb":1.7,"total_mb":3,"limit_mb":64,"external_mb":0},"memory":{"working_set_mb":18.23,"private_mb":11.07,"peak_working_set_mb":22.21}}
+  - CHECK {"calls":1000,"sum":-52944,"name_bytes":17327}
+  - DONE {"working_set_mb":20.04,"private_mb":11,"peak_working_set_mb":83.56}
+  - TEST {"test":"loop","threw":true,"error":"terminated by the host","ms":112.021,"watchdog_fired":true,"heap_limit_hits":0,"buffer_refusals":0,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.81,"total_mb":1.5,"limit_mb":64,"external_mb":0},"memory":{"working_set_mb":18.11,"private_mb":10.91,"peak_working_set_mb":22.21}}
+  - TEST {"test":"buffers","threw":true,"error":"RangeError: Array buffer allocation failed","ms":14.307,"watchdog_fired":false,"heap_limit_hits":1,"buffer_refusals":4,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.81,"total_mb":1.5,"limit_mb":70,"external_mb":0},"memory":{"working_set_mb":17.98,"private_mb":9.47,"peak_working_set_mb":82.75}}
+  - TEST {"test":"recursion","threw":true,"error":"RangeError: Maximum call stack size exceeded","ms":1.4935,"watchdog_fired":false,"heap_limit_hits":0,"buffer_refusals":0,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.81,"total_mb":1.5,"limit_mb":70,"external_mb":0},"memory":{"working_set_mb":18.96,"private_mb":10.51,"peak_working_set_mb":82.75}}
+  - TEST {"test":"alloc","threw":true,"error":"terminated by the host","ms":50.047599999999996,"watchdog_fired":false,"heap_limit_hits":1,"buffer_refusals":0,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":0.81,"total_mb":1.5,"limit_mb":70,"external_mb":0},"memory":{"working_set_mb":20.04,"private_mb":11,"peak_working_set_mb":83.56}}
+- Node vm (baseline), exit 0
+  - OS, idle: working set 37.4 MB, private working set 12.1 MB, private bytes 17.4 MB
+  - CPU over the frames: 91.8ms of cycles in 10007.9ms
+  - READY {"engine":"Node vm","version":"v22.23.1, V8 12.4.254.21-node.56","startup_ms":2.4025999999999996,"context_ms":0.36410000000000053,"eval_plugin_ms":0.4085000000000001,"eval_writers_ms":1.1599000000000004,"eval_runaway_ms":0.44819999999999993,"process_uptime_ms":31.9841,"heap":{"used_mb":5.22,"total_mb":5.85,"limit_mb":4144},"memory":{"working_set_mb":36.54,"heap_used_mb":5.24,"external_mb":1.85}}
+  - IDLE {"working_set_mb":37.36,"heap_used_mb":4.98,"external_mb":1.9}
+  - PLUGIN {"ok":true,"range_nm":40,"tilt_deg":-15,"exports_us":0.9708000000000538,"write_us":2.603900000000067}
+  - FRAMES {"frames":600,"mean_us":82.41399999995338,"p50_us":66.69999999940046,"p99_us":300.19999999967695,"max_us":1259.3000000006214,"first_us":1259.3000000006214,"wall_ms":9997.050200000001,"tick_cpu_ms":0,"tick_cpu_percent":0,"late_frames":0,"errors":0,"sink":{"calls":60000,"sum":1686825.0000000005,"name_bytes":1039848},"last_error":"","heap":{"used_mb":6.14,"total_mb":6.6,"limit_mb":4144},"memory":{"working_set_mb":39.4,"heap_used_mb":6.14,"external_mb":1.9}}
+  - CHECK {"calls":1000,"sum":-52944,"name_bytes":17327}
+  - DONE {"working_set_mb":296.64,"heap_used_mb":5.02,"external_mb":513.9}
+  - TEST {"test":"loop","threw":true,"error":"ERR_SCRIPT_EXECUTION_TIMEOUT: Script execution timed out after 100ms","ms":113.79190000000017,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":4.92,"total_mb":6.6,"limit_mb":4144},"memory":{"working_set_mb":38.58,"heap_used_mb":4.94,"external_mb":1.9}}
+  - TEST {"test":"buffers","threw":false,"error":"returned 256","ms":53.722900000000664,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":4.95,"total_mb":7.85,"limit_mb":4144},"memory":{"working_set_mb":295.64,"heap_used_mb":4.97,"external_mb":513.9}}
+  - TEST {"test":"recursion","threw":true,"error":"RangeError: Maximum call stack size exceeded","ms":1.59860000000117,"host_ok":true,"check":{"calls":1000,"sum":-52944,"name_bytes":17327},"heap":{"used_mb":5.02,"total_mb":7.85,"limit_mb":4144},"memory":{"working_set_mb":296.64,"heap_used_mb":5.02,"external_mb":513.9}}
+- Node vm alloc: exit 134, {"READY":{"heap":{"used_mb":5.15,"total_mb":5.85,"limit_mb":112},"memory":{"working_set_mb":35.63,"heap_used_mb":5.17,"external_mb":1.85}},"START":{"test":"alloc"}} 
+- Node worker alloc: exit 0, {"READY":{"heap":{"used_mb":5.42,"total_mb":6.1,"limit_mb":4144},"memory":{"working_set_mb":37.16,"heap_used_mb":5.44,"external_mb":1.85}},"START":{"test":"alloc"},"DONE":{"working_set_mb":41.68,"heap_used_mb":5.31,"external_mb":1.91}} {"test":"alloc","threw":true,"error":"ERR_WORKER_OUT_OF_MEMORY: Worker terminated due to reaching memory limit: JS heap out of memory","ms":106.02919999999999,"host_ok":true,"check":{"calls":1000,"sum":-52944.000000000015,"name_bytes":17327},"heap":{"used_mb":5.3,"total_mb":7.1,"limit_mb":4144},"memory":{"working_set_mb":41.68,"heap_used_mb":5.31,"external_mb":1.91}}

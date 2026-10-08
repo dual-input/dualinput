@@ -1,0 +1,6 @@
+# cargo's build output.
+target/
+# npm's install of esbuild.
+node_modules/
+# The bundles build.mjs compiles from ts/.
+dist/

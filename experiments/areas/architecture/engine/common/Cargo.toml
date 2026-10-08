@@ -1,0 +1,16 @@
+[package]
+name = "p04-common"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "p04-capped"
+path = "src/bin/capped.rs"
+
+[[bin]]
+name = "p04-cycles"
+path = "src/bin/cycles.rs"
+
+[dependencies.windows-sys]
+version = "=0.59.0"
+features = ["Win32_Foundation", "Win32_Security", "Win32_System_JobObjects", "Win32_System_ProcessStatus", "Win32_System_Threading", "Win32_System_WindowsProgramming"]

@@ -1,0 +1,8 @@
+[package]
+name = "p04-v8"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p04-common = { path = "../common" }
+v8 = "=152.2.0"

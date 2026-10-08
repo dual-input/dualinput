@@ -109,7 +109,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 ## Every client sends the core a message every 2s
 
 - **Decided:** every page and the desktop app send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s.
-  Proposed in node 1.2, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels.
+  Settled in node 1.2 by the user, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels.
 - **Because:**
   - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
   - FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").

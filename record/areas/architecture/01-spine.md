@@ -31,7 +31,7 @@ The watcher works while the core may not be running, and the services off the pi
 | Panel bridge | Every cockpit panel, through our `VCockpit.js` override | Pointer sync, and the modules that features and plugins name |
 | WASM module | The sim, as a standalone module from boot | The figures' placement, the aircraft's hold and writes, and the undoing of our state in the sim when the core goes quiet |
 | Relay | Off the pilots' machines | Invite codes, introductions between cores, and a session's traffic when the cores can't link directly |
-| Report server | Off the pilots' machines | Each pilot's part of a bug report |
+| Backend | Off the pilots' machines | Each pilot's part of a bug report, and later features that need a server of ours, such as [telemetry](../product/ideas.md#telemetry) |
 | Release host | Off the pilots' machines | Installers and updates |
 
 Plugins aren't components: a plugin's code runs inside the core, the panel bridge, or the WASM module, wherever its aircraft needs, through hooks in each ([04-room-for-later](../product/04-room-for-later.md#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
@@ -51,7 +51,7 @@ Where each sits, and why:
 - The WASM module writes inside the sim's frame and outlives the core ([tentative decisions](decisions.md#our-wasm-module-writes-the-following-aircraft)).
   Whether it also runs calculator code, for `H:` events if SimConnect's client events can't fire them (unverified, [01-profile-entries](../sync/01-profile-entries.md#the-writer-api)), is open ([left open](#left-open)).
 - The relay holds a session's invite code, as fsc-editor's does (read in fsc-editor, `relay/src/index.ts`), and introduces the cores, which try a direct link first and fall back to the relay ([network log](../network/log.md#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month)).
-- The report server's candidate is a Cloudflare Worker with D1 and R2 ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
+- The backend's candidate is a Cloudflare Worker with D1 and R2 ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 - The release host is GitHub Releases (user, 2026-10-08), which fsc-editor's `electron-updater` updates fsc-editor from (read in fsc-editor, `package.json`, `electron-builder.yml`, and `src/main/updates.ts`).
 
 ## Components with no session
@@ -115,7 +115,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
                       │                                             panel bridge
                       ├── SimConnect ── the sim: masks, events, AI traffic, and the CommBus
                       ├── SimConnect data slots ── WASM module
-                      └── the network ── other pilots' cores, the relay, the report server
+                      └── the network ── other pilots' cores, the relay, the backend
  Watcher ── HTTPS ── release host
 ```
 
@@ -194,7 +194,7 @@ The WASM module can't open a socket, so it reaches the core through data slots, 
 
 ### Between machines
 
-The core talks to other pilots' cores, directly when it can and through the relay when it can't, and to the report server over HTTPS.
+The core talks to other pilots' cores, directly when it can and through the relay when it can't, and to the backend over HTTPS.
 The watcher alone talks to the release host, over HTTPS.
 How the cores reach each other is for a top-level node after node 1 (user, 2026-10-08): the topology, the transport, getting through home routers, the relay, and encryption.
 

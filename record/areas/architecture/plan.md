@@ -72,7 +72,7 @@ Question: what does every other part of Crosscheck rest on?
 It covers:
 
 - the processes Crosscheck runs as
-- how its components talk to each other, on one machine and between machines: the watcher, the core, the desktop app, the EFB app, our WASM module, the panels, the relay, and the report server, and the plugins' code, which may run inside several of them
+- how its components talk to each other, on one machine and between machines: the watcher, the core, the desktop app, the EFB app, our WASM module, the panels, the relay, and the backend, and the plugins' code, which may run inside several of them
 - the conventions they share
 - the language
 - the boundaries between its parts
@@ -162,7 +162,19 @@ The spine can't pick a language until it knows the runtimes the components run i
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Waits on 1.3.1.
 Raised elsewhere: by 1.1, whether the core's native code for Windows input and audio runs in the core's own process or in a process the core supervises, since a crash in native code inside the core's process takes the core down, and the pilot out of the session until the core restarts ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
+
+## 1.3.1 The watcher's runtime
+
+Question: what does a process that shows only a tray icon cost in memory and CPU, idle, in each runtime the watcher could run in?
+1.3 can't pick the watcher's runtime without it.
+The watcher runs from the pilot's login, all day, and shows the pilot its own CPU and memory use ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and Node has no tray icon, so the watcher needs a runtime that has one, such as Electron's main process or a native program.
+An idle Node process took 29 MB, and Electron 43's executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, same step), but neither showed a tray icon.
+A probe settles it, with no sim: a tray icon and nothing else, idle for 60s, in Electron 43's main process, in .NET 9 WinForms built self-contained and with Native AOT, and in Rust on Win32, recording the memory and CPU of all of each one's processes.
+It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture) and the watcher's row in [01-spine](01-spine.md#components).
+Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
 
 ## 1.4 Shared conventions
 

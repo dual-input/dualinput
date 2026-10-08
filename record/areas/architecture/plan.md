@@ -131,10 +131,24 @@ The spine can't draw the boundaries between parts, or set the conventions they s
 It reads 1.1's answer, then the [interface](../interface/log.md) and [CommBus](../commbus/log.md) logs, and the foundations chapters on the ways to reach the sim: [04-01](../../learn/foundations/04-01-connection-and-data.md), [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md), [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Waits on 1.2.1.
 Raised elsewhere: by 1.1, how the core knows each component is alive and working, the watcher, the apps, the code in the sim, and the relay, so a component in trouble is plain to the pilot and lands in the logs and the recording ([ideas](../product/ideas.md#component-health); user, 2026-10-08).
 Raised elsewhere: by 1.1.2, how the core tells the components in the sim that a session started and ended ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the WASM module hears from the core every second on every machine in a session, so it can undo our state in the sim when the core stops ([01-spine](01-spine.md#what-moves-them)).
 Raised elsewhere: by 1.1, how a panel finds its own core when two cores run on one machine, since FS Copilot's panels try ports 9020 to 9024 and connect to the first that answers, one reason its test bench must not run beside a live sim (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
+
+## 1.2.1 Links from the sim's pages
+
+Question: can each kind of page in the sim that our components run in read an `L:` variable the core writes and hold a WebSocket to the core, and what do sockets in every cockpit panel cost in frame time?
+1.2 can't say how those components find the core and learn that a session started without it.
+The core is to announce its port in `L:CROSSCHECK_CORE_PORT`, and a cockpit panel is to connect only while `L:CROSSCHECK_SESSION` is 1, name its instruments, and close its socket if the core gives it nothing to load (user, 2026-10-08).
+WebSockets to a program on the same PC were measured from the EFB's document, the toolbar's, a cockpit panel's, and two of Parallel 42's in-game panels, but not from an in-game panel of our own or from the menu's document, `mainUi` ([interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
+Whether any of those pages can read an `L:` variable an outside program writes is unmeasured, and `mainUi` has `engine` but no `Coherent` ([interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)).
+How many sockets a session holds depends on the profile, and nobody has measured what they cost the sim.
+A probe settles it: with an in-game panel of ours installed, write the variable through SimConnect in the main menu, read it and open a WebSocket from each kind of page, in the menu and again once a flight has loaded, then compare frame time with a socket in every cockpit panel, idle and busy, against none.
+It reads the [interface log](../interface/log.md), the foundations chapter [06-04](../../learn/foundations/06-04-websockets-to-localhost.md), and the probes [p06-websocket.mjs](../../../experiments/areas/interface/p06-websocket.mjs) and [ingame/build.mjs](../../../experiments/areas/interface/ingame/build.mjs).
+Its answer goes in an entry in the interface log, which 1.2's section of `01-spine.md` cites.
+Exit: an interface log entry answers the question.
 
 ## 1.3 Language and toolchains
 

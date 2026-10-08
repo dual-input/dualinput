@@ -175,6 +175,7 @@ A probe settles it, with no sim: a tray icon and nothing else, idle for 60s, in 
 It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture) and the watcher's row in [01-spine](01-spine.md#components).
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-08.
 
 ## 1.3.2 A Rust standalone module
 
@@ -198,6 +199,7 @@ A probe settles it, with no sim: report the level of a process playing a tone an
 It reads the [tentative decisions](decisions.md) on the take-control input and the audio, and FS Copilot's `FsCopilot/Audio/`.
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-08.
 
 ## 1.4 Shared conventions
 

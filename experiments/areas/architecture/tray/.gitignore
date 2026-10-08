@@ -1,0 +1,5 @@
+# Build output: cargo's, and dotnet's objects and published programs.
+rust/target/
+*/bin/
+*/obj/
+*/out/

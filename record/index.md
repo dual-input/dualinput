@@ -27,3 +27,4 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/architecture/plan.md](areas/architecture/plan.md): how we design Crosscheck's v1 architecture, as a tree of questions that goes a level deeper only when the work shows a need, and where each question stands.
 - [areas/architecture/01-spine.md](areas/architecture/01-spine.md): the spine every other part of Crosscheck rests on, one section for each child of the architecture plan's node 1.
 - [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes have settled for now, and on what findings.
+- [areas/architecture/log.md](areas/architecture/log.md): what our experiments found for the architecture plan's nodes.

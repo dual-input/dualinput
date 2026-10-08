@@ -1,0 +1,21 @@
+p01-tray-runtimes, 2026-10-08T17:06:23.478Z
+Windows 10.0.26200, 16 logical processors; Node v22.23.1, Electron 43.4.0, .NET SDK 9.0.317, rustc 1.95.0 (59807616e 2026-04-14)
+Each: 15s to settle after its icon appeared, then 60s idle. Memory at the end; CPU over the 60s, as a share of one processor.
+
+- Node, no tray (reference): 2 processes, Task Manager's memory 11.0 MB, working set 38.4 MB, private bytes 16.7 MB, CPU 0.00% (0ms), 83.0 MB on disk
+  - node (37656): Task Manager's memory 10.2 MB, working set 31.3 MB, private bytes 15.5 MB
+  - conhost (21484): Task Manager's memory 0.8 MB, working set 7.1 MB, private bytes 1.2 MB
+
+- Electron main process: 3 processes, Task Manager's memory 39.7 MB, working set 165.9 MB, private bytes 104.7 MB, CPU 0.00% (0ms), 347.4 MB on disk
+  - electron (55800): Task Manager's memory 18.1 MB, working set 59.8 MB, private bytes 27.4 MB
+  - electron (63448): Task Manager's memory 15.4 MB, working set 67.5 MB, private bytes 66.5 MB
+  - electron (47124): Task Manager's memory 6.3 MB, working set 38.6 MB, private bytes 10.9 MB
+
+- .NET WinForms, self-contained: 1 process, Task Manager's memory 5.1 MB, working set 33.3 MB, private bytes 8.1 MB, CPU 0.00% (0ms), 107.7 MB on disk
+  - p01-tray-winforms (62056): Task Manager's memory 5.1 MB, working set 33.3 MB, private bytes 8.1 MB
+
+- .NET Native AOT, Win32: 1 process, Task Manager's memory 1.6 MB, working set 11.3 MB, private bytes 3.3 MB, CPU 0.00% (0ms), 1.1 MB on disk
+  - p01-tray-aot (37752): Task Manager's memory 1.6 MB, working set 11.3 MB, private bytes 3.3 MB
+
+- Rust, Win32: 1 process, Task Manager's memory 1.0 MB, working set 9.6 MB, private bytes 1.4 MB, CPU 0.00% (0ms), 0.1 MB on disk
+  - p01-tray-rust (56096): Task Manager's memory 1.0 MB, working set 9.6 MB, private bytes 1.4 MB

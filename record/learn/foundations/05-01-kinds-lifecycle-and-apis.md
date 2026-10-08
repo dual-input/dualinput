@@ -59,6 +59,9 @@ It can't read the loaded aircraft's files either, so what Crosscheck knows about
 
 **Traps.**
 
+- In one early run, a package's `modules` folder held two standalone modules, the cargo-msfs build and a build linked with `MSFS_WasmVersions.a`, and only the first ran [26].
+  The second is a build the sim refuses even in a package of its own ([05-03](05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), so the run doesn't show whether the sim ignores a second module (unverified).
+  Until it is measured, give each standalone module a package of its own.
 - A system module must be in the same package as the `systems.cfg` that names it [6], so Crosscheck can't add one to another vendor's aircraft from a package of its own.
 - A module that reads a file with the C library's blocking calls, while the sim is still streaming that file, is paused "for few frames" until it arrives; the SDK advises the asynchronous file API instead [1] [11].
 - The SDK says Marketplace packages are encrypted, and tells module authors not to read an aircraft's `*.xml`, `systems.cfg`, or `flight_model.cfg`, even in their own package [1].
@@ -198,6 +201,7 @@ The one call that runs it is deprecated in SDK 1.7.3 with no replacement, and it
 23. Measured on MSFS 2024, 2026-08-25: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-25 — The wire runs calculator code, and `gauges.h` came back clean".
 24. Documented in our record, read from the installed package `inibuilds-aircraft-a380` 1.0.0 on 2026-09-29: [inibuilds-a380 study](../../areas/aircraft/inibuilds-a380/study.md), the "Readable" line of its header and "What the encryption hides", from each archive's header.
 25. Documented in our record, read from the installed package `fsreborn-aircraft-phenom300e` 1.0.24 on 2026-09-29: [fsreborn-phenom-300e study](../../areas/aircraft/fsreborn-phenom-300e/study.md), the "Readable" line of its header and "What the encryption hides", from each archive's header.
+26. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [architecture log](../../areas/architecture/log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide), "A standalone module built from Rust with cargo-msfs, and packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client, once its SimConnect handle is 64 bits wide", with the output in `experiments/areas/architecture/results/p03-rust-module-2026-10-08-17-44-49.txt`, which doesn't record the package's layout; the layout is in the log and in the header comment of `experiments/areas/architecture/module/build.mjs`.
 
 ## Unverified claims
 
@@ -206,5 +210,8 @@ The one call that runs it is deprecated in SDK 1.7.3 with no replacement, and it
   A module that logs each call's `dTime` and a steady-clock time, through the main menu, a flight, a pause, and a simulation rate of 4, would settle both.
 - **Whether a module's globals start fresh when `module_init` runs again after a sign-in.**
   Signing out and back in with a module that reports a counter it increments in `module_init` would settle it.
+- **Whether the sim runs a second standalone module in one package.**
+  A run with the cargo-msfs build and the `MSFS_WasmVersions.a` build the sim refuses in one package ran only the first, which doesn't separate the order from the refusal [26].
+  Putting the cargo-msfs build and the build with the `StackSizesSection` removed in one package, and reading both frame counters, would settle it.
 - **Whether an `https` request from a module can reach a local app.**
   Calling `fsNetworkHttpRequestGet` on `https://localhost` with a self-signed certificate would settle it.

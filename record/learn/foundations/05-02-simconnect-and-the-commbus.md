@@ -42,6 +42,7 @@ module           reads "start" in its dispatch callback; writes a hello with the
 The third is which sim the module is built for.
 The SDK says a module is detected as an MSFS 2024 module only if it's linked with `MSFS_WasmVersions.a`, and that without it, features such as SimConnect "behave as if they were from a MSFS 2020 module" [7].
 The platform toolset links it without being asked ([05-03](05-03-toolchain-versioning-and-debugging.md#toolchain-sdk-platform-toolset-fspackagetool-the-project-editor)).
+A Rust module built without it was compiled into `WASM\MSFS2024` and ran [21], and what the sim does differently for such a module is unmeasured.
 
 A module has all of SimConnect, alongside the Vars API.
 FS Copilot's module reads four freeze and state variables and `L:FSC_CONTROL` through a data definition at `SIMCONNECT_PERIOD_SIM_FRAME` with the `CHANGED` flag, and writes position through calculator code [2].
@@ -53,6 +54,9 @@ The module is there before the app and stays after it, so the app has to find ou
 **Traps.**
 
 - Both our modules return from `module_init` without a word when `SimConnect_Open` fails, so a module that couldn't connect looks, from the app, like no module at all [2] [3].
+- Inside a module, `HANDLE` is 64 bits wide though pointers are 32 [20].
+  A Rust binding that declared it as a pointer got `S_OK` from `SimConnect_Open` and a handle that fit in 32 bits, then `E_FAIL`, −2147467259, from the first call after it, and the module's data areas never appeared; declared as a 64-bit integer, `SimConnect_Open` and the eight setup calls after it returned `S_OK` [21].
+  C++ takes the width from the SDK's header, so a binding written by hand has to follow the header for every type, because a wrong width compiles and loads.
 - Some SimConnect structures changed size in MSFS 2024: the `ident` member of `SIMCONNECT_ICAO` and the structures built on it grew to 8 [1] [7].
   The SDK warns about code that copies them into short fixed buffers.
 - In MSFS 2020, a gauge module received no `SimStart` or `SimStop`, because it loads only once a flight is running, according to a 2021 forum post (unverified) [8].
@@ -181,6 +185,8 @@ A SimConnect client can call into all but one of the pages we use, and a page's 
 17. Measured on MSFS 2024, 2026-09-28: [CommBus log](../../areas/commbus/log.md#2026-09-28-the-a220-sends-changes-not-snapshots-and-keeps-its-altimeter-setting-on-the-ads-and-ctp-channels), "The A220 sends changes, not snapshots, and keeps its altimeter setting on the ADS and CTP channels".
 18. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one), "Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one", with the output in `experiments/areas/interface/results/p13-sim-links-2026-10-08-13-54-50.txt` and `p14-commbus-pages-2026-10-08-14-05-05.txt`.
 19. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [interface log](../../areas/interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel), "A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel", with the output in `experiments/areas/interface/results/p15-links-coverage-2026-10-08-14-54-27.txt`.
+20. Documented, read from the SDK: MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_WindowsTypes.h`, `typedef unsigned long long HANDLE`.
+21. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [architecture log](../../areas/architecture/log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide), "A standalone module built from Rust with cargo-msfs, and packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client, once its SimConnect handle is 64 bits wide", with the output in `experiments/areas/architecture/results/p03-rust-module-2026-10-08-17-54-02.txt` for the failing call, `-17-59-24.txt` for the handle that fit in 32 bits, and `-18-04-12.txt` for the 64-bit run.
 
 ## Unverified claims
 

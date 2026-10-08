@@ -40,9 +40,15 @@ FS Copilot's project has the same shape, with a Debug configuration as well, and
 
 The toolset's link line adds what a module needs beyond its compiled code [2].
 It exports the allocator the sim calls into, from `--export malloc` to `--export mark_decommit_pages`.
-It links `MSFS_WasmVersions.a`, which marks the module as an MSFS 2024 module ([05-02](05-02-simconnect-and-the-commbus.md#simconnect-from-inside-a-module)), and exports `GetSimConnectVersion`.
-Under it are `clang-cl` 15.0.1, built from Asobo's `innative-llvm` repository, and `wasm-ld`, targeting `wasm32-unknown-wasi` [2] [7].
+It links `MSFS_WasmVersions.a`, which the SDK says marks the module as an MSFS 2024 module ([05-02](05-02-simconnect-and-the-commbus.md#simconnect-from-inside-a-module)), and exports `GetSimConnectVersion`.
+A Rust module built with neither was compiled into `WASM\MSFS2024` and ran, so the file doesn't decide that folder [23], and what does is unverified.
+Under the toolset are `clang-cl` 15.0.1, built from Asobo's `innative-llvm` repository, and `wasm-ld`, targeting `wasm32-unknown-wasi` [2] [7].
 fsc-editor drove those two tools straight from a shell, and its module linked and then didn't run in the sim, because it lacked the allocator exports ([Debugging, crashes, required exports](#debugging-crashes-required-exports)) [7] [15].
+
+The toolset isn't the only way to a module the sim runs.
+Navigraph's cargo-msfs v1.1.0 builds a Rust crate for MSFS 2024: it installed its SDK by downloading `MSFS2024_SDK_Core_Installer_1.8.1.zip` (622.5 MB) from `sdk.flightsimulator.com` and unpacking 1.6 GB of it without running the installer, in about 7 minutes, and each build afterward took about 1s [23].
+Our probe module exported the eight functions in [Debugging](#debugging-crashes-required-exports) and the three the sim calls on a standalone module, and lacked the toolset's `GetSimConnectVersion` export and its custom sections [23].
+Our own script wrote the package's `manifest.json` and `layout.json`, `fspackagetool` didn't run, and on MSFS 2024 SunRise 12.2.282174.999 the sim compiled the module into `WASM\MSFS2024`, ran its `Update_StandAlone` 136 times a second at the main menu, and let it exchange client data areas with a SimConnect client, once its SimConnect handle was declared 64 bits wide ([05-02](05-02-simconnect-and-the-commbus.md#simconnect-from-inside-a-module)) [23].
 
 Packaging reads two XML files.
 The project file lists package definitions, and each package definition lists asset groups; both our packages have a group of type `Copy` from `PackageSources\Modules\` to `modules\` [3] [4].
@@ -57,9 +63,9 @@ On our Steam machine each compiled module sits in `%APPDATA%\Microsoft Flight Si
 That folder holds 32 packages, and a sibling, `WASM\MSFS2020\`, holds 27 more, which we take to be the modules the sim treats as MSFS 2020 builds (unverified) [9].
 
 **What it changes for Crosscheck.**
-Building Crosscheck's module needs Visual Studio, the SDK, and MSFS on one machine.
-The SDK has no unattended install, and `fspackagetool` runs the game, so no hosted build server can produce the module [3] [10].
-fsc-editor answers this by committing the built package, and its CI compares a hash of the module's sources with the hash the build recorded [10].
+Built with the SDK's toolset and packaged by `fspackagetool`, Crosscheck's module needs Visual Studio, the SDK, and MSFS on one machine, because the tool runs the game and fsc-editor's record says the SDK has no unattended install, so fsc-editor commits the built package, and its CI compares a hash of the module's sources with the hash the build recorded [3] [10].
+Built from Rust with cargo-msfs and packaged by our own script, the module needed no game and no interactive install [23].
+Nobody has built it on a hosted build server (unverified).
 
 **Traps.**
 
@@ -177,6 +183,13 @@ Its build has to check the required exports before a package ships, where a mist
 
 - The eight exports may be required only of modules the sim treats as MSFS 2024 builds.
   MobiFlight's Event Module, installed on our machine, lacks five of them, and the sim compiled it into a DLL under `WASM\MSFS2020\` anyway; whether that module runs is unverified [17].
+- Linking `MSFS_WasmVersions.a` with Rust's linker brought along a `StackSizesSection`, and the sim refused the module: the WASM Debug window showed `FAILED` and "The module is not scheduled" (seen in the window by the user, 2026-10-08), and the sim compiled no DLL [23].
+  Removing the section fixed it [23].
+  The log says the section covers only that object's three functions, which no saved output shows (unverified).
+  The toolset-built module of fsc-editor carries a `StackSizesSection` [23] and runs [21], so the section's presence alone isn't what the sim refuses.
+- The WASM Debug window flagged the build types of the Rust modules cargo-msfs built, and of our C++ probe module built with the SDK's toolset, as "Incoherent build types" beside `READY` (seen in the window by the user, 2026-10-08) [23].
+  The SDK says a Debug DLL build type means WASM Debug Mode is enabled, and that the WASM and DLL build types should be the same [18].
+  We haven't checked that setting (unverified), but the flag appeared for both toolchains, so it doesn't point at either.
 - The SDK's debugging page says to attach to `Microsoft Flight Simulator.exe`, and the MSFS 2024 executable is `FlightSimulator2024.exe` [5] [19].
 - C++ exceptions aren't supported, and the toolset compiles with `-fno-exceptions`, so code with `try` or `throw` doesn't build [2] [8].
 - Where a module's `printf` output appears is unverified: FS Copilot's module logs with `fprintf(stdout, ...)`, and the SDK's console page names no WASM group [11] [22].
@@ -205,6 +218,8 @@ Its build has to check the required exports before a package ships, where a mist
 20. Documented: MSFS 2024 SDK, [SimConnect SDK](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/SimConnect_SDK.htm), section "Design Considerations".
 21. Measured on MSFS 2024, 2026-08-23: fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Stage 2a COMPLETE. All five questions pass; `L:` is reachable.", where the hello answered "did it load" apart from "does it work".
 22. Documented: MSFS 2024 SDK, [The Console](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Debug/The_Console.htm).
+23. Measured on MSFS 2024 SunRise 12.2.282174.999, 2026-10-08: [architecture log](../../areas/architecture/log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide), "A standalone module built from Rust with cargo-msfs, and packaged by our own script, runs on MSFS 2024 and trades data slots with a SimConnect client, once its SimConnect handle is 64 bits wide", with the output in `experiments/areas/architecture/results/p03-rust-module-2026-10-08-17-44-49.txt`, `-17-54-02.txt`, `-17-59-24.txt`, and `-18-04-12.txt`, and `p03-build-2026-10-08-18-05-07.txt`, and, for the manifest, `experiments/areas/architecture/module/build.mjs`, `writePackage`.
+    The log alone gives the SDK download's name, size, and time, the build time, and the Binaryen compile, and the user's reading of the WASM Debug window; no output of them was saved.
 
 ## Unverified claims
 
@@ -214,6 +229,13 @@ Its build has to check the required exports before a package ships, where a mist
 - **The allocator exports are required only of modules built for MSFS 2024, and `WASM\MSFS2020\` holds the modules the sim treats as MSFS 2020 builds.**
   Only fsc-editor's 2024 build is measured failing without the exports [15], and MobiFlight's module lacks them and was compiled anyway, into that folder [17].
   The WASM Debug window shows each module's status and whether it was compiled with the MSFS 2024 SDK or an earlier one [18], so checking MobiFlight's module there would settle both.
+- **What decides whether the sim compiles a module into `WASM\MSFS2024` or `WASM\MSFS2020`.**
+  Our Rust module, without `MSFS_WasmVersions.a`, went into `WASM\MSFS2024` [23], and MobiFlight's went into `WASM\MSFS2020` [17].
+  Their manifests differ in the `builder` field, which ours sets to "Microsoft Flight Simulator 2024" and MobiFlight's lacks, and in `minimum_game_version`, ours 1.8.14 and MobiFlight's 1.36.2, and may differ in others [17] [23].
+  Building the probe module again with one of those fields changed at a time, and reading where the sim compiles it, would settle it.
+- **Whether a hosted build server can build and package the module.**
+  The log says installing cargo-msfs compiled Binaryen's C++, with Visual Studio on the PC we used, and saved no output of it [23].
+  Running the install and the build script on a clean hosted runner would settle it.
 - **Where a module's `printf` output goes.**
   Loading FS Copilot's module with the Console open, and searching for its `Initialized` line, would settle it.
 - **The Project Editor's Build and Mount reloads a changed standalone module in the running sim.**

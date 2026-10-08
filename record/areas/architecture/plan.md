@@ -165,6 +165,7 @@ It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundat
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.3.1, 1.3.2, 1.3.3, 1.3.4, 1.3.5, and 1.3.6.
+Done on 2026-10-08.
 Raised elsewhere: by 1.1, whether the core's native code for Windows input and audio runs in the core's own process or in a process the core supervises, since a crash in native code inside the core's process takes the core down, and the pilot out of the session until the core restarts ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
 
 ## 1.3.1 The watcher's runtime

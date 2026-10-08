@@ -3,6 +3,58 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-08: Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one
+
+**Asked:** node 1.2.1 of the [architecture plan](../architecture/plan.md#121-links-from-the-sims-pages): can each kind of page our components run in read an `L:` variable the core writes and hold a WebSocket to the core, and what do sockets in every cockpit panel cost in frame time?
+The design under test has the core announce its port in an `L:` variable, and a cockpit panel connect only while a session flag is 1 (user, 2026-10-08).
+After the first run found the menu's page couldn't read the variable, we also asked whether a page can ask the core for its port over the CommBus and hear the answer.
+
+**Expected:** a WebSocket from every page, since the EFB's, the toolbar's, a cockpit panel's, and two of Parallel 42's in-game panels held one ([entry below](#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)); an `L:` read wherever the sim's `simvar.js` loads; and no frame time we could measure.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the A2A PA-24 parked, with crosscheck-p13-links, one in-game panel of ours, installed, p13 and p14 ran their code in every page through the inspector:
+
+- All 14 pages the inspector listed in the main menu, and all 32 in the flight, opened a WebSocket to the probe on 127.0.0.1 and got its echo, mainUi, our panel, the toolbar, the EFB, and the PA-24's 16 cockpit panels among them.
+  Every one sent `Origin: coui://html_ui`.
+- `SimConnect_SetDataOnSimObject` wrote `L:CROSSCHECK_P13_PORT` in the main menu, and SimConnect read it back.
+  After a flight loaded, the same read returned 0, and a write in the flight held for the rest of the run.
+- Where a page could read the variable, `SimVar.GetSimVarValue` and the sim's native `simvar.getValue` read the same value:
+
+  | Page | In the main menu | In the flight |
+  | --- | --- | --- |
+  | mainUi | Can't: no `SimVar`, `simvar`, or `Coherent` | Can't |
+  | The toolbar | Can't, for the same reason | Reads it |
+  | The EFB | Reads it | Reads it |
+  | Our in-game panel | Not open | Reads it |
+  | The 16 cockpit panels | None loaded | Read it |
+  | atlas, notifications, transition, Mission Steps, Shared variables | Can't | Can't |
+
+- Pollers in the 16 cockpit panels, reading `L:CROSSCHECK_P13_SESSION` every 500ms, connected 166ms to 547ms after the probe wrote 1, in both tries, and closed when it wrote 0.
+- With the frame rate capped at 30 fps, every 10s window read 31.0 fps, so the cap hid any cost.
+  Uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame.
+  The pollers alone, and 16 sockets idle, renewed every 2s, or taking 30 messages a second each, read 12.01ms to 12.07ms.
+  All 11,653 messages the probe sent arrived and parsed.
+- A page's call to `COMM_BUS_SIMCONNECT_CALLBACK` reached the probe's `SimConnect_SubscribeToCommBusEvent` subscription from every page but "transition", which answered "COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."
+  mainUi made the call with `engine.call`.
+- The probe's `SimConnect_CallCommBusEvent` for JavaScript reached every page but "transition", 12 calls of 12, by one of two routes:
+  - `RegisterCommBusListener`, in the pages that have the sim's `common.js`, after loading the sim's `Services/CommBus.js` where the page hadn't, as in the toolbar and our panel;
+  - `EVENT_FROM_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, in mainUi and the other pages without `Coherent`, once the page triggered `ADD_VIEW_LISTENER`, which is how mainUi's own view listeners take events (read in fs-base-ui, `html_ui/Global/lib.js`, `ViewListenerMgr`).
+    No call arrived as an event of its own name, which is all p13's first try listened for, so that try heard nothing in those pages.
+
+**Changed:**
+
+- An `L:` variable can't carry the core's port: the menu's page can't read one, and a flight load resets it.
+- The CommBus can: every page our components run in can ask the core on it and hear the answer.
+  A page would then learn the port with no fixed port and no value a load resets, and only from the core attached to its own sim, since the CommBus runs through that sim's SimConnect.
+  Which way node 1.2 takes is for its answer.
+- Sockets in every cockpit panel, and pollers reading a variable every 500ms, cost no frame time this run could measure.
+- Any `L:` variable the core relies on has to be written again after each flight load.
+
+What we haven't run: the CommBus in the menu's toolbar page, an aircraft with many more cockpit panels than the PA-24's 16, and a page whose CommBus listener never reported ready asking anyway, as the liveries, `VLogic`, and Parallel 42's overlay did.
+
+**Affects:** node 1.2 of the [architecture plan](../architecture/plan.md#12-communication); the foundations chapters [03-01](../../learn/foundations/03-01-units-and-variables.md), on how long an `L:` value lasts, [04-01](../../learn/foundations/04-01-connection-and-data.md) and [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), on SimConnect and the CommBus, and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md), on the `Origin`; and the per-lever hold flags in [soft takeover](../product/ideas.md#soft-takeover-on-handover).
+
+**Evidence:** `results/p13-sim-links-2026-10-08-13-39-22` (the menu, the flight load, and the capped frame time), `results/p13-sim-links-2026-10-08-13-54-50` (the flight, the first CommBus try, and the uncapped frame time), and `results/p14-commbus-pages-2026-10-08-14-05-05`, each `.txt` and `.ndjson`.
+
 ## 2026-10-06: Code in the menu's document tells which page is up, and nothing we found takes the menu home without the sim in front
 
 **Asked:** a Join that starts wherever the pilot is needs to know which page is up, and on a page outside its path, could it first bring the menu home?

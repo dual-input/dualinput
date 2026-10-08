@@ -149,6 +149,7 @@ A probe settles it: with an in-game panel of ours installed, write the variable 
 It reads the [interface log](../interface/log.md), the foundations chapter [06-04](../../learn/foundations/06-04-websockets-to-localhost.md), and the probes [p06-websocket.mjs](../../../experiments/areas/interface/p06-websocket.mjs) and [ingame/build.mjs](../../../experiments/areas/interface/ingame/build.mjs).
 Its answer goes in an entry in the interface log, which 1.2's section of `01-spine.md` cites.
 Exit: an interface log entry answers the question.
+Done on 2026-10-08.
 
 ## 1.3 Language and toolchains
 

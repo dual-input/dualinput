@@ -21,9 +21,9 @@ The watcher works while the core may not be running, and the services off the pi
 
 | Component | Runs in | Owns |
 | --- | --- | --- |
-| Watcher | A process of its own, from the pilot's login | The sim's start and stop, the core's start with the sim, the BlurPage copy, plugins' changes to aircraft files, and updates, all while the sim is closed or starting |
+| Watcher | A process of its own, from the pilot's login | Noticing the sim's start and stop, starting the core with the sim and again if it exits, the BlurPage copy, and, while the sim is closed, plugins' changes to aircraft files and updates |
 | Core | A process of its own, started by the watcher or the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, and the checks |
-| Helper | A process of its own, which the core starts and restarts | The core's native work: reading the keyboard, flight hardware, and mouse through Raw Input, capturing the microphone and the ATC app, running the speech recognizer, and playing sound |
+| Helper | A process of its own, which the core starts and restarts | The core's Windows input and audio work: reading the keyboard, flight hardware, and mouse through Raw Input, capturing the microphone and the ATC app, running the speech recognizer, and playing sound |
 | Desktop app | A window of its own, opened by the pilot, optional | Settings, bindings, the output device, the recording mode, the report page, and the session's view |
 | EFB app | The EFB's document in the sim | The controls a pilot needs in flight, and the EFB's opening onto it when a notice is clicked |
 | Banner panel | An in-game panel of ours | Notices |
@@ -42,7 +42,7 @@ The figure is the other pilot's, which our WASM module draws ([avatar sync](../p
 Where each sits, and why:
 
 - Step 7 gives the watcher the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives programs the sim launches, such as the warning at sim start that an update is waiting ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
-- The core reads the take-control input with native code ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)), runs the audio ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)), and works out where the figure's hand goes ([tentative decisions](decisions.md#the-core-works-out-where-the-figures-hand-goes)), with its helper doing the native work ([the helper](#the-helper)).
+- The core reads the take-control input ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)), runs the audio ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)), and works out where the figure's hand goes ([tentative decisions](decisions.md#the-core-works-out-where-the-figures-hand-goes)), with its helper doing the Windows input and audio work ([the helper](#the-helper)).
   It also reads the clipboard when the pilot selects the EFB app's code box ([invite code](../product/03-v1-scope.md#invite-code)), reads the flight file that names the PF's stand ([preflight](../product/03-v1-scope.md#preflight)), and uploads a bug report when the pilot asks from the desktop app's report page ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 - AI traffic is injected and written from the core, outside the sim.
   FS Copilot's app freezes each copy and writes it in SimConnect's `Frame` event (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `Render`, and `FsCopilot/Connection/SimTraffic.cs`), and the fork's prototype injector, driving copies the same way, moved them more smoothly than BeyondATC moves its own ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
@@ -173,7 +173,8 @@ So each page sends the core a message every 2s, and the core closes a socket it 
 
 A socket in each of the PA-24's 16 cockpit panels cost no frame time we could measure: uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame, and the windows with our sockets idle, taking a message every 2s, or taking 30 messages a second each read 12.01ms to 12.07ms (measured on MSFS 2024, 2026-10-08, [interface log][links]).
 
-The core accepts a WebSocket only when its `Origin` is `coui://html_ui`, which every page we use sent, all 14 in the main menu and all 32 in the A2A PA-24's flight, or absent, as from tokio-tungstenite 0.30.0 in a Tauri app's Rust side, which is where the desktop app connects from ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps); [the desktop app](#the-desktop-app)).
+The core accepts a WebSocket only when its `Origin` is `coui://html_ui` or absent ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none)).
+Every page we use sent `coui://html_ui`, all 14 in the main menu and all 32 in the A2A PA-24's flight (measured on MSFS 2024, 2026-10-08, [interface log][links]), and the desktop app connects from its Rust side, which sends none ([the desktop app](#the-desktop-app)).
 
 ### The WASM module
 
@@ -246,11 +247,12 @@ The core is a Rust program (user, 2026-10-08).
   In our probes, what a flight adds, such as masking, AI objects with liveries, input events, the camera, and a flight load's flow events, has run only through node-simconnect 4.2.0, a JavaScript client that speaks the same protocol to the same server (version read in `experiments/package.json`; measured in the probes behind the [aircraft](../aircraft/log.md), [flight-controls](../flight-controls/log.md), [avatars](../avatars/log.md), and [sync](../sync/log.md) logs).
   FS Copilot runs AI objects and input events through the SDK's managed wrapper over the same `SimConnect.dll` ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), and whether each works from our core through the SDK's library is [left open](#left-open).
 - Its bindings to SimConnect, like the WASM module's to the sim, are generated from the SDK's headers, as FlyByWire's msfs-rs generates them with bindgen (read in [msfs-rs](https://github.com/flybywiresim/msfs-rs), its main branch on 2026-10-08, `msfs/build.rs`), so that no type is copied by hand.
-  The module's hand-written bindings gave `HANDLE` 32 bits where the SDK's WebAssembly headers give it 64 ([code in the sim](#code-in-the-sim)); outside a module `HANDLE` is a pointer, and the core's client in the measurement above worked on declarations written by hand from the header ([architecture log][client]).
+  Hand-written bindings broke our WASM module ([code in the sim](#code-in-the-sim)); outside a module `HANDLE` is a pointer, and the core's client in the measurement above worked on declarations written by hand from the header ([architecture log][client]).
   That bindgen's output gets each type right is unverified, because it needs libclang, which our development machine lacked as of 2026-10-08; a bindgen run over the module's headers settles it.
 - Plugins and the profile's write functions run in QuickJS-ng, the fork of QuickJS that rquickjs embeds ([plugins](#plugins)).
   In a Rust host it started in 1.7ms to 2.6ms over two runs, idled at 0.9 MB of private working set, ran 100 hypothetical write functions a frame, 60 frames a second, in 75µs a frame on average, and stopped an endless allocation at its 64 MB limit and an endless loop at its 100ms limit, while the host ran on (measured on our development machine, 2026-10-08, [architecture log][engine]).
-  V8 was as fast, but its process died on the endless allocation as built, and not with its optimizing compiler, TurboFan, turned off; that its other optimizing tier, Maglev, isn't the cause is unverified, and its memory limit also needed an allocator of ours that counted ArrayBuffers, which its heap limit misses (same entry).
+  V8 was as fast, but as built, its process died on the endless allocation; with TurboFan, its optimizing compiler, off, the host ran on, though that Maglev isn't also the cause is unverified.
+  Its memory limit also needed an allocator of ours that counted ArrayBuffers, which its heap limit misses (same entry).
   A real profile's write functions, and the engine inside a core doing its other work, haven't run (same entry).
 
 ### The desktop app
@@ -258,7 +260,7 @@ The core is a Rust program (user, 2026-10-08).
 The desktop app is a Tauri app: a Rust program whose window shows the desktop app's pages, which the system's WebView2 draws, written in TypeScript (user, 2026-10-08).
 
 - In one run each, its window took about as much memory as an Electron window showing the same page, 72.3 MB of private working set over seven processes against 66.5 MB over four, and its program is 8.0 MB on disk against Electron's 347.4 MB (measured on our development machine, 2026-10-08, [architecture log][tauri]).
-  That figure leaves out WebView2's runtime, 861.2 MB on disk on our machine, which Microsoft includes with Windows 11, while "a small number of Windows 10 devices don't have" it (documented, [WebView2 distribution](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution)), and which Tauri's installer adds where it's missing (documented, [Tauri's webview versions](https://v2.tauri.app/reference/webview-versions/)).
+  The 8.0 MB leaves out WebView2's runtime, 861.2 MB on disk on our machine, which Microsoft includes with Windows 11, while "a small number of Windows 10 devices don't have" it (documented, [WebView2 distribution](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution)), and which Tauri's installer adds where it's missing (documented, [Tauri's webview versions](https://v2.tauri.app/reference/webview-versions/)).
 - It connects to the core from its Rust side, which sent no `Origin` through tokio-tungstenite 0.30.0, while the desktop app's pages sent `http://tauri.localhost`, which the core refuses ([the sim's pages](#the-sims-pages); same entry).
 
 ### Code in the sim
@@ -270,7 +272,8 @@ Compiling doesn't fill in the built-ins Coherent GT lacks, such as `Object.fromE
 Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ran its update about 136 times a second, and traded data slots with a SimConnect client at the main menu, and nobody has run it in a flight (measured on MSFS 2024, 2026-10-08, [architecture log][module]).
 
 - cargo-msfs fetches the SDK from the SDK site's public download, `sdk.flightsimulator.com`, and unpacks it without running the installer (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`), so the repository holds none of the SDK.
-  No run has built the module on a CI runner; one would need a C++ compiler for cargo-msfs's own install, whose `wasm-opt` dependency, version 0.116.1, builds Binaryen (read in navigraph/cargo-msfs v1.1.0, `Cargo.toml`); that it compiled C++ on our machine was read in the build's console, which wasn't saved ([architecture log][module]).
+  No run has built the module on a CI runner.
+  Installing cargo-msfs builds Binaryen's C++ through its `wasm-opt` 0.116.1 dependency (read in navigraph/cargo-msfs v1.1.0, `Cargo.toml`), so a runner needs a C++ compiler; we saw that compile only in the build's console, which wasn't saved ([architecture log][module]).
 - The module's hand-written bindings gave SimConnect's `HANDLE` 32 bits where the SDK's WebAssembly headers give it 64 (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_WindowsTypes.h`), and they compiled and loaded, while the first call after `SimConnect_Open` returned `E_FAIL` (same entry); so its bindings are generated from the headers too ([the core](#the-core)).
 - Each standalone module gets a package of its own until two working modules in one package are tried (same entry).
 
@@ -280,10 +283,11 @@ The core's work with Windows input and audio runs in the helper, a Rust program 
 A crash there, such as in a speech recognizer's C or C++ library, costs the take-control input, the figure's hand, and the audio only until the core restarts it, while in the core's own process it would take the pilot out of the session until the watcher restarted the core and they rejoined.
 
 - Our probes already work this way: mouse.mjs starts PowerShell, which compiles C# that reads the mouse through Raw Input, and the probe reads that program's reports line by line from its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
-- A Rust build captured another process's 440Hz tone through process loopback at the level it played, −26dBFS peak, played on the default output device after looking it up by name, and captured the default input device, a Focusrite input, though whether a microphone was on it is untested.
+- A Rust build played a 440Hz tone on the default output device, which it looked up by name, and a second copy captured it through process loopback at the level it played, −26dBFS peak.
+  It also captured the default input device, a Focusrite input, though whether a microphone was on it is untested.
   Registered for Raw Input in sink mode, with its own window never in front, it received F24 presses and releases that another program sent, and 1,447 HID reports in 4s from four devices nothing identified (measured on our development machine, 2026-10-08, [architecture log][helper]).
   Whether it receives them with the sim in front, and from a key a person presses, is untested ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
-- Its build linked with Visual Studio 2022's linker, and Rust's GNU target failed with Rust's own tools, and with a full MinGW is untried ([architecture log][helper]).
+- Its build linked with Visual Studio 2022's linker; Rust's GNU target failed with Rust's own tools, and we haven't tried it with a full MinGW ([architecture log][helper]).
   rustup documents Visual Studio's "Desktop Development with C++" workload for the MSVC target, and says its Build Tools edition, without the IDE, needs a license to Visual Studio's Community, Professional, or Enterprise edition (documented, [rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)).
 - The speech recognizer runs in it, and the recognizer is chosen when the voice phrases are built ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
 
@@ -295,10 +299,9 @@ None used CPU we could measure (measured on our development machine, 2026-10-08,
 
 ### Plugins
 
-A plugin is TypeScript that implements an interface of ours and runs only in the core, in the QuickJS-ng engine that also runs the profile's write functions ([the core](#the-core)), and it reaches everything else through APIs our own code carries out ([tentative decisions](decisions.md#plugin-code-runs-only-in-the-core)).
+A plugin is TypeScript that implements an interface of ours and runs only in the core, in the QuickJS-ng engine that also runs the profile's write functions ([the core](#the-core)), and it reaches everything else through APIs our own code carries out, so nothing a plugin ships runs in a cockpit panel or in the WASM module (user, 2026-10-08; [tentative decisions](decisions.md#plugin-code-runs-only-in-the-core)).
 
-- Nothing a plugin ships runs in a cockpit panel or in the WASM module (user, 2026-10-08).
-  When a plugin needs something done in a panel, such as reading a setting that lives only in a gauge's JavaScript, our panel bridge does it through a generic API, and when it needs something done inside the sim's frame, our WASM module does it, such as writing given variables every frame, running given calculator code, or placing an object.
+- When a plugin needs something done in a panel, such as reading a setting that lives only in a gauge's JavaScript, our panel bridge does it through a generic API, and when it needs something done inside the sim's frame, our WASM module does it, such as writing given variables every frame, running given calculator code, or placing an object.
   So Crosscheck's code owns each mechanism and the plugin owns the policy, as [04-room-for-later](../product/04-room-for-later.md#plugins) asks, and our panel code keeps the fail-open rules [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) sets for anything in the pilot's input path, whatever a plugin asks of it.
 - A plugin's logic inside the frame goes in calculator code our module runs, and logic beyond what calculator code expresses is [left out](decisions.md#plugin-code-runs-only-in-the-core), since no v1 plugin is known to need it.
   The one call that runs calculator code, `execute_calculator_code`, is deprecated with no replacement ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)), and it ran on MSFS 2024 on 2026-08-25 (measured, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-25 — The wire runs calculator code, and `gauges.h` came back clean"); FS Copilot's module makes every write to the aircraft through it (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_physics`, `apply_control`, and `dispatch`).

@@ -160,7 +160,7 @@ Done on 2026-10-08.
 ## 1.3 Language and toolchains
 
 Question: what language and toolchain does each component's runtime take?
-The spine can't pick a language until it knows the runtimes the components run in, and they differ: Coherent GT, the sim's WASM, Node and Electron if step 7's lean holds, and whatever the local speech recognizer and ATC audio capture run in, which the record leaves open ([voice phrases](../product/03-v1-scope.md#voice-phrases), [hearing ATC](../product/03-v1-scope.md#hearing-atc)).
+The spine can't pick a language until it knows the runtimes the components run in, and they differ: Coherent GT, the sim's WASM, whatever the core and the desktop app's window run in, and whatever the local speech recognizer and ATC audio capture run in, which the record leaves open ([voice phrases](../product/03-v1-scope.md#voice-phrases), [hearing ATC](../product/03-v1-scope.md#hearing-atc)).
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
@@ -172,7 +172,7 @@ Raised elsewhere: by 1.1, whether the core's native code for Windows input and a
 Question: what does a process that shows only a tray icon cost in memory and CPU, idle, in each runtime the watcher could run in?
 1.3 can't pick the watcher's runtime without it.
 The watcher runs from the pilot's login, all day, and shows the pilot its own CPU and memory use ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and Node has no tray icon, so the watcher needs a runtime that has one, such as Electron's main process or a native program.
-An idle Node process took 29 MB, and Electron 43's executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, same step), but neither showed a tray icon.
+An idle Node process took 29 MB, and Electron 43's executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, with Node 22.23.1), but neither showed a tray icon.
 A probe settles it, with no sim: a tray icon and nothing else, idle for 60s, in Electron 43's main process, in .NET 9 WinForms built self-contained and with Native AOT, and in Rust on Win32, recording the memory and CPU of all of each one's processes.
 It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture) and the watcher's row in [01-spine](01-spine.md#components).
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
@@ -219,7 +219,7 @@ Done on 2026-10-08.
 
 Question: what do QuickJS and V8, embedded in a Rust program, cost to start, hold idle, and call, running a plugin and 100 profile write functions compiled from TypeScript, and do their memory and time limits stop a runaway script without taking the program down?
 1.3 can't choose the core's language without it.
-Plugin code runs only in the core, in TypeScript (user, 2026-10-08), and step 7 asks for a sandbox, with size limits, for the profile's write functions ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), so a core in either language runs them in an engine with limits: Node's own `vm` module "is not a security mechanism" (documented, [Node.js vm](https://nodejs.org/api/vm.html)).
+Plugin code runs only in the core, in TypeScript (user, 2026-10-08), and step 7 asks for a sandbox, with size limits, for the profile's write functions ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), so a core in Rust or Node runs them in an engine with limits: Node's own `vm` module "is not a security mechanism" (documented, [Node.js vm](https://nodejs.org/api/vm.html)).
 A probe settles it, with no sim: compile a small plugin and 100 write functions with esbuild, run them in QuickJS through rquickjs and in V8 through a Rust binding, call the write functions as every frame at 60 frames a second would, and break each limit on purpose; Node's `vm` module runs the same code as a baseline.
 It reads [01-profile-entries](../sync/01-profile-entries.md#the-writer-api) and the [plugins](../product/03-v1-scope.md#plugins) section of 03-v1-scope.
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
@@ -230,7 +230,7 @@ Done on 2026-10-08.
 
 Question: what does a Tauri 2 window cost in memory against an Electron window showing the same page, and what `Origin` does a WebSocket send from a Tauri page and from Tauri's Rust side?
 1.3 can't take Tauri for the desktop app without it.
-The core accepts a WebSocket only with `Origin` `coui://html_ui` or none ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps)), so a desktop app whose pages send an `Origin` has to connect from a side that sends none.
+The core accepts a WebSocket only with `Origin` `coui://html_ui` or none ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none)), so a desktop app whose pages send an `Origin` has to connect from a side that sends none.
 A probe settles it, with no sim: open each window for 60s and record the memory of all its processes, as p01 did, and connect each way to a WebSocket server that logs the `Origin`, as p16 did.
 It reads [p01](../../../experiments/areas/architecture/p01-tray-runtimes.mjs) and [p16](../../../experiments/areas/interface/p16-client-origin.mjs).
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.

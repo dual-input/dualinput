@@ -65,7 +65,7 @@ A Tauri desktop app passes the core's `Origin` check by connecting from its Rust
 
 What we haven't run: a second run of each, and a real interface rather than a static page.
 
-**Affects:** node 1.3's answer, and the tentative decision on [the core's `Origin` check](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps).
+**Affects:** node 1.3's answer, and the tentative decision on [the core's `Origin` check](decisions.md#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none).
 
 **Evidence:** `results/p05-tauri-window-2026-10-08-19-40-06.txt`.
 
@@ -163,7 +163,7 @@ What we haven't run: Raw Input with the sim in front, which the take-control inp
 
 **Asked:** what does a process that shows only a tray icon cost, idle, in each runtime the watcher could run in (node 1.3.1)?
 
-**Expected:** Electron well above the others, since its executable took 35 MB running as plain Node ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+**Expected:** Electron well above the others, since its executable took 35 MB running as plain Node (measured on our development machine, 2026-10-06, with Node 22.23.1).
 
 **Found:** on our development machine, Windows 10.0.26200 with 16 logical processors, p01 started each program, waited 15s after its icon appeared, then left it idle for 60s.
 Memory is the private working set, which Task Manager's Memory column shows, summed over the program and every process it started:
@@ -178,7 +178,7 @@ Memory is the private working set, which Task Manager's Memory column shows, sum
 
 - None of them used any processor time that Windows recorded in the 60s.
 - Electron started two processes beside its main one, of 15.4 MB and 6.3 MB.
-- Node's working set, 31.3 MB for `node` itself, agrees with the 29 MB the product plan gives.
+- Node's working set, 31.3 MB for `node` itself, agrees with the 29 MB measured on 2026-10-06.
 - The Native AOT build linked with Visual Studio 2022's `link.exe`, and found it only once the Visual Studio Installer's folder was on `PATH`.
 
 **Changed:** a watcher in Rust costs the pilot about 1 MB all day, a tenth of an idle Node process, and one in Electron about 40 MB.

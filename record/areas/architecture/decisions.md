@@ -107,10 +107,11 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 ## Every client sends the core a message every 2s
 
 - **Decided:** every page, the desktop app, and the helper send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, and restarts a helper it hasn't heard from in 8s.
-  Settled in node 1.2 by the user, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels; the helper's in node 1.3 by the user, 2026-10-08, so the core tells a hung helper from a quiet one.
+  Settled in node 1.2 by the user, 2026-10-08, and the helper's messages in node 1.3 by the user, 2026-10-08.
 - **Because:**
   - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' were still open as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
   - FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
+  - A hung helper's process doesn't exit, so only its messages stopping tells the core it hung.
 - **Leaves out:** how long the sim keeps a socket open after its page is gone, past 23s.
 
 ## Cockpit panels connect only in a session, and only the ones in use stay
@@ -122,7 +123,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - The exchange is cheap: one per panel at a session's start, 20 on the Baron, whose cockpit has 20 panels ([interface log](../interface/log.md#2026-10-04-an-ai-copy-of-the-pilots-aircraft-opens-its-livery-painting-and-none-of-its-cockpit-gauges)).
   - A first message from every panel tells the core the panel bridge loaded at all, which it doesn't when another package's `VCockpit.js` override wins ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) or our own bridge fails to parse ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)).
 
-## The core accepts a WebSocket only from the sim's pages and our own apps
+## The core accepts a WebSocket only with the sim's Origin or none
 
 - **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from its Rust side.
   Settled in node 1.2 by the user, 2026-10-08, and the desktop app's side in node 1.3 by the user, 2026-10-08, with the desktop app a Tauri app.
@@ -160,7 +161,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Decided:** the core, the helper, the watcher, the desktop app's program, and the WASM module are Rust.
   TypeScript is for the code in Coherent GT, the desktop app's pages, plugins and the profile's write functions, and the backend ([01-spine](01-spine.md#language-and-toolchains)).
   The core reaches the sim through the SDK's own `SimConnect.dll`, and runs plugins and write functions in QuickJS-ng, embedded through rquickjs, with memory and time limits; the desktop app is a Tauri app; and the WASM module is built with Navigraph's cargo-msfs and packaged by our own script.
-  The Rust code's bindings to the SDK are generated from the SDK's headers.
+  The Rust code's bindings to the SDK are generated from the SDK's headers, and the Rust components share one crate that defines the messages they trade.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
   - The user chose Rust for every component a JavaScript engine doesn't run (user, 2026-10-08).
@@ -171,10 +172,10 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - Embedded in Rust, QuickJS-ng held its memory and time limits as built, with the host running on, while V8's process died on an endless allocation unless TurboFan was off, and Node's `vm` module has no memory limit (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
   - A Tauri window took about the memory of an Electron one, with a program a fortieth of the size, and its Rust side's WebSocket sends no `Origin` (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin)).
   - The module's hand-written bindings gave `HANDLE` the wrong width for the SDK's WebAssembly headers, and nothing reported it until the sim's calls failed (measured on MSFS 2024, 2026-10-08, [architecture log](log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide)), so no type is copied by hand.
-  - Coherent GT, WebView2, QuickJS-ng, and a Cloudflare Worker each run JavaScript, so our code in each is TypeScript compiled to JavaScript ([01-spine](01-spine.md#code-in-the-sim)).
+  - The user chose TypeScript for the code a JavaScript engine runs: the sim's pages, the desktop app's pages, plugins and write functions, and the backend (user, 2026-10-06 and 2026-10-08), and Coherent GT, WebView2, QuickJS-ng, and a Cloudflare Worker each run the JavaScript it compiles to.
 - **Leaves out:**
   - what the SDK's library does beyond the main menu, such as masking, AI objects with liveries, input events, the camera, and a flight load's flow events, which in our probes have run only through node-simconnect ([01-spine](01-spine.md#left-open))
-  - generated bindings run against the sim, which bindgen's need for libclang has kept from running, and a build without Visual Studio's linker, which failed with Rust's own tools ([01-spine](01-spine.md#the-core))
+  - generated bindings run against the sim, which bindgen's need for libclang has kept from running ([01-spine](01-spine.md#the-core)), and a build without Visual Studio's linker, which failed with Rust's own tools ([01-spine](01-spine.md#the-helper))
   - the relay's language ([01-spine](01-spine.md#language-and-toolchains)), and the choices that stay inside one part ([01-spine](01-spine.md#left-open))
 
 ## The core's input and audio work runs in a helper it starts
@@ -195,7 +196,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   This changes [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim), which gives plugins hooks in the panels and in the WASM module that load their modules by name, and answers [03-v1-scope](../product/03-v1-scope.md#plugins)'s question of where each part of a plugin runs.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - Plugins work within a framework API, the way a class implements an interface, and ship no code that runs directly in any part of our system; when a plugin needs something done in panel code, we offer the API, and our own panel code carries it out (user, 2026-10-08).
+  - Plugins implement a framework API, the way a class implements an interface, and their code runs only in the core's engine; when a plugin needs something done in panel code, we offer the API, and our own panel code carries it out (user, 2026-10-08).
   - Crosscheck's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic and panel code for one aircraft stay out of our module and our panel bridge.
   - Our generic panel code keeps the fail-open rules for anything in the pilot's input path ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)), whatever a plugin asks of it.
   - A plugin that's only JavaScript and data can reach pilots apart from Crosscheck's releases ([below](#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)), while the WASM module and the panel bridge load only when the sim boots or a panel loads.

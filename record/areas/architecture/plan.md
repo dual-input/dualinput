@@ -162,7 +162,7 @@ The spine can't pick a language until it knows the runtimes the components run i
 It reads 1.1's answer, then the foundations chapters [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
-Waits on 1.3.1.
+Waits on 1.3.1, 1.3.2, and 1.3.3.
 Raised elsewhere: by 1.1, whether the core's native code for Windows input and audio runs in the core's own process or in a process the core supervises, since a crash in native code inside the core's process takes the core down, and the pilot out of the session until the core restarts ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
 
 ## 1.3.1 The watcher's runtime
@@ -173,6 +173,29 @@ The watcher runs from the pilot's login, all day, and shows the pilot its own CP
 An idle Node process took 29 MB, and Electron 43's executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, same step), but neither showed a tray icon.
 A probe settles it, with no sim: a tray icon and nothing else, idle for 60s, in Electron 43's main process, in .NET 9 WinForms built self-contained and with Native AOT, and in Rust on Win32, recording the memory and CPU of all of each one's processes.
 It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture) and the watcher's row in [01-spine](01-spine.md#components).
+Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
+
+## 1.3.2 A Rust standalone module
+
+Question: does a standalone module built from Rust with Navigraph's cargo-msfs, and packaged by our own script, load on MSFS 2024, leave its version in a data slot, tick every frame, and read a data slot the core writes?
+1.3 can't take Rust for the WASM module without it.
+The Synaptic A220's systems module is Rust: it exports `rust_eh_personality` and the five allocator functions of the SDK's C library that the sim calls, `mallinfo`, `mchunkit_begin`, `mchunkit_next`, `get_pages_state`, and `mark_decommit_pages` (read in synaptic-aircraft-a220 1.0.10, `systems.wasm`, its exports), and the sim compiled it as an MSFS 2024 module (measured on our development machine, 2026-09-27, [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#gauge-vs-standalone-modules-and-the-sandbox)).
+But it loads with the aircraft and exports no `Update_StandAlone`.
+cargo-msfs builds Rust crates for MSFS 2020 and 2024 (documented, [cargo-msfs](https://github.com/navigraph/cargo-msfs)), and MSFS 2024 registered a package fsc-editor put together by hand (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — The module must export MSFS's allocator. Hand-driving clang was the wrong call.").
+A probe settles it: build a module that leaves its version in a data slot at load, counts frames in `Update_StandAlone`, and copies a slot the core writes into one the core reads; compare its exports and sections with fsc-editor's toolset build; install it, restart the sim to the main menu, and read the slots through node-simconnect.
+It reads [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and fsc-editor's `link/`.
+Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
+
+## 1.3.3 A Rust helper
+
+Question: can a Rust program capture one process's audio through WASAPI's process loopback, capture a microphone, play audio on an output device it picks, and read the keyboard through Raw Input in sink mode, and does it build without Visual Studio?
+1.3 can't take Rust for the core's native code without it.
+FS Copilot's app captured BeyondATC by process and played it back in C#, with the loopback's activation hand-written after Microsoft's ApplicationLoopback sample (read in the FS Copilot fork, `FsCopilot/Audio/ProcessLoopback.cs`; measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 3: the audio path works on one machine — Q10, Q12, Q13 settled"), and our probes read Raw Input in sink mode from C# ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
+Rust's default Windows target links with the linker in Visual Studio's Build Tools (documented, [rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)), and its GNU target links with a MinGW linker of its own (unverified).
+A probe settles it, with no sim: report the level of a process playing a tone and of the default microphone, play a tone on a named device, and print keys sent while another window has the focus, built once for each target.
+It reads the [tentative decisions](decisions.md) on the take-control input and the audio, and FS Copilot's `FsCopilot/Audio/`.
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
 

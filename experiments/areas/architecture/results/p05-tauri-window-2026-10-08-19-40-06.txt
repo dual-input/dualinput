@@ -1,0 +1,33 @@
+p05-tauri-window, 2026-10-08T19:40:06.397Z
+Windows 10.0.26200, 16 logical processors; Node v22.23.1; rustc 1.95.0 (59807616e 2026-04-14)
+Tauri crates, from tauri/app/Cargo.lock: tauri 2.12.1, tauri-build 2.7.1, tauri-runtime 2.12.1, tauri-runtime-wry 2.12.1, wry 0.57.0, tao 0.37.1, webview2-com 0.39.1, tokio 1.53.2, tokio-tungstenite 0.30.0, tungstenite 0.30.0; built with plain `cargo build --release` and the tauri feature custom-protocol, no tauri-cli
+WebView2 Runtime: 154.0.4258.62 by its EdgeUpdate registry entry, 154.0.4258.62 by msedgewebview2.exe's file version; its version folder takes 861.2 MB, shared by every WebView2 app and not shipped with ours
+Electron 43.4.0, fsc-editor's
+Each app: started with its window showing, waited for its connections, 15s to settle, sampled, 60s idle, sampled, then taskkill /T /F. CPU is the processor time its processes used during the idle 60s.
+Processes: the app's and every process under it by ParentProcessId; for Tauri also any msedgewebview2.exe whose command line holds --webview-exe-name=p05-tauri-window.exe or the identifier crosscheck.experiments.p05-tauri-window, which names its user data folder.
+
+- Tauri 2, release build:
+  7 processes; after 15s settling: Task Manager's memory 73.9 MB, working set 329.9 MB, private bytes 153.6 MB; after 60s idle: Task Manager's memory 72.3 MB, working set 334.7 MB, private bytes 151.7 MB; CPU over the 60s 0.16% of one processor (94ms); 8.0 MB on disk
+  Connections arrived 0.5s after start.
+  Processes at the end of the idle minute, each with how it was matched to the app:
+  - p05-tauri-window.exe (37388), app, by tree: Task Manager's memory 3.9 MB, working set 26.1 MB, private bytes 5.3 MB, CPU 16ms
+  - msedgewebview2.exe (41476), browser, by tree and command line: Task Manager's memory 26.5 MB, working set 119.1 MB, private bytes 34.5 MB, CPU 63ms
+  - msedgewebview2.exe (30956), crashpad-handler, by tree and command line: Task Manager's memory 1.8 MB, working set 12.8 MB, private bytes 3.1 MB, CPU 16ms
+  - msedgewebview2.exe (41472), gpu-process, by tree and command line: Task Manager's memory 17.8 MB, working set 62.5 MB, private bytes 68.7 MB, CPU 0ms
+  - msedgewebview2.exe (24072), utility (network.mojom.NetworkService), by tree and command line: Task Manager's memory 6.3 MB, working set 39.5 MB, private bytes 11.3 MB, CPU 0ms
+  - msedgewebview2.exe (69112), utility (storage.mojom.StorageService), by tree and command line: Task Manager's memory 2.7 MB, working set 19.2 MB, private bytes 7.2 MB, CPU 0ms
+  - msedgewebview2.exe (70092), renderer, by tree and command line: Task Manager's memory 13.3 MB, working set 55.5 MB, private bytes 21.6 MB, CPU 0ms
+  Outside the process tree but claimed by command line: 0. Other msedgewebview2.exe processes on the machine, left out: 12.
+  - tauri-rust sent no Origin; request headers: host, connection, upgrade, sec-websocket-version, sec-websocket-key
+  - tauri-page sent the Origin http://tauri.localhost; the page's location.origin was http://tauri.localhost; its user agent names Chrome/154.0.0.0, Edg/154.0.0.0; request headers: host, connection, pragma, cache-control, user-agent, upgrade, origin, sec-websocket-version, accept-encoding, accept-language, sec-websocket-key, sec-websocket-extensions
+
+- Electron, one BrowserWindow:
+  4 processes; after 15s settling: Task Manager's memory 67.6 MB, working set 275.3 MB, private bytes 148.4 MB; after 60s idle: Task Manager's memory 66.5 MB, working set 274.3 MB, private bytes 147.0 MB; CPU over the 60s 0.18% of one processor (109ms); 347.4 MB on disk
+  Connections arrived 0.5s after start.
+  Processes at the end of the idle minute, each with how it was matched to the app:
+  - electron.exe (41100), main, by tree: Task Manager's memory 22.7 MB, working set 83.8 MB, private bytes 32.9 MB, CPU 94ms
+  - electron.exe (45824), gpu-process, by tree: Task Manager's memory 21.9 MB, working set 84.3 MB, private bytes 78.8 MB, CPU 16ms
+  - electron.exe (13420), utility (network.mojom.NetworkService), by tree: Task Manager's memory 7.1 MB, working set 41.5 MB, private bytes 11.8 MB, CPU 0ms
+  - electron.exe (32652), renderer, by tree: Task Manager's memory 14.9 MB, working set 64.6 MB, private bytes 23.5 MB, CPU 0ms
+  Outside the process tree but claimed by command line: 0. Other msedgewebview2.exe processes on the machine, left out: 12.
+  - electron-page sent the Origin file://; the page's location.origin was file://; its user agent names Chrome/150.0.7871.224; request headers: host, connection, pragma, cache-control, user-agent, upgrade, origin, sec-websocket-version, accept-encoding, accept-language, sec-websocket-key, sec-websocket-extensions

@@ -3,6 +3,34 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-08: A Tauri 2 window takes 72.3 MB of memory over seven processes against Electron's 66.5 MB over four, its program is 8.0 MB against 347.4 MB, and its Rust side's WebSocket sends no Origin
+
+**Asked:** what does a Tauri 2 window cost in memory against an Electron window showing the same page, and what `Origin` does a WebSocket send from a Tauri page and from Tauri's Rust side (node 1.3.6)?
+
+**Expected:** Tauri lighter in memory as well as on disk, since its pages run in the system's shared WebView2 rather than a Chromium of its own.
+
+**Found:** on our development machine, Windows 10.0.26200, while MSFS 2024 was starting, with p05's two apps each showing one static page: Tauri 2.12.1 on WebView2 Runtime 154.0.4258.62, built by rustc 1.95.0 with no Tauri CLI, and Electron 43.4.0.
+Memory is the private working set, which Task Manager's Memory column shows, at the end of 60s idle after 15s to settle, summed over each app's processes:
+
+| App | Processes | Memory | Working set | Private bytes | CPU over the 60s | On disk |
+| --- | --- | --- | --- | --- | --- | --- |
+| Tauri 2 | 7: the app and WebView2's browser, GPU, renderer, network, storage, and crash handler | 72.3 MB | 334.7 MB | 151.7 MB | 0.16% of one processor | 8.0 MB |
+| Electron 43 | 4: main, GPU, renderer, and network | 66.5 MB | 274.3 MB | 147.0 MB | 0.18% of one processor | 347.4 MB |
+
+- The Tauri app's own process took 3.9 MB, and WebView2's browser process 26.5 MB of the rest.
+  WebView2's runtime takes 861.2 MB on disk, shared by every app that uses it and installed with Windows 11, so we wouldn't ship it.
+- Tauri's page sent the `Origin` `http://tauri.localhost`, Tauri's Rust side, through tokio-tungstenite 0.30.0, sent none, and Electron's page sent `file://`.
+- Each app ran once, and the Tauri app had run once for 10s before, so its WebView2 data folder already existed.
+
+**Changed:** Tauri saves disk, not memory: its window took 5.8 MB more than Electron's.
+A Tauri desktop app passes the core's `Origin` check by connecting from its Rust side, as an Electron one does from its main process.
+
+What we haven't run: a second run of each, and a real interface rather than a static page.
+
+**Affects:** node 1.3's answer, and the tentative decision on [the core's `Origin` check](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps).
+
+**Evidence:** `results/p05-tauri-window-2026-10-08-19-40-06.txt`.
+
 ## 2026-10-08: A Rust program on the SDK's own SimConnect.dll connects to MSFS 2024, trades CommBus calls with mainUi, follows system events, and trades data slots with our Rust module
 
 **Asked:** does a Rust program using the SDK's own SimConnect library connect to MSFS 2024, call the sim's pages and hear them over the CommBus, follow the sim's system events, and trade data slots with our Rust module (node 1.3.4)?

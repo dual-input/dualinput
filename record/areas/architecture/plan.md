@@ -232,6 +232,7 @@ A probe settles it, with no sim: open each window for 60s and record the memory 
 It reads [p01](../../../experiments/areas/architecture/p01-tray-runtimes.mjs) and [p16](../../../experiments/areas/interface/p16-client-origin.mjs).
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-08.
 
 ## 1.4 Shared conventions
 

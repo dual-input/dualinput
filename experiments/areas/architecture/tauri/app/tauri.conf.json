@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "p05-tauri-window",
+  "version": "0.1.0",
+  "identifier": "crosscheck.experiments.p05-tauri-window",
+  "build": {
+    "frontendDist": "../page"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": false,
+    "icon": ["icons/icon.ico"]
+  }
+}

@@ -1,0 +1,18 @@
+[package]
+name = "p05-tauri-window"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "=2.7.1", features = [] }
+
+# custom-protocol embeds the page and serves it from the app, as the Tauri
+# CLI's release build does, so a plain `cargo build --release` needs no CLI.
+[dependencies]
+tauri = { version = "=2.12.1", features = ["custom-protocol"] }
+tokio-tungstenite = "=0.30.0"
+futures-util = "=0.3.34"
+
+[profile.release]
+lto = true
+strip = true

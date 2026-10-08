@@ -1,7 +1,7 @@
 # Architecture: the spine
 
 ```text
-Purpose:     What every other part of Crosscheck rests on: its components, how they talk, the conventions they share, and its language.
+Purpose:     What every other part of Crosscheck rests on: its components, how they talk, the conventions they share, and its languages.
 Depends on:  decisions.md, ../product/plan.md (step 7), ../product/01-aims.md, ../product/03-v1-scope.md, ../product/04-room-for-later.md, ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/03-catch-up.md
 Decides:     Which components Crosscheck runs, where each runs, and what each owns (node 1.1); what each does with no session, and what moves it into one and back (node 1.1.2); how they reach each other, and how the core knows each is alive (node 1.2); what language and toolchain each is built with, where the core's native code runs, and what plugins are written in (node 1.3).
 ```
@@ -35,13 +35,13 @@ The watcher works while the core may not be running, and the services off the pi
 | Backend | Off the pilots' machines | Each pilot's part of a bug report, and later features that need a server of ours, such as [telemetry](../product/ideas.md#telemetry) |
 | Release host | Off the pilots' machines | Installers and updates |
 
-Plugins aren't components: a plugin's code runs inside the core, the panel bridge, or the WASM module, wherever its aircraft needs, through hooks in each ([04-room-for-later](../product/04-room-for-later.md#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+Plugins aren't components: a plugin's code runs inside the core or as modules the panel bridge loads, through hooks in each, and drives our WASM module's mechanisms for anything inside the sim's frame ([plugins](#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
 The installer runs once, and puts the app and our Community package in place ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
 The figure is the other pilot's, which our WASM module draws ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
 
 Where each sits, and why:
 
-- Step 7 gives the watcher the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives helpers, such as the warning at sim start that an update is waiting ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
+- Step 7 gives the watcher the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives programs the sim launches, such as the warning at sim start that an update is waiting ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
 - The core reads the take-control input with native code ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)), runs the audio ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)), and works out where the figure's hand goes ([tentative decisions](decisions.md#the-core-works-out-where-the-figures-hand-goes)), with its helper doing the native work ([the helper](#the-helper)).
   It also reads the clipboard when the pilot selects the EFB app's code box ([invite code](../product/03-v1-scope.md#invite-code)), reads the flight file that names the PF's stand ([preflight](../product/03-v1-scope.md#preflight)), and uploads a bug report when the pilot asks from the desktop app's report page ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 - AI traffic is injected and written from the core, outside the sim.
@@ -66,7 +66,7 @@ So the core tells every component below when a session starts.
 | --- | --- | --- |
 | Watcher | Notices the sim's process starting and stopping, keeps the BlurPage copy current, applies plugins' changes to aircraft files before the sim boots, and starts the core | No different |
 | Core | Holds its SimConnect connection and its masking group; follows the sim's system and flow events; serves its clients on 127.0.0.1 | Also brings up the network, loads the profile and plugins while the pilot's aircraft is loaded, watches the cockpit, records, runs the audio, and reads the take-control input |
-| Helper | Not running, except while the desktop app binds a key or lists the output devices | Reads the take-control input, and runs the audio |
+| Helper | Not running, except while the desktop app binds a key or lists the output devices | Reads the take-control input and the cursor, and captures and plays the audio, for the core |
 | Desktop app | Optional; offers to start or join a session | Optional; shows the session |
 | WASM module | Runs, and does nothing each frame | Places the figures, holds the aircraft in preflight, and on a following machine writes the aircraft |
 | Panel bridge | Runs in every cockpit panel, loads no modules, and captures nothing | Runs pointer sync, and loads the modules that features and plugins name |
@@ -131,7 +131,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 | Banner panel and core | The same, while the panel is open | Notices, and a click on one | The same |
 | Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile or a plugin names | Pointer presses, `H:` events, plugin modules' traffic, and the locks' renewals | The same; no panel's first message ever arriving means our panel bridge didn't load, as when another package's `VCockpit.js` wins |
 | Core and WASM module | Data slots, one for each kind of message | The session's state and a counter, the pose and velocities, the figures' poses, and the module's version | A counter the module writes every second |
-| Core and helper | The core starts the helper's process and talks to it over the helper's standard input and output | Key and button presses, the cursor, recognized phrases, and captured ATC one way; what to capture and what to play the other | The helper's process exiting, or its messages stopping |
+| Core and helper | The core starts the helper's process and talks to it over the helper's standard input and output | Key and button presses, the cursor, recognized phrases, and captured ATC one way; what to capture and what to play the other | The helper's process exiting, or its message every 2s stopping, as every client's does |
 | Core and other machines | The network, [below](#between-machines) | The six channels of [04-room-for-later](../product/04-room-for-later.md#channels), invite codes, and reports | For the node that designs how the cores reach each other |
 | Watcher and release host | HTTPS | Updates | Not needed |
 
@@ -212,7 +212,7 @@ Its pages describe it for WebRTC clients, so whether a client that isn't WebRTC,
 
 ### How the core knows a component is alive
 
-Every link but two tells the core when its component goes quiet: a page's or the desktop app's messages stop, a first message never comes, the module's counter stops, or the helper's process exits or falls silent.
+Every link but two tells the core when its component goes quiet: a page's or the desktop app's messages stop, a first message never comes, the module's counter stops, or the helper's process exits or its messages stop.
 The core can't tell whether the watcher runs, because the watcher sends it nothing, and how it learns that the relay or another pilot's core went quiet is for the node that designs how the cores reach each other.
 Each page's first message names the component and its version, and the WASM module leaves its version in a slot, so the core logs a page from an older package by name, and names each component it expected and never heard from.
 The core logs every connection, first message, and close, and the recording keeps them, so a bug report shows which component stopped and when ([ideas](../product/ideas.md#component-health)).
@@ -237,11 +237,12 @@ Crosscheck is written in TypeScript wherever a JavaScript engine runs it, and in
 
 The relay's language is for the node that designs how the cores reach each other.
 
-### The core and the apps
+### The core and the desktop app
 
 The core reaches the sim through node-simconnect, which implements SimConnect's protocol in JavaScript with no native code ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)).
-At version 4.2.0 it ran every SimConnect call our probes have needed on MSFS 2024: data definitions and requests, client events and masking groups, system and flow events, AI objects with liveries, input events, data slots, the camera, flight loads, and both CommBus calls (read in `experiments/areas/aircraft/lib/sim.mjs` and the probes that use it; measured in the probes behind the [aircraft](../aircraft/log.md), [flight-controls](../flight-controls/log.md), [avatars](../avatars/log.md), [sync](../sync/log.md), and [interface](../interface/log.md) logs).
-A binding that implements the protocol again has only the calls its authors wrote ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), so a call Crosscheck needs and node-simconnect lacks gets added to it.
+At version 4.2.0 (read in `experiments/package.json`), it ran every SimConnect call our probes have needed on MSFS 2024: data definitions and requests, client events and masking groups, system and flow events, AI objects with liveries, input events, data slots, the camera, flight loads, `SimConnect_CallCommBusEvent`, and `SimConnect_SubscribeToCommBusEvent`.
+Those probes are behind the [aircraft](../aircraft/log.md), [flight-controls](../flight-controls/log.md), [avatars](../avatars/log.md), [sync](../sync/log.md), and [interface](../interface/log.md) logs, from 2026-10-01 to 2026-10-08, with the CommBus calls on 2026-10-08 ([interface log][coverage]) and the data slots with our own module the same day ([architecture log][module]).
+A binding that implements the protocol again has only the calls its authors wrote ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), so when Crosscheck needs a call node-simconnect lacks, we add it to node-simconnect.
 
 fsc-editor ships an Electron app packaged by electron-builder (read in fsc-editor, `electron-builder.yml`), and the desktop app is built the same way.
 
@@ -250,41 +251,44 @@ fsc-editor ships an Electron app packaged by electron-builder (read in fsc-edito
 Code that runs in Coherent GT is written in TypeScript and compiled to the syntax the engine parses, as the vendors' own code is: the A220's DisplayUnits bundle spells `??` out the long way ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), and A2A's tablet is TSX that esbuild bundles ([EFB app](../product/03-v1-scope.md#efb-app)).
 Step 7's check that every file run in Coherent GT parses within the engine's measured limits runs on the compiled output ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
 
-Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ticked every frame, and traded data slots with a SimConnect client (measured on MSFS 2024, 2026-10-08, [architecture log][module]).
+Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ticked every frame, and traded data slots with a SimConnect client at the main menu, and nobody has run it in a flight (measured on MSFS 2024, 2026-10-08, [architecture log][module]).
 
-- cargo-msfs fetches the SDK from Asobo's public download and unpacks it without running the installer, so a CI runner can build the module, and we keep nothing of the SDK (same entry); no CI runner has built it yet.
-- The module's bindings to the sim are generated from the SDK's headers, as FlyByWire's msfs-rs generates them with bindgen (read in msfs-rs, `msfs/build.rs`), because a wrong type compiles, loads, and fails without an error.
-  Bindings written by hand gave SimConnect's `HANDLE` 32 bits where the SDK gives it 64, and every call after `SimConnect_Open` failed (same entry).
+- cargo-msfs fetches the SDK from Asobo's public download and unpacks it without running the installer, so the repository holds none of the SDK (same entry).
+  A CI runner with a C++ compiler for cargo-msfs's own install, which compiles Binaryen's C++, could build the module, which no run has tried.
+- The module's bindings to the sim are generated from the SDK's headers, as FlyByWire's msfs-rs generates them with bindgen (read in [msfs-rs](https://github.com/flybywiresim/msfs-rs), `msfs/build.rs`, on 2026-10-08), because a binding with a wrong type compiles and loads, and nothing reports the mistake until the sim's calls fail.
+  Bindings written by hand gave SimConnect's `HANDLE` 32 bits where the SDK gives it 64, and every call after `SimConnect_Open` returned `E_FAIL` (same entry).
 - Our package holds one standalone module, since the sim ran only the first of two in one package (same entry).
 
 ### The helper
 
 The core's native code runs in the helper, a Rust program the core starts, and starts again if it exits ([tentative decisions](decisions.md#the-cores-native-code-runs-in-a-helper-it-starts)).
-A crash in native code inside the core's process would take the core down, and the pilot out of the session until the watcher restarted the core and they rejoined, while a crash in the helper costs the take-control input and the audio only until the core restarts it.
+A crash in native code inside the core's process would take the core down, and the pilot out of the session until the watcher restarted the core and they rejoined, while a crash in the helper costs the take-control input, the figure's hand, and the audio only until the core restarts it.
 
 - Our probes already work this way: one starts a C# program that reads the mouse through Raw Input, and reads its reports line by line from its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
-- A Rust build captured another process's audio through process loopback at that audio's own level, played on an output device it found by name, captured the microphone, and read the keyboard and flight hardware through Raw Input in sink mode (measured on our development machine, 2026-10-08, [architecture log][helper]).
-- It runs in a session, and while the desktop app binds a key or lists the output devices ([components with no session](#components-with-no-session)).
-- Its build on Windows needs the linker in Visual Studio's Build Tools: Rust's GNU target, which avoids them, failed without a full MinGW (same entry).
-- The speech recognizer runs in it, and the voice phrases' build chooses which ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)).
+- A Rust build captured another process's audio through process loopback at that audio's own level, played on an output device it found by name, and captured the microphone.
+  Registered for Raw Input in sink mode, with its own window never in front, it received F24 presses and releases that another program sent, and about 1,450 reports in 4s from the flight hardware (measured on our development machine, 2026-10-08, [architecture log][helper]).
+- Its build on Windows needs the linker in Visual Studio's Build Tools: Rust's GNU target, which avoids them, failed without a full MinGW ([architecture log][helper]).
+- The speech recognizer runs in it, and the recognizer is chosen when the voice phrases are built ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
 
 ### The watcher
 
-The watcher is Rust because it runs all day and shows the pilot its own memory use ([the product plan](../product/plan.md#7-tech-stack-and-architecture)): a tray icon alone cost 1.0 MB of memory in Rust and 39.7 MB in Electron's main process, and no CPU we could measure in either (measured on our development machine, 2026-10-08, [architecture log][tray]).
+The watcher is Rust because it runs all day, shows the pilot its own memory use ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and Rust is the language of our other native code.
+A tray icon alone cost 1.0 MB of private working set, the figure Task Manager's Memory column shows, in Rust, 1.6 MB in .NET 9 Native AOT, and 39.7 MB over Electron 43.4.0's main process and the two processes it started, with no CPU we could measure in any of them (measured on our development machine, 2026-10-08, [architecture log][tray]).
 
 ### Plugins
 
 Plugins are TypeScript, and the changes they make to aircraft files are data the watcher applies ([tentative decisions](decisions.md#plugins-are-typescript-and-their-file-changes-are-data)).
 
-- A plugin's code runs in the core, or in an aircraft's panels, compiled like our own panel code.
-- It can't add code to the WASM module, because a module reaches only the functions the sim gives it ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#gauge-vs-standalone-modules-and-the-sandbox)) and our package holds one module.
-  What a plugin needs done inside the sim's frame is a mechanism of our module that the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, so Crosscheck's own code owns the mechanism and the plugin the policy ([04-room-for-later](../product/04-room-for-later.md#plugins)).
-- Calculator code carries any logic a plugin needs inside the frame: `execute_calculator_code` is deprecated in SDK 1.7.3 with no replacement, and still worked on MSFS 2024 on 2026-08-25 ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)).
-- The watcher applies file changes before the sim boots, usually while the core isn't running, so a plugin's changes are files and patches the watcher reads, not code it runs.
+- A plugin's code runs in the core, or as modules the panel bridge loads in the aircraft's cockpit panels, compiled like our own panel code.
+- It can't add code to the WASM module: our package holds one module ([architecture log][module]), so a plugin's code there would be compiled into Crosscheck's own module, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)).
+  What a plugin needs done inside the sim's frame is a mechanism of our module that the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, so Crosscheck's own code owns the mechanism and the plugin the policy (same section).
+- A plugin's logic inside the frame goes in calculator code our module runs, and logic beyond what calculator code expresses is [left out](decisions.md#plugins-are-typescript-and-their-file-changes-are-data), since no v1 plugin needs it.
+  The one call that runs calculator code, `execute_calculator_code`, is deprecated in SDK 1.7.3 with no replacement, and still worked on MSFS 2024 on 2026-08-25 ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)).
+- The watcher applies file changes before the sim boots, usually while the core isn't running, and as a Rust program it runs no TypeScript, so a plugin's changes are files and patches the watcher reads, not code it runs.
 
 ### Messages between TypeScript and Rust
 
-The messages that cross between TypeScript and Rust, through the data slots and the helper's pipe, need one definition both sides are checked against ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)), which is node 1.4's to settle.
+The messages that cross between TypeScript and Rust, through the data slots and the helper's standard input and output, need one definition both sides are checked against ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)), which is node 1.4's to settle.
 
 [module]: log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide
 [helper]: log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-picks-by-name-and-reads-the-keyboard-and-flight-hardware-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker

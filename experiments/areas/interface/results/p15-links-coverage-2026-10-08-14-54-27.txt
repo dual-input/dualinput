@@ -1,0 +1,59 @@
+p15-links-coverage, 2026-10-08T14:54:27.907Z, done
+Sim: SunRise 12.2.282174.999, SimConnect 12.2.0.0.
+
+Findings:
+- Node v22.23.1's built-in WebSocket sent no Origin.
+- menu: 13 of 14 pages both heard the core and reached it over the CommBus.
+- flight: 29 of 31 pages both heard the core and reached it over the CommBus.
+- our banner panel, closed: its socket was still open 6s after.
+- VCockpit37 - GNS_DISABLED, reloaded: its socket was still open 6s after.
+- Leaving the flight: 0 of 16 cockpit panel sockets ended (0 with a close frame), none; the inspector listed no cockpit panel 11s after it.
+
+The CommBus in a flight:
+- flight: atlas: engine, ready false, heard 13, asked true before ready, resolved, reached the core true
+- flight: Shared variables: engine, ready false, heard 13, asked true before ready, resolved, reached the core true
+- flight: mainUi: engine, ready false, heard 13, asked true before ready, resolved, reached the core true
+- flight: notifications: engine, ready false, heard 13, asked true before ready, resolved, reached the core true
+- flight: transition: engine, ready false, heard 0, asked true before ready, rejected, reached the core false; errors: ask rejected: [{"first":"NoSuchMethod","second":"COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."}]
+- flight: VLivery01 - LiveryRegistration: common.js (CommBus.js loaded), ready true, heard 13, asked true, resolved, reached the core true
+- flight: Electronic Flight Bag: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: Mission Steps: engine, ready false, heard 13, asked true before ready, resolved, reached the core true
+- flight: Toolbar: common.js (CommBus.js loaded), ready false, heard 13, asked true before ready, reached the core false
+- flight: notifications: engine, ready false, heard 13, asked true before ready, resolved, reached the core true
+- flight: VLivery03 - LiveryRegistration: common.js (CommBus.js loaded), ready true, heard 13, asked true, resolved, reached the core true
+- flight: VLivery02 - LiveryRegistration: common.js (CommBus.js loaded), ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit37 - GNS_DISABLED: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit36 - WasmInstrument: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit35 - GTN650_INT_2: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit34 - KLN90B: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit33 - WasmInstrument: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit32 - WTT2: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit31 - WTT1: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit30 - GTN750_INT: common.js, ready true, heard 13, asked true, resolved, reached the core true
+- flight: VCockpit29 - GNS_DISABLED_2: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit28 - GNS_DISABLED_1: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit27 - KLN90B: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit26 - AS5_a2amod_2: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit25 - AS5_a2amod_1: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit24 - WasmInstrument: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit23 - WasmInstrument: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VCockpit22 - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument - WasmInstrument: common.js, ready true, heard 12, asked true, resolved, reached the core true
+- flight: VLogic: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- flight: //42 CP Overlay (Reqd.): common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- flight: //42 Flow: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+
+The CommBus in the main menu:
+- menu: atlas: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: Shared variables: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: mainUi: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: notifications: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: transition: engine, ready false, heard 0, asked true before ready, rejected, reached the core false; errors: ask rejected: [{"first":"NoSuchMethod","second":"COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."}]
+- menu: VLivery01 - LiveryRegistration: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- menu: VLivery02 - LiveryRegistration: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- menu: VLivery03 - LiveryRegistration: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- menu: Electronic Flight Bag: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- menu: Mission Steps: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: Toolbar: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: notifications: engine, ready false, heard 12, asked true before ready, resolved, reached the core true
+- menu: //42 Flow: common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true
+- menu: //42 CP Overlay (Reqd.): common.js (CommBus.js loaded), ready true, heard 12, asked true, resolved, reached the core true

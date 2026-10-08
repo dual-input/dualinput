@@ -26,9 +26,10 @@ Other builds were running on the machine, so the p99 and CPU figures are noisy; 
 - QuickJS's memory limit stopped endless allocation in 88ms with "InternalError: out of memory", and its interrupt handler stopped an endless loop at 100ms; the host caught both and ran the next 10 frames correctly.
 - V8's watchdog stopped an endless loop in 104ms through `TerminateExecution`.
   Its near-heap-limit callback asked for termination 17 times while endless allocation went on, and the process died at the 1 GB cap with "Fatal JavaScript out of memory".
-  With `--no-turbofan`, the same callback stopped the allocation in 50ms, and the host ran on; with `--no-maglev` alone it still failed, so code TurboFan compiled missed the termination.
+  With `--no-turbofan`, the same callback stopped the allocation in 50ms, and the host ran on; the probe's agent read a failure with `--no-maglev` alone in a run whose output wasn't saved, so that TurboFan rather than Maglev is the cause is unverified.
 - V8's heap limit doesn't count ArrayBuffers: 256 MB of them passed the 64 MB limit until the host gave V8 an allocator that counted them.
-- Node's `vm` stopped an endless loop with its `timeout`, after 114ms, but has no memory limit: under `--max-old-space-size=64`, endless allocation ended the whole process, while a worker thread with `resourceLimits` ended alone and the main thread ran on.
+- Node's `vm` stopped an endless loop with its `timeout`, after 114ms, but has no memory limit: under `--max-old-space-size=64`, endless allocation ended the whole process.
+  A worker thread with `resourceLimits` ended alone and the main thread ran on in both runs, but in the first run the 10 frames after it didn't match their checksums, and in the second they did.
 - Endless recursion ended with a RangeError in every engine, and every host ran on.
 
 **Changed:** either engine runs a profile's write functions every frame for under 0.1ms, so the engine's cost doesn't decide the core's language.
@@ -120,7 +121,7 @@ What we haven't run: anything a flight adds, such as masking, AI objects with li
   It showed the same for `crosscheck-p12-follow`, our C++ probe module built with the SDK's MSBuild toolset, so the debug DLL comes from the sim, not from cargo-msfs or Rust.
 
 **Changed:** our WASM module can be Rust, built by cargo-msfs, which fetches the SDK from the SDK site's public download at build time, so we store nothing of the SDK.
-Bindings written by hand have to follow the SDK's headers for every type, because a binding with a wrong width compiles and loads, and nothing reports the mistake until the sim's calls fail; bindings generated from the headers, as FlyByWire's msfs-rs generates them with bindgen, rule that out.
+Bindings written by hand have to follow the SDK's headers for every type, because a binding with a wrong width compiles and loads, and nothing reports the mistake until the sim's calls fail; bindings generated from the headers, as FlyByWire's msfs-rs generates them with bindgen, would follow them, which no run has checked.
 Until two modules in one package are tried, each standalone module gets a package of its own.
 
 What we haven't run: the module in a flight, a build on a CI runner, which would need a C++ compiler for cargo-msfs's own install, and two working modules in one package.
@@ -150,7 +151,7 @@ What we haven't run: the module in a flight, a build on a CI runner, which would
   The probe's saved output says only that the GNU build wasn't there; these two failures were read in the build's console.
 
 **Changed:** Rust does each job the helper needs, through crates that already wrap them.
-On Windows, the helper's build takes a C toolchain besides Rust: the MSVC target linked with Visual Studio 2022's linker, and rustup documents Visual Studio's Build Tools as enough ([rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)); a full MinGW for the GNU target is untried.
+On Windows, the helper's build takes a C toolchain besides Rust: the MSVC target linked with Visual Studio 2022's linker, and rustup documents Visual Studio's "Desktop Development with C++" workload for it, and says the Build Tools edition, without the IDE, needs a license to Visual Studio's Community, Professional, or Enterprise edition ([rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)); a full MinGW for the GNU target is untried.
 
 What we haven't run: Raw Input with the sim in front, which the take-control input's [tentative decision](decisions.md#the-core-catches-the-take-control-key-and-buttons) leaves open; a key a person pressed rather than one a program sent; which devices the HID reports came from; a microphone; and an output device other than the default.
 

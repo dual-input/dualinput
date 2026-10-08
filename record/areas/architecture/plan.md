@@ -86,10 +86,12 @@ Its answer goes in `01-spine.md`, in this area.
 `01-spine.md` takes up step 7's paragraphs after its exit, from the headless core proposed on 2026-10-03 to sim awareness, and once the user agrees to it, step 7 links to it in their place.
 Exit: the user agrees to `01-spine.md`.
 Waits on 1.1, 1.2, 1.3, and 1.4.
-Raised elsewhere: by 1.1, whether profiles reach pilots apart from Crosscheck's releases, to place with the part that designs profiles and updates ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1 and 1.3, where profiles and plugins, which reach pilots apart from Crosscheck's releases, are served from, how their signing keys are kept, and how often the core checks for new versions, to place with the part that designs profiles and updates ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.3, whether masking, AI objects with liveries, input events, the camera, and a flight load's flow events work through the SDK's `SimConnect.dll`, to place with the part that designs the core ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.3, which APIs our panel bridge and WASM module offer plugins, to place with the part that designs plugins ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.1, whether the WASM module runs calculator code for the profile engine, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.1.2, how each module in a panel or the sim tears itself down, to place with the parts that design the panel bridge and plugins ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1, whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1.2, how each module, and each hook our panel code installs for a plugin, tears itself down, to place with the parts that design the panel bridge and the WASM module ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.2, what counts as trouble for each component and where the pilot sees it, to place with the parts that design the logs, the recording, and the apps ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.2, how the cores reach each other, a top-level node after node 1 (user, 2026-10-08) ([01-spine](01-spine.md#between-machines)).
 Raised elsewhere: by 1.2, letting a web page connect to the core, opt-in, if an integration ever needs it, to place with the part that designs the core's protocol ([01-spine](01-spine.md#left-open)).
@@ -228,7 +230,7 @@ Done on 2026-10-08.
 
 Question: what does a Tauri 2 window cost in memory against an Electron window showing the same page, and what `Origin` does a WebSocket send from a Tauri page and from Tauri's Rust side?
 1.3 can't take Tauri for the desktop app without it.
-The core accepts a WebSocket only with `Origin` `coui://html_ui` or none, and the desktop app connects from Electron's main process because a page in its window sends one ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps)).
+The core accepts a WebSocket only with `Origin` `coui://html_ui` or none ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-from-the-sims-pages-and-our-own-apps)), so a desktop app whose pages send an `Origin` has to connect from a side that sends none.
 A probe settles it, with no sim: open each window for 60s and record the memory of all its processes, as p01 did, and connect each way to a WebSocket server that logs the `Origin`, as p16 did.
 It reads [p01](../../../experiments/areas/architecture/p01-tray-runtimes.mjs) and [p16](../../../experiments/areas/interface/p16-client-origin.mjs).
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.

@@ -17,7 +17,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - The watcher takes over the jobs of programs the sim would launch ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), so it, rather than a program the sim launches, starts the core early enough.
   - Code in the sim reaches a program on the PC only if that program is already listening on 127.0.0.1 ([interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)), and we found no way for a panel to start one (unverified).
     A start button in the EFB app would need the watcher to listen and start the core, which is more than the watcher should do (user, 2026-10-07).
-  - A core that runs through every sim run, session or not, costs little: an idle Node process took 29 MB of memory and no measurable CPU (measured on our development machine, 2026-10-06, with Node 22.23.1, [the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+  - A core that runs through every sim run, session or not, has to cost little: a Rust program showing only a tray icon took 1.0 MB of private working set and no measurable CPU (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tray-icon-alone-costs-10-mb-of-memory-in-rust-16-mb-in-net-native-aot-51-mb-in-winforms-and-397-mb-over-three-processes-in-electron)); an idle core holding its SimConnect connection and its listener is unmeasured.
   - The desktop app's start covers a host who starts a session before the sim runs ([invite code](../product/03-v1-scope.md#invite-code)).
 - **Leaves out:**
   - what the core and the other components do while no session runs, which [node 1.1.2](plan.md#112-components-with-no-session) designs
@@ -60,7 +60,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3 by the user, 2026-10-08.
 - **Because:**
   - Pilots bind the key or a hardware button in Crosscheck's settings, as a single press or a long press ([take-control key](../product/03-v1-scope.md#take-control-key)), so Crosscheck needs each press and release.
-  - Electron's `globalShortcut` reports no release (documented in fsc-editor, `docs/sim-vars/08-marks.md`), and it lives in the desktop app, which is optional.
+  - A shortcut API in the desktop app, such as Electron's `globalShortcut`, which reports no release (documented in fsc-editor, `docs/sim-vars/08-marks.md`), would stop whenever the pilot closes the optional desktop app.
   - SimConnect's input mapping takes an event for the press and one for the release (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`, `SimConnect_MapInputEventToClientEvent_EX1`), and the user ruled it out as a hack (user, 2026-10-07).
 - **Leaves out:** whether Raw Input in sink mode delivers a keyboard key's and a flight-hardware button's presses and releases with the sim in front: with another window in front, it delivered F24 presses another program sent and reports from the flight hardware (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker)), and a probe in which a person presses a bound key and button with the sim in front settles it.
 
@@ -106,8 +106,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## Every client sends the core a message every 2s
 
-- **Decided:** every page and the desktop app send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s.
-  Settled in node 1.2 by the user, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels.
+- **Decided:** every page, the desktop app, and the helper send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, and restarts a helper it hasn't heard from in 8s.
+  Settled in node 1.2 by the user, 2026-10-08: the measurement below makes the core hear from each client, and the 2s and 8s follow FS Copilot's panels; the helper's in node 1.3 by the user, 2026-10-08, so the core tells a hung helper from a quiet one.
 - **Because:**
   - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' were still open as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
   - FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
@@ -127,9 +127,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from its Rust side.
   Settled in node 1.2 by the user, 2026-10-08, and the desktop app's side in node 1.3 by the user, 2026-10-08, with the desktop app a Tauri app.
 - **Because:**
-  - Every page in the sim sent `coui://html_ui` (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)).
-  - A Tauri app's Rust side sent no `Origin` through tokio-tungstenite, while its pages sent `http://tauri.localhost` (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin)), as RFC 6455 has a browser page do ([RFC 6455](https://www.rfc-editor.org/rfc/rfc6455#section-4.1), section 4.1).
-    Node 22.23.1's and Electron 43.4.0's own clients sent none too (measured on our development machine, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+  - Every page we use sent `coui://html_ui`, all 14 in the main menu and all 32 in the A2A PA-24's flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)); no other aircraft's pages were tried.
+  - A Tauri app's pages sent `http://tauri.localhost`, as RFC 6455 requires of a browser client, and its Rust side, through tokio-tungstenite 0.30.0, sent no `Origin`, which the RFC allows a client that isn't a browser (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin); [RFC 6455](https://www.rfc-editor.org/rfc/rfc6455#section-4.1), section 4.1).
   - Any page in a browser on the PC can open a WebSocket to 127.0.0.1 ([06-04](../../learn/foundations/06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost), its traps), so without the check, a page the pilot happens to have open could join them to a stranger's session or take control of their aircraft.
     Chrome may ask the pilot first for the local network (unverified, as of 2026-10-08), and the check doesn't rely on it.
 - **Leaves out:**
@@ -160,21 +159,22 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 - **Decided:** the core, the helper, the watcher, the desktop app's program, and the WASM module are Rust.
   TypeScript is for the code in Coherent GT, the desktop app's pages, plugins and the profile's write functions, and the backend ([01-spine](01-spine.md#language-and-toolchains)).
-  The core reaches the sim through the SDK's own `SimConnect.dll`, and runs plugins and write functions in QuickJS, embedded through rquickjs, with memory and time limits; the desktop app is a Tauri app; and the WASM module is built with Navigraph's cargo-msfs and packaged by our own script.
+  The core reaches the sim through the SDK's own `SimConnect.dll`, and runs plugins and write functions in QuickJS-ng, embedded through rquickjs, with memory and time limits; the desktop app is a Tauri app; and the WASM module is built with Navigraph's cargo-msfs and packaged by our own script.
   The Rust code's bindings to the SDK are generated from the SDK's headers.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - The user chose Rust for every component that isn't run by a JavaScript engine (user, 2026-10-08), and Rust did each job our probes asked of it ([architecture log](log.md)):
-    - a client on the SDK's own `SimConnect.dll` connected, called mainUi over the CommBus and heard each answer, followed a system event, and traded data slots with our module, at the main menu
-    - a standalone module built by cargo-msfs ran on MSFS 2024 at the main menu and traded data slots with a SimConnect client
-    - a helper captured one process's audio, played on an output device it looked up by name, captured an input device, and received keyboard and HID input through Raw Input in sink mode
-    - a tray icon alone cost 1.0 MB of private working set, against 1.6 MB in .NET 9 Native AOT and 39.7 MB over Electron 43.4.0's three processes
-  - Embedded in Rust, QuickJS ran 100 write functions a frame, 60 frames a second, in 75µs a frame on average, and held its 64 MB memory limit and its 100ms time limit with the host running on, while V8's memory limit held only with TurboFan off and an allocator counting ArrayBuffers, and Node's `vm` module has none (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
-  - A Tauri window took about as much memory as an Electron one, 72.3 MB against 66.5 MB, its program is 8.0 MB against Electron's 347.4 MB, and its Rust side's WebSocket sends no `Origin` (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin)).
-  - Bindings written by hand gave SimConnect's `HANDLE` 32 bits where the SDK gives it 64, the first call after `SimConnect_Open` returned `E_FAIL`, and the module's slots never appeared (measured on MSFS 2024, 2026-10-08, [architecture log](log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide)).
-  - Node, Electron, and Coherent GT run JavaScript, and the sim's pages have no other language, so TypeScript stays wherever an engine runs our code ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)).
+  - The user chose Rust for every component a JavaScript engine doesn't run (user, 2026-10-08).
+  - At the main menu, a Rust client on the SDK's own `SimConnect.dll` did what the core does there: it connected, traded calls with mainUi over the CommBus, followed a system event, and traded data slots with our module (measured on MSFS 2024, 2026-10-08, [architecture log](log.md#2026-10-08-a-rust-program-on-the-sdks-own-simconnectdll-connects-to-msfs-2024-trades-commbus-calls-with-mainui-follows-system-events-and-trades-data-slots-with-our-rust-module)).
+  - A standalone module built by cargo-msfs ran on MSFS 2024 at the main menu and traded data slots with a SimConnect client (measured on MSFS 2024, 2026-10-08, [architecture log](log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide)).
+  - A Rust helper did the helper's Windows input and audio work, built with Visual Studio's linker (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker)).
+  - A Rust program showing only a tray icon took a fortieth of the memory Electron's processes took for the same (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tray-icon-alone-costs-10-mb-of-memory-in-rust-16-mb-in-net-native-aot-51-mb-in-winforms-and-397-mb-over-three-processes-in-electron)).
+  - Embedded in Rust, QuickJS-ng held its memory and time limits as built, with the host running on, while V8's process died on an endless allocation unless TurboFan was off, and Node's `vm` module has no memory limit (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
+  - A Tauri window took about the memory of an Electron one, with a program a fortieth of the size, and its Rust side's WebSocket sends no `Origin` (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin)).
+  - The module's hand-written bindings gave `HANDLE` the wrong width for the SDK's WebAssembly headers, and nothing reported it until the sim's calls failed (measured on MSFS 2024, 2026-10-08, [architecture log](log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide)), so no type is copied by hand.
+  - Coherent GT, WebView2, QuickJS-ng, and a Cloudflare Worker each run JavaScript, so our code in each is TypeScript compiled to JavaScript ([01-spine](01-spine.md#code-in-the-sim)).
 - **Leaves out:**
-  - what a flight adds to SimConnect, such as masking at the sim's start, AI objects with liveries, input events, and the camera, which has run only through node-simconnect, not yet through the SDK's library ([01-spine](01-spine.md#left-open))
+  - what the SDK's library does beyond the main menu, such as masking, AI objects with liveries, input events, the camera, and a flight load's flow events, which in our probes have run only through node-simconnect ([01-spine](01-spine.md#left-open))
+  - generated bindings run against the sim, which bindgen's need for libclang has kept from running, and a build without Visual Studio's linker, which failed with Rust's own tools ([01-spine](01-spine.md#the-core))
   - the relay's language ([01-spine](01-spine.md#language-and-toolchains)), and the choices that stay inside one part ([01-spine](01-spine.md#left-open))
 
 ## The core's input and audio work runs in a helper it starts
@@ -185,21 +185,21 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Because:**
   - A crash in that code, such as in a speech recognizer's C or C++ library, takes the core down if it runs in the core's process, and the pilot out of the session until the watcher restarts the core and they rejoin ([01-spine](01-spine.md#the-helper)), while the core restarts a helper that crashes, and the session goes on.
   - Our probes read Raw Input from a program they start, line by line over its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
-- **Leaves out:** the messages on the helper's standard input and output, which need one definition that both the TypeScript and the Rust side are checked against, for node 1.4 to settle.
+- **Leaves out:** the fields of the helper's messages, which node 1.4 settles; the crate the Rust components share defines them for both ends ([01-spine](01-spine.md#messages-between-components)).
 
 ## Plugin code runs only in the core
 
-- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS embedded there under memory and time limits ([above](#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, the sim, and the pilot's files only through APIs our own code carries out.
+- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS-ng embedded there under memory and time limits ([above](#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, the sim, and the pilot's files only through APIs our own code carries out.
   Nothing a plugin ships runs in a panel or in the module: for something inside the sim's frame, our module offers mechanisms the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, and for something in a panel, our panel bridge offers generic operations.
   The changes a plugin makes to an aircraft's files are files and patches that the watcher applies.
   This changes [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim), which gives plugins hooks in the panels and in the WASM module that load their modules by name, and answers [03-v1-scope](../product/03-v1-scope.md#plugins)'s question of where each part of a plugin runs.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - The plugin API lets a plugin act in each part of Crosscheck, or in none, as it needs, as an implementation of our interface rather than code that runs in those parts (user, 2026-10-08).
+  - Plugins work within a framework API, the way a class implements an interface, and ship no code that runs directly in any part of our system; when a plugin needs something done in panel code, we offer the API, and our own panel code carries it out (user, 2026-10-08).
   - Crosscheck's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic and panel code for one aircraft stay out of our module and our panel bridge.
   - Our generic panel code keeps the fail-open rules for anything in the pilot's input path ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)), whatever a plugin asks of it.
   - A plugin that's only JavaScript and data can reach pilots apart from Crosscheck's releases ([below](#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)), while the WASM module and the panel bridge load only when the sim boots or a panel loads.
-  - The watcher, a Rust program, which runs no TypeScript, applies file changes before the sim boots, usually while the core isn't running ([01-spine](01-spine.md#components-with-no-session)).
+  - The watcher applies file changes before the sim boots, usually while the core isn't running ([01-spine](01-spine.md#components-with-no-session)), so code that runs only in the core couldn't make them.
 - **Leaves out:**
   - which APIs our panel bridge and module offer, for the part that designs plugins; the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins))
   - a plugin that needs logic inside the frame beyond what calculator code expresses, which no v1 plugin is known to need
@@ -208,12 +208,14 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 - **Decided:** profiles and plugins update apart from Crosscheck's releases.
   The core fetches each, checks its signature against a key its own release carries, and pins one version of each, by hash, for a session; nothing changes mid-session.
-  Each declares the version of our plugin API it needs, the core refuses one that needs a newer Crosscheck, and a pilot who lacks the session's version fetches it by hash.
+  Each profile and plugin declares the version of our plugin API it needs, and the core refuses one that needs a newer Crosscheck.
+  A pilot whose machine lacks the version the session pinned fetches it by its hash.
   A plugin's changes to aircraft files take effect at the next sim start, when the watcher applies them.
   This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's question of whether profiles reach pilots apart from Crosscheck's releases.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - Shipped in releases, every fix to a profile or a plugin would take a new Crosscheck, which every pilot installs only with the sim closed, and pilots on different versions can't fly together, so two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+  - If profiles and plugins shipped in releases, every fix to one would take a new Crosscheck.
+    A pilot installs a new Crosscheck only with the sim closed, and pilots on different versions can't fly together, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - The [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares each profile's version and hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../product/04-room-for-later.md#profiles)).
   - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
 - **Leaves out:** where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates.

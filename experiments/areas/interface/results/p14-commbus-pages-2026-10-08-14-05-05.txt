@@ -1,0 +1,34 @@
+p14-commbus-pages, 2026-10-08T14:05:05.345Z
+Sim: SunRise 12.2.282174.999, SimConnect 12.2.0.0. CROSSCHECK_P14_HELLO called for JavaScript every 500ms for 6s after the last page was set up.
+
+By page:
+- atlas: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 12 (+9 other) (last {"port":1,"at":1791468325589}), asked true, resolved
+- Shared variables: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 12 (+9 other) (last {"port":1,"at":1791468325589}), asked true, resolved
+- mainUi: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 12 (+9 other) (last {"port":1,"at":1791468325589}), asked true, resolved
+- notifications: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 12 (+9 other) (last {"port":1,"at":1791468325589}), asked true, resolved
+- transition: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 0, asked true, rejected; errors: ask rejected: [{"first":"NoSuchMethod","second":"COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."}]
+- VLivery01 - LiveryRegistration: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready false, heard 12, asked false
+- Electronic Flight Bag: Coherent object, common.js function, CommBus.js function; common.js: ready true, heard 12, asked true, resolved
+- Mission Steps: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 12 (+9 other) (last {"port":1,"at":1791468325589}), asked true, resolved
+- Toolbar: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready true, heard 12, asked true, resolved
+- notifications: Coherent undefined, common.js undefined, CommBus.js undefined; engine: registered 0, by name 0, from the view listener 12 (+10 other) (last {"port":1,"at":1791468325589}), asked true, resolved
+- VLivery03 - LiveryRegistration: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready false, heard 12, asked false
+- VLivery02 - LiveryRegistration: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready false, heard 12, asked false
+- VCockpit37 - GTN650_INT_2: Coherent object, common.js function, CommBus.js function; common.js: ready true, heard 12, asked true, resolved
+- VLogic: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready false, heard 12, asked false
+- //42 CP Overlay (Reqd.): Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready false, heard 12, asked false
+- //42 Flow: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready true, heard 12, asked true, resolved
+- Crosscheck P13: Coherent object, common.js function, CommBus.js undefined; common.js (CommBus.js loaded): ready true, heard 12, asked true, resolved
+
+CROSSCHECK_P14_ASK calls that reached the probe through SimConnect's CommBus:
+- {"from":"Electronic Flight Bag","way":"common.js"}
+- {"from":"Toolbar","way":"common.js"}
+- {"from":"VCockpit37 - GTN650_INT_2","way":"common.js"}
+- {"from":"//42 Flow","way":"common.js"}
+- {"from":"Crosscheck P13","way":"common.js"}
+- {"from":"atlas","way":"engine"}
+- {"from":"Shared variables","way":"engine"}
+- {"from":"mainUi","way":"engine"}
+- {"from":"notifications","way":"engine"}
+- {"from":"Mission Steps","way":"engine"}
+- {"from":"notifications","way":"engine"}

@@ -1,0 +1,14 @@
+p03-rust-module, 2026-10-08T17:44:49.909Z
+
+Sim: SunRise 12.2, build 282174.999
+
+Variant A, as cargo-msfs builds it:
+  CROSSCHECK_P03A_STAGE 4, CROSSCHECK_P03A_OPEN 0, CROSSCHECK_P03A_FRAMES 7980
+  OUT at connect: missing (timed out)
+
+Variant B, with MSFS_WasmVersions.a:
+  CROSSCHECK_P03B_STAGE 0, CROSSCHECK_P03B_OPEN 0, CROSSCHECK_P03B_FRAMES 0
+  OUT at connect: missing (timed out)
+
+Compiled into WASM\MSFS2024: m4c4a2398ceceb077_0.cache, m4c4a2398ceceb077_0.dll, m4c4a2398ceceb077_0.lib, m4c4a2398ceceb077_0.obj, m4c4a2398ceceb077_0.pdb, mcb172ab0e78190e0_0.cache, mcb172ab0e78190e0_0.dll, mcb172ab0e78190e0_0.lib, mcb172ab0e78190e0_0.obj, mcb172ab0e78190e0_0.pdb, work
+Compiled into WASM\MSFS2020: no

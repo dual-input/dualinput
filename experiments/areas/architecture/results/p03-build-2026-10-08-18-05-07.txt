@@ -1,0 +1,26 @@
+﻿p03 build, 2026-10-08T18:05:07.2748169Z
+cargo-msfs v1.1.0 (cargo-msfs info: MSFS 2024 SDK 1.8.1), rustc 1.95.0 (59807616e 2026-04-14)
+
+
+crosscheck-p03-rust, crosscheck-p03a.wasm: 40187 bytes
+  exports: memory, __wasm_call_ctors, __stack_pointer, Update_StandAlone, free, __indirect_function_table, malloc, module_deinit, module_init, rust_eh_personality, _RNvNtCset5xJoy1xWQ_3std9panicking11EMPTY_PANIC, mallinfo, mchunkit_begin, mchunkit_next, get_pages_state, mark_decommit_pages
+  imports: env (12): fsVarsRegisterLVar, fsVarsGetUnitId, fsVarsLVarSet, SimConnect_CallDispatch, SimConnect_SetClientData, SimConnect_AddToClientDataDefinition, SimConnect_CreateClientData, SimConnect_RequestClientData, SimConnect_MapClientDataNameToID, SimConnect_Close, SimConnect_Open, SimConnect_GetLastSentPacketID; wasi_snapshot_preview1 (5): environ_get, environ_sizes_get, fd_write, proc_exit, commit_pages
+  custom sections: none
+  required exports missing: none
+  in fsc-editor's toolset build and not this one: exports __wasm_call_patched_ctors, GetSimConnectVersion; sections name, producers, target_features, StackSizesSection, GuardPages
+
+crosscheck-p03b-rust, crosscheck-p03b.wasm: 41007 bytes
+  exports: memory, __wasm_call_ctors, __stack_pointer, Update_StandAlone, free, __indirect_function_table, malloc, module_deinit, module_init, rust_eh_personality, _RNvNtCset5xJoy1xWQ_3std9panicking11EMPTY_PANIC, mallinfo, mchunkit_begin, mchunkit_next, get_pages_state, mark_decommit_pages, GetSimConnectVersion, GetExtensionVersionBuffer, GetExtensionVersion
+  imports: env (12): fsVarsRegisterLVar, fsVarsGetUnitId, fsVarsLVarSet, SimConnect_CallDispatch, SimConnect_SetClientData, SimConnect_AddToClientDataDefinition, SimConnect_CreateClientData, SimConnect_RequestClientData, SimConnect_MapClientDataNameToID, SimConnect_Close, SimConnect_Open, SimConnect_GetLastSentPacketID; wasi_snapshot_preview1 (5): environ_get, environ_sizes_get, fd_write, proc_exit, commit_pages
+  custom sections: none
+  required exports missing: none
+  in fsc-editor's toolset build and not this one: exports __wasm_call_patched_ctors; sections name, producers, target_features, StackSizesSection, GuardPages
+
+crosscheck-p03c-rust, crosscheck-p03c.wasm: 41033 bytes
+  exports: memory, __wasm_call_ctors, __stack_pointer, Update_StandAlone, free, __indirect_function_table, malloc, module_deinit, module_init, rust_eh_personality, _RNvNtCset5xJoy1xWQ_3std9panicking11EMPTY_PANIC, mallinfo, mchunkit_begin, mchunkit_next, get_pages_state, mark_decommit_pages, GetSimConnectVersion, GetExtensionVersionBuffer, GetExtensionVersion
+  imports: env (12): fsVarsRegisterLVar, fsVarsGetUnitId, fsVarsLVarSet, SimConnect_CallDispatch, SimConnect_SetClientData, SimConnect_AddToClientDataDefinition, SimConnect_CreateClientData, SimConnect_RequestClientData, SimConnect_MapClientDataNameToID, SimConnect_Close, SimConnect_Open, SimConnect_GetLastSentPacketID; wasi_snapshot_preview1 (5): environ_get, environ_sizes_get, fd_write, proc_exit, commit_pages
+  custom sections: StackSizesSection
+  required exports missing: none
+  in fsc-editor's toolset build and not this one: exports __wasm_call_patched_ctors; sections name, producers, target_features, GuardPages
+
+packaged crosscheck-p03-rust, crosscheck-p03b-rust, crosscheck-p03c-rust in experiments\areas\architecture\module\build

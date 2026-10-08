@@ -1,0 +1,27 @@
+{"t":1791482364438,"s":0.032,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791482364439,"s":0.033,"kind":"find","text":"Sim: SunRise 12.2, build 282174.999"}
+{"t":1791482364439,"s":0.033,"kind":"find","text":""}
+{"t":1791482364439,"s":0.033,"kind":"find","text":"Variant A, as cargo-msfs builds it:"}
+{"t":1791482364451,"s":0.045,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791482364451,"s":0.045,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791482364451,"s":0.045,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791482364452,"s":0.046,"kind":"find","text":"  CROSSCHECK_P03A_STAGE 4, CROSSCHECK_P03A_OPEN 0, CROSSCHECK_P03A_HANDLE 3248889888, CROSSCHECK_P03A_FAIL_STEP 1, CROSSCHECK_P03A_FAIL_HR -2147467259, CROSSCHECK_P03A_SEND_FIRST 0, CROSSCHECK_P03A_EXC_COUNT 0, CROSSCHECK_P03A_EXC 0, CROSSCHECK_P03A_EXC_SEND 0, CROSSCHECK_P03A_EXC_INDEX 0, CROSSCHECK_P03A_FRAMES 7110"}
+{"t":1791482364459,"s":0.053,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1791482367459,"s":3.053,"kind":"find","text":"  OUT at connect: missing (timed out)"}
+{"t":1791482367459,"s":3.053,"kind":"find","text":""}
+{"t":1791482367459,"s":3.053,"kind":"find","text":"Variant B, with MSFS_WasmVersions.a, its StackSizesSection removed:"}
+{"t":1791482367463,"s":3.057,"kind":"find","text":"  CROSSCHECK_P03B_STAGE 4, CROSSCHECK_P03B_OPEN 0, CROSSCHECK_P03B_HANDLE 2771009568, CROSSCHECK_P03B_FAIL_STEP 1, CROSSCHECK_P03B_FAIL_HR -2147467259, CROSSCHECK_P03B_SEND_FIRST 0, CROSSCHECK_P03B_EXC_COUNT 0, CROSSCHECK_P03B_EXC 0, CROSSCHECK_P03B_EXC_SEND 0, CROSSCHECK_P03B_EXC_INDEX 0, CROSSCHECK_P03B_FRAMES 7470"}
+{"t":1791482367463,"s":3.057,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1791482370463,"s":6.057,"kind":"find","text":"  OUT at connect: missing (timed out)"}
+{"t":1791482370463,"s":6.057,"kind":"find","text":""}
+{"t":1791482370464,"s":6.058,"kind":"find","text":"Variant C, with MSFS_WasmVersions.a and its StackSizesSection:"}
+{"t":1791482370466,"s":6.06,"kind":"find","text":"  CROSSCHECK_P03C_STAGE 0, CROSSCHECK_P03C_OPEN 0, CROSSCHECK_P03C_HANDLE 0, CROSSCHECK_P03C_FAIL_STEP 0, CROSSCHECK_P03C_FAIL_HR 0, CROSSCHECK_P03C_SEND_FIRST 0, CROSSCHECK_P03C_EXC_COUNT 0, CROSSCHECK_P03C_EXC 0, CROSSCHECK_P03C_EXC_SEND 0, CROSSCHECK_P03C_EXC_INDEX 0, CROSSCHECK_P03C_FRAMES 0"}
+{"t":1791482370474,"s":6.068,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1791482373480,"s":9.074,"kind":"find","text":"  OUT at connect: missing (timed out)"}
+{"t":1791482373480,"s":9.074,"kind":"find","text":""}
+{"t":1791482373481,"s":9.075,"kind":"find","text":"crosscheck-p03-rust compiled into WASM\\MSFS2024: m4c4a2398ceceb077_0.dll at 2026-10-08T17:33:12.210Z, mcb172ab0e78190e0_0.dll at 2026-10-08T17:57:48.956Z"}
+{"t":1791482373482,"s":9.076,"kind":"find","text":"crosscheck-p03-rust compiled into WASM\\MSFS2020: no"}
+{"t":1791482373482,"s":9.076,"kind":"find","text":"crosscheck-p03b-rust compiled into WASM\\MSFS2024: mc3ea6cd5ac848e31_0.dll at 2026-10-08T17:57:49.158Z"}
+{"t":1791482373482,"s":9.076,"kind":"find","text":"crosscheck-p03b-rust compiled into WASM\\MSFS2020: no"}
+{"t":1791482373483,"s":9.077,"kind":"find","text":"crosscheck-p03c-rust compiled into WASM\\MSFS2024: no DLL"}
+{"t":1791482373483,"s":9.077,"kind":"find","text":"crosscheck-p03c-rust compiled into WASM\\MSFS2020: no"}

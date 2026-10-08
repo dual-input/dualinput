@@ -1,0 +1,31 @@
+{"t":1791482652690,"s":0.023,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791482652691,"s":0.024,"kind":"find","text":"Sim: SunRise 12.2, build 282174.999"}
+{"t":1791482652691,"s":0.024,"kind":"find","text":""}
+{"t":1791482652691,"s":0.024,"kind":"find","text":"Variant A, as cargo-msfs builds it:"}
+{"t":1791482652701,"s":0.034,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791482652701,"s":0.034,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791482652701,"s":0.034,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791482652702,"s":0.035,"kind":"find","text":"  CROSSCHECK_P03A_STAGE 4, CROSSCHECK_P03A_OPEN 0, CROSSCHECK_P03A_HANDLE 2809450906656, CROSSCHECK_P03A_FAIL_STEP 0, CROSSCHECK_P03A_FAIL_HR 0, CROSSCHECK_P03A_SEND_FIRST 2, CROSSCHECK_P03A_EXC_COUNT 0, CROSSCHECK_P03A_EXC 0, CROSSCHECK_P03A_EXC_SEND 0, CROSSCHECK_P03A_EXC_INDEX 0, CROSSCHECK_P03A_FRAMES 5220"}
+{"t":1791482652708,"s":0.041,"kind":"find","text":"  OUT at connect: magic ours, version 1, module_init ran 1 time(s), frame 5244, echo 0"}
+{"t":1791482657711,"s":5.044,"kind":"find","text":"  OUT 5s later: magic ours, version 1, module_init ran 1 time(s), frame 5925, echo 0"}
+{"t":1791482657711,"s":5.044,"kind":"find","text":"  Frames counted: 681 in 5.00s, 136.1 a second"}
+{"t":1791482658225,"s":5.558,"kind":"find","text":"  Wrote 1949081241 to IN; OUT 0.5s later: magic ours, version 1, module_init ran 1 time(s), frame 5996, echo 1949081241; the module read it"}
+{"t":1791482658225,"s":5.558,"kind":"find","text":""}
+{"t":1791482658225,"s":5.558,"kind":"find","text":"Variant B, with MSFS_WasmVersions.a, its StackSizesSection removed:"}
+{"t":1791482658232,"s":5.565,"kind":"find","text":"  CROSSCHECK_P03B_STAGE 4, CROSSCHECK_P03B_OPEN 0, CROSSCHECK_P03B_HANDLE 2809769837584, CROSSCHECK_P03B_FAIL_STEP 0, CROSSCHECK_P03B_FAIL_HR 0, CROSSCHECK_P03B_SEND_FIRST 2, CROSSCHECK_P03B_EXC_COUNT 0, CROSSCHECK_P03B_EXC 0, CROSSCHECK_P03B_EXC_SEND 0, CROSSCHECK_P03B_EXC_INDEX 0, CROSSCHECK_P03B_FRAMES 5970"}
+{"t":1791482658240,"s":5.573,"kind":"find","text":"  OUT at connect: magic ours, version 1, module_init ran 1 time(s), frame 5998, echo 0"}
+{"t":1791482663247,"s":10.58,"kind":"find","text":"  OUT 5s later: magic ours, version 1, module_init ran 1 time(s), frame 6707, echo 0"}
+{"t":1791482663248,"s":10.581,"kind":"find","text":"  Frames counted: 709 in 5.01s, 141.6 a second"}
+{"t":1791482663754,"s":11.087,"kind":"find","text":"  Wrote 3952214081 to IN; OUT 0.5s later: magic ours, version 1, module_init ran 1 time(s), frame 6781, echo 3952214081; the module read it"}
+{"t":1791482663755,"s":11.088,"kind":"find","text":""}
+{"t":1791482663755,"s":11.088,"kind":"find","text":"Variant C, with MSFS_WasmVersions.a and its StackSizesSection:"}
+{"t":1791482663761,"s":11.094,"kind":"find","text":"  CROSSCHECK_P03C_STAGE 0, CROSSCHECK_P03C_OPEN 0, CROSSCHECK_P03C_HANDLE 0, CROSSCHECK_P03C_FAIL_STEP 0, CROSSCHECK_P03C_FAIL_HR 0, CROSSCHECK_P03C_SEND_FIRST 0, CROSSCHECK_P03C_EXC_COUNT 0, CROSSCHECK_P03C_EXC 0, CROSSCHECK_P03C_EXC_SEND 0, CROSSCHECK_P03C_EXC_INDEX 0, CROSSCHECK_P03C_FRAMES 0"}
+{"t":1791482663769,"s":11.102,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1791482666766,"s":14.099,"kind":"find","text":"  OUT at connect: missing (timed out)"}
+{"t":1791482666766,"s":14.099,"kind":"find","text":""}
+{"t":1791482666768,"s":14.101,"kind":"find","text":"crosscheck-p03-rust compiled into WASM\\MSFS2024: m4c4a2398ceceb077_0.dll at 2026-10-08T17:33:12.210Z, mcb172ab0e78190e0_0.dll at 2026-10-08T18:02:50.072Z"}
+{"t":1791482666768,"s":14.101,"kind":"find","text":"crosscheck-p03-rust compiled into WASM\\MSFS2020: no"}
+{"t":1791482666768,"s":14.101,"kind":"find","text":"crosscheck-p03b-rust compiled into WASM\\MSFS2024: mc3ea6cd5ac848e31_0.dll at 2026-10-08T18:02:50.275Z"}
+{"t":1791482666769,"s":14.102,"kind":"find","text":"crosscheck-p03b-rust compiled into WASM\\MSFS2020: no"}
+{"t":1791482666769,"s":14.102,"kind":"find","text":"crosscheck-p03c-rust compiled into WASM\\MSFS2024: no DLL"}
+{"t":1791482666769,"s":14.102,"kind":"find","text":"crosscheck-p03c-rust compiled into WASM\\MSFS2020: no"}

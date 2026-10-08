@@ -1,0 +1,18 @@
+{"t":1791481489935,"s":0.026,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1791481489936,"s":0.027,"kind":"find","text":"Sim: SunRise 12.2, build 282174.999"}
+{"t":1791481489936,"s":0.027,"kind":"find","text":""}
+{"t":1791481489936,"s":0.027,"kind":"find","text":"Variant A, as cargo-msfs builds it:"}
+{"t":1791481489945,"s":0.036,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1791481489945,"s":0.036,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1791481489945,"s":0.036,"kind":"system","text":"View 0 (none)","event":"View","data":0}
+{"t":1791481489946,"s":0.037,"kind":"find","text":"  CROSSCHECK_P03A_STAGE 4, CROSSCHECK_P03A_OPEN 0, CROSSCHECK_P03A_FRAMES 7980"}
+{"t":1791481489951,"s":0.042,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1791481492950,"s":3.041,"kind":"find","text":"  OUT at connect: missing (timed out)"}
+{"t":1791481492951,"s":3.042,"kind":"find","text":""}
+{"t":1791481492951,"s":3.042,"kind":"find","text":"Variant B, with MSFS_WasmVersions.a:"}
+{"t":1791481492951,"s":3.042,"kind":"find","text":"  CROSSCHECK_P03B_STAGE 0, CROSSCHECK_P03B_OPEN 0, CROSSCHECK_P03B_FRAMES 0"}
+{"t":1791481492957,"s":3.048,"kind":"exception","text":"ILLEGAL_OPERATION (25) on send 0, parameter 4294967295","exception":25,"name":"ILLEGAL_OPERATION","sendId":0,"index":4294967295,"sent":"send 0"}
+{"t":1791481495958,"s":6.049,"kind":"find","text":"  OUT at connect: missing (timed out)"}
+{"t":1791481495958,"s":6.049,"kind":"find","text":""}
+{"t":1791481495958,"s":6.049,"kind":"find","text":"Compiled into WASM\\MSFS2024: m4c4a2398ceceb077_0.cache, m4c4a2398ceceb077_0.dll, m4c4a2398ceceb077_0.lib, m4c4a2398ceceb077_0.obj, m4c4a2398ceceb077_0.pdb, mcb172ab0e78190e0_0.cache, mcb172ab0e78190e0_0.dll, mcb172ab0e78190e0_0.lib, mcb172ab0e78190e0_0.obj, mcb172ab0e78190e0_0.pdb, work"}
+{"t":1791481495958,"s":6.049,"kind":"find","text":"Compiled into WASM\\MSFS2020: no"}

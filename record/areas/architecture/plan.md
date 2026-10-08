@@ -188,6 +188,7 @@ A probe settles it: build a module that leaves its version in a data slot at loa
 It reads [05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md), [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md), and fsc-editor's `link/`.
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-08.
 
 ## 1.3.3 A Rust helper
 

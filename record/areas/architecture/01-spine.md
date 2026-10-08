@@ -29,13 +29,13 @@ The watcher works while the core may not be running, and the services off the pi
 | Banner panel | An in-game panel of ours | Notices |
 | Toolbar script | The toolbar's document, through our toolbar icon | The banner panel's opening |
 | Menu script | The main menu's document, through our copy of BlurPage | Go to, through the world map's requests, and reports of which menu page is up |
-| Panel bridge | Every cockpit panel, through our `VCockpit.js` override | Pointer sync, and the modules that features and plugins name |
+| Panel bridge | Every cockpit panel, through our `VCockpit.js` override | Pointer sync, the modules that features name, and what plugins ask of the panels |
 | WASM module | The sim, as a standalone module from boot | The figures' placement, the aircraft's hold and writes, and the undoing of our state in the sim when the core goes quiet |
 | Relay | Off the pilots' machines | Invite codes, introductions between cores, and a session's traffic when the cores can't link directly |
 | Backend | Off the pilots' machines | Each pilot's part of a bug report, and later features that need a server of ours, such as [telemetry](../product/ideas.md#telemetry) |
 | Release host | Off the pilots' machines | Installers and updates |
 
-Plugins aren't components: a plugin's code runs inside the core or as modules the panel bridge loads, through hooks in each, and drives our WASM module's mechanisms for anything inside the sim's frame ([plugins](#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+Plugins aren't components: a plugin's code runs only in the core, and reaches the cockpit panels and our WASM module through APIs our own code carries out ([plugins](#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
 The installer runs once, and puts the app and our Community package in place ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
 The figure is the other pilot's, which our WASM module draws ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
 
@@ -69,7 +69,7 @@ So the core tells every component below when a session starts.
 | Helper | Not running, except while the desktop app binds a key or lists the output devices | Reads the take-control input and the cursor, and captures and plays the audio, for the core |
 | Desktop app | Optional; offers to start or join a session | Optional; shows the session |
 | WASM module | Runs, and does nothing each frame | Places the figures, holds the aircraft in preflight, and on a following machine writes the aircraft |
-| Panel bridge | Runs in every cockpit panel, loads no modules, and captures nothing | Runs pointer sync, and loads the modules that features and plugins name |
+| Panel bridge | Runs in every cockpit panel, loads no modules, and captures nothing | Runs pointer sync, loads the modules that features name, and carries out plugins' requests |
 | EFB app | Offers to start a session or enter a code | Shows the session's controls |
 | Toolbar script | Waits for the core | Opens the banner panel when the session has something to show |
 | Banner panel | Closed, so it has no page | Shows the session's notices |
@@ -129,7 +129,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 | EFB app and menu script, and core | WebSocket, found through the CommBus, whether or not a session runs | The EFB's controls and state, Go to, and which menu page is up | The same, and a first message naming the component and its version |
 | Toolbar script and core | The same, while a session runs | The banner's opening | The same |
 | Banner panel and core | The same, while the panel is open | Notices, and a click on one | The same |
-| Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile or a plugin names | Pointer presses, `H:` events, plugin modules' traffic, and the locks' renewals | The same; no panel's first message ever arriving means our panel bridge didn't load, as when another package's `VCockpit.js` wins |
+| Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile or a plugin names | Pointer presses, `H:` events, plugins' requests and their answers, and the locks' renewals | The same; no panel's first message ever arriving means our panel bridge didn't load, as when another package's `VCockpit.js` wins |
 | Core and WASM module | Data slots, one for each kind of message | The session's state and a counter, the pose and velocities, the figures' poses, and the module's version | A counter the module writes every second |
 | Core and helper | The core starts the helper's process and talks to it over the helper's standard input and output | Key and button presses, the cursor, recognized phrases, and captured ATC one way; what to capture and what to play the other | The helper's process exiting, or its message every 2s stopping, as every client's does |
 | Core and other machines | The network, [below](#between-machines) | The six channels of [04-room-for-later](../product/04-room-for-later.md#channels), invite codes, and reports | For the node that designs how the cores reach each other |
@@ -166,7 +166,7 @@ So a pilot's PC runs one core, and a development core with a data folder of its 
 - The toolbar script connects while a session runs, since it opens the banner panel only when the session has something to show.
 - The banner panel connects while it's open, since closing it destroys its page ([interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
 - Every cockpit panel's panel bridge connects when it hears that a session started, sends a first message naming the instruments it holds, and gets back the modules to load, and a panel the core gives nothing closes its socket ([tentative decisions](decisions.md#cockpit-panels-connect-only-in-a-session-and-only-the-ones-in-use-stay)).
-  Once it has loaded the profile and the plugins, the core keeps the panels holding the displays pointer sync replays into, one panel to listen for `H:` events, and those each plugin's modules run in.
+  Once it has loaded the profile and the plugins, the core keeps the panels holding the displays pointer sync replays into, one panel to listen for `H:` events, and those holding the instruments a plugin reads or writes.
 
 A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' were still open as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
 So each page sends the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, as FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog).
@@ -279,14 +279,17 @@ A tray icon alone cost 1.0 MB of private working set, the figure Task Manager's 
 
 ### Plugins
 
-Plugins are TypeScript, and the changes they make to aircraft files are data the watcher applies ([tentative decisions](decisions.md#plugins-are-typescript-and-their-file-changes-are-data)).
+A plugin is TypeScript that implements an interface of ours and runs only in the core, in the engine that also runs the profile's write functions, and it reaches everything else through APIs our own code carries out ([tentative decisions](decisions.md#plugin-code-runs-only-in-the-core)).
 
-- A plugin's code runs in the core, or as modules the panel bridge loads in the aircraft's cockpit panels, compiled like our own panel code.
-- A plugin adds no code to the WASM module (user, 2026-10-08).
-  What a plugin needs done inside the sim's frame is a mechanism of our module that the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, so Crosscheck's own code owns the mechanism and the plugin the policy, and code that serves one product stays out of Crosscheck's own module ([04-room-for-later](../product/04-room-for-later.md#plugins)).
-- A plugin's logic inside the frame goes in calculator code our module runs, and logic beyond what calculator code expresses is [left out](decisions.md#plugins-are-typescript-and-their-file-changes-are-data), since no v1 plugin is known to need it.
+- Nothing a plugin ships runs in a cockpit panel or in the WASM module (user, 2026-10-08).
+  When a plugin needs something done in a panel, such as reading a setting that lives only in a gauge's JavaScript, our panel bridge does it through a generic API, and when it needs something done inside the sim's frame, our WASM module does it, such as writing given variables every frame, running given calculator code, or placing an object.
+  So Crosscheck's own code owns each mechanism and the plugin the policy, code that serves one product stays out of Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), and our panel code keeps the fail-open rules [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) sets for anything in the pilot's input path.
+- A plugin's logic inside the frame goes in calculator code our module runs, and logic beyond what calculator code expresses is [left out](decisions.md#plugin-code-runs-only-in-the-core), since no v1 plugin is known to need it.
   The one call that runs calculator code, `execute_calculator_code`, is deprecated in SDK 1.7.3 with no replacement ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)), and FS Copilot's module makes every write to the aircraft through it (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_physics`), which we've flown with on MSFS 2024 (from our experience with FS Copilot).
 - The watcher applies file changes before the sim boots, usually while the core isn't running, and as a Rust program it runs no TypeScript, so a plugin's changes are files and patches the watcher reads, not code it runs.
+- Profiles and plugins reach pilots apart from Crosscheck's releases ([tentative decisions](decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
+  The core fetches each, checks its signature against a key its own release carries, and pins one version of each, by hash, for a session, so a fix to a profile or a plugin needs no new Crosscheck and no sim restart, except for a plugin's file changes, which wait for the next sim start.
+  Each declares the version of our plugin API it needs, and a pilot who lacks the session's version fetches it by hash.
 
 ### Messages between TypeScript and Rust
 
@@ -301,12 +304,11 @@ The messages that cross between TypeScript and Rust, through the data slots and 
 - What counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature ([ideas](../product/ideas.md#component-health)).
 - How the cores reach each other ([between machines](#between-machines)).
 - Letting a web page connect to the core, which the `Origin` check refuses (user, 2026-10-08): if an integration ever needs it, a site the pilot approves once, or one carrying a token, as the off-by-default listener for the tablet would ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)).
-- How each module tears itself down is the panel bridge's and the plugins' to design.
+- How each module, and each hook our panel code installs for a plugin, tears itself down is the panel bridge's and the WASM module's to design.
 - Choices that stay inside one part: the compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)); the desktop app's interface framework; the core's WebSocket library; and whether `node.exe` or Electron's executable running as Node runs the core.
 - Whether the toolbar script can open the banner outside a Build and Mount, at a flight load or mid-flight when a session starts then, is open: we've seen it open the panel only after Build and Mounts, two times in three ([03-v1-scope](../product/03-v1-scope.md#notification-banner)).
-- Whether profiles reach pilots apart from Crosscheck's releases.
-  Profiles ship in Crosscheck's releases unless this says otherwise, pilots on different Crosscheck versions can't fly together, and updates install only while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so a fix to one profile takes a release, and two pilots can't fly together until both have closed the sim to install it.
-  Profiles delivered on their own, keyed by the version and hash the [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares, would avoid that, and the profile registry, a Later pick, goes that way ([ideas](../product/ideas.md#profile-registry)).
+- Where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates; the profile registry, a Later pick, would deliver community profiles the same way ([ideas](../product/ideas.md#profile-registry)).
+- Which APIs our panel bridge and WASM module offer plugins, for the part that designs plugins: the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins)).
 - How the core judges an aircraft settled in a session started before [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s rule could call it settled.
   One way keeps [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 30s floor from Ready to fly and counts its 15s quiet window from when the profile loads.
 - Whether the WASM module runs calculator code for the profile engine, which a probe of whether SimConnect's client events reach `H:` events settles.

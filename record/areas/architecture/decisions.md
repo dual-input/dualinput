@@ -181,14 +181,33 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - Our probes read Raw Input from a program they start, line by line over its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
 - **Leaves out:** the messages on the helper's standard input and output, which need one definition that both the TypeScript and the Rust side are checked against, for node 1.4 to settle.
 
-## Plugins are TypeScript, and their file changes are data
+## Plugin code runs only in the core
 
-- **Decided:** a plugin's code is TypeScript, run in the core or as modules the panel bridge loads, and drives mechanisms of our WASM module for anything inside the sim's frame, such as writing given variables every frame, running given calculator code, or placing an object.
+- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in an engine embedded there, and it reaches the cockpit panels, the WASM module, the sim, and the pilot's files only through APIs our own code carries out.
+  Nothing a plugin ships runs in a panel or in the module: for something inside the sim's frame, our module offers mechanisms the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, and for something in a panel, our panel bridge offers generic operations.
   The changes a plugin makes to an aircraft's files are files and patches that the watcher applies.
-  This changes [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim), which makes the WASM module a host that loads plugins' modules by name.
+  This changes [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim), which gives plugins hooks in the panels and in the WASM module that load their modules by name, and answers [03-v1-scope](../product/03-v1-scope.md#plugins)'s question of where each part of a plugin runs.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - Crosscheck's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic for one aircraft stays out of our module.
-  - The plugin API lets a plugin act in each part of Crosscheck, or in none, as it needs, all from TypeScript (user, 2026-10-08).
+  - The plugin API lets a plugin act in each part of Crosscheck, or in none, as it needs, as an implementation of our interface rather than code that runs in those parts (user, 2026-10-08).
+  - Crosscheck's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic and panel code for one aircraft stay out of our module and our panel bridge.
+  - Our generic panel code keeps the fail-open rules for anything in the pilot's input path ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)), whatever a plugin asks of it.
+  - A plugin that's only JavaScript and data can reach pilots apart from Crosscheck's releases ([below](#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)), while the WASM module and the panel bridge load only when the sim boots or a panel loads.
   - The watcher, a Rust program, which runs no TypeScript, applies file changes before the sim boots, usually while the core isn't running ([01-spine](01-spine.md#components-with-no-session)).
-- **Leaves out:** a plugin that needs logic inside the frame beyond what calculator code expresses, which no v1 plugin is known to need: the Baron 58P's plugin's first candidate job is in its gauges' JavaScript and in the core ([plugins](../product/03-v1-scope.md#plugins)).
+- **Leaves out:**
+  - which APIs our panel bridge and module offer, for the part that designs plugins; the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins))
+  - a plugin that needs logic inside the frame beyond what calculator code expresses, which no v1 plugin is known to need
+
+## Profiles and plugins reach pilots apart from Crosscheck's releases
+
+- **Decided:** profiles and plugins update apart from Crosscheck's releases.
+  The core fetches each, checks its signature against a key its own release carries, and pins one version of each, by hash, for a session; nothing changes mid-session.
+  Each declares the version of our plugin API it needs, the core refuses one that needs a newer Crosscheck, and a pilot who lacks the session's version fetches it by hash.
+  A plugin's changes to aircraft files take effect at the next sim start, when the watcher applies them.
+  This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's question of whether profiles reach pilots apart from Crosscheck's releases.
+  Settled in node 1.3 by the user, 2026-10-08.
+- **Because:**
+  - Shipped in releases, every fix to a profile or a plugin would take a new Crosscheck, which every pilot installs only with the sim closed, and pilots on different versions can't fly together, so two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+  - The [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares each profile's version and hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../product/04-room-for-later.md#profiles)).
+  - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
+- **Leaves out:** where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates.

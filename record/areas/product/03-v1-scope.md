@@ -6,6 +6,10 @@ Depends on:  01-aims.md, 02-users.md, and the v1 picks in plan.md
 Decides:     The scope of every v1 feature.
 ```
 
+> **Note**
+> [Plugins](#plugins) below ship and update with Crosscheck and run their parts wherever their aircraft needs.
+> Since 2026-10-08, profiles and plugins reach pilots apart from Crosscheck's releases, and a plugin's code runs only in the core, reaching the panels and the WASM module through our own code's APIs ([architecture's tentative decisions](../architecture/decisions.md#plugin-code-runs-only-in-the-core)).
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Crosscheck does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.

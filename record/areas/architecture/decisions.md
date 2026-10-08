@@ -6,10 +6,11 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## The core starts with every sim run
 
-- **Decided:** the watcher starts the core whenever the sim starts, and the desktop app starts it when the pilot opens the app and the core isn't running.
+- **Decided:** the watcher starts the core whenever the sim starts, and again if the core exits while the sim runs, and the desktop app starts it when the pilot opens the app and the core isn't running.
   No code in the sim, such as a panel or the EFB app, starts the core.
-  Settled in node 1.1 by the user, 2026-10-07.
+  Settled in node 1.1 by the user, 2026-10-07, and the restart in node 1.2 by the user, 2026-10-08.
 - **Because:**
+  - Without the restart, a core that crashes mid-flight stays down until the pilot opens the desktop app.
   - A mask registered before the A2A PA-24 loaded got ahead of the aircraft's own, and one registered after it loaded didn't ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
     A core that starts after the flight loads couldn't hold back input on such an aircraft for soft takeover or mixed flight controls ([04-room-for-later](../product/04-room-for-later.md#an-input-layer)).
   - A group that took its priority as the sim started, held open by an event it only listened to, masked the PA-24's elevator ahead of Accu-Sim once the axis was added after the flight loaded, and held nothing back until then; SimConnect answered before the main menu loaded its aircraft ([flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)).
@@ -73,3 +74,80 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Leaves out:**
   - the choice of recognizer, which the voice phrases' build researches and tests ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks))
   - whether the native code runs in the core's own process or in a process the core supervises, which node 1.3 settles
+
+## Every link between our components ends at the core
+
+- **Decided:** no two of Crosscheck's components talk to each other directly, apart from the watcher downloading updates from the release host: each talks to the core, and the core passes on what another needs.
+  Apart from the handshake through which the sim's pages find the core ([below](#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)), the core uses the CommBus and `L:` variables only to reach the aircraft's state and the per-lever hold flags that other tools might read (unverified, [ideas](../product/ideas.md#soft-takeover-on-handover)).
+  Settled in node 1.2 by the user, 2026-10-08.
+- **Because:**
+  - Each of v1's features needs only links that end at the core: a click on a notice in the banner panel, for one, opens the EFB onto our app by way of the core ([01-spine](01-spine.md#communication)).
+  - One hub gives one place that logs every link, which component health needs ([ideas](../product/ideas.md#component-health)), and one owner of the session.
+- **Leaves out:** a direct link that a later feature might need for speed.
+  A panel's action meant for the WASM module takes a WebSocket and then a data slot, and nothing in v1 needs it faster.
+
+## The sim's pages find the core over the CommBus and talk to it over a WebSocket
+
+- **Decided:** a page in the sim asks over the CommBus, the core answers with its port and whether a session runs, and the page opens a WebSocket to the core on 127.0.0.1.
+  The CommBus carries only that handshake and the session's start and end, and the core listens on a port Windows picks.
+  Settled in node 1.2 by the user, 2026-10-08.
+- **Because:**
+  - In the main menu, 13 of the 14 pages asked over the CommBus and heard the answer, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 29 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+    Every page held a WebSocket to a program on the PC ([interface log](../interface/log.md#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one)).
+  - An `L:` variable couldn't carry the port: the menu's page can't read one, and a flight load reset ours to 0 (same entry).
+  - Only a SimConnect client of the pilot's sim can answer on its CommBus, so the core needs no fixed port that another program could take first, and a development core attached to a stand-in sim never reaches the real sim's pages.
+    FS Copilot's panels scan ports 9020 to 9024 and take whichever instance answers first, one of the three reasons its test bench can't run beside a live sim (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
+  - FS Copilot refused to announce its port over its CommBus path, because a bus that's down would take the WebSocket with it (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "4.2 Port discovery: range scan 9020–9024").
+    That path ran through its WASM module; ours runs through the core's own SimConnect connection, without which the core has no sim to serve.
+  - A CommBus call reaches every page listening on its name, so carrying the session over it would have every page sort every message, while a socket in each of 16 cockpit panels cost no frame time we could measure (same entry).
+- **Leaves out:**
+  - a sim update that changes how mainUi takes view listeners' events, which its route rests on (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`)
+  - the CommBus's limits for a SimConnect client, which nobody has measured and the handshake doesn't approach
+
+## Every client sends the core a message every 2s
+
+- **Decided:** every page and the desktop app send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s.
+  Settled in node 1.2, 2026-10-08, by the measurement below.
+- **Because:**
+  - A page's socket doesn't close when the page goes away: our banner panel's stayed open 35s after the panel closed, and a cockpit panel's 23s after it reloaded (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+  - FS Copilot's panels take 8s without their app's 2s renewal to mean the app is gone (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS`), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
+- **Leaves out:** how long the sim keeps a socket open after its page is gone, past 35s.
+
+## Cockpit panels connect only in a session, and only the ones in use stay
+
+- **Decided:** the panel bridge in a cockpit panel connects when it hears that a session started, names the instruments it holds in its first message, and gets back the modules to load, and a panel the core gives nothing closes its socket.
+  Settled in node 1.2 by the user, 2026-10-08.
+- **Because:**
+  - With no session, nothing watches the cockpit ([01-spine](01-spine.md#components-with-no-session)).
+  - The exchange is cheap: one per panel at a session's start, 20 on the Baron, whose cockpit has 20 panels ([interface log](../interface/log.md#2026-10-04-an-ai-copy-of-the-pilots-aircraft-opens-its-livery-painting-and-none-of-its-cockpit-gauges)).
+  - A first message from every panel tells the core the panel bridge loaded at all, which it doesn't when another package's `VCockpit.js` override wins ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+
+## The core accepts a WebSocket only from the sim's pages and our own apps
+
+- **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from Electron's Node side.
+  Settled in node 1.2 by the user, 2026-10-08.
+- **Because:**
+  - Every page in the sim sent `coui://html_ui`, and Node v22.23.1's built-in WebSocket sent none (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
+    A page in the desktop app's window would send an `Origin`, as a browser does.
+  - Any page in a browser on the PC can open a WebSocket to 127.0.0.1 ([06-04](../../learn/foundations/06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost), its traps), so without the check, a page the pilot happens to have open could join them to a stranger's session or take control of their aircraft.
+- **Leaves out:** a web page the pilot wants to connect, which a one-time approval or a token could let in later ([01-spine](01-spine.md#left-open)); and a program on the PC, which can send any `Origin` and could do worse anyway.
+
+## Apps outside the sim find the core through a port file
+
+- **Decided:** the core writes its port and process ID to a file in its data folder, and a core that finds the file naming a core that's still running exits, so one core runs for each data folder.
+  The desktop app reads the port there, and starts the core when the file names no running process; the watcher reads the process ID, to show the core's CPU and memory use beside its own.
+  Settled in node 1.2 by the user, 2026-10-08.
+- **Because:**
+  - The desktop app and the watcher hold no SimConnect connection, so the CommBus can't reach them.
+  - A development core gets a data folder of its own, so it runs beside the pilot's, each with its own ports and identity, as [the product plan](../product/plan.md#7-tech-stack-and-architecture) asks.
+
+## The core writes the WASM module's control slot every 200ms
+
+- **Decided:** in a session, the core writes the WASM module's control slot every 200ms, with the session's state and a counter, and each kind of message has a SimConnect client data area, a data slot, of its own.
+  The module leaves its version in a slot when it loads, and writes a counter every second.
+  Settled in node 1.2 by the user, 2026-10-08.
+- **Because:**
+  - The module can't open a socket, so data slots are its link ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#simconnect-from-inside-a-module)).
+  - FS Copilot's app writes its module's control slot every 200ms (read in the FS Copilot fork, `FsCopilot/Connection/SimClient.cs`, the constructor), and its module unfreezes after 1s with none, which we've flown with ([our WASM module writes the following aircraft](#our-wasm-module-writes-the-following-aircraft)).
+  - Whether two writes to one slot in one frame both arrive is unmeasured ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)), so no two kinds of message share a slot.
+  - A slot keeps its last value after its writer stops (documented, same chapter), so only a counter that moves tells the core the module is still running.

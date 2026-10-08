@@ -90,6 +90,9 @@ Raised elsewhere: by 1.1, whether profiles reach pilots apart from Crosscheck's 
 Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1, whether the WASM module runs calculator code for the profile engine, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how each module in a panel or the sim tears itself down, to place with the parts that design the panel bridge and plugins ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.2, what counts as trouble for each component and where the pilot sees it, to place with the parts that design the logs, the recording, and the apps ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.2, how the cores reach each other, a top-level node after node 1 (user, 2026-10-08) ([01-spine](01-spine.md#between-machines)).
+Raised elsewhere: by 1.2, letting a web page connect to the core, opt-in, if an integration ever needs it, to place with the part that designs the core's protocol ([01-spine](01-spine.md#left-open)).
 
 ## 1.1 Components
 

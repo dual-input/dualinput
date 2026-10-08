@@ -3,6 +3,37 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-08: A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel
+
+**Asked:** what the [entry below](#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one) left unmeasured that node 1.2's answer leans on: whether a page's WebSocket closes when the page goes away; the CommBus handshake in the main menu and in every cockpit panel, and from a page that asks before its listener reports ready; and whether Node's own WebSocket client sends an `Origin`, which decides whether the core's check on it lets our apps in.
+
+**Expected:** a page's socket closing with the page, as a browser closes a page's sockets when it unloads.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, with crosscheck-p13-links installed, p15 started at the main menu, ran in the A2A PA-24 parked, then watched the pilot leave for the main menu:
+
+- No page's socket closed when its page went away: no close frame came and no connection ended.
+  - Our banner panel's stayed open for the 35s left in the run after the toolbar's page closed the panel, which destroys its page ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
+  - `VCockpit37 - GNS_DISABLED`'s stayed open for the 23s left after the panel ran `location.reload()`.
+  - All 16 cockpit panels' were still open when the run ended, 11s after the prompt to leave the flight, as the inspector stopped listing cockpit panels; the sim sent `FLIGHT_END` and `BACK_TO_MAIN_MENU` 4s after the prompt.
+- Node v22.23.1's built-in WebSocket sent no `Origin`, and its socket sent a close frame and ended as soon as it closed.
+- In the main menu, 13 of the 14 pages heard the probe's CommBus calls, 12 of 12, and reached its subscription, and "transition" again couldn't call `COMM_BUS_SIMCONNECT_CALLBACK`.
+  mainUi, the toolbar, and the EFB were among the 13: the toolbar has no `Coherent` in the menu, so it took the calls as mainUi does, and the EFB loaded the sim's `Services/CommBus.js` first.
+- In the flight, 29 of 31 pages did both, all 16 cockpit panels among them, each hearing 12 or 13 calls.
+  The toolbar heard 13, but its listener hadn't reported ready 1.5s after it registered, and the call it made then never reached the probe or settled; in p14 its listener reported ready, and its call arrived.
+  The pages that asked before ready through `engine`, as mainUi does, all reached the probe.
+
+**Changed:**
+
+- The core can't take a socket's close to mean its page went away, so it has to hear from each page and close a socket that falls silent.
+- A page asks over the CommBus once its listener reports ready, and asks again until it hears an answer.
+- An app that connects through Node's built-in WebSocket passes an `Origin` check that lets through a connection with none.
+
+What we haven't run: how long the sim keeps a socket open after its page is gone, past 35s.
+
+**Affects:** node 1.2's answer in [01-spine](../architecture/01-spine.md#communication); and the foundations chapter [06-04](../../learn/foundations/06-04-websockets-to-localhost.md), which expects a socket to drop when its document reloads.
+
+**Evidence:** `results/p15-links-coverage-2026-10-08-14-54-27.txt` and `.ndjson`.
+
 ## 2026-10-08: Every page we use reaches the core by WebSocket and by the CommBus, but the menu's page can't read an `L:` variable, and a flight load resets one
 
 **Asked:** node 1.2.1 of the [architecture plan](../architecture/plan.md#121-links-from-the-sims-pages): can each kind of page our components run in read an `L:` variable the core writes and hold a WebSocket to the core, and what do sockets in every cockpit panel cost in frame time?
@@ -28,28 +59,30 @@ After the first run found the menu's page couldn't read the variable, we also as
   | The 16 cockpit panels | None loaded | Read it |
   | atlas, notifications, transition, Mission Steps, Shared variables | Can't | Can't |
 
-- Pollers in the 16 cockpit panels, reading `L:CROSSCHECK_P13_SESSION` every 500ms, connected 166ms to 547ms after the probe wrote 1, in both tries, and closed when it wrote 0.
+- Pollers in the 16 cockpit panels, reading `L:CROSSCHECK_P13_SESSION` every 500ms, connected 36ms to 547ms after the probe wrote 1, in four tries over the two p13 runs, and closed their sockets when it wrote 0.
 - With the frame rate capped at 30 fps, every 10s window read 31.0 fps, so the cap hid any cost.
   Uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame.
-  The pollers alone, and 16 sockets idle, renewed every 2s, or taking 30 messages a second each, read 12.01ms to 12.07ms.
+  The pollers alone, and 16 sockets idle, renewed every 2s, or taking 30 messages a second each, read 12.00ms to 12.07ms.
   All 11,653 messages the probe sent arrived and parsed.
-- A page's call to `COMM_BUS_SIMCONNECT_CALLBACK` reached the probe's `SimConnect_SubscribeToCommBusEvent` subscription from every page but "transition", which answered "COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."
+- In the flight, p13 and p14 tried the CommBus in the 16 pages that aren't cockpit panels and in one cockpit panel.
+  A page's call to `COMM_BUS_SIMCONNECT_CALLBACK` reached the probe's `SimConnect_SubscribeToCommBusEvent` subscription from each of them but "transition", which answered "COMM_BUS_SIMCONNECT_CALLBACK not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."
   mainUi made the call with `engine.call`.
-- The probe's `SimConnect_CallCommBusEvent` for JavaScript reached every page but "transition", 12 calls of 12, by one of two routes:
+- The probe's `SimConnect_CallCommBusEvent` for JavaScript reached each of the same pages but "transition", 12 calls of 12, by one of two routes:
   - `RegisterCommBusListener`, in the pages that have the sim's `common.js`, after loading the sim's `Services/CommBus.js` where the page hadn't, as in the toolbar and our panel;
-  - `EVENT_FROM_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, in mainUi and the other pages without `Coherent`, once the page triggered `ADD_VIEW_LISTENER`, which is how mainUi's own view listeners take events (read in fs-base-ui, `html_ui/Global/lib.js`, `ViewListenerMgr`).
+  - `EVENT_FROM_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS`, in mainUi and the other pages without `Coherent`, once the page triggered `ADD_VIEW_LISTENER`, which is how mainUi's own view listeners take events (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`).
     No call arrived as an event of its own name, which is all p13's first try listened for, so that try heard nothing in those pages.
 
 **Changed:**
 
 - An `L:` variable can't carry the core's port: the menu's page can't read one, and a flight load resets it.
-- The CommBus can: every page our components run in can ask the core on it and hear the answer.
-  A page would then learn the port with no fixed port and no value a load resets, and only from the core attached to its own sim, since the CommBus runs through that sim's SimConnect.
+- The CommBus can, in every page we tried: a page asks the core on it and hears the answer.
+  A page would then learn the port with no fixed port and no value a load resets, and a core that isn't a SimConnect client of the pilot's sim, such as a development core with a stand-in sim, has no way to answer on that sim's CommBus.
   Which way node 1.2 takes is for its answer.
 - Sockets in every cockpit panel, and pollers reading a variable every 500ms, cost no frame time this run could measure.
 - Any `L:` variable the core relies on has to be written again after each flight load.
 
-What we haven't run: the CommBus in the menu's toolbar page, an aircraft with many more cockpit panels than the PA-24's 16, and a page whose CommBus listener never reported ready asking anyway, as the liveries, `VLogic`, and Parallel 42's overlay did.
+What this entry didn't run, the CommBus in the main menu and in the other 15 cockpit panels, and a page asking before its listener reports ready, the [entry above](#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel) ran.
+Nobody has run an aircraft with many more cockpit panels than the PA-24's 16.
 
 **Affects:** node 1.2 of the [architecture plan](../architecture/plan.md#12-communication); the foundations chapters [03-01](../../learn/foundations/03-01-units-and-variables.md), on how long an `L:` value lasts, [04-01](../../learn/foundations/04-01-connection-and-data.md) and [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), on SimConnect and the CommBus, and [06-04](../../learn/foundations/06-04-websockets-to-localhost.md), on the `Origin`; and the per-lever hold flags in [soft takeover](../product/ideas.md#soft-takeover-on-handover).
 

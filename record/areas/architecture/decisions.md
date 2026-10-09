@@ -224,7 +224,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 ## Sessions and pilots are named by random UUIDs, carried as text
 
 - **Decided:** a session's ID and a pilot's ID are each a version 4 UUID, which has 122 random bits.
-  The host's core draws the session's when it starts the session, and each pilot's core draws theirs when they start or join a session, and keeps it through every rejoin of it; each crosses as its text, in every language.
+  The host's core draws the session's when it starts the session, and each pilot's core draws theirs when they start or join a session, and keeps it through every rejoin of it; each crosses as its lowercase text wherever JSON or TypeScript reads it.
   A run of the sim is named by its process's ID and the time the process was created.
   This answers [03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)'s question of what form the session's ID takes, and [02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)'s of a pilot ID's form.
   Settled in node 1.4 by the user, 2026-10-09.
@@ -253,12 +253,13 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine, and replays what they missed if their sim kept running; the user chose that a crashed core does the same (user, 2026-10-09).
   - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send, where the restart count costs one write per start.
 - **Leaves out:**
-  - how a restarted core recovers, for the part that designs sync ([01-spine](01-spine.md#left-open)): how it keeps or rebuilds its vector clock, the conflict rule's stamps, its shadow values, its record of which messages it applied, and its state object; how each channel tells a copy from a late message; how the conflict rule orders two changes from one pilot under two restart counts; and whether the others catch up on its pilot's changes that never reached them, including what it had sent that no machine received
+  - how a restarted core recovers everything the sync engine held only in memory, and gets the others the changes its pilot made that never reached them, for the part that designs sync ([01-spine](01-spine.md#left-open))
+  - how each channel tells a copy from a late message, for the part that designs sync and the node on how the cores reach each other ([01-spine](01-spine.md#left-open))
   - what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded ([01-spine](01-spine.md#left-open))
 
 ## A time in a message is µs on the sender's PC's monotonic clock
 
-- **Decided:** every time in a message is a whole number of µs on Windows' `QueryPerformanceCounter` on the sender's PC, whose ticks become µs through `QueryPerformanceFrequency`.
+- **Decided:** every stamp in a message, the moment a value was read, is a whole number of µs on Windows' `QueryPerformanceCounter` on the sender's PC, whose ticks become µs through `QueryPerformanceFrequency`, and every span in a message is a whole number of µs, whatever clock measured it.
   The conversion to µs runs in 128 bits, so it doesn't overflow on a PC that has run for weeks.
   A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin as it arrives, since a page can't read the counter, and the clocks a plugin can read, QuickJS-ng's `Date.now()` and `performance.now()`, aren't shown to count the same ticks; a page that needs a span measures it on its own clock and sends the span.
   The core stamps each data-slot write from our WASM module as it arrives, until a clock the module can read is shown to count the same ticks.
@@ -272,7 +273,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - A stamp, counted in µs from the PC's start, fits a JavaScript number exactly for about 285 years ([01-spine](01-spine.md#times)).
   - Each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)), so a frame on one machine names no moment on another.
   - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
-- **Leaves out:** how the offset is estimated, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
+- **Leaves out:** how the offset is estimated, what a higher restart count does to it, and how far two PCs' counters part in practice, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
 
 ## Messages cross to TypeScript as JSON, typed by ts-rs from the Rust crate
 

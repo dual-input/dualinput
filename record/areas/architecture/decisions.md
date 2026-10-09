@@ -229,7 +229,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   This answers [03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)'s question of what form the session's ID takes, and [02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)'s of a pilot ID's form.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs 36 characters an ID as text, once per join or link unless the vector clocks name pilots by ID ([01-spine](01-spine.md#ids); user, 2026-10-09).
+  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs 36 characters an ID as text, once per join or link unless the vector clocks name each counter by ID, which would carry one ID per counter in every message ([01-spine](01-spine.md#ids); user, 2026-10-09).
   - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed, so a 128-bit ID can't cross as a JavaScript number ([01-spine](01-spine.md#ids)).
   - The invite code can't name a session for a bug report, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - A process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone can't tell one run of the sim from the next.
@@ -237,22 +237,22 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
-- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's own restart count, the run of the sim the pilot was in, and, for each sender, the restart count its link last opened with and the last message number the core applied from it in each channel.
+- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
   The restart count goes up by 1 each time the core starts while the file exists.
-  Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel; a receiver keeps a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
-  In the vector clocks, each counter belongs to a pilot's ID and a restart count, and a restarted core takes its old counter from the other machines' clocks as it rejoins.
-  This changes [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s and [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)'s one counter per pilot.
-  Every core writes each number to its session file after applying the message and before applying the next.
-  A core that restarts while the sim keeps running rejoins the pilot under the same ID and replays what they missed, as after a network outage; one whose sim restarted too rejoins them under the same ID as a late joiner.
+  Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel, so every message is named by its sender's pilot ID, restart count, channel, and number; a receiver keeps what it knew of a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
+  In the vector clocks, each counter belongs to a pilot's ID and a restart count.
+  This changes [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s and [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)'s one counter per pilot, and gives 02-live-sync's message ID its form.
+  A core that restarts while the sim keeps running rejoins the pilot under the same ID and replays what they missed; one whose sim restarted too rejoins them under the same ID as a late joiner.
   This settles node 1.4's question of what a pilot's identity is across a core restart ([architecture plan](plan.md#14-shared-conventions)).
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - A receiver drops a message whose number it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a receiver that didn't know a core restarted would drop its messages, numbered from 1 again, as copies until their numbers passed the last one applied before the restart.
+  - A receiver drops a message it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a receiver that didn't know a core restarted would take its messages, numbered from 1 again, for copies of old ones.
     A link back from an outage under the same count is the same core, whose replay the receiver dedupes against the numbers it kept.
-  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); in Crosscheck, the numbers the session file keeps narrow the first to the message a core was applying as it crashed, the second stays, and the third doesn't arise, since a first join catches up state ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
+  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); the third doesn't arise in Crosscheck, since a first join catches up state ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine, and replays what they missed if their sim kept running; the user chose that a crashed core does the same (user, 2026-10-09).
-  - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send; the restart count costs one write per start, and a receiver's write of each number comes after applying the message, so no send waits on the disk.
+  - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send, where the restart count costs one write per start.
 - **Leaves out:**
+  - how a restarted core replays: how it keeps or rebuilds its vector clock, the conflict rule's stamps, its shadow values, and which messages it had applied, and how each channel tells a copy from a late message, for the sync engine ([01-spine](01-spine.md#left-open))
   - what the core had sent that no machine had received when it crashed, which is lost with its process ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts))
   - what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded ([01-spine](01-spine.md#left-open))
 

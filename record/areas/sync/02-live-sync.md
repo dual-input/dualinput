@@ -9,6 +9,7 @@ Decides:     What crosses the wire, the order changes apply in, how a conflict r
 > **Note**
 > Since 2026-10-09, each vector clock counter belongs to a pilot's ID and their core's restart count, not to the pilot alone, so a core that restarts starts a counter of its own ([architecture's tentative decisions](../architecture/decisions.md#a-pilot-keeps-their-id-through-a-core-restart-and-the-core-counts-its-restarts)).
 > A pilot ID is a version 4 UUID, and the tie-break below compares two as lowercase text ([architecture's spine](../architecture/01-spine.md#ids)).
+> The transport's message ID in [Keeping a change from applying twice](#keeping-a-change-from-applying-twice) is a number in its channel, under the sender's pilot ID and restart count, and a receiver starts a sender's numbers afresh when its link opens with a higher restart count ([architecture's spine](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts)).
 
 A state entry crosses the wire as its new value, and each receiving machine moves its cockpit to that value through the entry's write, then reads it back to check.
 Events and pointer presses cross as what happened.

@@ -3,6 +3,39 @@
 What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-09: Installed from the Community folder, our toolbar script loads at the flight load, and it and our EFB app's code each open the banner when the client asks over the CommBus
+
+**Asked:** does the toolbar script run outside a Build and Mount, and open the banner's panel after a flight loads and when a session starts mid-flight; and can our EFB app's code open it instead ([architecture plan](../architecture/plan.md#15-a-flight-with-crosschecks-rust-pieces), node 1.5)?
+The answer decides whether the toolbar script is one of Crosscheck's components at all.
+
+**Expected:** no prediction: the toolbar script had run only after a Build and Mount ([entry below](#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the A2A PA-24 parked, in architecture's probe p08, with two packages in the Community folder before the sim started, and no Build and Mount:
+
+- `crosscheck-p08-banner` held p05's panel as the Project Editor compiled it on 2026-10-04, and a toolbar icon that loads `p08-toolbar.js` into the toolbar's document.
+- `crosscheck-p08-efb` held one EFB app whose code listens on the CommBus.
+
+Both scripts, asked by p08's client over the CommBus, call `TOOLBAR_BUTTON_TOGGLE` for the panel and answer the client over the CommBus.
+
+- The toolbar script was running in the flight's toolbar document, having loaded about when `FLIGHT_START` and `RTC_START` came, 58s before Ready to fly.
+  It took the CommBus through `ADD_VIEW_LISTENER`, because neither `RegisterCommBusListener` nor `RegisterViewListenerT` with `Coherent` was defined when it loaded, and `Coherent.call` worked when it later opened the panel.
+  Whether it loaded in the main menu's toolbar the run can't say, because the client's call there came before the sim's open reply.
+- The EFB app's code loaded while the main menu loaded its aircraft, took the CommBus through the sim's `Services/CommBus.js`, and answered each call.
+  It answered "ready" twice, 0.1s apart, and which two listeners sent them is unverified.
+- 177s after Ready to fly, and again 279s after, each script called `TOOLBAR_BUTTON_TOGGLE`, and each call resolved.
+  The toolbar's own record listed the panel `Detached`, and the inspector listed the panel's page.
+  Asked to close it, each script closed the panel, and the inspector stopped listing the page.
+- Screenshots after three of the four openings show p05's pre-flight card at the left of the screen.
+  Before the first one was taken, the user had clicked the card's Start flying, which hides it.
+
+**Changed:** our package opens the banner from code, with no Build and Mount, after a flight load and mid-flight, from the toolbar script or from the EFB app's code, so either can be the component that opens it.
+
+What we haven't run: opening the panel during the load, between `FLIGHT_START` and Ready to fly; a second flight load in the same run of the sim; and the toolbar script in the main menu.
+
+**Affects:** the [notification banner](../product/03-v1-scope.md#notification-banner), whose open question asks whether the toolbar script opens the panel at every flight load; node 1.5 of the architecture plan; and the toolbar script's row in the spine's [components](../architecture/01-spine.md#components).
+
+**Evidence:** `experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.txt`, `.ndjson`, and a folder of screenshots.
+
 ## 2026-10-08: A page's WebSocket stays open after the page is gone, and the CommBus reaches every page we use in the menu and every cockpit panel
 
 **Asked:** what the [entry below](#2026-10-08-every-page-we-use-reaches-the-core-by-websocket-and-by-the-commbus-but-the-menus-page-cant-read-an-l-variable-and-a-flight-load-resets-one) left unmeasured that node 1.2's answer leans on: whether a page's WebSocket closes when the page goes away; the CommBus handshake in the main menu and in every cockpit panel, and from a page that asks before its listener reports ready; and whether Node's own WebSocket client sends an `Origin`, which decides whether the core's check on it lets our apps in.

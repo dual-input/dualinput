@@ -1,0 +1,47 @@
+p08 · Crosscheck's Rust pieces in a flight, on MSFS 2024 (architecture plan, node 1.5)
+2026-10-09T17:12:33.043Z, done; the client on SimConnect.dll through bindgen's declarations
+
+Connected 108.6s after the client started, which asked Steam to start the sim; no open record.
+Group A at the sim's start: map K:SIM_RATE_INCR returned 0; add it to group A, not maskable returned 0; group A at 10,000,000 returned 0.
+Before the main menu settled, after group A went in: no aircraft or flight loaded.
+At the main menu, no OUT record from the module within 10s of writing IN.
+At the main menu, a ping over the CommBus: no script answered.
+Flow events through the load, relative to RTC_END: TELEPORT_START +-130.9s, TELEPORT_DONE +-130.9s, TELEPORT_START +-94.6s, TELEPORT_DONE +-94.6s, FLT_LOAD +-73.9s, FLT_LOADED +-73.9s, FLT_LOAD +-73.9s, FLT_LOADED +-73.9s, TELEPORT_START +-73.9s, TELEPORT_DONE +-73.9s, FLIGHT_START +-57.7s, FLT_LOAD +-57.7s, FLT_LOADED +-57.7s, RTC_START +-57.7s, RTC_END +0.0s.
+System events through the load: AircraftLoaded %APPDATA%\microsoft flight simulator 2024\packages\community\a2a-aircraft-pa24\simobjects\airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg; AircraftLoaded %APPDATA%\microsoft flight simulator 2024\packages\community\a2a-aircraft-pa24\simobjects\airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg; FlightLoaded %APPDATA%\Microsoft Flight Simulator 2024\MISSIONS\Custom\CustomFlight\CustomFlight.FLT; AircraftLoaded %APPDATA%\microsoft flight simulator 2024\packages\community\a2a-aircraft-pa24\simobjects\airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.cfg.
+After Ready to fly, a ping over the CommBus: toolbar answered (view listener, loaded 230s ago, panel Invisible); efb answered (common.js, loaded 293s ago, panel unknown).
+After Ready to fly, the toolbar script asked to open the banner: open, open resolved; the inspector lists the banner's page (Crosscheck); the toolbar has the panel Detached; screenshot 01-banner-after-ready-to-fly-toolbar.jpg.
+After Ready to fly, the EFB app's code asked to open the banner: open, open resolved; the inspector lists the banner's page (Crosscheck); the toolbar has the panel Detached; screenshot 02-banner-after-ready-to-fly-efb.jpg.
+The user aircraft: TITLE A2A Piper PA-24-250 Comanche, LIVERY NAME N8351P; at -0.90886, -89.61669, 61 ft, heading 74.4° true.
+EnumerateSimObjectsAndLiveries listed 6297 aircraft entries, 16 of them PA-24s; the AI copy gets "C-FCIO".
+the AI PA-24, object 56066048: TITLE A2A Piper PA-24-250 Comanche, LIVERY NAME C-FCIO.
+our figure, object 56082432: TITLE CROSSCHECK_Figure, LIVERY NAME (none).
+The camera: status 2, game-controlled 0; at 0.302, 0.546, 0.011 m from the aircraft, pitch 4.1°, bank 7.8°, heading -0.0°, field of view 0.7.
+EnumerateInputEvents listed 318 input events; with "battery" in the name: SWITCH_BATTERY_MASTER_2STATES.
+SWITCH_BATTERY_MASTER_2STATES (hash 5779047746558467423): GetInputEvent read 1; set to 0, the subscription reported 0, 0 and L:Battery1Switch read 0; set back to 1, L:Battery1Switch read 1.
+The CommBus to VCockpit53 - GNS_DISABLED (common.js): 5 calls, 5 answers.
+The yoke, masked through SimConnect.dll by the group taken at the sim's start: ahead of Accu-Sim: group A heard the hardware and L:ElevatorInput held still (0% of its free range).
+  free: L:ElevatorInput -100..100; heard at the highest priority ×273, 161 past ±6000; group A heard ×0, 0 past ±6000.
+  masked by group A: L:ElevatorInput -18.26..-18.26; heard at the highest priority ×262, 142 past ±6000; group A heard ×262, 142 past ±6000.
+  cleared: L:ElevatorInput -100..100; heard at the highest priority ×0, 0 past ±6000; group A heard ×0, 0 past ±6000.
+A flight-hardware button through Raw Input in sink mode: 22 changes in 10s, 22 with the sim in front; VID_044F&PID_0405 down 1; VID_044F&PID_0405 down none; VID_044F&PID_0405 down 1; VID_044F&PID_0405 down none; VID_044F&PID_0405 down 1; VID_044F&PID_0405 down none.
+Mid-flight, a ping over the CommBus: toolbar answered (view listener, loaded 333s ago, panel Invisible); efb answered (common.js, loaded 395s ago, panel unknown).
+Mid-flight, the toolbar script asked to open the banner: open, open resolved; the inspector lists the banner's page (Crosscheck); the toolbar has the panel Detached; screenshot 04-banner-mid-flight-toolbar.jpg.
+Mid-flight, the EFB app's code asked to open the banner: open, open resolved; the inspector lists the banner's page (Crosscheck); the toolbar has the panel Detached; screenshot 05-banner-mid-flight-efb.jpg.
+
+Page Down through Raw Input in sink mode: 3 presses, 3 with the sim in front.
+
+Echoes: 2432 of 2432 IN writes came back; round trip, client's write to its receipt of the echo: min 5.01ms, median 16.95ms, 95th percentile 12949.87ms, max 37572.75ms.
+The module's monotonic clock: 0 of 2432 stamps fall between the client's write and its receipt on the client's own counter; offset to the counter 26959497.70ms at the first echo; drift -911.14 ppm over 456s, residual spread 1188.03ms.
+  Its smallest step between echoes: 0.002ms; the stamps end in varied ns digits.
+The module's realtime clock against the counter: drift -911.34 ppm over 456s, residual spread 1189.09ms.
+The sum of Update_StandAlone's frame times against the counter: 456.01s against 455.88s, over 42085 frames.
+L:CROSSCHECK_P08_ECHO, requested through SimConnect each sim frame it changes, against the slot from the same frame: 718 pairs; it arrived after the slot by min 1.14ms, median 1.79ms, 95th percentile 2.56ms, max 193.05ms.
+Node's hrtime against the client's counter: 3 samples, drift -44.74 ppm, residual spread 1.31ms.
+toolbar (Toolbar): 8 samples; performance.now() drifts -60.6 ppm from hrtime, residual spread 11.29ms; Date.now() drifts -61.0 ppm, residual spread 11.68ms; inspector round trip median 19.1ms.
+efb (Electronic Flight Bag): 8 samples; performance.now() drifts 5.6 ppm from hrtime, residual spread 1.74ms; Date.now() drifts 7.3 ppm, residual spread 1.87ms; inspector round trip median 21.6ms.
+cockpit panel (VCockpit53 - GNS_DISABLED): 8 samples; performance.now() drifts -5.3 ppm from hrtime, residual spread 5.03ms; Date.now() drifts -6.6 ppm, residual spread 5.09ms; inspector round trip median 22.3ms.
+banner (Crosscheck): 2 samples; performance.now() too few samples; Date.now() too few; inspector round trip median 21.8ms.
+
+Client calls: 66, every one returned S_OK.
+Exceptions: none.
+Client exit: still running when the report was written.

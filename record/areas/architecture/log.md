@@ -3,6 +3,67 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-09: In a flight, a Rust client on SimConnect.dll masks, creates AI objects with liveries, sets input events, reads the camera, and follows the load; the Rust module echoes; Raw Input gets a person's key and button; and the module's clock counts the counter's ticks from near the sim's start
+
+**Asked:** does what Crosscheck's Rust pieces did at the main menu hold in a flight (node 1.5)?
+Specifically: does the core's client on the SDK's `SimConnect.dll` do what our probes did through node-simconnect, does our Rust module run and trade data slots, and does the helper's Raw Input get a key and a button that a person presses with the sim in front?
+Three measurements rode along: whether a clock the module reads counts the same ticks as `QueryPerformanceCounter`, how long a data-slot write and a variable requested through SimConnect take to reach the client, and how each page's `performance.now()` runs against the counter.
+The banner's half of the run is in the [interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus).
+
+**Expected:** yes to each, since the DLL and node-simconnect speak one protocol to one server.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the A2A PA-24 parked, with p08's client, module, and helper built by rustc 1.95.0 on declarations bindgen 0.72.1 generated from the SDK's headers with libclang from LLVM 23.1.3, the client's from MSFS 2024 SDK 1.7.3 and the module's from the SDK 1.8.1 that cargo-msfs fetched:
+
+- **The declarations.** bindgen gave `HANDLE` a pointer in the client and a 64-bit integer in the module, as each header declares it, and the input event's hash a 64-bit integer; `SIMCONNECT_DATA_INITPOSITION` went by value.
+  All 66 of the client's calls returned `S_OK`, and no exception arrived.
+- **Connecting as the sim boots.** The client asked Steam to start the sim and retried `SimConnect_Open`, which returned `E_FAIL`, −2147467259, until it returned `S_OK` 109s later.
+  The client took group A at 10,000,000 at once, held open by `K:SIM_RATE_INCR`, and each call returned `S_OK`, but the sim's open reply arrived 46s after that, and the main menu's PA-24 loaded 16s after the reply.
+  Calls made before the reply took effect: the IN writes made then were echoed once the reply came, and group A sat ahead of Accu-Sim (below).
+- **Masking.** Once group A added `K:AXIS_ELEVATOR_SET`, maskable, after Ready to fly, it heard all 262 elevator events that the client's listener at the highest priority heard, 142 of them past ±6,000, and Accu-Sim's `L:ElevatorInput` held at −18.26 while the pilot moved the yoke; free, it ran −100 to 100.
+  Clearing group A also cut the listener's group off from the axis: in the cleared phase it heard none, while `L:ElevatorInput` ran −100 to 100 again.
+  Removing a client event from a group did the same through node-simconnect (measured on MSFS 2024, 2026-10-01, the comment on `subscribeKeys` in `experiments/areas/aircraft/lib/sim.mjs`).
+- **The flight load.** The client heard `TELEPORT_START` and `TELEPORT_DONE` twice in the main menu, then `FLT_LOAD` and `FLT_LOADED` for `apron.flt` and `CustomFlight.FLT`, `FLIGHT_START`, `RTC_START`, and `RTC_END` 58s after `RTC_START`, with `AircraftLoaded` three times and `FlightLoaded` once.
+- **AI objects.** `EnumerateSimObjectsAndLiveries` listed 6,297 aircraft entries, 16 of them PA-24 liveries.
+  `AICreateNonATCAircraft_EX1` created a PA-24 in the livery `C-FCIO`, beside the pilot's `N8351P`, and `AICreateSimulatedObject_EX1` created our figure, `CROSSCHECK_Figure`; each object's `TITLE` and `LIVERY NAME` read back as created, and both were removed.
+  The screenshot shows neither, since the aircraft faced a hangar wall.
+- **The camera.** `CameraGetStatus` answered 2, `SIMCONNECT_CAMERA_ACQUIRED_BY_OTHER` (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`), and `CameraGet` relative to the aircraft gave 0.302, 0.546, 0.011m, angles of 4.1°, 7.8°, and 0.0°, and a field of view of 0.739.
+- **Input events.** `EnumerateInputEvents` listed 318.
+  `GetInputEvent` read `SWITCH_BATTERY_MASTER_2STATES` as 1; set to 0, the subscription reported 0 twice and `L:Battery1Switch` read 0; set back to 1, both followed.
+- **The CommBus.** A listener put into `VCockpit53 - GNS_DISABLED` through the inspector heard all 5 of the client's calls and answered each.
+- **The module.** It echoed all 2,432 of the client's IN writes.
+  In the flight, from 20s after Ready to fly, 1,476 echoes over 299s came back in a round trip of 10.2ms at least, 16.6ms median, 22.1ms at the 95th percentile, and 44.6ms at most, while the module's update ran 26,702 times, 89.2 a second.
+  During the load, between the open reply and Ready to fly, round trips reached 2.8s, and the 178 writes made before the open reply came back up to 37.6s late.
+- **The module's clock.** WASI's monotonic clock, through `clock_time_get`, gave stamps in whole 100ns steps: 2,377 of 2,432 were multiples of 100ns, and the other 55 ended in 99ns.
+  That is `QueryPerformanceCounter`'s tick on this machine, whose frequency is 10 MHz.
+  One constant offset fits all 1,476 flight echoes.
+  With each stamp placed between the client's write and its receipt, the offsets that fit all of them span 9.5ms, those that fit the first and the last 30s overlap, and any drift is within ±33 ppm over the 299s; least squares gives −2 to −3 ppm.
+  The clock read 0 about 12s after Steam was asked to start the sim, not at the PC's start, so its stamps need an offset to reach the counter's timeline; which event in the sim's start sets that 0 is unverified.
+  WASI's realtime clock gave Unix time in multiples of 100ns, and the sum of `Update_StandAlone`'s frame times ran 36 ppm fast over the 299s.
+- **A variable through SimConnect.** `L:CROSSCHECK_P08_ECHO`, which the module set in the frame it echoed and the client requested each sim frame it changed, arrived after the slot from the same frame in all 718 pairs: by 1.14ms at least, 1.79ms median, 2.90ms at the 99th percentile, and 193ms at most.
+- **Raw Input.** In sink mode, the helper got all 3 Page Down presses the user made, each with `FlightSimulator2024.exe` in front.
+  In a 10s window it got 22 changes of the buttons down on device `VID_044F&PID_0405`, each with the sim in front.
+- **The pages' clocks.** Node's `process.hrtime` reads `QueryPerformanceCounter`: in a separate check that day, .NET's `Stopwatch.GetTimestamp`, which reads the counter, fell inside each of 3 brackets of `hrtime`, on the same 10 MHz scale.
+  The probe sampled each page's `performance.now()` through the inspector, bracketed by `hrtime`, about 8 times over the last 145s of the run.
+  Against the counter, the toolbar's ran −60.6 ppm, residual spread 11.3ms; the EFB's +5.6 ppm, 1.7ms; and `VCockpit53`'s −5.3 ppm, 5.0ms.
+  `Date.now()` ran within 2 ppm of `performance.now()` in each page.
+  Each sample's inspector round trip was about 20ms, so 8 samples over 145s can't tell a rate apart from the counter's below tens of ppm; no page's clock jumped by more than its spread.
+  The probe kept only these summaries, not the samples.
+
+**Changed:**
+
+- The core can reach the sim through the SDK's own `SimConnect.dll` for what a flight adds, and our module runs in one, both on declarations bindgen generates from the SDK's headers.
+- The core can take its masking group as soon as `SimConnect_Open` succeeds, before the sim's open reply arrives.
+- The helper's Raw Input in sink mode gets a key and a flight-hardware button that a person presses with the sim in front.
+- The module can stamp what it reads on `QueryPerformanceCounter`'s ticks through WASI's monotonic clock, but from an origin near the sim's start, so a stamp reaches the core's timeline only through one offset per run of the sim, which the core can estimate from the echoes' round trips.
+- A data-slot write reached the client within a 44.6ms round trip in the flight, and a variable requested through SimConnect each sim frame came about 2ms after the slot from the same frame, and once 193ms after it.
+- A page's `performance.now()` showed no jump over 145s, but this run can't resolve its rate against the counter.
+
+What we haven't run: the module's clock over a longer flight, and which event sets its 0; page samples kept and taken over longer; an aircraft other than the PA-24; a second flight load in the same sim run; and the helper's audio in a flight.
+
+**Affects:** node 1.5 of the [architecture plan](plan.md#15-a-flight-with-crosschecks-rust-pieces); the tentative decisions [Crosscheck is written in Rust](decisions.md#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it) and [The core catches the take-control key and buttons](decisions.md#the-core-catches-the-take-control-key-and-buttons); and the spine's [left open](01-spine.md#left-open) items on the core, the clocks, and the arrival delay.
+
+**Evidence:** `results/p08-flight-2026-10-09-17-12-31.txt`, `.ndjson`, and a folder of screenshots.
+
 ## 2026-10-09: ts-rs, with 64-bit integers set to numbers, generates TypeScript that matches what serde_json sends; specta needs two opt-ins, typeshare can't express our messages, and the data slots keep one layout on x86_64 and wasm32
 
 **Asked:** which of ts-rs, specta, and typeshare generates TypeScript types from a Rust crate of messages that match what serde_json sends; do the same messages reach TypeScript running in QuickJS-ng through rquickjs; and do the data slots' structs keep one layout on x86_64 and wasm32 (node 1.4.1)?

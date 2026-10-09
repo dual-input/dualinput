@@ -289,6 +289,7 @@ Meanwhile the core stamps the module's echoes as they arrive, and times each pag
 It reads the architecture log's 2026-10-08 entries, the probes [p02](../../../experiments/areas/architecture/p02-rust-helper.mjs), [p03](../../../experiments/areas/architecture/p03-rust-module.mjs), and [p06](../../../experiments/areas/architecture/p06-rust-simconnect.mjs), the [interface log](../interface/log.md), and the probes the flight-controls, avatars, and sync logs name.
 Its answer goes in entries in the logs of the areas the findings belong to, which `01-spine.md` and the tentative decisions cite.
 Exit: log entries answer each part of the question.
+Done on 2026-10-09.
 
 ## 1.6 Frameworks
 

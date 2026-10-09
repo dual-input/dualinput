@@ -238,7 +238,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
-- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 5 minutes cut off, or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
+- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 5 minutes cut off, or the core learns the session has ended.
+  The file holds the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
   The restart count goes up by 1 each time the core starts while the file exists, and the core flushes the raised count to disk before it opens any link.
   Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel, so every message is named by its sender's pilot ID, restart count, channel, and number; a receiver keeps what it knew of a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
   In the vector clocks, each counter belongs to a pilot's ID and a restart count.
@@ -275,11 +276,11 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - A stamp, counted in µs from the PC's start, fits a JavaScript number exactly for about 285 years ([01-spine](01-spine.md#times)).
   - Each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)), so a frame on one machine names no moment on another.
   - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
-- **Leaves out:** how the offset is estimated, what a higher restart count does to it, and how far two PCs' counters part in practice, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
+- **Leaves out:** how the offset is estimated, what a higher restart count does to it, and how far two PCs' counters part in practice, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`; how far the core's arrival stamp trails the read, for a page's message and a data-slot write from our WASM module; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
 
 ## Messages are defined in one Rust crate: JSON typed by ts-rs for TypeScript, fixed-width structs in data slots, and length-prefixed binary to the helper
 
-- **Decided:** over a WebSocket, and into a plugin, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with 64-bit integers typed as `number`.
+- **Decided:** over a WebSocket, and into a plugin, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with ts-rs's large-integer setting at `number`, which types `i64`, `u64`, `i128`, and `u128` alike, so an integer field that can pass 2^53 crosses as text, as the IDs do.
   In a data slot, a message is a struct of fixed-width fields, with its size and field offsets asserted in the crate, which builds for x86_64 and wasm32.
   Over the helper's standard input and output, a message is binary and prefixed with its length.
   Settled in node 1.4 by the user, 2026-10-09.
@@ -301,4 +302,6 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - Crosscheck's programs and its package update together, as one version, and pilots on different versions can't join each other ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - A version number nothing reads drifts: fsc-editor's package version sat at 0.0.1 while its module's reached 0.3.0, until its build derived one from the other ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)).
   - Two development builds can carry one version number with different messages, and the hash tells them apart, as FS Copilot's check of a hash of each packet type refuses a peer whose types differ ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
-- **Leaves out:** pilots on different versions flying together, which v1 doesn't offer ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) and which would need a version both sides speak rather than equal ones.
+- **Leaves out:**
+  - pilots on different versions flying together, which v1 doesn't offer ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) and which would need a version both sides speak rather than equal ones
+  - how the build hashes the message crate, which has to cover each message's encoding as well as its fields ([01-spine](01-spine.md#left-open))

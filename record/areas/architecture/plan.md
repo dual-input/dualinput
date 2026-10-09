@@ -260,6 +260,7 @@ It reads 1.2's answer, then the foundations chapters [08-01](../../learn/foundat
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.4.1.
+Done on 2026-10-09.
 Raised elsewhere: by 1.3, how the TypeScript sides, the sim's pages, the desktop app's pages, and plugins calling the core's host functions, get their types from the Rust crate that defines each message, so both sides are checked against one definition ([01-spine](01-spine.md#messages-between-components); [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)).
 Raised elsewhere: by 1.1, what a pilot's identity is across a core restart, since FS Copilot made a restarted app "a new peer in every respect" (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03), while [the connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine.
 

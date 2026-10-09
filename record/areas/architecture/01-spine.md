@@ -469,13 +469,16 @@ The tentative decisions behind these start at [decisions.md](decisions.md#the-co
 
 ### The check
 
-Every JavaScript file we ship into the sim, experiments' files included, passes three checks, run after every edit and in CI, as step 7 asks ([the product plan](../product/plan.md#7-tech-stack-and-architecture)); nobody maintains a rule set for Coherent GT that we could use instead ([architecture log][research]).
+Every JavaScript file we ship into the sim, experiments' files included, passes a check run after every edit and in CI, as step 7 asks ([the product plan](../product/plan.md#7-tech-stack-and-architecture)); nobody maintains a rule set for Coherent GT that we could use instead ([architecture log][research]).
+The check is a tool of its own, built for our needs in a repository of its own under Crosscheck's GitHub organization, and published as it is, for anyone to use, without support (user, 2026-10-09).
+It holds what [Coherent GT's JavaScript](coherent-gt.md) lists as one data file, and does two things to each file:
 
-1. A JavaScript parser set to ECMAScript 2017, such as acorn, parses each file we ship, compiled or written as JavaScript, so syntax newer than ES2017 fails with its file, line, and column, in our code or in a package's.
-   It rejects object rest too, which the engine parses, so code written as JavaScript keeps to ES2017.
-   `node --check` passes such syntax, `?.` among it, because Node accepts it.
-2. A check of our TypeScript and JavaScript sources rejects regex features from ES2018 on and a raw U+2028 or U+2029, which neither TypeScript 7.0.2 nor esbuild 0.28.2 makes work: TypeScript leaves such a regex as written, flagging named groups and the `s` flag but not lookbehind, and esbuild hides it in a `new RegExp(...)` call, which parses and then throws when it runs ([Coherent GT's JavaScript](coherent-gt.md#syntax)).
-3. A list fails any use of a built-in or web API that [Coherent GT's JavaScript](coherent-gt.md) lists as missing or filled in only in some documents, since TypeScript's DOM types declare every missing web API, such as `ResizeObserver`, ES5's lib declares `Intl`, and the type check doesn't see our JavaScript files.
+1. It parses the file at ECMAScript 2017, with the pattern of each regex literal and of each `new RegExp(...)` given a fixed string, so syntax newer than ES2017, in our code or in a package's, fails with its file, line, and column.
+   - That covers the regex features from ES2018 on, which neither TypeScript 7.0.2 nor esbuild 0.28.2 makes work. TypeScript leaves such a regex as written, flagging named groups and the `s` flag but not lookbehind. esbuild hides it in a `new RegExp(...)` call, which parses and then throws when it runs ([Coherent GT's JavaScript](coherent-gt.md#syntax)).
+   - A regex built from a pattern computed at run time escapes it.
+   - A parse at ES2017 rejects object rest too, which the engine parses, so code written as JavaScript keeps to ES2017.
+   - `node --check` passes such syntax, `?.` among it, because Node accepts it.
+2. It fails any use of a built-in or web API the data lists as missing or filled in only in some documents, since TypeScript's DOM types declare every missing web API, such as `ResizeObserver`, ES5's lib declares `Intl`, and the type check doesn't see our JavaScript files.
 
 Until the check exists, [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) asks for `node --check` and a look at the reference.
 
@@ -588,7 +591,7 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 **The build**, in its stage of step 8 unless an item says otherwise:
 
-- How each of [the check](#the-check)'s three parts is built: the parser, with p09's failing samples as its test; the rule for regex features in our sources, such as an ESLint rule set that names each one; and the list of banned built-ins and web APIs, with an exception for a package's own fill-in.
+- How [the check](#the-check)'s tool is built: its parser, with p09's failing samples as its test; its list of banned built-ins and web APIs, with an exception for a package's own fill-in; and whether it also offers an ESLint config, for warnings in the editor as our sources are written.
 - Whether the MSFS Avionics Framework's `for`-`of` rewrite, run through TypeScript before esbuild bundles, pays for itself in our interface, which a frame-time probe of the EFB app and the banner, built with it and without it, settles ([compiling our code in the sim](#compiling-our-code-in-the-sim)).
 - How the build hashes the message crate, which has to cover each message's encoding as well as its fields, since FS Copilot's fingerprint covers a type's fields and not its codec, so a codec that wrote them in a new order would pass it ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
 - The check in CI that ts-rs's generated files match the crate.

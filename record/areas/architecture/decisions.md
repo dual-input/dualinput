@@ -390,13 +390,16 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - esbuild refused FlyByWire's `safari11` target for an object rest in a parameter ([architecture log](log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild)), so `es2017` is the target both compilers take.
 - **Leaves out:** whether the framework's `for`-`of` rewrite, which esbuild can't run, pays for itself in our interface ([01-spine](01-spine.md#left-open)).
 
-## Every file we ship into the sim passes a parse check, a source check, and a list of what the engine lacks
+## A tool of our own checks every file we ship into the sim against Coherent GT's measured limits
 
-- **Decided:** every JavaScript file we ship into the sim, experiments' files included, passes three checks, run after every edit and in CI: a parser set to ECMAScript 2017 over each compiled file; a check of our sources for regex features from ES2018 on and a raw U+2028 or U+2029; and a list that fails any use of a built-in or web API [Coherent GT's JavaScript](coherent-gt.md) lists as missing or filled in only in some documents.
+- **Decided:** every JavaScript file we ship into the sim, experiments' files included, passes a check run after every edit and in CI.
+  The check parses each file at ECMAScript 2017, with the pattern of each regex literal and of each `new RegExp(...)` given a fixed string, and fails any use of a built-in or web API [Coherent GT's JavaScript](coherent-gt.md) lists as missing or filled in only in some documents.
+  It's a tool of its own, holding that list as one data file, built for our needs in a repository of its own under Crosscheck's GitHub organization, and published as it is, for anyone to use, without support.
   Settled in node 1.6 by the user, 2026-10-09.
 - **Because:**
   - Step 7 asks for a check that every file run in Coherent GT, experiments included, parses within the engine's measured limits, run in CI and after edits ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and nobody maintains a rule set for the engine we could use instead ([architecture log](log.md#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework)).
   - A syntax error takes out the whole file, and `node --check` passes the syntax the engine rejects, such as `?.` ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)).
   - Neither TypeScript 7.0.2 nor esbuild 0.28.2 makes the regex features from ES2018 on work: TypeScript leaves them as written and flags some, and esbuild hides each in a `new RegExp(...)` call that a check of its output can't see (measured on our development machine, 2026-10-09, [architecture log](log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild)).
   - TypeScript's DOM types declare web APIs the engine lacks, such as `ResizeObserver`, ES5's lib declares `Intl`, which the engine lacks too, and the sim's own scripts fill in some built-ins in some documents only (same entry).
-- **Leaves out:** how each check is built, for the build's stage of step 8 ([01-spine](01-spine.md#left-open)).
+  - Other MSFS projects have no such check either, and the user wants ours usable by them without our supporting it (user, 2026-10-09).
+- **Leaves out:** a regex built from a pattern computed at run time, which a parse can't see; and how the tool is built, for the build's stage of step 8 ([01-spine](01-spine.md#left-open)).

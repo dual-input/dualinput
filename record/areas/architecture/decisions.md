@@ -224,7 +224,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 ## Sessions and pilots are named by random UUIDs, carried as text
 
 - **Decided:** a session's ID and a pilot's ID are each a version 4 UUID, which has 122 random bits.
-  The host's core draws the session's when it starts the session, and each pilot's core draws theirs when they join a session, and keeps it through every rejoin of it; each crosses as its text, in every language.
+  The host's core draws the session's when it starts the session, and each pilot's core draws theirs when they start or join a session, and keeps it through every rejoin of it; each crosses as its text, in every language.
   A run of the sim is named by its process's ID and the time the process was created.
   This answers [03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)'s question of what form the session's ID takes, and [02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)'s of a pilot ID's form.
   Settled in node 1.4 by the user, 2026-10-09.
@@ -233,23 +233,25 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed, so a 128-bit ID can't cross as a JavaScript number ([01-spine](01-spine.md#ids)).
   - The invite code can't name a session for a bug report, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - A process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone can't tell one run of the sim from the next.
-- **Leaves out:** how the cores pack a pilot's ID into the vector clocks, by ID or by place in the member list ([01-spine](01-spine.md#left-open)).
+- **Leaves out:** how the cores pack each vector clock counter's key, by pilot ID and restart count or by place in the member list ([01-spine](01-spine.md#left-open)).
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
-- **Decided:** the core keeps a session file in its data folder, from the pilot's first join of a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, a restart count, the run of the sim the pilot was in, and, for each sender and channel, the last message number the core applied.
+- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's own restart count, the run of the sim the pilot was in, and, for each sender, the restart count its link last opened with and the last message number the core applied from it in each channel.
   The restart count goes up by 1 each time the core starts while the file exists.
   Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel; a receiver keeps a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
-  In the vector clocks, each counter belongs to a pilot's ID and a restart count.
+  In the vector clocks, each counter belongs to a pilot's ID and a restart count, and a restarted core takes its old counter from the other machines' clocks as it rejoins.
+  This changes [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s and [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)'s one counter per pilot.
+  Every core writes each number to its session file after applying the message and before applying the next.
   A core that restarts while the sim keeps running rejoins the pilot under the same ID and replays what they missed, as after a network outage; one whose sim restarted too rejoins them under the same ID as a late joiner.
   This settles node 1.4's question of what a pilot's identity is across a core restart ([architecture plan](plan.md#14-shared-conventions)).
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - A receiver drops a message whose number it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a receiver that didn't know a core restarted would drop its messages, numbered from 1 again, as copies until their numbers passed the last one applied before the restart.
     A link back from an outage under the same count is the same core, whose replay the receiver dedupes against the numbers it kept.
-  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); the restart count narrows the first to the message a core was applying as it crashed, keeps the second, and avoids the third ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
+  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); in Crosscheck, the numbers the session file keeps narrow the first to the message a core was applying as it crashed, the second stays, and the third doesn't arise, since a first join catches up state ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine, and replays what they missed if their sim kept running; the user chose that a crashed core does the same (user, 2026-10-09).
-  - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send; the restart count costs one write per start, and a receiver writes each number to the session file after applying the message, which delays no message.
+  - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send; the restart count costs one write per start, and a receiver's write of each number comes after applying the message, so no send waits on the disk.
 - **Leaves out:**
   - what the core had sent that no machine had received when it crashed, which is lost with its process ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts))
   - what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded ([01-spine](01-spine.md#left-open))
@@ -266,7 +268,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - `QueryPerformanceCounter` counts from the PC's start, gives consistent readings across processes, never goes backward, and ignores changes to the system clock, while a stamp on the wall clock moves when Windows sets that clock (documented, [Acquiring high-resolution time stamps](https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps)); so a restarted core goes on along the timeline it left.
-  - Two PCs' counters drift apart, by about 8.6s a day at the 50 ppm a PC's crystal is typically within (documented, same page), so one offset estimated once doesn't hold ([01-spine](01-spine.md#times)).
+  - Two PCs' counters can part by about 8.6s a day when both crystals sit 50 ppm off in opposite directions, before Windows compensates at start, and how far they part in practice is unmeasured ([01-spine](01-spine.md#times)), so one offset estimated once doesn't hold.
   - A stamp, counted in µs from the PC's start, fits a JavaScript number exactly for about 285 years ([01-spine](01-spine.md#times)).
   - Each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)), so a frame on one machine names no moment on another.
   - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").

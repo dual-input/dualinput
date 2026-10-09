@@ -6,6 +6,10 @@ Depends on:  01-profile-entries.md, ../product/03-v1-scope.md (state sync, the c
 Decides:     What crosses the wire, the order changes apply in, how a conflict resolves, how Crosscheck checks that a write landed, and how it keeps a change from applying twice.
 ```
 
+> **Note**
+> Since 2026-10-09, each vector clock counter belongs to a pilot's ID and their core's restart count, not to the pilot alone, so a core that restarts starts a counter of its own ([architecture's tentative decisions](../architecture/decisions.md#a-pilot-keeps-their-id-through-a-core-restart-and-the-core-counts-its-restarts)).
+> A pilot ID is a version 4 UUID, and the tie-break below compares two as lowercase text ([architecture's spine](../architecture/01-spine.md#ids)).
+
 A state entry crosses the wire as its new value, and each receiving machine moves its cockpit to that value through the entry's write, then reads it back to check.
 Events and pointer presses cross as what happened.
 All three travel in one stream, in an order every machine agrees on, so a page key always lands before a press on the page it opened.

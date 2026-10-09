@@ -172,8 +172,8 @@ A page's socket doesn't close when the page goes away: a cockpit panel's was sti
 So each page sends the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, as FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog).
 
 A socket in each of the PA-24's 16 cockpit panels cost no frame time we could measure.
-Uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame.
-The windows with our sockets read 12.01ms to 12.07ms, whether the sockets sat idle, took a message every 2s, or each took 30 messages a second, every message about 200 characters and parsed as JSON (measured on MSFS 2024, 2026-10-08, [interface log][links]; message size and parsing read in `experiments/areas/interface/p13-sim-links.mjs`).
+With the frame rate uncapped, at about 83 fps, the two 10s measurements with nothing of ours read 12.25ms and 12.07ms a frame.
+The measurements with our sockets read 12.01ms to 12.07ms, whether the sockets sat idle, took a message every 2s, or each took 30 messages a second, every message about 200 characters and parsed as JSON (measured on MSFS 2024, 2026-10-08, [interface log][links]; message size and parsing read in `experiments/areas/interface/p13-sim-links.mjs`).
 
 The core accepts a WebSocket only when its `Origin` is `coui://html_ui` or absent ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none)).
 Every page we use sent `coui://html_ui`, all 14 in the main menu and all 32 in the A2A PA-24's flight (measured on MSFS 2024, 2026-10-08, [interface log][links]), and the desktop app connects from its Rust side, which sends none ([the desktop app](#the-desktop-app)).
@@ -314,7 +314,7 @@ A plugin is TypeScript that implements an interface of ours and runs only in the
 
 ### Messages between components
 
-The Rust components share one crate that defines each message they trade: the core's with the helper over its standard input and output, with the WASM module through the data slots, and with the desktop app over its WebSocket, so both ends of each of those links compile against one definition.
+The Rust components share one crate that defines each message they trade: the core's with the helper over its standard input and output, with the WASM module through the data slots, with the desktop app over its WebSocket, and with other pilots' cores over the network, so both ends of each of those links compile against one definition.
 Three TypeScript sides trade those messages too: the sim's pages, the desktop app's pages, and plugins calling the core's host functions.
 A message passed between languages needs one definition both sides are checked against ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)), so the TypeScript sides' types come from that crate ([messages and their types](#messages-and-their-types)).
 
@@ -329,7 +329,7 @@ A message passed between languages needs one definition both sides are checked a
 
 Every component names sessions and pilots by random UUIDs carried as text.
 Every time in a message is in µs on the sending PC's monotonic clock, and the core stamps the messages of the pages and plugins that can't read that clock as they arrive.
-Every message is defined in one Rust crate, which ts-rs turns into TypeScript for the TypeScript sides, and every first message and join carries one version number and a hash of that crate.
+Every message, those between cores included, is defined in one Rust crate, which ts-rs turns into TypeScript for the TypeScript sides, and every first message and join carries one version number and a hash of that crate.
 A pilot keeps their ID when their core restarts, and the core counts its restarts, so the other machines can tell a core that restarted from one returning after an outage.
 The tentative decisions behind each are in [decisions.md](decisions.md#sessions-and-pilots-are-named-by-random-uuids-carried-as-text).
 
@@ -337,7 +337,7 @@ The tentative decisions behind each are in [decisions.md](decisions.md#sessions-
 
 - A session's ID is a version 4 UUID, which has 122 random bits ([RFC 9562](https://www.rfc-editor.org/rfc/rfc9562#section-5.4)), drawn by the host's core when it starts the session and given to each pilot as they join.
   It labels each pilot's recording and their part of a bug report, which the invite code can't, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
-- A pilot's ID is a version 4 UUID too, drawn by the pilot's core when they join a session, and kept through every rejoin of it.
+- A pilot's ID is a version 4 UUID too, drawn by the pilot's core when they start or join a session, and kept through every rejoin of it.
   A pilot's ID, with their core's restart count, keys their counters in the vector clocks ([the session file](#the-session-file-and-a-core-that-restarts)), and the conflict rule's tie-break compares two pilots' IDs as lowercase text, which orders them as their 128-bit values do ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
 - Each crosses as its text, such as `3e7d1f2a-5b6c-4d8e-9f0a-1b2c3d4e5f6a`, because a 128-bit ID can't cross as a number.
   `BigInt` was missing from the one cockpit panel's document we probed for it (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), and a JavaScript number holds every integer exactly only up to 2^53.
@@ -345,14 +345,14 @@ The tentative decisions behind each are in [decisions.md](decisions.md#sessions-
 - The user chose 122 random bits over 64 (user, 2026-10-09): among 10 million sessions, a hypothetical lifetime total, the chance that any two share an ID is about 1 in 10^23 with 122 random bits, against about 1 in 370,000 with 64.
   As text, a UUID is 36 characters.
   A session's ID crosses once, when a pilot joins, and a pilot's ID once as each link opens.
-  If the encoding between cores names a pilot in each vector clock by ID rather than by their place in the [member list](../product/04-room-for-later.md#people-beyond-the-crew), a pilot's ID crosses in every message instead, and that choice is [left open](#left-open).
+  If the encoding between cores names each vector clock counter by its pilot's ID and restart count rather than by a place in the [member list](../product/04-room-for-later.md#people-beyond-the-crew), a pilot's ID crosses in every message instead, and that choice is [left open](#left-open).
 - A run of the sim is named by its process's ID and its creation time, the `FILETIME` that `GetProcessTimes` gives (documented, [GetProcessTimes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)), so a core that restarts can tell from its session file whether the sim restarted too ([the session file](#the-session-file-and-a-core-that-restarts)).
   The ID alone can't tell, because a process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)).
 
 ### The session file, and a core that restarts
 
-The core keeps a session file in its data folder from the pilot's first join of a session until they press Leave session or the core learns the session has ended.
-It holds the session's ID and invite code, the pilot's ID, a restart count, the run of the sim the pilot was in, and, for each sender and channel, the last message number the core applied.
+The core keeps a session file in its data folder from when the pilot starts or first joins a session until they press Leave session or the core learns the session has ended.
+It holds the session's ID and invite code, the pilot's ID, the core's own restart count, the run of the sim the pilot was in, and, for each sender, the restart count its link last opened with and the last message number the core applied from it in each channel.
 One core runs for each data folder ([finding the core](#finding-the-core)), so a development core beside the pilot's has a session file, and a pilot ID, of its own.
 
 - The restart count goes up by 1 each time the core starts while the file exists.
@@ -360,16 +360,17 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
   A receiver keeps the last number it applied from each sender in each channel, and drops the second copy of a message that came both directly and through the relay ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
   - A link that opens again with the same restart count is the same core, back from an outage, so the receiver keeps its numbers and drops the copies a replay brings.
   - A link with a higher restart count is a core that restarted and numbers from 1 again, so the receiver starts that sender's numbers afresh, where without the count it would drop the restarted core's messages as copies until their numbers passed the last one it applied before the restart.
-  - In the vector clocks, each counter belongs to a pilot's ID and a restart count, so a restarted core starts a counter of its own, and no counter goes backward.
-- Every core writes each number to its session file right after applying the message, so the write delays no message.
+  - In the vector clocks, each counter belongs to a pilot's ID and a restart count, where [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order) keeps one counter per pilot, so a restarted core starts a counter of its own, no counter goes backward, and each restart adds a counter to every clock for the rest of the session.
+    A restarted core didn't save its old counter, so it takes it from the other machines' clocks as it rejoins, and its new messages order after every old one any machine received.
+- Every core writes each number to its session file after applying the message and before applying the next, so a crash leaves at most the message being applied unrecorded, and no send waits on the disk.
   A core could instead save the number of each message it sends and go on numbering after a restart, but that would put a disk write ahead of every send, where the restart count costs one write per start.
 - A core that restarts while the sim keeps running, such as after a crash, rejoins the pilot under the same ID, and replays what they missed, as after a network outage ([the connection](../product/03-v1-scope.md#the-connection); user, 2026-10-09).
-  It reads from the session file the last number it applied from each sender in each channel, and asks the other machines for the messages after them.
+  It reads from the session file, for each sender, the restart count and the last number it applied in each channel, and asks the other machines for the messages after them.
   Only a message it was applying as it crashed can apply again.
   What it had sent that no machine had received when it crashed is lost with its process.
 - A core whose sim restarted too, which it tells from the run in the session file, rejoins the pilot under the same ID as a late joiner ([the connection](../product/03-v1-scope.md#the-connection)).
 - FS Copilot made a restarted app a new peer instead: "Both the peer id and the session id are per app run, so a restarted peer is a new peer in every respect", and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
-  Crosscheck's restart count narrows the first to the message a core was applying as it crashed, keeps the second, and avoids the third, since a pilot joining for the first time catches up state rather than replaying ([03-catch-up](../sync/03-catch-up.md#which-catch-up-runs-when)).
+  In Crosscheck, the numbers the session file keeps narrow the first to the message a core was applying as it crashed, and the second stays; the third doesn't arise, since a pilot joining for the first time catches up state rather than replaying ([03-catch-up](../sync/03-catch-up.md#which-catch-up-runs-when)).
 
 ### Times
 
@@ -408,10 +409,10 @@ The crate that defines the messages ([messages between components](#messages-bet
 - In a data slot, a message is a struct of fixed-width fields, which the module reads in place.
   The crate asserts each struct's size and field offsets and builds for both x86_64 and wasm32, and p07's structs kept one layout on both, while a struct holding a pointer-sized `usize` was 16 bytes on x86_64 and 8 on wasm32 (measured on our development machine, 2026-10-09, [architecture log][types]).
 - Over the helper's standard input and output, a message is binary and prefixed with its length, since it carries audio.
-- Between cores, the encoding is for the node on how the cores reach each other.
+- Between cores, the messages are the crate's, and their encoding is for the node on how the cores reach each other.
 
 The TypeScript sides take their types from ts-rs, which generates them from the crate.
-Its large-integer setting, `TS_RS_LARGE_INT` or `Config::with_large_int`, is `number` (read in ts-rs 12.0.1, `src/lib.rs`), because serde_json writes a `u64` as a JSON number, and on its default, `bigint`, every p07 sample carrying a time failed the type check ([architecture log][types]).
+We set its large-integer setting, `TS_RS_LARGE_INT` or `Config::with_large_int`, to `number`, away from its default, `bigint` (read in ts-rs 12.0.1, `src/lib.rs`), because serde_json writes a `u64` as a JSON number, and on `bigint` every p07 sample carrying a time failed the type check ([architecture log][types]).
 So a `u64` reaches TypeScript exactly only up to 2^53: a time in µs stays under it for about 285 years ([times](#times)), and a field that can pass it crosses as text, as the IDs do ([IDs](#ids)).
 Its output is types alone, which erase when compiled, so nothing of it runs in Coherent GT.
 In p07, ts-rs's types, with that setting, took every message serde_json wrote and refused each of five wrong ones, while specta needed two opt-ins on a release candidate, and typeshare couldn't express an internally tagged enum ([architecture log][types]).
@@ -437,13 +438,13 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
   - the compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits))
   - the framework for the desktop app's pages
   - the core's async runtime and WebSocket library
-  - the WebSocket client in the desktop app's Rust side, which has to send no `Origin` or `coui://html_ui`
+  - the WebSocket client in the desktop app's Rust side, which must send either no `Origin` or `coui://html_ui`
   - whether the bindings to the SDK come from msfs-rs or from our own run of bindgen
-  - how the build hashes the message crate, and the check in CI that ts-rs's files match it
+  - how the build hashes the message crate, which has to cover each message's encoding as well as its fields, since FS Copilot's fingerprint passed a codec that reordered them ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)), and the check in CI that ts-rs's files match it
   - whether the desktop app's pages take messages from its Rust side through Tauri's commands or its events
   - the binary format on the helper's standard input and output, since both its ends are Rust built against the crate
-- How the cores pack each field of a message, such as whether a vector clock names each pilot by ID or by place in the member list, for the node on how the cores reach each other ([IDs](#ids)).
-- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can use the core's stamps without an offset, for the part that designs the flight-model sync ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
+- How the cores pack each field of a message, such as whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list, for the node on how the cores reach each other ([IDs](#ids)).
+- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset, for the part that designs the flight-model sync ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
 - Which clock a page in the sim measures a span on, for the part that designs each page that sends one, starting with the panel bridge.
   The one cockpit panel's document probed for it, the A220's DisplayUnits, has `performance.now()` (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), and the EFB's, the toolbar's, the banner's, and the menu's pages are untested; whether it runs steady in Coherent GT is unmeasured too, and FS Copilot's panel code measured its spans with `Date.now()` instead.
   Timing each page's `performance.now()` against the core's counter over a few minutes settles it.

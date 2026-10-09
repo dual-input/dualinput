@@ -7,7 +7,7 @@ Decides:     Which components Crosscheck runs, where each runs, and what each ow
 ```
 
 Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
-The watcher and the core are the two processes in [step 7 of the product plan](../product/plan.md#7-tech-stack-and-architecture), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
+The watcher and the core are Crosscheck's two long-running processes (user, 2026-10-06), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
 The flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).
 A pilot is in a session from starting or joining it until leaving it, or until 5 minutes cut off ([the connection](../product/03-v1-scope.md#the-connection)).
 
@@ -21,8 +21,8 @@ The watcher works while the core may not be running, and the services off the pi
 
 | Component | Runs in | Owns |
 | --- | --- | --- |
-| Watcher | A process of its own, from the pilot's login | Noticing the sim's start and stop, starting the core with the sim and again if it exits, the BlurPage copy, and, while the sim is closed, plugins' changes to aircraft files and updates |
-| Core | A process of its own, started by the watcher or the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, the checks, and the pilot's settings |
+| Watcher | A process of its own, from the pilot's login | Noticing the sim's start and stop from the operating system, starting the core with the sim and again if it exits, the BlurPage copy, and, while the sim is closed, plugins' changes to aircraft files and updates |
+| Core | A process of its own, out of sight, started by the watcher or the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, the checks, and the pilot's settings |
 | Helper | A process of its own, which the core starts and restarts | The core's Windows input and audio work: reading the keyboard, flight hardware, and mouse through Raw Input, capturing the microphone and the ATC app, running the speech recognizer, and playing sound |
 | Desktop app | A window of its own, opened by the pilot, optional | Editing the settings the core keeps, the report page, and the session's view |
 | EFB app | The EFB's document in the sim | The controls a pilot needs in flight, the EFB's opening onto it when a notice is clicked, and the banner panel's opening |
@@ -34,13 +34,13 @@ The watcher works while the core may not be running, and the services off the pi
 | Backend | Off the pilots' machines | Each pilot's part of a bug report, and later features that need a server of ours, such as [telemetry](../product/ideas.md#telemetry) |
 | Release host | Off the pilots' machines | Installers and updates |
 
-Plugins aren't components: a plugin's code runs only in the core, and reaches the cockpit panels and our WASM module through APIs our own code carries out ([plugins](#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+Plugins aren't components: a plugin's code runs only in the core, and reaches the cockpit panels and our WASM module through APIs our own code carries out ([plugins](#plugins)), and the watcher applies a plugin's changes to its aircraft's files while the sim is closed ([tentative decisions](decisions.md#plugin-code-runs-only-in-the-core)).
 The installer runs once, and puts the app and our Community package in place ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
 The figure is the other pilot's, which our WASM module draws ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
 
 Where each sits, and why:
 
-- Step 7 gives the watcher the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives programs the sim launches, such as the warning at sim start that an update is waiting ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
+- The watcher takes the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives a program the sim launches, such as the warning at sim start that an update is waiting (user, 2026-10-06), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
 - The core reads the take-control input ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)), runs the audio ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)), and works out where the figure's hand goes ([tentative decisions](decisions.md#the-core-works-out-where-the-figures-hand-goes)), with its helper doing the Windows input and audio work ([the helper](#the-helper)).
   It keeps the pilot's settings in its data folder, such as the take-control binding, the output device, the recording mode, and which plugins may change aircraft files, because it needs them while the desktop app is closed, as it is for a pilot flying in VR; the desktop app edits them by command, and the EFB app offers no setting in v1 ([EFB app](../product/03-v1-scope.md#efb-app); [tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
   It also reads the clipboard when the pilot selects the EFB app's code box ([invite code](../product/03-v1-scope.md#invite-code)), reads the flight file that names the PF's stand ([preflight](../product/03-v1-scope.md#preflight)), and uploads a bug report when the pilot asks from the desktop app's report page ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
@@ -193,7 +193,7 @@ The WASM module can't open a socket, so it reaches the core through data slots, 
 
 - The watcher starts the core when the sim starts, and again if the core exits while the sim runs ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
   The crew sees a restarted core as the same pilot ([the session file, and a core that restarts](#the-session-file-and-a-core-that-restarts)).
-- The watcher reads the core's process ID and creation time from the port file and shows its CPU and memory use beside its own ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+- The watcher reads the core's process ID and creation time from the port file and shows its CPU and memory use beside its own ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   It opens no socket to the core, and takes what its jobs need from files the core writes beside the port file: the date of the pilot's last session, which decides whether the warning that an update is waiting shows ([installing and updating](../product/03-v1-scope.md#installing-and-updating)); the file changes of each plugin the core fetched and checked; and which plugins the pilot lets change files ([plugins](../product/03-v1-scope.md#plugins)).
 - The desktop app starts the core when the port file names no running process with that ID and creation time, and waits for the file to be written again.
 - The core launches the desktop app when it isn't open and the pilot presses the EFB app's button that brings it to the front ([EFB app](../product/03-v1-scope.md#efb-app)).
@@ -298,7 +298,7 @@ A crash there, such as in a speech recognizer's C or C++ library, costs the take
 
 ### The watcher
 
-The watcher is Rust because it runs all day, shows the pilot its own memory use ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and Rust is the language of our other programs.
+The watcher is Rust because it runs all day, shows the pilot its own memory use ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and Rust is the language of our other programs.
 In Rust, a tray icon alone cost 1.0 MB of private working set, the figure Task Manager's Memory column shows; in .NET 9 Native AOT, 1.6 MB; and over Electron 43.4.0's main process and the two processes it started, 39.7 MB.
 None used CPU we could measure (measured on our development machine, 2026-10-08, [architecture log][tray]).
 
@@ -563,7 +563,9 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 - Which APIs our panel bridge and WASM module offer plugins: the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins)).
 - How each module, and each hook our panel code installs for a plugin, tears itself down ([what moves them](#what-moves-them)).
-- How our WASM module's 1s timeout, after which it undoes our state as if the core had stopped, treats a flight load, during which the client's round trips through the module reached 2.8s (measured on MSFS 2024, 2026-10-09, [architecture log][flight]); whether the module's update runs during a load, and whether a session reaches a load with the aircraft held, settle it.
+- How our WASM module takes the session up again when the core's writes come back after a flight load, and how the core keeps the module's counter going quiet during a load from counting as trouble, since sim awareness reports the load ([sim awareness](#sim-awareness)).
+  During a load, the client's round trips through the module reached 2.8s (measured on MSFS 2024, 2026-10-09, [architecture log][flight]), past the module's 1s timeout, after which it undoes our state as if the core had stopped.
+  That costs a v1 session nothing: preflight holds an aircraft only once its pilot is in the flight ([preflight](../product/03-v1-scope.md#preflight)), and a load that starts while the module holds or writes an aircraft unloads that aircraft, as when its pilot leaves the flight ([the connection](../product/03-v1-scope.md#the-connection)).
 
 **Flight-model sync**, in its stage of step 8:
 
@@ -595,4 +597,4 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 - Whether the MSFS Avionics Framework's `for`-`of` rewrite, run through TypeScript before esbuild bundles, pays for itself in our interface, which a frame-time probe of the EFB app and the banner, built with it and without it, settles ([compiling our code in the sim](#compiling-our-code-in-the-sim)).
 - How the build hashes the message crate, which has to cover each message's encoding as well as its fields, since FS Copilot's fingerprint covers a type's fields and not its codec, so a codec that wrote them in a new order would pass it ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
 - The check in CI that ts-rs's generated files match the crate.
-- A stand-in for the second pilot's sim, so a developer runs a whole session on one PC, and whether a second MSFS with its own Crosscheck runs in a virtual machine on the same PC, for the test bench ([the product plan](../product/plan.md#7-tech-stack-and-architecture)); node 2's transport lets two cores run on one PC.
+- A stand-in for the second pilot's sim, so a developer runs a whole session on one PC ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and whether a second MSFS with its own Crosscheck runs in a virtual machine on the same PC, which a probe settles, both for the test bench; node 2's transport lets two cores run on one PC.

@@ -73,7 +73,7 @@ When an area's experiments settle a question before any product design does, the
 Each one gives what was decided, the findings behind it with links to where each was found, and what it leaves out, if anything, and it's edited in place as findings arrive.
 A product design confirms each one as a decision in `record/decisions/`, changes it, or drops it, and the tentative one links to the result.
 Design work that settles a question before the design it belongs to is done writes a tentative decision too, because the rest of that design can still change the answer.
-The finished design is the product design that confirms it: for a node of the [architecture plan](../../record/areas/architecture/plan.md), that's its parent, at the point that plan's [Where answers go](../../record/areas/architecture/plan.md#where-answers-go) names.
+The finished design is the product design that confirms it, and for a node of the [architecture plan](../../record/areas/architecture/plan.md), that plan's [Where answers go](../../record/areas/architecture/plan.md#where-answers-go) says when that is.
 
 ### Reference
 

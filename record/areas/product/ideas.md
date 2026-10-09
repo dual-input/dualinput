@@ -175,7 +175,7 @@ When a pilot's sim crashes, the rest of the crew learns that it crashed, such as
 On the machine that crashed, the desktop app comes up with a Rejoin button, which starts the sim and puts the pilot back in the flight where the aircraft is, in the air if it's flying (user, 2026-10-07).
 
 - **Tech:** the core is a process of its own that starts with the sim ([architecture's tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), and while a session is held it stays up after the sim closes ([architecture's spine](../architecture/01-spine.md#what-moves-them)), so it can tell the crew.
-  The watcher notices the sim's process ending from the operating system ([the plan](plan.md#7-tech-stack-and-architecture)).
+  The watcher notices the sim's process ending from the operating system ([the architecture's spine](../architecture/01-spine.md#components)).
   In each of the 5 crashes in our records, our harness's SimConnect connection closed with no quit message before it, and Windows logged `FlightSimulator2024.exe` faulting with exception 0xc0000005 (measured on MSFS 2024, 2026-10-01, [crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv) and the run reports it names).
 - **Product:** the crew knows to wait for a pilot whose sim is restarting, rather than wondering whether the connection will come back.
 - **Open questions:** how the core tells a crash from a pilot closing the sim or going back to the main menu.

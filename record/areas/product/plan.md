@@ -185,30 +185,9 @@ The decisions also pick whether each machine sends to every other directly or th
 They build in what [04-room-for-later](04-room-for-later.md) says v1 builds now, and pick where each part of a [plugin](03-v1-scope.md#plugins) runs and what language plugins are written in.
 The tooling includes one check that every file that runs in Coherent GT, experiments included, parses within the engine's measured limits, run in CI and after edits; before writing its rules, we look for Coherent GT's own documentation of its JavaScript and for rules others already maintain.
 
-The leading candidate for the core architecture, proposed on 2026-10-03, is a headless core that owns SimConnect, the session, and the network, with the desktop app, the EFB app, and the in-sim pieces as its clients, and later the tablet and perhaps the Crosscheck IDE.
-The EFB app is panel code that runs in Coherent GT, whose user agent claims Chrome 49 while its measured features don't match it (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so code it shares with the desktop app is compiled down to the syntax that engine parses, with the missing functions filled in, and what it can share depends on what the EFB's own app framework and Coherent GT's CSS allow, which a probe measures.
 The architecture lets a Crosscheck developer run a whole session on one machine: two cores, each with its own ports and identity, and a stand-in for the second pilot's sim, as fsc-exerciser does and as the FS Copilot fork's two-instance bench did (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
-Whether a second MSFS, with its own Crosscheck, can run in a virtual machine on the same PC is open, and a probe settles it.
 
-Crosscheck's long-running processes are the watcher and the core (user, 2026-10-06), and the core starts a helper for Windows input and audio ([architecture's spine](../architecture/01-spine.md#the-helper)).
-The tentative decision on languages is Rust for every component a JavaScript engine doesn't run, and TypeScript for the code one does ([architecture's tentative decisions](../architecture/decisions.md#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)).
-The two processes:
-
-- **A watcher,** which starts with Windows, for the pilot's own account and as a setting, and does only this: it notices the sim's process starting and stopping, from the operating system rather than SimConnect; keeps our copy of BlurPage current by watching the sim's own file; applies a plugin's changes to an aircraft's files before the sim boots; installs Crosscheck's updates while the sim is closed, which takes over the jobs [installing and updating](03-v1-scope.md#installing-and-updating) gives programs the sim launches; and starts the core, and starts it again if it exits while the sim runs ([architecture's spine](../architecture/01-spine.md#the-watcher-and-the-desktop-app)).
-- **The core,** a program of its own, which starts with the sim and runs at least as long as it does, until [the spine](../architecture/01-spine.md#what-moves-them)'s rule says it exits, out of sight, with the desktop app and the EFB app as its clients.
-
-A pilot who rarely flies with a crew will ask why the watcher runs all day, so it records its own CPU and memory use and the core's, and shows them over its last 24 hours of running, in words a pilot takes in at a glance, when they open it from the tray icon, choose to quit it, or find its setting.
-It leaves out the desktop app's, because the pilot opened the app themselves (user, 2026-10-08).
-Beside the numbers it says what it does for them and what quitting costs, in concrete terms, such as Go to staying off after a sim update until Crosscheck runs again.
-It asks once per quit, gives Quit and Keep running equal weight, and a choice to turn it off stays off (user, 2026-10-06).
-
-A core that's running when the sim starts has its masks registered before any aircraft's module, which decided who got the pilot's input on the PA-24 ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
-It also lets a pilot who started the sim with no plan to fly together start or join a session later, from the EFB app.
-A masking group that takes its priority as the sim starts holds nothing back until it adds an event, and then masks ahead of Accu-Sim (measured on MSFS 2024, 2026-10-07, [flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)).
-
-Step 7 also decides sim awareness, a part of the core proposed on 2026-10-06 (user) that reports whether the sim is closed, starting, in the menu and on which page, loading, at Ready to fly, or in a flight and with which aircraft.
-It reports state only and knows nothing of features: a feature that depends on the sim's state reads it there instead of watching the sim itself, and decides on its own what to do with it, as preflight's Go to button is unavailable on a page it can't work from ([03-v1-scope](03-v1-scope.md#preflight); [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
-Its sources are the sim's process, SimConnect's system and flow events, and the page our script in the menu reports, and it reports a page it doesn't know as unknown rather than guessing.
+Crosscheck's components, how they talk, the conventions they share, its languages and frameworks, and its parts are in [the architecture's spine](../architecture/01-spine.md), with what it leaves open filed under each part, naming the node or stage of step 8 that settles each item.
 
 ## 8. v1 build plan
 

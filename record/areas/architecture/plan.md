@@ -25,7 +25,7 @@ To work a node:
    Wherever one answer needs something another doesn't give, reopen the node that has to change, as [Reopening a node](#reopening-a-node) says.
    You're done with this step when the whole session walks through the answers with nothing reopened.
 5. Write the node's answer in the document it names.
-6. Once the node's `Exit:` has happened and its answer meets [When a node is done](#when-a-node-is-done), add `Done on <YYYY-MM-DD>.` under its `Exit:` line, and number the tentative decisions its children settled, as [Where answers go](#where-answers-go) says.
+6. Once the node's `Exit:` has happened and its answer meets [When a node is done](#when-a-node-is-done), add `Done on <YYYY-MM-DD>.` under its `Exit:` line.
    You'll see the `Done on` line, and the next open node is where the work stands.
 
 When working one node turns up something another node has to settle, add it under that node on a line that starts `Raised elsewhere:` and names the node it came from.
@@ -34,7 +34,7 @@ If no node covers it, propose a new node for it, as step 2 says.
 
 The tree's root is step 7 of the product plan: its question is step 7's exit, and its children are the top-level nodes.
 When every top-level node is done and their answers don't yet give each decision step 7's exit names, propose the next top-level node, as step 2 does.
-When they do, check the top-level answers as step 4 does, number their tentative decisions as [Where answers go](#where-answers-go) says, and mark step 7 done in [the product plan](../product/plan.md#7-tech-stack-and-architecture).
+When they do, check the top-level answers as step 4 does, number this area's tentative decisions as [Where answers go](#where-answers-go) says, and mark step 7 done in [the product plan](../product/plan.md#7-tech-stack-and-architecture).
 
 ## When a node is done
 
@@ -56,9 +56,8 @@ An answer goes in one of these documents, never in this plan:
 
 This plan holds each node's question, its status, and its `Raised elsewhere:` lines.
 
-When you mark a node done, write each tentative decision its children settled as a numbered decision in `record/decisions/`, and link the tentative one to it.
-A child's decision isn't checked against its siblings' answers until its parent's step 4, and a numbered decision can't be edited, so numbering waits for the parent.
-A child that serves two nodes gets its decisions numbered when the last of them is done.
+Once the top-level answers pass the root's walk through a session ([how the tree grows](#how-the-tree-grows)), write each tentative decision in this area's `decisions.md` as a numbered decision in `record/decisions/`, and link the tentative one to it; those are the decisions step 7's exit names.
+A node's answer isn't checked against every other node's until that walk, and a numbered decision can't be edited, so numbering waits for it.
 
 ## Reopening a node
 
@@ -87,6 +86,7 @@ Its answer goes in `01-spine.md`, in this area.
 Its answer also names Crosscheck's parts, the area each one's documents go in, and where each is designed, in a node of this plan or in a stage of [step 8](../product/plan.md#8-v1-build-plan), and files each open question it leaves under the part it belongs to.
 Exit: the user agrees to `01-spine.md`, its Parts and Left open sections included.
 Waits on 1.1, 1.2, 1.3, 1.4, 1.5, and 1.6.
+Done on 2026-10-09.
 Raised elsewhere: by 1.3, whether masking, AI objects with liveries, input events, the camera, and a flight load's flow events work through the SDK's `SimConnect.dll`, which 1.5 settles ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.3, which APIs our panel bridge and WASM module offer plugins, to place with the part that designs plugins ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1, whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
@@ -128,7 +128,7 @@ Question: what does each component do while no session runs, and what moves it i
 1.1 can't say what each component owns until it says when.
 The core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)), and a pilot may fly the Baron every day and with a crew once a week, so with no session, nothing loads a profile, runs a plugin, or watches the cockpit (user, 2026-10-07).
 Our earlier apps did otherwise: FS Copilot's app opened its relay link and its rendezvous registration at launch, session or not (read in the FS Copilot fork, `FsCopilot/Program.cs`, `BuildAvaloniaApp`, and `FsCopilot/Network/RelayNetwork.cs` and `P2PNetwork.cs`, their constructors), and fsc-editor's module streams the sim's `L:` values until the sim exits, because the app never sends it the `stop` command it has (read in fsc-editor, `link/src/module.cpp` and `src/shared/link.ts`).
-It reads the tentative decisions 1.1 has settled ([decisions](decisions.md)), the session sections of [03-v1-scope](../product/03-v1-scope.md#session), and sim awareness in step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture).
+It reads the tentative decisions 1.1 has settled ([decisions](decisions.md)), the session sections of [03-v1-scope](../product/03-v1-scope.md#session), and the spine's [sim awareness](01-spine.md#sim-awareness).
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Done on 2026-10-07.
@@ -177,10 +177,10 @@ Raised elsewhere: by 1.1, whether the core's native code for Windows input and a
 
 Question: what does a process that shows only a tray icon cost in memory and CPU, idle, in each runtime the watcher could run in?
 1.3 can't pick the watcher's runtime without it.
-The watcher runs from the pilot's login, all day, and shows the pilot its own CPU and memory use ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and Node has no tray icon, so the watcher needs a runtime that has one, such as Electron's main process or a native program.
+The watcher runs from the pilot's login, all day, and shows the pilot its own CPU and memory use ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and Node has no tray icon, so the watcher needs a runtime that has one, such as Electron's main process or a native program.
 An idle Node process took 29 MB, and Electron 43's executable running as plain Node took 35 MB (measured on our development machine, 2026-10-06, with Node 22.23.1), but neither showed a tray icon.
 A probe settles it, with no sim: a tray icon and nothing else, idle for 60s, in Electron 43's main process, in .NET 9 WinForms built self-contained and with Native AOT, and in Rust on Win32, recording the memory and CPU of all of each one's processes.
-It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture) and the watcher's row in [01-spine](01-spine.md#components).
+It reads the watcher's part of [installing and updating](../product/03-v1-scope.md#installing-and-updating) and the watcher's row in [01-spine](01-spine.md#components).
 Its answer goes in an entry in this area's log, which 1.3's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
 Done on 2026-10-08.
@@ -276,7 +276,7 @@ Done on 2026-10-09.
 ## 1.5 A flight with Crosscheck's Rust pieces
 
 Question: in a flight on MSFS 2024, does the core's Rust client on the SDK's `SimConnect.dll` do what our probes did there through node-simconnect, does our Rust WASM module run and trade data slots, does the helper's Raw Input get a key and a button that a person presses with the sim in front, and can our code open the banner's panel when a flight loads and when a session starts mid-flight?
-Node 1 can't number its tentative decisions without it, because two of them rest on runs outside a flight.
+Node 1 can't be done without it, because two of its tentative decisions rest on runs outside a flight.
 [Crosscheck is written in Rust, and in TypeScript where an engine runs it](decisions.md#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it) names the SDK's `SimConnect.dll` and a Rust module, which have run only at the main menu, and under [the core catches the take-control key and buttons](decisions.md#the-core-catches-the-take-control-key-and-buttons), the helper has received only keys that another program sent while another window was in front.
 The banner decides whether the toolbar script is a component at all.
 It opened our panel with no click only after a Build and Mount ([interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)), while the same call opened the panel from the EFB's page too ([interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), where our EFB app's code runs with the EFB closed ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
@@ -297,7 +297,7 @@ Question: which frameworks does each component build on, beyond the languages an
 Step 7's exit needs a decision on the frameworks ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
 1.3 left three of them open as choices inside one part: the framework for the desktop app's pages, the core's async runtime and WebSocket library, and the compiler and syntax target for our code in Coherent GT, which four components share ([01-spine](01-spine.md#left-open)).
 Step 7 also asks for a check, run in CI and after edits, that every file run in Coherent GT, experiments included, parses within the engine's measured limits, written after we look for Coherent GT's own documentation of its JavaScript and for rules others already maintain; this node sets its rules, and the build's stage of step 8 runs it.
-And it asks for a probe of what code the EFB app can share with the desktop app, which [03-v1-scope](../product/03-v1-scope.md#efb-app) narrows: the EFB app is built on the sim's EFB framework, and the desktop app's interface doesn't run in the EFB.
+It also settles what code the EFB app can share with the desktop app, which [03-v1-scope](../product/03-v1-scope.md#efb-app) narrows: the EFB app is built on the sim's EFB framework, and the desktop app's interface doesn't run in the EFB.
 It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), the spine's [language and toolchains](01-spine.md#language-and-toolchains), the foundations chapters [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md) and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits), and the [EFB app](../product/03-v1-scope.md#efb-app) section of 03-v1-scope.
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.

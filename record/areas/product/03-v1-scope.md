@@ -759,7 +759,7 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 ### Installing and updating
 
 > **Note**
-> The helper the sim launches, below, is the watcher's job in [the architecture's spine](../architecture/01-spine.md#components) ([the plan](plan.md#7-tech-stack-and-architecture), user, 2026-10-06), and the spine's helper is the core's process for Windows input and audio.
+> The helper the sim launches, below, is the watcher's job in [the architecture's spine](../architecture/01-spine.md#components) (user, 2026-10-06), and the spine's helper is the core's process for Windows input and audio.
 
 One installer puts Crosscheck's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
 
@@ -772,6 +772,10 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 - An "install when the sim is closed" option: if Crosscheck is open when the sim exits, it updates itself then, and if it was closed first, a helper does it.
 - A helper that the sim launches warns, in a Windows notification early in the sim's load, that a waiting update will need a sim restart, so the pilot can close the sim before waiting for it to load.
   It warns only a pilot who has flown with Crosscheck lately, judged by the date of their last session, and stays quiet for one who hasn't used it in a while.
+- The watcher, which does that helper's jobs, starts with Windows, for the pilot's own account, as a setting the pilot can turn off (user, 2026-10-06).
+  A pilot who rarely flies with a crew will ask why it runs all day, so it records its own CPU and memory use and the core's, and shows them over its last 24 hours of running, in words a pilot takes in at a glance, when they open it from the tray icon, choose to quit it, or find its setting.
+  It leaves out the desktop app's, because the pilot opened the app themselves (user, 2026-10-08).
+  Beside the numbers it says what it does for them and what quitting costs, in concrete terms, such as Go to staying off after a sim update until Crosscheck runs again.
 - When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app and the EFB app each show a warning, such as "Conflict: another mod (mod-name) overrides a sim file Crosscheck overrides. You may experience issues. [Learn more]", and the [preflight match check](#preflight-match-check)'s list shows it as one, rather than a Windows notification as the sim starts (user, 2026-10-08).
   The SDK says the package mounted later wins (documented, [02-01](../../learn/foundations/02-01-installs-and-packages.md)), so only one override runs.
   FS Copilot treats YourControls' package as a conflict: its setup won't continue until the pilot removes it, and its app warns "Conflict detected with YourControls package." while YourControls' panel variable is set (read in the FS Copilot fork, `FsCopilot/ViewModels/SetupViewModel.cs` and `FsCopilot/ViewModels/MainViewModel.cs`; user, 2026-10-08).
@@ -789,6 +793,7 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 
 - Pilots on different versions can't join each other's session, and the join check says who is behind and what to do, such as "Adam has a newer Crosscheck; close the sim to update".
 - Disabling another package is reversible from Crosscheck's settings, and puts the package back exactly as it was.
+- When the pilot chooses to quit the watcher, it asks once, giving Quit and Keep running equal weight, and a choice to turn it off stays off (user, 2026-10-06).
 
 **Depends on:**
 

@@ -302,6 +302,7 @@ It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-archit
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.6.1 and 1.6.2.
+Done on 2026-10-09.
 
 ## 1.6.1 Coherent GT's JavaScript, as documented and as others build for it
 

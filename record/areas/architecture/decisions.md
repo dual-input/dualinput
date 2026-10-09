@@ -241,7 +241,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 5 minutes cut off, or the core learns the session has ended.
   The file holds the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
   The restart count goes up by 1 each time the core starts while the file exists, and the core flushes the raised count to disk before it opens any link.
-  Between cores, every message is named by its sender's pilot ID, restart count, channel, and number: a link that carries only its sender's messages names the pilot ID and restart count once, as it opens, and a link that carries several senders' messages carries them with each message; a receiver keeps what it knew of a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
+  Between cores, every message is named by its sender's pilot ID, restart count, channel, and number: a link that carries only its sender's messages names the pilot ID and restart count once, as it opens, and a link that carries several senders' messages carries them with each message; a receiver keeps what it knew of a sender's numbers when its link opens again with the same count, and starts them afresh when it sees a higher count for that sender, on a link that opens with it or on a message that carries it.
   In the vector clocks, each counter belongs to a pilot's ID and a restart count.
   This changes [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s and [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)'s one counter per pilot, and gives 02-live-sync's message ID its form.
   A core that restarts while the sim keeps running rejoins the pilot under the same ID and replays what they missed; one whose sim restarted too rejoins them under the same ID as a late joiner.
@@ -264,7 +264,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 - **Decided:** every stamp in a message, the moment a value was read, is a whole number of µs on Windows' `QueryPerformanceCounter` on the sender's PC, whose ticks become µs through `QueryPerformanceFrequency`, and every span in a message is a whole number of µs, whatever clock measured it.
   The conversion to µs runs in 128 bits, so it doesn't overflow on a PC that has run for weeks.
-  A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin as it arrives, since a page can't read the counter, and the clocks a plugin can read, QuickJS-ng's `Date.now()` and `performance.now()`, aren't shown to count the same ticks; a page that needs a span measures it on its own clock and sends the span.
+  A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin, and each value it requests through SimConnect, as it arrives, since a page can't read the counter, and the clocks a plugin can read, QuickJS-ng's `Date.now()` and `performance.now()`, aren't shown to count the same ticks; a page that needs a span measures it on its own clock and sends the span.
   The core stamps each data-slot write from our WASM module as it arrives, until a clock the module can read is shown to count the same ticks.
   A receiver reads a sender's stamps through an offset it keeps estimating for that sender.
   No frame count crosses between machines: a pace in frames counts the frames of the machine that runs it.
@@ -280,7 +280,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## Messages are defined in one Rust crate: JSON typed by ts-rs for TypeScript, fixed-width structs in data slots, and length-prefixed binary to the helper
 
-- **Decided:** over a WebSocket, into a plugin, and from the desktop app's Rust side to its pages, as a string they parse, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with ts-rs's large-integer setting at `number`, which types `i64`, `u64`, `i128`, and `u128` alike, so an integer field that can pass 2^53 crosses as text, as the IDs do.
+- **Decided:** over a WebSocket, into a plugin, and both ways between the desktop app's Rust side and its pages, as a string each side parses, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with ts-rs's large-integer setting at `number`, which types `i64`, `u64`, `i128`, and `u128` alike, so an integer field that can pass 2^53 crosses as text, as the IDs do.
   In a data slot, a message is a struct of fixed-width fields, with its size and field offsets asserted in the crate, which builds for x86_64 and wasm32.
   Over the helper's standard input and output, a message is binary and prefixed with its length.
   Settled in node 1.4 by the user, 2026-10-09.
@@ -288,15 +288,15 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - ts-rs's types, with its large-integer setting at `number`, took every message serde_json wrote, the plugin that answered them type-checked, and each of five wrong messages was refused; specta did the same only with two opt-ins, `PhasesFormat` and a `specta_typescript::Number` mark on each 64-bit field, and only as a release candidate; and typeshare refused a `u64` until each was marked `serialized_as = "U53"`, then refused an internally tagged enum, which we found no opt-in for (measured on our development machine, 2026-10-09, [architecture log](log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32)).
   - A format written twice drifts: fsc-editor writes its module's wire format in TypeScript and in C++, and "nothing but `src/main/sim/link.test.ts` notices when the two" drift (read in fsc-editor, `link/README.md`).
   - Coherent GT parses JSON with no library of ours, at no frame time we could measure in the PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [01-spine](01-spine.md#the-sims-pages)).
-  - The desktop app's Rust side hands its pages serde_json's text as a string, which they parse, so the shape ts-rs types doesn't rest on how Tauri serializes values of its own ([01-spine](01-spine.md#messages-and-their-types)).
+  - The desktop app's Rust side and its pages trade serde_json's text as a string, which each side parses, so each reads the same text p07 checked ts-rs's types against, whatever Tauri does with a value it serializes itself ([01-spine](01-spine.md#messages-and-their-types)).
   - The data slots' structs kept one layout on x86_64 and wasm32, while a struct with a pointer-sized field didn't (measured on our development machine, 2026-10-09, [architecture log](log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32)).
-- **Leaves out:** the encoding between cores, for the node on how the cores reach each other; whether the desktop app's pages take the messages' text through Tauri's commands or its events; and the choices inside the crate's build ([01-spine](01-spine.md#left-open)).
+- **Leaves out:** the encoding between cores, for the node on how the cores reach each other; whether the desktop app's pages and its Rust side trade the messages' text through Tauri's commands or its events, and whether tauri-specta types the command calls; and the choices inside the crate's build ([01-spine](01-spine.md#left-open)).
 
 ## Every first message carries one version number and a hash of the message crate
 
 - **Decided:** the watcher, the core, the helper, the desktop app, and the Community package, with the WASM module in it, carry one version number, which the build writes into each from one place.
   Each first message, the module's version slot, and each pilot's join carry that version and a hash of the message crate, both as text.
-  A core refuses a join whose version or hash differs from its own, and on one machine the core logs a component whose version or hash differs from its own; whether it then stops exchanging messages with that component is left open ([01-spine](01-spine.md#left-open)).
+  A core refuses a join whose version or hash differs from its own, and on one machine the core logs a component whose version or hash differs from its own.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - Crosscheck's programs and its package update together, as one version, and pilots on different versions can't join each other ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
@@ -305,3 +305,4 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Leaves out:**
   - pilots on different versions flying together, which v1 doesn't offer ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) and which would need a version both sides speak rather than equal ones
   - how the build hashes the message crate, which has to cover each message's encoding as well as its fields ([01-spine](01-spine.md#left-open))
+  - what the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, for the part that designs the core ([01-spine](01-spine.md#left-open))

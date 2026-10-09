@@ -305,9 +305,10 @@ Waits on 1.6.1 and 1.6.2.
 
 ## 1.6.1 Coherent GT's JavaScript, as documented and as others build for it
 
-Question: what do Coherent Labs and the MSFS 2024 SDK document about the JavaScript Coherent GT runs, and what compile targets and lint rules do the MSFS Avionics Framework, FlyByWire, and other open MSFS projects build their in-sim code with?
+Question: what do Coherent Labs and the MSFS 2024 SDK document about the JavaScript Coherent GT runs; what compile targets and lint rules do the MSFS Avionics Framework, FlyByWire, and other open MSFS projects build their in-sim code with; and how is the framework published, licensed, and versioned, so we know whether to bundle our own pinned copy or use the one the sim provides?
 1.6 can't set our compiler's target or write the parse check's rules without it: step 7 asks us to look for Coherent GT's own documentation of its JavaScript, and for rules others already maintain, before writing ours ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
 Our list of what the engine lacks comes from one probe of one A220 document on 2026-08-30 ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)).
+Our interface in the sim is built on the MSFS Avionics Framework ([tentative decisions](decisions.md#our-interface-in-the-sim-is-built-on-the-msfs-avionics-framework)), and p08's EFB app used the copy the sim provides, which a sim update can change ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
 It reads 06-01 and the FS Copilot fork's `record/pointer-forwarding/docs/09-environment.md`, then searches Coherent Labs' documentation, the MSFS 2024 SDK's, and the build configurations of the MSFS Avionics Framework's mirror, FlyByWire's aircraft, and other open MSFS projects.
 Its answer goes in an entry in this area's log, which 1.6.2 and 1.6's section of `01-spine.md` cite.
 Exit: a log entry in this area answers the question.

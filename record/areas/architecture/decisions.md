@@ -229,10 +229,11 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   This answers [03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)'s question of what form the session's ID takes, and [02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)'s of a pilot ID's form.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs 36 characters an ID as text, once per join or per link ([01-spine](01-spine.md#ids); user, 2026-10-09).
+  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs 36 characters an ID as text, once per join or link unless the vector clocks name pilots by ID ([01-spine](01-spine.md#ids); user, 2026-10-09).
   - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed, so a 128-bit ID can't cross as a JavaScript number ([01-spine](01-spine.md#ids)).
   - The invite code can't name a session for a bug report, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - A process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone can't tell one run of the sim from the next.
+- **Leaves out:** how the cores pack a pilot's ID into the vector clocks, by ID or by place in the member list ([01-spine](01-spine.md#left-open)).
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
@@ -241,12 +242,12 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel; a receiver keeps a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
   In the vector clocks, each counter belongs to a pilot's ID and a restart count.
   A core that restarts while the sim keeps running rejoins the pilot under the same ID and replays what they missed, as after a network outage; one whose sim restarted too rejoins them under the same ID as a late joiner.
-  This settles node 1.4's question of what a pilot's identity is across a core restart ([the plan](plan.md#14-shared-conventions)).
+  This settles node 1.4's question of what a pilot's identity is across a core restart ([architecture plan](plan.md#14-shared-conventions)).
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - A receiver drops a message whose number it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a receiver that didn't know a core restarted would drop its messages, numbered from 1 again, as copies until their numbers passed the last one applied before the restart.
     A link back from an outage under the same count is the same core, whose replay the receiver dedupes against the numbers it kept.
-  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
+  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); the restart count narrows the first to the message a core was applying as it crashed, keeps the second, and avoids the third ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine, and replays what they missed if their sim kept running; the user chose that a crashed core does the same (user, 2026-10-09).
   - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send; the restart count costs one write per start, and a receiver writes each number to the session file after applying the message, which delays no message.
 - **Leaves out:**
@@ -258,7 +259,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Decided:** every time in a message is a whole number of µs on Windows' `QueryPerformanceCounter` on the sender's PC, whose ticks become µs through `QueryPerformanceFrequency`.
   The conversion to µs runs in 128 bits, so it doesn't overflow on a PC that has run for weeks.
   A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin as it arrives, since a page can't read the counter and a plugin gets no clock of its own; a page that needs a span measures it on its own clock and sends the span.
-  A receiver reads a peer's stamps through an offset it keeps estimating for that peer.
+  The core stamps each data-slot write from our WASM module as it arrives, until a clock the module can read is shown to count the same ticks.
+  A receiver reads a sender's stamps through an offset it keeps estimating for that sender.
   No frame count crosses between machines: a pace in frames counts the frames of the machine that runs it.
   Wall-clock time, in UTC, appears only where a person reads it.
   Settled in node 1.4 by the user, 2026-10-09.
@@ -268,7 +270,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - A stamp, counted in µs from the PC's start, fits a JavaScript number exactly for about 285 years ([01-spine](01-spine.md#times)).
   - Each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)), so a frame on one machine names no moment on another.
   - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
-- **Leaves out:** how the offset is estimated, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
+- **Leaves out:** how the offset is estimated, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
 
 ## Messages cross to TypeScript as JSON, typed by ts-rs from the Rust crate
 
@@ -277,7 +279,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   Over the helper's standard input and output, a message is binary and prefixed with its length.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - ts-rs's types took every message serde_json wrote, the plugin that answered them type-checked, and each of five wrong messages was refused; specta did the same only with two opt-ins, `PhasesFormat` and a `specta_typescript::Number` mark on each 64-bit field, and only as a release candidate; and typeshare refused a `u64` until each was marked `serialized_as = "U53"`, then refused an internally tagged enum, which we found no opt-in for (measured on our development machine, 2026-10-09, [architecture log](log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32)).
+  - ts-rs's types, with its large-integer setting at `number`, took every message serde_json wrote, the plugin that answered them type-checked, and each of five wrong messages was refused; specta did the same only with two opt-ins, `PhasesFormat` and a `specta_typescript::Number` mark on each 64-bit field, and only as a release candidate; and typeshare refused a `u64` until each was marked `serialized_as = "U53"`, then refused an internally tagged enum, which we found no opt-in for (measured on our development machine, 2026-10-09, [architecture log](log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32)).
   - A format written twice drifts: fsc-editor writes its module's wire format in TypeScript and in C++, and "nothing but `src/main/sim/link.test.ts` notices when the two" drift (read in fsc-editor, `link/README.md`).
   - Coherent GT parses JSON with no library of ours, at no frame time we could measure in the PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [01-spine](01-spine.md#the-sims-pages)).
   - Tauri carries messages between the desktop app's Rust side and its pages as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so the same types describe them there, which no probe has tried.

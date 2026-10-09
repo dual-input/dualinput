@@ -171,7 +171,7 @@ So a pilot's PC runs one core, and a development core with a data folder of its 
 A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' were still open as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
 So each page sends the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, as FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog).
 
-A socket in each of the PA-24's 16 cockpit panels cost no frame time we could measure: uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame, and the windows with our sockets idle, taking a message every 2s, or taking 30 messages a second each read 12.01ms to 12.07ms (measured on MSFS 2024, 2026-10-08, [interface log][links]).
+A socket in each of the PA-24's 16 cockpit panels cost no frame time we could measure: uncapped, at about 83 fps, the two windows with nothing of ours read 12.25ms and 12.07ms a frame, and the windows with our sockets idle, taking a message every 2s, or taking 30 messages of about 200 characters a second, each parsed as JSON, read 12.01ms to 12.07ms (measured on MSFS 2024, 2026-10-08, [interface log][links]; message size and parsing read in `experiments/areas/interface/p13-sim-links.mjs`).
 
 The core accepts a WebSocket only when its `Origin` is `coui://html_ui` or absent ([tentative decisions](decisions.md#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none)).
 Every page we use sent `coui://html_ui`, all 14 in the main menu and all 32 in the A2A PA-24's flight (measured on MSFS 2024, 2026-10-08, [interface log][links]), and the desktop app connects from its Rust side, which sends none ([the desktop app](#the-desktop-app)).
@@ -314,7 +314,7 @@ A plugin is TypeScript that implements an interface of ours and runs only in the
 
 The Rust components share one crate that defines each message they trade: the core's with the helper over its standard input and output, with the WASM module through the data slots, and with the desktop app over its WebSocket, so both ends of each of those links compile against one definition.
 Three TypeScript sides trade those messages too: the sim's pages, the desktop app's pages, and plugins calling the core's host functions.
-A message passed between languages needs one definition both sides are checked against ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)), so their types come from that crate ([messages and their types](#messages-and-their-types)).
+A message passed between languages needs one definition both sides are checked against ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)), so the TypeScript sides' types come from that crate ([messages and their types](#messages-and-their-types)).
 
 [client]: log.md#2026-10-08-a-rust-program-on-the-sdks-own-simconnectdll-connects-to-msfs-2024-trades-commbus-calls-with-mainui-follows-system-events-and-trades-data-slots-with-our-rust-module
 [engine]: log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off
@@ -327,7 +327,7 @@ A message passed between languages needs one definition both sides are checked a
 
 Every component names sessions and pilots by random UUIDs carried as text, and every time in a message is in µs on the sending PC's monotonic clock, which the core reads for the pages and plugins that can't.
 Every message is defined in one Rust crate, which ts-rs turns into TypeScript for the TypeScript sides, and every first message and join carries one version number and a hash of that crate.
-A pilot keeps their ID when their core restarts, and the core counts its restarts, so the other machines can tell a core back from an outage from one that restarted.
+A pilot keeps their ID when their core restarts, and the core counts its restarts, so the other machines can tell a core that restarted from one returning after an outage.
 The tentative decisions behind each are in [decisions.md](decisions.md#sessions-and-pilots-are-named-by-random-uuids-carried-as-text).
 
 ### IDs
@@ -335,30 +335,30 @@ The tentative decisions behind each are in [decisions.md](decisions.md#sessions-
 - A session's ID is a version 4 UUID, which has 122 random bits ([RFC 9562](https://www.rfc-editor.org/rfc/rfc9562#section-5.4)), drawn by the host's core when it starts the session and given to each pilot as they join.
   It labels each pilot's recording and their part of a bug report, which the invite code can't, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 - A pilot's ID is a version 4 UUID too, drawn by the pilot's core when they join a session, and kept through every rejoin of it.
-  Each counter in the vector clocks belongs to a pilot's ID and their core's restart count ([below](#the-session-file-and-a-core-that-restarts)), and the conflict rule's tie-break compares two pilots' IDs as lowercase text, which orders them as their 128-bit values do ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
+  A pilot's ID also keys their counters in the vector clocks ([below](#the-session-file-and-a-core-that-restarts)), and the conflict rule's tie-break compares two pilots' IDs as lowercase text, which orders them as their 128-bit values do ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
 - The user chose 122 random bits over 64 (user, 2026-10-09): among 10 million sessions, a hypothetical lifetime total, the chance that any two share an ID is about 1 in 10^23 with 122 random bits, against about 1 in 370,000 with 64.
-  As text, a UUID is 36 characters, and a session's ID crosses once, when a pilot joins, and a pilot's once as each link opens, unless the cores name pilots by ID in every vector clock, which is [left open](#left-open).
+  As text, a UUID is 36 characters; a session's ID crosses once, when a pilot joins, and a pilot's once as each link opens, unless the encoding between cores writes the ID into every vector clock rather than the pilot's place in the member list, which is [left open](#left-open).
 - Each crosses as its text, such as `3e7d1f2a-5b6c-4d8e-9f0a-1b2c3d4e5f6a`.
-  `BigInt` was missing from the one cockpit panel's document we probed for it (measured on MSFS 2024, 2026-08-30, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), and a JavaScript number holds every integer exactly only up to 2^53: a time of 2^53 + 1µs, to which the plugin added 1, came back from QuickJS-ng as 2^53 where 2^53 + 2 was expected (measured on our development machine, 2026-10-09, [architecture log][types]).
+  A 128-bit ID can't cross as a number: `BigInt` was missing from the one cockpit panel's document we probed for it (measured on MSFS 2024, 2026-08-30, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), and a JavaScript number holds every integer exactly only up to 2^53, as p07 showed when a time of 2^53 + 1µs, plus 1 in a plugin, came back from QuickJS-ng as 2^53 rather than 2^53 + 2 (measured on our development machine, 2026-10-09, [architecture log][types]).
 - A run of the sim is named by its process's ID and the time the process was created, which `GetProcessTimes` gives (documented, [GetProcessTimes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)), because Windows may give a process's ID to a new process once the first has exited and every handle to it is closed (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)).
 
 ### The session file, and a core that restarts
 
 The core keeps a session file in its data folder from the pilot's first join of a session until they press Leave session or the core learns the session has ended.
-It holds the session's ID and invite code, the pilot's ID, a restart count, the run of the sim the pilot was in, and, for each sender and channel, the last number the core applied.
+It holds the session's ID and invite code, the pilot's ID, a restart count, the run of the sim the pilot was in, and, for each sender and channel, the last message number the core applied.
 One core runs for each data folder ([finding the core](#finding-the-core)), so a development core beside the pilot's has a session file, and a pilot ID, of its own.
 
 - The restart count goes up by 1 each time the core starts while the file exists.
-- Between cores, a link opens by naming the sender's pilot ID and restart count, and each message on it then carries only its number in its channel.
-  A receiver keeps the last number it applied from each sender in each channel, and drops a copy that came both directly and through the relay ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
+- Between cores, a link opens by naming the sender's pilot ID and restart count, so each message on it carries its number in its channel without repeating the ID or the count.
+  A receiver keeps the last number it applied from each sender in each channel, and drops the second copy of a message that came both directly and through the relay ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
   - A link that opens again with the same restart count is the same core, back from an outage, so the receiver keeps its numbers and drops the copies a replay brings.
-  - A link with a higher restart count is a core that restarted and numbers from 1 again, so the receiver starts that sender's numbers afresh, where without the count it would drop every new message as a copy of an old one.
+  - A link with a higher restart count is a core that restarted and numbers from 1 again, so the receiver starts that sender's numbers afresh, where without the count it would drop the restarted core's messages as copies until their numbers passed the last one it applied before the restart.
   - In the vector clocks, each counter belongs to a pilot's ID and a restart count, so a restarted core starts a counter of its own, and no counter goes backward.
-- The restart count is written once per start, where saving the number of each message sent would put a disk write ahead of every message; a receiver notes a number after it applies the message, which holds up nothing.
-- FS Copilot made a restarted app a new peer instead: "Both the peer id and the session id are per app run, so a restarted peer is a new peer in every respect", and the fix that review settled on accepted two limits: up to one acknowledgment interval of presses could apply twice on a restarted peer, and a restarted sender's history was gone (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
+- A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send; the restart count costs one write per start.
+- FS Copilot made a restarted app a new peer instead: "Both the peer id and the session id are per app run, so a restarted peer is a new peer in every respect", and the fix its pre-PR review settled on accepted two limits: up to one acknowledgment interval of presses could apply twice on a restarted peer, and a restarted sender's history was gone (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
 - A core that restarts while the sim keeps running, such as after a crash, rejoins the pilot under the same ID, and replays what they missed, as after a network outage ([the connection](../product/03-v1-scope.md#the-connection); user, 2026-10-09).
   It reads from the session file the last number it applied from each sender in each channel, and asks the other machines for the messages after them.
-  It notes each number once it has applied the message, so only a message it was applying as it crashed can apply again.
+  It writes each number to the session file after applying the message, which delays no message, so only a message it was applying as it crashed can apply again.
   What it had sent that no machine had received when it crashed is lost with its process, as FS Copilot's sender history was.
 - A core whose sim restarted too, which it tells from the run in the session file, rejoins the pilot under the same ID as a late joiner ([the connection](../product/03-v1-scope.md#the-connection)).
 
@@ -366,15 +366,16 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
 
 - Every time in a message is a whole number of µs on Windows' `QueryPerformanceCounter`, whose ticks become µs through `QueryPerformanceFrequency`.
   The counter counts from the PC's start, agrees across processes on the PC to within 1 tick, never goes backward, and ignores changes to the system clock (documented, [Acquiring high-resolution time stamps](https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps)).
-  - A core that restarts goes on along the timeline it left, and a PC that restarts may start a new one.
+  - A core that restarts goes on along the timeline it left, and a PC that restarts starts a new one, unless Windows' Fast Startup carries the counter over, which is untested.
     Both open their links with a higher restart count, so the count tells a receiver that the sender's timeline may have changed, not that it did.
   - Whole µs round a stamp by under 1µs, where whole ms would round it by up to 1ms, a quarter of a frame at 240 fps, and 2^53µs is about 285 years, so a stamp fits a JavaScript number exactly.
 - A value is stamped when it's read, not when its message is built, sent, or parsed.
-  Our traffic work found that "Sample times must not be arrival times", because arrival times carry the network's jitter into the path ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor stamped each value as it was parsed, so about 192 values read together landed 0ms to 3ms apart, in the order they were parsed (fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
+  Our traffic work found that "Sample times must not be arrival times", because arrival times carry the network's jitter into the path ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor stamped each value as it was parsed, so about 192 values that arrived in one 8 KB message landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
 - A page in the sim or a plugin can't read `QueryPerformanceCounter`, so the core stamps each of their messages as it arrives, the nearest it comes to when the value was read.
   A page that needs a span, such as the gap between two presses, measures it on its own clock and sends the span, as our fork's pointer sync sends each press's `GapMs` (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`; [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
 - A receiver reads a peer's stamps through an offset it estimates for that peer, and keeps estimating, because two PCs' counters drift apart.
-  A PC's crystal is typically within 50 ppm, so two counters can part by about 8.6s a day, and rarely by more, since a crystal can be off by as much as 500 ppm; Windows calibrates the counter at boot, so how far two PCs' counters drift in practice is unmeasured (documented, same page).
+  A PC's crystal is typically within 50 ppm and can be off by as much as 500 ppm, so two counters can part by about 8.6s a day, and by up to about 86s (documented, same page).
+  Windows calibrates the counter at boot, so how far two PCs' counters part in practice is unmeasured; logging two PCs' counters against each other through a session settles it.
   How the offset is estimated is for the flight-model sync and the node on how the cores reach each other ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)).
 - No frame count crosses between machines, because each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)).
   A pace in frames, such as a profile's `every(1, 'frame')` or the duplicate filter's 3 frames, counts the frames of the machine that runs it ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api); [02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
@@ -385,8 +386,9 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
 The crate that defines the messages ([messages between components](#messages-between-components)) fixes how each link carries them:
 
 - Over a WebSocket, to the sim's pages and the desktop app, a message is JSON that serde_json writes.
-  Coherent GT parses JSON with no library of ours, and a socket in each of the PA-24's 16 cockpit panels, taking 30 messages of about 200 characters a second and parsing each as JSON, cost no frame time we could measure (read in `experiments/areas/interface/p13-sim-links.mjs`; [the sim's pages](#the-sims-pages)).
-- Between the desktop app's Rust side and its pages, Tauri carries a command's arguments and its answer, and an event's payload, as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so the crate's messages reach the pages in the shape ts-rs types; no probe has sent them through Tauri.
+  Coherent GT parses JSON with no library of ours, at no frame time we could measure in the PA-24's cockpit panels ([the sim's pages](#the-sims-pages)).
+- Between the desktop app's Rust side and its pages, Tauri carries a command's arguments and its answer, and an event's payload, as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so the crate's messages reach the pages in the shape ts-rs types, while tauri-specta, not ts-rs, would type the command calls themselves.
+  No probe has sent messages through Tauri; sending p07's samples from the Rust side to a page as a command's answer and as an event's payload, checked against ts-rs's types, settles it.
 - A plugin gets each message as an object, through QuickJS-ng's own JSON parser, and its answer comes back to the core the same way (measured on our development machine, 2026-10-09, [architecture log][types]).
 - In a data slot, a message is a struct of fixed-width fields, which the module reads in place.
   The crate asserts each struct's size and field offsets and builds for both x86_64 and wasm32, and the structs in our probe p07 kept one layout on both, while a struct holding a pointer-sized `usize` was 16 bytes on x86_64 and 8 on wasm32 (same entry).
@@ -395,14 +397,15 @@ The crate that defines the messages ([messages between components](#messages-bet
 
 The TypeScript sides take their types from ts-rs, which generates them from the crate.
 Its large-integer setting is `number`, because serde_json writes a `u64` as a JSON number, and on its default, `bigint`, every sample carrying a time failed p07's type check (same entry).
+So a `u64` reaches TypeScript exactly only up to 2^53: a time in µs stays under it for about 285 years ([times](#times)), and a field that can pass it crosses as text, as the IDs do ([IDs](#ids)).
 Its output is types alone, which erase when compiled, so nothing of it runs in Coherent GT.
-In p07, ts-rs's types took every message serde_json wrote and refused each of five wrong ones; specta did the same only with two opt-ins, `PhasesFormat` and a `specta_typescript::Number` mark on each 64-bit field, and only as a release candidate; and typeshare refused a `u64` until each was marked `serialized_as = "U53"`, then refused an internally tagged enum, which we found no opt-in for (same entry).
+In p07, ts-rs's types took every message serde_json wrote and refused each of five wrong ones, while specta needed two opt-ins on a release candidate, and typeshare couldn't express an internally tagged enum ([architecture log][types]).
 
 ### Versions
 
 - The watcher, the core, the helper, the desktop app, and the Community package, with the WASM module in it, carry one version number, which the build writes into each from one place.
   They update together ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and a version number nothing reads drifts: fsc-editor's package version sat at 0.0.1 while its module's reached 0.3.0, until its build derived one from the other ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)).
-- Each first message, the module's version slot, and each pilot's join carry that version and a hash of the message crate.
+- Each first message, the module's version slot, and each pilot's join carry that version and a hash of the message crate, both as text.
   - Between pilots, a core refuses a join whose version or hash differs from its own, so two development builds of one version whose messages differ refuse each other too.
   - On one machine, the core logs a component whose version or hash differs from its own, by name ([how the core knows a component is alive](#how-the-core-knows-a-component-is-alive)).
 - Profiles and plugins carry versions of their own, and each declares the version of our plugin API it needs ([tentative decisions](decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
@@ -415,9 +418,17 @@ In p07, ts-rs's types took every message serde_json wrote and refused each of fi
 - How the cores reach each other ([between machines](#between-machines)).
 - Letting a web page connect to the core, which the `Origin` check refuses (user, 2026-10-08): if an integration ever needs it, a site the pilot approves once, or one carrying a token, as the off-by-default listener for the tablet would ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)).
 - How each module, and each hook our panel code installs for a plugin, tears itself down, for the panel bridge and the WASM module to design.
-- Choices that stay inside one part: the compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)); the framework for the desktop app's pages; the core's async runtime and WebSocket library; the WebSocket client in the desktop app's Rust side, which has to send no `Origin` or `coui://html_ui`; whether the bindings to the SDK come from msfs-rs or from our own run of bindgen; how the build hashes the message crate, and the check in CI that ts-rs's files match it; whether the desktop app's pages take messages from its Rust side through Tauri's commands or its events; and the binary format on the helper's standard input and output, since both its ends are Rust built against the crate.
+- Choices that stay inside one part:
+  - the compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits))
+  - the framework for the desktop app's pages
+  - the core's async runtime and WebSocket library
+  - the WebSocket client in the desktop app's Rust side, which has to send no `Origin` or `coui://html_ui`
+  - whether the bindings to the SDK come from msfs-rs or from our own run of bindgen
+  - how the build hashes the message crate, and the check in CI that ts-rs's files match it
+  - whether the desktop app's pages take messages from its Rust side through Tauri's commands or its events
+  - the binary format on the helper's standard input and output, since both its ends are Rust built against the crate
 - How the cores pack each field of a message, such as whether a vector clock names each pilot by ID or by place in the member list, for the node on how the cores reach each other ([shared conventions](#shared-conventions)).
-- Whether the sim's WebAssembly reads the same counter as `QueryPerformanceCounter`, which decides whether our module can take the core's stamps as they are, for the part that designs the flight-model sync ([times](#times)); a probe in which the module and the core stamp the same data-slot write settles it.
+- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can use the core's stamps without an offset, for the part that designs the flight-model sync ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
 - Which clock a page in the sim measures a span on: it has `performance.now()` (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), but whether that clock is steady in Coherent GT is unmeasured, for the part that designs the panel bridge; timing a page's `performance.now()` against the core's counter over a few minutes settles it.
 - What a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, since on the A2A PA-24 a mask registered after the aircraft loaded didn't get ahead of the aircraft's own (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)), for the part that designs the core; restarting the core mid-flight on the PA-24 and checking whether its masks still get ahead of Accu-Sim settles it.
 - Whether the SDK's library does what node-simconnect did beyond the main menu: masking, including a group that takes its priority as the sim starts, AI objects with liveries, input events, the camera, and a flight load's flow events, which tell the core when Ready to fly came ([what moves them](#what-moves-them)); a probe in a flight settles it, for the part that designs the core ([the core](#the-core)).

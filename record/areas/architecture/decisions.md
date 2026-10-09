@@ -229,14 +229,14 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   This answers [03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)'s question of what form the session's ID takes, and [02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)'s of a pilot ID's form.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs a few bytes once per join or per link ([01-spine](01-spine.md#ids); user, 2026-10-09).
-  - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed ([01-spine](01-spine.md#ids)).
+  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs 36 characters an ID as text, once per join or per link ([01-spine](01-spine.md#ids); user, 2026-10-09).
+  - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed, so a 128-bit ID can't cross as a JavaScript number ([01-spine](01-spine.md#ids)).
   - The invite code can't name a session for a bug report, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - Windows may give a process's ID to a new process once the first has exited and every handle to it is closed (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone can't tell one run of the sim from the next.
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
-- **Decided:** the core keeps a session file in its data folder, from the pilot's first join of a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, a restart count, the sim's run, and, for each sender and channel, the last number the core applied.
+- **Decided:** the core keeps a session file in its data folder, from the pilot's first join of a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, a restart count, the run of the sim the pilot was in, and, for each sender and channel, the last message number the core applied.
   The restart count goes up by 1 each time the core starts while the file exists.
   Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel; a receiver keeps a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
   In the vector clocks, each counter belongs to a pilot's ID and a restart count.
@@ -244,11 +244,11 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   This settles node 1.4's question of what a pilot's identity is across a core restart ([the plan](plan.md#14-shared-conventions)).
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - A receiver drops a message whose number it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a restarted core numbering from 1 would have every new message dropped as a copy, unless the receiver knows it restarted.
+  - A receiver drops a message whose number it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a receiver that didn't know a core restarted would drop its messages, numbered from 1 again, as copies until their numbers passed the last one applied before the restart.
     A link back from an outage under the same count is the same core, whose replay the receiver dedupes against the numbers it kept.
-  - FS Copilot made a restarted app a new peer, and the fix its review settled on accepted two limits: up to one acknowledgment interval of presses could apply twice on a restarted peer, and a restarted sender's history was gone (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
+  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on accepted two limits: up to one acknowledgment interval of presses could apply twice on a restarted peer, and a restarted sender's history was gone (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine, and replays what they missed if their sim kept running; the user chose that a crashed core does the same (user, 2026-10-09).
-  - The restart count is written once per start, where saving the number of each message sent would put a disk write ahead of every message; a receiver notes a number after it applies the message, which holds up nothing.
+  - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send; the restart count costs one write per start, and a receiver writes each number to the session file after applying the message, which delays no message.
 - **Leaves out:**
   - what the core had sent that no machine had received when it crashed, which is lost with its process ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts))
   - what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded ([01-spine](01-spine.md#left-open))
@@ -264,10 +264,10 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Because:**
   - `QueryPerformanceCounter` counts from the PC's start, agrees across processes to within 1 tick, never goes backward, and ignores changes to the system clock, while a stamp on the wall clock moves when Windows sets that clock (documented, [Acquiring high-resolution time stamps](https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps)); so a restarted core goes on along the timeline it left.
   - Two PCs' counters drift apart, by about 8.6s a day at the 50 ppm a PC's crystal is typically within (documented, same page), so one offset estimated once doesn't hold ([01-spine](01-spine.md#times)).
-  - A stamp fits a JavaScript number exactly for about 285 years of µs ([01-spine](01-spine.md#times)).
+  - A stamp, counted in µs from the PC's start, fits a JavaScript number exactly for about 285 years ([01-spine](01-spine.md#times)).
   - Each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)), so a frame on one machine names no moment on another.
-  - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
-- **Leaves out:** how the offset is estimated, for the flight-model sync and the node on how the cores reach each other; whether the sim's WebAssembly reads the same counter; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
+  - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
+- **Leaves out:** how the offset is estimated, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
 
 ## Messages cross to TypeScript as JSON, typed by ts-rs from the Rust crate
 
@@ -278,19 +278,19 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Because:**
   - ts-rs's types took every message serde_json wrote, the plugin that answered them type-checked, and each of five wrong messages was refused; specta did the same only with two opt-ins, `PhasesFormat` and a `specta_typescript::Number` mark on each 64-bit field, and only as a release candidate; and typeshare refused a `u64` until each was marked `serialized_as = "U53"`, then refused an internally tagged enum, which we found no opt-in for (measured on our development machine, 2026-10-09, [architecture log](log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32)).
   - A format written twice drifts: fsc-editor writes its module's wire format in TypeScript and in C++, and "nothing but `src/main/sim/link.test.ts` notices when the two" drift (read in fsc-editor, `link/README.md`).
-  - Coherent GT parses JSON with no library of ours, and a socket in each of the PA-24's 16 cockpit panels, taking 30 messages of about 200 characters a second and parsing each as JSON, cost no frame time we could measure ([01-spine](01-spine.md#messages-and-their-types)).
-  - Tauri carries messages between the desktop app's Rust side and its pages as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so the same types describe them there.
+  - Coherent GT parses JSON with no library of ours, at no frame time we could measure in the PA-24's cockpit panels ([01-spine](01-spine.md#the-sims-pages)).
+  - Tauri carries messages between the desktop app's Rust side and its pages as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so the same types describe them there, which no probe has tried.
   - The data slots' structs kept one layout on x86_64 and wasm32, while a struct with a pointer-sized field didn't (same entry).
-- **Leaves out:** the encoding between cores, for the node on how the cores reach each other, and the choices inside the crate's build ([01-spine](01-spine.md#left-open)).
+- **Leaves out:** the encoding between cores, for the node on how the cores reach each other; whether the desktop app's pages take messages through Tauri's commands or its events, which no probe has sent; and the choices inside the crate's build ([01-spine](01-spine.md#left-open)).
 
 ## Every first message carries one version number and a hash of the message crate
 
 - **Decided:** the watcher, the core, the helper, the desktop app, and the Community package, with the WASM module in it, carry one version number, which the build writes into each from one place.
-  Each first message, the module's version slot, and each pilot's join carry that version and a hash of the message crate.
+  Each first message, the module's version slot, and each pilot's join carry that version and a hash of the message crate, both as text.
   A core refuses a join whose version or hash differs from its own, and on one machine the core logs a component whose version or hash differs from its own.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - Crosscheck's programs and its package update together, as one version, and pilots on different versions can't join each other ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - A version number nothing reads drifts: fsc-editor's package version sat at 0.0.1 while its module's reached 0.3.0, until its build derived one from the other ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)).
   - Two development builds can carry one version number with different messages, and the hash tells them apart, as FS Copilot's check of a hash of each packet type refuses a peer whose types differ ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
-- **Leaves out:** pilots on different versions flying together, which v1 leaves out ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and would need a version both sides speak rather than equality.
+- **Leaves out:** pilots on different versions flying together, which v1 doesn't offer ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) and which would need a version both sides speak rather than equal ones.

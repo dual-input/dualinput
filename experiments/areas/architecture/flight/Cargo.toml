@@ -1,0 +1,10 @@
+# p08's Windows programs: the SimConnect client the core would be, and the
+# helper. The module builds apart, with cargo-msfs, for wasm32.
+[workspace]
+members = ["client", "helper"]
+exclude = ["module"]
+resolver = "2"
+
+[profile.release]
+lto = true
+strip = true

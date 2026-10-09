@@ -1,0 +1,5 @@
+# cargo's build output, SimConnect.dll beside the client included, and the
+# module's and the packages' build folders.
+target/
+module/target/
+build/

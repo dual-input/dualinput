@@ -312,6 +312,7 @@ Our interface in the sim is built on the MSFS Avionics Framework ([tentative dec
 It reads 06-01 and the FS Copilot fork's `record/pointer-forwarding/docs/09-environment.md`, then searches Coherent Labs' documentation, the MSFS 2024 SDK's, and the build configurations of the MSFS Avionics Framework's mirror, FlyByWire's aircraft, and other open MSFS projects.
 Its answer goes in an entry in this area's log, which 1.6.2 and 1.6's section of `01-spine.md` cite.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-09.
 
 ## 1.6.2 The syntax and built-ins Coherent GT has
 

@@ -3,6 +3,52 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-09: Coherent GT's makers last placed its engine near Safari 10.1, the MSFS Avionics Framework and FlyByWire compile to ES2017, nobody maintains a rule set for the engine, and Working Title ships its own pinned copy of the framework
+
+**Asked:** what do Coherent Labs and the MSFS 2024 SDK document about the JavaScript Coherent GT runs; what compile targets and lint rules do the MSFS Avionics Framework, FlyByWire, and other open MSFS projects build their in-sim code with; and how is the framework published, licensed, and versioned (node 1.6.1)?
+
+**Expected:** a target near ES2017, since the engine has `async` and lacks ES2020's syntax ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)).
+
+**Found:** a search of vendors' pages, package registries, and projects' repositories, on 2026-10-09:
+
+- **Coherent Labs.**
+  Coherent GT 2.0.1.3, released 2017-12-07, "Updated internal WebKit version to Safari Technology Preview (STP) 34. Closest browser comparison would now be Safari 10.1.2", and added "complete support for EcmaScript 6" and "EcmaScript 7" (documented, [Coherent GT changelog](https://coherent-labs.com/posts/changelog-coherent-gt/)).
+  No later entry, through 2.9.23.0 of 2023-06-06, names a newer WebKit, JavaScriptCore, or ECMAScript level.
+  The engine has `globalThis`, `WeakRef`, and `Array.prototype.flat` ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), which Safari got after 10.1, so either MSFS 2024 runs a newer build than the changelog shows, or the sim's scripts fill them in (unverified).
+- **The MSFS 2024 SDK.**
+  Its JavaScript, Coherent GT debugger, gauge, BaseInstrument, and EFB API pages name no ECMAScript level, browser, compile target, or bundler; its JavaScript page calls Coherent GT "the web engine being used by Microsoft Flight Simulator 2024 to display glasscockpits" (documented, [JavaScript](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/javascript/javascript/index.md)).
+- **The MSFS Avionics Framework.**
+  Its library compiles with TypeScript 5.8.3 through ts-patch, `"target": "es2017"`, `"lib": ["DOM", "DOM.Iterable", "ES2017", "ES2021.WeakRef"]`, and the `@microsoft/msfs-ts-transformer` plugin, and Rollup bundles the output with no second compile (read in microsoft/msfs-avionics-mirror, its main branch on 2026-10-09, `src/sdk/tsconfig.json`).
+  The transformer rewrites `for`-`of` loops and array destructuring as indexed access, which its description says Coherent GT's interpreter doesn't optimize well, so it's for speed, not syntax (documented, `@microsoft/msfs-ts-transformer` 1.0.0 on npm).
+  A comment in its source says "Object.fromEntries is not available in CoherentJS" (read in the same repository, `src/sdk/utils/datastructures/ObjectUtils.ts`).
+  Its documentation's own `tsconfig` sets `"target": "es2017"` with the comment "compatible with Coherent GT" (documented, [Setting Up Your Environment](https://microsoft.github.io/msfs-avionics-mirror/2024/docs/getting-started/setting-up-your-environment)).
+- **Its package, license, and versions.**
+  `@microsoft/msfs-sdk` 2.3.3, of 2025-12-12, is the newest on npm, with `"license": "MIT"` and `msfssdk.js` as its main file (read in the npm registry).
+  The repository's license is MIT with an addendum that the software is "licensed only for usage in Microsoft Flight Simulator. Licensing is strictly prohibited otherwise." (read in microsoft/msfs-avionics-mirror, `LICENSE`).
+  The repository's package version rose with each sim update, 2.1.1 at SU2, 2.2.3 at SU3, 2.3.3 at SU4, and 2.4.3 at SU5, and 2.4.3 isn't on npm yet; no document states how versions relate to the sim (read in the repository's history by our search).
+- **How Working Title ships it.**
+  The G1000 pins `"@microsoft/msfs-sdk": "2.4.3"` with no range, and its build copies the framework's `msfssdk-iife.js` into the instrument's own `Libraries` folder as `msfssdk.js` (read in microsoft/msfs-avionics-mirror, its main branch on 2026-10-09, `src/workingtitle-instruments-g1000/package.json`).
+  So the framework's authors ship their own pinned copy, rather than using one the sim provides.
+- **FlyByWire.**
+  Its shared `tsconfig.json` sets `"target": "es2017"` with the documentation's comment, and its esbuild helper sets `target: 'safari11'` under "// Target approximate CoherentGT WebKit version", with `format: 'iife'` (read in flybywiresim/aircraft, its master branch on 2026-10-09, `build-utils.js`; the tsconfig in `fbw-common/src/systems/tsconfig.json`, by our search).
+  Its instruments, built through `@synaptic-simulations/mach` with esbuild at `es2017`, bundle the framework into each instrument, and its ESLint config, at `ecmaVersion: 2021`, has no rule for Coherent GT (read by our search).
+- **Others.**
+  The KLN 90B, a toolbar panel, and Salty's 747 compile to `es2017` too, and one open EFB app, FSTRaK's, compiles with esbuild at `es2017` and takes the framework as the EFB's global `msfssdk` instead of bundling it (read by our search, in falcon71/kln90b, hallidave/landing-monitor, saltysimulations/salty-747, and o4oren/FSTRaK).
+- **Rule sets.**
+  We found no ESLint plugin, browserslist query, or compatibility table for Coherent GT or MSFS's JavaScript, on npm or in a code search of GitHub.
+
+**Changed:**
+
+- `es2017` is the compile target the framework's authors, FlyByWire, and every project we read use, and none goes higher, so it's our starting target, which 1.6.2 checks against what the engine parses.
+- A compiler's target lowers syntax but fills in no built-in, and TypeScript's `lib` setting catches a missing ES built-in such as `Object.fromEntries` at type-check time but not a missing DOM API such as `ResizeObserver`, which the `DOM` lib declares; so our check needs a rule of its own for those, and nobody maintains one to reuse.
+- We can ship our own pinned copy of the framework, as Working Title does, under a license that limits its use to Microsoft Flight Simulator, which Crosscheck is built for.
+
+What we haven't settled: whether the engine's newer built-ins are its own or the sim's fill-ins, which 1.6.2 measures; and how the framework's versions track sim updates, which no document states.
+
+**Affects:** node 1.6.1 of the [architecture plan](plan.md#161-coherent-gts-javascript-as-documented-and-as-others-build-for-it), which 1.6.2 and 1.6 build on; and the tentative decision [Our interface in the sim is built on the MSFS Avionics Framework](decisions.md#our-interface-in-the-sim-is-built-on-the-msfs-avionics-framework).
+
+**Evidence:** the pages and files named above, read on 2026-10-09.
+
 ## 2026-10-09: In a flight, a Rust client on SimConnect.dll masks, creates AI objects with liveries, sets input events, reads the camera, and follows the load; the Rust module echoes; Raw Input gets a person's key and button; and the module's clock counts the counter's ticks from near the sim's start
 
 **Asked:** does what Crosscheck's Rust pieces did at the main menu hold in a flight (node 1.5)?

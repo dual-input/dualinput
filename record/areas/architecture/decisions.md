@@ -221,7 +221,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
 - **Leaves out:** where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates.
 
-## Sessions and pilots are named by random UUIDs, carried as text
+## Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them
 
 - **Decided:** a session's ID and a pilot's ID are each a version 4 UUID, which has 122 random bits.
   The host's core draws the session's when it starts the session, and each pilot's core draws theirs when they start or join a session, and keeps it through every rejoin of it; each crosses as its lowercase text wherever JSON or TypeScript reads it.
@@ -230,7 +230,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID (user, 2026-10-09).
-    As text, an ID costs 36 characters each time it crosses: once per join or link, or in every message if the vector clocks name each counter by ID ([01-spine](01-spine.md#ids)).
+    As text, an ID costs 36 characters each time it crosses: once per join or link, in every message on a link that carries several senders' messages, and in every message if the vector clocks name each counter by ID ([01-spine](01-spine.md#ids)).
   - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed, so a 128-bit ID can't cross as a JavaScript number ([01-spine](01-spine.md#ids)).
   - The invite code can't name a session for a bug report, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - A process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone can't tell one run of the sim from the next.
@@ -239,7 +239,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
 - **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 5 minutes cut off, or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
-  The restart count goes up by 1 each time the core starts while the file exists.
+  The restart count goes up by 1 each time the core starts while the file exists, and the core flushes the raised count to disk before it opens any link.
   Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel, so every message is named by its sender's pilot ID, restart count, channel, and number; a receiver keeps what it knew of a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
   In the vector clocks, each counter belongs to a pilot's ID and a restart count.
   This changes [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s and [04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)'s one counter per pilot, and gives 02-live-sync's message ID its form.
@@ -277,7 +277,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - Samples stamped as they arrived carried the network's jitter into our traffic work's paths ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)), and fsc-editor's values stamped as they were parsed landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
 - **Leaves out:** how the offset is estimated, what a higher restart count does to it, and how far two PCs' counters part in practice, for the flight-model sync and the node on how the cores reach each other; whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`; and which clock a page measures a span on ([01-spine](01-spine.md#left-open)).
 
-## Messages cross to TypeScript as JSON, typed by ts-rs from the Rust crate
+## Messages are defined in one Rust crate: JSON typed by ts-rs for TypeScript, fixed-width structs in data slots, and length-prefixed binary to the helper
 
 - **Decided:** over a WebSocket, and into a plugin, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with 64-bit integers typed as `number`.
   In a data slot, a message is a struct of fixed-width fields, with its size and field offsets asserted in the crate, which builds for x86_64 and wasm32.

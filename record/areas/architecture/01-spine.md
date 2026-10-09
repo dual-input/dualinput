@@ -327,12 +327,12 @@ A message passed between languages needs one definition both sides are checked a
 
 ## Shared conventions
 
-Every component names sessions and pilots by random UUIDs carried as text.
+Every component names sessions and pilots by random UUIDs, carried as text wherever JSON or TypeScript reads them.
 Every stamp in a message, the moment a value was read, is in µs on the sending PC's monotonic clock, and every span is in µs too.
 The sim's pages and plugins can't stamp on that clock, so the core stamps their messages as they arrive, and it stamps the WASM module's data-slot writes the same way until a clock the module reads is shown to count the same ticks.
 Every message between our components on a pilot's PC, and between cores, is defined in one Rust crate, which ts-rs turns into TypeScript for the TypeScript sides, and every first message and join carries one version number and a hash of that crate.
 A pilot keeps their ID when their core restarts, and the core counts its restarts, so the other machines can tell a core that restarted from one returning after an outage.
-The tentative decisions behind each are in [decisions.md](decisions.md#sessions-and-pilots-are-named-by-random-uuids-carried-as-text).
+The tentative decisions behind each are in [decisions.md](decisions.md#sessions-and-pilots-are-named-by-random-uuids-carried-as-text-where-json-or-typescript-reads-them).
 
 ### IDs
 
@@ -345,7 +345,7 @@ The tentative decisions behind each are in [decisions.md](decisions.md#sessions-
   In our probe [p07](../../../experiments/areas/architecture/p07-types.mjs), QuickJS-ng held a time of 2^53 + 1µs as 2^53, so a plugin that added 1 returned 2^53, not 2^53 + 2 (measured on our development machine, 2026-10-09, [architecture log][types]).
 - The user chose 122 random bits over 64 (user, 2026-10-09): among 10 million sessions, a hypothetical lifetime total, the chance that any two share an ID is about 1 in 10^23 with 122 random bits, against about 1 in 370,000 with 64.
   A UUID is 36 characters as text and 16 bytes in a binary format.
-  A session's ID crosses once, when a pilot joins, and a pilot's ID once as each link opens.
+  A session's ID crosses once, when a pilot joins, and a pilot's ID once as each link opens, or in every message on a link that carries several senders' messages ([the session file](#the-session-file-and-a-core-that-restarts)).
   If the encoding between cores names each vector clock counter by its pilot's ID and restart count rather than by a place in the [member list](../product/04-room-for-later.md#people-beyond-the-crew), every message's clock carries one ID for each counter: 32 bytes with two pilots in a binary format, 72 characters as text, and one more ID for each restart in the session.
   That choice, and how a place in the member list would name a restart count, is [left open](#left-open).
 - A run of the sim is named by its process's ID and its creation time, the `FILETIME` that `GetProcessTimes` gives (documented, [GetProcessTimes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)), so a core that restarts can tell from its session file whether the sim restarted too ([the session file](#the-session-file-and-a-core-that-restarts)).
@@ -357,7 +357,7 @@ The core keeps a session file in its data folder from when the pilot starts or f
 It holds the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in, and the part that designs sync may keep there what a restarted core needs to replay ([left open](#left-open)).
 One core runs for each data folder ([finding the core](#finding-the-core)), so a development core beside the pilot's has a session file, and a pilot ID, of its own.
 
-- The restart count goes up by 1 each time the core starts while the file exists.
+- The restart count goes up by 1 each time the core starts while the file exists, and the core flushes the raised count to disk before it opens any link, because a core that sent under a count it hadn't saved would reuse that count after a crash, and the others would drop its messages, numbered from 1 again, as copies.
 - Between cores, a link opens by naming the sender's pilot ID and restart count, and each message on it carries its number in its channel.
   So every message is named by its sender's pilot ID, restart count, channel, and number.
   Where a link carries only its sender's messages, the pilot ID and restart count cross once, as it opens, rather than with each message, and a link that carries several senders' messages, as a relay's or a forwarding machine's could, names the sender in each message.
@@ -390,7 +390,7 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
   Our traffic work found that "Sample times must not be arrival times", because arrival times carry the network's jitter into the path the receiver draws each aircraft along (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 4, traffic: what the app needed that the prototype did not"; [08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)).
   fsc-editor stamped each value as it was parsed, so about 192 values that arrived in one 8 KB message landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
 - A page in the sim can't read `QueryPerformanceCounter`, and a plugin reads only QuickJS-ng's `Date.now()` and `performance.now()`, which rquickjs's full context includes (read in rquickjs-core 0.14.0, `src/context/builder.rs`, `intrinsic::All`) and which aren't shown to count the same ticks, so the core stamps each of their messages as it arrives, the nearest it comes to when the value was read.
-  How long a page's message takes to reach the core is unmeasured; a page that echoes a core's message, timed by the core, bounds it.
+  How long a page's message, or a data-slot write from our WASM module, takes to reach the core is unmeasured, so a stamp the core gives on arrival trails the read by a delay and jitter we don't know ([left open](#left-open)); a page that echoes a core's message, timed by the core, bounds a page's.
   A page that needs a span measures it on its own clock and sends it in whole µs.
   FS Copilot's pointer sync does the same in ms: each gesture carries its `GapMs`, the idle time since the gesture before it, capped at 1,000ms (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`; [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
   Its panel code measures that gap with `Date.now()` (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `_gapBefore`).
@@ -410,7 +410,7 @@ The crate that defines the messages ([messages between components](#messages-bet
 - Over a WebSocket, to the sim's pages and the desktop app, a message is JSON that serde_json writes.
   Coherent GT parses JSON with no library of ours, at no frame time we could measure in the PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log][links]; [the sim's pages](#the-sims-pages)).
 - Between the desktop app's Rust side and its pages, Tauri carries a command's arguments and its answer, and an event's payload, as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so either way a message from the crate arrives in the shape its ts-rs type describes.
-  ts-rs types the messages a command carries, not the command's name and arguments, which tauri-specta types (documented, [tauri-specta](https://docs.rs/tauri-specta/2.0.0-rc.21/tauri_specta/)); whether the desktop app needs it is unverified.
+  ts-rs types each message a command takes or returns, but not the call that names the command and binds its arguments, which tauri-specta types (documented, [tauri-specta](https://docs.rs/tauri-specta/2.0.0-rc.21/tauri_specta/)); whether the desktop app needs tauri-specta is unverified.
   No probe has sent messages through Tauri; sending p07's samples from the Rust side to a page as a command's answer and as an event's payload, and checking them against ts-rs's types, settles whether they arrive in that shape.
 - A plugin gets each message as an object, through QuickJS-ng's own JSON parser, and its answer comes back to the core the same way (measured on our development machine, 2026-10-09, [architecture log][types]).
 - In a data slot, a message is a struct of fixed-width fields, which the module reads in place.
@@ -451,7 +451,7 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
   - the check in CI that ts-rs's generated files match the crate
   - whether the desktop app's pages take messages from its Rust side through Tauri's commands or its events
   - the binary format on the helper's standard input and output, since both its ends are Rust built against the crate
-- How the cores pack each field of a message, such as whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list; how each channel other than the cockpit's tells a copy from a late message, since the transport carries each channel's delivery ([channels](../product/04-room-for-later.md#channels)); and whether the relay's and the backend's messages are the crate's, for the node on how the cores reach each other ([IDs](#ids); [the session file](#the-session-file-and-a-core-that-restarts)).
+- How the cores pack each field of a message, such as whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list; how each channel other than the cockpit's tells a copy from a late message, since the transport decides how each channel delivers, in order and resent or newest only ([channels](../product/04-room-for-later.md#channels)); and whether the relay's and the backend's messages are the crate's, for the node on how the cores reach each other ([IDs](#ids); [the session file](#the-session-file-and-a-core-that-restarts)).
 - How a core that restarted while the sim kept running recovers, for the part that designs sync ([the session file](#the-session-file-and-a-core-that-restarts)).
   That part lists what its engine keeps in memory, and decides how a restarted core keeps or rebuilds each, and what of it the core writes to the session file and when.
   It also decides how the cockpit channel tells a copy from a late message, how the conflict rule orders two changes from one pilot under two restart counts, which comparing pilot IDs can't, and how the others get the changes the pilot made that never reached them.
@@ -463,9 +463,10 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
   Timing each page's `performance.now()` against the core's counter over a few minutes settles it.
 - What a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, since on the A2A PA-24 a mask registered after the aircraft loaded didn't get ahead of the aircraft's own (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)), for the part that designs the core; restarting the core mid-flight on the PA-24 and checking whether its masks still get ahead of Accu-Sim settles it.
 - Whether the SDK's library does what node-simconnect did beyond the main menu: masking, including a group that takes its priority as the sim starts, AI objects with liveries, input events, the camera, and a flight load's flow events, which tell the core when Ready to fly came ([what moves them](#what-moves-them)); a probe in a flight settles it, for the part that designs the core ([the core](#the-core)).
-- Whether the toolbar script can open the banner outside a Build and Mount, at a flight load or mid-flight when a session starts then: we've seen it open the panel only after Build and Mounts, two times in three ([03-v1-scope](../product/03-v1-scope.md#notification-banner)).
+- Whether the toolbar script can open the banner outside a Build and Mount, at a flight load or mid-flight when a session starts then, for the part that designs the banner: it opened the panel with no click after two of three Build and Mounts, and no other case has been tried ([03-v1-scope](../product/03-v1-scope.md#notification-banner)); loading a flight with our package installed, then starting a session mid-flight, settles it.
 - Where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates; the profile registry, a Later pick, would deliver community profiles the same way ([ideas](../product/ideas.md#profile-registry)).
 - Which APIs our panel bridge and WASM module offer plugins, and how the version of our plugin API that each profile and plugin declares relates to Crosscheck's version, for the part that designs plugins: the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins)).
-- How the core judges an aircraft settled in a session started before [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s rule could call it settled.
+- How the core judges an aircraft settled in a session started before [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s rule could call it settled, for the part that designs sync.
   One way keeps [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 30s floor from Ready to fly and counts its 15s quiet window from when the profile loads.
-- Whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, which a probe of whether SimConnect's client events reach `H:` events settles.
+- Whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, for the part that designs the profile engine, which a probe of whether SimConnect's client events reach `H:` events settles.
+- How far the core's arrival stamp trails the read, for a page's message and for a data-slot write from our WASM module, for the part that designs the flight-model sync and each page that sends values ([times](#times)).

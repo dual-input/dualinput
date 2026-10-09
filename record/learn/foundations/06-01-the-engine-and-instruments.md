@@ -13,7 +13,7 @@ A glass cockpit display in MSFS 2024 is a web page that the sim draws onto one s
 ## Coherent GT: the Chrome 49 engine and its limits
 
 MSFS 2024 draws every HTML cockpit display with Coherent GT, a WebKit-based engine from Coherent Labs whose user agent says Chrome 49 [1] [2].
-Its JavaScript has `async` and `await` but none of the ES2020-or-later syntax we tested, such as `?.` and `??` [1].
+Its JavaScript parses ES2017 and object rest, and no other syntax from ES2018 on, such as object spread, `?.`, and `??` [1] [26].
 A file that uses any of that syntax fails to parse, and none of the file runs.
 
 **How it works.**
@@ -217,12 +217,10 @@ Synced topics cross between documents on a sim channel with a known key, and cod
 23. Documented: MSFS Avionics Framework, [Avionics Development](https://microsoft.github.io/msfs-avionics-mirror/2024/docs/avionics/).
 24. Measured on MSFS 2024, 2026-08-30: FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 - Q03 PASSES: a synthetic mouse click drives a React/SVG display", the geometry paragraph.
 25. Documented in our record, read from the aircraft's files: fsc-editor, `docs/aircraft/synaptic-a220.md`, sections "Package layout", "Architecture — the thing to remember", and "THE ALTIMETER PROBLEM".
+26. Measured on MSFS 2024, 2026-10-09: [architecture log](../../areas/architecture/log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild), five documents through the inspector; the full list is in [Coherent GT's JavaScript](../../areas/architecture/coherent-gt.md).
 
 ## Unverified claims
 
-- **Which ECMAScript version matches Coherent GT's syntax.**
-  It has ES2017's `async` and lacks ES2020's `?.` [1], and nobody has tested the syntax in between.
-  Evaluating object rest and spread, async iteration, and optional catch binding in a panel document through the inspector would settle it.
 - **When the sim changes an instrument's `quality`, and when it reloads a document.**
   The code shows what each does [7], and our only list of reload causes is reasoning [15].
   Watching `document.body`'s `quality` attribute and each document's page ID through the inspector, while changing views, popping out a display, and changing aircraft, would settle both.

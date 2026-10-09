@@ -1,0 +1,28 @@
+p09-compilers, 2026-10-09T19:30:30.547Z
+TypeScript Version 7.0.2, esbuild 0.28.2, both at es2017
+
+Source:
+const a = /(?<y>\d{4})/.exec("2026");
+const b = /(?<=x)y/;
+const c = /a.b/s;
+const d = 10n;
+export { a, b, c, d };
+
+TypeScript reported (exit 2):
+  sample.ts(1,14): error TS1503: Named capturing groups are only available when targeting 'ES2018' or later.
+  sample.ts(3,16): error TS1501: This regular expression flag is only available when targeting 'es2018' or later.
+  sample.ts(4,11): error TS2737: BigInt literals are not available when targeting lower than ES2020.
+TypeScript emitted:
+const a = /(?<y>\d{4})/.exec("2026");
+const b = /(?<=x)y/;
+const c = /a.b/s;
+const d = 10n;
+export { a, b, c, d };
+
+esbuild emitted:
+const a = new RegExp("(?<y>\\d{4})").exec("2026");
+const b = new RegExp("(?<=x)y");
+const c = new RegExp("a.b", "s");
+const d = /* @__PURE__ */ BigInt("10");
+export { a, b, c, d };
+warning: Big integer literals are not available in the configured target environment ("es2017") and may crash at run-time

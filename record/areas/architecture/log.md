@@ -44,13 +44,16 @@ Each reported the same user agent, `CoherentGT/2.0`, and the same syntax:
   [shared.ts](../../../experiments/areas/architecture/coherent/shared.ts) uses an enum, a static field, a `#private` field, `?.`, `??`, `??=`, object spread, object rest in a parameter, a numeric separator, `async`, and a spread of a `Map`'s values.
   Compiled by TypeScript 7.0.2 at `es2017`, and by esbuild 0.28.2 at `es2017`, each ran in the EFB's document and in the cockpit panel and passed all 7 of its checks, and its `async` method resolved.
   esbuild refused FlyByWire's target, `safari11`, with "Transforming destructuring to the configured target environment ("safari11") is not supported yet", for the object rest in a parameter.
+- **What the compilers do with what they can't lower**, in a sample with a named group, a lookbehind, the `s` flag, and a BigInt literal, compiled at `es2017` ([compilers.mjs](../../../experiments/areas/architecture/coherent/compilers.mjs), with no sim):
+  - TypeScript 7.0.2 emitted each regex and the BigInt literal as written, and its check reported TS1503 for the named group, TS1501 for the `s` flag, and TS2737 for the BigInt literal, and nothing for the lookbehind.
+  - esbuild 0.28.2 rewrote each regex as a `new RegExp(...)` call, with no warning, and the BigInt literal as `BigInt("10")`, warning that it "may crash at run-time".
 - The probe's first full run lost the compiled module's steps to "inspector connection failed", when it opened a page's inspector again straight after closing it; one connection for each page's steps fixed it.
 
 **Changed:**
 
 - `es2017` is our compile target: Coherent GT parses everything it emits, and both compilers lower every later syntax our module used.
-- The target doesn't cover what the compilers don't lower, which the build's check has to reject in our sources:
-  - every regex feature from ES2018 on, which neither compiler rewrites into ES2017
+- The target doesn't cover what the compilers don't lower, which the build's check has to reject in our sources, before compiling:
+  - every regex feature from ES2018 on, which TypeScript leaves as written and esbuild hides in a `new RegExp(...)` call that a parse check of its output can't see
   - a raw U+2028 or U+2029 in a string
 - Our code can count on ES2017's built-ins and `WeakRef`, and nothing later, since a fill-in one document has, another lacks.
   TypeScript's `lib` set to ES2017 and `ES2021.WeakRef`, the framework's own setting, flags every later built-in at type-check time.
@@ -62,7 +65,7 @@ What we haven't run: `import()` and a sort of a long array; the A220's DisplayUn
 
 **Affects:** node 1.6.2 of the [architecture plan](plan.md#162-the-syntax-and-built-ins-coherent-gt-has); 1.6's section of the spine; [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel); and the foundations chapter [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits), on which ECMAScript version Coherent GT matches.
 
-**Evidence:** `results/p09-coherent-syntax-2026-10-09-19-07-30.txt`; the first run's lost steps in `-19-05-28.txt`; and `-19-06-45.txt`, whose stable-sort line reads the wrong value as wanted.
+**Evidence:** `results/p09-coherent-syntax-2026-10-09-19-07-30.txt`; the first run's lost steps in `-19-05-28.txt`; `-19-06-45.txt`, whose stable-sort line reads the wrong value as wanted; and `results/p09-compilers-2026-10-09-19-30-30.txt`.
 
 ## 2026-10-09: Coherent GT's makers last placed its engine near Safari 10.1, the MSFS Avionics Framework and FlyByWire compile to ES2017, nobody maintains a rule set for the engine, and Working Title ships its own pinned copy of the framework
 

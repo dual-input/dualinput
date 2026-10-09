@@ -28,3 +28,4 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/architecture/01-spine.md](areas/architecture/01-spine.md): the spine every other part of Crosscheck rests on, one section for each child of the architecture plan's node 1.
 - [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes have settled for now, and on what findings.
 - [areas/architecture/log.md](areas/architecture/log.md): what our experiments found for the architecture plan's nodes.
+- [areas/architecture/coherent-gt.md](areas/architecture/coherent-gt.md): the syntax, built-ins, and web APIs Coherent GT has, as measured, which our code in the sim keeps within.

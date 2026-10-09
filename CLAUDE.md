@@ -110,14 +110,13 @@ It can't see inside images or compressed files, so check screenshots and capture
 
 ## Before writing code that runs in a panel
 
-MSFS 2024 panels run in Coherent GT, a WebKit-based engine whose user agent says Chrome 49, though it has `async`/`await`, `globalThis`, and `WeakRef`, which Chrome 49 didn't (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`).
-So go by its measured limits, not a browser version.
-These are syntax errors there, and a syntax error takes out the whole file rather than one line: optional chaining (`a?.b`), `??`, logical assignment (`||=`, `&&=`, `??=`), class fields and `#private` members, and numeric separators (`1_000`).
-`Object.fromEntries`, `Array.prototype.at`, `String.prototype.replaceAll`, and `Promise.allSettled` don't exist, and fail when called.
+MSFS 2024 runs panel code in Coherent GT, whose user agent says Chrome 49 while its features match no browser, so go by [its measured limits](record/areas/architecture/coherent-gt.md), not a browser version.
+A syntax error there takes out the whole file rather than one line: FS Copilot's `VCockpit.js`, the one file loaded into every panel, sat unparseable for two commits (FS Copilot fork, `record/conventions.md`).
+So write TypeScript compiled to `es2017`, or JavaScript, and in either keep to the syntax that reference lists as parsing, because a compiler leaves ES2018's regex features broken.
+Use no built-in or web API it lists as missing or as filled in only in some documents, such as `globalThis` and `Promise.prototype.finally`.
 
 Run `node --check` on every panel file before packaging it.
-That catches a file that doesn't parse at all, the failure that once broke every instrument in the sim through a shared `VCockpit.js` (FS Copilot fork, `record/conventions.md`).
-It doesn't catch the newer syntax listed above, because Node accepts it.
+It catches a file that doesn't parse at all, but not newer syntax such as `?.`, which Node accepts, so check hand-written panel JavaScript against the reference's syntax table.
 
 Anything injected into the pilot's own input path must fail open.
 In our FS Copilot work, a probe that wrapped a sim API to suppress input was left installed and disabled the aircraft's clicks, and the handle to undo it had already been deleted (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "13 · Dead ends").

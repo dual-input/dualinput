@@ -43,7 +43,7 @@ Where each sits, and why:
 
 - Step 7 gives the watcher the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives programs the sim launches, such as the warning at sim start that an update is waiting ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
 - The core reads the take-control input ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)), runs the audio ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)), and works out where the figure's hand goes ([tentative decisions](decisions.md#the-core-works-out-where-the-figures-hand-goes)), with its helper doing the Windows input and audio work ([the helper](#the-helper)).
-  It keeps the pilot's settings in its data folder, such as the take-control binding, the output device, the recording mode, the display name the crew sees, and which plugins may change aircraft files, because it needs them while the desktop app is closed, as it is for a pilot flying in VR; the desktop app, and the EFB app where it offers a setting, edit them by command ([tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
+  It keeps the pilot's settings in its data folder, such as the take-control binding, the output device, the recording mode, and which plugins may change aircraft files, because it needs them while the desktop app is closed, as it is for a pilot flying in VR; the desktop app edits them by command, and the EFB app offers no setting in v1 ([EFB app](../product/03-v1-scope.md#efb-app); [tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
   It also reads the clipboard when the pilot selects the EFB app's code box ([invite code](../product/03-v1-scope.md#invite-code)), reads the flight file that names the PF's stand ([preflight](../product/03-v1-scope.md#preflight)), and uploads a bug report when the pilot asks from the desktop app's report page ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 - AI traffic is injected and written from the core, outside the sim.
   FS Copilot's app freezes each copy and writes it in SimConnect's `Frame` event (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `Render`, and `FsCopilot/Connection/SimTraffic.cs`), and the fork's prototype injector, driving copies the same way, moved them more smoothly than BeyondATC moves its own ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
@@ -121,6 +121,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
                       ├── starts it; its standard input and output ── helper
                       └── the network ── other pilots' cores, the relay, the backend
  Watcher ── HTTPS ── release host
+ Watcher ◀── files the core writes in its data folder ── Core
 ```
 
 | Link | Means | What crosses | How the core knows it's alive |
@@ -158,7 +159,7 @@ The CommBus carries these announcements and nothing else, for two reasons:
 - A CommBus call reaches every page listening on its name, so each page would sort the whole session's traffic, as every panel did on FS Copilot's CommBus path (documented in the FS Copilot fork, `record/pointer-forwarding/docs/04-transport.md`, "What exists").
 - Its limits for a SimConnect client are unmeasured.
 
-The core writes its port, its process ID, and its process's creation time to a file in its data folder, and one core runs for each data folder: a core that finds the file naming a core that's still running, with that ID and that creation time, exits ([tentative decisions](decisions.md#apps-outside-the-sim-find-the-core-through-a-port-file)).
+The core writes its port, its process ID, and its process's creation time, the `FILETIME` that `GetProcessTimes` gives, as for a run of the sim ([IDs](#ids)), to a file in its data folder, and one core runs for each data folder: a core that finds the file naming a core that's still running, with that ID and that creation time, exits ([tentative decisions](decisions.md#apps-outside-the-sim-find-the-core-through-a-port-file)).
 Every reader of the file matches both, because a crashed core leaves its file behind, and Windows may give its process ID to another process ([IDs](#ids)).
 So a pilot's PC runs one core, and a development core with a data folder of its own runs beside it.
 
@@ -404,7 +405,7 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
   How the offset is estimated, and what a higher restart count does to it, is [left open](#left-open) ([08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)).
 - No frame count crosses between machines, because each sim runs its own frames ([08-01](../../learn/foundations/08-01-replication-models-and-authority.md#replication-models-state-input-lockstep-hybrid)).
   A pace in frames, such as a profile's `every(1, 'frame')` or the duplicate filter's 3 frames, counts the frames of the machine that runs it ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api); [02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
-- Wall-clock time, in UTC, appears in a message only where a person reads it, such as when a recording started and the dates on the report page, and in the session file only inside a run's name, which the core compares and never measures with.
+- Wall-clock time, in UTC, appears in a message only where a person reads it, such as when a recording started and the dates on the report page, and in the session file and the port file only inside a process's name, which the core compares and never measures with; the date of the pilot's last session, beside the port file, is the one wall-clock date a component compares with today ([the watcher and the desktop app](#the-watcher-and-the-desktop-app)).
 
 ### Messages and their types
 
@@ -473,7 +474,7 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
   One way keeps [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 30s floor from Ready to fly and counts its 15s quiet window from when the profile loads.
 - Whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, for the part that designs the profile engine, which a probe of whether SimConnect's client events reach `H:` events settles.
 - How the machines agree on which of two take-control presses came first, which [the take-control key](../product/03-v1-scope.md#take-control-key) leaves to the architecture, for the part that designs control.
-  Each machine reads another's stamps through an offset of its own ([times](#times)), so two presses closer than the offsets' error could order differently on two machines; the flying machine, the session's authority at every moment ([the connection](../product/03-v1-scope.md#the-connection)), could decide for every machine.
+  Each machine reads another's stamps through an offset of its own ([times](#times)), so two presses closer than the offsets' error could order differently on two machines; the flying machine, the session's authority at every moment ([the connection](../product/03-v1-scope.md#the-connection)), could decide for every machine, which makes the machines agree, but for presses closer than that error can still pick the later one, against the take-control key's rule that the earlier press wins however small the gap.
 - How far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, for the part that designs the flight-model sync and each page that sends values ([times](#times)); timing on the core's counter a page's echo of the core's message bounds a page's delay, and a probe in which the module echoes the control slot's counter would bound a data-slot write's.
   Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; the same probe settles it if the core also requests a variable the module sets in the frame it writes the slot.
 - What the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, such as a WASM module the sim loaded at boot from an older package, whose data slots the core would write in a layout the module doesn't read, for the part that designs the core ([versions](#versions)).

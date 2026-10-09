@@ -280,7 +280,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## Messages are defined in one Rust crate: JSON typed by ts-rs for TypeScript, fixed-width structs in data slots, and length-prefixed binary to the helper
 
-- **Decided:** over a WebSocket, and into a plugin, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with ts-rs's large-integer setting at `number`, which types `i64`, `u64`, `i128`, and `u128` alike, so an integer field that can pass 2^53 crosses as text, as the IDs do.
+- **Decided:** over a WebSocket, into a plugin, and from the desktop app's Rust side to its pages, as a string they parse, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with ts-rs's large-integer setting at `number`, which types `i64`, `u64`, `i128`, and `u128` alike, so an integer field that can pass 2^53 crosses as text, as the IDs do.
   In a data slot, a message is a struct of fixed-width fields, with its size and field offsets asserted in the crate, which builds for x86_64 and wasm32.
   Over the helper's standard input and output, a message is binary and prefixed with its length.
   Settled in node 1.4 by the user, 2026-10-09.

@@ -95,6 +95,7 @@ Raised elsewhere: by 1.1.2, how each module, and each hook our panel code instal
 Raised elsewhere: by 1.2, what counts as trouble for each component and where the pilot sees it, to place with the parts that design the logs, the recording, and the apps ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.2, how the cores reach each other, a top-level node after node 1 (user, 2026-10-08) ([01-spine](01-spine.md#between-machines)).
 Raised elsewhere: by 1.2, letting a web page connect to the core, opt-in, if an integration ever needs it, to place with the part that designs the core's protocol ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1, how the machines agree on which of two take-control presses came first, which per-machine clock offsets can't settle alone, to place with the part that designs control ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how a core that restarted while the sim kept running recovers what it lost and gets its pilot's lost changes to the others, how the cockpit channel tells a copy from a late message, and how the conflict rule orders two changes from one pilot under two restart counts, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes, to place with the part that designs the core and the node on how the cores reach each other ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, to place with the part that designs the flight-model sync ([01-spine](01-spine.md#left-open)).
@@ -115,7 +116,8 @@ It reads what node 1 reads, then the area logs, starting with [interface](../int
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.1.1 and 1.1.2.
-Done on 2026-10-08.
+Reopened on 2026-10-09, by node 1's walk through a session, which found that the core needs the pilot's settings while the optional desktop app is closed ([tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
+Done on 2026-10-09.
 
 ## 1.1.1 Masking priority at sim start
 
@@ -147,7 +149,8 @@ It reads 1.1's answer, then the [interface](../interface/log.md) and [CommBus](.
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.2.1.
-Done on 2026-10-08.
+Reopened on 2026-10-09, by node 1's walk through a session, which found that the watcher had no way to learn what its jobs need from the core, that the port file named the core by a process ID Windows may reuse, and that the core launched the desktop app for a Rejoin button v1 doesn't have ([tentative decisions](decisions.md#apps-outside-the-sim-find-the-core-through-a-port-file)).
+Done on 2026-10-09.
 Raised elsewhere: by 1.1, how the core knows each component is alive and working, the watcher, the apps, the code in the sim, and the relay, so a component in trouble is plain to the pilot and lands in the logs and the recording ([ideas](../product/ideas.md#component-health); user, 2026-10-08).
 Raised elsewhere: by 1.1.2, how the core tells the components in the sim that a session started and ended ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the WASM module hears from the core every second on every machine in a session, so it can undo our state in the sim when the core stops ([01-spine](01-spine.md#what-moves-them)).

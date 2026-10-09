@@ -22,9 +22,9 @@ The watcher works while the core may not be running, and the services off the pi
 | Component | Runs in | Owns |
 | --- | --- | --- |
 | Watcher | A process of its own, from the pilot's login | Noticing the sim's start and stop, starting the core with the sim and again if it exits, the BlurPage copy, and, while the sim is closed, plugins' changes to aircraft files and updates |
-| Core | A process of its own, started by the watcher or the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, and the checks |
+| Core | A process of its own, started by the watcher or the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, the checks, and the pilot's settings |
 | Helper | A process of its own, which the core starts and restarts | The core's Windows input and audio work: reading the keyboard, flight hardware, and mouse through Raw Input, capturing the microphone and the ATC app, running the speech recognizer, and playing sound |
-| Desktop app | A window of its own, opened by the pilot, optional | Settings, bindings, the output device, the recording mode, the report page, and the session's view |
+| Desktop app | A window of its own, opened by the pilot, optional | Editing the settings the core keeps, the report page, and the session's view |
 | EFB app | The EFB's document in the sim | The controls a pilot needs in flight, and the EFB's opening onto it when a notice is clicked |
 | Banner panel | An in-game panel of ours | Notices |
 | Toolbar script | The toolbar's document, through our toolbar icon | The banner panel's opening |
@@ -43,6 +43,7 @@ Where each sits, and why:
 
 - Step 7 gives the watcher the jobs [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives programs the sim launches, such as the warning at sim start that an update is waiting ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and the [tentative decisions](decisions.md#the-watcher-keeps-the-blurpage-copy-current) give it the BlurPage copy.
 - The core reads the take-control input ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)), runs the audio ([tentative decisions](decisions.md#the-core-runs-crosschecks-audio)), and works out where the figure's hand goes ([tentative decisions](decisions.md#the-core-works-out-where-the-figures-hand-goes)), with its helper doing the Windows input and audio work ([the helper](#the-helper)).
+  It keeps the pilot's settings in its data folder, such as the take-control binding, the output device, the recording mode, the display name the crew sees, and which plugins may change aircraft files, because it needs them while the desktop app is closed, as it is for a pilot flying in VR; the desktop app, and the EFB app where it offers a setting, edit them by command ([tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
   It also reads the clipboard when the pilot selects the EFB app's code box ([invite code](../product/03-v1-scope.md#invite-code)), reads the flight file that names the PF's stand ([preflight](../product/03-v1-scope.md#preflight)), and uploads a bug report when the pilot asks from the desktop app's report page ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 - AI traffic is injected and written from the core, outside the sim.
   FS Copilot's app freezes each copy and writes it in SimConnect's `Frame` event (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `Render`, and `FsCopilot/Connection/SimTraffic.cs`), and the fork's prototype injector, driving copies the same way, moved them more smoothly than BeyondATC moves its own ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
@@ -124,7 +125,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 
 | Link | Means | What crosses | How the core knows it's alive |
 | --- | --- | --- | --- |
-| Watcher to core | The watcher starts the core's process | Nothing else | It can't: the watcher sends it nothing |
+| Watcher to core | The watcher starts the core's process, and reads files the core writes in its data folder | The port file's process ID and creation time, the date of the pilot's last session, each checked plugin's file changes, and which plugins the pilot lets change files | It can't: the watcher sends it nothing |
 | Desktop app and core | WebSocket on 127.0.0.1, found through the port file | The core's state one way, commands the other | Messages every 2s |
 | EFB app and menu script, and core | WebSocket, found through the CommBus, whether or not a session runs | The EFB's controls and state, Go to, and which menu page is up | The same, and a first message naming the component and its version |
 | Toolbar script and core | The same, while a session runs | The banner's opening | The same |
@@ -157,7 +158,8 @@ The CommBus carries these announcements and nothing else, for two reasons:
 - A CommBus call reaches every page listening on its name, so each page would sort the whole session's traffic, as every panel did on FS Copilot's CommBus path (documented in the FS Copilot fork, `record/pointer-forwarding/docs/04-transport.md`, "What exists").
 - Its limits for a SimConnect client are unmeasured.
 
-The core writes its port and process ID to a file in its data folder, and one core runs for each data folder: a core that finds the file naming a core that's still running exits ([tentative decisions](decisions.md#apps-outside-the-sim-find-the-core-through-a-port-file)).
+The core writes its port, its process ID, and its process's creation time to a file in its data folder, and one core runs for each data folder: a core that finds the file naming a core that's still running, with that ID and that creation time, exits ([tentative decisions](decisions.md#apps-outside-the-sim-find-the-core-through-a-port-file)).
+Every reader of the file matches both, because a crashed core leaves its file behind, and Windows may give its process ID to another process ([IDs](#ids)).
 So a pilot's PC runs one core, and a development core with a data folder of its own runs beside it.
 
 ### The sim's pages
@@ -193,10 +195,11 @@ The WASM module can't open a socket, so it reaches the core through data slots, 
 
 - The watcher starts the core when the sim starts, and again if the core exits while the sim runs ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
   The crew sees a restarted core as the same pilot ([the session file, and a core that restarts](#the-session-file-and-a-core-that-restarts)).
-- The watcher reads the core's process ID from the port file and shows its CPU and memory use beside its own ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
-  It opens no socket to the core.
-- The desktop app starts the core when the port file names no running process, and waits for the file to be written again.
-- The core launches the desktop app when it isn't open: when the pilot presses the EFB app's button that brings it to the front ([EFB app](../product/03-v1-scope.md#efb-app)), and after a sim crash, to show the Rejoin button ([ideas](../product/ideas.md#telling-the-crew-a-sim-crashed)).
+- The watcher reads the core's process ID and creation time from the port file and shows its CPU and memory use beside its own ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+  It opens no socket to the core, and takes what its jobs need from files the core writes beside the port file: the date of the pilot's last session, which decides whether the warning that an update is waiting shows ([installing and updating](../product/03-v1-scope.md#installing-and-updating)); the file changes of each plugin the core fetched and checked; and which plugins the pilot lets change files ([plugins](../product/03-v1-scope.md#plugins)).
+- The desktop app starts the core when the port file names no running process with that ID and creation time, and waits for the file to be written again.
+- The core launches the desktop app when it isn't open and the pilot presses the EFB app's button that brings it to the front ([EFB app](../product/03-v1-scope.md#efb-app)).
+  The Rejoin button the desktop app would show after a sim crash isn't in v1, which picked only the crew's notice that a pilot's sim crashed ([the product plan](../product/plan.md#3-v1-or-later); [ideas](../product/ideas.md#telling-the-crew-a-sim-crashed)).
 
 ### Between machines
 
@@ -469,6 +472,8 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
 - How the core judges an aircraft settled in a session started before [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s rule could call it settled, for the part that designs sync.
   One way keeps [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 30s floor from Ready to fly and counts its 15s quiet window from when the profile loads.
 - Whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, for the part that designs the profile engine, which a probe of whether SimConnect's client events reach `H:` events settles.
+- How the machines agree on which of two take-control presses came first, which [the take-control key](../product/03-v1-scope.md#take-control-key) leaves to the architecture, for the part that designs control.
+  Each machine reads another's stamps through an offset of its own ([times](#times)), so two presses closer than the offsets' error could order differently on two machines; the flying machine, the session's authority at every moment ([the connection](../product/03-v1-scope.md#the-connection)), could decide for every machine.
 - How far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, for the part that designs the flight-model sync and each page that sends values ([times](#times)); timing on the core's counter a page's echo of the core's message bounds a page's delay, and a probe in which the module echoes the control slot's counter would bound a data-slot write's.
   Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; the same probe settles it if the core also requests a variable the module sets in the frame it writes the slot.
 - What the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, such as a WASM module the sim loaded at boot from an older package, whose data slots the core would write in a layout the module doesn't read, for the part that designs the core ([versions](#versions)).

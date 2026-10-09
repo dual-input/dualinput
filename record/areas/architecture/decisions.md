@@ -138,12 +138,26 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## Apps outside the sim find the core through a port file
 
-- **Decided:** the core writes its port and process ID to a file in its data folder, and a core that finds the file naming a core that's still running exits, so one core runs for each data folder.
-  The desktop app reads the port there, and starts the core when the file names no running process; the watcher reads the process ID, to show the core's CPU and memory use beside its own.
-  Settled in node 1.2 by the user, 2026-10-08.
+- **Decided:** the core writes its port, its process ID, and its process's creation time to a file in its data folder, and a core that finds the file naming a core that's still running, with that ID and that creation time, exits, so one core runs for each data folder.
+  The desktop app reads the port there, and starts the core when the file names no running process with that ID and creation time; the watcher reads the process ID, to show the core's CPU and memory use beside its own.
+  Beside the port file, the core writes what the watcher's jobs need: the date of the pilot's last session, the file changes of each plugin it fetched and checked, and which plugins the pilot lets change files; the watcher reads them, and opens no socket to the core.
+  Settled in node 1.2 by the user, 2026-10-08; the creation time and the watcher's files after node 1's walk through a session, by the user, 2026-10-09.
 - **Because:**
   - The desktop app and the watcher hold no SimConnect connection, so the CommBus can't reach them.
   - A development core gets a data folder of its own, so it runs beside the pilot's, each with its own ports and identity, as [the product plan](../product/plan.md#7-tech-stack-and-architecture) asks.
+  - A crashed core leaves its port file behind, and a process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone could name another program, and a restarted core could find it and exit.
+  - The watcher warns of a waiting update only if the pilot flew lately ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and applies plugins' file changes, which the pilot can turn off ([plugins](../product/03-v1-scope.md#plugins)), while the core, which knows both, may not be running.
+
+## The core keeps the pilot's settings
+
+- **Decided:** the core keeps the pilot's settings in its data folder, such as the take-control binding, the output device, the recording mode, the display name the crew sees, and which plugins may change aircraft files, and reads them when it starts.
+  The desktop app, and the EFB app where it offers a setting, edit them by command, and decide nothing ([01-spine](01-spine.md#components)).
+  This changes the spine's Components table, which gave settings to the desktop app.
+  Settled after node 1's walk through a session, by the user, 2026-10-09.
+- **Because:**
+  - The desktop app is optional, and a pilot in VR flies with it closed, while the core still needs the bound key, plays ATC "on the output device each pilot picks, with no window needed", records in the chosen mode, and names the pilot to the crew ([03-v1-scope](../product/03-v1-scope.md#hearing-atc)).
+  - A shortcut kept by the desktop app "would stop whenever the pilot closes the optional desktop app" ([above](#the-core-catches-the-take-control-key-and-buttons)).
+- **Leaves out:** the watcher's own settings, such as whether it starts with Windows, which the watcher keeps ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
 
 ## The core writes the WASM module's control slot every 200ms
 

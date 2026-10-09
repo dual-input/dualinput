@@ -301,6 +301,28 @@ And it asks for a probe of what code the EFB app can share with the desktop app,
 It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), the spine's [language and toolchains](01-spine.md#language-and-toolchains), the foundations chapters [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md) and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits), and the [EFB app](../product/03-v1-scope.md#efb-app) section of 03-v1-scope.
 Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
+Waits on 1.6.1 and 1.6.2.
+
+## 1.6.1 Coherent GT's JavaScript, as documented and as others build for it
+
+Question: what do Coherent Labs and the MSFS 2024 SDK document about the JavaScript Coherent GT runs, and what compile targets and lint rules do the MSFS Avionics Framework, FlyByWire, and other open MSFS projects build their in-sim code with?
+1.6 can't set our compiler's target or write the parse check's rules without it: step 7 asks us to look for Coherent GT's own documentation of its JavaScript, and for rules others already maintain, before writing ours ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+Our list of what the engine lacks comes from one probe of one A220 document on 2026-08-30 ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)).
+It reads 06-01 and the FS Copilot fork's `record/pointer-forwarding/docs/09-environment.md`, then searches Coherent Labs' documentation, the MSFS 2024 SDK's, and the build configurations of the MSFS Avionics Framework's mirror, FlyByWire's aircraft, and other open MSFS projects.
+Its answer goes in an entry in this area's log, which 1.6.2 and 1.6's section of `01-spine.md` cite.
+Exit: a log entry in this area answers the question.
+
+## 1.6.2 The syntax and built-ins Coherent GT has
+
+Question: which syntax from ES2017 to ES2022 does Coherent GT parse, which built-ins does it have, and does a TypeScript module compiled at the target 1.6.1 points to run in the EFB's document?
+1.6 can't set the compiler's target, decide what the build fills in or rejects, or write the parse check without it.
+Coherent GT has ES2017's `async` and lacks ES2020's `?.`, and nobody has tested the syntax in between ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#unverified-claims)); it has `Array.prototype.flat` and lacks `Object.fromEntries`, both ES2019 (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`).
+The module stands for the logic the EFB app and the desktop app's pages would share, since the EFB app is its own app on the sim's EFB framework ([03-v1-scope](../product/03-v1-scope.md#efb-app)).
+A probe settles it, with nothing for the user to do: through the inspector, in the main menu's EFB, toolbar, and mainUi documents, and in a cockpit panel once a flight is loaded, evaluate each syntax feature and built-in on its own, so that one that fails to parse hides no other; then evaluate the compiled module in the EFB's document and run it.
+It reads 1.6.1's answer, 06-01, [inspector.mjs](../../../experiments/tools/inspector.mjs), and p08's EFB app in [flight/build.mjs](../../../experiments/areas/architecture/flight/build.mjs).
+Its answer goes in an entry in this area's log, which 1.6's section of `01-spine.md` cites.
+Exit: a log entry in this area answers the question.
+Waits on 1.6.1.
 
 ## 2 How the cores reach each other
 

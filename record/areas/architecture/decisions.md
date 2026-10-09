@@ -339,3 +339,25 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - pilots on different versions flying together, which v1 doesn't offer ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) and which would need a version both sides speak rather than equal ones
   - how the build hashes the message crate, which has to cover each message's encoding as well as its fields ([01-spine](01-spine.md#left-open))
   - what the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, for the part that designs the core ([01-spine](01-spine.md#left-open))
+
+## The core runs on tokio
+
+- **Decided:** the core's Rust code runs its sockets, timers, and other waiting work on tokio, the async runtime.
+  Its WebSocket library is a choice inside the core, which accepts a connection only with the `Origin` it allows ([above](#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none)) and can listen beyond the PC, off by default ([01-spine](01-spine.md#left-open)).
+  Settled in node 1.6 by the user, 2026-10-09.
+- **Because:**
+  - The core holds many connections at once, about 20 cockpit panels' sockets on top of the desktop app's, the network, and its uploads ([01-spine](01-spine.md#communication)), and an async runtime runs them on a few threads where blocking code would hold one thread for each.
+  - Tauri, the desktop app's framework, runs on tokio: "Tauri uses tokio Runtime to initialize code" (documented, [tauri::async_runtime](https://docs.rs/tauri/latest/tauri/async_runtime/index.html), tauri 2.12.2, as of 2026-10-09).
+  - The desktop app's Rust side reached a WebSocket server through tokio-tungstenite 0.30.0, which runs on tokio (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin)).
+- **Leaves out:** the core's WebSocket library, for the core's stage of step 8 ([01-spine](01-spine.md#left-open)).
+
+## The desktop app's pages are React, built with Vite and styled with Tailwind
+
+- **Decided:** the desktop app's pages are TypeScript and React, built with Vite and styled with Tailwind.
+  They share no interface with the EFB app, only TypeScript logic and the types ts-rs generates from the message crate.
+  Settled in node 1.6 by the user, 2026-10-09.
+- **Because:**
+  - fsc-editor, our last desktop app, is built that way, on React 19, Vite 7, and Tailwind 4 (read in fsc-editor, `package.json`).
+  - Tauri "is frontend agnostic and supports most frontend frameworks out of the box", and recommends Vite for React (documented, [Tauri's frontend configuration](https://v2.tauri.app/start/frontend/), as of 2026-10-09).
+  - The EFB app is its own app on the sim's EFB framework, not the desktop app reused ([03-v1-scope](../product/03-v1-scope.md#efb-app)), so its interface is built from that framework's FSComponent components, which are class-based and don't re-render on new props ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)), and the desktop app's choice of framework doesn't reach it.
+- **Leaves out:** how the shared logic is compiled for Coherent GT, which [1.6.2](plan.md#162-the-syntax-and-built-ins-coherent-gt-has) settles.

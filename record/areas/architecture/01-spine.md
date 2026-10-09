@@ -523,16 +523,16 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 **Flight-model sync**, in its stage of step 8:
 
-- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
+- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset ([times](#times)); 1.5 measures it, with the module and the core each stamping the same data-slot write.
 - How far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, which each page that sends values needs too ([times](#times)).
-  Timing on the core's counter a page's echo of the core's message bounds a page's delay, and a probe in which the module echoes the control slot's counter would bound a data-slot write's.
-  Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; the same probe settles it if the core also requests a variable the module sets in the frame it writes the slot.
+  Timing on the core's counter a page's echo of the core's message bounds a page's delay, and 1.5 bounds a data-slot write's, with the module echoing a slot's counter.
+  Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; 1.5 settles it too if the core also requests a variable the module sets in the frame it writes the slot.
 
 **Pointer sync**, in its stage of step 8:
 
 - Which clock the panel bridge measures a span on; the apps' stage settles it for any other page that sends a span.
   The one cockpit panel's document probed for it, the A220's DisplayUnits, has `performance.now()` (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), and the EFB's, the toolbar's, the banner's, and the menu's pages are untested; whether it runs steady in Coherent GT is unmeasured too, and FS Copilot's panel code measured its spans with `Date.now()` instead.
-  Timing each page's `performance.now()` against the core's counter over a few minutes settles it.
+  1.5 times each page's `performance.now()` against the core's counter over a few minutes.
 
 **The apps**, in their stage of step 8 unless an item says otherwise:
 

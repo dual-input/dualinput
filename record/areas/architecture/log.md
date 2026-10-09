@@ -11,13 +11,13 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
 
 **Found:** on our development machine, Windows 10.0.26200, rustc 1.95.0, with serde 1.0.229, serde_json 1.0.151, uuid 1.27.0, ts-rs 12.0.1, specta 2.0.0-rc.25 with specta-typescript and specta-serde 0.0.12, typeshare 1.0.5 with typeshare-cli 1.13.4, rquickjs 0.14.0 (QuickJS-ng 0.16.2), TypeScript 7.0.2, and esbuild 0.28.2.
 The crate's messages cover an internally tagged enum with struct variants, an adjacently tagged enum with newtype variants, a unit enum, an `Option` sent as `null` and one left out when empty, a `Vec`, a map, a UUID sent as text, and a time in µs as a `u64`.
-TypeScript's compiler, under `--strict`, checked 5 sample messages and their 5 replies as serde_json wrote them against each generator's types, 5 deliberately wrong messages that each had to fail, and a plugin that answers each message.
+TypeScript's compiler, under `--strict`, checked 5 sample messages and their 5 replies as serde_json wrote them against each generator's types, 5 deliberately wrong messages that each had to fail, and a plugin that answers each message; typeshare's types, with the replies' enum left out, faced the 5 messages and 4 of the wrong ones.
 
-- **ts-rs** wrote types on its defaults, but typed each `u64` as `bigint`, so the 4 samples carrying a time failed with "Type 'number' is not assignable to type 'bigint'", and so did the plugin's `sentAtUs + 1`.
+- **ts-rs** wrote types on its defaults, but typed each `u64` as `bigint`, so the 2 sample messages carrying a time and their 2 replies failed with "Type 'number' is not assignable to type 'bigint'", and so did the plugin's `sentAtUs + 1`.
   With its large-integer setting at `number`, every sample, reply, and the plugin passed, and each wrong message failed.
 - **specta** refused twice: its `Format` refused the field left out when empty ("`skip_serializing_if` requires `PhasesFormat`"), and `PhasesFormat` refused the `u64` ("Specta forbids exporting BigInt-style types").
   With `PhasesFormat` and each `u64` field marked `specta_typescript::Number`, every check passed.
-  It typed each `f32` as `number | null`, and wrote each type whose shape differs by direction twice, such as `Notice_Serialize` and `Notice_Deserialize`.
+  It typed each `f32` as `number | null`, and wrote `Notice`, the type with the field left out when empty, twice, as `Notice_Serialize` and `Notice_Deserialize`, which came out the same here.
 - **typeshare** refused the `u64` ("Unsupported type"), and with each one marked `U53`, refused the internally tagged enum: "Serde content attribute needs to be specified for algebraic enum ToCore".
   With that enum left out, 3 of the 5 samples failed, because it typed `flying` as optional where serde_json sends `null`, and made `Level` a TypeScript `enum`, which rejects the `"warning"` and `"error"` that serde_json sends and is code that runs rather than only a type.
   Its file also failed on its own, naming `BTreeMap`, which TypeScript doesn't have.
@@ -27,10 +27,10 @@ TypeScript's compiler, under `--strict`, checked 5 sample messages and their 5 r
 - **The data slots' structs** compiled with their size and offset assertions for both x86_64 and wasm32-wasip1, and read back from each build the same layout: the control slot 32 bytes, aligned to 8, with its fields at offsets 0, 4, 8, and 16, and the pose 48 bytes, with `lat` at 8 after 4 bytes the compiler added.
   A struct holding a `usize` took 16 bytes with that field at 8 on x86_64, and 8 bytes with it at 4 on wasm32.
 
-**Changed:** ts-rs does what 1.4 needs with one setting; specta does with two opt-ins, on a release candidate; and typeshare can't express internally tagged enums or 64-bit fields without changing the messages themselves.
-A 64-bit integer reaches TypeScript exactly only below 2^53, so an ID crosses as text, and a struct in a data slot holds only fixed-width fields.
+**Changed:** ts-rs does what 1.4 needs with one setting; specta does with two opt-ins, on a release candidate; and typeshare takes a `u64` once each is marked, but can't express an internally tagged enum without changing the messages themselves.
+A 64-bit integer reaches TypeScript exactly only up to 2^53, so an ID crosses as text, and a struct in a data slot holds only fixed-width fields.
 
-What we haven't run: the types in Coherent GT itself, which never sees them, since types erase when compiled and the messages arrive as JSON; a check in CI that the generated files match the crate; and Tauri's commands between the desktop app's pages and its Rust side, which tauri-specta types and ts-rs doesn't.
+What we haven't run: the types in Coherent GT itself, which never sees them, since types erase when compiled and the messages arrive as JSON; a check in CI that the generated files match the crate; and Tauri's commands between the desktop app's pages and its Rust side, whose calls tauri-specta types, while ts-rs types only the messages they carry.
 
 **Affects:** node 1.4's answer.
 

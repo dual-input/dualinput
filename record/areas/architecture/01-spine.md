@@ -1,12 +1,12 @@
 # Architecture: the spine
 
 ```text
-Purpose:     What every other part of Crosscheck rests on: its components, how they talk, the conventions they share, and its languages.
+Purpose:     What every other part of Crosscheck rests on: its components, how they talk, the conventions they share, its languages, and its parts.
 Depends on:  decisions.md, ../product/plan.md (step 7), ../product/01-aims.md, ../product/03-v1-scope.md, ../product/04-room-for-later.md, ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/03-catch-up.md
-Decides:     Which components Crosscheck runs, where each runs, and what each owns (node 1.1); what each does with no session, and what moves it into one and back (node 1.1.2); how they reach each other, and how the core knows each is alive (node 1.2); what language and toolchain each is built with, where the core's input and audio work runs, where a plugin's code runs and what it's written in, and how profiles and plugins reach pilots (node 1.3); the IDs, times, encodings, and versions every component shares, and who a pilot is after their core restarts (node 1.4).
+Decides:     Which components Crosscheck runs, where each runs, and what each owns (node 1.1); what each does with no session, and what moves it into one and back (node 1.1.2); how they reach each other, and how the core knows each is alive (node 1.2); what language and toolchain each is built with, where the core's input and audio work runs, where a plugin's code runs and what it's written in, and how profiles and plugins reach pilots (node 1.3); the IDs, times, encodings, and versions every component shares, and who a pilot is after their core restarts (node 1.4); which parts Crosscheck's design divides into, where each is designed, and which part each open question belongs to (node 1).
 ```
 
-Each section answers one child of node 1 in the [architecture plan](plan.md), and the tentative decisions behind it, with their findings, are in [decisions.md](decisions.md).
+Each section up to [Shared conventions](#shared-conventions) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The watcher and the core are the two processes in [step 7 of the product plan](../product/plan.md#7-tech-stack-and-architecture), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
 The flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).
 A pilot is in a session from starting or joining it until leaving it, or until 5 minutes cut off ([the connection](../product/03-v1-scope.md#the-connection)).
@@ -206,7 +206,7 @@ The WASM module can't open a socket, so it reaches the core through data slots, 
 
 The core talks to other pilots' cores, directly when it can and through the relay when it can't, and to the backend over HTTPS.
 The watcher alone talks to the release host, over HTTPS.
-How the cores reach each other is for a top-level node after node 1 (user, 2026-10-08): the topology, the transport, getting through home routers, the relay, and encryption.
+How the cores reach each other is for [node 2](plan.md#2-how-the-cores-reach-each-other) of the architecture plan (user, 2026-10-08): the topology, the transport, getting through home routers, the relay, and encryption.
 
 Two findings go to it.
 A Cloudflare Worker takes HTTP requests, WebSocket upgrades among them, and Cloudflare's docs say it can't take a raw inbound TCP connection (documented, [Workers TCP sockets](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/), as of 2026-10-08).
@@ -439,42 +439,116 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
 
 [types]: log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32
 
+## Parts
+
+A part is a piece of Crosscheck's design that a node of the [architecture plan](plan.md) or a stage of [step 8](../product/plan.md#8-v1-build-plan) designs, and its design docs and build stages go in its area under `record/areas/`.
+A part may span several components, and a component may serve several parts.
+
+| Part | What it covers | Components | Area | Designed in |
+| --- | --- | --- | --- | --- |
+| The core | SimConnect and the sim's events, sim awareness, the clients' protocol, the pilot's settings, the checks, and versions | Core, helper, menu script | `core/` | Step 8 |
+| The network | The topology, the transport, home routers, the relay, encryption, each channel's delivery, and clock offsets between machines | Core, relay | `network/` | [Node 2](plan.md#2-how-the-cores-reach-each-other) |
+| Sync | State sync, catch-up, conflicts, and the profile engine | Core, WASM module | `sync/` | [Node 3](plan.md#3-sync-and-the-session), then step 8 |
+| The session | The invite code, the connection, roles, members, preflight and Go to, the match check, and the time, date, sim rate, and pause | Core, EFB app, desktop app, menu script, WASM module, watcher | `session/` | Node 3, then step 8 |
+| Control | The take-control key and buttons, and voice phrases | Core, helper | `control/` | Step 8 |
+| Profiles and plugin delivery | The profile format, how profiles and plugins reach pilots, and plugins' changes to aircraft files | Core, watcher, the server they come from | `profiles/` | [Node 4](plan.md#4-profiles-and-plugin-delivery) |
+| Plugins and the hosts in the sim | The APIs and hooks plugins use, and the panel bridge and the WASM module as hosts that load modules by name | Core, panel bridge, WASM module | `plugins/` | Step 8 |
+| Flight-model sync | The flying machine's pose and velocities on the following machines | Core, WASM module | `flight-model/` | Step 8 |
+| Pointer sync | Presses on displays and panels | Panel bridge, core | `pointer-sync/` | Step 8 |
+| Avatars | The figures, and the hand | Core, WASM module, helper | `avatars/` | Step 8 |
+| Traffic and ATC | Traffic sync, and hearing ATC | Core, helper | `traffic-atc/` | Step 8 |
+| The apps | The desktop app, the EFB app, and the banner | Desktop app, EFB app, banner panel, toolbar script | `interface/` | Step 8 |
+| Recording and bug reports | The recording, bug reports, and the backend | Core, desktop app, backend | `recording/` | Step 8 |
+| Installing and updating | The installer, and Crosscheck's updates | Watcher, release host | `install/` | Step 8 |
+| The build | The message crate's generated types and hash, the version stamp, the checks CI runs, among them the Coherent GT parse check whose rules [1.6](plan.md#16-frameworks) sets, and the test bench | None | `build/` | Step 8 |
+
+Findings so far stay in the logs that hold them: the time, date, sim rate, and pause in [environment](../environment/log.md), masking in [flight-controls](../flight-controls/log.md), and the CommBus in [commbus](../commbus/log.md).
+
+### Sim awareness
+
+Sim awareness is the piece of the core that reports whether the sim is closed, starting, in the menu and on which page, loading, at Ready to fly, or in a flight and with which aircraft (user, 2026-10-06).
+It reports state only and knows nothing of features: a feature that depends on the sim's state reads it there rather than watching the sim itself, and decides on its own what to do with it, as preflight's Go to button is unavailable on a page it can't work from ([preflight](../product/03-v1-scope.md#preflight); [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
+Its sources are the sim's process, SimConnect's system and flow events, and the page the menu script reports ([components](#components)), and it reports a page it doesn't know as unknown rather than guessing.
+
 ## Left open
 
-- What counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature, for the parts that design the logs, the recording, and the apps ([ideas](../product/ideas.md#component-health)).
+Each item sits under its part from [Parts](#parts), and names the node or the stage of step 8 that settles it.
+
+**The core**, in its stage of step 8 unless an item says otherwise:
+
+- Whether the SDK's library does what node-simconnect did beyond the main menu: masking, including a group that takes its priority as the sim starts, AI objects with liveries, input events, the camera, and a flight load's flow events, which tell the core when Ready to fly came ([what moves them](#what-moves-them); [the core](#the-core)).
+  [1.5](plan.md#15-a-flight-with-crosschecks-rust-pieces) settles it in a flight, with our Rust module, which hasn't run in one either ([code in the sim](#code-in-the-sim)).
+- The core's async runtime and WebSocket library, which [1.6](plan.md#16-frameworks) settles.
+- What a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, since on the A2A PA-24 a mask registered after the aircraft loaded didn't get ahead of the aircraft's own (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
+  Only the [input layer](../product/04-room-for-later.md#an-input-layer), a Soon pick that v1 doesn't build, masks, so the input layer's design after v1 settles it, not the core's stage of step 8; restarting the core mid-flight on the PA-24 and checking whether its masks still get ahead of Accu-Sim settles it.
+- What the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, such as a WASM module the sim loaded at boot from an older package, whose data slots the core would write in a layout the module doesn't read ([versions](#versions)).
+- How a client beyond the PC is let in: v1 builds a protocol that can listen beyond the PC, off by default ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)), while the core listens on 127.0.0.1 and its `Origin` check refuses a web page ([finding the core](#finding-the-core); [the sim's pages](#the-sims-pages)).
+  The tablet would carry a token from the desktop app's QR code, and a web page, if an integration ever needs one, could be a site the pilot approves once, or one carrying a token (user, 2026-10-08).
+- How the core tells a sim crash from the pilot closing the sim, which [the connection](../product/03-v1-scope.md#the-connection) leaves open, for sim awareness.
+- Whether the bindings to the SDK, the core's and the WASM module's, come from msfs-rs or from our own run of bindgen ([the core](#the-core)).
+- The binary format on the helper's standard input and output, since both its ends are Rust built against the crate ([messages and their types](#messages-and-their-types)).
+
+**The network**, in [node 2](plan.md#2-how-the-cores-reach-each-other):
+
 - How the cores reach each other ([between machines](#between-machines)).
-- Letting a web page connect to the core, which the `Origin` check refuses (user, 2026-10-08): if an integration ever needs it, a site the pilot approves once, or one carrying a token, as the off-by-default listener for the tablet would, for the part that designs the core's protocol ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)).
-- How each module, and each hook our panel code installs for a plugin, tears itself down, for the panel bridge and the WASM module to design.
-- Choices that stay inside one part:
-  - the compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits))
-  - the framework for the desktop app's pages
-  - the core's async runtime and WebSocket library
-  - the WebSocket client in the desktop app's Rust side, which must send either no `Origin` or `coui://html_ui`
-  - whether the bindings to the SDK come from msfs-rs or from our own run of bindgen
-  - how the build hashes the message crate, which has to cover each message's encoding as well as its fields, since FS Copilot's fingerprint covers a type's fields and not its codec, so a codec that wrote them in a new order would pass it ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions))
-  - the check in CI that ts-rs's generated files match the crate
-  - whether the desktop app's pages and its Rust side trade the messages' JSON text through Tauri's commands or its events, and whether tauri-specta types the command calls
-  - the binary format on the helper's standard input and output, since both its ends are Rust built against the crate
-- How the cores pack each field of a message, such as whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list; how each channel other than the cockpit's tells a copy from a late message, since the transport decides how each channel delivers, in order and resent or newest only ([channels](../product/04-room-for-later.md#channels)); and whether the relay's and the backend's messages are the crate's, for the node on how the cores reach each other ([IDs](#ids); [the session file](#the-session-file-and-a-core-that-restarts)).
-- How a core that restarted while the sim kept running recovers, for the part that designs sync ([the session file](#the-session-file-and-a-core-that-restarts)).
-  That part lists what its engine keeps in memory, and decides how a restarted core keeps or rebuilds each, and what of it the core writes to the session file and when.
+- How the cores pack each field of a message; how each channel other than the cockpit's tells a copy from a late message, since the transport decides how each channel delivers, in order and resent or newest only ([channels](../product/04-room-for-later.md#channels)); and whether the relay's and the backend's messages are the crate's ([the session file](#the-session-file-and-a-core-that-restarts)).
+- What a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes, as after a PC crash, since the file holds no time the core measures with ([the session file](#the-session-file-and-a-core-that-restarts)).
+- How a receiver estimates each sender's offset, what a higher restart count does to that estimate, and how far two PCs' counters part in practice, which the flight-model sync uses ([times](#times)); logging two PCs' offset over a few hours settles the last.
+
+**Sync**, in [node 3](plan.md#3-sync-and-the-session) unless an item says otherwise:
+
+- How a core that restarted while the sim kept running recovers ([the session file](#the-session-file-and-a-core-that-restarts)).
+  Node 3 lists what the sync engine keeps in memory, and decides how a restarted core keeps or rebuilds each, and what of it the core writes to the session file and when.
   It also decides how the cockpit channel tells a copy from a late message, how the conflict rule orders two changes from one pilot under two restart counts, which comparing pilot IDs can't, and how the others get the changes the pilot made that never reached them.
-- What a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes, as after a PC crash, since the file holds no time the core measures with, for the part that designs the core and the node on how the cores reach each other ([the session file](#the-session-file-and-a-core-that-restarts)).
-- How a receiver estimates each sender's offset, what a higher restart count does to that estimate, and how far two PCs' counters part in practice, for the part that designs the flight-model sync and the node on how the cores reach each other ([times](#times)); logging two PCs' offset over a few hours settles the last.
-- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset, for the part that designs the flight-model sync ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
-- Which clock a page in the sim measures a span on, for the part that designs each page that sends one, starting with the panel bridge.
+- Whether a vector clock names each counter by its pilot's ID and restart count or by a place in the [member list](../product/04-room-for-later.md#people-beyond-the-crew), and how a place would name a restart count ([IDs](#ids)).
+- How the core judges an aircraft settled in a session started before [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s rule could call it settled.
+  One way keeps 03-catch-up's 30s floor from Ready to fly and counts its 15s quiet window from when the profile loads.
+- Whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, in sync's stage of step 8, which a probe of whether SimConnect's client events reach `H:` events settles.
+
+**Control**, in its stage of step 8 unless an item says otherwise:
+
+- How the machines agree on which of two take-control presses came first, which [the take-control key](../product/03-v1-scope.md#take-control-key) leaves to the architecture, in node 3, since the PF is the first role in its table of roles.
+  Each machine reads another's stamps through an offset of its own ([times](#times)), so two presses closer than the offsets' error could order differently on two machines; the flying machine, the session's authority at every moment ([the connection](../product/03-v1-scope.md#the-connection)), could decide for every machine, which makes the machines agree, but for presses closer than that error can still pick the later one, against the take-control key's rule that the earlier press wins however small the gap.
+- Whether the helper's Raw Input gets a key and a button that a person presses with the sim in front ([the helper](#the-helper)), which 1.5 settles.
+
+**Profiles and plugin delivery**, in [node 4](plan.md#4-profiles-and-plugin-delivery):
+
+- Where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions; the profile registry, a Later pick, would deliver community profiles the same way ([ideas](../product/ideas.md#profile-registry)).
+- How the version of our plugin API that each profile and plugin declares relates to Crosscheck's version ([versions](#versions)).
+
+**Plugins and the hosts in the sim**, in their stage of step 8:
+
+- Which APIs our panel bridge and WASM module offer plugins: the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins)).
+- How each module, and each hook our panel code installs for a plugin, tears itself down ([what moves them](#what-moves-them)).
+
+**Flight-model sync**, in its stage of step 8:
+
+- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
+- How far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, which each page that sends values needs too ([times](#times)).
+  Timing on the core's counter a page's echo of the core's message bounds a page's delay, and a probe in which the module echoes the control slot's counter would bound a data-slot write's.
+  Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; the same probe settles it if the core also requests a variable the module sets in the frame it writes the slot.
+
+**Pointer sync**, in its stage of step 8:
+
+- Which clock the panel bridge measures a span on; the apps' stage settles it for any other page that sends a span.
   The one cockpit panel's document probed for it, the A220's DisplayUnits, has `performance.now()` (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), and the EFB's, the toolbar's, the banner's, and the menu's pages are untested; whether it runs steady in Coherent GT is unmeasured too, and FS Copilot's panel code measured its spans with `Date.now()` instead.
   Timing each page's `performance.now()` against the core's counter over a few minutes settles it.
-- What a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, since on the A2A PA-24 a mask registered after the aircraft loaded didn't get ahead of the aircraft's own (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)), for the part that designs the core; restarting the core mid-flight on the PA-24 and checking whether its masks still get ahead of Accu-Sim settles it.
-- Whether the SDK's library does what node-simconnect did beyond the main menu: masking, including a group that takes its priority as the sim starts, AI objects with liveries, input events, the camera, and a flight load's flow events, which tell the core when Ready to fly came ([what moves them](#what-moves-them)); a probe in a flight settles it, for the part that designs the core ([the core](#the-core)).
-- Whether the toolbar script can open the banner outside a Build and Mount, at a flight load or mid-flight when a session starts then, for the part that designs the banner: it opened the panel with no click after two of three Build and Mounts, and no other case has been tried ([03-v1-scope](../product/03-v1-scope.md#notification-banner)); loading a flight with our package installed, then starting a session mid-flight, settles it.
-- Where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates; the profile registry, a Later pick, would deliver community profiles the same way ([ideas](../product/ideas.md#profile-registry)).
-- Which APIs our panel bridge and WASM module offer plugins, and how the version of our plugin API that each profile and plugin declares relates to Crosscheck's version, for the part that designs plugins: the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins)).
-- How the core judges an aircraft settled in a session started before [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s rule could call it settled, for the part that designs sync.
-  One way keeps [03-catch-up](../sync/03-catch-up.md#settling-after-a-load)'s 30s floor from Ready to fly and counts its 15s quiet window from when the profile loads.
-- Whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, for the part that designs the profile engine, which a probe of whether SimConnect's client events reach `H:` events settles.
-- How the machines agree on which of two take-control presses came first, which [the take-control key](../product/03-v1-scope.md#take-control-key) leaves to the architecture, for the part that designs control.
-  Each machine reads another's stamps through an offset of its own ([times](#times)), so two presses closer than the offsets' error could order differently on two machines; the flying machine, the session's authority at every moment ([the connection](../product/03-v1-scope.md#the-connection)), could decide for every machine, which makes the machines agree, but for presses closer than that error can still pick the later one, against the take-control key's rule that the earlier press wins however small the gap.
-- How far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, for the part that designs the flight-model sync and each page that sends values ([times](#times)); timing on the core's counter a page's echo of the core's message bounds a page's delay, and a probe in which the module echoes the control slot's counter would bound a data-slot write's.
-  Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; the same probe settles it if the core also requests a variable the module sets in the frame it writes the slot.
-- What the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, such as a WASM module the sim loaded at boot from an older package, whose data slots the core would write in a layout the module doesn't read, for the part that designs the core ([versions](#versions)).
+
+**The apps**, in their stage of step 8 unless an item says otherwise:
+
+- What counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature, with what the logs and the recording keep ([ideas](../product/ideas.md#component-health)).
+- Whether our code can open the banner outside a Build and Mount, at a flight load, or mid-flight when a session starts then, which 1.5 settles: the toolbar script opened the panel with no click after two of three Build and Mounts, and no other case has been tried ([notification banner](../product/03-v1-scope.md#notification-banner)).
+- The framework for the desktop app's pages, which 1.6 settles.
+- The WebSocket client in the desktop app's Rust side, which must send either no `Origin` or `coui://html_ui` ([the desktop app](#the-desktop-app)).
+- Whether the desktop app's pages and its Rust side trade the messages' JSON text through Tauri's commands or its events, and whether tauri-specta types the command calls ([messages and their types](#messages-and-their-types)).
+
+**Recording and bug reports**, in its stage of step 8:
+
+- What the backend runs on, which [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) leaves to the architecture; a Cloudflare Worker with D1 and R2 is the candidate ([components](#components)).
+
+**The build**, in its stage of step 8 unless an item says otherwise:
+
+- The compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), which 1.6 settles.
+- How the build hashes the message crate, which has to cover each message's encoding as well as its fields, since FS Copilot's fingerprint covers a type's fields and not its codec, so a codec that wrote them in a new order would pass it ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
+- The check in CI that ts-rs's generated files match the crate.
+- A stand-in for the second pilot's sim, so a developer runs a whole session on one PC, and whether a second MSFS with its own Crosscheck runs in a virtual machine on the same PC, for the test bench ([the product plan](../product/plan.md#7-tech-stack-and-architecture)); node 2's transport lets two cores run on one PC.

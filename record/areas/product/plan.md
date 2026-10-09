@@ -212,8 +212,8 @@ Its sources are the sim's process, SimConnect's system and flow events, and the 
 
 ## 8. v1 build plan
 
-Produces: a plan with build stages, in the areas the architecture names.
-Exit: everything v1 includes, the picks and the three parts step 3 lists, is in a stage with its own exit criterion.
+Produces: a `plan.md` in each area that [the architecture's spine](../architecture/01-spine.md#parts) names, holding that part's build stages.
+Exit: everything v1 includes, the picks and the three parts step 3 lists, is in a stage with its own exit criterion, and so is each question the spine leaves to a stage of step 8 ([left open](../architecture/01-spine.md#left-open)).
 
 ## 9. Build, test, and release v1
 

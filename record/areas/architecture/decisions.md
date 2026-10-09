@@ -240,7 +240,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
     A pilot installs a new Crosscheck only with the sim closed, and pilots on different versions can't fly together, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - The [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares each profile's version and hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../product/04-room-for-later.md#profiles)).
   - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
-- **Leaves out:** where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions, for the part that designs profiles and updates.
+- **Leaves out:** where profiles and plugins are served from, how their signing keys are kept, how often the core checks for new versions, and how the plugin API version relates to Crosscheck's, for [node 4](plan.md#4-profiles-and-plugin-delivery) of the architecture plan.
 
 ## Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them
 

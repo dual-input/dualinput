@@ -78,34 +78,26 @@ It covers:
 - the boundaries between its parts
 
 A component is something that runs on its own, such as a process, a document in the sim, or a WASM module.
-A part is a piece of Crosscheck's design that a later node works on, such as the sync engine, and it may live in one component or span several.
+A part is one row of the spine's [Parts](01-spine.md#parts), such as sync, and it may live in one component or span several.
 
 Step 7 can't decide a language, frameworks, or a core architecture without it, and every node after it assumes its answer.
 It reads [01-aims](../product/01-aims.md), [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), and the sync design docs: [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md).
 Its answer goes in `01-spine.md`, in this area.
 `01-spine.md` takes up step 7's paragraphs after its exit, from the headless core proposed on 2026-10-03 to sim awareness, and once the user agrees to it, step 7 links to it in their place.
-Exit: the user agrees to `01-spine.md`.
-Waits on 1.1, 1.2, 1.3, and 1.4.
-Raised elsewhere: by 1.1 and 1.3, where profiles and plugins, which reach pilots apart from Crosscheck's releases, are served from, how their signing keys are kept, and how often the core checks for new versions, to place with the part that designs profiles and updates ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.3, whether masking, AI objects with liveries, input events, the camera, and a flight load's flow events work through the SDK's `SimConnect.dll`, to place with the part that designs the core ([01-spine](01-spine.md#left-open)).
+Its answer also names Crosscheck's parts, the area each one's documents go in, and where each is designed, in a node of this plan or in a stage of [step 8](../product/plan.md#8-v1-build-plan), and files each open question it leaves under the part it belongs to.
+Exit: the user agrees to `01-spine.md`, its Parts and Left open sections included.
+Waits on 1.1, 1.2, 1.3, 1.4, 1.5, and 1.6.
+Raised elsewhere: by 1.3, whether masking, AI objects with liveries, input events, the camera, and a flight load's flow events work through the SDK's `SimConnect.dll`, which 1.5 settles ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.3, which APIs our panel bridge and WASM module offer plugins, to place with the part that designs plugins ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1, whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how each module, and each hook our panel code installs for a plugin, tears itself down, to place with the parts that design the panel bridge and the WASM module ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.2, what counts as trouble for each component and where the pilot sees it, to place with the parts that design the logs, the recording, and the apps ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.2, how the cores reach each other, a top-level node after node 1 (user, 2026-10-08) ([01-spine](01-spine.md#between-machines)).
+Raised elsewhere: by 1.2, what counts as trouble for each component and where the pilot sees it, to place with the part that designs the apps ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.2, letting a web page connect to the core, opt-in, if an integration ever needs it, to place with the part that designs the core's protocol ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1, how the machines agree on which of two take-control presses came first, which per-machine clock offsets can't settle alone, to place with the part that designs control ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.4, how a core that restarted while the sim kept running recovers what it lost and gets its pilot's lost changes to the others, how the cockpit channel tells a copy from a late message, and how the conflict rule orders two changes from one pilot under two restart counts, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes, to place with the part that designs the core and the node on how the cores reach each other ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, to place with the part that designs the flight-model sync ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, which clock a page in the sim measures a span on, to place with the part that designs each page that sends a span, starting with the panel bridge ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, to place with the part that designs the core ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.4, how the cores pack each field of a message, such as a vector clock counter's key; how each channel other than the cockpit's tells a copy from a late message; and whether the relay's and the backend's messages are the message crate's, to place with the node on how the cores reach each other ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, to place with the part that designs the core ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, to place with the part that designs the flight-model sync and each page that sends values ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.4, how a receiver estimates each sender's clock offset, what a higher restart count does to it, and how far two PCs' counters part in practice, to place with the part that designs the flight-model sync and the node on how the cores reach each other ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 1.4, how the version of our plugin API that each profile and plugin declares relates to Crosscheck's version, to place with the part that designs plugins ([01-spine](01-spine.md#left-open)).
 
 ## 1.1 Components
 
@@ -280,3 +272,73 @@ It reads [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debuggin
 Its answer goes in an entry in this area's log, which 1.4's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
 Done on 2026-10-09.
+
+## 1.5 A flight with Crosscheck's Rust pieces
+
+Question: in a flight on MSFS 2024, does the core's Rust client on the SDK's `SimConnect.dll` do what our probes did there through node-simconnect, does our Rust WASM module run and trade data slots, does the helper's Raw Input get a key and a button that a person presses with the sim in front, and can our code open the banner's panel when a flight loads and when a session starts mid-flight?
+Node 1 can't number its tentative decisions without it, because two of them rest on runs outside a flight.
+[Crosscheck is written in Rust, and in TypeScript where an engine runs it](decisions.md#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it) names the SDK's `SimConnect.dll` and a Rust module, which have run only at the main menu, and under [the core catches the take-control key and buttons](decisions.md#the-core-catches-the-take-control-key-and-buttons), the helper has received only keys that another program sent while another window was in front.
+The banner decides whether the toolbar script is a component at all.
+It opened our panel with no click only after a Build and Mount ([interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)), while the same call opened the panel from the EFB's page too ([interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), where our EFB app's code runs with the EFB closed ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
+So if the toolbar script can't open the panel at a flight load, the EFB app may, and the toolbar script goes.
+A guided probe that the user runs settles it.
+In one flight, the core's Rust client does masking, including a group that took its priority as the sim started, AI objects with liveries, input events, the camera, and a flight load's flow events, as the probes behind the [flight-controls](../flight-controls/log.md), [avatars](../avatars/log.md), and [sync](../sync/log.md) logs did through node-simconnect.
+Our module counts frames and echoes a data slot, the user presses a key and a button the helper listens for while the sim is in front, and the toolbar script and the EFB app's code each try to open the banner's panel at a flight load and mid-flight.
+It reads the architecture log's 2026-10-08 entries, the probes [p02](../../../experiments/areas/architecture/p02-rust-helper.mjs), [p03](../../../experiments/areas/architecture/p03-rust-module.mjs), and [p06](../../../experiments/areas/architecture/p06-rust-simconnect.mjs), the [interface log](../interface/log.md), and the probes the flight-controls, avatars, and sync logs name.
+Its answer goes in entries in the logs of the areas the findings belong to, which `01-spine.md` and the tentative decisions cite.
+Exit: log entries answer each part of the question.
+
+## 1.6 Frameworks
+
+Question: which frameworks does each component build on, beyond the languages and toolchains 1.3 chose, how is our code in Coherent GT compiled and checked, and what can the EFB app share with the desktop app's pages?
+Step 7's exit needs a decision on the frameworks ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+1.3 left three of them open as choices inside one part: the framework for the desktop app's pages, the core's async runtime and WebSocket library, and the compiler and syntax target for our code in Coherent GT, which five components share ([01-spine](01-spine.md#left-open)).
+Step 7 also asks for a check, run in CI and after edits, that every file run in Coherent GT, experiments included, parses within the engine's measured limits, written after we look for Coherent GT's own documentation of its JavaScript and for rules others already maintain; this node sets its rules, and the build's stage of step 8 runs it.
+And it asks for a probe of what code the EFB app can share with the desktop app, which [03-v1-scope](../product/03-v1-scope.md#efb-app) narrows: the EFB app is built on the sim's EFB framework, and the desktop app's interface doesn't run in the EFB.
+It reads step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), the spine's [language and toolchains](01-spine.md#language-and-toolchains), the foundations chapters [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md) and [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits), and the [EFB app](../product/03-v1-scope.md#efb-app) section of 03-v1-scope.
+Its answer goes in its own section of `01-spine.md`.
+Exit: the user agrees to that section.
+
+## 2 How the cores reach each other
+
+Question: how do a session's cores reach each other and the relay: the topology, the transport, getting through home routers, the relay, and encryption?
+Step 7 can't decide the core architecture without it.
+Its decisions pick whether each machine sends to every other directly or through the flying machine ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)), and v1 builds a transport in which each channel declares who sends and receives it, its delivery, its priority, and whether it joins the cockpit's shared order ([04-room-for-later](../product/04-room-for-later.md#channels)).
+The relay's language follows from the transport, since a Cloudflare Worker can't relay UDP as of 2026-10-08 ([01-spine](01-spine.md#between-machines)), so this node picks it.
+It also says how a core learns that the relay or another pilot's core went quiet ([01-spine](01-spine.md#how-the-core-knows-a-component-is-alive)), and weighs the ways [the connection](../product/03-v1-scope.md#the-connection) lists to soften a short gap.
+The transport lets a developer run a whole session on one PC, with two cores, each with its own ports and identity ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+It reads the [network log](../network/log.md), [01-aims](../product/01-aims.md#relay-and-license), the [invite code](../product/03-v1-scope.md#invite-code) and [the connection](../product/03-v1-scope.md#the-connection) in 03-v1-scope, [channels](../product/04-room-for-later.md#channels) in 04-room-for-later, the spine's [between machines](01-spine.md#between-machines) and [shared conventions](01-spine.md#shared-conventions), and the foundations chapters [08-05](../../learn/foundations/08-05-position-and-clocks.md) and 09-01 to 09-06, starting with [09-01](../../learn/foundations/09-01-addresses-and-link-quality.md).
+It also reads our earlier relays: the FS Copilot fork's `record/self-hosted-relay/` and `record/traffic-atc/docs/04-transport.md`, and fsc-editor's `relay/`.
+Its answer goes in a design doc in the network area, `record/areas/network/01-between-machines.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 1.4, how the cores pack each field of a message, how each channel other than the cockpit's tells a copy from a late message, and whether the relay's and the backend's messages are the message crate's ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, how a receiver estimates each sender's clock offset, what a higher restart count does to it, and how far two PCs' counters part in practice, which the flight-model sync uses ([01-spine](01-spine.md#left-open)).
+
+## 3 Sync and the session
+
+Question: in what order does catch-up apply state, how does catch-up run as a pipeline of steps, how does a core that restarted recover, and how do the session's roles and members work?
+Step 7's decisions pick the order catch-up applies state in, where we lean toward first-final-value order, which needs the session's history, kept in the recording ([03-catch-up](../sync/03-catch-up.md#choosing-the-order)).
+They also build in three things [04-room-for-later](../product/04-room-for-later.md) says v1 builds: catch-up as a pipeline of steps ([a catch-up pipeline](../product/04-room-for-later.md#a-catch-up-pipeline)); one table of roles, each with its rule for who holds it, how it moves, and what happens when its holder drops out ([roles](../product/04-room-for-later.md#roles)); and a member list in which each member is crew or a passenger, with vector clocks that hold only members who send ([people beyond the crew](../product/04-room-for-later.md#people-beyond-the-crew)).
+The PF is the table's first role, so the take-control tie is part of how that role moves.
+It waits on node 2, because how a restarted core recovers and how the cockpit channel tells a copy from a late message turn on what that channel resends.
+It reads the sync design docs, [01-profile-entries](../sync/01-profile-entries.md), [02-live-sync](../sync/02-live-sync.md), and [03-catch-up](../sync/03-catch-up.md), and the [sync log](../sync/log.md); the [control](../product/03-v1-scope.md#control) and [session](../product/03-v1-scope.md#session) sections of 03-v1-scope; [04-room-for-later](../product/04-room-for-later.md); the spine's [shared conventions](01-spine.md#shared-conventions); and the foundations chapters [08-01](../../learn/foundations/08-01-replication-models-and-authority.md), [08-02](../../learn/foundations/08-02-echoes-and-initial-sync.md), and [08-03](../../learn/foundations/08-03-ordering-and-classes-of-data.md).
+Its answer goes in two new design docs: `record/areas/sync/04-order-and-recovery.md` for the sync rules, with a note at the top of each earlier sync doc whose text it changes, and `record/areas/session/01-roles-and-members.md` for the roles and the member list.
+Exit: the user agrees to the answer in those documents.
+Waits on 2.
+Raised elsewhere: by 1.4, how a core that restarted while the sim kept running recovers what it lost and gets its pilot's lost changes to the others, how the cockpit channel tells a copy from a late message, and how the conflict rule orders two changes from one pilot under two restart counts ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list, and how a place would name a restart count ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1, how the machines agree on which of two take-control presses came first, which per-machine clock offsets can't settle alone ([01-spine](01-spine.md#left-open)).
+
+## 4 Profiles and plugin delivery
+
+Question: what are a profile's syntax and file layout, what size limits does the sandbox for write functions set, what form do a plugin's changes to aircraft files take, and how do profiles and plugins reach pilots?
+Step 7's exit needs a decision on the profile format, which takes the shape [01-profile-entries](../sync/01-profile-entries.md) gives it, two blocks of entries and a writer API, and the decision picks its syntax and file layout; step 7 also picks the size limits of the sandbox that write functions run in ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+The format builds in what [04-room-for-later](../product/04-room-for-later.md#profiles) says v1 builds: watch-only entries, plugin values, a direction field with room for a third value, profile hashes the match check compares, and a format that takes new blocks.
+Profiles and plugins reach pilots apart from Crosscheck's releases, signed, and pinned for each session by hash ([tentative decisions](decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
+It reads 01-profile-entries; the [plugins](../product/03-v1-scope.md#plugins), [preflight match check](../product/03-v1-scope.md#preflight-match-check), and [installing and updating](../product/03-v1-scope.md#installing-and-updating) sections of 03-v1-scope; the [profiles](../product/04-room-for-later.md#profiles) and [plugins](../product/04-room-for-later.md#plugins) sections of 04-room-for-later; the [tentative decisions](decisions.md#plugin-code-runs-only-in-the-core) on plugins; the architecture log's [QuickJS-ng entry](log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off); and FS Copilot's profiles in `../fsc/profiles/`.
+Its answer goes in a design doc in the profiles area, `record/areas/profiles/01-format-and-delivery.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 1.1 and 1.3, where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, how the version of our plugin API that each profile and plugin declares relates to Crosscheck's version ([01-spine](01-spine.md#left-open)).

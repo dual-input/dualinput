@@ -238,7 +238,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
 
-- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
+- **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 5 minutes cut off, or the core learns the session has ended, with the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in.
   The restart count goes up by 1 each time the core starts while the file exists.
   Between cores, a link opens by naming the sender's pilot ID and restart count, and each message carries its number in its channel, so every message is named by its sender's pilot ID, restart count, channel, and number; a receiver keeps what it knew of a sender's numbers when its link opens again with the same count, and starts them afresh with a higher one.
   In the vector clocks, each counter belongs to a pilot's ID and a restart count.
@@ -255,6 +255,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
 - **Leaves out:**
   - how a restarted core recovers everything the sync engine held only in memory, and gets the others the changes its pilot made that never reached them, for the part that designs sync ([01-spine](01-spine.md#left-open))
   - how each channel tells a copy from a late message, for the part that designs sync and the node on how the cores reach each other ([01-spine](01-spine.md#left-open))
+  - how the conflict rule orders two changes from one pilot under two restart counts, which comparing pilot IDs can't, for the part that designs sync ([01-spine](01-spine.md#left-open))
+  - what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes ([01-spine](01-spine.md#left-open))
   - what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded ([01-spine](01-spine.md#left-open))
 
 ## A time in a message is µs on the sender's PC's monotonic clock
@@ -265,7 +267,7 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   The core stamps each data-slot write from our WASM module as it arrives, until a clock the module can read is shown to count the same ticks.
   A receiver reads a sender's stamps through an offset it keeps estimating for that sender.
   No frame count crosses between machines: a pace in frames counts the frames of the machine that runs it.
-  Wall-clock time, in UTC, appears only where a person reads it.
+  Wall-clock time, in UTC, appears in a message only where a person reads it, and in the session file only inside a run's name, which the core compares and never measures with.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
   - `QueryPerformanceCounter` counts from the PC's start, gives consistent readings across processes, never goes backward, and ignores changes to the system clock, while a stamp on the wall clock moves when Windows sets that clock (documented, [Acquiring high-resolution time stamps](https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps)); so a restarted core goes on along the timeline it left.

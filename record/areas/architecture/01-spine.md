@@ -353,14 +353,15 @@ The tentative decisions behind each are in [decisions.md](decisions.md#sessions-
 
 ### The session file, and a core that restarts
 
-The core keeps a session file in its data folder from when the pilot starts or first joins a session until they press Leave session or the core learns the session has ended.
+The core keeps a session file in its data folder from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 5 minutes cut off ([the connection](../product/03-v1-scope.md#the-connection)), or the core learns the session has ended.
 It holds the session's ID and invite code, the pilot's ID, the core's restart count, and the run of the sim the pilot was in, and the part that designs sync may keep there what a restarted core needs to replay ([left open](#left-open)).
 One core runs for each data folder ([finding the core](#finding-the-core)), so a development core beside the pilot's has a session file, and a pilot ID, of its own.
 
 - The restart count goes up by 1 each time the core starts while the file exists.
 - Between cores, a link opens by naming the sender's pilot ID and restart count, and each message on it carries its number in its channel.
   So every message is named by its sender's pilot ID, restart count, channel, and number.
-  Where a link carries only its sender's messages, only the number crosses with each; a link that carries several senders' messages, as a relay's or a forwarding machine's could, names the sender with each, which the node on how the cores reach each other decides.
+  Where a link carries only its sender's messages, the pilot ID and restart count cross once, as it opens, rather than with each message, and a link that carries several senders' messages, as a relay's or a forwarding machine's could, names the sender in each message.
+  Whether any link does is for the node on how the cores reach each other.
   - A receiver uses that name to drop the second copy of a message that came both directly and through the relay ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
     How each channel tells a copy from a late message is [left open](#left-open): one that applies a sender's messages in order can keep the last number it applied and drop any at or below it, while one that keeps the newest sample of each object, as traffic's does ([channels](../product/04-room-for-later.md#channels)), can't drop by that number alone.
   - A link that opens again with the same restart count is the same core, back from an outage, so the receiver keeps what it knew of that sender's numbers, and drops the copies a replay brings.
@@ -390,7 +391,9 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
   fsc-editor stamped each value as it was parsed, so about 192 values that arrived in one 8 KB message landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
 - A page in the sim can't read `QueryPerformanceCounter`, and a plugin reads only QuickJS-ng's `Date.now()` and `performance.now()`, which rquickjs's full context includes (read in rquickjs-core 0.14.0, `src/context/builder.rs`, `intrinsic::All`) and which aren't shown to count the same ticks, so the core stamps each of their messages as it arrives, the nearest it comes to when the value was read.
   How long a page's message takes to reach the core is unmeasured; a page that echoes a core's message, timed by the core, bounds it.
-  A page that needs a span measures it on its own clock and sends it in whole µs, as FS Copilot's pointer sync, in ms, sends with each gesture its `GapMs`, the idle time since the gesture before it, capped at 1,000ms (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`; [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage)), which FS Copilot's panel code measures with `Date.now()` (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `_gapBefore`).
+  A page that needs a span measures it on its own clock and sends it in whole µs.
+  FS Copilot's pointer sync does the same in ms: each gesture carries its `GapMs`, the idle time since the gesture before it, capped at 1,000ms (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`; [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
+  Its panel code measures that gap with `Date.now()` (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `_gapBefore`).
 - Our WASM module stamps a value it reads only once a clock it can read is shown to count the same ticks as `QueryPerformanceCounter` ([left open](#left-open)); until then, the core stamps each data-slot write from the module as it arrives, as it does a page's messages.
 - A receiver reads a sender's stamps through an offset it estimates for that sender, and keeps estimating, because two PCs' counters drift apart.
   A PC's crystal is typically within 50 ppm and can be off by as much as 500 ppm, and recent versions of Windows, "particularly Windows 8", compensate for a crystal's offset "to the extent possible" when Windows starts (documented, [Acquiring high-resolution time stamps](https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps)).
@@ -407,7 +410,7 @@ The crate that defines the messages ([messages between components](#messages-bet
 - Over a WebSocket, to the sim's pages and the desktop app, a message is JSON that serde_json writes.
   Coherent GT parses JSON with no library of ours, at no frame time we could measure in the PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log][links]; [the sim's pages](#the-sims-pages)).
 - Between the desktop app's Rust side and its pages, Tauri carries a command's arguments and its answer, and an event's payload, as JSON (documented, [Calling Rust from the frontend](https://v2.tauri.app/develop/calling-rust/)), so either way a message from the crate arrives in the shape its ts-rs type describes.
-  The command calls themselves, their names and arguments, would need tauri-specta's types rather than ts-rs's (documented, [tauri-specta](https://docs.rs/tauri-specta/2.0.0-rc.21/tauri_specta/)).
+  ts-rs types the messages a command carries, not the command's name and arguments, which tauri-specta types (documented, [tauri-specta](https://docs.rs/tauri-specta/2.0.0-rc.21/tauri_specta/)); whether the desktop app needs it is unverified.
   No probe has sent messages through Tauri; sending p07's samples from the Rust side to a page as a command's answer and as an event's payload, and checking them against ts-rs's types, settles whether they arrive in that shape.
 - A plugin gets each message as an object, through QuickJS-ng's own JSON parser, and its answer comes back to the core the same way (measured on our development machine, 2026-10-09, [architecture log][types]).
 - In a data slot, a message is a struct of fixed-width fields, which the module reads in place.
@@ -452,6 +455,7 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
 - How a core that restarted while the sim kept running recovers, for the part that designs sync ([the session file](#the-session-file-and-a-core-that-restarts)).
   That part lists what its engine keeps in memory, and decides how a restarted core keeps or rebuilds each, and what of it the core writes to the session file and when.
   It also decides how the cockpit channel tells a copy from a late message, how the conflict rule orders two changes from one pilot under two restart counts, which comparing pilot IDs can't, and how the others get the changes the pilot made that never reached them.
+- What a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes, as after a PC crash, since the file holds no time the core measures with, for the part that designs the core and the node on how the cores reach each other ([the session file](#the-session-file-and-a-core-that-restarts)).
 - How a receiver estimates each sender's offset, what a higher restart count does to that estimate, and how far two PCs' counters part in practice, for the part that designs the flight-model sync and the node on how the cores reach each other ([times](#times)); logging two PCs' offset over a few hours settles the last.
 - Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset, for the part that designs the flight-model sync ([times](#times)); a probe in which the module and the core each stamp the same data-slot write settles it.
 - Which clock a page in the sim measures a span on, for the part that designs each page that sends one, starting with the panel bridge.

@@ -340,9 +340,40 @@ It reads the [network log](../network/log.md), [01-aims](../product/01-aims.md#r
 It also reads our earlier relays: the FS Copilot fork's `record/self-hosted-relay/` and `record/traffic-atc/docs/04-transport.md`, and fsc-editor's `relay/`.
 Its answer goes in a design doc in the network area, `record/areas/network/01-between-machines.md`.
 Exit: the user agrees to that design doc.
+Waits on 2.1 and 2.2.
 Raised elsewhere: by 1.4, how the cores pack each field of a message, how each channel other than the cockpit's tells a copy from a late message, and whether the relay's and the backend's messages are the message crate's ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how a receiver estimates each sender's clock offset, what a higher restart count does to it, and how far two PCs' counters part in practice, which the flight-model sync uses ([01-spine](01-spine.md#left-open)).
+
+## 2.1 Carrying a session's traffic
+
+Question: how do the best current designs carry real-time traffic between two home PCs, directly and through a relay, and which Rust library lets us build the best of them?
+2 can't pick the transport, the way through home routers, or the relay without it, and the relay's language follows from the relay.
+The record knows the networking of FS Copilot's LiteNetLib, fsc-editor's WebSocket relay, and YourControls' laminar ([10-02](../../learn/foundations/10-02-yourcontrols.md)), and knows QUIC and WebRTC only from their RFCs ([09-02](../../learn/foundations/09-02-transports-and-delivery.md)).
+FS Copilot's networking came from patching an existing app with as little change as possible, so its choices are one example among others, while its measurements stand (user, 2026-10-09).
+Each channel gets the delivery it needs: a stream that resends for messages that must arrive, and packets sent once for what the next message replaces, such as the flight model, the avatars, and ATC audio ([channels](../product/04-room-for-later.md#channels)).
+The sender sends the most urgent data first, so a bulk transfer never delays the flight model.
+Encryption isn't a requirement, because nothing a session carries is sensitive, so Crosscheck builds nothing for it, and a transport that encrypts anyway is judged only on the bytes that adds (user, 2026-10-09).
+A research read settles it.
+It reads the documentation and source of QUIC through quinn, iroh, WebRTC data channels with a TURN relay, Valve's GameNetworkingSockets, and a UDP protocol of our own, and Tailscale's hole punching for its method.
+It judges each on each channel's delivery, priorities between channels, hole punching, relay fallback and switching between the two mid-session, two cores on one PC, the bytes it adds to a packet, and its maintenance as of 2026-10 and its license.
+For each relay, it judges what the relay is, its language, its cost per relayed session-hour against the aim of about $10 a month, and how that cost grows with users, since one small relay's figures say little about many users (user, 2026-10-09).
+It may end in a probe, such as relaying through Cloudflare's TURN from a client that isn't WebRTC, which the spine leaves unverified ([01-spine](01-spine.md#between-machines)).
+It reads [01-aims](../product/01-aims.md#relay-and-license), [the connection](../product/03-v1-scope.md#the-connection), [channels](../product/04-room-for-later.md#channels), the [network log](../network/log.md), the spine's [between machines](01-spine.md#between-machines), and the foundations chapters 09-01 to 09-06 and [10-02](../../learn/foundations/10-02-yourcontrols.md).
+Its answer goes in an entry in the network log, which 2's design doc cites.
+Exit: a network log entry answers the question.
+
+## 2.2 Packing a message between cores
+
+Question: which binary format does the message crate use between cores, and how many bytes does each channel's message take in it?
+2 can't say how the cores pack each field of a message without it, which 1.4 raised ([01-spine](01-spine.md#left-open)), and a message sent once has to fit in one packet, whose size 2.1 bounds.
+Between cores, the messages are the crate's ([messages and their types](01-spine.md#messages-and-their-types)), and a UUID takes 16 bytes in a binary serde format, against 36 characters as text ([IDs](01-spine.md#ids)).
+The relay's traffic grows with each message's size, and the user prefers compact messages.
+A probe settles it, with no sim: encode sample messages of each v1 channel in postcard, bincode 2, and MessagePack through rmp-serde, which YourControls uses ([10-02](../../learn/foundations/10-02-yourcontrols.md)), compare their sizes, and decode each back.
+The samples include a cockpit change with its vector clock for two pilots, a flight-model sample, an avatar pose, and a traffic batch.
+It reads the spine's [messages and their types](01-spine.md#messages-and-their-types) and [IDs](01-spine.md#ids), [02-live-sync](../sync/02-live-sync.md), [channels](../product/04-room-for-later.md#channels), and the probe [p07](../../../experiments/areas/architecture/p07-types.mjs).
+Its answer goes in an entry in the network log, which 2's design doc cites.
+Exit: a network log entry answers the question.
 
 ## 3 Sync and the session
 

@@ -2,7 +2,7 @@
 
 What MSFS 2024's Coherent GT, the engine of its cockpit panels, EFB, toolbar, in-game panels, and menu, parses and provides, as measured on MSFS 2024 SunRise 12.2.282174.999 in five documents on 2026-10-09: mainUi, the EFB's, the toolbar's, a cockpit panel, and an in-game panel of ours ([architecture log][p09]).
 Its user agent says Chrome 49 and its makers last compared it to Safari 10.1.2, but its features match neither ([architecture log][research]), so this list is the rule.
-Why our code is compiled to `es2017` is in the [spine](01-spine.md#code-in-the-sim).
+Why our code is compiled to `es2017` is in the [spine](01-spine.md#compiling-our-code-in-the-sim).
 
 ## Syntax
 

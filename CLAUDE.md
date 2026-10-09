@@ -112,7 +112,7 @@ It can't see inside images or compressed files, so check screenshots and capture
 
 MSFS 2024 runs panel code in Coherent GT, whose user agent says Chrome 49 while its features match no browser, so go by [its measured limits](record/areas/architecture/coherent-gt.md), not a browser version.
 A syntax error there takes out the whole file rather than one line: FS Copilot's `VCockpit.js`, the one file loaded into every panel, sat unparseable for two commits (FS Copilot fork, `record/conventions.md`).
-So write TypeScript compiled to `es2017`, or JavaScript, and in either keep to the syntax that reference lists as parsing, because a compiler leaves ES2018's regex features broken.
+So write TypeScript compiled to `es2017`, or JavaScript, and in either keep to ES2017's syntax, which the reference shows the engine parses, because a compiler leaves ES2018's regex features broken.
 Use no built-in or web API it lists as missing or as filled in only in some documents, such as `globalThis` and `Promise.prototype.finally`.
 
 Run `node --check` on every panel file before packaging it.

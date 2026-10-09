@@ -1,12 +1,12 @@
 # Architecture: the spine
 
 ```text
-Purpose:     What every other part of Crosscheck rests on: its components, how they talk, the conventions they share, its languages, and its parts.
+Purpose:     What every other part of Crosscheck rests on: its components, how they talk, the conventions they share, its languages and frameworks, and its parts.
 Depends on:  decisions.md, ../product/plan.md (step 7), ../product/01-aims.md, ../product/03-v1-scope.md, ../product/04-room-for-later.md, ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/03-catch-up.md
-Decides:     Which components Crosscheck runs, where each runs, and what each owns (node 1.1); what each does with no session, and what moves it into one and back (node 1.1.2); how they reach each other, and how the core knows each is alive (node 1.2); what language and toolchain each is built with, where the core's input and audio work runs, where a plugin's code runs and what it's written in, and how profiles and plugins reach pilots (node 1.3); the IDs, times, encodings, and versions every component shares, and who a pilot is after their core restarts (node 1.4); which parts Crosscheck's design divides into, where each is designed, and which part each open question belongs to (node 1).
+Decides:     Which components Crosscheck runs, where each runs, and what each owns (node 1.1); what each does with no session, and what moves it into one and back (node 1.1.2); how they reach each other, and how the core knows each is alive (node 1.2); what language and toolchain each is built with, where the core's input and audio work runs, where a plugin's code runs and what it's written in, and how profiles and plugins reach pilots (node 1.3); the IDs, times, encodings, and versions every component shares, and who a pilot is after their core restarts (node 1.4); which frameworks each component builds on, how our code in the sim is compiled, and the check that keeps it within what Coherent GT runs (node 1.6); which parts Crosscheck's design divides into, where each is designed, and which part each open question belongs to (node 1).
 ```
 
-Each section up to [Shared conventions](#shared-conventions) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
+Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The watcher and the core are the two processes in [step 7 of the product plan](../product/plan.md#7-tech-stack-and-architecture), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
 The flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).
 A pilot is in a session from starting or joining it until leaving it, or until 5 minutes cut off ([the connection](../product/03-v1-scope.md#the-connection)).
@@ -272,8 +272,7 @@ The desktop app is a Tauri app: a Rust program whose window shows the desktop ap
 ### Code in the sim
 
 Code that runs in Coherent GT is written in TypeScript and compiled to the syntax the engine parses, as the A220's DisplayUnits bundle is, which spells `??` out the long way ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)); A2A's tablet is TSX that esbuild bundles ([EFB app](../product/03-v1-scope.md#efb-app)).
-Step 7 has a check that every file run in Coherent GT parses within the engine's measured limits ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and we run it on the compiled output, which is what the engine parses.
-Compiling doesn't fill in the built-ins Coherent GT lacks, such as `Object.fromEntries`, whose calls throw when they run, and a parse check doesn't see them ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), so the build also fills them in or rejects their use.
+How it's compiled, and the check that keeps every file we ship into the sim within what Coherent GT runs, are in [frameworks](#frameworks).
 
 Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ran its update about 136 times a second, and traded data slots with a SimConnect client at the main menu (measured on MSFS 2024, 2026-10-08, [architecture log][module]), and in a flight it echoed every write the client made, its update running 89.2 times a second (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
 
@@ -440,6 +439,49 @@ In p07, ts-rs's types, with that setting, took every message serde_json wrote an
 
 [types]: log.md#2026-10-09-ts-rs-with-64-bit-integers-set-to-numbers-generates-typescript-that-matches-what-serde_json-sends-specta-needs-two-opt-ins-typeshare-cant-express-our-messages-and-the-data-slots-keep-one-layout-on-x86_64-and-wasm32
 
+## Frameworks
+
+The core runs on tokio, the desktop app's pages are React, and our interface in the sim is the MSFS Avionics Framework's.
+Our code in the sim is type-checked against ES2017 and bundled by esbuild at `es2017`, and a check run after every edit and in CI keeps every file we ship into the sim within what Coherent GT runs.
+The tentative decisions behind these start at [decisions.md](decisions.md#the-core-runs-on-tokio).
+
+| Component | Built on |
+| --- | --- |
+| Core | tokio, the async runtime Tauri runs on too; its WebSocket library is a choice inside the core ([left open](#left-open)) |
+| Desktop app | Tauri, with pages in React, built with Vite and styled with Tailwind |
+| Banner panel | The MSFS Avionics Framework's FSComponent, from our own pinned copy of `@microsoft/msfs-sdk` |
+| EFB app | The same framework, registered through Asobo's EFB API; whether from our pinned copy or the sim's own is [left open](#left-open) |
+| Menu script and panel bridge | No framework: TypeScript compiled as the rest of our code in the sim is |
+| Plugins and the profile's write functions | QuickJS-ng in the core ([the core](#the-core)) |
+| Watcher, helper, and WASM module | No framework beyond the libraries and toolchains in [language and toolchains](#language-and-toolchains) |
+| Backend and relay | Open: the backend's for its part, the relay's for node 2 ([left open](#left-open)) |
+
+### Compiling our code in the sim
+
+- TypeScript checks the types with its `lib` set to `DOM`, `DOM.Iterable`, `ES2017`, and `ES2021.WeakRef`, as the MSFS Avionics Framework's own build sets it (read in microsoft/msfs-avionics-mirror, its main branch on 2026-10-09, `src/sdk/tsconfig.json`), so a built-in from ES2018 on that the engine lacks, such as `Object.fromEntries`, fails the type check ([Coherent GT's JavaScript](coherent-gt.md#built-ins)); `Intl`, which ES5's lib declares, passes it.
+- esbuild bundles each page's code at `es2017`, the target the framework, FlyByWire's TypeScript and instruments, and every other project we read compile to ([architecture log][research]).
+  TypeScript 7.0.2 and esbuild 0.28.2 at `es2017` both lowered every later syntax our test module used, and it ran in the EFB's document and a cockpit panel, while esbuild refused FlyByWire's `safari11` target for an object rest in a parameter ([architecture log][p09]).
+  esbuild lowers the code it bundles from packages too, where the framework's own pipeline, TypeScript then Rollup, compiles only its own files; that pipeline also runs the framework's TypeScript plugin, which rewrites `for`-`of` loops because Coherent GT runs them slowly (documented, `@microsoft/msfs-ts-transformer` 1.0.0 on npm), and esbuild can't run it ([left open](#left-open)).
+- The banner panel bundles our own copy of `@microsoft/msfs-sdk`, pinned to one exact version, since the copy the sim provides can change with a sim update, as Working Title's G1000 pins 2.4.3 and ships its own (read in microsoft/msfs-avionics-mirror, its main branch on 2026-10-09, `src/workingtitle-instruments-g1000/package.json`).
+  Whether the EFB app can is [left open](#left-open): our probe apps registered with the EFB and drew with the sim's own copy, its global `msfssdk`, and no run has registered one drawn with a second copy.
+  The framework's license is MIT, for use only in Microsoft Flight Simulator (read in the same repository, `LICENSE`).
+- The EFB app and the desktop app's pages share TypeScript logic and the types ts-rs generates, not interface: a module of that kind, compiled at `es2017`, ran in the EFB's document ([architecture log][p09]).
+
+### The check
+
+Every JavaScript file we ship into the sim, experiments' files included, passes three checks, run after every edit and in CI, as step 7 asks ([the product plan](../product/plan.md#7-tech-stack-and-architecture)); nobody maintains a rule set for Coherent GT that we could use instead ([architecture log][research]).
+
+1. A JavaScript parser set to ECMAScript 2017, such as acorn, parses each file we ship, compiled or written as JavaScript, so syntax newer than ES2017 fails with its file, line, and column, in our code or in a package's.
+   It rejects object rest too, which the engine parses, so code written as JavaScript keeps to ES2017.
+   `node --check` passes such syntax, `?.` among it, because Node accepts it.
+2. A check of our TypeScript and JavaScript sources rejects regex features from ES2018 on and a raw U+2028 or U+2029, which neither TypeScript 7.0.2 nor esbuild 0.28.2 makes work: TypeScript leaves such a regex as written, flagging named groups and the `s` flag but not lookbehind, and esbuild hides it in a `new RegExp(...)` call, which parses and then throws when it runs ([Coherent GT's JavaScript](coherent-gt.md#syntax)).
+3. A list fails any use of a built-in or web API that [Coherent GT's JavaScript](coherent-gt.md) lists as missing or filled in only in some documents, since TypeScript's DOM types declare every missing web API, such as `ResizeObserver`, ES5's lib declares `Intl`, and the type check doesn't see our JavaScript files.
+
+Until the check exists, [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) asks for `node --check` and a look at the reference.
+
+[research]: log.md#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework
+[p09]: log.md#2026-10-09-coherent-gt-parses-all-of-es2017-and-object-rest-but-no-other-syntax-from-es2018-on-has-no-built-in-from-es2018-on-of-its-own-but-weakref-and-runs-typescript-compiled-to-es2017-by-tsc-and-by-esbuild
+
 ## Parts
 
 A part is a piece of Crosscheck's design that a node of the [architecture plan](plan.md) or a stage of [step 8](../product/plan.md#8-v1-build-plan) designs, and its design docs and build stages go in its area under `record/areas/`.
@@ -477,7 +519,7 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 **The core**, in its stage of step 8 unless an item says otherwise:
 
-- The core's async runtime and WebSocket library, which [1.6](plan.md#16-frameworks) settles.
+- The core's WebSocket library, which accepts a connection only with the `Origin` the core allows ([the sim's pages](#the-sims-pages)), and runs on tokio ([frameworks](#frameworks)).
 - What a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, since on the A2A PA-24 a mask registered after the aircraft loaded didn't get ahead of the aircraft's own (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
   Only the [input layer](../product/04-room-for-later.md#an-input-layer), a Soon pick that v1 doesn't build, masks, so the input layer's design after v1 settles it, not the core's stage of step 8; restarting the core mid-flight on the PA-24 and checking whether its masks still get ahead of Accu-Sim settles it.
 - What the core does with a component on its own machine whose version or hash differs from its own, beyond logging it, such as a WASM module the sim loaded at boot from an older package, whose data slots the core would write in a layout the module doesn't read ([versions](#versions)).
@@ -535,17 +577,19 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 - What counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature, with what the logs and the recording keep ([ideas](../product/ideas.md#component-health)).
 - Whether the EFB app's code opens the banner during a flight load, before Ready to fly, and after a second flight load in one run of the sim, which no run has tried; it opened the panel 177s and 279s after Ready to fly ([interface log, 2026-10-09](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)).
-- The framework for the desktop app's pages, which 1.6 settles.
+- Whether the EFB app bundles our pinned copy of the MSFS Avionics Framework or draws with the sim's own, its global `msfssdk`, which our probe apps and FSTRaK's EFB app used ([architecture log][research]); no run has registered an EFB app drawn with a second copy, and p08's EFB app rebuilt against a bundled copy settles it ([frameworks](#frameworks)).
+- Which version of `@microsoft/msfs-sdk` we pin, with 2.3.3 npm's newest as of 2026-10-09 while the framework's repository is at 2.4.3, and how its versions track sim updates, which no document states (same entry); the apps' stage picks the version, and re-running p09 and our pages after each sim update tracks it.
 - The WebSocket client in the desktop app's Rust side, which must send either no `Origin` or `coui://html_ui` ([the desktop app](#the-desktop-app)).
 - Whether the desktop app's pages and its Rust side trade the messages' JSON text through Tauri's commands or its events, and whether tauri-specta types the command calls ([messages and their types](#messages-and-their-types)).
 
 **Recording and bug reports**, in its stage of step 8:
 
-- What the backend runs on, which [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) leaves to the architecture; a Cloudflare Worker with D1 and R2 is the candidate ([components](#components)).
+- What the backend runs on, which [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) leaves to the architecture, and its framework; a Cloudflare Worker with D1 and R2 is the candidate ([components](#components)).
 
 **The build**, in its stage of step 8 unless an item says otherwise:
 
-- The compiler and syntax target for code in Coherent GT, where no ECMAScript version matches the engine ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), which 1.6 settles.
+- How each of [the check](#the-check)'s three parts is built: the parser, with p09's failing samples as its test; the rule for regex features in our sources, such as an ESLint rule set that names each one; and the list of banned built-ins and web APIs, with an exception for a package's own fill-in.
+- Whether the MSFS Avionics Framework's `for`-`of` rewrite, run through TypeScript before esbuild bundles, pays for itself in our interface, which a frame-time probe of the EFB app and the banner, built with it and without it, settles ([compiling our code in the sim](#compiling-our-code-in-the-sim)).
 - How the build hashes the message crate, which has to cover each message's encoding as well as its fields, since FS Copilot's fingerprint covers a type's fields and not its codec, so a codec that wrote them in a new order would pass it ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
 - The check in CI that ts-rs's generated files match the crate.
 - A stand-in for the second pilot's sim, so a developer runs a whole session on one PC, and whether a second MSFS with its own Crosscheck runs in a virtual machine on the same PC, for the test bench ([the product plan](../product/plan.md#7-tech-stack-and-architecture)); node 2's transport lets two cores run on one PC.

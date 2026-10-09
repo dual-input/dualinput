@@ -1,0 +1,3 @@
+# typeshare doesn't know the uuid crate's Uuid, which serde writes as text.
+[typescript]
+type_mappings = { "Uuid" = "string" }

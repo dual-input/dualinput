@@ -265,3 +265,4 @@ A probe settles it, with no sim: define messages shaped like ours in a crate, am
 It reads [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs), [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits), and the probes [p03](../../../experiments/areas/architecture/p03-rust-module.mjs) and [p04](../../../experiments/areas/architecture/p04-embedded-engine.mjs).
 Its answer goes in an entry in this area's log, which 1.4's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-09.

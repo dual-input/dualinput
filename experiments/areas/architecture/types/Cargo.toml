@@ -1,0 +1,3 @@
+[workspace]
+members = ["messages", "slots", "quickjs"]
+resolver = "2"

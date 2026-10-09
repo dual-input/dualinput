@@ -1,0 +1,10 @@
+[package]
+name = "p07-quickjs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p07-messages = { path = "../messages" }
+p07-slots = { path = "../slots" }
+rquickjs = "=0.14.0"
+serde_json = "1.0.151"

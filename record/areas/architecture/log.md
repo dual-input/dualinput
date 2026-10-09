@@ -3,6 +3,39 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-09: ts-rs, with 64-bit integers set to numbers, generates TypeScript that matches what serde_json sends; specta needs two opt-ins, typeshare can't express our messages, and the data slots keep one layout on x86_64 and wasm32
+
+**Asked:** which of ts-rs, specta, and typeshare generates TypeScript types from a Rust crate of messages that match what serde_json sends; do the same messages reach TypeScript running in QuickJS-ng through rquickjs; and do the data slots' structs keep one layout on x86_64 and wasm32 (node 1.4.1)?
+
+**Expected:** all three would generate usable types, each needing an opt-in for 64-bit integers, since Coherent GT has no `BigInt`.
+
+**Found:** on our development machine, Windows 10.0.26200, rustc 1.95.0, with serde 1.0.229, serde_json 1.0.151, uuid 1.27.0, ts-rs 12.0.1, specta 2.0.0-rc.25 with specta-typescript and specta-serde 0.0.12, typeshare 1.0.5 with typeshare-cli 1.13.4, rquickjs 0.14.0 (QuickJS-ng 0.16.2), TypeScript 7.0.2, and esbuild 0.28.2.
+The crate's messages cover an internally tagged enum with struct variants, an adjacently tagged enum with newtype variants, a unit enum, an `Option` sent as `null` and one left out when empty, a `Vec`, a map, a UUID sent as text, and a time in µs as a `u64`.
+TypeScript's compiler, under `--strict`, checked 5 sample messages and their 5 replies as serde_json wrote them against each generator's types, 5 deliberately wrong messages that each had to fail, and a plugin that answers each message.
+
+- **ts-rs** wrote types on its defaults, but typed each `u64` as `bigint`, so the 4 samples carrying a time failed with "Type 'number' is not assignable to type 'bigint'", and so did the plugin's `sentAtUs + 1`.
+  With its large-integer setting at `number`, every sample, reply, and the plugin passed, and each wrong message failed.
+- **specta** refused twice: its `Format` refused the field left out when empty ("`skip_serializing_if` requires `PhasesFormat`"), and `PhasesFormat` refused the `u64` ("Specta forbids exporting BigInt-style types").
+  With `PhasesFormat` and each `u64` field marked `specta_typescript::Number`, every check passed.
+  It typed each `f32` as `number | null`, and wrote each type whose shape differs by direction twice, such as `Notice_Serialize` and `Notice_Deserialize`.
+- **typeshare** refused the `u64` ("Unsupported type"), and with each one marked `U53`, refused the internally tagged enum: "Serde content attribute needs to be specified for algebraic enum ToCore".
+  With that enum left out, 3 of the 5 samples failed, because it typed `flying` as optional where serde_json sends `null`, and made `Level` a TypeScript `enum`, which rejects the `"warning"` and `"error"` that serde_json sends and is code that runs rather than only a type.
+  Its file also failed on its own, naming `BTreeMap`, which TypeScript doesn't have.
+- **QuickJS-ng**, handed each sample as an object through its own JSON parser, ran the plugin compiled by esbuild, and 4 of the 5 replies came back equal to what Rust expected.
+  The fifth carried a time of 2^53 + 1µs, 9,007,199,254,740,993, which JavaScript held as 9,007,199,254,740,992, so its reply came back 2µs short.
+  2^53µs is about 285 years, so a time in µs since boot fits a JavaScript number, and a 64-bit ID doesn't.
+- **The data slots' structs** compiled with their size and offset assertions for both x86_64 and wasm32-wasip1, and read back from each build the same layout: the control slot 32 bytes, aligned to 8, with its fields at offsets 0, 4, 8, and 16, and the pose 48 bytes, with `lat` at 8 after 4 bytes the compiler added.
+  A struct holding a `usize` took 16 bytes with that field at 8 on x86_64, and 8 bytes with it at 4 on wasm32.
+
+**Changed:** ts-rs does what 1.4 needs with one setting; specta does with two opt-ins, on a release candidate; and typeshare can't express internally tagged enums or 64-bit fields without changing the messages themselves.
+A 64-bit integer reaches TypeScript exactly only below 2^53, so an ID crosses as text, and a struct in a data slot holds only fixed-width fields.
+
+What we haven't run: the types in Coherent GT itself, which never sees them, since types erase when compiled and the messages arrive as JSON; a check in CI that the generated files match the crate; and Tauri's commands between the desktop app's pages and its Rust side, which tauri-specta types and ts-rs doesn't.
+
+**Affects:** node 1.4's answer.
+
+**Evidence:** `results/p07-types-2026-10-09-12-06-44.txt`.
+
 ## 2026-10-08: Embedded in Rust, QuickJS runs 100 write functions a frame in 75µs, idles under 1 MB, and holds its memory and time limits, while V8's memory limit failed until TurboFan was off
 
 **Asked:** what do QuickJS and V8, embedded in a Rust program, cost to start, hold idle, and call, running a plugin and 100 profile write functions compiled from TypeScript, and do their memory and time limits stop a runaway script without taking the program down (node 1.3.5)?

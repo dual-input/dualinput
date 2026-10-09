@@ -1,0 +1,9 @@
+# cargo's build output.
+target/
+# npm's install of esbuild and TypeScript.
+node_modules/
+# typeshare's command-line tool, which the probe builds here with cargo install.
+.tools/
+# What the generators write, and the plugin bundle.
+gen/
+dist/

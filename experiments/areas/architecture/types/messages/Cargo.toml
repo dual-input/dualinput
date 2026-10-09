@@ -1,0 +1,19 @@
+[package]
+name = "p07-messages"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.151"
+uuid = { version = "1.27.0", features = ["serde", "v4"] }
+ts-rs = { version = "=12.0.1", features = ["uuid-impl"] }
+specta = { version = "=2.0.0-rc.25", features = ["derive", "uuid"] }
+specta-typescript = "=0.0.12"
+specta-serde = "=0.0.12"
+typeshare = "=1.0.5"
+
+[features]
+# Marks each u64 field for specta as a JavaScript number, the per-field opt-in
+# specta-typescript's error asks for; without it, specta refuses to export u64.
+specta-number = []

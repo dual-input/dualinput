@@ -13,7 +13,7 @@ A pilot is in a session from starting or joining it until leaving it, or until 5
 
 ## Components
 
-Crosscheck runs as the watcher, the core, and the core's helper on each pilot's PC, with the desktop app when the pilot opens it, six pieces of code inside the sim, and three services off the pilots' machines.
+Crosscheck runs as the watcher, the core, and the core's helper on each pilot's PC, with the desktop app when the pilot opens it, five pieces of code inside the sim, and three services off the pilots' machines.
 The core owns everything a session does.
 The desktop app and the EFB app show its state and send it commands, and decide nothing ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)).
 The components in the sim carry out what the core tells them, and undo it on their own once the core goes quiet ([what moves them](#what-moves-them)).
@@ -25,9 +25,8 @@ The watcher works while the core may not be running, and the services off the pi
 | Core | A process of its own, started by the watcher or the desktop app | SimConnect, the session, the network, the profile engine and plugins, sim awareness, recording, audio, the take-control input, the figure's hand, AI traffic, the checks, and the pilot's settings |
 | Helper | A process of its own, which the core starts and restarts | The core's Windows input and audio work: reading the keyboard, flight hardware, and mouse through Raw Input, capturing the microphone and the ATC app, running the speech recognizer, and playing sound |
 | Desktop app | A window of its own, opened by the pilot, optional | Editing the settings the core keeps, the report page, and the session's view |
-| EFB app | The EFB's document in the sim | The controls a pilot needs in flight, and the EFB's opening onto it when a notice is clicked |
+| EFB app | The EFB's document in the sim | The controls a pilot needs in flight, the EFB's opening onto it when a notice is clicked, and the banner panel's opening |
 | Banner panel | An in-game panel of ours | Notices |
-| Toolbar script | The toolbar's document, through our toolbar icon | The banner panel's opening |
 | Menu script | The main menu's document, through our copy of BlurPage | Go to, through the world map's requests, and reports of which menu page is up |
 | Panel bridge | Every cockpit panel, through our `VCockpit.js` override | Pointer sync, the modules that features name, and what plugins ask of the panels |
 | WASM module | The sim, as a standalone module from boot | The figures' placement, the aircraft's hold and writes, and the undoing of our state in the sim when the core goes quiet |
@@ -48,7 +47,8 @@ Where each sits, and why:
 - AI traffic is injected and written from the core, outside the sim.
   FS Copilot's app freezes each copy and writes it in SimConnect's `Frame` event (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `Render`, and `FsCopilot/Connection/SimTraffic.cs`), and the fork's prototype injector, driving copies the same way, moved them more smoothly than BeyondATC moves its own ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
 - The core's checks are the version check at join ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), the [preflight match check](../product/03-v1-scope.md#preflight-match-check), and the check for another package's `VCockpit.js` override.
-- The EFB app, the banner panel, the toolbar script, and the menu script each reach the sim's documents by a route we measured on MSFS 2024: an app registered with the EFB ([interface log, 2026-10-06](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)), an in-game panel ([2026-10-04](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), a script that our toolbar icon loads ([2026-10-04](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)), and a script that our copy of BlurPage loads ([2026-10-06](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
+- The EFB app, the banner panel, and the menu script each reach the sim's documents by a route we measured on MSFS 2024: an app registered with the EFB ([interface log, 2026-10-06](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)), an in-game panel ([2026-10-04](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and a script that our copy of BlurPage loads ([2026-10-06](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
+- The EFB app's code opens the banner panel, as it did from our installed package after a flight load and mid-flight; a script our toolbar icon loads did too, but only through a trick in the icon's markup that a sim update could stop, so Crosscheck ships none ([interface log, 2026-10-09](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus); [tentative decisions](decisions.md#the-efb-apps-code-opens-the-banner-panel)).
 - The panel bridge loads one module per file, so one module's syntax error reaches no other ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)).
 - The WASM module writes inside the sim's frame and outlives the core ([tentative decisions](decisions.md#our-wasm-module-writes-the-following-aircraft)).
   Whether the profile engine fires `H:` events through SimConnect's client events or through calculator code our module runs, since the client events may not reach them (unverified, [01-profile-entries](../sync/01-profile-entries.md#the-writer-api)), is open ([left open](#left-open)).
@@ -71,8 +71,7 @@ So the core tells every component below when a session starts.
 | Desktop app | Optional; offers to start or join a session | Optional; shows the session |
 | WASM module | Runs, and does nothing each frame | Places the figures, holds the aircraft in preflight, and on a following machine writes the aircraft |
 | Panel bridge | Runs in every cockpit panel, loads no modules, and captures nothing | Runs pointer sync, loads the modules that features name, and carries out plugins' requests |
-| EFB app | Offers to start a session or enter a code | Shows the session's controls |
-| Toolbar script | Waits for the core | Opens the banner panel when the session has something to show |
+| EFB app | Offers to start a session or enter a code | Shows the session's controls, and opens the banner panel when the session has something to show |
 | Banner panel | Closed, so it has no page | Shows the session's notices |
 | Menu script | Answers the core when asked, and watches nothing | Reports which menu page is up, and runs Go to |
 
@@ -114,8 +113,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
  Watcher ──starts──▶ Core ◀── WebSocket ──▶ Desktop app
                       │ ▲
                       │ └── WebSocket, after a CommBus announcement ── EFB app, banner panel,
-                      │                                             toolbar script, menu script,
-                      │                                             panel bridge
+                      │                                             menu script, panel bridge
                       ├── SimConnect ── the sim: masks, events, AI traffic, and the CommBus
                       ├── SimConnect data slots ── WASM module
                       ├── starts it; its standard input and output ── helper
@@ -128,8 +126,7 @@ A page here is a document the sim runs in Coherent GT, one of those the inspecto
 | --- | --- | --- | --- |
 | Watcher to core | The watcher starts the core's process, and reads files the core writes in its data folder | The port file's process ID and creation time, the date of the pilot's last session, each checked plugin's file changes, and which plugins the pilot lets change files | It can't: the watcher sends it nothing |
 | Desktop app and core | WebSocket on 127.0.0.1, found through the port file | The core's state one way, commands the other | Messages every 2s |
-| EFB app and menu script, and core | WebSocket, found through the CommBus, whether or not a session runs | The EFB's controls and state, Go to, and which menu page is up | The same, and a first message naming the component and its version |
-| Toolbar script and core | The same, while a session runs | The banner's opening | The same |
+| EFB app and menu script, and core | WebSocket, found through the CommBus, whether or not a session runs | The EFB's controls and state, the banner's opening, Go to, and which menu page is up | The same, and a first message naming the component and its version |
 | Banner panel and core | The same, while the panel is open | Notices, and a click on one | The same |
 | Panel bridge and core | The same, from every cockpit panel when a session starts, kept open only by the panels the profile or a plugin names | Pointer presses, `H:` events, plugins' requests and their answers, and the locks' renewals | The same; no panel's first message ever arriving means our panel bridge didn't load, as when another package's `VCockpit.js` wins |
 | Core and WASM module | Data slots, one for each kind of message | The session's state and a counter, the pose and velocities, the figures' poses, and the module's version | A counter the module writes every second |
@@ -147,9 +144,9 @@ The page doesn't ask, and the core's next announcement reaches a page that loade
 In the main menu, 13 of the 14 pages heard a SimConnect client's calls, mainUi, the toolbar's page, and the EFB's among them, and in a flight, 30 of 31, among them all 16 of the A2A PA-24's cockpit panels (measured on MSFS 2024, 2026-10-08, [interface log][coverage]); our own in-game panel heard them in an earlier flight ([interface log][links]).
 The page that heard nothing, "transition", runs none of our code.
 A page could call the core through the CommBus, but a call the toolbar's page made before its listener reported ready never arrived ([interface log][coverage]), so our pages don't call it.
-mainUi and the menu's toolbar page have no `Coherent`, so our script there triggers `ADD_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS` and takes the core's calls as `EVENT_FROM_VIEW_LISTENER`, the way mainUi's own view listeners take events (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`).
+mainUi has no `Coherent`, so our menu script triggers `ADD_VIEW_LISTENER` for `JS_LISTENER_COMM_BUS` and takes the core's calls as `EVENT_FROM_VIEW_LISTENER`, the way mainUi's own view listeners take events (read in fs-base-ui 0.1.10, `html_ui/Global/lib.js`, `ViewListenerMgr`).
 That route rests on the sim's own page code rather than on the SDK's CommBus API ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), so a sim update could change it, as it could the BlurPage copy.
-In a page that has the sim's `common.js` but not its `Services/CommBus.js`, such as the toolbar's in a flight and our banner's, our script loads `CommBus.js` and listens through `RegisterCommBusListener`.
+In a page that has the sim's `common.js` but not its `Services/CommBus.js`, such as the EFB's and our banner's, our script loads `CommBus.js` and listens through `RegisterCommBusListener`.
 An `L:` variable can't carry the port: mainUi can't read one, and a flight load reset ours to 0 ([interface log][links]).
 
 The CommBus joins modules, panel JavaScript, and SimConnect clients ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), so among programs outside the sim, only a SimConnect client of the pilot's sim can call on its CommBus, and a development core attached to a stand-in sim can't reach the real sim's pages, which no run has tried.
@@ -166,7 +163,7 @@ So a pilot's PC runs one core, and a development core with a data folder of its 
 ### The sim's pages
 
 - The EFB app and the menu script connect whenever they hear the core's announcement: with no session, the EFB app is where a pilot starts one, and the core asks the menu script which page is up ([components with no session](#components-with-no-session)).
-- The toolbar script connects while a session runs, since it opens the banner panel only when the session has something to show.
+  In a session, the EFB app's code also opens the banner panel when the core says the session has something to show.
 - The banner panel connects while it's open, since closing it destroys its page ([interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
 - Every cockpit panel's panel bridge connects when it hears that a session started, sends a first message naming the instruments it holds, and gets back the modules to load, and a panel the core gives nothing closes its socket ([tentative decisions](decisions.md#cockpit-panels-connect-only-in-a-session-and-only-the-ones-in-use-stay)).
   Once it has loaded the profile and the plugins, the core keeps the panels holding the displays pointer sync replays into, one panel to listen for `H:` events, and those holding the instruments a plugin reads or writes.
@@ -238,7 +235,7 @@ Crosscheck is written in Rust, and in TypeScript wherever a JavaScript engine ru
 | Watcher | A Windows program of its own | Rust |
 | Desktop app | Tauri: a Rust program whose window shows the desktop app's pages, which WebView2 draws | Rust, and TypeScript for its pages |
 | WASM module | The sim's WebAssembly | Rust |
-| EFB app, banner panel, toolbar script, menu script, and panel bridge | Coherent GT | TypeScript, compiled to the syntax Coherent GT parses |
+| EFB app, banner panel, menu script, and panel bridge | Coherent GT | TypeScript, compiled to the syntax Coherent GT parses |
 | Plugins, and the profile's write functions | QuickJS-ng, embedded in the core | TypeScript, compiled to JavaScript |
 | Backend | A Cloudflare Worker, its candidate host | TypeScript |
 
@@ -250,12 +247,13 @@ The core is a Rust program (user, 2026-10-08).
 
 - It reaches the sim through the SDK's own `SimConnect.dll`.
   A Rust client on it connected to MSFS 2024, called mainUi over the CommBus and heard each answer, followed the "1sec" system event, and traded data slots with our Rust module, all at the main menu (measured on MSFS 2024, 2026-10-08, [architecture log][client]).
-  In our probes, what a flight adds, such as masking, AI objects with liveries, input events, the camera, and a flight load's flow events, has run only through node-simconnect 4.2.0, a JavaScript client that speaks the same protocol to the same server (version read in `experiments/package.json`; measured in the probes behind the [aircraft](../aircraft/log.md), [flight-controls](../flight-controls/log.md), [avatars](../avatars/log.md), and [sync](../sync/log.md) logs).
-  FS Copilot runs AI objects and input events through the SDK's managed wrapper over the same `SimConnect.dll` ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), and whether each works from our core through the SDK's library is [left open](#left-open).
+  In a flight in the A2A PA-24, a Rust client on it masked the elevator ahead of Accu-Sim with a group it took as the sim booted, created an AI PA-24 in another livery and our figure, read the camera, read, set, and heard an input event, called a cockpit panel over the CommBus, and followed the flight load's flow events, and all 66 of its calls returned `S_OK` (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
+  `SimConnect_Open` returned `S_OK` 46s before the sim's open reply arrived, and the calls the client made in between took effect, so the core takes its masking group as soon as `SimConnect_Open` succeeds (same entry).
+  Clearing one of a client's groups also cut the axis off from the client's other group, though each group held a client event of its own (read in `experiments/areas/architecture/flight/client/src/main.rs`), as removing a client event did through node-simconnect (same entry), so the core never clears a group, or removes a client event from one, while another of its groups hears that sim event.
 - Its bindings to SimConnect, like the WASM module's to the sim, are generated from the SDK's headers, as FlyByWire's msfs-rs generates them with bindgen (read in [msfs-rs](https://github.com/flybywiresim/msfs-rs), its main branch on 2026-10-08, `msfs/build.rs`), so that no type is copied by hand.
-  The core's client in the measurement above ran on declarations written by hand from the header, where `HANDLE` is a pointer, and they worked ([architecture log][client]).
+  The core's client at the main menu ran on declarations written by hand from the header, where `HANDLE` is a pointer, and they worked ([architecture log][client]).
   The module's hand-written bindings gave `HANDLE` 32 bits where its headers give 64, and broke it ([code in the sim](#code-in-the-sim)).
-  That bindgen's output gets each type right is unverified, because it needs libclang, which our development machine lacked as of 2026-10-08; a bindgen run over the module's headers settles it.
+  bindgen 0.72.1, with libclang from LLVM 23.1.3, gave `HANDLE` a pointer in the client and 64 bits in the module, as each header declares it, and the client and the module both ran in a flight on its declarations ([architecture log][flight]).
 - Plugins and the profile's write functions run in QuickJS-ng, the fork of QuickJS that rquickjs embeds ([plugins](#plugins)).
   In a Rust host it started in 1.7ms to 2.6ms over two runs, idled at 0.9 MB of private working set, ran 100 hypothetical write functions a frame, 60 frames a second, in 75µs a frame on average, and stopped an endless allocation at its 64 MB limit and an endless loop at its 100ms limit, while the host ran on (measured on our development machine, 2026-10-08, [architecture log][engine]).
   V8 was as fast, but as built, its process died on the endless allocation; with TurboFan, its top optimizing compiler, off, the host ran on.
@@ -277,7 +275,7 @@ Code that runs in Coherent GT is written in TypeScript and compiled to the synta
 Step 7 has a check that every file run in Coherent GT parses within the engine's measured limits ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and we run it on the compiled output, which is what the engine parses.
 Compiling doesn't fill in the built-ins Coherent GT lacks, such as `Object.fromEntries`, whose calls throw when they run, and a parse check doesn't see them ([06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits)), so the build also fills them in or rejects their use.
 
-Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ran its update about 136 times a second, and traded data slots with a SimConnect client at the main menu, and nobody has run it in a flight (measured on MSFS 2024, 2026-10-08, [architecture log][module]).
+Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own script: a module built that way loaded on MSFS 2024, ran its update about 136 times a second, and traded data slots with a SimConnect client at the main menu (measured on MSFS 2024, 2026-10-08, [architecture log][module]), and in a flight it echoed every write the client made, its update running 89.2 times a second (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
 
 - cargo-msfs fetches the SDK from the SDK site's public download, `sdk.flightsimulator.com`, and unpacks it without running the installer (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`), so the repository holds none of the SDK.
   No run has built the module on a CI runner.
@@ -294,7 +292,7 @@ A crash there, such as in a speech recognizer's C or C++ library, costs the take
 - A Rust build played a 440Hz tone on the default output device, which it looked up by name, and a second copy captured it through process loopback at the level it played, −26dBFS peak.
   It also captured the default input device, a Focusrite input, though whether a microphone was on it is untested.
   Registered for Raw Input in sink mode, with its own window never in front, it received F24 presses and releases that another program sent, and, in the same 4s, 1,447 HID reports from four devices nobody touched, which the probe didn't identify (measured on our development machine, 2026-10-08, [architecture log][helper]).
-  Whether it receives them with the sim in front, and from a key a person presses, is untested ([tentative decisions](decisions.md#the-core-catches-the-take-control-key-and-buttons)).
+  In a flight, with the sim in front, a later build got all 3 Page Down presses a person made, and 22 changes of a flight-hardware button's state in 10s, from its device by vendor and product ID (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
 - Its build linked with Visual Studio 2022's linker; Rust's GNU target failed with Rust's own tools, and we haven't tried it with a full MinGW ([architecture log][helper]).
   rustup documents Visual Studio's "Desktop Development with C++" workload for the MSVC target, and says its Build Tools edition, without the IDE, needs a license to Visual Studio's Community, Professional, or Enterprise edition (documented, [rustup](https://rust-lang.github.io/rustup/installation/windows-msvc.html)).
 - The speech recognizer runs in it, and the recognizer is chosen when the voice phrases are built ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
@@ -328,12 +326,13 @@ A message passed between languages needs one definition both sides are checked a
 [module]: log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide
 [helper]: log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker
 [tray]: log.md#2026-10-08-a-tray-icon-alone-costs-10-mb-of-memory-in-rust-16-mb-in-net-native-aot-51-mb-in-winforms-and-397-mb-over-three-processes-in-electron
+[flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 
 ## Shared conventions
 
 Every component names sessions and pilots by random UUIDs, carried as text wherever JSON or TypeScript reads them.
 Every stamp in a message, the moment a value was read, is in µs on the sending PC's monotonic clock, and every span is in µs too.
-The sim's pages and plugins can't stamp on that clock, so the core stamps their messages as they arrive, and it stamps each value it requests through SimConnect, and the WASM module's data-slot writes until a clock the module reads is shown to count the same ticks, the same way.
+The sim's pages and plugins can't stamp on that clock, so the core stamps their messages as they arrive, and it stamps each value it requests through SimConnect, and the WASM module's data-slot writes, the same way, unless the flight-model sync has the module stamp on its own clock, which counts the counter's ticks from an origin near the sim's start ([times](#times)).
 Every message between our components on a pilot's PC, and between cores, is defined in one Rust crate, which ts-rs turns into TypeScript for the TypeScript sides, and every first message and join carries one version number and a hash of that crate.
 A pilot keeps their ID when their core restarts, and the core counts its restarts, so the other machines can tell a core that restarted from one returning after an outage.
 The tentative decisions behind each are in [decisions.md](decisions.md#sessions-and-pilots-are-named-by-random-uuids-carried-as-text-where-json-or-typescript-reads-them).
@@ -394,11 +393,13 @@ One core runs for each data folder ([finding the core](#finding-the-core)), so a
   Our traffic work found that "Sample times must not be arrival times", because arrival times carry the network's jitter into the path the receiver draws each aircraft along (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 4, traffic: what the app needed that the prototype did not"; [08-05](../../learn/foundations/08-05-position-and-clocks.md#clocks-offset-estimation-sim-time-vs-wall-time-syncing-pause-and-sim-rate)).
   fsc-editor stamped each value as it was parsed, so about 192 values that arrived in one 8 KB message landed 0ms to 3ms apart, in the order they were parsed (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-24 — The right answer was being sorted last for arriving 2 ms early").
 - A page in the sim can't read `QueryPerformanceCounter`, and a plugin reads only QuickJS-ng's `Date.now()` and `performance.now()`, which rquickjs's full context includes (read in rquickjs-core 0.14.0, `src/context/builder.rs`, `intrinsic::All`) and which aren't shown to count the same ticks, so the core stamps each of their messages as it arrives, the nearest it comes to when the value was read.
-  How long a page's message, a data-slot write from our WASM module, or a value the core requests through SimConnect takes to reach the core is unmeasured, so a stamp the core gives on arrival trails the sim's read by a delay and jitter we don't know ([left open](#left-open)); the core can time, on its own counter, a page's echo of a message it sent, and that round trip bounds a page message's one-way delay.
+  In a flight, from 20s after Ready to fly, at 89 module updates a second, a data-slot write the client made came back from our module in a round trip of 16.6ms median and 44.6ms at most, which bounds a data-slot write's one-way delay there; between the sim's open reply and Ready to fly, round trips reached 2.8s, past the module's 1s timeout ([what moves them](#what-moves-them); [left open](#left-open)); and a variable the module set in the same frame, requested through SimConnect each sim frame it changed, arrived 1.79ms median after the slot, and 193ms at most (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
+  How long a page's message takes is unmeasured ([left open](#left-open)); the core can time, on its own counter, a page's echo of a message it sent, and that round trip bounds a page message's one-way delay.
   A page that needs a span measures it on its own clock and sends it in whole µs.
   FS Copilot's pointer sync does the same in ms: each gesture carries its `GapMs`, the idle time since the gesture before it, capped at 1,000ms (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`; [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
   Its panel code measures that gap with `Date.now()` (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `_gapBefore`).
-- Our WASM module stamps a value it reads only once a clock it can read is shown to count the same ticks as `QueryPerformanceCounter` ([left open](#left-open)); until then, the core stamps each data-slot write from the module as it arrives, as it does a page's messages.
+- WASI's monotonic clock, which our WASM module reads through `clock_time_get`, counts `QueryPerformanceCounter`'s ticks, 100ns on our 10 MHz machine, from an origin near the sim's start, not the PC's: one constant offset fit all 1,476 echoes over 299s of a flight, within ±33 ppm (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
+  So the module can stamp what it reads, and its stamps reach the core's timeline through one offset per run of the sim, which the core estimates from the echoes' round trips; whether it does, rather than the core stamping each data-slot write as it arrives, as it does a page's messages, is for the flight-model sync ([left open](#left-open)).
 - A receiver reads a sender's stamps through an offset it estimates for that sender, and keeps estimating, because two PCs' counters drift apart.
   A PC's crystal is typically within 50 ppm and can be off by as much as 500 ppm, and recent versions of Windows, "particularly Windows 8", compensate for a crystal's offset "to the extent possible" when Windows starts (documented, [Acquiring high-resolution time stamps](https://learn.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps)).
   So two counters off in opposite directions part by about 8.6s a day at 50 ppm, and about 86s a day at 500 ppm, before that compensation, and how far two PCs' counters part in practice is unmeasured; logging two PCs' offset over a few hours settles it.
@@ -457,7 +458,7 @@ A part may span several components, and a component may serve several parts.
 | Pointer sync | Presses on displays and panels | Panel bridge, core | `pointer-sync/` | Step 8 |
 | Avatars | The figures, and the hand | Core, WASM module, helper | `avatars/` | Step 8 |
 | Traffic and ATC | Traffic sync, and hearing ATC | Core, helper | `traffic-atc/` | Step 8 |
-| The apps | The desktop app, the EFB app, and the banner | Desktop app, EFB app, banner panel, toolbar script | `interface/` | Step 8 |
+| The apps | The desktop app, the EFB app, and the banner | Desktop app, EFB app, banner panel | `interface/` | Step 8 |
 | Recording and bug reports | The recording, bug reports, and the backend | Core, desktop app, backend | `recording/` | Step 8 |
 | Installing and updating | The installer, and Crosscheck's updates | Watcher, release host | `install/` | Step 8 |
 | The build | The message crate's generated types and hash, the version stamp, the checks CI runs, among them the Coherent GT parse check whose rules [1.6](plan.md#16-frameworks) sets, and the test bench | None | `build/` | Step 8 |
@@ -476,8 +477,6 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 **The core**, in its stage of step 8 unless an item says otherwise:
 
-- Whether the SDK's library does what node-simconnect did beyond the main menu: masking, including a group that takes its priority as the sim starts, AI objects with liveries, input events, the camera, and a flight load's flow events, which tell the core when Ready to fly came ([what moves them](#what-moves-them); [the core](#the-core)).
-  [1.5](plan.md#15-a-flight-with-crosschecks-rust-pieces) settles it in a flight, with our Rust module, which hasn't run in one either ([code in the sim](#code-in-the-sim)).
 - The core's async runtime and WebSocket library, which [1.6](plan.md#16-frameworks) settles.
 - What a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, since on the A2A PA-24 a mask registered after the aircraft loaded didn't get ahead of the aircraft's own (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
   Only the [input layer](../product/04-room-for-later.md#an-input-layer), a Soon pick that v1 doesn't build, masks, so the input layer's design after v1 settles it, not the core's stage of step 8; restarting the core mid-flight on the PA-24 and checking whether its masks still get ahead of Accu-Sim settles it.
@@ -509,7 +508,6 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 - How the machines agree on which of two take-control presses came first, which [the take-control key](../product/03-v1-scope.md#take-control-key) leaves to the architecture, in node 3, since the PF is the first role in its table of roles.
   Each machine reads another's stamps through an offset of its own ([times](#times)), so two presses closer than the offsets' error could order differently on two machines; the flying machine, the session's authority at every moment ([the connection](../product/03-v1-scope.md#the-connection)), could decide for every machine, which makes the machines agree, but for presses closer than that error can still pick the later one, against the take-control key's rule that the earlier press wins however small the gap.
-- Whether the helper's Raw Input gets a key and a button that a person presses with the sim in front ([the helper](#the-helper)), which 1.5 settles.
 
 **Profiles and plugin delivery**, in [node 4](plan.md#4-profiles-and-plugin-delivery):
 
@@ -520,24 +518,23 @@ Each item sits under its part from [Parts](#parts), and names the node or the st
 
 - Which APIs our panel bridge and WASM module offer plugins: the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins)).
 - How each module, and each hook our panel code installs for a plugin, tears itself down ([what moves them](#what-moves-them)).
+- How our WASM module's 1s timeout, after which it undoes our state as if the core had stopped, treats a flight load, during which the client's round trips through the module reached 2.8s (measured on MSFS 2024, 2026-10-09, [architecture log][flight]); whether the module's update runs during a load, and whether a session reaches a load with the aircraft held, settle it.
 
 **Flight-model sync**, in its stage of step 8:
 
-- Whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, which decides whether the module can stamp what it reads itself, on the core's timeline with no offset ([times](#times)); 1.5 measures it, with the module and the core each stamping the same data-slot write.
-- How far the core's arrival stamp trails the sim's read, for a page's message, a data-slot write from our WASM module, and a value the core requests through SimConnect, which each page that sends values needs too ([times](#times)).
-  Timing on the core's counter a page's echo of the core's message bounds a page's delay, and 1.5 bounds a data-slot write's, with the module echoing a slot's counter.
-  Whether a value the core requests through SimConnect arrives as soon as a data-slot write, so that the same bound covers it, is unverified; 1.5 settles it too if the core also requests a variable the module sets in the frame it writes the slot.
+- Whether the module stamps what it reads on WASI's monotonic clock, through one offset per run of the sim, rather than the core stamping each data-slot write as it arrives; which event in the sim's start sets that clock's 0; and how the core estimates the offset ([times](#times)).
+- How far the core's arrival stamp trails the sim's read for a page's message, which each page that sends values needs too ([times](#times)); timing on the core's counter a page's echo of the core's message bounds it.
 
 **Pointer sync**, in its stage of step 8:
 
 - Which clock the panel bridge measures a span on; the apps' stage settles it for any other page that sends a span.
-  The one cockpit panel's document probed for it, the A220's DisplayUnits, has `performance.now()` (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), and the EFB's, the toolbar's, the banner's, and the menu's pages are untested; whether it runs steady in Coherent GT is unmeasured too, and FS Copilot's panel code measured its spans with `Date.now()` instead.
-  1.5 times each page's `performance.now()` against the core's counter over a few minutes.
+  The A220's DisplayUnits has `performance.now()` (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/results/p08-environment-vcockpit02-displayunits-2026-08-30-11-48-57.txt`), and FS Copilot's panel code measured its spans with `Date.now()` instead.
+  In a flight, the EFB's, the toolbar's, and a PA-24 cockpit panel's `performance.now()` showed no jump over 145s against the core's counter, but about 8 samples each, through the inspector's 20ms round trips, couldn't tell its rate apart from the counter's below tens of ppm, and the menu's page is untested (measured on MSFS 2024, 2026-10-09, [architecture log][flight]); a longer run that keeps its samples settles it.
 
 **The apps**, in their stage of step 8 unless an item says otherwise:
 
 - What counts as trouble for each component, and where the pilot sees it: the desktop app, the EFB app for a pilot in VR, or a notice on the banner when it costs them a feature, with what the logs and the recording keep ([ideas](../product/ideas.md#component-health)).
-- Whether our code can open the banner outside a Build and Mount, at a flight load, or mid-flight when a session starts then, which 1.5 settles: the toolbar script opened the panel with no click after two of three Build and Mounts, and no other case has been tried ([notification banner](../product/03-v1-scope.md#notification-banner)).
+- Whether the EFB app's code opens the banner during a flight load, before Ready to fly, and after a second flight load in one run of the sim, which no run has tried; it opened the panel 177s and 279s after Ready to fly ([interface log, 2026-10-09](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)).
 - The framework for the desktop app's pages, which 1.6 settles.
 - The WebSocket client in the desktop app's Rust side, which must send either no `Origin` or `coui://html_ui` ([the desktop app](#the-desktop-app)).
 - Whether the desktop app's pages and its Rust side trade the messages' JSON text through Tauri's commands or its events, and whether tauri-specta types the command calls ([messages and their types](#messages-and-their-types)).

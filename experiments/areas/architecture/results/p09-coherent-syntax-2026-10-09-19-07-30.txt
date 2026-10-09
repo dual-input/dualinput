@@ -1,0 +1,171 @@
+p09-coherent-syntax, 2026-10-09T19:07:30.664Z
+Documents: mainUi (mainUi); EFB (Electronic Flight Bag); toolbar (Toolbar); cockpit panel (VCockpit53 - GNS_DISABLED); banner panel (Crosscheck)
+User agents: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/49.0.2623 Safari/604.1.38 CoherentGT/2.0
+Compilers: Version 7.0.2, esbuild 0.28.2
+
+Syntax, parsed with new Function, and run where a value is given (✓ parses and returns it, ✗ doesn't parse, ! parses but returns something else or throws):
+                                       mainUi        EFB           toolbar       cockpit panel banner panel  
+  2015 let and const                   ✓             ✓             ✓             ✓             ✓             
+  2015 arrow functions                 ✓             ✓             ✓             ✓             ✓             
+  2015 classes, getters, statics       ✓             ✓             ✓             ✓             ✓             
+  2015 extends and super               ✓             ✓             ✓             ✓             ✓             
+  2015 extending Error                 ✓             ✓             ✓             ✓             ✓             
+  2015 template literals               ✓             ✓             ✓             ✓             ✓             
+  2015 tagged templates                ✓             ✓             ✓             ✓             ✓             
+  2015 destructuring with defaults     ✓             ✓             ✓             ✓             ✓             
+  2015 default parameters              ✓             ✓             ✓             ✓             ✓             
+  2015 rest parameters                 ✓             ✓             ✓             ✓             ✓             
+  2015 spread in calls and arrays      ✓             ✓             ✓             ✓             ✓             
+  2015 computed keys, shorthand, methods ✓             ✓             ✓             ✓             ✓             
+  2015 for-of                          ✓             ✓             ✓             ✓             ✓             
+  2015 generators                      ✓             ✓             ✓             ✓             ✓             
+  2015 new.target                      ✓             ✓             ✓             ✓             ✓             
+  2015 super in object methods         ✓             ✓             ✓             ✓             ✓             
+  2015 binary and octal literals       ✓             ✓             ✓             ✓             ✓             
+  2015 regex u and y flags             ✓             ✓             ✓             ✓             ✓             
+  2016 exponent operator               ✓             ✓             ✓             ✓             ✓             
+  2017 async functions                 ✓             ✓             ✓             ✓             ✓             
+  2017 async arrows and methods        ✓             ✓             ✓             ✓             ✓             
+  2017 trailing commas in calls        ✓             ✓             ✓             ✓             ✓             
+  2018 object rest                     ✓             ✓             ✓             ✓             ✓             
+  2018 object spread                   ✗             ✗             ✗             ✗             ✗             
+  2018 for await                       ✗             ✗             ✗             ✗             ✗             
+  2018 async generators                ✗             ✗             ✗             ✗             ✗             
+  2018 regex named groups              ✗             ✗             ✗             ✗             ✗             
+  2018 regex lookbehind                ✗             ✗             ✗             ✗             ✗             
+  2018 regex s flag                    !             !             !             !             !             
+  2018 regex unicode properties        ✗             ✗             ✗             ✗             ✗             
+  2018 template literal revision       ✓             ✓             ✓             ✓             ✓             
+  2019 optional catch binding          ✗             ✗             ✗             ✗             ✗             
+  2019 U+2028 in a string literal      ✗             ✗             ✗             ✗             ✗             
+  2020 optional chaining               ✗             ✗             ✗             ✗             ✗             
+  2020 nullish coalescing              ✗             ✗             ✗             ✗             ✗             
+  2020 BigInt literals                 ✗             ✗             ✗             ✗             ✗             
+  2020 dynamic import                  ✓             ✓             ✓             ✓             ✓             
+  2021 logical assignment              ✗             ✗             ✗             ✗             ✗             
+  2021 numeric separators              ✗             ✗             ✗             ✗             ✗             
+  2022 class fields                    ✗             ✗             ✗             ✗             ✗             
+  2022 #private fields                 ✗             ✗             ✗             ✗             ✗             
+  2022 #private methods                ✗             ✗             ✗             ✗             ✗             
+  2022 static blocks                   ✗             ✗             ✗             ✗             ✗             
+  2022 #x in obj                       ✗             ✗             ✗             ✗             ✗             
+  2022 regex d flag                    !             !             !             !             !             
+
+Failures and wrong values:
+  object spread: SyntaxError: Invalid destructuring assignment target. (every document)
+  for await: SyntaxError: Unexpected identifier 'await'. Expected '(' to start a for-loop header. (every document)
+  async generators: SyntaxError: Unexpected token '*' (every document)
+  regex named groups: SyntaxError: Invalid regular expression: unrecognized character after (? (every document)
+  regex lookbehind: SyntaxError: Invalid regular expression: unrecognized character after (? (every document)
+  regex s flag: SyntaxError: Invalid regular expression: invalid flags (every document)
+  regex unicode properties: SyntaxError: Invalid regular expression: invalid escaped character for unicode pattern (every document)
+  optional catch binding: SyntaxError: Unexpected token '{'. Expected '(' to start a 'catch' target. (every document)
+  U+2028 in a string literal: SyntaxError: Unexpected EOF (every document)
+  optional chaining: SyntaxError: Unexpected token '.' (every document)
+  nullish coalescing: SyntaxError: Unexpected token '?' (every document)
+  BigInt literals: SyntaxError: No identifiers allowed directly after numeric literal (every document)
+  logical assignment: SyntaxError: Unexpected token '?' (every document)
+  numeric separators: SyntaxError: No identifiers allowed directly after numeric literal (every document)
+  class fields: SyntaxError: Unexpected token '='. Expected an opening '(' before a method's parameter list. (every document)
+  #private fields: SyntaxError: Invalid character: '#' (every document)
+  #private methods: SyntaxError: Invalid character: '#' (every document)
+  static blocks: SyntaxError: Unexpected token '{' (every document)
+  #x in obj: SyntaxError: Invalid character: '#' (every document)
+  regex d flag: SyntaxError: Invalid regular expression: invalid flags (every document)
+
+Built-ins (native, script = filled in by a script, - = missing):
+                                       mainUi        EFB           toolbar       cockpit panel banner panel  
+  2015 Promise                         native        native        native        native        native        
+  2015 Map                             native        native        native        native        native        
+  2015 Set                             native        native        native        native        native        
+  2015 WeakMap                         native        native        native        native        native        
+  2015 WeakSet                         native        native        native        native        native        
+  2015 Symbol                          native        native        native        native        native        
+  2015 Proxy                           native        native        native        native        native        
+  2015 Reflect                         object        object        object        object        object        
+  2015 Array.from                      native        native        native        native        native        
+  2015 Array.prototype.find            native        native        native        native        native        
+  2015 Object.assign                   native        native        native        native        native        
+  2015 String.prototype.startsWith     native        native        native        native        native        
+  2015 Number.isInteger                native        native        native        native        native        
+  2015 Math.trunc                      native        native        native        native        native        
+  2015 Uint8Array                      native        native        native        native        native        
+  2016 Array.prototype.includes        native        native        native        native        native        
+  2017 Object.values                   native        native        native        native        native        
+  2017 Object.entries                  native        native        native        native        native        
+  2017 Object.getOwnPropertyDescriptors native        native        native        native        native        
+  2017 String.prototype.padStart       native        native        native        native        native        
+  2017 SharedArrayBuffer               native        native        native        native        native        
+  2017 Atomics                         object        object        object        object        object        
+  2018 Promise.prototype.finally       script        script        script        -             -             
+  2019 Array.prototype.flat            -             -             -             -             -             
+  2019 Array.prototype.flatMap         -             -             -             -             -             
+  2019 Object.fromEntries              -             -             -             -             -             
+  2019 String.prototype.trimStart      -             -             script        -             -             
+  2019 Symbol.prototype.description    -             -             -             -             -             
+  2020 BigInt                          -             -             -             -             -             
+  2020 globalThis                      -             -             -             -             -             
+  2020 Promise.allSettled              script        -             script        -             -             
+  2020 String.prototype.matchAll       -             -             -             -             -             
+  2021 String.prototype.replaceAll     -             -             script        -             -             
+  2021 Promise.any                     -             -             -             -             -             
+  2021 AggregateError                  -             -             -             -             -             
+  2021 WeakRef                         native        native        native        native        native        
+  2021 FinalizationRegistry            -             -             -             -             -             
+  2022 Array.prototype.at              -             -             -             -             -             
+  2022 Object.hasOwn                   -             -             -             -             -             
+  2022 String.prototype.at             -             -             -             -             -             
+  2023 Array.prototype.findLast        -             -             -             -             -             
+  2023 Array.prototype.toSorted        -             -             -             -             -             
+       Intl                            -             -             -             -             -             
+       Intl.DateTimeFormat             -             -             -             -             -             
+       Intl.NumberFormat               -             -             -             -             -             
+
+Web APIs:
+  ResizeObserver                       -             -             -             -             -             
+  IntersectionObserver                 -             -             -             -             -             
+  MutationObserver                     native        native        native        native        native        
+  PointerEvent                         -             -             -             -             -             
+  TouchEvent                           native        native        native        native        native        
+  AbortController                      -             -             -             -             -             
+  EventTarget                          native        native        native        native        native        
+  CustomEvent                          native        native        native        native        native        
+  queueMicrotask                       -             -             -             -             -             
+  structuredClone                      -             -             -             -             -             
+  requestAnimationFrame                native        native        native        native        native        
+  requestIdleCallback                  -             -             -             -             -             
+  performance.now                      native        native        native        native        native        
+  TextEncoder                          native        native        native        native        native        
+  TextDecoder                          native        native        native        native        native        
+  URL                                  native        native        native        native        native        
+  URLSearchParams                      native        native        native        native        native        
+  fetch                                native        native        native        native        native        
+  XMLHttpRequest                       native        native        native        native        native        
+  WebSocket                            native        native        native        native        native        
+  Blob                                 native        native        native        native        native        
+  FileReader                           native        native        native        native        native        
+  DOMParser                            native        native        native        native        native        
+  crypto.getRandomValues               native        native        native        native        native        
+  crypto.subtle                        -             -             -             -             -             
+  customElements                       native        native        native        native        native        
+  Element.prototype.attachShadow       native        native        native        native        native        
+  CSS.supports                         native        native        native        native        native        
+  matchMedia                           native        native        native        native        native        
+  Worker                               -             -             -             -             -             
+  BroadcastChannel                     -             -             -             -             -             
+  localStorage                         native        native        native        native        native        
+  indexedDB                            -             -             -             -             -             
+
+Error cause: mainUi false; EFB false; toolbar false; cockpit panel false; banner panel false
+Stable sort (a stable sort gives 23014): mainUi 23014; EFB 23014; toolbar 23014; cockpit panel 23014; banner panel 23014
+
+shared.ts compiled and run:
+  tsc es2017: 3573 bytes
+  esbuild es2017: 3740 bytes
+  esbuild safari11: the compiler refused: Transforming destructuring to the configured target environment ("safari11") is not supported yet
+  EFB, tsc es2017: 7 of 7 checks passed; async settle returned 1
+  EFB, esbuild es2017: 7 of 7 checks passed; async settle returned 1
+  EFB, esbuild safari11: the compiler refused it
+  cockpit panel, tsc es2017: 7 of 7 checks passed; async settle returned 1
+  cockpit panel, esbuild es2017: 7 of 7 checks passed; async settle returned 1
+  cockpit panel, esbuild safari11: the compiler refused it

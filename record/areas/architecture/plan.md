@@ -325,6 +325,7 @@ It reads 1.6.1's answer, 06-01, [inspector.mjs](../../../experiments/tools/inspe
 Its answer goes in an entry in this area's log, which 1.6's section of `01-spine.md` cites.
 Exit: a log entry in this area answers the question.
 Waits on 1.6.1.
+Done on 2026-10-09.
 
 ## 2 How the cores reach each other
 

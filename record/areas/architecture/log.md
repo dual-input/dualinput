@@ -3,6 +3,67 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-09: Coherent GT parses all of ES2017 and object rest but no other syntax from ES2018 on, has no built-in from ES2018 on of its own but WeakRef, and runs TypeScript compiled to es2017 by tsc and by esbuild
+
+**Asked:** which syntax from ES2017 to ES2022 does Coherent GT parse, which built-ins does it have, and does a TypeScript module compiled at the target 1.6.1 points to run in the EFB's document (node 1.6.2)?
+We started at ES2015, since an `es2017` target passes ES2015 to ES2017 syntax through untouched (user, 2026-10-09).
+
+**Expected:** ES2017 syntax and no later, after [the entry below](#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the A2A PA-24 parked, p09 ran through the inspector in five documents: mainUi, the EFB's, the toolbar's, a cockpit panel, `VCockpit53 - GNS_DISABLED`, and our banner panel, which it opened through the toolbar's document.
+Each reported the same user agent, `CoherentGT/2.0`, and the same syntax:
+
+- **Every ES2015, ES2016, and ES2017 feature tried parsed and returned the right value:** classes with getters, statics, and `extends Error`, tagged templates, destructuring with defaults, generators, `new.target`, `super` in object methods, the `u` and `y` regex flags, `**`, `async` functions, arrows, and methods, and trailing commas in calls.
+- **From ES2018 on, only object rest and the template literal revision parsed**, and `import()` parsed but wasn't run.
+  These failed:
+  - object spread, with "Invalid destructuring assignment target."
+  - `for await`, async generators, and optional catch binding
+  - a raw U+2028 in a string literal, with "Unexpected EOF"
+  - `?.`, `??`, BigInt literals, logical assignment, numeric separators, class fields, `#private` fields and methods, static blocks, and `#x in obj`
+  - every regex feature from ES2018 on: named groups and lookbehind, with "unrecognized character after (?", unicode property escapes, and the `s` and `d` flags, which parse inside a function and throw "Invalid regular expression: invalid flags" when it runs
+- **Built-ins.**
+  Every ES2015 to ES2017 built-in tried was the engine's own, by `Function.prototype.toString`.
+  From ES2018 on, `WeakRef` was its own in all five documents, and nothing else was.
+  Each of these was missing in all five:
+  - `Array.prototype.flat`, `flatMap`, `Object.fromEntries`, and `Symbol.prototype.description`
+  - `BigInt`, `globalThis`, `String.prototype.matchAll`, `Promise.any`, `AggregateError`, and `FinalizationRegistry`
+  - `Array.prototype.at`, `Object.hasOwn`, `String.prototype.at`, `findLast`, `toSorted`, and `Intl`
+  The sim's own scripts filled in a few in some documents and not others:
+
+  | Built-in | Filled in by a script in | Missing in |
+  | --- | --- | --- |
+  | `Promise.prototype.finally` | mainUi, the EFB, the toolbar | the cockpit panel, our banner |
+  | `Promise.allSettled` | mainUi, the toolbar | the EFB, the cockpit panel, our banner |
+  | `String.prototype.trimStart`, `replaceAll` | the toolbar | the other four |
+
+  `new Error("a", { cause: 1 })` carried no `cause`, and a five-element sort came out stable.
+- **Web APIs**, the same in all five.
+  - Missing: `ResizeObserver`, `IntersectionObserver`, `PointerEvent`, `AbortController`, `queueMicrotask`, `structuredClone`, `requestIdleCallback`, `crypto.subtle`, `Worker`, `BroadcastChannel`, and `indexedDB`.
+  - Present: `MutationObserver`, `TouchEvent`, `EventTarget`, `CustomEvent`, `requestAnimationFrame`, `performance.now`, `TextEncoder` and `TextDecoder`, `URL` and `URLSearchParams`, `fetch`, `XMLHttpRequest`, `WebSocket`, `Blob`, `FileReader`, `DOMParser`, `crypto.getRandomValues`, `customElements`, `attachShadow`, `CSS.supports`, `matchMedia`, and `localStorage`.
+- **TypeScript compiled to `es2017`.**
+  [shared.ts](../../../experiments/areas/architecture/coherent/shared.ts) uses an enum, a static field, a `#private` field, `?.`, `??`, `??=`, object spread, object rest in a parameter, a numeric separator, `async`, and a spread of a `Map`'s values.
+  Compiled by TypeScript 7.0.2 at `es2017`, and by esbuild 0.28.2 at `es2017`, each ran in the EFB's document and in the cockpit panel and passed all 7 of its checks, and its `async` method resolved.
+  esbuild refused FlyByWire's target, `safari11`, with "Transforming destructuring to the configured target environment ("safari11") is not supported yet", for the object rest in a parameter.
+- The probe's first full run lost the compiled module's steps to "inspector connection failed", when it opened a page's inspector again straight after closing it; one connection for each page's steps fixed it.
+
+**Changed:**
+
+- `es2017` is our compile target: Coherent GT parses everything it emits, and both compilers lower every later syntax our module used.
+- The target doesn't cover what the compilers don't lower, which the build's check has to reject in our sources:
+  - every regex feature from ES2018 on, which neither compiler rewrites into ES2017
+  - a raw U+2028 or U+2029 in a string
+- Our code can count on ES2017's built-ins and `WeakRef`, and nothing later, since a fill-in one document has, another lacks.
+  TypeScript's `lib` set to ES2017 and `ES2021.WeakRef`, the framework's own setting, flags every later built-in at type-check time.
+- The DOM lib declares the missing web APIs, so the build needs a list of its own that bans them.
+- `globalThis` and `Array.prototype.flat` are missing in all five documents, though FS Copilot's probe found both in the A220's DisplayUnits document (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), so a script there likely filled them in (unverified).
+  [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) and the foundations chapter [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits) list `globalThis` as Coherent GT's own, after that probe.
+
+What we haven't run: `import()` and a sort of a long array; the A220's DisplayUnits document again, to see what fills in `globalThis` there; and a check over our compiled output in CI, which 1.6 designs.
+
+**Affects:** node 1.6.2 of the [architecture plan](plan.md#162-the-syntax-and-built-ins-coherent-gt-has); 1.6's section of the spine; [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel); and the foundations chapter [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#coherent-gt-the-chrome-49-engine-and-its-limits), on which ECMAScript version Coherent GT matches.
+
+**Evidence:** `results/p09-coherent-syntax-2026-10-09-19-07-30.txt`; the first run's lost steps in `-19-05-28.txt`; and `-19-06-45.txt`, whose stable-sort line reads the wrong value as wanted.
+
 ## 2026-10-09: Coherent GT's makers last placed its engine near Safari 10.1, the MSFS Avionics Framework and FlyByWire compile to ES2017, nobody maintains a rule set for the engine, and Working Title ships its own pinned copy of the framework
 
 **Asked:** what do Coherent Labs and the MSFS 2024 SDK document about the JavaScript Coherent GT runs; what compile targets and lint rules do the MSFS Avionics Framework, FlyByWire, and other open MSFS projects build their in-sim code with; and how is the framework published, licensed, and versioned (node 1.6.1)?

@@ -95,6 +95,11 @@ Raised elsewhere: by 1.1.2, how each module, and each hook our panel code instal
 Raised elsewhere: by 1.2, what counts as trouble for each component and where the pilot sees it, to place with the parts that design the logs, the recording, and the apps ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.2, how the cores reach each other, a top-level node after node 1 (user, 2026-10-08) ([01-spine](01-spine.md#between-machines)).
 Raised elsewhere: by 1.2, letting a web page connect to the core, opt-in, if an integration ever needs it, to place with the part that designs the core's protocol ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, how a core that restarted while the sim kept running recovers what it lost and gets its pilot's lost changes to the others, to place with the part that designs sync ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, whether a clock our WASM module can read counts the same ticks as `QueryPerformanceCounter`, to place with the part that designs the flight-model sync ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, which clock a page in the sim measures a span on, to place with the part that designs the panel bridge ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded, to place with the part that designs the core ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 1.4, how the cores pack each field of a message, such as a vector clock counter's key, and whether the relay's and the backend's messages are the message crate's, to place with the node on how the cores reach each other ([01-spine](01-spine.md#left-open)).
 
 ## 1.1 Components
 

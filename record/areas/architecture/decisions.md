@@ -229,7 +229,8 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   This answers [03-v1-scope](../product/03-v1-scope.md#recording-and-bug-reports)'s question of what form the session's ID takes, and [02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)'s of a pilot ID's form.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID, which costs 36 characters an ID as text, once per join or link unless the vector clocks name each counter by ID, which would carry one ID per counter in every message ([01-spine](01-spine.md#ids); user, 2026-10-09).
+  - The user chose 122 random bits over 64 for the margin against two sessions sharing an ID (user, 2026-10-09).
+    As text, an ID costs 36 characters each time it crosses: once per join or link, or in every message if the vector clocks name each counter by ID ([01-spine](01-spine.md#ids)).
   - `BigInt` was missing from the one cockpit panel's document we probed for it, and a JavaScript number holds every integer exactly only up to 2^53, which our QuickJS-ng run showed, so a 128-bit ID can't cross as a JavaScript number ([01-spine](01-spine.md#ids)).
   - The invite code can't name a session for a bug report, since a later session can draw the same six characters ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - A process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone can't tell one run of the sim from the next.
@@ -252,15 +253,14 @@ The watcher and the core are the two processes in [step 7 of the product plan](.
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine, and replays what they missed if their sim kept running; the user chose that a crashed core does the same (user, 2026-10-09).
   - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send, where the restart count costs one write per start.
 - **Leaves out:**
-  - how a restarted core replays: how it keeps or rebuilds its vector clock, the conflict rule's stamps, its shadow values, and which messages it had applied, and how each channel tells a copy from a late message, for the sync engine ([01-spine](01-spine.md#left-open))
-  - what the core had sent that no machine had received when it crashed, which is lost with its process ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts))
+  - how a restarted core recovers, for the part that designs sync ([01-spine](01-spine.md#left-open)): how it keeps or rebuilds its vector clock, the conflict rule's stamps, its shadow values, its record of which messages it applied, and its state object; how each channel tells a copy from a late message; how the conflict rule orders two changes from one pilot under two restart counts; and whether the others catch up on its pilot's changes that never reached them, including what it had sent that no machine received
   - what a core that restarts mid-flight gives up by registering its masks after the aircraft loaded ([01-spine](01-spine.md#left-open))
 
 ## A time in a message is µs on the sender's PC's monotonic clock
 
 - **Decided:** every time in a message is a whole number of µs on Windows' `QueryPerformanceCounter` on the sender's PC, whose ticks become µs through `QueryPerformanceFrequency`.
   The conversion to µs runs in 128 bits, so it doesn't overflow on a PC that has run for weeks.
-  A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin as it arrives, since a page can't read the counter and a plugin gets no clock of its own; a page that needs a span measures it on its own clock and sends the span.
+  A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin as it arrives, since a page can't read the counter, and the clocks a plugin can read, QuickJS-ng's `Date.now()` and `performance.now()`, aren't shown to count the same ticks; a page that needs a span measures it on its own clock and sends the span.
   The core stamps each data-slot write from our WASM module as it arrives, until a clock the module can read is shown to count the same ticks.
   A receiver reads a sender's stamps through an offset it keeps estimating for that sender.
   No frame count crosses between machines: a pace in frames counts the frames of the machine that runs it.

@@ -86,12 +86,12 @@ pub async fn app_main(ui: UiHandle, mut clicks: mpsc::UnboundedReceiver<Click>, 
     // Binding these sockets is what makes Windows Firewall ask, so the friend sees the prompt
     // now rather than in an empty room later; the TCP listener covers TCP's prompt.
     ui.with(|u| u.launch_line = "Opening network connections…".into());
-    let side = match iroh_endpoint(&ca, &IrohOpts { relays: vec![], ip: true, portmapper: true, ..Default::default() }).await {
+    let launch_ep = match iroh_endpoint(&ca, &IrohOpts { relays: vec![], ip: true, portmapper: true, ..Default::default() }).await {
         Ok(e) => e,
         Err(e) => return fatal(&ui, format!("This program couldn't open its network connections ({e})."), &exit, &mut clicks).await,
     };
     let listener = std::net::TcpListener::bind("0.0.0.0:0").ok();
-    log.rec("launch_sockets", json!({"side_bound": side.bound_sockets().iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+    log.rec("launch_sockets", json!({"side_bound": launch_ep.bound_sockets().iter().map(|s| s.to_string()).collect::<Vec<_>>(),
                                       "tcp": listener.as_ref().and_then(|l| l.local_addr().ok()).map(|a| a.to_string())}));
     let pm_log = log.clone();
     let portmap = tokio::spawn(async move { checks::portmap_probe(pm_log).await });
@@ -139,9 +139,23 @@ pub async fn app_main(ui: UiHandle, mut clicks: mpsc::UnboundedReceiver<Click>, 
     if far.is_none() {
         ui.note("Our second server didn't answer, so the test skips the runs through it.");
     }
-    if let Ok(url) = near.relay_url().parse::<iroh::RelayUrl>() {
-        side.insert_relay(url.clone(), Arc::new(iroh::RelayConfig::from(url))).await;
-    }
+    // The endpoint the launch opened has no relay transport at all, since iroh builds that
+    // transport only for an endpoint bound with relays (read in iroh 1.3.0, src/endpoint.rs,
+    // From<RelayMode>), and it couldn't have one: a relay connection before consent would send
+    // traffic to our servers. Side tests need a relay to reach a tester behind a router that
+    // filters by sender, so they get an endpoint of their own, bound now with both relays.
+    let side = match iroh_endpoint(&ca, &IrohOpts { relays: deploy.stations.iter().map(|s| s.relay_url()).collect(), ip: true, portmapper: true, ..Default::default() }).await {
+        Ok(ep) => {
+            launch_ep.close().await;
+            ep
+        }
+        Err(e) => {
+            log.rec("side_endpoint_err", json!({"e": e.to_string()}));
+            launch_ep
+        }
+    };
+    let online = tokio::time::timeout(Duration::from_secs(10), side.online()).await.is_ok();
+    log.rec("side_endpoint", json!({"online": online, "addr": p02_common::proto::AddrJson::from_addr(&side.addr())}));
     let ctx = Arc::new(Ctx {
         deploy: deploy.clone(),
         ca: ca.clone(),

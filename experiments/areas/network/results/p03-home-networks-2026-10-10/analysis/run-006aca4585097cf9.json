@@ -26,10 +26,10 @@
     "stalls": []
   },
   "load": {
-    "cpu_p50": 1.6,
-    "cpu_p95": 4.3,
-    "cpu_max": 24.9,
-    "own_p95": 0.3
+    "cpu_p50": 2.1,
+    "cpu_p95": 6.6,
+    "cpu_max": 33.6,
+    "own_p95": 0.1
   },
   "time_service": {
     "running": true,
@@ -3629,24 +3629,30 @@
   "clock": [
     {
       "station": "nyc",
-      "bursts": 180,
-      "span_s": 1934,
-      "qpc_drift_ppm": 13.06,
-      "qpc_resid_sd_us": 131,
-      "sysclock_vs_station_ppm": -13.06,
-      "sysclock_offset_ms": -110.7,
+      "bursts": 1186,
+      "span_s": 12754,
+      "qpc_drift_ppm": 13.44,
+      "qpc_resid_sd_us": 223,
+      "sysclock_vs_station_ppm": -13.44,
+      "sysclock_offset_ms": -183.5,
       "best_rtt_ms": 41.9
     },
     {
       "station": "fra",
-      "bursts": 62,
-      "span_s": 1922,
-      "qpc_drift_ppm": 13.16,
-      "qpc_resid_sd_us": 171,
-      "sysclock_vs_station_ppm": -13.16,
-      "sysclock_offset_ms": -114.8,
+      "bursts": 406,
+      "span_s": 12745,
+      "qpc_drift_ppm": 13.37,
+      "qpc_resid_sd_us": 249,
+      "sysclock_vs_station_ppm": -13.37,
+      "sysclock_offset_ms": -186.7,
       "best_rtt_ms": 130.1
     }
   ],
-  "side": []
+  "side": [
+    {
+      "role": "dial",
+      "other": "006aca585fdeee51",
+      "err": "timed out"
+    }
+  ]
 }

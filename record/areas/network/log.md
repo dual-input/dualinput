@@ -114,7 +114,7 @@ Clocks, against the droplets' chrony-disciplined clocks, through the shortest of
 Faults in the probe:
 
 - Step 8, the side test between friends whose runs overlap, couldn't connect in the build friends ran: each tester opened its side endpoint before consent with relays disabled, and iroh leaves its relay transport out of such an endpoint (read in iroh 1.3.0, `src/endpoint.rs`, `From<RelayMode>`), so the relay added after consent never took effect.
-  The two friends' runs overlapped and made no side test.
+  The two friends' runs overlapped: 48 minutes into serving after its test, the copy near New York dialed the one near Frankfurt with no relay address, only that PC's public IPv4 and IPv6 addresses, and timed out after 20s; it had no IPv6 of its own, and the other router lets in only replies.
   The tester's `run.rs` binds the side endpoint after consent, with both relays, in a build no friend received.
 - The tester replaced its own path in Windows Firewall's rules only where the letter case matched, so the uploads carried user folder names; the committed copy blanks them, and the tester's `sysmon.rs` ignores case, in a build no friend received.
 
@@ -133,7 +133,6 @@ Every router here kept an idle port at least 15s, so iroh's path keep-alive, 5s 
 
 **Evidence:** [p03](../../../experiments/areas/network/p03-home-networks/), and its results in [results/p03-home-networks-2026-10-10](../../../experiments/areas/network/results/p03-home-networks-2026-10-10/): `analysis/digest.txt` and one summary per run in `analysis/`, from `analyze/analyze.mjs`, and `raw/`, every tester's upload with each public address replaced by a label and user folder names blanked, and the peers' and stations' logs without iroh's debug lines and the forwarder's per-packet lines.
 The originals, with addresses, packet captures, and those lines, stay outside the repository.
-The friend near New York's after-test file, which would show the failed side test from their end, hadn't arrived when this was written.
 
 ## 2026-10-10: postcard packs every v1 message smallest but one, and which fields a message carries changes its size more than the format does
 

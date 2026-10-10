@@ -96,9 +96,10 @@ relay-fra-burst-0 iroh flight↑ 0% lost, excess p99 108.9ms max 217ms, late 30,
 relay-fra-burst-0 udp  flight↑ 0.67% lost, excess p99 5.4ms max 17.3ms, late 0, gaps 1 max 150.9ms | flight↓ 0.73% lost, excess p99 6.6ms max 11.7ms, late 0, gaps 6 max 154.2ms
                   udp  audio↑ 0.68% lost, excess p99 6.4ms max 16.7ms, late 0, gaps 14 max 100.7ms | audio↓ 0.71% lost, excess p99 6.1ms max 21.6ms, late 0, gaps 14 max 101.2ms | cockpit↓ 0% lost, excess p99 8ms max 246ms, gaps 0 max 0ms
 burst: {"median":19,"max":146} Mbps, path rtt {"before":44.5,"during":44.5,"after":44.6}, flight↑ excess p95 before/during/after 1.5/1.7/1.8ms
-clock vs nyc: QPC 13.06 ppm (resid 131µs over 1934s), system clock -13.06 ppm, offset -110.7ms
-clock vs fra: QPC 13.16 ppm (resid 171µs over 1922s), system clock -13.16 ppm, offset -114.8ms
+clock vs nyc: QPC 13.44 ppm (resid 223µs over 12754s), system clock -13.44 ppm, offset -183.5ms
+clock vs fra: QPC 13.37 ppm (resid 249µs over 12745s), system clock -13.37 ppm, offset -186.7ms
 windows time service: running, source time.windows.com,0x9
+side dial 006aca585fdeee51: connect undefinedms direct undefinedms timed out
 
 == run 006aca585fdeee51 (build friends-1) near fra {"fra":22.1,"nyc":97.1}
 network: {"kind":"wired","tx_mbps":1000,"rx_mbps":1000,"description":"Realtek PCIe 5GbE Family Controller"} wifi null v6 false changes 0 power []

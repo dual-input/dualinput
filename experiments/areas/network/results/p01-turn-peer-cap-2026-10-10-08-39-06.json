@@ -1,0 +1,290 @@
+{
+  "probe": "p01-turn-peer-cap",
+  "idle": false,
+  "phases": {
+    "p7": {
+      "sendFirst": [
+        {
+          "peer": "T01",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T02",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T03",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T04",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T05",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T06",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T07",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T08",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T09",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T10",
+          "openHeard": 0,
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "T11",
+          "openHeard": 0,
+          "toPeer": 0,
+          "fromPeer": 0
+        },
+        {
+          "peer": "T12",
+          "openHeard": 0,
+          "toPeer": 0,
+          "fromPeer": 0
+        }
+      ],
+      "bindFirst": [
+        {
+          "peer": "U01",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U02",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U03",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U04",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U05",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U06",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U07",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U08",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U09",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U10",
+          "openHeard": 0,
+          "channelBind": "ok",
+          "toPeer": 4,
+          "fromPeer": 4
+        },
+        {
+          "peer": "U11",
+          "openHeard": 0,
+          "channelBind": "400 \"\"",
+          "toPeer": null,
+          "fromPeer": 0
+        },
+        {
+          "peer": "U12",
+          "openHeard": 0,
+          "channelBind": "400 \"\"",
+          "toPeer": null,
+          "fromPeer": 0
+        }
+      ]
+    }
+  },
+  "mappings": [
+    {
+      "peer": "T01",
+      "local": 62066,
+      "mapped": "our-ip:46369"
+    },
+    {
+      "peer": "T02",
+      "local": 62067,
+      "mapped": "our-ip:46473"
+    },
+    {
+      "peer": "T03",
+      "local": 62068,
+      "mapped": "our-ip:46474"
+    },
+    {
+      "peer": "T04",
+      "local": 62069,
+      "mapped": "our-ip:46475"
+    },
+    {
+      "peer": "T05",
+      "local": 62070,
+      "mapped": "our-ip:46477"
+    },
+    {
+      "peer": "T06",
+      "local": 62071,
+      "mapped": "our-ip:46476"
+    },
+    {
+      "peer": "T07",
+      "local": 62072,
+      "mapped": "our-ip:46478"
+    },
+    {
+      "peer": "T08",
+      "local": 62073,
+      "mapped": "our-ip:46479"
+    },
+    {
+      "peer": "T09",
+      "local": 62074,
+      "mapped": "our-ip:46481"
+    },
+    {
+      "peer": "T10",
+      "local": 62075,
+      "mapped": "our-ip:46480"
+    },
+    {
+      "peer": "T11",
+      "local": 62076,
+      "mapped": "our-ip:46483"
+    },
+    {
+      "peer": "T12",
+      "local": 62077,
+      "mapped": "our-ip:46482"
+    },
+    {
+      "peer": "U01",
+      "local": 58373,
+      "mapped": "our-ip:46403"
+    },
+    {
+      "peer": "U02",
+      "local": 58374,
+      "mapped": "our-ip:46420"
+    },
+    {
+      "peer": "U03",
+      "local": 58375,
+      "mapped": "our-ip:46418"
+    },
+    {
+      "peer": "U04",
+      "local": 58376,
+      "mapped": "our-ip:46419"
+    },
+    {
+      "peer": "U05",
+      "local": 58377,
+      "mapped": "our-ip:46488"
+    },
+    {
+      "peer": "U06",
+      "local": 58378,
+      "mapped": "our-ip:46490"
+    },
+    {
+      "peer": "U07",
+      "local": 58379,
+      "mapped": "our-ip:46487"
+    },
+    {
+      "peer": "U08",
+      "local": 58380,
+      "mapped": "our-ip:46492"
+    },
+    {
+      "peer": "U09",
+      "local": 58381,
+      "mapped": "our-ip:46489"
+    },
+    {
+      "peer": "U10",
+      "local": 58382,
+      "mapped": "our-ip:46491"
+    },
+    {
+      "peer": "U11",
+      "local": 58383,
+      "mapped": "our-ip:46493"
+    },
+    {
+      "peer": "U12",
+      "local": 58384,
+      "mapped": "our-ip:46494"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+p01-turn-peer-cap, 2026-10-10-08-54-57 UTC, phases 6
+t+   0.2s  credentials: HTTP 201, 6 URLs, using turn:turn.cloudflare.com:3478?transport=udp, ttl 1500s
+t+   0.2s  TURN server turn.cloudflare.com is turn-server:3478; STUN server stun.cloudflare.com is stun-server:3478
+t+   0.3s  P01-P18: STUN mapped them to our-ip, 18 distinct public ports for 18 sockets
+
+Phase 1: A1; P01 sends once a second throughout, and P02-P15 join 2s apart with 4 datagrams each
+t+   0.3s  A1: Allocate ok, relayed relay-ip-1:21257, mapped our-ip:46391, lifetime 600s
+t+   0.3s  A1: CreatePermission for our-ip: ok
+t+   1.6s  P02 -> A1: 4/4 via Data indication, relay saw our-ip:46370
+t+   3.7s  P03 -> A1: 4/4 via Data indication, relay saw our-ip:46369
+t+   5.7s  P04 -> A1: 4/4 via Data indication, relay saw our-ip:46373
+t+   7.8s  P05 -> A1: 4/4 via Data indication, relay saw our-ip:46372
+t+   9.8s  P06 -> A1: 4/4 via Data indication, relay saw our-ip:46374
+t+  11.9s  P07 -> A1: 4/4 via Data indication, relay saw our-ip:46375
+t+  13.9s  P08 -> A1: 4/4 via Data indication, relay saw our-ip:46379
+t+  16.0s  P09 -> A1: 4/4 via Data indication, relay saw our-ip:46378
+t+  18.0s  P10 -> A1: 4/4 via Data indication, relay saw our-ip:46380
+t+  20.1s  P11 -> A1: 0/4
+t+  22.1s  P12 -> A1: 0/4
+t+  24.1s  P13 -> A1: 0/4
+t+  26.2s  P14 -> A1: 0/4
+t+  28.3s  P15 -> A1: 0/4
+    peer  source        sent  got  arrived as       relay saw
+    ----  ------------  ----  ---  ---------------  ------------
+    P02   our-ip:46370  4     4    Data indication  our-ip:46370
+    P03   our-ip:46369  4     4    Data indication  our-ip:46369
+    P04   our-ip:46373  4     4    Data indication  our-ip:46373
+    P05   our-ip:46372  4     4    Data indication  our-ip:46372
+    P06   our-ip:46374  4     4    Data indication  our-ip:46374
+    P07   our-ip:46375  4     4    Data indication  our-ip:46375
+    P08   our-ip:46379  4     4    Data indication  our-ip:46379
+    P09   our-ip:46378  4     4    Data indication  our-ip:46378
+    P10   our-ip:46380  4     4    Data indication  our-ip:46380
+    P11   our-ip:46381  4     0    -                -
+    P12   our-ip:46382  4     0    -                -
+    P13   our-ip:46383  4     0    -                -
+    P14   our-ip:46387  4     0    -                -
+    P15   our-ip:46385  4     0    -                -
+    9 of 14 got data through; nothing arrived from P11, P12, P13, P14, P15
+    the relay saw the STUN-mapped port for 9 of the 9 peers it heard from
+    P01 anchor so far: 30 of 30 arrived
+
+Phase 2: A1 sends to P01-P15 by Send indication, binds a channel to each, sends on it, and hears from P02-P15 again
+t+  34.0s  A1: ChannelBind 0x4001 to P01 at our-ip:46368: ok
+t+  34.0s  A1: ChannelBind 0x4002 to P02 at our-ip:46370: ok
+t+  34.0s  A1: ChannelBind 0x4003 to P03 at our-ip:46369: ok
+t+  34.0s  A1: ChannelBind 0x4004 to P04 at our-ip:46373: ok
+t+  34.0s  A1: ChannelBind 0x4005 to P05 at our-ip:46372: ok
+t+  34.1s  A1: ChannelBind 0x4006 to P06 at our-ip:46374: ok
+t+  34.1s  A1: ChannelBind 0x4007 to P07 at our-ip:46375: ok
+t+  34.1s  A1: ChannelBind 0x4008 to P08 at our-ip:46379: ok
+t+  34.1s  A1: ChannelBind 0x4009 to P09 at our-ip:46378: ok
+t+  34.1s  A1: ChannelBind 0x400a to P10 at our-ip:46380: ok
+t+  34.2s  A1: ChannelBind 0x400b to P11 at our-ip:46381: 400 ""
+t+  34.2s  A1: ChannelBind 0x400c to P12 at our-ip:46382: 400 ""
+t+  34.2s  A1: ChannelBind 0x400d to P13 at our-ip:46383: 400 ""
+t+  34.2s  A1: ChannelBind 0x400e to P14 at our-ip:46387: 400 ""
+t+  34.2s  A1: ChannelBind 0x400f to P15 at our-ip:46385: 400 ""
+    peer  addressed as       Send ind. arrived  ChannelBind  ChannelData arrived  peer again -> A1
+    ----  -----------------  -----------------  -----------  -------------------  ----------------
+    P01   address relay saw  4/4                ok           4/4                  (anchor)
+    P02   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P03   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P04   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P05   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P06   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P07   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P08   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P09   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P10   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P11   STUN-mapped        0/4                400 ""       -                    0/2
+    P12   STUN-mapped        0/4                400 ""       -                    0/2
+    P13   STUN-mapped        0/4                400 ""       -                    0/2
+    P14   STUN-mapped        0/4                400 ""       -                    0/2
+    P15   STUN-mapped        0/4                400 ""       -                    0/2
+
+t+  41.9s  A1: Refresh with LIFETIME 600: ok
+t+  43.2s  P16 -> A1: 0/4
+
+Phase 6: idle slots. A1 keeps its permission; A5 lets its permission lapse
+t+  43.2s  S01-S12: STUN mapped them to our-ip, 12 distinct public ports for 12 sockets
+t+  43.3s  A5: Allocate ok, relayed relay-ip-2:23084, mapped our-ip:46471, lifetime 600s
+t+  43.3s  A5: CreatePermission for our-ip: ok
+t+  44.6s  S01 -> A5: 4/4 via Data indication, relay saw our-ip:46426
+t+  46.6s  S02 -> A5: 4/4 via Data indication, relay saw our-ip:46428
+t+  48.6s  S03 -> A5: 4/4 via Data indication, relay saw our-ip:46427
+t+  50.6s  S04 -> A5: 4/4 via Data indication, relay saw our-ip:46429
+t+  52.6s  S05 -> A5: 4/4 via Data indication, relay saw our-ip:46430
+t+  54.6s  S06 -> A5: 4/4 via Data indication, relay saw our-ip:46464
+t+  56.6s  S07 -> A5: 4/4 via Data indication, relay saw our-ip:46465
+t+  58.6s  S08 -> A5: 4/4 via Data indication, relay saw our-ip:46467
+t+  60.6s  S09 -> A5: 4/4 via Data indication, relay saw our-ip:46466
+t+  62.6s  S10 -> A5: 4/4 via Data indication, relay saw our-ip:46468
+t+  64.6s  S11 -> A5: 0/4
+    peer  source        sent  got  arrived as       relay saw
+    ----  ------------  ----  ---  ---------------  ------------
+    S01   our-ip:46426  4     4    Data indication  our-ip:46426
+    S02   our-ip:46428  4     4    Data indication  our-ip:46428
+    S03   our-ip:46427  4     4    Data indication  our-ip:46427
+    S04   our-ip:46429  4     4    Data indication  our-ip:46429
+    S05   our-ip:46430  4     4    Data indication  our-ip:46430
+    S06   our-ip:46464  4     4    Data indication  our-ip:46464
+    S07   our-ip:46465  4     4    Data indication  our-ip:46465
+    S08   our-ip:46467  4     4    Data indication  our-ip:46467
+    S09   our-ip:46466  4     4    Data indication  our-ip:46466
+    S10   our-ip:46468  4     4    Data indication  our-ip:46468
+    S11   our-ip:46469  4     0    -                -
+    10 of 11 got data through; nothing arrived from S11
+t+  67.3s  waiting 306s
+t+ 163.3s  A1 keepalive: Refresh ok, CreatePermission for our-ip ok
+t+ 187.4s  A5 keepalive: Refresh ok, permission left to lapse
+t+ 283.3s  A1 keepalive: Refresh ok, CreatePermission for our-ip ok
+t+ 307.4s  A5 keepalive: Refresh ok, permission left to lapse
+
+t+ 373.2s  A1, 5.5 minutes after P02-P16 went quiet:
+t+ 374.5s  P02 -> A1: 4/4 via ChannelData, relay saw our-ip:46370
+t+ 375.8s  P17 -> A1: 0/4
+t+ 375.8s  waiting 22s
+
+t+ 397.3s  A5, 5.5 minutes after its peers went quiet, with its permission lapsed:
+t+ 398.6s  S02 -> A5: 0/4
+t+ 398.7s  A5: CreatePermission for our-ip: ok
+t+ 399.9s  S01 -> A5: 4/4 via Data indication, relay saw our-ip:46426
+t+ 401.2s  S12 -> A5: 0/4
+t+ 401.2s  waiting 272s
+t+ 403.3s  A1 keepalive: Refresh ok, CreatePermission for our-ip ok
+t+ 427.4s  A5 keepalive: Refresh ok, permission left to lapse
+t+ 523.3s  A1 keepalive: Refresh ok, CreatePermission for our-ip ok
+t+ 547.4s  A5 keepalive: Refresh ok, permission left to lapse
+t+ 643.3s  A1 keepalive: Refresh ok, CreatePermission for our-ip ok
+t+ 667.4s  A5 keepalive: Refresh ok, permission left to lapse
+
+t+ 673.2s  A1, 10.5 minutes after P02-P16 went quiet, past the 600s channel lifetime:
+t+ 674.5s  P03 -> A1: 4/4 via Data indication, relay saw our-ip:46369
+t+ 675.8s  P18 -> A1: 0/4
+
+t+ 675.8s  P01 anchor to A1: 669 of 669 arrived
+t+ 675.8s  A1: Refresh with LIFETIME 0 (delete): ok
+t+ 675.8s  A5: Refresh with LIFETIME 0 (delete): ok
+t+ 676.1s  credentials revoked: HTTP 204

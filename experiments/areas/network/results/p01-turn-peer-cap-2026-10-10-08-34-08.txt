@@ -1,0 +1,239 @@
+p01-turn-peer-cap, 2026-10-10-08-34-08 UTC
+t+   0.3s  credentials: HTTP 201, 6 URLs, using turn:turn.cloudflare.com:3478?transport=udp, ttl 600s
+t+   0.3s  TURN server turn.cloudflare.com is turn-server:3478; STUN server stun.cloudflare.com is stun-server:3478
+t+   0.3s  P01-P18: STUN mapped them to our-ip, 18 distinct public ports for 18 sockets
+
+Phase 1: A1; P01 sends once a second throughout, and P02-P15 join 2s apart with 4 datagrams each
+t+   0.3s  A1: Allocate ok, relayed relay-ip-1:44317, mapped our-ip:46367, lifetime 600s
+t+   0.4s  A1: CreatePermission for our-ip: ok
+t+   1.7s  P02 -> A1: 4/4 via Data indication, relay saw our-ip:46343
+t+   3.7s  P03 -> A1: 4/4 via Data indication, relay saw our-ip:46342
+t+   5.8s  P04 -> A1: 4/4 via Data indication, relay saw our-ip:46345
+t+   7.8s  P05 -> A1: 4/4 via Data indication, relay saw our-ip:46346
+t+   9.9s  P06 -> A1: 4/4 via Data indication, relay saw our-ip:46348
+t+  11.9s  P07 -> A1: 4/4 via Data indication, relay saw our-ip:46347
+t+  14.0s  P08 -> A1: 4/4 via Data indication, relay saw our-ip:46351
+t+  16.0s  P09 -> A1: 4/4 via Data indication, relay saw our-ip:46349
+t+  18.1s  P10 -> A1: 4/4 via Data indication, relay saw our-ip:46352
+t+  20.1s  P11 -> A1: 0/4
+t+  22.2s  P12 -> A1: 0/4
+t+  24.2s  P13 -> A1: 0/4
+t+  26.3s  P14 -> A1: 0/4
+t+  28.4s  P15 -> A1: 0/4
+    peer  source        sent  got  arrived as       relay saw
+    ----  ------------  ----  ---  ---------------  ------------
+    P02   our-ip:46343  4     4    Data indication  our-ip:46343
+    P03   our-ip:46342  4     4    Data indication  our-ip:46342
+    P04   our-ip:46345  4     4    Data indication  our-ip:46345
+    P05   our-ip:46346  4     4    Data indication  our-ip:46346
+    P06   our-ip:46348  4     4    Data indication  our-ip:46348
+    P07   our-ip:46347  4     4    Data indication  our-ip:46347
+    P08   our-ip:46351  4     4    Data indication  our-ip:46351
+    P09   our-ip:46349  4     4    Data indication  our-ip:46349
+    P10   our-ip:46352  4     4    Data indication  our-ip:46352
+    P11   our-ip:46353  4     0    -                -
+    P12   our-ip:46358  4     0    -                -
+    P13   our-ip:46357  4     0    -                -
+    P14   our-ip:46359  4     0    -                -
+    P15   our-ip:46360  4     0    -                -
+    9 of 14 got data through; nothing arrived from P11, P12, P13, P14, P15
+    the relay saw the STUN-mapped port for 9 of the 9 peers it heard from
+    P01 anchor so far: 30 of 30 arrived
+
+Phase 2: A1 sends to P01-P15 by Send indication, binds a channel to each, sends on it, and hears from P02-P15 again
+t+  34.1s  A1: ChannelBind 0x4001 to P01 at our-ip:46341: ok
+t+  34.1s  A1: ChannelBind 0x4002 to P02 at our-ip:46343: ok
+t+  34.1s  A1: ChannelBind 0x4003 to P03 at our-ip:46342: ok
+t+  34.1s  A1: ChannelBind 0x4004 to P04 at our-ip:46345: ok
+t+  34.2s  A1: ChannelBind 0x4005 to P05 at our-ip:46346: ok
+t+  34.2s  A1: ChannelBind 0x4006 to P06 at our-ip:46348: ok
+t+  34.2s  A1: ChannelBind 0x4007 to P07 at our-ip:46347: ok
+t+  34.2s  A1: ChannelBind 0x4008 to P08 at our-ip:46351: ok
+t+  34.2s  A1: ChannelBind 0x4009 to P09 at our-ip:46349: ok
+t+  34.3s  A1: ChannelBind 0x400a to P10 at our-ip:46352: ok
+t+  34.3s  A1: ChannelBind 0x400b to P11 at our-ip:46353: 400 ""
+t+  34.3s  A1: ChannelBind 0x400c to P12 at our-ip:46358: 400 ""
+t+  34.3s  A1: ChannelBind 0x400d to P13 at our-ip:46357: 400 ""
+t+  34.3s  A1: ChannelBind 0x400e to P14 at our-ip:46359: 400 ""
+t+  34.4s  A1: ChannelBind 0x400f to P15 at our-ip:46360: 400 ""
+    peer  addressed as       Send ind. arrived  ChannelBind  ChannelData arrived  peer again -> A1
+    ----  -----------------  -----------------  -----------  -------------------  ----------------
+    P01   address relay saw  4/4                ok           4/4                  (anchor)
+    P02   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P03   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P04   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P05   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P06   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P07   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P08   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P09   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P10   address relay saw  4/4                ok           4/4                  2/2 ChannelData
+    P11   STUN-mapped        0/4                400 ""       -                    0/2
+    P12   STUN-mapped        0/4                400 ""       -                    0/2
+    P13   STUN-mapped        0/4                400 ""       -                    0/2
+    P14   STUN-mapped        0/4                400 ""       -                    0/2
+    P15   STUN-mapped        0/4                400 ""       -                    0/2
+
+t+  42.0s  A1: Refresh with LIFETIME 600: ok
+t+  43.3s  P16 -> A1: 0/4
+
+Phase 3: A2, a fresh allocation; P15 down to P01 join 1.5s apart
+t+  43.4s  A2: Allocate ok, relayed relay-ip-2:12931, mapped our-ip:46402, lifetime 600s
+t+  43.4s  A2: CreatePermission for our-ip: ok
+t+  44.7s  P15 -> A2: 4/4 via Data indication, relay saw our-ip:46360
+t+  46.2s  P14 -> A2: 4/4 via Data indication, relay saw our-ip:46359
+t+  47.8s  P13 -> A2: 4/4 via Data indication, relay saw our-ip:46357
+t+  49.4s  P12 -> A2: 4/4 via Data indication, relay saw our-ip:46358
+t+  50.9s  P11 -> A2: 4/4 via Data indication, relay saw our-ip:46353
+t+  52.5s  P10 -> A2: 4/4 via Data indication, relay saw our-ip:46352
+t+  54.0s  P09 -> A2: 4/4 via Data indication, relay saw our-ip:46349
+t+  55.6s  P08 -> A2: 4/4 via Data indication, relay saw our-ip:46351
+t+  57.2s  P07 -> A2: 4/4 via Data indication, relay saw our-ip:46347
+t+  58.7s  P06 -> A2: 4/4 via Data indication, relay saw our-ip:46348
+t+  60.3s  P05 -> A2: 0/4
+t+  61.9s  P04 -> A2: 0/4
+t+  63.4s  P03 -> A2: 0/4
+t+  65.0s  P02 -> A2: 0/4
+t+  66.5s  P01 -> A2: 0/4
+    peer  source        sent  got  arrived as       relay saw
+    ----  ------------  ----  ---  ---------------  ------------
+    P15   our-ip:46360  4     4    Data indication  our-ip:46360
+    P14   our-ip:46359  4     4    Data indication  our-ip:46359
+    P13   our-ip:46357  4     4    Data indication  our-ip:46357
+    P12   our-ip:46358  4     4    Data indication  our-ip:46358
+    P11   our-ip:46353  4     4    Data indication  our-ip:46353
+    P10   our-ip:46352  4     4    Data indication  our-ip:46352
+    P09   our-ip:46349  4     4    Data indication  our-ip:46349
+    P08   our-ip:46351  4     4    Data indication  our-ip:46351
+    P07   our-ip:46347  4     4    Data indication  our-ip:46347
+    P06   our-ip:46348  4     4    Data indication  our-ip:46348
+    P05   our-ip:46346  4     0    -                -
+    P04   our-ip:46345  4     0    -                -
+    P03   our-ip:46342  4     0    -                -
+    P02   our-ip:46343  4     0    -                -
+    P01   our-ip:46341  4     0    -                -
+    10 of 15 got data through; nothing arrived from P05, P04, P03, P02, P01
+t+  68.8s  A2: Refresh with LIFETIME 0 (delete): ok
+
+Phase 4: A3 hears from 20 new peers at once, then is deleted and allocated again on the same socket
+t+  68.9s  Q01-Q20: STUN mapped them to our-ip, 20 distinct public ports for 20 sockets
+t+  68.9s  A3: Allocate ok, relayed relay-ip-2:15750, mapped our-ip:46426, lifetime 600s
+t+  68.9s  A3: CreatePermission for our-ip: ok
+    peer  source        sent  got  arrived as       relay saw
+    ----  ------------  ----  ---  ---------------  ------------
+    Q01   our-ip:46405  4     4    Data indication  our-ip:46405
+    Q02   our-ip:46406  4     4    Data indication  our-ip:46406
+    Q03   our-ip:46407  4     4    Data indication  our-ip:46407
+    Q04   our-ip:46409  4     4    Data indication  our-ip:46409
+    Q05   our-ip:46408  4     4    Data indication  our-ip:46408
+    Q06   our-ip:46410  4     4    Data indication  our-ip:46410
+    Q07   our-ip:46412  4     4    Data indication  our-ip:46412
+    Q08   our-ip:46414  4     4    Data indication  our-ip:46414
+    Q09   our-ip:46413  4     4    Data indication  our-ip:46413
+    Q10   our-ip:46416  4     0    -                -
+    Q11   our-ip:46415  4     4    Data indication  our-ip:46415
+    Q12   our-ip:46417  4     0    -                -
+    Q13   our-ip:46418  4     0    -                -
+    Q14   our-ip:46420  4     0    -                -
+    Q15   our-ip:46419  4     0    -                -
+    Q16   our-ip:46421  4     0    -                -
+    Q17   our-ip:46422  4     0    -                -
+    Q18   our-ip:46423  4     0    -                -
+    Q19   our-ip:46424  4     0    -                -
+    Q20   our-ip:46425  4     0    -                -
+    10 of 20 got data through; nothing arrived from Q10, Q12, Q13, Q14, Q15, Q16, Q17, Q18, Q19, Q20
+t+  72.0s  A3: Refresh with LIFETIME 0 (delete): ok
+t+  72.0s  A3b: Allocate ok, relayed relay-ip-2:17140, mapped our-ip:46426, lifetime 600s
+t+  72.0s  A3b: CreatePermission for our-ip: ok
+t+  73.3s  Q01 -> A3b: 4/4 via Data indication, relay saw our-ip:46405
+t+  74.6s  Q02 -> A3b: 4/4 via Data indication, relay saw our-ip:46406
+t+  75.9s  Q03 -> A3b: 4/4 via Data indication, relay saw our-ip:46407
+t+  77.3s  Q04 -> A3b: 4/4 via Data indication, relay saw our-ip:46409
+t+  78.6s  Q05 -> A3b: 4/4 via Data indication, relay saw our-ip:46408
+t+  79.9s  Q06 -> A3b: 4/4 via Data indication, relay saw our-ip:46410
+t+  81.2s  Q07 -> A3b: 4/4 via Data indication, relay saw our-ip:46412
+t+  82.5s  Q08 -> A3b: 4/4 via Data indication, relay saw our-ip:46414
+t+  83.8s  Q09 -> A3b: 4/4 via Data indication, relay saw our-ip:46413
+t+  85.1s  Q10 -> A3b: 4/4 via Data indication, relay saw our-ip:46416
+t+  86.4s  Q11 -> A3b: 0/4
+t+  87.8s  Q12 -> A3b: 0/4
+    peer  source        sent  got  arrived as       relay saw
+    ----  ------------  ----  ---  ---------------  ------------
+    Q01   our-ip:46405  4     4    Data indication  our-ip:46405
+    Q02   our-ip:46406  4     4    Data indication  our-ip:46406
+    Q03   our-ip:46407  4     4    Data indication  our-ip:46407
+    Q04   our-ip:46409  4     4    Data indication  our-ip:46409
+    Q05   our-ip:46408  4     4    Data indication  our-ip:46408
+    Q06   our-ip:46410  4     4    Data indication  our-ip:46410
+    Q07   our-ip:46412  4     4    Data indication  our-ip:46412
+    Q08   our-ip:46414  4     4    Data indication  our-ip:46414
+    Q09   our-ip:46413  4     4    Data indication  our-ip:46413
+    Q10   our-ip:46416  4     4    Data indication  our-ip:46416
+    Q11   our-ip:46415  4     0    -                -
+    Q12   our-ip:46417  4     0    -                -
+    10 of 12 got data through; nothing arrived from Q11, Q12
+t+  89.8s  A3b: Refresh with LIFETIME 0 (delete): ok
+
+Phase 5: A4 hears from H1-H3, other allocations' relayed addresses, mixed with R01-R09 on our IP
+t+  89.8s  H1: Allocate ok, relayed relay-ip-3:43164, mapped our-ip:46337, lifetime 600s
+t+  89.9s  H2: Allocate ok, relayed relay-ip-4:20772, mapped our-ip:46354, lifetime 600s
+t+  89.9s  H3: Allocate ok, relayed relay-ip-5:60452, mapped our-ip:46355, lifetime 600s
+t+  89.9s  R01-R09: STUN mapped them to our-ip, 9 distinct public ports for 9 sockets
+t+  90.0s  A4: Allocate ok, relayed relay-ip-6:24550, mapped our-ip:46376, lifetime 600s
+t+  90.0s  A4: CreatePermission for our-ip: ok
+t+  90.0s  A4: CreatePermission for relay-ip-3: ok
+t+  90.0s  A4: CreatePermission for relay-ip-4: ok
+t+  90.1s  A4: CreatePermission for relay-ip-5: ok
+t+  90.1s  H1: CreatePermission for relay-ip-6: ok
+t+  90.1s  H2: CreatePermission for relay-ip-6: ok
+t+  90.1s  H3: CreatePermission for relay-ip-6: ok
+t+  91.4s  H1 -> A4: 4/4 via Data indication, relay saw relay-ip-3:43164
+t+  93.4s  R01 -> A4: 4/4 via Data indication, relay saw our-ip:46356
+t+  95.4s  R02 -> A4: 4/4 via Data indication, relay saw our-ip:46363
+t+  97.4s  R03 -> A4: 4/4 via Data indication, relay saw our-ip:46368
+t+  99.4s  R04 -> A4: 4/4 via Data indication, relay saw our-ip:46365
+t+ 101.4s  R05 -> A4: 4/4 via Data indication, relay saw our-ip:46372
+t+ 103.4s  R06 -> A4: 4/4 via Data indication, relay saw our-ip:46371
+t+ 105.4s  R07 -> A4: 4/4 via Data indication, relay saw our-ip:46373
+t+ 107.4s  R08 -> A4: 4/4 via Data indication, relay saw our-ip:46374
+t+ 109.4s  H2 -> A4: 4/4 via Data indication, relay saw relay-ip-4:20772
+t+ 111.4s  H3 -> A4: 0/4
+t+ 113.4s  R09 -> A4: 0/4
+    peer  source            sent  got  arrived as       relay saw
+    ----  ----------------  ----  ---  ---------------  ----------------
+    H1    relay-ip-3:43164  4     4    Data indication  relay-ip-3:43164
+    R01   our-ip:46356      4     4    Data indication  our-ip:46356
+    R02   our-ip:46363      4     4    Data indication  our-ip:46363
+    R03   our-ip:46368      4     4    Data indication  our-ip:46368
+    R04   our-ip:46365      4     4    Data indication  our-ip:46365
+    R05   our-ip:46372      4     4    Data indication  our-ip:46372
+    R06   our-ip:46371      4     4    Data indication  our-ip:46371
+    R07   our-ip:46373      4     4    Data indication  our-ip:46373
+    R08   our-ip:46374      4     4    Data indication  our-ip:46374
+    H2    relay-ip-4:20772  4     4    Data indication  relay-ip-4:20772
+    H3    relay-ip-5:60452  4     0    -                -
+    R09   our-ip:46375      4     0    -                -
+    10 of 12 got data through; nothing arrived from H3, R09
+    A4 -> each source by Send indication:
+    source  arrived
+    ------  -------
+    H1      4/4
+    R01     4/4
+    R02     4/4
+    R03     4/4
+    R04     4/4
+    R05     4/4
+    R06     4/4
+    R07     4/4
+    R08     4/4
+    H2      4/4
+    H3      0/4
+    R09     0/4
+t+ 118.9s  A4: Refresh with LIFETIME 0 (delete): ok
+t+ 118.9s  H1: Refresh with LIFETIME 0 (delete): ok
+t+ 119.0s  H2: Refresh with LIFETIME 0 (delete): ok
+t+ 119.0s  H3: Refresh with LIFETIME 0 (delete): ok
+
+t+ 119.0s  P01 anchor to A1: 117 of 117 arrived
+t+ 119.0s  A1: Refresh with LIFETIME 0 (delete): ok
+t+ 119.2s  credentials revoked: HTTP 204

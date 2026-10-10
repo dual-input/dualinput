@@ -1,0 +1,572 @@
+{
+  "probe": "p01-turn-peer-cap",
+  "idle": false,
+  "phases": {
+    "p1": {
+      "rows": [
+        {
+          "peer": "P02",
+          "from": "our-ip:46370",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46370",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P03",
+          "from": "our-ip:46369",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46369",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P04",
+          "from": "our-ip:46373",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46373",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P05",
+          "from": "our-ip:46372",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46372",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P06",
+          "from": "our-ip:46374",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46374",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P07",
+          "from": "our-ip:46375",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46375",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P08",
+          "from": "our-ip:46379",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46379",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P09",
+          "from": "our-ip:46378",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46378",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P10",
+          "from": "our-ip:46380",
+          "sent": 4,
+          "got": 4,
+          "via": "Data indication",
+          "relaySaw": "our-ip:46380",
+          "stunPortMatches": true
+        },
+        {
+          "peer": "P11",
+          "from": "our-ip:46381",
+          "sent": 4,
+          "got": 0,
+          "via": "-",
+          "relaySaw": "-",
+          "stunPortMatches": null
+        },
+        {
+          "peer": "P12",
+          "from": "our-ip:46382",
+          "sent": 4,
+          "got": 0,
+          "via": "-",
+          "relaySaw": "-",
+          "stunPortMatches": null
+        },
+        {
+          "peer": "P13",
+          "from": "our-ip:46383",
+          "sent": 4,
+          "got": 0,
+          "via": "-",
+          "relaySaw": "-",
+          "stunPortMatches": null
+        },
+        {
+          "peer": "P14",
+          "from": "our-ip:46387",
+          "sent": 4,
+          "got": 0,
+          "via": "-",
+          "relaySaw": "-",
+          "stunPortMatches": null
+        },
+        {
+          "peer": "P15",
+          "from": "our-ip:46385",
+          "sent": 4,
+          "got": 0,
+          "via": "-",
+          "relaySaw": "-",
+          "stunPortMatches": null
+        }
+      ],
+      "through": [
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06",
+        "P07",
+        "P08",
+        "P09",
+        "P10"
+      ],
+      "refused": [
+        "P11",
+        "P12",
+        "P13",
+        "P14",
+        "P15"
+      ]
+    },
+    "p2": {
+      "rows": [
+        {
+          "peer": "P01",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "(anchor)"
+        },
+        {
+          "peer": "P02",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P03",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P04",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P05",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P06",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P07",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P08",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P09",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P10",
+          "addressedAs": "address relay saw",
+          "sendIndication": "4/4",
+          "channelBind": "ok",
+          "channelData": "4/4",
+          "again": "2/2 ChannelData"
+        },
+        {
+          "peer": "P11",
+          "addressedAs": "STUN-mapped",
+          "sendIndication": "0/4",
+          "channelBind": "400 \"\"",
+          "channelData": "-",
+          "again": "0/2"
+        },
+        {
+          "peer": "P12",
+          "addressedAs": "STUN-mapped",
+          "sendIndication": "0/4",
+          "channelBind": "400 \"\"",
+          "channelData": "-",
+          "again": "0/2"
+        },
+        {
+          "peer": "P13",
+          "addressedAs": "STUN-mapped",
+          "sendIndication": "0/4",
+          "channelBind": "400 \"\"",
+          "channelData": "-",
+          "again": "0/2"
+        },
+        {
+          "peer": "P14",
+          "addressedAs": "STUN-mapped",
+          "sendIndication": "0/4",
+          "channelBind": "400 \"\"",
+          "channelData": "-",
+          "again": "0/2"
+        },
+        {
+          "peer": "P15",
+          "addressedAs": "STUN-mapped",
+          "sendIndication": "0/4",
+          "channelBind": "400 \"\"",
+          "channelData": "-",
+          "again": "0/2"
+        }
+      ],
+      "afterRefresh": {
+        "peer": "P16",
+        "got": 0,
+        "sent": 4
+      }
+    },
+    "p6": {
+      "fill": {
+        "rows": [
+          {
+            "peer": "S01",
+            "from": "our-ip:46426",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46426",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S02",
+            "from": "our-ip:46428",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46428",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S03",
+            "from": "our-ip:46427",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46427",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S04",
+            "from": "our-ip:46429",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46429",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S05",
+            "from": "our-ip:46430",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46430",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S06",
+            "from": "our-ip:46464",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46464",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S07",
+            "from": "our-ip:46465",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46465",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S08",
+            "from": "our-ip:46467",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46467",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S09",
+            "from": "our-ip:46466",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46466",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S10",
+            "from": "our-ip:46468",
+            "sent": 4,
+            "got": 4,
+            "via": "Data indication",
+            "relaySaw": "our-ip:46468",
+            "stunPortMatches": true
+          },
+          {
+            "peer": "S11",
+            "from": "our-ip:46469",
+            "sent": 4,
+            "got": 0,
+            "via": "-",
+            "relaySaw": "-",
+            "stunPortMatches": null
+          }
+        ],
+        "through": [
+          "S01",
+          "S02",
+          "S03",
+          "S04",
+          "S05",
+          "S06",
+          "S07",
+          "S08",
+          "S09",
+          "S10"
+        ],
+        "refused": [
+          "S11"
+        ]
+      },
+      "a1After330s": {
+        "oldP02": 4,
+        "newP17": 0
+      },
+      "a5": {
+        "oldS02Lapsed": 0,
+        "oldS01Repermitted": 4,
+        "newS12Repermitted": 0
+      },
+      "a1After630s": {
+        "oldP03": 4,
+        "newP18": 0
+      }
+    }
+  },
+  "mappings": [
+    {
+      "peer": "P01",
+      "local": 50177,
+      "mapped": "our-ip:46368"
+    },
+    {
+      "peer": "P02",
+      "local": 50178,
+      "mapped": "our-ip:46370"
+    },
+    {
+      "peer": "P03",
+      "local": 50179,
+      "mapped": "our-ip:46369"
+    },
+    {
+      "peer": "P04",
+      "local": 50180,
+      "mapped": "our-ip:46373"
+    },
+    {
+      "peer": "P05",
+      "local": 50181,
+      "mapped": "our-ip:46372"
+    },
+    {
+      "peer": "P06",
+      "local": 50182,
+      "mapped": "our-ip:46374"
+    },
+    {
+      "peer": "P07",
+      "local": 50183,
+      "mapped": "our-ip:46375"
+    },
+    {
+      "peer": "P08",
+      "local": 50184,
+      "mapped": "our-ip:46379"
+    },
+    {
+      "peer": "P09",
+      "local": 50185,
+      "mapped": "our-ip:46378"
+    },
+    {
+      "peer": "P10",
+      "local": 50186,
+      "mapped": "our-ip:46380"
+    },
+    {
+      "peer": "P11",
+      "local": 50187,
+      "mapped": "our-ip:46381"
+    },
+    {
+      "peer": "P12",
+      "local": 50188,
+      "mapped": "our-ip:46382"
+    },
+    {
+      "peer": "P13",
+      "local": 50189,
+      "mapped": "our-ip:46383"
+    },
+    {
+      "peer": "P14",
+      "local": 50190,
+      "mapped": "our-ip:46387"
+    },
+    {
+      "peer": "P15",
+      "local": 50191,
+      "mapped": "our-ip:46385"
+    },
+    {
+      "peer": "P16",
+      "local": 50192,
+      "mapped": "our-ip:46388"
+    },
+    {
+      "peer": "P17",
+      "local": 50193,
+      "mapped": "our-ip:46389"
+    },
+    {
+      "peer": "P18",
+      "local": 50194,
+      "mapped": "our-ip:46390"
+    },
+    {
+      "peer": "S01",
+      "local": 65207,
+      "mapped": "our-ip:46426"
+    },
+    {
+      "peer": "S02",
+      "local": 65208,
+      "mapped": "our-ip:46428"
+    },
+    {
+      "peer": "S03",
+      "local": 65209,
+      "mapped": "our-ip:46427"
+    },
+    {
+      "peer": "S04",
+      "local": 65210,
+      "mapped": "our-ip:46429"
+    },
+    {
+      "peer": "S05",
+      "local": 65211,
+      "mapped": "our-ip:46430"
+    },
+    {
+      "peer": "S06",
+      "local": 65212,
+      "mapped": "our-ip:46464"
+    },
+    {
+      "peer": "S07",
+      "local": 65213,
+      "mapped": "our-ip:46465"
+    },
+    {
+      "peer": "S08",
+      "local": 65214,
+      "mapped": "our-ip:46467"
+    },
+    {
+      "peer": "S09",
+      "local": 65215,
+      "mapped": "our-ip:46466"
+    },
+    {
+      "peer": "S10",
+      "local": 65216,
+      "mapped": "our-ip:46468"
+    },
+    {
+      "peer": "S11",
+      "local": 65217,
+      "mapped": "our-ip:46469"
+    },
+    {
+      "peer": "S12",
+      "local": 65218,
+      "mapped": "our-ip:46470"
+    }
+  ],
+  "anchor": {
+    "sent": 669,
+    "got": 669
+  }
+}

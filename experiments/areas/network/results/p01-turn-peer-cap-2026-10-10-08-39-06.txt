@@ -1,0 +1,90 @@
+p01-turn-peer-cap, 2026-10-10-08-39-06 UTC, phases 7
+t+   0.1s  credentials: HTTP 201, 6 URLs, using turn:turn.cloudflare.com:3478?transport=udp, ttl 600s
+t+   0.1s  TURN server turn.cloudflare.com is turn-server:3478; STUN server stun.cloudflare.com is stun-server:3478
+
+Phase 7: A6 sends to 12 peers it has never heard from, and A7 binds channels to 12 before any data
+t+   0.1s  T01-T12: STUN mapped them to our-ip, 12 distinct public ports for 12 sockets
+t+   0.2s  A6: Allocate ok, relayed relay-ip-1:39011, mapped our-ip:46484, lifetime 600s
+t+   0.2s  A6: CreatePermission for our-ip: ok
+t+   2.9s  A6 -> T01 by Send indication: 4/4
+t+   3.6s  A6 -> T02 by Send indication: 4/4
+t+   4.3s  A6 -> T03 by Send indication: 4/4
+t+   5.0s  A6 -> T04 by Send indication: 4/4
+t+   5.7s  A6 -> T05 by Send indication: 4/4
+t+   6.5s  A6 -> T06 by Send indication: 4/4
+t+   7.2s  A6 -> T07 by Send indication: 4/4
+t+   7.9s  A6 -> T08 by Send indication: 4/4
+t+   8.6s  A6 -> T09 by Send indication: 4/4
+t+   9.3s  A6 -> T10 by Send indication: 4/4
+t+  10.0s  A6 -> T11 by Send indication: 0/4
+t+  10.7s  A6 -> T12 by Send indication: 0/4
+t+  14.0s  T01 -> A6: 4/4 via Data indication, relay saw our-ip:46369
+t+  15.5s  T02 -> A6: 4/4 via Data indication, relay saw our-ip:46473
+t+  17.0s  T03 -> A6: 4/4 via Data indication, relay saw our-ip:46474
+t+  18.6s  T04 -> A6: 4/4 via Data indication, relay saw our-ip:46475
+t+  20.0s  T05 -> A6: 4/4 via Data indication, relay saw our-ip:46477
+t+  21.6s  T06 -> A6: 4/4 via Data indication, relay saw our-ip:46476
+t+  23.1s  T07 -> A6: 4/4 via Data indication, relay saw our-ip:46478
+t+  24.6s  T08 -> A6: 4/4 via Data indication, relay saw our-ip:46479
+t+  26.1s  T09 -> A6: 4/4 via Data indication, relay saw our-ip:46481
+t+  27.6s  T10 -> A6: 4/4 via Data indication, relay saw our-ip:46480
+t+  29.1s  T11 -> A6: 0/4
+t+  30.6s  T12 -> A6: 0/4
+    peer  TTL-4 datagram heard by A6  A6 -> peer  peer -> A6 after
+    ----  --------------------------  ----------  ----------------
+    T01   0                           4/4         4/4
+    T02   0                           4/4         4/4
+    T03   0                           4/4         4/4
+    T04   0                           4/4         4/4
+    T05   0                           4/4         4/4
+    T06   0                           4/4         4/4
+    T07   0                           4/4         4/4
+    T08   0                           4/4         4/4
+    T09   0                           4/4         4/4
+    T10   0                           4/4         4/4
+    T11   0                           0/4         0/4
+    T12   0                           0/4         0/4
+t+  32.8s  A6: Refresh with LIFETIME 0 (delete): ok
+t+  32.8s  U01-U12: STUN mapped them to our-ip, 12 distinct public ports for 12 sockets
+t+  32.9s  A7: Allocate ok, relayed relay-ip-2:40420, mapped our-ip:46495, lifetime 600s
+t+  32.9s  A7: CreatePermission for our-ip: ok
+t+  34.9s  A7: ChannelBind 0x4001 to U01, never heard from: ok
+t+  34.9s  A7: ChannelBind 0x4002 to U02, never heard from: ok
+t+  35.0s  A7: ChannelBind 0x4003 to U03, never heard from: ok
+t+  35.0s  A7: ChannelBind 0x4004 to U04, never heard from: ok
+t+  35.0s  A7: ChannelBind 0x4005 to U05, never heard from: ok
+t+  35.0s  A7: ChannelBind 0x4006 to U06, never heard from: ok
+t+  35.0s  A7: ChannelBind 0x4007 to U07, never heard from: ok
+t+  35.1s  A7: ChannelBind 0x4008 to U08, never heard from: ok
+t+  35.1s  A7: ChannelBind 0x4009 to U09, never heard from: ok
+t+  35.1s  A7: ChannelBind 0x400a to U10, never heard from: ok
+t+  35.1s  A7: ChannelBind 0x400b to U11, never heard from: 400 ""
+t+  35.1s  A7: ChannelBind 0x400c to U12, never heard from: 400 ""
+t+  38.5s  U01 -> A7: 4/4 via ChannelData, relay saw our-ip:46403
+t+  40.0s  U02 -> A7: 4/4 via ChannelData, relay saw our-ip:46420
+t+  41.5s  U03 -> A7: 4/4 via ChannelData, relay saw our-ip:46418
+t+  43.0s  U04 -> A7: 4/4 via ChannelData, relay saw our-ip:46419
+t+  44.5s  U05 -> A7: 4/4 via ChannelData, relay saw our-ip:46488
+t+  46.0s  U06 -> A7: 4/4 via ChannelData, relay saw our-ip:46490
+t+  47.5s  U07 -> A7: 4/4 via ChannelData, relay saw our-ip:46487
+t+  49.0s  U08 -> A7: 4/4 via ChannelData, relay saw our-ip:46492
+t+  50.5s  U09 -> A7: 4/4 via ChannelData, relay saw our-ip:46489
+t+  52.0s  U10 -> A7: 4/4 via ChannelData, relay saw our-ip:46491
+t+  53.5s  U11 -> A7: 0/4
+t+  55.0s  U12 -> A7: 0/4
+    peer  TTL-4 datagram heard by A7  ChannelBind  ChannelData -> peer  peer -> A7 after
+    ----  --------------------------  -----------  -------------------  ----------------
+    U01   0                           ok           4/4                  4/4
+    U02   0                           ok           4/4                  4/4
+    U03   0                           ok           4/4                  4/4
+    U04   0                           ok           4/4                  4/4
+    U05   0                           ok           4/4                  4/4
+    U06   0                           ok           4/4                  4/4
+    U07   0                           ok           4/4                  4/4
+    U08   0                           ok           4/4                  4/4
+    U09   0                           ok           4/4                  4/4
+    U10   0                           ok           4/4                  4/4
+    U11   0                           400 ""       -                    0/4
+    U12   0                           400 ""       -                    0/4
+t+  57.2s  A7: Refresh with LIFETIME 0 (delete): ok
+t+  57.4s  credentials revoked: HTTP 204

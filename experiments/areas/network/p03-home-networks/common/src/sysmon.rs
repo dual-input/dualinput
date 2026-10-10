@@ -390,11 +390,18 @@ mod win {
         let exe = std::env::current_exe().map(|p| p.display().to_string()).unwrap_or_default();
         let state = quiet("netsh", &["advfirewall", "show", "allprofiles", "state"]);
         let rules = quiet("netsh", &["advfirewall", "firewall", "show", "rule", "name=all", "verbose"]);
+        // netsh may print the path in other letter case than current_exe, so the match and the
+        // replacement both ignore case, line by line.
         let mut ours = Vec::new();
         if !exe.is_empty() {
+            let lower = exe.to_lowercase();
             for block in rules.split("\r\n\r\n") {
-                if block.to_lowercase().contains(&exe.to_lowercase()) {
-                    ours.push(block.replace(&exe, "<exe>"));
+                if block.to_lowercase().contains(&lower) {
+                    let cleaned: Vec<String> = block
+                        .lines()
+                        .map(|l| if l.to_lowercase().contains(&lower) { l.to_lowercase().replace(&lower, "<exe>") } else { l.to_string() })
+                        .collect();
+                    ours.push(cleaned.join("\r\n"));
                 }
             }
         }

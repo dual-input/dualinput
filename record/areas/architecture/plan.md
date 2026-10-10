@@ -430,6 +430,7 @@ It reads the [network log](../network/log.md), the foundations chapters [09-01](
 Its answer goes in an entry in the network log, which 2's design doc cites.
 Exit: a network log entry answers the question.
 Waits on 2.1.
+Done on 2026-10-10.
 
 ## 3 Sync and the session
 

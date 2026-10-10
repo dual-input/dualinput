@@ -1,0 +1,155 @@
+== run 006aca2dbd62e2fc (build 20261010T1201) near fra {"fra":53.3,"nyc":117.3}
+network: {"kind":"wired","tx_mbps":1000,"rx_mbps":1000,"description":"Realtek Gaming 2.5GbE Family Controller"} wifi null v6 false changes 0 power []
+router: {"map-a":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":false,"mapped_kind":"public"},"map-b":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":false,"mapped_kind":"public"}} filtering [{"same_port":true,"other_port":false,"other_ip":false},{"same_port":true,"other_port":false,"other_ip":false},{"same_port":true,"other_port":false,"other_ip":false}] pmp silent pcp silent upnp silent double_nat null
+holds: 15s:kept 30s:kept 60s:kept 90s:kept 120s:kept 150s:lost 180s:lost(new port) 240s:lost(new port)
+connect eim: 10/10 connected, 10 direct, direct median 105ms max 108ms
+connect apdf: 10/10 connected, 10 direct, direct median 106ms max 107ms
+connect sym: 10/10 connected, 0 direct, direct median nullms max nullms
+connect home: 10/10 connected, 10 direct, direct median 0ms max 0ms
+switch switch-15s-0: to relay 15007ms, back 29874ms after lift, flight gap 15019.5/3599.7ms
+switch switch-15s-1: to relay 15009ms, back 29854ms after lift, flight gap 15012.9/3599.2ms
+switch switch-5s-0: to relay 5019ms, back 39849ms after lift, flight gap 5021.3/2549.8ms
+switch switch-5s-1: to relay 5003ms, back 39854ms after lift, flight gap 5011.6/2499.7ms
+switch switch-2s-0: to relay 1999ms, back 42864ms after lift, flight gap 2010.6/1848.6ms
+switch switch-2s-1: to relay 2002ms, back 42862ms after lift, flight gap 2011/1850ms
+relay-fra-clear-0 iroh flight↑ 0% lost, excess p99 5.3ms max 15.3ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 17.3ms max 24.9ms, late 0, gaps 0 max 0ms
+                  iroh audio↑ 0% lost, excess p99 5.6ms max 15.8ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 18ms max 47.4ms, late 0, gaps 1 max 66ms | cockpit↓ 0% lost, excess p99 17.3ms max 23.3ms, gaps 0 max 0ms
+relay-fra-clear-0 udp  flight↑ 0% lost, excess p99 5.5ms max 17.9ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 5.9ms max 14.9ms, late 0, gaps 0 max 0ms
+                  udp  audio↑ 0.01% lost, excess p99 5.6ms max 28.4ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 5.5ms max 27.6ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 5.1ms max 13.3ms, gaps 0 max 0ms
+relay-nyc-clear-0 iroh flight↑ 0% lost, excess p99 5ms max 11.8ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 18.7ms max 26.5ms, late 0, gaps 0 max 0ms
+                  iroh audio↑ 0% lost, excess p99 5.1ms max 13.4ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 17.1ms max 26.7ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 18.6ms max 24ms, gaps 0 max 0ms
+relay-nyc-clear-0 udp  flight↑ 0% lost, excess p99 17.4ms max 25.1ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 16.9ms max 28.4ms, late 0, gaps 0 max 0ms
+                  udp  audio↑ 0.01% lost, excess p99 16.4ms max 28.9ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 16.9ms max 27.5ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 16.3ms max 21.3ms, gaps 0 max 0ms
+relay-fra-loss-1 iroh flight↑ 0% lost, excess p99 95.5ms max 157.3ms, late 25, gaps 13 max 206.2ms | flight↓ 0% lost, excess p99 118ms max 172ms, late 107, gaps 56 max 212.4ms
+                 iroh audio↑ 0% lost, excess p99 93.6ms max 165.5ms, late 560, gaps 335 max 176.9ms | audio↓ 0% lost, excess p99 115.9ms max 172.5ms, late 785, gaps 333 max 192.6ms | cockpit↓ 0% lost, excess p99 116.4ms max 148.5ms, gaps 0 max 0ms
+relay-fra-loss-1 udp  flight↑ 1.73% lost, excess p99 6.4ms max 10.8ms, late 0, gaps 0 max 0ms | flight↓ 1.8% lost, excess p99 6.1ms max 11.4ms, late 0, gaps 1 max 150.5ms
+                 udp  audio↑ 2.19% lost, excess p99 7.9ms max 21.3ms, late 0, gaps 1 max 60.3ms | audio↓ 1.88% lost, excess p99 4.6ms max 22.2ms, late 0, gaps 1 max 61.5ms | cockpit↓ 0% lost, excess p99 126.7ms max 128.6ms, gaps 0 max 0ms
+relay-nyc-loss-1 iroh flight↑ 0% lost, excess p99 282.5ms max 483.5ms, late 647, gaps 200 max 412.5ms | flight↓ 0% lost, excess p99 311.1ms max 521.2ms, late 758, gaps 198 max 553.8ms
+                 iroh audio↑ 0% lost, excess p99 282.8ms max 483.9ms, late 2257, gaps 500 max 392.3ms | audio↓ 0% lost, excess p99 309.4ms max 532.1ms, late 2539, gaps 555 max 479.1ms | cockpit↓ 0% lost, excess p99 311.2ms max 456.1ms, gaps 0 max 0ms
+relay-nyc-loss-1 udp  flight↑ 2.37% lost, excess p99 88.2ms max 235.4ms, late 22, gaps 11 max 317.4ms | flight↓ 1.9% lost, excess p99 101.5ms max 224.5ms, late 35, gaps 19 max 270.7ms
+                 udp  audio↑ 1.99% lost, excess p99 92.5ms max 246.6ms, late 196, gaps 145 max 317.4ms | audio↓ 2.15% lost, excess p99 105ms max 263ms, late 224, gaps 152 max 270.7ms | cockpit↓ 0% lost, excess p99 294.7ms max 334.7ms, gaps 0 max 0ms
+relay-fra-loss-3 iroh flight↑ 0% lost, excess p99 187.6ms max 434.1ms, late 417, gaps 137 max 365.5ms | flight↓ 0% lost, excess p99 196.6ms max 432.1ms, late 467, gaps 144 max 373.9ms
+                 iroh audio↑ 0% lost, excess p99 194.4ms max 434.4ms, late 2265, gaps 594 max 365.5ms | audio↓ 0% lost, excess p99 196.5ms max 439.9ms, late 2305, gaps 597 max 373.9ms | cockpit↓ 0% lost, excess p99 216.8ms max 332.4ms, gaps 0 max 0ms
+relay-fra-loss-3 udp  flight↑ 6.53% lost, excess p99 6ms max 23.4ms, late 0, gaps 5 max 152.7ms | flight↓ 6.2% lost, excess p99 6.5ms max 11.1ms, late 0, gaps 5 max 199.9ms
+                 udp  audio↑ 6.11% lost, excess p99 7.2ms max 15ms, late 0, gaps 7 max 82.7ms | audio↓ 5.89% lost, excess p99 3.9ms max 27.3ms, late 0, gaps 14 max 63.3ms | cockpit↓ 0% lost, excess p99 130.1ms max 264.3ms, gaps 0 max 0ms
+relay-nyc-loss-3 iroh flight↑ 0% lost, excess p99 416.7ms max 576.9ms, late 1540, gaps 298 max 615ms | flight↓ 0% lost, excess p99 495.8ms max 747.5ms, late 1634, gaps 294 max 726ms
+                 iroh audio↑ 0% lost, excess p99 416.7ms max 577.2ms, late 4759, gaps 920 max 572.2ms | audio↓ 0% lost, excess p99 499.5ms max 759.7ms, late 4978, gaps 879 max 726ms | cockpit↓ 0% lost, excess p99 480.9ms max 679.6ms, gaps 5 max 726.2ms
+relay-nyc-loss-3 udp  flight↑ 5.87% lost, excess p99 188.6ms max 342.4ms, late 143, gaps 77 max 407.9ms | flight↓ 5.8% lost, excess p99 199.1ms max 492.9ms, late 172, gaps 95 max 525.8ms
+                 udp  audio↑ 5.28% lost, excess p99 191.5ms max 353.1ms, late 812, gaps 393 max 407.9ms | audio↓ 6.15% lost, excess p99 197.3ms max 513.2ms, late 955, gaps 457 max 525.8ms | cockpit↓ 0% lost, excess p99 466.3ms max 615.5ms, gaps 8 max 811.2ms
+relay-fra-burst-0 iroh flight↑ 0% lost, excess p99 46ms max 196.3ms, late 14, gaps 12 max 246.9ms | flight↓ 0% lost, excess p99 55.2ms max 208.8ms, late 16, gaps 11 max 256.5ms
+                  iroh audio↑ 0% lost, excess p99 37.1ms max 207.4ms, late 58, gaps 14 max 226.7ms | audio↓ 0% lost, excess p99 45.7ms max 209.4ms, late 63, gaps 15 max 227.9ms | cockpit↓ 0% lost, excess p99 80.4ms max 187.1ms, gaps 0 max 0ms
+relay-fra-burst-0 udp  flight↑ 0.73% lost, excess p99 4.9ms max 12.8ms, late 0, gaps 4 max 153.3ms | flight↓ 0.73% lost, excess p99 4.7ms max 15.3ms, late 0, gaps 7 max 153ms
+                  udp  audio↑ 0.71% lost, excess p99 4.5ms max 19ms, late 0, gaps 14 max 101.2ms | audio↓ 0.73% lost, excess p99 3.9ms max 13.2ms, late 0, gaps 14 max 101.6ms | cockpit↓ 0% lost, excess p99 5.1ms max 188.3ms, gaps 0 max 0ms
+relay-nyc-burst-0 iroh flight↑ 0% lost, excess p99 163.6ms max 349.6ms, late 48, gaps 14 max 397.7ms | flight↓ 0% lost, excess p99 157.3ms max 371.6ms, late 51, gaps 15 max 422.1ms
+                  iroh audio↑ 0% lost, excess p99 169.6ms max 372.2ms, late 151, gaps 16 max 391.2ms | audio↓ 0% lost, excess p99 158ms max 371.9ms, late 147, gaps 16 max 391.2ms | cockpit↓ 0% lost, excess p99 156.9ms max 272.1ms, gaps 0 max 0ms
+relay-nyc-burst-0 udp  flight↑ 0.77% lost, excess p99 6.5ms max 24.7ms, late 0, gaps 4 max 152ms | flight↓ 0.67% lost, excess p99 6.8ms max 14.3ms, late 0, gaps 4 max 156.3ms
+                  udp  audio↑ 0.69% lost, excess p99 7.6ms max 41.3ms, late 0, gaps 14 max 101.3ms | audio↓ 0.72% lost, excess p99 7.4ms max 47.5ms, late 0, gaps 14 max 105ms | cockpit↓ 0% lost, excess p99 72ms max 314.7ms, gaps 0 max 0ms
+burst: {"median":39,"max":60} Mbps, path rtt {"before":54.1,"during":53.9,"after":54}, flight↑ excess p95 before/during/after 1.5/3.4/1.3ms
+clock vs fra: QPC -25.59 ppm (resid 147µs over 2102s), system clock 25.59 ppm, offset -14463.8ms
+clock vs nyc: QPC -25.76 ppm (resid 149µs over 2102s), system clock 25.76 ppm, offset -14460.3ms
+windows time service: not running, source null
+
+== run 006aca4585097cf9 (build friends-1) near nyc {"nyc":42.2,"fra":131}
+network: {"kind":"wired","tx_mbps":1000,"rx_mbps":1000,"description":"Realtek PCIe GbE Family Controller"} wifi null v6 false changes 0 power []
+router: {"map-a":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":true,"mapped_kind":"public"},"map-b":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":true,"mapped_kind":"public"}} filtering [{"same_port":true,"other_port":false,"other_ip":false},{"same_port":true,"other_port":false,"other_ip":false},{"same_port":true,"other_port":false,"other_ip":false}] pmp silent pcp silent upnp answered double_nat null
+holds: 15s:kept 30s:lost 60s:lost 90s:lost 120s:lost 150s:lost 180s:lost 240s:lost
+connect eim: 10/10 connected, 10 direct, direct median 84ms max 104ms
+connect apdf: 10/10 connected, 10 direct, direct median 105ms max 106ms
+connect sym: 10/10 connected, 10 direct, direct median 125ms max 126ms
+connect home: 10/10 connected, 10 direct, direct median 316ms max 317ms
+switch switch-15s-0: to relay 15017ms, back 29871ms after lift, flight gap 14999.1/3500.4ms
+switch switch-15s-1: to relay 15014ms, back 29866ms after lift, flight gap 15000.1/3499.4ms
+switch switch-5s-0: to relay 5005ms, back 39883ms after lift, flight gap 5002.5/2450.4ms
+switch switch-5s-1: to relay 5007ms, back 39871ms after lift, flight gap 5003.6/2450.2ms
+switch switch-2s-0: to relay 2019ms, back 42878ms after lift, flight gap 2000.4/1749.8ms
+switch switch-2s-1: to relay 2022ms, back 42846ms after lift, flight gap 2030.1/1751ms
+relay-nyc-clear-0 iroh flight↑ 0% lost, excess p99 5.2ms max 17.2ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 4.2ms max 16ms, late 0, gaps 0 max 0ms
+                  iroh audio↑ 0% lost, excess p99 5.2ms max 15.6ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 3.7ms max 10.4ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 3.4ms max 4.3ms, gaps 0 max 0ms
+relay-nyc-clear-0 udp  flight↑ 0% lost, excess p99 5ms max 11.1ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 4.8ms max 10.7ms, late 0, gaps 0 max 0ms
+                  udp  audio↑ 0% lost, excess p99 5.5ms max 17.2ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 4ms max 10.9ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 4.5ms max 10.4ms, gaps 0 max 0ms
+relay-fra-clear-0 iroh flight↑ 0% lost, excess p99 7.9ms max 21ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 4.8ms max 20.4ms, late 0, gaps 0 max 0ms
+                  iroh audio↑ 0% lost, excess p99 8.8ms max 20.4ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 4.2ms max 13.3ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 4.8ms max 12.1ms, gaps 0 max 0ms
+relay-fra-clear-0 udp  flight↑ 0% lost, excess p99 3.5ms max 12.4ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 4.7ms max 11.5ms, late 0, gaps 0 max 0ms
+                  udp  audio↑ 0% lost, excess p99 3.7ms max 11.8ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 3.9ms max 13.1ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 4.3ms max 6.6ms, gaps 0 max 0ms
+relay-nyc-loss-1 iroh flight↑ 0% lost, excess p99 79.3ms max 554.8ms, late 22, gaps 3 max 603.4ms | flight↓ 0% lost, excess p99 59.8ms max 119.5ms, late 2, gaps 1 max 167.1ms
+                 iroh audio↑ 0% lost, excess p99 84.4ms max 564.4ms, late 207, gaps 139 max 583.7ms | audio↓ 0% lost, excess p99 59.4ms max 111.7ms, late 62, gaps 205 max 130.4ms | cockpit↓ 0% lost, excess p99 64.3ms max 89.6ms, gaps 0 max 0ms
+relay-nyc-loss-1 udp  flight↑ 1.3% lost, excess p99 10.1ms max 27.1ms, late 0, gaps 0 max 0ms | flight↓ 0.97% lost, excess p99 9.1ms max 23.2ms, late 0, gaps 0 max 0ms
+                 udp  audio↑ 0.99% lost, excess p99 14.9ms max 49.4ms, late 0, gaps 3 max 69ms | audio↓ 0.96% lost, excess p99 12.8ms max 48ms, late 0, gaps 4 max 79.3ms | cockpit↓ 0% lost, excess p99 9.4ms max 252.9ms, gaps 0 max 0ms
+relay-fra-loss-1 iroh flight↑ 0% lost, excess p99 168ms max 443.7ms, late 185, gaps 115 max 493.2ms | flight↓ 0% lost, excess p99 162.2ms max 267.9ms, late 179, gaps 114 max 316.9ms
+                 iroh audio↑ 0% lost, excess p99 168ms max 473.6ms, late 703, gaps 124 max 493.2ms | audio↓ 0% lost, excess p99 157.2ms max 287.6ms, late 671, gaps 142 max 299.5ms | cockpit↓ 0% lost, excess p99 162ms max 216.8ms, gaps 0 max 0ms
+relay-fra-loss-1 udp  flight↑ 1.13% lost, excess p99 4.6ms max 9.9ms, late 0, gaps 0 max 0ms | flight↓ 1.13% lost, excess p99 5.9ms max 22.7ms, late 0, gaps 0 max 0ms
+                 udp  audio↑ 1.19% lost, excess p99 5.5ms max 22.8ms, late 0, gaps 1 max 61.2ms | audio↓ 1.2% lost, excess p99 4.1ms max 44.1ms, late 0, gaps 4 max 60.7ms | cockpit↓ 0% lost, excess p99 207ms max 228.2ms, gaps 0 max 0ms
+relay-nyc-loss-3 iroh flight↑ 0% lost, excess p99 263.5ms max 404.9ms, late 88, gaps 15 max 448.9ms | flight↓ 0% lost, excess p99 86.9ms max 170.9ms, late 11, gaps 7 max 185.8ms
+                 iroh audio↑ 0% lost, excess p99 276.7ms max 399ms, late 627, gaps 333 max 418.9ms | audio↓ 0% lost, excess p99 76.7ms max 180.3ms, late 280, gaps 381 max 185.8ms | cockpit↓ 0% lost, excess p99 89.5ms max 130.8ms, gaps 0 max 0ms
+relay-nyc-loss-3 udp  flight↑ 3.77% lost, excess p99 13.4ms max 52ms, late 0, gaps 3 max 150.9ms | flight↓ 3.13% lost, excess p99 11.5ms max 56ms, late 0, gaps 2 max 151.4ms
+                 udp  audio↑ 2.79% lost, excess p99 19.2ms max 63.5ms, late 1, gaps 10 max 82.8ms | audio↓ 2.88% lost, excess p99 11.8ms max 70.9ms, late 2, gaps 8 max 89.1ms | cockpit↓ 0% lost, excess p99 186.5ms max 380.3ms, gaps 0 max 0ms
+relay-fra-loss-3 iroh flight↑ 0% lost, excess p99 534.4ms max 1084.8ms, late 638, gaps 290 max 1131.5ms | flight↓ 0% lost, excess p99 280.9ms max 727.8ms, late 416, gaps 164 max 736ms
+                 iroh audio↑ 0% lost, excess p99 534.5ms max 1102.1ms, late 2280, gaps 368 max 1114.6ms | audio↓ 0% lost, excess p99 285.1ms max 737ms, late 1830, gaps 544 max 736ms | cockpit↓ 0% lost, excess p99 295.7ms max 577ms, gaps 1 max 736ms
+relay-fra-loss-3 udp  flight↑ 3.23% lost, excess p99 30.7ms max 139.2ms, late 2, gaps 4 max 179ms | flight↓ 3.27% lost, excess p99 30.6ms max 140ms, late 3, gaps 4 max 179.6ms
+                 udp  audio↑ 2.88% lost, excess p99 38.7ms max 169.4ms, late 26, gaps 40 max 179ms | audio↓ 2.72% lost, excess p99 39.9ms max 150.7ms, late 31, gaps 30 max 179.7ms | cockpit↓ 0% lost, excess p99 227.5ms max 432.3ms, gaps 1 max 610.1ms
+relay-nyc-burst-0 iroh flight↑ 0% lost, excess p99 43.4ms max 144.3ms, late 10, gaps 10 max 193.5ms | flight↓ 0% lost, excess p99 22.4ms max 130.7ms, late 7, gaps 6 max 178.5ms
+                  iroh audio↑ 0% lost, excess p99 43.6ms max 144.5ms, late 63, gaps 16 max 163.9ms | audio↓ 0% lost, excess p99 23.8ms max 131.3ms, late 52, gaps 15 max 149.8ms | cockpit↓ 0% lost, excess p99 10ms max 103.8ms, gaps 0 max 0ms
+relay-nyc-burst-0 udp  flight↑ 0.73% lost, excess p99 10.5ms max 19.8ms, late 0, gaps 5 max 153.3ms | flight↓ 0.63% lost, excess p99 4.5ms max 25.1ms, late 0, gaps 5 max 152.4ms
+                  udp  audio↑ 0.73% lost, excess p99 10.2ms max 49.8ms, late 0, gaps 16 max 110.1ms | audio↓ 0.69% lost, excess p99 4.1ms max 64.9ms, late 1, gaps 15 max 104.7ms | cockpit↓ 0% lost, excess p99 11.8ms max 242.1ms, gaps 0 max 0ms
+relay-fra-burst-0 iroh flight↑ 0% lost, excess p99 108.9ms max 217ms, late 30, gaps 14 max 266.2ms | flight↓ 0% lost, excess p99 103.9ms max 217.7ms, late 33, gaps 14 max 266.9ms
+                  iroh audio↑ 0% lost, excess p99 107.5ms max 217.9ms, late 106, gaps 14 max 234.3ms | audio↓ 0% lost, excess p99 103.4ms max 209ms, late 104, gaps 14 max 227.2ms | cockpit↓ 0% lost, excess p99 68ms max 193.7ms, gaps 0 max 0ms
+relay-fra-burst-0 udp  flight↑ 0.67% lost, excess p99 5.4ms max 17.3ms, late 0, gaps 1 max 150.9ms | flight↓ 0.73% lost, excess p99 6.6ms max 11.7ms, late 0, gaps 6 max 154.2ms
+                  udp  audio↑ 0.68% lost, excess p99 6.4ms max 16.7ms, late 0, gaps 14 max 100.7ms | audio↓ 0.71% lost, excess p99 6.1ms max 21.6ms, late 0, gaps 14 max 101.2ms | cockpit↓ 0% lost, excess p99 8ms max 246ms, gaps 0 max 0ms
+burst: {"median":19,"max":146} Mbps, path rtt {"before":44.5,"during":44.5,"after":44.6}, flight↑ excess p95 before/during/after 1.5/1.7/1.8ms
+clock vs nyc: QPC 13.06 ppm (resid 131µs over 1934s), system clock -13.06 ppm, offset -110.7ms
+clock vs fra: QPC 13.16 ppm (resid 171µs over 1922s), system clock -13.16 ppm, offset -114.8ms
+windows time service: running, source time.windows.com,0x9
+
+== run 006aca585fdeee51 (build friends-1) near fra {"fra":22.1,"nyc":97.1}
+network: {"kind":"wired","tx_mbps":1000,"rx_mbps":1000,"description":"Realtek PCIe 5GbE Family Controller"} wifi null v6 false changes 0 power []
+router: {"map-a":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":true,"mapped_kind":"public"},"map-b":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":true,"mapped_kind":"public"},"v6":{"destinations":4,"same_port_everywhere":true,"same_ip_everywhere":true,"port_preserved":true,"mapped_kind":"public"}} filtering [{"same_port":true,"other_port":false,"other_ip":false},{"same_port":true,"other_port":false,"other_ip":false},{"same_port":true,"other_port":false,"other_ip":false}] pmp silent pcp silent upnp silent double_nat null
+holds: 15s:kept 30s:kept 60s:kept 90s:kept 120s:kept 150s:lost 180s:lost 240s:lost
+connect eim: 10/10 connected, 10 direct, direct median 42ms max 44ms
+connect apdf: 10/10 connected, 10 direct, direct median 42ms max 43ms
+connect sym: 10/10 connected, 0 direct, direct median nullms max nullms
+connect home: 10/10 connected, 10 direct, direct median 106ms max 126ms
+switch switch-15s-0: to relay 15024ms, back 29908ms after lift, flight gap 15043.2/3600.6ms
+switch switch-15s-1: to relay 15028ms, back 29913ms after lift, flight gap 15041.6/3550.8ms
+switch switch-5s-0: to relay 5025ms, back 39884ms after lift, flight gap 5041.2/2550.2ms
+switch switch-5s-1: to relay 5022ms, back 39902ms after lift, flight gap 5041.1/2550.6ms
+switch switch-2s-0: to relay 2027ms, back 42892ms after lift, flight gap 2041.6/1899.9ms
+switch switch-2s-1: to relay 2026ms, back 42907ms after lift, flight gap 2040.5/1749ms
+relay-fra-clear-0 iroh flight↑ 0% lost, excess p99 12ms max 17.8ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 4.7ms max 11.5ms, late 0, gaps 0 max 0ms
+                  iroh audio↑ 0% lost, excess p99 11.6ms max 22.5ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 4.2ms max 11.8ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 4.2ms max 9.5ms, gaps 0 max 0ms
+relay-fra-clear-0 udp  flight↑ 0% lost, excess p99 4.1ms max 12.9ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 3ms max 8.9ms, late 0, gaps 0 max 0ms
+                  udp  audio↑ 0.01% lost, excess p99 4.3ms max 12.9ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 2.8ms max 13.1ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 3.2ms max 8.3ms, gaps 0 max 0ms
+relay-nyc-clear-0 iroh flight↑ 0% lost, excess p99 20.1ms max 137.8ms, late 7, gaps 7 max 184.5ms | flight↓ 0% lost, excess p99 4.9ms max 16.6ms, late 0, gaps 0 max 0ms
+                  iroh audio↑ 0% lost, excess p99 16ms max 143.8ms, late 37, gaps 9 max 164.2ms | audio↓ 0% lost, excess p99 3.4ms max 26.2ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 5.3ms max 6.8ms, gaps 0 max 0ms
+relay-nyc-clear-0 udp  flight↑ 0.07% lost, excess p99 12.1ms max 22.1ms, late 0, gaps 0 max 0ms | flight↓ 0% lost, excess p99 4.8ms max 10.6ms, late 0, gaps 0 max 0ms
+                  udp  audio↑ 0.04% lost, excess p99 11.7ms max 25.6ms, late 0, gaps 0 max 0ms | audio↓ 0% lost, excess p99 3.3ms max 20.7ms, late 0, gaps 0 max 0ms | cockpit↓ 0% lost, excess p99 5ms max 6.8ms, gaps 0 max 0ms
+relay-fra-loss-1 iroh flight↑ 0% lost, excess p99 51.9ms max 238.8ms, late 3, gaps 1 max 288.6ms | flight↓ 0% lost, excess p99 31ms max 50.6ms, late 0, gaps 0 max 0ms
+                 iroh audio↑ 0% lost, excess p99 52.3ms max 238.8ms, late 26, gaps 115 max 199.4ms | audio↓ 0% lost, excess p99 29.9ms max 61ms, late 1, gaps 11 max 79.8ms | cockpit↓ 0% lost, excess p99 30.8ms max 43.7ms, gaps 0 max 0ms
+relay-fra-loss-1 udp  flight↑ 1.2% lost, excess p99 5.3ms max 230.3ms, late 3, gaps 1 max 280ms | flight↓ 0.9% lost, excess p99 5.7ms max 53.8ms, late 0, gaps 0 max 0ms
+                 udp  audio↑ 0.93% lost, excess p99 5.9ms max 230.3ms, late 12, gaps 2 max 208.2ms | audio↓ 1.21% lost, excess p99 3.5ms max 83.3ms, late 3, gaps 2 max 102.1ms | cockpit↓ 0% lost, excess p99 95.3ms max 105ms, gaps 0 max 0ms
+relay-nyc-loss-1 iroh flight↑ 0% lost, excess p99 188.1ms max 379.3ms, late 259, gaps 126 max 430ms | flight↓ 0% lost, excess p99 115.4ms max 210.9ms, late 86, gaps 47 max 239.3ms
+                 iroh audio↑ 0% lost, excess p99 183.5ms max 372.1ms, late 933, gaps 141 max 390ms | audio↓ 0% lost, excess p99 114ms max 211.7ms, late 523, gaps 190 max 231.6ms | cockpit↓ 0% lost, excess p99 121.4ms max 188.7ms, gaps 0 max 0ms
+relay-nyc-loss-1 udp  flight↑ 1.1% lost, excess p99 29ms max 117.1ms, late 1, gaps 1 max 164ms | flight↓ 0.87% lost, excess p99 23.4ms max 76.9ms, late 0, gaps 0 max 0ms
+                 udp  audio↑ 0.92% lost, excess p99 38.1ms max 109.2ms, late 25, gaps 29 max 125.2ms | audio↓ 1.01% lost, excess p99 30.5ms max 103.7ms, late 10, gaps 20 max 111.7ms | cockpit↓ 0% lost, excess p99 47.4ms max 250.6ms, gaps 0 max 0ms
+relay-fra-loss-3 iroh flight↑ 0% lost, excess p99 53.2ms max 101.4ms, late 1, gaps 0 max 0ms | flight↓ 0% lost, excess p99 47ms max 101.2ms, late 1, gaps 0 max 0ms
+                 iroh audio↑ 0% lost, excess p99 52.3ms max 103.8ms, late 26, gaps 290 max 122.9ms | audio↓ 0% lost, excess p99 44.7ms max 93.8ms, late 30, gaps 72 max 112.9ms | cockpit↓ 0% lost, excess p99 45.5ms max 70.9ms, gaps 0 max 0ms
+relay-fra-loss-3 udp  flight↑ 3.4% lost, excess p99 6.7ms max 13.9ms, late 0, gaps 3 max 150.5ms | flight↓ 3.87% lost, excess p99 5.9ms max 11.3ms, late 0, gaps 3 max 150.9ms
+                 udp  audio↑ 2.92% lost, excess p99 6.5ms max 14.4ms, late 0, gaps 4 max 80.1ms | audio↓ 3.09% lost, excess p99 4.5ms max 19ms, late 0, gaps 2 max 60.7ms | cockpit↓ 0% lost, excess p99 96.5ms max 117.6ms, gaps 0 max 0ms
+relay-nyc-loss-3 iroh flight↑ 0% lost, excess p99 346.4ms max 582.5ms, late 775, gaps 283 max 632.5ms | flight↓ 0% lost, excess p99 171.1ms max 288.2ms, late 246, gaps 119 max 323.7ms
+                 iroh audio↑ 0% lost, excess p99 337ms max 590.8ms, late 2558, gaps 355 max 609.7ms | audio↓ 0% lost, excess p99 163ms max 280.7ms, late 1349, gaps 608 max 285.3ms | cockpit↓ 0% lost, excess p99 168.1ms max 260.4ms, gaps 0 max 0ms
+relay-nyc-loss-3 udp  flight↑ 3.13% lost, excess p99 78.1ms max 193.9ms, late 18, gaps 12 max 214.2ms | flight↓ 3.2% lost, excess p99 72.9ms max 166.8ms, late 11, gaps 9 max 214ms
+                 udp  audio↑ 2.99% lost, excess p99 81.2ms max 203.5ms, late 156, gaps 163 max 214.2ms | audio↓ 2.67% lost, excess p99 75.9ms max 207.7ms, late 132, gaps 120 max 214ms | cockpit↓ 0% lost, excess p99 294.6ms max 530.3ms, gaps 1 max 719.2ms
+relay-fra-burst-0 iroh flight↑ 0% lost, excess p99 13ms max 103.4ms, late 3, gaps 2 max 154ms | flight↓ 0% lost, excess p99 10.7ms max 110.8ms, late 1, gaps 1 max 160.8ms
+                  iroh audio↑ 0% lost, excess p99 12ms max 114.1ms, late 38, gaps 15 max 132ms | audio↓ 0% lost, excess p99 9.5ms max 110.7ms, late 36, gaps 15 max 130.8ms | cockpit↓ 0% lost, excess p99 6ms max 89.5ms, gaps 0 max 0ms
+relay-fra-burst-0 udp  flight↑ 0.67% lost, excess p99 4.2ms max 16.5ms, late 0, gaps 4 max 151.8ms | flight↓ 0.67% lost, excess p99 4.5ms max 8.3ms, late 0, gaps 5 max 154.8ms
+                  udp  audio↑ 0.75% lost, excess p99 4.4ms max 37.2ms, late 0, gaps 15 max 104.4ms | audio↓ 0.73% lost, excess p99 2.3ms max 26.1ms, late 0, gaps 15 max 101.3ms | cockpit↓ 0% lost, excess p99 7.3ms max 118.6ms, gaps 0 max 0ms
+relay-nyc-burst-0 iroh flight↑ 0% lost, excess p99 90.2ms max 198.9ms, late 24, gaps 14 max 248.1ms | flight↓ 0% lost, excess p99 81.3ms max 181.6ms, late 24, gaps 14 max 231.5ms
+                  iroh audio↑ 0% lost, excess p99 80.3ms max 198.8ms, late 87, gaps 14 max 219.1ms | audio↓ 0% lost, excess p99 75.2ms max 176.1ms, late 86, gaps 15 max 194.4ms | cockpit↓ 0% lost, excess p99 74.7ms max 171.5ms, gaps 0 max 0ms
+relay-nyc-burst-0 udp  flight↑ 0.63% lost, excess p99 13.8ms max 19.5ms, late 0, gaps 2 max 150.9ms | flight↓ 0.8% lost, excess p99 4.6ms max 18.8ms, late 0, gaps 6 max 151.7ms
+                  udp  audio↑ 0.73% lost, excess p99 13.7ms max 19.5ms, late 0, gaps 14 max 112ms | audio↓ 0.69% lost, excess p99 4ms max 19.3ms, late 0, gaps 14 max 101.5ms | cockpit↓ 0% lost, excess p99 95.5ms max 295.7ms, gaps 0 max 0ms
+burst: {"median":277,"max":804} Mbps, path rtt {"before":21.2,"during":21.4,"after":21.2}, flight↑ excess p95 before/during/after 1.3/3.3/1.4ms
+clock vs fra: QPC -0.33 ppm (resid 211µs over 2605s), system clock 22.99 ppm, offset -65.8ms
+clock vs nyc: QPC -0.2 ppm (resid 95µs over 2588s), system clock 22.92 ppm, offset -63.3ms
+windows time service: running, source time.windows.com,0x9
+
+peer home clock vs fra: QPC -26.02 ppm over 16601s, system clock 26.02 ppm
+peer home clock vs nyc: QPC -26.02 ppm over 16602s, system clock 26.02 ppm

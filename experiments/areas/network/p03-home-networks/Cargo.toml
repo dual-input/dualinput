@@ -1,6 +1,8 @@
-# p02: node 2.3's probe across friends' home networks.
+# p03: node 2.3's probe across friends' home networks.
 # The tester is the Windows program friends run, the peer answers it on our PC and in
 # the droplets' simulated NATs, and the station runs on each droplet.
+# Its crates, programs, droplet paths, and ALPN say p02, the number it ran under; the
+# copies friends ran carry those names, so they stay.
 [workspace]
 members = ["common", "tester", "peer", "station"]
 resolver = "3"

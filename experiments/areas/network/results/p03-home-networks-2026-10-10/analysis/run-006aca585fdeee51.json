@@ -1,0 +1,3654 @@
+{
+  "run_id": "006aca585fdeee51",
+  "build": "friends-1",
+  "windows": {
+    "build": 26200,
+    "cpus": 32,
+    "display_version": "25H2",
+    "edition": "Professional",
+    "major": 10,
+    "minor": 0,
+    "product": "Windows 10 Pro",
+    "ubr": 9457
+  },
+  "network": {
+    "adapter": {
+      "kind": "wired",
+      "tx_mbps": 1000,
+      "rx_mbps": 1000,
+      "description": "Realtek PCIe 5GbE Family Controller"
+    },
+    "wifi_signal": null,
+    "wifi_rssi_dbm": null,
+    "ipv6_global": false,
+    "netchanges": 0,
+    "power": [],
+    "stalls": []
+  },
+  "load": {
+    "cpu_p50": 8,
+    "cpu_p95": 13.4,
+    "cpu_max": 34.6,
+    "own_p95": 0.3
+  },
+  "time_service": {
+    "running": true,
+    "source": "time.windows.com,0x9"
+  },
+  "stations": {
+    "near": "fra",
+    "far": "nyc",
+    "rtts_ms": {
+      "fra": 22.1,
+      "nyc": 97.1
+    }
+  },
+  "router": {
+    "mapping": {
+      "map-a": {
+        "destinations": 4,
+        "same_port_everywhere": true,
+        "same_ip_everywhere": true,
+        "port_preserved": true,
+        "mapped_kind": "public"
+      },
+      "map-b": {
+        "destinations": 4,
+        "same_port_everywhere": true,
+        "same_ip_everywhere": true,
+        "port_preserved": true,
+        "mapped_kind": "public"
+      },
+      "v6": {
+        "destinations": 4,
+        "same_port_everywhere": true,
+        "same_ip_everywhere": true,
+        "port_preserved": true,
+        "mapped_kind": "public"
+      }
+    },
+    "v6": "answered",
+    "filtering": [
+      {
+        "same_port": true,
+        "other_port": false,
+        "other_ip": false
+      },
+      {
+        "same_port": true,
+        "other_port": false,
+        "other_ip": false
+      },
+      {
+        "same_port": true,
+        "other_port": false,
+        "other_ip": false
+      }
+    ],
+    "nat_pmp": "silent",
+    "pcp": "silent",
+    "upnp": "silent",
+    "model": null,
+    "gateway_oui": [
+      "00:00:00",
+      "78:c2:13",
+      "36:00:a6",
+      "78:c2:13",
+      "00:00:00",
+      "00:00:00"
+    ],
+    "portmap": {
+      "nat_pmp": false,
+      "pcp": false,
+      "upnp": false
+    },
+    "portmap_mapping": "none",
+    "double_nat": null,
+    "wan_kind_from_pmp": null,
+    "holds": [
+      {
+        "gap_s": 15,
+        "woke": true,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 30,
+        "woke": true,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 60,
+        "woke": true,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 90,
+        "woke": true,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 120,
+        "woke": true,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 150,
+        "woke": false,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 180,
+        "woke": false,
+        "same_port_after": true
+      },
+      {
+        "gap_s": 240,
+        "woke": false,
+        "same_port_after": true
+      }
+    ]
+  },
+  "connections": {
+    "eim": {
+      "tries": 10,
+      "connected": 10,
+      "direct": 10,
+      "direct_ms": {
+        "median": 42,
+        "max": 44
+      },
+      "connect_ms": {
+        "median": 24
+      },
+      "errors": []
+    },
+    "apdf": {
+      "tries": 10,
+      "connected": 10,
+      "direct": 10,
+      "direct_ms": {
+        "median": 42,
+        "max": 43
+      },
+      "connect_ms": {
+        "median": 24
+      },
+      "errors": []
+    },
+    "sym": {
+      "tries": 10,
+      "connected": 10,
+      "direct": 0,
+      "direct_ms": {
+        "median": null,
+        "max": null
+      },
+      "connect_ms": {
+        "median": 24
+      },
+      "errors": []
+    },
+    "home": {
+      "tries": 10,
+      "connected": 10,
+      "direct": 10,
+      "direct_ms": {
+        "median": 106,
+        "max": 126
+      },
+      "connect_ms": {
+        "median": 76
+      },
+      "errors": []
+    }
+  },
+  "switch": [
+    {
+      "label": "switch-15s-0",
+      "idle_ms": 15000,
+      "keepalive_ms": 5000,
+      "to_relay_ms": 15024,
+      "back_after_lift_ms": 29908,
+      "flight_gap_peer_to_tester_ms": 15043.2,
+      "flight_gap_tester_to_peer_ms": 3600.6,
+      "loss": {
+        "flight": 70
+      }
+    },
+    {
+      "label": "switch-15s-1",
+      "idle_ms": 15000,
+      "keepalive_ms": 5000,
+      "to_relay_ms": 15028,
+      "back_after_lift_ms": 29913,
+      "flight_gap_peer_to_tester_ms": 15041.6,
+      "flight_gap_tester_to_peer_ms": 3550.8,
+      "loss": {
+        "flight": 77
+      }
+    },
+    {
+      "label": "switch-5s-0",
+      "idle_ms": 5000,
+      "keepalive_ms": 1666,
+      "to_relay_ms": 5025,
+      "back_after_lift_ms": 39884,
+      "flight_gap_peer_to_tester_ms": 5041.2,
+      "flight_gap_tester_to_peer_ms": 2550.2,
+      "loss": {
+        "flight": 54
+      }
+    },
+    {
+      "label": "switch-5s-1",
+      "idle_ms": 5000,
+      "keepalive_ms": 1666,
+      "to_relay_ms": 5022,
+      "back_after_lift_ms": 39902,
+      "flight_gap_peer_to_tester_ms": 5041.1,
+      "flight_gap_tester_to_peer_ms": 2550.6,
+      "loss": {
+        "flight": 57
+      }
+    },
+    {
+      "label": "switch-2s-0",
+      "idle_ms": 2000,
+      "keepalive_ms": 666,
+      "to_relay_ms": 2027,
+      "back_after_lift_ms": 42892,
+      "flight_gap_peer_to_tester_ms": 2041.6,
+      "flight_gap_tester_to_peer_ms": 1899.9,
+      "loss": {
+        "flight": 35
+      }
+    },
+    {
+      "label": "switch-2s-1",
+      "idle_ms": 2000,
+      "keepalive_ms": 666,
+      "to_relay_ms": 2026,
+      "back_after_lift_ms": 42907,
+      "flight_gap_peer_to_tester_ms": 2040.5,
+      "flight_gap_tester_to_peer_ms": 1749,
+      "loss": {
+        "flight": 34
+      }
+    }
+  ],
+  "failovers": {
+    "connections": 55,
+    "direct_to_relay": 6,
+    "uncaused": []
+  },
+  "rtt_ms": {
+    "connect-eim iroh-relay": {
+      "samples": 8,
+      "p50": 23.2,
+      "p95": 24.1,
+      "max": 24.1
+    },
+    "connect-eim direct": {
+      "samples": 32,
+      "p50": 24.3,
+      "p95": 29.5,
+      "max": 30.6
+    },
+    "connect-apdf iroh-relay": {
+      "samples": 10,
+      "p50": 23.6,
+      "p95": 25.1,
+      "max": 25.1
+    },
+    "connect-apdf direct": {
+      "samples": 30,
+      "p50": 23.5,
+      "p95": 32.3,
+      "max": 34.2
+    },
+    "connect-sym iroh-relay": {
+      "samples": 210,
+      "p50": 23.1,
+      "p95": 25.1,
+      "max": 33.2
+    },
+    "connect-home iroh-relay": {
+      "samples": 10,
+      "p50": 76.1,
+      "p95": 77.9,
+      "max": 77.9
+    },
+    "connect-home direct": {
+      "samples": 30,
+      "p50": 56.9,
+      "p95": 61.6,
+      "max": 62.1
+    },
+    "switch-15s direct": {
+      "samples": 48,
+      "p50": 21.9,
+      "p95": 22.2,
+      "max": 25.5
+    },
+    "switch-15s iroh-relay": {
+      "samples": 80,
+      "p50": 21.8,
+      "p95": 22.7,
+      "max": 23.9
+    },
+    "switch-5s direct": {
+      "samples": 28,
+      "p50": 22.1,
+      "p95": 24.9,
+      "max": 30.2
+    },
+    "switch-5s iroh-relay": {
+      "samples": 100,
+      "p50": 21.9,
+      "p95": 22.6,
+      "max": 23.9
+    },
+    "switch-2s direct": {
+      "samples": 22,
+      "p50": 22.1,
+      "p95": 23.2,
+      "max": 25.1
+    },
+    "switch-2s iroh-relay": {
+      "samples": 106,
+      "p50": 22.7,
+      "p95": 23.2,
+      "max": 25.1
+    },
+    "relay-fra-clear udp-forwarder": {
+      "samples": 153,
+      "p50": 74.4,
+      "p95": 75.5,
+      "max": 78.8
+    },
+    "relay-fra-clear iroh-relay": {
+      "samples": 153,
+      "p50": 76.1,
+      "p95": 77.3,
+      "max": 123.8
+    },
+    "relay-nyc-clear udp-forwarder": {
+      "samples": 154,
+      "p50": 210.3,
+      "p95": 211.6,
+      "max": 214.6
+    },
+    "relay-nyc-clear iroh-relay": {
+      "samples": 154,
+      "p50": 207.6,
+      "p95": 209.4,
+      "max": 371.3
+    }
+  },
+  "anomalies": {
+    "clock_lost": 16,
+    "tx_errors": 0,
+    "api_errors": [],
+    "attempt_errors": [],
+    "relay_errors": [],
+    "switch_errors": [],
+    "burst": [],
+    "stalls": [],
+    "stopped": false,
+    "trace_warnings": 0
+  },
+  "relay": [
+    {
+      "label": "relay-fra-clear-0",
+      "target": "home",
+      "mode": "clear",
+      "pct": 0,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.1,
+              "p95": 8.6,
+              "p99": 12,
+              "max": 17.8
+            },
+            "jitter_ms": 2.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.1,
+              "p95": 2,
+              "p99": 4.7,
+              "max": 11.5
+            },
+            "jitter_ms": 0.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.2,
+              "p95": 9.6,
+              "p99": 12.2,
+              "max": 15
+            },
+            "jitter_ms": 2.7,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.3,
+              "p95": 1.2,
+              "p99": 4.2,
+              "max": 9.5
+            },
+            "jitter_ms": 0.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 7.9,
+              "p99": 11.6,
+              "max": 22.5
+            },
+            "jitter_ms": 2.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 1.5,
+              "p99": 4.2,
+              "max": 11.8
+            },
+            "jitter_ms": 0.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 2.8,
+              "p99": 4.1,
+              "max": 12.9
+            },
+            "jitter_ms": 0.7,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.4,
+              "p95": 0.9,
+              "p99": 3,
+              "max": 8.9
+            },
+            "jitter_ms": 0.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.3,
+              "p95": 3.6,
+              "p99": 5.4,
+              "max": 8.6
+            },
+            "jitter_ms": 1.2,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.4,
+              "p95": 0.8,
+              "p99": 3.2,
+              "max": 8.3
+            },
+            "jitter_ms": 0.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7499,
+            "lost": 1,
+            "loss_pct": 0.01,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 2.2,
+              "p99": 4.3,
+              "max": 12.9
+            },
+            "jitter_ms": 0.6,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0.01,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.01,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.01
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 1.1,
+              "p99": 2.8,
+              "max": 13.1
+            },
+            "jitter_ms": 0.2,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-nyc-clear-0",
+      "target": "home",
+      "mode": "clear",
+      "pct": 0,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.3,
+              "p95": 9,
+              "p99": 20.1,
+              "max": 137.8
+            },
+            "jitter_ms": 3.3,
+            "gaps": {
+              "n": 7,
+              "max_ms": 184.5,
+              "lengths_ms": [
+                184.5,
+                178.2,
+                172.4,
+                172.1,
+                170,
+                169.6,
+                165.3
+              ]
+            },
+            "late_100ms": 7,
+            "missed_100ms_pct": 0.23,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 3.1,
+              "p99": 4.9,
+              "max": 16.6
+            },
+            "jitter_ms": 0.7,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 3.3,
+              "p95": 10.4,
+              "p99": 30.5,
+              "max": 125
+            },
+            "jitter_ms": 4.5,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 4.6,
+              "p99": 5.3,
+              "max": 6.8
+            },
+            "jitter_ms": 1,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.1,
+              "p95": 8.6,
+              "p99": 16,
+              "max": 143.8
+            },
+            "jitter_ms": 2.8,
+            "gaps": {
+              "n": 9,
+              "max_ms": 164.2,
+              "lengths_ms": [
+                164.2,
+                158.4,
+                156.5,
+                153,
+                150.5,
+                147.6,
+                145.2,
+                145,
+                140.8
+              ]
+            },
+            "late_60ms": 37,
+            "missed_60ms_pct": 0.49,
+            "late_120ms": 10,
+            "missed_120ms_pct": 0.13,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 1.6,
+              "p99": 3.4,
+              "max": 26.2
+            },
+            "jitter_ms": 0.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2998,
+            "lost": 2,
+            "loss_pct": 0.07,
+            "excess_ms": {
+              "p50": 1.1,
+              "p95": 8.4,
+              "p99": 12.1,
+              "max": 22.1
+            },
+            "jitter_ms": 2.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.07,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.07
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 3.8,
+              "p99": 4.8,
+              "max": 10.6
+            },
+            "jitter_ms": 1,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.8,
+              "p95": 10.5,
+              "p99": 14.7,
+              "max": 23.5
+            },
+            "jitter_ms": 3.2,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 3.8,
+              "p99": 5,
+              "max": 6.8
+            },
+            "jitter_ms": 1,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7497,
+            "lost": 3,
+            "loss_pct": 0.04,
+            "excess_ms": {
+              "p50": 1.1,
+              "p95": 7.8,
+              "p99": 11.7,
+              "max": 25.6
+            },
+            "jitter_ms": 2.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0.04,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.04,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.04
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 1.4,
+              "p99": 3.3,
+              "max": 20.7
+            },
+            "jitter_ms": 0.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-fra-loss-1",
+      "target": "home",
+      "mode": "loss",
+      "pct": 1,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.2,
+              "p95": 12.7,
+              "p99": 51.9,
+              "max": 238.8
+            },
+            "jitter_ms": 5.1,
+            "gaps": {
+              "n": 1,
+              "max_ms": 288.6,
+              "lengths_ms": [
+                288.6
+              ]
+            },
+            "late_100ms": 3,
+            "missed_100ms_pct": 0.1,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 12.3,
+              "p99": 31,
+              "max": 50.6
+            },
+            "jitter_ms": 3.1,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.2,
+              "p95": 15.7,
+              "p99": 54.4,
+              "max": 144.9
+            },
+            "jitter_ms": 6.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 9.7,
+              "p99": 30.8,
+              "max": 43.7
+            },
+            "jitter_ms": 2.7,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.2,
+              "p95": 14.3,
+              "p99": 52.3,
+              "max": 238.8
+            },
+            "jitter_ms": 4.1,
+            "gaps": {
+              "n": 115,
+              "max_ms": 199.4,
+              "lengths_ms": [
+                199.4,
+                123.7,
+                114.1,
+                99.3,
+                91.1,
+                86.3,
+                82.6,
+                82.3,
+                81.5,
+                80.8,
+                77.6,
+                77.2,
+                77.1,
+                76.7,
+                76.5,
+                76.1,
+                76,
+                75.9,
+                75.7,
+                75.4
+              ]
+            },
+            "late_60ms": 26,
+            "missed_60ms_pct": 0.35,
+            "late_120ms": 8,
+            "missed_120ms_pct": 0.11,
+            "late_170ms": 5,
+            "missed_170ms_pct": 0.07
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 7.5,
+              "p99": 29.9,
+              "max": 61
+            },
+            "jitter_ms": 1.9,
+            "gaps": {
+              "n": 11,
+              "max_ms": 79.8,
+              "lengths_ms": [
+                79.8,
+                73.2,
+                61.5,
+                61.3,
+                61.1,
+                61,
+                60.9,
+                60.6,
+                60.6,
+                60.1,
+                60
+              ]
+            },
+            "late_60ms": 1,
+            "missed_60ms_pct": 0.01,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2964,
+            "lost": 36,
+            "loss_pct": 1.2,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 3.7,
+              "p99": 5.3,
+              "max": 230.3
+            },
+            "jitter_ms": 1.1,
+            "gaps": {
+              "n": 1,
+              "max_ms": 280,
+              "lengths_ms": [
+                280
+              ]
+            },
+            "late_100ms": 3,
+            "missed_100ms_pct": 1.3,
+            "late_400ms": 0,
+            "missed_400ms_pct": 1.2
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 2973,
+            "lost": 27,
+            "loss_pct": 0.9,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 4,
+              "p99": 5.7,
+              "max": 53.8
+            },
+            "jitter_ms": 0.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.9,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.9
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.3,
+              "p95": 6.7,
+              "p99": 90.4,
+              "max": 144.2
+            },
+            "jitter_ms": 4.4,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 4.9,
+              "p99": 95.3,
+              "max": 105
+            },
+            "jitter_ms": 3.2,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7430,
+            "lost": 70,
+            "loss_pct": 0.93,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 2.8,
+              "p99": 5.9,
+              "max": 230.3
+            },
+            "jitter_ms": 0.8,
+            "gaps": {
+              "n": 2,
+              "max_ms": 208.2,
+              "lengths_ms": [
+                208.2,
+                61.6
+              ]
+            },
+            "late_60ms": 12,
+            "missed_60ms_pct": 1.09,
+            "late_120ms": 8,
+            "missed_120ms_pct": 1.04,
+            "late_170ms": 5,
+            "missed_170ms_pct": 1
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7409,
+            "lost": 91,
+            "loss_pct": 1.21,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 1.2,
+              "p99": 3.5,
+              "max": 83.3
+            },
+            "jitter_ms": 0.3,
+            "gaps": {
+              "n": 2,
+              "max_ms": 102.1,
+              "lengths_ms": [
+                102.1,
+                84
+              ]
+            },
+            "late_60ms": 3,
+            "missed_60ms_pct": 1.25,
+            "late_120ms": 0,
+            "missed_120ms_pct": 1.21,
+            "late_170ms": 0,
+            "missed_170ms_pct": 1.21
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-nyc-loss-1",
+      "target": "home",
+      "mode": "loss",
+      "pct": 1,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 141.4,
+              "p99": 188.1,
+              "max": 379.3
+            },
+            "jitter_ms": 15.2,
+            "gaps": {
+              "n": 126,
+              "max_ms": 430,
+              "lengths_ms": [
+                430,
+                419.3,
+                242.2,
+                240.9,
+                240.7,
+                240.4,
+                240.3,
+                240.3,
+                240.3,
+                240.2,
+                240,
+                240,
+                239.5,
+                239.2,
+                239.2,
+                238.9,
+                238.8,
+                238.1,
+                237.7,
+                237.1
+              ]
+            },
+            "late_100ms": 259,
+            "missed_100ms_pct": 8.63,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 9.2,
+              "p95": 82.3,
+              "p99": 115.4,
+              "max": 210.9
+            },
+            "jitter_ms": 15.8,
+            "gaps": {
+              "n": 47,
+              "max_ms": 239.3,
+              "lengths_ms": [
+                239.3,
+                239.2,
+                231.6,
+                230,
+                211.2,
+                193.3,
+                187,
+                172.9,
+                169.1,
+                168.9,
+                167.6,
+                167.1,
+                166,
+                165.4,
+                164.1,
+                163.5,
+                163.1,
+                163,
+                162,
+                161.3
+              ]
+            },
+            "late_100ms": 86,
+            "missed_100ms_pct": 2.87,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 138.7,
+              "p99": 191.1,
+              "max": 270.7
+            },
+            "jitter_ms": 30.6,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 9.7,
+              "p95": 80.2,
+              "p99": 121.4,
+              "max": 188.7
+            },
+            "jitter_ms": 18.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 141.9,
+              "p99": 183.5,
+              "max": 372.1
+            },
+            "jitter_ms": 6.9,
+            "gaps": {
+              "n": 141,
+              "max_ms": 390,
+              "lengths_ms": [
+                390,
+                390,
+                214.1,
+                212,
+                211.3,
+                211.2,
+                211.2,
+                211.1,
+                211.1,
+                211.1,
+                211,
+                210.8,
+                210.7,
+                210.5,
+                210.3,
+                210.3,
+                210.2,
+                210.1,
+                210.1,
+                210
+              ]
+            },
+            "late_60ms": 933,
+            "missed_60ms_pct": 12.44,
+            "late_120ms": 525,
+            "missed_120ms_pct": 7,
+            "late_170ms": 172,
+            "missed_170ms_pct": 2.29
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 3.7,
+              "p95": 75.9,
+              "p99": 114,
+              "max": 211.7
+            },
+            "jitter_ms": 9.5,
+            "gaps": {
+              "n": 190,
+              "max_ms": 231.6,
+              "lengths_ms": [
+                231.6,
+                229.3,
+                219.7,
+                209.6,
+                202.3,
+                175.9,
+                168.2,
+                159.1,
+                153.3,
+                149.6,
+                146.1,
+                146,
+                145,
+                144.6,
+                144.1,
+                143.1,
+                142.5,
+                139.8,
+                139.8,
+                138
+              ]
+            },
+            "late_60ms": 523,
+            "missed_60ms_pct": 6.97,
+            "late_120ms": 47,
+            "missed_120ms_pct": 0.63,
+            "late_170ms": 10,
+            "missed_170ms_pct": 0.13
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2967,
+            "lost": 33,
+            "loss_pct": 1.1,
+            "excess_ms": {
+              "p50": 1.7,
+              "p95": 12.2,
+              "p99": 29,
+              "max": 117.1
+            },
+            "jitter_ms": 3.9,
+            "gaps": {
+              "n": 1,
+              "max_ms": 164,
+              "lengths_ms": [
+                164
+              ]
+            },
+            "late_100ms": 1,
+            "missed_100ms_pct": 1.13,
+            "late_400ms": 0,
+            "missed_400ms_pct": 1.1
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 2974,
+            "lost": 26,
+            "loss_pct": 0.87,
+            "excess_ms": {
+              "p50": 0.4,
+              "p95": 7,
+              "p99": 23.4,
+              "max": 76.9
+            },
+            "jitter_ms": 3.2,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.87,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.87
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 5.3,
+              "p95": 22.4,
+              "p99": 240.7,
+              "max": 308.2
+            },
+            "jitter_ms": 11.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 3,
+              "p95": 10,
+              "p99": 47.4,
+              "max": 250.6
+            },
+            "jitter_ms": 5.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7431,
+            "lost": 69,
+            "loss_pct": 0.92,
+            "excess_ms": {
+              "p50": 1.2,
+              "p95": 12.6,
+              "p99": 38.1,
+              "max": 109.2
+            },
+            "jitter_ms": 3.9,
+            "gaps": {
+              "n": 29,
+              "max_ms": 125.2,
+              "lengths_ms": [
+                125.2,
+                117,
+                110.4,
+                101.5,
+                99.5,
+                95.1,
+                92,
+                88.1,
+                86.4,
+                82.6,
+                78.2,
+                77,
+                76.6,
+                73.9,
+                72.6,
+                71.9,
+                70.5,
+                70.5,
+                69.7,
+                66.9
+              ]
+            },
+            "late_60ms": 25,
+            "missed_60ms_pct": 1.25,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.92,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.92
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7424,
+            "lost": 76,
+            "loss_pct": 1.01,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 3.6,
+              "p99": 30.5,
+              "max": 103.7
+            },
+            "jitter_ms": 1.2,
+            "gaps": {
+              "n": 20,
+              "max_ms": 111.7,
+              "lengths_ms": [
+                111.7,
+                105.6,
+                94.2,
+                91.5,
+                77.3,
+                76.3,
+                75.1,
+                70.6,
+                69.4,
+                66.2,
+                66.1,
+                66,
+                63.8,
+                63.1,
+                62.3,
+                61.8,
+                61.1,
+                60.8,
+                60.8,
+                60.7
+              ]
+            },
+            "late_60ms": 10,
+            "missed_60ms_pct": 1.15,
+            "late_120ms": 0,
+            "missed_120ms_pct": 1.01,
+            "late_170ms": 0,
+            "missed_170ms_pct": 1.01
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-fra-loss-3",
+      "target": "home",
+      "mode": "loss",
+      "pct": 3,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 45.2,
+              "p99": 53.2,
+              "max": 101.4
+            },
+            "jitter_ms": 8.7,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 1,
+            "missed_100ms_pct": 0.03,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 2.4,
+              "p95": 32.4,
+              "p99": 47,
+              "max": 101.2
+            },
+            "jitter_ms": 9.6,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            },
+            "late_100ms": 1,
+            "missed_100ms_pct": 0.03,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 47.7,
+              "p99": 53.5,
+              "max": 98
+            },
+            "jitter_ms": 9.9,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 2.5,
+              "p95": 32.5,
+              "p99": 45.5,
+              "max": 70.9
+            },
+            "jitter_ms": 9.5,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 38.2,
+              "p99": 52.3,
+              "max": 103.8
+            },
+            "jitter_ms": 5.6,
+            "gaps": {
+              "n": 290,
+              "max_ms": 122.9,
+              "lengths_ms": [
+                122.9,
+                122.8,
+                122,
+                118.2,
+                116.6,
+                112.7,
+                110.9,
+                107.8,
+                107,
+                82.3,
+                80.5,
+                79,
+                78.7,
+                77.9,
+                77.8,
+                77.5,
+                76.9,
+                76.3,
+                76.1,
+                75.9
+              ]
+            },
+            "late_60ms": 26,
+            "missed_60ms_pct": 0.35,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 2.2,
+              "p95": 31.3,
+              "p99": 44.7,
+              "max": 93.8
+            },
+            "jitter_ms": 6.4,
+            "gaps": {
+              "n": 72,
+              "max_ms": 112.9,
+              "lengths_ms": [
+                112.9,
+                112.8,
+                100.1,
+                95.6,
+                94.5,
+                93.2,
+                92.2,
+                91.7,
+                88.1,
+                88.1,
+                84.1,
+                83.8,
+                83.2,
+                83.2,
+                83,
+                82.4,
+                82.3,
+                82.1,
+                80.6,
+                80.1
+              ]
+            },
+            "late_60ms": 30,
+            "missed_60ms_pct": 0.4,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2898,
+            "lost": 102,
+            "loss_pct": 3.4,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 4.6,
+              "p99": 6.7,
+              "max": 13.9
+            },
+            "jitter_ms": 1.4,
+            "gaps": {
+              "n": 3,
+              "max_ms": 150.5,
+              "lengths_ms": [
+                150.5,
+                150.3,
+                150.2
+              ]
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 3.4,
+            "late_400ms": 0,
+            "missed_400ms_pct": 3.4
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 2884,
+            "lost": 116,
+            "loss_pct": 3.87,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 4.3,
+              "p99": 5.9,
+              "max": 11.3
+            },
+            "jitter_ms": 1.4,
+            "gaps": {
+              "n": 3,
+              "max_ms": 150.9,
+              "lengths_ms": [
+                150.9,
+                150.6,
+                150.2
+              ]
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 3.87,
+            "late_400ms": 0,
+            "missed_400ms_pct": 3.87
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 2.8,
+              "p95": 7.8,
+              "p99": 95.7,
+              "max": 115.3
+            },
+            "jitter_ms": 7.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 2,
+              "p95": 7.5,
+              "p99": 96.5,
+              "max": 117.6
+            },
+            "jitter_ms": 8.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7281,
+            "lost": 219,
+            "loss_pct": 2.92,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 4.7,
+              "p99": 6.5,
+              "max": 14.4
+            },
+            "jitter_ms": 1,
+            "gaps": {
+              "n": 4,
+              "max_ms": 80.1,
+              "lengths_ms": [
+                80.1,
+                64.2,
+                60.1,
+                60
+              ]
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 2.92,
+            "late_120ms": 0,
+            "missed_120ms_pct": 2.92,
+            "late_170ms": 0,
+            "missed_170ms_pct": 2.92
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7268,
+            "lost": 232,
+            "loss_pct": 3.09,
+            "excess_ms": {
+              "p50": 1,
+              "p95": 1.8,
+              "p99": 4.5,
+              "max": 19
+            },
+            "jitter_ms": 0.4,
+            "gaps": {
+              "n": 2,
+              "max_ms": 60.7,
+              "lengths_ms": [
+                60.7,
+                60.5
+              ]
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 3.09,
+            "late_120ms": 0,
+            "missed_120ms_pct": 3.09,
+            "late_170ms": 0,
+            "missed_170ms_pct": 3.09
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-nyc-loss-3",
+      "target": "home",
+      "mode": "loss",
+      "pct": 3,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 2.6,
+              "p95": 196.4,
+              "p99": 346.4,
+              "max": 582.5
+            },
+            "jitter_ms": 37.5,
+            "gaps": {
+              "n": 283,
+              "max_ms": 632.5,
+              "lengths_ms": [
+                632.5,
+                609.7,
+                597.6,
+                446.4,
+                445.6,
+                444.2,
+                441.1,
+                428.3,
+                423.3,
+                405.4,
+                393.2,
+                392.8,
+                318.5,
+                310.5,
+                297.5,
+                295,
+                257.3,
+                253.8,
+                252.1,
+                251.1
+              ]
+            },
+            "late_100ms": 775,
+            "missed_100ms_pct": 25.83,
+            "late_400ms": 11,
+            "missed_400ms_pct": 0.37
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 17.9,
+              "p95": 120.8,
+              "p99": 171.1,
+              "max": 288.2
+            },
+            "jitter_ms": 30.9,
+            "gaps": {
+              "n": 119,
+              "max_ms": 323.7,
+              "lengths_ms": [
+                323.7,
+                301.1,
+                285.1,
+                285,
+                283.5,
+                244.6,
+                242,
+                232.8,
+                217.4,
+                217.3,
+                216.5,
+                213.1,
+                209,
+                209,
+                208,
+                207.1,
+                203.4,
+                202.6,
+                197.6,
+                194.2
+              ]
+            },
+            "late_100ms": 246,
+            "missed_100ms_pct": 8.2,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 4.6,
+              "p95": 196.8,
+              "p99": 355.2,
+              "max": 548.8
+            },
+            "jitter_ms": 73.6,
+            "gaps": {
+              "n": 3,
+              "max_ms": 746.7,
+              "lengths_ms": [
+                746.7,
+                711.8,
+                654.6
+              ]
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 15.8,
+              "p95": 122.1,
+              "p99": 168.1,
+              "max": 260.4
+            },
+            "jitter_ms": 34.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.5,
+              "p95": 195.9,
+              "p99": 337,
+              "max": 590.8
+            },
+            "jitter_ms": 17.1,
+            "gaps": {
+              "n": 355,
+              "max_ms": 609.7,
+              "lengths_ms": [
+                609.7,
+                607.4,
+                592.3,
+                419,
+                418.1,
+                413.8,
+                408.1,
+                406.8,
+                406.5,
+                397.1,
+                393,
+                392.6,
+                310.4,
+                276.3,
+                259.4,
+                253.7,
+                242.1,
+                235.1,
+                226.1,
+                226
+              ]
+            },
+            "late_60ms": 2558,
+            "missed_60ms_pct": 34.11,
+            "late_120ms": 1604,
+            "missed_120ms_pct": 21.39,
+            "late_170ms": 812,
+            "missed_170ms_pct": 10.83
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 16.2,
+              "p95": 115.7,
+              "p99": 163,
+              "max": 280.7
+            },
+            "jitter_ms": 19.3,
+            "gaps": {
+              "n": 608,
+              "max_ms": 285.3,
+              "lengths_ms": [
+                285.3,
+                285.1,
+                285,
+                279.1,
+                248,
+                232.8,
+                229,
+                225,
+                217.4,
+                207.1,
+                206.5,
+                199.5,
+                195.5,
+                195.1,
+                194.2,
+                190.5,
+                190.2,
+                190.1,
+                186.1,
+                185.2
+              ]
+            },
+            "late_60ms": 1349,
+            "missed_60ms_pct": 17.99,
+            "late_120ms": 324,
+            "missed_120ms_pct": 4.32,
+            "late_170ms": 64,
+            "missed_170ms_pct": 0.85
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2906,
+            "lost": 94,
+            "loss_pct": 3.13,
+            "excess_ms": {
+              "p50": 2,
+              "p95": 33.5,
+              "p99": 78.1,
+              "max": 193.9
+            },
+            "jitter_ms": 7.5,
+            "gaps": {
+              "n": 12,
+              "max_ms": 214.2,
+              "lengths_ms": [
+                214.2,
+                212.1,
+                211.7,
+                187.1,
+                180,
+                178.9,
+                176.6,
+                171.5,
+                168.8,
+                162.2,
+                151.4,
+                150.8
+              ]
+            },
+            "late_100ms": 18,
+            "missed_100ms_pct": 3.73,
+            "late_400ms": 0,
+            "missed_400ms_pct": 3.13
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 2904,
+            "lost": 96,
+            "loss_pct": 3.2,
+            "excess_ms": {
+              "p50": 0.6,
+              "p95": 32.2,
+              "p99": 72.9,
+              "max": 166.8
+            },
+            "jitter_ms": 6.6,
+            "gaps": {
+              "n": 9,
+              "max_ms": 214,
+              "lengths_ms": [
+                214,
+                185,
+                174.2,
+                171.2,
+                158.8,
+                157.9,
+                155.7,
+                155.2,
+                150.6
+              ]
+            },
+            "late_100ms": 11,
+            "missed_100ms_pct": 3.57,
+            "late_400ms": 0,
+            "missed_400ms_pct": 3.2
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 5.1,
+              "p95": 53.9,
+              "p99": 248.3,
+              "max": 533
+            },
+            "jitter_ms": 15.9,
+            "gaps": {
+              "n": 1,
+              "max_ms": 625.5,
+              "lengths_ms": [
+                625.5
+              ]
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 3.5,
+              "p95": 86.6,
+              "p99": 294.6,
+              "max": 530.3
+            },
+            "jitter_ms": 24.9,
+            "gaps": {
+              "n": 1,
+              "max_ms": 719.2,
+              "lengths_ms": [
+                719.2
+              ]
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7276,
+            "lost": 224,
+            "loss_pct": 2.99,
+            "excess_ms": {
+              "p50": 1.4,
+              "p95": 40.6,
+              "p99": 81.2,
+              "max": 203.5
+            },
+            "jitter_ms": 7,
+            "gaps": {
+              "n": 163,
+              "max_ms": 214.2,
+              "lengths_ms": [
+                214.2,
+                187.1,
+                176.6,
+                171.5,
+                168.8,
+                167.4,
+                162.2,
+                156.9,
+                156,
+                151.2,
+                148.1,
+                141.5,
+                141.4,
+                125.2,
+                119.7,
+                115.1,
+                113.9,
+                112.9,
+                110.4,
+                109
+              ]
+            },
+            "late_60ms": 156,
+            "missed_60ms_pct": 5.07,
+            "late_120ms": 24,
+            "missed_120ms_pct": 3.31,
+            "late_170ms": 4,
+            "missed_170ms_pct": 3.04
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7300,
+            "lost": 200,
+            "loss_pct": 2.67,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 36.1,
+              "p99": 75.9,
+              "max": 207.7
+            },
+            "jitter_ms": 4.5,
+            "gaps": {
+              "n": 120,
+              "max_ms": 214,
+              "lengths_ms": [
+                214,
+                185,
+                176.8,
+                158.8,
+                144.2,
+                138,
+                137.2,
+                132.6,
+                131.1,
+                127.1,
+                125.4,
+                122.1,
+                117,
+                116.2,
+                115.2,
+                115.1,
+                112.1,
+                110.6,
+                109.3,
+                106.8
+              ]
+            },
+            "late_60ms": 132,
+            "missed_60ms_pct": 4.43,
+            "late_120ms": 14,
+            "missed_120ms_pct": 2.85,
+            "late_170ms": 3,
+            "missed_170ms_pct": 2.71
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-fra-burst-0",
+      "target": "home",
+      "mode": "burst",
+      "pct": 0,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.6,
+              "p95": 2.3,
+              "p99": 13,
+              "max": 103.4
+            },
+            "jitter_ms": 1.3,
+            "gaps": {
+              "n": 2,
+              "max_ms": 154,
+              "lengths_ms": [
+                154,
+                153.1
+              ]
+            },
+            "late_100ms": 3,
+            "missed_100ms_pct": 0.1,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 1.6,
+              "p99": 10.7,
+              "max": 110.8
+            },
+            "jitter_ms": 1.1,
+            "gaps": {
+              "n": 1,
+              "max_ms": 160.8,
+              "lengths_ms": [
+                160.8
+              ]
+            },
+            "late_100ms": 1,
+            "missed_100ms_pct": 0.03,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 3.2,
+              "p99": 8.9,
+              "max": 103
+            },
+            "jitter_ms": 1.6,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 2.6,
+              "p99": 6,
+              "max": 89.5
+            },
+            "jitter_ms": 1.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 1.5,
+              "p99": 12,
+              "max": 114.1
+            },
+            "jitter_ms": 0.8,
+            "gaps": {
+              "n": 15,
+              "max_ms": 132,
+              "lengths_ms": [
+                132,
+                131,
+                127.5,
+                123,
+                122,
+                122,
+                121.1,
+                119.3,
+                111.2,
+                111,
+                110.9,
+                103.1,
+                102.9,
+                101.8,
+                100.9
+              ]
+            },
+            "late_60ms": 38,
+            "missed_60ms_pct": 0.51,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 1.3,
+              "p99": 9.5,
+              "max": 110.7
+            },
+            "jitter_ms": 0.6,
+            "gaps": {
+              "n": 15,
+              "max_ms": 130.8,
+              "lengths_ms": [
+                130.8,
+                129.7,
+                127.8,
+                122.1,
+                121.9,
+                121.1,
+                112.1,
+                109.5,
+                108.8,
+                108.6,
+                108.3,
+                108.2,
+                108.2,
+                108.1,
+                107.2
+              ]
+            },
+            "late_60ms": 36,
+            "missed_60ms_pct": 0.48,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2980,
+            "lost": 20,
+            "loss_pct": 0.67,
+            "excess_ms": {
+              "p50": 0.6,
+              "p95": 3,
+              "p99": 4.2,
+              "max": 16.5
+            },
+            "jitter_ms": 0.7,
+            "gaps": {
+              "n": 4,
+              "max_ms": 151.8,
+              "lengths_ms": [
+                151.8,
+                151.1,
+                150.1,
+                150.1
+              ]
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.67,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.67
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 2980,
+            "lost": 20,
+            "loss_pct": 0.67,
+            "excess_ms": {
+              "p50": 0.5,
+              "p95": 2.4,
+              "p99": 4.5,
+              "max": 8.3
+            },
+            "jitter_ms": 0.5,
+            "gaps": {
+              "n": 5,
+              "max_ms": 154.8,
+              "lengths_ms": [
+                154.8,
+                153.4,
+                151.4,
+                151.1,
+                150.8
+              ]
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.67,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.67
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.9,
+              "p95": 5.2,
+              "p99": 9.8,
+              "max": 159
+            },
+            "jitter_ms": 3.1,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.3,
+              "p95": 3.4,
+              "p99": 7.3,
+              "max": 118.6
+            },
+            "jitter_ms": 2.7,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7444,
+            "lost": 56,
+            "loss_pct": 0.75,
+            "excess_ms": {
+              "p50": 0.6,
+              "p95": 1.4,
+              "p99": 4.4,
+              "max": 37.2
+            },
+            "jitter_ms": 0.5,
+            "gaps": {
+              "n": 15,
+              "max_ms": 104.4,
+              "lengths_ms": [
+                104.4,
+                102.1,
+                101.1,
+                100.2,
+                100,
+                100,
+                100,
+                99.4,
+                99.1,
+                98.4,
+                81.9,
+                80.1,
+                80.1,
+                79.9,
+                79
+              ]
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0.75,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.75,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.75
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7445,
+            "lost": 55,
+            "loss_pct": 0.73,
+            "excess_ms": {
+              "p50": 0.7,
+              "p95": 1,
+              "p99": 2.3,
+              "max": 26.1
+            },
+            "jitter_ms": 0.2,
+            "gaps": {
+              "n": 15,
+              "max_ms": 101.3,
+              "lengths_ms": [
+                101.3,
+                100.8,
+                100.5,
+                100.4,
+                100.1,
+                100,
+                100,
+                99.8,
+                99.6,
+                98.4,
+                82,
+                81.4,
+                81,
+                79.5,
+                78.6
+              ]
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0.73,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.73,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.73
+          }
+        }
+      }
+    },
+    {
+      "label": "relay-nyc-burst-0",
+      "target": "home",
+      "mode": "burst",
+      "pct": 0,
+      "iroh": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.5,
+              "p95": 11.2,
+              "p99": 90.2,
+              "max": 198.9
+            },
+            "jitter_ms": 4.7,
+            "gaps": {
+              "n": 14,
+              "max_ms": 248.1,
+              "lengths_ms": [
+                248.1,
+                242.9,
+                239,
+                233.6,
+                210.5,
+                210,
+                208.6,
+                205.4,
+                204.1,
+                197.5,
+                194.1,
+                187.6,
+                186.6,
+                183.1
+              ]
+            },
+            "late_100ms": 24,
+            "missed_100ms_pct": 0.8,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 3000,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.5,
+              "p95": 3.4,
+              "p99": 81.3,
+              "max": 181.6
+            },
+            "jitter_ms": 2.7,
+            "gaps": {
+              "n": 14,
+              "max_ms": 231.5,
+              "lengths_ms": [
+                231.5,
+                230.8,
+                230,
+                229.2,
+                223.9,
+                220.2,
+                220,
+                209.8,
+                205.3,
+                197.8,
+                183.9,
+                181.3,
+                177.8,
+                175.4
+              ]
+            },
+            "late_100ms": 24,
+            "missed_100ms_pct": 0.8,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 3,
+              "p95": 12,
+              "p99": 53.8,
+              "max": 158.6
+            },
+            "jitter_ms": 5.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.3,
+              "p95": 3.6,
+              "p99": 74.7,
+              "max": 171.5
+            },
+            "jitter_ms": 4.3,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 1.2,
+              "p95": 10.7,
+              "p99": 80.3,
+              "max": 198.8
+            },
+            "jitter_ms": 3.7,
+            "gaps": {
+              "n": 14,
+              "max_ms": 219.1,
+              "lengths_ms": [
+                219.1,
+                214.9,
+                211.8,
+                210,
+                206.7,
+                200.2,
+                198.2,
+                197.3,
+                194.9,
+                191.2,
+                190.1,
+                187.5,
+                176,
+                172.7
+              ]
+            },
+            "late_60ms": 87,
+            "missed_60ms_pct": 1.16,
+            "late_120ms": 47,
+            "missed_120ms_pct": 0.63,
+            "late_170ms": 16,
+            "missed_170ms_pct": 0.21
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7500,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 2.2,
+              "p99": 75.2,
+              "max": 176.1
+            },
+            "jitter_ms": 1,
+            "gaps": {
+              "n": 15,
+              "max_ms": 194.4,
+              "lengths_ms": [
+                194.4,
+                194.3,
+                193.1,
+                191.7,
+                190.7,
+                190.2,
+                190.2,
+                189.9,
+                189.9,
+                189.9,
+                189.8,
+                183.9,
+                180.8,
+                175.5,
+                114.4
+              ]
+            },
+            "late_60ms": 86,
+            "missed_60ms_pct": 1.15,
+            "late_120ms": 41,
+            "missed_120ms_pct": 0.55,
+            "late_170ms": 10,
+            "missed_170ms_pct": 0.13
+          }
+        }
+      },
+      "udp": {
+        "flight": {
+          "tester_to_peer": {
+            "sent": 3000,
+            "received": 2981,
+            "lost": 19,
+            "loss_pct": 0.63,
+            "excess_ms": {
+              "p50": 1.4,
+              "p95": 10.4,
+              "p99": 13.8,
+              "max": 19.5
+            },
+            "jitter_ms": 3.3,
+            "gaps": {
+              "n": 2,
+              "max_ms": 150.9,
+              "lengths_ms": [
+                150.9,
+                150
+              ]
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.63,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.63
+          },
+          "peer_to_tester": {
+            "sent": 3000,
+            "received": 2976,
+            "lost": 24,
+            "loss_pct": 0.8,
+            "excess_ms": {
+              "p50": 0.5,
+              "p95": 3.2,
+              "p99": 4.6,
+              "max": 18.8
+            },
+            "jitter_ms": 0.6,
+            "gaps": {
+              "n": 6,
+              "max_ms": 151.7,
+              "lengths_ms": [
+                151.7,
+                151.4,
+                150.9,
+                150.8,
+                150.4,
+                150.3
+              ]
+            },
+            "late_100ms": 0,
+            "missed_100ms_pct": 0.8,
+            "late_400ms": 0,
+            "missed_400ms_pct": 0.8
+          }
+        },
+        "cockpit": {
+          "tester_to_peer": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 3.4,
+              "p95": 10.9,
+              "p99": 54.8,
+              "max": 276.2
+            },
+            "jitter_ms": 6,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          },
+          "peer_to_tester": {
+            "sent": 750,
+            "received": 750,
+            "lost": 0,
+            "loss_pct": 0,
+            "excess_ms": {
+              "p50": 0.4,
+              "p95": 4.3,
+              "p99": 95.5,
+              "max": 295.7
+            },
+            "jitter_ms": 5.8,
+            "gaps": {
+              "n": 0,
+              "max_ms": 0,
+              "lengths_ms": []
+            }
+          }
+        },
+        "audio": {
+          "tester_to_peer": {
+            "sent": 7500,
+            "received": 7445,
+            "lost": 55,
+            "loss_pct": 0.73,
+            "excess_ms": {
+              "p50": 1.1,
+              "p95": 9.8,
+              "p99": 13.7,
+              "max": 19.5
+            },
+            "jitter_ms": 3.2,
+            "gaps": {
+              "n": 14,
+              "max_ms": 112,
+              "lengths_ms": [
+                112,
+                104.4,
+                103.2,
+                102.7,
+                102.7,
+                102.6,
+                101.6,
+                100.9,
+                100.2,
+                100.1,
+                99,
+                98.3,
+                96.3,
+                80.6
+              ]
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0.73,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.73,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.73
+          },
+          "peer_to_tester": {
+            "sent": 7500,
+            "received": 7448,
+            "lost": 52,
+            "loss_pct": 0.69,
+            "excess_ms": {
+              "p50": 0.8,
+              "p95": 1.5,
+              "p99": 4,
+              "max": 19.3
+            },
+            "jitter_ms": 0.3,
+            "gaps": {
+              "n": 14,
+              "max_ms": 101.5,
+              "lengths_ms": [
+                101.5,
+                101.2,
+                100.4,
+                100.1,
+                100.1,
+                99.9,
+                99.9,
+                99.6,
+                96.7,
+                81,
+                80.4,
+                80.1,
+                79.6,
+                77.9
+              ]
+            },
+            "late_60ms": 0,
+            "missed_60ms_pct": 0.69,
+            "late_120ms": 0,
+            "missed_120ms_pct": 0.69,
+            "late_170ms": 0,
+            "missed_170ms_pct": 0.69
+          }
+        }
+      }
+    }
+  ],
+  "burst": {
+    "upload_s": 60,
+    "upload_mbps": {
+      "median": 277,
+      "max": 804
+    },
+    "path_rtt_ms": {
+      "before": 21.2,
+      "during": 21.4,
+      "after": 21.2
+    },
+    "before": {
+      "flight": {
+        "tester_to_peer": {
+          "sent": 600,
+          "received": 600,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.8,
+            "p95": 1.3,
+            "p99": 2.8,
+            "max": 4.2
+          },
+          "jitter_ms": 0.4,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_100ms": 0,
+          "missed_100ms_pct": 0,
+          "late_400ms": 0,
+          "missed_400ms_pct": 0
+        },
+        "peer_to_tester": {
+          "sent": 600,
+          "received": 600,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.2,
+            "p95": 0.5,
+            "p99": 2,
+            "max": 5.1
+          },
+          "jitter_ms": 0.2,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_100ms": 0,
+          "missed_100ms_pct": 0,
+          "late_400ms": 0,
+          "missed_400ms_pct": 0
+        }
+      },
+      "cockpit": {
+        "tester_to_peer": {
+          "sent": 150,
+          "received": 150,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.7,
+            "p95": 1.2,
+            "p99": 2.7,
+            "max": 3.9
+          },
+          "jitter_ms": 0.4,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          }
+        },
+        "peer_to_tester": {
+          "sent": 150,
+          "received": 150,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.1,
+            "p95": 0.4,
+            "p99": 1.1,
+            "max": 5
+          },
+          "jitter_ms": 0.2,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          }
+        }
+      },
+      "audio": {
+        "tester_to_peer": {
+          "sent": 1500,
+          "received": 1500,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.8,
+            "p95": 1.4,
+            "p99": 3.2,
+            "max": 10.6
+          },
+          "jitter_ms": 0.4,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_60ms": 0,
+          "missed_60ms_pct": 0,
+          "late_120ms": 0,
+          "missed_120ms_pct": 0,
+          "late_170ms": 0,
+          "missed_170ms_pct": 0
+        },
+        "peer_to_tester": {
+          "sent": 1500,
+          "received": 1500,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.2,
+            "p95": 0.4,
+            "p99": 1.3,
+            "max": 7.1
+          },
+          "jitter_ms": 0.1,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_60ms": 0,
+          "missed_60ms_pct": 0,
+          "late_120ms": 0,
+          "missed_120ms_pct": 0,
+          "late_170ms": 0,
+          "missed_170ms_pct": 0
+        }
+      }
+    },
+    "during": {
+      "flight": {
+        "tester_to_peer": {
+          "sent": 1199,
+          "received": 1198,
+          "lost": 1,
+          "loss_pct": 0.08,
+          "excess_ms": {
+            "p50": 0.9,
+            "p95": 3.3,
+            "p99": 10.6,
+            "max": 26.6
+          },
+          "jitter_ms": 0.9,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_100ms": 0,
+          "missed_100ms_pct": 0.08,
+          "late_400ms": 0,
+          "missed_400ms_pct": 0.08
+        },
+        "peer_to_tester": {
+          "sent": 1199,
+          "received": 1199,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.2,
+            "p95": 0.7,
+            "p99": 2.9,
+            "max": 7.5
+          },
+          "jitter_ms": 0.3,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_100ms": 0,
+          "missed_100ms_pct": 0,
+          "late_400ms": 0,
+          "missed_400ms_pct": 0
+        }
+      },
+      "cockpit": {
+        "tester_to_peer": {
+          "sent": 300,
+          "received": 300,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.9,
+            "p95": 3.2,
+            "p99": 10.9,
+            "max": 26.4
+          },
+          "jitter_ms": 1,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          }
+        },
+        "peer_to_tester": {
+          "sent": 300,
+          "received": 300,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.1,
+            "p95": 0.5,
+            "p99": 1.3,
+            "max": 4.3
+          },
+          "jitter_ms": 0.2,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          }
+        }
+      },
+      "audio": {
+        "tester_to_peer": {
+          "sent": 2998,
+          "received": 2991,
+          "lost": 7,
+          "loss_pct": 0.23,
+          "excess_ms": {
+            "p50": 0.9,
+            "p95": 2.9,
+            "p99": 10.6,
+            "max": 33.2
+          },
+          "jitter_ms": 0.8,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_60ms": 0,
+          "missed_60ms_pct": 0.23,
+          "late_120ms": 0,
+          "missed_120ms_pct": 0.23,
+          "late_170ms": 0,
+          "missed_170ms_pct": 0.23
+        },
+        "peer_to_tester": {
+          "sent": 2998,
+          "received": 2998,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.3,
+            "p95": 0.7,
+            "p99": 2.5,
+            "max": 10.7
+          },
+          "jitter_ms": 0.2,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_60ms": 0,
+          "missed_60ms_pct": 0,
+          "late_120ms": 0,
+          "missed_120ms_pct": 0,
+          "late_170ms": 0,
+          "missed_170ms_pct": 0
+        }
+      }
+    },
+    "after": {
+      "flight": {
+        "tester_to_peer": {
+          "sent": 600,
+          "received": 600,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.7,
+            "p95": 1.4,
+            "p99": 2.5,
+            "max": 3.4
+          },
+          "jitter_ms": 0.4,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_100ms": 0,
+          "missed_100ms_pct": 0,
+          "late_400ms": 0,
+          "missed_400ms_pct": 0
+        },
+        "peer_to_tester": {
+          "sent": 600,
+          "received": 600,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.2,
+            "p95": 0.5,
+            "p99": 2,
+            "max": 4.1
+          },
+          "jitter_ms": 0.2,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_100ms": 0,
+          "missed_100ms_pct": 0,
+          "late_400ms": 0,
+          "missed_400ms_pct": 0
+        }
+      },
+      "cockpit": {
+        "tester_to_peer": {
+          "sent": 150,
+          "received": 150,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.9,
+            "p95": 1.5,
+            "p99": 2.1,
+            "max": 2.2
+          },
+          "jitter_ms": 0.4,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          }
+        },
+        "peer_to_tester": {
+          "sent": 150,
+          "received": 150,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.1,
+            "p95": 0.4,
+            "p99": 1,
+            "max": 2
+          },
+          "jitter_ms": 0.1,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          }
+        }
+      },
+      "audio": {
+        "tester_to_peer": {
+          "sent": 1500,
+          "received": 1500,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.9,
+            "p95": 1.6,
+            "p99": 3.2,
+            "max": 6.2
+          },
+          "jitter_ms": 0.5,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_60ms": 0,
+          "missed_60ms_pct": 0,
+          "late_120ms": 0,
+          "missed_120ms_pct": 0,
+          "late_170ms": 0,
+          "missed_170ms_pct": 0
+        },
+        "peer_to_tester": {
+          "sent": 1500,
+          "received": 1500,
+          "lost": 0,
+          "loss_pct": 0,
+          "excess_ms": {
+            "p50": 0.3,
+            "p95": 0.5,
+            "p99": 1.4,
+            "max": 5.5
+          },
+          "jitter_ms": 0.1,
+          "gaps": {
+            "n": 0,
+            "max_ms": 0,
+            "lengths_ms": []
+          },
+          "late_60ms": 0,
+          "missed_60ms_pct": 0,
+          "late_120ms": 0,
+          "missed_120ms_pct": 0,
+          "late_170ms": 0,
+          "missed_170ms_pct": 0
+        }
+      }
+    }
+  },
+  "clock": [
+    {
+      "station": "fra",
+      "bursts": 247,
+      "span_s": 2605,
+      "qpc_drift_ppm": -0.33,
+      "qpc_resid_sd_us": 211,
+      "sysclock_vs_station_ppm": 22.99,
+      "sysclock_offset_ms": -65.8,
+      "best_rtt_ms": 20.6
+    },
+    {
+      "station": "nyc",
+      "bursts": 84,
+      "span_s": 2588,
+      "qpc_drift_ppm": -0.2,
+      "qpc_resid_sd_us": 95,
+      "sysclock_vs_station_ppm": 22.92,
+      "sysclock_offset_ms": -63.3,
+      "best_rtt_ms": 88.2
+    }
+  ],
+  "side": []
+}

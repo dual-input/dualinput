@@ -81,7 +81,7 @@ for (const f of walk(rawDir)) {
     testers.set(m[1], e);
   } else if ((m = b.match(/^peer-([a-z]+)-\d+\.ndjson/))) {
     peers.push({ name: m[1], file: f, recs: read(f) });
-  } else if (b === 'station.ndjson') {
+  } else if (b.replace(/\.gz$/, '') === 'station.ndjson') {
     const recs = read(f);
     const start = recs.find((r) => r.k === 'station_start');
     stations.push({ name: start?.name || path.basename(path.dirname(f)), recs });

@@ -2,6 +2,139 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-10: iroh moves to the relay one path idle timeout after a direct link dies and back within 60s, and at 3% loss its TCP relay's p99 lateness grows with the round trip to the relay, from 53ms at 22ms away to 534ms at 131ms
+
+**Asked:** between real home networks, how often does iroh link two PCs directly, how much do its TCP relay's stalls cost a session's traffic against a UDP relay under the same loss, how fast does it move to the relay when a direct link dies silently, how much does a busy upload add to a session's delays, and how far does a PC's `QueryPerformanceCounter` part from true time ([architecture plan, 2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks))?
+
+**Expected:** from [2.1's arithmetic](#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast), stalls of about 35ms to 70ms through a relay in the pilot's region and 145ms to 170ms across an ocean, and a move to the relay after the 15s default path idle timeout.
+
+**Found:** [p03](../../../experiments/areas/network/p03-home-networks/) ran three times on 2026-10-10, each for 35 to 43 minutes: from our PC, and from two friends' PCs, one nearer our droplet in New York and one nearer our droplet in Frankfurt (measured 2026-10-10 with p03).
+All three PCs were wired.
+Each friend's relayed traffic went to the peer on our PC, and `tc netem` dropped packets only on the friend's leg, between their PC and the relay; in our own run, both ends sat behind our router, so the loss hit both legs.
+The sample is two home networks plus ours.
+It has no Wi-Fi, since the user expects most simmers to be wired (user, 2026-10-10), no carrier-grade NAT, no mobile link, no double NAT, no real router that picks a new public port per destination, which only a simulated NAT stood in for, and no IPv6 path between pilots, since only one PC had a public IPv6 address.
+
+The three routers:
+
+| | Our PC | Friend near New York | Friend near Frankfurt |
+| --- | --- | --- | --- |
+| Public port | One for every destination, not the PC's own port number | One for every destination, the PC's own port number | One for every destination, the PC's own port number |
+| Lets in | Only replies from the address and port the PC sent to | Only replies from the address and port the PC sent to | Only replies from the address and port the PC sent to |
+| UPnP, NAT-PMP, PCP | None answered | UPnP answered, an eero Pro 7, and granted a mapping | None answered |
+| Public IPv6 | No | No | Yes, and 4 of 4 STUN servers answered over it |
+| Idle port kept | Through 120s, gone by 150s | Through 15s, gone by 30s | Through 120s, gone by 150s |
+
+Each idle-port check used a port that had seen one request and one reply; how long a port with steady two-way traffic lasts, the run doesn't show.
+
+Hole punching, 10 fresh connections to each target, with the median time from the connection opening to a direct path:
+
+| Target | From our PC | Friend near New York | Friend near Frankfurt |
+| --- | --- | --- | --- |
+| Simulated NAT: one port, lets anyone in | 10 direct, 105ms | 10 direct, 84ms | 10 direct, 42ms |
+| Simulated NAT: one port, only replies | 10 direct, 106ms | 10 direct, 105ms | 10 direct, 42ms |
+| Simulated NAT: a new port per destination | 0 direct | 10 direct, 125ms | 0 direct |
+| The peer on our PC | the same PC | 10 direct, 316ms | 10 direct, 106ms |
+
+- The friend near New York's direct paths to the new-port NAT ran to ports it never advertised, which only the open UPnP mapping on the friend's router would let in (inference).
+  Between our router and the friend near Frankfurt's, which both let in only replies and neither answered UPnP, every connection went direct, because both keep one public port for every destination.
+- Connections opened in a median of 24ms to 159ms, about one round trip to the relay, and moved to a direct path, where one opened, within the times above.
+
+The switch, two runs at each path idle timeout, set through `QuicTransportConfigBuilder::default_path_max_idle_timeout` on both ends, the firewall dropping the direct path mid-session:
+
+| Path idle timeout | To the relay | Back to direct, after the path works again |
+| --- | --- | --- |
+| 15s | 15.0s | 29.9s |
+| 5s | 5.0s | 39.9s |
+| 2s | 2.0s | 42.9s |
+
+- All three runs matched to within 0.06s.
+  The flight-model stream went silent for the whole timeout, then resumed through the relay.
+- Each end's path keep-alive was a third of the timeout, 0.67s at 2s, set through `default_path_keep_alive_interval`.
+  iroh's default is 5s (read in iroh 1.3.0, `src/socket.rs`, `HEARTBEAT_INTERVAL`), above a 2s timeout, so at the default an idle backup path would time out between keep-alives (inference); with the lowered keep-alive the relay path stayed open, and it took over each time.
+- iroh tries hole punching again on a new connection, a network change the operating system reports, new candidate addresses on either side, and every 60s while no direct path has a round trip of 10ms or less, and retries with the same candidates at least 5s apart (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `UPGRADE_INTERVAL`, `GOOD_ENOUGH_LATENCY`, `check_connections`, and `HOLEPUNCH_ATTEMPTS_INTERVAL`); all four are private.
+  The three return times differ by exactly the differences between the timeouts, and each return came about 55s after the drop, 60s after the connection opened, which fits all three returning on the same 60s tick (inference).
+- No switch happened that the firewall didn't cause: across 55 connections in each run, the only 6 moves from a direct path to the relay each came inside a drop.
+
+iroh's relay against the UDP forwarder, both carrying the same session-shaped traffic at once for 150s per run, in the friend's sending direction, the worse of the two in every run with loss.
+Late is delay above the run's lowest, what a playout buffer of that size would have to absorb; a share counts packets later than the threshold.
+
+| Friend | Relay | Loss | iroh p99 late | iroh max late | Flight samples >100ms | Audio frames >60ms | Audio frames >170ms | UDP forwarder lost |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Near New York | New York, 42ms away | none | 5ms | 17ms | 0% | 0% | 0% | 0% |
+| | | 1% | 79ms | 555ms | 0.7% | 2.8% | 0.6% | 1.3% |
+| | | 3% | 264ms | 405ms | 2.9% | 8.4% | 2.0% | 3.8% |
+| | | bursts | 43ms | 144ms | 0.3% | 0.8% | 0% | 0.7% |
+| | Frankfurt, 131ms away | none | 8ms | 21ms | 0% | 0% | 0% | 0% |
+| | | 1% | 168ms | 444ms | 6.2% | 9.4% | 0.8% | 1.1% |
+| | | 3% | 534ms | 1,085ms | 21% | 30% | 5.9% | 3.2% |
+| | | bursts | 109ms | 217ms | 1.0% | 1.4% | 0.4% | 0.7% |
+| Near Frankfurt | Frankfurt, 22ms away | none | 12ms | 18ms | 0% | 0% | 0% | 0% |
+| | | 1% | 52ms | 239ms | 0.1% | 0.4% | 0.07% | 1.2% |
+| | | 3% | 53ms | 101ms | 0.03% | 0.4% | 0% | 3.4% |
+| | | bursts | 13ms | 103ms | 0.1% | 0.5% | 0% | 0.7% |
+| | New York, 97ms away | none | 20ms | 138ms | 0.2% | 0.5% | 0% | 0.07% |
+| | | 1% | 188ms | 379ms | 8.6% | 12% | 2.3% | 1.1% |
+| | | 3% | 346ms | 583ms | 26% | 34% | 11% | 3.1% |
+| | | bursts | 90ms | 199ms | 0.8% | 1.2% | 0.2% | 0.6% |
+
+- "Bursts" dropped everything both ways for 70ms every 8s to 12s, about 0.7% of the time.
+- iroh's relay lost nothing; the UDP forwarder lost about what `tc netem` dropped, and its p99 lateness stayed within 13ms through the near relay and reached 81ms through the far one at 3%, where QUIC's congestion control held datagrams back after each loss.
+- The stall grows with the friend's round trip to the relay: at 3% loss, iroh's p99 lateness was 53ms at 22ms away, 264ms at 42ms, 346ms at 97ms, and 534ms at 131ms.
+- With no injected loss, the path through New York lost 0.04% to 0.07% of the friend near Frankfurt's packets on its own, and those losses alone held iroh's packets up to 138ms.
+- In the receiving direction, where Linux's TCP on the relay resends, the stalls were shorter: at 3% through the far relay, a p99 of 281ms against 534ms, and 171ms against 346ms.
+- Flight-model samples later than 400ms: 1.6% for the friend near New York through Frankfurt at 3%, and 0.4% or less in every other run.
+- Audio frames later than 120ms ran between the 60ms and 170ms columns: 17% and 21% in the two far runs at 3%, and 2.6% or less through the near relay.
+- The cockpit stream, which resends, reached up to 295ms at p99 through the UDP forwarder under loss, and up to 584ms through iroh's relay.
+- In our own run, with loss on both legs, iroh's p99 at 1% was 118ms through Frankfurt, 53ms from our PC, and 311ms through New York; the UDP forwarder's was 6ms and 101ms.
+
+The real link, with no injected loss:
+
+| | Friend near New York | Friend near Frankfurt | Our PC |
+| --- | --- | --- | --- |
+| Round trip to the near droplet, median (p95) | 44ms (49ms) | 24ms (30ms) | 55ms (64ms) |
+| Round trip, direct to the peer on our PC | 161ms | 57ms | the same PC |
+| Through the New York relay to our PC, iroh / UDP forwarder | 161ms / 156ms | 208ms / 210ms | |
+| Through the Frankfurt relay to our PC, iroh / UDP forwarder | 184ms / 182ms | 76ms / 74ms | |
+| Jitter, the mean change in one-way delay between packets | 0.5ms to 1.5ms | 0.2ms to 2.4ms | |
+| Upload, as the station received it, median | 18.8 Mbps | 275 Mbps | 39 Mbps |
+| Round trip before and during the upload | 44.5ms, 44.5ms | 21.2ms, 21.4ms | 54.1ms, 53.9ms |
+| Flight model's p99 lateness before and during | 2.9ms, 4.5ms | 2.8ms, 10.6ms | 4.8ms, 4.8ms |
+| Flight-model samples lost during the upload | 0% | 0.08% | 0.84% |
+
+- No upload raised the round trip; ours lost 0.84% of the session's packets instead.
+- Whether the friend near Frankfurt filled their uplink, the run can't show: at 275 Mbps to 786 Mbps, the droplet or the path may have been the limit.
+
+Clocks, against the droplets' chrony-disciplined clocks, through the shortest of each eight exchanges over 32 to 43 minutes:
+
+- The friend near New York's counter ran 13.1 ppm slow, the friend near Frankfurt's within 0.33 ppm, and ours 25.6 ppm fast, each the same against both droplets to within 0.5 ppm, with 95µs to 211µs of scatter.
+  Two of these PCs part by up to 39 ppm, 3.4s a day (arithmetic).
+- Windows Time ran on both friends' PCs and doesn't on ours.
+  Both friends' system clocks sat 63ms to 115ms behind the droplets; ours sat 14.5s behind and drifted with its counter, and the friend near Frankfurt's moved 23 ppm against the droplets while its counter held.
+
+Faults in the probe:
+
+- Step 8, the side test between friends whose runs overlap, couldn't connect in the build friends ran: each tester opened its side endpoint before consent with relays disabled, and iroh leaves its relay transport out of such an endpoint (read in iroh 1.3.0, `src/endpoint.rs`, `From<RelayMode>`), so the relay added after consent never took effect.
+  The two friends' runs overlapped and made no side test.
+  The tester's `run.rs` binds the side endpoint after consent, with both relays, in a build no friend received.
+- The tester replaced its own path in Windows Firewall's rules only where the letter case matched, so the uploads carried user folder names; the committed copy blanks them, and the tester's `sysmon.rs` ignores case, in a build no friend received.
+
+**Changed:** iroh 1.3 as it is meets both of 2.1's conditions at the user's pass lines (user, 2026-10-10):
+
+- A 2s path idle timeout is acceptable, with the path keep-alive below it, and so is the measured return to direct, up to 60s after the direct path works again.
+- iroh's relay over TCP is acceptable for v1, with an adaptive buffer for ATC audio.
+  The 300ms line in [03-v1-scope](../product/03-v1-scope.md) stands, because in a busy moment, such as a heading right after takeoff, the pilot knows the answer before the controller finishes and starts the readback before the call ends.
+  So relayed pilots far from the relay, on lossy links, will hear ATC past that line in v1, an accepted cost.
+
+So 2.1's lead holds for node 2's design doc.
+v1 records which sessions relay, through which relay, and how late each ATC audio frame arrives, which tells whether that cost grows; what would change then waits until then (user, 2026-10-10).
+Every router here kept an idle port at least 15s, so iroh's path keep-alive, 5s by default, keeps a direct path's mapping open.
+
+**Affects:** node 2's design doc, the ATC audio buffer, the flight-model sync's delay, and 1.4's question of how far two PCs' counters part ([01-spine](../architecture/01-spine.md#left-open)).
+
+**Evidence:** [p03](../../../experiments/areas/network/p03-home-networks/), and its results in [results/p03-home-networks-2026-10-10](../../../experiments/areas/network/results/p03-home-networks-2026-10-10/): `analysis/digest.txt` and one summary per run in `analysis/`, from `analyze/analyze.mjs`, and `raw/`, every tester's upload with each public address replaced by a label and user folder names blanked, and the peers' and stations' logs without iroh's debug lines and the forwarder's per-packet lines.
+The originals, with addresses, packet captures, and those lines, stay outside the repository.
+The friend near New York's after-test file, which would show the failed side test from their end, hadn't arrived when this was written.
+
 ## 2026-10-10: postcard packs every v1 message smallest but one, and which fields a message carries changes its size more than the format does
 
 **Asked:** which binary format does the message crate use between cores, and how many bytes does each channel's message take in it ([architecture plan, 2.2](../architecture/plan.md#22-packing-a-message-between-cores))?

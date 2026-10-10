@@ -16,9 +16,16 @@ import net from 'node:net';
 import path from 'node:path';
 import zlib from 'node:zlib';
 
-const [rawDir, outDir, deployFile] = process.argv.slice(2);
+//   --skip-runs <id,...>     leaves out those runs' uploads, such as our own short tests
+//   --drop-kinds <k,...>     leaves those record kinds out of every log but the testers'
+//                            uploads, such as `trace` and `fwd`, to keep the copy small
+const argv = process.argv.slice(2);
+const opt = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1].split(',') : []);
+const skipRuns = opt('--skip-runs');
+const dropKinds = new Set(opt('--drop-kinds'));
+const [rawDir, outDir, deployFile] = argv.filter((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
 if (!rawDir || !outDir || !deployFile) {
-  console.log('usage: node redact.mjs <raw-dir> <out-dir> <deploy.json>');
+  console.log('usage: node redact.mjs <raw-dir> <out-dir> <deploy.json> [--skip-runs <ids>] [--drop-kinds <kinds>]');
   process.exit(1);
 }
 const deploy = JSON.parse(fs.readFileSync(deployFile, 'utf8'));
@@ -56,8 +63,15 @@ const V6 = /(?<![0-9A-Za-z:.])(?:[0-9A-Fa-f]{1,4}:){2,7}(?::|[0-9A-Fa-f]{1,4})(?
 
 // The pattern also catches clock times (12:03:42) and MAC prefixes (98:3f:60); only what Node
 // parses as a full IPv6 address gets a label.
+// A Windows path under a user's folder names the user; the friends' build replaced its own
+// path in firewall rules only where the letter case matched.
+const USER_DIR = /([A-Za-z]:(?:\\\\|\\|\/)Users(?:\\\\|\\|\/))[^\\/"]+/gi;
+
 function redactText(s) {
-  return s.replace(V6, (m) => (net.isIPv6(m) ? label6(m) : m)).replace(V4, (m) => label4(m));
+  return s
+    .replace(V6, (m) => (net.isIPv6(m) ? label6(m) : m))
+    .replace(V4, (m) => label4(m))
+    .replace(USER_DIR, '$1<user>');
 }
 
 const DROP = { stun: ['raw'], nat_pmp: ['raw'], pcp: ['raw'] };
@@ -85,9 +99,12 @@ let files = 0;
 for (const f of walk(rawDir)) {
   const rel = path.relative(rawDir, f);
   if (!/\.(ndjson|log)(\.gz)?$/.test(f) || rel.startsWith('analysis')) continue;
+  const upload = /^[0-9a-f]{16}-part\d/.test(path.basename(f)) || /^run-[0-9a-f]{16}-part\d/.test(path.basename(f));
+  if (upload && skipRuns.some((id) => path.basename(f).includes(id))) continue;
   let buf = fs.readFileSync(f);
   if (f.endsWith('.gz')) buf = zlib.gunzipSync(buf);
-  const out = buf.toString('utf8').split('\n').map((l) => (l ? redactLine(l) : l)).join('\n');
+  const keep = (l) => upload || !dropKinds.size || !dropKinds.has((l.match(/"k":"([a-z_]+)"/) || [])[1]);
+  const out = buf.toString('utf8').split('\n').filter((l) => !l || keep(l)).map((l) => (l ? redactLine(l) : l)).join('\n');
   const dst = path.join(outDir, rel.replace(/\.gz$/, '') + '.gz');
   fs.mkdirSync(path.dirname(dst), { recursive: true });
   fs.writeFileSync(dst, zlib.gzipSync(out, { level: 9 }));

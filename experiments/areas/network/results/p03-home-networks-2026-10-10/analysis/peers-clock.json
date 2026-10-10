@@ -1,0 +1,27 @@
+[
+  {
+    "peer": "home",
+    "clocks": [
+      {
+        "station": "fra",
+        "bursts": 1532,
+        "span_s": 16601,
+        "qpc_drift_ppm": -26.02,
+        "qpc_resid_sd_us": 1491,
+        "sysclock_vs_station_ppm": 26.02,
+        "sysclock_offset_ms": -14298.6,
+        "best_rtt_ms": 43.8
+      },
+      {
+        "station": "nyc",
+        "bursts": 1464,
+        "span_s": 16602,
+        "qpc_drift_ppm": -26.02,
+        "qpc_resid_sd_us": 1348,
+        "sysclock_vs_station_ppm": 26.02,
+        "sysclock_offset_ms": -14295.3,
+        "best_rtt_ms": 113.3
+      }
+    ]
+  }
+]

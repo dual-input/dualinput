@@ -409,7 +409,16 @@ Its other end is ours (user, 2026-10-10):
    It doesn't read the system clock, because Windows' time service steers it.
 8. If another friend's run overlaps, the server introduces the two, and they connect through iroh as in step 3, recording whether the link went direct and how long that took, then send session traffic between them on the side, recording its round trips and losses.
 
-The program uploads raw data and draws no conclusions: each packet's channel, number, send stamp, and arrival stamp, iroh's path events, the router and STUN answers, and the clock samples, so our analysis runs on our side and can run again with other thresholds (user, 2026-10-10).
+The program uploads raw data and draws no conclusions, so our analysis runs on our side and can run again with other thresholds, and it collects all the raw data that's reasonable to collect (user, 2026-10-10):
+
+- every packet both ways, on every stream and path: its channel, number, size, send stamp, and arrival stamp;
+- every connection attempt, with its candidate addresses and the time each step took;
+- iroh's path events, and each path's statistics each second: round trip, congestion window, lost packets, congestion events, and MTU;
+- the router's and the STUN servers' answers as they came;
+- the PC's network: wired or Wi-Fi, link speed, Wi-Fi signal strength where Windows reports it, IPv6 addresses, and Windows' network-change, sleep, and resume events;
+- the PC's CPU and memory load each second, and its Windows version;
+- `QueryPerformanceCounter` samples against the droplet's clock, and the system clock beside them;
+- the droplets' own side: the relay's and forwarder's logs and the `tc netem` and firewall settings in force at each moment.
 It uploads as it goes, so a crash or a closed laptop loses little.
 Its window says what it's doing at each step and shows progress through the whole run (user, 2026-10-09), in clear words that name things as they are, such as a relay server or a peer, rather than vaguer ones such as "partner" (user, 2026-10-10).
 It's unsigned, so each friend passes the SmartScreen warning once.

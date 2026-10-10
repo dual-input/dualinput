@@ -122,11 +122,11 @@ Faults in the probe:
 
 - A 2s path idle timeout is acceptable, with the path keep-alive below it, and so is the measured return to direct, up to 60s after the direct path works again.
 - iroh's relay over TCP is acceptable for v1, with an adaptive buffer for ATC audio.
-  The 300ms line in [03-v1-scope](../product/03-v1-scope.md) stands, because in a busy moment, such as a heading right after takeoff, the pilot knows the answer before the controller finishes and starts the readback before the call ends.
+  The 300ms line in [03-v1-scope](../product/03-v1-scope.md) stands, because in a busy moment, such as a heading right after takeoff, the pilot knows the answer before the controller finishes and reads back the moment the call ends.
   So relayed pilots far from the relay, on lossy links, will hear ATC past that line in v1, an accepted cost.
 
 So 2.1's lead holds for node 2's design doc.
-v1 records which sessions relay, through which relay, and how late each ATC audio frame arrives, which tells whether that cost grows; what would change then waits until then (user, 2026-10-10).
+v1 records each session's path, loss, and relay stalls in the recording that bug reports carry, which tells how many pilots end up relayed, far from the relay, and on lossy links, and what we'd do about it waits until that data asks for it (user, 2026-10-10).
 Every router here kept an idle port at least 15s, so iroh's path keep-alive, 5s by default, keeps a direct path's mapping open.
 
 **Affects:** node 2's design doc, the ATC audio buffer, the flight-model sync's delay, and 1.4's question of how far two PCs' counters part ([01-spine](../architecture/01-spine.md#left-open)).

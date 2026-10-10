@@ -148,8 +148,8 @@ fn main() {
     let make = |renderer: eframe::Renderer| eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Crosscheck network test")
-            .with_inner_size([720.0, 660.0])
-            .with_min_inner_size([560.0, 520.0]),
+            .with_inner_size([720.0, 580.0])
+            .with_min_inner_size([560.0, 480.0]),
         renderer,
         ..Default::default()
     };

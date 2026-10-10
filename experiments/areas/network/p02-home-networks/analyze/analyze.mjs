@@ -232,9 +232,18 @@ function direction(tx, rx, stream, t0, t1) {
   return out;
 }
 
+// The far end of a tag: a peer's log, or, for a side test, the other tester's upload.
+function farEnd(runId, tag) {
+  if (peerByTag.has(tag)) return peerByTag.get(tag);
+  for (const [key, e] of testerByTag) {
+    if (key.endsWith(`/${tag}`) && !key.startsWith(`${runId}/`)) return e;
+  }
+  return { tx: [], rx: [] };
+}
+
 function both(runId, tag, t0, t1) {
   const mine = testerByTag.get(`${runId}/${tag}`) || { tx: [], rx: [] };
-  const theirs = peerByTag.get(tag) || { tx: [], rx: [] };
+  const theirs = farEnd(runId, tag);
   const res = {};
   for (const s of [1, 2, 3]) {
     const up = direction(mine.tx, theirs.rx, s, t0, t1);
@@ -270,6 +279,13 @@ function analyzeRun(runId, recs) {
   };
   const load = all('load').map((l) => l.cpu_pct).sort((a, b) => a - b);
   out.load = load.length ? { cpu_p50: q(load, 0.5), cpu_p95: q(load, 0.95), cpu_max: load[load.length - 1], own_p95: q(all('load').map((l) => l.own_cpu_pct).sort((a, b) => a - b), 0.95) } : null;
+  const ts = first('timesvc');
+  out.time_service = ts
+    ? {
+        running: /RUNNING/.test(ts.service || ''),
+        source: ((ts.status || '').match(/^Source:\s*(.+)$/m) || [])[1]?.trim() || null,
+      }
+    : null;
   const st = first('stations');
   out.stations = st ? { near: st.near, far: st.far, rtts_ms: Object.fromEntries((st.rtts_us || []).map((r) => [r.st, ms(r.rtt_us)])) } : null;
 
@@ -354,7 +370,7 @@ function analyzeRun(runId, recs) {
         return ms(g);
       };
       const mine = testerByTag.get(`${runId}/${conn.g}`);
-      const theirs = peerByTag.get(conn.g);
+      const theirs = farEnd(runId, conn.g);
       r.flight_gap_peer_to_tester_ms = mine ? gapAround(mine.rx) : null;
       r.flight_gap_tester_to_peer_ms = theirs ? gapAround(theirs.rx.map((p) => ({ ...p, t: p.ts }))) : null;
       r.loss = { flight: res.flight?.peer_to_tester?.lost };
@@ -401,7 +417,17 @@ function analyzeRun(runId, recs) {
     return rest;
   });
 
-  out.side = all('side').map((s) => ({ role: s.role, other: s.other, connect_ms: s.connect_ms, direct_ms: s.direct_ms, err: s.err }));
+  out.side = all('side').map((s) => {
+    const conn = recs.find((c) => c.k === 'send_start' && c.c === s.c);
+    return {
+      role: s.role,
+      other: s.other,
+      connect_ms: s.connect_ms,
+      direct_ms: s.direct_ms,
+      err: s.err,
+      traffic: s.role === 'dial' && conn ? both(runId, conn.g) : undefined,
+    };
+  });
   return out;
 }
 
@@ -441,7 +467,11 @@ for (const s of summaries) {
   }
   if (s.burst) lines.push(`burst: ${JSON.stringify(s.burst.upload_mbps)} Mbps, path rtt ${JSON.stringify(s.burst.path_rtt_ms)}, flight↑ excess p95 before/during/after ${s.burst.before?.flight?.tester_to_peer?.excess_ms.p95}/${s.burst.during?.flight?.tester_to_peer?.excess_ms.p95}/${s.burst.after?.flight?.tester_to_peer?.excess_ms.p95}ms`);
   for (const c of s.clock || []) if (c) lines.push(`clock vs ${c.station}: QPC ${c.qpc_drift_ppm} ppm (resid ${c.qpc_resid_sd_us}µs over ${c.span_s}s), system clock ${c.sysclock_vs_station_ppm} ppm, offset ${c.sysclock_offset_ms}ms`);
-  for (const d of s.side || []) lines.push(`side ${d.role} ${d.other || ''}: connect ${d.connect_ms}ms direct ${d.direct_ms}ms ${d.err || ''}`);
+  if (s.time_service) lines.push(`windows time service: ${s.time_service.running ? 'running' : 'not running'}, source ${s.time_service.source}`);
+  for (const d of s.side || []) {
+    const f = d.traffic?.flight;
+    lines.push(`side ${d.role} ${d.other || ''}: connect ${d.connect_ms}ms direct ${d.direct_ms}ms ${d.err || ''}${f ? ` flight↑ ${f.tester_to_peer?.loss_pct}% lost p99 ${f.tester_to_peer?.excess_ms.p99}ms, flight↓ ${f.peer_to_tester?.loss_pct}% lost p99 ${f.peer_to_tester?.excess_ms.p99}ms` : ''}`);
+  }
   lines.push('');
 }
 for (const p of peerClocks) for (const c of p.clocks) lines.push(`peer ${p.peer} clock vs ${c.station}: QPC ${c.qpc_drift_ppm} ppm over ${c.span_s}s, system clock ${c.sysclock_vs_station_ppm} ppm`);

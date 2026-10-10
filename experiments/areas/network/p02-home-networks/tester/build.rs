@@ -12,4 +12,16 @@ fn main() {
         .unwrap_or_else(|e| panic!("can't read the deployment file {src}: {e}; run deploy/ first"));
     let out = std::path::Path::new(&std::env::var("OUT_DIR").unwrap()).join("deploy.json");
     std::fs::write(out, body).unwrap();
+
+    // The version block Windows reads for the name in its Firewall prompt and the file's
+    // properties; without it, the prompt shows the bare file name.
+    #[cfg(windows)]
+    {
+        let mut r = winresource::WindowsResource::new();
+        r.set("FileDescription", "Crosscheck network test");
+        r.set("ProductName", "Crosscheck network test");
+        r.set("CompanyName", "Crosscheck");
+        r.set("OriginalFilename", "Crosscheck network test.exe");
+        r.compile().expect("Windows resource compiler");
+    }
 }

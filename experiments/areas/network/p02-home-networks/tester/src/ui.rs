@@ -67,27 +67,27 @@ pub fn plan() -> Vec<Step> {
         s(
             "Checking your router",
             "Asking public STUN servers and our servers which public address and port your router gives this PC, whether it lets in packets from addresses this PC hasn't contacted, how long it keeps an unused port open, and whether it opens a port when asked (UPnP, NAT-PMP, PCP).",
-            60.0,
+            30.0,
         ),
         s(
             "Full upload for 1 minute",
             "Uploading as fast as your connection allows to our server for 1 minute, while timing a stream of session-sized packets beside it, to measure how much a busy upload delays them.",
-            135.0,
+            130.0,
         ),
         s(
             "Connecting to peers",
             "Opening 40 fresh connections, to copies of this program behind three kinds of simulated router on our server and to a copy on another tester's computer, and timing how long each takes to reach a direct link.",
-            540.0,
+            480.0,
         ),
         s(
             "Losing the direct link",
             "Blocking the direct link to a copy on our server in the middle of a session, and timing how long the connection takes to move to the relay server and back.",
-            480.0,
+            420.0,
         ),
         s(
             "Through the relay servers",
             "Sending session-sized traffic to another tester's computer through our relay servers in Frankfurt and New York, with 0%, 1%, and 3% of packets dropped, and with short outages.",
-            1270.0,
+            1260.0,
         ),
         s("Sending the results", "Compressing the results file and uploading it to our server.", 45.0),
     ]
@@ -294,7 +294,7 @@ pub fn draw(ui: &mut egui::Ui, h: &UiHandle) -> Option<Click> {
             }
             Screen::Consent => {
                 heading(ui, "Crosscheck network test");
-                ui.label(RichText::new("About 50 minutes. Nothing to do once it starts.").size(16.0).color(bright(ui)));
+                ui.label(RichText::new("About 40 minutes. Nothing to do once it starts.").size(16.0).color(bright(ui)));
                 ui.add_space(14.0);
                 card(ui, "WHILE IT RUNS", |ui| {
                     bullet(ui, "Keeps this PC awake. Closing this window stops the test.");

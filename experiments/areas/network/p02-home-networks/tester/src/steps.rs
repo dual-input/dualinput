@@ -263,7 +263,7 @@ pub async fn switch(ctx: &Ctx) {
             let idle = Duration::from_secs(idle_s);
             let keepalive = idle / 3;
             let label = format!("switch-{idle_s}s-{rep}");
-            ctx.ui.action(format!("Run {n} of {}: a connection that gives up on a silent path after {idle_s} s", idles.len() as u32 * reps));
+            ctx.ui.action(format!("Run {n} of {}: a connection that gives up on a silent path after {idle_s} seconds", idles.len() as u32 * reps));
             let r = switch_once(ctx, &near, idle, keepalive, &label).await;
             if let Err(e) = r {
                 ctx.log.rec("switch", json!({"label": label, "err": e}));
@@ -336,7 +336,7 @@ pub async fn relay(ctx: &Ctx) -> u32 {
             let what = match mode {
                 "clear" => "no packets dropped".to_string(),
                 "loss" => format!("{pct}% of packets dropped"),
-                _ => "a 70 ms outage every 10 s".to_string(),
+                _ => "a 70 ms outage every 10 seconds".to_string(),
             };
             let city = if st.name == "fra" { "Frankfurt" } else if st.name == "nyc" { "New York" } else { st.name.as_str() };
             ctx.ui.action(format!("Run {n} of {total}: through {city}, {what}"));

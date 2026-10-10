@@ -21,9 +21,10 @@ if (!rawDir) {
   process.exit(1);
 }
 
-// The thresholds 2.3 names: a flight-model delay of 100ms and 0.4s, and a 60ms audio buffer.
+// The thresholds 2.3 names, a flight-model delay of 100ms and 0.4s and a 60ms audio buffer,
+// with 120ms and 170ms audio buffers beside it for the pass line still to be set.
 const FLIGHT_DELAYS_US = [100_000, 400_000];
-const AUDIO_BUFFER_US = 60_000;
+const AUDIO_BUFFERS_US = [60_000, 120_000, 170_000];
 const STREAMS = { 1: 'flight', 2: 'cockpit', 3: 'audio' };
 const PERIOD_US = { 1: 50_000, 2: 200_000, 3: 20_000 };
 
@@ -173,8 +174,18 @@ function clockFit(recs, station) {
 // ---- one direction of one traffic run ----
 // Excess delay: each packet's one-way delay above the run's floor. The floor is a line through
 // the lowest delay in each 10s window, so the two clocks' drift over a run doesn't read as delay.
-function direction(tx, rx, stream, t0, t1) {
-  const sent = tx.filter((r) => r.s === stream && (t0 == null || (r.t >= t0 && r.t < t1)));
+// A window [t0, t1) is on the tester's clock. For the direction the tester sends, it selects by
+// send stamp; for the one it receives, by arrival, and then by the range of sequence numbers
+// that arrived in it, so packets lost in the window still count as sent.
+function direction(tx, rx, stream, t0, t1, receiverWindow = false) {
+  let inWindow = (r) => t0 == null || (r.t >= t0 && r.t < t1);
+  if (receiverWindow && t0 != null) {
+    const seqs = rx.filter((r) => r.s === stream && r.t >= t0 && r.t < t1).map((r) => r.n);
+    const lo = Math.min(...seqs);
+    const hi = Math.max(...seqs);
+    inWindow = (r) => seqs.length > 0 && r.n >= lo && r.n <= hi;
+  }
+  const sent = tx.filter((r) => r.s === stream && inWindow(r));
   const sentSeq = new Set(sent.map((r) => r.n));
   const got = rx.filter((r) => r.s === stream && sentSeq.has(r.n));
   if (!sent.length) return null;
@@ -216,19 +227,28 @@ function direction(tx, rx, stream, t0, t1) {
     const g = arr[i] - arr[i - 1];
     if (g > 3 * PERIOD_US[stream]) gaps.push(g);
   }
+  // Jitter as RTP measures it: the mean change in one-way delay between packets in send order.
+  const bySeq = [...d].sort((a, b) => a.n - b.n);
+  let jsum = 0;
+  for (let i = 1; i < bySeq.length; i++) jsum += Math.abs(bySeq[i].d - bySeq[i - 1].d);
   const out = {
     sent: sent.length,
     received: uniq.length,
     lost: sent.length - uniq.length,
     loss_pct: Math.round((10000 * (sent.length - uniq.length)) / sent.length) / 100,
     excess_ms: { p50: ms(q(ex, 0.5)), p95: ms(q(ex, 0.95)), p99: ms(q(ex, 0.99)), max: ms(ex[ex.length - 1]) },
-    base_ms: d.length ? ms(Math.min(...d.map((p) => p.d))) : null,
+    jitter_ms: bySeq.length > 1 ? ms(jsum / (bySeq.length - 1)) : null,
     gaps: { n: gaps.length, max_ms: ms(gaps.length ? Math.max(...gaps) : 0), lengths_ms: gaps.map(ms).sort((a, b) => b - a).slice(0, 20) },
   };
-  if (stream === 1) {
-    for (const lim of FLIGHT_DELAYS_US) out[`late_${lim / 1000}ms`] = ex.filter((e) => e > lim).length;
+  // A late packet and a lost one both leave the receiver without the sample, so each share
+  // counts both, over everything sent.
+  const share = (n) => Math.round((10000 * n) / sent.length) / 100;
+  const lim = stream === 1 ? FLIGHT_DELAYS_US : stream === 3 ? AUDIO_BUFFERS_US : [];
+  for (const l of lim) {
+    const late = ex.filter((e) => e > l).length;
+    out[`late_${l / 1000}ms`] = late;
+    out[`missed_${l / 1000}ms_pct`] = share(late + out.lost);
   }
-  if (stream === 3) out[`late_${AUDIO_BUFFER_US / 1000}ms`] = ex.filter((e) => e > AUDIO_BUFFER_US).length;
   return out;
 }
 
@@ -247,7 +267,7 @@ function both(runId, tag, t0, t1) {
   const res = {};
   for (const s of [1, 2, 3]) {
     const up = direction(mine.tx, theirs.rx, s, t0, t1);
-    const down = direction(theirs.tx, mine.rx, s, t0, t1);
+    const down = direction(theirs.tx, mine.rx, s, t0, t1, true);
     if (up || down) res[STREAMS[s]] = { tester_to_peer: up, peer_to_tester: down };
   }
   return res;
@@ -378,6 +398,73 @@ function analyzeRun(runId, recs) {
     return r;
   });
 
+  // Switches nobody caused: on every connection, each change of the selected path between a
+  // direct one and a relayed one. A move to the relay counts as caused only inside a switch
+  // run, between the firewall's drop and 60s after its lift; a first move from the relay to a
+  // direct path is the hole punch, and expected.
+  // iroh reports no Selected event for the path the handshake ran on, so the timeline also
+  // takes each second's statistics, which mark the selected path.
+  const labelOf = new Map(all('conn').map((c) => [c.c, c.label]));
+  const kindOf = new Map(all('conn').map((c) => [c.c, c.kind]));
+  const sel = new Map();
+  const mark = (c, t, kind) => {
+    const list = sel.get(c) || [];
+    list.push({ t, kind });
+    sel.set(c, list);
+  };
+  for (const e of all('pev')) if (e.ev === 'selected') mark(e.c, e.t, /Relay/.test(e.remote) ? 'relay' : 'direct');
+  for (const p of all('path')) if (p.sel && kindOf.get(p.c) === 'iroh') mark(p.c, p.t, p.relay ? 'relay' : 'direct');
+  for (const [c, list] of sel) {
+    list.sort((a, b) => a.t - b.t);
+    sel.set(c, list.filter((x, i) => i === 0 || x.kind !== list[i - 1].kind));
+  }
+  const windows = all('switch').filter((s) => s.drop_t).map((s) => ({ c: s.c, from: s.drop_t, to: (s.lift_t || s.drop_t) + 60e6 }));
+  const uncaused = [];
+  let directToRelay = 0;
+  for (const [c, list] of sel) {
+    for (let i = 1; i < list.length; i++) {
+      if (list[i].kind === list[i - 1].kind) continue;
+      const toRelay = list[i].kind === 'relay';
+      if (toRelay) directToRelay++;
+      const caused = windows.some((w) => w.c === c && list[i].t >= w.from && list[i].t <= w.to);
+      if (toRelay && !caused) uncaused.push({ c, label: labelOf.get(c), t_s: Math.round((list[i].t - (start?.t || 0)) / 1e6) });
+    }
+  }
+  out.failovers = { connections: sel.size, direct_to_relay: directToRelay, uncaused };
+
+  // Round trips on the real link, from QUIC's estimate on the selected path each second, by
+  // what the connection was for.
+  const rttBy = {};
+  for (const p of all('path')) {
+    if (!p.sel) continue;
+    const label = labelOf.get(p.c) || '';
+    const kind = kindOf.get(p.c) === 'noq' ? 'udp-forwarder' : p.relay ? 'iroh-relay' : 'direct';
+    const what = label.replace(/-\d+$/, '').replace(/^(relay-[a-z]+)-(clear|loss|burst)-.*$/, '$1-$2');
+    (rttBy[`${what} ${kind}`] ||= []).push(p.rtt_us);
+  }
+  out.rtt_ms = Object.fromEntries(
+    Object.entries(rttBy)
+      .filter(([k]) => !/loss|burst/.test(k))
+      .map(([k, v]) => {
+        const s = [...v].sort((a, b) => a - b);
+        return [k, { samples: s.length, p50: ms(q(s, 0.5)), p95: ms(q(s, 0.95)), max: ms(s[s.length - 1]) }];
+      }),
+  );
+
+  // Signs that the probe or the data went wrong somewhere.
+  out.anomalies = {
+    clock_lost: all('clock_lost').length,
+    tx_errors: all('txerr').length,
+    api_errors: all('api').filter((a) => !a.ok).map((a) => `${a.path}: ${String(a.err).slice(0, 100)}`),
+    attempt_errors: all('attempt').filter((a) => a.err).map((a) => `${a.target}: ${a.err.slice(0, 100)}`),
+    relay_errors: all('relay_run').filter((r) => r.err).map((r) => `${r.label}: ${r.err.slice(0, 100)}`),
+    switch_errors: all('switch').filter((s) => s.err).map((s) => `${s.label}: ${s.err}`),
+    burst: all('burst_err').map((b) => b.e).concat(all('burst_skipped').map((b) => b.why)),
+    stalls: all('stall').map((s) => s.gap_ms),
+    stopped: all('stop').length > 0,
+    trace_warnings: recs.filter((r) => r.k === 'trace' && /"level":"(WARN|ERROR)"/.test(JSON.stringify(r.e))).length,
+  };
+
   // The relay runs: iroh's relay and the UDP forwarder side by side.
   out.relay = all('relay_run').filter((r) => r.iroh_tag != null).map((r) => ({
     label: r.label,
@@ -401,6 +488,7 @@ function analyzeRun(runId, recs) {
     const mbps = [...perSec.values()].map((b) => (b * 8) / 1e6).sort((a, c) => a - c);
     const rtt = (lo, hi) => median(recs.filter((p) => p.k === 'path' && p.c === bl.c && p.sel && p.t >= lo && p.t < hi).map((p) => p.rtt_us));
     out.burst = {
+      upload_s: Math.round((b1 - b0) / 1e6),
       upload_mbps: { median: Math.round(q(mbps, 0.5)), max: Math.round(mbps[mbps.length - 1]) },
       path_rtt_ms: { before: ms(rtt(b0 - 30e6, b0)), during: ms(rtt(b0, b1)), after: ms(rtt(b1, b1 + 30e6)) },
       before: conn ? both(runId, conn.g, b0 - 30e6, b0) : null,

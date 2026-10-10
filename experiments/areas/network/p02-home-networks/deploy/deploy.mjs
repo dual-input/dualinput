@@ -207,7 +207,9 @@ function collect(dest) {
   const h = hosts();
   fs.mkdirSync(dest, { recursive: true });
   for (const s of h.stations) {
-    ssh(s.ipv4, 'journalctl -u p02-relay -o json --no-pager > /var/lib/p02/relay-journal.ndjson; journalctl -u p02-station -u "p02-peer@*" -o short-iso --no-pager > /var/lib/p02/services.log; tar czf /root/p02-data.tgz -C /var/lib p02');
+    // tar exits 1 when a file grows while it reads it, which the station's live log always
+    // does; that's a warning, and the archive holds the file up to that moment.
+    ssh(s.ipv4, 'journalctl -u p02-relay -o json --no-pager > /var/lib/p02/relay-journal.ndjson; journalctl -u p02-station -u "p02-peer@*" -o short-iso --no-pager > /var/lib/p02/services.log; tar czf /root/p02-data.tgz -C /var/lib p02; [ $? -le 1 ]');
     const r = spawnSync('scp', ['-i', KEY, '-o', `UserKnownHostsFile=${KNOWN}`, `root@${s.ipv4}:/root/p02-data.tgz`, path.join(dest, `${s.name}-${buildId()}.tgz`)], { stdio: 'inherit' });
     if (r.status !== 0) throw new Error(`scp from ${s.name} failed`);
   }

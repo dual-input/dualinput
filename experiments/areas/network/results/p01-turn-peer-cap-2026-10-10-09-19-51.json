@@ -1,0 +1,71 @@
+{
+  "probe": "p01-turn-peer-cap",
+  "idle": false,
+  "phases": {
+    "p8": {
+      "grants": [
+        {
+          "request": "Allocate asking 1800",
+          "granted": 1800
+        },
+        {
+          "request": "Refresh asking 1800",
+          "outcome": "ok",
+          "granted": 1800
+        },
+        {
+          "request": "Refresh asking 600",
+          "outcome": "ok",
+          "granted": 600
+        },
+        {
+          "request": "Refresh asking 300",
+          "outcome": "ok",
+          "granted": 300
+        },
+        {
+          "request": "Refresh asking nothing",
+          "outcome": "ok",
+          "granted": 600
+        },
+        {
+          "request": "Refresh asking 3600",
+          "outcome": "ok",
+          "granted": 600
+        },
+        {
+          "request": "Refresh asking 1800",
+          "outcome": "ok",
+          "granted": 1800
+        }
+      ],
+      "bindPeer": "ok",
+      "frames": [
+        "ChannelData, 17 bytes of data, 3 of padding"
+      ],
+      "toPeer": {
+        "padded": 4,
+        "unpadded": 4,
+        "sent": 4
+      },
+      "relayToRelay": {
+        "perms": {
+          "a8ForH8": "ok",
+          "h8ForA8": "ok"
+        },
+        "bindA8": "ok",
+        "bindH8": "ok",
+        "a8ToH8": 4,
+        "h8ToA8": 4,
+        "sent": 4
+      }
+    }
+  },
+  "mappings": [
+    {
+      "peer": "V01",
+      "local": 63812,
+      "mapped": "our-ip:46449"
+    }
+  ]
+}

@@ -12,7 +12,7 @@
  *   node experiments/areas/network/p01-turn-peer-cap.mjs --idle
  *   node experiments/areas/network/p01-turn-peer-cap.mjs --phases=7
  *
- * It runs phases 1-5 and 7, then 6 with --idle, or the ones --phases names;
+ * It runs phases 1-5, 7, and 8, then 6 with --idle, or the ones --phases names;
  * phases 2 and 6 run 1 first, because they use its allocation.
  *
  * It needs a Cloudflare TURN key: TURN_KEY_ID and TURN_KEY_API_TOKEN in the
@@ -49,6 +49,9 @@
  *      12 before any data, which is what ICE's checks from a relayed
  *      candidate do; each peer first opens its NAT toward the relay with a
  *      datagram that expires on the way (OPEN_TTL).
+ *   8. A8 asks for the LIFETIMEs turn-client-proto asks for, and others, and
+ *      records what Cloudflare grants; then it exchanges ChannelData, padded
+ *      and not, with a peer, and with H8's relayed address.
  *
  * The report names every address by its role, never its number, so it can be
  * committed.
@@ -65,7 +68,7 @@ import { crc32 } from "node:zlib"
 import { repoRelative, resultFile, stamp } from "../../tools/results.mjs"
 
 const IDLE = process.argv.includes("--idle")
-const PHASES = (process.argv.find((a) => a.startsWith("--phases="))?.slice(9).split(",") ?? [1, 2, 3, 4, 5, 7, ...(IDLE ? [6] : [])]).map(Number)
+const PHASES = (process.argv.find((a) => a.startsWith("--phases="))?.slice(9).split(",") ?? [1, 2, 3, 4, 5, 7, 8, ...(IDLE ? [6] : [])]).map(Number)
 const TTL_S = PHASES.includes(6) ? 1500 : 600
 const API = "https://rtc.live.cloudflare.com/v1/turn/keys"
 const KEY_FILE = join(homedir(), ".crosscheck", "cloudflare-turn.env")
@@ -179,6 +182,8 @@ function outcome(r) {
   return v ? `${(v[2] & 7) * 100 + v[3]} "${v.subarray(4).toString("utf8")}"` : "error with no ERROR-CODE"
 }
 const errorCode = (r) => { const v = r?.klass === 3 && r.attrs.get(A.ERROR_CODE); return v ? (v[2] & 7) * 100 + v[3] : 0 }
+const granted = (r) => (r?.klass === 2 ? r.attrs.get(A.LIFETIME)?.readUInt32BE(0) : undefined)
+const refreshed = (r) => `${outcome(r)}${granted(r) === undefined ? "" : `, LIFETIME ${granted(r)}s`}`
 
 // ---------------------------------------------------------------- sockets
 
@@ -255,23 +260,24 @@ class Turn extends Endpoint {
     }
     if (buf.length >= 4 && buf[0] >= 0x40 && buf[0] <= 0x7f) {
       const len = buf.readUInt16BE(2)
-      this.received.push({ text: buf.subarray(4, 4 + len).toString("utf8"), from: this.channels.get(buf.readUInt16BE(0)), via: "ChannelData" })
+      this.received.push({ text: buf.subarray(4, 4 + len).toString("utf8"), from: this.channels.get(buf.readUInt16BE(0)), via: "ChannelData", len, pad: buf.length - 4 - len })
       return
     }
     note(`${this.name}: unexpected ${buf.length}-byte datagram from ${show(from)}`)
   }
   // Long-term credentials: the first Allocate draws a 401 with the realm and
   // nonce, and the key is MD5 of "username:realm:password".
-  async allocate(label) {
+  async allocate(label, lifetime) {
     this.alloc = label
     this.relayed = null
-    const transport = attr(A.REQUESTED_TRANSPORT, Buffer.from([17, 0, 0, 0]))
+    const attrs = [attr(A.REQUESTED_TRANSPORT, Buffer.from([17, 0, 0, 0]))]
+    if (lifetime) attrs.push(attr(A.LIFETIME, u32(lifetime)))
     if (!this.key) {
-      const r = await this.transact(this.server, (tid) => encode(T.ALLOCATE, tid, [transport]))
+      const r = await this.transact(this.server, (tid) => encode(T.ALLOCATE, tid, attrs))
       if (errorCode(r) !== 401) return r
       this.learn(r)
     }
-    const r = await this.request(T.ALLOCATE, [transport])
+    const r = await this.request(T.ALLOCATE, attrs)
     if (r?.klass === 2) {
       this.relayed = readXorAddress(r.attrs.get(A.XOR_RELAYED_ADDRESS))
       this.mapped = readXorAddress(r.attrs.get(A.XOR_MAPPED_ADDRESS))
@@ -303,9 +309,10 @@ class Turn extends Endpoint {
   sendIndication(to, text) {
     this.socket.send(encode(T.SEND, randomBytes(12), [attr(A.XOR_PEER_ADDRESS, xorAddress(to)), attr(A.DATA, Buffer.from(text))]), this.server.port, this.server.ip)
   }
-  channelData(ch, text) {
+  // Over UDP, RFC 8656 makes the padding to a multiple of 4 optional.
+  channelData(ch, text, padded = true) {
     const d = Buffer.from(text)
-    const b = Buffer.alloc(4 + d.length + ((4 - (d.length % 4)) % 4))
+    const b = Buffer.alloc(4 + d.length + (padded ? (4 - (d.length % 4)) % 4 : 0))
     b.writeUInt16BE(ch, 0)
     b.writeUInt16BE(d.length, 2)
     d.copy(b, 4)
@@ -397,10 +404,11 @@ async function newAllocation(label) {
   return allocateOn(t, label)
 }
 
-async function allocateOn(t, label) {
-  const r = await t.allocate(label)
+async function allocateOn(t, label, lifetime) {
+  const r = await t.allocate(label, lifetime)
   if (t.relayed) nameIp(t.relayed.ip, nextRole("relay-ip"))
-  note(`${label}: Allocate ${outcome(r)}${t.relayed ? `, relayed ${show(t.relayed)}, mapped ${show(t.mapped)}, lifetime ${t.lifetime}s` : ""}`)
+  if (!ourIp && t.mapped) { ourIp = t.mapped.ip; nameIp(ourIp, "our-ip") }
+  note(`${label}: Allocate${lifetime ? ` asking LIFETIME ${lifetime}s` : ""} ${outcome(r)}${t.relayed ? `, relayed ${show(t.relayed)}, mapped ${show(t.mapped)}, LIFETIME ${t.lifetime}s` : ""}`)
   if (!t.relayed) throw new Error(`${label}: no allocation`)
   allocations.push(t)
   return t
@@ -518,13 +526,13 @@ async function phase2(a1) {
   table(["peer", "addressed as", "Send ind. arrived", "ChannelBind", "ChannelData arrived", "peer again -> A1"],
     rows.map((r) => [r.peer, r.addressedAs, r.sendIndication, r.channelBind, r.channelData, r.again]))
   out()
-  note(`A1: Refresh with LIFETIME 600: ${outcome(await a1.refresh(600))}`)
+  note(`A1: Refresh with LIFETIME 600: ${refreshed(await a1.refresh(600))}`)
   await hear(P[15], a1, "after-refresh")
   data.phases.p2 = { rows, afterRefresh: { peer: "P16", got: a1.hits("after-refresh", "P16").length, sent: BURST } }
   // A1 stays for phase 6, so its allocation and its permission for our IP
   // are refreshed from here on; channels are left to expire.
   timers.push(setInterval(async () => {
-    note(`A1 keepalive: Refresh ${outcome(await a1.refresh(600))}, CreatePermission for our-ip ${outcome(await a1.permit(P[0].mapped))}`)
+    note(`A1 keepalive: Refresh ${refreshed(await a1.refresh(600))}, CreatePermission for our-ip ${outcome(await a1.permit(P[0].mapped))}`)
   }, KEEP_MS))
 }
 
@@ -606,7 +614,7 @@ async function phase6(a1, quietSince) {
   await sleep(SETTLE_MS)
   const fill = tally(a5, "join", S.slice(0, 11))
   const a5Quiet = Date.now()
-  timers.push(setInterval(async () => note(`A5 keepalive: Refresh ${outcome(await a5.refresh(600))}, permission left to lapse`), KEEP_MS))
+  timers.push(setInterval(async () => note(`A5 keepalive: Refresh ${refreshed(await a5.refresh(600))}, permission left to lapse`), KEEP_MS))
   const result = { fill }
   // At each check a peer that holds a slot sends first, the control that the
   // allocation and that peer's public port still work, then a new peer.
@@ -702,6 +710,63 @@ async function phase7() {
   data.phases.p7 = { sendFirst, bindFirst }
 }
 
+// turn-client-proto 0.7.3 asks for a LIFETIME of 1800 in its Allocate and in
+// every Refresh, and ignores a Refresh response that grants under 600s, so its
+// allocation would lapse (read on docs.rs, turn-client-proto 0.7.3,
+// src/protocol.rs, send_initial_request, poll_transmit, and MIN_LIFETIME).
+async function phase8() {
+  out()
+  out("Phase 8: the LIFETIME Cloudflare grants, and ChannelData framing, to a peer and relay to relay")
+  const a8 = new Turn("A8", server, creds)
+  sockets.push(a8)
+  await a8.bind()
+  await allocateOn(a8, "A8", 1800)
+  const grants = [{ request: "Allocate asking 1800", granted: a8.lifetime }]
+  for (const ask of [1800, 600, 300, null, 3600, 1800]) {
+    const r = ask === null ? await a8.request(T.REFRESH, []) : await a8.refresh(ask)
+    grants.push({ request: `Refresh asking ${ask ?? "nothing"}`, outcome: outcome(r), granted: granted(r) })
+    note(`A8: Refresh asking ${ask === null ? "with no LIFETIME" : `LIFETIME ${ask}s`}: ${refreshed(r)}`)
+  }
+
+  const [v] = await makePeers("V", 1, 1)
+  await permit(a8, v.mapped)
+  await hear(v, a8, "first", 1)
+  const bindPeer = outcome(await a8.bindChannel(0x4001, v.mapped))
+  if (bindPeer === "ok") a8.channels.set(0x4001, v.mapped)
+  note(`A8: ChannelBind 0x4001 to V01: ${bindPeer}`)
+  await hear(v, a8, "chan")
+  for (let i = 1; i <= BURST; i++) a8.channelData(0x4001, `p01|A8|padded|V01|${i}`, true)
+  for (let i = 1; i <= BURST; i++) a8.channelData(0x4001, `p01|A8|unpadded|V01|${i}`, false)
+  await sleep(SETTLE_MS)
+  const frames = a8.hits("chan", "V01").map((h) => `${h.via}, ${h.len} bytes of data, ${h.pad ?? "-"} of padding`)
+  note(`V01 -> A8 frames: ${[...new Set(frames)].join("; ") || "none"}`)
+  note(`A8 -> V01 ChannelData: padded ${v.count("A8", "padded")}/${BURST}, unpadded ${v.count("A8", "unpadded")}/${BURST}`)
+
+  const h8 = await newAllocation("H8")
+  const perms = { a8ForH8: await permit(a8, h8.relayed), h8ForA8: await permit(h8, a8.relayed) }
+  const bindA8 = outcome(await a8.bindChannel(0x4002, h8.relayed))
+  const bindH8 = outcome(await h8.bindChannel(0x4001, a8.relayed))
+  if (bindA8 === "ok") a8.channels.set(0x4002, h8.relayed)
+  if (bindH8 === "ok") h8.channels.set(0x4001, a8.relayed)
+  note(`A8: ChannelBind 0x4002 to H8's relayed address: ${bindA8}; H8: ChannelBind 0x4001 to A8's: ${bindH8}`)
+  for (let i = 1; i <= BURST; i++) {
+    a8.channelData(0x4002, `p01|H8|relay|A8|${i}`)
+    h8.channelData(0x4001, `p01|A8|relay|H8|${i}`)
+  }
+  await sleep(SETTLE_MS)
+  const a8ToH8 = h8.hits("relay", "A8", "H8")
+  const h8ToA8 = a8.hits("relay", "H8", "A8")
+  note(`relay to relay by ChannelData: A8 -> H8 ${a8ToH8.length}/${BURST}${a8ToH8[0] ? ` as ${a8ToH8[0].via}` : ""}, H8 -> A8 ${h8ToA8.length}/${BURST}${h8ToA8[0] ? ` as ${h8ToA8[0].via}` : ""}`)
+
+  data.phases.p8 = {
+    grants, bindPeer, frames: [...new Set(frames)],
+    toPeer: { padded: v.count("A8", "padded"), unpadded: v.count("A8", "unpadded"), sent: BURST },
+    relayToRelay: { perms, bindA8, bindH8, a8ToH8: a8ToH8.length, h8ToA8: h8ToA8.length, sent: BURST },
+  }
+  await drop(h8)
+  await drop(a8)
+}
+
 // ---------------------------------------------------------------- run
 
 async function main() {
@@ -749,6 +814,7 @@ async function main() {
     if (run(4)) await phase4()
     if (run(5)) await phase5()
     if (run(7)) await phase7()
+    if (run(8)) await phase8()
     if (run(6)) await phase6(a1, quietSince)
   } catch (e) {
     note(`stopped: ${e.stack ?? e.message}`)

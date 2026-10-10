@@ -34,8 +34,14 @@ Each peer was a UDP socket on one PC, sending through a router that gave it its 
   A fresh allocation heard from the same 15 peers in reverse order, took the 5 the first had refused and 5 more, and refused the last 5, which the first had taken.
   Deleting an allocation and allocating again from the same client socket also starts at zero.
 - A peer that holds a slot keeps it: one sending once a second throughout got 669 of 669 datagrams through over 11 minutes.
-- Two Cloudflare allocations relay to each other: data went both ways between one allocation and two others' relayed addresses.
+- Two Cloudflare allocations relay to each other.
+  CreatePermission and ChannelBind toward another of our allocations' relayed addresses were accepted, and data went both ways between two allocations, by Send and Data indications and by ChannelData.
   Allocations don't share one relayed IP: 8 in one run used 6 relayed IPs.
+- Cloudflare grants the LIFETIME a request asks for, up to at least 1800s.
+  An Allocate asking 1800s got 1800s, and Refreshes asking 1800s, 600s, and 300s got exactly that.
+  An Allocate or Refresh with no LIFETIME got 600s, and so did a Refresh asking 3600s.
+  turn-client-proto 0.7.3 asks for 1800s in its Allocate and in every Refresh, and ignores a Refresh response that grants under 600s (read on docs.rs, turn-client-proto 0.7.3, `src/protocol.rs`, `send_initial_request`, `poll_transmit`, and `MIN_LIFETIME`).
+- Cloudflare pads the ChannelData it sends to a multiple of 4 bytes, 17 bytes of data arriving with 3 of padding, and it takes ChannelData from the client with or without padding.
 - This connection forgets an idle UDP mapping after between 120s and 150s, which spoiled the permission check in two of our three idle runs.
   Cloudflare never answered the Refreshes of an allocation whose client socket had been silent for about 130s, and a peer that held a slot got nothing after 5.5 quiet minutes, presumably because each came back on a new public port (unverified).
   With every socket sending a STUN Binding request every 15s, both worked.
@@ -44,12 +50,14 @@ Each peer was a UDP socket on one PC, sending through a router that gave it its 
 So a core that relays through Cloudflare must take a new allocation before it addresses an 11th, whether the peer reconnected from a new port or ICE has more remote candidates to check than the allocation has slots left.
 One allocation per relayed connection spends a slot each time the peer's address changes, and ICE spends one on each remote candidate it checks from the relayed candidate, before any pair wins.
 When both pilots need the relay, their two allocations can relay to each other.
+Cloudflare grants the 1800s turn-client-proto asks for, so the crate's allocation doesn't lapse on its check against grants under 600s.
 On a connection like this one, a socket quiet for 2 minutes loses its public port, so a core's keepalives must come more often than that, to the relay and to a direct peer alike.
 
 **Affects:** node 2.1 of the [architecture plan](../architecture/plan.md).
 
-**Evidence:** [p01-turn-peer-cap](../../../experiments/areas/network/p01-turn-peer-cap.mjs) and its output in [results](../../../experiments/areas/network/results/): phases 1 to 5 in `p01-turn-peer-cap-2026-10-10-08-34-08.txt`, phase 7 in `p01-turn-peer-cap-2026-10-10-08-39-06.txt`, and phase 6, with its controls, in `p01-turn-peer-cap-2026-10-10-08-54-57.txt`.
+**Evidence:** [p01-turn-peer-cap](../../../experiments/areas/network/p01-turn-peer-cap.mjs) and its output in [results](../../../experiments/areas/network/results/): phases 1 to 5 in `p01-turn-peer-cap-2026-10-10-08-34-08.txt`, phase 7 in `p01-turn-peer-cap-2026-10-10-08-39-06.txt`, phase 8 in `p01-turn-peer-cap-2026-10-10-09-19-51.txt`, and phase 6, with its controls, in `p01-turn-peer-cap-2026-10-10-08-54-57.txt`.
 The idle runs `p01-turn-peer-cap-2026-10-10-08-36-28.txt` and `p01-turn-peer-cap-2026-10-10-08-46-48.txt` came before the keepalives: their checks on quiet peers agree, and the NAT spoiled their permission checks.
+`p01-turn-peer-cap-2026-10-10-09-19-28.txt` is an identical phase 8 run that labels our IP `other-ip-1`.
 
 ## 2026-10-06: Research puts the share of pilot pairs that need the relay between 5% and 31%, and one small server's transfer covers tens of thousands of session-hours a month
 

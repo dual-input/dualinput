@@ -1,0 +1,27 @@
+p01-turn-peer-cap, 2026-10-10-09-19-51 UTC, phases 8
+t+   0.1s  credentials: HTTP 201, 6 URLs, using turn:turn.cloudflare.com:3478?transport=udp, ttl 600s
+t+   0.1s  TURN server turn.cloudflare.com is turn-server:3478; STUN server stun.cloudflare.com is stun-server:3478
+
+Phase 8: the LIFETIME Cloudflare grants, and ChannelData framing, to a peer and relay to relay
+t+   0.2s  A8: Allocate asking LIFETIME 1800s ok, relayed relay-ip-1:55710, mapped our-ip:46434, LIFETIME 1800s
+t+   0.2s  A8: Refresh asking LIFETIME 1800s: ok, LIFETIME 1800s
+t+   0.2s  A8: Refresh asking LIFETIME 600s: ok, LIFETIME 600s
+t+   0.3s  A8: Refresh asking LIFETIME 300s: ok, LIFETIME 300s
+t+   0.3s  A8: Refresh asking with no LIFETIME: ok, LIFETIME 600s
+t+   0.3s  A8: Refresh asking LIFETIME 3600s: ok, LIFETIME 600s
+t+   0.3s  A8: Refresh asking LIFETIME 1800s: ok, LIFETIME 1800s
+t+   0.3s  V01-V01: STUN mapped them to our-ip, 1 distinct public ports for 1 sockets
+t+   0.4s  A8: CreatePermission for our-ip: ok
+t+   0.9s  V01 -> A8: 1/1 via Data indication, relay saw our-ip:46449
+t+   0.9s  A8: ChannelBind 0x4001 to V01: ok
+t+   2.2s  V01 -> A8: 4/4 via ChannelData, relay saw our-ip:46449
+t+   4.2s  V01 -> A8 frames: ChannelData, 17 bytes of data, 3 of padding
+t+   4.2s  A8 -> V01 ChannelData: padded 4/4, unpadded 4/4
+t+   4.2s  H8: Allocate ok, relayed relay-ip-2:22443, mapped our-ip:46450, LIFETIME 600s
+t+   4.2s  A8: CreatePermission for relay-ip-2: ok
+t+   4.2s  H8: CreatePermission for relay-ip-1: ok
+t+   4.3s  A8: ChannelBind 0x4002 to H8's relayed address: ok; H8: ChannelBind 0x4001 to A8's: ok
+t+   6.3s  relay to relay by ChannelData: A8 -> H8 4/4 as ChannelData, H8 -> A8 4/4 as ChannelData
+t+   6.3s  H8: Refresh with LIFETIME 0 (delete): ok
+t+   6.3s  A8: Refresh with LIFETIME 0 (delete): ok
+t+   6.5s  credentials revoked: HTTP 204

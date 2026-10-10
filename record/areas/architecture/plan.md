@@ -419,7 +419,8 @@ The program uploads raw data and draws no conclusions, so our analysis runs on o
 - the PC's CPU and memory load each second, and its Windows version;
 - `QueryPerformanceCounter` samples against the droplet's clock, and the system clock beside them;
 - the droplets' own side: the relay's and forwarder's logs and the `tc netem` and firewall settings in force at each moment.
-It uploads as it goes, so a crash or a closed laptop loses little.
+It writes its raw data to a file on the PC as it goes, so uploading never competes with the traffic it measures and a crash loses little, and it uploads the file itself at the end (user, 2026-10-10).
+If that upload fails, it retries the next time it's opened, and as a last resort the window shows the file so the friend can send it over by hand.
 Its window says what it's doing at each step and shows progress through the whole run (user, 2026-10-09), in clear words that name things as they are, such as a relay server or a peer, rather than vaguer ones such as "partner" (user, 2026-10-10).
 It's unsigned, so each friend passes the SmartScreen warning once.
 Its raw results carry the friends' public IP addresses, which they agree to send us, and the results we commit leave them out, because nothing personal enters the tree ([CLAUDE.md](../../../CLAUDE.md#working-rules)).

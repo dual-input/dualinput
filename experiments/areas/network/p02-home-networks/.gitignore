@@ -1,0 +1,5 @@
+# cargo's build output.
+target/
+# The droplets' addresses, our certificate authority's key, the probe's SSH key, and the
+# DigitalOcean token: made by deploy/, kept off the tree.
+deploy/generated/

@@ -1,0 +1,112 @@
+Node 2.1 research digest: notes condensed from six research agents' reports (2026-10-09)
+and two code reads (2026-10-10), made while the planning session compared transports.
+Every line is an agent's reading of its source unless the network log entry of 2026-10-10
+on iroh's lead marks it checked; versions and dates are as the agents read them.
+
+== quinn 0.11.12 (2026-09-14), quinn-proto 0.11.19 (2026-09-30), MIT OR Apache-2.0 ==
+- Datagrams: send_datagram drops the oldest queued datagrams when the 1 MiB send buffer
+  is full; send_datagram_wait waits instead; max_datagram_size about 1,162 B at the
+  1,200-byte starting MTU, up to about 1,414 B with MTU discovery.
+- Datagrams are congestion-controlled; they wait, they aren't starved.
+- SendStream::set_priority(i32): strict priority; send_fairness round-robins equals.
+- populate_packet writes DATAGRAM frames before STREAM frames.
+- Cubic by default; NewReno; BBR marked experimental. Minimum window 2 x MTU, about
+  24 KB/s at a 100ms round trip, above our ~5 KB/s per pilot.
+- Only the client may migrate (RFC 9000); no multipath upstream; path_changed exists only
+  in quinn-proto. iroh measured ~20s for stale congestion state to settle, ~3s after
+  resetting it (iroh blog, "Why we forked quinn", 2024-05-20).
+- About 29-30 B of QUIC overhead per packet; encryption can't be turned off.
+- keep_alive_interval None by default; max_idle_timeout 30s.
+- rust-libp2p 0.57.0 (2026-09-11): libp2p-quic disables datagrams and migration and
+  exposes no stream priority; circuit relay v2 is one resending stream, 2 minutes and
+  128 KiB by default.
+
+== iroh 1.3.0 (2026-09-28); 1.0.0 on 2026-06-15; QUIC on n0's quinn fork, noq 1.3.0 ==
+- Dial by public key; hole punching inside QUIC; QUIC Address Discovery from the relay on
+  UDP 7842; portmapper (UPnP, PCP, NAT-PMP) on by default; IPv6.
+- Relay: HTTPS on TCP 443 upgraded to a WebSocket; frame 1 + 32 + 1 B; all relayed
+  traffic shares one TCP connection; no QUIC relay (issue #4395, untriaged).
+- Self-hosted iroh-relay (Linux, macOS, Windows binaries); n0 public relays for
+  development and hobby use; Pro $19/month with 100 GB, then $0.09/GB; Dedicated
+  $199/month per region.
+- Relay and direct are multipath paths of one connection; only the selected path is
+  Available, the rest Backup; the relay path stays warm (5s heartbeat). A silent dead path
+  is abandoned after PATH_MAX_IDLE_TIMEOUT, 15s, which accepts lower values.
+- Datagrams drop oldest from a 1 MiB buffer; set_priority exposed; DATAGRAM before STREAM.
+- Overhead about 54-57 B a packet direct (IPv4), about 130-150 B relayed.
+- Two endpoints per PC; relay only through Builder::clear_ip_transports().
+- unstable-custom-transports (add_custom_transport, path_selector) has no semver promise
+  and broke in 1.1.0.
+- Windows issues: #3968 bind hang (ring build flags), #4297 and #4448 fixed.
+- n0: "roughly 9 out of 10 connections go direct", no method given.
+
+== iroh with TURN as a custom transport (code read, 2026-10-10) ==
+- Traits CustomTransport, CustomEndpoint, CustomSender; CustomAddr is a u64 id plus bytes.
+- iroh learns its public address only from relays in its RelayMap; with none it
+  advertises only LAN addresses, so punching between two ordinary NATs mostly fails.
+- A custom path opens only if it carried the handshake; iroh never opens one later
+  (PR #4565 proposes adding addresses mid-connection).
+- Path selection reruns only when a path opens or is abandoned; failover waits for the
+  path idle timeout; a custom transport can't report its path dead; send errors and
+  Pending count as sent.
+- Workable only as TURN preferred plus our own iroh relay kept for address discovery.
+- About 1,000-2,000 lines of glue by the agent's estimate; no published TURN transport.
+
+== ICE via is + TURN + quinn (code read, 2026-10-10) ==
+- is 0.11.1 (2026-09-25), str0m's ICE agent extracted, sans-IO, MIT OR Apache-2.0.
+  The application sends on the last NominatedSend; failed pairs are pruned; the
+  controlling side renominates the best succeeded pair without an ICE restart; dead-pair
+  detection takes 21.5s with defaults (tunable). It can't parse a STUN reply without
+  MESSAGE-INTEGRITY, so our own STUN client claims those replies first.
+  Keeping a direct and a relayed path both alive needs two agents per peer.
+  Firezone runs it in production under WireGuard.
+- quinn custom AsyncUdpSocket: a virtual address per connection works; a client drops
+  packets from another address; non-ConnectionReset receive errors end the endpoint;
+  quinn drops duplicate packets with an RFC 4303-style sliding window (Dedup, spaces.rs).
+- turn-client-proto 0.7.3 (2026-10-06, one maintainer): Allocate, CreatePermission,
+  ChannelBind, ChannelData, Send/Data indications, automatic refresh, 438 retries;
+  asks for 1800s and ignores grants under 600s.
+- Glue about 2,500-4,000 lines plus a test harness by the agent's estimate.
+- C-prime: one QUIC connection over both paths, duplicating while unsure; quinn's Dedup
+  drops copies; costs shared congestion and RTT state across paths.
+- IETF drafts (draft-thatcher-p2p-quic, draft-seemann-quic-nat-traversal) describe QUIC
+  over an ICE-selected pair; no Rust project pairs an ICE crate with quinn.
+
+== WebRTC in Rust ==
+- webrtc-rs 0.21.0 and rtc 0.21.0 (2026-09-19): new architecture about 10 weeks old, one
+  main author; rtc-turn issues #263 (stale nonce, ~65 min) and #267 (ChannelBind on 438)
+  open; the selected pair never changes.
+- str0m 0.24.1 (2026-10-03): full ICE that keeps checking pairs and renominates without a
+  restart; no TURN client; sctp-proto has two FIFO queues and no per-stream priority;
+  about 65 B a packet with DTLS 1.2, about 50 B with DTLS 1.3.
+- Cloudflare Realtime TURN: allocation in the nearest data center; billed from Cloudflare
+  to the client at $0.05/GB after 1,000 GB a month; UDP relaying only; IPv4 relay
+  addresses only; no permissions to private addresses.
+
+== Valve GameNetworkingSockets v1.6.1 (2026-10-03), BSD-3-Clause ==
+- Lanes with priorities and weights; native ICE the default since v1.6.0 (2026-06-03);
+  TURN through Send indications; no newest-only delivery; no UPnP or PCP.
+- Rust binding game-networking-sockets 0.3.0: no peer-to-peer in its safe API; builds
+  C++ and protobuf through vcpkg inside build.rs; its own polling thread.
+
+== Our own UDP protocol ==
+- Crates for parts: stun-proto 2.0.3, stun_codec 0.4.0, turn-client-proto 0.7.3,
+  rice-proto 0.4.3, portmapper 0.19.3, igd-next 0.18.0, crab_nat 0.8.1; renet 2.0.0 has
+  channels but no congestion control and is client/server only; laminar unmaintained.
+
+== Tailscale, gaps, and keepalives ==
+- Connections start on DERP (HTTPS over TCP) and upgrade to direct; paths ranked by round
+  trip with under-1% hysteresis; heartbeat 3s, trust 6.5s; when trust expires it sends on
+  both the direct path and DERP; "well north of 90%" direct (2025-10-15). Peer relays
+  (UDP, user-run) generally available 2026-02-18.
+- Gaps: Valve's Source engine interpolates 100ms at 20 updates a second and extrapolates
+  at most 250ms; Google removed XOR FEC from QUIC in 2016 for little benefit; Ellis and
+  Perkins (2010): over 85% of residential traces lost under 1%, mostly single packets.
+- Keepalives: RFC 4787 2-minute minimum mapping timer; RFC 8085 at least 15s apart;
+  WireGuard 25s; Richter et al. (2016): 74% of NATs drop idle UDP state within a minute.
+
+== Hosting (prices fetched 2026-10-09) ==
+- Relayed two-pilot session: 42.5-61.2 MB an hour out of the relay with overhead.
+- 10 relayed sessions around the clock: $4-8 on one small server; $0 on Cloudflare TURN.
+- 100: Hetzner and OVH stay at base price; DigitalOcean $25-38; Cloudflare TURN $28-173.
+- 1,000: CPU-bound; per-GB hosts $155-422; Cloudflare TURN $725-2,184; Hetzner EU $16-38.

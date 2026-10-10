@@ -2,6 +2,109 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-10: iroh 1.3 leads for carrying a session between home PCs, provided its TCP relay's stalls don't show and its switch to the relay can be made fast
+
+**Asked:** how do the best current designs carry real-time traffic between two home PCs, directly and through a relay, and which Rust library lets us build the best of them ([architecture plan, 2.1](../architecture/plan.md#21-carrying-a-sessions-traffic))?
+
+**Expected:** no prediction.
+
+**Found:** six research agents read each candidate's documentation and source on 2026-10-09, and two more read the code behind the leading combinations on 2026-10-10.
+We rechecked each claim below marked documented or read, as [Evidence](../../../.claude/rules/writing.md#evidence) uses the words; the rest are the agents' reads, unverified, condensed in [the research digest](results/2026-10-10-transport-research-digest.txt).
+
+The terms, for a reader new to them:
+
+- ICE (Interactive Connectivity Establishment) is the standard way two programs find a direct link: each gathers its addresses, they swap them, and each tests pairs of addresses, one of its own with one of the other's, and sends on the pair it settles on, the nominated pair.
+- STUN is a request that asks a server which public address it arrived from.
+- TURN (Traversal Using Relays around NAT) is the standard relay protocol: a program takes an allocation, a public address on the TURN server that relays to and from it.
+- UPnP, NAT-PMP, and PCP are three ways a program asks a home router to open a port.
+- n0 is the company that makes iroh, and noq is its fork of the QUIC library quinn.
+- A relayed packet travels two legs, pilot to relay and relay to pilot.
+
+The design the research points to, whatever the library:
+
+1. A session starts through the relay at once and upgrades to a direct link in the background, so nobody waits on hole punching, as Tailscale does ([How NAT traversal works](https://tailscale.com/blog/how-nat-traversal-works)).
+2. The relay carries UDP.
+   Some pilots will relay on every flight, so the relay is their whole experience (user, 2026-10-09), and over TCP one lost packet holds back everything behind it ([09-02](../../learn/foundations/09-02-transports-and-delivery.md#delivery-modes-reliable-ordered-sequenced-unreliable-head-of-line-blocking-mtu-and-fragmentation)).
+3. Each channel gets its own delivery, by strict priority: a resending stream for messages that must arrive, and one-off packets for what the next message replaces.
+4. Both paths stay warm, with copies sent over both while the direct link is in doubt.
+   Tailscale sends on both its direct path and its relay once it stops trusting the direct one (read in tailscale/tailscale, main branch on 2026-10-10, `wgengine/magicsock/endpoint.go`, `addrForSendLocked`).
+5. The standby path carries heartbeats, plus point 4's copies while the direct link is in doubt, and the flight-model stream serves as the active path's heartbeat.
+
+Encryption isn't a requirement, because nothing a session carries is sensitive, so a transport that encrypts anyway is judged only on the bytes its encryption adds (user, 2026-10-09).
+Building hole punching ourselves is out: its success rate rests on edge cases in routers we can't reproduce, and each pair it fails relays (user, 2026-10-10).
+
+| Option | Finding a path | Relay | Channels | Where it stands |
+| --- | --- | --- | --- | --- |
+| iroh 1.3.0 as it is | Built in, with router ports, IPv6, and retries | iroh's, over TCP | QUIC on noq, n0's fork of quinn | Lead, on two conditions |
+| iroh with TURN plugged in | iroh's | TURN, over UDP | QUIC on noq | Behind: an unstable API, and it still needs an iroh relay |
+| ICE through `is`, TURN, and quinn | `is`, with our glue | TURN, over UDP | QUIC on quinn | Next if iroh fails a condition |
+| WebRTC through str0m, with TURN | Built in | TURN, over UDP | SCTP, the layer WebRTC's data channels run on, with no priorities | Behind the ICE-and-quinn option |
+| quinn with our own hole punching | Ours | Ours | QUIC on quinn | Set aside: the edge cases |
+| Valve's GameNetworkingSockets | Built in | TURN | Lanes with priorities | Set aside: unsafe calls, C++ build |
+| WebRTC through webrtc-rs | Built in | TURN | SCTP | Set aside: open relay bugs |
+| rust-libp2p | DCUtR, its hole punching through a relay | Circuit relay, one stream | QUIC without one-off packets | Set aside: no one-off packets or priorities, and a relay capped by default at 2 minutes and 128 KiB |
+| No hole punching | None | Any | Any | Set aside: too many relayed pairs |
+| A UDP protocol of our own | Ours | Ours | Ours | Set aside: we'd build all of it |
+
+**iroh as it is.**
+
+- iroh reached 1.0 on 2026-06-15, with the API and wire protocol stable within a major version, and 1.3.0 on 2026-09-28 ([Iroh 1.0](https://www.iroh.computer/blog/v1)).
+  One developer's write-up, [Why iroh, not libp2p or WebRTC](https://www.uniclipboard.app/blog/why-iroh-not-libp2p-webrtc), argues for it over both for a desktop app whose devices know each other.
+  crates.io counted 2.0 million downloads of iroh in the 90 days to 2026-10-10, against 2.3 million for libp2p (documented, crates.io API).
+- Its direct path is QUIC over UDP, with a stream per channel, `SendStream::set_priority`, and one-off packets queued ahead of the streams, the oldest dropped when the queue fills ([iroh 1.3.0 on docs.rs](https://docs.rs/iroh/1.3.0/iroh/)).
+  It punches holes inside QUIC, asks the router for a port through UPnP, PCP, and NAT-PMP, prefers IPv6, and retries when addresses change.
+  n0 says "roughly 9 out of 10 connections go direct", with no method (documented, [iroh FAQ](https://docs.iroh.computer/about/faq)).
+- Its relay carries everything over "Outbound TCP 443", "an HTTPS connection that upgrades to a WebSocket" (documented, same FAQ, "What ports does iroh use?"), and the agents read the same in `iroh-relay/src/client.rs`.
+  So on a relayed path, a lost packet holds back every channel until TCP resends it.
+  TCP's RACK loss detection marks a packet lost once a packet sent after it has been acknowledged and a round trip and a quarter have passed since it was sent ([RFC 8985](https://www.rfc-editor.org/rfc/rfc8985)).
+  So the lost packet, and everything behind it, arrives late by a round trip and a quarter, or by a round trip plus the gap to the next packet, whichever is longer.
+  That's about 35ms to 70ms through a relay in the pilot's region, where our PC's round trip to Cloudflare's nearest site averaged 22ms, and about 145ms to 170ms across an ocean, where its round trip to New York was 117ms ([09-01](../../learn/foundations/09-01-addresses-and-link-quality.md#latency-jitter-loss-and-bandwidth-typical-figures-on-a-lan-vs-the-internet)), the lower figures at 2.3's 75 packets a second and the higher at the flight model's 20 alone (arithmetic, unmeasured).
+  At 1% loss, that's a stall about every 1.3s on each leg at 75 packets a second, and every 5s at 20.
+  Windows on our development machine has RACK and Tail Loss Probe on (read with `netsh int tcp show supplemental`, 2026-10-10), which governs the leg the pilot's PC sends on, and the relay's own operating system resends on the leg to the other pilot.
+  When no packet follows a lost one, Tail Loss Probe, or failing that this PC's 300ms minimum resend timeout, finds the loss instead.
+  The flight model would hide every such stall behind the 0.4s by which v1 accepts the following pilot sees the aircraft ([flight-model sync](../product/03-v1-scope.md#flight-model-sync)).
+  A 60ms audio buffer, as FS Copilot's ATC audio used (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 3: the audio path works on one machine — Q10, Q12, Q13 settled"), would absorb most stalls through a relay in the region and play each one across an ocean as a dropout (inference).
+  Counting IPv4 and its other headers, a relayed packet carries about 130 to 150 bytes of overhead, against about 55 on the direct path.
+- It sends on one path at a time: only the selected path is `PathStatus::Available`, and every other is `Backup` (read in n0-computer/iroh v1.3.0, `iroh/src/socket/remote_map/remote_state.rs`, `path_status_for_addr`).
+  So it sends no copies while a direct link is in doubt, and a direct link that dies silently is dropped only after the path idle timeout, 15s by default.
+  The agents read that `QuicTransportConfigBuilder::default_path_max_idle_timeout` accepts lower values (unverified).
+- Its relay runs as our own `iroh-relay`, whose address is a setting, and n0's [public relays](https://docs.iroh.computer/iroh-services/relays/public) are for development and hobby use (the agents' read).
+
+**iroh with TURN plugged in** through the `unstable-custom-transports` feature (documented, [Builder on docs.rs](https://docs.rs/iroh/1.3.0/iroh/endpoint/struct.Builder.html)).
+iroh learns its own public address only from an iroh relay, opens a custom path only if that path carried the handshake, and chooses a path again only when one opens or is abandoned (the agents' read of v1.3.0).
+So it would keep an iroh relay of ours and the idle-timer switch, on an API with no semver promise, which broke in 1.1.0.
+
+**ICE through `is`, TURN, and quinn.**
+
+- `is` 0.11.1 is str0m's ICE agent as a crate of its own that does no networking itself (documented, [is on docs.rs](https://docs.rs/is/latest/is/)), and Firezone runs it in production under WireGuard.
+  It hands the application one pair to send on, the last `NominatedSend`, and prunes failed pairs (read in algesten/str0m at `95e5038c`, `crates/is/src/agent.rs`), so keeping a direct and a relayed path both alive takes two agents per peer (the agents' inference).
+- quinn takes a socket of ours with a made-up peer address per connection, and drops a duplicate packet with its "RFC4303-style sliding window" (read in quinn-rs/quinn at tag `quinn-proto-0.11.18`, `quinn-proto/src/connection/spaces.rs`, `Dedup`).
+  STUN, TURN, and QUIC can share one port, sorted by first byte and by whether a packet came from the TURN server, if QUIC never randomizes its fixed bit, which QUIC calls greasing (documented, [RFC 9443](https://www.rfc-editor.org/rfc/rfc9443)).
+- turn-client-proto 0.7.3 does TURN's channel framing, refreshes, and stale-nonce retries.
+  Cloudflare grants the 1800s it asks for and relays from one of its allocations to another, but an allocation exchanges data with only 10 peer addresses over its life and silently drops an 11th, so ICE spends a slot on each remote address it checks from the relay ([the entry below](#2026-10-10-a-cloudflare-turn-allocation-exchanges-data-with-10-peer-addresses-over-its-life-and-silently-drops-everything-to-or-from-an-11th)).
+  Each pilot's allocation sits in the Cloudflare data center nearest that pilot, and Cloudflare bills only traffic sent to TURN clients (documented, [Cloudflare TURN FAQ](https://developers.cloudflare.com/realtime/turn/faq/)).
+- The glue is about 2,500 to 4,000 lines plus a test harness, by one agent's estimate.
+  Carrying one QUIC connection over both paths removes the glue's hardest part, moving must-arrive channels between two connections, because quinn drops the copies itself.
+  It costs one round-trip estimate and one congestion window shared by both paths.
+
+**WebRTC through str0m** keeps checking every pair and "can change the nominated pair without needing an ICE restart" (documented, algesten/str0m main branch on 2026-10-10, `docs/ice.md`), and leaves TURN to the caller (documented, its README).
+Its SCTP layer serves channels from two first-in-first-out queues with no priority between them (read in algesten/sctp-proto, main branch on 2026-10-10, `src/queue/pending_queue.rs`).
+It adds about 65 bytes a packet with DTLS 1.2, against about 30 for QUIC, neither counting IP and UDP headers.
+
+Hole-punching rates come from different populations and methods, so they don't compare directly: libp2p's DCUtR connected 70% ± 7.1% of pairs directly over 4.4 million attempts ([Trautwein et al.](https://arxiv.org/abs/2510.27500)), callstats.io's WebRTC conferences needed a relay 22% of the time in 2015 and 2016 ([the 2026-10-06 entry](#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month)), iroh claims about 9 in 10 direct, and Tailscale "well north of 90%" ([NAT traversal improvements, pt. 1](https://tailscale.com/blog/nat-traversal-improvements-pt-1)).
+
+**Changed:** iroh 1.3 as it is leads for node 2's transport, because it finds paths, opens router ports, and relays with no glue of ours, where ICE through `is` needs about 2,500 to 4,000 lines.
+It leads on two conditions nobody has measured: its relay's TCP stalls mustn't show in relayed pilots' flight data and ATC audio, and its move to the relay when a direct link dies silently must be fast enough once its path idle timeout is lowered.
+Neither has a pass line yet; we expect stalls across an ocean to break a 60ms audio buffer, so the user sets the audio buffer and the switch time we'd accept from 2.3's counts, before node 2 picks.
+[2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks) measures both, against a UDP relay under the same injected loss.
+If iroh fails either, 2.1 reopens, and ICE through `is` with TURN and quinn, over one QUIC connection, comes next.
+On any QUIC option, Crosscheck drops a waiting flight-model sample as soon as a newer one is ready, because QUIC's one-off queue drops the oldest only when its 1 MiB fills, thousands of stale samples at 150 bytes each (research digest).
+It paces bulk transfers so they never crowd the flight model.
+
+**Affects:** [2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks), node 2's design doc, and the spine's [between machines](../architecture/01-spine.md#between-machines), which leaves the relay's language to node 2: iroh's relay is Rust.
+
+**Evidence:** the sources linked above, and [the research digest](results/2026-10-10-transport-research-digest.txt); the agents' full reports are in the planning session's transcript and aren't committed.
+
 ## 2026-10-10: A Cloudflare TURN allocation exchanges data with 10 peer addresses over its life, and silently drops everything to or from an 11th
 
 **Asked:** does a Cloudflare Realtime TURN allocation stop relaying once it has exchanged data with 10 distinct peer transport addresses (IP and port), as a developer reported in [cloudflare/cloudflare-docs#33972](https://github.com/cloudflare/cloudflare-docs/issues/33972), opened 2026-10-04 and unanswered by Cloudflare as of 2026-10-10?

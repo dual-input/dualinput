@@ -362,6 +362,7 @@ It may end in a probe, such as relaying through Cloudflare's TURN from a client 
 It reads [01-aims](../product/01-aims.md#relay-and-license), [the connection](../product/03-v1-scope.md#the-connection), [channels](../product/04-room-for-later.md#channels), the [network log](../network/log.md), the spine's [between machines](01-spine.md#between-machines), and the foundations chapters 09-01 to 09-06 and [10-02](../../learn/foundations/10-02-yourcontrols.md).
 Its answer goes in an entry in the network log, which 2's design doc cites.
 Exit: a network log entry answers the question.
+Done on 2026-10-10.
 
 ## 2.2 Packing a message between cores
 
@@ -377,19 +378,39 @@ Exit: a network log entry answers the question.
 
 ## 2.3 A probe across friends' home networks
 
-Question: between real home networks, how often does a direct link form with the library 2.1 picks, how do the direct and relayed paths carry a session's traffic, and how far do two PCs' clocks part over 2 hours?
-2 can't settle without it how the cores get through real home routers, how often a heartbeat must go to keep a router's mapping open, or how often short gaps come, which the ways to soften one in [the connection](../product/03-v1-scope.md#the-connection) are weighed against.
-Nor can it settle how far two PCs' counters part, which 1.4 raised ([01-spine](01-spine.md#left-open)).
-The share of pilot pairs that need the relay comes only from research, 5% to 31% ([network log](../network/log.md)), and our records measure round trips only from our own PC to servers ([09-01](../../learn/foundations/09-01-addresses-and-link-quality.md)).
-A probe settles it, with no sim: several friends each run one program on their home PC, which registers with a server of ours on a temporary droplet, and every pair of them runs the tests on its own for 2 hours, then uploads its results to that server (user, 2026-10-09).
+Question: between real home networks, how often does iroh link two PCs directly, how much do the stalls of its relay, which carries packets over TCP, cost a session's traffic against a UDP relay under the same loss, how fast does iroh move to the relay when a direct link dies silently, how much does a busy home upload add to a session's delays, and how far does a PC's `QueryPerformanceCounter` part from true time?
+2 can't choose its transport without it, because 2.1 leads with iroh as it is on two conditions nobody has measured: that its relay's stalls don't show in flight data and ATC audio, and that its switch to the relay can be made fast enough ([network log](../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast)).
+Neither condition has a pass line yet: the user sets the audio buffer and the switch time we'd accept from this probe's counts, before node 2 picks.
+Nor can 2 settle without it how often a heartbeat must go to keep a router's mapping open, how often short gaps come, which tells us which of the ways to soften a gap in [the connection](../product/03-v1-scope.md#the-connection) to build, or how far two PCs' counters part, which 1.4 raised ([01-spine](01-spine.md#left-open)).
+Our records measure round trips only from our own PC to servers ([09-01](../../learn/foundations/09-01-addresses-and-link-quality.md)), and one home router of ours, which forgot an idle UDP mapping after 120s to 150s ([network log](../network/log.md#2026-10-10-a-cloudflare-turn-allocation-exchanges-data-with-10-peer-addresses-over-its-life-and-silently-drops-everything-to-or-from-an-11th)).
+A probe settles it, with no sim.
+Each friend runs one program on their home PC whenever they like, for about an hour, alone, with nothing to do once it starts (user, 2026-10-10).
+Its other end is ours (user, 2026-10-10):
 
-- For each participant, it finds whether the router keeps one public port for every destination, through a few public STUN servers; whether the router answers UPnP, NAT-PMP, or PCP; whether the PC reaches the internet over IPv6; and how long the router keeps an idle mapping.
-- For each pair, it finds whether a direct link forms and how long that takes, and opens a link through the candidate relay.
-  It sends traffic shaped like a session over both links for the whole run, recording round trips, jitter, loss, and each gap with its length.
-  It times the switch to the relay when it cuts the direct link on purpose, and back, and it follows the two PCs' clock offset through the run.
+- a temporary droplet near the friends, running our own iroh relay, a UDP forwarder, and copies of the probe;
+- a second temporary droplet in a distant region, running another iroh relay and UDP forwarder;
+- a copy of the probe that runs all day on the user's PC, behind a real home router.
 
-The program has a simple window that says what it's doing at each step, in words someone with no networking knowledge follows, and shows progress through the whole run (user, 2026-10-09).
-It's unsigned, so each friend passes Windows' SmartScreen warning once.
+1. It asks for every approval first: Windows' SmartScreen warning, Windows Firewall's prompt, which the program brings up by opening its sockets and asking the router for a port at launch, and one consent screen.
+   The screen says how long it runs; that it uses the full upload speed for about a minute, and that its load on the PC and the connection is very low otherwise; and what it uploads to our server: its measurements, such as connection times, delays, and losses, and the PC's public IP address and the kind of router it's behind.
+   Then it keeps the PC awake and runs to the end.
+2. It finds whether the friend's router keeps one public port for every destination, through a few public STUN servers, whether the router answers UPnP, NAT-PMP, or PCP, whether the PC reaches the internet over IPv6, and whether the router keeps an idle mapping through gaps of 30s, 60s, 120s, and 180s.
+3. It tries about 10 fresh iroh connections to each of three copies of the probe on the droplet, each behind a NAT the droplet simulates in a network namespace of its own: one that keeps one public port for every destination, one that also filters by sender, and one that picks a new port for each destination.
+   It tries the same to the copy on the user's PC, which puts two real home routers against each other.
+4. Against the copy behind the easiest simulated NAT, it times iroh's move to the relay when the droplet's firewall drops the direct path mid-session, and its move back.
+   It runs this with iroh's path idle timeout at 15s, 5s, and 2s, set through `QuicTransportConfigBuilder::default_path_max_idle_timeout`, which agents read accepts values under 15s (unverified), or by patching iroh if it doesn't.
+5. For about 20 minutes, it sends traffic shaped like a session to the copy on the user's PC through our iroh relay, with iroh's direct addresses off through `Builder::clear_ip_transports()`, while the UDP forwarder carries an identical copy beside it.
+   The traffic is a flight-model stream of 20 one-off packets a second of about 150 bytes, a cockpit stream that resends, of about 5 messages a second of about 100 bytes, and an audio-shaped stream of 50 one-off packets a second of about 60 bytes, an Opus frame's size at 24 kbps (FS Copilot fork, `record/traffic-atc/docs/04-transport.md`, "The MTU floor").
+   The droplet drops packets on the traffic between the relay and the friend's PC, both ways, with Linux's `tc netem`: none, then 1%, then 3%, then bursts of 5 packets in a row about every 10s.
+   The same four runs go through the distant droplet, and the 20 minutes cover both.
+   It records every stall and gap with its length, and how many would show behind a flight-model delay of 100ms and of 0.4s, and in an audio buffer of 60ms.
+6. For one minute, it uses the full upload speed toward the droplet while step 5's traffic runs over the direct path, and records how far that traffic's round trip and loss rise.
+7. It samples `QueryPerformanceCounter`, the counter every stamp uses ([times](01-spine.md#times)), against the droplet's clock, which internet time keeps accurate, through the run.
+   It doesn't read the system clock, because Windows' time service steers it.
+8. If another friend's run overlaps, the server introduces the two, and they connect through iroh as in step 3, recording whether the link went direct and how long that took, then send session traffic between them on the side, recording its round trips and losses.
+
+Its window says what it's doing at each step and shows progress through the whole run (user, 2026-10-09), in clear words that name things as they are, such as a relay server or a peer, rather than vaguer ones such as "partner" (user, 2026-10-10).
+It's unsigned, so each friend passes the SmartScreen warning once.
 Its raw results carry the friends' public IP addresses, which they agree to send us, and the results we commit leave them out, because nothing personal enters the tree ([CLAUDE.md](../../../CLAUDE.md#working-rules)).
 It reads the [network log](../network/log.md), the foundations chapters [09-01](../../learn/foundations/09-01-addresses-and-link-quality.md), [09-03](../../learn/foundations/09-03-nat-and-traversal.md), and [09-06](../../learn/foundations/09-06-connection-lifecycle.md), the spine's [times](01-spine.md#times), and 2.1's answer.
 Its answer goes in an entry in the network log, which 2's design doc cites.

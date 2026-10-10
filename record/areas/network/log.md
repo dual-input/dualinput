@@ -31,6 +31,11 @@ Sizes, in bytes:
 - wincode writes bincode's format, with integers at their full width, and took 7% to 126% more than postcard.
 - No encoding took longer than 6.1µs to encode and decode the traffic batch once, or 3.7µs for any other message, and wincode took under 0.3µs for every one.
   At the 75 messages a second of [2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks)'s traffic, the slowest costs well under 1ms of CPU a second, so speed doesn't separate them.
+- Weighted by how often each message goes, postcard's lead holds (arithmetic).
+  Against bitcode's derive, it saves 11 bytes per flight-model sample, 220 bytes a second at 20 samples a second.
+  bitcode's 23 bytes per traffic batch come to 56 to 260 bytes a second at the 2.4 to 11 batches of 23 a second that FS Copilot's traffic for 130 aircraft took with and without its change gate, 1.8 and 8.3 KB/s at 32 bytes a state (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · The change gate: 20 % of samples, 8.3 → 1.8 KB/s").
+  With avatar poses and cockpit changes at an assumed 20 and 5 a second, postcard comes out about 100 to 500 bytes a second ahead; 2.3 records the real rates.
+- Every packet carries about 58 bytes before any message, QUIC's 30 or so and IPv4's and UDP's 28, so at 75 packets a second the headers alone take about 4.3 KB/s, about ten times any difference between formats (arithmetic).
 - The fields change a message's size more than the format does.
   In postcard, a cockpit change took 84 bytes carrying its entry's name and a vector clock that names two pilots by ID, and 27 bytes carrying the entry's index and each pilot's slot in the member list.
   A flight-model sample took 105 bytes in `f64` and 69 with attitude and velocities in `f32`; its position stays `f64`, because an `f32` latitude steps by about 0.4m.
@@ -39,6 +44,8 @@ Sizes, in bytes:
   bitcode lists a "Stable format across major versions" as a non-goal ([bitcode 0.6.9 on docs.rs](https://docs.rs/bitcode/0.6.9/bitcode/)), and wincode has no serde support and needs derives of its own ([wincode 0.6.2 on docs.rs](https://docs.rs/wincode/0.6.2/wincode/)).
 
 **Changed:** postcard leads for the messages between cores: smallest on all but one message, a stable wire format, and no second set of derives.
+Mixing formats by channel, bitcode for traffic alone, would save 50 to 250 bytes a second for two formats to keep, so one format serves every channel.
+Fewer packets save more than any format: a cockpit change that rides in the same packet as the next flight-model sample saves that packet's 58 bytes of headers, so node 2's design doc weighs putting several messages in one packet.
 The larger savings are in which fields each message carries, and those belong to the parts that design the messages: naming an entry by its index in the profile, and a vector clock counter by a member-list slot rather than a pilot's ID, which [node 3](../architecture/plan.md#3-sync-and-the-session) decides, would cut a cockpit change from 84 bytes to 27; `f32` attitude and velocities would cut a flight-model sample from 105 to 69, for the flight-model sync to weigh.
 
 **Affects:** node 2's design doc, node 3's choice of how a vector clock names its counters, and the flight-model sync.

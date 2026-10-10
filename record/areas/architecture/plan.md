@@ -370,7 +370,8 @@ Question: which binary format does the message crate use between cores, and how 
 2 can't say how the cores pack each field of a message without it, which 1.4 raised ([01-spine](01-spine.md#left-open)), and a message sent once has to fit in one packet, whose size 2.1 bounds.
 Between cores, the messages are the crate's ([messages and their types](01-spine.md#messages-and-their-types)), and a UUID takes 16 bytes in a binary serde format, against 36 characters as text ([IDs](01-spine.md#ids)).
 The relay's traffic grows with each message's size, and the user prefers compact messages.
-A probe settles it, with no sim: encode sample messages of each v1 channel in postcard, bincode 2, and MessagePack through rmp-serde, which YourControls uses ([10-02](../../learn/foundations/10-02-yourcontrols.md)), compare their sizes, and decode each back.
+A probe settles it, with no sim: encode sample messages of each v1 channel in postcard 1.1.3, MessagePack through rmp-serde 1.3.1, which YourControls uses ([10-02](../../learn/foundations/10-02-yourcontrols.md)), bitcode 0.6.9, which packs bits, and wincode 0.6.2, which writes bincode's format, compare their sizes, and decode each back.
+bincode itself is out: its development "has ceased", and its last release, 3.0.0 on 2025-12-16, holds only a README and a compile error ([bincode 3.0.0 on docs.rs](https://docs.rs/crate/bincode/3.0.0)).
 The samples include a cockpit change with its vector clock for two pilots, a flight-model sample, an avatar pose, and a traffic batch.
 It reads the spine's [messages and their types](01-spine.md#messages-and-their-types) and [IDs](01-spine.md#ids), [02-live-sync](../sync/02-live-sync.md), [channels](../product/04-room-for-later.md#channels), and the probe [p07](../../../experiments/areas/architecture/p07-types.mjs).
 Its answer goes in an entry in the network log, which 2's design doc cites.

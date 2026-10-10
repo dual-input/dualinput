@@ -403,12 +403,14 @@ Its other end is ours (user, 2026-10-10):
    The traffic is a flight-model stream of 20 one-off packets a second of about 150 bytes, a cockpit stream that resends, of about 5 messages a second of about 100 bytes, and an audio-shaped stream of 50 one-off packets a second of about 60 bytes, an Opus frame's size at 24 kbps (FS Copilot fork, `record/traffic-atc/docs/04-transport.md`, "The MTU floor").
    The droplet drops packets on the traffic between the relay and the friend's PC, both ways, with Linux's `tc netem`: none, then 1%, then 3%, then bursts of 5 packets in a row about every 10s.
    The same four runs go through the distant droplet, and the 20 minutes cover both.
-   It records every stall and gap with its length, and how many would show behind a flight-model delay of 100ms and of 0.4s, and in an audio buffer of 60ms.
+   Our analysis finds every stall and gap with its length, and how many would show behind a flight-model delay of 100ms and of 0.4s, and in an audio buffer of 60ms.
 6. For one minute, it uses the full upload speed toward the droplet while step 5's traffic runs over the direct path, and records how far that traffic's round trip and loss rise.
 7. It samples `QueryPerformanceCounter`, the counter every stamp uses ([times](01-spine.md#times)), against the droplet's clock, which internet time keeps accurate, through the run.
    It doesn't read the system clock, because Windows' time service steers it.
 8. If another friend's run overlaps, the server introduces the two, and they connect through iroh as in step 3, recording whether the link went direct and how long that took, then send session traffic between them on the side, recording its round trips and losses.
 
+The program uploads raw data and draws no conclusions: each packet's channel, number, send stamp, and arrival stamp, iroh's path events, the router and STUN answers, and the clock samples, so our analysis runs on our side and can run again with other thresholds (user, 2026-10-10).
+It uploads as it goes, so a crash or a closed laptop loses little.
 Its window says what it's doing at each step and shows progress through the whole run (user, 2026-10-09), in clear words that name things as they are, such as a relay server or a peer, rather than vaguer ones such as "partner" (user, 2026-10-10).
 It's unsigned, so each friend passes the SmartScreen warning once.
 Its raw results carry the friends' public IP addresses, which they agree to send us, and the results we commit leave them out, because nothing personal enters the tree ([CLAUDE.md](../../../CLAUDE.md#working-rules)).

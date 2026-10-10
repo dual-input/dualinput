@@ -1,0 +1,36 @@
+p02: bytes per message in each format (rmp-serde writes MessagePack; +names keeps field names)
+
+                                                 |      postcard |       msgpack | msgpack+names | bitcode serde |       bitcode |       wincode
+Cockpit change, entry by name, clock by pilot ID |            84 |            96 |           181 |            92 |            90 |           122
+Cockpit change, entry by index, clock by slot    |            27 |            37 |           120 |            35 |            35 |            61
+Flight-model sample, all f64                     |           105 |           123 |           219 |           120 |           116 |           112
+Flight-model sample, attitude and velocities f32 |            69 |            87 |           183 |            75 |            75 |            76
+Avatar pose, 27 joints and a color               |           121 |           157 |           193 |           126 |           126 |           129
+Traffic batch, 23 aircraft                       |           945 |          1165 |          3189 |           922 |           922 |          1013
+ATC audio frame, 60 bytes of Opus                |            70 |            75 |            96 |            74 |            74 |            84
+Join, IDs and hash as bytes                      |            85 |           106 |           157 |            88 |            87 |           107
+Join, IDs and hash as text                       |           158 |           162 |           213 |           159 |           159 |           203
+
+Mean time to encode and decode once, in ns (release build, this PC)
+
+                                                 |      postcard |       msgpack | msgpack+names | bitcode serde |       bitcode |       wincode
+Cockpit change, entry by name, clock by pilot ID |           528 |           516 |           794 |          2108 |           898 |            89
+Cockpit change, entry by index, clock by slot    |           187 |           298 |           529 |          1588 |           903 |            60
+Flight-model sample, all f64                     |           331 |           429 |           638 |          1663 |           730 |            26
+Flight-model sample, attitude and velocities f32 |           344 |           430 |           621 |          1954 |           793 |            27
+Avatar pose, 27 joints and a color               |           324 |           575 |           620 |          2676 |           547 |            27
+Traffic batch, 23 aircraft                       |          1124 |          2512 |          6113 |          2553 |          1366 |           126
+ATC audio frame, 60 bytes of Opus                |           145 |           198 |           274 |           749 |           340 |            56
+Join, IDs and hash as bytes                      |           344 |           589 |           732 |          3725 |           807 |           136
+Join, IDs and hash as text                       |           444 |           508 |           736 |          1299 |          1004 |           273
+
+Every message decoded back to the value it was encoded from, in every format.
+
+Crates, as built:
+  bitcode v0.6.9
+  postcard v1.1.3
+  rmp-serde v1.3.1
+  serde v1.0.229
+  serde_bytes v0.11.19
+  uuid v1.28.0
+  wincode v0.6.2

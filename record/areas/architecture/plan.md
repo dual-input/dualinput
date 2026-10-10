@@ -376,6 +376,7 @@ The samples include a cockpit change with its vector clock for two pilots, a fli
 It reads the spine's [messages and their types](01-spine.md#messages-and-their-types) and [IDs](01-spine.md#ids), [02-live-sync](../sync/02-live-sync.md), [channels](../product/04-room-for-later.md#channels), and the probe [p07](../../../experiments/areas/architecture/p07-types.mjs).
 Its answer goes in an entry in the network log, which 2's design doc cites.
 Exit: a network log entry answers the question.
+Done on 2026-10-10.
 
 ## 2.3 A probe across friends' home networks
 

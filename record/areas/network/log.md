@@ -2,6 +2,49 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-10: postcard packs every v1 message smallest but one, and which fields a message carries changes its size more than the format does
+
+**Asked:** which binary format does the message crate use between cores, and how many bytes does each channel's message take in it ([architecture plan, 2.2](../architecture/plan.md#22-packing-a-message-between-cores))?
+
+**Expected:** bitcode, which packs values bit by bit, to come out smallest.
+
+**Found:** [p02](../../../experiments/areas/network/p02-formats.mjs) encoded nine sample messages, one or two per v1 channel, in six encodings, decoded each back to the value it came from, and timed an encode and a decode together (measured on our development machine, 2026-10-10).
+Every message survived every encoding.
+Sizes, in bytes:
+
+| Message | postcard | MessagePack | MessagePack with field names | bitcode through serde | bitcode's own derive | wincode |
+| --- | --- | --- | --- | --- | --- | --- |
+| Cockpit change, entry by name, clock by pilot ID | 84 | 96 | 181 | 92 | 90 | 122 |
+| Cockpit change, entry by index, clock by member slot | 27 | 37 | 120 | 35 | 35 | 61 |
+| Flight-model sample, every field `f64` | 105 | 123 | 219 | 120 | 116 | 112 |
+| Flight-model sample, attitude and velocities `f32` | 69 | 87 | 183 | 75 | 75 | 76 |
+| Avatar pose, 27 joints and a color | 121 | 157 | 193 | 126 | 126 | 129 |
+| Traffic batch, 23 aircraft | 945 | 1,165 | 3,189 | 922 | 922 | 1,013 |
+| ATC audio frame, 60 bytes of Opus | 70 | 75 | 96 | 74 | 74 | 84 |
+| Join, IDs and hash as bytes | 85 | 106 | 157 | 88 | 87 | 107 |
+| Join, IDs and hash as text | 158 | 162 | 213 | 159 | 159 | 203 |
+
+- postcard was smallest for 8 of the 9 messages.
+  bitcode beat it only on the traffic batch, 922 bytes to 945, where bitcode's derive groups each field across the 23 aircraft.
+- MessagePack without field names took 3% to 37% more than postcard, and with them 1.4 to 4.4 times as much.
+  Its traffic batch, 1,165 bytes, is 3 bytes over the 1,162 a QUIC one-off packet carries at QUIC's starting packet size ([research digest](results/2026-10-10-transport-research-digest.txt)), where postcard's 945 fits.
+- wincode writes bincode's format, with integers at their full width, and took 7% to 126% more than postcard.
+- No encoding took longer than 6.1µs to encode and decode the traffic batch once, or 3.7µs for any other message, and wincode took under 0.3µs for every one.
+  At the 75 messages a second of [2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks)'s traffic, the slowest costs well under 1ms of CPU a second, so speed doesn't separate them.
+- The fields change a message's size more than the format does.
+  In postcard, a cockpit change took 84 bytes carrying its entry's name and a vector clock that names two pilots by ID, and 27 bytes carrying the entry's index and each pilot's slot in the member list.
+  A flight-model sample took 105 bytes in `f64` and 69 with attitude and velocities in `f32`; its position stays `f64`, because an `f32` latitude steps by about 0.4m.
+  A join took 85 bytes with its IDs and hash as bytes and 158 as text.
+- postcard has had "a documented and stable wire format" since 1.0.0, writes every integer wider than 8 bits as a varint, and works through serde's derives, which the crate's messages already have (documented, [postcard 1.1.3 on docs.rs](https://docs.rs/postcard/1.1.3/postcard/)).
+  bitcode lists a "Stable format across major versions" as a non-goal ([bitcode 0.6.9 on docs.rs](https://docs.rs/bitcode/0.6.9/bitcode/)), and wincode has no serde support and needs derives of its own ([wincode 0.6.2 on docs.rs](https://docs.rs/wincode/0.6.2/wincode/)).
+
+**Changed:** postcard leads for the messages between cores: smallest on all but one message, a stable wire format, and no second set of derives.
+The larger savings are in which fields each message carries, and those belong to the parts that design the messages: naming an entry by its index in the profile, and a vector clock counter by a member-list slot rather than a pilot's ID, which [node 3](../architecture/plan.md#3-sync-and-the-session) decides, would cut a cockpit change from 84 bytes to 27; `f32` attitude and velocities would cut a flight-model sample from 105 to 69, for the flight-model sync to weigh.
+
+**Affects:** node 2's design doc, node 3's choice of how a vector clock names its counters, and the flight-model sync.
+
+**Evidence:** [p02-formats.mjs](../../../experiments/areas/network/p02-formats.mjs), the Rust program in [formats](../../../experiments/areas/network/formats/), and its output in `experiments/areas/network/results/p02-formats-2026-10-10-10-16-39.txt`.
+
 ## 2026-10-10: iroh 1.3 leads for carrying a session between home PCs, provided its TCP relay's stalls don't show and its switch to the relay can be made fast
 
 **Asked:** how do the best current designs carry real-time traffic between two home PCs, directly and through a relay, and which Rust library lets us build the best of them ([architecture plan, 2.1](../architecture/plan.md#21-carrying-a-sessions-traffic))?

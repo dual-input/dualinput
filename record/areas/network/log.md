@@ -122,12 +122,13 @@ The real link, with no injected loss:
 - No upload raised the round trip; ours lost 0.84% of the session's packets instead.
 - Whether the friend near Frankfurt filled their uplink, the run can't show: at 275 Mbps to 786 Mbps, the droplet or the path may have been the limit.
 
-Clocks, against the droplets' chrony-disciplined clocks, through the shortest of each eight exchanges over 32 to 43 minutes:
+Clocks, against the droplets' chrony-disciplined clocks, through the shortest of each eight exchanges, over 35 minutes for our PC, 43 minutes for the friend near Frankfurt, and 3.5 hours for the friend near New York, whose copy went on serving after its test:
 
-- The friend near New York's counter ran 13.1 ppm slow, the friend near Frankfurt's within 0.33 ppm, and ours 25.6 ppm fast, each the same against both droplets to within 0.5 ppm, with 95µs to 211µs of scatter.
+- The friend near New York's counter ran 13.4 ppm slow, the friend near Frankfurt's within 0.33 ppm, and ours 25.6 ppm to 25.8 ppm fast, each the same against both droplets to within 0.5 ppm, with 95µs to 249µs of scatter.
   Two of these PCs part by up to 39 ppm, 3.4s a day (arithmetic).
 - Windows Time ran on both friends' PCs and doesn't on ours.
-  Both friends' system clocks sat 63ms to 115ms behind the droplets; ours sat 14.5s behind and drifted with its counter, and the friend near Frankfurt's moved 23 ppm against the droplets while its counter held.
+  The friends' system clocks sat 63ms to 66ms and 184ms to 187ms behind the droplets; ours sat 14.5s behind and drifted with its counter, and the friend near Frankfurt's moved 23 ppm against the droplets while its counter held.
+- These figures were corrected on 2026-10-11 against [p03's digest](../../../experiments/areas/network/results/p03-home-networks-2026-10-10/analysis/digest.txt), which the entry first misquoted.
 
 Faults in the probe:
 

@@ -450,7 +450,11 @@ Raised elsewhere: by 1.4, how a core that restarted while the sim kept running r
 Raised elsewhere: by 1.4, whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list, and how a place would name a restart count ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1, how the machines agree on which of two take-control presses came first, which per-machine clock offsets can't settle alone ([01-spine](01-spine.md#left-open)).
-Raised elsewhere: by 2, who holds control when two cores each take the other for cut off, which happens when both still reach their relays but not each other ([01-between-machines](../network/01-between-machines.md#how-a-core-learns-another-went-quiet)).
+Raised elsewhere: by 2, how a returning ex-PF's cockpit and aircraft come to the new PF's state when another pilot took control while their connection was lost, over what the ex-PF flew alone ([01-between-machines](../network/01-between-machines.md#while-a-connection-is-lost)).
+Raised elsewhere: by 2, how a replay handles messages a sender's restarted core lost, the user preferring a replay with gaps over a full catch-up of state, which can't restore a display's page or an FMS; and, for crews beyond two, messages a departed third member's core held ([01-between-machines](../network/01-between-machines.md#reconnecting-and-replaying)).
+Raised elsewhere: by 2, which of the session channel's states need an authority or the cockpit's shared order, since that channel orders messages only per sender: control, active pause, the countdown, Go without, and seat claims ([01-between-machines](../network/01-between-machines.md#channels)).
+Raised elsewhere: by 2, how the following machine writes the PF's last value back when the PM moves a PF-owned engine lever or trim ([01-between-machines](../network/01-between-machines.md#channels)).
+Raised elsewhere: by 2, naming a profile entry by its index in a message, which 2.2 found cuts a cockpit change from 84 bytes to 27, only when both machines' profile hashes match, since the match check lets a crew fly with different profiles ([network log, 2.2](../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does)).
 
 ## 4 Profiles and plugin delivery
 

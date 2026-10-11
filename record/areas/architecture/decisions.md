@@ -406,68 +406,91 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Every pair of cores holds one QUIC connection through iroh 1.3, directly or through our relays
 
-- **Decided:** each core runs one iroh 1.3 endpoint, its key kept in the core's data folder, and holds one QUIC connection to every other core in the session.
+- **Decided:** each core runs one iroh 1.3 endpoint, under a key drawn fresh for each session and kept in the session file, and holds one QUIC connection to every other core in the session.
   iroh makes the connection directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't, and moves it between the two.
-  No core forwards another's messages, QUIC's TLS 1.3 encryption stays on, and Crosscheck builds nothing for encryption.
+  After an outage only the core with the lower endpoint ID dials, so a pair keeps one connection.
+  A core keys what it keeps about a sender by the sender's pilot ID and restart count, never by a connection; v1 forwards nothing, and a later feature that forwards carries each message's sender with it.
+  QUIC's TLS 1.3 encryption stays on, and Crosscheck builds nothing for encryption.
   This answers how the cores reach each other, which the spine leaves to node 2 ([01-spine](01-spine.md#between-machines)), and picks [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s link between every pair.
   Settled in node 2 by the user, 2026-10-11 ([01-between-machines](../network/01-between-machines.md)).
 - **Because:**
   - iroh finds paths, opens router ports, and relays with no glue of ours, where ICE through `is` with TURN and quinn needs about 2,500 to 4,000 lines by an agent's estimate ([network log, 2.1][n21]).
-  - Across two friends' home networks and ours, every connection between real routers went direct, and iroh's relay and its move to the relay met the user's pass lines ([network log, 2.3][n23]).
+  - From each of two friends' home networks to ours, 10 of 10 connections went direct, and iroh's relay and its move to the relay met the user's pass lines ([network log, 2.3][n23]).
   - Two endpoints in two processes on one PC each drew their own endpoint ID and ports and connected directly in 2.2ms ([network log, p04][p04]).
-- **Leaves out:** Wi-Fi, carrier-grade NAT, double NAT, and mobile links, which no run has covered and v1's recordings count ([01-between-machines](../network/01-between-machines.md#the-way-through-home-routers)).
+  - In our FS Copilot work, two connections between one pair carried every packet twice, and a duplicate arriving at the same instant made the traffic receiver's aircraft stutter (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 4, traffic: what the app needed that the prototype did not", item 5).
+  - A key that outlives a session would let the backend and the relays link every session one pilot joins (user, 2026-10-11).
+- **Leaves out:** Wi-Fi, carrier-grade NAT, double NAT, mobile links, and two friends' routers paired with each other, which no run has covered and v1's recordings count ([01-between-machines](../network/01-between-machines.md#the-way-through-home-routers)).
 
-## Our relays run iroh-relay unmodified, in at least two regions
+## Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck
 
-- **Decided:** a relay runs n0's `iroh-relay`, in Rust, with nothing of ours on it, in at least two regions, and the app lists the relays as a setting.
+- **Decided:** a relay runs n0's `iroh-relay`, in Rust, with nothing of ours on it, in at least two regions.
+  It admits only clients that present a shared token every copy of Crosscheck carries, and caps each client's rate.
+  The backend serves the default relay list and its token, a setting overrides the list, and a core reads it before it binds its endpoint.
   Each pilot homes at the relay with the lowest latency, as iroh picks it.
   This settles the relay's language ([01-spine](01-spine.md#between-machines)), and changes [01-aims](../product/01-aims.md#relay-and-license)' one relay.
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
   - iroh's relay carries packets over TCP, and a lost packet held back the ones behind it longer the farther the sender was from the relay: at 3% loss, 53ms at p99 at 22ms away and 534ms at 131ms ([network log, 2.3][n23]).
-  - iroh makes the relay with the best latency over the last 5 minutes its home, and moves only for one under two-thirds of the current one's (read in iroh 1.3.0, `src/net_report.rs`, `add_report_history_and_set_preferred_relay`).
-- **Leaves out:** who hosts the relays, our own servers or n0's managed relays, which changes nothing else; and a pair on two continents, whose sender's leg stays long whatever relays run ([01-between-machines](../network/01-between-machines.md#the-relays)).
+  - `iroh-relay` admits everyone by default, and with shared tokens admits only a client that presents one of those its configuration lists, which can be two at once (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig`).
+  - iroh leaves the relay out of an endpoint bound without one, and a relay added afterward never takes effect ([network log, 2.3][n23]).
+  - iroh probes the first 5 relays in its list, homes at the one with the best latency over the last 5 minutes, and moves only for one under two-thirds of the current one's (read in iroh 1.3.0, `src/net_report.rs`, `add_report_history_and_set_preferred_relay`).
+- **Leaves out:** who hosts the relays, our own servers or n0's managed relays, which changes nothing else; and which relay each direction uses when two pilots home at different relays, which a probe settles ([01-between-machines](../network/01-between-machines.md#the-relays)).
 
-## The backend matches invite codes to the crew's endpoints
+## The backend matches invite codes to the crew's endpoints, and has no part in a running session
 
 - **Decided:** the backend draws each invite code and keeps the session's crew under it, each pilot with their endpoint ID and home relay.
-  Each core refreshes its place every 60s, the backend counts a pilot out after 5 minutes with no refresh and frees the code once the crew is empty, and it tells a core that starts with a session file whether its pilot is still in the crew.
-  A core accepts a connection only from an endpoint ID its crew lists.
-  The backend's requests and answers are the message crate's, as JSON, and the relays speak only iroh's protocol.
-  This changes the spine, which gave invite codes and introductions to the relay ([01-spine](01-spine.md#components)), and answers its questions of what a core does with a session file found after a long outage, and whether the relay's and the backend's messages are the crate's ([01-spine](01-spine.md#left-open)).
+  It refuses a joiner whose version or message crate hash differs from the session's, naming who is behind, and otherwise answers with the session's ID and the crew.
+  Each core renews its place every 10 minutes, the backend drops a member after 30 minutes without renewal, Leave session tells it at once, and it frees the code once the crew is empty.
+  Each request carries a signature by the core's endpoint key, and requests and answers are JSON with the message crate's types and a version of the backend's own.
+  A core accepts a connection whose first message carries its session's code, version, and hash, a joiner counts as crew only once that first message has passed, and a returning pilot dials the crew's endpoints its core kept and asks the backend only if nobody answers.
+  The relays speak only iroh's protocol.
+  This changes the spine, which gave invite codes and introductions to the relay ([01-spine](01-spine.md#components)), and answers its question of whether the relay's and the backend's messages are the crate's ([01-spine](01-spine.md#left-open)).
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
   - A stock relay keeps code of ours off the relays, so n0's releases or n0's managed relays drop in unchanged (user, 2026-10-11).
-  - The session file holds no time the core measures with, and the backend times the gap since a core's last refresh on its own clock ([01-between-machines](../network/01-between-machines.md#a-session-file-after-a-long-outage)).
+  - A backend that a running session never asks can't end one by going down (user, 2026-10-11).
+  - FS Copilot counted a handshake that later failed as a peer, and locked the pilot's panels for 5 minutes ([09-06](../../learn/foundations/09-06-connection-lifecycle.md#connection-lifecycle-heartbeats-timeouts-a-clean-leave-vs-an-outage-reconnecting)).
   - iroh's handshake checks the accepting core's key against the endpoint ID the dialer asked for and has the dialer sign with its own key (read in iroh 1.3.0, `src/tls/verifier.rs`).
 - **Leaves out:** what the backend runs on, for which the spine's candidate is a Cloudflare Worker ([01-spine](01-spine.md#components)).
 
-## Each channel rides a stream or one-off packets, as its delivery needs
+## Each channel declares how it travels, and rides a stream or one-off packets as its delivery needs
 
-- **Decided:** the session and cockpit channels ride a stream from each sender, the session's above the cockpit's, and traffic's identities ride one below the cockpit's.
-  Flight-model samples, avatar poses, traffic samples, and ATC audio frames ride one-off packets, which QUIC sends ahead of every stream.
-  Every message between cores is postcard, and each channel but the cockpit's tells a copy from a late message by the rule [01-between-machines](../network/01-between-machines.md#channels-on-the-connection) gives it.
-  Each core keeps the last 5 minutes of what it sent on the session and cockpit streams, and resends after an outage what the other hadn't applied.
+- **Decided:** the core keeps a registry of the session's channels, each declaring who sends and receives it, its delivery, its priority, and whether it joins the cockpit's shared order, and a plugin opens only instances of the kinds of channel Crosscheck provides.
+  The session's and the cockpit's channels each ride a stream from each sender, the session's above the cockpit's, and traffic's identities ride one below the cockpit's.
+  The flight model, the flight controls, which carry the PF's yoke, rudder, and toe brakes at the flight model's rate, the avatars, traffic's samples, and ATC audio ride one-off packets.
+  The PF's engine levers and trim ride the cockpit stream, and the following machine writes the PF's last value back when the PM moves one.
+  The core keeps one newest-only slot per one-off channel and a small QUIC queue for them, one scheduler gives every channel a share, and a traffic batch stays under 1,162 bytes.
+  Every message between cores is postcard, and each channel but the cockpit's tells a copy from a late message by the rule [01-between-machines](../network/01-between-machines.md#channels) gives it.
+  Each core keeps what it sent on the resending streams until the other acknowledges it, within the 5-minute cut-off, and resends the rest after an outage.
   This answers the spine's questions of how the cores pack a message and how each channel other than the cockpit's tells a copy from a late message ([01-spine](01-spine.md#left-open)).
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
   - postcard packed every v1 message smallest but one, with a stable wire format and serde's derives ([network log, 2.2][n22]).
-  - QUIC builds each packet from what's waiting, one-off packets first, so messages handed over together share one packet's headers (read in noq-proto 1.3.0, `src/connection/mod.rs`, `populate_packet`).
+  - The yoke and rudder move nearly every frame while the PF hand-flies, which would flood the cockpit stream and its replay (user, 2026-10-11).
+  - noq's queue for one-off packets drops the oldest packet of any channel only to make room for a new one (read in noq 1.3.0, `src/connection.rs`, `send_datagram`).
+  - A relayed packet crosses links that discover their packet size separately, so FS Copilot budgeted to the smallest (FS Copilot fork, `record/traffic-atc/docs/04-transport.md`, "The MTU floor").
   - Two kinds of message share an ordered channel only if neither is hurt by waiting behind the other ([04-room-for-later](../product/04-room-for-later.md#channels)).
-- **Leaves out:** how the cockpit channel tells a copy from a late message, for node 3; and which fields each message carries, for node 3 and the flight-model sync ([network log, 2.2][n22]).
+- **Leaves out:** how the cockpit channel tells a copy from a late message, for node 3; which fields each message carries, for node 3 and the flight-model sync ([network log, 2.2][n22]); and whether one-off packets starve the streams on a lossy relay, which a probe settles.
 
-## A direct path silent for 2s gives way to the relay, and a core silent for 5s counts as cut off
+## While a connection is lost, the PF flies on, a PM's displays lock, and any pilot can take control
 
 - **Decided:** iroh's path idle timeout is 2s and its path keep-alive 0.67s, and the core sends no copies over a second path.
   Through a short gap, the following machine carries the aircraft on its last velocities and eases it to the true position when samples come again.
-  A core that has heard nothing from another for 5s, a starting value, counts it silent, and tells which of the two was cut off by whether it still reaches its own home relay and the backend; it keeps dialing until the 5-minute cut-off.
-  This answers how a core learns another core went quiet ([01-spine](01-spine.md#how-the-core-knows-a-component-is-alive)) and which ways to soften a short gap v1 builds ([the connection](../product/03-v1-scope.md#the-connection)).
+  The once-a-second clock exchange is the heartbeat, and a core that hears nothing from a crew member for 5s, a starting value, counts that connection lost.
+  Then the PF flies on, a PM's synced displays lock, every pilot's banner lists each crew member's connection and whether this PC reaches the internet, and any pilot can take control, a PM with a warning that names what follows; no core decides who lost the connection.
+  When data flows again, each side resends what the other missed, and if control changed, the later take-control wins.
+  A crew member unheard for 5 minutes is out of the session for that core, a PM that has heard from nobody for 5 minutes leaves it, and the PF stays.
+  A core that starts with a session file asks the crew whether its pilot is still in, since a crew member timed the silence.
+  Leave session's goodbye is QUIC's close, with an application code that only Leave sends.
+  This changes [the connection](../product/03-v1-scope.md#the-connection)'s rule that control passes to the PM when the PF's connection drops, and answers how a core learns another core went quiet ([01-spine](01-spine.md#how-the-core-knows-a-component-is-alive)), which ways to soften a short gap v1 builds ([the connection](../product/03-v1-scope.md#the-connection)), and what a core does with a session file found after a long outage ([01-spine](01-spine.md#left-open)).
   Settled in node 2 by the user, 2026-10-10 and 2026-10-11.
 - **Because:**
-  - iroh moved to the relay 2.0s after the direct path died, every time, and samples came again through the relay at once; no move happened that a drop didn't cause ([network log, 2.3][n23]).
-  - One friend's router forgot an idle port within 30s (same entry).
+  - iroh moved to the relay 2.0s after a firewall cut the direct path, every time, and samples came again through the relay at once; no move happened that a cut didn't cause ([network log, 2.3][n23]).
+  - Telling which pilot lost the connection takes a third party both cores trust, and a pilot who sees the crew's connections, warned of what a takeover does, decides as well (user, 2026-10-11).
+  - noq lets a peer drop stream data it hasn't delivered once a close arrives, and closes a connection with code 0 when every handle to it is dropped (read in noq 1.3.0, `src/connection.rs`).
+  - One friend's router forgot an idle port within 30s ([network log, 2.3][n23]).
   - iroh sends on one path at a time ([network log, 2.1][n21]).
-- **Leaves out:** tuning the 5s and the 2s from v1's recordings; how far the following machine carries the aircraft and how it eases, for the flight-model sync; and who holds control when two cores each take the other for cut off, for node 3 ([01-between-machines](../network/01-between-machines.md#how-a-core-learns-another-went-quiet)).
+- **Leaves out:** tuning the 5s and the 2s from v1's recordings; how far the following machine carries the aircraft, how it eases, and the marker for a sim stopped on purpose, for the flight-model sync; bringing a returning ex-PF's cockpit and aircraft to the new PF's state, for node 3; and how long a connection takes to come back after a full outage, which a probe measures ([01-between-machines](../network/01-between-machines.md#while-a-connection-is-lost)).
 
 ## A receiver estimates each sender's clock offset from one timed exchange a second
 
@@ -477,7 +500,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Because:**
   - 2.3 estimated each PC's counter against our droplets through the shortest of each eight exchanges, and the estimates scattered by 95µs to 211µs ([network log, 2.3][n23]).
   - The three PCs' counters ran from 13.1 ppm slow to 25.6 ppm fast, so two parted by up to 39 ppm, 3.4s a day (same entry), and an estimate 8s old is off by 0.3ms at that rate (arithmetic).
-- **Leaves out:** the error when a connection's two directions take unequal times, which is half the difference, and how the take-control key's rule that the earlier press wins copes with it, for node 3 ([01-between-machines](../network/01-between-machines.md#clock-offsets)).
+- **Leaves out:** the error when a connection's two directions take unequal times, which is half the difference, and how the take-control key's rule that the earlier press wins copes with it, for node 3; and easing the offset the following machine applies when it steps, for the flight-model sync ([01-between-machines](../network/01-between-machines.md#clock-offsets)).
 
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

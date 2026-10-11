@@ -20,25 +20,27 @@ Each member writes its own entry on the session channel: its pilot ID, display n
 - A joiner becomes a member once its first message has passed ([joining](../network/01-between-machines.md#joining)), and stops being one when it leaves the session, quits Crosscheck, or has been disconnected for 30 minutes ([coming back](../network/01-between-machines.md#coming-back)).
 - A member's kind is crew in v1, and passenger once [join modes](../product/ideas.md#join-modes) comes.
   Crew members send on the cockpit stream, so they hold counters in the vector clocks; a passenger sends no cockpit message, so it never appears in one ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
-- Every member, a passenger included, acknowledges on the heartbeat what it applied, because each core keeps the cockpit's messages until every member has acknowledged them ([coming back](../network/01-between-machines.md#coming-back)).
-  In FS Copilot, a peer that stopped acknowledging "keeps its last ack as the floor, so history stops draining", until a cap of 2,000 gestures drops the oldest (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "4.6 History: everything after the last ack").
+- Every crew member acknowledges on the heartbeat what it applied, because each core keeps the cockpit's messages until every member on its links has acknowledged them ([coming back](../network/01-between-machines.md#coming-back)).
+  A passenger takes a one-way feed off the crew's links ([04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)), so it holds nothing up, and how its feed catches up after an outage is for the pick that brings passengers.
+  In FS Copilot, a peer that stopped acknowledging "keeps its last ack as the floor, so history stops draining", until a cap of 2,000 gestures (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, "4.6 History: everything after the last ack").
 - [Preflight](../product/03-v1-scope.md#preflight) waits for every crew member's Ready, except those another pilot chose to go without.
 
 ## The table of roles
 
 | Role | Who may hold it | How it moves | Its holder loses the link | Its holder leaves the flight, or their sim closes | Its holder leaves the session |
 | --- | --- | --- | --- | --- | --- |
-| PF | Any crew member | [Below](#the-pf) | Nothing changes | Control passes to the PM at once | Control passes to the PM first |
-| Traffic and ATC host | Any crew member | [Below](#the-traffic-and-atc-host) | Nothing changes | Hosting pauses | The role is released |
+| PF | Any crew member | [Below](#the-pf) | Nothing changes | Control passes on at once | Control passes on first |
+| Traffic and ATC host | Any crew member | [Below](#the-traffic-and-atc-host) | Nothing changes | Nothing changes | The role is released |
 
 ### The PF
 
 - Any crew member may hold control, and never a passenger, nor later a flight engineer ([take-control key](../product/03-v1-scope.md#take-control-key)).
-- Control moves by the take-control key or button, at any time except during the pilot's own catch-up ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)); by a voice handover, the PF's offer and the PM's answer ([voice phrases](../product/03-v1-scope.md#voice-phrases)); and when the PF leaves the flight or the session, or their sim closes ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed); [leaving](../network/01-between-machines.md#leaving)).
+- Control moves by the take-control key or button, or by a voice handover, the PF's offer and the PM's answer ([voice phrases](../product/03-v1-scope.md#voice-phrases)), to any pilot but one whose own catch-up or replay runs ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
+- It also passes on when the PF leaves the flight or the session, or their sim run ends ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed); [leaving](../network/01-between-machines.md#leaving)), and then it goes to a pilot whose cockpit is up to date where there is one, and to a pilot still catching up or replaying only where none is.
+  In v1 that's the one PM either way; with more than two crew, which up-to-date pilot it goes to is this row's rule, which the pick for larger crews sets ([join modes](../product/ideas.md#join-modes)).
 - Each change raises the control value, and two made at once are settled by pilot ID ([control](../network/01-between-machines.md#control)).
 - While the PF's link is lost, nothing changes: the PF flies on, a PM that lost the flying machine locks, and any pilot may take control, a PM with a warning ([while a link is lost](../network/01-between-machines.md#while-a-link-is-lost)).
 - The session's authority moves with control ([the connection](../product/03-v1-scope.md#the-connection)), and a new PF writes the session channel's keys again under the new control value ([channels](../network/01-between-machines.md#channels)).
-- In v1, control passes to the one PM when the PF leaves; with more than two crew, this row says which pilot it passes to, a rule the pick for larger crews sets ([join modes](../product/ideas.md#join-modes)).
 
 ### The traffic and ATC host
 
@@ -49,13 +51,15 @@ Each member writes its own entry on the session channel: its pilot ID, display n
   Two pilots who turn it on at once are settled by the session channel's stamp, and the switch of the one who lost goes back off ([channels](../network/01-between-machines.md#channels)).
   FS Copilot's build worked the same way, with no taking over: "a toggle is disabled while someone else hosts that feature" (same document, same section, row 2).
   Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which [traffic sync](../product/03-v1-scope.md#traffic-sync)'s open questions leave unknown.
-- While the host's link is lost, the host keeps the role, and a receiver removes a copy that has had no sample for 15s, as FS Copilot's receiver does; the identity set that comes with the new connection spawns it again ([channels](../network/01-between-machines.md#channels); FS Copilot fork, same document, "Key invariants").
-- While the host is out of the flight, or their sim is closed, the host keeps the role and hosting pauses: every receiver removes that host's copies at once, and once the host's sim is back in a flight, its traffic arrives as a fresh set.
-  FS Copilot withdrew hosting while the host's sim was disconnected, and took it up again when it reconnected (same document, "Key invariants").
-- When the host leaves the session, the role is released, and every receiver removes that host's copies, as FS Copilot's did (same document, "Decisions locked with the user (2026-09-06)", row 4).
-- When the role passes to a new host, the new host first removes the copies it had spawned of the old host's traffic, and the old host stops sending ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+- A receiver keeps the host's set of identities, and spawns each object it lacks whenever its sim is in a flight ([channels](../network/01-between-machines.md#channels)).
+  Two rules remove copies, and cover every way a host stops (user, 2026-10-11):
+  - When the session channel stops naming a pilot as host, because they released the role, left the session, or handed it on, every machine removes that host's copies, the new host's included, as FS Copilot removed a host's traffic once the host stopped (same document, "Decisions locked with the user (2026-09-06)", row 4).
+  - A copy with no sample for 15s is removed, as FS Copilot's receiver removed one (same document, "Key invariants").
+    That covers a lost link, a host out of the flight, and a host whose sim closed, which keep the role while their copies on the other machines stand still for up to 15s and go; their objects come back when samples do.
+- FS Copilot removed a dropped host's traffic at once rather than after a timeout, and 15s of copies standing still is the cost of one rule for every way a host goes quiet.
+- When the role passes to a new host, the old host stops sending ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
 
 ## Roles after v1
 
 [04-room-for-later](../product/04-room-for-later.md#roles) names the rows later picks add, each with the same columns: the machine that carries out ground services, which is the flying machine; a weather source; the ATC host's duty of taking the second pilot's microphone to ATC; and a flight engineer, whom control never passes to.
-Passengers are a kind of member, not a role.
+04-room-for-later lists passengers among those roles too, and here they're a kind of member instead, since nothing moves between passengers and no duty falls to one.

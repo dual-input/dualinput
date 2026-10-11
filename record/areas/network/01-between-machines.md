@@ -125,7 +125,7 @@ The core sets iroh's path idle timeout to 2s and its path keep-alive to 0.67s, a
 - A direct path that goes silent is dropped after 2s, and the connection moves to the relay path, which stays open.
   In 2.3, the move came 2.0s after the drop every time, and no move happened that a drop didn't cause, across 55 connections in each run.
 - In those 2s, streams resend over the relay what the dead path swallowed, and one-off packets sent into it are lost.
-  The following aircraft holds still through the gap and jumps when data returns, which [the connection](../product/03-v1-scope.md#the-connection) accepts for v1.
+  The following machine carries the aircraft on its last velocities through the gap ([below](#softening-a-short-gap)).
 - iroh punches again at once when the operating system reports a network change, and otherwise every 60s, so the connection is back on a direct path within 60s of one working again ([2.3]).
 - The keep-alive also holds each router's mapping open: one friend's router forgot an idle port within 30s ([2.3]).
 
@@ -133,23 +133,31 @@ iroh sends on one path at a time ([2.1]), so the core sends no copies over a sec
 
 ## Softening a short gap
 
-[The connection](../product/03-v1-scope.md#the-connection) lists three ways to soften a short gap for the architecture to weigh, and v1 builds none of them:
+A short gap is a stretch in which the following machine gets no flight-model samples: one lost packet, or the 2s in which a dead direct path gives way to the relay.
+[The connection](../product/03-v1-scope.md#the-connection) lists three ways to soften one, for the architecture to weigh, and v1 builds one of them:
 
-- Copies through the relay while the direct path is in doubt, because iroh sends on one path at a time.
-- The last few samples in each packet, because the following machine draws the aircraft 0.4s in the past ([flight-model sync](../product/03-v1-scope.md#flight-model-sync)), so when one sample is lost, the samples 50ms before and after it, at 2.3's 20 a second, have already arrived to draw between.
+- The following machine carries the aircraft on its last velocities through the gap, and eases it to the true position when samples come again, rather than holding it still and jumping (user, 2026-10-11).
+  Through a 2s move to the relay, that's about 1.7s of carrying, since the 0.4s the following machine draws behind covers the rest (arithmetic).
+  How far it carries the aircraft before holding it, and how it eases, are the flight-model sync's, in its stage of step 8 ([01-spine](../architecture/01-spine.md#parts)).
+- Not the last few samples in each packet, because the following machine draws the aircraft 0.4s in the past ([flight-model sync](../product/03-v1-scope.md#flight-model-sync)), so when one sample is lost, the samples 50ms before and after it, at 2.3's 20 a second, have already arrived to draw between.
   Flight-model samples later than 0.4s came to 0.4% or less in every 2.3 run but one, the far relay at 3% loss, at 1.6% ([2.3]).
-- Carrying the aircraft on its last velocities and easing it to the true position, which belongs to the flight-model sync, since v1 accepts the aircraft holding still.
+- Not copies through the relay while the direct path is in doubt, because iroh sends on one path at a time.
 
 ## How a core learns another went quiet
 
 During a session, packets cross every connection both ways many times a second: flight-model samples one way, avatar poses both ways, and the path keep-alive every 0.67s.
 So silence is the signal.
 
-- A core counts another cut off once nothing has come from it for 5s, a starting value above the 2s move to the relay, to tune once recordings hold real outages.
-  [The connection](../product/03-v1-scope.md#the-connection)'s rules then run: the cut-off pilot's displays lock, the banner says so, and control passes to the PM if the PF was cut off.
+- A core counts the other silent once nothing has come from it for 5s, a starting value to tune once recordings hold real outages.
+  It sits above a move to the relay, after which samples came again 2.0s after the drop, plus the relay route's extra delay ([2.3]), so a move to the relay never counts as a drop.
+- A core that counts the other silent tells which of them was cut off from its own home relay and the backend.
+  If it still reaches them, the other pilot was cut off, and if it reaches neither, it was cut off itself; iroh reports the state of its connection to its home relay (read in iroh 1.3.0, `src/endpoint.rs`, `home_relay_status`).
+  [The connection](../product/03-v1-scope.md#the-connection)'s rules then run: the cut-off pilot's synced displays lock, and their banner tells them they've lost the connection and offers to keep trying or to disconnect and take control of their own aircraft; the others' banner names who was cut off; and if the PF was cut off, control passes to the PM.
+  Two cores that each still reach their relays, but not each other, would each take the other for cut off, which nobody has seen happen; who holds control after that is for the table of roles that [node 3](../architecture/plan.md#3-sync-and-the-session) designs.
+- Nothing a pilot sees changes after that until the connection comes back or the 5-minute cut-off ends the session for the cut-off pilot, whatever the core does underneath.
 - A pilot who presses Leave session sends a goodbye on the session stream, the core closes the connection with QUIC's close and an application code of ours, and it waits for that close to go out before it exits, since a goodbye queued on the way out never leaves ([09-06](../../learn/foundations/09-06-connection-lifecycle.md#connection-lifecycle-heartbeats-timeouts-a-clean-leave-vs-an-outage-reconnecting)).
 - After 30s with nothing on any path, iroh closes the connection, its default idle timeout for a connection, which iroh gives its relay path too (read in iroh 1.3.0, `src/socket.rs`, `RELAY_PATH_MAX_IDLE_TIMEOUT` and its comment).
-  The core goes on dialing the cut-off core by endpoint ID and home relay, and asks the backend for its home relay again when a dial fails, until the 5-minute cut-off.
+  The core goes on dialing the other core by endpoint ID and home relay, and asks the backend for its home relay again when a dial fails, until the 5-minute cut-off; the first dial that gets through unlocks the displays and replays what was missed, [below](#reconnecting-and-replaying).
 - An endpoint homes only at a relay that answered its latest measurement (read in iroh 1.3.0, `src/net_report.rs`), so a relay that goes down moves its pilots to the next nearest, and the core records the move.
 - When the backend can't be reached, a pilot can't start or join a session, and the core says so; a running session doesn't need the backend.
 

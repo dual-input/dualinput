@@ -1,0 +1,257 @@
+Agent abdb4eff75366c837, started 2026-10-09T21:16:40.990Z
+
+== Asked ==
+
+Research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots on two home PCs fly one aircraft; each PC runs a Rust core on tokio, Windows 10/11 x64). Today is 2026-10-09. Do the research yourself: do NOT spawn subagents. Do NOT write or edit files anywhere; put everything in your final report.
+
+## Our requirements (shared by six parallel research agents; you cover one candidate group)
+- Six v1 channels: Session (every message, in order), Cockpit (every message, in causal order), Flight model (newest sample only, ~20/s, ~120–150 B each), Avatars (newest pose), Traffic (identities reliable; samples unreliable, batches up to ~1 KB), ATC audio (Opus frames, low delay, loss OK). Later: bulk transfers, the PM's axes at lowest delay, a one-way feed to passengers.
+- Each channel gets its own delivery: one reliable ordered stream per channel that needs it (a loss on one never delays another), and unreliable messages for what the next message replaces. Sender schedules by priority so bulk never delays the flight model.
+- Direct link first (hole punching, plus IPv6 and router port mapping), relay fallback (5–31% of pairs). Ideally switch between direct and relayed mid-session without dropping the session, and keep the relay path warm.
+- Encryption is NOT required; a transport that encrypts anyway is judged only on bytes and round trips added.
+- Two cores on one PC (own ports, own identity); a dev must be able to force the relay path.
+- Relay: cost aim ~$10/month at small scale; relay address is a setting. A two-pilot session sends ~5 KB/s per pilot before overhead.
+
+## Your group: Valve's GameNetworkingSockets, and a UDP protocol of our own
+1. GameNetworkingSockets (https://github.com/ValveSoftware/GameNetworkingSockets): latest release/commit activity as of 2026-10, license; message model (reliable/unreliable, "lanes" with priorities and weights — exact API and semantics), Nagle, fragmentation, max message size; per-packet overhead and encryption (can it be disabled? `k_ESteamNetworkingConfig_Unencrypted` or similar — check), handshake; P2P outside Steam: ICE support (which ICE library: WebRTC's or libjuice? build flags), STUN/TURN configuration, signaling it expects you to provide; whether Steam Datagram Relay is usable without Steam (likely not — confirm); build on Windows (dependencies: protobuf, OpenSSL/libsodium), binary size.
+2. Rust bindings for GNS (e.g. `gns`/`gns-sys`/`gns-rs` or others on crates.io): which exist, latest versions/dates, maintenance, coverage of P2P/ICE and lanes, async/tokio fit.
+3. A UDP protocol of our own: what we'd have to build (per-channel reliability and ordering, acks, congestion control, fragmentation, hole punching, relay, keepalive). Maintained Rust building blocks as of 2026-10, each with latest version/date: STUN (e.g. `stun-rs`, `stun_codec`, `bytecodec`), UPnP (`igd-next`), NAT-PMP / PCP crates, `renet` (and `renet2`?), `laminar` (YourControls used a fork; is laminar maintained?), `naia`, `netcode`, `matchbox` (WebRTC for games), any other game-networking crates with channels and priorities. For each: what it gives, transport, whether it supports hole punching or a relay.
+4. Lessons from published game networking designs (Glenn Fiedler's articles on reliability over UDP, snapshot compression, packet fragmentation; Valve's/Bungie's/Riot's public material) on per-channel delivery and priorities, briefly, with sources.
+
+## Evidence rules
+Every claim gets a source (URL plus section, or file path plus symbol at a named version/tag/commit). Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a version, API name, number, or URL; say when you can't find something. Prefer primary sources.
+
+## Report
+Answer each point with tag and source, then short verdicts: how close GNS (via Rust bindings) gets to our requirements and its risks (C++ build, bindings' maintenance), and what a protocol of our own would cost us to build and which crates would carry part of it. Keep quotes short and exact.
+
+== Report ==
+
+# GameNetworkingSockets and a UDP protocol of our own: research read (2026-10-09)
+
+Unless a tag is named, the GNS sources are read at master `d534c19aa7` (2026-10-02), and the gns-rs sources at master `537e442d35` (2026-09-02). Tags: [DOC] for docs, READMEs, release notes, and crates.io metadata; [SRC] for code read; [INFERENCE] and [UNVERIFIED] as defined.
+
+## 1. Valve GameNetworkingSockets (GNS)
+
+**Activity and license**
+- The latest release is v1.6.1 (2026-10-03). Earlier releases: v1.6.0 (2026-06-03), v1.5.1 (2026-05-04), v1.5.0 (2026-04-28), and before those v1.4.1 (2022-06-16), so releases stopped for almost four years. [DOC] `api.github.com/repos/ValveSoftware/GameNetworkingSockets/releases`
+- Master has commits through 2026-10-02, for example `0abe0ed1fe` "Fix auth race condition when handling P2P signals." and `93db6d5b87` "Add ICE implementation fallback to native". [SRC] commits API
+- The license is BSD-3-Clause. [DOC] repo page
+
+**Message model** (all [SRC] `include/steam/steamnetworkingtypes.h` unless noted)
+- Each message is reliable or unreliable by send flag: `k_nSteamNetworkingSend_Unreliable`=0, `NoNagle`=1, `NoDelay`=4, `UnreliableNoDelay`=5, `Reliable`=8, `ReliableNoNagle`=9.
+- The largest message is `k_cbMaxSteamNetworkingSocketsMessageSizeSend = 512 * 1024`.
+- Fragmentation:
+  - Reliable messages are fragmented, reassembled, and resent.
+  - An unreliable message may span several packets, but it's dropped whole if any piece is lost.
+  - An unreliable message over `k_cbMaxUnreliableMsgSizeSend = 15*1100` is "automatically convert[ed] to reliable" ([SRC] `steamnetworkingsockets_snp.h`).
+- Nagle: `NagleTime` defaults to "5000us (5ms)", and a message under the MTU (maximum transmission unit) waits to be coalesced unless it's sent with NoNagle.
+- Lanes:
+  - The call is `ConfigureConnectionLanes( HSteamNetConnection hConn, int nNumLanes, const int *pLanePriorities, const uint16 *pLaneWeights )` ([SRC] `isteamnetworkingsockets.h`).
+  - A lower priority value goes first, and higher-valued lanes are served only when all lower ones are empty.
+  - Weights share bandwidth among lanes of equal priority.
+  - Each lane sends in queue order and numbers its messages from 1.
+  - Only reliable messages on the same lane are guaranteed to arrive in order.
+  - "Messages sent on a lane index other than 0 have a small overhead on the wire."
+  - You can add lanes but not remove them. The header advises "3 or so is fine; >8 is a lot", and Steam's maximum is 255.
+- Head-of-line blocking per lane: each lane has its own reliable stream position, and "Any lane change resets the reliable and unreliable decode context" ([SRC] `SNP_WIRE_FORMAT.md`). So a loss on one lane's reliable stream shouldn't hold back another lane. [INFERENCE]
+- There's no newest-only delivery:
+  - Commit `1ed58872bf` (authored 2026-08-18, committed 2026-10-02, "Fixes #399") corrected the docs: `UnreliableNoDelay` drops a message only while the connection is Connecting or FindingRoute.
+  - The promised "~200ms" backlog drop "is not currently implemented".
+  - A full queue returns `k_EResultLimitExceeded`, and `SendBufferSize` defaults to 512 KB. I found no expiry for queued unreliable messages ([SRC] `steamnetworkingsockets_snp.cpp`, partial read).
+  - So the app has to keep the flight-model queue near-empty itself. gns-rs exposes per-lane `pending_bytes_unreliable` and `approximated_queue_time` for that check. [SRC] gns `lib.rs`
+- Rate control:
+  - A token bucket starts at an initial rate computed "in the manner of RFC 3390" and is clamped by `SNP_ClampSendRate()`. The header gives `SendRateMin` and `SendRateMax` a default of "256K".
+  - What congestion response it runs beyond that, I couldn't determine. [SRC partial, UNVERIFIED]
+- Reliability uses the "ack vector" model from DCCP (RFC 4340 §11.4). [DOC] README
+
+**Bytes per packet**
+- The UDP header `UDPDataMsgHdr` is `uint8 m_unMsgFlags; uint32 m_unToConnectionID; uint16 m_unSeqNum;`, packed to 7 B. [SRC] `steamnetworkingsockets_udp.h`
+- The AES-GCM tag is `k_cbAESGCMTagSize = 16` ([SRC] `steamnetworkingsockets_internal.h`). With the NULL cipher, `m_cbEncryptionOverhead = 0` ([SRC] `steamnetworkingsockets_connections.cpp`, `FinishCryptoHandshake`).
+- Frames ([SRC] `SNP_WIRE_FORMAT.md`):
+  - An unreliable segment costs a lead byte, a 16- or 32-bit message number on the packet's first segment, and a size byte.
+  - An ack costs at least 5 B, and a lane change costs 1 B.
+- A UDP payload is at most 1300 B, and the encrypted payload at most 1248 B. [SRC]
+- One 150 B unreliable message alone in a packet costs about 26–27 B of GNS overhead when encrypted and about 10–11 B with the NULL cipher. Add 28 B of IPv4 and UDP headers, plus at least 5 B when an ack rides along. [INFERENCE from the above]
+- Through TURN (the standard relay protocol):
+  - The native ICE client wraps relayed packets in `k_nTURN_SendIndication` with XOR-PEER-ADDRESS and DATA. I found no ChannelBind in `steamnetworkingsockets_ice_client.cpp`. [SRC]
+  - That adds about 36–39 B per packet on each leg (IPv4), against 4 B for TURN's ChannelData framing. [INFERENCE from RFC 8656 framing, not measured]
+
+**Disabling encryption**
+- `k_ESteamNetworkingConfig_Unencrypted` (34) takes 0 = not allowed (the default), 1 = allowed but prefer encrypted, 2 = allowed and preferred, 3 = required.
+- The header says "This is a dev configuration value, since its purpose is to disable encryption." and "it requires the peer to also modify their value". [SRC]
+- With the NULL cipher, the handshake still exchanges certificates and runs `CCrypto::PerformKeyExchange`. [SRC] `steamnetworkingsockets_connections.cpp`
+
+**Handshake**
+- A direct IP connection takes 2 round trips: `ChallengeRequest` (padded to `k_cbSteamNetworkingMinPaddedPacketSize = 512`), `ChallengeReply`, `ConnectRequest`, `ConnectOK`. The server sends `ConnectOK` only after the app calls `AcceptConnection`. [SRC] `steamnetworkingsockets_udp.cpp`
+- In peer-to-peer (P2P), `connect_request` and `connect_ok` travel inside signaling messages through `SetRendezvousCommonFieldsAndSendSignal`, then ICE runs its checks. The controlled side waits up to `k_usecWaitForControllingAgentBeforeSelectingNonNominatedTransport` = 1 s for the first choice of transport. [SRC] `steamnetworkingsockets_p2p.cpp`
+- Total P2P setup time is unmeasured. [UNVERIFIED]
+
+**P2P outside Steam**
+- The ICE implementation is Valve's own, and not libjuice:
+  - v1.6.0 made the native ICE client the default, with "no external dependencies", plus TURN (RFC 5766) and IPv6. The client had been beta since v1.4.1 (2022-06-16). [DOC] release notes
+  - In CMake, `ENABLE_ICE` defaults to ON and `USE_STEAMWEBRTC` (Google's WebRTC ICE) to OFF ([SRC] `CMakeLists.txt`). The v1.6.0 notes call the second flag `USE_WEBRTC`, which `CMakeLists.txt` doesn't define.
+  - vcpkg's default features are `openssl` and `ice`. [SRC] `vcpkg.json`
+  - At runtime, `P2P_Transport_ICE_Implementation` (110) takes 0 = default, 1 = native, 2 = WebRTC. Value 0 falls back to native if WebRTC isn't compiled in or fails to load. [SRC] commit `93db6d5b87`
+- STUN and TURN settings ([SRC] `steamnetworkingtypes.h`):
+  - `P2P_STUN_ServerList` (103) is comma-separated, and an empty value disables NAT piercing.
+  - TURN takes `P2P_TURN_ServerList`, `P2P_TURN_UserList`, and `P2P_TURN_PassList` (107–109).
+  - `P2P_Transport_ICE_Enable` (104) is a bitmask: `_Relay`=1 ("Relayed connection via TURN server."), `_Private`=2, `_Public`=4.
+  - Setting `_Relay` alone forces the relay path for a developer. [INFERENCE]
+- The native ICE client ([SRC] `steamnetworkingsockets_ice_client.cpp`):
+  - It gathers host candidates (skipping localhost), server-reflexive candidates, and TURN relay candidates, over IPv4 and IPv6.
+  - It keeps the TURN allocation alive: refresh at half its lifetime, and CreatePermission for up to 10 peers.
+  - It uses regular nomination, sends a keepalive every 15 s, and runs its loop every 50 ms.
+  - The controlling side nominates a pair that passes `BIsPreferredRouteOver`, so it can upgrade from relay to direct.
+  - Whether it falls back from a dead direct pair to the relay before the connection times out isn't visible in the code I read. [UNVERIFIED] Probe 2.3 can time it.
+- Switching within a connection:
+  - `ThinkSelectTransport` re-scores every 1 s (every 50 ms while unsettled), with stickiness `nScore * 11 / 10 + 5`.
+  - `SelectTransport` swaps transports without closing the connection. [SRC] `steamnetworkingsockets_p2p.cpp`
+  - Off Steam the only transport is ICE, so any mid-session change happens inside ICE's selected pair. [INFERENCE]
+- Signaling is ours to provide, with "best-effort datagram semantics" ([DOC] `README_P2P.md`). The flat C API takes plain callbacks, and both functions below are present at tag v1.6.0 ([SRC] `steamnetworkingsockets_flat.h`):
+  - `SteamAPI_ISteamNetworkingSockets_CreateCustomSignaling` takes a context, a send callback, and a release callback.
+  - `SteamAPI_ISteamNetworkingSockets_ConnectP2PCustomSignaling` opens the connection.
+  - `SteamAPI_ISteamNetworkingSockets_ReceivedP2PCustomSignal2` takes `OnConnectRequest` and `SendRejectionSignal` callbacks.
+  - The example signaling server is `trivial_signaling_server.py`.
+- `k_ESteamNetworkingConfig_SymmetricConnect` (37) lets either peer initiate. [SRC]
+- Identity:
+  - Each process calls `GameNetworkingSockets_Init(pIdentity, errMsg)` once. The open-source P2P test sets no auth config. [SRC] `tests/test_common.cpp`
+  - Two cores on one PC, as two processes, each get their own identity. [INFERENCE]
+- Steam Datagram Relay without Steam: no. The README says "at this time we are not able to offer access to SDR on other platforms to all partners", and otherwise offers it only "as long as you ship a version of your game on Steam". [DOC] README
+- I found no UPnP, NAT-PMP, or PCP support in the README or the config enum. [INFERENCE]
+
+**Windows build and size**
+- Requirements: protobuf at 2.6.1 or later, with `protoc` and `libprotobuf` at the same version. Protobuf 22 and later pulls in abseil and needs C++17. One crypto backend: OpenSSL, libsodium, or BCrypt (Windows only). CMake 3.15 or later. [DOC] `BUILDING.md`
+- `BUILDING.md` still says vcpkg's port ships with "P2P disabled", which v1.6.0 and `vcpkg.json` contradict.
+- I didn't find a Windows binary size. Debian's `libgamenetworkingsockets1debian1` 1.6.1-1 (amd64) installs at 1,169.0 kB, with protobuf and libssl as separate shared libraries ([DOC] packages.debian.org). A static Windows build adds protobuf and abseil. [UNVERIFIED size]
+
+## 2. Rust bindings
+- The only maintained binding is gns-rs, published as `game-networking-sockets` and `game-networking-sockets-sys`:
+  - Both are at 0.3.0 (2026-09-02), MIT/Apache-2.0, with 8 releases since 2025-07-04.
+  - Downloads are 5,612 and 5,985. [DOC] crates.io
+  - The crate named `gns` is unrelated.
+  - `fdns-gamenetworkingsockets-sys` 0.3.0 (2021-08-07) is stale.
+  - The "Initial Rust bindings (community contribution)" bullet in v1.5.0 matches commit `611cf27e40`, which only adds a README link to gns-rs. [SRC]
+- Maintenance: two authors, commits from 2026-08-24 to 2026-09-02, and 2 open issues. [SRC]
+- Build:
+  - It bundles GNS as a submodule at `5f06b0a3c5` (2026-08-24, after v1.6.0).
+  - `build.rs` uses the `cmake` crate for a static library, and runs `bindgen` (which needs clang) on `steamnetworkingsockets_flat.h` with no allowlist.
+  - On MSVC it sets `USE_CRYPTO=BCrypt`, clones microsoft/vcpkg into `OUT_DIR`, and runs `vcpkg install` with triplet `x64-windows-static-md-release`.
+  - It panics if the buildtrees path is longer than 100 characters, unless `GNS_VCPKG_BUILDTREES_ROOT` is set. [SRC] `gns-sys/build.rs`
+  - It doesn't set `ENABLE_ICE`, so native ICE compiles in. The first build compiles protobuf through vcpkg. [INFERENCE]
+- Coverage:
+  - The safe API has lanes (`configure_connection_lanes`, `GnsLane`, `set_lane`, per-lane status), send flags, config getters and setters, and `socket_pair`.
+  - It has no P2P, ICE, or signaling. [SRC] gns `lib.rs`
+  - The raw `-sys` bindings should include the flat P2P functions, since bindgen runs with no allowlist [INFERENCE]. So signaling means writing unsafe `extern "C"` callbacks.
+- Async: none. It's a poll loop (`poll_callbacks`, `receive_messages`, `receive_events`) around the global `GnsGlobal::get`. With tokio, that means a dedicated polling thread bridged by channels. [SRC, INFERENCE]
+
+## 3. A UDP protocol of our own
+
+**What we'd build**
+1. A packet header with a session ID, sequence, and acks (ack plus a 32-bit bitfield), RTT estimate, and keepalive.
+2. A reliable ordered stream per channel that needs one: message IDs, resending on an RTT-based timer, and a receive window.
+3. Newest-only unreliable delivery: a per-channel sequence, where the receiver drops anything older.
+4. A priority scheduler with a byte budget.
+5. Fragmentation for bulk transfers only, keeping every unreliable message to one packet of about 1200 B or less.
+6. Rate control.
+7. NAT traversal: STUN, candidate exchange through our rendezvous server, simultaneous punching, IPv6, and UPnP/NAT-PMP/PCP port mapping.
+8. A relay: either our own Rust UDP forwarder or a TURN client.
+9. Path management: keep both paths warm, switch with hysteresis, and keep the session ID independent of the address.
+10. Forcing the relay with a flag, and loss and latency simulation for tests.
+
+**Crates, with latest version and date** [DOC crates.io unless noted]
+
+| Need | Crate | Version (date) | What it gives |
+|---|---|---|---|
+| STUN | `stun-proto` | 2.0.3 (2026-10-03) | Sans-IO STUN |
+| STUN | `stun_codec` | 0.4.0 (2025-05-06) | Encoders and decoders for RFC 5389 and its extensions |
+| STUN | `bytecodec` | 0.5.0 (2025-05-05) | Dependency of `stun_codec` |
+| STUN | `stun-rs` | 0.1.11 (2025-03-31) | STUN messages |
+| TURN client | `turn-client-proto` | 0.7.3 (2026-10-06) | Sans-IO TURN |
+| TURN client | `turn` (webrtc-rs) | 0.17.2 (2026-07-20) | Async TURN |
+| ICE | `rice-proto` | 0.4.3 (2026-05-11) | Sans-IO RFC 8445. Its README calls STUN "relatively mature" and says ICE needs more work |
+| ICE | `webrtc-ice` | 0.17.2 (2026-07-20) | Async ICE from webrtc-rs |
+| ICE | `str0m` | 0.24.1 (2026-10-03) | Whole WebRTC stack, sans-IO |
+| Port mapping | `portmapper` | 0.19.3 (2026-08-25) | "Provides upnp, pcp and nat-pmp protocols support" (n0, used in iroh); depends on tokio |
+| Port mapping | `igd-next` | 0.18.0 (2026-10-04) | UPnP IGD, with an `aio_tokio` feature |
+| Port mapping | `crab_nat` | 0.8.1 (2026-07-06) | NAT-PMP and PCP |
+| Port mapping | `natpmp` | 0.5.0 (2024-11-06) | NAT-PMP |
+
+**Channel and reliability libraries**
+- `renet` 2.0.0 (2026-01-20):
+  - It offers `ReliableOrdered`, `ReliableUnordered`, and `Unreliable` channels, split into 1200 B slices, with acks as ranges.
+  - Channel priority is "the order of the channels in this Vec", within `available_bytes_per_tick` (default 60_000).
+  - It's sans-IO: `process_packet` and `get_packets_to_send` "should only be called by the transport layer". [DOC]
+  - Each packet carries one channel, and acks travel in packets of their own. [SRC] `renet/src/packet.rs`
+  - It has no congestion control, no newest-only channel, and no NAT traversal, and it's client/server only. The last repo commit was 2026-06-20.
+  - Its core is about 107 KB of Rust including tests. [SRC] GitHub contents API
+- `renet2` 0.17.1 (2026-10-05) is a fork with several transports and optional encryption. It documents no P2P.
+- `laminar` is unmaintained in practice:
+  - Its last release is 0.5.0 (2021-05-06), and its last commit is 2023-10-07.
+  - Congestion control is listed under "Planned".
+  - YourControls uses the `Sequal32/laminar.git` fork, last commit 2022-12-02, along with `igd` 0.12. [SRC] `yourcontrols-net/Cargo.toml`
+- `naia-shared` 0.25.0 (2026-05-12) does server-authoritative entity replication, with a `SequencedUnreliable` mode. It's client/server, with no P2P.
+- The `netcode` crate (0.3.1, 2017) is dead. The netcode protocol lives on in `renet_netcode` 2.0.0, which is client/server.
+- `matchbox_socket` 0.14.0 (2026-02-13) gives WebRTC data channels. It runs on `webrtc` 0.17 natively, and its WebSocket client uses `async-std` runtime features.
+- `aeronet` (0.22.0-rc.1, 2026-09-23) and `lightyear` (0.30.1, 2026-09-16) are tied to Bevy.
+
+## 4. Lessons from published designs
+- Fiedler, "UDP vs. TCP" (2008-10-01): with TCP, after a loss "everything has to stop and wait for that packet to be resent", and he advises "Don't mix TCP and UDP!". [DOC]
+- Fiedler, "Reliability and Congestion Avoidance over UDP" (2008-10-20): a sender runs a good mode at 30 packets/s and a bad mode at 10 packets/s, switching on an RTT threshold of 250ms. The wait before returning to good mode adapts between 1s and 60s. [DOC]
+- Fiedler, "Reliable Ordered Messages" (2016-09-15):
+  - Every packet carries `sequence`, `ack`, and a 32-bit `ack_bits`, so "Each ack is sent 32 times".
+  - Messages ride in new packets until one carrying them is acked, and become eligible again after 0.1s. Reliability is per message, not per packet. [DOC]
+- Fiedler, "Packet Fragmentation and Reassembly" (2016-09-06):
+  - He takes 1200 B as a conservative payload budget.
+  - At 1% loss per fragment, 256 fragments lose 92.4% of packets.
+  - Fragment only 2 to 4 pieces of time-critical data, and send large blocks with resends instead. [DOC]
+- Fiedler, "Snapshot Compression" (2015-01-04): quantization, smallest-three quaternions, and deltas against an acked baseline, starting from "17.37 megabits per-second!" against a target of 256 kbit/s. [DOC]
+- Fiedler, "State Synchronization" (2015-01-05): a priority accumulator under a per-packet bandwidth budget, where "objects that don't fit are first in line" next time, and a jitter buffer of "4-5 frames @ 60HZ". [DOC]
+- Fiedler, "Deterministic Lockstep" (2014-11-29): "we redundantly include _all inputs_ in each UDP packet until we know for sure the other side has received them". This fits the pilot monitoring's (PM's) axes at the lowest delay. [DOC]
+- Valve's GNS design: per-message reliability, lanes with strict priority plus weights, and a DCCP ack vector (see section 1).
+- Bungie, "I Shot You First: Networking the Gameplay of HALO: REACH" (GDC 2011, gdcvault.com/play/1014345): secondary write-ups say it splits traffic into state, events, and control, with a scheduler that prioritizes by relevance. [UNVERIFIED] I couldn't reach the slides.
+- Riot, "Peeking into VALORANT's Netcode" (2020-07-28) covers 128 tick and buffering targets, but not per-channel delivery. [DOC]
+
+## Verdicts
+
+**GNS through gns-rs comes close on the channel model and on P2P, but not on the edges.** [INFERENCE throughout]
+- It meets:
+  - Six channels map onto lanes with priority and weights, each with its own reliable stream.
+  - Reliable or unreliable is chosen per message.
+  - Native ICE gives STUN, TURN, and IPv6, and a TURN-only setting forces the relay.
+  - The connection survives a change of route.
+  - The license is BSD.
+- It doesn't meet:
+  - No newest-only delivery, so the app must gate its sends on the queue status.
+  - No UPnP, NAT-PMP, or PCP.
+  - The relay has to be a TURN server, with about 36 B per packet each way.
+  - Encryption is on by default (16 B tag). Turning it off is a "dev" setting that both peers must change.
+  - Relay-to-direct switching is in the code, but falling back from direct to relay is unproven.
+- Risks:
+  - The C++ and protobuf build runs vcpkg inside `build.rs`, so the first build is slow and fails on paths over 100 characters.
+  - P2P works only through unsafe FFI, because the safe wrapper lacks it.
+  - The model is a poll thread rather than tokio.
+  - The binding has two maintainers and about 5.6k downloads.
+  - GNS itself went four years without a release, and native ICE has been the default only since 2026-06-03.
+  - When ICE fails on a friend's router, we'd be debugging C++ code we don't own.
+- The bytes per relayed session-hour, at an assumed 30 packets/s per pilot and 5 KB/s of payload: about 7.7 KB/s per pilot into TURN, so about 56 MB/h out of the relay and the same in.
+
+**A protocol of our own gives exact semantics, at the cost of building and proving it.** [INFERENCE]
+- It gives:
+  - Newest-only delivery, causal-order hooks, and a priority scheduler.
+  - A header of about 8–12 B and a relay overhead of 0–4 B, about 45 MB/h through the relay under the same assumption.
+  - Pure Rust on tokio, and control over path switching.
+- Crates carry the protocol parsers and port mapping: `stun-proto` or `stun_codec`, `portmapper` (or `igd-next` with `crab_nat`), and `turn-client-proto` or `rice-proto` if we want TURN or full ICE.
+- For reliability and channels, `renet` is a sans-IO reference, or a start, but it's client/server only, puts one channel in each packet, and has no congestion control.
+- Left for us to build:
+  - Punching orchestration.
+  - Path management with warm keepalives on both paths.
+  - The relay forwarder.
+  - The scheduler.
+  - Rate control.
+  - Fragmentation for bulk transfers later.
+  - A loss and latency simulator.
+- Two sizes to scale that work against: renet's reliability and channel layer alone is about 107 KB of Rust. GNS's matching files run to about 590K characters of C++: `snp.cpp` about 181K, `connections.cpp` 162K, `p2p.cpp` 128K, and `ice_client.cpp` 121K.
+
+Two cheap probes would settle the open points:
+- Time GNS's fallback from direct to relay mid-session, and its P2P setup time.
+- Check whether GNS's native TURN client allocates on Cloudflare's TURN, which ties into the spine's open question.

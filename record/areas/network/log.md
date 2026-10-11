@@ -303,7 +303,7 @@ It paces bulk transfers so they never crowd the flight model.
 
 **Affects:** [2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks), node 2's design doc, and the spine's [between machines](../architecture/01-spine.md#between-machines), which leaves the relay's language to node 2: iroh's relay is Rust.
 
-**Evidence:** the sources linked above, and [the research digest](results/2026-10-10-transport-research-digest.txt); the agents' full reports are in the planning session's transcript and aren't committed.
+**Evidence:** the sources linked above, and [the research digest](results/2026-10-10-transport-research-digest.txt); the agents' full reports, each with what it was asked, are in [results/2026-10-10-transport-research-reports](results/2026-10-10-transport-research-reports/), where 08a to 08d are the reads that 08's agent ran and folded into its report.
 
 ## 2026-10-10: A Cloudflare TURN allocation exchanges data with 10 peer addresses over its life, and silently drops everything to or from an 11th
 

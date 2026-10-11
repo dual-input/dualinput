@@ -1,0 +1,158 @@
+Agent a969c54395d448dd5, started 2026-10-09T21:16:41.015Z
+
+== Asked ==
+
+Research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots on two home PCs fly one aircraft). Today is 2026-10-09. Do the research yourself: do NOT spawn subagents. Do NOT write or edit files anywhere; put everything in your final report.
+
+## Context
+Pilots' cores link directly when they can and through a relay when they can't (research puts 5–31% of pairs there). The relay forwards UDP (or, for some designs, TCP/WebSocket) between the two cores. Aim: about $10/month at small scale, and we need to know how cost grows with many users. Assume a relayed two-pilot session sends ~5 KB/s per pilot before transport overhead, so ~36 MB/hour out of the relay (both directions counted as egress from the relay, since each pilot's packets leave the relay toward the other); per-packet transport overhead adds maybe 30–70 bytes per packet at ~30–50 packets/s per pilot — compute a range. A Cloudflare Worker can't relay UDP as of 2026-10-08. We'd also host a small introduction server (invite codes, telling each core the other's public address).
+
+## Your topic: relay hosting options and cost, as of 2026-10
+For each option, give the current price page (URL), what's included (vCPU, RAM, transfer allowance), overage price per GB, inbound vs outbound billing, whether UDP is filtered/throttled or DDoS-protected, IPv4/IPv6 inclusion, regions, and any terms that matter (idle reclamation, fair use):
+- DigitalOcean Basic droplets ($4/$6 tiers), Hetzner Cloud (CX/CAX lines), Vultr, Linode/Akamai, OVHcloud VPS (unmetered?), Scaleway, AWS Lightsail, Oracle Cloud Always Free (egress allowance), Fly.io (does it support UDP now? price), and Cloudflare Realtime TURN ($0.05/GB after 1,000 GB free? which direction billed?).
+- Also n0's hosted iroh relays (are they free, rate-limited, paid tiers and prices as of 2026-10?).
+Then compute, for the cheapest sensible 2–3 options, the cost per relayed session-hour and the monthly cost at: 10, 100, and 1,000 relayed sessions running concurrently around the clock; and also at realistic usage, e.g. 1,000 / 10,000 / 100,000 relayed session-hours per month. Note when a single small server's CPU or packet rate (packets per second through a userspace UDP forwarder on 1 vCPU) would become the limit instead of transfer — find any published packets-per-second figures for a userspace UDP relay or TURN server (coturn benchmarks, etc.) with sources. Also note latency: a relay in one region adds both legs; mention anycast options (Cloudflare) and multi-region costs.
+
+## Evidence rules
+Every claim gets a source (URL plus section). Tag each: [DOC], [MEASURED-BY-OTHERS], [INFERENCE] (for your arithmetic, showing the inputs), [UNVERIFIED]. Never invent a price, number, or URL; say when you can't find something; give "as of" dates.
+
+## Report
+A table of options, the arithmetic tables, and a short verdict on which hosting fits the $10/month aim at small scale and what happens at 100 and 1,000 concurrent relayed sessions. Keep quotes short and exact.
+
+== Report ==
+
+## Relay hosting for Crosscheck: options, costs, and limits (prices fetched 2026-10-09)
+
+### Verdict
+
+- **Small scale (the $10/month aim):** several single small servers fit, with 10 relayed sessions running all month inside their included transfer.
+  - **Hetzner CPX02 in the EU:** about $8.09/month including IPv4, with 20 TB included. This is the best choice if most pilots are in Europe.
+  - **OVH VPS-1:** $4.54/month with unlimited traffic at 500 Mbps, but that price needs 12 months paid upfront.
+  - **DigitalOcean $4/$6, Vultr $5, or Linode $5:** these suit US or global pilots.
+  - **Cloudflare Realtime TURN:** costs $0 below 1,000 GB/month, which is about 16,000–24,000 relayed session-hours. It also gives anycast latency. The catch is that the cores must speak TURN, and its per-GB price is the steepest once usage grows.
+  - **Introduction server:** it can run on the same server at no extra cost [INFERENCE], or on the Workers Free plan, which allows 100,000 requests/day [DOC, https://developers.cloudflare.com/workers/platform/pricing/].
+- **100 relayed sessions around the clock:** that is 3.1–4.5 TB/month out of the relay and 6k–10k forwarded packets/s. Hetzner EU and OVH stay at their base price, Vultr costs about $6–19, Linode $16–22, DigitalOcean $25–38, and Cloudflare TURN $28–173. One vCPU is enough.
+- **1,000 relayed sessions around the clock:** that is 31–45 TB/month, 94–136 Mbit/s each way, and 60k–100k forwarded packets/s.
+  - Providers that charge per GB cost $155–422/month (Linode, DigitalOcean, Vultr), Fly $624–898, Cloudflare TURN $725–2,184, and n0's iroh $2.8k–4.0k.
+  - Hosts with a flat price or a large allowance stay cheap: Hetzner EU about $16–38, and OVH $4.54 per server.
+  - At this scale CPU becomes the limit, not transfer. The relay needs somewhere between 0.16 and 4 cores, depending on how much CPU each packet costs. So batch the system calls and measure on the server we'd actually rent.
+
+### Traffic inputs [INFERENCE]
+
+- **Payload:** 5,000 B/s per pilot.
+- **Overhead:** 30–70 B per packet at 30–50 packets/s, which adds 900–3,500 B/s per pilot.
+- **Egress per session:** 11,800–17,000 B/s, counting both pilots. That is 94–136 kbit/s, or **42.5–61.2 MB per session-hour**, against 36 MB for payload alone.
+- **Ingress:** the same amount comes in, and most providers don't bill it.
+- **Packet rate:** the relay forwards 60–100 packets/s per session.
+- **Month length:** I used 730 hours. DigitalOcean and Vultr cap a month at 672 hours, which makes little difference here.
+
+### Options
+
+| Option | Cheapest sensible plan | Included egress | Overage | Ingress | UDP and DDoS | IPv4/IPv6 | Regions and terms |
+|---|---|---|---|---|---|---|---|
+| **DigitalOcean** ([pricing/droplets](https://www.digitalocean.com/pricing/droplets)) | $4: 1 vCPU, 512 MiB. $6: 1 vCPU, 1 GiB [DOC] | 500 GiB / 1,000 GiB, pooled across the team, accrued per second [DOC, [bandwidth](https://docs.digitalocean.com/platform/billing/bandwidth/)] | $0.01/GiB | Free | Free L3/L4 DDoS protection. Above its capacity it blackholes the target IP [DOC, [ddos-protection](https://docs.digitalocean.com/platform/ddos-protection/)] | IPv4 included. IPv6 available, price not stated | 16 datacenters in 13 regions (page verified 2026-08-10) [DOC, [regional-availability](https://docs.digitalocean.com/platform/regional-availability)] |
+| **Hetzner CPX02 (EU)** | 1 vCPU, 1 GB. €6.49 / $8.09 including IPv4, orderable on 2026-10-07 [third-party tracker reading Hetzner's price API, [agentdeals](https://agentdeals.dev/hetzner-pricing-2026)] | 20 TB in the EU, at least 1 TB in the US, 0.5 TB in Singapore [DOC, [regular-performance](https://www.hetzner.com/cloud/regular-performance/)] | €1.00/TB (about $1.20) in the EU and US, €7.40/TB in Singapore [UNVERIFIED, third-party] | Free; only outgoing traffic is billed, in 100 MB blocks [DOC, [billing FAQ](https://docs.hetzner.com/cloud/billing/faq/)] | DDoS filtering (Arbor/Juniper) [DOC, German DDoS page, seen only in a search snippet]. Expect "about 300–500 Mbit/s", no guarantee [DOC, [general-purpose FAQ](https://www.hetzner.com/cloud/general-purpose/)] | IPv4 €0.50/month [DOC, [servers overview](https://docs.hetzner.com/cloud/servers/overview/)]. IPv6 free | DE, FI, US (ASH, HIL), SG. See the Hetzner caveats below. |
+| **Vultr** ([vultr.com/pricing](https://www.vultr.com/pricing/) returned 403) | vc2-1c-1gb: $5, 1 vCPU, 1 GB, 1,024 GB transfer, 31 locations [DOC, live API https://api.vultr.com/v2/plans?type=vc2]. $3.50 is in 1 location; $2.50 is IPv6-only, in 2 | Plan transfer plus 2 TB free per account each month, accrued hourly over a 672-hour month [DOC, [bandwidth caps](https://docs.vultr.com/support/platform/billing/how-are-bandwidth-caps-calculated)] | $0.01/GB [DOC, overage-rate page, via snippet] | Free [DOC, 2022 announcement] | DDoS protection is a $10/month add-on per instance [DOC, via snippet] | IPv4 on standard plans | 31 locations for the $5 plan |
+| **Linode/Akamai** ([pricing/cpu](https://www.akamai.com/cloud/pricing/cpu)) | Nanode: $5, 1 vCPU, 1 GB [DOC] | 1 TB, pooled, prorated by the hour [DOC, [transfer](https://techdocs.akamai.com/cloud-computing/docs/network-transfer-usage-and-costs)] | $0.005/GB in core regions. São Paulo $0.007, Jakarta $0.015 [DOC, via snippets] | Free | L3/L4 DDoS protection at no charge; null-routes very large attacks [third-party, InfoQ 2020] | Public IPv4 egress is metered | Regional prices differ |
+| **OVH VPS-1** ([us.ovhcloud.com/vps](https://us.ovhcloud.com/vps/)) | From $4.54/month with 12 months upfront: 2 vCores, 4 GB, 500 Mbps [DOC]. Price without commitment not published [UNVERIFIED] | Unlimited | None | — | Anti-DDoS included, automatic [DOC]. The footnote behind "Unlimited\*" wasn't visible | IPv4 and IPv6 included | In Asia-Pacific (Mumbai, Singapore, Sydney) VPS-1 has a monthly quota, then 10 Mbps [DOC] |
+| **Scaleway** ([pricing](https://www.scaleway.com/en/pricing/virtual-instances/)) | STARDUST1-S: 1 vCPU, 1 GB, 100 Mbps, €0.0046/h (about €3.36/month) plus IPv4 at €0.004/h (about €2.92), so about €6.28/month [DOC, [FAQ](https://www.scaleway.com/en/docs/instances/faq/) for the IPv4 price]. The English page returned €0.0006/h, so the base price is uncertain. DEV1-S comes to about €9.48 with IPv4. | Egress included in the list price [DOC] | None | — | Not stated | IPv4 billed even while powered off | EU only (Paris, Amsterdam, Warsaw). STARDUST has limited availability. |
+| **AWS Lightsail** ([pricing](https://aws.amazon.com/lightsail/pricing/)) | $5: 0.5 GB, 1 TB (with IPv4). $3.50: IPv6-only [DOC] | 1 TB, and **inbound counts against it too** | $0.09/GB on outbound | Counts toward the allowance | Not checked | IPv6-only plans are cheaper | Half the allowance in Mumbai, Sydney, Jakarta, and São Paulo |
+| **Oracle Always Free** ([resourceref](https://docs.oracle.com/en-us/iaas/Content/FreeTier/resourceref.htm)) | 2× E2.1.Micro at 50 Mbps internet each. A1: 2 OCPU and 12 GB [DOC] | 10 TB/month | About $0.0085/GB [UNVERIFIED; egresscost.com, 2026-09; oracle.com returned 403] | — | — | One public IP per micro | Home region only. Out-of-capacity errors. Reclaims instances whose 95th-percentile CPU and network both stay under 20% for 7 days [DOC]. A lightly used relay fits that test. |
+| **Fly.io** ([pricing](https://docs.fly.io/about/pricing)) | shared-cpu-1x 256 MB $2.19, plus **dedicated IPv4 at $2, which UDP requires** [DOC] | None listed | $0.02/GB in North America and Europe, $0.04 in APAC/Oceania/South America, $0.12 in Africa/India | Free | UDP works, but not over public IPv6. Bind to `fly-global-services`. Assume about 1,300-byte packets [DOC, [udp-and-tcp](https://docs.fly.io/networking/udp-and-tcp)] | — | Anycast. A community thread reported UDP being routed to random regions; support fixed that case [third-party, [thread](https://community.fly.io/t/tcp-vs-udp-anycast-routing-inconsistency-at-fly-io/17577)] |
+| **Cloudflare Realtime TURN** ([turn](https://developers.cloudflare.com/realtime/turn/), [pricing](https://developers.cloudflare.com/realtime/pricing/), updated 2026-09-22) | Pay per use | First 1,000 GB/month free, shared with the SFU | $0.05 per GB "outbound from Cloudflare to the TURN client". The server-to-peer leg isn't billed [DOC, [FAQ](https://developers.cloudflare.com/realtime/turn/faq/)] | Free | UDP, TCP, and TLS on 3478, 443, and 5349. Per allocation: about 50–100 Mbps and 5–10 kpps, beyond which it drops packets | Clients may use IPv6, but relay addresses are IPv4 only | Anycast in about 330 cities. Credentials last at most 48 hours. Non-WebRTC clients aren't addressed. |
+| **n0 iroh relays** ([pricing](https://www.iroh.computer/pricing), no effective date; footer © 2025) | Community: free, rate-limited, "development and hobby use only", no SLA [DOC, [public relays](https://docs.iroh.computer/iroh-services/relays/public)]. Pro $19/month. Dedicated $199/month per region, added to Pro. | Pro 100 GB, Dedicated 250 GB | $0.09/GB | — | Pro has a 5 MB/s rate limit; the page doesn't say per what | — | Community relays are in the US, EU, and Singapore. These relays serve iroh endpoints only, and the relay runs over HTTP(S) [DOC, docs.rs iroh-relay 1.3.0], so it is TCP [INFERENCE]. |
+
+Notes on these options:
+
+- **Hetzner prices and availability:**
+  - The 15 June 2026 adjustment rose prices across the cloud line, and the CPX line rose roughly 2.4–3×. The official table shows the US CPX11 at $20.49 with 1 TB, and the Singapore CPX12 at $17.99. Those official prices exclude IPv4. [DOC, [price-adjustment](https://docs.hetzner.com/general/infrastructure-and-availability/price-adjustment/)]
+  - The official table doesn't list CPX02.
+  - Hetzner's page shows the CX and CAX lines as "currently unavailable", and its plan pages show the same banner even on CPX plans. **Check orderability in the console.**
+- **Contradictions with our earlier FS Copilot work:**
+  - The FS Copilot fork's record (`record/self-hosted-relay/docs/02-hosting-choice.md`) says Fly.io can't carry inbound UDP. Fly's current docs say it can, so I used the docs.
+  - The same record lists the Oracle A1 shape at 4 OCPU and 24 GB. Oracle's current page says 2 OCPU and 12 GB.
+  - That relay ran on a DigitalOcean $4 droplet in NYC1, where the process used 27 MB of memory (FS Copilot fork, `05-deployment-log.md`, 2026-09-08). [MEASURED-BY-OTHERS]
+- **UDP throttling:** none of the provider pages I fetched documents UDP throttling. The FS Copilot record warns that some hosts throttle sustained UDP, without a source. [UNVERIFIED]
+
+### Cost per relayed session-hour [INFERENCE]
+
+"Marginal" is the transfer price once the allowance is used up. The other columns are the monthly bill divided by session-hours.
+
+| Option | Marginal ($) | At 1k SH/month | At 10k | At 100k |
+|---|---|---|---|---|
+| Hetzner CPX02 EU | 0.00005–0.00007 | 0.0081 | 0.00081 | 0.000081 |
+| OVH VPS-1 | 0 | 0.0045 | 0.00045 | 0.000045 |
+| Linode $5 | 0.00021–0.00031 | 0.005 | 0.0005 | 0.00021–0.00031 |
+| Vultr $5 | 0.00042–0.00061 | 0.005 | 0.0005 | 0.00017–0.00036 |
+| DigitalOcean $6 | 0.00040–0.00057 | 0.006 | 0.0006 | 0.00036–0.00053 |
+| Fly (NA/EU) | 0.00085–0.00122 | 0.0050–0.0054 | 0.0013–0.0016 | 0.00089–0.00127 |
+| Cloudflare TURN, both pilots TURN clients | 0.0021–0.0031 | 0 | 0 | 0.0016–0.0026 |
+| Cloudflare TURN, one pilot a TURN client | 0.0011–0.0015 | 0 | 0 | 0.00056–0.00103 |
+| iroh Pro | 0.0038–0.0055 | 0.019 | 0.0048–0.0065 | 0.0039–0.0056 |
+
+Cloudflare bills only traffic to TURN clients. So if one pilot is a TURN client and the other sends straight to that client's relay address, the billed bytes halve [INFERENCE from the FAQ diagram; confirm with Cloudflare].
+
+### Monthly cost (US$) [INFERENCE]
+
+**Concurrent sessions running around the clock:**
+
+| Concurrent | Egress GB | Hetzner ×1 | Hetzner ×2 | OVH | Vultr | Linode | DigitalOcean $6 | CF TURN (both / one) | Fly | Oracle | iroh Pro |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 10 | 310–447 | 8.09 | 16.18 | 4.54 | 5.00 | 5.00 | 6.00 | 0 / 0 | 10.39–13.13 | 0 | 37.91–50.21 |
+| 100 | 3,101–4,468 | 8.09 | 16.18 | 4.54 | 5.77–19.44 | 15.51–22.34 | 24.88–37.61 | 105–173 / 28–62 | 66–94 | 0 | 289–412 |
+| 1,000 | 31,010–44,676 | 21.30–37.70 | 16.18–21.79 | 4.54 (more servers if CPU-bound) | 285–422 | 155–223 | 285–412 | 1,501–2,184 / 725–1,067 | 624–898 | 179–295, plus pay-as-you-go | 2,801–4,031 |
+
+**Session-hours per month:**
+
+| Session-hours | Egress GB | Hetzner | OVH | Vultr | Linode | DigitalOcean | CF TURN (both / one) | Fly | iroh |
+|---|---|---|---|---|---|---|---|---|---|
+| 1,000 | 42–61 | 8.09 | 4.54 | 5 | 5 | 6 | 0 / 0 | 5.04–5.41 | 19 |
+| 10,000 | 425–612 | 8.09 | 4.54 | 5 | 5 | 6 | 0 / 0 | 12.69–16.43 | 48–65 |
+| 100,000 | 4,248–6,120 | 8.09 | 4.54 | 17.24–35.96 | 21.24–30.60 | 35.56–53.00 | 162–256 / 56–103 | 89–127 | 392–561 |
+
+Assumptions behind these tables:
+
+- **Hetzner ×2** assumes each server brings its own 20 TB [UNVERIFIED].
+- **Lightsail $5** fits 10 concurrent sessions, because 620–894 GB counting both directions is under 1 TB. At 100 concurrent, outbound overage is roughly $234–357/month [INFERENCE].
+- **Oracle's 50 Mbps micro** caps out at about 368–530 concurrent sessions.
+- **Scaleway's 100 Mbps** caps out at about 735–1,059.
+- **OVH's 500 Mbps** caps out at about 3,676–5,297.
+
+### When CPU or packet rate becomes the limit
+
+Published measurements:
+
+- **Naive Go UDP relay, bare metal** (one receive and one send call per packet, 128-byte frames, one core, Xeon w5-2455X): 335–380 kpps at about 2.6–3.0 µs of CPU per forwarded packet. [MEASURED-BY-OTHERS, 2026-09-23, https://github.com/romshark/toy-relay-afxdp]
+- **Game UDP relay, one core** (unbatched, includes the game's own per-packet work, 88-byte payload): 35–40 µs per datagram, measured on 1 core under WSL.
+  - 21,000 datagrams/s ran at 77% CPU with 0.43% loss.
+  - 28,000 datagrams/s ran at 100% CPU with 8.9% loss.
+  - On a production 1-vCPU, 512 MB droplet (provider not named), 5,400 datagrams/s used 23% CPU.
+  - [MEASURED-BY-OTHERS, 2026-10-08, https://github.com/clintcan/3d-fighter-server/issues/17]
+- **Cloudflare 2015, receive only:** a single thread on a 2 GHz Xeon received 197k–374k pps. [MEASURED-BY-OTHERS, https://blog.cloudflare.com/how-to-receive-a-million-packets/]
+- **coturn:** I found no published pps figures. Its author claimed "thousands" of calls per CPU in an interview about a decade old ([webrtcHacks](https://webrtchacks.com/coturn/)). Its wiki performance page is outdated.
+
+What that means for us [INFERENCE]:
+
+- **Sessions per core at 70% load:** 2,333–4,403 at the fast rate, or 175–333 at the slow rate.
+- **100 sessions:** needs 0.02–0.4 of a core.
+- **1,000 sessions:** needs 0.16–4 cores.
+- A virtualized shared vCPU is likely slower per packet than bare metal [UNVERIFIED].
+- I found no per-instance packet-rate caps for DigitalOcean, Hetzner, or Vultr.
+
+### Latency
+
+- **Single-region relay:** a relayed round trip is roughly RTT(A to relay) + RTT(relay to B). A pair far from the relay pays both legs [INFERENCE].
+- **Cloudflare TURN:** each client reaches its nearest location. Packets to a relay address enter Cloudflare near the sender, and misrouted ones travel over Cloudflare's backbone [DOC, [blog](https://blog.cloudflare.com/webrtc-turn-using-anycast), 2024-09-25].
+- **Other anycast options:**
+  - AWS Global Accelerator supports UDP and costs $0.025/hour (about $18.25/month), plus a per-GB premium from $0.015 and normal EC2 egress [DOC, [pricing](https://aws.amazon.com/global-accelerator/pricing/)].
+  - Cloudflare Spectrum carries UDP only on the Enterprise plan [DOC, seen only on a preview mirror of protocols-per-plan].
+- **Multiple regions:** with providers that pool transfer across regions (DigitalOcean, Vultr, Linode), three regions cost about 3 × $4–6 = $12–18/month base [INFERENCE]. Hetzner's cheap traffic exists only in the EU.
+
+### What I couldn't verify
+
+- Hetzner's overage price and CPX02 price come from third-party trackers only.
+- Oracle's overage price, because oracle.com returned 403.
+- OVH's price without a 12-month commitment, and its fair-use footnote.
+- Scaleway's STARDUST1-S base price.
+- The scope of iroh Pro's 5 MB/s limit.
+- Whether Cloudflare TURN accepts non-WebRTC clients.

@@ -1,0 +1,368 @@
+Agent ab56e6521f3d2ab88, started 2026-10-10T08:41:51.144Z
+
+== Asked ==
+
+You are doing a code-level research read for Crosscheck, a shared cockpit for Microsoft Flight Simulator 2024: two pilots' Rust cores on tokio, Windows 10/11 x64, that must link over the internet. Today is 2026-10-10.
+
+## Hard rules
+- Do not create, write, or edit any file anywhere (no git clone, no downloads to disk, no scratch files). Read everything in memory.
+- Read source exactly with PowerShell, for example: `$ProgressPreference='SilentlyContinue'; $c=(Invoke-WebRequest -UseBasicParsing -Uri '<raw url>' -Headers @{'User-Agent'='research'}).Content; $l=$c -split "`n"; ...` and print line ranges with line numbers or grep with line numbers. Output per call is capped at about 30,000 characters. `gh` (GitHub CLI) is installed: `gh api repos/<o>/<r>/contents/<path>?ref=<tag>`, `gh api repos/<o>/<r>/tags`, `gh issue view -R <o>/<r> <n>`, `gh search code`. For crates hosted on GitLab, use the GitLab raw URLs (`https://gitlab.freedesktop.org/<group>/<project>/-/raw/<ref>/<path>`) or the GitLab API. docs.rs source view `https://docs.rs/crate/<name>/<ver>/source/.cargo_vcs_info.json` gives the git commit a crate was published from (the page is HTML; grep for sha1 and path_in_vcs). crates.io API needs a User-Agent header (`https://crates.io/api/v1/crates/<name>`, `/versions`, `/owners`, `/reverse_dependencies`). WebFetch and WebSearch are available.
+- Do not launch subagents.
+- Every claim gets a source: a URL with section, or a file path plus symbol and line at a named tag or commit. Tag each claim [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], or [UNVERIFIED]. Never invent a version, API name, number, or URL; say plainly when you can't find something. Quote short and exact.
+
+## The design being evaluated
+Each peer allocates a relayed address on a TURN server (Cloudflare Realtime TURN by default, which uses long-term credentials minted per session through Cloudflare's API; coturn as a self-hosted alternative). The TURN client side is `turn-client-proto` 0.7.3 (sans-IO). It runs on the same UDP socket as STUN and QUIC (demultiplexed by first byte per RFC 9443: ChannelData uses first byte 64..79, STUN 0..3, QUIC 128..191 when the QUIC bit is not greased). QUIC packets (quinn) to the peer through the relay are wrapped in ChannelData (preferred, 4-byte header) or Send indications. An ICE agent (the `is` crate from str0m) will hold the relayed address as a local relayed candidate and run connectivity checks through it, so STUN binding requests and responses to and from the peer also traverse the TURN allocation.
+
+## Questions to answer, each with sources
+1. Identify `turn-client-proto` 0.7.3: crates.io data (published date, publisher, license, repository, owners, full version history with dates, downloads), and the git commit it was published from. Find its source repository and the sibling crates (e.g. `turn-types`, `turn-server-proto`, `stun-proto`, `stun-types`, and whether `librice` / `rice-proto` by the same author depend on it).
+2. Feature coverage in 0.7.3, each answered from source: Allocate with long-term credentials (401 then retry with realm/nonce, MESSAGE-INTEGRITY and MESSAGE-INTEGRITY-SHA256?), REQUESTED-TRANSPORT UDP, address families (IPv4/IPv6 relayed addresses, RFC 8656 REQUESTED-ADDRESS-FAMILY / ADDITIONAL-ADDRESS-FAMILY), CreatePermission, ChannelBind, ChannelData framing (the 4-byte header, padding over TCP), Send and Data indications, Refresh of the allocation (and lifetime 0 to deallocate), refresh of permissions (5 minutes) and channel bindings (10 minutes) — automatic or caller-driven, 438 Stale Nonce handling, 437/508 errors, transports to the server: UDP, TCP, TLS (and DTLS?). Show the exact type names and functions (e.g. a `TurnClient` enum or trait with `TurnClientUdp`, `TurnClientTcp`, `TurnClientTls`?).
+3. The sans-IO usage pattern: how to construct a client (server address, local address, credentials), how to feed incoming bytes from the server (`recv`?), how to get outgoing bytes to send (`poll_transmit`?), how to send application data to a peer through the relay (`send_to`?) and what it returns (a transmit with the ChannelData or Send-indication bytes, and to which destination), how received relayed data is surfaced (with the peer address), timers (`poll` returning a wait-until instant?), events (allocated, error, permission created). Show a minimal sketch built only from real API names you found (label it a sketch). Check examples in the repository (e.g. an `examples/` directory or a `turn-client-udp` example) and tests (count them, name test files, and whether there's integration testing against coturn or a server in the same repo).
+4. Whether it can share a UDP socket with other protocols: does its receive function accept or reject packets that aren't from the TURN server or aren't TURN (e.g. returns an "ignored" variant that lets us hand the packet elsewhere)? Does it need ownership of the socket?
+5. Maintainer(s), activity (commits in the last 6 months), open issues, and who uses it (crates.io reverse dependencies; GitHub/GitLab code search). Is it the TURN client inside `librice`/`rice-proto`, and is that used by GStreamer's webrtcbin or `gst-plugins-rs`?
+6. Compare briefly with webrtc-rs's TURN crate. The caller named "webrtc-rs's `turn` crate (0.17.2)": check crates.io `https://crates.io/api/v1/crates/turn/versions` for whether 0.17.2 exists, which repository it comes from (webrtc-rs/webrtc monorepo vs the newer sans-IO `webrtc-rs/rtc` repo, whose crates may be named `rtc-turn`), its date, and its API style (async with tokio vs sans-IO). Then read issues #263 and #267 in https://github.com/webrtc-rs/rtc (`gh issue view -R webrtc-rs/rtc 263` and `267`, including comments): what each reports, its state, and whether it applies to the `turn` crate 0.17.2 or only to `rtc-turn` or another crate. Also note whether the `turn` client in webrtc-rs supports ChannelData, TCP, and refresh.
+7. Cloudflare Realtime TURN specifics, from Cloudflare docs: the TURN server hostnames and ports (turn.cloudflare.com, 3478 UDP/TCP, 5349 TLS, 53?, 80/443 alternates), how credentials are generated (the API endpoint that mints ice servers with a TTL), whether it supports ChannelBind/ChannelData, IPv6 relayed addresses, allocation limits, pricing ($ per GB, free tier), and any documented limitations ("does not support ..."). Cite the exact docs pages (https://developers.cloudflare.com/realtime/turn/ and its subpages).
+
+## Report
+Return a structured report answering each numbered question, each claim tagged and sourced. Include short exact code quotes where the exact text matters (constructors, the send-to-peer function signature, refresh handling). End with a list of things you could not determine.
+
+== Report ==
+
+## Report: `turn-client-proto` 0.7.3, webrtc-rs TURN, and Cloudflare Realtime TURN (read 2026-10-10)
+
+`turn-client-proto` 0.7.3 fits the design. It's a sans-IO UDP/TCP TURN client, and its `recv` hands back anything it doesn't own, so it can share one socket with ICE STUN and quinn. Refresh of the allocation, permissions, and channels is automatic as long as the caller keeps driving `poll`/`poll_transmit`.
+
+The design statement has one error you need to fix, and quinn's default works against the demux. Both are explained in the next section.
+
+Unless noted, source refs are at commit `52209bfadde1bf7be7423cdf53654c5d68e59102` of github.com/ystreet/turn-proto (written `@52209bf` below).
+
+### Corrections to the design statement
+
+- **QUIC is not in 128..191.** RFC 9443 assigns QUIC to 80..127 and 192..255. 128..191 belongs to RTP/RTCP. QUIC short headers can also fall in 64..79, which overlaps TURN ChannelData. RFC 9443 §2 resolves the overlap by source address: a packet in that range is ChannelData only if it comes from the TURN server's address and port. [DOC] https://www.rfc-editor.org/rfc/rfc9443.txt lines 119-134 and Figure 3 (lines 194-208).
+  - `TurnClientUdp::recv` already applies that source-address check (udp.rs:187-197 `@52209bf`). [SRC]
+- **quinn greases the QUIC bit by default, and RFC 9443 forbids that for multiplexed sockets.**
+  - RFC 9443: endpoints that multiplex their socket "MUST NOT send the grease_quic_bit transport parameter" (lines 98-100). [DOC]
+  - quinn-proto 0.11.19 has `grease_quic_bit: true` by default (`quinn-proto/src/config/mod.rs:63`, setter `EndpointConfig::grease_quic_bit` at :127-135, tag `quinn-proto-0.11.19`). We have to set it to false. [SRC]
+
+### 1. Identity and history of `turn-client-proto`
+
+**crates.io data** [SRC] (https://crates.io/api/v1/crates/turn-client-proto, plus `/owners` and `/0.7.3/dependencies`):
+- **0.7.3:** published 2026-10-06T23:31:56Z by `ystreet`. License `MIT OR Apache-2.0`, MSRV 1.80.0, 621 downloads.
+- **Repository:** https://github.com/ystreet/turn-proto. Sole owner `ystreet` (Matthew Waters, Centricular per the `Cargo.toml` authors line).
+- **Downloads:** 35,533 total, 21,596 recent.
+- **Dependencies:** `stun-proto ^2.0.1`, `turn-types ^0.7.1`, `smallvec`, `byteorder`, `thiserror ^2`, `tracing`. Optional `rustls ^0.23` and `openssl ^0.10`. Features: `default=["std"]`.
+
+**Version history** (all published by ystreet) [SRC]:
+
+| Version | Date |
+|---|---|
+| 0.1.0 | 2025-06-03 |
+| 0.2.0 | 2025-06-19 |
+| 0.3.0 | 2025-07-28 |
+| 0.4.0-alpha0 | 2025-09-01 |
+| 0.4.0-alpha1 | 2025-09-02 |
+| 0.4.0-alpha2 | 2025-09-23 |
+| 0.4.0 | 2025-10-10 |
+| 0.4.1 | 2025-10-20 |
+| 0.5.0 | 2026-01-20 |
+| 0.6.0-rc.0 | 2026-02-12 |
+| 0.6.0 | 2026-03-15 |
+| 0.7.0 | 2026-03-21 |
+| 0.7.1 | 2026-03-30 |
+| 0.7.2 | 2026-08-05 |
+| 0.7.3 | 2026-10-06 |
+
+**Publish commit** [SRC]:
+- docs.rs `.cargo_vcs_info.json` gives `sha1 52209bfadde1bf7be7423cdf53654c5d68e59102` with `path_in_vcs turn-client-proto`.
+- That commit is "Release 0.7.3" (2026-10-06, PR #115), and it equals `main` (GitHub compare reports "identical").
+- The repository has no `v0.7.3` git tag; tags stop at `v0.7.2`.
+
+**Sibling crates in the same workspace** (workspace `Cargo.toml @52209bf`) [SRC]:
+- `turn-types` 0.7.3
+- `turn-server-proto` 0.7.3
+- `turn-client-rustls` 0.1.2, `turn-client-openssl` 0.1.2, `turn-client-dimpl` 0.2.1
+- server counterparts of the three TLS crates
+
+**Other crates by the same author** [SRC]:
+- `stun-proto` and `stun-types` 2.0.3 (2026-10-03), from github.com/ystreet/stun-proto. The workspace `Cargo.lock` pins 2.0.3.
+- `rice-proto` 0.4.3 (2026-05-11) depends on `turn-client-proto ^0.7.1` (normal dependency), plus the optional TLS client crates (crates.io deps; `rice-proto/Cargo.toml` at tag v0.4.3 of ystreet/librice).
+- `rice-proto/src/turn.rs` wraps `TurnClientUdp` and `TurnClientTcp`.
+- `librice` 0.4.3 does not depend on `rice-proto` directly. It uses `rice-c`, whose manifest declares `[package.metadata.system-deps] rice-proto = "0.4.2"` (the C library built from rice-proto's `capi` feature).
+
+### 2. Feature coverage in 0.7.3
+
+All paths below are under `turn-client-proto/src/` `@52209bf` unless named otherwise. All [SRC] unless tagged.
+
+**Client types**
+- `TurnClientUdp` (udp.rs:42) and `TurnClientTcp` (tcp.rs:44).
+- TLS and DTLS live in separate crates:
+  - `TurnClientRustls` (`turn-client-rustls/src/lib.rs:60`): TLS only.
+  - `TurnClientOpensslTls` (`turn-client-openssl`): TLS and DTLS.
+  - `TurnClientDimpl`: DTLS. Its doc says no certificate validation is performed and it is "not currently recommended for use".
+- All implement trait `api::TurnClientApi` (api.rs:34, `: core::fmt::Debug + Send`).
+- `client::TurnClient` is an enum `{Udp, Tcp}` generated by `impl_client!` (client.rs:226). You can build your own enum with that macro.
+
+**Long-term credentials**
+- The first ALLOCATE is unauthenticated and carries LIFETIME 1800, REQUESTED-TRANSPORT, and DONT-FRAGMENT (protocol.rs:134-181).
+- A 401 carrying REALM and NONCE leads `stun_proto::auth::LongTermClientAuth::validate_incoming_message` to return `ResendRequest` (stun-proto v2.0.3 `stun-proto/src/auth.rs:493-587`). The client then sends a signed ALLOCATE (protocol.rs:184-234).
+- The signed ALLOCATE omits DONT-FRAGMENT.
+
+**MESSAGE-INTEGRITY versus MESSAGE-INTEGRITY-SHA256**
+- `TurnConfig::new` defaults to SHA-1 only (api.rs:178-187).
+- SHA-256 is used only if `add_supported_integrity(IntegrityAlgorithm::Sha256)` is called and the server's nonce carries the RFC 8489 security bits with PASSWORD-ALGORITHMS (auth.rs:509-560).
+- Anonymous USERHASH is supported (`set_anonymous_username`, api.rs:284).
+
+**REQUESTED-TRANSPORT**
+- UDP by default. TCP allocation (RFC 6062) needs a TCP client connection; otherwise construction panics (protocol.rs:114-118, udp.rs:78-80).
+
+**Address families**
+- IPv4 by default.
+- `set_address_family(IPV6)` sends REQUESTED-ADDRESS-FAMILY. `add_address_family` with more than one family sends ADDITIONAL-ADDRESS-FAMILY (RFC 8656) (protocol.rs:155-171).
+- On error 440 with a dual-stack request, the client retries IPv6-only (protocol.rs:1258-1290).
+- A relayed address whose family wasn't requested is not recorded. If none matches, the allocation fails (protocol.rs:1318-1369).
+
+**CreatePermission and ChannelBind**
+- `create_permission(transport, IpAddr, now)` (protocol.rs:2091-2150).
+- `bind_channel(transport, SocketAddr, now)` picks the first free number in 0x4000..=0x7FFF and implicitly installs a permission (protocol.rs:2369-2464).
+- After a channel expires, the same peer can't be rebound for 300 s: `BindChannelError::ExpiredChannelExists`.
+
+**ChannelData framing**
+- 4-byte header (`turn-types/src/transmit.rs:142-170`, `turn-types/src/channel.rs:85-100`).
+- No 4-byte padding over TCP, in either direction. Searching the crates finds no padding or alignment code. RFC 8656 §12.5 says ChannelData over TCP/TLS "MUST be padded to a multiple of four bytes" (rfc8656.txt lines 2364-2370). [INFERENCE] TCP/TLS channel interop with coturn or Cloudflare could break; not measured.
+- Over UDP, trailing padding from a server is tolerated (`ChannelData::parse` uses `data[4..4+len]`).
+
+**Send and Data indications**
+- Outgoing Send indications come from `DelayedMessage::for_server` (transmit.rs:191-240).
+- Incoming Data indications are parsed, including the ICMP attribute, but only from peers with a permission (protocol.rs:551-606).
+
+**Allocation refresh**
+- Automatic, inside `poll_transmit`. It always requests LIFETIME 1800 (protocol.rs:1990-2005).
+- The refresh fires at expiry minus 60 s, or at lifetime/2 if the lifetime is 120 s or less (protocol.rs:2507-2514, `EXPIRY_BUFFER` 60 s at :50).
+- A REFRESH response granting less than 600 s is ignored with a warning (protocol.rs:741-747, `MIN_LIFETIME` :64, PR #88).
+- `delete(now)` sends REFRESH with LIFETIME 0, and a 437 reply to it counts as success (protocol.rs:2067-2088, :716-719).
+
+**Permission and channel refresh**
+- Automatic. Permissions use `PERMISSION_DURATION` 300 s and refresh at 240 s. Channels use `CHANNEL_DURATION` 600 s and refresh at 540 s (protocol.rs:52-56, :2007-2052).
+- **0.7.3 is the first version where lost refreshes are retried and overdue entries expire** (commit 9c368515, "client: retry lost refreshes and expire overdue permissions and channels", fixes issue #112).
+  - Issue #112 reported that in 0.7.2 a lost refresh was "never retried (busy loop, silent drop)" [MEASURED-BY-OTHERS] (github.com/ystreet/turn-proto/issues/112).
+
+**438 Stale Nonce**
+- `handle_resend_request` (protocol.rs:324-516) re-sends ALLOCATE, REFRESH, CHANNEL_BIND (same channel number), or CREATE_PERMISSION with the new nonce.
+- At most 8 consecutive 438s (`MAX_STALE_NONCE_REPLIES`, :62). The counter resets on any success.
+- So the failure modes in webrtc-rs/rtc issues #263 and #267 (question 6) are handled here. [SRC, not measured]
+
+**Other error codes (437, 486, 508)**
+- Any ALLOCATE error other than the 440 case produces `TurnEvent::AllocationCreateFailed(family)` with no error code exposed to the caller (protocol.rs:1292-1302). The client can't tell 486 from 508 except in tracing logs.
+- No 300 Try-Alternate handling (no ALTERNATE reference in protocol.rs).
+- [INFERENCE] An unsigned error response during authentication returns `Ignored` (protocol.rs:1225-1235), so the transaction runs until the STUN retransmit timeout. That's about 39.5 s with defaults: initial RTO 500 ms and 7 transmissions (stun-proto `agent.rs:638-646`).
+  - The timeout path sets `Error` without pushing `AllocationCreateFailed` (protocol.rs:1642-1650). The caller only sees `TurnPollRet::Closed`.
+  - A second 401 with unchanged realm and nonce (wrong password) takes this path (auth.rs:499-507).
+
+**Transports to the server**
+- UDP and TCP in this crate. TLS over TCP via rustls or openssl. DTLS via openssl or dimpl (lib.rs:29-36).
+
+**Missing API**
+- `TurnClientApi` has no way to update credentials (api.rs:34-134). After Cloudflare's 48-hour credential maximum, you need a new allocation. `rtc-turn` does have `update_credentials` (rtc-turn/src/client/mod.rs:552 @master).
+
+### 3. The sans-IO usage pattern
+
+**Construction**
+- `TurnClientUdp::allocate(local_addr: SocketAddr, remote_addr: SocketAddr, config: TurnConfig) -> Self` (udp.rs:74).
+- `TurnConfig::new(TurnCredentials::new(username: &str, password: &str))` (api.rs:178; `turn-types/src/lib.rs:90`).
+- Optional `set_request_retransmits(initial, max, retransmits, final_timeout)` (api.rs:311).
+
+**Receiving**
+- `recv<T>(&mut self, transmit: Transmit<T>, now: Instant) -> TurnRecvRet<T>` (api.rs:114).
+- `TurnRecvRet` is `Handled`, `Ignored(Transmit<T>)`, `PeerData(TurnPeerData<T>)` (with `.peer: SocketAddr`, `.transport`, and `.data()`; zero-copy range into your buffer), or `PeerIcmp{..}` (api.rs:386-417, :432).
+- `poll_recv` always returns `None` for UDP (udp.rs:228).
+
+**Sending**
+- `poll_transmit(now) -> Option<Transmit<Data<'static>>>` (api.rs:127). Requests are paced at no more than one per 50 ms (`MIN_STUN_REQUEST_CADENCE`, protocol.rs:60, :1959-1975).
+
+**Send to a peer through the relay**
+```rust
+fn send_to<T: AsRef<[u8]> + Debug>(&mut self, transport: TransportType, to: SocketAddr, data: T, now: Instant)
+    -> Result<Option<TransmitBuild<DelayedMessageOrChannelSend<T>>>, SendError>;   // api.rs:103-109
+```
+- UDP always returns `Some` (udp.rs:178).
+- The result is ChannelData if a confirmed, unexpired channel exists for that exact peer `SocketAddr`; otherwise it's a Send indication (protocol.rs:1534-1549).
+- `from` is the local address and `to` is the TURN server.
+- It returns `Err(SendError::NoPermission)` when there's no permission for `to.ip()` (protocol.rs:1500-1502).
+- Materialize the bytes with `.build() -> Transmit<Vec<u8>>` or `.write_into(&mut [u8])`. With `write_into`, pass a slice of exactly `.data.len()` bytes: some variants use `copy_from_slice` (api.rs:597-600, :649-656).
+
+**Timers and events**
+- `poll(now) -> TurnPollRet::{WaitUntil(Instant), AllocateTcpSocket{..}, TcpClose{..}, Closed}` (api.rs:346-371).
+- `poll` returns `WaitUntil(now)` while events are queued (protocol.rs:1595-1597), so drain `poll_event()` before sleeping.
+- `poll_event() -> Option<TurnEvent>`. Variants: `AllocationCreated(TransportType, SocketAddr)`, `AllocationCreateFailed(AddressFamily)`, `PermissionCreated` and `PermissionCreateFailed(TransportType, IpAddr)`, `ChannelCreated` and `ChannelCreateFailed(TransportType, SocketAddr)`, `TcpConnected` and `TcpConnectFailed` (api.rs:445-463).
+- `Instant` is `sans_io_time::Instant`, re-exported as `turn_client_proto::stun::Instant`. `Instant::from_std(base)` gives the time elapsed since `base`.
+
+**Minimal sketch** (not compiled; every name is from the source above):
+```rust
+use turn_client_proto::prelude::*;                       // TurnClientApi, DelayedTransmitBuild
+use turn_client_proto::api::{TurnConfig, TurnEvent, TurnPollRet, TurnRecvRet};
+use turn_client_proto::udp::TurnClientUdp;
+use turn_client_proto::stun::{agent::Transmit, Instant};
+use turn_client_proto::types::{TransportType, TurnCredentials};
+
+let base = std::time::Instant::now();
+let mut turn = TurnClientUdp::allocate(local_addr, turn_server,
+    TurnConfig::new(TurnCredentials::new(&user, &cred)));
+// driver: TurnPollRet::WaitUntil(t) => sleep until t or a packet/command; Closed => tear down
+while let Some(ev) = turn.poll_event() { if let TurnEvent::AllocationCreated(_, relayed) = ev { /* ICE relay candidate */ } }
+while let Some(t) = turn.poll_transmit(Instant::from_std(base)) { sock.send_to(&t.data, t.to).await?; }
+// every datagram on the shared socket:
+match turn.recv(Transmit::new(&buf[..n], TransportType::Udp, from, local_addr), Instant::from_std(base)) {
+    TurnRecvRet::PeerData(d) => { /* d.peer, d.data(): QUIC or ICE STUN from the peer */ }
+    TurnRecvRet::Ignored(t) => { /* not TURN: demux by first byte to ICE / quinn */ }
+    _ => {}
+}
+turn.bind_channel(TransportType::Udp, peer, Instant::from_std(base))?;     // also installs a permission
+if let Some(tb) = turn.send_to(TransportType::Udp, peer, quic_bytes, Instant::from_std(base))? {
+    let out = tb.build(); sock.send_to(&out.data, out.to).await?;          // out.to == TURN server
+}
+```
+
+**Examples**
+- The only example is `examples/src/bin/turn.rs` (1,134 lines). It's a separate unpublished workspace using std threads and `std::net::UdpSocket`, with modes for udp, tcp, rustls, openssl, and dimpl. Its doc comment walks through a manual run against coturn plus netcat (lines 11-62).
+- One third-party repository, mystxcal/rift (0 stars), wraps `TurnClientUdp` to relay QUIC datagrams: "RIFT keeps TURN outside QUIC" (`crates/rift-transport/src/turn.rs:1-6`). It's a lead, not evidence. [SRC]
+
+**Tests** (counts of `#[test]` attributes)
+
+| File | Tests |
+|---|---|
+| `src/protocol.rs` | 63 |
+| `src/api.rs` | 3 |
+| `tests/udp.rs` | 14 |
+| `tests/tcp.rs` | 19 |
+| `turn-client-rustls/tests/rustls.rs` | 7 |
+| `turn-client-openssl/tests/openssl.rs` | 7 |
+| `turn-client-dimpl/tests/dimpl.rs` | 5 |
+
+- Beyond that there are fuzz targets (`turn_recv_authed`, `turn_recv_unauthed`, `stun_msg_from_bytes`) and `benches/sendrecv.rs`.
+- The integration tests run the client against the in-repo `turn-server-proto` in memory, through the unpublished `api-tests` crate.
+- CI (`.github/workflows/rust.yml`) runs no coturn or other external server. That covers Ubuntu, macOS, and Windows on Rust 1.80 and stable.
+- Issue #112 notes the published package's tests don't compile because `api_tests` isn't published. [MEASURED-BY-OTHERS]
+
+### 4. Sharing a UDP socket
+
+**The crate does not need to own the socket**, since it does no I/O.
+
+`recv` returns `TurnRecvRet::Ignored(transmit)`, with the original buffer handed back, in these cases [SRC]:
+- `transmit.to` isn't the construction `local_addr`.
+- `from` isn't the TURN server.
+- The transport doesn't match.
+- The packet parses as neither STUN nor ChannelData (udp.rs:187-203).
+- It's a STUN response to an unknown transaction, so stun-proto `handle_stun_message_with_time` returns false (`agent.rs:352-359`). That covers an ICE binding response coming back from `turn.cloudflare.com`.
+- It's ChannelData on an unknown or still-pending channel (protocol.rs:1127-1146).
+- Tested: `test_client_receive_offpath_data` and `turn_unparseable_data` (`tests/udp.rs:144-163`, `api-tests/src/lib.rs:1143-1159`).
+
+[INFERENCE] Pass the same `to` address you gave `allocate`. A dual-stack `[::]` socket reports IPv4 peers as `::ffff:a.b.c.d`, which won't equal an IPv4 `remote_addr`.
+
+[INFERENCE] Size the QUIC MTU for the wrapper: 4 bytes for ChannelData, or about 36 bytes plus padding for a Send indication (RFC 9443 line 113 cites "36-byte STUN overhead").
+
+### 5. Maintainers, activity, and users
+
+**Maintainers and activity** [SRC]
+- Maintainer: Matthew Waters (`ystreet`). Contributors: ystreet 218 commits, philn 1, cliqer 1, tp-m 1.
+- The project is funded through NLnet's NGI0 Commons Fund (README.md:72-77).
+- 18 commits since 2026-04-10: 17 by Matthew Waters and 1 by "Protogon" (the #112 fix, PR #113 by cliqer).
+- The repository has 11 stars and 4 forks, and 0 open issues as of this check.
+
+**Users** [SRC]
+- crates.io reverse dependencies: 7.
+  - Normal: `turn-client-rustls`, `turn-client-openssl`, `turn-client-dimpl`, and `rice-proto`.
+  - Dev-only: `turn-server-dimpl`, `turn-server-rustls`, `turn-server-openssl`.
+  - All are the same author's.
+- GitHub code search, outside ystreet's repositories:
+  - `lince-social/lince` (12 stars).
+  - `Midwess/Bytover`.
+  - `mystxcal/rift`.
+  - `FlyCockpit/flycockpitapp`: an AI harness, not flight-sim. It pins `=0.7.1`, and its `Cargo.toml` comment claims a coturn conformance test on Linux CI. [UNVERIFIED]
+  - a Gentoo overlay packaging librice.
+
+**Is it the TURN client inside librice/rice-proto, and does GStreamer use it?**
+- Yes, it's rice-proto's TURN client (`rice-proto/src/turn.rs:23-37` @v0.4.3).
+- GStreamer's C `webrtcbin` (gst-plugins-bad) does not use it. It uses the libnice backend: `gst-libs/gst/webrtc/nice/` is the only ICE backend directory found.
+- `gst-plugins-rs` `net/webrtcbin2` ("GStreamer plugin for low level WebRTC elements", 0.16.0-alpha) depends on `librice = { version = "0.4.3", ..., features = ["runtime-tokio"] }` (`net/webrtcbin2/Cargo.toml` and `Cargo.lock` on main).
+  - That chain runs librice → rice-c → the system rice-proto C library → turn-client-proto.
+- GitLab code search needs a login, so this comes from the manifests and lock file only.
+
+### 6. webrtc-rs TURN crates
+
+**`turn` 0.17.2** [SRC]
+- It exists: published 2026-07-20 by rainliu, license `MIT/Apache-2.0`, 7.48M total downloads.
+- Repository: webrtc-rs/webrtc, published from commit `1da3fe8ee84db8d266322cbcfcb357c745959a8e` ("bump version to v0.17.2", tag `v0.17.2`, branch `v0.17.x`, `path_in_vcs turn`).
+- **API style: async on tokio.**
+  - Dependencies include `tokio ^1.32`, `async-trait`, and `webrtc-util` (conn).
+  - Public API: `Client::new(ClientConfig).await`, `listen()`, `allocate() -> impl Conn`, `close()`, `send_binding_request*` (`turn/src/client/mod.rs:607-646`).
+- **It can't share our socket without a wrapper.** `ClientConfig.conn: Arc<dyn Conn>`. `listen()` spawns the read loop itself and silently drops non-TURN packets (mod.rs:224-330). `handle_inbound` is private to `ClientInternal`.
+- **Supports:** ChannelData, padded to 4 bytes always (`proto/chandata.rs:7-50`). Data goes as Send indications until the binding is ready (`relay_conn.rs:294-358`).
+- **Refresh:** allocation at lifetime/2, permissions every 120 s, each with up to 3 retries on 438 (`relay_conn.rs:27-28`, :85-86, :587-621). Channels re-bind on a send after 5 minutes (:313-351).
+- **Missing:** TCP or TLS to the server and REQUESTED-ADDRESS-FAMILY. The client always requests `PROTO_UDP` and has no stream framing (mod.rs:42, :527, :553).
+
+**`rtc-turn` 0.21.0** [SRC]
+- Published 2026-09-19 from github.com/webrtc-rs/rtc (tag v0.21.0).
+- It's the sans-IO rewrite: "The Sans-I/O TURN client" (`rtc-turn/src/client/mod.rs:1`).
+
+**Issues #263 and #267** in webrtc-rs/rtc [SRC]. Both are open and target `rtc-turn` 0.21.0 and master, not `turn` 0.17.2:
+- **#263** (opened 2026-09-27, no comments): an allocation Refresh that gets 438 is not re-sent, so relayed connections drop at about 65 minutes. The reporter reproduced it twice. [MEASURED-BY-OTHERS]
+  - It doesn't apply to `turn` 0.17.2, which returns `ErrTryAgain` on 438 and retries up to 3 times (`relay_conn.rs:502-504`, :590-602).
+- **#267** (opened 2026-10-03): a ChannelBind refresh that gets 438 deletes the binding. Rebinding with a new channel number then gets 400s, and ICE fails at about 10m40s (3 of 3 sessions). The reporter's patch kept an 82-minute session up, and maintainer rainliu replied "yes, please submit a PR". [MEASURED-BY-OTHERS]
+  - [INFERENCE] `turn` 0.17.2 fails differently: any ChannelBind non-success becomes `ErrUnexpectedResponse`, which marks the binding `Failed` and keeps it. `bind()` never reads the new nonce, and a `Failed` binding is never re-bound, so traffic to that peer silently falls back to Send indications (`relay_conn.rs:248-308`, :330-351, :537-582).
+
+### 7. Cloudflare Realtime TURN [DOC]
+
+**Hosts and ports** (https://developers.cloudflare.com/realtime/turn/ "Service address and ports"; updated 2026-09-25)
+
+| Protocol | Host | Primary port | Alternate port |
+|---|---|---|---|
+| STUN | stun.cloudflare.com | 3478/udp | |
+| TURN over UDP | turn.cloudflare.com | 3478/udp | 443/udp |
+| TURN over TCP | turn.cloudflare.com | 3478/tcp | 80/tcp |
+| TURN over TLS | turn.cloudflare.com | 5349/tcp | 443/tcp |
+
+- A note on the generate-credentials page mentions an "alternate port 53", but neither the port table nor the example response lists 53. The docs are inconsistent.
+- TLS 1.1 through 1.3 are supported.
+- The FAQ says `turn.cloudflare.com` also answers STUN binding requests.
+- Custom domains work for UDP and TCP, not TLS (/custom-domains/).
+
+**Credentials** (/generate-credentials/)
+- Create a TURN key in the dashboard or API. That key is not usable as a credential itself.
+- Mint per-session credentials with `POST https://rtc.live.cloudflare.com/v1/turn/keys/$TURN_KEY_ID/credentials/generate-ice-servers`, header `Authorization: Bearer $TURN_KEY_API_TOKEN`, body `{"ttl": 86400}`.
+- It returns 201 with `iceServers` (urls, `username`, `credential`).
+- The `/credentials/generate` endpoint (on /replacing-existing/) also accepts a `customIdentifier`.
+- `/credentials/$USERNAME/revoke` returns 204.
+- Maximum TTL is 48 hours.
+- An allocation has no maximum duration. Expired credentials are cut off "after a short delay" (/faq/).
+
+**Feature matrix** (/rfc-matrix/, updated 2026-04-21; plus /faq/)
+- Supported: UDP, TCP, and TLS to the server, TURN REST API, ALPN.
+- Not supported: DTLS, RFC 6062 TCP relaying, RFC 6156 IPv6 relays, OAuth, MICE.
+- Clients can reach the server over IPv6, but it issues **IPv4 relay addresses only** and ignores `REQUESTED-ADDRESS-FAMILY`.
+  - [INFERENCE] With `set_address_family(IPV6)`, `turn-client-proto` would reject the IPv4 relay and fail (protocol.rs:1318-1369). Keep the default IPv4-only config.
+- ChannelBind is implied supported: the FAQ names "CreatePermission or ChannelBind requests". ChannelData isn't stated explicitly.
+- CreatePermission and ChannelBind are denied for private, loopback, link-local, multicast, and BYOIP addresses.
+  - [INFERENCE] Don't request permissions for the peer's host candidates. Expect `PermissionCreateFailed` if you do.
+
+**Limits and pricing**
+- Per-allocation limits: more than 5 new IPs per second, more than 5-10 kpps, more than 50-100 Mbps. Exceeding them drops packets (landing page "Limits").
+- No specific MTU limit.
+- $0.05 per GB, counted on egress from Cloudflare to the TURN client, TURN overhead included.
+- Free tier: 1,000 GB per month, shared with the SFU (/sfu/platform/pricing/, updated 2026-09-22; /faq/).
+- STUN is free.
+
+### Things I could not determine
+
+1. **Cloudflare's granted allocation lifetime.** If a REFRESH response grants less than 600 s, `turn-client-proto` ignores it and the allocation lapses (protocol.rs:745-747).
+2. **Other Cloudflare protocol details**:
+   - nonce lifetime
+   - MESSAGE-INTEGRITY-SHA256 support
+   - whether it signs error responses (unsigned ones surface slowly in this client)
+   - how it handles DONT-FRAGMENT in the first Allocate and ADDITIONAL-ADDRESS-FAMILY
+3. **The port 53 discrepancy** in Cloudflare's docs.
+4. **Interop is unmeasured**:
+   - against Cloudflare
+   - against coturn, beyond the repo's manual example and FlyCockpit's unverified CI claim
+   - over TCP or TLS with the missing ChannelData padding
+5. **Wrong-password timing.** About 39.5 s, then `Closed` with no event, is inferred from source, not measured.
+6. **GStreamer usage beyond manifests.** GitLab code search needs a login.
+7. **`rtc-turn` internals** were read only far enough to confirm it's sans-IO.

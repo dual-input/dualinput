@@ -1,0 +1,336 @@
+Agent a12373e75b66a885e, started 2026-10-09T21:16:41.004Z
+
+== Asked ==
+
+Research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots on two home PCs fly one aircraft; each PC runs a Rust core). Today is 2026-10-09. Do the research yourself: do NOT spawn subagents. Do NOT write or edit files anywhere; put everything in your final report.
+
+## Context
+We need the cores to link directly through home NATs when possible (hole punching, IPv6, router port mapping) and fall back to a relay (research puts 5–31% of pairs there), ideally switching between direct and relay mid-session without dropping it, and keeping the relay path warm so a copy can go through it while the direct path is lossy. The flight model streams ~20 samples/s from the flying PC; a short gap in it currently holds the follower's aircraft still and then it jumps. Our product doc lists three ways to soften a short gap: carry the aircraft on its last velocities for about a second then ease to the true position; have each packet carry the last few samples so one lost packet costs nothing; send a copy through the relay only while the direct link is losing packets or switching paths.
+
+## Your topics
+1. Tailscale's NAT traversal method, from primary sources: "How NAT traversal works" (tailscale.com/blog/how-nat-traversal-works) and the 2025 "NAT traversal improvements" posts (part 1 and any later parts). Summarize: disco protocol (what it is, ping/pong, call-me-maybe), DERP relays (protocol: HTTPS/TCP? latency/HOL implications, how many regions, how they pick one), how a connection starts on DERP and upgrades to direct, how they handle hard/symmetric NATs (port probing/birthday attack; numbers they give), port mapping (UPnP/NAT-PMP/PCP), IPv6, how often they re-probe, how they detect a broken direct path and fall back, and any success-rate figures they publish (quote exactly, with the date). Also the newer "peer relays" feature if it exists (UDP relays run by users) — what it is and when it shipped.
+2. Short-gap techniques used by the best-regarded real-time systems, with sources: redundancy (sending the last N samples in each packet — e.g. Quake 3 / Overwatch / Rocket League style, or Opus in-band FEC and RFC 2198 redundant audio), forward error correction (e.g. XOR/Reed-Solomon FEC in WebRTC: ULPFEC/FlexFEC; QUIC FEC drafts), duplicating over two paths (e.g. multipath QUIC redundant scheduling, Apple's multipath TCP for Siri, Tailscale/WireGuard practice?), dead reckoning / extrapolation limits (Fiedler's "Snapshot Interpolation", Valve's Source multiplayer networking: interp 100ms, extrapolation 250ms). For each: what it costs in bandwidth and delay, and when it helps (random loss vs bursts vs outages). Give published measurements of home-internet loss patterns (burst lengths, typical loss rates on Wi-Fi vs wired) if you find credible ones.
+3. Keepalive and timeout practice over UDP through NATs: RFC 4787 REQ-5 (mapping timer), RFC 8085 section 3.5 (keepalive guidance), WireGuard's PersistentKeepalive recommendation (25s) and why, ICE consent freshness RFC 7675 (interval and timeout), QUIC idle timeout guidance (RFC 9000 §10.1, and quinn's/browsers' defaults), Tailscale's heartbeat intervals, game engines' typical timeouts (e.g. Valve GNS's default connection timeout). Also published measurements of real home-router UDP mapping timeouts (e.g. studies of NAT binding timeouts — names, dates, findings).
+
+## Evidence rules
+Every claim gets a source (URL plus section, or RFC section). Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a number, URL, or quote; say when you can't find something. Prefer primary sources.
+
+## Report
+Three sections for the three topics, then a short synthesis: what Tailscale's method suggests for our design, which gap-softening technique fits a 20 Hz newest-wins flight-model stream best and at what cost, and what keepalive interval and timeout the sources support. Keep quotes short and exact.
+
+== Report ==
+
+# Research report: NAT traversal (Tailscale), short-gap techniques, and UDP keepalive practice
+
+Every claim has a source and a tag.
+The tags are [DOC] for a vendor or spec page, [SRC] for source code, [MEASURED-BY-OTHERS], [INFERENCE] for my own reasoning, and [UNVERIFIED].
+
+**How I read the sources:**
+- **Tailscale blog quotes** came through a fetch tool that summarizes pages. Spot-check them against the live page before the record cites them.
+- **Source code quotes** are verbatim from raw files on GitHub.
+- **PDF quotes** (QUIC SIGCOMM 2017, VIA 2016, Ellis 2010, Neubert 2025, Apple's IETF 99 slides) are verbatim. The fetch tool couldn't read these PDFs, so I wrote a small text extractor in the session scratchpad and read them with it. That is the only place I wrote files. Nothing in the repository was touched.
+
+---
+
+## 1. Tailscale's NAT traversal
+
+### Sources
+
+| Short name | Source | Date |
+| --- | --- | --- |
+| A20 | "How NAT traversal works", David Anderson, https://tailscale.com/blog/how-nat-traversal-works | 2020-08-21 |
+| P1 | "NAT traversal improvements, pt. 1", https://tailscale.com/blog/nat-traversal-improvements-pt-1 | 2025-10-15 |
+| P2 | "pt. 2: cloud environments", https://tailscale.com/blog/nat-traversal-improvements-pt-2-cloud-environments (I read only the opening and a summary) | 2025-10-21 |
+| P3 | "pt. 3: looking ahead", https://tailscale.com/blog/nat-traversal-improvements-pt3-looking-ahead | 2025-10-24 |
+| PR-beta | https://tailscale.com/blog/peer-relays-beta | 2025-10-29 |
+| PR-GA | https://tailscale.com/blog/peer-relays-ga | 2026-02-18 |
+
+Source files read: `wgengine/magicsock/magicsock.go`, `wgengine/magicsock/endpoint.go`, `disco/disco.go`, `derp/derp.go`, and `tsconst` (v1.104.1 on pkg.go.dev), all on the `main` branch of github.com/tailscale/tailscale.
+
+### Disco protocol
+
+Disco is Tailscale's own path-discovery protocol. It is separate from WireGuard and is encrypted with a NaCl box under a per-node "disco" key [SRC disco.go].
+
+- **Header:** a 6-byte magic "TS💬", then a 32-byte sender disco public key, a 24-byte nonce, and the boxed payload.
+- **Payload:** a type byte, a version byte, then the message.
+- **Message types:**
+  - `Ping` = 0x01, which carries a random TxID.
+  - `Pong` = 0x02, which "includes the sender's source IP + port, so it's effectively a STUN response".
+  - `CallMeMaybe` = 0x03, "sent only over DERP to request that the recipient try to open up a magicsock path back to the sender". The sender "should've already sent UDP packets to the peer to open up the stateful firewall mappings inbound".
+  - 0x04–0x09 handle UDP relay allocation and binding, including `CallMeMaybeVia`.
+
+### DERP relays
+
+- **Transport:**
+  - A20 says "It runs over HTTP" [DOC].
+  - P1 says "DERP traffic is carried over HTTPS (TCP port 443) by design" [DOC].
+  - P3 calls it "essentially a TCP-based relay" that "isn't optimized for high performance" [DOC].
+  - DERP routes packets by curve25519 public key. Frames are a 1-byte type plus a 4-byte big-endian length. The server sends keepalive frames at least every 60s (`KeepAlive = 60 * time.Second`), and `MaxPacketSize` is 64 KiB [SRC derp.go].
+- **Head-of-line blocking:** because DERP runs over TCP, one lost segment on the client-to-DERP leg stalls every later packet until it's retransmitted [INFERENCE]. Tailscale itself says only "There will be a bit more latency, maybe less bandwidth" (A20) [DOC]. P3 points to a "UDP DERP" proposal, GitHub issue tailscale/tailscale#10953 [DOC].
+- **Regions:** the live default DERP map (https://login.tailscale.com/derpmap/default, read 2026-10-09) lists 28 regions with 88 nodes [DOC]. The knowledge-base page https://tailscale.com/kb/1232/derp-servers (last validated 2026-01-21) says "Most regions have at least three DERP servers" [DOC].
+- **Region choice:** "The client selects a *home DERP server* based on latency information" and reports it to the coordination server (KB 1232) [DOC]. When magicsock sends to a peer over DERP, it uses that peer's `derpAddr` [SRC endpoint.go]. I infer this is the peer's home region but didn't trace it [INFERENCE].
+
+### Starting on DERP and upgrading to direct
+
+- **Every connection starts on DERP.**
+  - A20 says "all connections start out with DERP preselected". The connection is usable at once "while path discovery runs in parallel", and it "transparently upgrades" when a direct path works [DOC].
+  - P1 says "every connection technically begins via DERP" [DOC].
+- **Path ranking by latency.** A20 says Tailscale "switched from a hardcoded preference order to round-trip latency" [DOC]. In the source, `betterAddr` scores each candidate on latency (0–100 points) and adds bonuses: loopback +50, link-local +30, private address +20, IPv6 +10 [SRC endpoint.go].
+- **Hysteresis.** A path whose latency improvement is under 1% doesn't replace the current one, to avoid flapping [SRC endpoint.go].
+- **Relay rank.** Geneve-encapsulated relay paths always rank below direct paths [SRC endpoint.go].
+
+### Re-probe and heartbeat timers [SRC]
+
+These come from `magicsock.go` and from `tsconst/ping.go`.
+
+| Constant | Value | Meaning |
+| --- | --- | --- |
+| `heartbeatInterval` | 3s | "how often pings to the best UDP address are sent" |
+| `trustUDPAddrDuration` | 6.5s | "how long we trust a UDP address as the exclusive path (without using DERP) without having heard a Pong reply" |
+| `pingTimeoutDuration` | 5s | how long to wait for a pong |
+| `discoPingInterval` | 5s | minimum time between pings to one endpoint |
+| `upgradeUDPDirectInterval` | 1 min | full re-probe for a better direct path, skipped if best latency ≤ `goodEnoughLatency` (5ms) |
+| `upgradeUDPRelayInterval` | 1 min | how often it looks for better UDP relay paths |
+| `discoverUDPRelayPathsInterval` | 30s | minimum time between UDP relay path discoveries |
+| `sessionActiveTimeout` | 45s | after this much idle time, heartbeats stop |
+| `endpointsFreshEnoughDuration` | 27s | "UDP NAT mappings typically expire at 30 seconds, so this is a few seconds shy of that." |
+| STUN re-run | random 20–26s | comment: "Pick a random duration between 20 and 26 seconds (just under 30s, a" (the rest wasn't returned) |
+| UDP lifetime probe | 10s, 30s, 60s "cliffs", once per 24h | measures how long a UDP path stays open when idle |
+
+### Detecting a broken direct path
+
+1. Each pong from the best address extends trust to now + 6.5s [SRC endpoint.go].
+2. When trust expires, `addrForSendLocked` returns both the UDP address and DERP. The code comment reads: "We had a bestAddr but it expired so send both to it and DERP." [SRC]
+3. Expired trust also triggers a full disco ping of all candidates (`wantFullPingLocked`) [SRC].
+
+Tailscale's failover is therefore to duplicate across both paths, not to switch.
+A dead direct path can still carry traffic alone for up to about 6.5s after the last good pong [INFERENCE from the constants].
+A20 names the alternative, "keep a set of 'warm' fallbacks ready to go", but prefers to "fall all the way back to your relay of last resort" and "restart path discovery" [DOC].
+
+### Hard (symmetric) NATs
+
+A20 describes the birthday-paradox method [DOC]:
+
+- **One hard side:** "let's open, say, 256 ports on the hard side". Then 174 probes give a 50% chance of a hit, 256 give 64%, 1024 give 98%, and 2048 give 99.9%. At 100 probes/s, "half the time we'll get through in under 2 seconds".
+- **Two hard sides:** "To hit a 99.9% chance of success, we need each side to send 170,000 probes", which is about 28 minutes. After 20s the chance is "0.01%".
+
+A20 never says Tailscale ships this, and P1–P3 don't mention it.
+Whether magicsock does birthday probing is [UNVERIFIED].
+I found no Tailscale issue or code that shows it.
+
+P1 lists the changes Tailscale did make [DOC]:
+- an endpoint-independent mapping patch for FreeBSD pf;
+- NAT-PMP/PCP "epoch" monitoring, so clients rebuild mappings after a router reboot;
+- racing candidate paths (IPv4 vs. IPv6, NAT64 vs. NAT44, several interfaces) and keeping the fastest;
+- better handling of NAT changes mid-connection;
+- `tailscale netcheck` showing NAT mapping behavior.
+
+### Port mapping and IPv6
+
+- **Port mapping:**
+  - The `net/portmapper` package doc says it "currently allows for mapping over NAT-PMP, UPnP, and PCP" [SRC].
+  - A20 notes "a single 'UPnP' checkbox that actually toggles UPnP, NAT-PMP and PCP all at once", and that CGNAT ISPs often disable port mapping [DOC].
+- **IPv6:** P1 and P3 say Tailscale prefers IPv6 when both peers have it ("Tailscale already prefers IPv6 when available") [DOC]. `betterAddr` adds +10 for IPv6 [SRC].
+
+### Success-rate figures (exact wording)
+
+- **A20, 2020-08-21:** "I'd estimate you could get a direct connection over 90% of the time". This is an estimate, not a measurement [DOC].
+- **P1, 2025-10-15:** "Internal metrics have indicated success rates for direct NAT traversal well north of 90% in typical conditions." [DOC]
+- **PR-beta, 2025-10-29:** direct connections succeed "over 90% of the time" [DOC].
+
+No methodology or distribution is published.
+
+### Peer relays
+
+- **Shipped:** beta on 2025-10-29, generally available on 2026-02-18, "available on all Tailscale plans, including our free Personal plan" [DOC].
+- **What they are:** users run the relay on any of their own nodes, over UDP, needing "a single UDP port that must be available to both sides of a connection" [DOC PR-beta].
+- **Path order:** direct first, then a peer relay, then DERP [DOC PR-beta].
+- **Performance:**
+  - Throughput is "nearing that of a direct connection", "often multiple orders of magnitude higher than Tailscale's managed DERP fleet" [DOC].
+  - GA added spreading across several UDP sockets and static endpoints (`--relay-server-static-endpoints`) [DOC].
+
+---
+
+## 2. Short-gap techniques
+
+### Playout delay, interpolation, and extrapolation
+
+- **Valve Source** (developer.valvesoftware.com/wiki/Source_Multiplayer_Networking, "Entity interpolation"):
+  - I got these through search snippets, because the wiki returns HTTP 403 to fetches [DOC].
+  - `cl_updaterate` defaults to 20 snapshots/s, the same as our flight-model rate.
+  - The default 100ms delay (`cl_interp 0.1`) means "even if one snapshot is lost, there are always two valid snapshots to interpolate between".
+  - If more than one snapshot in a row is lost, the client extrapolates linearly. "The extrapolation is done only for 0.25 seconds of packet loss (cl_extrapolate_amount), since the prediction errors would become too big after that."
+- **Glenn Fiedler, "Snapshot Interpolation"** (https://gafferongames.com/post/snapshot_interpolation/, 2014-11-30) [DOC]:
+  - Rule: a buffer of 3× the packet interval, so "I can lose two packets in a row and still have something to interpolate towards". That's 300ms at 10 pps, "150ms" at 30 pps, and "85ms" at 60 pps.
+  - Hermite interpolation with velocities removes the jitter of linear interpolation, at a small bandwidth cost for sending velocity.
+  - "extrapolation doesn't work very well for rigid bodies because their motion is non-linear and unpredictable".
+- **At our 20 Hz** [INFERENCE]: a 2-interval buffer is 100ms (Source's default), and a 3-interval buffer is 150ms. It costs no bandwidth, only latency.
+- **Distributed Interactive Simulation (DIS, IEEE 1278.1):** dead reckoning with a 5s heartbeat timer and thresholds on position and orientation error. This comes from a secondary survey, https://arxiv.org/pdf/1008.3758 [UNVERIFIED against the standard].
+
+### Redundancy: the last N samples in each packet
+
+- **Quake III client** [SRC]:
+  - `cl_packetdup` defaults to "1" and is clamped to 0–5 (`code/client/cl_main.c`, `code/client/cl_input.c`).
+  - The comment reads: "we want to send all the usercmds that were generated in the last few packet, so even if a couple packets are dropped in a row, all the cmds will make it to the server".
+- **Quake III server:** it delta-encodes each snapshot against the last snapshot the client acknowledged. So unacknowledged changes are resent until an ack arrives: "Resend OLD information that were not received and NEW information in a single message" (Sanglard, https://fabiensanglard.net/quake3/network.php, 2012-06-30) [DOC].
+- **Fiedler, "Deterministic Lockstep"** (2014-11-29):
+  - He chose to "redundantly include _all inputs_ in each UDP packet until we know for sure the other side has received them".
+  - Bit-packed, the worst case is "only 90 bytes of input".
+  - The demo stayed in sync at "25% packet loss" [DOC].
+- **Rocket League:** a devtrackers.gg comment from an account named "Psyonix_Cone" says "We allow up to 10 frames of input history to be sent on every outgoing packet". Both the attribution and the date are [UNVERIFIED].
+- **Overwatch:** I couldn't confirm any input redundancy from primary material, because the GDC 2017 talk is behind a login.
+- **RFC 2198** (Redundant Audio Data, September 1997) [DOC]:
+  - A packet carries the primary block plus redundant blocks of earlier data, each with a 14-bit timestamp offset.
+  - The redundant encoding "MUST NOT be higher bandwidth than the primary".
+  - Recovery works "provided that the average number of consecutively lost packets is small".
+- **Opus:**
+  - Opus's built-in forward error correction (low-bitrate redundancy, LBRR) "can only carry redundancy information for the immediately preceding audio frame" (RFC 8854 §3.3) [DOC].
+  - Opus 1.5's Deep REDundancy (DRED, https://opus-codec.org/demo/opus-1.5/, 2024-03-04) carries up to 1s of redundancy at "about 12-32 kb/s overhead". It is "specifically designed to handle burst loss", because "packets often go missing in bursts" [DOC].
+
+**What redundancy costs** [INFERENCE]:
+- Bandwidth is N× the sample payload per packet, while the IP/UDP header is paid once.
+- It adds no delay to the newest sample.
+- A recovered sample arrives (lost run × 50ms) late. So it helps only when the follower's playout delay is at least that long.
+
+### Forward error correction
+
+- **RFC 8854** (WebRTC FEC requirements, January 2021) [DOC]:
+  - It recommends Opus's built-in FEC for audio and Flexible FEC (RFC 8627) for video.
+  - FEC "should only be activated if network conditions warrant it", and senders should "only transmit the amount of FEC needed to protect against the observed packet loss".
+  - Under congestion, "the additional bandwidth used by the redundant data may actually make the situation worse".
+- **Google QUIC** (Langley et al., SIGCOMM 2017, §7.3) [MEASURED-BY-OTHERS]:
+  - Google tried XOR parity to "enable recovery from a single packet loss within a group".
+  - Result: "FEC had statistically insignificant impact on Search Latency and increased both Video Latency and Video Rebuffer Rate".
+  - "the benefit of using an FEC scheme that recovers from a single packet loss is limited to under 30% of loss episodes" (Figure 13, data from March 2016).
+  - Google "removed support for XOR-based FEC from QUIC in early 2016".
+- **Block delay at 20 Hz:** a k-packet FEC block can make the receiver wait up to (k−1)×50ms [INFERENCE].
+- **Reed-Solomon vs. RLC:** Michel et al. 2018 (arXiv 1809.04822) is said to find Reed-Solomon better for long bursts and random linear codes (RLC) better for short ones. I saw this only in a search summary [UNVERIFIED].
+
+### Duplicating over two paths
+
+- **Multipath QUIC**, draft-ietf-quic-multipath-21 (the IESG approved it 2026-03-18; it was in the RFC Editor queue as of May 2026) [DOC]:
+  - "this document does not specify scheduling algorithms".
+  - Duplicating lost frames on several paths is "not recommended for general purpose use due to the network overhead" (§5.6).
+  - §5.9 says it "does not specify per-path idle timeouts", and that keepalives are not recommended.
+- **XLINK** (Alibaba, SIGCOMM 2021, multipath QUIC with selective re-injection) [MEASURED-BY-OTHERS]:
+  - "23 to 67% improvement in the re-buffering rate at the expense of 2.1% redundant traffic" (abstract).
+  - Alibaba's IETF 111 slides say feedback-driven re-injection cut overhead "from 15% to 2%".
+- **Apple Multipath TCP** [DOC]:
+  - Christoph Paasch's IETF 99 slides (2017) say Siri has used it since iOS 7, with "20% faster in the 95th percentile" time-to-first-word and a "5x reduction of network failures" [MEASURED-BY-OTHERS].
+  - Interactive mode "attempts to use the lowest-latency interface". It picks one path rather than duplicating [DOC, Apple's MultipathServiceType reference].
+- **Tailscale:** it sends on both UDP and DERP only while the direct path is untrusted (section 1).
+- **Valve Steam Datagram Relay (SDR)** keeps backup router sessions warm [SRC GameNetworkingSockets `steamnetworkingsockets_internal.h`]:
+  - Backup routers get `k_usecSteamDatagramClientBackupRouterKeepaliveInterval = 45 * k_nMillion`, "to make sure our backup session still exists and we could switch to it".
+  - The primary router gets a 1s keepalive when quiet.
+- **VIA** (Microsoft/Skype, SIGCOMM 2016, https://cs.cmu.edu/~junchenj/via.pdf) [MEASURED-BY-OTHERS]:
+  - "over 15%" of calls on default routes had average RTT over 320ms, loss over 1.2%, or jitter over 12ms.
+  - Relay selection cut poor-network incidence by "up to 66%".
+  - "in cases of a poor last-hop network, no relaying strategy can help improve call quality".
+
+### Loss patterns on home internet
+
+- **Ellis and Perkins, CCNC 2010** (https://eprints.gla.ac.uk/39991/), June–July 2009 [MEASURED-BY-OTHERS]:
+  - Setup: four UK residential links (two ADSL, two cable), 1–8.5 Mbps streams, about 76 million packets.
+  - "over 85% of all traces experienced less than 1% packet loss".
+  - "the overwhelming majority of loss events comprise a single packet loss, and that the likelihood of longer bursts drops rapidly with burst length". Higher-rate flows had longer bursts.
+  - Non-congestive losses were "around half of all loss events on the ADSL links" and were "primarily isolated single packet losses".
+  - Congestive losses "generally occur in bursts after a queue overflow".
+  - Only 173 packets were reordered.
+- **Burst lengths at our rate** [INFERENCE]: their packets were milliseconds apart, while ours are 50ms apart. So one of their multi-packet bursts would usually span less than one of our intervals, and most of our loss events would hit a single packet. Our probe 2.3 can check this [UNVERIFIED].
+- **Google QUIC 2017** (bulk traffic): under 30% of RTT-long loss episodes were a single packet, as above.
+- **Wi-Fi:**
+  - Pei et al., INFOCOM 2016 (47 campus access points over two months), as quoted from a paper copy found by search: "more than 50% (10%) of TCP packets suffer from WiFi hop latency larger than 20ms (100ms)" [MEASURED-BY-OTHERS; quote not checked against IEEE's copy].
+  - I found no credible published measurement of loss-burst lengths on home Wi-Fi at the IP layer.
+  - A blog (PacketProbe, not peer-reviewed) argues that link-layer retries turn Wi-Fi loss into delay spikes [UNVERIFIED].
+- **FCC Measuring Broadband America:** the thirteenth report groups subscribers by peak-period loss (<0.4%, 0.4–1%, >1%), but its PDF is encrypted and I couldn't read the values.
+
+---
+
+## 3. Keepalive and timeout practice
+
+### Standards and implementations
+
+| Source | Guidance or default |
+| --- | --- |
+| RFC 4787 REQ-5 (January 2007) [DOC] | "A NAT UDP mapping timer MUST NOT expire in less than two minutes, unless REQ-5a applies." REQ-5c: "A default value of five minutes or more ... is RECOMMENDED." REQ-6: outbound refresh MUST be true, inbound refresh only MAY. |
+| RFC 8085 §3.5 (March 2017) [DOC] | Keepalives "SHOULD NOT transmit them more frequently than once every 15 seconds", with longer intervals when possible and random jitter. "a significant fraction of currently deployed middleboxes unfortunately use shorter timeouts". Keepalives are "NOT RECOMMENDED for general use" and are no substitute for recovering a broken session. |
+| RFC 8445 §11 (ICE) [DOC] | "Agents SHOULD use a Tr value of 15 seconds" and "MUST NOT use a value smaller than 15 seconds". §18.5 calls 15s "a very conservative estimate". |
+| RFC 7675 (ICE consent freshness, October 2015) [DOC] | Checks every 5s, randomized ×0.8–1.2 (4–6s), never under 4s. "Consent expires after 30 seconds", after which the endpoint "MUST cease transmission". |
+| WireGuard [DOC] | `PersistentKeepalive` is off by default. "A sensible interval that works with a wide variety of firewalls is 25 seconds." (https://www.wireguard.com/quickstart/) |
+| RFC 9000 §10.1 and §10.1.2 [DOC] | The effective idle timeout is the minimum of both peers' `max_idle_timeout`, and at least 3× the probe timeout (PTO). "sending packets every 30 seconds is necessary to prevent the majority of middleboxes from losing state". |
+| RFC 9308 §3.2 (September 2022) [DOC] | Citing Hätönen 2010: "UDP applications can assume that any NAT binding or other state entry can expire after just thirty seconds of inactivity." Also: PINGs "more frequently than every 30 seconds over long idle periods may result in excessive unproductive traffic". |
+| quinn (Rust QUIC library) [SRC quinn-proto `src/config/transport.rs`] | `max_idle_timeout` defaults to 30s. `keep_alive_interval` is `None` by default, and "Must be set lower than the idle_timeout of both peers". |
+| Chromium and quiche [SRC] | Chromium's idle connection timeout "Defaults to 30 seconds" (300s under a field trial; `net/quic/quic_context.h`). quiche sets `kPingTimeoutSecs = 15`, `kMaximumIdleTimeoutSecs` = 600, `kInitialIdleTimeoutSecs = 5`. |
+| Tailscale [SRC] | Heartbeat 3s, trust window 6.5s, ping timeout 5s, re-STUN every 20–26s, heartbeats stop after 45s idle. The DERP server keepalive is 60s. |
+| Valve GameNetworkingSockets (GNS) [SRC] | `TimeoutInitial` = `TimeoutConnected` = 10000ms (`csteamnetworkingsockets.cpp`). Keepalive is 10s on an active link and 60s on an idle one. Tracer pings go out every 5–7s. "If we are timing out, ping the peer on this interval" is 200ms (`steamnetworking_statsutils.h`). The SDR ping timeout is 750ms. |
+
+### Measured UDP mapping timeouts
+
+- **Hätönen et al., IMC 2010** (34 home gateways) [MEASURED-BY-OTHERS]:
+  - The source I read is a 2016 summary (arXiv 1612.07816): median bidirectional UDP idle timeout of about 3 minutes, minimum 30s.
+  - The authors' preliminary Helsinki poster gives a 90s median for a single outbound packet and 180s for bidirectional traffic.
+  - RFC 9308 treats this as the source of the 30s figure.
+- **Richter et al., IMC 2016**, carrier-grade NAT (CGN) study (https://arxiv.org/abs/1605.05606; Netalyzr tests 2014–2016) [MEASURED-BY-OTHERS]:
+  - "74% of detected NATs expire idle UDP state after 1 minute or less", with values from 10s to 200s. The test could not see timeouts above 200s.
+  - Median 65s on cellular CGNs and 35s on non-cellular CGNs. Home routers (CPE) "predominantly" 65s.
+  - Symmetric mapping: 11% of non-cellular CGN ASes, 40% on cellular CGNs, and under 2% of CPE tests.
+- **Neubert, Winter, and Winkler, "On The Evolution of Home Gateways", ITC 36 (2025)** (https://thomasez.folk.ntnu.no/itc36/itc2025-final4.pdf; 23 devices, mostly from the German market, 6 of them ISP-supplied) [MEASURED-BY-OTHERS]:
+  - The low end is "a binding timeout of merely 30 seconds", the same as in 2010. "a lot of devices stay below that minimum value", meaning RFC 4787's 2 minutes.
+  - Many high-end models sit around 300s.
+  - For streaming traffic, "19 out of our 23 devices are in compliance".
+  - 22 of 23 keep the source port.
+
+---
+
+## Synthesis
+
+All of this section is [INFERENCE] from the sources above.
+
+### What Tailscale's method suggests
+
+1. **Open the session on the relay at once and upgrade in the background.** The session should never wait on NAT traversal.
+2. **Choose paths by measured RTT, with hysteresis.** Rank the relay below direct, and give IPv6 a small edge.
+3. **Send on both paths whenever the current path is in doubt.** Tailscale's own fallback is to duplicate, and that's the same move as our third gap-softening option. It also makes direct-to-relay switches seamless, because the receiver dedups by sequence number.
+4. **Don't copy Tailscale's timers.** They suit mostly idle VPN traffic: with a 3s heartbeat and a 6.5s trust window, a dead path can swallow traffic for seconds. Our 20 Hz stream is its own heartbeat. The follower sees silence after about 2–3 intervals (100–150ms), and if it sends feedback at the same rate, the flyer can start dual-sending within a few hundred ms. GNS's 200ms "aggressive ping" when timing out is the closer model.
+5. **Make our relay UDP.** DERP's TCP transport adds head-of-line stalls exactly when we'd be duplicating through it during loss. Tailscale itself moved to UDP relays (peer relays), and a UDP relay also matches the 5–31% of pairs who will rely on it.
+6. **Use birthday probing only where one side is easy.** A20's numbers make it practical within seconds when one side is hard (256 ports, about 2s median) and hopeless when both are hard. Add port mapping (UPnP, NAT-PMP, PCP) and watch the router epoch. While on the relay, re-probe for direct about every 60s.
+
+### Which gap-softening technique fits a 20 Hz newest-wins flight-model stream
+
+- **Base layer:** a playout delay of 1–2 sample intervals (50–100ms) with Hermite interpolation using velocities. Source does exactly this at 20 Hz with 100ms. It costs no bandwidth.
+- **If we stay pure newest-wins with no buffer:** redundant old samples are worth almost nothing, because the next packet already carries a newer one. The gap then has to be covered by extrapolation.
+  - Valve caps extrapolation at 250ms.
+  - Our product doc's "about a second" is 4× that, and no source supports it. Aircraft in free flight are smoother than player characters, but this needs measuring.
+- **Redundancy (last 2–3 samples per packet):** the cheapest cover for the isolated single losses that dominate residential links (Ellis 2010). It pays off only together with a playout delay of at least one interval.
+  - Cost per packet: an IP/UDP header of 28 bytes (IPv4) or 48 bytes (IPv6), plus our header, plus N×S, where S is our sample size and isn't fixed yet.
+  - At 20 Hz, going from N=1 to N=3 adds 40×S bytes/s. For a hypothetical S of 100 bytes, that's +4 kB/s (32 kbit/s).
+  - Delta-encoding against the last acknowledged sample (the Quake III approach) cuts this further.
+- **XOR or Reed-Solomon FEC:** a poor fit. A block costs (k−1)×50ms of delay at 20 Hz, Google measured little benefit, and XOR can't repair bursts.
+- **Duplicating through the relay:** the right tool for losses on the wide-area path, outages, and path switches. It doubles bandwidth while it's on, so trigger it only on loss or a path change, as Tailscale does (XLINK kept selective re-injection to 2.1% overhead). It can't fix loss on the home Wi-Fi or router, because both copies cross that same last hop (VIA).
+- **Suggested mix:**
+  - always: 1-interval playout delay plus the last 2–3 samples in each packet;
+  - triggered: duplication through the relay;
+  - when the stream stops: extrapolation capped near 250ms, then a hold and an eased correction.
+
+### Keepalive interval and timeout
+
+- **Active path:** the stream keeps the NAT mapping fresh on the sending side. The follower must also send outbound on the same path, at least as feedback, because RFC 4787 makes inbound refresh optional ("MAY").
+- **Standby path** (the relay while on direct, or direct while on the relay): send a jittered keepalive every 15–25s.
+  - That range sits between the 15s floor in ICE and RFC 8085, WireGuard's 25s, and Tailscale's 20–26s re-STUN.
+  - Richter's 10s low tail and 35s non-cellular CGN median argue against going above 25s.
+  - Better still, ping the standby path about every 5s (ICE consent runs every 4–6s; GNS tracer pings every 5–7s). That doubles as the keepalive and keeps a fresh RTT ready for the switch.
+- **Timeouts, in three tiers:**
+  - suspect a path after about 3 missed 50ms intervals, and start duplicating;
+  - declare it dead after about 2–6s (Tailscale: 5s ping timeout, 6.5s trust window);
+  - end the session after 10s (GNS) to 30s (ICE consent, quinn, and Chromium's QUIC idle timeout). Where in that range is a product decision.
+- **Our own routers:** Tailscale's idle-cliff probing (10s, 30s, 60s) is a technique probe 2.3 could borrow to measure mapping lifetimes on friends' routers.
+
+### Not found
+
+- Overwatch and Rocket League from primary material.
+- Direct access to Valve's wiki (I used search snippets).
+- The FCC loss values.
+- Measured loss-burst lengths on home Wi-Fi.
+- Whether Tailscale implements birthday probing.
+- How long Tailscale takes to upgrade from DERP to direct.
+- The full text of P2.

@@ -1,0 +1,427 @@
+Agent a0a018aef2d09da02, started 2026-10-10T08:39:08.312Z
+
+== Asked ==
+
+Code-level research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots' Rust cores on tokio, Windows 10/11 x64, must link over the internet). Today is 2026-10-10. Do NOT write or edit files anywhere; put everything in your final report. You may launch subagents of your own only in the foreground (run_in_background: false, several in one message to run them in parallel), and you must fold their findings, with sources, into your report before you hand back.
+
+## The design being evaluated ("option C")
+- ICE through the `is` crate (str0m's ICE agent extracted as a standalone sans-IO crate, 0.11.1) does hole punching and path choice. Candidates: host addresses (IPv4 and IPv6), a server-reflexive address from a STUN query, a port opened on the router via n0's `portmapper` crate, and a relayed address from a TURN allocation (Cloudflare Realtime TURN by default; coturn as a self-hosted setting).
+- TURN client side through `turn-client-proto` 0.7.3 (sans-IO).
+- quinn (0.11.12) carries the session's channels: one reliable stream per channel that must arrive, with `SendStream::set_priority`, and RFC 9221 datagrams for newest-only data.
+- Two QUIC connections per pair of cores: one over the direct path, one over the TURN path, both kept open; the application sends datagram channels on the better connection (or both when in doubt, deduplicating by its own per-channel sequence numbers) and moves reliable channels between connections, resending what the peer hadn't acknowledged at the application level.
+- One UDP socket per core, shared by STUN, TURN, and QUIC, demultiplexed by first byte per RFC 9443 (QUIC must not grease the QUIC bit; quinn has `EndpointConfig::grease_quic_bit(false)`).
+- A thin "socket layer" of ours sits under quinn as a custom `AsyncUdpSocket`, so each QUIC connection sees a stable virtual peer address while our layer routes its packets over the direct pair or wraps them for TURN.
+
+## Questions (answer each with sources)
+1. `is` 0.11.1 (docs.rs, crates.io, and its source in the str0m repo, e.g. `crates/is/`): the full usage pattern standalone. How to create the agent, set local/remote ICE credentials, controlling/controlled role, add local candidates of each kind (host, srflx, relayed — what does a relayed candidate need: the relayed address plus its base/local address?), add remote candidates, and whether both can be added at any time (trickle). How it represents outgoing packets (poll_transmit: source and destination) — for a relayed local candidate, does it hand us the packet with the relayed address as source so we wrap it for TURN ourselves? How it takes incoming packets (handle_packet) and how STUN is recognized. Events (selected/nominated pair changes, connection state). Timers and settings: consent/keepalive interval, how fast a dead pair is detected (max_rto, retransmits), failed-pair pruning, whether a pair can recover or must be re-added. IPv6 support. Tests or examples of standalone use, and who uses `is` outside str0m. License, maintainers, release history.
+2. quinn 0.11.12 custom sockets: the `AsyncUdpSocket` trait's required methods and semantics (`create_io_poller`, `try_send(&Transmit)`, `poll_recv` with `RecvMeta`, `local_addr`, `max_transmit_segments`/`max_receive_segments` for GSO/GRO), and `Endpoint::new_with_abstract_socket`. Can our layer present a virtual peer address per connection (e.g. a synthetic SocketAddr) and route by it? Can two endpoints, or one endpoint with two connections, sit on one physical UDP socket through our layer? What does quinn do with a packet whose source address differs from the connection's remote (client side drops it? server side migrates?) — cite the code. Does quinn drop a duplicate QUIC packet (same packet number) on receive — cite the function/file. Any examples or crates that implement `AsyncUdpSocket` for multiplexing or relaying (e.g. iroh before noq, libp2p, others).
+3. turn-client-proto 0.7.3 (docs.rs and its source repository): does it implement Allocate with long-term credentials, CreatePermission, ChannelBind and ChannelData framing (the 4-byte header), Send/Data indications, Refresh of allocation, permissions and channels, 438 Stale Nonce handling, UDP and TCP transports? Its sans-IO usage pattern and examples. Maintainer(s), release history, tests, who uses it (e.g. librice/rice-proto by the same author?). Compare briefly with webrtc-rs's `turn` crate (0.17.2), noting the open bugs reported in `webrtc-rs/rtc` issues #263 and #267 if they apply to that crate.
+4. Prior art: any project or spec that runs QUIC over an ICE-selected path, or combines ICE with QUIC (e.g. RFC 9443's motivation, IETF work on QUIC and ICE, RTP-over-QUIC with ICE, any Rust project pairing an ICE agent with quinn). Note how iroh/Tailscale's approach differs.
+5. Your assessment: how much glue option C needs (rough size and the hard parts), and the biggest risks you see.
+
+## Evidence rules
+Every claim gets a source: a URL with section, or a file path plus symbol at a named version/tag/commit. Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a version, API name, number, or URL; say when you can't find something. Keep quotes short and exact.
+
+== Report ==
+
+# Option C: what the code says (read 2026-10-10)
+
+**How this was done.** Four foreground subagents read the sources in memory, one each for `is`, quinn, the TURN crates, and prior art, and I folded their findings in below. I then re-read the lines this design depends on myself; those claims are marked "(re-read)". No files were written. One tool side effect: WebFetch cached two PDFs it couldn't parse in the session's tool-results folder.
+
+**Source pins**
+- **`is` 0.11.1:** algesten/str0m @ `95e5038c6f45de6646d8e3f4c2bca6207a5bedde`, under `crates/is/src/`. The commit comes from docs.rs `.cargo_vcs_info.json`.
+- **quinn 0.11.12, quinn-proto 0.11.18, quinn-udp 0.5.15:** quinn-rs/quinn @ `eaec0db4bcb698f76df736d89938743c88a2ad5f`, tags `quinn-0.11.12` and `quinn-proto-0.11.18`.
+- **turn-client-proto 0.7.3:** ystreet/turn-proto @ `52209bfadde1bf7be7423cdf53654c5d68e59102`. The repository has no git tag for 0.7.3; this is its "Release 0.7.3" commit.
+
+## Findings that change option C
+
+1. **`is` gives us only one path to send data on, and that path can be relayed.**
+   - The application learns the path only from the last `IceAgentEvent::NominatedSend`.
+   - `mod pair` is private and `CandidatePair` isn't re-exported (lib.rs L100-122, re-read). So no supported API lists the pairs that succeeded.
+   - Nomination goes by priority. The type preference for a relayed candidate over UDP is 2, against 126 for host (agent.rs L459-468) [SRC].
+   - So when every direct pair dies, a single agent nominates a relayed pair. The "direct" QUIC connection then quietly rides the relay, and both connections share one path [INFERENCE].
+   - Keeping two paths needs two `IceAgent`s per peer, or a fork. One agent would hold only direct candidates (host, server-reflexive, port-mapped). The other would hold our relayed candidate plus host candidates, and would be sent only the peer's relayed candidates. Each agent gets its own ufrag and password [INFERENCE].
+   - A demultiplexer can offer each STUN packet to both agents in turn. `handle_packet` returns `false` for a packet the agent doesn't accept, and `accepts_message` rejects a USERNAME ufrag that isn't the agent's own (agent.rs L1063-1158, L1163) [SRC].
+2. **TURN is entirely our job, including permissions.**
+   - The `is` README says the agent "does not ... query STUN servers, or allocate TURN relays" (lib.rs L47-48) [DOC].
+   - A relayed candidate's base is the relayed address itself: `Candidate::relayed(addr, local, proto)` passes `Some(addr)` as base (candidate.rs L296-317, re-read).
+   - Every send uses `source: local.base()`, for connectivity checks and for `NominatedSend` alike (agent.rs L1764-1769, L1962-1966, re-read).
+   - So our layer must spot `source == our relayed address` and wrap the packet for TURN. Firezone does exactly this (firezone @ `7b0055e1`, `snownet/src/node.rs` L1654-1667, re-read) [SRC].
+   - Creating permissions and channels for the peer's addresses is also ours [INFERENCE].
+3. **`is` can't parse an ordinary STUN server's reply.**
+   - `StunMessage::parse` rejects a Binding success without MESSAGE-INTEGRITY: "No message integrity in incoming STUN binding reply" (stun.rs L164-171, re-read) [SRC].
+   - So our own STUN client, used to discover the server-reflexive address, must claim its responses by transaction ID before `is` sees them [INFERENCE].
+   - The same goes for public STUN servers, which typically omit MESSAGE-INTEGRITY [UNVERIFIED].
+4. **The first byte alone doesn't demultiplex the socket.**
+   - RFC 9443 assigns 0-3 to STUN, 64-79 to TURN ChannelData only when the packet comes from the TURN server, and 64-127 and 192-255 to QUIC otherwise. Its words: "if the source IP address and port of a packet do not match that of a responding TURN server, a packet with a first octet of 64 to 127 can be unambiguously demultiplexed as QUIC" (rfc9443.txt L132-134, re-read) [DOC].
+   - `TurnClientUdp::recv` already applies the source check (udp.rs L187-197, re-read) [SRC].
+5. **Two quinn error paths are fatal.**
+   - If `poll_recv` returns any error except `ConnectionReset`, the endpoint driver stops and every connection on it dies (quinn/src/endpoint.rs L843-850, re-read) [SRC].
+   - If `try_send` returns any error except `WouldBlock`, that connection's driver dies (quinn/src/connection.rs L1055-1061, re-read) [SRC].
+6. **Cloudflare and turn-client-proto have constraints that bite.**
+   - Cloudflare issues IPv4 relay addresses only, ignores REQUESTED-ADDRESS-FAMILY, and "denies CreatePermission or ChannelBind requests" for private, loopback, link-local, multicast, and BYOIP addresses (developers.cloudflare.com/realtime/turn/faq/, updated 2026-07-14) [DOC].
+   - turn-client-proto ignores a REFRESH response granting less than 600s (`MIN_LIFETIME`, protocol.rs L64 and L741-747, re-read) [SRC].
+   - We don't know what lifetime Cloudflare grants.
+
+## 1. `is` 0.11.1
+
+**Identity** [DOC, crates.io API]
+- License `MIT OR Apache-2.0`. Owner: algesten only. Cargo.toml authors: Martin Algesten and Thomas Eizinger.
+- Versions 0.7.0 (2026-03-24) through 0.11.1 (2026-09-25) are this crate.
+- Versions 0.1.0 to 0.6.0 (2019) are an unrelated earlier crate under the same name, all yanked.
+- There is no changelog of its own; entries are mixed into str0m's root `CHANGELOG.md`, for example "Refactor out new crate "is" (ice agent) #912" [SRC].
+
+**Construction, credentials, and roles** [SRC, agent.rs]
+- `IceAgent::new(IceCreds)` (L317) needs the default `sha1` feature. `IceAgent::with_hmac(creds, &'static dyn Sha1HmacProvider)` is the alternative (L322).
+- Credentials are `IceCreds { pub ufrag: String, pub pass: String }`. The setters are `set_local_credentials` (L414) and `set_remote_credentials` (L527).
+- `IceCreds::new()` uses `fastrand`, which is not a cryptographic generator (crates/proto/src/id.rs L12-20). We should generate ufrag and password ourselves.
+- `set_controlling(bool)` (L596, re-read) has this doc: "You should not call this function after ICE candidate pair formation has started".
+- Role conflicts (487) are resolved by tie-breaker since is-0.9.0 (#950). The handling is at L1467-1483 and L1780-1814, with the test `role_conflict_resolves_to_one_controlled_side`.
+
+**Local candidates** [SRC, candidate.rs]
+- The constructors:
+  - `host(addr, proto)` (L231)
+  - `server_reflexive(addr, base, proto)` (L256)
+  - `relayed(addr, local, proto)` (L296)
+  - `builder()`, `from_sdp_string`, and `to_sdp_string`
+- A relayed candidate needs the allocated relay address plus `local`, the interface address the allocation was sent from (doc at L291-294, re-read). Sends use only `base()`, which equals `addr`. `local` feeds only the local-preference penalty for mixing address families.
+- **Port-mapped address:** add it as `server_reflexive(mapped_public, local_socket_addr, "udp")` [INFERENCE].
+  - With that, the base is our real socket.
+  - The peer's checks that come in through the mapping arrive with destination equal to our host address. The agent requires that: a request's destination must match a Host or Relayed candidate's `addr`, or the agent logs "Discarding STUN request on unknown interface" (agent.rs L1448-1465, re-read) [SRC].
+  - A local server-reflexive candidate whose base matches a host candidate forms no extra pairs; it exists to be signaled to the peer (L857-897; test at lib.rs L939-966) [SRC].
+- `add_local_candidate` returns `Option<&Candidate>`: the candidate to signal, or `None` if redundant (L620) [SRC].
+
+**Remote candidates, trickle, and restart** [SRC]
+- `add_remote_candidate(Candidate)` (L729) works at any time, including after connection. The README says "Trickle ICE only".
+- There is no end-of-candidates and no Failed state. The comment reads "it's always possible to "come back"" (L210-219).
+- `invalidate_candidate` (L941), `ice_restart(creds, keep_local)` (L988), and `recreate_candidate_pairs()` (L1023) exist.
+
+**Outgoing packets**
+- `poll_transmit() -> Option<Transmit>` (L1288).
+- `Transmit { proto, source, destination, contents }` is `str0m_proto::Transmit` and isn't re-exported by `is`. Naming it means depending on `str0m-proto`, whose README says it isn't intended for direct use. Firezone depends on it anyway [SRC].
+
+**Incoming packets** [SRC]
+- `handle_packet(now, StunPacket { proto, source, destination, message }) -> bool` (L1163), after `StunMessage::parse(&buf)`.
+- `accepts_message` rejects:
+  - Binding indications
+  - TURN methods
+  - a request whose ufrag doesn't match
+  - a message that fails the integrity check
+  - a response with an unknown transaction ID
+- The parser checks the length and the magic cookie. Recognizing STUN by first byte is our job; str0m's own test is `byte0 < 2 && len >= 20`.
+- **For a packet that came through TURN:** pass `source` = the peer's address and `destination` = our relayed address. A response is matched by transaction ID, so its `destination` isn't checked [SRC].
+
+**Events and states** [SRC, L257-297 and L185-227]
+- The event enum `IceAgentEvent` has these variants:
+  - `IceRestart(IceCreds)`
+  - `IceConnectionStateChange(_)`
+  - `DiscoveredRecv { proto, source }`
+  - `NominatedSend { proto, source, destination }`
+- The states are New, Checking, Connected, Completed, and Disconnected.
+- Peer-reflexive candidates are created silently, with no event.
+- Use `is_connected()`, because Completed rarely appears when several pairs work [INFERENCE].
+
+**Timers, liveness, and pruning** [SRC]
+
+| Value | Default | Location | Setter |
+| --- | --- | --- | --- |
+| Pacing interval (Ta) | 50ms | agent.rs L345 | `set_timing_advance` |
+| Initial RTO | 250ms | stun.rs L67 (re-read) | `set_initial_stun_rto` |
+| Maximum RTO | 3000ms | stun.rs L70 (re-read) | `set_max_stun_rto` |
+| Maximum retransmits | 9 | stun.rs L12 (re-read) | `set_max_stun_retransmits` |
+| Candidate pair limit | 100 | agent.rs L918 | `set_max_candidate_pairs` |
+| Peer-request grace | 15s | pair.rs L12 (re-read) | none |
+
+- **Dead-pair detection** comes from `ice_timeout() = Σ delay(2..=9) + delay(9)`, where `delay(n) = min(250ms << (n-1), 3000ms)` (stun.rs L23-48, re-read). With defaults that is **21.5s** [INFERENCE, arithmetic].
+  - The source comment: "libwebrtc uses 8000 here but we want faster detection of gone peers."
+  - Firezone tunes all three setters (node.rs L174-176, re-read). Its test asserts 16.5s for its settings.
+- **Keepalive:** every pair is re-checked no later than `now + max_rto` (pair.rs L431-465, re-read), so in steady state there's about one check per pair every 3s [INFERENCE].
+- A pair stays alive while the peer has sent us a request within the last 15s (pair.rs L470-480).
+- The agent has no separate RFC 7675 consent mechanism [SRC per subagent search].
+- **Pruning:** `handle_timeout` drops every pair that fails `is_still_possible`, logs "Remove failed pair", and re-runs nomination (agent.rs L1229-1246, re-read).
+  - A failed pair is deleted, not marked failed.
+  - It comes back only when a peer request recreates it, through new candidates, or through `recreate_candidate_pairs()`.
+
+**Nomination** [SRC]
+- Regular nomination only, by the controlling side, and only after a pair has succeeded (L1733, L1926-1932).
+- Nomination isn't final. The controlling side re-nominates whenever the highest-priority pair that succeeded changes, and never looks at RTT (L1942-1950).
+
+**IPv6** [SRC]
+- IPv4 pairs only with IPv4, and IPv6 only with IPv6 (L700-706, L815-821).
+- Within a candidate kind, IPv6 gets +1 local preference.
+- Link-local IPv6 is accepted, and unique local addresses get no special handling.
+- `set_local_preference` lets us plug in our own policy.
+
+**Tests, examples, and users**
+- The crate has no `examples/` or `tests/` folder. It has about 26 two-agent tests in lib.rs on a simulated-NAT harness, such as `symmetric_nat_both_sides` and `trickle_host_host` [SRC]. No real-NAT measurements were found.
+- The only crates.io reverse dependency is str0m 0.24.1 [DOC].
+- On GitHub, Firezone uses it (`is = "0.11.0"` with `str0m-proto = "0.7"`) under WireGuard, not QUIC [SRC].
+- Open issues that touch this:
+  - str0m #416 (ICE restart docs)
+  - #687 (signal candidate-list changes)
+  - #723 (STUN/TURN support); a comment there points to `turn-client-proto`
+  - [DOC]
+
+## 2. quinn 0.11.12 with a custom socket
+
+**The trait** (quinn/src/runtime.rs L42-103, re-read) [SRC]
+- `AsyncUdpSocket: Send + Sync + Debug + 'static` has these methods:
+  - `create_io_poller(self: Arc<Self>) -> Pin<Box<dyn UdpPoller>>`
+  - `try_send(&self, &Transmit) -> io::Result<()>`
+  - `poll_recv(&self, cx, bufs: &mut [IoSliceMut], meta: &mut [RecvMeta]) -> Poll<io::Result<usize>>`
+  - `local_addr()`
+  - `max_transmit_segments()` and `max_receive_segments()`, both defaulting to 1
+  - `may_fragment()`, defaulting to `true`
+- `UdpPoller::poll_writable` is the poller's only method.
+- `quinn_udp::Transmit` has `destination`, `ecn`, `contents`, `segment_size`, and `src_ip` [SRC].
+- `RecvMeta` has `addr`, `len`, `stride`, `ecn`, and `dst_ip` [SRC].
+
+**`Endpoint::new_with_abstract_socket(EndpointConfig, Option<ServerConfig>, Arc<dyn AsyncUdpSocket>, Arc<dyn Runtime>)`** (endpoint.rs L133-166, re-read) [SRC]
+- It reads `local_addr()`.
+- It sets `allow_mtud = !socket.may_fragment()`, so with the default `true`, MTU discovery is off for every connection on the endpoint.
+- It spawns the driver on the runtime.
+
+**Send semantics** (connection.rs L1048-1070, re-read) [SRC]
+- quinn calls `poll_writable` before each `try_send`.
+- On `WouldBlock` it keeps the packet and retries.
+- On any other error the connection's driver dies.
+- iroh v0.35.0 notes "Returning WouldBlock triggers a hot loop. Returning an error would immediately fail a connection" (magicsock.rs L637-639) [SRC].
+- So our `try_send` returns `Ok(())` for per-path failures and lets QUIC loss recovery handle them [INFERENCE].
+
+**Receive semantics** (endpoint.rs L795-851, re-read) [SRC]
+- quinn splits each buffer by `stride`, so stride must equal len without GRO. A stride of 0 loops forever [INFERENCE from L799-800].
+- A meta with `len = 0` is skipped; iroh uses that to hide its own STUN packets.
+- `ConnectionReset` is ignored. Any other error ends the endpoint, and each connection terminates with "endpoint driver future was dropped". quinn issue #2733 shows this happening in the field [MEASURED-BY-OTHERS].
+
+**Virtual peer addresses: yes.**
+- quinn-proto routes incoming packets by connection ID: 8-byte CIDs by default, and the address is used only for zero-length CIDs (quinn-proto/src/endpoint.rs L1095-1122) [SRC].
+- Outgoing transmits carry `destination: self.path.remote`, so our layer can route by destination [SRC].
+- The rules:
+  - Use a nonzero port and a specified IP, because `connect` rejects port 0 and unspecified addresses (quinn-proto endpoint.rs L348-350) [SRC].
+  - `local_addr()` must be IPv6 if the virtual addresses are IPv6 (quinn endpoint.rs L218-225) [SRC].
+  - `poll_recv` must report exactly the `SocketAddr` quinn was given. An IPv4 address and its IPv4-mapped IPv6 form compare unequal [INFERENCE].
+  - Passing `dst_ip: None` and `ecn: None` is fine. iroh does the former on Windows [SRC].
+- iroh's precedent (v0.35.0) is `NodeIdMappedAddr`: a ULA in fd15:070a:510b::/48, with a counter in the low 64 bits and port 12345 (magicsock.rs L3222-3256) [SRC].
+
+**Packets from another address** (quinn-proto connection/mod.rs, re-read) [SRC]
+- The receive check is `if remote != self.path.remote && !self.side.remote_may_migrate()`, which logs "discarding packet from unrecognized peer" and returns (L1131-1137).
+- `remote_may_migrate()` is `false` for clients and `server_config.migration` for servers (L3827-3833).
+- During the handshake both sides drop such packets (L2297-2300).
+- A server with migration on calls `migrate()` and validates the new path with PATH_CHALLENGE (L3046-3061).
+- On the server side, set `ServerConfig::migration(false)`, which defaults to `true` [SRC].
+- Client-side migration exists only as endpoint-wide `rebind`/`rebind_abstract` [SRC].
+
+**Two connections**
+- One endpoint holding two connections to one peer works. Give them distinct virtual addresses so outbound traffic can be routed by destination; routing is by CID anyway [SRC plus INFERENCE].
+- Two endpoints on one socket also work, if our layer delivers each datagram to the right endpoint.
+  - A misrouted datagram triggers a stateless reset.
+  - Build each endpoint from its own `EndpointConfig::default()`, so the endpoints don't share a reset key (config/mod.rs L38) [SRC plus INFERENCE].
+
+**Duplicate packets are dropped**
+- `Dedup` is an "RFC4303-style sliding window" of 129 packets (spaces.rs L459-483, re-read).
+- The call site is mod.rs L2343-2346, which logs "discarding possible duplicate packet" before any frame is processed (re-read) [SRC].
+- Dedup works per connection. A datagram sent on both of our connections arrives twice and must be deduplicated by the application.
+
+**Datagrams and priorities** [SRC]
+- `send_datagram` discards the oldest queued datagrams when the buffer is full. `send_datagram_wait` exists in 0.11.12.
+- Defaults: 1,250,000-byte receive buffer and 1 MiB send buffer.
+- DATAGRAM frames are packed before STREAM frames.
+- `SendStream::set_priority(i32)`: higher goes first. Streams of equal priority are round-robined when `send_fairness` is on, which is the default.
+
+**Timers** [SRC]
+- `max_idle_timeout` is 30s and `keep_alive_interval` is `None`.
+- 0.11.12 has no public `ping`.
+- A supervisor can watch `rtt()` and `stats().path`: `lost_packets`, `congestion_events`, `black_holes_detected`, and `current_mtu`.
+- `INITIAL_MTU` is 1200. MTU discovery defaults to an upper bound of 1452 and runs only when `may_fragment()` returns false.
+
+**Greasing** (config/mod.rs L63, L127-135, re-read) [SRC]
+- `grease_quic_bit: true` is the default.
+- quinn greases its own packets only if the peer advertised the parameter (packet_builder.rs L127-129).
+- So both peers must call `.grease_quic_bit(false)`. RFC 9443 says such endpoints "MUST NOT send the grease_quic_bit transport parameter" (L99-100, re-read) [DOC].
+
+**Windows (quinn-udp 0.5.15)**
+- On receive, `dst_ip` comes from `IP_PKTINFO`/`IPV6_PKTINFO` (windows.rs L227-246, re-read).
+- On send, `src_ip` is honored through PKTINFO (L353-371, re-read).
+- So one wildcard socket can fill `StunPacket.destination` and honor `is`'s `Transmit.source` [SRC].
+- `BATCH_SIZE` is 1 (L441), and GRO is off because of open issue #2041 [SRC].
+- It does **not** disable `SIO_UDP_CONNRESET`/`SIO_UDP_NETRESET`. n0's fork, noq-udp, disables both: "We never want to fail the recv path due to a failed send" [SRC].
+- quinn 0.11.12 has no release yet containing commit 12d7f077 (a clean close on transmit error).
+- quinn-proto 0.11.19 (2026-09-30) will enter a fresh lockfile [DOC].
+
+**Other `AsyncUdpSocket` implementations** [SRC]
+- **iroh `MagicSock`**, up to v0.96.1 on `iroh-quinn`; noq since 0.97.0 (2026-03-16). It maps peers to ULA addresses, sends on UDP and/or relay, and hides STUN and disco packets with `len = 0`. It sets `grease_quic_bit(false)`.
+- **Citadel-Protocol `TurnRelaySocket`** (@6b127b86, re-read). Its doc reads "A TURN allocation presented to quinn as a UDP socket". `may_fragment` is true because "The client leg to the TURN server does not set DF". It uses a fixed relayed MTU of 1276.
+- **equalitie/ouisync** `net/src/quic.rs`.
+- **OpenBubbles/rustpush** `MultiplexEndpoint`.
+- **gjovanov/roomler-ai** `RelayUdpSocket`, over webrtc-rs `turn`.
+- **libp2p-quic** does not implement it; it hole-punches with random packets on a cloned socket.
+
+## 3. turn-client-proto 0.7.3
+
+**Identity** [DOC]
+- Published 2026-10-06 by ystreet (Matthew Waters, Centricular), the sole owner. License `MIT OR Apache-2.0`.
+- Funded by NLnet NGI0. 11 stars, 0 open issues.
+- 15 releases since 2025-06-03; 0.4.0 came out 2025-10-10.
+- Siblings: `turn-types`, `turn-server-proto`, and the TLS/DTLS crates `turn-client-rustls`, `-openssl`, and `-dimpl`. STUN comes from `stun-proto` 2.0.3.
+- It is the TURN client inside `rice-proto` 0.4.3 (librice). gst-plugins-rs `webrtcbin2` reaches it through librice, then rice-c. GStreamer's C `webrtcbin` uses libnice instead [SRC].
+
+**Coverage** (protocol.rs unless noted) [SRC]
+- **Allocate with long-term credentials:** a 401 with realm and nonce leads to a signed resend. MESSAGE-INTEGRITY-SHA256 is used only if enabled and the server offers it.
+- **Address family:** IPv4 by default. REQUESTED-ADDRESS-FAMILY and ADDITIONAL-ADDRESS-FAMILY are optional. Keep IPv4 for Cloudflare [INFERENCE].
+- **Permissions and channels:** `create_permission` and `bind_channel`. `bind_channel` uses channels 0x4000-0x7FFF and implies a permission.
+- **Framing:** ChannelData with a 4-byte header. Send and Data indications.
+- **Automatic refresh** from `poll_transmit` (re-read L49-64):
+  - The allocation requests 1800s and refreshes 60s before expiry.
+  - Permissions last 300s and channels 600s.
+  - `delete()` sends LIFETIME 0.
+- **Lost refreshes:** 0.7.3 is the first release that retries them. Issue #112: "lost or overdue permission/channel/allocation refresh never retried (busy loop, silent drop)" (re-read title) [MEASURED-BY-OTHERS].
+- **438 Stale Nonce:** handled for ALLOCATE, REFRESH, CHANNEL_BIND, and CREATE_PERMISSION, up to `MAX_STALE_NONCE_REPLIES` = 8 in a row (L62, re-read).
+- **Other allocation errors:** they surface only as `AllocationCreateFailed(family)`, with no error code. There is no 300 Try-Alternate handling.
+- **Transports:** UDP and TCP in this crate; TLS and DTLS in the sibling crates.
+- **Gaps:**
+  - No ChannelData padding over TCP, which RFC 8656 §12.5 requires [SRC plus DOC]. That doesn't matter on UDP.
+  - The trait has no method to update credentials (api.rs L34-133, re-read). Cloudflare credentials last at most 48 hours, so a longer session needs a new allocation [INFERENCE].
+
+**Sans-IO pattern** [SRC]
+- Build the client with `TurnClientUdp::allocate(local_addr, server_addr, TurnConfig::new(TurnCredentials::new(user, pass)))`.
+- Feed every datagram to `recv(Transmit::new(buf, TransportType::Udp, from, to), now)`. It returns one of:
+  - `Handled`
+  - `Ignored(transmit)`, which gives the bytes back for the other demux branches
+  - `PeerData { peer, data() }`
+  - `PeerIcmp`
+- `Ignored` covers a wrong `to` or `from`, a non-TURN packet, an unknown transaction, and an unknown channel (udp.rs L187-203; api.rs L386-406, re-read).
+- **Sending to a peer** (api.rs L103-109, re-read):
+  ```rust
+  send_to(&mut self, transport, to: SocketAddr, data: T, now)
+      -> Result<Option<TransmitBuild<DelayedMessageOrChannelSend<T>>>, SendError>
+  ```
+  - It uses ChannelData if an unexpired channel exists for that peer, otherwise a Send indication. Either way the destination is the TURN server (protocol.rs L1534-1549, re-read).
+  - It returns `NoPermission` when there is no permission for the peer.
+- **Driving it:** `poll(now)` returns `WaitUntil`, `Closed`, or a TCP variant; also call `poll_transmit(now)` and `poll_event()`.
+- **Gotchas:**
+  - `Instant` is `sans_io_time::Instant`.
+  - `poll` returns `WaitUntil(now)` while events are queued.
+  - A dual-stack `[::]` socket reports `::ffff:a.b.c.d`, which won't equal an IPv4 server address [INFERENCE].
+- **Examples and tests:**
+  - The only example is `examples/src/bin/turn.rs`, a manual run against coturn.
+  - About 118 `#[test]`s across the crates, run against the in-repo server in memory, plus fuzz targets.
+  - CI runs Ubuntu, macOS, and Windows, with no external TURN server [SRC].
+
+**webrtc-rs comparison** [SRC]
+- `turn` 0.17.2 exists: 2026-07-20, from the webrtc-rs/webrtc monorepo, tag `v0.17.2`.
+  - It is async on tokio and takes an `Arc<dyn Conn>`.
+  - It spawns its own read loop and drops non-TURN packets, so it can't share our socket without a wrapper.
+  - It has no TCP, TLS, or REQUESTED-ADDRESS-FAMILY. It does have ChannelData, refresh, and up to 3 retries on 438.
+- Issues #263 and #267 in webrtc-rs/rtc are both open and both titled for **rtc-turn**, the sans-IO rewrite (0.21.0), not `turn` 0.17.2 (re-read):
+  - **#263:** "allocation Refresh is not retried after 438 Stale Nonce, so relayed connections drop after ~65 minutes".
+  - **#267:** a ChannelBind refresh that gets 438 deletes the binding, and rebinding is rejected with 400.
+  - turn-client-proto 0.7.3 handles both cases in source [SRC, not measured].
+  - `turn` 0.17.2 can still leave a ChannelBind that failed on 438 marked failed and fall back to Send indications [INFERENCE].
+
+**Cloudflare Realtime TURN** [DOC]
+- **Ports:** `turn.cloudflare.com` on 3478/udp (443/udp alternate), 3478/tcp (80 alternate), and 5349/tls (443 alternate). `stun.cloudflare.com` is on 3478/udp.
+- **Credentials:** minted with `POST https://rtc.live.cloudflare.com/v1/turn/keys/$TURN_KEY_ID/credentials/generate-ice-servers` using a Bearer API token, so a backend has to mint them [INFERENCE].
+- **Limits:** credentials last at most 48 hours, and an allocation has no maximum duration. An allocation drops packets above roughly 5-10 kpps or 50-100 Mbps.
+- **Price:** $0.05/GB, with a free tier of 1,000 GB per month.
+- **ICE restart:** the FAQ recommends support for it, because maintenance can disrupt allocations.
+- ChannelData isn't mentioned explicitly.
+
+## 4. Prior art
+
+- **RFC 9443** [DOC]
+  - It was motivated by the Chrome RTCQuicTransport origin trial and by peer-to-peer RTP over QUIC, where STUN, TURN, and QUIC share one port.
+  - It gives the first-byte ranges above and is "not compatible with QUIC bit greasing".
+  - It doesn't mention ICE.
+- **draft-seemann-quic-nat-traversal-03** (2026-10-08, expires 2027-04-11, individual, not adopted) describes option C's mode as the baseline (L156-164, re-read):
+  - "When an external signaling channel is used, the QUIC connection is established after the two ICE agents have agreed on a candidate pair."
+  - "This mode doesn't require any modification to existing QUIC stacks."
+  - "the QUIC bit cannot be greased."
+  - The draft itself replaces ICE checks with PATH_CHALLENGE probes inside QUIC [DOC].
+- **draft-thatcher-p2p-quic-00** (July 2023, expired) is the closest spec to option C (re-read):
+  - "QUIC packets MUST be sent using the ICE selected candidate pair."
+  - "Network migration SHOULD be done using ICE, not QUIC."
+  - QUIC "SHOULD NOT change the connection ID due to ICE migration."
+  - ACKed QUIC PINGs may count as ICE checks.
+- **Other drafts** [DOC]
+  - draft-perkins-quic-p2p-mux-00 (2019) is an outline of ICE then QUIC.
+  - draft-ietf-quic-address-discovery-01 replaces STUN for learning one's own address.
+  - draft-ietf-quic-multipath-21 is in the RFC Editor queue. Upstream quinn lacks multipath (issue #224 is open); noq implements it.
+  - draft-bruynooghe-n0-quic-nat-traversal-00 documents iroh/noq.
+  - draft-ietf-masque-connect-udp-listen is a possible HTTP-based relayed candidate.
+  - RTP over QUIC (-14) defines no ICE use. draft-ietf-avtcore-sdp-roq-00 assumes ICE runs before QUIC.
+- **Implementations** [DOC/SRC]
+  - Chrome RTCQuicTransport, origin trial M73-M75, ran QUIC over RTCIceTransport.
+  - pion `QUICTransport` ran over `ICETransport` (v2.2.26) and was removed 2020-12-08.
+  - W3C p2p-webtransport is marked discontinued.
+- **Rust:** no project was found pairing an ICE-agent crate (`is`, webrtc-ice, rice-proto) with quinn [SRC: gh code searches]. The nearest:
+  - Citadel: its own TURN client under quinn, using Cloudflare.
+  - roomler-ai: webrtc-rs `turn` under quinn, with no ICE agent.
+  - oetiker/oxutrm: its own ICE, then quinn. Its README (L229-231, re-read) says "A better path found after connect is lost until the next attach", because there's no quinn API to repoint a connection.
+  - Firezone: `is` plus its own TURN client, under WireGuard.
+- **How iroh and Tailscale differ** [DOC/SRC]
+  - iroh before 0.96 used one QUIC connection with a socket layer that lied about addresses ("completely lies to the QUIC stack"). Its relay is HTTPS/WebSocket over TCP, it used disco pings, and it saw "hiccups for a few seconds" on path switches.
+  - iroh since 0.96, on noq since 0.97: one connection, with the relay and each direct address as QUIC multipath paths, each with its own congestion state. Hole punching happens inside QUIC.
+  - Tailscale: one WireGuard session; magicsock switches the path underneath; the DERP relay runs over HTTP/TCP, probed with disco pings.
+  - Option C instead uses TURN over UDP, ICE STUN checks, and two connections chosen by the application.
+- **Measured hole-punching success** [MEASURED-BY-OTHERS]
+  - libp2p DCUtR (arXiv:2604.12484): 70% ± 7.1% over 4.4M+ attempts.
+  - ProbeLab 2026-08-03, via a fetch summary: port-restricted cone 82.9%, symmetric 39.7%.
+  - Tailscale: "well north of 90%".
+  - callstats 2016: 22% of conferences needed TURN.
+
+## 5. Assessment
+
+**How much glue** [INFERENCE: rough sizes; calibration from Firezone @ `7b0055e1`]
+- Firezone's snownet is 8,898 lines including tests (counted). Of that, `allocation.rs` is its own 3,230-line TURN client, which turn-client-proto would replace. snownet does ICE and TURN glue for many peers, with no QUIC.
+
+| Piece | What it does | Rough lines |
+| --- | --- | --- |
+| Physical socket and demux | owns the socket through `quinn_udp::UdpSocketState`; turns off Windows CONNRESET/NETRESET; filters errors; normalizes dual-stack addresses; demuxes by source then first byte | 300-500 |
+| Virtual `AsyncUdpSocket` | gives each connection a virtual address; routes each transmit to the direct pair or wraps it with `send_to`; labels incoming packets; implements the poller | 300-500 |
+| ICE driver | runs two agents; feeds timers into tokio; enumerates interfaces; runs our own STUN client; integrates portmapper; serializes trickle candidates | 600-1,000 |
+| TURN driver | fetches credentials from our backend; manages the allocation lifecycle; creates permissions and channels for the peer's public IPs; re-allocates and replaces the relayed candidate | 400-700 |
+| Two-connection manager | per-channel sequence numbers and deduplication; picks a connection or duplicates; moves reliable channels using application-level acks | 800-1,500 |
+
+- That totals about 2,500-4,000 lines of product code. A NAT-simulation test harness adds 1,000 or more.
+- Signaling and the credential-minting backend are extra.
+
+**The hard parts**
+1. **Two paths out of an agent that reports one.** The ICE driver needs a two-agent split and has to keep TURN permissions in step with ICE: every peer public IP that pairs with our relay needs a permission, or the TURN server drops the peer's checks [INFERENCE].
+2. **Labeling incoming QUIC with the right virtual address.** Relayed pairs can be asymmetric: the peer can send straight from its host to our relayed address, or from its relay to our server-reflexive address. So "arrived via our TURN server" isn't the whole test.
+   - The rule: also treat a source equal to any of the peer's relayed addresses as the relay path.
+   - A wrong label makes a quinn client drop the packet (connection/mod.rs L1134, re-read) [INFERENCE].
+3. **Moving reliable channels between connections.** This is a small transport of its own on top of two transports: application-level acks, exactly-once apply, and ordering across the switch.
+4. **Detection speed against false failovers.** ICE defaults to 21.5s and QUIC idle to 30s, which is slow for a cockpit. Tighter ICE timing trades against Wi-Fi loss [INFERENCE].
+
+**Biggest risks**
+1. **Library maturity and churn.**
+   - `is`: five breaking releases in six months; one external user (Firezone, pinned at 0.11.0); only simulated-NAT tests. Its README is the main documentation, and `Transmit` comes from an "internal" crate.
+   - turn-client-proto: single maintainer; its refresh-retry fix is 4 days old; no CI interop with coturn or Cloudflare [DOC/SRC].
+2. **Cloudflare unknowns:**
+   - the granted refresh lifetime; turn-client-proto ignores anything under 600s, and the allocation would then lapse [INFERENCE];
+   - whether relay-to-relay permissions to Cloudflare's own relay IPs are allowed, given the BYOIP and other denials [UNVERIFIED];
+   - explicit ChannelData support.
+3. **Stale congestion and RTT state** when `is` re-nominates under a fixed virtual address.
+   - RFC 9000 §9.4 wants a reset [DOC]. quinn 0.11 has no public method for it; Ralith in #2016: "A method to return the congestion controller to the initial state doesn't exist" [SRC].
+   - At our low data rates the effect is probably brief spurious retransmits [INFERENCE].
+4. **MTU on the relay.**
+   - A 1200-byte Initial in a Send indication is about 1236 bytes, which overflows an IPv6 1280 path.
+   - So bind the channel before the relay handshake, and fix the relay connection's MTU, as Citadel does with 1276.
+   - MTU discovery is gated per endpoint by `may_fragment()` [SRC plus INFERENCE].
+5. **Windows error paths:** ICMP-driven `WSAECONNRESET` and `WSAEMSGSIZE` on the shared socket must never reach quinn as anything but `ConnectionReset` [SRC plus DOC].
+
+**A cheaper variant on the same parts** [INFERENCE, evidence cited]
+- Run one QUIC connection behind the same virtual socket. Our layer sends each packet over direct and/or relay, duplicating while unsure, and quinn's `Dedup` drops the duplicates (spaces.rs, re-read).
+- That's what pre-noq iroh did (magicsock.rs L550-586, v0.35.0) [SRC].
+- It removes the application-level deduplication and the reliable-channel migration, which are hard parts 3 and most of 2.
+- The cost is one shared congestion and RTT state across both paths: iroh's "hiccups" [DOC].
+- It deserves a comparison before option C is chosen.
+
+## What I couldn't determine
+- **Cloudflare TURN:** the granted lifetime, nonce lifetime, relay-to-relay permissions, ChannelData support in its own words, and whether the relay leg sets DF.
+- Whether public STUN servers include MESSAGE-INTEGRITY.
+- Which `is` changes came in 0.10.0 through 0.11.1; no changelog headings exist for them.
+- Any real-NAT measurement of `is`.
+- Any project running an ICE-agent crate under quinn, or a measured success rate for iroh.
+- Whether quinn issue #2682 (Windows non-wildcard IPv6 bind panic) affects 0.11.12.
+- **Not run:** nothing above was run on Windows. Every claim is from reading source and documentation.

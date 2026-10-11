@@ -1,0 +1,279 @@
+Agent a571031fbdeeceee5, started 2026-10-09T21:16:40.965Z
+
+== Asked ==
+
+Research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots on two home PCs fly one aircraft; each PC runs a Rust core on tokio, Windows 10/11 x64). Today is 2026-10-09. Do the research yourself: do NOT spawn subagents. Do NOT write or edit files anywhere; put everything in your final report.
+
+## Our requirements (shared by six parallel research agents; you cover one candidate)
+- Six v1 channels: Session (every message, in order), Cockpit (every message, in causal order), Flight model (newest sample only, ~20/s, ~120–150 B each), Avatars (newest pose), Traffic (identities reliable; samples unreliable, batches up to ~1 KB), ATC audio (Opus frames, low delay, loss OK). Later: bulk transfers, the PM's axes at lowest delay, a one-way feed to passengers.
+- Each channel gets its own delivery: one reliable ordered stream per channel that needs it (a loss on one never delays another), and unreliable datagrams for what the next message replaces. Sender schedules by priority so bulk never delays the flight model.
+- Direct link first (hole punching, plus IPv6 and router port mapping), relay fallback (5–31% of pairs). Ideally switch between direct and relayed mid-session without dropping the session, and keep the relay path warm so a copy can go through it while direct is lossy.
+- Encryption is NOT required; a transport that encrypts anyway is judged only on bytes and round trips added.
+- Two cores on one PC (own ports, own identity); a dev must be able to force the relay path.
+- Relay: cost aim ~$10/month at small scale; relay address is a setting so a group can run its own. A two-pilot session sends ~5 KB/s per pilot before overhead (~36 MB/hour out of the relay).
+
+## Your candidate: iroh (by n0, https://github.com/n0-computer/iroh)
+Establish from iroh.computer docs, docs.rs, GitHub source, and n0's blog:
+- latest version and date as of 2026-10; whether 1.0 shipped and when; API stability promises; maintainers and activity; license;
+- what it does: dial by public key (EndpointId/NodeId), address discovery (DNS/pkarr/etc.), hole punching method, port mapping (UPnP/NAT-PMP/PCP via portmapper crate?), IPv6;
+- its relay: protocol (HTTP/1.1 upgrade? WebSocket? QUIC?), carried over TCP or UDP, and therefore whether relayed datagrams suffer TCP head-of-line blocking; whether a QUIC-based relay path exists or is planned; self-hosting iroh-relay (binary, config, resources), n0's public/default relays and their terms, rate limits, and paid offerings (prices) as of 2026-10;
+- path switching between relay and direct mid-connection, multipath (QUIC multipath in its quinn fork "noq" or similar?), whether both paths can carry traffic at once, and how quickly it switches when the direct path breaks;
+- datagrams (size limits) and stream priority (does it expose quinn's `set_priority`?), congestion control;
+- bytes added per packet on direct and on relayed paths, handshake round trips, whether encryption can be off;
+- two endpoints on one PC; forcing relay-only for testing (is there a relay-only mode?);
+- Windows support and any known issues;
+- published measurements of its hole-punching success rate (say whose and how measured).
+
+## Evidence rules
+Every claim gets a source (URL plus section, or file path plus symbol at a named version/tag/commit). Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a version, API name, number, or URL; say when you can't find something. Prefer primary sources.
+
+## Report
+Answer each point with tag and source, then a short verdict: how close iroh gets to our requirements, what we'd still build, and its risks (relay over TCP, dependence on n0, API churn). Keep quotes short and exact.
+
+== Report ==
+
+## iroh research for Crosscheck (as of 2026-10-09)
+
+**Conventions used below:**
+- Sources: "iroh@v1.3.0" means files at https://github.com/n0-computer/iroh/tree/v1.3.0. "noq@main" means https://github.com/n0-computer/noq on main as read on 2026-10-09; that repo has no noq release tags, and iroh 1.3.0 pins noq 1.3.0, so main may be slightly ahead of what iroh uses.
+- Tags: [DOC] vendor docs or blog, [SRC] source code, [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED].
+
+### 1. Version, stability, maintainers, license
+
+**Latest version:** iroh 1.3.0, published 2026-09-28T19:26:13Z. [SRC] GitHub API, releases/tags/v1.3.0.
+- Notable items: batch datagram APIs `send_many_datagrams`/`read_many_datagrams`, and a fix titled "Keep the remote actor responsive during Initial sends". [DOC] https://www.iroh.computer/blog/iroh-1-3-0
+- Earlier 1.x releases: 1.0.0 (2026-06-15), 1.0.1 (06-29), 1.0.2 (07-06), 1.0.3 (07-20), 1.1.0 (08-25), 1.2.0 (09-11). [SRC] https://github.com/n0-computer/iroh/releases
+
+**1.0 shipped 2026-06-15,** in the post "Iroh 1.0 - Dial Keys, not IPs" by b5. [DOC] https://www.iroh.computer/blog/v1
+- It followed 65 pre-releases over more than 4 years. [DOC, secondary] techtimes.com, 2026-06-16
+
+**Stability promises:**
+- The 1.0 post says iroh "asserts stability for both the wire protocol and language APIs". Wire breaks "will always coincide with a major release". [DOC] blog/v1
+- Release policy: majors bring "New features, breaking changes" on a cycle of at least 6 months, so a 2.0 is possible from about 2026-12. [DOC] https://docs.iroh.computer/about/release-policy.md
+  - Minors come at least every 4 weeks.
+  - 2.x must stay wire-compatible with 1.x.
+  - A major gets 1 year of full support, then maintenance mode until 1–3 years after release.
+  - n0 runs public relays "only for the latest major version".
+- Excluded from semver:
+  - `unstable-custom-transports`, which covers `add_custom_transport` and `path_selector`. [DOC] docs.rs Builder; https://www.iroh.computer/blog/iroh-1-0-0-rc-1
+  - `unstable-net-report`. [SRC] iroh@v1.3.0 `iroh/Cargo.toml`
+  - 1.1.0 already shipped a "[breaking]" change in that area: "Fix serialization of CustomAddr…" (#4465). [SRC] https://github.com/n0-computer/iroh/releases/tag/v1.1.0
+
+**License:** `MIT OR Apache-2.0`, MSRV 1.91, edition 2024. [SRC] iroh@v1.3.0 `iroh/Cargo.toml`
+- noq is also dual-licensed MIT/Apache-2.0. [DOC] noq README
+
+**Maintainers and activity:**
+- n0, inc. ("number 0") maintains it. The company is "partly venture-funded and partly founder-funded" and earns revenue through Iroh Services. [DOC] https://docs.iroh.computer/about/faq
+- Top contributors by commits: dignifiedquire 792, flub 509, rklaehn 308, Frando 287, Arqu 148, matheus23 131, ramfox 131, divagant-martian 124. [SRC] GitHub API, /contributors
+- Repo stats: 12,672 stars, 171 open issues plus PRs, last push 2026-10-09. [SRC] GitHub API, /repos/n0-computer/iroh
+
+### 2. What it does
+
+**Dial by public key:**
+- `SecretKey` → `PublicKey` = `EndpointId`. Connections are QUIC with TLS 1.3 using raw public keys (RFC 7250), and the peer is verified against the EndpointId. [DOC] https://docs.rs/iroh/1.3.0/iroh/; https://www.iroh.computer/blog/iroh-0-34-0-raw-public-keys
+- Our Rust core would run on tokio: noq is built with `runtime-tokio`. [SRC] `iroh/Cargo.toml`
+
+**Address lookup:**
+- The `presets::N0` preset sets the n0 relays, plus `PkarrPublisher::n0_dns()`, `PkarrResolver::n0_dns()` and `DnsAddressLookup::n0_dns()` against n0's server at `iroh.link`. [SRC] iroh@v1.3.0 `iroh/src/endpoint/presets.rs`
+- Lookups are DNS TXT queries at `_iroh.<z32-endpoint-id>.dns.iroh.link`.
+- By default the published record holds only the EndpointId and the home relay URL. [DOC] https://docs.iroh.computer/concepts/address-lookup.md
+- Mainline DHT and mDNS lookup are opt-in. [DOC] same page
+- 1.0.3 added an HTTPS pkarr resolver as a fallback. [DOC] https://www.iroh.computer/blog/iroh-1-0-3
+- `iroh-dns-server` is self-hostable, with release binaries including Windows. [SRC] v1.3.0 release assets
+- [INFERENCE] We can skip n0's DNS entirely: our own session server can hand out the `EndpointAddr` (relay URL plus addresses).
+
+**Hole punching:**
+- The approach is "similar to Tailscale's". [DOC] https://www.iroh.computer/blog/the-road-to-iroh-1-0
+- Since 0.96, hole punching runs inside QUIC, using n0's "own interpretation" of draft-seemann-quic-nat-traversal ("in no way a settled spec yet"). [DOC] https://www.iroh.computer/blog/noq-announcement; blog iroh-0-96-0-…
+- Public addresses come from QUIC Address Discovery (QAD), which replaced STUN, served by the relay on UDP 7842 (`DEFAULT_RELAY_QUIC_PORT = 7842`). [SRC] iroh@v1.3.0 `iroh-relay/src/defaults.rs`; [DOC] FAQ
+- 1.0.0-rc.1 made the asymmetric case work where the server sits behind a hard NAT (endpoint-dependent mapping) and the client behind an easy one. [DOC] blog iroh-1-0-0-rc-1
+- n0's patchbay NAT test bench lists EDM/APDF ("Strict") as "No, requires a relay". [DOC] https://raw.githubusercontent.com/n0-computer/patchbay/main/docs/reference/holepunching.md
+- [INFERENCE] There is no port prediction, so pairs with hard NATs on both sides go through the relay.
+- Retry timing [SRC] `iroh/src/socket/remote_map/remote_state.rs`:
+  - Hole punching re-triggers on address changes and network changes.
+  - `HOLEPUNCH_ATTEMPTS_INTERVAL = 5s`.
+  - A periodic upgrade check (`UPGRADE_INTERVAL = 60s`) re-punches when no IP path has RTT ≤ `GOOD_ENOUGH_LATENCY = 10ms`.
+
+**Port mapping:**
+- `Builder::portmapper_config` "Configures the portmapper service (UPnP, PCP, NAT-PMP)". It defaults to `PortmapperConfig::Enabled`. [DOC] docs.rs Builder and PortmapperConfig; portmapper crate 0.19.3 per [SRC] `iroh/Cargo.toml`
+- The docs warn that UPnP's SSDP multicast "can raise firewall dialogs".
+- Whether it maps IPv6 or opens IPv6 pinholes is not documented. [UNVERIFIED]
+
+**IPv6:**
+- The builder always binds `[::]:0`, and "This bind is allowed to fail". [DOC] docs.rs Builder::bind_addr; [SRC] `iroh/src/socket/transports.rs` (`default_ipv6`)
+- The default path selector gives IPv6 a 3ms RTT advantage. [SRC] `iroh/src/socket/biased_rtt_path_selector.rs`
+- The relay client dials IPv4 and IPv6 with happy eyeballs. [SRC] `iroh-relay/src/client/tls.rs`; 1.0.0 release notes
+
+### 3. Relay
+
+**Protocol:** HTTPS on TCP 443, upgraded to a WebSocket at path `/relay`. The subprotocol is negotiated through `Sec-WebSocket-Protocol` as `iroh-relay-v2` or `iroh-relay-v1`. [SRC] iroh@v1.3.0 `iroh-relay/src/http.rs`
+- The native client uses `tokio_websockets` over TCP and TLS, and sets `stream.set_nodelay(true)`. [SRC] `iroh-relay/src/client.rs`, `client/tls.rs`
+- The FAQ agrees: "HTTPS on TCP 443, which upgrades to a WebSocket". [DOC] https://docs.iroh.computer/about/faq
+- The docs.rs crate docs still say the connection is upgraded to "plain TCP using a custom relay protocol". That text is stale; we went by the source.
+- Raw TCP was dropped in 0.91. [DOC] https://www.iroh.computer/blog/iroh-0-91-0-the-last-relay-break
+
+**Framing:** Each relayed packet is a frame of 1 type byte + 32-byte EndpointId + 1 ECN byte, then the payload. Batch frames add a 2-byte segment size. [SRC] `iroh-relay/src/protos/relay.rs`
+- `MAX_PACKET_SIZE = 64 * 1024`.
+- Server-side `PER_CLIENT_SEND_QUEUE_DEPTH = 512`.
+
+**Head-of-line blocking: yes.** [INFERENCE from the above]
+- All relayed QUIC packets between an endpoint and a relay share one TLS-over-TCP byte stream, and so do all its streams and datagrams to every peer reached through that relay.
+- So one lost TCP segment delays every channel, datagrams included, on both legs: A→relay and relay→B.
+- The sender dials the remote's home relay when it isn't its own. [SRC] `iroh/src/socket/transports/relay/actor.rs` (`RelaySendItem.url` "The home relay of the remote endpoint")
+- Rate limiting adds to this. The relay pauses reading from a client when its token bucket empties ("Data isn't dropped… writes stall"). [DOC] https://docs.iroh.computer/relays/rate-limiting.md
+- The relay client drops datagrams it can't deliver after `UNDELIVERABLE_DATAGRAM_TIMEOUT` (3s). [SRC] actor.rs
+
+**QUIC-based relay:** none exists.
+- The relay's QUIC endpoint is "for QUIC address discovery" only, and allows 0 streams. [SRC] `iroh-relay/src/quic.rs`
+- Issue #4395 "QUIC relay connection" was opened 2026-07-07 with an embedded-device (ESP32) motivation. A maintainer replied that he has "an old branch that adds http/3 support" (`relay-h3`). The issue has no milestone or labels and still needs triage. [SRC] https://github.com/n0-computer/iroh/issues/4395
+- The roadmap page mentions no QUIC or MASQUE relay. [DOC] https://iroh.computer/roadmap
+
+**Self-hosting:**
+- Run the `iroh-relay` binary; release assets cover Linux gnu and musl, macOS, and Windows (msvc). Or use the Docker image `n0computer/iroh-relay`. [SRC] v1.3.0 assets; [DOC] https://docs.iroh.computer/iroh-services/relays/self-hosted.md
+- Config is TOML: `http_bind_addr`, then `[tls]` with `https_bind_addr`, `hostname`, `cert_mode = "LetsEncrypt"`, `cert_dir`, `contact`. Run it with `iroh-relay -c config.toml`. [DOC] same page
+- Ports: TCP 80 and 443, UDP 7842 (QAD), metrics on 9090. [SRC] `iroh-relay/src/defaults.rs`
+- The full option list is "not published"; the docs say to read `iroh-relay/src/main.rs`.
+- Access control options: allow everyone, allowlist or denylist, a shared bearer token, or an HTTP callout. [DOC] iroh-relay README
+- Per-client rate limits: `[limits.client.rx] bytes_per_second`, `max_burst_bytes`. They are off by default.
+- No CPU or RAM guidance is published.
+  - The key cache is sized for 1M clients at about 56MB. [SRC] `iroh-relay/src/defaults.rs`
+  - n0 quotes 60,000 concurrent connections per dedicated relay.
+- Clients point at a relay with `RelayMode::Custom(RelayMap)`, so the relay address can be a setting. [DOC] docs.rs RelayMode
+
+**n0's relays and prices:**
+- Default production relays: `use1-1`, `usw1-1`, `euc1-1` and `aps1-1` under `.relay.n0.iroh.link.` [SRC] `iroh/src/defaults.rs`
+- Public (free) relays are for "development and hobby use only", with "No SLA or uptime guarantee". [DOC] https://docs.iroh.computer/iroh-services/relays/public.md
+  - They are rate-limited by "total current unauthenticated traffic", with no published numbers ("Variable"). [DOC] https://www.iroh.computer/blog/shared-relays; https://www.iroh.computer/pricing
+- Pro: $19/month for shared relays. [DOC] pricing page; https://docs.iroh.computer/iroh-services/relays/shared.md
+  - Limits: 5 MB/s per connection, 10,000 connections, 100 GB of egress included, then $0.09/GB.
+  - Only relayed traffic counts toward egress.
+- Dedicated: $199/month per region on top of Pro, 250 GB included, then $0.09/GB, no rate limits.
+- Enterprise: custom pricing.
+
+### 4. Switching paths, multipath, failover
+
+**Switching without dropping the session:** works today. Relay and direct are QUIC multipath paths inside one connection on n0's hard fork of Quinn, noq. [DOC] https://www.iroh.computer/blog/iroh-0-96-0-the-quic-multipaths-to-1-0
+- Apps can watch paths through `Connection::paths()`, `paths_stream()` and `path_events()`. [DOC] docs.rs Connection
+
+**Both paths at once: no.**
+- iroh marks only the selected path `PathStatus::Available` and all other paths `Backup`. [SRC] `remote_state.rs` (`path_status_for_addr`)
+- noq uses Backup paths only "if there are no available paths". [SRC] noq@main `noq-proto/src/connection/paths.rs`
+- The default `BiasedRttPathSelector` returns one path. It ranks direct IPv4 and IPv6 as primary and relay as backup, needs 5ms of improvement to switch within a tier, and switches "immediate[ly]" across tiers. [SRC] `biased_rtt_path_selector.rs`
+- A custom `PathSelector` exists only behind the unstable feature, and it still returns one path.
+
+**Relay path kept warm:** yes, but no copy of the traffic goes through it.
+- "Relay and custom paths are kept open". [SRC] remote_state.rs
+- Backup paths are pinged so they don't expire.
+- `RELAY_PATH_MAX_IDLE_TIMEOUT = 30s` and `HEARTBEAT_INTERVAL = 5s`. [SRC] `iroh/src/socket.rs`
+
+**Failover speed when direct breaks:**
+- noq has no PTO- or loss-based path failure. A path is abandoned on the idle timer: `PathTimer::PathIdle` → `PathAbandonReason::TimedOut`. [SRC] noq@main `noq-proto/src/connection/mod.rs`
+- `PATH_MAX_IDLE_TIMEOUT = 15s` with 5s keepalives. [SRC] `iroh/src/socket.rs`
+- [INFERENCE] A silently dead direct path can blackhole datagrams and stall streams for up to about 15s, then traffic switches to the relay at once.
+- The value can be set lower, since "values higher than … (15 seconds) are clamped". [DOC] docs.rs QuicTransportConfigBuilder::default_path_max_idle_timeout
+- Local network changes trigger re-punching sooner. [SRC] remote_state.rs
+- n0 publishes no failover timing measurement. [UNVERIFIED]
+
+### 5. Datagrams, priority, congestion control
+
+**Datagrams:**
+- API: `send_datagram`, which "may drop older queued datagrams"; `send_datagram_wait`; `send_many_datagrams`; `max_datagram_size()`, which tracks path MTU. [DOC] docs.rs Connection
+- On a full buffer, noq pops the oldest queued datagram (`pop_front`). The send buffer defaults to `1024 * 1024` bytes. [SRC] noq@main `connection/datagrams.rs`, `config/transport.rs`
+- [INFERENCE] For "newest sample only" channels we'd shrink `datagram_send_buffer_size`; at 1 MiB, stale samples can queue during congestion.
+- [INFERENCE] Size limit at the minimum MTU (`initial_mtu` default 1200): about 1,162 B. That is 1200 − (1 + 8-byte CID + 16 tag) − 4 PN − `SIZE_BOUND` (1+8). Our ≤1 KB batches and Opus frames fit.
+
+**Priority:** `SendStream::set_priority(i32)` is exposed: "Locally buffered data from streams with higher priority will be transmitted before data from streams with lower priority." [DOC] docs.rs SendStream
+- Caveats in the same doc: a change "may only take effect after that data has been transmitted", and many priority levels can hurt performance.
+- `send_fairness` (round-robin among streams of equal priority) defaults to true. [SRC] noq `config/transport.rs`
+- In each packet, noq writes `// DATAGRAM` frames before `// STREAM` frames, so datagrams go ahead of every stream. [SRC] noq@main `connection/mod.rs` (`populate_packet`)
+
+**Congestion control:** Cubic by default (`CubicConfig::default()`), and iroh doesn't override it. The controller is replaceable through `congestion_controller_factory`. [SRC] noq `config/transport.rs`; iroh `endpoint/quic.rs`
+- Congestion state is per path. [DOC] noq blog
+- [INFERENCE] On the relay path, QUIC's Cubic runs on top of TCP's congestion control.
+
+### 6. Overhead, handshake, encryption
+
+**Encryption can't be turned off.** The FAQ says it "is always enabled". [DOC] FAQ
+
+**Direct path, per packet:** [INFERENCE from SRC values; IP/UDP sizes are standard]
+- IPv4 20 + UDP 8 + QUIC short header (1 flags + 8 CID + 1–4 PN) + 16 AEAD tag = 54–57 B. IPv6 adds 20.
+- The 8-byte CID is noq's default (`cid_len: 8`). [SRC] `noq-proto/src/cid_generator.rs`
+- Each DATAGRAM frame adds 1 type byte + a 1–2 byte length; noq always encodes the length. [SRC] `noq-proto/src/frame.rs`
+
+**Relayed path, per packet:** [INFERENCE from RFC 6455 and RFC 8446 sizes]
+- The same QUIC packet, plus the 34 B relay frame header [SRC], a WebSocket header of about 8 B client→server (including the mask) or 4 B server→client, a TLS record of about 22 B, and TCP/IPv4 40–52 B per segment unless writes coalesce.
+- That totals roughly 130–150 B per small packet, against about 55 B direct.
+- At 20–40 packets/s per pilot, this may roughly double our 36 MB/hour relay-egress estimate.
+
+**Handshake round trips:** [INFERENCE except where marked]
+- Relay connection setup: TCP + TLS + WebSocket upgrade is about 3 RTT. The auth header "can save a full round trip" compared with the challenge fallback. [SRC] `iroh-relay/src/protos/handshake.rs`
+- If needed, add a DNS lookup and a second relay connection to the peer's home relay.
+- QUIC/TLS 1.3 takes 1 RTT through the relay. 0-RTT works with a prior session ticket. [DOC] https://www.iroh.computer/blog/0rtt-api
+- QUIC NAT traversal frames and path validation add at least 1 RTT on top.
+- Optional post-quantum key exchange (X25519MLKEM768) adds "roughly 1 KB in each direction". [DOC] https://www.iroh.computer/blog/iroh-post-quantum-handshakes
+
+### 7. Two endpoints on one PC; forcing the relay
+
+**Two endpoints per PC:** supported.
+- The default binds are `0.0.0.0:0` and `[::]:0`, so each endpoint gets random ports. [SRC] `iroh/src/socket/transports.rs`
+- Each endpoint has its own `secret_key`. [DOC] docs.rs Builder
+
+**Forcing the relay:** `Builder::clear_ip_transports()` ("Removes all IP based transports") is a stable API. [DOC] docs.rs Builder
+- [INFERENCE] With no UDP sockets, the endpoint can only use the relay.
+- The old `PathSelection::RelayOnly` is gone: nothing by that name appears in docs.rs/iroh/1.3.0 all.html.
+- An unstable custom `PathSelector` is the other route.
+
+### 8. Windows
+
+- noq lists Windows as broadly supported. [DOC] noq README
+- The iroh CI builds and tests on Windows. [SRC] issue #4513
+- Known issues:
+  - #3968 (0.96.1, Feb 2026): `bind()` hung on about half of one game's players' Windows PCs. Maintainers blamed CPU-specific build flags in the `ring` crypto backend; closed "not planned". Workarounds: build for the correct target, or switch to aws-lc-rs.
+  - #4297: a `WSAENETRESET` on recv killed the transport. Fixed by PR #4348 (closed 2026-07-01).
+  - #4448: with the `platform-verifier` feature, Windows CryptoAPI rejected the trailing-dot relay hostnames. Fixed upstream in rustls-platform-verifier 0.7.1 (2026-09-28).
+  - #3901: iroh didn't work under Wine/Proton. Closed 2026-04-16.
+- [INFERENCE] Binding UDP will raise a Windows Defender Firewall prompt on first run.
+
+### 9. Published hole-punching measurements
+
+**n0:** "roughly 9 out of 10 connections go direct". No method, sample, or date is given. [DOC] FAQ; https://docs.iroh.computer/concepts/nat-traversal.md
+- n0 also says "It's normal to see 95% of data transferred… directly", which measures data volume, not pair success. [DOC] blog/v1
+- n0 reports "more than 200 million endpoints created" in 30 days. [DOC] blog/v1
+
+**Third parties:** we found no independent hole-punch success-rate study.
+- Issue #3699 (Nov 2025, pre-1.0, a game developer): forced relay-only gave 250–425 ms ping against 3–5 ms direct. Relay location and setup unknown. [MEASURED-BY-OTHERS] https://github.com/n0-computer/iroh/issues/3699
+- Beignet issue #1311 (Oct 2026, iroh 1.x via dumbpipe, local Docker setup): [MEASURED-BY-OTHERS] https://github.com/coreyphillips/beignet/issues/1311
+  - Usable direct channel after a median 680 ms; 3.76s when UDP was blocked.
+  - After a 120s outage, the link recovered in about 1s when direct, and in about 29–31s when relay-only, which the author calls "Not explained yet".
+
+### Verdict
+
+**How close it gets:** iroh 1.3 covers most of the transport layer.
+- It dials by key, with hole punching, port mapping, and IPv6.
+- It keeps one QUIC connection that moves between relay and direct without dropping the session, and keeps the relay path warm as a backup.
+- It gives one QUIC stream per reliable channel (no cross-channel head-of-line blocking on UDP paths), unreliable drop-oldest datagrams, and stream priorities, with datagrams ahead of all streams.
+- It runs on tokio and Windows, with a self-hostable relay whose URL is a setting.
+- It handles two endpoints per PC and has a stable relay-only switch.
+- Pro relays ($19/month, 100 GB) or a small self-hosted VPS fit our cost aim. 100 GB is about 2,800 relayed session-hours at 36 MB/hour, or about half that once overhead roughly doubles egress. [INFERENCE]
+
+**What we'd still build:**
+1. A way around TCP head-of-line blocking on the relay path (5–31% of pairs). Either accept it, or write a UDP relay as an `unstable-custom-transports` transport, which isn't semver-covered.
+2. Sending a copy over the relay while direct is lossy. iroh sends on one path only, so this needs a second, relay-only endpoint per core (`clear_ip_transports`) plus our own deduplication. [INFERENCE]
+3. Faster failover: tune `default_path_max_idle_timeout` below 15s and measure it in probe 2.3.
+4. Bulk-transfer pacing and caps, a small datagram buffer, and causal ordering for Cockpit; iroh only orders within a stream.
+5. Rendezvous through our own session server or a self-hosted `iroh-dns-server`.
+6. Our own measurement of direct-path success, because the only figure is n0's unexplained "9 out of 10".
+
+**Risks:**
+- **Relay over TCP:** a relayed pair loses per-channel independence entirely. No QUIC relay is planned beyond an untriaged issue (#4395).
+- **Dependence on n0:**
+  - Public relays are dev-only, "Variable" rate limits, latest major only.
+  - n0 hosts the default DNS.
+  - noq is a QUIC stack maintained only by n0.
+  - All of it is open source and replaceable: self-host the relay and DNS server.
+- **API churn:** 65 pre-releases with frequent breaks before 1.0. Majors may come every 6 months or more, so 2.0 is possible from about 2026-12. The unstable features we'd need for (1) and a custom path selector already broke in 1.1.0.
+- **Young code:**
+  - 0.96–0.97 regressed hole punching.
+  - noq panics were fixed in 1.0.3.
+  - iroh-relay 1.0.3 crashed on any UDP to the QAD port in musl builds (#4483, a duplicate of noq#774).
+  - Windows bind hangs were tied to build flags (#3968).

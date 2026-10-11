@@ -1,0 +1,224 @@
+Agent a245ddec92f83b5d3, started 2026-10-09T21:16:40.948Z
+
+== Asked ==
+
+Research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots on two home PCs fly one aircraft; each PC runs a Rust core on tokio, Windows 10/11 x64). Today is 2026-10-09. Do the research yourself: do NOT spawn subagents. Do NOT write or edit files anywhere; put everything in your final report.
+
+## Our requirements (shared by six parallel research agents; you cover one candidate group)
+- Six v1 channels: Session (every message, in order), Cockpit (every message, in causal order), Flight model (newest sample only, ~20/s, ~120–150 B each), Avatars (newest pose), Traffic (identities reliable; samples unreliable, batches up to ~1 KB), ATC audio (Opus frames, low delay, loss OK). Later: bulk transfers (profile files; ~1,674-field state dumps), the PM's axes at lowest delay, a one-way feed to passengers.
+- Each channel gets its own delivery: one reliable ordered stream per channel that needs it (a loss on one never delays another), and unreliable datagrams for what the next message replaces. Sender schedules by priority so bulk never delays the flight model.
+- Direct link first (hole punching, plus IPv6 and router port mapping), relay fallback (5–31% of pairs). Ideally switch between direct and relayed mid-session without dropping the session, and keep the relay path warm so a copy can go through it while direct is lossy.
+- Encryption is NOT required; a transport that encrypts anyway is judged only on bytes and round trips added.
+- Two cores on one PC (own ports, own identity); a dev must be able to force the relay path.
+- Relay: cost aim ~$10/month at small scale; relay address is a setting. A two-pilot session sends ~5 KB/s per pilot before overhead (~36 MB/hour out of the relay).
+
+## Your group: QUIC through quinn (with RFC 9221 datagrams), and rust-libp2p
+For quinn, establish from docs.rs, the quinn GitHub repo source, and RFCs:
+- latest version and release date as of 2026-10, maintainers, activity, license;
+- datagram support (API names, max size, `max_datagram_size`, behavior when congested — are datagrams dropped or queued?), stream API and per-stream priority (`set_priority` or equivalent; how the scheduler uses it; does priority apply between datagrams and streams?);
+- congestion control options (e.g. Cubic/NewReno/BBR) and whether congestion control can starve datagrams;
+- connection migration and path changes: what quinn supports (client-initiated migration only? `rebind`? NAT rebinding), any multipath support, and whether a QUIC connection could move between a relay address and a direct address;
+- using one UDP socket for hole punching (sending raw punch packets on the endpoint's socket, custom `AsyncUdpSocket`), and examples/crates that do QUIC hole punching;
+- bytes added per packet (short header: flags, connection ID length default, packet number, AEAD tag, DATAGRAM frame header) and handshake round trips (1-RTT, 0-RTT), self-signed certificates / skipping verification (rustls dangerous config), and whether encryption can be turned off;
+- keepalive and idle timeout settings (`keep_alive_interval`, `max_idle_timeout`) and defaults;
+- two endpoints on one PC.
+For rust-libp2p: QUIC transport, DCUtR hole punching, circuit relay v2 (is the relay over TCP or QUIC? limits on relayed data/duration by default?), maintenance as of 2026-10, and whether it is competitive for a two-peer real-time app with per-channel datagrams.
+
+## Evidence rules
+Every claim gets a source (URL plus section, or file path plus symbol at a named version/tag/commit). Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a version, API name, number, or URL; say when you can't find something. Prefer primary sources.
+
+## Report
+Answer each point above with its tag and source, then a short verdict: how close quinn alone gets to our requirements and what we'd still build (hole punching, relay, path switching, duplication), and whether libp2p is competitive. Keep quotes short and exact.
+
+== Report ==
+
+# QUIC through quinn, and rust-libp2p: research read (2026-10-09)
+
+I did the work alone, with no subagents, and wrote no files. Tags follow the brief. "L" means a line number in the cited file at the named version.
+
+## quinn
+
+### Version, maintainers, activity, license
+- **Latest release:** quinn 0.11.12, published 2026-09-14. The 0.11.x before it were 0.11.11 (2026-06-22) and 0.11.9 (2025-08-27). [DOC] https://crates.io/api/v1/crates/quinn
+- **quinn-proto:** 0.11.19, published 2026-09-30. Its release notes list fixes for two advisories: a MAX_STREAM_DATA frame that opens streams past the limit, and a Retry packet with a long token. 0.11.18 (2026-09-14) fixed a panic on the datagram drop-oldest path and added "Reject DATAGRAMs larger than the send buffer." [DOC] https://github.com/quinn-rs/quinn/releases
+- **Next major version:** `main` carries an unreleased `version = "0.12.0"`, so a breaking release is pending. [SRC] quinn/Cargo.toml on main, read 2026-10-09
+- **Maintainers:** Dirkjan Ochtman and Benjamin Saunders founded it. [DOC] README
+  - `djc` and `Ralith` committed most of the recent commits on main, and the newest is dated 2026-10-08. [SRC] https://github.com/quinn-rs/quinn/commits/main
+  - The repository has 5.3k stars.
+- **Platforms:** the README says "Works on stable Rust, tested on Linux, macOS and Windows." [DOC]
+- **License:** MIT OR Apache-2.0. [DOC] crates.io
+
+### Datagrams (RFC 9221)
+- **API:** all on `Connection`: `send_datagram(Bytes) -> Result<(), SendDatagramError>`, `send_datagram_wait(Bytes)`, `read_datagram()`, `max_datagram_size() -> Option<usize>`, and `datagram_send_buffer_space()`. [DOC] https://docs.rs/quinn/0.11.12/quinn/struct.Connection.html
+- **Errors:** `UnsupportedByPeer`, `Disabled`, `TooLarge`, and `Blocked(Bytes)`. [SRC] quinn-proto 0.11.19, src/connection/datagrams.rs, `SendDatagramError`
+- **Size formula:** max size = min(peer's `max_datagram_frame_size` − 9, current MTU − (1 + remote CID length + 4 + 16) − 9). [SRC] `Datagrams::max_size` (datagrams.rs L73-96), `predict_1rtt_overhead` (connection/mod.rs L3757-3776), `Datagram::SIZE_BOUND = 1 + 8` (frame.rs L902)
+- **Size with defaults:** an 8-byte CID, a 1,200 B starting MTU, and MTU discovery up to 1,452 B give 1,162 B at the start and up to 1,414 B later. [INFERENCE] from the formula, the `TransportConfig` defaults, and `MtuDiscoveryConfig::upper_bound` "Defaults to 1452" [DOC]
+  - The docs promise the limit is "a little over a kilobyte at minimum" when the peer's limit is large. [DOC]
+  - quinn advertises `max_datagram_frame_size = min(datagram_receive_buffer_size, 65535)`. [SRC] transport_parameters.rs L170-172
+  - Our ≤1 KB traffic batches fit.
+- **When congested, quinn queues datagrams and drops the oldest.**
+  - `send_datagram` pushes onto one FIFO, `datagram_send_buffer_size`, which defaults to 1 MiB. When the FIFO is full, `make_space_for` pops the oldest unsent datagrams ("dropping outgoing datagram"). [SRC] datagrams.rs L19-56 and L154-161
+  - The docs say: "Previously queued datagrams which are still unsent may be discarded … oldest to newest." [DOC]
+  - `send_datagram_wait` waits instead, "which effectively prioritizes old datagrams over new datagrams." [DOC]
+  - The receive buffer defaults to 1,250,000 B and drops the oldest when full ("dropping stale datagram"). [SRC] datagrams.rs L145-148; config/transport.rs `impl Default`
+  - The API has no per-datagram acknowledgment or loss notification. [DOC] Connection method list
+  - RFC 9221 §5.4 allows a sender either to "delay sending the frame until the controller allows it or drop the frame." [DOC]
+- **Datagrams are congestion-controlled.** They are ack-eliciting (RFC 9221 §5.2). `poll_transmit` blocks an ack-eliciting packet when `in_flight.bytes + bytes_to_send >= congestion.window()` ("blocked by congestion control"), and it also paces ("blocked by pacing"). [SRC] connection/mod.rs L604-638
+
+### Streams and priority
+- **Priority API:** `SendStream::set_priority(i32) -> Result<(), ClosedStream>`. Every stream starts at 0, and higher-priority data is sent first. The docs add: "Changing the priority of a stream with pending data may only take effect after that data has been transmitted." [DOC] https://docs.rs/quinn/0.11.12/quinn/struct.SendStream.html
+- **Scheduler:** `write_stream_frames` pops "the stream of the highest priority that currently has pending data", so priority is strict. [SRC] quinn-proto 0.11.19, connection/streams/state.rs L598-654
+  - `send_fairness` (default `true`) round-robins streams of equal priority. [SRC] transport.rs default
+- **Between datagrams and streams there is no setting.** `populate_packet` writes every queued DATAGRAM frame ("// DATAGRAM", L3350-3365) before STREAM frames ("// STREAM", L3406-3412) in each 1-RTT packet. [SRC] connection/mod.rs
+  - So queued datagrams always go ahead of all stream data, bulk included.
+  - Datagrams among themselves are one FIFO with no priority, although RFC 9221 §5.1 says implementations "SHOULD present an API" for that. [SRC] [DOC]
+- **What priority can't control:** it orders only what goes into the next packet. Bulk data already in flight still fills the congestion window and the router's queue, and a datagram waits for ACKs to free window space. So bulk must be rate-limited by us, through app-level pacing or a small `send_window`. [INFERENCE]
+- **Independent streams:** each stream is reliable and ordered, and a loss on one stream doesn't delay another. This is a QUIC property.
+
+### Congestion control
+- **Choices:** Cubic is the default. NewReno is available. `Bbr` is labeled "Experimental! Use at your own risk." A custom controller can be plugged in through `ControllerFactory`. [DOC] https://docs.rs/quinn-proto/0.11.19/quinn_proto/congestion/index.html; [SRC] transport.rs default `CubicConfig`
+- **Datagrams wait, they aren't starved.** The congestion window and the pacer hold them back. They are dropped only when the send FIFO overflows. [SRC] as above
+- **Worst case for our traffic:**
+  - Cubic's minimum window is `2 * self.current_mtu`, and persistent congestion resets the window to it. [SRC] congestion/cubic.rs L88-90, L201-214
+  - At a 100ms round-trip time, 2 × 1,200 B per round trip is about 24 KB/s, above our ~5 KB/s per pilot.
+  - So congestion control alone shouldn't starve the v1 channels. Bulk sharing the window is the risk. [INFERENCE]
+
+### Migration and paths
+- **RFC 9000:**
+  - "Only clients are able to migrate in this version of QUIC" (§1).
+  - "Migrating a connection to a new server address mid-connection is not supported" (§9.6).
+  - On NAT rebinding, the receiver "MUST initiate path validation" (§9.3).
+  - [DOC] https://www.rfc-editor.org/rfc/rfc9000.html
+- **Server side:** `ServerConfig::migration` defaults to true ("Improves behavior for clients that move … or suffer NAT rebinding"). [SRC] config/mod.rs L244, L288-291
+  - `migrate()` resets congestion and RTT state unless the new address has the same IPv4 address. [SRC] connection/mod.rs L3063-3103
+- **Client side:** the client drops packets from an unknown remote ("discarding packet from unrecognized peer"). [SRC] mod.rs L1128-1132
+- **Active migration:** `Endpoint::rebind` and `rebind_abstract` switch the local socket "affecting all active connections." [DOC] https://docs.rs/quinn/0.11.12/quinn/struct.Endpoint.html
+  - Internally this sends `ConnectionEvent::Rebind`. [SRC] quinn 0.11.12, endpoint.rs L253-270
+- **Peer-to-peer consequence:** the peer that plays QUIC server can't change its address. If that peer's NAT rebinds its port, the client discards the packets and the connection dies at the idle timeout. [INFERENCE] from the SRC above
+- **No multipath upstream.** The README doesn't list it [DOC], and `TransportConfig` on main has no multipath field [SRC].
+- **`path_changed` exists but is hard to reach.**
+  - quinn-proto has `Connection::path_changed(now)`, which "Resets path-specific settings": the congestion controller, RTT estimator, pacer, and MTU discovery. [DOC] https://docs.rs/quinn-proto/0.11.19/quinn_proto/struct.Connection.html
+  - quinn's high-level `Connection` doesn't expose it. Its 28 methods include no `path_changed` and no `ping`. [DOC]
+  - Calling it means driving quinn-proto ourselves. quinn-proto "contains no networking code." [DOC]
+- **Relay ↔ direct inside one connection: not native.**
+  - The only route is a custom `AsyncUdpSocket` that shows quinn one stable virtual peer address and routes each `Transmit` direct or via the relay.
+  - That was iroh's design before noq ("QUIC does not know the underlying network paths used").
+  - iroh found the stale congestion state took about 20s to settle. After their fork reset the controller's state, it took about 3s. [MEASURED-BY-OTHERS] https://www.iroh.computer/blog/why-we-forked-quinn (2024-05-20)
+- **noq:** n0 then hard-forked quinn as noq, which carries the multipath draft, so the relay and direct links become QUIC paths of one connection. [DOC] https://iroh.computer/blog/noq-announcement (2026-03-19)
+  - noq 1.3.0 was published 2026-09-09 under MIT/Apache-2.0. [DOC] https://docs.rs/crate/noq/latest
+  - It's a separate candidate, probably in the iroh agent's group.
+
+### One socket for hole punching
+- **Socket hooks:** `Endpoint::new` takes a `std::net::UdpSocket`. `new_with_abstract_socket` takes an `Arc<dyn AsyncUdpSocket>`, whose methods are `create_io_poller`, `try_send(&Transmit)`, `poll_recv`, `local_addr`, and others. [DOC] https://docs.rs/quinn/0.11.12/quinn/trait.AsyncUdpSocket.html
+- **Sending punch packets:** libp2p-quic calls `socket.try_clone()` before handing the socket to quinn. On the clone it sends 64 random bytes at random 10–200ms intervals (`rand::random_range(10..=200)`). [SRC] rust-libp2p master, transports/quic/src/transport.rs (`listen_on`, `dial`), hole_punching.rs
+- **Receiving non-QUIC packets** such as STUN replies on that socket needs a wrapping `AsyncUdpSocket`, because quinn's receive loop reads everything. [INFERENCE]
+  - If STUN shares the socket, set `EndpointConfig::grease_quic_bit(false)`. It defaults to `true`. [SRC] config/mod.rs L63
+  - draft-seemann-quic-nat-traversal says the QUIC bit can't be greased in that setup. [DOC] I saw this in a search snippet of draft -02 and didn't read the draft in full.
+- **QUIC has no simultaneous open.** DCUtR's QUIC pattern: A dials on `Sync`, and B "starts to send UDP packets filled with random bytes", "between 10 and 200 ms". The result is A as client and B as server. [DOC] https://github.com/libp2p/specs/blob/master/relay/DCUtR.md
+- **Retry timing:** quinn's `initial_rtt` defaults to 333ms [SRC], which gives "handshakes starting with a PTO of 1 second", doubling after each expiry [DOC] RFC 9002 §6.2.1-6.2.2.
+  - So an Initial dropped by the peer's NAT is retried after about 1s unless we lower `initial_rtt`, for example from the RTT measured through the relay. [INFERENCE]
+- **Windows:** quinn's receive loop ignores `ConnectionReset` ("Ignore ECONNRESET as it's undefined in QUIC"). [SRC] quinn 0.11.12, endpoint.rs L843-846
+  - So ICMP port-unreachable replies during punching shouldn't kill the endpoint, assuming Rust maps WSAECONNRESET to `ConnectionReset`. [INFERENCE]
+- **Examples and crates:**
+  - libp2p-quic, described above.
+  - noq/iroh, which have it built in.
+  - quinn's own examples have no hole punching: client, server, connection, insecure_connection, single_socket. [SRC] repo listing
+
+### Bytes per packet and handshake
+- **Header pieces:**
+  - The short header is 1 flags byte + the destination CID + a 1–4 byte packet number. [DOC] RFC 9000 §17.3.1
+  - The AEAD tag is 16 bytes. [DOC] RFC 9001 §5.3
+  - quinn's default CID is 8 bytes (`HashedConnectionIdGenerator`). [SRC] cid_generator.rs L167-168; config/mod.rs L57-61
+  - A DATAGRAM frame is a type byte (0x30/0x31) plus a length varint, and quinn always writes the length (`encode(true, …)`). [SRC] frame.rs L906-913; datagrams.rs L217
+- **For a 140 B flight-model sample:**
+  - QUIC adds 1 + 8 + 1–2 + 16 + 1 + 2 = 29–30 B.
+  - With IPv4/UDP, that's 57–58 B a packet. With IPv6/UDP, it's 77–78 B. [INFERENCE]
+- **ACKs:** a receiver "SHOULD send an ACK frame after receiving at least two ack-eliciting packets" (§13.2.2), and `max_ack_delay` defaults to 25ms (§18.2). [DOC] RFC 9000
+  - When both directions carry data, the ACKs ride along in data packets. [INFERENCE]
+- **Handshake:**
+  - The client can send application data after 1 round trip. [DOC] RFC 9001 §2.1
+  - 0-RTT works only when resuming a session (`Connecting::into_0rtt`), and the server can send 0.5-RTT data. [DOC]
+  - Retry is the application's choice and costs one more round trip if used. [DOC] `Incoming::retry`
+  - quinn pads client Initial datagrams to at least `min_mtu` (1,200 B). [DOC] transport.rs
+  - QUIC's anti-amplification limit (RFC 9000 §8.1) caps the server's first flight, so certificate size matters. [DOC] I didn't re-read §8.1 here.
+- **Self-signed certificates:**
+  - The examples generate them with `rcgen::generate_simple_self_signed`.
+  - `insecure_connection.rs` skips verification with `.dangerous().with_custom_certificate_verifier(SkipServerVerification::new())`.
+  - [SRC] quinn main, quinn/examples/common/mod.rs and insecure_connection.rs
+  - Pinning a fingerprint exchanged through session signaling would be the better verifier. [INFERENCE]
+- **Encryption off:** quinn has no switch.
+  - The third-party `quinn-plaintext` 0.3.0 (2025-08-27, "Plaintext quinn cryptography (insecure)", depends on quinn-proto ^0.11.8) replaces the AEAD with an 8-byte SeaHash checksum (`tag_len` 8) and drops header protection (`sample_size` 0). [SRC] quinn-plaintext 0.3.0, src/lib.rs
+  - It saves only 8 B a packet, and QUIC still needs its 1-round-trip Initial/Handshake exchange for transport parameters. It isn't worth it. [INFERENCE]
+
+### Keepalive and idle timeout
+- `keep_alive_interval` defaults to `None`: "Only one side of any given connection needs keep-alive." [DOC/SRC] transport.rs
+- `max_idle_timeout` defaults to 30s ("30 second default recommended by RFC 9308 § 3.2"). The effective timeout is the minimum of both peers' values. [DOC/SRC] transport.rs
+
+### Two endpoints on one PC
+- Each core binds its own port with `Endpoint::server(config, addr)` and uses its own key and certificate. [DOC]
+- The `single_socket.rs` example runs three servers on ports 5000–5002 and one client in one process. [SRC]
+- Forcing the relay path would be our own policy, such as skipping direct candidates. [INFERENCE]
+
+## rust-libp2p
+
+- **Status:**
+  - libp2p 0.57.0 was published 2026-09-11, after 0.56.0 on 2025-06-27. [DOC] crates.io
+  - libp2p-quic 0.14.0 depends on `quinn = "0.11"`. [SRC] transports/quic/Cargo.toml
+  - libp2p-dcutr 0.15.0, libp2p-relay 0.22.0, and libp2p-upnp 0.7.0 were all published 2026-09-11. [DOC] crates.io
+  - docs.rs failed to build libp2p 0.57.0 and libp2p-relay 0.22.0. [DOC] docs.rs
+  - Maintainers: Elena Frank and João Oliveira. [DOC] README
+  - Commits run through 2026-10-08, mostly gossipsub changes and dependency bumps. [SRC] commits page
+  - License: MIT. [SRC] file headers
+- **Its QUIC transport turns off what we need.** [SRC] libp2p-quic 0.14.0
+  - "// Disable datagrams." `transport.datagram_receive_buffer_size(None);` (config.rs)
+  - `server_config.migration(false);` (config.rs)
+  - Streams are exposed only as `AsyncRead`/`AsyncWrite`, with no `set_priority`, and the inner `quinn::Connection` is private (connection.rs, connection/stream.rs).
+  - Defaults: keep-alive 5s, idle timeout 10s, handshake timeout 5s.
+- **DCUtR:**
+  - Peers exchange `Connect` and `Sync` over the relay to measure RTT, then run the QUIC punching pattern above.
+  - The spec says to retry twice, for three attempts. On failure the peers "can keep using the relay connection." [DOC] DCUtR spec
+  - The direct connection is a new connection, and long-lived streams have to be reopened on it rather than migrating.
+  - Our record holds a measurement: 70% ± 7.1% of hole punches connected directly, 97.6% of those on the first try. [MEASURED-BY-OTHERS] Trautwein et al., cited in Crosscheck `record/areas/network/log.md`
+- **Circuit relay v2:**
+  - It works over any transport. The relayed connection flows in a `hop` stream over whatever connection the peer has with the relay, TCP or QUIC, and the endpoints then "upgrade the relayed connection with a security protocol and a multiplexer." [DOC] relay/circuit-v2.md
+  - rust-libp2p does `.upgrade(V1Lazy).authenticate(..).multiplex(..)`. [SRC] libp2p/src/builder/phase/relay.rs `with_relay_client`
+  - So the relayed path is one reliable byte stream with no datagrams, and every channel can stall behind a loss on any other. [INFERENCE]
+  - Default limits: `max_circuit_duration` 2 min, `max_circuit_bytes: 1 << 17` (128 KiB), `max_circuits` 16 (4 per peer), and a 1h reservation. [SRC] protocols/relay/src/behaviour.rs `Config::default`
+  - At ~5 KB/s, 128 KiB lasts about 26s. The limits are settings on a relay we host. [INFERENCE]
+- **It isn't competitive for us.** It has no unreliable channel, no priorities, and no path switching within a connection, and its relayed path is head-of-line blocked. [INFERENCE]
+  - What's worth taking from it is DCUtR's timing method and its measured success rate.
+
+## Verdict
+
+**quinn alone covers the transport layer.**
+- One reliable ordered stream per channel, where a loss on one stream doesn't delay another.
+- Strict stream priority.
+- Datagrams that always go ahead of stream data, with drop-oldest when the queue overflows.
+- Cubic congestion control that our rates fit under even at the minimum window.
+- Two endpoints per PC.
+- A 1-round-trip handshake.
+- About 30 B of QUIC overhead per packet.
+
+**What we'd still build:**
+1. **Newest-only scheduling per channel.** quinn's datagram queue is one FIFO shared by all channels. We'd keep a one-slot mailbox per unreliable channel, and either shrink `datagram_send_buffer_size` or hand a datagram to quinn only when `datagram_send_buffer_space()` has room. [INFERENCE]
+2. **Bulk pacing,** so bulk data in flight never fills the window or the router's queue ahead of the flight model. [INFERENCE]
+3. **Hole punching:**
+   - Gathering candidates (STUN or the address the relay sees), including IPv6.
+   - Router port mapping (UPnP/PCP), which quinn lacks.
+   - Signaling through the relay.
+   - A DCUtR-style timed dial plus a punch spray on the same socket, with a socket wrapper for STUN.
+4. **A UDP relay** that we write and host. quinn has none.
+5. **Switching paths mid-session and duplicating packets.** quinn can't move a connection between a relay address and a direct one. There are three ways around it:
+   - (a) A virtual-address `AsyncUdpSocket` that switches or duplicates below QUIC.
+     - quinn discards duplicate packets through its "RFC4303-style sliding window" (`Dedup`, spaces.rs L459-521). [SRC]
+     - This also hides the NAT-rebinding gap of the server-role peer.
+     - The catch is stale congestion and RTT estimates unless we drive quinn-proto and call `path_changed`.
+   - (b) Two QUIC connections, one direct and one relayed, with app-level sequence numbers for datagrams and app-level resending for reliable channels when we switch.
+   - (c) noq, which does relay-as-path natively through multipath but on a draft spec.
+
+**Net:** quinn gives us roughly the whole transport and none of the connectivity layer. That connectivity layer is about the scope of iroh's MagicSock. [INFERENCE]
+
+**Still unknown, unsettled by this read:**
+- quinn's behavior measured on Windows.
+- Whether the quinn client follows a server's `preferred_address`.
+- Whether quinn accepts zero-length CIDs. They would save 8 B a packet, but RFC 9000 §5.1 warns they "will cause failures in the presence of peer connection migration, NAT rebinding, and client port reuse."

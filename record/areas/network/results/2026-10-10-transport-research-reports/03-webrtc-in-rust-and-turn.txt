@@ -1,0 +1,296 @@
+Agent a7f3f37a8d12af36a, started 2026-10-09T21:16:40.979Z
+
+== Asked ==
+
+Research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots on two home PCs fly one aircraft; each PC runs a Rust core on tokio, Windows 10/11 x64). Today is 2026-10-09. Do the research yourself: do NOT spawn subagents. Do NOT write or edit files anywhere; put everything in your final report.
+
+## Our requirements (shared by six parallel research agents; you cover one candidate group)
+- Six v1 channels: Session (every message, in order), Cockpit (every message, in causal order), Flight model (newest sample only, ~20/s, ~120–150 B each), Avatars (newest pose), Traffic (identities reliable; samples unreliable, batches up to ~1 KB), ATC audio (Opus frames, low delay, loss OK). Later: bulk transfers, the PM's axes at lowest delay, a one-way feed to passengers.
+- Each channel gets its own delivery: one reliable ordered stream per channel that needs it (a loss on one never delays another), and unreliable messages for what the next message replaces. Sender schedules by priority so bulk never delays the flight model.
+- Direct link first (hole punching, plus IPv6 and router port mapping), relay fallback (5–31% of pairs). Ideally switch between direct and relayed mid-session without dropping the session, and keep the relay path warm.
+- Encryption is NOT required; a transport that encrypts anyway is judged only on bytes and round trips added.
+- Two cores on one PC (own ports, own identity); a dev must be able to force the relay path.
+- Relay: cost aim ~$10/month at small scale; relay address is a setting. A two-pilot session sends ~5 KB/s per pilot before overhead (~36 MB/hour out of the relay).
+
+## Your group: WebRTC data channels in Rust, and TURN as the relay
+1. webrtc-rs (https://github.com/webrtc-rs/webrtc) and any newer sans-IO rewrite by the same org (e.g. an "rtc" crate): latest versions and dates as of 2026-10, maintenance status, known problems; full ICE, TURN client support, ICE restart; data channel options (ordered/unordered, maxRetransmits, maxPacketLifeTime); per-channel priority scheduling in its SCTP implementation; Windows support.
+2. str0m (https://github.com/algesten/str0m): latest version/date, maintainers, whether it does full ICE or ICE-lite, TURN client support (or whether you bring your own TURN), data channel options and priority, sans-IO model with tokio.
+3. Bytes added per data-channel message (DTLS record header, AEAD nonce/tag for the cipher suites used, SCTP common header and DATA/I-DATA chunk header), handshake round trips (ICE + DTLS + SCTP), whether encryption can be off (it can't in WebRTC per RFC 8831 — confirm), max message size and fragmentation.
+4. Cloudflare Realtime TURN (https://developers.cloudflare.com/realtime/turn/): how credentials are obtained (API, TTL), which transports client-to-server (UDP/TCP/TLS, which ports), that it relays UDP only to peers (no RFC 6062), pricing ($0.05/GB? which direction is billed? free tier 1,000 GB/month?) as of 2026-10, and especially whether anything restricts it to WebRTC/browser clients — can a plain RFC 8656 TURN client (e.g. Rust `turn` crate, or str0m's/ webrtc-rs's) allocate and relay arbitrary UDP? Look for docs, FAQ, community reports. Also: does Cloudflare's TURN anycast mean relay latency is near-optimal for both peers?
+5. coturn as a self-hosted TURN option (resources, maintenance), and other hosted TURN services and prices (Twilio, Metered, Xirsys) for comparison.
+6. Path switching mid-session in WebRTC (ICE restart, continual gathering, renomination) and whether both a direct and a relayed candidate pair can be kept warm.
+
+## Evidence rules
+Every claim gets a source (URL plus section, or file path plus symbol at a named version/tag/commit). Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a version, API name, number, or URL; say when you can't find something. Prefer primary sources.
+
+## Report
+Answer each point with tag and source, then a short verdict: how close WebRTC data channels in Rust get to our requirements, which crate, what we'd still build (signaling over our server, etc.), and the cost per relayed session-hour through Cloudflare TURN vs self-hosted coturn. Keep quotes short and exact.
+
+== Report ==
+
+## WebRTC data channels in Rust, with TURN as the relay: research for Crosscheck (as of 2026-10-09)
+
+Everything below comes from web reads: GitHub source fetched raw from `master`/`main` on 2026-10-09, crates.io, vendor docs, and RFCs. Nothing was cloned or run, and no files were written.
+
+### 1. webrtc-rs (`webrtc`) and its sans-IO core (`rtc`)
+
+**Versions and status**
+- `webrtc` 0.21.0 and `rtc` 0.21.0 were both published 2026-09-19 [DOC, crates.io API `/crates/webrtc`, `/crates/rtc`].
+- The new architecture is very young. `webrtc` 0.20.0 came out 2026-07-31, and 0.21 went through alpha, beta, and rc between 2026-08-09 and 2026-09-04 [DOC, crates.io].
+- The README calls 0.21.x "the recommended choice today". `webrtc` is "a thin async layer over `rtc`" [DOC, github.com/webrtc-rs/webrtc README].
+- The runtime is chosen by feature: `runtime-tokio` (the default) or `runtime-smol` [DOC, same README].
+- The old tokio-coupled line ended at v0.17. The project calls it "the final feature release of the Tokio-coupled implementation", with bug fixes "through 2026" [DOC, webrtc.rs/blog/2026/01/31/async-friendly-webrtc-architecture.html]. Its last release was 0.17.2 on 2026-07-20 [DOC, crates.io].
+- The 1.0 gating issue #836 was closed 2026-08-22 with every item done [DOC, github.com/webrtc-rs/webrtc/issues/836].
+- One author does almost all the work: `rtc` contributors are rainliu with 601 commits, and the next contributor has 23 [DOC, GitHub contributors API].
+
+**Known problems**
+- **Relayed sessions drop on a stale nonce (`rtc` #263, open).** The allocation Refresh isn't retried after `438 Stale Nonce`, so relayed connections drop after about 65 minutes [MEASURED-BY-OTHERS, github.com/webrtc-rs/rtc/issues/263].
+- **Relayed sessions drop on a ChannelBind refresh (`rtc` #267, open).** A ChannelBind refresh that gets a 438 deletes the binding, and rebinding is rejected with 400. Against an unnamed production TURN server, sessions dropped about 10m40s after Allocate [MEASURED-BY-OTHERS, issue #267]. The maintainer replied "please submit a PR" on 2026-10-04.
+- **64 KB message cap (`rtc` #252, open)** [DOC].
+- **TURN over TCP is post-1.0 (`webrtc` #848)** [DOC].
+- **DTLS 1.3 is post-1.0 (`rtc` #149, `webrtc` #801)** [DOC].
+
+**ICE**
+- Full ICE, with `lite` as an option [SRC, `rtc-ice/src/agent/agent_config.rs`].
+- ICE restart exists: `pub fn restart(now, ufrag, pwd, keep_local_candidates)` [SRC, `rtc-ice/src/agent/mod.rs`]. There is also an `examples/ice-restart` [DOC, rtc repo].
+- Nomination is regular nomination [SRC, `rtc-ice/src/agent/agent_selector.rs`].
+- Once a pair is selected it never changes. Both selection points are guarded by `selected_pair_is_none` [SRC, same file].
+- On failure the agent runs `set_selected_pair(now, None)` and `delete_all_candidates(false)`, so it doesn't fall over to another pair [SRC, `rtc-ice/src/agent/mod.rs`].
+- Keepalives go only to the selected pair (`check_keepalive`, RFC 7675 consent) [SRC, same file].
+- There is no renomination and no continual gathering [SRC].
+- Defaults: disconnected after 5s, failed after 25s [SRC, `agent_config.rs`].
+
+**TURN client** (`webrtc/src/peer_connection/transport/turn_relayer.rs`) [SRC]
+- It allocates, refreshes, creates permissions, and rotates credentials.
+- Transport is UDP only. It logs "Skipping unsupported secure TURN url" for `turns:` and "Skipping unsupported non-UDP TURN url" for `?transport=tcp`.
+- `rtc-turn` (`client/relay.rs`) binds a channel lazily on the first permitted send, and that first send goes out as a Send indication. It refreshes permissions every 120s and the allocation at half its lifetime [SRC].
+
+**Data channel options** (`src/data_channel/init.rs`) [SRC]
+- `RTCDataChannelInit` has `ordered`, `max_packet_life_time`, `max_retransmits`, `protocol`, and `negotiated: Option<StreamId>`. It has no priority field.
+- `rtc-datachannel` sets a `priority: u16`, but only copies it into the DCEP open message (constants 128, 256, 512, and 1024) [SRC, `rtc-datachannel/src/data_channel/mod.rs`, `message_channel_open.rs`].
+- Sends are unbounded by default. `try_send` fails with `ErrSendBufferFull` only once a limit is configured [SRC, `webrtc/src/data_channel/mod.rs`].
+
+**SCTP scheduling** (`rtc-sctp/src/queue/pending_queue.rs`) [SRC]
+- There is no per-stream priority. The queue has two FIFOs, `unordered_queue` and `ordered_queue`, and unordered always goes first.
+- The fragments of a message are sent back to back. While a fragmented message is "selected", the other queue waits.
+- There is no I-DATA (RFC 8260 interleaving). `chunk_payload_data.rs` has `PAYLOAD_DATA_HEADER_SIZE: usize = 12` plus the 4-byte chunk header, and no I-DATA chunk exists.
+
+**Windows**
+- CI builds on `windows-latest`, but the test matrix is `os: [ 'ubuntu-latest' ] #, 'macos-latest', 'windows-latest' ]` [SRC, `.github/workflows/cargo.yml` in both `webrtc` and `rtc`].
+- `rtc` needs Rust edition 2024 and uses `ring` by default [DOC, rtc README].
+
+### 2. str0m
+
+**Versions and maintainers**
+- 0.24.1 was published 2026-10-03. Releases have come roughly monthly through 2026 [DOC, crates.io].
+- MSRV is 1.85.0 [SRC, `Cargo.toml`].
+- Several people maintain it: algesten (1149 commits), k0nserv (156), davibe (133), thomaseizinger (110), xnorpx (95), and pthatcher (30) [DOC, GitHub contributors API].
+- The README says it was "originally developed by Martin Algesten of Lookback".
+
+**Sans-IO model**
+- "the `Rtc` instance itself is not doing any network talking". It "has no internal threads or async tasks" and "is fully sync" [DOC, README].
+- You drive it with `poll_output` (Transmit, Timeout, or Event) and feed packets back as `Input`. This drops into a tokio task that owns the sockets [DOC, docs.rs/str0m].
+- `DirectApi` skips SDP entirely: `set_remote_ice_credentials`, `set_remote_fingerprint`, `start_dtls`, `start_sctp`, `start_sctp_with_snap`, `create_data_channel`, and `invalidate_candidate` [DOC, docs.rs `change::DirectApi`].
+
+**ICE**
+- Full ICE, with `set_ice_lite` as an option [DOC, docs.rs RtcConfig].
+- The ICE agent ships as its own crate, `is` 0.11.1 (2026-09-25) [DOC, crates.io].
+- "We let the gathering and evaluation of candidate pairs continue regardless of nomination state" and "The ICE agent can change the nominated pair without needing an ICE restart" [DOC, `docs/ice.md`].
+- In the code, `handle_timeout` schedules binding attempts on every pair, and each pair's next attempt is capped at `now + max_rto()`. `max_rto` defaults to 3000ms, with 9 retransmits [SRC, `crates/is/src/agent.rs`, `crates/is/src/pair.rs`].
+- So succeeded direct and relayed pairs both stay checked. A failed nominated pair is pruned, and `evaluate_nomination()` picks the next-best succeeded pair [SRC].
+- Trickle ICE is required ("We do not support ICE _without_ trickle ice"). Local candidates can be added at any time [DOC, `docs/ice.md`].
+
+**TURN**
+- Not included. The feature table marks Turn ❌ [DOC, README].
+- You call `Candidate::relayed(addr, local, proto)` with an allocation you made yourself: "Allocate a TURN addr to use as a local candidate" [DOC, docs.rs Candidate].
+- Open issue #723 asks for STUN/TURN support [DOC].
+
+**Data channels**
+- `ChannelConfig` has `label`, `ordered`, `reliability` (`Reliable`, `MaxPacketLifetime { lifetime: u16 }`, or `MaxRetransmits { retransmits: u16 }`), `negotiated: Option<u16>`, and `protocol`. It has no priority [DOC, docs.rs].
+- `Channel::write` returns `Ok(false)` when the shared buffer is full. `set_sctp_max_buffered_amount` defaults to 128 KiB, summed over all channels [SRC/DOC].
+- Max message size is 256 KiB locally and defaults to 64 KiB for the remote [SRC, `src/sctp/mod.rs`]. Open issue #844 says "max-message-size is not passed to sctp-proto".
+
+**SCTP scheduling**
+- str0m uses `sctp-proto` 0.10.5, which the str0m maintainers have maintained since January 2026 [DOC, github.com/algesten/sctp-proto].
+- It has the same two-FIFO design as webrtc-rs: unordered first, no per-stream priority, no I-DATA [SRC, `sctp-proto/src/queue/pending_queue.rs`].
+- Open issue #977 evaluates moving to `dcsctp`.
+
+**DTLS**
+- `dimpl` 0.7.5 does DTLS 1.2 and 1.3 [DOC, crates.io, dimpl README].
+- `set_dtls_version` takes `Dtls12` (the default), `Dtls13`, or `Auto` [DOC, docs.rs].
+
+**SNAP**
+- `set_snap_enabled` / `start_sctp_with_snap` implement draft-hancke-tsvwg-snap. Both sides exchange their SCTP INIT out of band, which skips SCTP's 4-way handshake [SRC, `src/sctp/snap.rs`].
+- The draft is an expired individual draft (-00) [DOC, datatracker].
+
+**Windows**
+- CI runs the tests on `windows-latest` with the `aws-lc-rs`, `rust-crypto`, `wincrypto`, and `wincrypto-dimpl` features [SRC, `.github/workflows/cargo.yml`].
+
+**Worth knowing: `dcsctp`**
+- `dcsctp` 0.1.15 (2026-10-01, github.com/webrtc/dcsctp) is a Rust SCTP. It describes itself as "a spiritual successor to the C++ version" in libwebrtc.
+- Its API has `enable_message_interleaving` (RFC 8260), `set_stream_priority`, and per-stream `buffered_amount`, and it is sans-IO (`handle_input`, `advance_time`, `poll_event`) [DOC, docs.rs dcsctp::api].
+- Neither crate uses it yet.
+
+### 3. Bytes, round trips, encryption, and message size
+
+**Encryption can't be turned off**
+- RFC 8831 §6.1: "The DTLS encapsulation of SCTP packets as described in [RFC8261] MUST be used" [DOC].
+- Neither stack offers a NULL cipher. `rtc-dtls` lists only AEAD and CBC suites, and dimpl says "(no CBC/EtM modes)" [SRC/DOC].
+- str0m's `set_fingerprint_verification(false)` drops authentication, not encryption [DOC].
+
+**DTLS bytes per record**
+- DTLS 1.2 header is 13 B (RFC 6347 §4.1).
+  - AES-GCM adds an 8 B explicit nonce and a 16 B tag (RFC 5288 §3), for **37 B**. This is the webrtc-rs default first choice [SRC, `rtc-dtls/src/cipher_suite/mod.rs`].
+  - ChaCha20-Poly1305 has no explicit nonce and a 16 B tag (RFC 7905), for **29 B** [DOC].
+- DTLS 1.3 unified header (RFC 9147 §4) is 1 flags byte, a 1–2 B sequence number, and an optional 2 B length. Add the 1 B inner content type and the 16 B tag for **about 19–22 B** [DOC + INFERENCE].
+- str0m budgets `MAX_DTLS_OVERHEAD: usize = 48` as its worst case [SRC, `src/io/mod.rs`].
+
+**SCTP bytes**
+- Common header: 12 B (RFC 9260 §3.1).
+- DATA chunk header: 16 B. I-DATA is 20 B, "4 bytes more than the length of the DATA chunk header" (RFC 8260 §2.1).
+- Chunks pad to 4 B.
+- SACK is at least 16 B. The receiver SACKs "at least every second packet" and "within 200 ms" (RFC 9260 §3.3.4, §6.2) [DOC].
+- SACKs mostly ride along with data, since both pilots send [INFERENCE].
+
+**Per-message total**
+- One 140 B flight-model sample in one packet, direct IPv4, DTLS 1.2 GCM: 20 + 8 + 37 + 12 + 16 = **93 B of overhead**, about 233 B on the wire [INFERENCE from the above].
+- Of that, WebRTC adds about 65 B over bare UDP.
+- TURN adds 4 B on the client-to-server leg with ChannelData. A Send indication adds about 36 B: STUN header 20 + XOR-PEER-ADDRESS 12 + DATA 4 (RFC 8656 §11.1, §12.4) [DOC + INFERENCE].
+
+**Handshake round trips**
+- **ICE:** 1–2 RTT, counting the check plus the USE-CANDIDATE nomination [INFERENCE, RFC 8445].
+- **DTLS 1.2:** 2 RTT, plus 1 with a HelloVerifyRequest. RFC 6347 §4.2.1 says the cookie exchange "SHOULD" be the default [DOC]. Whether either crate sends a HelloVerifyRequest is [UNVERIFIED].
+- **DTLS 1.3:** 1 RTT, plus 1 with a HelloRetryRequest cookie [DOC, RFC 9147 §5.1].
+- **SCTP:** INIT/INIT-ACK, then COOKIE-ECHO, which "MAY be bundled with any pending outbound DATA chunks". First data arrives at about 1.5 RTT (RFC 9260 §5.1) [DOC].
+- **DCEP:** 0 extra RTT. The sender "MAY start sending ... without waiting for ... DATA_CHANNEL_ACK" but must send ordered until then (RFC 8832 §6) [DOC]. Negotiated channels skip DCEP.
+- **Totals after signaling:** about 4.5–7 RTT with webrtc-rs. About 2–4 RTT with str0m using DTLS 1.3, SNAP, and negotiated channels [INFERENCE].
+- Our server adds the signaling exchange on top.
+
+**Message size and fragmentation**
+- SCTP fragments a message larger than about MTU − 48 − 40 B into several chunks [SRC, str0m `src/sctp/mod.rs`].
+- With no interleaving, RFC 8831 §6.6 says "the sender SHOULD limit the maximum message size to 16 KB to avoid monopolization" [DOC].
+- RFC 8831 §6.4 says priorities "MUST be interpreted as weighted-fair-queuing scheduling priorities" [DOC]. Neither Rust stack does this.
+
+### 4. Cloudflare Realtime TURN
+
+**Credentials**
+- Our server POSTs to `https://rtc.live.cloudflare.com/v1/turn/keys/$TURN_KEY_ID/credentials/generate-ice-servers` with `Authorization: Bearer $TURN_KEY_API_TOKEN` and `{"ttl": 86400}`. It returns `iceServers` (HTTP 201) [DOC, /realtime/turn/generate-credentials/].
+- "You should keep your TURN key on the server side". Credentials can be revoked [DOC].
+- A credential can expire "up to 48 hours in the future" [DOC, FAQ].
+
+**Transports and ports**
+- UDP on 3478 (alternate 443/udp), TCP on 3478 (alternate 80), TLS on 5349 (alternate 443) [DOC, /realtime/turn/].
+- A custom-domain CNAME works for UDP and TCP, but not TLS [DOC, /realtime/turn/custom-domains].
+- "Realtime does not implement RFC6062", so it relays UDP only [DOC, FAQ].
+- Relay addresses are IPv4 only: it "will not respect `REQUESTED-ADDRESS-FAMILY`" [DOC, FAQ].
+- It "denies CreatePermission or ChannelBind requests if private IP ranges" [DOC, FAQ].
+
+**Pricing**
+- "$0.05 per GB", "based on the data sent from the Cloudflare edge to the TURN client", including all TURN overhead [DOC, FAQ].
+- The FAQ's billing diagram shows ingress free and server-to-peer traffic unbilled [DOC, FAQ].
+- "The first 1,000 GB each month is free", and "SFU and TURN share this allowance" [DOC, /realtime/pricing/].
+
+**Use from a plain TURN client, outside WebRTC**
+- No Cloudflare doc restricts which clients may use it.
+- Its explainer says "You can use TURN directly in your application too" and names "webrtc-rs in Rust" [DOC, /realtime/turn/what-is-turn/].
+- Someone else confirmed it works. cloudflare-docs issue #33972 (2026-10-04, open, no Cloudflare reply) used its own client and aioice 0.10.2, with plain UDP sockets as peers [MEASURED-BY-OTHERS].
+- **The same report found a cap:** an allocation takes data from at most 10 peer addresses over its whole life. The 11th "get[s] nothing (no Data indication, no error)", and its ChannelBind gets a 400 [MEASURED-BY-OTHERS].
+- That matters to us because ICE checks our relay candidate against every remote candidate address [INFERENCE].
+- Per-allocation limits: more than 5 new IPs per second, about 5–10 kpps, about 50–100 Mbps; "Hitting these limits will result in packet drops" [DOC, /realtime/turn/].
+
+**Anycast latency**
+- An allocation is "homed in the nearest available Cloudflare data center to the TURN client" [DOC, FAQ].
+- Packets sent to the relayed address "enter the Cloudflare network as close to the sender as possible" and are forwarded "over our backbone to the correct datacenter" [DOC, blog.cloudflare.com/webrtc-turn-using-anycast, 2024-09-25].
+- When both ends use Cloudflare TURN, it can "control the routing". The FAQ says the latency gain varies by location, and the loss reduction is the more predictable gain [DOC].
+- So a relayed path doesn't detour through a fixed server far from either pilot. Whether it's near-optimal is unmeasured [INFERENCE].
+
+**Incident**
+- "performance degradation affecting our TURN service since August 22nd": traffic was relayed over TCP instead of UDP. It was fixed 2026-09-07, but "existing connections" stayed on TCP until they restarted [DOC, Cloudflare status via pulsetic.com/status/cloudflare/incidents/7021].
+
+### 5. coturn and other hosted TURN services
+
+**coturn**
+- Active: 4.18.0 on 2026-09-08, with commits up to 2026-10-06 [DOC, GitHub API].
+- 4.17.0 fixed security bugs in `--mobility`, DTLS, and `EVEN-PORT` [DOC, release notes].
+- It implements RFC 8656 and RFC 6062 [DOC, README]. It has 304 open issues.
+- Its CPU and RAM needs at our load aren't measured. A small VPS is very likely enough [INFERENCE].
+- One VPS sits in one region, so a pilot far from it pays the detour [INFERENCE].
+
+**VPS for comparison**
+- DigitalOcean Basic is $4/month with 500 GiB, or $6 with 1,000 GiB. Overage is "$0.01 per GiB", pooled per team [DOC, digitalocean.com/pricing/droplets, docs.digitalocean.com/platform/billing/bandwidth/].
+- Hetzner cloud includes 20 TB in the EU and at least 1 TB in the US. I couldn't capture Hetzner's prices [DOC, hetzner.com/cloud/regular-performance/].
+
+**Other hosted services**
+- **Twilio:** $0.40/GB in the US and EU, up to $0.80/GB elsewhere [DOC, twilio.com/en-us/stun-turn/pricing].
+- **Metered:** $99/month for 150 GB, then $0.40/GB. Usage counts ingress plus egress. The free trial is 500 MB [DOC, metered.ca/stun-turn].
+- **Xirsys:** $39/month for 50 GB, then $0.50/GB. The free tier is 500 MB with a hard cap [DOC, xirsys.com/pricing].
+
+### 6. Switching paths mid-session
+
+**What standard ICE allows**
+- RFC 8445 §8.1.1: "MUST NOT nominate another pair ... within the ICE session". Changing the pair "requires an ICE restart" [DOC].
+- After selection, "keepalives are only sent on those pairs" (§11) [DOC].
+- Renomination (draft-thatcher-ice-renomination) expired in 2017 [DOC, datatracker].
+- Continual gathering is a libwebrtc policy (`GATHER_CONTINUALLY`), not a standard [DOC, webrtc.googlesource.com].
+
+**webrtc-rs**
+- You only get ICE restart through renegotiation over our signaling server.
+- The relay pair doesn't stay warm. The allocation is still refreshed, and `restart(..., keep_local_candidates)` can reuse it [SRC + INFERENCE].
+- Expect a gap of about 5–25s to detect the failure, plus a signaling round trip [SRC defaults + INFERENCE].
+- Whether DTLS and SCTP survive an ICE restart in `rtc` is [UNVERIFIED].
+
+**str0m**
+- Both the direct and the relayed pair stay checked at least every `max_rto`, which defaults to 3s.
+- Nomination moves without a restart, and DTLS and SCTP sit above ICE, so they don't notice the switch [SRC/DOC].
+- How long it takes to declare the direct pair dead is set by `set_max_stun_rto` and `set_max_stun_retransmits`, and is unmeasured.
+- Switching back once the direct path recovers may need its candidates re-added, because failed pairs are pruned [INFERENCE, UNVERIFIED].
+
+### Verdict
+
+**How close it gets.** WebRTC data channels cover most of the requirements:
+- per-channel ordered or unordered delivery
+- `maxRetransmits` and `maxPacketLifeTime`
+- independent stream ordering, so one channel's loss doesn't hold back another's delivery
+- ICE with STUN and TURN
+
+They fall short in three places:
+- **No priority scheduling in either Rust stack.** Every ordered message from every channel shares one FIFO, and a large message monopolizes it. We would schedule above SCTP, keep the SCTP buffer shallow with `write`→`Ok(false)` and the buffered-amount events, and cut bulk into messages of about 1 KB or less.
+- **Mandatory DTLS plus SCTP costs bytes.** About 65 B per packet with DTLS 1.2, or about 50 B with DTLS 1.3.
+- **Standard ICE can't switch paths without a restart.**
+
+**Crate.** str0m fits best:
+- it's sans-IO under our own tokio loop
+- full ICE keeps checking every pair and switches the nominated pair without a restart, so both paths stay warm
+- `DirectApi` avoids SDP
+- it has DTLS 1.3 and SNAP
+- its CI runs the tests on Windows
+- several people maintain it
+
+webrtc-rs 0.21 works, but:
+- its architecture is about 10 weeks old, and one author does almost all the work
+- TURN is UDP only, with two open bugs that drop relayed sessions
+- the selected pair never switches
+- CI builds on Windows but doesn't run the tests there
+
+**What we'd still build** on str0m:
+- signaling through our server: ICE credentials, candidates, DTLS fingerprint, and the SNAP INIT
+- candidate gathering: host candidates including IPv6, server-reflexive via STUN, and port-mapped addresses
+- a TURN client: credentials minted by our server; allocate, refresh, permissions, ChannelBind, and stale-nonce handling. `rtc-turn` is sans-IO but has the open bugs above.
+- socket I/O and demultiplexing, with relay packets wrapped and unwrapped as ChannelData
+- the priority scheduler
+- a forced-relay dev switch that adds only the relay candidate. On one PC through Cloudflare, both cores must run relay-only, because Cloudflare refuses permissions to private addresses [INFERENCE].
+
+**Cost per relayed session-hour.** These are estimates [INFERENCE], assuming 5,000 B/s of payload per pilot, about 50 packets/s, and about 71 B of TURN+DTLS+SCTP overhead per packet, plus SACKs and STUN:
+
+| Case | Billed traffic | Cloudflare TURN | Self-hosted coturn |
+|---|---|---|---|
+| One pilot relayed | about 31–37 MB/h | about $0.0017/h | $4–6/month flat |
+| Both pilots relayed | about 64–74 MB/h | about $0.0035/h | $4–6/month flat |
+
+- Cloudflare's free 1,000 GB/month covers about 13,500 both-relayed session-hours, so at small scale it costs $0.
+- A $4 DigitalOcean VPS covers about 7,500 both-relayed session-hours inside its 500 GiB, then costs about $0.0007 per hour.
+- At 200 relayed session-hours a month, coturn works out to about $0.02/h, against $0 for Cloudflare.
+- At $0.40/GB, Twilio would cost about $0.028 per both-relayed session-hour.
+- WebRTC overhead raises the relay's traffic about 65–100% above the 36 MB/h payload figure.
+
+Before relying on Cloudflare, two things should be measured: the 10-peer-address cap per allocation, and relay latency from the testers' homes. The 2.3 home-network probe could measure both.

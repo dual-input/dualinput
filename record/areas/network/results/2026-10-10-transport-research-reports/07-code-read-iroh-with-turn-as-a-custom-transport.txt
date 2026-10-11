@@ -1,0 +1,294 @@
+Agent abc289c209621594d, started 2026-10-10T08:39:08.322Z
+
+== Asked ==
+
+Code-level research read for Crosscheck (a shared cockpit for MSFS 2024: two pilots' Rust cores on tokio, Windows 10/11 x64, must link over the internet). Today is 2026-10-10. Do NOT write or edit files anywhere; put everything in your final report. You may launch subagents of your own only in the foreground (run_in_background: false), and you must fold their findings, with sources, into your report before you hand back.
+
+## The question ("option B")
+Could we keep iroh 1.3.0's hole punching, router port mapping, and multipath QUIC (its quinn fork, noq), but replace iroh's relay — which carries packets over a TCP WebSocket to an iroh-relay server, so a lost packet stalls everything behind it — with a UDP relay, specifically a TURN allocation on Cloudflare Realtime TURN (or coturn), plugged in through iroh's `unstable-custom-transports` feature?
+
+## Questions (answer each with sources from docs.rs/iroh/1.3.0, the n0-computer/iroh repository at tag v1.3.0, and n0's blog)
+1. The custom transport API: the traits `CustomTransport`, `CustomEndpoint`, `CustomSender` (module `iroh::endpoint::transports`), `PathSelector`, and `Builder::add_custom_transport` / `path_selector`: required methods, how packets are sent and received, how custom addresses are represented (`CustomAddr`? `TransportAddr::Custom`?), and how a transport tells iroh which remote addresses it can reach. Any examples or tests (e.g. `test_utils::TestTransport`) and any community custom transports.
+2. Addresses: how a custom address of the remote endpoint reaches the local endpoint — is it part of `EndpointAddr`, published through address lookup, or exchanged inside the QUIC NAT-traversal frames? Could we hand iroh the other side's TURN relayed address through our own signaling server?
+3. Can iroh run with no iroh-relay at all (`RelayMode::Disabled` or a custom relay map that's empty) and still hole-punch, if a custom transport provides a working first path? Where does it learn its own public address (QUIC Address Discovery on the relay's UDP port 7842)? Does hole-punch coordination need a path through an iroh relay, or any existing path?
+4. Path selection: how the default `BiasedRttPathSelector` ranks a custom path against direct IP paths and the relay; whether a custom `PathSelector` can choose more than one path; how failover works (path idle timeout, `PATH_MAX_IDLE_TIMEOUT` 15s, `default_path_max_idle_timeout`), and whether a custom transport can signal that its path is dead.
+5. Stability: what the `unstable-custom-transports` feature promises; what broke in 1.1.0 (#4465) and since; any stated plans for the API (roadmap, issues), and any planned UDP or QUIC relay (issue #4395).
+6. Your assessment: is option B feasible with TURN as a custom transport, how much glue would it take, and what are the biggest risks?
+
+## Evidence rules
+Every claim gets a source: a URL with section, or a file path plus symbol at v1.3.0 (or a named commit). Tag each: [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], [UNVERIFIED]. Never invent a version, API name, number, or URL; say when you can't find something. Keep quotes short and exact.
+
+== Report ==
+
+## Option B: TURN as an iroh 1.3.0 custom transport, research report
+
+**Bottom line.** Option B works mechanically, but not in the form asked.
+- Hole punching and multipath keep working when the first path is a custom transport.
+- Three things in iroh 1.3.0 change the plan:
+  1. Without a configured iroh relay, iroh has no way to learn its own public address, so hole punching between two ordinary home NATs mostly fails.
+  2. A custom path is opened only if it carries the handshake. iroh never opens one later.
+  3. Path selection reruns only when a path opens or is abandoned. Failing over from a dead direct path to TURN therefore waits for the per-path idle timeout, 15s by default and lowerable.
+- The workable shape is "B-prime": TURN as the preferred fallback, plus a small iroh-relay of our own kept for address discovery and as a last-resort backup.
+
+**How I read it.** Source was read at tag v1.3.0 through a fetch tool that summarizes pages and returns only short quotes. The paths and symbols are exact, but I have no line numbers. Claims resting on a partial read are marked. I wrote no files.
+
+**Tags:** [DOC] docs, blog, changelog, or GitHub thread. [SRC] source at v1.3.0, or noq at tag `noq-proto-v1.3.0` (commit c1f41156…). [INFERENCE] my reasoning. [UNVERIFIED] not settled.
+
+---
+
+### 1. The custom transport API
+
+**Feature flag** [DOC]
+- The flag is `unstable-custom-transports`, declared as `unstable-custom-transports = []` in `iroh/Cargo.toml`.
+- The comment there reads "Unstable: Custom transport API (may change without notice)".
+- The docs also spell it `unstable-custom-transport` (singular), which is a typo.
+- Source: https://docs.rs/iroh/1.3.0/iroh/endpoint/transports/index.html
+
+**Traits** [SRC] `iroh/src/socket/transports/custom.rs`
+
+`CustomTransport` is a factory with one method:
+- `fn bind(&self) -> io::Result<Box<dyn CustomEndpoint>>`
+- It is called once per `Builder::bind`.
+
+`CustomEndpoint` methods:
+- `fn watch_local_addrs(&self) -> n0_watcher::Direct<Vec<CustomAddr>>`
+- `fn create_sender(&self) -> Arc<dyn CustomSender>`
+- `fn poll_recv(&mut self, cx, bufs: &mut [IoSliceMut], metas: &mut [noq_udp::RecvMeta], recv_infos: &mut [RecvInfo]) -> Poll<io::Result<usize>>`
+  - The three slices have equal length, at most `noq_udp::BATCH_SIZE`.
+  - For each packet, set `RecvInfo::new(remote: CustomAddr, local: Option<CustomAddr>)`.
+  - Also fill `meta.len` and `meta.stride`. A zero stride once panicked iroh with a divide by zero (#4144, fixed by #4178, April 2026) [DOC].
+- `fn max_transmit_segments(&self) -> NonZeroUsize` is provided. It defaults to 1, meaning no GSO batching.
+
+`CustomSender` methods:
+- `fn is_valid_send_addr(&self, addr: &CustomAddr) -> bool`
+- `fn poll_send(&self, cx, dst: &CustomAddr, src: Option<&CustomAddr>, transmit: &Transmit) -> Poll<io::Result<()>>`
+- `Transmit` has `contents: &[u8]` and `segment_size: Option<usize>`.
+
+**How a transport says which remotes it can reach.** Only through `is_valid_send_addr` [SRC] `iroh/src/socket/transports.rs`, `TransportsSender::poll_send`.
+- The `FourTuple::Custom { remote, local }` arm tries each custom sender whose `is_valid_send_addr(remote)` returns true.
+- If no sender accepts the address, the packet is silently dropped and reported as sent (`trace!("no valid transport available")`, then `Poll::Ready(Ok(()))`).
+- Send errors are also swallowed (`debug!("dropped transmit…")`, then `Ok(())`), so noq sees them as loss.
+- A `Poll::Pending` from a custom sender is also turned into "sent" [DOC]:
+  - #4544 reported this and was closed as not planned, a duplicate of open issue #2676.
+  - The fix is deferred to a noq rework, noq#403.
+
+**Addresses**
+- `iroh_base::CustomAddr` is a `u64` transport id plus opaque bytes [DOC] https://docs.rs/iroh-base/1.3.0/iroh_base/struct.CustomAddr.html.
+  - Methods: `from_parts(id, &[u8])`, `id()`, `data()`, `to_vec()`, `from_bytes()`.
+  - The binary form is the id as 8 bytes little-endian, followed by the data.
+  - The string form is `<hexid>_<hexdata>`.
+- It appears as:
+  - `TransportAddr::Custom(CustomAddr)` in `EndpointAddr`.
+  - `transports::Addr::Custom` and `FourTuple::Custom { remote, local }` inside path selection.
+  - `AddrKind::Custom(u64)`.
+- Internally, iroh hands each custom address to noq as a fake IPv6 address in `fd15:70a:510b:3::/64` [SRC] `iroh/src/socket/mapped_addrs.rs`, `CustomMappedAddr`.
+- The transport id registry is `TRANSPORTS.md`:
+  - 0x00–0x1F are reserved.
+  - 0x20 is Test.
+  - 0x544F52 is Tor, marked experimental.
+  - 0x424C45 is BLE, marked reserved.
+
+**Path selector**
+- Configured with `Builder::path_selector(Arc<dyn PathSelector>)`. Custom transports are added with `Builder::add_custom_transport(Arc<dyn CustomTransport>)`. Both are behind the feature flag [DOC] https://docs.rs/iroh/1.3.0/iroh/endpoint/struct.Builder.html.
+- The trait has one method: `fn select(&self, ctx: &PathSelectionContext) -> PathSelection`.
+- What a selector sees:
+  - `ctx.current()` returns `Option<&FourTuple>`.
+  - `ctx.paths()` iterates `PathSelectionData`, each with `network_path()` and `stats() -> Option<PathStats>`.
+  - `PathStats` includes `rtt`, `lost_packets`, `lost_bytes`, `cwnd`, `congestion_events`, `black_holes_detected`, and `current_mtu` [DOC].
+
+**Examples and tests**
+- `iroh/examples/custom-transport.rs` uses the in-memory `TestTransport` and a `PreferTestTransport` selector, run with relay and IP transports cleared [SRC].
+- `iroh/src/test_utils/test_transport.rs` [SRC]:
+  - `CustomAddr` is `(0x20, endpoint_id bytes)`.
+  - The address lookup's `publish` does nothing. Its `resolve` derives the custom address from the endpoint id.
+  - `impl Preset for Arc<TestTransport>` calls `add_custom_transport` plus `address_lookup`.
+
+**Community transports** [DOC]
+- Tor (iroh-tor): https://www.iroh.computer/blog/tor-custom-transport
+- Nym (https://docs.rs/iroh-nym-transport)
+- BLE (github.com/mcginty/iroh-ble-transport, AGPL)
+- Two WebRTC efforts, linked from discussion #4024:
+  - github.com/anchalshivank/iroh-webrtc-transport
+  - github.com/SuddenlyHazel/iroh-webrtc-transport
+- I found no TURN transport.
+
+### 2. How the remote's custom address reaches the local endpoint
+
+Only two ways [SRC] `remote_state.rs`:
+- The application's `EndpointAddr`, passed to `connect` and stored as `Source::App` by `handle_msg_resolve_remote`.
+- An `AddressLookup` result, stored as `Source::AddressLookup`.
+
+It is not part of in-band hole punching [SRC]:
+- QUIC NAT traversal candidate sets are `BTreeSet<SocketAddr>`, so they carry IP addresses only.
+- `max_remote_nat_traversal_addresses` concerns IP candidates.
+
+iroh never publishes custom addresses [SRC]:
+- `socket.rs` `publish_my_addr` publishes only `TransportAddr::Ip` direct addresses and the relay.
+- `Endpoint::addr()` and `watch_addr()` in `endpoint.rs` build their result from IP addresses and the home relay only.
+
+So yes, our signaling server can hand iroh the other side's TURN address [INFERENCE from the above]. Two ways:
+- `EndpointAddr::from_parts(id, [TransportAddr::Custom(CustomAddr::from_parts(OUR_ID, bytes))])` [DOC] https://docs.rs/iroh-base/1.3.0/iroh_base/struct.EndpointAddr.html
+- Our own `AddressLookup` whose `resolve` queries the signaling server.
+
+Limit: a custom address learned after a connection exists cannot be added to it in 1.3.0 [SRC]:
+- `handle_msg_resolve_remote` only stores the address.
+- Open PR #4565 (2026-09-29, not reviewed) proposes `Endpoint::add_remote_addrs`. Its description says connect's candidate set is "fixed at dial time".
+
+Design consequence [INFERENCE]:
+- Make the `CustomAddr` a stable logical id, such as the peer's EndpointId or a session id, as the Tor and Test transports do.
+- Keep the peer's current TURN relayed address in our transport's own table, updated by signaling.
+- A TURN reallocation then needs no new iroh address.
+
+### 3. Running with no iroh relay
+
+**It runs.** `Builder::empty()` starts with relay disabled, and `RelayMode::Disabled` removes the relay transport [DOC, SRC] `endpoint.rs`.
+
+**Hole punching needs no relay path, only an existing connection** [SRC] `remote_state.rs` `trigger_holepunching`:
+- It requires at least one connection and a client-side connection.
+- `WrongConnectionSide` is fatal, so only the dialer starts rounds.
+- It requires readable NAT traversal candidates.
+- It has no relay precondition, and a selected custom path does not suppress it.
+- noq queues the coordination frames in the Data space [SRC] noq `connection/mod.rs` `initiate_nat_traversal_round`. Which path carries them is not stated in the source. My reading is that any open path does, the TURN path included [INFERENCE].
+
+**The problem is iroh's own public address** [SRC]
+- `socket.rs` `update_direct_addresses` merges four sources of candidates:
+  - interfaces (`Local`)
+  - router port mapping (`Portmapped`)
+  - net_report's `global_v4` and `global_v6` (`Qad`, plus the `Qad4LocalPort` hard-NAT guess)
+  - `external_addr` (`Config`)
+- QUIC Address Discovery probes go only to relays in the RelayMap, through the same noq endpoint and socket as peer traffic (`net_report.rs`, `run_probe_v4`).
+- The RelayMap is collected only from `TransportConfig::Relay` entries. With none, it is empty and `run()` skips probing.
+- `clear_relay_transports()` removes the map as well.
+- `DEFAULT_RELAY_QUIC_PORT = 7842` [SRC] `iroh-relay/src/defaults.rs`.
+
+So with no relay, a peer behind a NAT without UPnP, PCP, or NAT-PMP advertises only LAN addresses [INFERENCE].
+- Punching through two such NATs then fails.
+- If one side has a port mapping, it can still succeed.
+
+**Ways to get the public address back**
+- Option (a) [SRC] `iroh-relay/src/main.rs`: run our own iroh-relay with `enable_relay = false` and `enable_quic_addr_discovery = true`.
+  - That runs address discovery only. TLS is required.
+  - On the client it must still be configured as a relay transport.
+  - Whether the client tolerates a relay whose WebSocket side is off (home-relay retries, `online()` never resolving) is [UNVERIFIED].
+- Option (b) [INFERENCE]: run a full iroh-relay of our own. It serves as the address-discovery server and as a backup-tier relay behind TURN.
+- n0's public relays are "development and hobby use only" [DOC] https://docs.iroh.computer/iroh-services/relays/public.
+- Feeding a reflexive address learned through TURN into `add_external_addr` is unreliable [INFERENCE]. The TURN client's socket is not iroh's socket, so the external port differs unless the router preserves ports.
+
+### 4. Path selection and failover
+
+**Default selector** [SRC] `iroh/src/socket/biased_rtt_path_selector.rs`
+- `pub(crate) BiasedRttPathSelector`. It is not exported, so a custom selector cannot wrap it.
+- Tiers:
+  - IPv4 and IPv6 are `Primary`, and IPv6 gets `IPV6_RTT_ADVANTAGE = 3ms`.
+  - Relay is `Backup`.
+  - Custom has no entry, so it falls to `TransportBias::primary()`: same tier as direct IP, no bias.
+- It switches across tiers immediately, but within a tier only on an improvement of at least `RTT_SWITCHING_MIN = 5ms`.
+- Consequence [INFERENCE]: if TURN is selected first and a punched direct path is not 5ms faster, the default selector stays on TURN and keeps paying TURN costs. We need our own selector that prefers IP.
+
+**One path at a time**
+- `PathSelection` "Today … holds at most one path". `set` replaces any earlier choice [DOC].
+- The chosen path becomes `PathStatus::Available` and every other path `Backup` (`apply_selected_path`) [SRC].
+
+**A TURN path is open only if it carried the handshake** [SRC] `remote_state.rs`
+- Only open paths are candidates for selection: `PathSelectionContext` reads live connections only.
+- Custom addresses are never opened proactively:
+  - `handle_msg_add_connection` opens extra paths only for `is_relay()` addresses.
+  - `apply_selected_path` opens only the selected path.
+- The handshake Initial is fanned out to every known address, custom ones included (`handle_msg_send_datagram`).
+- `server_handshake_migration` lets the client "accept the fastest reply" [DOC] https://docs.rs/noq-proto/1.3.0/noq_proto/struct.TransportConfig.html. So the first path is whichever transport answered first [INFERENCE].
+- To keep TURN as a standby path, dial with only the TURN custom address. Hole punching then adds IP paths in-band.
+- Once open, "Relay and custom paths are kept open". Only redundant IP paths are closed [SRC].
+
+**When the selector runs** [SRC]
+- Only on `AddConnection`, a noq `Established` event, or a noq `Abandoned` event.
+- Never on a timer, nor on RTT or loss changes.
+- A selector therefore cannot fail over on rising loss.
+
+**Failover timing**
+- Failover happens after noq abandons the dead path.
+- The `PathIdle` timer runs `close_path_inner(…, PathAbandonReason::TimedOut)` after `max(timeout, 3 * pto)` [SRC] noq `mod.rs` `rearm_path_max_idle_timer` and `handle_timeout`.
+- Defaults [SRC] `socket.rs` and `endpoint/quic.rs`:
+  - `PATH_MAX_IDLE_TIMEOUT = 15s`
+  - `HEARTBEAT_INTERVAL = 5s`
+  - `RELAY_PATH_MAX_IDLE_TIMEOUT = 30s`
+  - connection `max_idle_timeout` = 30s
+- `default_path_max_idle_timeout` clamps values above 15s but accepts lower ones. `default_path_keep_alive_interval` ignores values above 5s but accepts lower ones [SRC] `endpoint/quic.rs`.
+- So something like 2–3s with sub-second keep-alives is possible [INFERENCE]. The cost is abandoning punched paths on short loss bursts and then re-punching.
+- PTO is capped at 2s after the handshake [DOC] https://www.iroh.computer/blog/iroh-0-98-0-getting-back-to-traversing-nats.
+- A maintainer calls faster detection of unusable paths "a known issue" [DOC] #4424. The reporter there measured about 15s of detection per fallback.
+
+**Keep-alives and data on Backup paths** [SRC, partial read of noq `mod.rs`]
+- `reset_keep_alive` and the `PathKeepAlive` handler (`ping_path`) check no `PathStatus`, so a Backup TURN path should stay alive.
+- Loss probes go out on Backup paths too.
+- Stream data prefers a validated Available path.
+
+**A transport cannot report its own path as dead**
+- There is no API for it, and send and receive errors are swallowed [SRC].
+- Its only lever is to stop delivering packets [INFERENCE].
+- On a network change, iroh's `NetworkChangeHint` returns `false` for custom paths ("Assume it is unrecoverable for now") [SRC] `socket.rs`. noq then closes the path and reopens one to the same remote [SRC] noq `mod.rs`, `UnusableAfterNetworkChange`.
+
+### 5. Stability
+
+**What the flag promises**
+- No semver: the items "may change in any release without a major version bump" [DOC] transports module page.
+- The 0.97.0 post says the API "is unstable and will remain so for some time even after iroh 1.0" [DOC] https://www.iroh.computer/blog/iroh-0-97-0-custom-transports-and-noq.
+
+**History**
+- Introduced in #3845, merged 2026-03 and shipped in 0.97.0.
+- Breaking changes since [DOC] CHANGELOG.md, PR titles, blog:
+  - #4185: `RecvInfo` added to `poll_recv`.
+  - #4228: feature gating reworked.
+  - #4232 and #4234: `transport_bias` replaced by `PathSelector`.
+  - #4273 and #4281: `FourTuple`, and the new `src` argument to `poll_send`.
+  - All of these landed before 1.0.0 (2026-06-15).
+- In 1.1.0 (2026-08-25), #4465 changed `CustomAddr`'s serde encoding, which "breaks CustomAddr deser".
+  - It was released as a minor version, justified by the experimental status.
+  - 1.1.0 also fixed an out-of-bounds index on crafted `CustomAddr`s.
+- No changelog entries touch custom transports in 1.2.0 or 1.3.0 (2026-09-28). The 1.3.0 post promises "new, bigger features … before the end of the year" without naming them.
+
+**Open items**
+- #4565: add custom addresses mid-connection.
+- #3736: per-connection path preference, open since 2025-12 with no maintainer comment.
+- #2676 and noq#403: backpressure on sends.
+- I found no roadmap for the custom transport API.
+
+**#4395, a QUIC relay connection** [DOC] https://github.com/n0-computer/iroh/issues/4395
+- Opened 2026-07-07, open, untriaged.
+- Motivated by small embedded devices.
+- A maintainer has an old `relay-h3` (HTTP/3) branch to "rebase it sometime", with no timeline.
+- Whether it would carry packets as unreliable datagrams, which would remove the head-of-line stall, is not stated [UNVERIFIED].
+
+### 6. Assessment
+
+**Feasible:** yes, as B-prime [INFERENCE].
+1. Write a TURN custom transport using a stable logical `CustomAddr`.
+2. Keep our own iroh-relay configured as the relay. It supplies address discovery, without which punching fails between NATs that lack UPnP, and serves as a last-resort backup.
+3. Write a selector that ranks direct IP first, then TURN, then relay. It must work from `FourTuple` kind and RTT only.
+4. Dial with only the TURN address, so TURN becomes the first path and stays open as Backup.
+5. Lower `default_path_max_idle_timeout` and the keep-alive interval to speed up failover.
+
+**Glue needed** [INFERENCE]
+- A TURN client per peer:
+  - Allocate, refresh (allocations default to a 600s lifetime), CreatePermission for the peer's relayed IP (300s), and ChannelBind (600s).
+  - Use ChannelData, with a 4-byte header, for each QUIC packet. 1,200-byte QUIC packets fit.
+  - Handle credential refresh, which Cloudflare issues through its API.
+  - These TURN figures come from the TURN standard and were not re-checked in this read.
+- The three trait implementations, about 200 lines judging by `test_transport.rs`.
+- The signaling exchange of relayed addresses.
+- The selector.
+- The webrtc-rs `turn` crate 0.17.2 has `Client::allocate() -> impl Conn` [DOC] https://docs.rs/turn/0.17.2/turn/client/struct.Client.html. I did not verify whether it handles refresh and channels itself.
+- My guess is on the order of 1–2k lines of Rust. That is not measured.
+
+**Biggest risks**
+1. API churn on an unstable flag, which has already had five breaking changes in six months, plus a wire-format break.
+2. Failover waits for the path idle timeout, and the selector cannot react to loss.
+3. Address discovery forces an iroh-relay to remain, so B does not remove relay operations.
+4. Custom paths open only on the handshake.
+   - If an IP reply wins the race, there is no TURN standby.
+   - A dead TURN path cannot be reopened in-connection without #4565.
+5. Silent drops: Pending and errors become "sent", an unaccepted address is blackholed, and #4424-style path flapping costs about 15s per event.
+6. No one has published a TURN or UDP-relay iroh transport, so we would be first.
+7. If any part of this matters for a design, measure it before relying on it, especially:
+   - noq keep-alives on Backup paths
+   - a QAD-only relay on the client side
+   - real failover times

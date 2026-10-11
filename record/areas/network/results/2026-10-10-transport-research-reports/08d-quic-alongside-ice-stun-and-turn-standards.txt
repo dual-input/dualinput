@@ -1,0 +1,394 @@
+Agent ad6e43f43a7a46457, started 2026-10-10T08:41:51.153Z
+
+== Asked ==
+
+You are doing a research read for Crosscheck, a shared cockpit for Microsoft Flight Simulator 2024: two pilots' Rust cores on tokio, Windows 10/11 x64, that must link over the internet. Today is 2026-10-10.
+
+## Hard rules
+- Do not create, write, or edit any file anywhere (no git clone, no downloads to disk, no scratch files). Read everything in memory.
+- Tools: WebFetch, WebSearch, and PowerShell for exact reads: `$ProgressPreference='SilentlyContinue'; (Invoke-WebRequest -UseBasicParsing -Uri '<url>' -Headers @{'User-Agent'='research'}).Content` (output per call capped at about 30,000 characters, so select ranges). `gh` (GitHub CLI) is installed: `gh search repos`, `gh search code`, `gh api repos/<o>/<r>/contents/<path>?ref=<tag>`. IETF drafts and RFCs are readable as text at `https://www.rfc-editor.org/rfc/rfcNNNN.txt` and `https://www.ietf.org/archive/id/<draft-name>-NN.txt`; the datatracker gives draft status (`https://datatracker.ietf.org/doc/<draft-name>/`).
+- Do not launch subagents.
+- Every claim gets a source: a URL with section, or a file path plus symbol at a named tag or commit. Tag each claim [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], or [UNVERIFIED]. Never invent a version, API name, number, draft revision, or URL; say plainly when you can't find something. Quote short and exact.
+
+## The design being evaluated ("option C")
+- ICE (RFC 8445) through the `is` crate (str0m's ICE agent as a standalone sans-IO crate) does hole punching and path choice. Candidates: host (IPv4 and IPv6), server-reflexive from STUN, a router port mapping (UPnP/NAT-PMP/PCP via n0's `portmapper`), and a relayed address from a TURN allocation (Cloudflare Realtime TURN default; coturn self-hosted).
+- quinn carries the session: reliable streams per channel with priorities, and RFC 9221 datagrams for newest-only data.
+- Two QUIC connections per pair of peers: one over the direct path, one over the TURN path, both kept open; the application picks or duplicates per channel.
+- One UDP socket per peer shared by STUN, TURN, and QUIC, demultiplexed by first byte per RFC 9443 (QUIC bit not greased).
+- A custom quinn `AsyncUdpSocket` presents each connection a stable virtual peer address while routing over the direct pair or TURN.
+
+## Questions to answer, each with sources
+1. RFC 9443 (Multiplexing Scheme Updates for QUIC): what problem it states as its motivation, the exact first-byte ranges it assigns (STUN, ZRTP, DTLS, TURN ChannelData, RTP/RTCP, QUIC), what it says about the QUIC bit and greasing (RFC 9287), and whether it describes QUIC running alongside ICE/STUN/TURN on one 5-tuple.
+2. IETF work combining QUIC with ICE or NAT traversal: e.g. draft-seemann-quic-nat-traversal (and any adopted successor), draft-ietf-quic-address-discovery (QUIC Address Discovery), draft-ietf-quic-multipath (now an RFC?), any "QUIC with ICE" or "ICE for QUIC" drafts, and MASQUE CONNECT-UDP as a relay. For each: status as of the latest datatracker data, what mechanism it defines, and how it relates to running QUIC over an ICE-selected path (does it replace ICE, use ICE candidates, or run ICE-like probing inside QUIC with PATH_CHALLENGE?).
+3. RTP over QUIC (draft-ietf-avtcore-rtp-over-quic): what it says about ICE, multiplexing with STUN/TURN, and peer-to-peer use. Also any SDP draft for QUIC (e.g. draft-dawkins-avtcore-sdp-rtp-quic or successors) and its ICE handling.
+4. Implementations that ran QUIC over an ICE transport: the ORTC/WebRTC `RTCQuicTransport` experiment in Chrome (years, status, and how it layered QUIC on RTCIceTransport), pion/quic (Go; QUIC over ICE?), any WebTransport-P2P proposals (W3C "webtransport p2p" or "RTCQuicTransport" explainer), and any Rust project pairing an ICE agent (webrtc-ice, str0m's `is`, librice) with quinn or another QUIC stack. Use `gh search code` for e.g. "AsyncUdpSocket" together with "ice", "webrtc_ice" with "quinn", "str0m" with "quinn", and `gh search repos` "quic ice nat traversal rust". For each hit, give the repo, the file, how it plugs ICE under QUIC, and its activity level.
+5. How iroh (n0-computer) and Tailscale differ from option C: iroh's magicsock (relay servers formerly called DERP, now "iroh-relay"; disco hole punching; QUIC Address Discovery; and its 2025-2026 move to QUIC multipath in n0's quinn fork — find what that fork is called, e.g. "noq" or "iroh-quinn", and when), and Tailscale's magicsock with DERP and disco over WireGuard. Key differences to state: relay protocol (HTTP/WebSocket-based relays over TCP vs TURN over UDP), path probing (disco pings vs ICE STUN checks vs QUIC PATH_CHALLENGE), one connection with path switching underneath vs two connections chosen by the application. Cite iroh docs/blog posts (iroh.computer/blog) and Tailscale's "How NAT traversal works" blog post and source paths at a tag.
+6. Any measured data others published on hole-punching success rates (e.g. Tailscale, iroh's stats, libp2p's DCUtR hole-punching measurement campaign results, academic papers), with numbers and links. Tag as [MEASURED-BY-OTHERS].
+7. Any known pitfalls others hit running QUIC over TURN or ICE: e.g. MTU (QUIC's 1200-byte minimum and TURN overhead: ChannelData 4 bytes, Send indication ~36 bytes, over IPv6), TURN servers' handling of non-STUN payloads, consent freshness (RFC 7675) vs QUIC keepalive, NAT binding timeouts (UDP mapping timeouts measured on home routers: RFC 4787 says at least 2 minutes, real routers often 30s), and ICE's keepalive interval.
+
+## Report
+Return a structured report answering each numbered question, each claim tagged and sourced. Keep quotes short and exact. End with a list of things you could not determine.
+
+== Report ==
+
+# Option C research: QUIC alongside ICE, STUN, and TURN
+
+I read everything in memory and wrote no files. Two tool side effects are worth knowing about. WebFetch saved two PDFs it couldn't parse into the session's tool-results folder: the IMC 2010 paper and arXiv 1612.07816. Nothing else touched the disk.
+
+Tags used throughout:
+- **[DOC]**: a spec, blog post, or documentation page.
+- **[SRC]**: source code, read at a named tag or commit.
+- **[MEASURED-BY-OTHERS]**: a measurement someone else published.
+- **[INFERENCE]**: my own reasoning from the sources.
+- **[UNVERIFIED]**: not checked against a primary source.
+
+Text in quotation marks was read raw, unless I mark it as coming through the fetch tool's summary.
+
+**Headline:** option C is the pattern the IETF documents describe as the no-extension baseline. Every running system I found has moved away from it, or hit its known gaps:
+- one QUIC connection that changes path underneath, with no change of remote address and no reset of congestion state;
+- the shared socket that needs QUIC-bit greasing turned off;
+- MTU over TURN;
+- Windows `WSAECONNRESET` on the shared socket.
+
+## 1. RFC 9443, Multiplexing Scheme Updates for QUIC
+Source: https://www.rfc-editor.org/rfc/rfc9443.txt. Standards Track, July 2023; updates RFC 5764 and RFC 7983.
+
+**Motivation [DOC, Abstract and §1]**
+- RFC 7983 let one receiving port carry DTLS, STUN, SRTP/SRTCP, ZRTP, and TURN channel packets.
+- RFC 9443 extends that "to also allow QUIC packets to be multiplexed on a single receiving socket."
+- The use cases it names:
+  - WebRTC peer-to-peer QUIC: the W3C P2P-QUIC report and Chrome 73's RTCQuicTransport origin trial. There, "SRTP/SRTCP [RFC3550], STUN, TURN, DTLS, and QUIC need to be multiplexed on the same port."
+  - RTP over QUIC used peer to peer: "STUN, TURN, and QUIC need to be multiplexed on the same port."
+
+**First-byte ranges [DOC, §3, new Figure 3]**
+
+| First byte | Protocol |
+| --- | --- |
+| 0–3 | STUN |
+| 4–15 | dropped |
+| 16–19 | ZRTP |
+| 20–63 | DTLS |
+| 64–79 | TURN ChannelData if the packet comes from a responding TURN server's source IP and port, otherwise QUIC |
+| 80–127 | QUIC |
+| 128–191 | RTP/RTCP |
+| 192–255 | QUIC |
+
+Any other value "MUST be dropped."
+
+**Why the 64–79 overlap is safe [DOC, §2]**
+- TURN channels carry "a 4-byte prefix instead of the standard 36-byte STUN overhead."
+- A QUIC short-header first byte can fall anywhere in 64–127, which overlaps TURN's 64–79.
+- The RFC resolves this by source address: "a packet with a first octet of 64 to 127 can be unambiguously demultiplexed as QUIC" when it doesn't come from the TURN server.
+
+**QUIC bit and greasing [DOC, §1 and §3]**
+- The scheme is "compatible with QUIC version 2" but "not compatible with QUIC bit greasing [RFC9287]".
+- So "endpoints that wish to use multiplexing on their socket MUST NOT send the grease_quic_bit transport parameter."
+- Greasing would break the ranges [INFERENCE from RFC 9000 §17 header formats]. With the fixed bit cleared, a short header lands in 0–63 (the STUN, ZRTP, and DTLS ranges) and a long header in 128–191 (the RTP range).
+- RFC 9287 §3.1 allows greasing only after receiving the peer's parameter, or with a NEW_TOKEN less than 7 days old from a server that advertised it [DOC].
+
+**quinn's default [SRC, quinn-proto-0.11.19]**
+- `EndpointConfig::new` sets `grease_quic_bit: true` (config/mod.rs).
+- connection/packet_builder.rs then flips the bit at random: `if conn.peer_params.grease_quic_bit && conn.rng.random() { buffer[..] ^= FIXED_BIT; }`.
+- Both peers must call `EndpointConfig::grease_quic_bit(false)`.
+
+**Does it describe QUIC with ICE, STUN, and TURN on one 5-tuple? [DOC]**
+- It speaks of "the same port" and "a single receiving socket," with traffic from the TURN server told apart by remote address. In effect that is one local socket serving several 5-tuples.
+- The text never mentions ICE, and never describes QUIC carried inside TURN.
+- For option C [INFERENCE]: QUIC on the TURN path arrives from the TURN server wrapped in ChannelData (64–79) or a Data indication (0–3). The TURN client unwraps it before quinn sees it.
+
+## 2. IETF work combining QUIC with ICE or NAT traversal
+Statuses are from the datatracker API, read 2026-10-10.
+
+**draft-seemann-quic-nat-traversal-03, "Using QUIC to traverse NATs"** [DOC]
+- Seemann and Kinnear (Apple), 8 Oct 2026. Individual submission with no WG state; draft-ietf-quic-nat-traversal returns 404, so there is no adopted successor.
+- Revisions: -00 2023-07-10, -01 2023-10-23, -02 2024-03-04, -03 2026-10-08. Presented to the quic and avtcore WGs at IETF 117.
+- Mechanism:
+  - It starts from an already established proxied QUIC connection.
+  - The server advertises its candidates in ALTERNATIVE_ADDRESS frames (draft-munizaga-quic-alternative-server-address-02).
+  - The client pairs candidates using RFC 8445's pairing logic and asks for an attempt with PUNCH_REQUEST, spending a PUNCH_GRANT.
+  - Both sides send PATH_CHALLENGE probes using "punching connection IDs" and report the result with PUNCH_DONE.
+  - The connection then migrates to the validated path. Multipath is optional, using reserved Path ID 0xffffffff.
+  - Gathering candidates is out of scope (§5.1), and amplification mitigation is still a TODO (§6.4).
+- Relation to ICE: it "borrows address candidate pairing concepts from ... ICE ... but does not use the ICE protocol." It replaces ICE's STUN checks with probing inside QUIC.
+- §3 describes option C as the baseline:
+  - "When an external signaling channel is used, the QUIC connection is established after the two ICE agents have agreed on a candidate pair. This mode doesn't require any modification to existing QUIC stacks."
+  - "QUIC and ICE need to use the same UDP socket ... the QUIC bit cannot be greased."
+
+**draft-bruynooghe-n0-quic-nat-traversal-00** [DOC]
+- Informational, 6 Jul 2026. It describes how noq does NAT traversal for iroh, "including all current bugs."
+- It is based on Seemann's -02 "with heavy modifications," using ADD_ADDRESS, REMOVE_ADDRESS, and REACH_OUT frames.
+- Its probes are PATH_CHALLENGE packets "not padded to 1200 bytes," so they don't validate the path. After a success the client opens a multipath path and validates it.
+- Probes back off on the normal PTO and are abandoned after 30s.
+- It admits sending probes on the active connection ID "in clear violation of Section 9.5" of RFC 9000.
+- Candidates come from QUIC Address Discovery over a separate connection. To the QUIC stack, the relay path "looks like a normal IP path that uses IPv6 Unique Local Addresses."
+
+**draft-ietf-quic-address-discovery-01** [DOC]
+- QUIC WG document. -00 was adopted 2025-03-03, replacing draft-seemann-quic-address-discovery. It expired 2025-09-04, and -01 was posted 2026-08-15.
+- Mechanism:
+  - The `address_discovery` transport parameter (0x9f81a176) takes 0, 1, or 2.
+  - OBSERVED_ADDRESS frames (0x9f81a6–a7) carry sequence numbers. They are probing frames and are sent on every new path.
+- Its §1 motivation ends: "If QUIC traffic doesn't need to be demultiplexed from STUN traffic, implementations can enable QUIC bit greasing."
+- It replaces STUN for learning a server-reflexive address, and needs a cooperating QUIC server.
+
+**draft-ietf-quic-multipath-21** [DOC]
+- Dated 17 Mar 2026. It is not an RFC yet. The IESG state has been "RFC Ed Queue" since 2026-03-19, and the RFC Editor was on its second edit as of 2026-10-07.
+- It "only enables clients to open a new path."
+- It "does not specify address discovery or management, nor how applications using QUIC schedule traffic over multiple paths."
+- It is the one-connection, many-paths alternative to option C's two connections.
+- Upstream quinn doesn't have it: issue #224 "Implement support for multipath" is still open, last updated 2026-02-04 [SRC]. noq implements it.
+
+**draft-thatcher-p2p-quic-00, "P2P QUIC"** [DOC]
+- July 2023; expired January 2024. "describes how to combine ICE and QUIC to do p2p QUIC". This is the closest to option C.
+- "QUIC packets MUST be sent using the ICE selected candidate pair."
+- It demultiplexes ICE from QUIC by the STUN magic cookie.
+- §11: "ACKed QUIC PING frames MAY be treated the same as a succesful ICE check" (sic).
+- §12: "Network migration SHOULD be done using ICE, not QUIC." QUIC should still change behavior, such as congestion control, "as if it had done a network migration," but "SHOULD NOT change the connection ID."
+- §8: QUIC multipath "SHOULD NOT be used unless it is known that one of the peers is a server."
+
+**draft-perkins-quic-p2p-mux-00** [DOC]
+- March 2019; expired. An outline:
+  - gather candidates per RFC 8445 for a single QUIC component;
+  - exchange them either out of band or embedded in QUIC;
+  - run the connectivity checks with STUN;
+  - open QUIC on the chosen pair, possibly as a simultaneous open;
+  - demultiplex per draft-aboba-avtcore-quic-multiplexing, which became RFC 9443.
+
+**MASQUE** [DOC]
+- RFC 9298, "Proxying UDP in HTTP" (CONNECT-UDP), proxies to one fixed target.
+- draft-ietf-masque-connect-udp-listen-16, "Proxying Bound UDP in HTTP":
+  - It is in the RFC Editor queue; IANA reached RFC-Ed-Ack on 2026-08-31.
+  - It exists because ICE needs to send to several hosts from one address.
+  - It adds `Connect-UDP-Bind` and `Proxy-Public-Address`.
+  - Its security section says TURN "can be run over this mechanism."
+  - For option C it would be a relayed candidate reached over HTTP/3 or HTTP/2 instead of TURN [INFERENCE].
+- draft-seemann-masque-connect-udp-rendezvous-00 (2026-08-16, individual) relays between two clients of the same proxy. "No public UDP address is allocated." That is closer to the iroh-relay and DERP model.
+- I didn't examine draft-ietf-masque-quic-proxy-09, draft-li-quic-nat-optimization-00, or draft-duke-quic-natsupp-03.
+
+## 3. RTP over QUIC and its SDP
+**draft-ietf-avtcore-rtp-over-quic-14 (RoQ)** [DOC]
+- Status: posted 2025-03-21, WG Last Call since 2025-07-03, expired 2025-09-21.
+- [SRC, a text search of -14]: it mentions STUN, TURN, RFC 9443, and RFC 7983 zero times, and ICE twice.
+- §3.3, Table 1 marks Topo-PtP-Relay "yes" with Note-NAT: "Not supported, because QUIC [RFC9000] does not support NAT traversal."
+- §13.2 lists as future work "Guidance for using RoQ with QUIC NAT traversal solutions. This could use ... (ICE) [RFC8445] or other NAT traversal solutions."
+- Its term "peer" "does not have anything to do with 'peer-to-peer' operation."
+- So RoQ defines no ICE use, no multiplexing, and no peer-to-peer mode.
+
+**draft-ietf-avtcore-sdp-roq-00** [DOC]
+- A WG document from October 2025. It replaced draft-dawkins-avtcore-sdp-rtp-quic and draft-dawkins-avtcore-sdp-roq, and expired 2026-04-14.
+- §6.4 assumes that endpoints needing NAT traversal "will perform ICE procedures as described in [RFC8445]." Because QUIC validates the peer's address, "an ICE agent will have already performed ICE candidate pair connectivity checking before a QUIC connection can be opened."
+- It lists liveness checks at several layers:
+  - QUIC PING frames;
+  - ICE keepalives (RFC 5245 §10, RFC 6263);
+  - consent freshness (RFC 7675);
+  - RTCP.
+- It concludes that consent freshness "also serves the ICE keepalive function, so ICE keepalives are no longer necessary."
+- An editors' note says other NAT traversal methods are possible.
+
+**Earlier and related SDP drafts** [DOC]
+- draft-dawkins-avtcore-sdp-rtp-quic-00 (January 2022) said peer-to-peer RoQ "likely would require extensions to the QUIC protocol for NAT traversal, at a bare minimum."
+- draft-thatcher §14 defines `UDP/QUIC` in SDP with the standard ICE attributes plus `a=setup` and `a=fingerprint`.
+
+## 4. Implementations that ran QUIC over an ICE transport
+
+**Chrome RTCQuicTransport**
+- chromestatus feature 6311472179183616 [DOC]:
+  - origin trial on desktop from M73 to M75;
+  - status still reads "In developer trial (Behind a flag)";
+  - its summary says "the RTCQuicTransport is P2P and uses ICE."
+- The Chrome developer blog (last updated 2019-01-31), as summarized by the fetch tool [DOC]:
+  - RTCIceTransport was the QUIC connection's packet transport, passed to `new RTCQuicTransport(iceTransport)`;
+  - datagrams were "Coming soon";
+  - Google did not plan to keep the API past the trial.
+- Removal: pion's commit 37658f4521 (2020-12-08), "Remove QUIC Support," says "Chromium remove RtcQuicTransport" [SRC]. I didn't find which Chrome version removed it.
+
+**W3C P2P WebTransport** (w3c/p2p-webtransport, formerly webrtc-quic) [SRC, DOC]
+- Archived. The README says the ORTC Community Group closed in April 2023 and "This document is no longer being pursued."
+- Last commit 2026-06-23: "Mark repository and spec as discontinued (#141)."
+- index.html defines `constructor(RTCIceTransport transport, optional sequence<RTCCertificate> certificates)` and cites RFC 9443 for multiplexing.
+
+**pion** [SRC]
+- pion/webrtc tag v2.2.26, quictransport.go (build tag `quic`):
+  - `NewQUICTransport(transport *ICETransport, ...)`;
+  - QUIC ran on `t.iceTransport.NewEndpoint(mux.MatchAll)`;
+  - the QUIC role came from ICE controlling or controlled;
+  - certificates were pinned by fingerprint.
+- Removed 2020-12-08 in 37658f4521.
+- pion/quic today (pushed 2026-10-08) wraps quic-go v0.59.1 for client/server use and WebTransport, with no ICE in transport.go.
+
+**Rust**
+
+I found no repository pairing webrtc-ice, str0m's `is`, or librice/rice-proto directly with quinn. My `gh search code` queries:
+- "AsyncUdpSocket ice"
+- "webrtc_ice quinn"
+- "str0m quinn"
+- "rice_proto quinn"
+- "librice quic"
+- "\"IceAgent\" quinn"
+- every `impl AsyncUdpSocket for` hit, reviewed by hand
+
+The closest projects:
+
+- **Avarok-Cybersecurity/Citadel-Protocol** (163★, pushed 2026-10-05) [SRC]
+  - Commit 1ff5e831e6 (2026-09-23): "P2P over a TURN relay (Cloudflare Realtime TURN) when hole punching can't work."
+  - `citadel_wire/src/udp_traversal/turn_relay/socket.rs`:
+    - `TurnRelaySocket` implements `quinn::AsyncUdpSocket` over its own RFC 8656 client: "A TURN allocation presented to quinn as a UDP socket, so QUIC runs unchanged over the relay."
+    - Peer addresses map to a channel or a Send indication.
+    - `local_addr` reports the relayed address, and `max_transmit_segments` is 1.
+    - `may_fragment` is true because "The client leg to the TURN server does not set DF."
+  - `standard/quic.rs`: `RELAYED_QUIC_MTU = 1280 − CHANNEL_DATA_HEADER_LEN`, with path-MTU discovery off on relayed paths and an 8,000ms keep-alive.
+  - The direct path uses its own hole punching, not ICE [INFERENCE from the module layout].
+  - A manual, ignored live test relays bytes through turn.cloudflare.com on UDP 3478 and TLS 443.
+- **gjovanov/roomler-ai** (5★, pushed 2026-10-10) [SRC]
+  - `crates/tunnel-core/src/transport/relay.rs`: `RelayUdpSocket` runs "a quinn QUIC endpoint over an arbitrary relayed datagram connection," using webrtc-rs's `turn` client, with a TURNS-over-TCP tier.
+  - `quic.rs` gathers host and STUN server-reflexive candidates on the same socket before handing it to quinn, "so STUN traverses the SAME NAT mapping QUIC will use." The client then tries candidates in order; there is no ICE agent.
+- **oetiker/oxutrm** (created 2026-08-28) [SRC]
+  - Its own ICE in `crates/oxutrm-net/src/ice.rs`, plus quinn.
+  - "Nomination completes before QUIC starts" because "There is no mechanism in RFC 9000 and no `quinn` API to repoint an established connection at a different **remote** address."
+  - README: "A better path found after connect is lost until the next attach."
+  - Uses NAT-PMP, PCP, and UPnP mappings as the first rung of its ladder.
+- **s-te-ch/wispers-client** [SRC]: libjuice (a C ICE library) plus quiche, not quinn. Per its docs, "the nodes can also establish a QUIC connection on top of the already established UDP path," keyed by a pre-shared key.
+- **Firezone** (rust/Cargo.toml) [SRC]: depends on `is = "0.11.0"` with boringtun (WireGuard) and quinn-udp. The snownet README describes it as built "on top of ICE ... and wireguard," with TURN servers as the fallback. It is a production user of `is`, but not over QUIC.
+- **rust-libp2p** `transports/quic/src/hole_punching.rs` (commit cdabcd0dd8) [SRC]: no ICE. It sends 64-byte random UDP packets from the quinn socket every 10–200ms.
+- **OpenBubbles/rustpush** `src/ids/link.rs` (commit 885638c47a) [SRC]: a `MultiplexEndpoint` implements quinn's `AsyncUdpSocket` over one UDP socket, alongside candidate pairs and TURN ChannelData parsing.
+- **The `is` crate** [DOC]
+  - Version 0.11.1 (2026-09-25), in `crates/is` of algesten/str0m. Its README:
+    - "The agent does not enumerate network interfaces, query STUN servers, or allocate TURN relays."
+    - "Nomination is not final -- the agent can change its nominated pair as network conditions shift, without an ICE restart."
+    - BUNDLE is assumed, and it supports trickle ICE only.
+  - On crates.io its only reverse dependency is str0m.
+
+## 5. How iroh and Tailscale differ from option C
+
+**iroh before 0.96** [DOC: https://www.iroh.computer/blog/iroh-on-QUIC-multipath, 2025-08-05]
+- The relay is "HTTP1.1 inside a TLS stream," which endpoints "upgrade ... to a WebSocket connection."
+- Hole-punching datagrams travel outside QUIC, marked by setting the QUIC bit to 0.
+- "Iroh completely lies to the QUIC stack and tells it to send packets to some private IPv6 range."
+- "iroh somehow coerces the QUIC congestion controller to restart whenever iroh chooses a new path."
+- Applications saw "hiccups for a few seconds" on path switches.
+- iroh v0.95.0 `iroh/src/disco.rs` uses Tailscale's magic "TS💬" with Ping, Pong, and CallMeMaybe [SRC].
+- n0 kept `iroh_quinn::WeakConnectionHandle::reset_congestion_state` in its fork; flub said so in quinn issue #2016 on 2024-10-21 [SRC].
+
+**iroh's address discovery** [DOC, iroh.computer/blog/qad, 2025-09-01, via the fetch tool's summary]: QUIC Address Discovery first appeared in iroh 0.32, and iroh has used it exclusively since 0.90. The relay server can expose a QAD endpoint (iroh-relay README at v1.3.0).
+
+**iroh's move to multipath** [SRC: iroh/Cargo.toml at each tag; git tree]
+
+| Release | Date | QUIC stack | What changed |
+| --- | --- | --- | --- |
+| 0.96 | 2026-01-27 | iroh-quinn 0.16 | QUIC multipath; QNT hole punching replaces the custom out-of-band protocol; `disco.rs` gone from the tree |
+| 0.97 | 2026-03-16 | noq 0.17 | the fork renamed |
+| 0.98 | 2026-04-17 | noq | fixes for regressions; relay protocol v2 |
+| 1.3.0 | 2026-09-28 | noq 1.3.0 | adds iroh-relay 1.3.0 and portmapper 0.19.3 (optional) |
+
+- The noq crate was first published 2026-02-24 (crates.io).
+- The announcement, "noq, noq, who's there?" (2026-03-19), calls it a hard fork of Quinn with multipath and NAT traversal [DOC, via the fetch tool's summary]. It also says the relay path and the direct UDP path are each a QUIC path.
+- The 0.98 regressions fixed (blog, via the fetch tool's summary): connections that should have punched through "would sometimes sit on the relay."
+- iroh-relay v1.3.0 `http.rs` serves `/relay` "over websockets and a custom upgrade protocol" [SRC].
+
+**Tailscale**
+- "How NAT traversal works" (David Anderson, 2020-08-21) [DOC]. On choosing DERP over TURN:
+  - TURN is "not a particularly pleasant protocol to work with";
+  - "there are no open TURN servers on the internet";
+  - DERP "runs over HTTP ... and relays encrypted payloads based on the destination's public key."
+- Source at v1.104.1 [SRC]:
+  - `derp/derp.go`: DERP proxies "encrypted WireGuard packets ... DERP is a last resort." `KeepAlive` is 60s.
+  - `derphttp_client.go`: "DNS + TCP + TLS + HTTP Upgrade + DERP upgrade," with optional WebSockets, on port 443 by default.
+  - `disco/disco.go`: NaCl-boxed messages (Ping, Pong, CallMeMaybe, plus UDP-relay messages).
+  - `magicsock.go`:
+
+    | Constant | Value |
+    | --- | --- |
+    | `heartbeatInterval` | 3s |
+    | `sessionActiveTimeout` | 45s |
+    | `upgradeUDPDirectInterval` | 1 minute |
+    | `trustUDPAddrDuration` | 6.5s |
+    | `goodEnoughLatency` | 5ms |
+
+  - `endpoint.go`: `addrForSendLocked` sends to both the UDP address and DERP once trust in the best UDP address expires. WireGuard addresses the peer by `fakeWGAddr`, which is the same idea as option C's virtual address.
+  - `endpoint.go` also probes how long UDP mappings live, at cliffs of 10s, 30s, and 60s.
+- Peer Relays (beta 2025-10-29) [DOC]: each relay uses "a single UDP port," and clients try a direct path, then a peer relay, then DERP.
+
+**Differences from option C** [INFERENCE from the sources above]
+
+| | Relay protocol | Path probing | Connections |
+| --- | --- | --- | --- |
+| iroh 1.x | WebSocket over HTTPS (TCP) | in-QUIC PATH_CHALLENGE (QNT) | one QUIC connection; the relay and each direct address are multipath paths with their own congestion control and RTT |
+| Tailscale | DERP over HTTP(S)/TCP; Peer Relays on UDP | disco ping and pong | one WireGuard session; magicsock switches the path underneath; WireGuard has no congestion control of its own |
+| Option C | TURN over UDP | ICE STUN checks plus consent | two QUIC connections (direct and TURN), each with its own congestion control; the application chooses or duplicates per channel |
+
+## 6. Measured hole-punching success
+- **libp2p DCUtR**, Trautwein et al., IMC '26, arXiv:2604.12484 (v1 2026-04-14) [MEASURED-BY-OTHERS]
+  - 4.4M+ attempts from 85,000+ networks in 167 countries.
+  - Success "70% ± 7.1%," conditional on the relay reservation and address discovery succeeding first.
+  - TCP and QUIC both ~70%.
+  - 97.6% of successes came on the first attempt.
+  - The paper cites carrier-grade NATs using endpoint-dependent mapping "in 40% of cases as of 2016" (Richter et al.).
+- **ProbeLab, "Can libp2p punch through NATs?"** (2026-08-03), via the fetch tool's summary [MEASURED-BY-OTHERS]
+  - Port-restricted cone: 82.9% (3,042 of 3,669).
+  - Symmetric: 39.7% (213 of 536).
+  - About 36% of NAT'd peers never got a relay reservation.
+  - Confirmed symmetric NATs were 3.9% of 43,684 classified peers.
+- **Tailscale, NAT traversal improvements part 1** (2025-10-15) [MEASURED-BY-OTHERS]: "Internal metrics have indicated success rates for direct NAT traversal well north of 90% in typical conditions." The 2020 post's "over 90%" is an estimate, not a measurement.
+- **iroh docs** (concepts/relay) [DOC]: "Anecdotal evidence points to the holepunching rate being around 90%." A formal collection is in progress.
+- **callstats.io via webrtcHacks** (2016-04-08; data from January 2015 to February 2016) [MEASURED-BY-OTHERS]: "22% of the conferences need some kind of TURN relay server," and "About 9% of the conferences required TCP."
+- **Ford, Srisuresh, and Kegel**, bford.info/pub/net/p2pnat, via the fetch tool's summary [MEASURED-BY-OTHERS]:
+  - UDP hole punching worked with 82% of NATs (310 of 380 data points).
+  - TCP: 64% (184 of 286).
+  - The sample "do[es] not constitute a random sample."
+- **Halkes and Pouwelse 2011**, quoted in the DCUtR paper [MEASURED-BY-OTHERS]: "approximately 64% of all peers are behind a NAT box or firewall which should allow hole punching to work, and more than 80% of hole punching attempts between these peers succeed." The primary source was bot-blocked.
+
+## 7. Known pitfalls
+- **Greasing.** quinn advertises `grease_quic_bit` by default and greases about half its packets once the peer has advertised it. Both sides must turn it off (§1 above) [SRC].
+- **MTU.**
+  - RFC 9000 §14 requires paths to carry at least 1,200 bytes of UDP payload. At a 1,280-byte IP MTU, the payload ceiling is 1,232 bytes on IPv6 and 1,252 on IPv4 [DOC].
+  - TURN overhead: ChannelData adds 4 bytes, padded only over TCP or TLS (RFC 8656 §12.5). A Send indication adds "36-byte" overhead (RFC 9443 §2) [DOC].
+  - At the IPv6 minimum MTU, ChannelData leaves 1,228 bytes, which fits. A Send indication leaves 1,196 bytes, or 1,184 with an IPv6 peer address, which is too small for a 1,200-byte Initial. So bind the channel before the QUIC handshake [INFERENCE].
+  - RFC 8656 §3.7 says to assume a 1,280-byte path MTU, recommends ChannelData, and suggests ≤500 bytes of payload as a rule of thumb. §3.6: no end-to-end fragmentation, and the relay may reset ECN [DOC].
+- **quinn MTU discovery with a custom socket** [SRC, quinn-0.11.12]
+  - `AsyncUdpSocket::may_fragment()` defaults to true, and `Endpoint::new_with_abstract_socket` sets `allow_mtud = !socket.may_fragment()`. A custom socket therefore turns off MTU discovery for the whole endpoint unless it overrides this.
+  - quinn-udp's Windows socket sets `IP_DONTFRAGMENT` and `IPV6_DONTFRAG` and returns false.
+  - Per connection, `TransportConfig::{initial_mtu, min_mtu, mtu_discovery_config}` are available.
+- **Path changes under a stable virtual address.**
+  - quinn-proto 0.11.19 drops a client's packets from a new remote ("discarding packet from unrecognized peer") [SRC].
+  - RFC 9000 §9.4 requires resetting congestion control and RTT after an address change; a virtual address never triggers that [DOC].
+  - quinn 0.11.12's `Connection` has no method to reset congestion state. Ralith in #2016: "A method to return the congestion controller to the initial state doesn't exist" [SRC].
+  - `is` may re-nominate a pair at any time, so option C must decide what to do when that happens [INFERENCE].
+- **Keepalive and consent.**
+  - RFC 7675 §5.1: consent expires after 30s; checks go out every 5s by default (randomized to 4–6s), and never less than 4s apart [DOC].
+  - RFC 8445 §11: send a keepalive if nothing was sent for Tr = 15s, never less than 15s, and "Agents MUST by default use STUN keepalives." Any packet resets the timer [DOC].
+  - quinn defaults to `keep_alive_interval: None` and `max_idle_timeout` 30s, citing RFC 9308 [SRC].
+- **TURN state** [DOC, RFC 8656]
+  - An allocation lasts 600s by default and is refreshed only by Refresh: "sending data to a peer does not refresh an allocation."
+  - Permissions last 300s; channel bindings last 10 minutes.
+  - ChannelData received by the server "MUST NOT refresh either the channel binding or the permission."
+- **Cloudflare Realtime TURN** [DOC, FAQ]
+  - Relayed addresses are IPv4 only: it "will issue IPv4 addresses only."
+  - It doesn't implement RFC 6062 (TCP relaying).
+  - It "denies CreatePermission or ChannelBind requests if private IP ranges" are used.
+  - Credentials last at most 48 hours.
+  - Maintenance or anycast changes can disrupt an allocation, so "ICE restart ... support by clients is highly recommended."
+  - The documentation doesn't address ChannelData, MTU, or payloads other than WebRTC's.
+- **NAT mapping timeouts.**
+  - RFC 4787 REQ-5: a mapping MUST NOT expire in less than 2 minutes, and 5 minutes or more is recommended [DOC].
+  - RFC 8085 §3.5: keepalives no more often than every 15s, though "a significant fraction" of middleboxes use shorter timeouts [DOC].
+  - RFC 9308 §3.2, citing Hätönen 2010: state "can expire after just thirty seconds of inactivity" [MEASURED-BY-OTHERS].
+  - Tailscale 2020: "a common value for UDP is 30 seconds." Carrier-grade NATs "typically employ short port timeouts and symmetric mapping" [DOC].
+- **Windows.**
+  - An ICMP port-unreachable makes the next `recvfrom` fail with `WSAECONNRESET` [DOC: Microsoft's recvfrom documentation].
+  - quinn's receive loop ignores `ConnectionReset` [SRC: `quinn/src/endpoint.rs` at quinn-0.11.12].
+  - quinn-udp 0.6.3 doesn't set `SIO_UDP_CONNRESET` [SRC].
+  - noq-udp turns off both `SIO_UDP_CONNRESET` and `SIO_UDP_NETRESET`: "We never want to fail the recv path due to a failed send" [SRC, noq-udp/src/windows.rs; last commit to that file db9bf72ac4].
+  - Option C's demultiplexer reads the shared socket itself, so it needs the same handling, because hole-punch probes go to closed ports [INFERENCE].
+
+## Things I could not determine
+- Which Chrome version removed RTCQuicTransport; chromestatus still reads "behind a flag."
+- Any project running RFC 8445 ICE from webrtc-ice, `is`, or librice under quinn.
+- Hätönen 2010's per-device numbers; neither PDF would parse.
+- Halkes 2011's primary abstract (bot-blocked), and the "93 home NATs" figure for Guha 2005.
+- Whether Cloudflare TURN supports ChannelData, its maximum packet size, and whether it has been tested with non-WebRTC payloads.
+- Whether `is` sends RFC 7675 consent checks, and at what keepalive interval.
+- How quinn handles `WSAENETRESET`.
+- Any QUIC WG plan to adopt QNT.
+- iroh's measured direct-connection rate (only the anecdotal ~90% is published).
+- iroh's MTU handling on the relay path.
+- The date Tailscale Peer Relays reached general availability.
+- Whether Citadel's live Cloudflare test passes; it is manual and never run in CI.

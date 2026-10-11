@@ -1,0 +1,365 @@
+Agent abd39c9fd820b8ccf, started 2026-10-10T08:41:51.136Z
+
+== Asked ==
+
+You are doing a code-level research read for Crosscheck, a shared cockpit for Microsoft Flight Simulator 2024: two pilots' Rust cores on tokio, Windows 10/11 x64, that must link over the internet. Today is 2026-10-10.
+
+## Hard rules
+- Do not create, write, or edit any file anywhere (no git clone, no downloads to disk, no scratch files). Read everything in memory.
+- Read source exactly with PowerShell, for example: `$ProgressPreference='SilentlyContinue'; $c=(Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/quinn-rs/quinn/<tag>/quinn/src/runtime.rs' -Headers @{'User-Agent'='research'}).Content; $l=$c -split "`n"; ...` and print line ranges with line numbers. Output per call is capped at about 30,000 characters, so print ranges or grep with line numbers. `gh` (GitHub CLI) is installed: `gh api repos/quinn-rs/quinn/git/refs/tags` or `gh api repos/quinn-rs/quinn/contents/<path>?ref=<tag>`, `gh search code`, `gh issue list`. WebFetch and WebSearch are available for docs pages. crates.io API needs a User-Agent header.
+- Do not launch subagents.
+- Every claim gets a source: a URL with section, or a file path plus symbol and line at a named tag or commit. Tag each claim [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], or [UNVERIFIED]. Never invent a version, API name, number, or URL; say plainly when you can't find something. Quote short and exact.
+
+## The design being evaluated
+quinn 0.11.12 carries the session between two peers. Two QUIC connections per pair of peers: one over a direct (hole-punched) UDP path chosen by an ICE agent, one over a TURN relay path, both kept open. One physical UDP socket per peer is shared by STUN, TURN, and QUIC, demultiplexed by first byte per RFC 9443 (so QUIC must not grease the QUIC bit; quinn has `EndpointConfig::grease_quic_bit(false)` — verify). A thin layer of ours sits under quinn as a custom `AsyncUdpSocket`, so each QUIC connection sees a stable virtual peer address (e.g. a synthetic SocketAddr) while our layer routes its packets over the direct pair or wraps them in TURN ChannelData/Send indications. The application may send the same datagram channel on both connections and deduplicate itself.
+
+First establish the exact quinn and quinn-proto versions: quinn 0.11.12 (check crates.io `https://crates.io/api/v1/crates/quinn/versions` for its date and which quinn-proto/quinn-udp versions it requires) and find the matching git tags (e.g. `quinn-0.11.12`, `quinn-proto-0.11.x`). Read the source at those tags.
+
+## Questions to answer, each with sources
+1. The `AsyncUdpSocket` trait in quinn 0.11.12: every method with exact signature and doc comment semantics: `create_io_poller`, the `UdpPoller` trait and `poll_writable`, `try_send(&self, transmit: &Transmit)` (what fields does `quinn_udp::Transmit` have: destination, ecn, contents, segment_size, src_ip?), `poll_recv` with `RecvMeta` (fields: addr, len, stride, ecn, dst_ip?), `local_addr`, `max_transmit_segments`, `max_receive_segments`, `may_fragment`. What happens when try_send returns WouldBlock vs another error (is the packet dropped, does the connection die)? What must `poll_recv` do with `stride` when GRO is not used? Whether `Send + Sync + Debug` bounds apply.
+2. `Endpoint::new_with_abstract_socket` signature, and `Runtime` trait requirements (`TokioRuntime`). Also `Endpoint::rebind_abstract` if present.
+3. Virtual peer addresses: quinn-proto routes incoming datagrams to connections how? Show `quinn_proto::Endpoint::handle` and how it looks up a connection (by connection ID; by remote address for zero-length CIDs?). Can our layer present a synthetic SocketAddr per connection (e.g. an address in a reserved IPv6 range) and route outgoing transmits by destination? Does quinn validate or use the remote address in ways that would break a synthetic one (e.g. `local_ip`, ECN, `may_fragment`, MTU discovery, IPv4-mapped handling, address validation tokens on the server side, `validate_remote_address`/`Endpoint::connect` rejecting unspecified ports or addresses)? Cite.
+4. Can one endpoint hold two connections to the same peer (two different virtual addresses), and can two quinn endpoints sit on one physical UDP socket through our layer? What constraints (both endpoints would receive each other's packets unless our layer routes by virtual address or by connection ID)?
+5. Address change behavior: what quinn-proto does with a packet whose source address differs from the connection's current remote. Client side: dropped? Server side: path migration (`allow_migration` in ServerConfig / `migration()`), path validation with PATH_CHALLENGE. Cite the exact function, file, and line in quinn-proto (e.g. `Connection::handle_packet` / `handle_event` / `remote_may_migrate`), and quote the condition. Also: does quinn 0.11 support the client actively migrating (`Endpoint::rebind`) and what that implies for us.
+6. Duplicate packets: does quinn-proto drop a duplicate QUIC packet (same packet number) on receive? Cite the struct/function (e.g. a `Dedup` type in `quinn-proto/src/connection/spaces.rs` or `packet_space.rs`, its window size) and the call site that discards it, quoting the log message. What happens to a duplicate datagram frame or stream frame inside it.
+7. Datagrams (RFC 9221): `Connection::send_datagram`, `max_datagram_size`, `datagram_send_buffer_space`, `TransportConfig::datagram_receive_buffer_size` / `datagram_send_buffer_size`, what happens when the send buffer is full (oldest dropped?), and `send_datagram_wait` if it exists in 0.11.12. Also `SendStream::set_priority` semantics (i32, higher first?) and how streams of equal priority are scheduled.
+8. Timers relevant to a path going dead: idle timeout, keep-alive interval, PTO/loss detection constants, and whether quinn has any built-in path-failure detection a supervisor could watch (e.g. `Connection::rtt`, `stats()` fields like `path.lost_packets`, `congestion_events`). Any MTU discovery (PLPMTUD) settings and what initial MTU is (1200?), important because TURN ChannelData adds 4 bytes and Send indications add ~36 bytes of overhead.
+9. Examples of crates that implement `AsyncUdpSocket` for multiplexing or relaying: iroh's `magicsock` (iroh releases that still used quinn/iroh-quinn before n0's fork "noq" — find what noq is and when iroh switched), libp2p-quic, and any others (use `gh search code "impl AsyncUdpSocket for"` and `gh search code "new_with_abstract_socket"`). For each, the repo, file path, and what it does (does it present virtual addresses? how does iroh map its `NodeId`/endpoint IDs to SocketAddr for quinn — e.g. "QuicMappedAddr" in an IPv6 ULA range?). Cite exact file paths at a tag.
+10. Windows specifics: quinn-udp on Windows (GSO via UDP_SEND_MSG_SIZE, GRO via UDP_RECV_MAX_COALESCED_SIZE, ECN), any known Windows issues in quinn issues (e.g. WSAECONNRESET / ICMP port unreachable on UDP sockets: does quinn-udp set SIO_UDP_CONNRESET off?). If our layer owns the physical socket (a tokio UdpSocket or quinn_udp::UdpSocketState), what do we have to do ourselves.
+
+## Report
+Return a structured report answering each numbered question, each claim tagged and sourced (file path + symbol + line at a named tag, or URL). Include short exact code quotes where the exact text matters (trait signatures, the address-change condition, the dedup call site). End with a list of things you could not determine.
+
+== Report ==
+
+## How quinn 0.11.12 fits the design
+
+The design fits quinn 0.11.12 as long as our layer follows four rules:
+
+- **Stable virtual address per connection.** Give each connection a fixed virtual address, and never change it.
+- **No errors from `try_send`.** Return only `Ok` or `WouldBlock`.
+- **Filtered errors from `poll_recv`.** Never return any error except `ConnectionReset`.
+- **Both peers set `grease_quic_bit(false)`.**
+
+Breaking any of these kills either one connection or every connection on the endpoint.
+
+All source is read at commit **eaec0db4bcb698f76df736d89938743c88a2ad5f**. Links below as `quinn@eaec0db/<path>:<line>` mean `https://github.com/quinn-rs/quinn/blob/eaec0db4bcb698f76df736d89938743c88a2ad5f/<path>#L<line>`.
+
+### Versions [DOC]
+- **quinn 0.11.12:** published 2026-09-14 (`https://crates.io/api/v1/crates/quinn/versions`). Its dependencies (`.../quinn/0.11.12/dependencies`) are `quinn-proto ^0.11.18`, `quinn-udp ^0.5`, `socket2 >=0.5,<0.7`, and `tokio ^1.28.1`.
+- **No quinn 0.11.10 exists on crates.io:** the list goes 0.11.9, then 0.11.11, then 0.11.12.
+- **Tags [SRC]:** `quinn-0.11.12` and `quinn-proto-0.11.18` both point to eaec0db ("Bump versions to 0.11.18 / 0.11.12"). At that commit, `quinn-udp/Cargo.toml` is version 0.5.15.
+- **Newer patch versions:** quinn-proto 0.11.19 and quinn-udp 0.5.16 were released 2026-09-30, both at commit 8192ed39.
+  - A fresh lockfile picks those up [INFERENCE, normal Cargo semver resolution].
+  - Relevant commits in between: `8ada074d` "Pad Initial datagrams to the configured minimum MTU", plus proto hardening in `74c33ff7`, `a6e78d1c`, and `73114d82`.
+  - `12d7f077` "fix: cleanup state if transmit failed" changes the quinn crate, and no quinn release contains it yet. quinn 0.11.12 is still the newest quinn on crates.io.
+  - `6862d3dc` is a Unix-only receive fix.
+
+## 1. The `AsyncUdpSocket` trait
+
+`quinn@eaec0db/quinn/src/runtime.rs:42-103` [SRC]:
+```rust
+pub trait AsyncUdpSocket: Send + Sync + Debug + 'static {
+    fn create_io_poller(self: Arc<Self>) -> Pin<Box<dyn UdpPoller>>;
+    fn try_send(&self, transmit: &Transmit) -> io::Result<()>;
+    fn poll_recv(&self, cx: &mut Context, bufs: &mut [IoSliceMut<'_>], meta: &mut [RecvMeta]) -> Poll<io::Result<usize>>;
+    fn local_addr(&self) -> io::Result<SocketAddr>;
+    fn max_transmit_segments(&self) -> usize { 1 }
+    fn max_receive_segments(&self) -> usize { 1 }
+    fn may_fragment(&self) -> bool { true }
+}
+pub trait UdpPoller: Send + Sync + Debug + 'static {
+    fn poll_writable(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>>;
+}
+```
+
+**Doc comments** [SRC]:
+- `create_io_poller` lets "any number of interested tasks" each wait on writability with their own `Waker`.
+- `try_send`: "Send UDP datagrams from `transmits`, or return `WouldBlock` and clear the underlying socket's readiness, or return an I/O error."
+- `poll_writable` "Must be called after `try_send` returns `WouldBlock`", and the poller "may be reused indefinitely".
+- `may_fragment`: "Sockets should prevent this for best performance. See e.g. the `IPV6_DONTFRAG` socket option."
+- quinn exports these through `pub use crate::runtime::{AsyncTimer, AsyncUdpSocket, Runtime, UdpPoller, default_runtime}` and `pub use udp` (`quinn/src/lib.rs:75,90`).
+- The helper `UdpPollHelper` is private (`runtime.rs:105-113`, no `pub`). ouisync copies it verbatim for that reason (see question 9).
+
+**`quinn_udp::Transmit`** has these fields: `destination: SocketAddr`, `ecn: Option<EcnCodepoint>`, `contents: &'a [u8]`, `segment_size: Option<usize>`, and `src_ip: Option<IpAddr>` (`quinn-udp/src/lib.rs:133-147`) [SRC].
+- quinn fills them straight from `proto::Transmit` (`quinn/src/lib.rs:106-114`).
+
+**`RecvMeta`** has these fields: `addr`, `len`, `stride`, `ecn: Option<EcnCodepoint>`, and `dst_ip: Option<IpAddr>` (`quinn-udp/src/lib.rs:95-118`) [SRC].
+- `stride` is "The size of a single datagram in the associated buffer"; datagrams sit at `stride` increments.
+
+**What quinn does with a `try_send` result** (`quinn/src/connection.rs:1016-1082`, `drive_transmit`) [SRC]:
+- **Call order:** quinn calls `poll_writable(cx)` *before* every `try_send` (`:1048`). If that returns Pending, it buffers the transmit and returns.
+- **`WouldBlock`:** the packet is not dropped. quinn stores it in `buffered_transmit` and `continue`s the loop (`:1060-1069`).
+  - So if the poller says Ready while `try_send` keeps returning `WouldBlock`, the loop spins inside one poll [INFERENCE from the loop].
+  - iroh hit exactly this: "Returning WouldBlock triggers a hot loop. Returning an error would immediately fail a connection." (iroh v0.35.0 `iroh/src/magicsock.rs:637-639`) [SRC].
+  - iroh also notes that quinn calls `poll_writable()` before `try_send()`, the opposite of what the docs say (`:2181-2186`).
+- **Any other error:** `Err(e) => return Err(e)` (`:1061`). `ConnectionDriver::poll` then propagates it with `?` (`:267`), and the spawned task logs `tracing::error!("I/O error: {e}")` (`:68-69`). The driver stops, so the connection dies.
+  - In 0.11.12 the connection is not even closed cleanly. The unreleased `12d7f077` adds `implicit_close` on this path.
+- **Stateless responses:** `respond()` ignores send errors: `_ = socket.try_send(...)` (`quinn/src/endpoint.rs:584`).
+- **What quinn's own socket does:** quinn-udp's `UdpSocketState::send` "will only ever return errors of kind `WouldBlock`. All other errors will be logged and converted to `Ok`." (`quinn-udp/src/windows.rs:144-165`) [SRC].
+- **Rule for our `try_send`:** return `Ok(())` for anything per-path, such as no route, TURN not ready, or an OS error, and let QUIC loss recovery handle it. iroh does the same (`magicsock.rs:505-515`, `:610-632`, `:643`) [SRC].
+
+**What quinn does with a `poll_recv` result** (`quinn/src/endpoint.rs:772-859`) [SRC]:
+- **Buffer splitting:** for each meta, `while !data.is_empty() { let buf = data.split_to(meta.stride.min(data.len())); ... }` (`:799-800`).
+  - **Set `stride = len` when GRO is not used.** `stride == 0` makes `split_to(0)` return empty forever, an infinite loop [INFERENCE from the code].
+  - `len = 0` makes quinn skip the buffer. iroh uses that to hide STUN and disco packets (`magicsock.rs:970-990`) [SRC].
+- **Errors:**
+  - `ConnectionReset` gets `continue` (`:843-847`).
+  - Any other error is `return Err(e)` (`:848-850`). The `EndpointDriver` then ends with "I/O error" (`:155-157`), and its `Drop` clears every connection's sender (`:401-409`).
+  - Each connection then terminates with `INTERNAL_ERROR` "endpoint driver future was dropped" (`quinn/src/connection.rs:1110-1115`) [SRC].
+  - That exact failure was seen in the field [MEASURED-BY-OTHERS]: quinn issue #2733 logged `ERROR quinn::endpoint: I/O error: Message too long (os error 90)`, then "endpoint driver future was dropped". This was on main after PR #2721.
+  - So our `poll_recv` must never return an error except `ConnectionReset`.
+- **Batch size:** quinn passes `BATCH_SIZE` buffers, which is `1` on Windows (`quinn-udp/src/windows.rs:441`) and `32` on most Unix (`unix.rs:792`).
+  - Each buffer holds `min(max_udp_payload_size, 64K) * max_receive_segments` bytes (`endpoint.rs:754-759`). By default that is 1472 bytes per buffer.
+
+**Bounds:** `Send + Sync + Debug + 'static` applies to `AsyncUdpSocket`, `UdpPoller`, and `Runtime` [SRC, quoted above].
+
+## 2. Endpoint constructor, `Runtime`, and rebind
+
+**Constructor** (`quinn/src/endpoint.rs:133-166`) [SRC]:
+```rust
+pub fn new_with_abstract_socket(config: EndpointConfig, server_config: Option<ServerConfig>,
+    socket: Arc<dyn AsyncUdpSocket>, runtime: Arc<dyn Runtime>) -> io::Result<Self>
+```
+- It reads `socket.local_addr()?`.
+- It sets `allow_mtud = !socket.may_fragment()`.
+- It records `ipv6 = addr.is_ipv6()`.
+- It calls `runtime.spawn(driver)`.
+
+**`Runtime` trait** (`runtime.rs:16-31`) [SRC]: `new_timer(&self, Instant) -> Pin<Box<dyn AsyncTimer>>`, `spawn(&self, Pin<Box<dyn Future<Output=()> + Send>>)`, `wrap_udp_socket(&self, std::net::UdpSocket) -> io::Result<Arc<dyn AsyncUdpSocket>>` (only when not `wasm_browser`), and `now()`.
+- `TokioRuntime::spawn` is `tokio::spawn(future)` (`runtime/tokio.rs:26-28`), so we must construct the endpoint inside a Tokio runtime context [INFERENCE].
+- `default_runtime()` returns Tokio only `if Handle::try_current().is_ok()` (`runtime.rs:169-175`).
+
+**Rebind** (`endpoint.rs:253-270`) [SRC]: `rebind_abstract(&self, socket: Arc<dyn AsyncUdpSocket>) -> io::Result<()>` exists.
+- It is endpoint-wide. Every connection gets `ConnectionEvent::Rebind`, which calls `local_address_changed()`: `update_rem_cid(); ping();` (`quinn-proto/src/connection/mod.rs:3109-3112`).
+- The old socket keeps being polled until a connection packet arrives on the new one (`endpoint.rs:500-518`).
+
+## 3. Virtual peer addresses
+
+**How quinn-proto routes an incoming datagram.** `quinn_proto::Endpoint::handle(now, remote, local_ip, ecn, data, buf)` (`quinn-proto/src/endpoint.rs:148-273`) [SRC] decodes the header, builds `FourTuple { remote, local_ip }`, and calls `ConnectionIndex::get` (`:1095-1122`). That lookup tries, in order:
+1. The local CID (`connection_ids`). The default `HashedConnectionIdGenerator` makes 8-byte CIDs (`cid_generator.rs:50-52`).
+2. The initial DCID, on the server side.
+3. Only for zero-length DCIDs: `incoming_connection_remotes` by four-tuple, or `outgoing_connection_remotes` by remote address.
+4. A stateless-reset token keyed by `(remote, token)`.
+
+A short-header packet with an unknown CID gets a stateless reset when it is larger than about 21 bytes, at most one reset per 20ms (`:259-271`, `:275-335`).
+
+**So synthetic addresses work.** With non-zero CIDs, routing never depends on the address [SRC]. Outgoing transmits carry `destination: self.path.remote` (`connection/mod.rs:1006-1019`), so our layer can route by destination [SRC]. The constraints:
+
+- **Address checks in `connect`.**
+  - `Endpoint::connect` in proto rejects `remote.port() == 0 || remote.ip().is_unspecified()` with `InvalidRemoteAddress` (`quinn-proto/src/endpoint.rs:348-350`) [SRC]. Use a nonzero port and a real-looking IP.
+  - quinn's `connect_with` rejects an IPv6 remote when the socket's `local_addr` is IPv4, and converts IPv4 remotes to IPv4-mapped IPv6 when it is IPv6 (`quinn/src/endpoint.rs:218-225`, `ensure_ipv6` at `:631-636`) [SRC].
+  - So `local_addr()` must return an IPv6 address if the virtual addresses are IPv6. iroh "pretend[s] to be IPv6, because our `MappedAddr`s need to be IPv6" (iroh v0.35.0 `magicsock.rs:2219-2236`) [SRC].
+- **Address equality is exact.** The receive path passes `meta.addr` to proto unchanged (`endpoint.rs:802-805`). A client then drops `if remote != self.path.remote && !self.side.remote_may_migrate()` (`connection/mod.rs:1134-1136`) [SRC].
+  - So `poll_recv` must report exactly the `SocketAddr` quinn was given: same IPv6 form, flowinfo 0, scope 0.
+  - A V4 address versus its V4-mapped V6 form compares unequal, and every packet would be dropped [INFERENCE].
+- **`local_ip` and `src_ip`.** `RecvMeta.dst_ip` becomes the server connection's `local_ip`, which is echoed as `Transmit.src_ip` (`connection/mod.rs:1018`). Clients use `None` [SRC]. Our layer can ignore `src_ip` and pass `dst_ip: None`. iroh does exactly that on Windows, citing iroh PR #2595 (`magicsock.rs:884-889`) [SRC].
+- **ECN.** quinn starts with `sending_ecn: true` and marks ECT0 (`paths.rs:73`, `mod.rs:1009-1013`). Any ACK without ECN counts stops it: "ECN not acknowledged by peer" (`mod.rs:1576-1580`) [SRC]. Returning `ecn: None` is harmless.
+- **MTU discovery** is gated endpoint-wide by `may_fragment()`. The trait default is `true`, which turns MTUD off for every connection (see question 8).
+- **Tokens.** `NEW_TOKEN` binds the client IP and Retry tokens bind the full address (`token.rs:152-167`, `mod.rs:3377-3389`) [SRC]. A token from an earlier session's virtual address just counts as unvalidated [SRC token.rs:166-167]. This is harmless.
+- **Migration resets state.** `migrate()` keeps RTT and congestion state only `if remote.is_ipv4() && remote.ip() == self.path.remote.ip()` (`mod.rs:3072`) [SRC]. With IPv6 virtual addresses, any migration starts a fresh `PathData` [INFERENCE].
+- **There is no `validate_remote_address` function.** The only address checks are those above [SRC, grep of `quinn-proto/src/endpoint.rs`, `connection/mod.rs`, `quinn/src/endpoint.rs`].
+
+**Precedent:** iroh v0.35.0 maps each peer to `NodeIdMappedAddr`, an IPv6 Unique Local Address with prefix `fd`, global ID `[21,7,10,81,11]` (fd15:070a:510b), subnet 0, a counter in the low 64 bits, and fixed port `12345` (`magicsock.rs:3222-3256`) [SRC].
+
+## 4. Two connections per peer, or two endpoints on one socket
+
+**One endpoint, two connections to the same peer:** this works [SRC + INFERENCE].
+- CIDs are generated per endpoint and checked for uniqueness (`quinn-proto/src/endpoint.rs:416-429`), and routing is by CID.
+- Give each connection a distinct virtual address, such as V_direct and V_relay, so outgoing transmits can be routed by `destination`. Label incoming packets by physical path.
+- Two connections with the *same* virtual address would still route inbound by CID, but our layer could no longer route outbound by destination [INFERENCE].
+- On the server side, set `ServerConfig::migration(false)` (`config/mod.rs:292-295`; default `true` at `:244`). A mislabeled packet is then dropped instead of triggering a migration [SRC].
+- The server can pick per-connection settings: `Incoming::remote_address()` and `Incoming::accept_with(...)` exist (`quinn/src/incoming.rs:35,74`) [SRC].
+
+**Two endpoints on one physical socket:** possible, but our layer must route every inbound datagram to the right endpoint, by path label or by parsing the DCID [INFERENCE].
+- A datagram routed to the wrong endpoint is an unknown-CID packet, so that endpoint sends a stateless reset with `ResetToken::new(&*self.config.reset_key, dst_cid)` (`quinn-proto/src/endpoint.rs:324`) [SRC].
+- If both endpoints were built from one cloned `EndpointConfig`, they share the `Arc<dyn HmacKey>` reset key (`config/mod.rs:38`; `Default` draws a random key at `:179-190`) [SRC]. The reset would then carry the token the peer stored for that CID and kill the connection [INFERENCE].
+- So build each endpoint from its own `EndpointConfig::default()`, or prefer one endpoint.
+- Other endpoint-wide settings: one `may_fragment()` value and one `rebind_abstract` per endpoint [SRC endpoint.rs:140,253].
+
+## 5. Packets from a different address
+
+There are three checks [SRC]:
+1. **Every connection, at receive** (`connection/mod.rs:1131-1137`, `handle_event`):
+   ```rust
+   if remote != self.path.remote && !self.side.remote_may_migrate() {
+       trace!("discarding packet from unrecognized peer {}", remote);
+       return;
+   }
+   ```
+   `remote_may_migrate()` is `server_config.migration` for servers and `false` for clients (`:3828-3833`). A client always drops the packet.
+2. **During the handshake, both sides drop it:** `if self.is_handshaking() && remote != self.path.remote { debug!("discarding packet with unexpected remote during handshake"); return; }` (`:2297-2300`).
+3. **A server with migration enabled, after authentication** (`:3046-3061`): if `remote != self.path.remote && !is_probing_packet && number == self.spaces[SpaceId::Data].rx_packet`, then `self.migrate(now, remote)`.
+   - `migrate()` (`:3066-3106`) sets a new `PathData` with a PATH_CHALLENGE and keeps the old path as `prev_path`.
+   - It sets `Timer::PathValidation` to `now + 3 * max(pto, prev_pto)`.
+   - If validation fails it logs "path validation failed" and reverts to the previous path (`:1226-1233`).
+   - Off-path PATH_RESPONSE and PATH_CHALLENGE go to the other path's address and are padded to 1200 bytes (`:857-886`, `:1062-1077`).
+
+**Client-side active migration:** quinn 0.11 supports it only as `Endpoint::rebind`/`rebind_abstract`, which moves every connection on the endpoint at once (section 2) [SRC].
+- For us, this means: keep each connection's virtual address fixed, and if the physical path changes, change it inside our layer [INFERENCE].
+- quinn will not notice, and its RTT and congestion state will be stale until it re-measures [INFERENCE].
+
+## 6. Duplicate packets
+
+- **Mechanism:** `Dedup` in `quinn-proto/src/connection/spaces.rs:459-523` is an "RFC4303-style sliding window" with a `u128` window. `WINDOW_SIZE = 1 + 128 = 129` packets (`:480-483`).
+  - `insert` returns `true` (a possible duplicate) for a number already seen. It also returns `true` for anything left of the window (`:519-521`). So a copy more than 129 packet numbers late is dropped too [SRC].
+- **Call site:** after decryption (`connection/mod.rs:2343-2346`) [SRC]:
+  ```rust
+  let is_duplicate = |n| self.spaces[packet.header.space()].dedup.insert(n);
+  if number.is_some_and(is_duplicate) {
+      debug!("discarding possible duplicate packet");
+      return;
+  ```
+  The whole packet is dropped before any frame is processed. Neither its DATAGRAM frames nor its STREAM frames reach the application [SRC].
+- **Retransmitted stream data** comes in new packets. The stream assembler drops it by offset ("Discard duplicate data", `connection/assembler.rs:153-190`) [SRC].
+- **Scope:** dedup is per connection and per packet-number space. The same application datagram sent on our two *separate* connections arrives twice, and the application must deduplicate it [INFERENCE].
+- **The alternative iroh used:** pre-noq iroh sent the *same QUIC packet* of a single connection over both UDP and relay (`magicsock.rs:550-586`, v0.35.0) [SRC], relying on this dedup [INFERENCE].
+
+## 7. Datagrams and stream priority
+
+**Connection-level API** [SRC]:
+- `Connection::send_datagram(&self, Bytes) -> Result<(), SendDatagramError>` (`quinn/src/connection.rs:448`) calls `datagrams().send(data, true)`. Its doc: "Previously queued datagrams which are still unsent may be discarded to make space for this datagram, in order of oldest to newest."
+- `send_datagram_wait(&self, Bytes) -> SendDatagram<'_>` exists in 0.11.12 (`:476`). It calls `send(data, false)` and on `Blocked` waits for `datagrams_unblocked` (`:854-891`), which "effectively prioritizes old datagrams over new datagrams".
+- `max_datagram_size() -> Option<usize>` (`:495`). It equals `path.current_mtu() - 1-RTT overhead - Datagram::SIZE_BOUND`, capped by the peer's `max_datagram_frame_size` (`quinn-proto/src/connection/datagrams.rs:82-96`).
+- `datagram_send_buffer_space() -> usize` (`:508`).
+
+**Buffers** [SRC]:
+- **Send buffer full:** `make_space_for` pops the oldest queued datagrams (`datagrams.rs:154-161`; the `trace!` message is "dropping outgoing datagram").
+- **Receive buffer full:** "dropping stale datagram", oldest first (`:145-148`).
+- **Defaults:** `datagram_receive_buffer_size: Some(1_250_000)` (that is `STREAM_RWND`) and `datagram_send_buffer_size: 1024*1024` (`config/transport.rs:394-395`). The advertised `max_datagram_frame_size` is `min(buffer, u16::MAX)` (`transport_parameters.rs:170-172`).
+- **After an MTU drop:** queued datagrams that no longer fit are dropped (`drop_oversized`, `datagrams.rs:182-198`).
+
+**Scheduling** [SRC]:
+- DATAGRAM frames are written into each packet before STREAM frames (`connection/mod.rs:3353-3415`).
+- Both are subject to the congestion and pacing gate for ack-eliciting packets (`:602-638`).
+
+**Stream priority** [SRC]:
+- `SendStream::set_priority(&self, priority: i32) -> Result<(), ClosedStream>` (`quinn/src/send_stream.rs:220`).
+- Its doc: "Every send stream has an initial priority of 0. Locally buffered data from streams with higher priority will be transmitted before data from streams with lower priority", and a change "may only take effect after that data has been transmitted".
+- Streams with equal priority are round-robined through a `BinaryHeap<PendingStream>` ordered by (priority, decreasing recency counter) (`connection/streams/mod.rs:387-470`) when `send_fairness` is true, the default (`config/transport.rs:145-160,379`). With fairness off, streams go "in the order they are written to".
+
+## 8. Timers, path-failure signals, and MTU
+
+**Defaults** (`config/transport.rs:363-406`) [SRC]:
+- `max_idle_timeout`: 30s.
+- `keep_alive_interval`: `None`.
+- `initial_rtt`: 333ms.
+- `packet_threshold`: 3; `time_threshold`: 9/8.
+- `persistent_congestion_threshold`: 3.
+- Congestion control: Cubic.
+
+**How the timers work** [SRC]:
+- The negotiated idle timeout is the minimum of both peers' values, where 0 or absent means off (`negotiate_max_idle_timeout`, `connection/mod.rs:4107-4114`).
+- The idle timer is armed at `max(timeout, 3 * pto)` (`:1994-1995`).
+- `Timer::Idle` calls `kill(ConnectionError::TimedOut)` (`:1205-1206`).
+- PTO is `smoothed_rtt + max(4*rttvar, 1ms) + max_ack_delay`, where `TIMER_GRANULARITY` is 1ms (`paths.rs:331-333`, `mod.rs:1923-1929`, `lib.rs:334`). It backs off by `2^min(pto_count,16)` (`:1835-1836`, `MAX_BACKOFF_EXPONENT` at `:4056`).
+- Keep-alive only pings while established (`:1998-2004`).
+- quinn 0.11.12 has no public `Connection::ping` [SRC: absent from the list of public functions in `quinn/src/connection.rs`]. A supervisor that wants probes has to send its own datagram.
+- For reference, iroh sets a 1s keep-alive (iroh v0.35.0 `endpoint.rs:129`).
+
+**What a supervisor can watch** [SRC]:
+- There is no built-in path-failure detector besides the idle timeout and the migration-only `PathValidation` timer.
+- Pollable values: `Connection::rtt()`, `min_rtt()`, and `stats()`.
+- `PathStats` has `rtt`, `min_rtt`, `cwnd`, `congestion_events`, `lost_packets`, `lost_bytes`, `sent_packets`, `sent_plpmtud_probes`, `lost_plpmtud_probes`, `black_holes_detected`, and `current_mtu` (`connection/stats.rs:136-160`).
+- `ConnectionStats` also has `udp_rx` and `udp_tx` (datagrams, bytes, ios) and per-frame counters such as `frame_rx.acks` (`:165-175`).
+
+**MTU** [SRC]:
+- `INITIAL_MTU = 1200` and `MIN_INITIAL_SIZE = 1200` (`lib.rs:330-332`). `initial_mtu` and `min_mtu` both default to 1200.
+- `MtuDiscoveryConfig::default()` is: interval 600s, `upper_bound` 1452, `black_hole_cooldown` 60s, `minimum_change` 20 (`config/transport.rs:745-753`).
+- `EndpointConfig` `max_udp_payload_size` is 1472 (`config/mod.rs:60`).
+- MTUD runs only if the socket's `may_fragment()` returns false: the check is `.filter(|_| allow_mtud)` in `PathData::new` (`paths.rs:86-99`), fed from `endpoint.rs:140`. The trait default `true` disables it.
+- quinn-udp on Windows sets `IP_DONTFRAGMENT`/`IPV6_DONTFRAG` and returns `may_fragment() == false` (`windows.rs:71-114,320-322`).
+- Initial and path-challenge datagrams are padded to 1200 bytes (`mod.rs:868,1066`).
+
+**TURN overhead.** ChannelData adds a 4-byte header [DOC, RFC 8656 §12.4, cited by Citadel]. Send indications add roughly 36 bytes for an IPv4 peer [UNVERIFIED: my arithmetic from the STUN header plus attributes]. Either way, the 1200-byte QUIC minimum still fits a 1500-byte path [INFERENCE].
+- Citadel disables MTUD on its relayed connections and fixes the MTU at `1280 - 4 = 1276` (`citadel_wire/src/standard/quic.rs:352-359,404-405` @6b127b86) [SRC].
+
+## 9. Other `AsyncUdpSocket` implementations
+
+**iroh and noq.** n0's fork of quinn is **noq** (`github.com/n0-computer/noq`, README): "Noq started out as a fork of the excellent Quinn project", adding QUIC Multipath, QUIC Address Discovery, and NAT traversal drafts [DOC].
+- The crates.io dependency lists show which QUIC crate each iroh release used [DOC]:
+
+| iroh versions | QUIC crate |
+| --- | --- |
+| up to 0.15.0 | upstream `quinn ^0.10` |
+| 0.16 to 0.96.1 (last one released 2026-02-06) | `iroh-quinn` |
+| 0.97.0 (2026-03-16) and later, including 1.x | `noq` |
+
+- **iroh v0.35.0 (iroh-quinn 0.13)** has the same trait shape as quinn 0.11.12. Its `impl AsyncUdpSocket for MagicSock` is at `iroh/src/magicsock.rs:2175-2291` [SRC]. It:
+  - creates one shared `IoPoller` that is Ready when any path is (`:2293-2320`);
+  - in `try_send`, maps `NodeIdMappedAddr` to the best UDP address and/or the relay, and sends on both (`:489-646`);
+  - in `poll_recv`, rewrites `meta.addr` to the mapped address, sets `len = 0` for STUN and disco packets, and zeroes their first byte so quinn rejects them (`:858-994`);
+  - sets `endpoint_config.grease_quic_bit(false)` for exactly that reason (`:1799-1805`).
+- The address type was named `QuicMappedAddr` in iroh v0.28.1 (`iroh-net/src/magicsock.rs:2606`) and v0.31.0 (`iroh/src/magicsock.rs:2751`). It is `NodeIdMappedAddr` in v0.35.0 and `EndpointIdMappedAddr` in v0.95.1 (`magicsock.rs:2383-2428`) [SRC].
+- By v0.95.1 the iroh-quinn API had diverged from upstream (`create_sender`, `poll_recv(&mut self)`) (`magicsock.rs:1714-1727`) [SRC].
+
+**Avarok-Cybersecurity/Citadel-Protocol** @6b127b86, `citadel_wire/src/udp_traversal/turn_relay/socket.rs` [SRC]: presents a TURN allocation as an `AsyncUdpSocket`.
+- It addresses the peer by its real transport address, not a virtual one.
+- Its poller is always writable (`:41-54`), and `try_send` goes to the allocation, which uses a channel or a Send indication.
+- `poll_recv` fills `stride: len, ecn: None, dst_ip: None` (`:85-91`).
+- `local_addr` is the relayed address, and `may_fragment()` returns true (`:97-105`).
+
+**equalitie/ouisync** @95b36777, `net/src/quic.rs:330-433` [SRC]: wraps tokio plus `UdpSocketState`, and broadcasts every received datagram to "side channels" for its own STUN and hole punching. quinn also receives everything.
+
+**rust-libp2p `libp2p-quic` 0.14.0** (master @14b102a2) [SRC]: does not implement `AsyncUdpSocket`.
+- It uses `quinn::Endpoint::new` with a std socket (`transports/quic/src/transport.rs:117`).
+- It hole-punches by sending 64 random bytes every 10 to 200ms through a `try_clone()` of the same socket (`hole_punching.rs:26-43`, `transport.rs:230`).
+
+**moq-dev/moq** `quest/m2/one-port/udp-demux.md` @13739466 [SRC]: a plan, not code, for a first-byte demux into per-stack virtual `AsyncUdpSocket`s on one port for noq, with QUIC-bit greasing off.
+
+**Seen by name only (not read):** `EasyTier/EasyTier easytier/src/tunnel/quic/session_socket.rs`, `8xFF/atm0s-media-server bin/src/quinn/vsocket.rs`, `lapce/lapdev crates/tunnel/src/relay.rs` ("Adapter that exposes a WebSocket as a virtual UDP socket suitable for Quinn", `:123`), and `IntQuant/noita_entangled_worlds noita_proxy/tangled/src/connection_manager.rs:234`. All came from `gh search code` [SRC].
+
+**RFC 9443** [DOC, https://www.rfc-editor.org/rfc/rfc9443.html]:
+- First-byte ranges (§3): 0-3 STUN; 64-79 "TURN Channel if from a responding TURN server; otherwise QUIC"; 80-127 QUIC; 192-255 QUIC.
+- "Endpoints that wish to demultiplex QUIC MUST NOT send the grease_quic_bit transport parameter" (§1, §3).
+- §2 resolves the overlap between 64-79 and TURN channels by the source address.
+- In quinn [SRC]:
+  - `grease_quic_bit(false)` stops quinn sending that transport parameter (`transport_parameters.rs:173,370-375`).
+  - quinn greases its own packets only if the *peer* sent it: `if conn.peer_params.grease_quic_bit && conn.rng.random() { buffer[...] ^= FIXED_BIT }` (`packet_builder.rs:127-129`).
+  - With greasing off, packets with the fixed bit clear are rejected ("fixed bit unset", `packet.rs:585-586`).
+  - So both peers must set `grease_quic_bit(false)`.
+
+## 10. Windows
+
+**quinn-udp 0.5.15 `UdpSocketState::new`** (`quinn-udp/src/windows.rs:31-120`) [SRC]:
+- Sets the socket nonblocking.
+- Reads `IPV6_V6ONLY` to detect dual-stack.
+- Sets `IP_DONTFRAGMENT`, `IP_PKTINFO`, and `IP_RECVECN`, plus the IPv6 equivalents.
+- Requires `WSARecvMsg`.
+
+**Offloads and ECN** [SRC]:
+- **GSO:** `UDP_SEND_MSG_SIZE` per message (`:390-397`). `MAX_GSO_SEGMENTS` is 512 if a throwaway probe socket accepts the option (`:495-513`).
+  - Issue #2818, about the probe leaving the option set on the caller's socket, affects 0.6.1 and not 0.5.15 [DOC issue text].
+- **GRO (URO):** `set_gro` exists but is "Disabled by default on Windows due to https://github.com/quinn-rs/quinn/issues/2041" (`:122-142`), so `stride == len` (`:228`). Issue #2041 ("Potential bug in GRO code for Windows?") is still open [DOC].
+- **ECN:** sent through `IP_ECN`/`IPV6_ECN` control messages (`:379-388`) and read on receive (`:248-255`).
+
+**ICMP-derived receive errors.** quinn-udp 0.5.15 does **not** call `SIO_UDP_CONNRESET` or `SIO_UDP_NETRESET` (no match in `windows.rs`) [SRC]. Microsoft documents what that means:
+- `WSAECONNRESET`: "For a UPD datagram socket, this error would indicate that a previous send operation resulted in an ICMP 'Port Unreachable' message".
+- `WSAENETRESET`: "the time to live has expired".
+- `WSAEMSGSIZE`: the message was truncated (https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsarecvfrom) [DOC].
+- `SIO_UDP_CONNRESET` "Controls whether UDP PORT_UNREACHABLE messages are reported" (https://learn.microsoft.com/en-us/windows/win32/winsock/winsock-ioctls) [DOC].
+- noq-udp turns both off with `WSAIoctl(..., FALSE)`. It logs and continues where unsupported (Windows 8+ for `NETRESET`; not available under Wine) (`n0-computer/noq@f916a5c5 noq-udp/src/windows.rs:54-77,558-586`) [SRC].
+
+**quinn's own tokio socket hides errors.** In 0.11.12, its `poll_recv` discards every receive error (`if let Ok(res) = self.io.try_io(...)` in a loop, `runtime/tokio.rs:77-84`) [SRC].
+- PR #2721 (merged to `main` 2026-07-10, not 0.11.x) explains that tokio's `try_io` clears readiness only on `WouldBlock`, so a persistent error makes that loop spin [DOC PR text].
+
+**If our layer owns the socket, we must do these ourselves** [INFERENCE from the above]:
+- Create `UdpSocketState` from a std socket bound by us (or by `socket2`).
+- Disable `SIO_UDP_CONNRESET` and `SIO_UDP_NETRESET`, or skip those errors. ICE checks to dead candidates will trigger them.
+- Skip `WSAEMSGSIZE` instead of returning it, and size receive buffers well above 1472 plus TURN overhead.
+- Never return a non-`ConnectionReset` error to quinn.
+- Don't spin on a latched error.
+- Keep `stride = len`.
+- Split `segment_size` batches before TURN-wrapping, or report `max_transmit_segments() = 1`.
+- Return `may_fragment() = false` only if DF is really set on the path we send through.
+
+Open issue #2682, "Panic when binding to non-wildcard ipv6 on Windows 11" (`os error 10022`), is reported against "latest commit". It is unclear whether it affects 0.11.12 [DOC].
+
+## What I couldn't determine
+- **Whether the TURN server's relay leg sets DF.** This decides whether MTUD over a relayed connection measures the real path, and depends on the TURN server and the RFC 8656 DONT-FRAGMENT attribute. [UNVERIFIED]
+- **The exact byte overhead of a TURN Send indication.** I didn't read RFC 8656 or RFC 8489 to confirm it.
+- **Whether issue #2682 affects quinn 0.11.12.**
+- **When or whether a quinn 0.11.13 will ship** commit 12d7f077 (clean close on a transmit error).
+- **How EasyTier, atm0s, lapdev, and noita_entangled_worlds route packets.** I located their files but didn't read them.
+- **Whether mio or tokio on Windows sets `SIO_UDP_CONNRESET` for us.** `gh search code` found no match in tokio-rs/mio or tokio-rs/tokio. The search's coverage isn't guaranteed, so this is not proof.
+- **All findings are from reading source.** None of this was run on Windows.

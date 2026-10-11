@@ -1,0 +1,439 @@
+Agent abee55ce2377eaee5, started 2026-10-10T08:41:51.126Z
+
+== Asked ==
+
+You are doing a code-level research read for Crosscheck, a shared cockpit for Microsoft Flight Simulator 2024: two pilots' Rust cores on tokio, Windows 10/11 x64, that must link over the internet. Today is 2026-10-10.
+
+## Hard rules
+- Do not create, write, or edit any file anywhere (no git clone, no downloads to disk, no scratch files). Read everything in memory.
+- Read source exactly with PowerShell, for example: `$ProgressPreference='SilentlyContinue'; $c=(Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/algesten/str0m/<sha>/crates/is/src/lib.rs' -Headers @{'User-Agent'='research'}).Content; $l=$c -split "`n"; for($i=0;$i -lt $l.Length;$i++){ if($l[$i] -match 'pub fn'){ '{0}: {1}' -f ($i+1),$l[$i] } }` to list, and print line ranges with line numbers. Output per call is capped at about 30,000 characters, so print ranges. `gh` (GitHub CLI) is installed: `gh api repos/algesten/str0m/contents/crates/is/src?ref=<sha>` lists a directory; `gh search code`, `gh api search/...`, `gh issue list -R algesten/str0m` work. WebFetch and WebSearch are available for docs pages.
+- Do not launch subagents.
+- Every claim gets a source: a URL with section, or a file path plus symbol and line at the commit below. Tag each claim [DOC], [SRC], [MEASURED-BY-OTHERS], [INFERENCE], or [UNVERIFIED]. Never invent a version, API name, number, or URL; say plainly when you can't find something. Quote short and exact.
+
+## Known facts to start from
+- crates.io `is` 0.11.1, published 2026-09-25 by algesten, license "MIT OR Apache-2.0", repository https://github.com/algesten/str0m. docs.rs `.cargo_vcs_info.json` for 0.11.1 says git sha1 `95e5038c6f45de6646d8e3f4c2bca6207a5bedde`, path_in_vcs `crates/is`. Read the source at that commit. Versions 0.7.0 (2026-03-24) to 0.11.1 are algesten's; 0.1.0 to 0.6.0 (2019) predate them and appear to be an unrelated earlier crate under the same name — confirm if you can.
+- It depends on a `str0m-proto` crate (feature `_internal_test_exports` maps to `str0m-proto/_internal_test_exports`); check what types (e.g. `Transmit`, `Protocol`, `TaskTimeout`?) come from there and whether STUN parsing lives in `is` or elsewhere.
+
+## The design being evaluated
+ICE through `is` does hole punching and path choice between two peers. Our candidates: host addresses (IPv4 and IPv6), a server-reflexive address from a STUN query we run ourselves (or does `is` run it?), a port opened on the router via UPnP/NAT-PMP/PCP (n0's `portmapper` crate), and a relayed address from a TURN allocation that our own code makes with the separate `turn-client-proto` crate. One UDP socket per core is shared by STUN, TURN, and QUIC (quinn), demultiplexed by first byte per RFC 9443. Our own layer routes packets over the direct pair or wraps them for TURN.
+
+## Questions to answer, each with sources
+1. The full standalone usage pattern: how to construct the agent (type name, constructor), set local and remote ICE credentials (ufrag/pwd types), set controlling or controlled role, and how role conflicts (487) are handled. Show a minimal sketch built only from real API names you found (label it a sketch).
+2. Adding local candidates of each kind: host, server-reflexive, relayed. What constructors exist on the candidate type (e.g. `Candidate::host`, `server_reflexive`, `relayed`), their exact signatures, and what a relayed candidate needs (the relayed address plus a base/local address?). How a port-mapped address should be added (as host? srflx?). Does `is` itself send STUN binding requests to a STUN server to discover srflx, or must we do it? Does it do anything with TURN?
+3. Adding remote candidates, and whether local and remote candidates can be added at any time (trickle ICE), including after connection. Is there end-of-candidates? Removing/invalidating candidates? ICE restart?
+4. Outgoing packets: what poll_transmit (or equivalent) returns: the struct and its fields (source, destination, protocol, contents). For a pair whose local candidate is relayed, what source address does it hand us: the relayed address, or the base? Does the code anywhere branch on candidate kind when sending? So does our code have to recognize "this source is our relayed address, wrap it in a TURN Send indication or ChannelData"? Quote the relevant code.
+5. Incoming packets: the function that takes them (handle_packet / handle_receive / accepts?), its argument types, how STUN is recognized (is there an `accepts_message` or similar helper; does it parse non-STUN packets; what does it do with them), and for packets that arrived via TURN, what source/destination we must present (peer address as source, relayed address as destination?).
+6. Events: the event enum and its variants (e.g. IceConnectionStateChange, NominatedSend / selected pair changes, discovered peer-reflexive candidates). How the application learns which pair (source, destination) to send its own non-STUN data on. Connection states and their meanings (e.g. Checking, Connected, Completed, Disconnected) and the transitions.
+7. Timers and settings: handle_timeout / poll_timeout. Every timing constant: Ta pacing, keepalive / consent interval, initial RTO, max RTO, retransmit counts, how fast a dead nominated pair is detected and how the agent reacts (does it switch to another succeeded pair automatically? re-nominate?), whether failed pairs are pruned and whether a failed pair can recover or must be re-added. Any settings to tune these (setters on the agent). Give the exact constant names and values with file and line.
+8. IPv6: does it pair v4 with v4 and v6 with v6 only? Any link-local or ULA handling, priority preferences between v4 and v6?
+9. Whether it supports aggressive nomination or only regular nomination; who nominates (controlling side), and whether the selected pair can change after the first nomination (does the controlling side re-nominate a better pair later?).
+10. Tests or examples of standalone use in the crate (tests module, examples directory), with file names. The README text about standalone use.
+11. Who uses `is` outside str0m: crates.io reverse dependencies (`https://crates.io/api/v1/crates/is/reverse_dependencies` with a User-Agent header), and a GitHub code search for `is::IceAgent` or `use is::` (if `gh search code` works). Also how str0m itself depends on it (str0m's Cargo.toml at that commit).
+12. Maintainers (crates.io owners API), release history (already listed above; add the changelog for `is` if there is one: look for CHANGELOG.md in the repo or crate), open issues in algesten/str0m that touch ICE (search issue titles for "ice", "candidate", "relay", "turn"), and whether str0m's docs say anything about TURN support ("str0m does not do TURN" or similar).
+
+## Report
+Return a structured report answering each numbered question, with each claim tagged and sourced (file path + symbol + line at commit 95e5038c6f45de6646d8e3f4c2bca6207a5bedde, or URL). Include short exact code quotes where a reader needs the exact text (signatures, constants, the send path for relayed candidates). End with a list of things you could not determine.
+
+== Report ==
+
+# `is` 0.11.1: how the ICE agent works, read from source
+
+**Where this comes from.** I read the code without writing any files. Unless a citation says otherwise, every path is under `crates/is/src/` in algesten/str0m at commit `95e5038c6f45de6646d8e3f4c2bca6207a5bedde`. I confirmed that sha against docs.rs `.cargo_vcs_info.json` for 0.11.1, which gives `path_in_vcs` as `crates/is`. "L" means line number. Lines from str0m outside the crate are given with their full path. Firezone is cited at firezone/firezone `7b0055e134d55fe053adb3df9c7bd414471bb46c`, which was `main` on 2026-10-10.
+
+## What matters most for our design
+
+1. **TURN wrapping is our job.** When the agent sends from a relayed candidate, `Transmit.source` is the relayed address. The candidate's base is set to that address, and nothing in the send path checks the candidate's kind. So our layer has to spot "source == our relayed address" and wrap the packet for TURN. Firezone's code does exactly this. [SRC]
+2. **Packets that arrive through TURN.** We must hand them to the agent with `source` = the peer's address and `destination` = our relayed address. The agent drops a binding request unless its `destination` equals the address of one of our local Host or Relayed candidates. [SRC]
+3. **The agent does no STUN-server queries and no TURN.** Its parser rejects a Binding success response that has no MESSAGE-INTEGRITY, so it can't parse typical public STUN server replies. Those replies must go to our own STUN client. [SRC] That public servers usually omit MESSAGE-INTEGRITY is [UNVERIFIED].
+4. **Path choice is by candidate priority, not measured round-trip time.** The controlling side re-nominates whenever a higher-priority pair succeeds, or when the nominated pair fails. With default settings a dead pair is detected in about 21.5s, and every timing value can be changed. [SRC] and [INFERENCE]
+5. **There is no Failed state and no end-of-candidates.** A pair that fails is deleted and isn't retried on its own. [SRC]
+6. **We should generate the ICE credentials ourselves.** `IceCreds::new()` draws them from `fastrand`, which is not a cryptographic random number generator. [SRC]
+7. **`Transmit` isn't re-exported by `is`.** It is `str0m_proto::Transmit`. [SRC]
+
+---
+
+## 1. Standalone usage, credentials, roles, and 487 role conflicts
+
+**The agent type and its constructors.** The type is `is::IceAgent`.
+- `IceAgent::new(local_credentials: IceCreds) -> Self` is gated on the default `sha1` feature (agent.rs L316-319). [SRC]
+- `IceAgent::with_hmac(local_credentials: IceCreds, sha1_hmac_provider: &'static dyn Sha1HmacProvider) -> Self` is at agent.rs L322-351. [SRC]
+
+**Credentials.**
+- The struct is `pub struct IceCreds { pub ufrag: String, pub pass: String }` (agent.rs L238-244). [SRC]
+- The setters are `set_local_credentials` (L414) and `set_remote_credentials` (L527). The getters are `local_credentials` (L409) and `remote_credentials()` (L522). [SRC]
+- `IceCreds::new()` builds a 16-character ufrag and a 22-character password from `Id::<N>::random()` (L301-309). [SRC]
+  - `Id::random()` calls `NonCryptographicRng::f32()`, which calls `fastrand::f32()` (crates/proto/src/id.rs L12-20, rng.rs L25-27). [SRC]
+  - Its alphabet has 60 characters and leaves out `w` and `W` (id.rs L7). [SRC]
+- The comment above `IceCreds::new()` quotes the RFC requirement that the values "MUST be unguessable" (L302-305). [SRC]
+- So we should build `IceCreds { ufrag, pass }` from a cryptographic random generator ourselves. [INFERENCE]
+
+**Before checks can start.**
+- Checks don't start until remote credentials are set: `handle_timeout` returns early while they are `None` (L1248-1251). [SRC]
+- Binding requests that arrive before then are queued, at most 100 (L1407-1418), and dropped once they are older than `ice_timeout` (L1209-1216). [SRC]
+- The first `handle_timeout` emits `IceRestart(local_creds)` and moves the state from New to Checking (L1198-1200, L2056-2058). [SRC]
+
+**Roles.**
+- The setter is `set_controlling(v: bool)` (L596), and the default is controlled (L333). [SRC]
+- Its doc comment says: "You should not call this function after ICE candidate pair formation has started, as the controlling state influences candidate prio!" [SRC]
+- The tie-breaker is a random `u64` (L334), and `set_control_tie_breaker(u64)` overrides it (L372). [SRC]
+
+**487 role conflicts.** The agent has handled these since is-0.9.0; CHANGELOG.md L88 reads "Implement ICE role conflict resolution #950". [SRC]
+- *When a request arrives claiming our role:* if our tie-breaker is greater than or equal to the peer's, the agent replies 487 and drops the request. Otherwise it switches role with `switch_role`, which recomputes every pair's priority (L1467-1483, L1668-1723). [SRC]
+- *When a 487 response arrives:* the agent switches role only if the original request was sent under the role it holds now. Otherwise it ignores the response as stale (L1780-1814). [SRC]
+- The agent sends no immediate re-check after switching. The next scheduled check carries the new role. [INFERENCE]
+- A test covers this: `role_conflict_resolves_to_one_controlled_side` (lib.rs L307-338). [SRC]
+- The design document is out of date here. `docs/ice.md` L86-101 says "ICE role conflicts won't happen ... We ignore this MUST", and the code contradicts it. We should trust the code. [SRC]
+
+**Sketch.** This is not compiled. Every name in it was found in the source.
+```rust
+use is::{Candidate, IceAgent, IceAgentEvent, IceCreds, Protocol};
+use is::stun::{StunMessage, StunPacket};
+
+let mut agent = IceAgent::new(IceCreds { ufrag: my_ufrag, pass: my_pass }); // CSPRNG values
+agent.set_controlling(true);                    // before adding candidates
+agent.set_remote_credentials(IceCreds { ufrag: their_ufrag, pass: their_pass });
+
+if let Some(c) = agent.add_local_candidate(Candidate::host(lan_v4, "udp")?) { signal(c.to_sdp_string()); }
+agent.add_local_candidate(Candidate::server_reflexive(public_v4, lan_v4, "udp")?);
+agent.add_local_candidate(Candidate::relayed(relay_addr, lan_v4, "udp")?);
+agent.add_remote_candidate(Candidate::from_sdp_string(&their_line)?);
+
+agent.handle_timeout(now);                      // poll_timeout() is None until this has run once
+while let Some(t) = agent.poll_transmit() {     // t.proto, t.source, t.destination, t.contents (Deref<[u8]>)
+    if t.source == relay_addr { turn_wrap_and_send(t.destination, &t.contents) } else { send(t.source, t.destination, &t.contents) }
+}
+while let Some(ev) = agent.poll_event() {
+    if let IceAgentEvent::NominatedSend { proto, source, destination } = ev { /* use for data */ }
+}
+// On receive, after our first-byte demux says STUN:
+let msg = StunMessage::parse(&buf[..n])?;
+let accepted: bool = agent.handle_packet(now, StunPacket { proto: Protocol::Udp, source: from, destination: local_or_relayed, message: msg });
+let next = agent.poll_timeout();
+```
+
+## 2. Adding local candidates
+
+**Candidate constructors and helpers.** All of these are in candidate.rs. [SRC]
+```rust
+pub fn host(addr: SocketAddr, proto: impl TryInto<Protocol>) -> Result<Self, IceError>                       // L231
+pub fn server_reflexive(addr: SocketAddr, base: SocketAddr, proto: impl TryInto<Protocol>) -> Result<Self, IceError> // L256-260
+pub fn relayed(addr: SocketAddr, local: SocketAddr, proto: impl TryInto<Protocol>) -> Result<Self, IceError>  // L296-300
+pub fn builder() -> CandidateBuilder<NoProtocol, NoRoute>   // L151; .udp()/.tcp()/.ssl_tcp()/.tls() then .host(addr) | .server_reflexive(addr, base) | .relayed(addr, local) then .build() (L745-884)
+pub fn from_sdp_string(s: &str) -> Result<Self, IceError>   // L324
+pub fn from_parts(foundation: String, component_id: u16, proto: Protocol, prio: u32, addr: SocketAddr, kind: CandidateKind, raddr: Option<SocketAddr>, tcptype: Option<TcpType>, ufrag: Option<String>) -> Self // L197-207
+pub fn to_sdp_string(&self) -> String                       // L565
+```
+- Serde gives a JSON form `{candidate, sdpMid, sdpMLineIndex, usernameFragment}` (L650-693). [SRC]
+- A string such as `"udp"` converts to `Protocol` through `TryFrom<&str>` (crates/proto/src/net.rs L85-98). [SRC]
+
+**Base and local address for each kind.** The source states this in the field docs at L49-58 and L85-93. [SRC]
+- *Host:* base = `addr`, local = `addr`.
+- *Server-reflexive:* base = `base`, local = `base`.
+- *Relayed:* base = `addr`, which is the allocation on the TURN server, and `local` is whatever we pass in (L305-317, builder L807-821).
+- For server-reflexive and relayed candidates, `raddr` is faked to `0.0.0.0:0` (L279, L313, L356-373). [SRC]
+
+**Validation.**
+- `is_valid_ip` (L628-635) rejects these IPv4 addresses: link-local, broadcast, multicast, and unspecified. For IPv6 it rejects only multicast and unspecified. [SRC]
+- `server_reflexive` requires `addr` and `base` to be the same IP family (L265-269). [SRC]
+- `relayed()` doesn't validate `local` at all. [SRC]
+
+**What `add_local_candidate(&mut self, c: Candidate) -> Option<&Candidate>` does** (L620-722). [SRC]
+- It sets the candidate's local preference and its ufrag.
+- It drops a redundant candidate (same `addr`, `base`, and `proto`), keeping the one with higher priority.
+- It pairs the candidate with every remote candidate of the same IP family.
+- The candidate it returns is the one to signal to the other pilot.
+
+**What a relayed candidate needs.**
+- `addr` is the allocated relay address, the XOR-RELAYED-ADDRESS from the TURN server. [SRC]
+- `local` is the interface address the TURN allocation was made from (L291-295). [SRC]
+- `local` is used only in two places: a penalty in local preference when the two addresses are different IP families (preference.rs L62-77), and the public getter `Candidate::local()` (L512). [SRC]
+- Every send uses `base()` (agent.rs L1599, L1766, L1964), and `.local()` appears nowhere in agent.rs. [SRC]
+
+**STUN and TURN servers are our job.**
+- lib.rs L47-48 states: "The agent does not enumerate network interfaces, query STUN servers, or allocate TURN relays." [DOC/SRC]
+- The agent sends binding requests only to candidate pairs (L1725-1772). [SRC]
+- It accepts a response only if the transaction ID belongs to one of those pairs (L1119-1133). [SRC]
+- `StunMessage::parse` rejects a Binding success without integrity, with the error "No message integrity in incoming STUN binding reply" (stun.rs L164-175). [SRC]
+- On TURN: `accepts_message` rejects the TURN methods (agent.rs L1144-1156). The STUN codec does carry TURN attributes and builder methods (stun.rs L1256-1290), but the crate has no TURN client logic. [SRC]
+- Thomas Eizinger, a co-author of `is`, suggests rolling our own STUN client: "you can roll your own client using `stun-codec` quite easily" (str0m issue #723). [DOC]
+
+**How to add a port-mapped address.** RFC 8445's text never mentions UPnP, NAT-PMP, or PCP; I searched rfc8445.txt. [DOC] I recommend adding it as `Candidate::server_reflexive(mapped_public, local_sock_addr, "udp")`. [INFERENCE]
+- The agent then sends from the base, which is our real socket.
+- Checks that come in through the mapping arrive with an OS destination equal to the local address. The agent requires that destination to match a Host or Relayed candidate's `addr` (L1448-1452), and our host candidate does.
+- If we added the mapped address as a host candidate instead, its base would be the public address. The agent would then emit `Transmit`s with a source our socket isn't bound to.
+
+**A local server-reflexive candidate creates no extra pairs.** When its base matches a host candidate's, the duplicate-pair check on local base removes them (L857-897). A test asserts exactly 1 pair (lib.rs L939-966). [SRC] A test-helper comment adds: "Server-reflexive candidates are typically not added locally because one cannot directly send from them." (lib.rs L1350-1354) [SRC]
+
+**Type preferences** (L459-468). [SRC]
+
+| Candidate kind | Type preference |
+| --- | --- |
+| Host over UDP | 126 |
+| Peer-reflexive over UDP | 110 |
+| Server-reflexive | 100 |
+| Host over TCP | 90 |
+| Peer-reflexive over TCP | 80 |
+| Relayed over UDP | 2 |
+| Relayed over TCP | 1 |
+| Relayed over anything else | 0 |
+
+## 3. Remote candidates, trickle, removal, and restart
+
+**Adding remote candidates.**
+- The signature is `add_remote_candidate(&mut self, c: Candidate)` and it returns `()`, although its doc says "Returns `false`" (L724-825). [SRC]
+- It rejects a candidate whose component isn't 1. It also rejects a ufrag mismatch when remote credentials are already set. [SRC]
+- It replaces a temporary peer-reflexive candidate with the real one when it arrives. [SRC]
+- It re-enables a candidate that was earlier invalidated. [SRC]
+
+**Trickle ICE.**
+- Local and remote candidates can be added at any time, including after the connection is up ("Trickle ICE only", README L73). [DOC]
+- Tests show this working:
+  - `trickle_host_host` (lib.rs L733-761).
+  - `migrates_to_new_candidates_after_invalidation_without_timeout` (L411-465): a new pair takes over before `ice_timeout`.
+  - `new_candidates_after_disconnected_should_transition_to_checking` (L1094-1165).
+- [SRC]
+
+**There is no end-of-candidates and no Failed state.** `docs/ice.md` L14-21 covers it, and the comment at agent.rs L210-219 reads: "We never end trickle ice and it's always possible to "come back" if more remote candidates are added." [SRC]
+
+**Removing a candidate.**
+- `invalidate_candidate(&mut self, c: &Candidate) -> bool` (L941-979) works on local or remote candidates. It matches on `addr`, `base`, `raddr`, `kind`, and `proto`, and drops the candidate's pairs. [SRC]
+- Re-adding an invalidated candidate re-enables it (L658-662, L800-803; tests at lib.rs L468-556). [SRC]
+
+**ICE restart.**
+- `ice_restart(&mut self, local_credentials: IceCreds, keep_local_candidates: bool)` (L988-1018) clears the remote credentials, remote candidates, pairs, queued transmits, and queued events. It then emits `IceRestart` and sets the state to Checking. [SRC]
+- `recreate_candidate_pairs()` (L1023-1043) rebuilds the pairs from the candidates the agent already has, and sets the state to Checking. [SRC]
+- One mismatch: the doc on `stats()` says "Resets on ICE restart" (L607), but `ice_restart` doesn't touch the stats. [SRC]
+
+## 4. Outgoing packets and relayed candidates
+
+**`poll_transmit(&mut self) -> Option<Transmit>`** is at L1288-1297. [SRC]
+
+**The `Transmit` struct** is `str0m_proto::Transmit` (crates/proto/src/net.rs L118-136). [SRC]
+- `proto: Protocol`
+- `source: SocketAddr`
+- `destination: SocketAddr`
+- `contents: DatagramSend`, which dereferences to `[u8]` and converts into `Vec<u8>` (L149-171)
+
+**Naming the type.** `is` re-exports only `Protocol` and `Sha1HmacProvider` from str0m-proto (lib.rs L122). To name `Transmit` you depend on `str0m-proto`, whose README says "Internal crate for str0m. Not intended for direct use." Firezone depends on it anyway. [SRC]
+
+**Every send uses `base()`, with no branch on candidate kind.** [SRC]
+```rust
+// agent.rs L1764-1769 (connectivity check)
+let trans = Transmit { proto: local.proto(), source: local.base(), destination: remote.addr(), contents: buf.into() };
+// agent.rs L1962-1966
+self.emit_event(IceAgentEvent::NominatedSend { proto: local.proto(), source: local.base(), destination: remote.addr() })
+// candidate.rs L305-317, Candidate::relayed: base = Some(addr)
+Ok(Candidate::new(None, 1, parse_proto(proto)?, None, addr, Some(addr), CandidateKind::Relayed, Some(Self::arbitrary_raddr(addr)), None, None, local))
+```
+- Binding replies use the same base as their source (L1597-1663). [SRC]
+- A 487 reply uses `source: req.destination` (L1689-1694). [SRC]
+
+**So the answer is yes: our code must recognize the relayed source and wrap the packet.**
+- The test harness agrees. In `symmetric_nat_both_sides` the nominated `source` is the relayed address `4.4.4.4:1000` (lib.rs L1205-1209). [SRC]
+- Firezone does the same in `snownet/src/node.rs` L1653-1681. Its comment reads: "Check if `is` wants us to send from a "remote" socket, i.e. one that we allocated with a relay." It looks up `allocations.get_mut_by_allocation(source)` and wraps the packet as ChannelData to the relay; if there's no match it sends from `source` locally. [SRC, firezone]
+- The application's own data, sent on `NominatedSend`, needs the same routing. [INFERENCE]
+
+## 5. Incoming packets
+
+**The functions.**
+- The entry point is `handle_packet(&mut self, now: Instant, packet: StunPacket) -> bool` (L1163-1189). It returns false when the packet isn't accepted. [SRC]
+- `StunPacket<'a> { pub proto: Protocol, pub source: SocketAddr, pub destination: SocketAddr, pub message: StunMessage<'a> }` is at stun.rs L1453-1464. [SRC]
+- We parse first, with `StunMessage::parse(buf: &'a [u8]) -> Result<StunMessage<'a>, StunError>` (stun.rs L121). [SRC]
+
+**How the agent decides a STUN message is for it.** The public helper is `accepts_message(&self, &StunMessage<'_>) -> bool` (L1063-1158). `handle_packet` calls it internally. It returns false for any of these: [SRC]
+- a Binding indication
+- an unknown method or class
+- any TURN method
+- a request whose USERNAME left half isn't our ufrag
+- a request whose right half doesn't match the remote ufrag, once that is known
+- a message that fails the integrity check
+- a response whose transaction ID it doesn't recognize
+
+**Non-STUN data never reaches the agent, because the types prevent it.** [SRC]
+- The parser checks the length is a multiple of 4, that the length plus 20 equals the buffer length, and the magic cookie (stun.rs L122-139).
+- It masks off the top two bits of the type field rather than checking them (L126).
+- It requires a binding request to carry MESSAGE-INTEGRITY, a USERNAME containing `:`, and PRIORITY (L176-190).
+- It parses FINGERPRINT but doesn't verify it (L1037-1043).
+- Demultiplexing by first byte is our job. str0m's own test is `byte0 < 2 && len >= 20` (src/io/mod.rs L125-126).
+
+**Packets that arrived through TURN.** [SRC]
+- A binding request is accepted only if `destination` equals the `addr` of a local Host or Relayed candidate with the same protocol. Otherwise the agent logs "Discarding STUN request on unknown interface" (L1448-1465).
+- So we present `destination` = our relayed address and `source` = the peer's address.
+- For responses the agent doesn't check `destination`. It finds the pair by transaction ID and matches XOR-MAPPED-ADDRESS against local candidates' `addr` (L1846-1850). That address will be our relayed address.
+- Firezone does the same (node.rs L563-564): "For our agents, it is important what the initial "destination" of the packet was."
+
+**Packets that arrived directly.** `destination` must be the host candidate's address. [SRC] With one socket bound to the wildcard address we need each datagram's destination IP. [INFERENCE] I didn't check whether quinn-udp provides it on Windows. [UNVERIFIED]
+
+## 6. Events and connection states
+
+**The event enum** is `IceAgentEvent` (L257-297), read with `poll_event()` (L1359). [SRC]
+- `IceRestart(IceCreds)`
+- `IceConnectionStateChange(IceConnectionState)`
+- `DiscoveredRecv { proto, source }`, deduplicated per (protocol, address) (L1343-1349)
+- `NominatedSend { proto, source, destination }`
+
+**Choosing where to send data.** We use the last `NominatedSend`; its doc says "The application should always use the values of the last emitted event to send data." (L283-285). [SRC] Both roles emit it, from `evaluate_nomination` (L1923-1968). [SRC]
+
+**Peer-reflexive candidates and other source addresses.**
+- The agent creates peer-reflexive candidates silently and emits no event for them (L1542-1551, L1891-1906). [SRC]
+- `DiscoveredRecv` is the only signal of a new remote source address. [SRC]
+- `has_viable_remote_candidate(addr) -> bool` (L514-519) says whether data from an address belongs to a pair that has succeeded. [SRC]
+
+**States** (L185-220). [SRC]
+- The states are New, Checking, Connected, Completed, and Disconnected. There is no Failed or Closed.
+- `is_connected()` is true for Connected and Completed (L224-227).
+
+**Transitions,** from `evaluate_state` (L2034-2099). [SRC]
+- From New, the agent moves to Checking.
+- From Checking or Disconnected:
+  - with a nominated pair, to Connected if other pairs are still possible, otherwise to Completed;
+  - with nothing nominated and nothing possible, to Disconnected;
+  - otherwise to Checking.
+- From Connected, with nothing nominated, to Checking or Disconnected.
+- From Completed, when new pairs become possible, to Connected.
+
+**Completed rarely appears.** Nominated pairs don't count as "still possible" (L2040-2046). So with several working pairs the state stays Connected and never reaches Completed. We should test with `is_connected()`. [INFERENCE]
+
+## 7. Timers and settings
+
+**Polling.**
+- `poll_timeout(&mut self) -> Option<Instant>` (L1305-1341) returns `None` until `handle_timeout` has run once. If anything is queued it returns `last_now + Ta`. Otherwise it returns the earliest next check, but no sooner than `last_now + Ta`. With no pairs at all it returns `last_now + 3s`. [SRC]
+- `handle_timeout(&mut self, now)` handles at most one queued request, or one pair check, per call (L1218-1222, L1268-1284). So checks are paced at one per Ta. [SRC]
+
+**Constants and setters.** [SRC]
+
+| Value | Default | Where | Setter |
+| --- | --- | --- | --- |
+| Pacing interval (Ta) | 50ms | agent.rs L345 | `set_timing_advance(Duration)` L404 |
+| Initial retransmission timeout (RTO) | 250ms | stun.rs L67 | `set_initial_stun_rto` L428 |
+| Maximum RTO | 3000ms | stun.rs L70 | `set_max_stun_rto` L450 |
+| `DEFAULT_MAX_RETRANSMITS` | 9 | stun.rs L12 | `set_max_stun_retransmits` L465 |
+| Candidate pair limit | 100 | agent.rs L918 | `set_max_candidate_pairs` L379 |
+| Queued request limit | 100 | agent.rs L1415 | none |
+| `RECENT_BINDING_REQUEST` | 15s | pair.rs L12 | none |
+| MTU target / warning size | 1150 / 1280 bytes | proto lib.rs L4, L13 | `set_mtu` agent.rs L354 |
+
+- The source comment on the maximum RTO reads: "libwebrtc uses 8000 here but we want faster detection of gone peers." [SRC]
+- `set_local_preference` (L478), `set_ice_lite` (L394), and `set_control_tie_breaker` (L372) are the other setters. [SRC]
+- Timing changes take effect immediately (L482-486; test at lib.rs L1037-1091). [SRC]
+
+**Retransmit delay.** `stun_resend_delay(n) = min(initial_rto << min(n-1, max_retransmits), max_rto)` (stun.rs L37-48). Each retry is a new transaction with a new transaction ID. The agent keeps the last `max_retransmits` attempts, so a late response to one of those still counts (pair.rs L284-297). [SRC]
+
+**Time to detect a dead pair.** `ice_timeout()` is `timeout()`, which is the sum of `delay(2..=max_retransmits)` plus `delay(max_retransmits)` (stun.rs L23-29). [SRC]
+- With defaults that is 500 + 1000 + 2000 + 3000×5 + 3000 = **21.5s**. [INFERENCE: arithmetic]
+- Firezone's test asserts 16.5s for its own settings (12 retransmits, 1500ms maximum RTO, 250ms initial RTO), which matches the formula (firezone node.rs L156-162, L2291-2297). [SRC]
+- A pair that never gets an answer is pruned after roughly 21.75s. [INFERENCE]
+
+**Keepalive.**
+- Every pair, not only the nominated one, keeps being checked. The next check is due at the last check plus `delay(number of attempts)`, and never more than `max_rto` later (pair.rs L431-465). [SRC]
+- In steady state that is about one check every 3s, per pair, from each side. [INFERENCE]
+- When the oldest unanswered check is more than `max_rto/2` old, the delays restart from the unanswered count (pair.rs L441-450). [SRC]
+- A pair counts as alive while the peer has sent us a binding request within the last 15s (pair.rs L476-480). [SRC]
+
+**When the nominated pair dies.** [SRC]
+- `handle_timeout` deletes pairs that have failed (L1229-1246) and then runs `evaluate_nomination` again.
+- The controlling side switches to the highest-priority surviving pair that has succeeded and emits a new `NominatedSend` (L1926-1932, L1958-1966). The controlled side follows the new USE-CANDIDATE.
+- If no pair survives, the state becomes Disconnected (L2076-2085). No event cancels the last `NominatedSend`.
+
+**Recovering a failed pair.**
+- A failed pair is deleted, not marked; the comment is at pair.rs L78-86. [SRC]
+- A binding request from the peer recreates the pair (agent.rs L1568-1588). [SRC]
+- So do new candidates, or a call to `recreate_candidate_pairs()`. [SRC]
+- Re-adding an identical local candidate is rejected. `same_kind` counts the existing candidate, so the new one gets a lower priority and is logged as "Reject redundant candidate" (L632-672). [INFERENCE]
+- Re-adding a remote candidate after its pairs are gone does create pairs again (L754-824). [INFERENCE]
+- Firezone switches to longer "idle" timing when idle (`client_idle`: 25s RTO, 4 retransmits; node.rs L164-170). [SRC]
+
+## 8. IPv6
+
+- The agent pairs IPv4 only with IPv4 and IPv6 only with IPv6 (L700-706, L815-821). [SRC]
+- The default local preference (preference.rs L13-78) gives each candidate kind its own range: relayed 0-16384, server-reflexive to 32768, peer-reflexive to 49152, host to 65536. Inside each range IPv6 gets the odd values, so it sits 1 above IPv4. [SRC]
+- A relayed candidate whose relay address and local address are different IP families takes a penalty of 1000. A test shows a relayed IPv4-to-IPv4 pair winning over an IPv6 relay reached over IPv4 (lib.rs L968-1035). [SRC]
+- IPv6 link-local addresses are accepted (candidate.rs L628-635). [SRC]
+- Unique local addresses (ULA, fc00::/7) get no special handling; I searched and found none. [SRC]
+- Loopback addresses are accepted, although the doc comments at L618-619 and L727-728 say they "cause an error". [SRC]
+- `set_local_preference(impl LocalPreference)` lets us plug in our own policy, for example demoting ULA or link-local addresses. It must be set before any local candidate is added (L475-480). [SRC]
+
+## 9. Nomination
+
+**Regular nomination only, made by the controlling side.**
+- The agent adds USE-CANDIDATE only when `self.controlling && pair.is_nominated()` (L1733). [SRC]
+- It nominates a pair only after that pair has succeeded (L1926-1932, L1953-1956). [SRC]
+- In the `host_host` test the controlling side sends 2 requests: a check, then the nomination (lib.rs L277-286). [SRC]
+
+**The controlled side.** It nominates a pair when USE-CANDIDATE arrives (L1627-1633). It rejects USE-CANDIDATE while it is itself controlling (L1485-1489). [SRC]
+
+**The selected pair can change.** README L76-77 says "Nomination is not final", and docs/ice.md L120-140 explains why. [DOC] [SRC]
+- `evaluate_nomination` runs after every response the controlling side receives (L1915-1917) and on every `handle_timeout` (L1227).
+- It picks the highest-priority pair that has succeeded, and switches when that priority differs from the current one (L1942-1950).
+- It never looks at round-trip time.
+- A test confirms a lower-priority pair added later doesn't take over (lib.rs L763-807).
+
+## 10. Tests, examples, and the README
+
+- `crates/is` contains only `Cargo.toml`, `README.md`, and `src/`. There is no `examples/` or `tests/` folder. [SRC]
+- lib.rs L124-1727 holds about 26 tests that run two agents against each other. They use a `TestAgent`/`progress()` harness that simulates port-restricted cone and symmetric NATs. Examples:
+  - `host_host`
+  - `trickle_host_host`
+  - `symmetric_nat_both_sides`
+  - `role_conflict_resolves_to_one_controlled_side`
+  - `migrates_to_new_candidates_after_invalidation_without_timeout`
+  - `changed_timing_config_takes_effect_immediately`
+- [SRC]
+- Unit tests are also in agent.rs from L2108, pair.rs L584-645, candidate.rs from L894, preference.rs from L80, and stun.rs from L1466. [SRC]
+- The README's "Quick start" and "Address discovery is external" sections are mirrored as the `no_run` doctest at lib.rs L28-50. [DOC]
+
+## 11. Who uses `is`
+
+**crates.io.** The reverse-dependencies API reports a total of 1: `str0m 0.24.1` with requirement `^0.11.1`. [DOC]
+
+**How str0m depends on it.** [SRC]
+- The workspace declares `is = { version = "0.11.1", path = "crates/is", default-features = false }` (Cargo.toml L44), and str0m uses `is.workspace = true` (L145).
+- str0m re-exports `Candidate`, `CandidateBuilder`, `CandidateKind`, `IceConnectionState`, and `IceCreds` (src/lib.rs L726).
+- It also has a hidden `pub mod ice` (src/lib.rs L747-757).
+- It feeds the agent through `Rtc::accepts` (L1909-1937) and `do_handle_receive` (L2070-2098).
+
+**GitHub code search for `is::IceAgent`.** Besides str0m and two vendored copies of it, the hit is firezone/firezone `rust/libs/connlib/snownet/src/node/connections.rs`. [SRC]
+- Firezone's workspace has `is = "0.11.0"` (rust/Cargo.toml L155) and `str0m-proto = "0.7"` (L229). snownet also uses `stun_codec`. [SRC]
+- Firezone also has an "iceless" `path-agent` that it can use instead (snownet/src/agent.rs L1-18). [SRC]
+
+**The `use is::` search** turned up mostly unrelated repositories. [SRC]
+
+## 12. Maintainers, releases, issues, and TURN
+
+**Maintainers.**
+- The crates.io owners API lists only `algesten` (Martin Algesten). [DOC]
+- Cargo.toml lists two authors: Martin Algesten and Thomas Eizinger (L4). [SRC]
+- Eizinger links Firezone's code as "ours" in str0m issue #723, which suggests he works on Firezone. [DOC/INFERENCE]
+- The GitHub commits API lists 21 commits touching `crates/is` since the 2026-03-24 workspace move, which is when that path was created: algesten 12, thomaseizinger 5, and four others 1 each. [SRC]
+
+**Release history.**
+- Versions 0.7.0 through 0.11.1 run from 2026-03-24 to 2026-09-25 and were all published by algesten. [DOC]
+- Versions 0.1.0 through 0.6.0 (2019) are an unrelated crate, which confirms what you suspected. [DOC]
+  - Their license is MIT and `published_by` is null.
+  - All of them are yanked; the crates.io record shows algesten yanked 0.6.0 on 2026-03-07.
+  - The 0.6.0 description begins: "This is a crate that was made with idea that made no sense to begin with".
+
+**Changelog.** There is no separate changelog for `is`; the root `CHANGELOG.md` mixes in its entries. [SRC]
+- str0m 0.18.0 has "Refactor out new crate "is" (ice agent) #912" (L108).
+- `is-0.9.0` lists #950 (role conflicts) and #951 (L85-88).
+- `is-0.9.1` lists #962, the RTT statistics (L75-77).
+- There are no headings for `is` 0.10.0, 0.11.0, or 0.11.1.
+
+**Open str0m issues on these topics.** [DOC]
+- #416 "Missing docs or examples for how to use ICE restart"
+- #687 "Signal when the candidate list changes"
+- #694 "Receive Stun bytes not counted"
+- #723 "[Feature Request] Add STUN/TURN server support for NIC enumeration". A comment from 2026-06-12 points to ystreet's `turn-client-proto`.
+
+**Open PR.** #1019 "Add support for DTLS over ICE" by pthatcher touches `crates/is` (agent.rs +135/−16, a new dtls_over_ice.rs of 897 lines, and stun.rs). [DOC]
+
+**TURN.** str0m's README says TURN is a way of "obtaining sockets", and its feature table has "Turn | :x:" (README L459-468, L568). The `is` README's design decisions list "**STUN/TURN are external**". [DOC]
+
+## What I could not determine
+
+- Whether public STUN servers include MESSAGE-INTEGRITY. If they don't, `is::stun::StunMessage::parse` can't read their replies.
+- Whether quinn-udp on Windows gives each datagram's destination IP and lets us set its source IP. We need both to fill `StunPacket.destination` and to honor `Transmit.source` on one wildcard socket.
+- What changed in `is` 0.10.0, 0.11.0, and 0.11.1. The changelog has no headings for them, and I didn't diff the tags.
+- How the agent behaves on real NATs. I found no measurements; the NAT tests are simulations.
+- RFC 9443's demux byte ranges, and how they interact with ChannelData. I didn't fetch the RFC.
+- Whether `is` implements consent freshness as RFC 7675 defines it. The source has no explicit consent mechanism, only the periodic checks on every pair.

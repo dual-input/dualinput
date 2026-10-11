@@ -223,36 +223,42 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Plugin code runs only in the core
 
-- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS-ng embedded there under memory and time limits ([above](#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, the sim, and the pilot's files only through APIs our own code carries out.
+- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS-ng embedded there under memory and time limits ([above](#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, and the sim only through APIs our own code carries out, and never the pilot's files or the network.
   Nothing a plugin ships runs in a panel or in the module: for something inside the sim's frame, our module offers mechanisms the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, and for something in a panel, our panel bridge offers generic operations.
-  The changes a plugin makes to an aircraft's files are files and patches that the watcher applies.
+  A plugin belongs to one profile and sits beside it, runs on every variant the profile covers, and writes only through `write()`, with the panel bridge's operations among its targets ([01-format-and-delivery](../profiles/01-format-and-delivery.md#plugins)).
   This changes [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim), which gives plugins hooks in the panels and in the WASM module that load their modules by name, and answers [03-v1-scope](../product/03-v1-scope.md#plugins)'s question of where each part of a plugin runs.
-  Settled in node 1.3 by the user, 2026-10-08.
+  Settled in node 1.3 by the user, 2026-10-08, and narrowed to the sim and the aircraft in node 4, 2026-10-11.
 - **Because:**
   - Plugins implement a framework API, the way a class implements an interface, and their code runs only in the core's engine; when a plugin needs something done in panel code, we offer the API, and our own panel code carries it out (user, 2026-10-08).
   - Crosscheck's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic and panel code for one aircraft stay out of our module and our panel bridge.
   - Our generic panel code keeps the fail-open rules for anything in the pilot's input path ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)), whatever a plugin asks of it.
   - A plugin that's only JavaScript and data can reach pilots apart from Crosscheck's releases ([below](#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)), while the WASM module and the panel bridge load only when the sim boots or a panel loads.
-  - The watcher applies file changes before the sim boots, usually while the core isn't running ([01-spine](01-spine.md#components-with-no-session)), so code that runs only in the core couldn't make them.
+  - A plugin that read the pilot's files, published from a hijacked repository, could pass them to a crewmate over a channel; with no files or network, a plugin can do no worse than a profile, which only spoils a flight, so neither needs signing, and the 58P's plugin reads its gauges' JavaScript and DataStorage through our panel bridge and needs no files (user, 2026-10-11).
 - **Leaves out:**
   - which APIs our panel bridge and module offer, for the part that designs plugins; the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins))
   - a plugin that needs logic inside the frame beyond what calculator code expresses, which no v1 plugin is known to need
+  - how a plugin changes an aircraft's files, which waits until a plugin needs it, with [decision 001](../../decisions/001-changing-other-developers-packages.md) holding meanwhile (user, 2026-10-11)
 
 ## Profiles and plugins reach pilots apart from Crosscheck's releases
 
 - **Decided:** profiles and plugins update apart from Crosscheck's releases.
-  The core fetches each, checks its signature against a key its own release carries, and pins one version of each, by hash, for a session; nothing changes mid-session.
-  Each profile and plugin declares the version of our plugin API it needs, and the core refuses one that needs a newer Crosscheck.
-  A pilot whose machine lacks the version the session pinned fetches it by its hash.
-  A plugin's changes to aircraft files take effect at the next sim start, when the watcher applies them.
-  This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's question of whether profiles reach pilots apart from Crosscheck's releases.
-  Settled in node 1.3 by the user, 2026-10-08.
+  They live in one public repository of flat files, and on each merge CI checks each against the format, works out the level it needs, merges a profile's modules into it, compiles a plugin to JavaScript, and publishes them on GitHub Pages: an index of every published version, with the variants it covers, its hash, the date CI published it, and its level, and every version under its hash, kept for good.
+  When an aircraft loads, the core fetches the index, takes the newest profile that covers the loaded aircraft at or below its own level, fetches it and its plugin by hash, and checks the bytes against the hash.
+  It pins one version of each, by hash, for a session, and nothing changes mid-session; a pilot whose machine lacks the version the session pinned fetches it by its hash.
+  The format and the plugin API share one level, an integer that each release adding to either raises by 1, and a release runs every profile and plugin at or below its own level.
+  Nothing is signed, and a profile carries no version or date of its own.
+  This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's questions of whether profiles reach pilots apart from Crosscheck's releases, where they're served from, how often the core checks, and how the plugin API's version relates to Crosscheck's.
+  Settled in node 1.3 by the user, 2026-10-08, and in node 4, 2026-10-11 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#delivery)).
 - **Because:**
   - If profiles and plugins shipped in releases, every fix to one would take a new Crosscheck.
     A pilot installs a new Crosscheck only with the sim closed, and pilots on different versions can't fly together, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - The [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares each profile's version and hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../product/04-room-for-later.md#profiles)).
   - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
-- **Leaves out:** where profiles and plugins are served from, how their signing keys are kept, how often the core checks for new versions, and how the plugin API version relates to Crosscheck's, for [node 4](plan.md#4-profiles-and-plugin-delivery) of the architecture plan.
+  - The repository authors edit is the one CI publishes from, and GitHub Pages "sites have a soft bandwidth limit of 100 GB per month" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).
+  - Neither a profile's script nor a plugin reaches the pilot's files or the network ([above](#plugin-code-runs-only-in-the-core)), so a hijacked repository could publish something that spoils flights and nothing more, and a signature would help only with a key kept off GitHub, a manual step in every publish (user, 2026-10-11).
+  - A strict loader refuses what it doesn't know: our FS Copilot fork's new `pointer:` key "bricks profile loading on older releases" (FS Copilot fork, `record/pointer-forwarding/docs/11-fsc-implementation-plan.md`, item 6), so a core has to know which version it can run, and a level CI works out asks nothing of authors (user, 2026-10-11).
+  - Versions are hard for an average author, and a date the author writes is missing from 4 of FS Copilot's 56 profiles (fsc-editor, `docs/sim-vars/18-language-core.md`, `header-updated`), so the hash is computed and the date is when CI published (user, 2026-10-11).
+- **Leaves out:** which pilot's version the session pins when two pilots' cores took different versions, for the session's stage of step 8; and signing, if a later plugin needs the pilot's files.
 
 ## Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them
 
@@ -622,6 +628,47 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
   - One rule for every way a host goes quiet costs up to 15s of copies standing still where FS Copilot removed them at once, which the user accepted for the simpler design (user, 2026-10-11).
 - **Leaves out:** which pilot receives control when the PF leaves a crew of more than two, and hosts of their own for traffic and ATC, for the picks that need them.
+
+## A profile is YAML whose script is JavaScript, where names only name and only `write()` writes
+
+- **Decided:** a profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Crosscheck's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()`, with a chain for pacing, is the one call that writes, a plugin's writes included.
+  An entry's `write:` is a name, a map for `toggle` or `inc` and `dec`, a plugin's write method, or a function `(value) => …` that reads the global `state` and returns nothing, and an event entry's `write:` is required.
+  An entry's direction is `owner`, `pilot_flying` or `shared` by default; an `aircraft:` header maps variant IDs to SimObjects folders, which entries, seats, and displays select with `only`; a profile imports modules by path; and profiles and modules live as flat files in one public repository.
+  The core, CI, and the IDE run one checker, and a load fails on anything that breaks a rule.
+  This gives [01-profile-entries](../sync/01-profile-entries.md) the syntax and file layout that step 7's exit names ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+  Settled in node 4 by the user, 2026-10-11 ([01-format-and-delivery](../profiles/01-format-and-delivery.md)).
+- **Because:**
+  - YAML is easy for a simmer who doesn't code, and functions let the IDE guide and check a strict API (user, 2026-10-11).
+  - Quoted names keep one real language, which QuickJS-ng runs and TypeScript checks as they are, where a grammar of our own would make every condition in a write function a feature to build (user, 2026-10-11).
+  - Names that only name and one call that writes let the engine see every write, which it marks as its own, paces, orders, and checks ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
+  - FS Copilot's format guessed a setter's kind from its characters and fell back silently, emptied a whole profile on one unknown key, and ran a repeated name as two subscriptions (fsc-editor, `docs/fscopilot-behavior.md` and `docs/sim-vars/18-language-core.md`).
+- **Leaves out:** counting into a shadow value with `default`, settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, and reading client data, each until a profile or plugin needs it.
+
+## A write is checked every frame for up to 2s, and only the built-in forms retry
+
+- **Decided:** after writing a state entry, a machine reads the entry's value every frame, and the write has landed the moment the value matches what it was asked to write, within float32 precision.
+  After 2s without a match, a name, `toggle`, or `inc` and `dec` writes again, a write function or a plugin's write method gets no retry, and a write that never matches flags its entry.
+  A run of a write function that calls no `write()` gets no check, and a write function runs again when an entry it read changes, but only while its own entry's value still differs from the value it was asked to write.
+  This changes [02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)'s fixed 500ms wait and its retries of every form, and answers its question of how to keep a repeated action from doing harm.
+  Settled in node 4 by the user, 2026-10-11 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
+- **Because:**
+  - On the Fenix, the battery bus and a lamp followed a write to the battery switch after 1.2s (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)), so an entry that reads a readout the aircraft computes needs longer than 500ms, and a `toggle` read back too early flips twice.
+  - The built-in forms do only what's left, and catch-up's radio frequency written before the bus has power lands on a retry ([03-catch-up](../sync/03-catch-up.md#choosing-the-order)), while a retried write function could press a button twice.
+  - An animation frame we wrote as 165 read back as 165.000002 (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)).
+- **Leaves out:** the retry count, which [02-live-sync](../sync/02-live-sync.md#open-questions) leaves open.
+
+## Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 10ms a call, and 4 KB a value
+
+- **Decided:** each loaded aircraft gets two QuickJS-ng runtimes in the core, one for its profile's script and one for its plugin, each limited to 64 MB of memory and 10ms a call, and an entry's value is capped at 4 KB as sent, with no cap of its own on the state object.
+  A write function at a limit fails that write and its entry is flagged, a plugin at a limit is turned off for the rest of the session, and a value over 4 KB isn't sent and its entry is flagged.
+  This sets the size limits of the sandbox that write functions run in, which step 7's exit names ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
+  Settled in node 4 by the user, 2026-10-11 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#the-sandbox)).
+- **Because:**
+  - QuickJS stopped a runaway allocation at a 64 MB limit in 88ms and an endless loop at its time limit, with the host running on, and an idle runtime held 0.9 MB, while 100 write functions took 75µs a frame (measured on our development machine, 2026-10-08, [architecture log](log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
+  - A runtime runs one call at a time, so a stuck call holds up every write behind it, and 10ms is less than one sim frame at 60 fps.
+  - A cockpit change naming its entry and two pilots in full took 84 bytes ([network log, 2.2][n22]), and the largest value we know of, the KNS-81's 10 waypoints, would be a few hundred bytes (an estimate).
+  - A profile fixes its entries when it loads, so the cap on each value bounds the state object.
+- **Leaves out:** what real profiles and plugins need, which the 58P's profile and plugin measure.
 
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

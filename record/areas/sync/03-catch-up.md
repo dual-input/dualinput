@@ -6,6 +6,10 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, ../product/03-v1-scope.md (
 Decides:     Which catch-up runs when, the order state applies in, what happens while catch-up runs, and when a freshly loaded aircraft counts as settled.
 ```
 
+> **Note**
+> Since 2026-10-11, a pilot cut off for up to 30 minutes whose sim kept running comes back to a replay, where [replaying a short outage](#replaying-a-short-outage) below sizes one for 5 minutes: through a cut in which the PF was busy, a replay at the PF's spacing runs nearly as long as the cut, so node 3 shortens it ([01-between-machines](../network/01-between-machines.md#coming-back)).
+> Control no longer passes when the PF's connection drops, so a PM's catch-up doesn't stop for it, as [while catch-up runs](#while-catch-up-runs) below says; a catch-up cut off by a lost link starts again on the new connection ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
+
 A cockpit catches up in one of two ways.
 After a short outage with the sim still running, it replays the changes it missed, in order.
 After a late join, a sim restart, or the end of preflight, it takes the flying machine's state as it stands, applies each entry once in an order step 7 decides, checks every write, and flags what never matches.

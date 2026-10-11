@@ -409,7 +409,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Decided:** each core runs one iroh 1.3 endpoint, under a key drawn fresh for each session and kept in the session file, and holds one QUIC connection to every other core in the session.
   iroh makes the connection directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't, and moves it between the two.
   Each link is up, lost after 5s with nothing from that member, when its core closes the connection and redials, or disconnected after 30 minutes without one; any packet counts as hearing from a member, and a heartbeat goes once a second.
-  A joining core dials every member, and after a lost link both cores redial; when two connections between a pair pass their first message, each side learns which the other still holds from numbers in the first messages, and of two both hold, the one a PM dialed to the PF stays.
+  A joining core dials every member, and after a lost link both cores redial; when two connections between a pair pass their first message, each side learns which the other still holds from numbers in the first messages, and of two both hold, the one the lower endpoint ID dialed stays.
   A core keys what it keeps about a sender by the sender's pilot ID and restart count, never by a connection; v1 forwards nothing, and a later feature that forwards carries each message's sender with it.
   QUIC's TLS 1.3 encryption stays on, and Crosscheck builds nothing for encryption.
   This answers how the cores reach each other, which the spine leaves to node 2 ([01-spine](01-spine.md#between-machines)), and how a core learns another went quiet ([01-spine](01-spine.md#how-the-core-knows-a-component-is-alive)), and picks [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s link between every pair.
@@ -418,7 +418,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - iroh finds paths, opens router ports, and relays with no glue of ours, where ICE through `is` with TURN and quinn needs about 2,500 to 4,000 lines by an agent's estimate ([network log, 2.1][n21]).
   - From each of two friends' home networks to ours, 10 of 10 connections went direct, and iroh's relay and its move to the relay met the user's pass lines ([network log, 2.3][n23]).
   - A fresh connection carried data 0.3s to 1.4s after a total outage ended, while one that lived through a 10s outage took 5s to 7s ([network log, p07][p07]).
-  - Both directions of a relayed connection cross the dialed endpoint's home relay, so the connection a PM dialed to the PF runs through the relay nearest the PF ([network log, p05][p05]).
+  - Endpoint IDs are the one thing both sides of a pair always agree on; a rule by who is PF would break after a takeover during a cut, when each side counts itself PF, keeps the other's dial, closes the one the other kept, and redials again.
+    The relay such a rule would choose, the dialed endpoint's home relay ([network log, p05][p05]), helps only when the PF's own link loses packets ([network log, 2.3][n23]).
   - Two endpoints in two processes on one PC each drew their own endpoint ID and ports and connected directly in 2.2ms ([network log, p04][p04]).
   - In our FS Copilot work, two connections between one pair carried every packet twice, and a duplicate arriving at the same instant made the traffic receiver's aircraft stutter (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 4, traffic: what the app needed that the prototype did not", item 5).
   - A key that outlives a session would let the backend and the relays link every session one pilot joins (user, 2026-10-11).
@@ -465,6 +466,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Decided:** the core keeps a registry of the session's channels, each declaring who sends and receives it, its delivery, its priority, and whether it joins the cockpit's shared order.
   v1's channels have fixed numbers in the message crate, each stream opens with a header naming its channel, a channel in the cockpit's shared order rides the cockpit stream tagged with its channel, and a plugin opens only instances of the kinds Crosscheck provides, announcing each on the session channel.
   The cockpit stream is the one replayed log; the session channel and traffic's identities carry the newest value of each key, all of them again on a new connection, and catch-up starts again there.
+  A new connection's first message carries every session key, and a core applies nothing else from the connection until it has passed; a new connection's set of traffic identities replaces the receiver's.
+  A member's own session keys have one writer; every other key but control carries a stamp, the control value its writer held, a number one past the highest its writer has seen, and the writer's pilot ID, and every receiver keeps the value with the highest.
   The flight model's samples, which also carry the yoke, rudder, and toe-brake positions the flying aircraft applied, the avatars, traffic's samples, ATC audio, and a heartbeat once a second ride one-off packets.
   The PF's engine levers and trim ride the cockpit stream, and the following machine writes the PF's last value back when the PM moves one.
   The core holds only the newest packet for each connection, channel, and key, and ATC frames in a short queue with a deadline, hands them to a QUIC queue of a few packets in a fixed order as it has room, keeps a traffic batch under 1,162 bytes, and paces what it sends through a relay below the cap the relay list gives.
@@ -473,7 +476,10 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
   - postcard packed every v1 message smallest but one, with a stable wire format and serde's derives ([network log, 2.2][n22]).
-  - A replayed stale pause or sim-rate change would undo the session's state, where a snapshot of each key's newest value can't.
+  - A replayed stale pause or sim-rate change would undo the session's state, where each key's newest value can't.
+  - QUIC keeps no order across streams, so state sent on its own stream could arrive after the replay it should precede.
+  - Two pilots who change pause during a cut each hold a value the other's numbering can't order, so without a stamp each would take the other's and the two sims would swap.
+  - An object the sim removes during a cut never sends its removal, so merging a new connection's set would keep it frozen on the receiver's screen.
   - The yoke and rudder move nearly every frame while the PF hand-flies, which would flood the cockpit stream and its replay (user, 2026-10-11), and in the flight model's samples they cost no packets of their own.
   - noq queues one-off packets in order and drops the oldest, of any channel, only to make room for a new one (read in noq-proto 1.3.0, `src/connection/datagrams.rs`); on iroh's relay that never happened, and nothing a sender did changed when its channels arrived ([network log, p06][p06]).
   - QUIC keeps no order across streams, so a channel in the cockpit's shared order can only keep it on the cockpit's own stream, and a stream that waited on an announcement on another stream could arrive first.
@@ -483,13 +489,16 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## Control is one value, a generation and the PF's pilot ID
 
 - **Decided:** every change of PF, by the take-control key, by voice, by a PF leaving the flight, or by a takeover while a link is lost or after a sim crash, raises the generation one past the highest its maker has seen, and of two changes with the same generation, the one naming the lower pilot ID wins.
-  The value rides the session channel as one key, so a new connection settles it before any replay, and every cockpit message and flight-model sample carries the generation it was made under; a receiver drops those made under an older generation than the newest it knows.
+  The value rides the session channel as one key, in a new connection's first message, and every cockpit message and flight-model sample carries the whole value it was made under.
+  A receiver drops a sample made under an older value than the newest it knows, and of cockpit messages only those a superseded value's PF made under it that reach it in a replay; a dropped message counts as delivered for the cockpit's causal order.
   A PF who leaves the flight passes control to the PM; a PF whose sim crashes passes nothing, since Crosscheck recovers from a crash.
   This replaces [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the earlier press wins, however small the gap, and the rule that the later take-control wins after an outage.
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
   - Two machines that compare the moments of two presses, each through its own estimate of the other's clock, can order them differently, and a generation and a pilot ID compare the same on both; two presses within one round trip are settled by pilot ID, which no pilot can notice (user, 2026-10-11).
   - A replay of an ex-PF's solo flying into the new PF's cockpit would repeat FS Copilot's replay of solo input into a fresh session (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R04).
+  - Dropping every live message from an older value would drop a switch the PF flipped in the round trip before it learned of a handover, which its own cockpit keeps, and nothing would send it again.
+  - Two pilots who take control from the same generation make values that differ only in the PF, so a message tagged with the generation alone couldn't tell the loser's from the winner's.
   - A crash is something to recover from, not a goodbye (user, 2026-10-11).
 - **Leaves out:** who may change control and when, the table of roles that node 3 designs; and how a crashed PF's aircraft and cockpit come back, for node 3 ([01-between-machines](../network/01-between-machines.md#control)).
 
@@ -498,8 +507,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Decided:** iroh's path idle timeout is 2s and its path keep-alive 0.67s, and the core sends no copies over a second path.
   Through a short gap, the following machine carries the aircraft on its last velocities and eases it to the true position when samples come again.
   While a link is lost, the PF flies on, a PM that lost the flying machine locks its synced displays, every pilot's banner lists each crew member's link and whether this PC reaches the internet, and any pilot whose role may hold control can take it, a PM with a warning that names what follows; no core decides who lost the connection.
-  When a new connection's first message passes, each side sends the session's state whole, control first, then the cockpit stream's replay: each core keeps every sender's cockpit messages it applied until every member has acknowledged them on the heartbeat, for up to 30 minutes, and sends the other what it lacks.
-  Within 30 minutes a returning pilot always gets a replay; at 30 minutes without a connection to any member, a core leaves the session, PF or PM.
+  A new connection's first message carries the session's state whole, control among it, and then each side sends the cockpit stream's replay: each core keeps every sender's cockpit messages it applied until every member has acknowledged them on the heartbeat, for up to 30 minutes, and sends the other what it lacks.
+  Within 30 minutes a returning pilot whose sim kept running gets a replay, which rests on node 3 shortening a replay that would otherwise run nearly as long as the cut; at 30 minutes without a connection to any member, a core leaves the session, PF or PM.
   A core that starts with a session file asks the crew whether its pilot is still in, since a crew member timed the silence.
   Leave session's goodbye is QUIC's close, with an application code that only Leave sends, and closing Crosscheck any other way sends a quit code that the others treat as a Leave.
   This changes [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that control passes to the PM when the PF's connection drops, and [the connection](../product/03-v1-scope.md#the-connection)'s 5-minute cut-off, and answers which ways to soften a short gap v1 builds ([the connection](../product/03-v1-scope.md#the-connection)) and what a core does with a session file found after a long outage ([01-spine](01-spine.md#left-open)).

@@ -2,6 +2,24 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-11: Two iroh endpoints in two processes on one PC, each with its own key and ports, connect directly over the PC's own address
+
+**Asked:** can a developer run two cores on one PC, each with its own identity and ports, linked as two pilots' cores would be ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?
+
+**Expected:** yes, from iroh's design, but nobody had run it.
+
+**Found:** [p04](../../../experiments/areas/network/p04-two-cores.mjs) started two copies of one Rust program on iroh 1.3.0 with relays turned off: one listened and printed its address, and the other dialed it and timed 20 round trips on a stream (measured on our development machine, 2026-10-11).
+
+- Each copy drew its own key, so their endpoint IDs differed, and each bound its own ports, one IPv4 and one IPv6 socket apiece: 53293 and 53295 for the listener, 53302 and 53304 for the dialer.
+- The dialer connected in 2.2ms over the PC's LAN address, and the listener named the dialer's endpoint ID as the one that connected.
+- The 20 round trips took 45µs to 676µs, 68µs median, all on that direct path.
+
+**Changed:** two cores on one PC need nothing special: a core's key gives it its own endpoint ID, and iroh binds each endpoint to free ports of its own.
+
+**Affects:** node 2's design doc.
+
+**Evidence:** [p04-two-cores.mjs](../../../experiments/areas/network/p04-two-cores.mjs), the program in [two-cores](../../../experiments/areas/network/two-cores/), and its output in `experiments/areas/network/results/p04-two-cores-2026-10-11-08-40-22.txt`.
+
 ## 2026-10-10: iroh moves to the relay one path idle timeout after a direct link dies and back within 60s, and at 3% loss its TCP relay's p99 lateness grows with the round trip to the relay, from 53ms at 22ms away to 534ms at 131ms
 
 **Asked:** between real home networks, how often does iroh link two PCs directly, how much do its TCP relay's stalls cost a session's traffic against a UDP relay under the same loss, how fast does it move to the relay when a direct link dies silently, how much does a busy upload add to a session's delays, and how far does a PC's `QueryPerformanceCounter` part from true time ([architecture plan, 2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks))?

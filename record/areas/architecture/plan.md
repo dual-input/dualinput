@@ -86,7 +86,7 @@ Its answer goes in `01-spine.md`, in this area.
 Its answer also names Crosscheck's parts, the area each one's documents go in, and where each is designed, in a node of this plan or in a stage of [step 8](../product/plan.md#8-v1-build-plan), and files each open question it leaves under the part it belongs to.
 Exit: the user agrees to `01-spine.md`, its Parts and Left open sections included.
 Waits on 1.1, 1.2, 1.3, 1.4, 1.5, and 1.6.
-Done on 2026-10-09.
+Reopened on 2026-10-11, by 1.1's reopening.
 Raised elsewhere: by 1.3, whether masking, AI objects with liveries, input events, the camera, and a flight load's flow events work through the SDK's `SimConnect.dll`, which 1.5 settles ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.3, which APIs our panel bridge and WASM module offer plugins, to place with the part that designs plugins ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1, whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
@@ -109,7 +109,7 @@ Its answer goes in its own section of `01-spine.md`.
 Exit: the user agrees to that section.
 Waits on 1.1.1 and 1.1.2.
 Reopened on 2026-10-09, by node 1's walk through a session, which found that the core needs the pilot's settings while the optional desktop app is closed ([tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
-Done on 2026-10-09.
+Reopened on 2026-10-11, by node 2's answer, which gives invite codes and introductions between cores to the backend rather than the relay ([01-between-machines](../network/01-between-machines.md#how-a-crew-finds-each-other)).
 
 ## 1.1.1 Masking priority at sim start
 

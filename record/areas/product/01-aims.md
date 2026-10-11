@@ -6,6 +6,9 @@ Depends on:  nothing.
 Decides:     Who Crosscheck is for, its aims and non-goals, and the relay and license commitments every design works within.
 ```
 
+> **Note**
+> Since 2026-10-11, we run relays in at least two regions, not one, because the relay Crosscheck uses carries packets over TCP, and each lost packet holds back the ones behind it longer the farther the sender is from the relay: at 3% loss, 53ms at p99 at 22ms away, and 534ms at 131ms (user, 2026-10-11; [01-between-machines](../network/01-between-machines.md#the-relays)).
+
 Crosscheck is built for us first, and then for anyone who flies MSFS 2024 with friends.
 Its pilots are flight sim enthusiasts at every level of technical skill.
 Some would write a profile, the file that tells Crosscheck what to sync on one aircraft, and others don't know what a profile is for.

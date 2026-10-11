@@ -11,6 +11,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/flight-model/log.md](areas/flight-model/log.md): what our experiments found about a following machine setting a frozen aircraft from the flying machine's values, on the Black Square Baron 58P.
 - [areas/interface/log.md](areas/interface/log.md): what our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner, and reaching the sim's menu to set the world map.
 - [areas/network/log.md](areas/network/log.md): what we found about connecting the crew's machines, directly or through our relay.
+- [areas/network/01-between-machines.md](areas/network/01-between-machines.md): how a session's cores reach each other through iroh, our relays, and the backend, and how each channel travels between them.
 - [areas/avatars/log.md](areas/avatars/log.md): what our experiments found about reading the pilot's avatar and showing a figure in its place on the other machine, with its hand where the pilot clicks.
 - [areas/avatars/decisions.md](areas/avatars/decisions.md): what those experiments have settled for now about the figure's hands, and on what findings.
 - [areas/sync/01-profile-entries.md](areas/sync/01-profile-entries.md): what a profile says about an aircraft's cockpit, its state and events blocks, and the writer API.

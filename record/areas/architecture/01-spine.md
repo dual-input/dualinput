@@ -6,6 +6,10 @@ Depends on:  decisions.md, ../product/plan.md (step 7), ../product/01-aims.md, .
 Decides:     Which components Crosscheck runs, where each runs, and what each owns (node 1.1); what each does with no session, and what moves it into one and back (node 1.1.2); how they reach each other, and how the core knows each is alive (node 1.2); what language and toolchain each is built with, where the core's input and audio work runs, where a plugin's code runs and what it's written in, and how profiles and plugins reach pilots (node 1.3); the IDs, times, encodings, and versions every component shares, and who a pilot is after their core restarts (node 1.4); which frameworks each component builds on, how our code in the sim is compiled, and the check that keeps it within what Coherent GT runs (node 1.6); which parts Crosscheck's design divides into, where each is designed, and which part each open question belongs to (node 1).
 ```
 
+> **Note**
+> Since 2026-10-11, invite codes and introductions between cores are the backend's, not the relay's, and the relay runs n0's `iroh-relay` unmodified: it carries a session's traffic when the cores can't link directly, and tells each core its public address ([01-between-machines](../network/01-between-machines.md#the-pieces)).
+> That design doc also answers what this one leaves to node 2 in [between machines](#between-machines), [how the core knows a component is alive](#how-the-core-knows-a-component-is-alive), and the network's items in [left open](#left-open).
+
 Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The watcher and the core are Crosscheck's two long-running processes (user, 2026-10-06), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).
 The flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).

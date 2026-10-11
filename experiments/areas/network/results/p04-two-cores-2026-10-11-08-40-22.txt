@@ -1,0 +1,6 @@
+p04: two iroh 1.3.0 endpoints in two processes on one PC, relays disabled
+
+listen: {"addrs":["192.168.100.116:53293","127.0.0.1:53293","[::1]:53295"],"bound":["0.0.0.0:53293","[::]:53295"],"id":"3d11679a939e68230f274ccd30af64288614d2c11364eb05196f72b1d8a9677b","pid":16908,"role":"listen"}
+dial: {"bound":["0.0.0.0:53302","[::]:53304"],"connect_ms":2.1981,"id":"5bfd17d4a1e61fdd24d3a85777fe923ba82d06197d2cd106f62a621ffa175764","paths":[{"ip":true,"remote":"Ip(192.168.100.116:53293)","rtt_us":173,"selected":true}],"pid":14064,"remote_id_matches":true,"role":"dial","round_trips":20,"rtt_us_max":676,"rtt_us_median":68,"rtt_us_min":45}
+listen: {"accepted_from":"5bfd17d4a1e61fdd24d3a85777fe923ba82d06197d2cd106f62a621ffa175764","echoed":20,"paths":[{"ip":true,"remote":"Ip(192.168.100.116:53302)","rtt_us":84,"selected":true}],"role":"listen"}
+listener exit: 0

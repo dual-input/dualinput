@@ -9,6 +9,7 @@ Decides:     Which components Crosscheck runs, where each runs, and what each ow
 > **Note**
 > Since 2026-10-11, invite codes and introductions between cores are the backend's, not the relay's, and the relay runs n0's `iroh-relay` unmodified: it carries a session's traffic when the cores can't link directly, and tells each core its public address ([01-between-machines](../network/01-between-machines.md#the-pieces)).
 > That design doc also answers what this one leaves to node 2 in [between machines](#between-machines), [how the core knows a component is alive](#how-the-core-knows-a-component-is-alive), and the network's items in [left open](#left-open).
+> It adds one item to the flight-model sync's in left open: how far the following machine carries the aircraft on its last velocities through a short gap in the flying machine's data, and how it eases it to the true position when data returns ([01-between-machines](../network/01-between-machines.md#softening-a-short-gap)).
 
 Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The watcher and the core are Crosscheck's two long-running processes (user, 2026-10-06), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).

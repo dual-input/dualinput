@@ -87,6 +87,7 @@ Its answer also names Crosscheck's parts, the area each one's documents go in, a
 Exit: the user agrees to `01-spine.md`, its Parts and Left open sections included.
 Waits on 1.1, 1.2, 1.3, 1.4, 1.5, and 1.6.
 Reopened on 2026-10-11, by 1.1's reopening.
+Done on 2026-10-11.
 Raised elsewhere: by 1.3, whether masking, AI objects with liveries, input events, the camera, and a flight load's flow events work through the SDK's `SimConnect.dll`, which 1.5 settles ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.3, which APIs our panel bridge and WASM module offer plugins, to place with the part that designs plugins ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1, whether the profile engine fires `H:` events through SimConnect's client events or through the calculator code our WASM module runs for plugins, to place with the part that designs the profile engine ([01-spine](01-spine.md#left-open)).
@@ -110,6 +111,7 @@ Exit: the user agrees to that section.
 Waits on 1.1.1 and 1.1.2.
 Reopened on 2026-10-09, by node 1's walk through a session, which found that the core needs the pilot's settings while the optional desktop app is closed ([tentative decisions](decisions.md#the-core-keeps-the-pilots-settings)).
 Reopened on 2026-10-11, by node 2's answer, which gives invite codes and introductions between cores to the backend rather than the relay ([01-between-machines](../network/01-between-machines.md#how-a-crew-finds-each-other)).
+Done on 2026-10-11.
 
 ## 1.1.1 Masking priority at sim start
 
@@ -341,6 +343,7 @@ It also reads our earlier relays: the FS Copilot fork's `record/self-hosted-rela
 Its answer goes in a design doc in the network area, `record/areas/network/01-between-machines.md`.
 Exit: the user agrees to that design doc.
 Waits on 2.1, 2.2, and 2.3.
+Done on 2026-10-11.
 Raised elsewhere: by 1.4, how the cores pack each field of a message, how each channel other than the cockpit's tells a copy from a late message, and whether the relay's and the backend's messages are the message crate's ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how a receiver estimates each sender's clock offset, what a higher restart count does to it, and how far two PCs' counters part in practice, which the flight-model sync uses ([01-spine](01-spine.md#left-open)).
@@ -447,6 +450,7 @@ Raised elsewhere: by 1.4, how a core that restarted while the sim kept running r
 Raised elsewhere: by 1.4, whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list, and how a place would name a restart count ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1, how the machines agree on which of two take-control presses came first, which per-machine clock offsets can't settle alone ([01-spine](01-spine.md#left-open)).
+Raised elsewhere: by 2, who holds control when two cores each take the other for cut off, which happens when both still reach their relays but not each other ([01-between-machines](../network/01-between-machines.md#how-a-core-learns-another-went-quiet)).
 
 ## 4 Profiles and plugin delivery
 

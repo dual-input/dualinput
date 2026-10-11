@@ -345,6 +345,7 @@ Exit: the user agrees to that design doc.
 Waits on 2.1, 2.2, and 2.3.
 Reopened on 2026-10-11, by a design review of its answer against v1's scope, the features after v1, and our earlier projects' incidents, which found gaps v1 hits, such as two connections for one pair after an outage and two machines both flying after an ordinary drop.
 Reopened on 2026-10-11, by node 3's answer, which makes a sim that closes count as leaving the flight, so a PF's crash passes control ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
+Done on 2026-10-11.
 Raised elsewhere: by 1.4, how the cores pack each field of a message, how each channel other than the cockpit's tells a copy from a late message, and whether the relay's and the backend's messages are the message crate's ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how a receiver estimates each sender's clock offset, what a higher restart count does to it, and how far two PCs' counters part in practice, which the flight-model sync uses ([01-spine](01-spine.md#left-open)).
@@ -447,6 +448,7 @@ It reads the sync design docs, [01-profile-entries](../sync/01-profile-entries.m
 Its answer goes in two new design docs: `record/areas/sync/04-order-and-recovery.md` for the sync rules, with a note at the top of each earlier sync doc whose text it changes, and `record/areas/session/01-roles-and-members.md` for the roles and the member list.
 Exit: the user agrees to the answer in those documents.
 Waits on 2.
+Done on 2026-10-11.
 Raised elsewhere: by 1.4, how a core that restarted while the sim kept running recovers what it lost and gets its pilot's lost changes to the others, how the cockpit channel tells a copy from a late message, and how the conflict rule orders two changes from one pilot under two restart counts ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list, and how a place would name a restart count ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.1.2, how the core judges an aircraft settled in a session started before 03-catch-up's rule could call it settled ([01-spine](01-spine.md#left-open)).

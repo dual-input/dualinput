@@ -99,9 +99,9 @@ The two friends' routers were never paired with each other, because 2.3's test b
 Connections opened in a median 24ms to 159ms, about one round trip to a relay, which fits a connection that starts through the relay (inference), and those that went direct moved to it in a median 42ms to 316ms ([2.3]).
 A simulated router that picks a new public port for each destination was reached directly only from the friend near New York, whose router answered UPnP, which would let in the ports it mapped (inference, [2.3]).
 
-The installer adds a Windows Firewall rule that lets the core receive, for every network profile, on the core's install path compared without regard to letter case, and an update keeps that path.
-2.3's tester matched its own path in Windows Firewall's rules only where the letter case matched ([2.3]).
-Whether the rule also has to remove a block rule left by a dismissed prompt, because Windows lets a block rule win over an allow rule, is unverified, and a clean install that dismisses the prompt settles it.
+The installer adds a Windows Firewall rule, for every network profile, that lets the program at the core's install path receive, and an update keeps that path.
+When the core looks for its own rule, it compares paths without regard to letter case, because the rules 2.3's tester read held its path in a letter case other than its own ([2.3]).
+Whether the installer must also remove a block rule left by a dismissed prompt, which would win over its allow rule if Windows ranks block rules first (unverified), a clean install that dismisses the prompt settles.
 
 Wi-Fi, carrier-grade NAT, double NAT, and mobile links are unmeasured, since 2.3's three PCs were all wired at home.
 v1 records each connection's path, loss, and relay stalls in the recording that bug reports carry, which tells how many pilots end up relayed, far from the relay their packets cross, and on lossy links (user, 2026-10-10).
@@ -110,14 +110,15 @@ v1 records each connection's path, loss, and relay stalls in the recording that 
 
 A relay runs n0's `iroh-relay`, in Rust, unmodified, which settles the relay's language the [spine](../architecture/01-spine.md#language-and-toolchains) left to this node.
 We run relays in at least two regions (user, 2026-10-11).
-The backend serves the default relay list with its token, a setting overrides it, so a group can point Crosscheck at relays of its own, as [01-aims](../product/01-aims.md#relay-and-license) asks, and the core keeps the list and token in its data folder.
+The backend serves the default relay list with each relay's token, and the core keeps both in its data folder.
+A setting overrides the list, so a group can point Crosscheck at relays of its own, as [01-aims](../product/01-aims.md#relay-and-license) asks.
 
 A core builds its endpoint from iroh's `presets::Minimal`, with `RelayMode::Custom` and the session's relay list, as 2.3's probe did ([2.3]).
 iroh's `presets::N0` would publish each pilot's endpoint ID and home relay to n0's DNS for the whole session (read in iroh 1.3.0, `src/endpoint/presets.rs`), and an endpoint bound with relays turned off never gets a relay at all ([2.3]).
 
 Our relays admit only Crosscheck (user, 2026-10-11).
-Each relay's configuration lists one or more shared tokens, and admits only a client that presents one (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig::SharedToken`), and every copy of Crosscheck carries the token with the relay list.
-That keeps other iroh applications off our relays, though not someone who digs the token out of our program, and listing two tokens at once lets us change it without cutting anyone off, as long as the old one stays listed longer than the longest session.
+Each relay's configuration lists one or more shared tokens, and admits only a client that presents one (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig::SharedToken`), and a core presents the token the backend served with that relay.
+That keeps other iroh applications off our relays, though not someone who reads the token out of a running Crosscheck, and listing two tokens at once lets us change it without cutting anyone off, as long as the old one stays listed longer than the longest session.
 Each relay also caps how fast one client can send (read in iroh-relay 1.3.0, `src/main.rs`, `limits.client.rx`), and a client at the cap waits on everything it sends through that relay ([research report 02](results/2026-10-10-transport-research-reports/02-iroh.txt)), so the cap sits above v1's peak, with a burst at least the size of a replay, both from the network's build ([left open](#left-open)).
 
 Each endpoint picks its home relay by latency, never by cost, as [the connection](../product/03-v1-scope.md#the-connection)'s rule that flight data wins asks (read in iroh 1.3.0, `src/net_report.rs`):
@@ -202,7 +203,8 @@ The core sets iroh's path idle timeout to 2s and its path keep-alive to 0.67s, a
 - In 2.3, where a firewall cut the direct path mid-session, flight-model samples came again through the relay 2.0s after the cut every time, and no move happened that a cut didn't cause, across 55 connections in each run ([2.3]).
 - iroh punches again at once when it counts an operating-system network change as major (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `handle_msg_network_change`), and otherwise every 60s, so the connection is back on a direct path within 60s of one working again ([2.3]).
 - The keep-alive also holds each router's mapping open: one friend's router forgot an idle port within 30s ([2.3]).
-- A stall that holds a direct path's packets for 2s costs up to a minute on the relay (inference, [2.3]), and 2.3's PCs were all wired, so the recording counts every move to the relay that came with no network change.
+- A stall that holds a direct path's packets for 2s trips the path idle timeout, and the connection then stays on the relay until iroh's next 60s punch finds the direct path again, so a 2s stall can cost up to a minute of relaying (inference, [2.3]).
+  2.3's PCs were all wired and saw no such stall, so the recording counts every move to the relay that came with no network change.
 
 iroh sends on one path at a time ([2.1]), so the core sends no copies over a second path.
 
@@ -215,7 +217,8 @@ A short gap is a stretch in which the following machine gets no flight-model sam
   Through a 2s move to the relay, that's about 1.6s of carrying, the 2s less the 0.4s the following machine draws behind, plus the relay route's extra one-way delay, 0ms to 75ms in 2.3 (arithmetic, [2.3]).
   The flying machine sends samples at a fixed rate even while nothing changes, and marks a stretch in which its sim stopped on purpose, such as a pause or a load, so the following machine carries the aircraft only through a gap the network made; how far it carries before holding, how it eases, and that marker are the flight-model sync's, in its stage of step 8 ([01-spine](../architecture/01-spine.md#parts)).
 - Sending the last few samples in each packet, which v1 doesn't build: the following machine draws the aircraft 0.4s in the past ([flight-model sync](../product/03-v1-scope.md#flight-model-sync)), so when one sample is lost, the samples 50ms before and after it, at 2.3's 20 a second, have already arrived to draw between.
-  In the friends' runs, flight-model samples later than 0.4s came to 0.4% or less except through the far relay at 3% loss, at 1.6%; in our own run, with loss on both legs, they reached 1.1% and 2.7% through New York at 3% ([2.3]; p03's digest).
+  In the friends' runs, flight-model samples later than 0.4s came to 0.4% or less in every run but one, the friend near New York through Frankfurt at 3% loss, at 1.6%; in our own run, with loss on both legs, they reached 1.1% in one direction and 2.7% in the other through New York at 3% ([2.3]; p03's digest).
+  Those late samples were held back by the relay's TCP, not lost, so copies of them in later packets would arrive no sooner.
 - Sending copies through the relay while the direct path is in doubt, which iroh can't do on one connection, since it sends on one path at a time ([2.1]).
 
 ## While a connection is lost
@@ -246,7 +249,7 @@ A PF who leaves the flight, for the main menu or another flight, passes control 
 A PF whose sim crashes passes nothing, because Crosscheck recovers from a crash (user, 2026-10-11): the PF's core, which stays up, tells the crew the sim crashed, the PM's machine locks and holds as when it has lost the flying machine, its banner names the crash, and the PM can take control, with no warning, since a crashed sim flies nothing.
 How the crashed PF's aircraft and cockpit come back, as PF if nobody took control, is node 3's.
 
-The connection comes back on its own after an outage shorter than iroh's 30s idle timeout for a connection, on the same connection (read in iroh 1.3.0, `src/socket.rs`, `RELAY_PATH_MAX_IDLE_TIMEOUT` and its comment).
+After an outage shorter than iroh's 30s idle timeout for a connection, which its relay path matches (read in iroh 1.3.0, `src/socket.rs`, the comment on `RELAY_PATH_MAX_IDLE_TIMEOUT`), the same connection comes back on its own.
 After a longer one, both cores redial, the one with the higher endpoint ID 2s after the other, at the latest addresses each heard on the session stream, with every relay in the session's list as a way in, and [the topology's rule](#topology) settles a second connection.
 A redial that only one side made could fail for good: in FS Copilot a link that went dark never came back on its own (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-12 — A blackholed peer link never comes back on its own").
 
@@ -287,7 +290,8 @@ So it dials the crew at the addresses in the file, and a crew member that answer
 - If it was gone for 5 minutes or more, the session ended for that pilot, the core deletes the file, and the pilot can enter the code again and join as a late joiner.
 - If nobody answers, the core asks the backend whether its code still holds the session, deletes the file if it doesn't, and otherwise keeps dialing for 5 minutes from its own start.
 
-Crosscheck installs no update while a session file exists, because a core that restarts on a new version can't rejoin a crew still on the old one, and a sim that crashes is a sim that closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+Crosscheck installs no update while a session file exists.
+Otherwise it installs a waiting update when the sim closes, and a crash closes the sim too, so a core could restart mid-session on a new version that can't rejoin a crew still on the old one ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
 
 ## Clock offsets
 
@@ -319,7 +323,7 @@ So a development setting builds a core's endpoint with its IP transports cleared
 
 ## iroh as a dependency
 
-The design leans on values iroh keeps private and a minor release may change: the 60s timer for punching again, the 30s idle timeout on a relay path, the 5s ceiling on a path keep-alive, the 15s ceiling on a path idle timeout, and the two-thirds rule for moving home relay (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `src/socket.rs`, `src/endpoint/quic.rs`, and `src/net_report.rs`).
+The design leans on values iroh keeps private and a minor release may change: the 60s timer for punching again, the 30s idle timeout for a connection, which its relay path matches, the 5s ceiling on a path keep-alive, the 15s ceiling on a path idle timeout, and the two-thirds rule for moving home relay (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `src/socket.rs`, `src/endpoint/quic.rs`, and `src/net_report.rs`).
 So Crosscheck pins the exact versions of iroh, noq, and `iroh-relay`, and an upgrade is a change of its own:
 
 1. Read the release notes, and the diff of those values.
@@ -328,7 +332,7 @@ So Crosscheck pins the exact versions of iroh, noq, and `iroh-relay`, and an upg
 4. Upgrade our relays before the release that carries the new iroh, since iroh keeps its wire protocol stable within a major version ([2.1]).
 
 An iroh 2.0 is work of its own.
-On Windows, iroh's `bind` hung on about half of one game's players' PCs, which the maintainers put down to CPU-specific build flags in the ring cryptography library, read by a research agent in iroh's issue #3968 ([research report 02](results/2026-10-10-transport-research-reports/02-iroh.txt)).
+On Windows, iroh 0.96.1's `bind` hung on about half of one game's players' PCs, and the maintainers put it down to CPU-specific build flags in the ring cryptography library and closed the issue as not planned (documented in iroh's issue #3968, as [research report 02](results/2026-10-10-transport-research-reports/02-iroh.txt) summarizes it; unverified on iroh 1.3).
 So a release build targets the baseline x86-64 CPU, and the core binds its endpoint under a timeout and reports a failure rather than hanging.
 
 ## Left open
@@ -337,7 +341,7 @@ So a release build targets the baseline x86-64 CPU, and the core binds its endpo
   n0's free public relays are out, since n0 calls them "suitable for development and hobby use only" (documented, [public relays](https://docs.iroh.computer/iroh-services/relays/public), as of 2026-10-11).
 - How the status list looks, which is for the banner's design, and how a pilot sees which kind of connection they have, which [the connection](../product/03-v1-scope.md#the-connection) leaves to a design for later.
 - The 5s, the 2s path idle timeout, the 10-minute renewal, the relay's cap, and the ATC buffer's limits, which v1's recordings tune.
-- Checks for the network's stage of step 8, which tune the network layer without changing this design (user, 2026-10-11), and which p05 to p07 on 2.3's droplets may answer first:
+- Checks for the network's stage of step 8, which tune the network layer without changing this design (user, 2026-10-11), and which the probes p05 to p07, running on 2.3's droplets as of 2026-10-11, may answer first:
   - v1's full mix of channels through iroh's relay at 1% and 3% loss, with and without the newest-only slots, measuring how late the session and cockpit streams arrive, since the session stream carries take-control and the heartbeat;
   - how long the session stream takes to carry data again after a direct path dies, against the 5s;
   - how long a connection takes to carry data again after outages of 10s to 120s, which is how long a PM stays locked once the network is back;

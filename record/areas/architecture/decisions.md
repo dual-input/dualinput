@@ -424,8 +424,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck
 
 - **Decided:** a relay runs n0's `iroh-relay`, in Rust, with nothing of ours on it, in at least two regions.
-  It admits only clients that present a shared token every copy of Crosscheck carries, and caps each client's rate above v1's peak.
-  The backend serves the default relay list and its token, a setting overrides the list, and the core keeps both in its data folder.
+  It admits only clients that present one of its shared tokens, and caps each client's rate above v1's peak.
+  The backend serves the default relay list with each relay's token, a setting overrides the list, and the core keeps both in its data folder.
   A session uses its host's relay list, which the join answer carries and a joiner adds to its endpoint before dialing, and the session file keeps.
   A core builds its endpoint from iroh's `presets::Minimal` with `RelayMode::Custom`.
   Each pilot homes at the relay with the lowest latency, as iroh picks it.

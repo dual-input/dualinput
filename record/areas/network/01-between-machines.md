@@ -6,6 +6,10 @@ Depends on:  ../architecture/01-spine.md, ../product/01-aims.md, ../product/03-v
 Decides:     The topology, the transport, the way through home routers, the relay and its language, encryption, how a crew finds each other, how each channel travels and tells a copy from a late message, how control travels, what a session does while a link is lost and when it comes back, which ways to soften a short gap v1 builds, two cores on one PC, and how a receiver estimates a sender's clock offset.
 ```
 
+> **Note**
+> Since 2026-10-11, a sim that closes, by a crash or by its pilot, counts as leaving the flight, so a PF whose sim crashes passes control to the PM at once, and the pilot comes back as a late joiner; this replaces [control](#control)'s rule that a crash passes nothing, and what [leaving](#leaving) compares with it is the PM's machine having lost the flying machine ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
+> A replay needs no shortening, since its 2s cap on each gap bounds it at 2s a change, and a test that stops syncing an entry the aircraft drives itself keeps one from filling it, so [coming back](#coming-back)'s promise rests on nothing more of node 3's ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-replay)).
+
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:

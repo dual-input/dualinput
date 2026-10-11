@@ -17,6 +17,8 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/sync/01-profile-entries.md](areas/sync/01-profile-entries.md): what a profile says about an aircraft's cockpit, its state and events blocks, and the writer API.
 - [areas/sync/02-live-sync.md](areas/sync/02-live-sync.md): how a change reaches every cockpit during a session, how conflicts resolve, and how Crosscheck checks a write landed.
 - [areas/sync/03-catch-up.md](areas/sync/03-catch-up.md): how a cockpit that missed changes comes to the flying machine's state, and when a loaded aircraft counts as settled.
+- [areas/sync/04-order-and-recovery.md](areas/sync/04-order-and-recovery.md): what comes back after a link, a core, a sim, or a PC goes down, and how the cockpit stream, its replay, and catch-up keep their order.
+- [areas/session/01-roles-and-members.md](areas/session/01-roles-and-members.md): who is in a session, the table of roles with the PF and the traffic and ATC host, and how each role moves.
 - [areas/sync/log.md](areas/sync/log.md): what our experiments found about settling after a load, write order, the double-fire, and how aircraft take stepped writes.
 - [areas/product/plan.md](areas/product/plan.md): Crosscheck's master plan, the steps from ideas to a released v1, and where each one stands.
 - [areas/product/01-aims.md](areas/product/01-aims.md): who Crosscheck is for, what it aims at, what it won't do, and its relay and license commitments.

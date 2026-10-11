@@ -493,11 +493,11 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Control is one value, a generation and the PF's pilot ID
 
-- **Decided:** every change of PF, by the take-control key, by voice, by a PF leaving the flight, or by a takeover while a link is lost or after a sim crash, raises the generation one past the highest its maker has seen, and of two changes with the same generation, the one naming the lower pilot ID wins.
+- **Decided:** every change of PF, by the take-control key, by voice, by a PF leaving the flight, or by a takeover while a link is lost, raises the generation one past the highest its maker has seen, and of two changes with the same generation, the one naming the lower pilot ID wins.
   The value rides the session channel as one key, in a new connection's first message, and every cockpit message and flight-model sample carries the whole value it was made under.
   A receiver drops a sample made under an older value than the newest it knows, and of cockpit messages only those a superseded value's PF made under it that reach it in a replay; a dropped message counts as delivered for the cockpit's causal order.
   A receiver that meets a newer value on any message or sample adopts it.
-  A PF who leaves the flight or the session, or quits, passes control to the PM as an ordinary handover, and leaves only once the PM's messages carry the new value or 1s has passed; a PF whose sim crashes passes nothing, since Crosscheck recovers from a crash.
+  A PF who leaves the flight or the session, or quits, passes control to the PM as an ordinary handover, and leaves only once the PM's messages carry the new value or 1s has passed; a PF whose sim closes, by a crash or otherwise, has left the flight, and its core, which stays up, passes control the same way (user, 2026-10-11, in node 3; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
   This replaces [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the earlier press wins, however small the gap, and the rule that the later take-control wins after an outage.
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
@@ -505,9 +505,9 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - A replay of an ex-PF's solo flying into the new PF's cockpit would repeat FS Copilot's replay of solo input into a fresh session (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R04).
   - Dropping every live message from an older value would drop a switch the PF flipped in the round trip before it learned of a handover, which its own cockpit keeps, and nothing would send it again.
   - Two pilots who take control from the same generation make values that differ only in the PF, so a message tagged with the generation alone couldn't tell the loser's from the winner's.
-  - A crash is something to recover from, not a goodbye (user, 2026-10-11).
+  - A sim that closed has lost its pages, FMS, and avionics state, which nothing restores, so the machine whose cockpit is intact flies on (user, 2026-10-11).
   - noq lets a peer drop stream data it hasn't delivered once a close arrives (read in noq 1.3.0, `src/connection.rs`, `Connection::close`), so a handover sent just before a Leave's close could be lost; FS Copilot's master leaving on purpose locked the other pilot, and making that pilot master was deferred (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R02).
-- **Leaves out:** who may change control and when, the table of roles that node 3 designs; and how a crashed PF's aircraft and cockpit come back, for node 3 ([01-between-machines](../network/01-between-machines.md#control)).
+- **Leaves out:** who may change control and when, which the table of roles sets ([roles and members](../session/01-roles-and-members.md#the-pf)).
 
 ## While a link is lost, the PF flies on, a PM that lost the flying machine locks, and any pilot can take control
 
@@ -515,7 +515,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   Through a short gap, the following machine carries the aircraft on its last velocities and eases it to the true position when samples come again.
   While a link is lost, the PF flies on, a PM that lost the flying machine locks its synced displays, every pilot's banner lists each crew member's link and whether this PC reaches the internet, and any pilot whose role may hold control can take it, a PM with a warning that names what follows; no core decides who lost the connection.
   A new connection's first message carries the session's state whole, control among it, and then each side sends the cockpit stream's replay: each core keeps every sender's cockpit messages it applied until every member has acknowledged them on the heartbeat, for up to 30 minutes, and sends the other what it lacks.
-  Within 30 minutes a returning pilot whose sim kept running gets a replay, which rests on node 3 shortening a replay that would otherwise run nearly as long as the cut; at 30 minutes without a connection to any member, a core leaves the session, PF or PM.
+  Within 30 minutes a returning pilot whose sim kept running gets a replay, which its 2s cap on each gap bounds at 2s a change ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-replay)); at 30 minutes without a connection to any member, a core leaves the session, PF or PM.
   A core that starts with a session file asks the crew whether its pilot is still in, since a crew member timed the silence.
   Leave session's goodbye is QUIC's close, with an application code that only Leave sends, and closing Crosscheck any other way sends a quit code that the others treat as a Leave.
   This changes [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that control passes to the PM when the PF's connection drops, and [the connection](../product/03-v1-scope.md#the-connection)'s 5-minute cut-off, and answers which ways to soften a short gap v1 builds ([the connection](../product/03-v1-scope.md#the-connection)) and what a core does with a session file found after a long outage ([01-spine](01-spine.md#left-open)).
@@ -527,7 +527,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - noq lets a peer drop stream data it hasn't delivered once a close arrives, and closes a connection with code 0 when every handle to it is dropped (read in noq 1.3.0, `src/connection.rs`).
   - One friend's router forgot an idle port within 30s ([network log, 2.3][n23]).
   - iroh sends on one path at a time ([network log, 2.1][n21]).
-- **Leaves out:** tuning the 5s, the 2s, and the 30 minutes from v1's recordings; how far the following machine carries the aircraft, how it eases, and the marker for a sim stopped on purpose, for the flight-model sync; and how a replay paces state entries against events and presses, and how a returning ex-PF's cockpit comes to the new PF's state, for node 3 ([01-between-machines](../network/01-between-machines.md#coming-back)).
+- **Leaves out:** tuning the 5s, the 2s, and the 30 minutes from v1's recordings; how far the following machine carries the aircraft, how it eases, and the marker for a sim stopped on purpose, for the flight-model sync; and how an ex-PF's cockpit comes to the new PF's state, which [04-order-and-recovery](../sync/04-order-and-recovery.md#an-ex-pf-after-a-takeover) settles.
 
 ## A receiver estimates each sender's clock offset from one timed exchange a second
 
@@ -539,6 +539,85 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - 2.3 estimated each PC's counter against our droplets through the shortest of each eight exchanges, and the estimates scattered by 95µs to 249µs ([network log, 2.3][n23]).
   - The three PCs' counters ran from 13.4 ppm slow to 25.8 ppm fast, so two parted by up to 39 ppm, 3.4s a day (same entry), and an estimate 8s old is off by 0.3ms at that rate (arithmetic).
 - **Leaves out:** the error when a connection's two directions take unequal times, which is half the difference; and easing the offset the following machine applies when it steps, for the flight-model sync ([01-between-machines](../network/01-between-machines.md#clock-offsets)).
+
+## A sim that kept running comes back by replay, and one that closed comes back as a late joiner
+
+- **Decided:** after a cut link, or a core restart with the sim still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, with no shortening.
+  A sim that closes, by a crash or by its pilot, counts as leaving the flight: a PF's control passes to the PM at once, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
+  An ex-PF that sent any message under the control value it lost in a replay follows the replay with a catch-up of state from the new PF.
+  This changes node 2's rule that a sim crash passes nothing, and settles how a replay is paced and how an ex-PF and a crashed PF come back ([architecture plan](plan.md#3-sync-and-the-session)).
+  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#what-comes-back-after-what)).
+- **Because:**
+  - A sim that closed has lost its pages, FMS, and avionics state, such as a GTN 750's flight plan, which no profile entry reads and replayed presses needn't rebuild (user, 2026-10-11).
+  - A replay's 2s cap bounds it at 2s a change, so it lasts as long as its cut only if the PF changed something every 2s throughout (arithmetic).
+  - Every receiver drops an ex-PF's replayed messages made under the value it lost ([01-between-machines](../network/01-between-machines.md#control)), so the ex-PF's cockpit holds changes no other has, and a catch-up skips every entry that already matches.
+- **Leaves out:** tuning the 2s cap from v1's recordings.
+
+## Catch-up writes in the order the flying machine's cockpit first took each value
+
+- **Decided:** catch-up writes each entry at the flying machine's value, in the order the flying machine's cockpit first took each of those values, read from its recording, with entries it took before the session or never changed first.
+  It carries the flying machine's vector clock, from which the catching-up machine's clock starts, and starts again from the flying machine on a new connection or a change of control, skipping what already matches.
+  v1's catch-up pipeline has one step, catching up state; the time, date, simulation rate, and pause reach a late joiner as session keys, and traffic as the host's identity set.
+  A pilot can't press take-control until their own catch-up ends.
+  A session started after the aircraft loaded counts the settle rule's 30s floor from Ready to fly and its 15s quiet window from the profile's load.
+  This settles [03-catch-up](../sync/03-catch-up.md#choosing-the-order)'s order and the spine's question of settling in such a session ([01-spine](01-spine.md#left-open)).
+  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
+- **Because:**
+  - Where an interlock makes order matter, this order writes the battery before the hypothetical APU master, and where order doesn't matter it costs nothing, so no probe of interlocks could change the choice ([03-catch-up](../sync/03-catch-up.md#choosing-the-order)).
+  - The recording keeps every change of the session ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
+  - The catching-up pilot's changes aren't sent while catch-up runs ([03-catch-up](../sync/03-catch-up.md#while-catch-up-runs)), so a cockpit taken over halfway would differ from the others' with nothing sent to bring them together.
+- **Leaves out:** later steps of the pipeline, which the picks that need them add ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
+
+## A core that restarts rebuilds from its recording
+
+- **Decided:** a core records each cockpit message before it sends it and after it applies it, so its recording is its journal, and the recording's minimal mode keeps the cockpit stream.
+  A core that restarts while its sim keeps running rebuilds from it the state object, each entry's stamp, the vector clock, the shadow values, and the highest number it applied from each sender; sends each entry whose value in the sim differs as its pilot's change; and gets the rest from the replay.
+  Every component in the sim sends a core that connects its whole current state.
+  This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
+  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
+- **Because:**
+  - The operating system keeps what a process wrote when the process dies.
+  - fsc-editor's module outlived its app, and an editor that restarted "found the table already walked and heard nothing" (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Verified live: `L:` values in the editor, end to end").
+  - FS Copilot's fix for a restarted peer lived with up to one acknowledgment interval of events applying twice, and a restarted sender's history gone (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
+- **Leaves out:** a shadow value whose events its pilot fired while the core was down.
+
+## The cockpit stream drops copies by number and counts a skipped message as applied
+
+- **Decided:** a receiver keeps, for each sender's pilot ID and restart count, the highest number it applied, and drops a message at or below it as a copy.
+  A message counts as applied once its write is made, its event fired, or its press handed to the display's panel, and the heartbeat acknowledges only applied messages.
+  A receiver skips the messages control drops, presses during its own catch-up or for a display not yet announced, and changes to an entry the aircraft drives itself, each counting as applied.
+  A vector clock names each counter by a number its sender defines on its stream, and of two changes from one pilot under two restart counts that neither saw, the higher count wins.
+  A message names a profile entry by its index when the receiver's profile hash matches the sender's, and by name otherwise.
+  This answers the spine's questions of how the cockpit channel tells a copy from a late message, how a clock names its counters, and how two changes from one pilot under two restart counts are ordered ([01-spine](01-spine.md#left-open)).
+  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
+- **Because:**
+  - FS Copilot acknowledged a press on receipt, and its restarted app then dropped one with "No panel for DisplayUnits|config=N324DU; event dropped" (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone").
+  - Naming a counter by its pilot's ID costs 16 bytes a counter ([01-spine](01-spine.md#ids)), and naming an entry by index cuts a cockpit change from 84 bytes to 27 ([network log, 2.2][n22]).
+- **Leaves out:** the exact fields of a cockpit message, which sync's stage of step 8 lays out in the message crate.
+
+## An entry every machine's aircraft keeps changing stops syncing
+
+- **Decided:** a machine counts an entry as driven by the aircraft when, in every 3s for 30s, its own aircraft changed it, other than by Crosscheck's write, and another machine's change to it arrived; it then stops sending, applying, and writing back that entry for the rest of the load, skips the rest of its replayed changes, marks the recording, and shows the once-a-flight notice of a write that never lands.
+  A following machine writes the PF's last value back when its own sim moves a PF-owned entry other than by Crosscheck's write.
+  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
+- **Because:**
+  - An entry for something that ticks, which a profile's author added by mistake, would send a change at every tick and fill every replay, whatever the IDE warned (user, 2026-10-11).
+  - A pilot changes an entry on one machine, and the others' aircraft only take the writes, so no pilot produces the sign.
+  - FS Copilot wrote no PF-owned value back, so a PM's throttle could spool up their own engine until the PF next moved theirs ([take-control key](../product/03-v1-scope.md#take-control-key)), and an axis fires no event inside a dead zone set in MSFS ([flight-controls log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)).
+- **Leaves out:** tuning the 3s and the 30s from v1's recordings.
+
+## v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand
+
+- **Decided:** each member writes its own entry on the session channel, crew in v1 and passenger later; crew members hold vector clock counters, and every member acknowledges on the heartbeat.
+  The table of roles gives each role who may hold it, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.
+  The PF is any crew member, and moves by key, at any time except during the pilot's own catch-up, by voice, or when the PF leaves the flight or the session or their sim closes, always to the PM in v1; a lost link changes nothing.
+  The traffic and ATC host is one role, which a pilot takes by turning on "Share my traffic and ATC", the first to turn it on holding it and two at once settled by the stamp; through a lost link the host keeps it and receivers remove copies after 15s without a sample, while the host is out of the flight hosting pauses and receivers remove its copies, and leaving the session releases it.
+  This answers [traffic sync](../product/03-v1-scope.md#traffic-sync)'s question of how the host is chosen, and builds the table [04-room-for-later](../product/04-room-for-later.md#roles) asks v1 for.
+  Settled in node 3 by the user, 2026-10-11 ([roles and members](../session/01-roles-and-members.md)).
+- **Because:**
+  - FS Copilot's build had no taking over, "a toggle is disabled while someone else hosts that feature", removed a host's traffic at once when the host stopped or dropped, withdrew hosting while the host's sim was disconnected, and removed a copy after 15s without a sample (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", rows 2 and 4, and "Key invariants").
+  - Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+- **Leaves out:** which pilot receives control when the PF leaves a crew of more than two, and hosts of their own for traffic and ATC, for the picks that need them.
 
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

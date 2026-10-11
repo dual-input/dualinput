@@ -2,6 +2,56 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-11: after a total outage, a redialed connection carries data 0.3s to 1.4s after the link returns, while one that lived through a 10s outage takes 5s to 7s
+
+**Asked:** for node 2's revision, when everything between two pilots stops for 10s, 30s, 60s, or 120s, how long after the link returns does data flow again, on the same connection where it lives and through a redial where it doesn't, and when does iroh's relay connection come back ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?
+
+**Expected:** a connection inside QUIC's 30s idle timeout picks up within a round trip or two; past it, the redial connects on its first attempt after the link returns; iroh's relay connection comes back within its reconnect backoff of up to 16s plus its 10s connect timeout (read in iroh 1.3.0, `src/socket/transports/relay/actor.rs`, `ExponentialBuilder` and `CONNECT_TIMEOUT`).
+
+**Found:** [p07](../../../experiments/areas/network/p07-outage/) ran twice on 2026-10-11, once at iroh's default path timers, a 15s path idle timeout and a 5s keep-alive, and once at the v1 timers 2.3 accepted, a 2s idle timeout and a 0.67s keep-alive.
+Endpoint A ran in a network namespace of its own on the Frankfurt droplet, behind a NAT that keeps its port, and endpoint B beside New York's relay.
+Both listed both relays and kept their direct addresses, so they connected directly, with an 84ms round trip, and each sent the flight-model stream, 20 packets a second.
+A's endpoint ID was the lower, so A dialed, and after a connection closed it started a dial every 2s, each left running up to 30s, until one connected.
+`tc netem` then dropped every packet both ways on A's link, direct and relayed alike, for 10s, 30s, 60s, and 120s, each followed by 90s with the link back.
+The link itself stayed up, so neither operating system saw a network change.
+A fresh packet is one its sender made after the link came back.
+
+| Outage | Timers | The connection | Fresh data after the link came back, A to B / B to A | Carried by | A's home relay connected again, after the link came back |
+| --- | --- | --- | --- | --- | --- |
+| 10s | default | lived | 5.4s / 5.2s | the relay | never dropped |
+| | v1 | lived | 7.1s / 7.2s | the relay | never dropped |
+| 30s | default | lived | 1.3s / 2.1s | the relay | 3.7s |
+| | v1 | timed out 30.2s after the drop | 0.4s / 0.4s | a redialed direct connection | 2.7s |
+| 60s | default | timed out 34.3s after the drop | 1.4s / 1.4s | a redialed direct connection | 8.7s |
+| | v1 | timed out 30.1s after the drop | 0.3s / 0.3s | a redialed direct connection | 20.1s |
+| 120s | default | timed out 30.2s after the drop | 0.4s / 0.4s | a redialed direct connection | 23.8s |
+| | v1 | timed out 30.1s after the drop | 0.4s / 0.5s | a redialed direct connection | 16.2s |
+
+- Each row is one run.
+- A connection that lived through a 10s outage was the slowest to recover.
+  In the default run, A's direct path stopped sending about 3s into the outage, once its 12,000 B congestion window was full of packets nobody had acknowledged, and QUIC counted none of them lost, so from then on it sent only probes, at growing intervals.
+  After the link came back it sent nothing more on that path, and 15s after the drop the path's idle timeout closed it; the relay took over, and data flowed through it at once.
+- In the v1 run, both ends moved to the relay 2.0s into the outage, though A's dead link cut that path too.
+  When the link came back, B received 71 of A's packets made during the outage within 1s, but nothing of B's reached A for 6.9s, and then B's QUIC counted 73 packets lost.
+  Why B's packets waited, the run doesn't show; the relay's TCP connection to A backing off its resends through the outage would fit (unverified; an `ss` sample of the relay's socket to A during the recovery would settle it).
+- In the default run's 30s outage, both ends had moved to the relay 15s in, data resumed through it, and the direct path returned 4.4s after the link.
+  After each 10s outage, the direct path returned 19.0s to 19.3s after the link.
+- The connection timed out 30.1s to 30.2s after the drop, and 34.3s once, so a 30s outage sits on the edge: the default run's connection lived through it and the v1 run's didn't.
+- Every redial connected 0.2s to 1.3s after the link came back, directly, to the address B's endpoint address carried.
+  Every attempt started during the outage connected too, up to 15 of them within 6.5s of the link's return, and A closed all but the first.
+- A's home relay connection dropped 3.3s to 9.3s into each outage of 30s or more, and came back 2.7s to 23.8s after the link, within iroh's backoff of up to 16s plus its 10s connect timeout.
+  No redial waited for it, since each went direct.
+
+**Changed:** a connection that outlives a short outage recovers 5s to 7s after the link returns, because QUIC waits out its own backed-off probes, while a fresh connection carries data within 1.4s.
+So node 2's design can't leave recovery to the surviving connection; one option is a second connection dialed alongside a silent one, keeping whichever carries data first, which p07 didn't test.
+The v1 timers don't help here: they move traffic to the relay sooner, but a total outage cuts the relay too, and their 10s recovery was the slower of the two.
+A redial should cancel its older attempts, since every attempt still running connects when the link returns.
+How a redial fares between pilots who reach each other only through a relay, p07 didn't test.
+
+**Affects:** node 2's design doc: how a core notices a dead link, when it redials, and what it does with a connection that survives.
+
+**Evidence:** [p07](../../../experiments/areas/network/p07-outage/), and its results in [results/p07-outage-2026-10-11](../../../experiments/areas/network/results/p07-outage-2026-10-11/): `analysis.txt` from `analyze.mjs`, with each outage's timeline, and `raw/`, both endpoints' logs and the outage script's times, with the droplets' addresses replaced by their station names.
+
 ## 2026-10-11: on iroh's relay under loss, v1's streams run as late as its one-off packets and no later, because QUIC never sees a loss there, so a sender that keeps only each channel's newest packet changes nothing
 
 **Asked:** for node 2's revision, on iroh's relay under loss, do v1's one-off channels starve the session and cockpit streams, and does a sender that keeps only each channel's newest datagram, handing it to QUIC only when QUIC's datagram buffer has room, fix it ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?

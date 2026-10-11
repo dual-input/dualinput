@@ -1,0 +1,1571 @@
+== default-20261011T125804: A 808672c6 dials, B c0be42b2 listens; A's ID is lower
+  first connection at +-0.8s from the outage script's start
+  -- 10s outage; before it, A on direct, B on direct
+     A: connection survived; B: connection survived
+     A's home relay: no change
+     B's home relay: no change
+     redials: 0 started, none connected
+     fresh data after the link came back: A to B 5.4s on the receiver's conn 1, relay; B to A 5.2s on the receiver's conn 1, relay
+     first packet of any age: at B 5.1s, made during the outage, at A 3.1s, made during the outage
+     path selections during, from the drop: A none; B none
+     path selections after: A +5.1s relay, +19.2s direct; B +5.0s relay, +19.3s direct
+  -- 30s outage; before it, A on direct, B on direct
+     A: connection survived; B: connection survived
+     A's home relay: +4.6s https://fra/ connected=false | +33.7s https://fra/ connected=true
+     B's home relay: no change
+     redials: 0 started, none connected
+     fresh data after the link came back: A to B 1.3s on the receiver's conn 1, relay; B to A 2.1s on the receiver's conn 1, relay
+     first packet of any age: at B 0.5s, made during the outage, at A 1.0s, made during the outage
+     path selections during, from the drop: A +15.0s relay; B +15.1s relay
+     path selections after: A +4.4s direct; B +4.5s direct
+  -- 60s outage; before it, A on direct, B on direct
+     A: conn 1 closed at +34.3s (timed out); B: conn 1 closed at +34.2s (timed out), conn 3 closed at +61.4s (closed by peer: duplicate (code 0)), conn 4 closed at +61.5s (closed by peer: duplicate (code 0)), conn 5 closed at +61.5s (closed by peer: duplicate (code 0)), conn 6 closed at +62.5s (closed by peer: duplicate (code 0)), conn 7 closed at +62.5s (closed by peer: duplicate (code 0)), conn 8 closed at +62.5s (closed by peer: duplicate (code 0)), conn 9 closed at +63.5s (closed by peer: duplicate (code 0)), conn 10 closed at +63.5s (closed by peer: duplicate (code 0)), conn 15 closed at +64.9s (closed by peer: duplicate (code 0)), conn 13 closed at +65.4s (closed by peer: duplicate (code 0)), conn 11 closed at +65.8s (closed by peer: duplicate (code 0)), conn 12 closed at +66.1s (closed by peer: duplicate (code 0)), conn 14 closed at +66.1s (closed by peer: duplicate (code 0))
+     A's home relay: +4.2s https://fra/ connected=false | +68.7s https://fra/ connected=true
+     B's home relay: no change
+     redials: 14 started, #15 connected 1.3s after the link came back, taking 1.1s, #14 connected 1.4s after the link came back, taking 3.1s, #8 connected 1.4s after the link came back, taking 15.2s, #5 connected 1.5s after the link came back, taking 21.2s, #13 connected 2.4s after the link came back, taking 6.1s, #11 connected 2.4s after the link came back, taking 10.2s, #2 connected 2.5s after the link came back, taking 28.2s, #9 connected 3.4s after the link came back, taking 15.2s, #6 connected 3.5s after the link came back, taking 21.2s, #3 connected 4.1s after the link came back, taking 27.9s, #4 connected 4.1s after the link came back, taking 25.9s, #7 connected 4.2s after the link came back, taking 19.9s, #10 connected 4.2s after the link came back, taking 13.9s, #12 connected 4.3s after the link came back, taking 10.0s
+     fresh data after the link came back: A to B 1.4s on the receiver's conn 2, direct; B to A 1.4s on the receiver's conn 2, direct
+     first packet of any age: at B 1.4s, at A 1.4s
+     path selections during, from the drop: A +15.0s relay; B +15.0s relay
+     path selections after: A none; B none
+  -- 120s outage; before it, A on direct, B on direct
+     A: conn 2 closed at +30.2s (timed out); B: conn 2 closed at +30.2s (timed out), conn 17 closed at +120.4s (closed by peer: duplicate (code 0)), conn 18 closed at +120.5s (closed by peer: duplicate (code 0)), conn 19 closed at +121.4s (closed by peer: duplicate (code 0)), conn 20 closed at +121.5s (closed by peer: duplicate (code 0)), conn 21 closed at +121.5s (closed by peer: duplicate (code 0)), conn 22 closed at +122.4s (closed by peer: duplicate (code 0)), conn 23 closed at +122.5s (closed by peer: duplicate (code 0)), conn 24 closed at +122.5s (closed by peer: duplicate (code 0)), conn 25 closed at +123.5s (closed by peer: duplicate (code 0)), conn 26 closed at +123.5s (closed by peer: duplicate (code 0)), conn 27 closed at +124.5s (closed by peer: duplicate (code 0)), conn 28 closed at +125.5s (closed by peer: duplicate (code 0)), conn 29 closed at +125.5s (closed by peer: duplicate (code 0)), conn 30 closed at +126.6s (closed by peer: duplicate (code 0))
+     A's home relay: +9.3s https://fra/ connected=false | +143.8s https://fra/ connected=true
+     B's home relay: no change
+     redials: 46 started, #61 connected 0.3s after the link came back, taking 0.1s, #58 connected 0.4s after the link came back, taking 6.1s, #47 connected 0.5s after the link came back, taking 28.2s, #60 connected 1.4s after the link came back, taking 3.1s, #54 connected 1.4s after the link came back, taking 15.2s, #51 connected 1.4s after the link came back, taking 21.2s, #59 connected 2.4s after the link came back, taking 6.1s, #57 connected 2.4s after the link came back, taking 10.2s, #48 connected 2.5s after the link came back, taking 28.2s, #55 connected 3.4s after the link came back, taking 15.2s, #52 connected 3.5s after the link came back, taking 21.2s, #49 connected 4.5s after the link came back, taking 28.2s, #56 connected 5.4s after the link came back, taking 15.2s, #53 connected 5.5s after the link came back, taking 21.2s, #50 connected 6.5s after the link came back, taking 28.3s, 31 failed (timed out; no answer in 30s)
+     fresh data after the link came back: A to B 0.4s on the receiver's conn 16, direct; B to A 0.4s on the receiver's conn 3, direct
+     first packet of any age: at B 0.4s, at A 0.4s
+     path selections during, from the drop: A +15.0s relay; B +15.1s relay
+     path selections after: A none; B none
+== v1-20261011T130907: A 61cbd7ec dials, B 6bc493ad listens; A's ID is lower
+  first connection at +-1.0s from the outage script's start
+  -- 10s outage; before it, A on direct, B on direct
+     A: connection survived; B: connection survived
+     A's home relay: no change
+     B's home relay: no change
+     redials: 0 started, none connected
+     fresh data after the link came back: A to B 7.1s on the receiver's conn 1, relay; B to A 7.2s on the receiver's conn 1, relay
+     first packet of any age: at B 0.3s, made during the outage, at A 6.9s, made during the outage
+     path selections during, from the drop: A +2.0s relay; B +2.0s relay
+     path selections after: A +19.0s direct; B +19.1s direct
+  -- 30s outage; before it, A on direct, B on direct
+     A: conn 1 closed at +30.2s (timed out); B: conn 1 closed at +30.2s (timed out)
+     A's home relay: +4.3s https://fra/ connected=false | +32.7s https://fra/ connected=true
+     B's home relay: no change
+     redials: 1 started, #2 connected 0.3s after the link came back, taking 0.1s
+     fresh data after the link came back: A to B 0.4s on the receiver's conn 2, direct; B to A 0.4s on the receiver's conn 2, direct
+     first packet of any age: at B 0.4s, at A 0.4s
+     path selections during, from the drop: A +2.0s relay; B +2.0s relay
+     path selections after: A none; B none
+  -- 60s outage; before it, A on direct, B on direct
+     A: conn 2 closed at +30.1s (timed out); B: conn 2 closed at +30.1s (timed out), conn 4 closed at +60.3s (closed by peer: duplicate (code 0)), conn 5 closed at +60.4s (closed by peer: duplicate (code 0)), conn 6 closed at +60.4s (closed by peer: duplicate (code 0)), conn 7 closed at +61.3s (closed by peer: duplicate (code 0)), conn 8 closed at +61.4s (closed by peer: duplicate (code 0)), conn 9 closed at +61.4s (closed by peer: duplicate (code 0)), conn 10 closed at +62.3s (closed by peer: duplicate (code 0)), conn 11 closed at +62.4s (closed by peer: duplicate (code 0)), conn 12 closed at +62.4s (closed by peer: duplicate (code 0)), conn 13 closed at +63.4s (closed by peer: duplicate (code 0)), conn 14 closed at +63.4s (closed by peer: duplicate (code 0)), conn 15 closed at +64.9s (closed by peer: duplicate (code 0)), conn 16 closed at +65.0s (closed by peer: duplicate (code 0)), conn 17 closed at +65.5s (closed by peer: duplicate (code 0))
+     A's home relay: +3.3s https://fra/ connected=false | +80.1s https://fra/ connected=true
+     B's home relay: no change
+     redials: 16 started, #18 connected 0.2s after the link came back, taking 0.1s, #15 connected 0.3s after the link came back, taking 6.1s, #13 connected 0.3s after the link came back, taking 10.2s, #4 connected 0.4s after the link came back, taking 28.2s, #17 connected 1.2s after the link came back, taking 3.1s, #11 connected 1.3s after the link came back, taking 15.2s, #8 connected 1.3s after the link came back, taking 21.2s, #16 connected 2.3s after the link came back, taking 6.1s, #14 connected 2.3s after the link came back, taking 10.2s, #5 connected 2.4s after the link came back, taking 28.2s, #6 connected 3.3s after the link came back, taking 27.2s, #12 connected 3.3s after the link came back, taking 15.2s, #9 connected 3.3s after the link came back, taking 21.2s, #7 connected 3.4s after the link came back, taking 25.2s, #10 connected 3.4s after the link came back, taking 19.2s, 1 failed (timed out)
+     fresh data after the link came back: A to B 0.3s on the receiver's conn 3, direct; B to A 0.3s on the receiver's conn 3, direct
+     first packet of any age: at B 0.3s, at A 0.3s
+     path selections during, from the drop: A +2.0s relay; B +2.1s relay
+     path selections after: A none; B none
+  -- 120s outage; before it, A on direct, B on direct
+     A: conn 3 closed at +30.1s (timed out); B: conn 3 closed at +30.1s (timed out), conn 19 closed at +121.3s (closed by peer: duplicate (code 0)), conn 20 closed at +121.3s (closed by peer: duplicate (code 0)), conn 21 closed at +121.4s (closed by peer: duplicate (code 0)), conn 22 closed at +121.4s (closed by peer: duplicate (code 0)), conn 23 closed at +122.4s (closed by peer: duplicate (code 0)), conn 24 closed at +122.4s (closed by peer: duplicate (code 0)), conn 25 closed at +122.5s (closed by peer: duplicate (code 0)), conn 26 closed at +123.4s (closed by peer: duplicate (code 0)), conn 27 closed at +123.4s (closed by peer: duplicate (code 0)), conn 28 closed at +124.4s (closed by peer: duplicate (code 0)), conn 29 closed at +124.5s (closed by peer: duplicate (code 0)), conn 30 closed at +125.4s (closed by peer: duplicate (code 0)), conn 31 closed at +125.4s (closed by peer: duplicate (code 0)), conn 32 closed at +126.5s (closed by peer: duplicate (code 0))
+     A's home relay: +5.6s https://fra/ connected=false | +136.2s https://fra/ connected=true
+     B's home relay: no change
+     redials: 46 started, #50 connected 0.4s after the link came back, taking 28.3s, #64 connected 1.2s after the link came back, taking 1.1s, #63 connected 1.3s after the link came back, taking 3.1s, #57 connected 1.3s after the link came back, taking 15.2s, #54 connected 1.4s after the link came back, taking 21.2s, #62 connected 2.3s after the link came back, taking 6.1s, #60 connected 2.3s after the link came back, taking 10.2s, #51 connected 2.4s after the link came back, taking 28.2s, #58 connected 3.3s after the link came back, taking 15.2s, #55 connected 3.4s after the link came back, taking 21.2s, #61 connected 4.3s after the link came back, taking 10.2s, #52 connected 4.4s after the link came back, taking 28.2s, #59 connected 5.3s after the link came back, taking 15.2s, #56 connected 5.4s after the link came back, taking 21.2s, #53 connected 6.4s after the link came back, taking 28.2s, 31 failed (timed out; no answer in 30s)
+     fresh data after the link came back: A to B 0.4s on the receiver's conn 18, direct; B to A 0.5s on the receiver's conn 4, direct
+     first packet of any age: at B 0.4s, at A 0.5s
+     path selections during, from the drop: A +2.0s relay; B +2.1s relay
+     path selections after: A none; B none
+
+{
+  "default-20261011T125804": [
+    {
+      "outage_s": 10,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [],
+        "B": []
+      },
+      "home_A": [],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 5118491,
+          "made_before_up": true
+        },
+        "at_A": {
+          "after_up": 3081889,
+          "made_before_up": true
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 5398381,
+          "c": 1,
+          "path": "relay"
+        },
+        "B_to_A": {
+          "after_up": 5160285,
+          "c": 1,
+          "path": "relay"
+        }
+      },
+      "dials": 0,
+      "dial_ok": [],
+      "dial_err": [],
+      "selected_during": {
+        "A": [],
+        "B": []
+      },
+      "selected_after_up": {
+        "A": [
+          {
+            "at": 5077366,
+            "path": "relay"
+          },
+          {
+            "at": 19240026,
+            "path": "direct"
+          }
+        ],
+        "B": [
+          {
+            "at": 5034713,
+            "path": "relay"
+          },
+          {
+            "at": 19280469,
+            "path": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "outage_s": 30,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [],
+        "B": []
+      },
+      "home_A": [
+        {
+          "at": 4564605,
+          "status": "https://fra/ connected=false"
+        },
+        {
+          "at": 33730990,
+          "status": "https://fra/ connected=true"
+        }
+      ],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 506935,
+          "made_before_up": true
+        },
+        "at_A": {
+          "after_up": 981307,
+          "made_before_up": true
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 1310341,
+          "c": 1,
+          "path": "relay"
+        },
+        "B_to_A": {
+          "after_up": 2079336,
+          "c": 1,
+          "path": "relay"
+        }
+      },
+      "dials": 0,
+      "dial_ok": [],
+      "dial_err": [],
+      "selected_during": {
+        "A": [
+          {
+            "at": 15028932,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 15069494,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [
+          {
+            "at": 4439283,
+            "path": "direct"
+          }
+        ],
+        "B": [
+          {
+            "at": 4482075,
+            "path": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "outage_s": 60,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [
+          {
+            "c": 1,
+            "at": 34251036,
+            "reason": "timed out"
+          }
+        ],
+        "B": [
+          {
+            "c": 1,
+            "at": 34209998,
+            "reason": "timed out"
+          },
+          {
+            "c": 3,
+            "at": 61432373,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 4,
+            "at": 61507964,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 5,
+            "at": 61531621,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 6,
+            "at": 62457872,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 7,
+            "at": 62481734,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 8,
+            "at": 62549983,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 9,
+            "at": 63506407,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 10,
+            "at": 63529501,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 15,
+            "at": 64881761,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 13,
+            "at": 65352115,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 11,
+            "at": 65837645,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 12,
+            "at": 66142203,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 14,
+            "at": 66144378,
+            "reason": "closed by peer: duplicate (code 0)"
+          }
+        ]
+      },
+      "home_A": [
+        {
+          "at": 4248833,
+          "status": "https://fra/ connected=false"
+        },
+        {
+          "at": 68714620,
+          "status": "https://fra/ connected=true"
+        }
+      ],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 1405652,
+          "made_before_up": false
+        },
+        "at_A": {
+          "after_up": 1440982,
+          "made_before_up": false
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 1405652,
+          "c": 2,
+          "path": "direct"
+        },
+        "B_to_A": {
+          "after_up": 1440982,
+          "c": 2,
+          "path": "direct"
+        }
+      },
+      "dials": 14,
+      "dial_ok": [
+        {
+          "at": 1342825,
+          "attempt": 15,
+          "took": 1089475
+        },
+        {
+          "at": 1364821,
+          "attempt": 14,
+          "took": 3112990
+        },
+        {
+          "at": 1439378,
+          "attempt": 8,
+          "took": 15194732
+        },
+        {
+          "at": 1463598,
+          "attempt": 5,
+          "took": 21224035
+        },
+        {
+          "at": 2390236,
+          "attempt": 13,
+          "took": 6139479
+        },
+        {
+          "at": 2413898,
+          "attempt": 11,
+          "took": 10165236
+        },
+        {
+          "at": 2482052,
+          "attempt": 2,
+          "took": 28247399
+        },
+        {
+          "at": 3438964,
+          "attempt": 9,
+          "took": 15193228
+        },
+        {
+          "at": 3461826,
+          "attempt": 6,
+          "took": 21220215
+        },
+        {
+          "at": 4098451,
+          "attempt": 3,
+          "took": 27862729
+        },
+        {
+          "at": 4098576,
+          "attempt": 4,
+          "took": 25861009
+        },
+        {
+          "at": 4182311,
+          "attempt": 7,
+          "took": 19939656
+        },
+        {
+          "at": 4182416,
+          "attempt": 10,
+          "took": 13935594
+        },
+        {
+          "at": 4265700,
+          "attempt": 12,
+          "took": 10016040
+        }
+      ],
+      "dial_err": [],
+      "selected_during": {
+        "A": [
+          {
+            "at": 14998348,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 15037017,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [],
+        "B": []
+      }
+    },
+    {
+      "outage_s": 120,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [
+          {
+            "c": 2,
+            "at": 30198655,
+            "reason": "timed out"
+          }
+        ],
+        "B": [
+          {
+            "c": 2,
+            "at": 30241179,
+            "reason": "timed out"
+          },
+          {
+            "c": 17,
+            "at": 120446470,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 18,
+            "at": 120542612,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 19,
+            "at": 121420378,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 20,
+            "at": 121494915,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 21,
+            "at": 121514632,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 22,
+            "at": 122447320,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 23,
+            "at": 122472631,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 24,
+            "at": 122538105,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 25,
+            "at": 123494123,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 26,
+            "at": 123517361,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 27,
+            "at": 124541466,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 28,
+            "at": 125498654,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 29,
+            "at": 125522045,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 30,
+            "at": 126550676,
+            "reason": "closed by peer: duplicate (code 0)"
+          }
+        ]
+      },
+      "home_A": [
+        {
+          "at": 9274262,
+          "status": "https://fra/ connected=false"
+        },
+        {
+          "at": 143847081,
+          "status": "https://fra/ connected=true"
+        }
+      ],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 394398,
+          "made_before_up": false
+        },
+        "at_A": {
+          "after_up": 438610,
+          "made_before_up": false
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 394398,
+          "c": 16,
+          "path": "direct"
+        },
+        "B_to_A": {
+          "after_up": 438610,
+          "c": 3,
+          "path": "direct"
+        }
+      },
+      "dials": 46,
+      "dial_ok": [
+        {
+          "at": 336936,
+          "attempt": 61,
+          "took": 94167
+        },
+        {
+          "at": 380136,
+          "attempt": 58,
+          "took": 6140446
+        },
+        {
+          "at": 474635,
+          "attempt": 47,
+          "took": 28249956
+        },
+        {
+          "at": 1355129,
+          "attempt": 60,
+          "took": 3112961
+        },
+        {
+          "at": 1428477,
+          "attempt": 54,
+          "took": 15193325
+        },
+        {
+          "at": 1448797,
+          "attempt": 51,
+          "took": 21219296
+        },
+        {
+          "at": 2382100,
+          "attempt": 59,
+          "took": 6140685
+        },
+        {
+          "at": 2406268,
+          "attempt": 57,
+          "took": 10167245
+        },
+        {
+          "at": 2473247,
+          "attempt": 48,
+          "took": 28247616
+        },
+        {
+          "at": 3429264,
+          "attempt": 55,
+          "took": 15193288
+        },
+        {
+          "at": 3451440,
+          "attempt": 52,
+          "took": 21219825
+        },
+        {
+          "at": 4475483,
+          "attempt": 49,
+          "took": 28248821
+        },
+        {
+          "at": 5432530,
+          "attempt": 56,
+          "took": 15194398
+        },
+        {
+          "at": 5455299,
+          "attempt": 53,
+          "took": 21221737
+        },
+        {
+          "at": 6479888,
+          "attempt": 50,
+          "took": 28251985
+        }
+      ],
+      "dial_err": [
+        {
+          "at": -59813468,
+          "attempt": 16,
+          "e": "timed out"
+        },
+        {
+          "at": -57812866,
+          "attempt": 17,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -55812094,
+          "attempt": 18,
+          "e": "timed out"
+        },
+        {
+          "at": -53811237,
+          "attempt": 19,
+          "e": "timed out"
+        },
+        {
+          "at": -51808724,
+          "attempt": 20,
+          "e": "timed out"
+        },
+        {
+          "at": -49808570,
+          "attempt": 21,
+          "e": "timed out"
+        },
+        {
+          "at": -47807063,
+          "attempt": 22,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -45806063,
+          "attempt": 23,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -43805013,
+          "attempt": 24,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -41802597,
+          "attempt": 25,
+          "e": "timed out"
+        },
+        {
+          "at": -39802034,
+          "attempt": 26,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -37799975,
+          "attempt": 27,
+          "e": "timed out"
+        },
+        {
+          "at": -35798008,
+          "attempt": 28,
+          "e": "timed out"
+        },
+        {
+          "at": -33798401,
+          "attempt": 29,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -31796785,
+          "attempt": 30,
+          "e": "timed out"
+        },
+        {
+          "at": -29796067,
+          "attempt": 31,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -27794580,
+          "attempt": 32,
+          "e": "timed out"
+        },
+        {
+          "at": -25792816,
+          "attempt": 33,
+          "e": "timed out"
+        },
+        {
+          "at": -23792611,
+          "attempt": 34,
+          "e": "timed out"
+        },
+        {
+          "at": -21791418,
+          "attempt": 35,
+          "e": "timed out"
+        },
+        {
+          "at": -19787997,
+          "attempt": 36,
+          "e": "timed out"
+        },
+        {
+          "at": -17788054,
+          "attempt": 37,
+          "e": "timed out"
+        },
+        {
+          "at": -15786261,
+          "attempt": 38,
+          "e": "timed out"
+        },
+        {
+          "at": -13785277,
+          "attempt": 39,
+          "e": "timed out"
+        },
+        {
+          "at": -11783800,
+          "attempt": 40,
+          "e": "timed out"
+        },
+        {
+          "at": -9783162,
+          "attempt": 41,
+          "e": "timed out"
+        },
+        {
+          "at": -7781245,
+          "attempt": 42,
+          "e": "timed out"
+        },
+        {
+          "at": -5779751,
+          "attempt": 43,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -3778629,
+          "attempt": 44,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -1777065,
+          "attempt": 45,
+          "e": "timed out"
+        },
+        {
+          "at": 225491,
+          "attempt": 46,
+          "e": "timed out"
+        }
+      ],
+      "selected_during": {
+        "A": [
+          {
+            "at": 15028132,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 15068590,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [],
+        "B": []
+      }
+    }
+  ],
+  "v1-20261011T130907": [
+    {
+      "outage_s": 10,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [],
+        "B": []
+      },
+      "home_A": [],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 258544,
+          "made_before_up": true
+        },
+        "at_A": {
+          "after_up": 6935397,
+          "made_before_up": true
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 7100583,
+          "c": 1,
+          "path": "relay"
+        },
+        "B_to_A": {
+          "after_up": 7190781,
+          "c": 1,
+          "path": "relay"
+        }
+      },
+      "dials": 0,
+      "dial_ok": [],
+      "dial_err": [],
+      "selected_during": {
+        "A": [
+          {
+            "at": 1989400,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 2029681,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [
+          {
+            "at": 19009920,
+            "path": "direct"
+          }
+        ],
+        "B": [
+          {
+            "at": 19052025,
+            "path": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "outage_s": 30,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [
+          {
+            "c": 1,
+            "at": 30249164,
+            "reason": "timed out"
+          }
+        ],
+        "B": [
+          {
+            "c": 1,
+            "at": 30207601,
+            "reason": "timed out"
+          }
+        ]
+      },
+      "home_A": [
+        {
+          "at": 4344182,
+          "status": "https://fra/ connected=false"
+        },
+        {
+          "at": 32691742,
+          "status": "https://fra/ connected=true"
+        }
+      ],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 384379,
+          "made_before_up": false
+        },
+        "at_A": {
+          "after_up": 425950,
+          "made_before_up": false
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 384379,
+          "c": 2,
+          "path": "direct"
+        },
+        "B_to_A": {
+          "after_up": 425950,
+          "c": 2,
+          "path": "direct"
+        }
+      },
+      "dials": 1,
+      "dial_ok": [
+        {
+          "at": 327647,
+          "attempt": 2,
+          "took": 92256
+        }
+      ],
+      "dial_err": [],
+      "selected_during": {
+        "A": [
+          {
+            "at": 2005986,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 2048177,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [],
+        "B": []
+      }
+    },
+    {
+      "outage_s": 60,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [
+          {
+            "c": 2,
+            "at": 30130362,
+            "reason": "timed out"
+          }
+        ],
+        "B": [
+          {
+            "c": 2,
+            "at": 30093290,
+            "reason": "timed out"
+          },
+          {
+            "c": 4,
+            "at": 60337538,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 5,
+            "at": 60359706,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 6,
+            "at": 60432063,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 7,
+            "at": 61311106,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 8,
+            "at": 61386031,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 9,
+            "at": 61407340,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 10,
+            "at": 62334333,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 11,
+            "at": 62360634,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 12,
+            "at": 62429590,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 13,
+            "at": 63386831,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 14,
+            "at": 63411371,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 15,
+            "at": 64873085,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 16,
+            "at": 64951027,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 17,
+            "at": 65505721,
+            "reason": "closed by peer: duplicate (code 0)"
+          }
+        ]
+      },
+      "home_A": [
+        {
+          "at": 3277084,
+          "status": "https://fra/ connected=false"
+        },
+        {
+          "at": 80103598,
+          "status": "https://fra/ connected=true"
+        }
+      ],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 283746,
+          "made_before_up": false
+        },
+        "at_A": {
+          "after_up": 325694,
+          "made_before_up": false
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 283746,
+          "c": 3,
+          "path": "direct"
+        },
+        "B_to_A": {
+          "after_up": 325694,
+          "c": 3,
+          "path": "direct"
+        }
+      },
+      "dials": 16,
+      "dial_ok": [
+        {
+          "at": 225943,
+          "attempt": 18,
+          "took": 93203
+        },
+        {
+          "at": 270350,
+          "attempt": 15,
+          "took": 6140769
+        },
+        {
+          "at": 293681,
+          "attempt": 13,
+          "took": 10166615
+        },
+        {
+          "at": 366139,
+          "attempt": 4,
+          "took": 28249276
+        },
+        {
+          "at": 1243423,
+          "attempt": 17,
+          "took": 3112182
+        },
+        {
+          "at": 1319289,
+          "attempt": 11,
+          "took": 15194573
+        },
+        {
+          "at": 1339022,
+          "attempt": 8,
+          "took": 21218048
+        },
+        {
+          "at": 2269321,
+          "attempt": 16,
+          "took": 6138960
+        },
+        {
+          "at": 2295341,
+          "attempt": 14,
+          "took": 10166794
+        },
+        {
+          "at": 2364228,
+          "attempt": 5,
+          "took": 28246272
+        },
+        {
+          "at": 3274641,
+          "attempt": 6,
+          "took": 27155096
+        },
+        {
+          "at": 3321444,
+          "attempt": 12,
+          "took": 15195350
+        },
+        {
+          "at": 3342495,
+          "attempt": 9,
+          "took": 21220540
+        },
+        {
+          "at": 3360383,
+          "attempt": 7,
+          "took": 25240373
+        },
+        {
+          "at": 3360411,
+          "attempt": 10,
+          "took": 19237248
+        }
+      ],
+      "dial_err": [
+        {
+          "at": 117467,
+          "attempt": 3,
+          "e": "timed out"
+        }
+      ],
+      "selected_during": {
+        "A": [
+          {
+            "at": 2016386,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 2057778,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [],
+        "B": []
+      }
+    },
+    {
+      "outage_s": 120,
+      "selected_before": {
+        "A": "direct",
+        "B": "direct"
+      },
+      "closed": {
+        "A": [
+          {
+            "c": 3,
+            "at": 30111312,
+            "reason": "timed out"
+          }
+        ],
+        "B": [
+          {
+            "c": 3,
+            "at": 30071735,
+            "reason": "timed out"
+          },
+          {
+            "c": 19,
+            "at": 121304504,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 20,
+            "at": 121329289,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 21,
+            "at": 121403004,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 22,
+            "at": 121428301,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 23,
+            "at": 122358182,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 24,
+            "at": 122380019,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 25,
+            "at": 122452708,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 26,
+            "at": 123406226,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 27,
+            "at": 123432810,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 28,
+            "at": 124380694,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 29,
+            "at": 124451893,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 30,
+            "at": 125408503,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 31,
+            "at": 125430607,
+            "reason": "closed by peer: duplicate (code 0)"
+          },
+          {
+            "c": 32,
+            "at": 126452747,
+            "reason": "closed by peer: duplicate (code 0)"
+          }
+        ]
+      },
+      "home_A": [
+        {
+          "at": 5584703,
+          "status": "https://fra/ connected=false"
+        },
+        {
+          "at": 136158291,
+          "status": "https://fra/ connected=true"
+        }
+      ],
+      "home_B": [],
+      "first_rx_after_up": {
+        "at_B": {
+          "after_up": 446399,
+          "made_before_up": false
+        },
+        "at_A": {
+          "after_up": 480656,
+          "made_before_up": false
+        }
+      },
+      "first_fresh": {
+        "A_to_B": {
+          "after_up": 446399,
+          "c": 18,
+          "path": "direct"
+        },
+        "B_to_A": {
+          "after_up": 480656,
+          "c": 4,
+          "path": "direct"
+        }
+      },
+      "dials": 46,
+      "dial_ok": [
+        {
+          "at": 382800,
+          "attempt": 50,
+          "took": 28250948
+        },
+        {
+          "at": 1236212,
+          "attempt": 64,
+          "took": 1086287
+        },
+        {
+          "at": 1260144,
+          "attempt": 63,
+          "took": 3111606
+        },
+        {
+          "at": 1334780,
+          "attempt": 57,
+          "took": 15192237
+        },
+        {
+          "at": 1359962,
+          "attempt": 54,
+          "took": 21221357
+        },
+        {
+          "at": 2290239,
+          "attempt": 62,
+          "took": 6142395
+        },
+        {
+          "at": 2311787,
+          "attempt": 60,
+          "took": 10166854
+        },
+        {
+          "at": 2382590,
+          "attempt": 51,
+          "took": 28249553
+        },
+        {
+          "at": 3337056,
+          "attempt": 58,
+          "took": 15193660
+        },
+        {
+          "at": 3364244,
+          "attempt": 55,
+          "took": 21224288
+        },
+        {
+          "at": 4312250,
+          "attempt": 61,
+          "took": 10165682
+        },
+        {
+          "at": 4383091,
+          "attempt": 52,
+          "took": 28248560
+        },
+        {
+          "at": 5339930,
+          "attempt": 59,
+          "took": 15195281
+        },
+        {
+          "at": 5362603,
+          "attempt": 56,
+          "took": 21221009
+        },
+        {
+          "at": 6385952,
+          "attempt": 53,
+          "took": 28248871
+        }
+      ],
+      "dial_err": [
+        {
+          "at": -59903864,
+          "attempt": 19,
+          "e": "timed out"
+        },
+        {
+          "at": -57903230,
+          "attempt": 20,
+          "e": "timed out"
+        },
+        {
+          "at": -55902173,
+          "attempt": 21,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -53901285,
+          "attempt": 22,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -51898967,
+          "attempt": 23,
+          "e": "timed out"
+        },
+        {
+          "at": -49897107,
+          "attempt": 24,
+          "e": "timed out"
+        },
+        {
+          "at": -47896012,
+          "attempt": 25,
+          "e": "timed out"
+        },
+        {
+          "at": -45894495,
+          "attempt": 26,
+          "e": "timed out"
+        },
+        {
+          "at": -43893258,
+          "attempt": 27,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -41892922,
+          "attempt": 28,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -39890147,
+          "attempt": 29,
+          "e": "timed out"
+        },
+        {
+          "at": -37890427,
+          "attempt": 30,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -35889178,
+          "attempt": 31,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -33888403,
+          "attempt": 32,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -31885938,
+          "attempt": 33,
+          "e": "timed out"
+        },
+        {
+          "at": -29885386,
+          "attempt": 34,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -27883384,
+          "attempt": 35,
+          "e": "timed out"
+        },
+        {
+          "at": -25882905,
+          "attempt": 36,
+          "e": "no answer in 30s"
+        },
+        {
+          "at": -23879952,
+          "attempt": 37,
+          "e": "timed out"
+        },
+        {
+          "at": -21879373,
+          "attempt": 38,
+          "e": "timed out"
+        },
+        {
+          "at": -19878607,
+          "attempt": 39,
+          "e": "timed out"
+        },
+        {
+          "at": -17876856,
+          "attempt": 40,
+          "e": "timed out"
+        },
+        {
+          "at": -15875898,
+          "attempt": 41,
+          "e": "timed out"
+        },
+        {
+          "at": -13875001,
+          "attempt": 42,
+          "e": "timed out"
+        },
+        {
+          "at": -11873047,
+          "attempt": 43,
+          "e": "timed out"
+        },
+        {
+          "at": -9872913,
+          "attempt": 44,
+          "e": "timed out"
+        },
+        {
+          "at": -7872322,
+          "attempt": 45,
+          "e": "timed out"
+        },
+        {
+          "at": -5871677,
+          "attempt": 46,
+          "e": "timed out"
+        },
+        {
+          "at": -3870544,
+          "attempt": 47,
+          "e": "timed out"
+        },
+        {
+          "at": -1868991,
+          "attempt": 48,
+          "e": "timed out"
+        },
+        {
+          "at": 131665,
+          "attempt": 49,
+          "e": "timed out"
+        }
+      ],
+      "selected_during": {
+        "A": [
+          {
+            "at": 2012805,
+            "path": "relay"
+          }
+        ],
+        "B": [
+          {
+            "at": 2055678,
+            "path": "relay"
+          }
+        ]
+      },
+      "selected_after_up": {
+        "A": [],
+        "B": []
+      }
+    }
+  ]
+}

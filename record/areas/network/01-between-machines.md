@@ -43,7 +43,7 @@ The terms:
 | Every core | On each pilot's PC | Its iroh endpoint, under a key drawn fresh for each session; a connection to every other crew member, and each link's state; the channels and what sends them; the session's state and the replay when a link comes back; clock offsets; recording each connection's path, loss, and relay stalls, and each sender's clock offset |
 | The flying machine's core | The PF's PC | What 03-v1-scope already gives it: the flight model and the aircraft's authority; nothing more for the connection |
 | Relay | n0's `iroh-relay`, unmodified, on servers off the pilots' machines, in at least two regions | Carries a pair's packets when no direct path works, tells each endpoint its public address, and admits only Crosscheck |
-| Backend | Off the pilots' machines; its candidate is a Cloudflare Worker ([01-spine](../architecture/01-spine.md#components)) | Draws invite codes and maps each to the crew's endpoint IDs, limits code guessing, serves the relay list and its tokens, and holds bug reports; nothing a running session waits on |
+| Backend | Off the pilots' machines; its candidate is a Cloudflare Worker ([01-spine](../architecture/01-spine.md#components)) | Draws invite codes and maps each to the crew's endpoint IDs, limits code guessing, and holds bug reports; nothing a running session waits on |
 
 ## The link between two cores
 
@@ -57,7 +57,7 @@ Each link has one state, as its core sees it:
 | State | When | What the core does |
 | --- | --- | --- |
 | Up | A connection's first message has passed ([joining](#joining)) | Sends and receives |
-| Lost | Nothing from that member for 5s | Closes the connection with an application code of ours and redials; the session is degraded ([while a link is lost](#while-a-link-is-lost)) |
+| Lost | Nothing on the connection for 5s | Closes the connection with an application code of ours and redials; the session is degraded ([while a link is lost](#while-a-link-is-lost)) |
 | Up again | A new connection's first message, which carries the session's state, has passed | Sends the replay ([coming back](#coming-back)) |
 | Disconnected | 30 minutes without a connection to that member | Counts the member out of the session; a core disconnected from every member leaves the session itself ([coming back](#coming-back)) |
 
@@ -65,17 +65,18 @@ A core closes a lost connection rather than waiting for it, because a fresh conn
 At iroh's default path timers, that connection's QUIC was waiting out the probes it had backed off; at v1's, why it waited is unverified, and the relay's TCP connection backing off its resends would fit ([p07]).
 So every return takes one path, a new connection, whatever the outage's length.
 
-Any packet from a crew member, one-off packets included, counts as hearing from them, and the heartbeat channel ([channels](#channels)), which each core sends once a second whatever its sim is doing, guarantees one at least that often.
+Any packet on a connection, one-off packets included, counts as hearing from its member, and the heartbeat channel ([channels](#channels)), which each core sends once a second whatever its sim is doing, guarantees one at least that often.
 iroh's path keep-alives don't count, because iroh sends and answers them itself, and the core never sees them.
 5s is a starting value, to tune once recordings hold real outages: it sits above the 2s a dead direct path takes to give way to the relay, after which packets came again at once ([2.3]).
 
 A joining core dials every member.
 When a link is lost, both cores redial, each running one dial at a time and starting a new one every 2s in place of the last, because every dial still running when the link returns connects, up to 15 of them within 6.5s ([p07]).
-When two connections between a pair both pass their first message, the rule that picks the one that stays needs both sides to agree on what each still holds:
+When two connections between a pair both pass their first message, each side picks the one that stays from what it knows itself, so both pick the same one however the two dials raced:
 
-- Each first message carries a random number naming its connection, and the numbers of any other connections its sender still holds with the receiver.
-  A receiver closes any connection the other side no longer holds, which covers a core that restarted or timed out a connection without saying so.
-- Of two connections both sides still hold, the one the lower endpoint ID dialed stays, so the rule needs nothing a cut puts in doubt, such as who is PF.
+- A first message with a higher restart count than an existing connection's closes that connection, because its pilot's core restarted and dropped it.
+- Of two connections from the same restart, the one the lower endpoint ID dialed stays, comparing the two IDs as numbers, which both sides hold; of two the same side dialed, the newer stays, since a core dials a member only while it holds no connection to them.
+  The rule needs nothing a cut puts in doubt, such as who is PF.
+- A connection with nothing on it for 5s closes, as any lost one does, which clears one whose other side dropped it without the close arriving.
 - A connection whose first message hasn't arrived within 10s closes.
 - Each close carries an application code of its own.
 
@@ -90,7 +91,7 @@ In our FS Copilot work, two connections between one pair carried every packet tw
    Otherwise it answers with the session's ID, its relay list and tokens, and each member's pilot ID, display name, kind, and endpoint ID, and lists nobody new.
 3. The joining core builds its endpoint with exactly the session's relays, so it homes at one of them, and dials each member by endpoint ID with every relay in that list.
    Until a connection has chosen a path, iroh sends its first packets to every address it knows (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `handle_msg_send_datagram`), and an endpoint's address holds several relays at once (read in iroh-base 1.3.0, `src/endpoint_addr.rs`), so the dial reaches the member through whichever relay it homes at, and iroh learns the direct addresses over the connection itself (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `trigger_holepunching`).
-4. Each side's first message on a connection opens the session channel's stream with a header that no release changes, holding Crosscheck's version and the message crate's hash, followed by the session's code, the sender's pilot ID and restart count, the numbers that [the link's rule](#the-link-between-two-cores) needs, and every key of the session channel the sender holds, control among them.
+4. Each side's first message on a connection opens the session channel's stream with a header that no release changes, holding Crosscheck's version and the message crate's hash, followed by the session's code, the sender's pilot ID and restart count, and every key of the session channel the sender holds, its own member entry and control among them.
    A core accepts a connection whose first message carries its session's code, version, and hash, and closes any other with an application code that says why.
    Until that first message has passed, it applies nothing else from the connection: neither its other streams, which QUIC keeps no order with, nor its one-off packets, which QUIC can deliver before the first stream data.
    So every receiver knows the session's state, and who flies, before anything that depends on them.
@@ -105,7 +106,7 @@ Each member's kind is crew in v1, and the field leaves room for passengers later
 
 The backend keeps a session only as long as its crew uses it, and no running session waits on it:
 
-- Each core renews its place every 10 minutes, and the renewal's answer carries the current tokens for our relays; the backend drops a member that hasn't renewed for 30 minutes.
+- Each core renews its place every 10 minutes, and the backend drops a member that hasn't renewed for 30 minutes.
 - Leave session tells the backend at once, and the backend frees the code once its last member has left or lapsed.
 - The backend limits how many wrong codes one address can try, as fsc-editor's Worker limits join attempts per IP address ([09-04](../../learn/foundations/09-04-relays-and-sessions.md#setting-up-a-session-codes-rendezvous-servers)), counting only wrong codes, since carrier-grade NAT puts many pilots behind one address ([network log, 2026-10-06](log.md#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month)).
 - Each request a core makes about itself carries a signature by its endpoint key, and the backend keys members by endpoint ID, so nobody else can register, renew, or leave in a pilot's name.
@@ -133,7 +134,7 @@ v1 records each connection's path, loss, and relay stalls in the recording that 
 
 A relay runs n0's `iroh-relay`, in Rust, unmodified, which settles the relay's language the [spine](../architecture/01-spine.md#language-and-toolchains) left to this node.
 We run relays in at least two regions (user, 2026-10-11).
-The backend serves the default relay list, each entry with its URL, its token, and the rate it caps a client at, and the core keeps the list in its data folder.
+Each release of Crosscheck carries the default relay list, each entry with its URL, its token, and the rate it caps a client at (user, 2026-10-11).
 A setting overrides the list, so a group can point Crosscheck at relays of its own, as [01-aims](../product/01-aims.md#relay-and-license) asks, and a session uses the list its host started with ([joining](#joining)).
 
 A core builds its endpoint from iroh's `presets::Minimal`, with `RelayMode::Custom` and the session's relay list, as 2.3's probe did ([2.3]).
@@ -141,7 +142,9 @@ iroh's `presets::N0` would publish each pilot's endpoint ID and home relay to n0
 
 Our relays admit only Crosscheck (user, 2026-10-11).
 Each relay's configuration lists one or more shared tokens, and admits only a client that presents one (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig::SharedToken`), and a core presents the token its relay list carries.
-That keeps other iroh applications off our relays, though not someone who reads the token out of a running Crosscheck, and listing two tokens at once, while renewals hand out the new one, lets us change it without cutting anyone off.
+That keeps other iroh applications off our relays, though not someone who reads the token out of Crosscheck.
+A session's members all run one release ([joining](#joining)), so they all hold its tokens, and a token changes only with a release, after which a relay lists the old token and the new one until the old release is out of use.
+`iroh-relay` reads its tokens only when it starts, and reloads only its certificates (read in iroh-relay 1.3.0, `src/main.rs`), so a change of tokens restarts the relay, as an upgrade does, and a restart drops every relayed connection through it until a redial lands, which waits for the dialed core's home relay connection to come back, as long as 23.8s after a link outage in [p07]; we restart relays at a quiet hour.
 Each relay also caps how fast one client can send (read in iroh-relay 1.3.0, `src/main.rs`, `limits.client.rx`), above v1's live traffic, and the core paces everything it sends through a relay below the cap its list gives ([sending](#sending)).
 
 Each endpoint picks its home relay by latency, never by cost, as [the connection](../product/03-v1-scope.md#the-connection)'s rule that flight data wins asks (read in iroh 1.3.0, `src/net_report.rs`):
@@ -189,11 +192,14 @@ Everything else that must arrive is state: the session channel and traffic's ide
 | ATC audio | The ATC host | One-off packets, one 20ms Opus frame each, numbered | Played in number order behind an adaptive buffer; a frame that arrives after its turn is dropped | Ahead of every stream |
 | Heartbeat | Every machine | One-off packets, one a second | Each carries a clock exchange ([clock offsets](#clock-offsets)) and the last number its sender applied from each sender on the cockpit stream | Ahead of every other channel |
 
-- The session channel's keys are the session's state: the control value ([control](#control)), Ready, the countdown, the time, date, simulation rate, and pause, the PF's position and stand, the match check's comparison, a sim crash or a flight left, the plugin channel instances, and whom each member is connected to and who left ([03-v1-scope](../product/03-v1-scope.md#a-session-from-start-to-finish)).
+- The session channel's keys are the session's state: the control value ([control](#control)); each member's entry, its pilot ID, display name, kind, and endpoint ID, which it writes itself; Ready, the countdown, and seat claims; the traffic host and the ATC host; the time, date, simulation rate, and pause; the PF's position and stand; the match check's comparison; a sim crash or a flight left; the plugin channel instances; and whom each member is connected to and who left ([03-v1-scope](../product/03-v1-scope.md#a-session-from-start-to-finish)).
+  A core dials any member it learns of from another's entry and holds no connection to, so two pilots who join at the same moment, each listed by the backend without the other, still find each other.
 - Every key but control carries a stamp: the control value its writer held, a number one past the highest its writer has seen on that key, and the writer's pilot ID.
   A receiver keeps the value with the highest stamp, comparing control values first, as [control](#control) orders them, then the numbers, with the lower pilot ID winning a tie.
-  So of two changes to a key several pilots write, such as active pause, made at once or during a cut, every machine keeps the same one, and after a takeover the new PF's time, date, and simulation rate win, as its cockpit does.
-  A key only one member writes, such as its Ready, its crash, or whom it's connected to, needs nothing more, since each of its writer's changes stamps higher than the last.
+  So of two changes to a key several pilots write, such as active pause, made at once or during a cut, every machine keeps the same one.
+  A key only one member writes, such as its entry, its Ready, or whom it's connected to, needs nothing more, since each of its writer's changes stamps higher than the last.
+- A core that takes control writes every session-wide key again, every key that isn't one member's own, under the new control value, so nothing the ex-PF set during a cut, such as a sim rate or a pause, outranks the new PF's session, as its cockpit messages don't ([control](#control)).
+  A key added later is either one member's own or session-wide, and the rule covers it either way.
 - The flight-model sample also carries the yoke, rudder, and toe-brake positions the flying aircraft applied, which move nearly every frame while the PF hand-flies and would flood the cockpit stream and its replay; the fixed rate means the PF's values overwrite any yoke input of the PM's within a sample, and a later feature that mixes the PM's input adds a channel toward the flying machine and changes nothing the following machines read (user, 2026-10-11).
   Which fields the sample carries is the flight-model sync's.
 - The PF's engine levers and trim move far less often, so they stay entries on the cockpit stream, owned by the PF, and the following machine writes the PF's last value back at once when its own sim reports that the PM moved one, which keeps [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the PM's hardware can't hold them away (user, 2026-10-11).
@@ -224,6 +230,7 @@ Who may change control, and when, is the table of roles that [node 3](../archite
 
 The value rides the session channel as one key, so a new connection's first message carries it, and a receiver applies nothing else from that connection until the first message has passed ([joining](#joining)).
 Every cockpit message and flight-model sample carries the whole value it was made under, so a receiver can tell apart two pilots who took control from the same generation.
+A receiver that meets a newer value on any message or sample adopts it as though the key had come, since QUIC can deliver a new PF's first lever change before the control key it rode after.
 
 - A receiver drops a flight-model sample made under a value older than the newest it knows, since only the flying machine sends samples.
 - Of cockpit messages, a receiver drops only those a superseded value's PF made under that value that reach it in a replay ([coming back](#coming-back)), so an ex-PF's solo flying through a cut never replays into the new PF's cockpit, as FS Copilot once replayed a pilot's solo input into a fresh session (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R04).
@@ -231,6 +238,7 @@ Every cockpit message and flight-model sample carries the whole value it was mad
 - A dropped message counts as delivered for the cockpit stream's causal order, so no later message waits on it; how the order marks it is node 3's, as is how the ex-PF's own cockpit comes to the new PF's state.
 
 A PF who leaves the flight, for the main menu or another flight, passes control to the PM, as [the connection](../product/03-v1-scope.md#the-connection)'s rules for a pilot who leaves the flight say.
+A PF who leaves the session passes control the same way first ([leaving](#leaving)).
 A PF whose sim crashes passes nothing, because Crosscheck recovers from a crash (user, 2026-10-11): the PF's core, which stays up, puts the crash on the session channel, the PM's machine locks and holds as when it has lost the flying machine, its banner names the crash, and the PM can take control, with no warning, since a crashed sim flies nothing.
 How the crashed PF's aircraft and cockpit come back, as PF if nobody took control, is node 3's.
 
@@ -268,7 +276,9 @@ This replaces [the connection](../product/03-v1-scope.md#the-connection)'s 5-min
 Leave session closes each connection with an application code of ours that only Leave sends, and that close is the goodbye:
 
 - noq lets a peer drop stream data it hasn't delivered once a close arrives (read in noq 1.3.0, `src/connection.rs`, `Connection::close`), so a goodbye message sent just before the close could be lost.
-- Closing Crosscheck any other way, from the tray, by a Windows shutdown or logoff, or for an update, closes each connection with a quit code of ours before `Endpoint::close`, and the others treat a quit as a Leave (user, 2026-10-11).
+- So a PF who leaves first passes control to the PM as an ordinary handover, and closes once a message from the PM carries the new control value, which the PM's rewrite of the session-wide keys sends at once ([channels](#channels)), or once 1s has passed.
+  If the close comes first, the PM's machine locks and holds as after a PF's sim crash, and the PM can take control with no warning ([control](#control)).
+- Closing Crosscheck any other way, from the tray, by a Windows shutdown or logoff, or for an update, passes control the same way and closes each connection with a quit code of ours before `Endpoint::close`, and the others treat a quit as a Leave (user, 2026-10-11).
 - A process that dies sends no close, or at most one with code 0, which noq sends when every handle to a connection is dropped (read in noq 1.3.0, `src/connection.rs`, the docs of `Connection`), so code 0 and every error QUIC or iroh closes with count as a lost link, never as a leave.
 - A core that exits awaits iroh's `Endpoint::close`, bounded in time, which resends the closes until each peer acknowledges them (read in iroh 1.3.0, `src/endpoint.rs`, `Endpoint::close`).
 - Leave session also tells the backend, which frees the code once the last member has left, and the session channel tells any member who can't reach the leaver.
@@ -339,7 +349,9 @@ So a development setting builds a core's endpoint with its IP transports cleared
 - a core suspended for 60s, and a core killed and restarted;
 - the relay a session runs through taken down for 40s, and a core's home relay moved;
 - two relays, with the dialed and the dialing core homed at different ones;
-- a take-control during a cut, and the return after it.
+- both cores redialing at once after an outage, with each pair of dials in either order;
+- a take-control during a cut, with the ex-PF changing the sim rate and pause alone, and the return after it;
+- a PF's Leave session mid-flight.
 
 ## iroh as a dependency
 
@@ -349,7 +361,7 @@ So Crosscheck pins the exact versions of iroh, noq, and `iroh-relay`, and an upg
 1. Read the release notes, and the diff of that behavior.
 2. Change the pins.
 3. Run the network tests, and 2.3's switch, cutting the direct path and timing the move to the relay and back.
-4. Upgrade our relays before the release that carries the new iroh, since iroh keeps its wire protocol stable within a major version ([2.1]).
+4. Upgrade our relays before the release that carries the new iroh, since iroh keeps its wire protocol stable within a major version ([2.1]), at a quiet hour, since a restart drops relayed connections ([the relays](#the-relays)).
 
 An iroh 2.0 is work of its own.
 On Windows, iroh 0.96.1's `bind` hung on about half of one game's players' PCs, and the maintainers put it down to CPU-specific build flags in the ring cryptography library and closed the issue as not planned (documented in iroh's issue #3968, as [research report 02](results/2026-10-10-transport-research-reports/02-iroh.txt) summarizes it; unverified on iroh 1.3).

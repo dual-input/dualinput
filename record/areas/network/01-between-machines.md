@@ -180,7 +180,7 @@ Everything else that must arrive is state: the session channel and traffic's ide
 
 | Channel | From | Carried as | Copies and late values | Priority |
 | --- | --- | --- | --- | --- |
-| Session | Every machine | A stream from each sender, the newest value of each key, all of them again in a new connection's first message | A receiver keeps each key's newest value, by its writer's numbering or its stamp (below) | Above every other stream |
+| Session | Every machine | A stream from each sender, the newest value of each key, all of them again in a new connection's first message | A receiver keeps each key's value with the highest stamp (below) | Above every other stream |
 | Cockpit | Every machine | A stream from each sender, the one replayed log | Causal order across senders ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)); telling a copy from a late message is node 3's ([01-spine](../architecture/01-spine.md#left-open)) | Below the session's |
 | Catch-up | The flying machine | A stream to the catching-up machine, started again on a new connection | In order | Below the cockpit's |
 | Flight model | The flying machine | One-off packets, one sample each, at a fixed rate | A receiver drops a sample whose stamp isn't later than the newest it applied from that sender, or that was made under a control value older than the newest it knows | Ahead of every stream |
@@ -190,9 +190,10 @@ Everything else that must arrive is state: the session channel and traffic's ide
 | Heartbeat | Every machine | One-off packets, one a second | Each carries a clock exchange ([clock offsets](#clock-offsets)) and the last number its sender applied from each sender on the cockpit stream | Ahead of every other channel |
 
 - The session channel's keys are the session's state: the control value ([control](#control)), Ready, the countdown, the time, date, simulation rate, and pause, the PF's position and stand, the match check's comparison, a sim crash or a flight left, the plugin channel instances, and whom each member is connected to and who left ([03-v1-scope](../product/03-v1-scope.md#a-session-from-start-to-finish)).
-- A member's own keys, such as its Ready, its crash, or whom it's connected to, have one writer, and a receiver keeps that member's newest by its own numbering.
-  Every other key but control, such as active pause, which any pilot may set, or the time, date, and simulation rate, which the PF sets, carries a stamp: the control value its writer held, a number one past the highest its writer has seen on that key, and the writer's pilot ID.
-  A receiver keeps the value with the highest stamp, comparing control values first, as [control](#control) orders them, then the numbers, with the lower pilot ID winning a tie, so of two changes made at once or during a cut, every machine keeps the same one, and after a takeover the new PF's settings win, as its cockpit does.
+- Every key but control carries a stamp: the control value its writer held, a number one past the highest its writer has seen on that key, and the writer's pilot ID.
+  A receiver keeps the value with the highest stamp, comparing control values first, as [control](#control) orders them, then the numbers, with the lower pilot ID winning a tie.
+  So of two changes to a key several pilots write, such as active pause, made at once or during a cut, every machine keeps the same one, and after a takeover the new PF's time, date, and simulation rate win, as its cockpit does.
+  A key only one member writes, such as its Ready, its crash, or whom it's connected to, needs nothing more, since each of its writer's changes stamps higher than the last.
 - The flight-model sample also carries the yoke, rudder, and toe-brake positions the flying aircraft applied, which move nearly every frame while the PF hand-flies and would flood the cockpit stream and its replay; the fixed rate means the PF's values overwrite any yoke input of the PM's within a sample, and a later feature that mixes the PM's input adds a channel toward the flying machine and changes nothing the following machines read (user, 2026-10-11).
   Which fields the sample carries is the flight-model sync's.
 - The PF's engine levers and trim move far less often, so they stay entries on the cockpit stream, owned by the PF, and the following machine writes the PF's last value back at once when its own sim reports that the PM moved one, which keeps [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the PM's hardware can't hold them away (user, 2026-10-11).

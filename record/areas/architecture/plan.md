@@ -344,6 +344,7 @@ Its answer goes in a design doc in the network area, `record/areas/network/01-be
 Exit: the user agrees to that design doc.
 Waits on 2.1, 2.2, and 2.3.
 Reopened on 2026-10-11, by a design review of its answer against v1's scope, the features after v1, and our earlier projects' incidents, which found gaps v1 hits, such as two connections for one pair after an outage and two machines both flying after an ordinary drop.
+Done on 2026-10-11.
 Raised elsewhere: by 1.4, how the cores pack each field of a message, how each channel other than the cockpit's tells a copy from a late message, and whether the relay's and the backend's messages are the message crate's ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, what a core does when it starts and finds a session file after being down long enough that its pilot may have been cut off for more than 5 minutes ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how a receiver estimates each sender's clock offset, what a higher restart count does to it, and how far two PCs' counters part in practice, which the flight-model sync uses ([01-spine](01-spine.md#left-open)).

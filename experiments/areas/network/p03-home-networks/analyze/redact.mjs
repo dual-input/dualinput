@@ -98,7 +98,7 @@ function* walk(dir) {
 let files = 0;
 for (const f of walk(rawDir)) {
   const rel = path.relative(rawDir, f);
-  if (!/\.(ndjson|log)(\.gz)?$/.test(f) || rel.startsWith('analysis')) continue;
+  if (!/\.(ndjson|log|txt)(\.gz)?$/.test(f) || rel.startsWith('analysis')) continue;
   const upload = /^[0-9a-f]{16}-part\d/.test(path.basename(f)) || /^run-[0-9a-f]{16}-part\d/.test(path.basename(f));
   if (upload && skipRuns.some((id) => path.basename(f).includes(id))) continue;
   let buf = fs.readFileSync(f);

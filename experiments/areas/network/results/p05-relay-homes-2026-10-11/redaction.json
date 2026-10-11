@@ -1,0 +1,8 @@
+{
+  "note": "Public addresses replaced by labels; the mapping itself is kept only outside the repository.",
+  "counts": {
+    "stations": 2,
+    "public_v4": 0,
+    "public_v6": 0
+  }
+}

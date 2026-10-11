@@ -1,0 +1,131 @@
+[
+  {
+    "run": "fra-dials-nyc-20261011T121925",
+    "home": {
+      "fra": "https://fra/ connected=true",
+      "nyc": "https://nyc/ connected=true"
+    },
+    "phases": [
+      {
+        "what": "fra sends to nyc",
+        "sender_sent_by_relay": {
+          "fra": {
+            "sent": 0,
+            "recv": 0
+          },
+          "nyc": {
+            "sent": 48734,
+            "recv": 22764
+          }
+        },
+        "receiver_received_by_relay": {
+          "nyc": {
+            "sent": 19164,
+            "recv": 52334
+          }
+        },
+        "sender_selected": [
+          "Relay(https://nyc/)"
+        ],
+        "receiver_selected": [
+          "Relay(https://nyc/)"
+        ]
+      },
+      {
+        "what": "nyc sends to fra",
+        "sender_sent_by_relay": {
+          "nyc": {
+            "sent": 49037,
+            "recv": 23231
+          }
+        },
+        "receiver_received_by_relay": {
+          "fra": {
+            "sent": 0,
+            "recv": 0
+          },
+          "nyc": {
+            "sent": 18739,
+            "recv": 51035
+          }
+        },
+        "sender_selected": [
+          "Relay(https://nyc/)"
+        ],
+        "receiver_selected": [
+          "Relay(https://nyc/)"
+        ]
+      }
+    ]
+  },
+  {
+    "run": "nyc-dials-fra-20261011T122111",
+    "home": {
+      "fra": "https://fra/ connected=true",
+      "nyc": "https://nyc/ connected=true"
+    },
+    "phases": [
+      {
+        "what": "nyc sends to fra",
+        "sender_sent_by_relay": {
+          "fra": {
+            "sent": 48734,
+            "recv": 22801
+          },
+          "nyc": {
+            "sent": 0,
+            "recv": 0
+          }
+        },
+        "receiver_received_by_relay": {
+          "fra": {
+            "sent": 19201,
+            "recv": 52334
+          }
+        },
+        "sender_selected": [
+          "Relay(https://fra/)"
+        ],
+        "receiver_selected": [
+          "Relay(https://fra/)"
+        ]
+      },
+      {
+        "what": "fra sends to nyc",
+        "sender_sent_by_relay": {
+          "fra": {
+            "sent": 49036,
+            "recv": 23223
+          }
+        },
+        "receiver_received_by_relay": {
+          "fra": {
+            "sent": 19569,
+            "recv": 52690
+          },
+          "nyc": {
+            "sent": 0,
+            "recv": 0
+          }
+        },
+        "sender_selected": [
+          "Relay(https://fra/)"
+        ],
+        "receiver_selected": [
+          "Relay(https://fra/)"
+        ]
+      }
+    ]
+  }
+]
+
+== fra-dials-nyc-20261011T121925: endpoint on fra homes at https://fra/ connected=true; endpoint on nyc homes at https://nyc/ connected=true
+  fra sends to nyc: sender's relay sockets sent fra 0 B, nyc 48734 B; receiver's relay sockets received nyc 52334 B
+    paths selected: sender Relay(https://nyc/), receiver Relay(https://nyc/)
+  nyc sends to fra: sender's relay sockets sent nyc 49037 B; receiver's relay sockets received fra 0 B, nyc 51035 B
+    paths selected: sender Relay(https://nyc/), receiver Relay(https://nyc/)
+== nyc-dials-fra-20261011T122111: endpoint on fra homes at https://fra/ connected=true; endpoint on nyc homes at https://nyc/ connected=true
+  nyc sends to fra: sender's relay sockets sent fra 48734 B, nyc 0 B; receiver's relay sockets received fra 52334 B
+    paths selected: sender Relay(https://fra/), receiver Relay(https://fra/)
+  fra sends to nyc: sender's relay sockets sent fra 49036 B; receiver's relay sockets received fra 52690 B, nyc 0 B
+    paths selected: sender Relay(https://fra/), receiver Relay(https://fra/)

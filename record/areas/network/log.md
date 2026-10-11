@@ -2,6 +2,38 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-11: when two endpoints home at different relays, iroh carries both directions through the dialed endpoint's home relay, so whoever dials picks the relay
+
+**Asked:** for node 2's revision, when two pilots' endpoints home at different relays, which relay carries each direction ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?
+
+**Expected:** no prediction; each sender could have used its receiver's home relay, the one each endpoint's address names, or both directions could have shared one.
+
+**Found:** [p05](../../../experiments/areas/network/p05-relay-homes/) ran twice on 2026-10-11 between two endpoints on our droplets, with direct addresses off through `clear_ip_transports()`.
+The endpoint on the Frankfurt droplet homed at Frankfurt's relay and the one on the New York droplet at New York's, as each one's `home_relay_status()` reported.
+In each run the dialer sent the flight-model stream, 20 packets a second, for 10s, then the listener sent it back for 10s, and `ss` on both droplets counted each endpoint's bytes on its TCP connection to each relay:
+
+| Who dials | Direction | Frankfurt's relay, sender sent / receiver received | New York's relay, sender sent / receiver received | Path both ends selected |
+| --- | --- | --- | --- | --- |
+| Frankfurt's endpoint | Frankfurt to New York | 0 B / no connection | 48,734 B / 52,334 B | New York's relay |
+| | New York to Frankfurt | no connection / 0 B | 49,037 B / 51,035 B | New York's relay |
+| New York's endpoint | New York to Frankfurt | 48,734 B / 52,334 B | 0 B / no connection | Frankfurt's relay |
+| | Frankfurt to New York | 49,036 B / 52,690 B | no connection / 0 B | Frankfurt's relay |
+
+- The dialer opened a second relay connection, to the dialed endpoint's home relay, and connected in 339ms and 343ms.
+  The dialed endpoint never opened the dialer's home relay, and the selected path didn't change in either run.
+- The round trip through the shared relay had a median of 85ms to 88ms on both ends in both runs, the same either way, because each endpoint sat beside its own relay.
+- iroh sends to a remote through the relay its address names if it already holds a connection there, otherwise through a relay it holds that has heard from that remote, and only otherwise opens the named relay (read in iroh 1.3.0, `src/socket/transports/relay/actor.rs`, `active_relay_handle_for_endpoint`).
+  The dialer holds no connection to the dialed endpoint's relay, so it opens one, and the dialed endpoint answers on the path it heard the dialer on, through its own home relay (inference from the selected paths).
+- Each run lasted about 30s, so whether iroh ever moves a long relayed session to the other relay, we haven't measured.
+
+**Changed:** which pilot dials decides which relay carries a relayed session, and so whose TCP leg to the relay crosses the distance between them.
+[2.3](#2026-10-10-iroh-moves-to-the-relay-one-path-idle-timeout-after-a-direct-link-dies-and-back-within-60s-and-at-3-loss-its-tcp-relays-p99-lateness-grows-with-the-round-trip-to-the-relay-from-53ms-at-22ms-away-to-534ms-at-131ms) found that a lossy pilot's stalls grow with that pilot's round trip to the relay, so the dialed pilot keeps a short leg and the dialer takes the long one.
+Node 2's design has to say who dials, because a rule chosen for another reason, such as the lower endpoint ID dialing, picks the relay by chance.
+
+**Affects:** node 2's design doc, its rule for which pilot dials and redials.
+
+**Evidence:** [p05](../../../experiments/areas/network/p05-relay-homes/), and its results in [results/p05-relay-homes-2026-10-11](../../../experiments/areas/network/results/p05-relay-homes-2026-10-11/): `analysis.txt` from `analyze.mjs`, and `raw/`, both endpoints' logs and the `ss` samples, with the droplets' addresses replaced by their station names.
+
 ## 2026-10-11: Two iroh endpoints in two processes on one PC, each with its own key and ports, connect directly over the PC's own address
 
 **Asked:** can a developer run two cores on one PC, each with its own identity and ports, linked as two pilots' cores would be ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?

@@ -52,12 +52,12 @@ A receiver's own vector clock is its one record of what it has applied, and serv
   A message the receiver's clock already covers is a copy, and the receiver drops it.
 - A message counts as applied, and moves the receiver's clock on, once Crosscheck has made its write, fired its event, or handed its press to the display's panel, and the heartbeat acknowledges by carrying the receiver's clock ([01-between-machines](../network/01-between-machines.md#channels)).
   FS Copilot's acknowledgment meant "received by the app", not "applied by the panel" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, the constructor's comment), and its app, restarted, dropped a press it had no panel for yet, logging "No panel for DisplayUnits|config=N324DU; event dropped" (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone").
-- A press for a display whose panel hasn't announced itself to the core yet, as after a core restart, waits until it does.
-- A receiver skips a message in four cases, and a skipped message counts as applied, so nothing waits on it and its sender stops keeping it:
+- A receiver skips a message in five cases, and a skipped message counts as applied, so nothing waits on it and its sender stops keeping it:
   - [a change of control](#a-change-of-control) drops it;
   - it's a press that arrives while the receiver's cockpit catches up ([03-catch-up](03-catch-up.md#while-catch-up-runs));
-  - it's a press for a display the receiver's aircraft doesn't have, which the [preflight match check](../product/03-v1-scope.md#preflight-match-check) finds;
-  - its entry is one the aircraft drives itself ([below](#entries-the-aircraft-drives-itself)).
+  - it's a press for a display whose panel hasn't announced itself to the core, as for a display the receiver's aircraft lacks, which FS Copilot's pointer sync drops too (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`);
+  - its entry is one the aircraft drives itself ([below](#entries-the-aircraft-drives-itself));
+  - it's a change to a PF-owned entry in a replay that a later change to the same entry follows, with only PF-owned changes between them ([the replay](#the-replay)).
 - A machine with no aircraft in a flight, such as a joiner still in the sim's menu, applies nothing from the cockpit stream and holds what arrives until its catch-up ([catch-up](#catch-up)).
 
 A message names its entry by name, and each counter by its pilot ID and restart count, which [2.2] measured at 84 bytes for a sample cockpit change against 27 for an entry's index and each pilot's place in the member list (measured on our development machine, 2026-10-10).
@@ -73,10 +73,10 @@ Catch-up writes each entry at the flying machine's value in the order the flying
 That settles [03-catch-up](03-catch-up.md#choosing-the-order)'s choice of order: where an interlock makes order matter, as with the hypothetical APU master that tries once to start the APU, it writes the battery first, and where order doesn't matter, it costs nothing, so no probe can change the choice.
 Entries whose value the flying machine took before the session began, or never changed, go first.
 
-- The catch-up carries the flying machine's vector clock as of the state it sends, and that clock becomes the catching-up machine's.
+- The catch-up carries the flying machine's vector clock as of the state it sends, and the catching-up machine takes it for every counter but its own, which keeps the larger of the two, since a machine's own counter never goes back and a number used twice would drop the second message as a copy ([01-spine](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts)).
   So every message the state already holds, queued while the machine waited or arriving late on the stream, drops as a copy, and the rest apply on top in stream order ([03-catch-up](03-catch-up.md#while-catch-up-runs)).
 - When control passes between two other pilots while catch-up runs, it starts again from the new flying machine and skips every entry that already matches.
-- Control can't pass to a pilot while their own catch-up or [replay](#the-replay) runs, by the take-control key or button or by their answer to a voice offer, and the button says why.
+- Control can't pass to a pilot while their own catch-up or [replay](#the-replay) runs over a link that's up, by the take-control key or button or by their answer to a voice offer, and the button says why; if the link is lost again first, the lost-link rules apply instead, and any pilot may take control ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
   During catch-up their own changes aren't sent ([03-catch-up](03-catch-up.md#while-catch-up-runs)), and during a replay their cockpit is behind by what's left of it, so a pilot who took over partway would fly a cockpit that differs from the others' or dates from before the cut.
   When the PF leaves the flight, the pass happens anyway, to an up-to-date pilot where there is one ([roles and members](../session/01-roles-and-members.md#the-pf)).
 
@@ -89,11 +89,12 @@ The time, date, simulation rate, and pause aren't steps, because they're session
 
 [03-catch-up](03-catch-up.md#replaying-a-short-outage)'s rule holds for a cut of up to 30 minutes: every missed change, in causal order, each after the gap the PF left before it, capped at 2s.
 
-- The one exception is a PF-owned entry, such as an engine lever or the trim: the replay applies only its newest value, at once (user, 2026-10-11).
+- The one exception is a run of changes to a PF-owned entry, such as an engine lever or the trim, with nothing between them but other PF-owned changes: the replay skips all but the last of the run, which applies in its place with no wait before it (user, 2026-10-11).
   A PF working the throttle changes it every time the lever moves, and a following machine only shows it, as it shows the yoke from the flight model's newest sample ([01-between-machines](../network/01-between-machines.md#channels)).
+  Each lever still holds the value it had before every event or press that followed it, so a starter press replays against the mixture the PF had then.
 - So a replay lasts at most 2s for each change it carries, and changes made close together, such as a knob turned through 20 degrees, replay at their own spacing.
   How long that is turns on how often the PF changed shared entries during the cut, which v1's recordings will show; an entry the aircraft drives itself, which would change at every tick, stops syncing within 30s ([its test](#entries-the-aircraft-drives-itself)).
-- While the replay runs, the returning PM's synced displays stay locked, as they were while the link was lost ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)), the banner says they're catching up, and control can't pass to them ([catch-up](#catch-up)).
+- While the replay runs, the returning PM's synced displays stay locked, as they were while the link was lost ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)), the banner says they're catching up, and control can't pass to them while the link stays up ([catch-up](#catch-up)).
 
 ## A change of control
 
@@ -120,7 +121,7 @@ A core that restarts while its sim keeps running, such as after a crash of its o
    The two others it lost need no rebuilding: a message it held back for a predecessor wasn't applied, so its clock doesn't cover it and the replay sends it again; and an echo token waits for a report the sim sends within frames of the write, long before a restarted core listens again.
 3. Every component in the sim sends a core that connects its whole current state, and the core takes it as live sync takes any report: a value Crosscheck didn't write is a change its pilot made while the core was down, which the core sends if it may and [puts back](#putting-back) if it may not, so a following machine's levers return to the PF's.
    fsc-editor's module outlived its app, and an editor that restarted "found the table already walked and heard nothing" (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Verified live: `L:` values in the editor, end to end").
-4. It opens its links under its raised restart count, and the replay brings each side what it lacks, the core's own unacknowledged messages included ([01-between-machines](../network/01-between-machines.md#coming-back)).
+4. Once every panel its recording shows had announced itself before the restart has announced again, or a bound the panel bridge's stage of step 8 sets has passed, it opens its links under its raised restart count, so no replayed press finds its panel not yet back, and the replay brings each side what it lacks, the core's own unacknowledged messages included ([01-between-machines](../network/01-between-machines.md#coming-back)).
 
 - On a following machine, our WASM module unfreezes the aircraft once the core has been quiet for 1s, as the spine designs it after FS Copilot's module ([01-spine](../architecture/01-spine.md#what-moves-them)), and the core freezes it again and writes the flying machine's next sample when it comes back.
 - A core keeps no cockpit message only in memory, so a restart loses none that it kept for another member's replay, and the replay has no gap from one ([01-between-machines](../network/01-between-machines.md#coming-back)).

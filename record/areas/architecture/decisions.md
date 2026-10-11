@@ -542,15 +542,15 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A sim that kept running comes back by replay, and one that closed comes back as a late joiner
 
-- **Decided:** after a cut link, or a core restart with the sim still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that a PF-owned entry applies only its newest value.
+- **Decided:** after a cut link, or a core restart with the sim still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that of each run of changes to a PF-owned entry with only PF-owned changes between them, it applies only the last, in its place.
   A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or in the core's first message, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
   Each change of control carries its maker's vector clock, a receiver drops the superseded PF's messages made under the value it lost only where that clock doesn't include them, live or in a replay, and every machine that applied one catches up state from the new PF.
-  Control can't pass to a pilot while their own replay or catch-up runs, by key, button, or voice; when the PF leaves, it passes anyway, to an up-to-date pilot where there is one.
+  Control can't pass to a pilot while their own replay or catch-up runs over a link that's up, by key, button, or voice; when the PF leaves, it passes anyway, to an up-to-date pilot where there is one.
   This changes node 2's rules that a sim crash passes nothing and that control drops the superseded PF's messages that reach a receiver in a replay, and settles how a replay is paced and how an ex-PF and a crashed PF come back ([architecture plan](plan.md#3-sync-and-the-session)).
   Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#what-comes-back-after-what)).
 - **Because:**
   - A sim that closed has lost its pages, FMS, and avionics state, such as a GTN 750's flight plan, which no profile entry reads and replayed presses needn't rebuild (user, 2026-10-11).
-  - A replay's 2s cap bounds it at 2s a change (arithmetic), and a PF working the throttle changes it every time the lever moves, while a following machine only shows it (user, 2026-10-11).
+  - A replay's 2s cap bounds it at 2s a change (arithmetic), and a PF working the throttle changes it every time the lever moves, while a following machine only shows it (user, 2026-10-11); keeping the last change of each run in its place keeps each lever where it was before the next event, such as a starter press.
   - A PF's own handover comes after every message it made, so its clock includes them all, while a takeover during a cut doesn't include the solo flying it supersedes; dropping by the replay instead would drop a leaving PF's last changes from a PM still replaying.
   - A pilot who took control partway through a replay would fly a cockpit that dates from before the cut, and one who took it during catch-up a cockpit whose own changes were never sent.
 - **Leaves out:** tuning the 2s cap from v1's recordings, and which up-to-date pilot receives control in a crew of more than two.
@@ -558,7 +558,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## Catch-up writes in the order the flying machine's cockpit first took each value
 
 - **Decided:** catch-up writes each entry at the flying machine's value, in the order the flying machine's cockpit first took each of those values, read from its recording, with entries it took before the session or never changed first.
-  It carries the flying machine's vector clock, which becomes the catching-up machine's, so every message the state already holds drops as a copy, and it starts again from a new flying machine, skipping what already matches, if control passes between other pilots.
+  It carries the flying machine's vector clock, which the catching-up machine takes for every counter but its own, which never goes back, so every message the state already holds drops as a copy, and it starts again from a new flying machine, skipping what already matches, if control passes between other pilots.
   v1's catch-up pipeline has one step, catching up state; the time, date, simulation rate, and pause reach a late joiner as session keys, and traffic as the host's objects, which a receiver spawns whenever its sim is in a flight.
   A session started after the aircraft loaded counts the settle rule's 30s floor from Ready to fly and its 15s quiet window from the profile's load.
   This settles [03-catch-up](../sync/03-catch-up.md#choosing-the-order)'s order and the spine's question of settling in such a session ([01-spine](01-spine.md#left-open)).
@@ -572,7 +572,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## A core that restarts rebuilds from its recording
 
 - **Decided:** a core records each cockpit message before it sends it and after it applies it, so its recording is its journal, and the recording's minimal mode keeps the cockpit stream.
-  A core that restarts while its sim keeps running rebuilds from it the state object, each entry's stamp, the vector clock, and the shadow values; takes the whole current state every component in the sim sends a core that connects as live sync takes any report, sending what its pilot changed meanwhile where it may and putting it back where it may not; and gets the rest from the replay.
+  A core that restarts while its sim keeps running rebuilds from it the state object, each entry's stamp, the vector clock, and the shadow values; takes the whole current state every component in the sim sends a core that connects as live sync takes any report, sending what its pilot changed meanwhile where it may and putting it back where it may not; opens its links once its panels have announced themselves again, or a bound has passed; and gets the rest from the replay.
   A core that starts and finds its session file's sim run gone counts its pilot as having left the flight.
   This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
   Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
@@ -585,8 +585,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## A machine's vector clock is its record of what it applied, and a skipped message counts as applied
 
 - **Decided:** a receiver's vector clock is its one record of what it applied: a message the clock already covers is a copy and drops, the sender's own counter is a message's number, and the heartbeat acknowledges by carrying the clock.
-  A message counts as applied once its write is made, its event fired, or its press handed to the display's panel; a press for a display whose panel hasn't announced itself yet waits for it.
-  A receiver skips the messages a change of control drops, presses during its own catch-up or for a display its aircraft lacks, and changes to an entry the aircraft drives itself, each counting as applied, and a machine with no aircraft in a flight holds the stream until its catch-up.
+  A message counts as applied once its write is made, its event fired, or its press handed to the display's panel.
+  A receiver skips the messages a change of control drops, presses during its own catch-up or for a display whose panel hasn't announced itself, changes to an entry the aircraft drives itself, and in a replay all but the last of a run of PF-owned changes, each counting as applied, and a machine with no aircraft in a flight holds the stream until its catch-up.
   A message names its entry by name and its clock's counters by pilot ID and restart count, and of two changes from one pilot under two restart counts that neither saw, the higher count wins.
   This answers the spine's questions of how the cockpit channel tells a copy from a late message, how a clock names its counters, and how two changes from one pilot under two restart counts are ordered ([01-spine](01-spine.md#left-open)).
   Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).

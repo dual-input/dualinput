@@ -35,7 +35,7 @@ Each member writes its own entry on the session channel: its pilot ID, display n
 ### The PF
 
 - Any crew member may hold control, and never a passenger, nor later a flight engineer ([take-control key](../product/03-v1-scope.md#take-control-key)).
-- Control moves by the take-control key or button, or by a voice handover, the PF's offer and the PM's answer ([voice phrases](../product/03-v1-scope.md#voice-phrases)), to any pilot but one whose own catch-up or replay runs ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
+- Control moves by the take-control key or button, or by a voice handover, the PF's offer and the PM's answer ([voice phrases](../product/03-v1-scope.md#voice-phrases)), to any pilot but one whose own catch-up or replay runs over a link that's up ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
 - It also passes on when the PF leaves the flight or the session, or their sim run ends ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed); [leaving](../network/01-between-machines.md#leaving)), and then it goes to a pilot whose cockpit is up to date where there is one, and to a pilot still catching up or replaying only where none is.
   In v1 that's the one PM either way; with more than two crew, which up-to-date pilot it goes to is this row's rule, which the pick for larger crews sets ([join modes](../product/ideas.md#join-modes)).
 - Each change raises the control value, and two made at once are settled by pilot ID ([control](../network/01-between-machines.md#control)).

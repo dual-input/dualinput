@@ -1,0 +1,3822 @@
+== near-0pct-quiet-a: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 23ms p99 24ms max 24ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":24.162}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":25.213}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.4    1.8    7.3       57            0.0
+  cockpit       d>l    301         0     301    301     0       0.4    1.5    2.5      202              -
+  audio         d>l   3000         0    3000   3000     0       0.5    1.8    6.9       27            0.0
+  controls      d>l   1200         0    1200   1200     0       0.4    1.7    4.2       54            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.4    1.7    7.3       57            0.0
+  batch         d>l    144         0     144    144     0       0.4    2.7    3.2      420            0.0
+  session req   d>l     61         0      61     61     0       0.5    1.3    1.3     1002              -
+  avatar        l>d   1200         0    1200   1200     0       0.3    1.6     17       57            0.0
+  session rep   l>d     61         0      61     61     0       0.2    0.9    0.9     1002              -
+== near-0pct-quiet-b: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 23ms p99 25ms max 25ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":23.843}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":27.109}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.4    2.4    8.2       55            0.1
+  cockpit       d>l    301         0     301    301     0       0.4    0.9    2.0      202              -
+  audio         d>l   3000         0    3000   3000     0       0.4    1.8    6.8       24            0.0
+  controls      d>l   1200         0    1200   1200     0       0.4    2.6    8.2       55            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.4    2.3    8.2       55            0.1
+  batch         d>l    144         0     144    144     0       0.4    3.3    4.1      421            0.1
+  session req   d>l     61         0      61     61     0       0.5    1.1    1.1     1002              -
+  avatar        l>d   1200         0    1200   1200     0       0.3    1.8     16       54            0.0
+  session rep   l>d     61         0      61     61     0       0.2    1.4    1.4     1003              -
+== near-0pct-busy-a: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 23ms p99 26ms max 26ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":25.171}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":26.961}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.5    2.6    9.0       58            0.0
+  cockpit       d>l   1201         0    1201   1201     0       0.4    2.2    8.9       58              -
+  audio         d>l   3000         0    3000   3000     0       0.4    2.0    9.1       28            0.0
+  controls      d>l   1200         0    1200   1200     0       0.5    2.5    8.9       58            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.5    2.4    8.9       58            0.0
+  batch         d>l    660         0     660    660     0       0.4    2.0    7.9       96            0.0
+  session req   d>l     61         0      61     61     0       0.5    1.3    1.3     1001              -
+  avatar        l>d   1200         0    1200   1200     0       0.3    1.8     16       63            0.0
+  session rep   l>d     61         0      61     61     0       0.2    2.2    2.2     1003              -
+== near-0pct-busy-b: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 24ms p99 27ms max 27ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":25.448}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":25.409}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.4    2.9     12       57            0.1
+  cockpit       d>l   1201         0    1201   1201     0       0.4    2.9     13       59              -
+  audio         d>l   3000         0    3000   3000     0       0.5    2.7    8.4       27            0.1
+  controls      d>l   1200         0    1200   1200     0       0.4    3.0     14       60            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.4    2.9     12       59            0.1
+  batch         d>l    660         0     660    660     0       0.3    1.8    5.2       99            0.1
+  session req   d>l     61         0      61     61     0       0.6    3.8    3.8     1004              -
+  avatar        l>d   1200         0    1200   1200     0       0.3    3.0     15       57            0.1
+  session rep   l>d     61         0      61     61     0       0.2    1.7    1.7     1004              -
+== near-1pct-quiet-a: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 24ms p99 68ms max 68ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":30.973}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":33.567}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.6     32     45       92            0.0
+  cockpit       d>l    301         0     301    301     0       0.4     33     45      245              -
+  audio         d>l   3000         0    3000   3000     0       0.5     32     52       71            0.0
+  controls      d>l   1200         0    1200   1200     0       0.6     32     45       95            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.6     32     45       95            0.0
+  batch         d>l    144         0     144    144     0       0.5     32     34      449            0.0
+  session req   d>l     61         0      61     61     0       0.5     45     45     1042              -
+  avatar        l>d   1200         0    1200   1200     0       0.6     31     45       93            0.0
+  session rep   l>d     61         0      61     61     0       0.5     31     31     1041              -
+== near-1pct-quiet-b: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 24ms p99 164ms max 164ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":32.044}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":31.389}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.5     30     38       89            0.1
+  cockpit       d>l    301         0     301    301     0       0.5     31     32      232              -
+  audio         d>l   3000         0    3000   3000     0       0.4     29     64       84            0.1
+  controls      d>l   1200         0    1200   1200     0       0.5     30     37       86            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.5     30     38       86            0.1
+  batch         d>l    144         0     144    144     0       0.5     23     30      444            0.0
+  session req   d>l     61         0      61     61     0       0.6     32     32     1031              -
+  avatar        l>d   1200         0    1200   1200     0       0.4     34    233      282            0.1
+  session rep   l>d     61         0      61     61     0       0.3    141    141     1140              -
+== near-1pct-busy-a: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 24ms p99 57ms max 57ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":34.803}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":34.718}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.4     31     56      104            0.0
+  cockpit       d>l   1201         0    1201   1201     0       0.4     31     56      105              -
+  audio         d>l   3000         0    3000   3000     0       0.4     23     45       65            0.0
+  controls      d>l   1200         0    1200   1200     0       0.5     25     56      104            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.5     31     56      105            0.0
+  batch         d>l    660         0     660    660     0       0.4     31     56      147            0.0
+  session req   d>l     61         0      61     61     0       0.4     32     32     1031              -
+  avatar        l>d   1200         0    1200   1200     0       0.4     32     52      101            0.0
+  session rep   l>d     61         0      61     61     0       0.3     34     34     1033              -
+== near-1pct-busy-b: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 24ms p99 76ms max 76ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":31.528}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":29.857}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.5     31     36       83            0.1
+  cockpit       d>l   1201         0    1201   1201     0       0.5     31     36       83              -
+  audio         d>l   3000         0    3000   3000     0       0.5     32     45       63            0.0
+  controls      d>l   1200         0    1200   1200     0       0.5     31     36       83            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.5     31     33       82            0.2
+  batch         d>l    660         0     660    660     0       0.5     27     36      126            0.0
+  session req   d>l     61         0      61     61     0       0.5     23     23     1023              -
+  avatar        l>d   1200         0    1200   1200     0       0.5     42    248      297            0.1
+  session rep   l>d     61         0      61     61     0       0.4     32     32     1053              -
+== near-3pct-quiet-a: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 26ms p99 204ms max 204ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":49.071}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":45.248}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.5     45    277      315            0.0
+  cockpit       d>l    301         0     301    301     0       0.5     33    277      477              -
+  audio         d>l   3000         0    3000   3000     0       0.5     44    296      310            0.0
+  controls      d>l   1200         0    1200   1200     0       0.5     45    277      315            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.5     45    278      315            0.0
+  batch         d>l    144         0     144    144     0       0.6     79    306      711            0.0
+  session req   d>l     61         0      61     61     0       0.5    158    158     1158              -
+  avatar        l>d   1200         0    1200   1200     0       1.4     53     75      120            0.0
+  session rep   l>d     61         0      61     61     0       2.2     61     61     1178              -
+== near-3pct-quiet-b: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 26ms p99 100ms max 100ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":100.555}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":95.242}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.6     47    255      304            0.2
+  cockpit       d>l    301         0     301    301     0       0.7     46    150      350              -
+  audio         d>l   3000         0    3000   3000     0       0.6     46    267      285            0.1
+  controls      d>l   1200         0    1200   1200     0       0.6     47    255      304            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.6     47    255      304            0.1
+  batch         d>l    144         0     144    144     0       0.5     40     43      458            0.1
+  session req   d>l     61         0      61     61     0       0.8     45     45     1044              -
+  avatar        l>d   1200         0    1200   1200     0       0.6     54    104      137            0.0
+  session rep   l>d     61         0      61     61     0       2.6     63     63     1075              -
+== near-3pct-busy-a: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 35ms p99 114ms max 114ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":40.879}; listener: {"lost":0,"cong":0,"min_cwnd":13200,"max_rtt_ms":46.002}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.7     45     75      123            0.0
+  cockpit       d>l   1201         0    1201   1201     0       0.6     45    105      142              -
+  audio         d>l   3000         0    3000   3000     0       0.6     43     86      107            0.0
+  controls      d>l   1200         0    1200   1200     0       0.7     45     75      124            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.6     45     75      123            0.0
+  batch         d>l    660         0     660    660     0       0.6     41     89      172            0.0
+  session req   d>l     61         0      61     61     0       0.7     25     25     1025              -
+  avatar        l>d   1200         0    1200   1200     0       0.9     56    282      309            0.0
+  session rep   l>d     61         0      61     61     0       4.0     90     90     1052              -
+== near-3pct-busy-b: floor 11ms dialer to listener, 11ms back (one-way, one clock); session round trip p50 31ms p99 128ms max 128ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":44.933}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":76.389}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.6     45    261      310            0.2
+  cockpit       d>l   1201         0    1201   1201     0       0.6     45    310      360              -
+  audio         d>l   3000         0    3000   3000     0       0.6     44    301      321            0.1
+  controls      d>l   1200         0    1200   1200     0       0.6     45    310      360            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.6     45    310      360            0.2
+  batch         d>l    660         0     660    660     0       0.5     54    264      354            0.1
+  session req   d>l     61         0      61     61     0       0.7    105    105     1105              -
+  avatar        l>d   1200         0    1200   1200     0       0.5     46     85      118            0.0
+  session rep   l>d     61         0      61     61     0       3.6     52     52     1105              -
+== far-0pct-quiet-a: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 84ms p99 91ms max 91ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":86.083}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":89.819}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.8    6.5    7.9       58            0.0
+  cockpit       d>l    301         0     301    301     0       0.6    6.8    8.1      208              -
+  audio         d>l   3000         0    3000   3000     0       0.6    3.9     12       30            0.0
+  controls      d>l   1200         0    1200   1200     0       0.8    6.6     16       63            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.7    6.9     16       63            0.0
+  batch         d>l    144         0     144    144     0       0.6    4.8    5.8      423            0.0
+  session req   d>l     61         0      61     61     0       0.7    6.9    6.9     1006              -
+  avatar        l>d   1200         0    1200   1200     0       0.4    4.0    6.7       56            0.0
+  session rep   l>d     61         0      61     61     0       0.1    4.0    4.0     1007              -
+== far-0pct-quiet-b: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 84ms p99 88ms max 88ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":86.65}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":97.066}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.5    3.3    7.0       57            0.1
+  cockpit       d>l    301         0     301    301     0       0.6    4.2    5.8      205              -
+  audio         d>l   3000         0    3000   3000     0       0.5    3.3    5.8       27            0.0
+  controls      d>l   1200         0    1200   1200     0       0.5    3.8    6.9       57            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.5    3.3    6.3       57            0.1
+  batch         d>l    144         0     144    144     0       0.4    5.4    7.1      424            0.1
+  session req   d>l     61         0      61     61     0       0.7    4.3    4.3     1004              -
+  avatar        l>d   1200         0    1200   1200     0       0.3    3.1    8.4       55            0.0
+  session rep   l>d     61         0      61     61     0       0.1    1.7    1.7     1005              -
+== far-0pct-busy-a: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 84ms p99 90ms max 90ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":85.843}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":87.694}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.7    4.1    6.9       57            0.0
+  cockpit       d>l   1201         0    1201   1201     0       0.7    4.1    6.9       57              -
+  audio         d>l   3000         0    3000   3000     0       0.7    3.7    7.7       25            0.0
+  controls      d>l   1200         0    1200   1200     0       0.7    4.1    5.7       55            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.7    4.6    7.0       57            0.0
+  batch         d>l    660         0     660    660     0       0.5    3.4    6.9       96            0.0
+  session req   d>l     61         0      61     61     0       0.8    5.6    5.6     1005              -
+  avatar        l>d   1200         0    1200   1200     0       0.3    2.6    8.8       55            0.0
+  session rep   l>d     61         0      61     61     0       0.2    2.7    2.7     1006              -
+== far-0pct-busy-b: floor 3614ms dialer to listener, -3530.7ms back (includes the clocks' offset); session round trip p50 84ms p99 92ms max 92ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":87.643}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":87.366}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.7    5.3     16       59            0.2
+  cockpit       d>l   1201         0    1201   1201     0       0.7    4.9     11       59              -
+  audio         d>l   3000         0    3000   3000     0       0.7    5.0     16       36            0.1
+  controls      d>l   1200         0    1200   1200     0       0.7    5.3     16       59            0.2
+  avatar        d>l   1200         0    1200   1200     0       0.7    5.3     16       59            0.3
+  batch         d>l    660         0     660    660     0       0.6    5.2    7.0       96            0.0
+  session req   d>l     61         0      61     61     0       0.8    8.4    8.4     1007              -
+  avatar        l>d   1200         0    1200   1200     0       0.7    4.8     11       60            0.1
+  session rep   l>d     61         0      61     61     0       0.3    4.8    4.8     1008              -
+== far-1pct-quiet-a: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 93ms p99 257ms max 257ms over 61; QUIC datagram buffer peak 70 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":124}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":113.78}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.8    107    122      171            0.0
+  cockpit       d>l    301         0     301    301     0       1.5    107    121      307              -
+  audio         d>l   3000         0    3000   3000     0       0.7    106    126      142            0.0
+  controls      d>l   1200         0    1200   1200     0       0.9    107    122      171            0.0
+  avatar        d>l   1200         0    1200   1200     0       0.8    107    122      169            0.0
+  batch         d>l    144         0     144    144     0       0.8    106    109      522            0.2
+  session req   d>l     61         0      61     61     0       1.5    107    107     1107              -
+  avatar        l>d   1200         0    1200   1200     0       2.0    107    143      179            0.0
+  session rep   l>d     61         0      61     61     0       1.5    108    108     1113              -
+== far-1pct-quiet-b: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 103ms p99 255ms max 255ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":190.877}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":191.662}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       0.6    106    121      158            0.1
+  cockpit       d>l    301         0     301    301     0       1.1    107    121      313              -
+  audio         d>l   3000         0    3000   3000     0       0.5    106    130      140            0.0
+  controls      d>l   1200         0    1200   1200     0       0.6    107    121      161            0.1
+  avatar        d>l   1200         0    1200   1200     0       0.6    106    121      161            0.1
+  batch         d>l    144         0     144    144     0       0.6     94    107      523            0.1
+  session req   d>l     61         0      61     61     0       1.4    108    108     1103              -
+  avatar        l>d   1200         0    1200   1200     0       1.3    108    191      241            0.1
+  session rep   l>d     61         0      61     61     0       5.9    129    129     1172              -
+== far-1pct-busy-a: floor 3614ms dialer to listener, -3530.6ms back (includes the clocks' offset); session round trip p50 92ms p99 337ms max 337ms over 61; QUIC datagram buffer peak 291 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":129.409}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":128.562}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       2.2    108    218      268            0.0
+  cockpit       d>l   1201         0    1201   1201     0       1.8    108    168      218              -
+  audio         d>l   3000         0    3000   3000     0       1.1    107    208      228            0.0
+  controls      d>l   1200         0    1200   1200     0       1.9    108    218      268            0.0
+  avatar        d>l   1200         0    1200   1200     0       1.9    108    218      268            0.0
+  batch         d>l    660         0     660    660     0       0.9    108    140      230            0.0
+  session req   d>l     61         0      61     61     0       3.0    111    111     1104              -
+  avatar        l>d   1200         0    1200   1200     0       1.4    107    188      237            0.0
+  session rep   l>d     61         0      61     61     0       1.5    187    187     1251              -
+== far-1pct-busy-b: floor 3614ms dialer to listener, -3530.4ms back (includes the clocks' offset); session round trip p50 90ms p99 190ms max 190ms over 61; QUIC datagram buffer peak 361 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":137.862}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":128.181}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0       1.9    107    139      186            0.1
+  cockpit       d>l   1201         0    1201   1201     0       1.6    106    139      186              -
+  audio         d>l   3000         0    3000   3000     0       1.7    107    153      172            0.1
+  controls      d>l   1200         0    1200   1200     0       2.0    107    143      188            0.1
+  avatar        d>l   1200         0    1200   1200     0       2.0    107    139      186            0.2
+  batch         d>l    660         0     660    660     0       0.8    103    117      199            0.1
+  session req   d>l     61         0      61     61     0       2.2     83     83     1079              -
+  avatar        l>d   1200         0    1200   1200     0       1.0    106    198      189            0.1
+  session rep   l>d     61         0      61     61     0       0.4    106    106     1098              -
+== far-3pct-quiet-a: floor 3614ms dialer to listener, -3530.6ms back (includes the clocks' offset); session round trip p50 130ms p99 316ms max 316ms over 61; QUIC datagram buffer peak 291 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":150.533}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":177.654}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0        15    138    217      243            0.0
+  cockpit       d>l    301         0     301    301     0        13    130    158      329              -
+  audio         d>l   3000         0    3000   3000     0       7.4    133    247      236            0.0
+  controls      d>l   1200         0    1200   1200     0        15    138    217      243            0.0
+  avatar        d>l   1200         0    1200   1200     0        15    134    217      243            0.0
+  batch         d>l    144         0     144    144     0        17    179    251      600            0.0
+  session req   d>l     61         0      61     61     0        11    107    107     1097              -
+  avatar        l>d   1200         0    1200   1200     0        15    163    266      271            0.0
+  session rep   l>d     61         0      61     61     0        25    227    227     1176              -
+== far-3pct-quiet-b: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 123ms p99 413ms max 413ms over 61; QUIC datagram buffer peak 0 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":191.902}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":169.164}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0        14    148    268      316            0.1
+  cockpit       d>l    301         0     301    301     0        12    131    219      415              -
+  audio         d>l   3000         0    3000   3000     0       7.1    147    259      251            0.1
+  controls      d>l   1200         0    1200   1200     0        14    141    268      316            0.1
+  avatar        d>l   1200         0    1200   1200     0        14    149    268      316            0.1
+  batch         d>l    144         0     144    144     0        15    143    147      551            0.0
+  session req   d>l     61         0      61     61     0       5.9    163    163     1134              -
+  avatar        l>d   1200         0    1200   1200     0        16    165    252      268            0.1
+  session rep   l>d     61         0      61     61     0        23    167    167     1267              -
+== far-3pct-busy-a: floor 3614ms dialer to listener, -3530.6ms back (includes the clocks' offset); session round trip p50 130ms p99 314ms max 314ms over 61; QUIC datagram buffer peak 161 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":190.027}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":168.527}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0        16    169    277      303            0.0
+  cockpit       d>l   1201         0    1201   1201     0        16    177    303      334              -
+  audio         d>l   3000         0    3000   3000     0       9.6    170    293      290            0.0
+  controls      d>l   1200         0    1200   1200     0        16    182    303      334            0.0
+  avatar        d>l   1200         0    1200   1200     0        16    182    303      334            0.0
+  batch         d>l    660         0     660    660     0        11    173    263      283            0.0
+  session req   d>l     61         0      61     61     0       7.9    124    124     1124              -
+  avatar        l>d   1200         0    1200   1200     0        17    154    254      269            0.0
+  session rep   l>d     61         0      61     61     0        24    187    187     1205              -
+== far-3pct-busy-b: floor 3614ms dialer to listener, -3530.5ms back (includes the clocks' offset); session round trip p50 133ms p99 286ms max 286ms over 61; QUIC datagram buffer peak 200 B dialer, 0 B listener; send errors 0
+  QUIC on the relay path, dialer: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":210.795}; listener: {"lost":0,"cong":0,"min_cwnd":12000,"max_rtt_ms":183.057}
+  channel       way   made  replaced  handed  got    lost  late p50  p99    max    gap max  slot wait p99
+  flight        d>l   1200         0    1200   1200     0        13    143    224      257            0.1
+  cockpit       d>l   1201         0    1201   1201     0        11    156    243      254              -
+  audio         d>l   3000         0    3000   3000     0       7.7    151    245      244            0.0
+  controls      d>l   1200         0    1200   1200     0        13    156    244      254            0.1
+  avatar        d>l   1200         0    1200   1200     0        12    154    244      254            0.1
+  batch         d>l    660         0     660    660     0       7.8    171    223      271            0.0
+  session req   d>l     61         0      61     61     0       4.5    173    173     1151              -
+  avatar        l>d   1200         0    1200   1200     0        17    152    181      231            0.0
+  session rep   l>d     61         0      61     61     0        26    165    165     1181              -
+
+summary, late in ms (p99 / max); loss is of what the sender made, replaced ones included
+run                      flight      audio       batch loss  cockpit       session rtt   avatar back
+near-0pct-quiet-a        1.8/7.3     1.8/6.9     0.0%        1.5/2.5       24/24         1.6/17
+near-0pct-quiet-b        2.4/8.2     1.8/6.8     0.0%        0.9/2.0       25/25         1.8/16
+near-0pct-busy-a         2.6/9.0     2.0/9.1     0.0%        2.2/8.9       26/26         1.8/16
+near-0pct-busy-b         2.9/12      2.7/8.4     0.0%        2.9/13        27/27         3.0/15
+near-1pct-quiet-a        32/45       32/52       0.0%        33/45         68/68         31/45
+near-1pct-quiet-b        30/38       29/64       0.0%        31/32         164/164       34/233
+near-1pct-busy-a         31/56       23/45       0.0%        31/56         57/57         32/52
+near-1pct-busy-b         31/36       32/45       0.0%        31/36         76/76         42/248
+near-3pct-quiet-a        45/277      44/296      0.0%        33/277        204/204       53/75
+near-3pct-quiet-b        47/255      46/267      0.0%        46/150        100/100       54/104
+near-3pct-busy-a         45/75       43/86       0.0%        45/105        114/114       56/282
+near-3pct-busy-b         45/261      44/301      0.0%        45/310        128/128       46/85
+far-0pct-quiet-a         6.5/7.9     3.9/12      0.0%        6.8/8.1       91/91         4.0/6.7
+far-0pct-quiet-b         3.3/7.0     3.3/5.8     0.0%        4.2/5.8       88/88         3.1/8.4
+far-0pct-busy-a          4.1/6.9     3.7/7.7     0.0%        4.1/6.9       90/90         2.6/8.8
+far-0pct-busy-b          5.3/16      5.0/16      0.0%        4.9/11        92/92         4.8/11
+far-1pct-quiet-a         107/122     106/126     0.0%        107/121       257/257       107/143
+far-1pct-quiet-b         106/121     106/130     0.0%        107/121       255/255       108/191
+far-1pct-busy-a          108/218     107/208     0.0%        108/168       337/337       107/188
+far-1pct-busy-b          107/139     107/153     0.0%        106/139       190/190       106/198
+far-3pct-quiet-a         138/217     133/247     0.0%        130/158       316/316       163/266
+far-3pct-quiet-b         148/268     147/259     0.0%        131/219       413/413       165/252
+far-3pct-busy-a          169/277     170/293     0.0%        177/303       314/314       154/254
+far-3pct-busy-b          143/224     151/245     0.0%        156/243       286/286       152/181
+
+{
+  "near-0pct-quiet-a": {
+    "d2l": {
+      "floor": 11312,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 419,
+          "late_p99": 1800,
+          "late_max": 7325,
+          "max_gap": 56767,
+          "slot_wait_p99": 3
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 430,
+          "late_p99": 1460,
+          "late_max": 2484,
+          "max_gap": 202082,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 453,
+          "late_p99": 1785,
+          "late_max": 6886,
+          "max_gap": 27283,
+          "slot_wait_p99": 7
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 424,
+          "late_p99": 1686,
+          "late_max": 4247,
+          "max_gap": 53748,
+          "slot_wait_p99": 3
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 414,
+          "late_p99": 1737,
+          "late_max": 7302,
+          "max_gap": 56793,
+          "slot_wait_p99": 3
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 444,
+          "late_p99": 2711,
+          "late_max": 3165,
+          "max_gap": 420019,
+          "slot_wait_p99": 5
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 477,
+          "late_p99": 1278,
+          "late_max": 1278,
+          "max_gap": 1001560,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11304,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 291,
+          "late_p99": 1603,
+          "late_max": 17205,
+          "max_gap": 56879,
+          "slot_wait_p99": 3
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 190,
+          "late_p99": 943,
+          "late_max": 943,
+          "max_gap": 1001585,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23319,
+      "p99": 24344,
+      "max": 24344
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 24.162
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 25.213
+      }
+    }
+  },
+  "near-0pct-quiet-b": {
+    "d2l": {
+      "floor": 11344,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 445,
+          "late_p99": 2371,
+          "late_max": 8172,
+          "max_gap": 55310,
+          "slot_wait_p99": 94
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 403,
+          "late_p99": 912,
+          "late_max": 1984,
+          "max_gap": 201970,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 379,
+          "late_p99": 1834,
+          "late_max": 6843,
+          "max_gap": 23803,
+          "slot_wait_p99": 41
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 449,
+          "late_p99": 2603,
+          "late_max": 8174,
+          "max_gap": 55328,
+          "slot_wait_p99": 90
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 447,
+          "late_p99": 2250,
+          "late_max": 8166,
+          "max_gap": 55295,
+          "slot_wait_p99": 101
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 426,
+          "late_p99": 3337,
+          "late_max": 4066,
+          "max_gap": 420875,
+          "slot_wait_p99": 72
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 497,
+          "late_p99": 1051,
+          "late_max": 1051,
+          "max_gap": 1001735,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11322,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 274,
+          "late_p99": 1769,
+          "late_max": 16103,
+          "max_gap": 53962,
+          "slot_wait_p99": 33
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 153,
+          "late_p99": 1422,
+          "late_max": 1422,
+          "max_gap": 1002544,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23318,
+      "p99": 24933,
+      "max": 24933
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 23.843
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 27.109
+      }
+    }
+  },
+  "near-0pct-busy-a": {
+    "d2l": {
+      "floor": 11308,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 458,
+          "late_p99": 2587,
+          "late_max": 8954,
+          "max_gap": 58488,
+          "slot_wait_p99": 3
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 441,
+          "late_p99": 2190,
+          "late_max": 8876,
+          "max_gap": 58404,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 438,
+          "late_p99": 1985,
+          "late_max": 9143,
+          "max_gap": 28079,
+          "slot_wait_p99": 6
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 456,
+          "late_p99": 2529,
+          "late_max": 8857,
+          "max_gap": 58489,
+          "slot_wait_p99": 3
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 463,
+          "late_p99": 2390,
+          "late_max": 8877,
+          "max_gap": 58487,
+          "slot_wait_p99": 3
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 431,
+          "late_p99": 1975,
+          "late_max": 7939,
+          "max_gap": 96049,
+          "slot_wait_p99": 7
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 461,
+          "late_p99": 1335,
+          "late_max": 1335,
+          "max_gap": 1001010,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11258,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 307,
+          "late_p99": 1829,
+          "late_max": 15790,
+          "max_gap": 63376,
+          "slot_wait_p99": 5
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 246,
+          "late_p99": 2204,
+          "late_max": 2204,
+          "max_gap": 1003046,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23305,
+      "p99": 26125,
+      "max": 26125
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 25.171
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 26.961
+      }
+    }
+  },
+  "near-0pct-busy-b": {
+    "d2l": {
+      "floor": 11448,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 436,
+          "late_p99": 2866,
+          "late_max": 12322,
+          "max_gap": 57334,
+          "slot_wait_p99": 133
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 419,
+          "late_p99": 2943,
+          "late_max": 13300,
+          "max_gap": 58724,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 472,
+          "late_p99": 2705,
+          "late_max": 8425,
+          "max_gap": 27126,
+          "slot_wait_p99": 72
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 439,
+          "late_p99": 2962,
+          "late_max": 13775,
+          "max_gap": 60382,
+          "slot_wait_p99": 114
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 437,
+          "late_p99": 2871,
+          "late_max": 12185,
+          "max_gap": 58776,
+          "slot_wait_p99": 106
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 336,
+          "late_p99": 1773,
+          "late_max": 5221,
+          "max_gap": 98785,
+          "slot_wait_p99": 80
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 557,
+          "late_p99": 3818,
+          "late_max": 3818,
+          "max_gap": 1003701,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11314,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 343,
+          "late_p99": 3040,
+          "late_max": 15199,
+          "max_gap": 56715,
+          "slot_wait_p99": 52
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 228,
+          "late_p99": 1729,
+          "late_max": 1729,
+          "max_gap": 1003934,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23634,
+      "p99": 27224,
+      "max": 27224
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 25.448
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 25.409
+      }
+    }
+  },
+  "near-1pct-quiet-a": {
+    "d2l": {
+      "floor": 11401,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 585,
+          "late_p99": 31801,
+          "late_max": 45255,
+          "max_gap": 91553,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 423,
+          "late_p99": 33088,
+          "late_max": 45177,
+          "max_gap": 244552,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 507,
+          "late_p99": 31670,
+          "late_max": 52114,
+          "max_gap": 71203,
+          "slot_wait_p99": 10
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 591,
+          "late_p99": 32048,
+          "late_max": 45217,
+          "max_gap": 94519,
+          "slot_wait_p99": 4
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 599,
+          "late_p99": 31939,
+          "late_max": 45279,
+          "max_gap": 94519,
+          "slot_wait_p99": 4
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 532,
+          "late_p99": 32407,
+          "late_max": 33577,
+          "max_gap": 449227,
+          "slot_wait_p99": 5
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 476,
+          "late_p99": 45069,
+          "late_max": 45069,
+          "max_gap": 1041849,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11344,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 588,
+          "late_p99": 30881,
+          "late_max": 45007,
+          "max_gap": 93267,
+          "slot_wait_p99": 10
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 464,
+          "late_p99": 30878,
+          "late_max": 30878,
+          "max_gap": 1041437,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 24189,
+      "p99": 67896,
+      "max": 67896
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 30.973
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 33.567
+      }
+    }
+  },
+  "near-1pct-quiet-b": {
+    "d2l": {
+      "floor": 11361,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 513,
+          "late_p99": 30411,
+          "late_max": 38200,
+          "max_gap": 89133,
+          "slot_wait_p99": 103
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 472,
+          "late_p99": 30718,
+          "late_max": 31744,
+          "max_gap": 231548,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 428,
+          "late_p99": 29008,
+          "late_max": 64201,
+          "max_gap": 83923,
+          "slot_wait_p99": 57
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 512,
+          "late_p99": 30336,
+          "late_max": 36932,
+          "max_gap": 86434,
+          "slot_wait_p99": 93
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 513,
+          "late_p99": 30461,
+          "late_max": 37929,
+          "max_gap": 86176,
+          "slot_wait_p99": 91
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 502,
+          "late_p99": 23172,
+          "late_max": 30461,
+          "max_gap": 444272,
+          "slot_wait_p99": 44
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 577,
+          "late_p99": 31794,
+          "late_max": 31794,
+          "max_gap": 1030988,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11321,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 410,
+          "late_p99": 33504,
+          "late_max": 233111,
+          "max_gap": 281949,
+          "slot_wait_p99": 55
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 301,
+          "late_p99": 140913,
+          "late_max": 140913,
+          "max_gap": 1140149,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23574,
+      "p99": 164192,
+      "max": 164192
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 32.044
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 31.389
+      }
+    }
+  },
+  "near-1pct-busy-a": {
+    "d2l": {
+      "floor": 11410,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 442,
+          "late_p99": 30965,
+          "late_max": 56383,
+          "max_gap": 104009,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 437,
+          "late_p99": 31100,
+          "late_max": 56254,
+          "max_gap": 104794,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 412,
+          "late_p99": 22866,
+          "late_max": 45096,
+          "max_gap": 64781,
+          "slot_wait_p99": 7
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 450,
+          "late_p99": 24781,
+          "late_max": 56342,
+          "max_gap": 103962,
+          "slot_wait_p99": 4
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 452,
+          "late_p99": 30838,
+          "late_max": 55585,
+          "max_gap": 104839,
+          "slot_wait_p99": 4
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 399,
+          "late_p99": 31461,
+          "late_max": 56330,
+          "max_gap": 146666,
+          "slot_wait_p99": 10
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 424,
+          "late_p99": 31573,
+          "late_max": 31573,
+          "max_gap": 1031079,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11341,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 394,
+          "late_p99": 32405,
+          "late_max": 52009,
+          "max_gap": 101263,
+          "slot_wait_p99": 7
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 258,
+          "late_p99": 33774,
+          "late_max": 33774,
+          "max_gap": 1032852,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23808,
+      "p99": 56636,
+      "max": 56636
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 34.803
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 34.718
+      }
+    }
+  },
+  "near-1pct-busy-b": {
+    "d2l": {
+      "floor": 11298,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 526,
+          "late_p99": 31372,
+          "late_max": 35833,
+          "max_gap": 82665,
+          "slot_wait_p99": 141
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 501,
+          "late_p99": 31111,
+          "late_max": 35894,
+          "max_gap": 82849,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 464,
+          "late_p99": 31588,
+          "late_max": 44779,
+          "max_gap": 62998,
+          "slot_wait_p99": 42
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 517,
+          "late_p99": 31418,
+          "late_max": 35860,
+          "max_gap": 83139,
+          "slot_wait_p99": 142
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 518,
+          "late_p99": 31489,
+          "late_max": 32913,
+          "max_gap": 82376,
+          "slot_wait_p99": 153
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 473,
+          "late_p99": 26772,
+          "late_max": 35866,
+          "max_gap": 126033,
+          "slot_wait_p99": 43
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 528,
+          "late_p99": 22977,
+          "late_max": 22977,
+          "max_gap": 1022679,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11201,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 458,
+          "late_p99": 41976,
+          "late_max": 247859,
+          "max_gap": 297419,
+          "slot_wait_p99": 52
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 416,
+          "late_p99": 31774,
+          "late_max": 31774,
+          "max_gap": 1052543,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 23557,
+      "p99": 76387,
+      "max": 76387
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 31.528
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 29.857
+      }
+    }
+  },
+  "near-3pct-quiet-a": {
+    "d2l": {
+      "floor": 11399,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 505,
+          "late_p99": 45174,
+          "late_max": 277411,
+          "max_gap": 314893,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 467,
+          "late_p99": 33156,
+          "late_max": 277451,
+          "max_gap": 476842,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 488,
+          "late_p99": 44185,
+          "late_max": 296319,
+          "max_gap": 310019,
+          "slot_wait_p99": 8
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 511,
+          "late_p99": 44552,
+          "late_max": 277453,
+          "max_gap": 314893,
+          "slot_wait_p99": 4
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 509,
+          "late_p99": 45049,
+          "late_max": 277558,
+          "max_gap": 314907,
+          "slot_wait_p99": 5
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 575,
+          "late_p99": 79430,
+          "late_max": 305851,
+          "max_gap": 711126,
+          "slot_wait_p99": 4
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 508,
+          "late_p99": 158193,
+          "late_max": 158193,
+          "max_gap": 1157571,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11390,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1363,
+          "late_p99": 52604,
+          "late_max": 74541,
+          "max_gap": 119737,
+          "slot_wait_p99": 4
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 2195,
+          "late_p99": 60615,
+          "late_max": 60615,
+          "max_gap": 1177517,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 26246,
+      "p99": 203775,
+      "max": 203775
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 49.071
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 45.248
+      }
+    }
+  },
+  "near-3pct-quiet-b": {
+    "d2l": {
+      "floor": 11403,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 583,
+          "late_p99": 46951,
+          "late_max": 255017,
+          "max_gap": 304353,
+          "slot_wait_p99": 164
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 670,
+          "late_p99": 45587,
+          "late_max": 149743,
+          "max_gap": 349995,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 601,
+          "late_p99": 45831,
+          "late_max": 267334,
+          "max_gap": 284661,
+          "slot_wait_p99": 84
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 567,
+          "late_p99": 46967,
+          "late_max": 254994,
+          "max_gap": 304360,
+          "slot_wait_p99": 113
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 580,
+          "late_p99": 46979,
+          "late_max": 254988,
+          "max_gap": 304357,
+          "slot_wait_p99": 137
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 487,
+          "late_p99": 39983,
+          "late_max": 42955,
+          "max_gap": 458447,
+          "slot_wait_p99": 68
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 760,
+          "late_p99": 45241,
+          "late_max": 45241,
+          "max_gap": 1044250,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11338,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 562,
+          "late_p99": 54004,
+          "late_max": 104435,
+          "max_gap": 137361,
+          "slot_wait_p99": 39
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 2552,
+          "late_p99": 63224,
+          "late_max": 63224,
+          "max_gap": 1074812,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 25953,
+      "p99": 99956,
+      "max": 99956
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 100.555
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 95.242
+      }
+    }
+  },
+  "near-3pct-busy-a": {
+    "d2l": {
+      "floor": 11315,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 663,
+          "late_p99": 44648,
+          "late_max": 75257,
+          "max_gap": 123417,
+          "slot_wait_p99": 3
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 640,
+          "late_p99": 44902,
+          "late_max": 104777,
+          "max_gap": 142222,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 573,
+          "late_p99": 43234,
+          "late_max": 86413,
+          "max_gap": 106665,
+          "slot_wait_p99": 7
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 664,
+          "late_p99": 44891,
+          "late_max": 75397,
+          "max_gap": 123625,
+          "slot_wait_p99": 3
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 642,
+          "late_p99": 44743,
+          "late_max": 75339,
+          "max_gap": 123413,
+          "slot_wait_p99": 3
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 593,
+          "late_p99": 41407,
+          "late_max": 89038,
+          "max_gap": 172091,
+          "slot_wait_p99": 6
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 743,
+          "late_p99": 25309,
+          "late_max": 25309,
+          "max_gap": 1024894,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11327,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 940,
+          "late_p99": 56192,
+          "late_max": 281837,
+          "max_gap": 309400,
+          "slot_wait_p99": 6
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 3996,
+          "late_p99": 90442,
+          "late_max": 90442,
+          "max_gap": 1051916,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 34961,
+      "p99": 113563,
+      "max": 113563
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 40.879
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 13200,
+        "max_rtt_ms": 46.002
+      }
+    }
+  },
+  "near-3pct-busy-b": {
+    "d2l": {
+      "floor": 11362,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 592,
+          "late_p99": 45404,
+          "late_max": 261379,
+          "max_gap": 310447,
+          "slot_wait_p99": 165
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 561,
+          "late_p99": 45118,
+          "late_max": 310485,
+          "max_gap": 360103,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 612,
+          "late_p99": 43896,
+          "late_max": 301255,
+          "max_gap": 320685,
+          "slot_wait_p99": 64
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 581,
+          "late_p99": 45222,
+          "late_max": 310494,
+          "max_gap": 360103,
+          "slot_wait_p99": 146
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 593,
+          "late_p99": 45133,
+          "late_max": 310499,
+          "max_gap": 360080,
+          "slot_wait_p99": 167
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 473,
+          "late_p99": 53501,
+          "late_max": 263719,
+          "max_gap": 354292,
+          "slot_wait_p99": 92
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 656,
+          "late_p99": 105432,
+          "late_max": 105432,
+          "max_gap": 1105365,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": 11359,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 457,
+          "late_p99": 45860,
+          "late_max": 84949,
+          "max_gap": 118426,
+          "slot_wait_p99": 46
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 3617,
+          "late_p99": 52349,
+          "late_max": 52349,
+          "max_gap": 1105159,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 30973,
+      "p99": 128123,
+      "max": 128123
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 44.933
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 76.389
+      }
+    }
+  },
+  "far-0pct-quiet-a": {
+    "d2l": {
+      "floor": 3613623,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 750,
+          "late_p99": 6547,
+          "late_max": 7892,
+          "max_gap": 57642,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 626,
+          "late_p99": 6833,
+          "late_max": 8104,
+          "max_gap": 207560,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 592,
+          "late_p99": 3897,
+          "late_max": 11509,
+          "max_gap": 30313,
+          "slot_wait_p99": 8
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 786,
+          "late_p99": 6648,
+          "late_max": 15983,
+          "max_gap": 63145,
+          "slot_wait_p99": 4
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 736,
+          "late_p99": 6884,
+          "late_max": 16023,
+          "max_gap": 63157,
+          "slot_wait_p99": 7
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 591,
+          "late_p99": 4823,
+          "late_max": 5764,
+          "max_gap": 423149,
+          "slot_wait_p99": 4
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 658,
+          "late_p99": 6856,
+          "late_max": 6856,
+          "max_gap": 1005947,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530496,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 389,
+          "late_p99": 4020,
+          "late_max": 6681,
+          "max_gap": 56313,
+          "slot_wait_p99": 7
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 143,
+          "late_p99": 3993,
+          "late_max": 3993,
+          "max_gap": 1006518,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 84275,
+      "p99": 91431,
+      "max": 91431
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 86.083
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 89.819
+      }
+    }
+  },
+  "far-0pct-quiet-b": {
+    "d2l": {
+      "floor": 3613657,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 507,
+          "late_p99": 3268,
+          "late_max": 6952,
+          "max_gap": 57033,
+          "slot_wait_p99": 111
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 578,
+          "late_p99": 4195,
+          "late_max": 5792,
+          "max_gap": 205021,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 509,
+          "late_p99": 3290,
+          "late_max": 5791,
+          "max_gap": 27125,
+          "slot_wait_p99": 42
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 506,
+          "late_p99": 3783,
+          "late_max": 6943,
+          "max_gap": 57015,
+          "slot_wait_p99": 131
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 505,
+          "late_p99": 3255,
+          "late_max": 6284,
+          "max_gap": 56681,
+          "slot_wait_p99": 132
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 445,
+          "late_p99": 5354,
+          "late_max": 7062,
+          "max_gap": 423710,
+          "slot_wait_p99": 55
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 699,
+          "late_p99": 4261,
+          "late_max": 4261,
+          "max_gap": 1003676,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530489,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 332,
+          "late_p99": 3094,
+          "late_max": 8395,
+          "max_gap": 55091,
+          "slot_wait_p99": 39
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 72,
+          "late_p99": 1692,
+          "late_max": 1692,
+          "max_gap": 1005448,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 84007,
+      "p99": 88193,
+      "max": 88193
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 86.65
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 97.066
+      }
+    }
+  },
+  "far-0pct-busy-a": {
+    "d2l": {
+      "floor": 3613618,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 703,
+          "late_p99": 4055,
+          "late_max": 6933,
+          "max_gap": 57381,
+          "slot_wait_p99": 3
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 670,
+          "late_p99": 4063,
+          "late_max": 6913,
+          "max_gap": 57379,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 718,
+          "late_p99": 3687,
+          "late_max": 7668,
+          "max_gap": 25464,
+          "slot_wait_p99": 8
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 701,
+          "late_p99": 4132,
+          "late_max": 5719,
+          "max_gap": 55473,
+          "slot_wait_p99": 3
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 702,
+          "late_p99": 4573,
+          "late_max": 6951,
+          "max_gap": 57380,
+          "slot_wait_p99": 3
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 503,
+          "late_p99": 3448,
+          "late_max": 6928,
+          "max_gap": 96314,
+          "slot_wait_p99": 4
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 815,
+          "late_p99": 5571,
+          "late_max": 5571,
+          "max_gap": 1004525,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530486,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 329,
+          "late_p99": 2612,
+          "late_max": 8826,
+          "max_gap": 55073,
+          "slot_wait_p99": 7
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 210,
+          "late_p99": 2745,
+          "late_max": 2745,
+          "max_gap": 1005886,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 84204,
+      "p99": 89812,
+      "max": 89812
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 85.843
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 87.694
+      }
+    }
+  },
+  "far-0pct-busy-b": {
+    "d2l": {
+      "floor": 3613662,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 733,
+          "late_p99": 5293,
+          "late_max": 15927,
+          "max_gap": 59341,
+          "slot_wait_p99": 194
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 699,
+          "late_p99": 4889,
+          "late_max": 11424,
+          "max_gap": 59164,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 714,
+          "late_p99": 5021,
+          "late_max": 16001,
+          "max_gap": 35778,
+          "slot_wait_p99": 94
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 742,
+          "late_p99": 5332,
+          "late_max": 15940,
+          "max_gap": 59335,
+          "slot_wait_p99": 190
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 747,
+          "late_p99": 5304,
+          "late_max": 15923,
+          "max_gap": 59242,
+          "slot_wait_p99": 256
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 586,
+          "late_p99": 5236,
+          "late_max": 7032,
+          "max_gap": 96254,
+          "slot_wait_p99": 49
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 849,
+          "late_p99": 8386,
+          "late_max": 8386,
+          "max_gap": 1007257,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530669,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 673,
+          "late_p99": 4788,
+          "late_max": 11242,
+          "max_gap": 59939,
+          "slot_wait_p99": 55
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 344,
+          "late_p99": 4769,
+          "late_max": 4769,
+          "max_gap": 1007907,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 84346,
+      "p99": 91800,
+      "max": 91800
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 87.643
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 87.366
+      }
+    }
+  },
+  "far-1pct-quiet-a": {
+    "d2l": {
+      "floor": 3613720,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 754,
+          "late_p99": 107270,
+          "late_max": 122082,
+          "max_gap": 170883,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 1523,
+          "late_p99": 106657,
+          "late_max": 120890,
+          "max_gap": 307200,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 739,
+          "late_p99": 105989,
+          "late_max": 125924,
+          "max_gap": 141964,
+          "slot_wait_p99": 6
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 872,
+          "late_p99": 107350,
+          "late_max": 122007,
+          "max_gap": 171118,
+          "slot_wait_p99": 4
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 793,
+          "late_p99": 107426,
+          "late_max": 121915,
+          "max_gap": 169495,
+          "slot_wait_p99": 5
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 776,
+          "late_p99": 106059,
+          "late_max": 109375,
+          "max_gap": 522201,
+          "slot_wait_p99": 189
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 1485,
+          "late_p99": 106860,
+          "late_max": 106860,
+          "max_gap": 1106612,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530515,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 2012,
+          "late_p99": 106942,
+          "late_max": 143431,
+          "max_gap": 179097,
+          "slot_wait_p99": 7
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 1499,
+          "late_p99": 107636,
+          "late_max": 107636,
+          "max_gap": 1113090,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 93428,
+      "p99": 257043,
+      "max": 257043
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 70,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 124
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 113.78
+      }
+    }
+  },
+  "far-1pct-quiet-b": {
+    "d2l": {
+      "floor": 3613782,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 592,
+          "late_p99": 106480,
+          "late_max": 121285,
+          "max_gap": 157518,
+          "slot_wait_p99": 99
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 1056,
+          "late_p99": 106832,
+          "late_max": 121029,
+          "max_gap": 312817,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 538,
+          "late_p99": 105860,
+          "late_max": 129545,
+          "max_gap": 139871,
+          "slot_wait_p99": 40
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 622,
+          "late_p99": 106603,
+          "late_max": 121282,
+          "max_gap": 161345,
+          "slot_wait_p99": 93
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 560,
+          "late_p99": 106441,
+          "late_max": 121279,
+          "max_gap": 161329,
+          "slot_wait_p99": 82
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 595,
+          "late_p99": 93599,
+          "late_max": 106604,
+          "max_gap": 522711,
+          "slot_wait_p99": 56
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 1376,
+          "late_p99": 107826,
+          "late_max": 107826,
+          "max_gap": 1103452,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530494,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1257,
+          "late_p99": 108157,
+          "late_max": 191287,
+          "max_gap": 240643,
+          "slot_wait_p99": 51
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 5923,
+          "late_p99": 129291,
+          "late_max": 129291,
+          "max_gap": 1172186,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 102801,
+      "p99": 254985,
+      "max": 254985
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 190.877
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 191.662
+      }
+    }
+  },
+  "far-1pct-busy-a": {
+    "d2l": {
+      "floor": 3613581,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 2167,
+          "late_p99": 108480,
+          "late_max": 218203,
+          "max_gap": 267656,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 1849,
+          "late_p99": 107661,
+          "late_max": 167827,
+          "max_gap": 217778,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 1097,
+          "late_p99": 107304,
+          "late_max": 207951,
+          "max_gap": 228051,
+          "slot_wait_p99": 6
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1871,
+          "late_p99": 107681,
+          "late_max": 218130,
+          "max_gap": 267658,
+          "slot_wait_p99": 3
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1935,
+          "late_p99": 108372,
+          "late_max": 218115,
+          "max_gap": 267657,
+          "slot_wait_p99": 4
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 910,
+          "late_p99": 107640,
+          "late_max": 140201,
+          "max_gap": 230267,
+          "slot_wait_p99": 4
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 3027,
+          "late_p99": 110664,
+          "late_max": 110664,
+          "max_gap": 1103867,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530590,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1388,
+          "late_p99": 107042,
+          "late_max": 187949,
+          "max_gap": 236750,
+          "slot_wait_p99": 10
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 1539,
+          "late_p99": 187484,
+          "late_max": 187484,
+          "max_gap": 1250892,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 91887,
+      "p99": 337288,
+      "max": 337288
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 291,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 129.409
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 128.562
+      }
+    }
+  },
+  "far-1pct-busy-b": {
+    "d2l": {
+      "floor": 3613702,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1931,
+          "late_p99": 107009,
+          "late_max": 138738,
+          "max_gap": 185972,
+          "slot_wait_p99": 140
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 1590,
+          "late_p99": 106438,
+          "late_max": 138702,
+          "max_gap": 185787,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 1694,
+          "late_p99": 107203,
+          "late_max": 152688,
+          "max_gap": 171828,
+          "slot_wait_p99": 68
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 2037,
+          "late_p99": 107211,
+          "late_max": 143013,
+          "max_gap": 187568,
+          "slot_wait_p99": 126
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1953,
+          "late_p99": 106565,
+          "late_max": 138774,
+          "max_gap": 185973,
+          "slot_wait_p99": 211
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 844,
+          "late_p99": 102563,
+          "late_max": 117030,
+          "max_gap": 198545,
+          "slot_wait_p99": 60
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 2227,
+          "late_p99": 82924,
+          "late_max": 82924,
+          "max_gap": 1079178,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530445,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 1028,
+          "late_p99": 106104,
+          "late_max": 197985,
+          "max_gap": 188687,
+          "slot_wait_p99": 80
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 395,
+          "late_p99": 105697,
+          "late_max": 105697,
+          "max_gap": 1098279,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 90327,
+      "p99": 189629,
+      "max": 189629
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 361,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 137.862
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 128.181
+      }
+    }
+  },
+  "far-3pct-quiet-a": {
+    "d2l": {
+      "floor": 3613682,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 15229,
+          "late_p99": 137872,
+          "late_max": 216959,
+          "max_gap": 242575,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 12937,
+          "late_p99": 129779,
+          "late_max": 157590,
+          "max_gap": 328720,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 7373,
+          "late_p99": 133313,
+          "late_max": 247032,
+          "max_gap": 235663,
+          "slot_wait_p99": 8
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 15181,
+          "late_p99": 137816,
+          "late_max": 216794,
+          "max_gap": 242571,
+          "slot_wait_p99": 7
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 15244,
+          "late_p99": 133711,
+          "late_max": 216772,
+          "max_gap": 242576,
+          "slot_wait_p99": 4
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 17047,
+          "late_p99": 178676,
+          "late_max": 250628,
+          "max_gap": 600245,
+          "slot_wait_p99": 4
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 11148,
+          "late_p99": 106694,
+          "late_max": 106694,
+          "max_gap": 1096529,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530571,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 15354,
+          "late_p99": 162643,
+          "late_max": 266369,
+          "max_gap": 271180,
+          "slot_wait_p99": 7
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 25266,
+          "late_p99": 226653,
+          "late_max": 226653,
+          "max_gap": 1176261,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 130053,
+      "p99": 315627,
+      "max": 315627
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 291,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 150.533
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 177.654
+      }
+    }
+  },
+  "far-3pct-quiet-b": {
+    "d2l": {
+      "floor": 3613676,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 13940,
+          "late_p99": 148346,
+          "late_max": 268195,
+          "max_gap": 315862,
+          "slot_wait_p99": 125
+        },
+        "2": {
+          "produced": 301,
+          "superseded": 0,
+          "handed": 301,
+          "received": 301,
+          "lost_after_handing": 0,
+          "late_p50": 11938,
+          "late_p99": 131382,
+          "late_max": 218568,
+          "max_gap": 415480,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 7147,
+          "late_p99": 147268,
+          "late_max": 258604,
+          "max_gap": 250584,
+          "slot_wait_p99": 65
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 13665,
+          "late_p99": 141256,
+          "late_max": 268138,
+          "max_gap": 315879,
+          "slot_wait_p99": 150
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 13607,
+          "late_p99": 148692,
+          "late_max": 268281,
+          "max_gap": 315856,
+          "slot_wait_p99": 126
+        },
+        "6": {
+          "produced": 144,
+          "superseded": 0,
+          "handed": 144,
+          "received": 144,
+          "lost_after_handing": 0,
+          "late_p50": 15362,
+          "late_p99": 142775,
+          "late_max": 146613,
+          "max_gap": 551314,
+          "slot_wait_p99": 29
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 5921,
+          "late_p99": 163105,
+          "late_max": 163105,
+          "max_gap": 1134241,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530490,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 15607,
+          "late_p99": 165362,
+          "late_max": 251647,
+          "max_gap": 267687,
+          "slot_wait_p99": 147
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 23050,
+          "late_p99": 166736,
+          "late_max": 166736,
+          "max_gap": 1267136,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 123058,
+      "p99": 413032,
+      "max": 413032
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 0,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 191.902
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 169.164
+      }
+    }
+  },
+  "far-3pct-busy-a": {
+    "d2l": {
+      "floor": 3613705,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 16479,
+          "late_p99": 169477,
+          "late_max": 277159,
+          "max_gap": 302993,
+          "slot_wait_p99": 4
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 16369,
+          "late_p99": 177095,
+          "late_max": 302803,
+          "max_gap": 333685,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 9630,
+          "late_p99": 169916,
+          "late_max": 292680,
+          "max_gap": 289794,
+          "slot_wait_p99": 12
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 16444,
+          "late_p99": 181703,
+          "late_max": 302837,
+          "max_gap": 333748,
+          "slot_wait_p99": 3
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 16439,
+          "late_p99": 181727,
+          "late_max": 302944,
+          "max_gap": 333747,
+          "slot_wait_p99": 4
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 11495,
+          "late_p99": 173499,
+          "late_max": 263305,
+          "max_gap": 282981,
+          "slot_wait_p99": 17
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 7905,
+          "late_p99": 123930,
+          "late_max": 123930,
+          "max_gap": 1123749,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530563,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 16987,
+          "late_p99": 153976,
+          "late_max": 254211,
+          "max_gap": 268563,
+          "slot_wait_p99": 11
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 23758,
+          "late_p99": 187092,
+          "late_max": 187092,
+          "max_gap": 1205250,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 129651,
+      "p99": 313881,
+      "max": 313881
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 161,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 190.027
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 168.527
+      }
+    }
+  },
+  "far-3pct-busy-b": {
+    "d2l": {
+      "floor": 3613690,
+      "txerr": 0,
+      "chans": {
+        "1": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 13170,
+          "late_p99": 142602,
+          "late_max": 224334,
+          "max_gap": 257311,
+          "slot_wait_p99": 106
+        },
+        "2": {
+          "produced": 1201,
+          "superseded": 0,
+          "handed": 1201,
+          "received": 1201,
+          "lost_after_handing": 0,
+          "late_p50": 11421,
+          "late_p99": 155751,
+          "late_max": 243418,
+          "max_gap": 254098,
+          "slot_wait_p99": null
+        },
+        "3": {
+          "produced": 3000,
+          "superseded": 0,
+          "handed": 3000,
+          "received": 3000,
+          "lost_after_handing": 0,
+          "late_p50": 7688,
+          "late_p99": 151282,
+          "late_max": 244775,
+          "max_gap": 243845,
+          "slot_wait_p99": 41
+        },
+        "4": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 13211,
+          "late_p99": 155753,
+          "late_max": 243645,
+          "max_gap": 254203,
+          "slot_wait_p99": 114
+        },
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 12455,
+          "late_p99": 153560,
+          "late_max": 243643,
+          "max_gap": 254205,
+          "slot_wait_p99": 128
+        },
+        "6": {
+          "produced": 660,
+          "superseded": 0,
+          "handed": 660,
+          "received": 660,
+          "lost_after_handing": 0,
+          "late_p50": 7826,
+          "late_p99": 170513,
+          "late_max": 222851,
+          "max_gap": 271208,
+          "slot_wait_p99": 38
+        },
+        "7": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 4491,
+          "late_p99": 173383,
+          "late_max": 173383,
+          "max_gap": 1150729,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "l2d": {
+      "floor": -3530549,
+      "txerr": 0,
+      "chans": {
+        "5": {
+          "produced": 1200,
+          "superseded": 0,
+          "handed": 1200,
+          "received": 1200,
+          "lost_after_handing": 0,
+          "late_p50": 16513,
+          "late_p99": 151737,
+          "late_max": 181474,
+          "max_gap": 231341,
+          "slot_wait_p99": 45
+        },
+        "8": {
+          "produced": 61,
+          "superseded": 0,
+          "handed": 61,
+          "received": 61,
+          "lost_after_handing": 0,
+          "late_p50": 26223,
+          "late_p99": 165148,
+          "late_max": 165148,
+          "max_gap": 1181205,
+          "slot_wait_p99": null
+        }
+      }
+    },
+    "session_rtt": {
+      "n": 61,
+      "p50": 133277,
+      "p99": 286499,
+      "max": 286499
+    },
+    "dgram_buffer_peak_bytes": {
+      "dialer": 200,
+      "listener": 0
+    },
+    "quic": {
+      "dialer": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 210.795
+      },
+      "listener": {
+        "lost": 0,
+        "cong": 0,
+        "min_cwnd": 12000,
+        "max_rtt_ms": 183.057
+      }
+    }
+  }
+}

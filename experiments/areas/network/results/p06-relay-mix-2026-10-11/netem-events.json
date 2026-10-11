@@ -1,0 +1,98 @@
+[
+  {
+    "id": "near-0pct-quiet-a",
+    "netem": "netem 1791721473170193368 delay=11 loss=0"
+  },
+  {
+    "id": "near-0pct-quiet-b",
+    "netem": "netem 1791721552911805052 delay=11 loss=0"
+  },
+  {
+    "id": "near-0pct-busy-a",
+    "netem": "netem 1791721632451244727 delay=11 loss=0"
+  },
+  {
+    "id": "near-0pct-busy-b",
+    "netem": "netem 1791721712104113577 delay=11 loss=0"
+  },
+  {
+    "id": "near-1pct-quiet-a",
+    "netem": "netem 1791721791420732680 delay=11 loss=1"
+  },
+  {
+    "id": "near-1pct-quiet-b",
+    "netem": "netem 1791721872058213329 delay=11 loss=1"
+  },
+  {
+    "id": "near-1pct-busy-a",
+    "netem": "netem 1791721951937311326 delay=11 loss=1"
+  },
+  {
+    "id": "near-1pct-busy-b",
+    "netem": "netem 1791722031419333943 delay=11 loss=1"
+  },
+  {
+    "id": "near-3pct-quiet-a",
+    "netem": "netem 1791722110969090530 delay=11 loss=3"
+  },
+  {
+    "id": "near-3pct-quiet-b",
+    "netem": "netem 1791722190513507715 delay=11 loss=3"
+  },
+  {
+    "id": "near-3pct-busy-a",
+    "netem": "netem 1791722269985510793 delay=11 loss=3"
+  },
+  {
+    "id": "near-3pct-busy-b",
+    "netem": "netem 1791722349417454198 delay=11 loss=3"
+  },
+  {
+    "id": "far-0pct-quiet-a",
+    "netem": "netem 1791722428946443486 delay=0 loss=0"
+  },
+  {
+    "id": "far-0pct-quiet-b",
+    "netem": "netem 1791722515748446947 delay=0 loss=0"
+  },
+  {
+    "id": "far-0pct-busy-a",
+    "netem": "netem 1791722601244034911 delay=0 loss=0"
+  },
+  {
+    "id": "far-0pct-busy-b",
+    "netem": "netem 1791722687015444022 delay=0 loss=0"
+  },
+  {
+    "id": "far-1pct-quiet-a",
+    "netem": "netem 1791722772780462478 delay=0 loss=1"
+  },
+  {
+    "id": "far-1pct-quiet-b",
+    "netem": "netem 1791722859226066852 delay=0 loss=1"
+  },
+  {
+    "id": "far-1pct-busy-a",
+    "netem": "netem 1791722945623458555 delay=0 loss=1"
+  },
+  {
+    "id": "far-1pct-busy-b",
+    "netem": "netem 1791723031690653684 delay=0 loss=1"
+  },
+  {
+    "id": "far-3pct-quiet-a",
+    "netem": "netem 1791723117669943896 delay=0 loss=3"
+  },
+  {
+    "id": "far-3pct-quiet-b",
+    "netem": "netem 1791723203667898234 delay=0 loss=3"
+  },
+  {
+    "id": "far-3pct-busy-a",
+    "netem": "netem 1791723289120204059 delay=0 loss=3"
+  },
+  {
+    "id": "far-3pct-busy-b",
+    "netem": "netem 1791723374435980185 delay=0 loss=3"
+  }
+]

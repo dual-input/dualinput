@@ -2,6 +2,65 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-11: on iroh's relay under loss, v1's streams run as late as its one-off packets and no later, because QUIC never sees a loss there, so a sender that keeps only each channel's newest packet changes nothing
+
+**Asked:** for node 2's revision, on iroh's relay under loss, do v1's one-off channels starve the session and cockpit streams, and does a sender that keeps only each channel's newest datagram, handing it to QUIC only when QUIC's datagram buffer has room, fix it ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?
+
+**Expected:** under loss, QUIC's congestion window shrinks, datagrams queue in front of the streams' packets, up to the 1 MiB QUIC holds by default (read in noq-proto 1.3.0, `src/config/transport.rs`, `datagram_send_buffer_size`), and the streams fall behind; the newest-only sender bounds that queue.
+
+**Found:** [p06](../../../experiments/areas/network/p06-relay-mix/) ran 24 runs of 60s on 2026-10-11 between two endpoints on our droplets, every packet through iroh's relay, with direct addresses off through `clear_ip_transports()`.
+The dialer ran in a network namespace of its own on the Frankfurt droplet, whose link `tc netem` dropped packets on both ways, standing in for a pilot's lossy home link; the listener ran beside the relay under test.
+Near was Frankfurt's relay with 11ms added each way, a 22ms round trip; far was New York's relay, an 84ms round trip.
+
+The dialer sent all of v1's channels:
+
+- as datagrams: the flight model, 20/s at 130 B; flight controls, 20/s at 40 B; avatar poses, 20/s at 121 B; ATC audio, 50/s at 70 B; and traffic batches of 945 B;
+- on one stream, cockpit changes of 84 B;
+- on another, a 64 B session request each second, which the listener answered at once.
+
+The listener sent avatar poses back.
+The quiet mix sent batches at 2.4/s and cockpit changes at 5/s, 97 kbps of payload; the busy mix sent 11/s and 20/s, 172 kbps.
+Sender (a) handed every datagram to `send_datagram` as it was made, at iroh's defaults.
+Sender (b) set `datagram_send_buffer_size` to 3,600 B, three 1,200 B packets, kept each one-off channel's newest datagram in a slot of its own, and handed the oldest slot to QUIC whenever `datagram_send_buffer_space()` had room.
+
+Late is one-way delay above the run's lowest that way, so it's what a playout buffer would have to absorb; the session's figure is its round trip, whose p99 over 61 exchanges is the slowest.
+Each cell is sender (a) / sender (b), in ms:
+
+| Relay | Loss | Mix | Flight model's p99 late | Cockpit stream's p99 late | Session round trip, p99 |
+| --- | --- | --- | --- | --- | --- |
+| Frankfurt, 22ms | none | quiet | 2 / 2 | 1 / 1 | 24 / 25 |
+| | | busy | 3 / 3 | 2 / 3 | 26 / 27 |
+| | 1% | quiet | 32 / 30 | 33 / 31 | 68 / 164 |
+| | | busy | 31 / 31 | 31 / 31 | 57 / 76 |
+| | 3% | quiet | 45 / 47 | 33 / 46 | 204 / 100 |
+| | | busy | 45 / 45 | 45 / 45 | 114 / 128 |
+| New York, 84ms | none | quiet | 7 / 3 | 7 / 4 | 91 / 88 |
+| | | busy | 4 / 5 | 4 / 5 | 90 / 92 |
+| | 1% | quiet | 107 / 106 | 107 / 107 | 257 / 255 |
+| | | busy | 108 / 107 | 108 / 106 | 337 / 190 |
+| | 3% | quiet | 138 / 148 | 130 / 131 | 316 / 413 |
+| | | busy | 169 / 143 | 177 / 156 | 314 / 286 |
+
+- Every packet arrived in every run, on every channel.
+- QUIC counted no lost packet and no congestion event in any run, on either end, and its congestion window stayed at its initial 12,000 B.
+  The relay's TCP resent what `tc netem` dropped, so QUIC saw a late packet, never a lost one, and its datagram buffer, sampled each second, never held more than 361 B.
+- So sender (b) never replaced a datagram, and none waited in a slot longer than 0.2ms at p99.
+  Both senders put the same packets on the wire at the same moments, so the gaps between their columns, up to 26ms at p99 on the flight model and the cockpit stream, are the spread between runs; the session's p99 is its one slowest exchange, so it spreads further.
+- In every run with loss, the cockpit stream's p99 came within 17ms of the flight model's, above it in some runs and below in others, and ATC audio's within 9ms.
+  The relay's TCP connection carries every QUIC packet in one byte stream, so a resend holds up everything behind it, whatever channel it carries.
+- The busy mix's 172 kbps added no lateness beyond the spread between runs.
+- Lateness grows with the round trip to the relay, as in [2.3](#2026-10-10-iroh-moves-to-the-relay-one-path-idle-timeout-after-a-direct-link-dies-and-back-within-60s-and-at-3-loss-its-tcp-relays-p99-lateness-grows-with-the-round-trip-to-the-relay-from-53ms-at-22ms-away-to-534ms-at-131ms): at 1% loss, the flight model's p99 was 30ms to 32ms at 22ms away and 106ms to 108ms at 84ms.
+  At 3% through Frankfurt, its p99 of 45ms to 47ms sits beside 2.3's 53ms for the friend 22ms from Frankfurt.
+- The flight model's longest silence was 316ms, at 3% loss.
+
+**Changed:** on iroh's relay, nothing the sender does with its channels changes when they arrive, because the relay's TCP connection holds them all alike, and the session and cockpit streams share the one-off channels' lateness, so 2.3's accepted cost for ATC audio covers them too.
+Node 2's design needs no newest-only sender for the relay path.
+Whether it needs one on a direct path, where QUIC sees losses itself and shrinks its congestion window, p06 didn't test, because its packets never went direct.
+
+**Affects:** node 2's design doc, its sender's handling of datagrams and its priorities between channels.
+
+**Evidence:** [p06](../../../experiments/areas/network/p06-relay-mix/), and its results in [results/p06-relay-mix-2026-10-11](../../../experiments/areas/network/results/p06-relay-mix-2026-10-11/): `analysis.txt` from `analyze.mjs`, with every channel's counts and lateness per run, `netem-events.json`, and `raw/`, both endpoints' logs of every packet, with the droplets' addresses replaced by their station names.
+
 ## 2026-10-11: when two endpoints home at different relays, iroh carries both directions through the dialed endpoint's home relay, so whoever dials picks the relay
 
 **Asked:** for node 2's revision, when two pilots' endpoints home at different relays, which relay carries each direction ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?

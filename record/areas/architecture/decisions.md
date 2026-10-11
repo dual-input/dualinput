@@ -434,7 +434,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - `iroh-relay` admits everyone by default, and with shared tokens admits only a client that presents one of those its configuration lists, which can be two at once (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig`).
   - iroh leaves the relay out of an endpoint bound without one, and a relay added afterward never takes effect ([network log, 2.3][n23]).
   - iroh probes the first 5 relays in its list, homes at the one with the best latency over the last 5 minutes, and moves only for one under two-thirds of the current one's (read in iroh 1.3.0, `src/net_report.rs`, `add_report_history_and_set_preferred_relay`).
-- **Leaves out:** who hosts the relays, our own servers or n0's managed relays, which changes nothing else; and which relay each direction uses when two pilots home at different relays, which a probe settles ([01-between-machines](../network/01-between-machines.md#the-relays)).
+- **Leaves out:** who hosts the relays, our own servers or n0's managed relays, which changes nothing else; and which relay each direction uses when two pilots home at different relays, which nothing here depends on ([01-between-machines](../network/01-between-machines.md#the-relays)).
 
 ## The backend matches invite codes to the crew's endpoints, and has no part in a running session
 
@@ -470,7 +470,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - noq's queue for one-off packets drops the oldest packet of any channel only to make room for a new one (read in noq 1.3.0, `src/connection.rs`, `send_datagram`).
   - A relayed packet crosses links that discover their packet size separately, so FS Copilot budgeted to the smallest (FS Copilot fork, `record/traffic-atc/docs/04-transport.md`, "The MTU floor").
   - Two kinds of message share an ordered channel only if neither is hurt by waiting behind the other ([04-room-for-later](../product/04-room-for-later.md#channels)).
-- **Leaves out:** how the cockpit channel tells a copy from a late message, for node 3; which fields each message carries, for node 3 and the flight-model sync ([network log, 2.2][n22]); and whether one-off packets starve the streams on a lossy relay, which a probe settles.
+- **Leaves out:** how the cockpit channel tells a copy from a late message, for node 3; which fields each message carries, for node 3 and the flight-model sync ([network log, 2.2][n22]); and whether one-off packets starve the streams on a lossy relay, which the network's stage of step 8 checks ([01-between-machines](../network/01-between-machines.md#left-open)).
 
 ## While a connection is lost, the PF flies on, a PM's displays lock, and any pilot can take control
 
@@ -490,7 +490,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - noq lets a peer drop stream data it hasn't delivered once a close arrives, and closes a connection with code 0 when every handle to it is dropped (read in noq 1.3.0, `src/connection.rs`).
   - One friend's router forgot an idle port within 30s ([network log, 2.3][n23]).
   - iroh sends on one path at a time ([network log, 2.1][n21]).
-- **Leaves out:** tuning the 5s and the 2s from v1's recordings; how far the following machine carries the aircraft, how it eases, and the marker for a sim stopped on purpose, for the flight-model sync; bringing a returning ex-PF's cockpit and aircraft to the new PF's state, for node 3; and how long a connection takes to come back after a full outage, which a probe measures ([01-between-machines](../network/01-between-machines.md#while-a-connection-is-lost)).
+- **Leaves out:** tuning the 5s and the 2s from v1's recordings; how far the following machine carries the aircraft, how it eases, and the marker for a sim stopped on purpose, for the flight-model sync; bringing a returning ex-PF's cockpit and aircraft to the new PF's state, for node 3; and how long a connection takes to come back after a full outage, which the network's stage of step 8 measures ([01-between-machines](../network/01-between-machines.md#left-open)).
 
 ## A receiver estimates each sender's clock offset from one timed exchange a second
 

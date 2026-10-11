@@ -113,8 +113,7 @@ Each endpoint picks its home relay by latency, never by cost, as [the connection
 So with v1's two relays, each pilot homes at the nearer.
 
 A relayed packet goes to the receiver's home relay, unless the sender already holds a connection to a relay where it has heard from the receiver (read in iroh 1.3.0, `src/socket/transports/relay/actor.rs`, `active_relay_handle_for_endpoint`).
-So when one pilot dials another through the other's home relay, the replies likely come back the same way, and both directions cross one relay, with the dialer's leg the long one when the two are far apart.
-Which relay each direction uses in practice is unmeasured; a probe with two pilots homed at different relays settles it.
+So when two pilots home at different relays, their two directions may cross one relay or two, which nobody has measured and nothing in this design depends on.
 
 A relay carries everything over one TCP connection per pilot, so it loses nothing, and a lost packet holds back everything behind it until TCP resends it ([2.1]).
 The hold-up grows with the sender's round trip to the relay: at 3% loss, iroh's p99 lateness was 53ms at 22ms away, 264ms at 42ms, 346ms at 97ms, and 534ms at 131ms, where a UDP relay under the same loss lost about 3% and stayed within 81ms ([2.3]).
@@ -154,7 +153,7 @@ Sending:
 - noq's queue for one-off packets drops the oldest packet of any channel only to make room for a new one (read in noq 1.3.0, `src/connection.rs`, `send_datagram`), so a traffic batch could push out a flight sample, and a stale sample could wait behind newer ones.
   So the core sets that queue to a few packets (`QuicTransportConfigBuilder::datagram_send_buffer_size`, read in iroh 1.3.0, `src/endpoint/quic.rs`), keeps one slot per one-off channel that holds only its newest packet, and hands a packet to QUIC only when `Connection::datagram_send_buffer_space` shows room (read in iroh 1.3.0, `src/endpoint/connection.rs`).
 - One scheduler for the whole core drains those slots by priority and gives every channel a share, so the streams are never shut out, across every connection a core holds.
-  Whether one-off packets starve the streams on a lossy relay, and whether the slots prevent it, is unmeasured; a probe running v1's full mix of channels through iroh's relay under loss settles it.
+  Whether one-off packets starve the streams on a lossy relay, and whether the slots prevent it, is unmeasured, and the network's build checks it before it sets the shares ([left open](#left-open)).
 - QUIC builds each packet from what's waiting when it builds it: queued one-off packets first, then stream data, until the packet is full (read in noq-proto 1.3.0, `src/connection/mod.rs`, `populate_packet`).
   The core hands over what one sim frame produced together, though whether two messages handed over together share one packet is unmeasured.
 - A batch of traffic samples stays under 1,162 bytes, the one-off packet's size at QUIC's starting packet size ([research digest](results/2026-10-10-transport-research-digest.txt)), not the size a path has discovered.
@@ -280,7 +279,9 @@ So a release build targets the baseline x86-64 CPU, and the core binds its endpo
   n0's free public relays are out, since n0 calls them "suitable for development and hobby use only" (documented, [public relays](https://docs.iroh.computer/iroh-services/relays/public), as of 2026-10-11).
 - How the status list looks, which is for the banner's design, and how a pilot sees which kind of connection they have, which [the connection](../product/03-v1-scope.md#the-connection) leaves to a design for later.
 - The 5s, the 2s path idle timeout, the 10-minute renewal, and the ATC buffer's limits, which v1's recordings tune.
-- Three probes running on 2.3's droplets: which relay each direction uses when two pilots home at different relays, whether v1's full mix of channels starves the streams on a lossy relay, and how long a connection takes to come back after a full outage.
+- Two checks for the network's stage of step 8, which tune the network layer without changing this design (user, 2026-10-11):
+  - v1's full mix of channels through iroh's relay at 1% and 3% loss, with and without the newest-only slots, measuring how late the session and cockpit streams arrive, since the session stream carries take-control;
+  - how long a connection takes to carry data again after outages of 10s to 120s, which is how long a PM stays locked once the network is back.
 
 [2.1]: log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [2.2]: log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

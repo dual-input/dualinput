@@ -9,7 +9,7 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in a public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules and its compiled plugin in it, under its hash.
-Each time the core starts, it brings its cache up to date from the published index, it loads every profile from that cache, and a session pins one profile for each aircraft by its hash.
+Each time the core starts, it brings its cache up to date from the published index, it loads every profile from that cache, and a session, which flies one aircraft, pins its profile by its hash.
 An aircraft's plugin is a TypeScript file beside its profile, and every write it makes goes through `write()` too.
 
 This answers node 4 of the [architecture plan](../architecture/plan.md#4-profiles-and-plugin-delivery).
@@ -249,12 +249,15 @@ The bench starts from two simplifications (user, 2026-10-12):
 - A write gets one attempt, with no retry, since every write that landed in our tests landed on the first try, and the one that didn't, the A220's heading, didn't land after 3 retries either (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
 - A write function runs once for each value it's given.
 
-It tests the cases node 4's review traced, each of which broke a rule written on paper:
+It tests the cases node 4's and node 3's reviews traced, each of which broke a rule written on paper or turns on frame timing:
 
 - A knob turned a detent a frame, sending 100, 101, and 102: the receiving machine reads 100 when 102 is already wanted, so an echo rule that knows only the newest wanted value sends 100 back as a pilot's change, and a stepped write that starts again from a lagging reading overshoots.
 - A pilot turning a knob back within 2s of a write that passed through the same values, whose change an echo rule that remembers those values would swallow, against [state sync](../product/03-v1-scope.md#state-sync)'s rule that such a change goes out.
 - A `toggle` over a lamp that lights after the check gives up, or never lights, where a retry would flip the switch a second time.
 - A write right behind the battery switch in catch-up's burst, before the bus has power, and a write function that checks for power and writes nothing, whose value is lost without a flag unless the engine checks it anyway.
+- A press on a synced display that sets a variable the profile also syncs, whose change reaches the core through SimConnect before the press arrives over the panel's WebSocket, so the other machine writes the variable, then replays the press, which flips it back, and that later change wins everywhere (node 3's review, 2026-10-13).
+  The 58P's tablet mirrors its settings to `L:` variables the profile syncs ([plugins](../product/03-v1-scope.md#plugins)), so its profile meets this if it also lists the tablet as a display.
+- A button that sets an `L:` variable to 1 and back to 0 within one frame, which a reading once a frame may never see, so an event entry watching it never fires (node 3's review, 2026-10-13).
 - A value written as 165 that reads back as 165.000002 (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)), so a check compares within float32 precision.
 
 ## The aircraft and its variants
@@ -464,7 +467,7 @@ The core uses them:
 1. Each time it starts, the core fetches `index.json` and downloads, for each profile, the newest bundle at or below its own level that its cache lacks, and checks that the bytes match the hash; it never rebuilds a published bundle.
    The core starts with every sim run ([tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), so a bundle CI publishes reaches a pilot at their next sim start.
 2. It loads a profile from its cache whenever the spine's [what moves them](../architecture/01-spine.md#what-moves-them) says to, such as when a session starts with the aircraft already loaded, so a load never waits on the network.
-3. A session pins one bundle for each aircraft it flies, by its hash, and that bundle doesn't change for the rest of the session outside a test session; a pilot whose cache lacks it fetches it by its hash ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
+3. A session flies one aircraft, its PF's ([roles and members](../session/01-roles-and-members.md#the-pf)), and pins that aircraft's bundle by its hash, which doesn't change for the rest of the session outside a test session; a pilot whose cache lacks it fetches it by its hash ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
 4. Offline, the core uses what it has cached.
 
 - **Why Pages:** GitHub Pages "sites have a soft bandwidth limit of 100 GB per month", and a published site "may be no larger than 1 GB" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).
@@ -507,7 +510,7 @@ Each of these waits until a profile or plugin needs it, and adding it takes a ne
 
 ## Left open
 
-- Which pilot's bundle the session pins for an aircraft, when two pilots' cores hold different ones, such as when one pilot's sim started after a merge; that's the session's to decide in step 8.
+- Which pilot's bundle the session pins, when two pilots' cores hold different ones, such as when one pilot's sim started after a merge; that's the session's to decide in step 8.
 - Whether the core tells which preset loaded from the path the sim reports or from `A:TITLE`, for the core's stage of step 8 ([the aircraft and its variants](#the-aircraft-and-its-variants)).
 - Where the core reads the version of a streamed Marketplace aircraft, which keeps no `manifest.json` in its folder, the match check's open question ([preflight match check](../product/03-v1-scope.md#preflight-match-check)).
 - Whether the legacy transmit call reaches every aircraft's handlers ([which call sends an event](#which-call-sends-an-event)).

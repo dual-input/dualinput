@@ -248,7 +248,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Decided:** profiles and plugins update apart from Crosscheck's releases.
   They live in one public repository of flat files, and on each merge CI builds each profile into a bundle, one YAML file with its modules merged in and its plugin compiled to JavaScript under a `plugin:` key only the builder writes, checks it, works out its level, and publishes it on GitHub Pages: an index of every published bundle, with its profile's path, the variants it covers, its hash, the date CI published it, and its level, and every bundle under its hash, kept for good.
   Each time the core starts, it fetches the index and downloads the newest bundle of each profile at or below its own level that its cache lacks, checking the bytes against the hash; it never rebuilds a published bundle, and it loads every profile from that cache.
-  A session pins one bundle for each aircraft it flies, by hash, and that bundle doesn't change mid-session; a pilot whose machine lacks the pinned bundle fetches it by its hash.
+  A session flies one aircraft and pins one bundle, by hash, which doesn't change mid-session; a pilot whose machine lacks the pinned bundle fetches it by its hash.
   The format and the plugin API share one level, an integer that each release adding to either raises by 1, and a release runs every bundle at or below its own level.
   Nothing is signed, and a profile carries no version or date of its own.
   For testing, the core builds the same bundle from a local folder, and shows it in the match check as "unpublished".
@@ -556,35 +556,40 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## A cut link comes back by replay, and a sim, core, or PC that went down comes back as a late joiner
 
 - **Decided:** after a cut link, with the sim and the core still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that of each run of changes to a PF-owned entry with only PF-owned changes between them, it applies only the last, in its place.
-  A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or once the crew's first message has passed, the traffic and ATC host's role is released the same way, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
+  That pacing holds for every cockpit message, live or replayed: each waits the gap its sender left before it, capped at 2s, counted from when the one before it applied, so it waits only what's left, and the core alone paces, with our panel bridge playing each press when the core hands it over.
+  A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or once the crew's first message has passed, to a pilot still in the flight, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
   Each change of control carries its maker's vector clock, a receiver drops the superseded PF's messages made under the value it lost only where that clock doesn't include them, live or in a replay, and every machine that applied one catches up state from the new PF.
-  Control can't pass to a pilot while their own replay or catch-up runs over a link that's up, by key, button, or voice; when the PF leaves, it passes anyway, to an up-to-date pilot where there is one.
+  Control can't pass to a pilot while their own replay or catch-up runs over a link that's up, by key, button, or voice; when the PF leaves, it passes anyway, to a pilot still in the flight, an up-to-date one where there is one.
   This changes node 2's rules that a sim crash passes nothing and that control drops the superseded PF's messages that reach a receiver in a replay, and settles how a replay is paced and how an ex-PF and a crashed PF come back ([architecture plan](plan.md#3-sync-and-the-session)).
-  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#what-comes-back-after-what)).
+  Settled in node 3 by the user, 2026-10-11, and the pacing of every message by the user, 2026-10-12 ([04-order-and-recovery](../sync/04-order-and-recovery.md#what-comes-back-after-what)).
 - **Because:**
   - A sim that closed has lost its pages, FMS, and avionics state, such as a GTN 750's flight plan, which no profile entry reads and replayed presses needn't rebuild (user, 2026-10-11).
   - A replay's 2s cap bounds it at 2s a change (arithmetic), and a PF working the throttle changes it every time the lever moves, while a following machine only shows it (user, 2026-10-11); keeping the last change of each run in its place keeps each lever where it was before the next event, such as a starter press.
   - A PF's own handover comes after every message it made, so its clock includes them all, while a takeover during a cut doesn't include the solo flying it supersedes; dropping by the replay instead would drop a leaving PF's last changes from a PM still replaying.
   - A pilot who took control partway through a replay would fly a cockpit that dates from before the cut, and one who took it during catch-up a cockpit whose own changes were never sent.
+  - FS Copilot's panels paced presses the same way, "Each waits its *remaining* gap, not the full one, so live gestures add no latency" (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, 0.4), and a panel that paced too would wait each gap a second time.
 - **Leaves out:** tuning the 2s cap from v1's recordings, and which up-to-date pilot receives control in a crew of more than two.
 
 ## Catch-up writes in the order the flying machine's cockpit first took each value
 
 - **Decided:** catch-up writes each entry at the flying machine's value, in the order the flying machine's cockpit first took each of those values, read from its recording, with entries it took before the session or never changed first.
   It carries the flying machine's vector clock, which the catching-up machine takes for every counter but its own, which never goes back, so every message the state already holds drops as a copy, and it starts again from a new flying machine, skipping what already matches, if control passes between other pilots.
-  v1's catch-up pipeline has one step, catching up state; the time, date, simulation rate, and pause reach a late joiner as session keys, and traffic as the host's objects, which a receiver spawns whenever its sim is in a flight.
+  v1's catch-up pipeline has one step, catching up state; the simulation rate and pause reach a late joiner as session keys, the time and date aren't synced in v1, and traffic reaches them as the host's objects, which a receiver spawns whenever its sim is in a flight.
+  A catch-up ends once it has made its last write and its aircraft has settled, whichever comes later, and the core reads an input event's value once when it starts watching it, so a catch-up can tell whether that entry matches.
   A session started after the aircraft loaded counts the settle rule's 30s floor from Ready to fly and its 15s quiet window from the profile's load.
   This settles [03-catch-up](../sync/03-catch-up.md#choosing-the-order)'s order and the spine's question of settling in such a session ([01-spine](01-spine.md#left-open)).
-  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
+  Settled in node 3 by the user, 2026-10-11, and when a catch-up ends and the first read of an input event by the user, 2026-10-12 ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
 - **Because:**
   - Where an interlock makes order matter, this order writes the battery before the hypothetical APU master, and where order doesn't matter it costs nothing, so no probe of interlocks could change the choice ([03-catch-up](../sync/03-catch-up.md#choosing-the-order)).
   - The recording keeps every change of the session ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - The catching-up pilot's changes aren't sent while catch-up runs ([03-catch-up](../sync/03-catch-up.md#while-catch-up-runs)), so a cockpit taken over halfway would differ from the others' with nothing sent to bring them together.
+  - An aircraft that settled long ago, at the end of preflight, for an ex-PF, or after a core restart, would end a catch-up timed by settling alone the moment it began.
+  - Subscribing to an input event reports nothing until its value changes (fsc-editor, `docs/sim-vars/build/v1-log.md`), and our Rust client read one in a flight (measured on MSFS 2024, 2026-10-09, [architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
 - **Leaves out:** later steps of the pipeline, which the picks that need them add ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
 
 ## A core that crashes comes back as a late joiner
 
-- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on and releases the traffic and ATC host's role if they held them, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
+- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
   Because the aircraft didn't reload, each shadow value starts at the flying machine's, and the aircraft counts as settled at once.
   The recording's minimal mode keeps the cockpit stream, from which catch-up takes its order.
   This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
@@ -597,12 +602,15 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## A machine's vector clock is its record of what it applied, and a skipped message counts as applied
 
 - **Decided:** a receiver's vector clock is its one record of what it applied: a message the clock already covers is a copy and drops, the sender's own counter is a message's number, and the heartbeat acknowledges by carrying the clock.
-  A message counts as applied once its write is made, its event fired, or its press handed to the display's panel.
+  A message counts as applied once its write is made, its event fired, or its press played by the display's panel through to its release.
+  A machine sends each state entry's newest value at most 20 times a second, a starting value, and any value it's holding goes out before its next event or press, which go out as they happen.
   A receiver skips the messages a change of control drops, presses during its own catch-up or for a display whose panel hasn't announced itself, changes to an entry the aircraft drives itself, and in a replay all but the last of a run of PF-owned changes, each counting as applied, and a machine with no aircraft in a flight, or with an aircraft other than the flying machine's, holds the stream and sends nothing on it until its catch-up.
   A message names its entry by name and its clock's counters by pilot ID and restart count, and of two changes from one pilot under two restart counts that neither saw, the higher count wins.
   This answers the spine's questions of how the cockpit channel tells a copy from a late message, how a clock names its counters, and how two changes from one pilot under two restart counts are ordered ([01-spine](01-spine.md#left-open)).
-  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
+  Settled in node 3 by the user, 2026-10-11, and the cap and a press played through by the user, 2026-10-12 ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
 - **Because:**
+  - A hardware axis that jitters with no dead zone changes its lever every frame, up to 360 messages a second for the 58P's six engine levers at 60 fps, against node 2's assumed 5 to 20 (arithmetic), and FS Copilot sampled every entry that wasn't shared every 30ms (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `AddLink`).
+  - FS Copilot's panel plays a press for as long as the pilot held it, up to 1.5s (read in the FS Copilot fork, `pointer.js`, `hold`), so a press counted at the hand-over could let the next event land before its click.
   - FS Copilot's acknowledgment meant "received by the app", not "applied by the panel" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, the constructor's comment), and its restarted app dropped a press with "No panel for DisplayUnits|config=N324DU; event dropped" (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone").
   - One value for the copy check, the acknowledgment, and what catch-up hands over means a catch-up's clock covers every message its state holds, where a separate count of applied messages let a late joiner's queued messages apply again on top of its catch-up.
   - Names in full cost 84 bytes for a sample cockpit change against 27 for an index and member-list places ([network log, 2.2][n22]), 285 bytes to 1.1 KB a second more at node 2's assumed rates (arithmetic), for one encoding that depends on nothing the receiver publishes.
@@ -610,13 +618,13 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A shared entry every machine's aircraft keeps changing stops syncing, and a machine puts back what it may not send
 
-- **Decided:** a machine counts a shared entry as driven by the aircraft when, in every 3s for 30s, its own aircraft changed it, other than by Crosscheck's write, and another machine's change to it arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notice of a write that never lands.
-  When a machine's sim reports a change Crosscheck didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the time, date, or simulation rate on any machine but the flying one.
-  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
+- **Decided:** a machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Crosscheck's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notice of a write that never lands.
+  When a machine's sim reports a change Crosscheck didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
+  Settled in node 3 by the user, 2026-10-11, and the test's reach to event entries by the user, 2026-10-13 ([04-order-and-recovery](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
 - **Because:**
-  - An entry for something that ticks, which a profile's author added by mistake, would send a change at every tick and fill every replay, whatever the IDE warned (user, 2026-10-11).
+  - An entry for something that ticks, which a profile's author added by mistake, would send a change or a firing at every tick and fill every replay, whatever the IDE warned (user, 2026-10-11), and 21 of the A220's input events reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, as the [A220 study](../aircraft/synaptic-a220/study.md) cites).
   - A pilot changes an entry on one machine, and the others' aircraft only take the writes, so no pilot produces the sign; a PF-owned entry is left out, since following machines put it back, and a PM's hand resting on a throttle would otherwise trip the test.
-  - Catch-up already moved a catching-up pilot's changes back, and v1's scope already put back another pilot's change to the time, date, or simulation rate ([time, date, sim rate, and pause](../product/03-v1-scope.md#time-date-sim-rate-and-pause)), so one rule replaces three.
+  - Catch-up already moved a catching-up pilot's changes back, and v1's scope already put back another pilot's change to the simulation rate ([time, date, sim rate, and pause](../product/03-v1-scope.md#time-date-sim-rate-and-pause)), so one rule replaces three.
   - FS Copilot wrote no PF-owned value back, so a PM's throttle could spool up their own engine until the PF next moved theirs ([take-control key](../product/03-v1-scope.md#take-control-key)), and an axis fires no event inside a dead zone set in MSFS ([flight-controls log](../flight-controls/log.md#2026-10-01-inside-a-dead-zone-set-in-msfs-the-axis-fires-no-event)).
 - **Leaves out:** tuning the 3s and the 30s from v1's recordings.
 
@@ -624,16 +632,18 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 - **Decided:** each member writes its own entry on the session channel, crew in v1 and passenger later; crew members hold vector clock counters and acknowledge on the heartbeat, and a passenger, on a one-way feed off the crew's links, holds nothing up.
   The table of roles gives each role who may hold it, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.
-  The PF is any crew member, and control moves by key or voice to any pilot but one whose own catch-up or replay runs, or when the PF leaves the flight or the session or their sim run ends, to an up-to-date pilot where there is one, the PM in v1; a lost link changes nothing.
-  The traffic and ATC host is one role, which a pilot takes by turning on "Share my traffic and ATC", the first to turn it on holding it and two at once settled by the stamp, and which leaving the flight or the session, or a sim that closes, releases.
-  Two rules remove a host's copies: when the session channel stops naming a pilot as host, every machine removes that host's copies, and a copy with no sample for 15s is removed, which covers a lost link.
+  The PF is any crew member, and control moves by key or voice to any pilot but one whose own catch-up or replay runs, or when the PF leaves the flight or the session or their sim run ends, to a pilot still in the flight, an up-to-date one where there is one, the PM in v1; a lost link changes nothing.
+  The take-control input is live only while its pilot is in the flight, after preflight; once preflight has ended, a session with no pilot in the flight ends; and a session flies one aircraft, its PF's, with preflight only at its start.
+  The traffic and ATC host is one role, which a pilot takes by turning on "Share my traffic and ATC", any pilot at any time, two at once settled by the stamp; it stays with its holder through a lost link, a flight left, or a crash, and only leaving the session releases it.
+  Two rules remove a host's copies: when the session channel stops naming a pilot as host, every machine removes that host's copies, and a copy with no sample for 15s is removed and its identity forgotten, while the host sends each object's sample at least every 5s; a receiver keeps each sender's identities apart and shows the host's.
   This answers [traffic sync](../product/03-v1-scope.md#traffic-sync)'s question of how the host is chosen, and builds the table [04-room-for-later](../product/04-room-for-later.md#roles) asks v1 for.
-  Settled in node 3 by the user, 2026-10-11 ([roles and members](../session/01-roles-and-members.md)).
+  Settled in node 3 by the user, 2026-10-11; the take-control input, a session's end, and one aircraft a session by the user, 2026-10-12; and taking the host's role at any time by the user, 2026-10-13 ([roles and members](../session/01-roles-and-members.md)).
 - **Because:**
-  - FS Copilot's build had no taking over, "a toggle is disabled while someone else hosts that feature", removed a host's traffic at once when the host stopped or dropped, withdrew hosting while the host's sim was disconnected, and removed a copy after 15s without a sample (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", rows 2 and 4, and "Key invariants").
+  - FS Copilot's build had no taking over, "a toggle is disabled while someone else hosts that feature", removed a host's traffic once the host stopped, withdrew hosting while the host's sim was disconnected, and removed a copy after 15s without a sample (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", rows 2 and 4, and "Key invariants"); it dropped a disconnected host's claim after the 15s its networking took to call a peer gone, sent each object at least every 5s, and forgot an identity with its stale copy (read in the FS Copilot fork, `FsCopilot/Simulation/ShareSwitch.cs`, `OnPeers`, `FsCopilot/Network/RelayNetwork.cs`, `DisconnectTimeout`, `FsCopilot/Simulation/TrafficHost.cs`, `Heartbeat`, and `TrafficReceiver.cs`, line 413).
   - Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
-  - A crew flies with a friend first and with that friend's traffic second, so a host who leaves the flight takes their traffic along, rather than holding a role for a pilot who may not come back (user, 2026-10-12).
-  - Keeping the role through a lost link costs up to 15s of copies standing still where FS Copilot removed them at once, which the user accepted for the simpler design (user, 2026-10-11).
+  - Pilots who all want the best for the session settle a tussle over the switch on voice, so a role anyone can take needs no release rule, and covers a host who doesn't come back (user, 2026-10-13).
+  - Control that rests only with a pilot in the flight never lands on one with no aircraft, and a session with nobody in the flight has nothing left to sync, so starting a new one is the clean way back (user, 2026-10-12).
+  - Keeping the role while its holder is quiet costs up to 15s of copies standing still, which the user accepted for the simpler design (user, 2026-10-11).
 - **Leaves out:** which pilot receives control when the PF leaves a crew of more than two, and hosts of their own for traffic and ATC, for the picks that need them.
 
 ## A profile is YAML whose script is JavaScript, where names only name and only `write()` writes

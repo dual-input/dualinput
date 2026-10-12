@@ -10,11 +10,12 @@ Decides:     The profile's two blocks, the fields of an entry, the writer API, a
 > Since 2026-10-11, [01-format-and-delivery](../profiles/01-format-and-delivery.md) gives this format its syntax, and changes it in these ways.
 > A profile's script is JavaScript calling Crosscheck's globals, with names quoted, as `L('BKSQ_MixtureLeverPosition_1')`, where the sketches below leave names bare.
 > The direction field is `owner`, `pilot_flying` or `shared` by default.
-> `write:` takes a name, which it sets, a map for `toggle` or `inc` and `dec`, a plugin's write method, or a function, so `set:` and `then` are gone.
-> A write function takes only the value to write, reads the global `state`, writes through `write()`, as in `write(K('SET_XPDR_MODE'), value)`, in place of the writer's `k()`, `l()`, `b()`, and `h()`, and returns nothing; it runs again when an entry it read changes only while its own entry's value still differs.
+> `write:` is required on every entry, and takes a name, which it sets, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function, or `none`, which marks a watch-only entry in place of a missing `write`; `set:` and `then` are gone.
+> A write function takes only the value to write, reads the global `state`, writes through `write()`, as in `write(K('SET_XPDR_MODE'), value)`, in place of the writer's `k()`, `l()`, `b()`, and `h()`, and returns nothing; it runs once for each value, and never again because an entry it read changed, where [the writer API](#the-writer-api) below runs it again.
+> A counting `watch` takes `inc` and `dec`, `set`, or `count`, in place of the `on:` rules below, and `wrap`, required, and `range` live only in a map that steps or counts, where the `inc` and `dec` form's `range` and `wrap` sit beside them below.
 > A plugin's values are `plugin.state.<name>`, and its writes `plugin.write.<name>(…)`, each the whole write; an aircraft's client data is read by its plugin, not watched by name.
-> An event entry's `run` is named `write`, and is required.
-> Counting into a shadow value, with `default`, and the settings for following machines wait until a profile needs them; a profile names no transport, since the engine picks the call by how many values an event carries; and a pace is written `2 frames` or `40ms`, for the whole aircraft in the profile's header.
+> An event entry's `run` is named `write`.
+> The settings for following machines wait until a profile needs them; a profile names no transport, since the engine picks the call by how many values an event carries; a pace is written `2 frames` or `40ms`, for the whole aircraft in the profile's header; and the engine caps one entry's value, not the whole state object, since a profile fixes its entries when it loads.
 
 A profile describes an aircraft's cockpit in two blocks.
 `state:` holds the controls whose value Crosscheck can read, or can track by counting the events that change it: it syncs them as values, checks that each write landed, and brings a cockpit that missed changes back to the flying machine's state.

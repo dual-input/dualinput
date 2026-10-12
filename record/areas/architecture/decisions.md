@@ -247,7 +247,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   It pins one bundle, by hash, for a session, and nothing changes mid-session; a pilot whose machine lacks the bundle the session pinned fetches it by its hash.
   The format and the plugin API share one level, an integer that each release adding to either raises by 1, and a release runs every bundle at or below its own level.
   Nothing is signed, and a profile carries no version or date of its own.
-  For testing, the core builds the same bundle from a local folder whenever a file there is saved, and in a test session every machine reloads the session's profile from each new bundle the author's core sends.
+  For testing, the core builds the same bundle from a local folder, and shows it in the match check as "unpublished".
   This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's questions of whether profiles reach pilots apart from Crosscheck's releases, where they're served from, how often the core checks, and how the plugin API's version relates to Crosscheck's.
   Settled in node 1.3 by the user, 2026-10-08, and in node 4, 2026-10-11 and 2026-10-12 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#delivery)).
 - **Because:**
@@ -260,7 +260,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - Neither a profile's script nor a plugin reaches the pilot's files or the network ([above](#plugin-code-runs-only-in-the-core)), so a hijacked repository could publish something that spoils flights and nothing more, and a signature would help only with a key kept off GitHub, a manual step in every publish (user, 2026-10-11).
   - A strict loader refuses what it doesn't know: our FS Copilot fork's new `pointer:` key "bricks profile loading on older releases" (FS Copilot fork, `record/pointer-forwarding/docs/11-fsc-implementation-plan.md`, item 6), so a core has to know which version it can run, and a level CI works out asks nothing of authors (user, 2026-10-11).
   - Versions are hard for an average author, and a date the author writes is missing from 4 of FS Copilot's 56 profiles (fsc-editor, `docs/sim-vars/18-language-core.md`, `header-updated`), so the hash is computed and the date is when CI published (user, 2026-10-11).
-- **Leaves out:** which pilot's bundle the session pins when two pilots' cores took different ones, how a session becomes a test session, and which compiler the core embeds for a local build, for step 8; and signing, if a later plugin needs the pilot's files.
+- **Leaves out:** which pilot's bundle the session pins when two pilots' cores took different ones, which compiler the core embeds for a local build, and test sessions, in which the author's core sends each saved bundle to the crew and every machine reloads it, with the three needs [01-format-and-delivery](../profiles/01-format-and-delivery.md#testing-an-edit) lists, for step 8; and signing, if a later plugin needs the pilot's files.
 
 ## Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them
 
@@ -634,7 +634,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## A profile is YAML whose script is JavaScript, where names only name and only `write()` writes
 
 - **Decided:** a profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Crosscheck's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included; a run's plain `write()` calls go out together, in call order, and only a chain spaces them.
-  Every entry's `write:` is required, and is a name, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function `(value) => …` that reads the global `state`, runs once per value, and returns nothing, or `none` for a watch-only entry.
+  Every entry's `write:` is required, and is a name, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function `(value) => …` that reads the global `state` and returns nothing, or `none` for a watch-only entry.
   A state entry whose value no variable shows counts events into a shadow value starting from `default`, and `wrap`, required, and `range` appear only in a map that steps or counts.
   An entry's direction is `owner`, `pilot_flying` or `shared` by default; an `aircraft:` header maps variant IDs to SimObjects folders, which entries and seats select with `only`; a profile imports modules by path, and a module carries no `only` or `location`; and profiles and modules live as flat files in one public repository.
   The core, CI, and the IDE run one checker, and a load fails on anything that breaks a rule.
@@ -647,21 +647,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - FS Copilot's format guessed a setter's kind from its characters and fell back silently, emptied a whole profile on one unknown key, and ran a repeated name as two subscriptions (fsc-editor, `docs/fscopilot-behavior.md` and `docs/sim-vars/18-language-core.md`).
   - A required `write`, with `none` for watch-only, turns a forgotten `write` into a load error rather than a silent watch-only entry, and a required `wrap` turns a forgotten one into a load error rather than a heading bug that crosses north by 359 steps the long way (user, 2026-10-12).
   - The first aircraft after the 58P with a control no variable shows would otherwise wait for a Crosscheck release before its profile could be written (user, 2026-10-12).
-- **Leaves out:** settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, reading client data, and locations for a module's entries, each until a profile or plugin needs it.
-
-## A write gets one attempt, checked every frame for up to 2s after its last action
-
-- **Decided:** after writing a state entry, a machine reads the entry's value every frame, and the write has landed the moment the value matches what it was asked to write, within float32 precision; if it hasn't matched 2s after the write's last action, the entry is flagged.
-  No write is retried, whatever its form, and a write function runs once for each value it's given and never again because what it read changed.
-  The engine remembers every value its writes to an entry should produce, each value set, each step's value for `inc` and `dec`, and the target for `toggle`, and a reading equal to one of them is its own and isn't sent, while any other reading is a pilot's change and goes out; the remembered values expire 2s after the write's last action.
-  This changes [02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)'s fixed 500ms wait and its retries, settles its questions of how many retries and how to keep a repeated action from doing harm, and drops [03-catch-up](../sync/03-catch-up.md#catching-up-state)'s write function that runs again when an entry it read lands.
-  Settled in node 4 by the user, 2026-10-11 and 2026-10-12 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
-- **Because:**
-  - On the Fenix, sound variables for the battery bus and a battery lamp followed a write to the battery switch after 1.2s (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)), so an entry that reads a readout the aircraft computes needs longer than 500ms.
-  - A retry or a rerun repeats a flip, a step, or a press whenever the watched readout lags or a lamp never lights, while every write that landed in our tests landed on the first try (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)), and the case retries were kept for, a radio frequency written before the bus has power, is reasoning in 03-catch-up, not a measurement; no record shows an aircraft refusing a write for want of power (user, 2026-10-12).
-  - A knob turned a detent a frame sends 100, 101, and 102, and the receiving machine's sim reports 100 when 102 is already wanted, so an echo rule that matched only the newest wanted value would send 100 back as the pilot's change (node 4's review, 2026-10-12).
-  - An animation frame we wrote as 165 read back as 165.000002 (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)).
-- **Leaves out:** a write sent before its system has power, such as one right behind the battery switch in catch-up's burst, which is flagged rather than redone; if an aircraft shows it, reruns of a function's run that wrote nothing can come back without changing the format.
+- **Leaves out:** settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, reading client data, and locations for a module's entries, each until a profile or plugin needs it; and how the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, which sync's stage of step 8 settles on a two-instance bench, starting from one attempt per write and one run of a function per value, with the cases [01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write) lists (user, 2026-10-12).
 
 ## Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value
 

@@ -131,27 +131,26 @@ heading_bug:
 ### Write functions
 
 ```yaml
-xpdr_mode:
-  name: Transponder mode
-  watch: L('XPDR_MODE')                       # hypothetical
+fuel_pump_1_1:
+  name: Fuel pump 1-1
+  watch: L('SWITCH_FUEL_PUMP_1_1')
   write: |
     (value) => {
-      if (state.battery_1 === 0) return
-      write(K('SET_XPDR_MODE'), value)        // hypothetical event
+      write(L('SWITCH_FUEL_PUMP_1_1'), value)
+      write(H('FUEL'))
     }
 ```
 
-- A write function takes the value to write.
+The L-1011's fuel pump click flips `L:SWITCH_FUEL_PUMP_1_1` and fires `H:FUEL`, and its flight engineer's script acts only on `H:FUEL` (read in inibuilds-aircraft-l1011 1.0.8, [L-1011 study](../aircraft/inibuilds-l1011/study.md); unverified in the sim).
+
+- A write function takes the value to write, and returns nothing.
   `state`, the state object, is a global, and so are the names and `write()`, so nothing else is passed in.
 - It reads only `state`, never through a name, and one that reads a key the profile doesn't have fails the load.
-- It runs once for each value it's given, and returns nothing.
-  A run that calls no `write()`, such as the transponder's while the battery is off, writes nothing and gets no [check](#checking-a-write), and the function doesn't run again when what it read changes.
 - `write(target)` sends the name's own arguments, and `write(target, value)` sends the value, then the name's arguments.
-- Each `write()` hands the engine one action, and the engine sends a run's actions together, in call order, in the frame after the function returns.
-  So the engine sees every action, as 01-profile-entries' writer required: it marks each one's echo, orders it with the rest of the session, and checks it.
+- Each `write()` hands the engine one action, and the engine sends a run's actions together, in call order, so it sees every action, as 01-profile-entries' writer required.
   Two writes to one variable in one frame landed in the order sent on six aircraft (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)); whether an aircraft's code sees writes to two different targets in the order sent is untested.
 - Only a chain spaces actions out: `write(K('HEADING_BUG_INC')).repeat(steps)` sends the event `steps` times at the aircraft's [pace](#pace), and `.every('2 frames')` sets the spacing for that chain.
-  When a new value arrives for the entry, the engine drops whatever is left of the last run's chain.
+- When the engine runs a function, and what it does with a run that writes nothing, belong to the sync engine ([checking a write](#checking-a-write)).
 
 ### Pace
 
@@ -241,19 +240,22 @@ The IDE fills `write` with the watched name.
 
 ## Checking a write
 
-After a machine writes a state entry, it reads the entry's value in the state object, from its `watch`, every frame.
+How the engine checks that a write landed, how it tells the echo of its own write from a pilot's change, whether it retries, how a stepped write follows a knob that's still moving, and when it runs a write function all belong to the sync engine inside the core, and none of them changes the format.
+They stay open for sync's stage of step 8, to be settled on a two-instance bench in the sim rather than on paper, because each turns on timing: a write shows in a reading within 2 frames, and a readout the aircraft computes can follow 1.2s later, as the Fenix's battery bus and lamp did after a write to its battery switch (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames), and [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
+[02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)'s rules hold until then.
 
-- **Landed:** the write has landed the moment the value matches the value it was asked to write, within float32 precision, because an animation frame we wrote as 165 read back as 165.000002 (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)).
-- **Never landed:** if it hasn't matched 2s after the write's last action, the engine flags the entry, once a flight, as 02-live-sync describes.
-  The 2s, a starting value, counts from the last action, since a paced write of many steps runs longer, and it leaves room for a readout the aircraft computes: on the Fenix, sound variables for the battery bus and a battery lamp followed a write to the battery switch after 1.2s (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
-- **No retries:** a write gets one attempt, whatever its form, so nothing is done twice, and nothing an author writes has to be safe to repeat.
-  Every write that landed in our tests landed on the first try, and the one that didn't, the A220's heading, didn't land after 3 retries either (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
-- **Its own echo:** the engine remembers every value its writes to an entry should produce, and a reading equal to one of them is its own write, which it doesn't send: each value a write set, each value on the way from start to target for `inc` and `dec`, and the target for `toggle`.
-  Any other reading is a pilot's change, and goes out, as [state sync](../product/03-v1-scope.md#state-sync)'s rules require of a change made right after a write.
-  The remembered values expire 2s after the write's last action.
-  A knob turned a detent a frame sends 100, 101, and 102, and the receiving machine's sim reports 100 when 102 is already wanted, so a rule that matched only the newest wanted value would send 100 back as a change.
+The bench starts from two simplifications (user, 2026-10-12):
 
-A write sent before its system has power, such as one right behind the battery switch in catch-up's burst, is flagged rather than redone.
+- A write gets one attempt, with no retry, since every write that landed in our tests landed on the first try, and the one that didn't, the A220's heading, didn't land after 3 retries either (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
+- A write function runs once for each value it's given.
+
+It tests the cases node 4's review traced, each of which broke a rule written on paper:
+
+- A knob turned a detent a frame, sending 100, 101, and 102: the receiving machine reads 100 when 102 is already wanted, so an echo rule that knows only the newest wanted value sends 100 back as a pilot's change, and a stepped write that starts again from a lagging reading overshoots.
+- A pilot turning a knob back within 2s of a write that passed through the same values, whose change an echo rule that remembers those values would swallow, against [state sync](../product/03-v1-scope.md#state-sync)'s rule that such a change goes out.
+- A `toggle` over a lamp that lights after the check gives up, or never lights, where a retry would flip the switch a second time.
+- A write right behind the battery switch in catch-up's burst, before the bus has power, and a write function that checks for power and writes nothing, whose value is lost without a flag unless the engine checks it anyway.
+- A value written as 165 that reads back as 165.000002 (measured on MSFS 2024, 2026-10-02, [avatars log](../avatars/log.md#2026-10-02-writing-a-gsx-persons-animation-frame-makes-it-walk-and-a-seated-one-moves-on-its-own)), so a check compares within float32 precision.
 
 ## The aircraft and its variants
 
@@ -426,12 +428,12 @@ crosscheck-profiles/
 ### Testing an edit
 
 - The author works in a local profiles folder, laid out as the repository is, which the core reads before the published profiles: a profile there overrides the published one for its variants, and its imports resolve there first.
-- The core watches that folder, and when a file is saved, builds the same [bundle](#delivery) CI would, with the same builder code, and the match check shows it as "unpublished".
-  A build that fails a check changes nothing, and the IDE shows the errors.
-- In a test session, the author's core sends each new bundle to the crew over the session's own links, as one message, and every machine reloads the session's profile from it, as when a pilot changes aircraft: each core unloads the profile and its plugin, loads the new bundle, and each cockpit catches up from the flying machine.
-  A crewmate's core needs no folder and no compiler, and runs exactly the author's bytes, so the hashes match.
-- A test session is for switch testing on the ground, not a real flight, so a reload needs no pilot's consent, and the session's pin moves with each reload.
-- How a session becomes a test session, and whether v1 builds the watch-and-reload loop for our own work on the 58P's profile, are for step 8; the Crosscheck IDE, a Soon pick, builds on it, and [04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client) already lists reloading a profile mid-session among the IDE's commands.
+- When it loads a profile from there, the core builds the same [bundle](#delivery) CI would, with the same builder code, and the match check shows it as "unpublished".
+  A crewmate testing with the author puts the same files in their own local folder, and equal hashes prove they run the same copy.
+
+Rapid testing, where the core rebuilds on every save and the author's core sends each new bundle to the crew over the session, which reloads the session's profile on every machine, is a test session (user, 2026-10-12).
+The one-file bundle makes each reload one message, and a crewmate's core runs the author's exact bytes with no folder or compiler of its own.
+Test sessions are for step 8, with the Crosscheck IDE's dev loop, a Soon pick ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client) lists reloading a profile mid-session among the IDE's commands), and node 4's review found three things they need: a reload starts a plugin that was turned off afresh, a reload skips [catch-up's settling window](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session), since the aircraft didn't load again, and the author's core sends the current bundle to a pilot who joins or rejoins, since a test bundle isn't on Pages.
 
 ## Delivery
 
@@ -494,5 +496,4 @@ Each of these waits until a profile or plugin needs it, and adding it takes a ne
 - Where the core reads the version of a streamed Marketplace aircraft, which keeps no `manifest.json` in its folder, the match check's open question ([preflight match check](../product/03-v1-scope.md#preflight-match-check)).
 - Whether the legacy transmit call reaches every aircraft's handlers ([which call sends an event](#which-call-sends-an-event)).
 - Which compiler the core embeds to build a local bundle's plugin, for step 8.
-</content>
-</invoke>
+- How the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, for sync's stage of step 8 ([checking a write](#checking-a-write)).

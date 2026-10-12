@@ -122,7 +122,7 @@ heading_bug:
 
 - An `inc` and `dec` map steps from the local value to the wanted one, `step` at a time, which defaults to 1.
   Both values are the aircraft's own readings, so the steps never ask the control to pass its ends.
-- `wrap` is required in the map: `true` for a control that goes from its top straight back to its bottom, like a heading, and `false` for one that stops.
+- `wrap` is required in the map, except on a counted entry, whose write steps by the count's `wrap` and `range` ([counting](#counting-into-a-shadow-value)): `true` for a control that goes from its top straight back to its bottom, like a heading, and `false` for one that stops.
   With `wrap: true`, `range` is required too, and the engine steps the shorter way round, so a turn from 359 to 0 is one step rather than 359 the other way.
   The load error for a missing `wrap` asks that question, and the IDE fills in `dec`, `wrap`, and `range` once `inc` is typed.
 - An `inc` and `dec` map takes an optional `pace` ([pace](#pace)).
@@ -366,7 +366,7 @@ Errors:
 - A name of the wrong kind for its field, such as a state entry watching a `K:` or `H:` event, an event entry watching an `A:` variable, or `toggle` given an `L:` or `A:` variable.
 - A unit where a name takes none, or no unit on `A()`.
 - A function that fails to type-check on any one variant, such as one that reads a key that variant doesn't have.
-- In a map that steps or counts: no `wrap`; `wrap: true` without `range`; a counting `watch` without `range` or without `default`; or a stepping write on a counted entry that gives its own `wrap` or `range`.
+- In a map that steps or counts: no `wrap`, except in a counted entry's stepping write; `wrap: true` without `range`; a counting `watch` without `range` or without `default`; or a stepping write on a counted entry that gives its own `wrap` or `range`.
   Outside such a map, any `wrap` or `range`.
 - `only`, or a `location` map, naming an unknown variant; `only` or `location` in a module; `only` on a display; a missing module or an import cycle; `value` twice in one name, or in a name that `write()` also gives a value; a pace in any other form than [pace](#pace) gives; a `WasmInstrument|` display in v1; and a `plugin.state` or `plugin.write` name the plugin doesn't register.
 

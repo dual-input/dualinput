@@ -58,7 +58,7 @@ A receiver's own vector clock is its one record of what it has applied, and serv
   - it's a press for a display whose panel hasn't announced itself to the core, as for a display the receiver's aircraft lacks, which FS Copilot's pointer sync drops too (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`);
   - its entry is one the aircraft drives itself ([below](#entries-the-aircraft-drives-itself));
   - it's a change to a PF-owned entry in a replay that a later change to the same entry follows, with only PF-owned changes between them ([the replay](#the-replay)).
-- A machine with no aircraft in a flight, such as a joiner still in the sim's menu, applies nothing from the cockpit stream and holds what arrives until its catch-up ([catch-up](#catch-up)).
+- A machine with no aircraft in a flight, such as a joiner still in the sim's menu, or with an aircraft other than the flying machine's, which keeps its pilot out of the flight ([03-v1-scope](../product/03-v1-scope.md)), applies nothing from the cockpit stream, sends nothing on it, and holds what arrives until its catch-up ([catch-up](#catch-up)).
 
 A message names its entry by name, and each counter by its pilot ID and restart count, which [2.2] measured at 84 bytes for a sample cockpit change against 27 for an entry's index and each pilot's place in the member list (measured on our development machine, 2026-10-10).
 At node 2's assumed 5 to 20 changes a second, that's 285 bytes to 1.1 KB a second more (arithmetic), which buys one encoding that depends on nothing the receiver publishes and holds nothing to rebuild after a reconnect.

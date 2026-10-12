@@ -160,23 +160,27 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The watcher reads what its jobs need from files the core writes
 
-- **Decided:** beside the port file, the core writes what the watcher's jobs need: the date of the pilot's last session, the file changes of each plugin it fetched and checked, and which plugins the pilot lets change files.
-  The watcher reads them, and opens no socket to the core.
+- **Decided:** beside the port file, the core writes what the watcher's jobs need, the date of the pilot's last session.
+  The watcher reads it, and opens no socket to the core.
   Settled in node 1.2 by the user, 2026-10-09, after node 1's walk through a session reopened it.
 - **Because:**
-  - The watcher warns of a waiting update only if the pilot flew lately ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and applies plugins' file changes before the sim boots, which the pilot can turn off ([plugins](../product/03-v1-scope.md#plugins)), while the core, which knows both, may not be running ([01-spine](01-spine.md#components-with-no-session)).
-- **Leaves out:** how recent a last session has to be for the watcher to warn, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) leaves open.
+  - The watcher warns of a waiting update only if the pilot flew lately ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), while the core, which knows when they last flew, may not be running ([01-spine](01-spine.md#components-with-no-session)).
+- **Leaves out:**
+  - how recent a last session has to be for the watcher to warn, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) leaves open
+  - plugins' changes to aircraft files, which the watcher would apply before the sim boots from files the core writes, and which wait with how a plugin changes an aircraft's files ([plugin code runs only in the core](#plugin-code-runs-only-in-the-core))
 
 ## The core keeps the pilot's settings
 
-- **Decided:** the core keeps the pilot's settings in its data folder, such as the take-control binding, the output device, the recording mode, and which plugins may change aircraft files, and reads them when it starts.
+- **Decided:** the core keeps the pilot's settings in its data folder, such as the take-control binding, the output device, and the recording mode, and reads them when it starts.
   The desktop app edits them by command, and decides nothing ([01-spine](01-spine.md#components)); the EFB app offers no setting in v1 ([EFB app](../product/03-v1-scope.md#efb-app)).
   [03-v1-scope](../product/03-v1-scope.md#efb-app)'s settings stay in the desktop app as the place a pilot edits them, and the core keeps their values.
   Settled in node 1.1 by the user, 2026-10-09, after node 1's walk through a session reopened it.
 - **Because:**
   - The desktop app is optional, and a pilot in VR flies with it closed, while the core still needs the bound key ([take-control key](../product/03-v1-scope.md#take-control-key)), plays ATC "on the output device each pilot picks, with no window needed" ([hearing ATC](../product/03-v1-scope.md#hearing-atc)), and records in the mode a setting chooses ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
   - The desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)), so the values the core acts on live with the core rather than in a file of the desktop app's.
-- **Leaves out:** the watcher's own settings, such as whether it starts with Windows, which the watcher keeps ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+- **Leaves out:**
+  - the watcher's own settings, such as whether it starts with Windows, which the watcher keeps ([installing and updating](../product/03-v1-scope.md#installing-and-updating))
+  - which plugins may change aircraft files, which waits with how a plugin changes an aircraft's files ([plugin code runs only in the core](#plugin-code-runs-only-in-the-core))
 
 ## The core writes the WASM module's control slot every 200ms
 
@@ -242,9 +246,9 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 ## Profiles and plugins reach pilots apart from Crosscheck's releases
 
 - **Decided:** profiles and plugins update apart from Crosscheck's releases.
-  They live in one public repository of flat files, and on each merge CI builds each profile into a bundle, one YAML file with its modules merged in and its plugin compiled to JavaScript under a `plugin:` key only the builder writes, checks it, works out its level, and publishes it on GitHub Pages: an index of every published bundle, with the variants it covers, its hash, the date CI published it, and its level, and every bundle under its hash, kept for good.
-  When an aircraft loads, the core fetches the index, takes the newest bundle that covers the loaded aircraft at or below its own level, fetches it by hash, and checks the bytes against the hash; it never rebuilds a published bundle.
-  It pins one bundle, by hash, for a session, and nothing changes mid-session; a pilot whose machine lacks the bundle the session pinned fetches it by its hash.
+  They live in one public repository of flat files, and on each merge CI builds each profile into a bundle, one YAML file with its modules merged in and its plugin compiled to JavaScript under a `plugin:` key only the builder writes, checks it, works out its level, and publishes it on GitHub Pages: an index of every published bundle, with its profile's path, the variants it covers, its hash, the date CI published it, and its level, and every bundle under its hash, kept for good.
+  Each time the core starts, it fetches the index and downloads the newest bundle of each profile at or below its own level that its cache lacks, checking the bytes against the hash; it never rebuilds a published bundle, and it loads every profile from that cache.
+  A session pins one bundle for each aircraft it flies, by hash, and that bundle doesn't change mid-session; a pilot whose machine lacks the pinned bundle fetches it by its hash.
   The format and the plugin API share one level, an integer that each release adding to either raises by 1, and a release runs every bundle at or below its own level.
   Nothing is signed, and a profile carries no version or date of its own.
   For testing, the core builds the same bundle from a local folder, and shows it in the match check as "unpublished".
@@ -256,6 +260,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - The [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares each profile by a hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../product/04-room-for-later.md#profiles)).
   - A plugin published apart from its profile escaped the profile's hash, pin, and level: a merge that changed only the plugin left the hash the same while two pilots ran different plugins, and a plugin needing a newer level could ride beside an older profile (node 4's review, 2026-10-12).
   - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
+  - A cache brought up to date at each start lets the core load a profile at any moment a session needs one, such as a session started with the aircraft already loaded, with no wait on the network, and a session changes no bundle midway anyway (user, 2026-10-12).
   - The repository authors edit is the one CI publishes from, and GitHub Pages "sites have a soft bandwidth limit of 100 GB per month" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).
   - Neither a profile's script nor a plugin reaches the pilot's files or the network ([above](#plugin-code-runs-only-in-the-core)), so a hijacked repository could publish something that spoils flights and nothing more, and a signature would help only with a key kept off GitHub, a manual step in every publish (user, 2026-10-11).
   - A strict loader refuses what it doesn't know: our FS Copilot fork's new `pointer:` key "bricks profile loading on older releases" (FS Copilot fork, `record/pointer-forwarding/docs/11-fsc-implementation-plan.md`, item 6), so a core has to know which version it can run, and a level CI works out asks nothing of authors (user, 2026-10-11).
@@ -594,7 +599,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 - **Decided:** a receiver's vector clock is its one record of what it applied: a message the clock already covers is a copy and drops, the sender's own counter is a message's number, and the heartbeat acknowledges by carrying the clock.
   A message counts as applied once its write is made, its event fired, or its press handed to the display's panel.
-  A receiver skips the messages a change of control drops, presses during its own catch-up or for a display whose panel hasn't announced itself, changes to an entry the aircraft drives itself, and in a replay all but the last of a run of PF-owned changes, each counting as applied, and a machine with no aircraft in a flight holds the stream until its catch-up.
+  A receiver skips the messages a change of control drops, presses during its own catch-up or for a display whose panel hasn't announced itself, changes to an entry the aircraft drives itself, and in a replay all but the last of a run of PF-owned changes, each counting as applied, and a machine with no aircraft in a flight, or with an aircraft other than the flying machine's, holds the stream and sends nothing on it until its catch-up.
   A message names its entry by name and its clock's counters by pilot ID and restart count, and of two changes from one pilot under two restart counts that neither saw, the higher count wins.
   This answers the spine's questions of how the cockpit channel tells a copy from a late message, how a clock names its counters, and how two changes from one pilot under two restart counts are ordered ([01-spine](01-spine.md#left-open)).
   Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
@@ -636,7 +641,7 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Decided:** a profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Crosscheck's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included; a run's plain `write()` calls go out together, in call order, and only a chain spaces them.
   Every entry's `write:` is required, and is a name, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function `(value) => …` that reads the global `state` and returns nothing, or `none` for a watch-only entry.
   A state entry whose value no variable shows counts events into a shadow value starting from `default`, and `wrap`, required, and `range` appear only in a map that steps or counts.
-  An entry's direction is `owner`, `pilot_flying` or `shared` by default; an `aircraft:` header maps variant IDs to SimObjects folders, which entries and seats select with `only`; a profile imports modules by path, and a module carries no `only` or `location`; and profiles and modules live as flat files in one public repository.
+  An entry's direction is `owner`, `pilot_flying` or `shared` by default, and the PF's entries are the engine levers and trim, since the yoke, rudder, and toe brakes travel in the flight model's samples; an `aircraft:` header maps variant IDs to SimObjects folders, or to presets inside one, which entries and seats select with `only`; a profile imports modules by path, and a module carries no `only` or `location`; and profiles and modules live as flat files in one public repository.
   The core, CI, and the IDE run one checker, and a load fails on anything that breaks a rule.
   This gives [01-profile-entries](../sync/01-profile-entries.md) the syntax and file layout that step 7's exit names ([the product plan](../product/plan.md#7-tech-stack-and-architecture)).
   Settled in node 4 by the user, 2026-10-11 and 2026-10-12 ([01-format-and-delivery](../profiles/01-format-and-delivery.md)).
@@ -647,7 +652,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - FS Copilot's format guessed a setter's kind from its characters and fell back silently, emptied a whole profile on one unknown key, and ran a repeated name as two subscriptions (fsc-editor, `docs/fscopilot-behavior.md` and `docs/sim-vars/18-language-core.md`).
   - A required `write`, with `none` for watch-only, turns a forgotten `write` into a load error rather than a silent watch-only entry, and a required `wrap` turns a forgotten one into a load error rather than a heading bug that crosses north by 359 steps the long way (user, 2026-10-12).
   - The first aircraft after the 58P with a control no variable shows would otherwise wait for a Crosscheck release before its profile could be written (user, 2026-10-12).
-- **Leaves out:** settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, reading client data, and locations for a module's entries, each until a profile or plugin needs it; and how the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, which sync's stage of step 8 settles on a two-instance bench, starting from one attempt per write and one run of a function per value, with the cases [01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write) lists (user, 2026-10-12).
+  - The Fenix's A319, A320, and A321 are presets of one folder, `FNX_32X`, and both pilots must fly the same preset (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md#identity)), while FS Copilot keeps only the folder from the path the sim reports (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`), so a folder alone can't tell those variants apart (the root's walk, 2026-10-12).
+- **Leaves out:** whether the core tells which preset loaded from the path the sim reports or from `A:TITLE`, for the core's stage of step 8; settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, reading client data, and locations for a module's entries, each until a profile or plugin needs it; and how the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, which sync's stage of step 8 settles on a two-instance bench, starting from one attempt per write and one run of a function per value, with the cases [01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write) lists (user, 2026-10-12).
 
 ## Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value
 

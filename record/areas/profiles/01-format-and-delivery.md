@@ -9,7 +9,7 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in a public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules and its compiled plugin in it, under its hash.
-When an aircraft loads, the core reads the published index and takes the newest profile it can run, and the session pins that profile by its hash.
+Each time the core starts, it brings its cache up to date from the published index, it loads every profile from that cache, and a session pins one profile for each aircraft by its hash.
 An aircraft's plugin is a TypeScript file beside its profile, and every write it makes goes through `write()` too.
 
 This answers node 4 of the [architecture plan](../architecture/plan.md#4-profiles-and-plugin-delivery).
@@ -178,7 +178,7 @@ That every aircraft acts on an event sent with the legacy call is unverified: FS
 | `location` | No | Where the control is, for the figure's hand |
 
 - With `owner: pilot_flying`, only the flying machine sends the entry, and a following machine puts back its own pilot's change ([04-order-and-recovery](../sync/04-order-and-recovery.md#putting-back)).
-  The PF's entries are the flight controls, toe brakes, engine levers, and trim ([state sync](../product/03-v1-scope.md#state-sync)).
+  A profile's PF-owned entries are the engine levers and trim, and the yoke, rudder, and toe brakes travel in the flight model's samples instead ([01-between-machines](../network/01-between-machines.md#channels)).
   `owner` names a role from the [table of roles](../session/01-roles-and-members.md#the-table-of-roles), so a later crew role with a panel of its own needs no new field.
 - A request, which 04-room-for-later keeps room for as a third direction, becomes a field of its own when ground operations need it.
   A pushback still belongs to the PF; what changes is what happens to another pilot's change, put back in v1 and forwarded to the PF as a request then ([04-room-for-later](../product/04-room-for-later.md#profiles)).
@@ -269,7 +269,21 @@ aircraft:
 
 - `variants` maps a short ID, which `only` and `location` use, to a SimObjects folder, so each folder's name is written once.
   It's a map even with one variant, so adding a second is one more line.
-- The core matches a loaded aircraft by its folder alone, from the path the sim reports when it loads, as FS Copilot does, and compares the folder ignoring case, since one load reported a relative, mixed-case path and then an absolute, lowercase one ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
+- An aircraft built the MSFS 2024 way keeps its variants as presets inside one folder, so a variant can name presets instead, each by its path below `SimObjects\Airplanes\`, written with `/`, and one ID can list several.
+  A bare folder covers every preset in it.
+
+```yaml
+aircraft:
+  variants:
+    a359: [A350/presets/inibuilds/A350-900_Default_Cabin, A350/presets/inibuilds/A350-900_No_Cabin]
+    a35k: [A350/presets/inibuilds/A350-1000_Default_Cabin, A350/presets/inibuilds/A350-1000_No_Cabin]
+```
+
+- The iniBuilds A350's -900 and -1000 are presets of the folder `A350`, and the Fenix's A319, A320, and A321 are presets of `FNX_32X`, whose study says both pilots must fly the same preset (read in inibuilds-aircraft-a350 1.2.6 and fnx-aircraft-320 2.4.0.4720, [A350 study](../aircraft/inibuilds-a350/study.md#identity), [Fenix study](../aircraft/fenix-a320-family/study.md#identity)).
+- The core matches a loaded aircraft by its folder and its preset, from the path the sim reports when it loads, and compares them ignoring case, since one load reported a relative, mixed-case path and then an absolute, lowercase one ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
+  FS Copilot keeps only the folder, the path's segment after `SimObjects\Airplanes\` (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`), though the PA-24's path named its preset too: `pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` (measured on MSFS 2024, 2026-08-18, fsc-editor, [A2A PA-24 study](../aircraft/a2a-pa24-comanche/study.md)).
+  The PA-24 has one preset, so whether the path names the loaded preset on an aircraft with several, and whether `A:TITLE` gives the preset's own title, is the [L-1011 study](../aircraft/inibuilds-l1011/study.md)'s sim question 13; the profile names the preset either way, so which of the two the core reads is for the core's stage of step 8.
+- Two pilots fly together only in the same folder and preset: another aircraft, a different variant included, keeps a pilot out of the flight, while different versions and liveries stop nothing ([03-v1-scope](../product/03-v1-scope.md); user, 2026-10-12).
 - The core finds the package that holds the folder from the same path, for the aircraft's version and the [preflight match check](../product/03-v1-scope.md#preflight-match-check), so a profile names no package.
   One package can hold several aircraft: `bksq-aircraft-baronpro` 0.1.1 holds all three Barons ([Baron study](../aircraft/black-square-baron-pro/study.md#identity)).
 - A profile lists no aircraft versions, because authors would leave the list empty or wrong too often for its warning to mean anything, and the match check still compares the two pilots' aircraft versions with each other.
@@ -442,23 +456,24 @@ On each merge, CI builds every profile into a bundle and publishes static files 
 - **A bundle** is a profile in this same YAML format, with its modules merged in, so it has no `import`, and with its plugin compiled to JavaScript under a `plugin:` key, which only the builder writes.
   It gets one hash, over its bytes, and one [level](#levels), the higher of the profile's and the plugin's.
   A bug report can carry the exact profile and plugin a session ran as one text file.
-- **`index.json`** lists every published bundle with the variants it covers, its hash, the date CI published it, and its level.
+- **`index.json`** lists every published bundle with its profile's path, the variants it covers, its hash, the date CI published it, and its level.
 - **Every bundle** is published under its hash and kept for good.
 
 The core uses them:
 
-1. When an aircraft loads, the core fetches `index.json`, and takes the newest bundle whose variants include the loaded folder and whose level is at or below its own.
-2. It fetches that bundle by its hash, and checks that the bytes match the hash; it never rebuilds a published bundle.
-3. The session pins one bundle by its hash, nothing changes mid-session outside a test session, and a pilot who lacks the pinned bundle fetches it by its hash ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
+1. Each time it starts, the core fetches `index.json` and downloads, for each profile, the newest bundle at or below its own level that its cache lacks, and checks that the bytes match the hash; it never rebuilds a published bundle.
+   The core starts with every sim run ([tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), so a bundle CI publishes reaches a pilot at their next sim start.
+2. It loads a profile from its cache whenever the spine's [what moves them](../architecture/01-spine.md#what-moves-them) says to, such as when a session starts with the aircraft already loaded, so a load never waits on the network.
+3. A session pins one bundle for each aircraft it flies, by its hash, and that bundle doesn't change for the rest of the session outside a test session; a pilot whose cache lacks it fetches it by its hash ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
 4. Offline, the core uses what it has cached.
 
 - **Why Pages:** GitHub Pages "sites have a soft bandwidth limit of 100 GB per month", and a published site "may be no larger than 1 GB" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).
-  FS Copilot's 58P profile, merged but for its five modules, is 59 KB (read on disk, FS Copilot profiles, `profiles/bksq-aircraft-baronpropress.yaml`), so 1,000 pilots fetching a bundle that size 30 times a month would take about 2 GB (arithmetic).
+  FS Copilot's 58P profile, merged but for its five modules, is 59 KB (read on disk, FS Copilot profiles, `profiles/bksq-aircraft-baronpropress.yaml`), and a pilot downloads each bundle once, so 1,000 pilots taking 50 bundles that size, a hypothetical count, take about 3 GB once, and after that only what CI publishes, plus the index at each start (arithmetic).
   Whether Pages answers a repeat fetch of an unchanged `index.json` with "not modified", sending almost nothing, is unverified.
 - **Nothing is signed.** A profile's script can't touch files or the network, and neither can a plugin ([plugins](#plugins)), so a bundle published from a hijacked repository could spoil flights and do nothing more.
   The hash check guarantees that pilots pinned to one bundle run identical bytes.
   If a later plugin needs the pilot's files, signing comes back with it, with a key kept off GitHub, since a key CI holds would sign whatever a hijacked repository asks.
-- The core checks for new versions whenever an aircraft loads, which answers the [spine](../architecture/01-spine.md#left-open)'s question of how often.
+- The core checks for new versions each time it starts, which answers the [spine](../architecture/01-spine.md#left-open)'s question of how often.
 
 A profile carries no version or date of its own: the core computes the hash, and the date is when CI published it, so neither can be forgotten or wrong, and a copy passed around for testing shows as "unpublished".
 
@@ -492,7 +507,8 @@ Each of these waits until a profile or plugin needs it, and adding it takes a ne
 
 ## Left open
 
-- Which pilot's bundle the session pins, when two pilots' cores took different ones, such as when one fetched the index after a merge; that's the session's to decide in step 8.
+- Which pilot's bundle the session pins for an aircraft, when two pilots' cores hold different ones, such as when one pilot's sim started after a merge; that's the session's to decide in step 8.
+- Whether the core tells which preset loaded from the path the sim reports or from `A:TITLE`, for the core's stage of step 8 ([the aircraft and its variants](#the-aircraft-and-its-variants)).
 - Where the core reads the version of a streamed Marketplace aircraft, which keeps no `manifest.json` in its folder, the match check's open question ([preflight match check](../product/03-v1-scope.md#preflight-match-check)).
 - Whether the legacy transmit call reaches every aircraft's handlers ([which call sends an event](#which-call-sends-an-event)).
 - Which compiler the core embeds to build a local bundle's plugin, for step 8.

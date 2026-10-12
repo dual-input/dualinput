@@ -553,10 +553,10 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - The three PCs' counters ran from 13.4 ppm slow to 25.8 ppm fast, so two parted by up to 39 ppm, 3.4s a day (same entry), and an estimate 8s old is off by 0.3ms at that rate (arithmetic).
 - **Leaves out:** the error when a connection's two directions take unequal times, which is half the difference; and easing the offset the following machine applies when it steps, for the flight-model sync ([01-between-machines](../network/01-between-machines.md#clock-offsets)).
 
-## A sim that kept running comes back by replay, and one that closed comes back as a late joiner
+## A cut link comes back by replay, and a sim, core, or PC that went down comes back as a late joiner
 
-- **Decided:** after a cut link, or a core restart with the sim still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that of each run of changes to a PF-owned entry with only PF-owned changes between them, it applies only the last, in its place.
-  A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or in the core's first message, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
+- **Decided:** after a cut link, with the sim and the core still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that of each run of changes to a PF-owned entry with only PF-owned changes between them, it applies only the last, in its place.
+  A pilot whose sim run ends, which their core sees as the sim closes or finds at start after a PC crash, has left the flight: if they were the PF, control passes on, at once or once the crew's first message has passed, the traffic and ATC host's role is released the same way, and the pilot comes back as a late joiner under the same pilot ID, with a catch-up of state and a notice that pages, FMS, and avionics state may differ.
   Each change of control carries its maker's vector clock, a receiver drops the superseded PF's messages made under the value it lost only where that clock doesn't include them, live or in a replay, and every machine that applied one catches up state from the new PF.
   Control can't pass to a pilot while their own replay or catch-up runs over a link that's up, by key, button, or voice; when the PF leaves, it passes anyway, to an up-to-date pilot where there is one.
   This changes node 2's rules that a sim crash passes nothing and that control drops the superseded PF's messages that reach a receiver in a replay, and settles how a replay is paced and how an ex-PF and a crashed PF come back ([architecture plan](plan.md#3-sync-and-the-session)).
@@ -582,18 +582,17 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - The catching-up pilot's changes aren't sent while catch-up runs ([03-catch-up](../sync/03-catch-up.md#while-catch-up-runs)), so a cockpit taken over halfway would differ from the others' with nothing sent to bring them together.
 - **Leaves out:** later steps of the pipeline, which the picks that need them add ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
 
-## A core that restarts rebuilds from its recording
+## A core that crashes comes back as a late joiner
 
-- **Decided:** a core records each cockpit message before it sends it and after it applies it, so its recording is its journal, and the recording's minimal mode keeps the cockpit stream.
-  A core that restarts while its sim keeps running rebuilds from it the state object, each entry's stamp, the vector clock, and the shadow values; takes the whole current state every component in the sim sends a core that connects as live sync takes any report, sending what its pilot changed meanwhile where it may and putting it back where it may not; opens its links once its panels have announced themselves again, or a bound has passed; and gets the rest from the replay.
-  A core that starts and finds its session file's sim run gone counts its pilot as having left the flight.
+- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on and releases the traffic and ATC host's role if they held them, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
+  Because the aircraft didn't reload, each shadow value starts at the flying machine's, and the aircraft counts as settled at once.
+  The recording's minimal mode keeps the cockpit stream, from which catch-up takes its order.
   This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
-  Settled in node 3 by the user, 2026-10-11 ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
+  Settled in node 3 by the user, 2026-10-11, and changed to a late join by the user, 2026-10-12 ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
 - **Because:**
-  - The operating system keeps what a process wrote when the process dies.
-  - fsc-editor's module outlived its app, and an editor that restarted "found the table already walked and heard nothing" (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Verified live: `L:` values in the editor, end to end").
-  - FS Copilot's fix for a restarted peer lived with up to one acknowledgment interval of events applying twice, and a restarted sender's history gone (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03).
-- **Leaves out:** a shadow value whose events its pilot fired while the core was down.
+  - Crosscheck aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and a late join reuses the path a sim crash already takes, where recovering in place needed a journal written before every send, a rebuild of four structures, a comparison with the sim, and a wait for the panels (user, 2026-10-12).
+  - A restarted core's aircraft kept the controls it had, which matched the flying machine's, so the flying machine's shadow values are the nearest to its own.
+- **Leaves out:** a shadow value's turns its pilot made while the core was down; and the presses either pilot made in that window, which are lost.
 
 ## A machine's vector clock is its record of what it applied, and a skipped message counts as applied
 
@@ -626,14 +625,15 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Decided:** each member writes its own entry on the session channel, crew in v1 and passenger later; crew members hold vector clock counters and acknowledge on the heartbeat, and a passenger, on a one-way feed off the crew's links, holds nothing up.
   The table of roles gives each role who may hold it, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.
   The PF is any crew member, and control moves by key or voice to any pilot but one whose own catch-up or replay runs, or when the PF leaves the flight or the session or their sim run ends, to an up-to-date pilot where there is one, the PM in v1; a lost link changes nothing.
-  The traffic and ATC host is one role, which a pilot takes by turning on "Share my traffic and ATC", the first to turn it on holding it and two at once settled by the stamp, and which leaving the session releases.
-  Two rules remove a host's copies: when the session channel stops naming a pilot as host, every machine removes that host's copies, and a copy with no sample for 15s is removed, which covers a lost link, a host out of the flight, and a host whose sim closed.
+  The traffic and ATC host is one role, which a pilot takes by turning on "Share my traffic and ATC", the first to turn it on holding it and two at once settled by the stamp, and which leaving the flight or the session, or a sim that closes, releases.
+  Two rules remove a host's copies: when the session channel stops naming a pilot as host, every machine removes that host's copies, and a copy with no sample for 15s is removed, which covers a lost link.
   This answers [traffic sync](../product/03-v1-scope.md#traffic-sync)'s question of how the host is chosen, and builds the table [04-room-for-later](../product/04-room-for-later.md#roles) asks v1 for.
   Settled in node 3 by the user, 2026-10-11 ([roles and members](../session/01-roles-and-members.md)).
 - **Because:**
   - FS Copilot's build had no taking over, "a toggle is disabled while someone else hosts that feature", removed a host's traffic at once when the host stopped or dropped, withdrew hosting while the host's sim was disconnected, and removed a copy after 15s without a sample (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", rows 2 and 4, and "Key invariants").
   - Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
-  - One rule for every way a host goes quiet costs up to 15s of copies standing still where FS Copilot removed them at once, which the user accepted for the simpler design (user, 2026-10-11).
+  - A crew flies with a friend first and with that friend's traffic second, so a host who leaves the flight takes their traffic along, rather than holding a role for a pilot who may not come back (user, 2026-10-12).
+  - Keeping the role through a lost link costs up to 15s of copies standing still where FS Copilot removed them at once, which the user accepted for the simpler design (user, 2026-10-11).
 - **Leaves out:** which pilot receives control when the PF leaves a crew of more than two, and hosts of their own for traffic and ATC, for the picks that need them.
 
 ## A profile is YAML whose script is JavaScript, where names only name and only `write()` writes

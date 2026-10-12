@@ -6,9 +6,9 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, ../network/
 Decides:     What comes back after a link, a core, a sim, or a PC goes down; how a machine records what it applied, drops copies, and skips messages; catch-up's order and pipeline, and when control can't pass; how a replay is paced; which messages a change of control drops, and who catches up after one; how a core that restarted recovers; how an entry the aircraft drives itself is caught; how a machine puts back a change it may not send; and when an aircraft that loaded before its session counts as settled.
 ```
 
-What comes back depends on whether the sim kept running.
-While it runs, its cockpit keeps everything no profile entry reads, such as a display's page or an FMS, so a returning pilot gets every missed change replayed in order, and loses nothing.
-Once it closes, none of that can be restored, so the pilot comes back as a late joiner, with the profile's entries caught up and the rest as their aircraft loaded (user, 2026-10-11).
+What comes back depends on what went down.
+A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
+A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).
 A few rules for the cockpit stream, its replay, and catch-up hold whatever went down.
 
 This answers node 3 of the [architecture plan](../architecture/plan.md#3-sync-and-the-session) for sync, and [the session's roles and members](../session/01-roles-and-members.md) answers it for the session.
@@ -20,7 +20,7 @@ The control value, the session channel, the heartbeat, and a link's states are [
 | What went down | The sim | What comes back |
 | --- | --- | --- |
 | A link, cut for less than 30 minutes | Kept running | A replay of every change the pilot missed, in order ([the replay](#the-replay)) |
-| The core | Kept running | Its state rebuilt from its recording, what its pilot changed meanwhile, then the replay ([a core that restarts](#a-core-that-restarts)) |
+| The core | Kept running | A late join ([a core that restarts](#a-core-that-restarts)) |
 | The sim, by a crash or by the pilot closing it | Closed | A late join ([a sim that closed](#a-sim-that-closed)) |
 | The PC | Closed | A late join |
 
@@ -35,8 +35,9 @@ So a pilot whose sim run has ended has left the flight, and comes back as a late
 Their core learns the run ended in one of two ways: it watches the sim close, by a crash or by the pilot closing it, or it starts after a PC crash and finds that the run its session file names is gone ([01-spine](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts)).
 Either way:
 
-- If they were the PF, their core passes control on, at once if it watched the sim close, as for a PF who goes to the main menu ([the connection](../product/03-v1-scope.md#the-connection)), and in its first message on each new connection if it found the run gone, so a PF back from a PC crash never returns holding control.
+- If they were the PF, their core passes control on, at once if it watched the sim close, as for a PF who goes to the main menu ([the connection](../product/03-v1-scope.md#the-connection)), and once the crew's first message has passed if it found the run gone, since only then does it know the current control value, so a PF back from a PC crash never returns holding control.
   In v1 control passes to the PM, and with more crew to a pilot whose cockpit is up to date where there is one ([roles and members](../session/01-roles-and-members.md#the-pf)).
+- If they held the traffic and ATC host's role, their core releases it the same way ([roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)).
 - The crew's notice says their sim closed, or crashed once the core can tell the two apart, which is open for sim awareness ([01-spine](../architecture/01-spine.md#left-open)).
 - Once they're in a flight again, their core rejoins them under the same pilot ID, with no code to type, and their cockpit catches up state from the flying machine ([catch-up](#catch-up)).
 - They're told that their displays' pages, their FMS, and anything else the profile can't read may differ from the PF's.
@@ -65,7 +66,7 @@ At node 2's assumed 5 to 20 changes a second, that's 285 bytes to 1.1 KB a secon
 Only members who send cockpit messages have counters, so a passenger never appears in one ([04-room-for-later](../product/04-room-for-later.md#people-beyond-the-crew)).
 
 [The conflict rule](02-live-sync.md#when-two-pilots-change-one-entry) gains one tie-break: of two changes from one pilot under two restart counts, neither made after its sender saw the other, the higher restart count wins, since it's the later.
-That happens only after a PC crash, because a core that restarts while its PC runs carries its clock on from its recording ([a core that restarts](#a-core-that-restarts)).
+That happens only after a crash of the core or the PC ([a core that restarts](#a-core-that-restarts)).
 
 ## Catch-up
 
@@ -113,20 +114,16 @@ Every machine that applied a message the change drops catches up state from the 
 
 ## A core that restarts
 
-A core that restarts while its sim keeps running, such as after a crash of its own, rebuilds from its recording, which is its journal:
+A core that crashes while its sim keeps running comes back as a [sim that closed](#a-sim-that-closed) does: the watcher restarts it, it counts its pilot as having left the flight, passes control on and releases the host's role if they held them, and rejoins its pilot as a late joiner, whose catch-up starts at once, since the sim is still in the flight.
+Crosscheck aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and the crew's notice asks for a bug report (user, 2026-10-12).
 
-1. While it runs, the core records each message before it sends it, and each message after it applies it.
-   The operating system keeps what the core wrote when the core's process dies.
-2. On a start with a session file whose run of the sim is still running ([01-spine](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts)), it rebuilds four things the sync engine held in memory: the state object, each entry's stamp, the vector clock, and the shadow values.
-   The two others it lost need no rebuilding: a message it held back for a predecessor wasn't applied, so its clock doesn't cover it and the replay sends it again; and an echo token waits for a report the sim sends within frames of the write, long before a restarted core listens again.
-3. Every component in the sim sends a core that connects its whole current state, and the core takes it as live sync takes any report: a value Crosscheck didn't write is a change its pilot made while the core was down, which the core sends if it may and [puts back](#putting-back) if it may not, so a following machine's levers return to the PF's.
-   fsc-editor's module outlived its app, and an editor that restarted "found the table already walked and heard nothing" (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Verified live: `L:` values in the editor, end to end").
-4. Once every panel its recording shows had announced itself before the restart has announced again, or a bound the panel bridge's stage of step 8 sets has passed, it opens its links under its raised restart count, so no replayed press finds its panel not yet back, and the replay brings each side what it lacks, the core's own unacknowledged messages included ([01-between-machines](../network/01-between-machines.md#coming-back)).
+Two things differ from a late join after a load, because the aircraft didn't reload:
 
-- On a following machine, our WASM module unfreezes the aircraft once the core has been quiet for 1s, as the spine designs it after FS Copilot's module ([01-spine](../architecture/01-spine.md#what-moves-them)), and the core freezes it again and writes the flying machine's next sample when it comes back.
-- A core keeps no cockpit message only in memory, so a restart loses none that it kept for another member's replay, and the replay has no gap from one ([01-between-machines](../network/01-between-machines.md#coming-back)).
-  A PC that crashes can lose what its operating system hadn't yet written, but its pilot comes back as a late joiner, and the others still hold every message that pilot hadn't acknowledged.
-- The recording's minimal mode still records the cockpit stream, since the journal is the recording ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
+- Each shadow value starts at the flying machine's, since the core lost its own, and the aircraft's controls stayed where they were, matching the flying machine's, rather than going back to `default` ([01-profile-entries](01-profile-entries.md#keeping-a-shadow-value)).
+- The aircraft counts as settled at once, since the core missed Ready to fly, and nothing restores itself in an aircraft that didn't load.
+
+A PF whose core crashes loses control, and their aircraft then follows the new PF's, so it jumps back by the seconds the core was down; presses either pilot made in that window are lost (user, 2026-10-12).
+The recording's minimal mode still records the cockpit stream, because catch-up takes its order from the flying machine's recording ([catch-up](#catch-up); [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 
 ## Entries the aircraft drives itself
 
@@ -166,7 +163,7 @@ None needs the cockpit's causal order, since none acts on a page another change 
 
 ## Known limits
 
-- After a core restart, a shadow value misses the events its pilot fired while the core was down, so it's right only if they didn't touch that control meanwhile ([01-profile-entries](01-profile-entries.md#keeping-a-shadow-value)).
+- After a core restart, each shadow value takes the flying machine's, so it's right only if its pilot didn't touch that control while the core was down ([01-profile-entries](01-profile-entries.md#keeping-a-shadow-value)).
 - After a sim closes, a pilot's pages, FMS, and avionics state come back as their aircraft loaded, and the notice says so.
 - A PF-owned entry the aircraft drives itself isn't caught at runtime, only by its author in the IDE.
 

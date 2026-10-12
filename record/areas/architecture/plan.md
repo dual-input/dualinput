@@ -449,6 +449,7 @@ Its answer goes in two new design docs: `record/areas/sync/04-order-and-recovery
 Exit: the user agrees to the answer in those documents.
 Waits on 2.
 Reopened on 2026-10-12, by the root's walk through a session ([how the tree grows](#how-the-tree-grows)), which found that a machine in an aircraft other than the flying machine's would apply and send changes to entries the other aircraft lacks, and stall the cockpit stream behind one it can't apply ([03-v1-scope](../product/03-v1-scope.md)).
+Reopened on 2026-10-12, by a walk of its answer through real scenarios with the user, which found that a traffic and ATC host out of the flight kept the role from the crew, that a core restarted after a PC crash passed control before it could know the current control value, and, zooming out, that recovering a crashed core in place cost more than a late join ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
 Done on 2026-10-12.
 Raised elsewhere: by 1.4, how a core that restarted while the sim kept running recovers what it lost and gets its pilot's lost changes to the others, how the cockpit channel tells a copy from a late message, and how the conflict rule orders two changes from one pilot under two restart counts ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, whether a vector clock names each counter by its pilot's ID and restart count or by a place in the member list, and how a place would name a restart count ([01-spine](01-spine.md#left-open)).

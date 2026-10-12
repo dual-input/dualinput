@@ -30,7 +30,7 @@ Each member writes its own entry on the session channel: its pilot ID, display n
 | Role | Who may hold it | How it moves | Its holder loses the link | Its holder leaves the flight, or their sim closes | Its holder leaves the session |
 | --- | --- | --- | --- | --- | --- |
 | PF | Any crew member | [Below](#the-pf) | Nothing changes | Control passes on at once | Control passes on first |
-| Traffic and ATC host | Any crew member | [Below](#the-traffic-and-atc-host) | Nothing changes | Nothing changes | The role is released |
+| Traffic and ATC host | Any crew member | [Below](#the-traffic-and-atc-host) | Nothing changes | The role is released | The role is released |
 
 ### The PF
 
@@ -51,12 +51,16 @@ Each member writes its own entry on the session channel: its pilot ID, display n
   Two pilots who turn it on at once are settled by the session channel's stamp, and the switch of the one who lost goes back off ([channels](../network/01-between-machines.md#channels)).
   FS Copilot's build worked the same way, with no taking over: "a toggle is disabled while someone else hosts that feature" (same document, same section, row 2).
   Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which [traffic sync](../product/03-v1-scope.md#traffic-sync)'s open questions leave unknown.
+- Leaving the flight, or a sim that closes, releases the role too, as leaving the session does (user, 2026-10-12).
+  A crew flies with a friend first and with that friend's traffic second, so losing the traffic along with the friend costs less than a role kept for a pilot who may not come back.
+  After a sim crash, the host's core writes the release, and after a crash of the core or the PC, the restarted core writes it once the crew's first message has passed ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
+  Hosting doesn't resume on its own: once the pilot is back in the flight, any pilot can turn the switch on, the returning one included.
 - A receiver keeps the host's set of identities, and spawns each object it lacks whenever its sim is in a flight ([channels](../network/01-between-machines.md#channels)).
   Two rules remove copies, and cover every way a host stops (user, 2026-10-11):
-  - When the session channel stops naming a pilot as host, because they released the role, left the session, or handed it on, every machine removes that host's copies, the new host's included, as FS Copilot removed a host's traffic once the host stopped (same document, "Decisions locked with the user (2026-09-06)", row 4).
+  - When the session channel stops naming a pilot as host, because they released the role, left the flight or the session, their sim closed, or they handed the role on, every machine removes that host's copies, the new host's included, as FS Copilot removed a host's traffic once the host stopped (same document, "Decisions locked with the user (2026-09-06)", row 4).
   - A copy with no sample for 15s is removed, as FS Copilot's receiver removed one (same document, "Key invariants").
-    That covers a lost link, a host out of the flight, and a host whose sim closed, which keep the role while their copies on the other machines stand still for up to 15s and go; their objects come back when samples do.
-- FS Copilot removed a dropped host's traffic at once rather than after a timeout, and 15s of copies standing still is the cost of one rule for every way a host goes quiet.
+    That covers a lost link, which leaves the host in the flight and the role theirs, while their copies on the other machines stand still for up to 15s and go; their objects come back when samples do.
+- FS Copilot removed a dropped host's traffic at once rather than after a timeout, and 15s of copies standing still is the cost of keeping the role through a link that may come back in seconds.
 - When the role passes to a new host, the old host stops sending ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
 
 ## Roles after v1

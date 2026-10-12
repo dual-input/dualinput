@@ -29,7 +29,7 @@ Each member writes its own entry on the session channel: its pilot ID, display n
 
 | Role | Who may hold it | How it moves | Its holder loses the link | Its holder leaves the flight, or their sim closes | Its holder leaves the session |
 | --- | --- | --- | --- | --- | --- |
-| PF | Any crew member | [Below](#the-pf) | Nothing changes | Control passes on at once | Control passes on first |
+| PF | Any crew member | [Below](#the-pf) | Nothing changes | Control passes on, as soon as their core knows | Control passes on first |
 | Traffic and ATC host | Any crew member | [Below](#the-traffic-and-atc-host) | Nothing changes | Nothing changes | The role is released |
 
 ### The PF

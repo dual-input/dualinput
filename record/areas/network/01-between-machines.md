@@ -232,7 +232,7 @@ Everything else that must arrive is state: the session channel and traffic's ide
 Control is one value: a generation and the PF's pilot ID.
 Every change of PF raises the generation to one past the highest its maker has seen: the take-control key, a handover by voice, a PF leaving the flight, and a takeover while a link is lost or after a sim crash.
 Of two changes with the same generation, the one naming the lower pilot ID wins, so every machine compares the same two numbers and reaches the same answer, where comparing the moments of two presses through each machine's own clock estimate could order them differently on two machines.
-This replaces both [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the earlier press wins, however small the gap, and the rule that the later take-control wins after an outage: two presses within one round trip of each other are settled by pilot ID, which no pilot can notice (user, 2026-10-11).
+This replaces [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the earlier press wins, however small the gap: two presses within one round trip of each other are settled by pilot ID, which no pilot can notice (user, 2026-10-11).
 Who may change control, and when, is the table of roles that [node 3](../architecture/plan.md#3-sync-and-the-session) designs; this design says how the value travels.
 
 The value rides the session channel as one key, so a new connection's first message carries it, and a receiver applies nothing else from that connection until the first message has passed ([joining](#joining)).

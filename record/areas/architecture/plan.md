@@ -529,6 +529,7 @@ It reads 04-room-for-later, the [channels](../network/01-between-machines.md#cha
 Its answer goes in its own section of `02-code-map.md`.
 Exit: the user agrees to that section.
 Waits on 5.1.1.
+Done on 2026-10-14.
 
 ## 5.1.1 How hosts run and extend themselves
 

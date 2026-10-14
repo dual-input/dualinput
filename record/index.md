@@ -75,6 +75,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.
 - [areas/architecture/plan.md](areas/architecture/plan.md): how we design Crosscheck's v1 architecture, as a tree of questions that goes a level deeper only when the work shows a need, and where each question stands.
 - [areas/architecture/01-spine.md](areas/architecture/01-spine.md): the spine every other part of Crosscheck rests on, one section for each child of the architecture plan's node 1.
+- [areas/architecture/map.html](areas/architecture/map.html): v1's whole architecture on one page to open in a browser, drawn from decisions 001 to 046 on 2026-10-14: a clickable map of the components, the systems, each component's lifecycle, the links and channels, and one change traced end to end.
 - [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes settled, and on what findings, each numbered as one of decisions 002 to 046.
 - [areas/architecture/log.md](areas/architecture/log.md): what our experiments found for the architecture plan's nodes.
 - [areas/architecture/coherent-gt.md](areas/architecture/coherent-gt.md): the syntax, built-ins, and web APIs Coherent GT has, as measured, which our code in the sim keeps within.

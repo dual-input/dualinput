@@ -507,7 +507,7 @@ Three tests stand in for a definition of clean, because a definition in prose in
 
 A system is the units one design doc designs, in one area, and [node 6](#6-systems) designs each system.
 A feature's messages stay in the one message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), so deleting a feature also deletes its module there (user, 2026-10-14).
-Each contract is defined once, and linked or generated wherever it's used, because every hand-kept copy in our earlier work bred bugs.
+Each contract is defined once, and linked or generated wherever it's used, because a hand-kept copy in our earlier work bred bugs.
 fsc-editor's Trace copied eight of FS Copilot's C# functions into TypeScript, and of the bugs in its first cut, "All three were found by re-reading, not by any check" (fsc-editor, `docs/help/trace-panel.md`, "The problem, stated honestly").
 An IDE that links the sync engine runs the core's own code instead.
 It reads the spine, decisions 001 to 046, the design docs in the [network](../network/01-between-machines.md), [sync](../sync/01-profile-entries.md), [session](../session/01-roles-and-members.md), and [profiles](../profiles/01-format-and-delivery.md) areas, [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), and the [avatars' tentative decisions](../avatars/decisions.md).

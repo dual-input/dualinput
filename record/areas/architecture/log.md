@@ -29,7 +29,7 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
   Bevy registers a plugin through `Plugin::build(&mut App)`, but "systems run in parallel by default whenever possible", and a message race is possible "If no ordering is applied" (documented, [Bevy 0.20.0](https://docs.rs/bevy/0.20.0/bevy/app/trait.Plugin.html), [quick start](https://bevy.org/learn/quick-start/getting-started/ecs/), [Messages](https://docs.rs/bevy/latest/bevy/ecs/message/struct.Messages.html)).
   VS Code's activation events and contribution points match a plugin that loads with its profile and a profile block (documented, [activation events](https://code.visualstudio.com/api/references/activation-events), [contribution points](https://code.visualstudio.com/api/references/contribution-points)).
 - **What breaks a replay on our stack.**
-  - QuickJS-ng reads the wall clock when it makes a context, seeding `Math.random` and its hash seed (read in rquickjs-sys 0.14.0, `quickjs/quickjs.c`, `JS_NewContextRaw`; checked), and again in `Date.now` (same file, `js_Date_now`; checked).
+  - QuickJS-ng reads the wall clock when it makes a context, seeding `Math.random` and its hash seed (read in rquickjs-sys 0.14.0, `quickjs/quickjs.c`, `JS_NewContextRaw`; checked), and again in `Date.now` (same file, `js_Date_now`; checked), in `new Date()` and `Date()` (same file, `js_date_constructor`; checked), and in `performance.now` (same file, `js_perf_now`; checked).
     Our 100ms limit runs on the clock too, while QuickJS-ng calls the interrupt handler once every 10,000 ticks of its own counter (same file, `JS_INTERRUPT_COUNTER_INIT`; checked).
   - A `HashMap`'s iteration order is randomly seeded (documented, [std](https://doc.rust-lang.org/std/collections/struct.HashMap.html)).
   - The x64 Universal C Runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" (documented, [`_set_FMA3_enable`](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-fma3-enable-set-fma3-enable)); whether Rust's `f64` functions reach it on our target is unverified.
@@ -45,7 +45,8 @@ Its costs come with it:
 
 - A multi-step flow, such as catch-up, is a state machine written out, not an `async` function.
 - A slow handler delays every input behind it: at 89 sim updates a second, one plugin call at its 100ms limit holds back about 9 updates, in order, none lost (arithmetic).
-- The loop's crates keep rules that clippy's [`disallowed_methods`](https://rust-lang.github.io/rust-clippy/master/index.html#disallowed_methods) can enforce: no iterating a `HashMap`, no `Instant::now`, no random number generator the operating system seeds, no threads, and no `.await`.
+- The loop's crates keep these rules: no iterating a `HashMap`, no `Instant::now`, no random number generator the operating system seeds, no threads, and no `.await`.
+  Clippy's [`disallowed_methods`](https://rust-lang.github.io/rust-clippy/master/index.html#disallowed_methods) fails a build that calls a listed function, and its `iter_over_hash_type` one that loops over a `HashMap`, but no lint catches `.await` or I/O, so keeping tokio and every crate that does I/O out of the loop's crates is what stops them.
 - QuickJS-ng's `Math.random` and `Date.now` become host functions on the loop's time and a recorded seed, and its time limit becomes a count of interrupt calls, recorded where it fired.
 
 **Affects:** node 5.1 of the [architecture plan](plan.md#51-the-hosts-interface); and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)' open question of how big a flight's recording is, since the loop's inputs are what a recording would keep.

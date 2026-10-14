@@ -7,7 +7,8 @@ Decides:     The member list and its kinds, the table of roles and v1's two, who
 ```
 
 > **Note**
-> Since 2026-10-14, traffic and ATC audio each hold a role of their own, the traffic host and the ATC host, and the "Share my traffic and ATC" switch claims both, where [the traffic and ATC host](#the-traffic-and-atc-host) below gives them one role that can split ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)).
+> Since 2026-10-14, a role is a session key a feature declares, which names its holder and which the host clears of a member who leaves the session, and who may hold it is a guard on writing the key, so [the table of roles](#the-table-of-roles) below documents the session's roles, and the code keeps no registry of them ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
+> Traffic and ATC audio each hold a role of their own, the traffic host and the ATC host, which one request from the "Share my traffic and ATC" switch claims together, where [the traffic and ATC host](#the-traffic-and-atc-host) below gives them one role that can split ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)).
 
 A session's members are listed on the session channel, each by an entry it writes itself.
 Its roles are one table, each row saying who may hold the role, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.

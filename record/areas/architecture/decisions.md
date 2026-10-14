@@ -779,50 +779,79 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 5 by the user, 2026-10-14 ([02-code-map](02-code-map.md#tiers)).
 - **Because:**
   - The user wants each system clean, "almost like you could take it out of the project", with confidence in it before any product code, and without a definition in prose that agents would enforce where it doesn't fit (user, 2026-10-14).
-  - Every hand-kept copy of a contract in our earlier work bred bugs: fsc-editor's Trace copied eight of FS Copilot's C# functions into TypeScript, and of the bugs in its first cut, "All three were found by re-reading, not by any check" (fsc-editor, `docs/help/trace-panel.md`, "The problem, stated honestly").
+  - A hand-kept copy of a contract bred bugs in fsc-editor's Trace, which copied eight of FS Copilot's C# functions into TypeScript, and of the bugs in its first cut, "All three were found by re-reading, not by any check" (fsc-editor, `docs/help/trace-panel.md`, "The problem, stated honestly").
+    fsc-editor's module keeps its wire format in TypeScript and in C++, and "nothing but `src/main/sim/link.test.ts` notices when the two" drift (read in fsc-editor, `link/README.md`).
     An engine that the core and the IDE both link leaves nothing to copy.
   - The core, CI, and the IDE already run one checker for profiles ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), and CI and the IDE check a profile without the core.
 - **Leaves out:** the units themselves, which the code map names as node 5's children settle.
 
 ## The core runs as one loop that takes every input, stamped, from one recorded queue
 
-- **Decided:** one thread owns the host's services, every feature's state, and the QuickJS-ng runtimes, and handles one input at a time from one queue, which edge tasks for SimConnect, tokio's sockets and timers, the helper's pipe, and a pool for slow work fill, stamping each input as they queue it.
+- **Decided:** one thread owns the host's services, every feature's state, and the QuickJS-ng runtimes, and handles one input at a time from one queue, which edge tasks for SimConnect, tokio's sockets and timers, the helper's pipe, and a pool for slow work fill, each stamping an input as it pushes it.
+  Everything the loop reads from disk, the settings, the session file, and the profile's bundle, arrives as an input.
   Handlers are synchronous, read no clock, do no I/O, and iterate no `HashMap`; time arrives with each input, and timers and slow work leave as outputs and come back as inputs.
-  The host records the queue under a header that names the build, the profile's hash, and the seed, so the same build replays a whole run.
+  A profile's script and a plugin get no clock: their QuickJS-ng contexts leave out `Date`, `performance`, and `Math.random`, and one that has to wait asks the host for a timer; the 100ms limit stays by the clock, and the recording keeps the count of interrupt calls at which it fired.
+  The host records the queue under a header that names the build and a seed, so the same build replays a whole run, and only that build reads it as a replay; what a later version reads from a recording is a separate, self-describing record with named fields.
   Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#one-loop)).
 - **Because:**
   - Sans-IO cores, LMAX, and TigerBeetle run this way, game studios replayed matches from recorded inputs to reproduce bugs, while actors leave the order between features to the scheduler and simulation runtimes replay a seeded world, not a pilot's run ([architecture log, 5.1.1][a511]).
   - A bug report's recording then reproduces a bug in the core on our own PC, which the user found "super appealing" (user, 2026-10-14).
+  - QuickJS-ng reads the wall clock in `Date`, `performance.now`, and the seed of `Math.random` (read in rquickjs-sys 0.14.0, `quickjs/quickjs.c`, `js_date_constructor`, `js_perf_now`, and `JS_NewContextRaw`), and neither a profile nor a plugin needs the time (user, 2026-10-14).
+  - A replay needs its own build anyway, so the replay log needs no rules for being read across versions, while the report page, the debrief timeline, and plugin tests do, and names survive a field added later where postcard's positions don't (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`).
 - **Leaves out:**
-  - how much of the queue the recording keeps, and for how long, for node 6's design of recording
+  - whether a recording replays on a PC with another CPU, since Windows' C runtime picks its FMA3 math by CPU ([architecture log, 5.1.1][a511]), which replaying a recording on two PCs settles
+  - how much of the queue the recording keeps, and the self-describing record, for node 6's design of recording
   - whether one loop meets its budgets, for node 7's bench
 
 ## A feature reaches other features only through the host, and blocks a request only through a guard
 
-- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the moments it handles, its session keys, roles, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notices, items for the match check, and the helper's input and audio it needs.
-  A handler writes only its own feature's state, reads the host's, and acts through an outbox, asking the host for any change to the host's state.
-  Features reach each other only through moments the host raises.
-  A feature that can block a request the host decides, such as taking control or claiming a role, registers a guard, a quick check that allows the request or denies it with a reason, and any denial refuses it; the host's own rules are guards it registers on itself, and a pass the host makes itself, such as when the PF leaves the flight, isn't a request.
+- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the host's moments it handles, its session keys, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notices, items for the match check, and the helper's input and audio it needs.
+  A handler writes only its own feature's state, reads the host's, and acts through an outbox, asking the host for any change to the host's state, which the host decides before the next input.
+  Features reach each other only through moments the host raises, and no feature raises one of its own.
+  A feature that can block a request the host decides, such as taking control or claiming a role's key, registers a guard, a quick check that allows the request or denies it with a reason, and any denial refuses it.
+  The host asks every guard after every input and keeps each request's verdict, which the apps show and a request takes; its own rules are guards it registers on itself; and a pass the host makes itself, such as when the PF leaves the flight, isn't a request.
   Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#what-a-feature-registers)).
 - **Because:**
   - Deleting a feature has to leave every other feature whole, and a feature that called another, or that the host checked by name, would break that.
     FS Copilot wired its features together by constructor injection, with `TrafficHost` and `AtcHost` built after `Coordinator` (read in the FS Copilot fork, `FsCopilot/Program.cs`).
-  - A guard lets a later feature, such as a hypothetical one that lets only an instructor take control, block a request without the host knowing it exists, and a denial's reason is what the apps show beside the button.
+  - A moment one feature raised for another would have its type either in the raising feature's crate, which the handling feature would then depend on, or in the host's, which would keep it after the raising feature is deleted (node 5.1's review, 2026-10-14).
+  - A guard lets a later feature, such as a hypothetical one that lets only an instructor take control, block a request without the host knowing it exists.
+    Only the host can ask every guard, so only the host can say why not before a pilot presses the button, as [04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up) asks (node 5.1's review, 2026-10-14).
 - **Leaves out:** which hooks plugins reach through QuickJS-ng, for node 6's design of plugins, once the features they may plug into are designed (user, 2026-10-14).
 
-## Every ID that's stored or crosses between versions is a number assigned once
+## A role is a session key that names its holder
 
-- **Decided:** the kinds of message on the cockpit stream, channels, session keys, roles, the apps' commands, and the kinds of input in the recording are each named by a number the message crate assigns once and never reuses, and a deleted feature's numbers stay retired; settings are named keys, never reused either.
-  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#ids)).
-- **Because:** postcard writes an enum's variant as its position (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`), so a variant deleted with its feature would shift every one after it, and a recording that a later version reads would be misread.
-- **Leaves out:** which crate holds the numbers, for node 5.4.
+- **Decided:** a role a feature holds is one of its session keys, whose value names the member who holds it and which the host clears of a member who leaves the session; who may hold a role, where a later role limits it, is a guard on writing its key.
+  The table of roles stays in [roles and members](../session/01-roles-and-members.md#the-table-of-roles) as the session's documentation, and the code holds no registry of roles.
+  This changes [decision 044](../../decisions/044-table-of-roles.md), and [04-room-for-later](../product/04-room-for-later.md#roles)'s "one table of roles" that v1 builds, once step 8's decisions are numbered.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#what-a-feature-registers)).
+- **Because:** each column of v1's rows for the traffic host and the ATC host is what a session key already does: any crew member writes it, the session channel's stamp settles two writes at once, it keeps its value through a lost link or a flight left, and it's cleared when its holder leaves the session ([01-between-machines](../network/01-between-machines.md#channels); node 5.1's review, 2026-10-14).
+  A later flight engineer, whom control never passes to by request, is a guard on taking control, and the PF stays the host's control value.
 
-## Traffic and ATC audio each hold a role, and one switch claims both
+## Traffic and ATC audio each hold a role, and one request claims both
 
-- **Decided:** traffic registers the traffic host and ATC audio the ATC host, as two roles, and the apps' "Share my traffic and ATC" switch sends one command that claims both, writing both roles' keys in one message on the session channel.
-  This changes [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), which gives the two one role that can split, and [decision 044](../../decisions/044-table-of-roles.md) once step 8's decisions are numbered.
+- **Decided:** traffic declares the traffic host's key and ATC audio the ATC host's, and the host offers one request that claims several keys together, refused whole if any guard denies one.
+  The apps' "Share my traffic and ATC" switch sends it with both keys, and shows on while the pilot holds both, so the host never knows what either key is for.
+  This changes [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), which gives the two one role that can split.
   Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#the-traffic-and-atc-switch)).
-- **Because:** with one shared role, deleting traffic would take ATC's role with it, while with two, deleting traffic leaves the switch claiming ATC alone.
+- **Because:**
+  - With one shared role, deleting traffic would take ATC's role with it, while with two, deleting traffic leaves the switch claiming ATC alone, and the apps lose traffic's key from the switch as they lose any deleted feature's section.
+  - A command that traffic or ATC audio owned would go with its feature, or reach the other feature's key, and a command the host owned would make the host know both features (node 5.1's review, 2026-10-14).
+
+## A feature whose messages keep the cockpit's order registers cockpit stream kinds, not a channel
+
+- **Decided:** a feature whose messages must apply in order with the cockpit's, such as a later bus bridge carrying a message that opens a page, registers kinds on the cockpit stream, so no channel declares a place in the cockpit's order and a cockpit message carries one tag, its kind.
+  This changes [decision 035](../../decisions/035-channels-declare-how-they-travel.md) once step 8's decisions are numbered.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#what-a-feature-registers)).
+- **Because:** a channel that joined the cockpit's order rode the cockpit stream anyway, tagged with its channel beside its kind ([01-between-machines](../network/01-between-machines.md#channels)), so the replay, catch-up, pacing, and drops on a change of control already reached it as a kind (node 5.1's review, 2026-10-14).
+
+## A write function that hits its limit stops its entry syncing for the rest of the load
+
+- **Decided:** a write function that hits its 64 MB or 100ms limit fails that write, and its entry stops syncing on every machine for the rest of the load, flagged as a write that never lands is, as a plugin at its limit is turned off.
+  This changes [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), under which a write function at a limit fails only that write, once step 8's decisions are numbered.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#budgets)).
+- **Because:** on one loop, a stuck call holds up every input behind it.
+  A write function that loops forever on a knob the PF turns would take 100ms for each of up to 20 values a second, so within 1s the PM's WASM module would stop hearing from the core and unfreeze the aircraft, and within 5s the link would count as lost (node 5.1's review, 2026-10-14; [04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream); [01-between-machines](../network/01-between-machines.md#the-link-between-two-cores)).
 
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast

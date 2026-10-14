@@ -6,6 +6,9 @@ Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-
 Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what a plugin can reach; what fails a load; the sandbox's limits; and how profiles and plugins reach pilots, with the level of the format each needs.
 ```
 
+> **Note**
+> Since 2026-10-14, a write function that hits a limit in [the sandbox](#the-sandbox) also stops its entry syncing on every machine for the rest of the load, as a plugin at its limit is turned off, because the core runs its features on one loop, where a stuck call holds up every input behind it; and a profile's script and a plugin get no clock, their runtimes leaving out `Date`, `performance`, and `Math.random`, so one that has to wait asks the host for a timer ([02-code-map](../architecture/02-code-map.md#budgets)).
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in a public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules and its compiled plugin in it, under its hash.

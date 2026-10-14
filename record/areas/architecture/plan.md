@@ -542,6 +542,7 @@ It judges each on registering at compile time, deleting an extension, replaying 
 It reads the spine's [the core](01-spine.md#the-core), [decision 027](../../decisions/027-core-runs-on-tokio.md), and 5.1's question.
 Its answer goes in an entry in this area's log, which 5.1's section of `02-code-map.md` cites.
 Exit: a log entry in this area answers the question.
+Done on 2026-10-14.
 
 ## 5.2 The sim seam
 

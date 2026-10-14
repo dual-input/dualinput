@@ -3,6 +3,55 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-14: A core replays a whole run when one ordered loop owns its state and takes every input stamped through one queue, as sans-IO cores, LMAX, and TigerBeetle run, and neither actors nor simulation runtimes can replay a run from a pilot's PC
+
+**Asked:** how do current designs run an app's core and its extensions, on one ordered loop or as concurrent tasks, so that deleting an extension leaves the rest whole, a run replays exactly from its recorded inputs, order holds at the sim's frame rate, and plugins in QuickJS-ng reach a subset of the same hooks (node 5.1.1)?
+
+**Expected:** one ordered loop, carrying to every input of the core what fsc-editor's replay did for sim events alone, which "swaps the source of events and changes nothing else" (fsc-editor, `src/main/sim/replay.ts`).
+
+**Found:** a research read, on 2026-10-14, of each design's documentation and source ([results](results/2026-10-14-host-research.txt)), where we read the lines marked checked ourselves:
+
+- **One loop, with I/O at its edges.**
+  noq-proto, the QUIC core under iroh 1.3, "contains no networking code and does not get any relevant timestamps from the operating system", and takes the time as an argument (read in noq-proto 1.3.0, `src/lib.rs`; checked).
+  str0m "never calls `Instant::now()` itself" (documented, [str0m](https://github.com/algesten/str0m)).
+  LMAX runs its business logic on one thread, rebuilds its state by replaying its input events, and ends a slow external call "with an output event", because on one thread it "will halt the entire order processing machine" (documented, [Fowler, 2011-07-12](https://martinfowler.com/articles/lmax.html)).
+  TigerBeetle's core is single-threaded (documented, [ARCHITECTURE.md](https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/ARCHITECTURE.md)), and Polar Signals writes each component as synchronous calls that run to completion (documented, [Subiotto, 2025-07-08](https://blog.polarsignals.com/blog/posts/2025/07/08/dst-rust)).
+- **Replaying a run from the field.**
+  On Age of Empires, "a game recording gave us a great way of passing around repro cases for bugs" (documented, [Bettner and Terrano, GDC 2001](https://www.gamedeveloper.com/programming/1500-archers-on-a-28-8-network-programming-in-age-of-empires-and-beyond)).
+  Riot replayed each frame's recorded packets into League of Legends' server, recorded "above our low-level network system", after fixing five kinds of divergence: six clock APIs, several random number generators, uninitialized variables, containers ordered by pointer, and differences between operating systems (documented, [Riot, 2017-06-20](https://www.riotgames.com/en/news/determinism-league-legends-implementation)).
+  So our core records the messages iroh delivers, and iroh's own I/O stays out of the replay.
+- **Simulation runtimes**, madsim, turmoil, and shuttle, reproduce a simulated run from a seed, with mocked I/O and a virtual clock (documented, [turmoil 0.7.2](https://docs.rs/turmoil/0.7.2/turmoil/), [madsim](https://github.com/madsim-rs/madsim), [shuttle](https://github.com/awslabs/shuttle)).
+  Nothing simulates a pilot's sim, crew, and panels, so none of them replays a run from a pilot's PC; they fit a bench of two cores on one PC.
+- **Actors on tokio,** one per feature, leave the order between features to the scheduler, so two features answering one moment could write to the sim in either order, and a replay would need every delivery recorded (inference).
+  A QuickJS `Runtime` is `Send` only with rquickjs's `parallel` feature (read in rquickjs-core 0.14.0, `src/runtime/base.rs`), so a plugin actor would need a thread of its own.
+- **Registering a feature.**
+  Zed's own features are crates, each started by one call in `main`, such as `editor::init(cx)` (read in Zed's main branch on 2026-10-14, `crates/zed/src/main.rs`).
+  Bevy registers a plugin through `Plugin::build(&mut App)`, but "systems run in parallel by default whenever possible", and a message race is possible "If no ordering is applied" (documented, [Bevy 0.20.0](https://docs.rs/bevy/0.20.0/bevy/app/trait.Plugin.html), [quick start](https://bevy.org/learn/quick-start/getting-started/ecs/), [Messages](https://docs.rs/bevy/latest/bevy/ecs/message/struct.Messages.html)).
+  VS Code's activation events and contribution points match a plugin that loads with its profile and a profile block (documented, [activation events](https://code.visualstudio.com/api/references/activation-events), [contribution points](https://code.visualstudio.com/api/references/contribution-points)).
+- **What breaks a replay on our stack.**
+  - QuickJS-ng reads the wall clock when it makes a context, seeding `Math.random` and its hash seed (read in rquickjs-sys 0.14.0, `quickjs/quickjs.c`, `JS_NewContextRaw`; checked), and again in `Date.now` (same file, `js_Date_now`; checked).
+    Our 100ms limit runs on the clock too, while QuickJS-ng calls the interrupt handler once every 10,000 ticks of its own counter (same file, `JS_INTERRUPT_COUNTER_INIT`; checked).
+  - A `HashMap`'s iteration order is randomly seeded (documented, [std](https://doc.rust-lang.org/std/collections/struct.HashMap.html)).
+  - The x64 Universal C Runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" (documented, [`_set_FMA3_enable`](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-fma3-enable-set-fma3-enable)); whether Rust's `f64` functions reach it on our target is unverified.
+  - tokio's RNG takes a seed only behind `tokio_unstable` (read in tokio 1.53.2, `src/runtime/builder.rs`, `Builder::rng_seed`).
+- **Size,** unmeasured for our core.
+  fsc-editor's 115s capture of a PA-24, with every `L:` variable watched, holds 243,858 changes in 1.8MB of gzipped NDJSON (read in fsc-editor, `src/main/sim/fixtures/README.md`, "pa24-many-controls", and the file's size; checked), about 56MB an hour (arithmetic).
+
+**Changed:** 5.1's answer starts from one ordered loop, as the research recommends.
+Edge tasks for SimConnect, iroh, the WebSocket clients, and the helper's pipe, and a pool for slow work, stamp each input with its time and queue it.
+The loop owns the host's state, every feature, and the QuickJS-ng runtimes, runs synchronous handlers in the order features registered, and never reads a clock or does I/O itself; slow work leaves as an output and comes back as an input.
+Recorded with a header holding the build and the profile's hash, the queue replays the core exactly on the same build.
+Its costs come with it:
+
+- A multi-step flow, such as catch-up, is a state machine written out, not an `async` function.
+- A slow handler delays every input behind it: at 89 sim updates a second, one plugin call at its 100ms limit holds back about 9 updates, in order, none lost (arithmetic).
+- The loop's crates keep rules that clippy's [`disallowed_methods`](https://rust-lang.github.io/rust-clippy/master/index.html#disallowed_methods) can enforce: no iterating a `HashMap`, no `Instant::now`, no random number generator the operating system seeds, no threads, and no `.await`.
+- QuickJS-ng's `Math.random` and `Date.now` become host functions on the loop's time and a recorded seed, and its time limit becomes a count of interrupt calls, recorded where it fired.
+
+**Affects:** node 5.1 of the [architecture plan](plan.md#51-the-hosts-interface); and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)' open question of how big a flight's recording is, since the loop's inputs are what a recording would keep.
+
+**Evidence:** [results/2026-10-14-host-research.txt](results/2026-10-14-host-research.txt), the research agent's report, and the four lines marked checked, read on 2026-10-14.
+
 ## 2026-10-09: Coherent GT parses all of ES2017 and object rest but no other syntax from ES2018 on, has no built-in from ES2018 on of its own but WeakRef, and runs TypeScript compiled to es2017 by tsc and by esbuild
 
 **Asked:** which syntax from ES2017 to ES2022 does Coherent GT parse, which built-ins does it have, and does a TypeScript module compiled at the target 1.6.1 points to run in the EFB's document (node 1.6.2)?

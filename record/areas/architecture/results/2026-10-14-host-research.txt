@@ -1,0 +1,205 @@
+Node 5.1.1 research report: one research agent's report, 2026-10-14, on how current
+designs run an app's core and its extensions. Every line is the agent's reading of its
+source unless the architecture log entry of 2026-10-14 marks it checked; versions and
+dates are as the agent read them.
+
+== Answer ==
+Run the core as one ordered loop that owns all session state, every feature, and the
+QuickJS-ng runtime. The loop has one input queue, filled by I/O tasks at its edges. Every
+input carries its time, and slow work leaves as an output and comes back as an input.
+Record that queue, and the core replays exactly on the same build. This is the shape of
+sans-IO protocol cores, LMAX, TigerBeetle, and Polar Signals' DST design. Neither an actor
+per feature nor a DST runtime can replay a run from a pilot's machine.
+
+== Comparison ==
+Design | Register / remove | Runs as | Extensions talk by | Time and I/O enter | Replays a field run | A slow handler stalls | Recording grows with | JS face
+Sans-IO core on one loop | one call in one list | one loop, with I/O in edge tasks | moments queued on the loop | as stamped inputs, with `now` passed in | yes, on the same build | every input behind it | external inputs only | one more handler on the loop
+DST runtimes (madsim, turmoil, shuttle) | unchanged | tasks on one simulated thread | channels | a simulated clock and libc overrides | no: a seed replays a simulated run | that task | a seed, in tests only | not covered
+Actors on tokio (hand-rolled, ractor, actix) | spawn, plus wiring the handles | one task per actor | mailboxes | each actor reads them itself | only if every delivery is recorded | its own actor, and anything awaiting it | inputs times fan-out | an actor on its own thread
+Bevy | add_plugins, disable | schedules each frame, with systems in parallel | resources and messages | the Time resource and task pools | not built in (unverified) | the frame | inputs per frame | not covered
+VS Code | contributes and activation events | one extension host process per window | API calls over RPC | an async API | no | the extension host | n/a | JS is its only face
+Zed | init(cx) calls in main | a foreground thread, a background executor, and Wasm extensions | entities and subscriptions | background results return to the main thread | in tests only | the main thread | n/a | WIT host functions
+Game replays, event sourcing | n/a | one simulation | n/a | commands and the clock, recorded | yes, on the same build | n/a | commands | n/a
+
+== Sans-IO cores ==
+- noq-proto, the QUIC core under iroh 1.3, "contains no networking code and does not get
+  any relevant timestamps from the operating system" (read in noq-proto 1.3.0,
+  src/lib.rs). Time enters as `now` in handle_timeout, poll_transmit, and
+  Endpoint::handle, and EndpointConfig::rng_seed seeds its RNG (same crate,
+  src/connection/mod.rs and src/config/mod.rs).
+- noq drives that core from a ConnectionDriver future over a Mutex<State> (read in noq
+  1.3.0, src/connection.rs).
+- str0m "never calls Instant::now() itself", and each mutation must be followed by
+  draining poll_output (documented, https://github.com/algesten/str0m).
+- Firezone composes several of these state machines in one event loop. It names two
+  costs: a sequential flow becomes a hand-written state machine, and a dependency such
+  as boringtun still calls Instant::now (documented, Eizinger, 2024-07-02,
+  https://www.firezone.dev/blog/sans-io).
+- LMAX runs its business logic on one thread and rebuilds its state "by replaying the
+  events". A slow external call ends "with an output event", because on one thread it
+  "will halt the entire order processing machine" (documented, Fowler, 2011-07-12,
+  https://martinfowler.com/articles/lmax.html).
+- TigerBeetle is single-threaded, and its commit "doesn't do any reading from storage"
+  (documented,
+  https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/ARCHITECTURE.md).
+- Polar Signals writes each component as synchronous receive and tick calls, with no
+  async, so every call runs to completion. Their stated cost is logic leaking into the
+  production driver, where their simulation tests can't reach it (documented, Subiotto,
+  2025-07-08, https://blog.polarsignals.com/blog/posts/2025/07/08/dst-rust).
+- We don't need iroh itself to be deterministic. We record decoded messages above it, as
+  Riot recorded packets "above our low-level network system" (documented, Riot,
+  2017-06-20,
+  https://www.riotgames.com/en/news/determinism-league-legends-implementation).
+
+== DST runtimes ==
+- turmoil runs hosts "within a single thread", with a seeded RNG and virtual time
+  (documented, https://docs.rs/turmoil/0.7.2/turmoil/).
+- madsim requires every I/O interface to be mocked (documented,
+  https://github.com/madsim-rs/madsim).
+- S2 still had to override getrandom and clock_gettime, and found nondeterminism in
+  dependencies and in hash maps. It checks determinism by rerunning a seed and comparing
+  TRACE logs byte for byte (documented, Bhushan, 2025-04-02, https://s2.dev/blog/dst).
+- shuttle randomizes thread schedules and "is not sound" (documented,
+  https://github.com/awslabs/shuttle).
+- None of these replays a run from a pilot's machine. A seed reproduces a simulated
+  world, and nothing simulates a pilot's sim, peers, and panels. They suit the bench of
+  two cores on one PC, not bug reports.
+
+== Actors ==
+- Ryhl keeps I/O in small reader and writer tasks that forward to an actor, and warns
+  that a cycle of bounded channels deadlocks (documented, Ryhl, 2021-02-13,
+  https://ryhl.io/blog/actors-with-tokio/).
+- In actix, wait "stops processing any incoming events until the future resolves"
+  (documented, https://docs.rs/actix/0.13.5/actix/trait.AsyncContext.html).
+- ractor's handle is async (documented, https://docs.rs/ractor/0.16.5/ractor/).
+- With one actor per feature, the scheduler decides the order between features. Two
+  features reacting to one moment can then write to SimConnect in either order, so a
+  replay needs every delivery recorded (inference).
+- A QuickJS Runtime is Send only with rquickjs's parallel feature (read in rquickjs-core
+  0.14.0, src/runtime/base.rs), so a plugin actor needs a thread of its own.
+
+== Bevy 0.20.0 ==
+- Plugin::build configures the App (documented,
+  https://docs.rs/bevy/0.20.0/bevy/app/trait.Plugin.html), and
+  PluginGroupBuilder::disable drops one plugin (documented,
+  https://docs.rs/bevy/latest/bevy/app/struct.PluginGroupBuilder.html).
+- "systems run in parallel by default whenever possible" (documented,
+  https://bevy.org/learn/quick-start/getting-started/ecs/). Detection of systems with
+  conflicting access and no set order defaults to Ignore (documented,
+  https://docs.rs/bevy/latest/bevy/ecs/schedule/struct.ScheduleBuildSettings.html).
+- A message race is possible "If no ordering is applied" (documented,
+  https://docs.rs/bevy/latest/bevy/ecs/message/struct.Messages.html).
+- TimeUpdateStrategy::ManualInstant injects time (documented,
+  https://docs.rs/bevy/latest/bevy/time/enum.TimeUpdateStrategy.html).
+- Worth borrowing: registration through build(&mut App) and explicit ordering. Not worth
+  borrowing: the parallel executor, or Bevy itself as a dependency.
+
+== VS Code ==
+- Extensions declare contribution points and activation events in package.json, and VS
+  Code loads them lazily (documented,
+  https://code.visualstudio.com/api/references/contribution-points,
+  https://code.visualstudio.com/api/references/activation-events).
+- One extension host process per window runs every extension (documented, 2022-11-28,
+  https://code.visualstudio.com/blogs/2022/11/28/vscode-sandbox).
+- In our terms, a plugin loading with its aircraft's profile is an activation event, and
+  a profile block is a contribution point.
+
+== Zed ==
+- Zed's own features are crates, each started by a plain call such as editor::init(cx)
+  or vim::init(cx) in main (read in zed's main branch on 2026-10-14,
+  crates/zed/src/main.rs). That is our "one registration".
+- "The main thread should never, ever block", and slow work goes to the background
+  executor and returns (documented, Zed, 2024-04-09,
+  https://zed.dev/blog/zed-decoded-async-rust).
+- Zed's tests run a seeded scheduler with randomize_order: true and a fake clock (read in
+  zed's main branch, crates/gpui/src/platform/test/dispatcher.rs, TestDispatcher::new).
+- Zed calls its Wasm extensions through async host functions over a channel
+  (documented, Zed, 2024-10-21, https://zed.dev/blog/zed-decoded-extensions).
+
+== Game replays and event sourcing ==
+- On Age of Empires, "a game recording gave us a great way of passing around repro cases
+  for bugs". Players issued a command every 1.5s to 2s (documented, Bettner and Terrano,
+  GDC 2001,
+  https://www.gamedeveloper.com/programming/1500-archers-on-a-28-8-network-programming-in-age-of-empires-and-beyond).
+- Riot recorded each frame's packets and made the League of Legends server replay them,
+  but had to fix five kinds of divergence: six separate clock APIs; several PRNGs, some
+  used by nondeterministic code; uninitialized variables; containers ordered by pointer;
+  and differences between operating systems (documented, Riot, above).
+- Fowler: turn the gateways off during a replay, and record the answers to external
+  queries (documented, Event Sourcing, 2005,
+  https://martinfowler.com/eaaDev/EventSourcing.html).
+
+== Recommendation: one loop, with I/O in edge tasks ==
+- Edges. The loop is one thread reading one queue, fed by edge tasks: a SimConnect thread,
+  since SimConnect clients "are not currently thread-safe"
+  (record/learn/foundations/04-01-connection-and-data.md); iroh tasks; WebSocket tasks;
+  the helper's pipe task; and a worker pool. Each edge stamps its inputs with the time,
+  and the loop never reads a clock.
+- Features. Each feature crate exposes register(&mut Host), called from one list.
+  Handlers are synchronous: fn(&mut State, &Moment, &mut Ctx). A moment's handlers run in
+  registration order. Moments a handler raises go into a queue on the loop, which empties
+  before the next input. Moment and registry types live in the host or the message crate,
+  so deleting a feature removes only its listeners. No feature relies on another's
+  handler order.
+- Plugins. A plugin's on(moment, fn) adds a handler to the same list, for the moments the
+  host marks visible to plugins.
+
+Costs:
+1. Every multi-step flow, such as catch-up, is a state machine rather than async.
+2. A slow handler delays everything behind it. At 89 updates a second, a sim frame is
+   11.2ms, so one plugin call at its 100ms limit holds back about 9 sim updates (in
+   order, none lost). The 150ms cockpit model load, profile fetches, file reads,
+   recording compression, and audio frames all run off the loop.
+3. A replay needs the same build and the same profile and plugin hashes. tokio's seeded
+   RNG asks the same of tokio, its dependencies, and the compiler (read in tokio 1.53.2,
+   src/runtime/builder.rs, Builder::rng_seed, behind tokio_unstable).
+4. The loop's crates follow rules that clippy's disallowed_methods enforces: no iterating
+   a HashMap, which is "randomly seeded" (documented, std); no Instant::now; no RNG
+   seeded by the operating system; no threads; no .await.
+5. QuickJS-ng reads the wall clock in three places (read in rquickjs-sys 0.14.0,
+   quickjs/quickjs.c): JS_NewContextRaw seeds Math.random from the wall clock; js_Date_now
+   reads it; the 100ms limit runs on it. The core replaces the first two with host
+   functions that use the loop's time and a seed. For the limit, __js_poll_interrupts
+   calls the interrupt handler every 10,000 counter ticks (JS_INTERRUPT_COUNTER_INIT), so
+   the handler counts its calls, the recording keeps the count at which the limit fired,
+   and a replay interrupts at that count.
+6. Floating point can differ between PCs. The x64 UCRT picks its FMA3 math
+   implementations by CPU, and "Differences may also be observable between computers"
+   (documented,
+   https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-fma3-enable-set-fma3-enable).
+   Whether Rust's f64::sin reaches those implementations on our target is unverified.
+   Calling _set_FMA3_enable(0), or using a pure-Rust libm, removes the question.
+
+== Inputs and outputs ==
+Inputs: every SimConnect message, our module's client data included, plus the HRESULT of
+any call whose result the loop branches on; each decoded message from another core, and
+each link event; each client's WebSocket messages, connections, and disconnections; each
+line from the helper, and each time it exits; each timer expiry, as an input's own time;
+each slow job's result (a profile fetch, a model load, the flight file, the clipboard,
+and the settings and session file at start); a header with the build ID, the hashes, and
+the seed. How much of the cockpit model load to record, the whole mesh or a summary, is
+open.
+Outputs: SimConnect calls; messages to other cores and to clients; commands to the
+helper; timer deadlines; job requests; log lines. In a replay, outputs go to a sink that
+hashes them.
+
+Size is the unknown. fsc-editor's 115s capture of the PA-24, with every L: variable
+watched, holds 243,858 changes in 1.8MB of gzipped NDJSON, about 56MB an hour (read in
+fsc-editor, src/main/sim/fixtures/README.md, pa24-many-controls; the hourly figure is
+arithmetic on the file's size). The core watches fewer variables, but on the flying
+machine it reads the flight model every frame.
+
+== The probe ==
+1. In the sim, about 10 minutes in the PA-24: extend p08's Rust client to subscribe as a
+   flying machine's core would (the flight-model set every sim frame, the profile's
+   entries on change, and our module's client data). Append every dispatch record, with
+   its time stamp, to a raw file and to a zstd stream. You'll see records a second by
+   kind, and MB an hour raw and compressed.
+2. Offline: build a loop skeleton that reads the capture alongside synthetic inputs
+   (peers at 20 flight-model samples and 20 cockpit changes a second, 20 panel clients,
+   the helper). On that load it runs 100 QuickJS-ng write functions every sim frame, a
+   100ms JS stall once a minute, and a 150ms job on a worker. It prints queue latency at
+   p50, p99, and max, the share of time the loop is busy, and the fastest replay speed.
+   It then replays its own log twice and compares the output hashes.
+The probe passes when queue latency at p99 stays under 11.2ms, the two replays' hashes
+match, and the size per flight hour is one the user accepts.

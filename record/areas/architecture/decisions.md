@@ -1,7 +1,7 @@
 # Architecture: tentative decisions
 
 What the architecture's nodes settled, each with the findings behind it and what it leaves out.
-Each one is numbered as a decision in `record/decisions/` since 2026-10-13, at the end of step 7 of the product plan, once the top-level answers passed the walk through a session, as [the plan](plan.md#where-answers-go) says.
+Step 7's are numbered as decisions in `record/decisions/` since 2026-10-13, once its top-level answers passed the walk through a session, as [the plan](plan.md#where-answers-go) says; step 8's, from [Crosscheck's code is a host, engines, and features](#crosschecks-code-is-a-host-engines-and-features-and-deleting-a-features-crate-leaves-the-rest-whole) on, are numbered once step 8's top-level answers pass theirs.
 The numbered decision is the one that holds, and a change to it is a new decision that reverses it ([writing.md](../../../.claude/rules/writing.md#decisions)).
 The watcher and the core are the two long-running processes in [the spine](01-spine.md), and the flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).
 
@@ -771,6 +771,60 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A profile fixes its entries when it loads, so the cap on each value bounds the state object.
 - **Leaves out:** what real profiles and plugins need, which the 58P's profile and plugin measure.
 
+## Crosscheck's code is a host, engines, and features, and deleting a feature's crate leaves the rest whole
+
+- **Decided:** Crosscheck's code is in three tiers: the host, the services every feature uses, in the core and, through the panel bridge and our WASM module, in the sim; engines, libraries that know nothing of the app; and features, each one thing a pilot gets.
+  Three tests stand in for a definition of clean: deleting a feature's crate and its one registration leaves everything else building and passing its tests; an engine builds and runs outside the core; and CI checks each crate's dependencies against the ones the code map allows.
+  A feature's messages stay in the one message crate, and its profile block in the profile engine, so deleting a feature also deletes its module in each.
+  Settled in node 5 by the user, 2026-10-14 ([02-code-map](02-code-map.md#tiers)).
+- **Because:**
+  - The user wants each system clean, "almost like you could take it out of the project", with confidence in it before any product code, and without a definition in prose that agents would enforce where it doesn't fit (user, 2026-10-14).
+  - Every hand-kept copy of a contract in our earlier work bred bugs: fsc-editor's Trace copied eight of FS Copilot's C# functions into TypeScript, and of the bugs in its first cut, "All three were found by re-reading, not by any check" (fsc-editor, `docs/help/trace-panel.md`, "The problem, stated honestly").
+    An engine that the core and the IDE both link leaves nothing to copy.
+  - The core, CI, and the IDE already run one checker for profiles ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), and CI and the IDE check a profile without the core.
+- **Leaves out:** the units themselves, which the code map names as node 5's children settle.
+
+## The core runs as one loop that takes every input, stamped, from one recorded queue
+
+- **Decided:** one thread owns the host's services, every feature's state, and the QuickJS-ng runtimes, and handles one input at a time from one queue, which edge tasks for SimConnect, tokio's sockets and timers, the helper's pipe, and a pool for slow work fill, stamping each input as they queue it.
+  Handlers are synchronous, read no clock, do no I/O, and iterate no `HashMap`; time arrives with each input, and timers and slow work leave as outputs and come back as inputs.
+  The host records the queue under a header that names the build, the profile's hash, and the seed, so the same build replays a whole run.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#one-loop)).
+- **Because:**
+  - Sans-IO cores, LMAX, and TigerBeetle run this way, game studios replayed matches from recorded inputs to reproduce bugs, while actors leave the order between features to the scheduler and simulation runtimes replay a seeded world, not a pilot's run ([architecture log, 5.1.1][a511]).
+  - A bug report's recording then reproduces a bug in the core on our own PC, which the user found "super appealing" (user, 2026-10-14).
+- **Leaves out:**
+  - how much of the queue the recording keeps, and for how long, for node 6's design of recording
+  - whether one loop meets its budgets, for node 7's bench
+
+## A feature reaches other features only through the host, and blocks a request only through a guard
+
+- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the moments it handles, its session keys, roles, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notices, items for the match check, and the helper's input and audio it needs.
+  A handler writes only its own feature's state, reads the host's, and acts through an outbox, asking the host for any change to the host's state.
+  Features reach each other only through moments the host raises.
+  A feature that can block a request the host decides, such as taking control or claiming a role, registers a guard, a quick check that allows the request or denies it with a reason, and any denial refuses it; the host's own rules are guards it registers on itself, and a pass the host makes itself, such as when the PF leaves the flight, isn't a request.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#what-a-feature-registers)).
+- **Because:**
+  - Deleting a feature has to leave every other feature whole, and a feature that called another, or that the host checked by name, would break that.
+    FS Copilot wired its features together by constructor injection, with `TrafficHost` and `AtcHost` built after `Coordinator` (read in the FS Copilot fork, `FsCopilot/Program.cs`).
+  - A guard lets a later feature, such as a hypothetical one that lets only an instructor take control, block a request without the host knowing it exists, and a denial's reason is what the apps show beside the button.
+- **Leaves out:** which hooks plugins reach through QuickJS-ng, for node 6's design of plugins, once the features they may plug into are designed (user, 2026-10-14).
+
+## Every ID that's stored or crosses between versions is a number assigned once
+
+- **Decided:** the kinds of message on the cockpit stream, channels, session keys, roles, the apps' commands, and the kinds of input in the recording are each named by a number the message crate assigns once and never reuses, and a deleted feature's numbers stay retired; settings are named keys, never reused either.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#ids)).
+- **Because:** postcard writes an enum's variant as its position (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`), so a variant deleted with its feature would shift every one after it, and a recording that a later version reads would be misread.
+- **Leaves out:** which crate holds the numbers, for node 5.4.
+
+## Traffic and ATC audio each hold a role, and one switch claims both
+
+- **Decided:** traffic registers the traffic host and ATC audio the ATC host, as two roles, and the apps' "Share my traffic and ATC" switch sends one command that claims both, writing both roles' keys in one message on the session channel.
+  This changes [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), which gives the two one role that can split, and [decision 044](../../decisions/044-table-of-roles.md) once step 8's decisions are numbered.
+  Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#the-traffic-and-atc-switch)).
+- **Because:** with one shared role, deleting traffic would take ATC's role with it, while with two, deleting traffic leaves the switch claiming ATC alone.
+
+[a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does
 [n23]: ../network/log.md#2026-10-10-iroh-moves-to-the-relay-one-path-idle-timeout-after-a-direct-link-dies-and-back-within-60s-and-at-3-loss-its-tcp-relays-p99-lateness-grows-with-the-round-trip-to-the-relay-from-53ms-at-22ms-away-to-534ms-at-131ms

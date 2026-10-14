@@ -27,9 +27,54 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/product/03-v1-scope.md](areas/product/03-v1-scope.md): what each v1 feature does, where v1 stops, and the rules for its behavior.
 - [areas/product/04-room-for-later.md](areas/product/04-room-for-later.md): what each feature after v1 needs from what v1 builds, and what v1 builds so it slots in without rework.
 - [decisions/001-changing-other-developers-packages.md](decisions/001-changing-other-developers-packages.md): Crosscheck's own features never change another developer's package, and an aircraft's plugin may, on the pilot's machine.
+- [decisions/002-core-starts-with-every-sim-run.md](decisions/002-core-starts-with-every-sim-run.md): The core starts with every sim run.
+- [decisions/003-watcher-keeps-blurpage-copy-current.md](decisions/003-watcher-keeps-blurpage-copy-current.md): The watcher keeps the BlurPage copy current.
+- [decisions/004-core-works-out-figures-hand.md](decisions/004-core-works-out-figures-hand.md): The core works out where the figure's hand goes.
+- [decisions/005-wasm-module-writes-following-aircraft.md](decisions/005-wasm-module-writes-following-aircraft.md): Our WASM module writes the following aircraft.
+- [decisions/006-core-catches-take-control-input.md](decisions/006-core-catches-take-control-input.md): The core catches the take-control key and buttons.
+- [decisions/007-core-runs-audio.md](decisions/007-core-runs-audio.md): The core runs Crosscheck's audio.
+- [decisions/008-every-link-ends-at-core.md](decisions/008-every-link-ends-at-core.md): Every link between our components ends at the core.
+- [decisions/009-sim-pages-find-core-over-commbus.md](decisions/009-sim-pages-find-core-over-commbus.md): The sim's pages find the core over the CommBus and talk to it over a WebSocket.
+- [decisions/010-clients-message-core-every-2s.md](decisions/010-clients-message-core-every-2s.md): Every client sends the core a message every 2s.
+- [decisions/011-cockpit-panels-connect-only-in-session.md](decisions/011-cockpit-panels-connect-only-in-session.md): Cockpit panels connect only in a session, and only the ones in use stay.
+- [decisions/012-efb-app-opens-banner-panel.md](decisions/012-efb-app-opens-banner-panel.md): The EFB app's code opens the banner panel.
+- [decisions/013-core-accepts-sim-origin-or-none.md](decisions/013-core-accepts-sim-origin-or-none.md): The core accepts a WebSocket only with the sim's Origin or none.
+- [decisions/014-apps-find-core-through-port-file.md](decisions/014-apps-find-core-through-port-file.md): Apps outside the sim find the core through a port file.
+- [decisions/015-watcher-reads-files-core-writes.md](decisions/015-watcher-reads-files-core-writes.md): The watcher reads what its jobs need from files the core writes.
+- [decisions/016-core-keeps-pilots-settings.md](decisions/016-core-keeps-pilots-settings.md): The core keeps the pilot's settings.
+- [decisions/017-core-writes-control-slot-every-200ms.md](decisions/017-core-writes-control-slot-every-200ms.md): The core writes the WASM module's control slot every 200ms.
+- [decisions/018-rust-and-typescript.md](decisions/018-rust-and-typescript.md): Crosscheck is written in Rust, and in TypeScript where an engine runs it.
+- [decisions/019-input-and-audio-run-in-helper.md](decisions/019-input-and-audio-run-in-helper.md): The core's input and audio work runs in a helper it starts.
+- [decisions/020-plugin-code-runs-only-in-core.md](decisions/020-plugin-code-runs-only-in-core.md): Plugin code runs only in the core.
+- [decisions/021-profiles-and-plugins-apart-from-releases.md](decisions/021-profiles-and-plugins-apart-from-releases.md): Profiles and plugins reach pilots apart from Crosscheck's releases.
+- [decisions/022-random-uuids-as-text.md](decisions/022-random-uuids-as-text.md): Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them.
+- [decisions/023-pilot-id-and-restart-count.md](decisions/023-pilot-id-and-restart-count.md): A pilot keeps their ID through a core restart, and the core counts its restarts.
+- [decisions/024-times-in-microseconds-on-monotonic-clock.md](decisions/024-times-in-microseconds-on-monotonic-clock.md): A time in a message is µs on the sender's PC's monotonic clock.
+- [decisions/025-messages-in-one-rust-crate.md](decisions/025-messages-in-one-rust-crate.md): Messages are defined in one Rust crate: JSON typed by ts-rs for TypeScript, fixed-width structs in data slots, and length-prefixed binary to the helper.
+- [decisions/026-first-message-carries-version-and-hash.md](decisions/026-first-message-carries-version-and-hash.md): Every first message carries one version number and a hash of the message crate.
+- [decisions/027-core-runs-on-tokio.md](decisions/027-core-runs-on-tokio.md): The core runs on tokio.
+- [decisions/028-desktop-pages-react-vite-tailwind.md](decisions/028-desktop-pages-react-vite-tailwind.md): The desktop app's pages are React, built with Vite and styled with Tailwind.
+- [decisions/029-in-sim-interface-on-msfs-avionics-framework.md](decisions/029-in-sim-interface-on-msfs-avionics-framework.md): Our interface in the sim is built on the MSFS Avionics Framework.
+- [decisions/030-in-sim-code-es2017-esbuild.md](decisions/030-in-sim-code-es2017-esbuild.md): Our code in the sim is type-checked against ES2017 and bundled by esbuild at es2017.
+- [decisions/031-coherent-gt-check-tool.md](decisions/031-coherent-gt-check-tool.md): A tool of our own checks every file we ship into the sim against Coherent GT's measured limits.
+- [decisions/032-one-quic-connection-through-iroh.md](decisions/032-one-quic-connection-through-iroh.md): Every pair of cores holds one QUIC connection through iroh 1.3, directly or through our relays.
+- [decisions/033-relays-run-iroh-relay-unmodified.md](decisions/033-relays-run-iroh-relay-unmodified.md): Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck.
+- [decisions/034-backend-matches-invite-codes.md](decisions/034-backend-matches-invite-codes.md): The backend matches invite codes to the crew's endpoint IDs, and no running session waits on it.
+- [decisions/035-channels-declare-how-they-travel.md](decisions/035-channels-declare-how-they-travel.md): Each channel declares how it travels, and only the cockpit stream is replayed.
+- [decisions/036-control-is-one-value.md](decisions/036-control-is-one-value.md): Control is one value, a generation and the PF's pilot ID.
+- [decisions/037-while-a-link-is-lost.md](decisions/037-while-a-link-is-lost.md): While a link is lost, the PF flies on, a PM that lost the flying machine locks, and any pilot can take control.
+- [decisions/038-clock-offset-from-timed-exchange.md](decisions/038-clock-offset-from-timed-exchange.md): A receiver estimates each sender's clock offset from one timed exchange a second.
+- [decisions/039-cut-link-replays-others-late-join.md](decisions/039-cut-link-replays-others-late-join.md): A cut link comes back by replay, and a sim, core, or PC that went down comes back as a late joiner.
+- [decisions/040-catch-up-first-final-value-order.md](decisions/040-catch-up-first-final-value-order.md): Catch-up writes in the order the flying machine's cockpit first took each value.
+- [decisions/041-core-crash-comes-back-as-late-joiner.md](decisions/041-core-crash-comes-back-as-late-joiner.md): A core that crashes comes back as a late joiner.
+- [decisions/042-vector-clock-records-what-applied.md](decisions/042-vector-clock-records-what-applied.md): A machine's vector clock is its record of what it applied, and a skipped message counts as applied.
+- [decisions/043-driven-entries-and-putting-back.md](decisions/043-driven-entries-and-putting-back.md): A shared entry every machine's aircraft keeps changing stops syncing, and a machine puts back what it may not send.
+- [decisions/044-table-of-roles.md](decisions/044-table-of-roles.md): v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand.
+- [decisions/045-profile-format-yaml-and-javascript.md](decisions/045-profile-format-yaml-and-javascript.md): A profile is YAML whose script is JavaScript, where names only name and only `write()` writes.
+- [decisions/046-sandbox-runtimes-and-limits.md](decisions/046-sandbox-runtimes-and-limits.md): Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value.
 - [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.
 - [areas/architecture/plan.md](areas/architecture/plan.md): how we design Crosscheck's v1 architecture, as a tree of questions that goes a level deeper only when the work shows a need, and where each question stands.
 - [areas/architecture/01-spine.md](areas/architecture/01-spine.md): the spine every other part of Crosscheck rests on, one section for each child of the architecture plan's node 1.
-- [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes have settled for now, and on what findings.
+- [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes settled, and on what findings, each numbered as one of decisions 002 to 046.
 - [areas/architecture/log.md](areas/architecture/log.md): what our experiments found for the architecture plan's nodes.
 - [areas/architecture/coherent-gt.md](areas/architecture/coherent-gt.md): the syntax, built-ins, and web APIs Coherent GT has, as measured, which our code in the sim keeps within.

@@ -189,6 +189,8 @@ The architecture lets a Crosscheck developer run a whole session on one machine:
 
 Crosscheck's components, how they talk, the conventions they share, its languages and frameworks, and its parts are in [the architecture's spine](../architecture/01-spine.md), with what it leaves open filed under each part, naming the node or stage of step 8 that settles each item.
 
+Done on 2026-10-13: the architecture plan's four top-level nodes passed the walk through a session, and their tentative decisions are numbered as decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) to [046](../../decisions/046-sandbox-runtimes-and-limits.md).
+
 ## 8. v1 build plan
 
 Produces: a `plan.md` in each area that [the architecture's spine](../architecture/01-spine.md#parts) names, holding that part's build stages.

@@ -36,7 +36,7 @@ Their core learns the run ended in one of two ways: it watches the sim close, by
 Either way:
 
 - If they were the PF, their core passes control on, at once if it watched the sim close, as for a PF who goes to the main menu ([the connection](../product/03-v1-scope.md#the-connection)), and once the crew's first message has passed if it found the run gone, since only then does it know the current control value, so a PF back from a PC crash never returns holding control.
-  Control passes only to a pilot still in the flight, in v1 the PM, and with more crew one whose cockpit is up to date where there is one; if no pilot is in the flight, the session ends ([roles and members](../session/01-roles-and-members.md#the-pf)).
+  Control passes only to a pilot still in the flight, in v1 the PM, and with more crew one whose cockpit is up to date where there is one; if no pilot is in the flight once preflight has ended, the session ends ([roles and members](../session/01-roles-and-members.md#the-pf)).
 - The crew's notice says their sim closed, or crashed once the core can tell the two apart, which is open for sim awareness ([01-spine](../architecture/01-spine.md#left-open)).
 - Once they're in a flight again, their core rejoins them under the same pilot ID, with no code to type, and their cockpit catches up state from the flying machine ([catch-up](#catch-up)).
 - They're told that their displays' pages, their FMS, and anything else the profile can't read may differ from the PF's.

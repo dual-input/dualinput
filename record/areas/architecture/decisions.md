@@ -1,10 +1,13 @@
 # Architecture: tentative decisions
 
-What the architecture's nodes have settled for now, each with the findings behind it and what it leaves out.
-Each one becomes a numbered decision in `record/decisions/` at the end of step 7 of the product plan, once the top-level answers pass the walk through a session, as [the plan](plan.md#where-answers-go) says.
+What the architecture's nodes settled, each with the findings behind it and what it leaves out.
+Each one is numbered as a decision in `record/decisions/` since 2026-10-13, at the end of step 7 of the product plan, once the top-level answers passed the walk through a session, as [the plan](plan.md#where-answers-go) says.
+The numbered decision is the one that holds, and a change to it is a new decision that reverses it ([writing.md](../../../.claude/rules/writing.md#decisions)).
 The watcher and the core are the two long-running processes in [the spine](01-spine.md), and the flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).
 
 ## The core starts with every sim run
+
+Numbered as [decision 002](../../decisions/002-core-starts-with-every-sim-run.md) on 2026-10-13.
 
 - **Decided:** the watcher starts the core whenever the sim starts, and again if the core exits while the sim runs, and the desktop app starts it when the pilot opens the app and the core isn't running.
   No code in the sim, such as a panel or the EFB app, starts the core.
@@ -26,6 +29,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The watcher keeps the BlurPage copy current
 
+Numbered as [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md) on 2026-10-13.
+
 - **Decided:** the watcher, not the core, makes our copy of the sim's BlurPage component from the sim's own file, watches that file, and makes the copy again whenever the file's hash differs from the one the copy was made from.
   This changes the [interface log's 2026-10-06 entry](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly), which gives the job to the core.
   Settled in node 1.1 by the user, 2026-10-07.
@@ -33,6 +38,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** whether a sim update can change `fs-base-ui` while the sim boots, after the watcher's last check, which no run has tried ([interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
 
 ## The core works out where the figure's hand goes
+
+Numbered as [decision 004](../../decisions/004-core-works-out-figures-hand.md) on 2026-10-13.
 
 - **Decided:** on the clicking pilot's machine, the core reads the aircraft's models, the camera, and the cursor, and finds each hand's point.
   This changes the avatars' tentative decision, which gave the job to the desktop app ([avatars decisions](../avatars/decisions.md#the-clicking-pilots-machine-finds-the-point-and-the-other-machine-only-draws-it)).
@@ -42,6 +49,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - Our avatar probes read the pilot's mouse from a program outside the sim through Windows' Raw Input in sink mode, which sits in nobody's input path ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
 
 ## Our WASM module writes the following aircraft
+
+Numbered as [decision 005](../../decisions/005-wasm-module-writes-following-aircraft.md) on 2026-10-13.
 
 - **Decided:** our WASM module holds every machine's aircraft still in [preflight](../product/03-v1-scope.md#preflight), and on a following machine freezes the aircraft and writes the flying machine's pose and velocities inside the sim's frame.
   When it hasn't heard from the core for 1s, on any machine in a session, it unfreezes the aircraft, as [flight-model sync](../product/03-v1-scope.md#flight-model-sync) requires, and clears every variable of ours that holds something back ([01-spine](01-spine.md#what-moves-them)).
@@ -56,6 +65,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The core catches the take-control key and buttons
 
+Numbered as [decision 006](../../decisions/006-core-catches-take-control-input.md) on 2026-10-13.
+
 - **Decided:** the core reads the pilot's keyboard and flight hardware through Windows' input APIs, by way of the helper it starts ([below](#the-cores-input-and-audio-work-runs-in-a-helper-it-starts)), rather than mapping the input through SimConnect.
   Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3 by the user, 2026-10-08.
 - **Because:**
@@ -66,6 +77,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The core runs Crosscheck's audio
 
+Numbered as [decision 007](../../decisions/007-core-runs-audio.md) on 2026-10-13.
+
 - **Decided:** the core captures the pilot's microphone and runs the speech recognizer, captures the ATC app's audio by process, and plays ATC and Crosscheck's own sounds on the device the pilot picks, in the helper the core starts ([below](#the-cores-input-and-audio-work-runs-in-a-helper-it-starts)), so the desktop app stays optional.
   Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3 by the user, 2026-10-08.
 - **Because:**
@@ -74,6 +87,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** the choice of recognizer, which is made when the voice phrases are built ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
 
 ## Every link between our components ends at the core
+
+Numbered as [decision 008](../../decisions/008-every-link-ends-at-core.md) on 2026-10-13.
 
 - **Decided:** no two of Crosscheck's components talk to each other directly, apart from the watcher downloading updates from the release host: each talks to the core, and the core passes on what another needs.
   Apart from the announcements through which the sim's pages find the core and learn whether a session runs ([below](#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)), the core uses the CommBus and `L:` variables only to reach the aircraft's state; soft takeover, a Soon pick, would add a hold flag for each lever as an `L:` variable for the pilot's binding tool to read, and whether such a tool can make a binding wait on one is unverified ([ideas](../product/ideas.md#soft-takeover-on-handover)).
@@ -85,6 +100,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   A panel's action meant for the WASM module takes a WebSocket and then a data slot, and nothing in v1 needs it faster.
 
 ## The sim's pages find the core over the CommBus and talk to it over a WebSocket
+
+Numbered as [decision 009](../../decisions/009-sim-pages-find-core-over-commbus.md) on 2026-10-13.
 
 - **Decided:** the core announces its port and whether a session runs on the CommBus every 2s, and at once when a session starts or ends, and a page in the sim that hears it opens a WebSocket to the core on 127.0.0.1.
   The CommBus carries only those announcements, and the core listens on a port Windows picks.
@@ -106,6 +123,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Every client sends the core a message every 2s
 
+Numbered as [decision 010](../../decisions/010-clients-message-core-every-2s.md) on 2026-10-13.
+
 - **Decided:** every page, the desktop app, and the helper send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, and restarts a helper it hasn't heard from in 8s.
   Settled in node 1.2 by the user, 2026-10-08, and the helper's messages in node 1.3 by the user, 2026-10-08.
 - **Because:**
@@ -116,6 +135,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Cockpit panels connect only in a session, and only the ones in use stay
 
+Numbered as [decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md) on 2026-10-13.
+
 - **Decided:** the panel bridge in a cockpit panel connects when it hears that a session started, names the instruments it holds in its first message, and gets back the modules to load, and a panel the core gives nothing closes its socket.
   Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
@@ -124,6 +145,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - A first message from every panel tells the core the panel bridge loaded at all, which it doesn't when another package's `VCockpit.js` override wins ([installing and updating](../product/03-v1-scope.md#installing-and-updating)) or our own bridge fails to parse ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)).
 
 ## The EFB app's code opens the banner panel
+
+Numbered as [decision 012](../../decisions/012-efb-app-opens-banner-panel.md) on 2026-10-13.
 
 - **Decided:** in a session, the EFB app's code opens the banner panel when the core says the session has something to show, and closes it, by calling `TOOLBAR_BUTTON_TOGGLE` from the EFB's document.
   Crosscheck ships no script in the toolbar's document.
@@ -136,6 +159,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** opening the panel during a flight load, before Ready to fly, and after a second flight load in one run of the sim, which no run has tried ([01-spine](01-spine.md#left-open)); and how the banner shows in VR, which waits for a headset ([the product plan](../product/plan.md#6-probes-that-retire-architecture-risks)).
 
 ## The core accepts a WebSocket only with the sim's Origin or none
+
+Numbered as [decision 013](../../decisions/013-core-accepts-sim-origin-or-none.md) on 2026-10-13.
 
 - **Decided:** the core accepts a WebSocket whose `Origin` is `coui://html_ui` or missing, and refuses every other, and the desktop app connects from its Rust side.
   Settled in node 1.2 by the user, 2026-10-08, and the desktop app's side in node 1.3 by the user, 2026-10-08, with the desktop app a Tauri app.
@@ -150,6 +175,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Apps outside the sim find the core through a port file
 
+Numbered as [decision 014](../../decisions/014-apps-find-core-through-port-file.md) on 2026-10-13.
+
 - **Decided:** the core writes its port, its process ID, and its process's creation time, the `FILETIME` that `GetProcessTimes` gives, to a file in its data folder, and a core that finds the file naming a core that's still running, with that ID and that creation time, exits, so one core runs for each data folder.
   The desktop app reads the port there, and starts the core when the file names no running process with that ID and creation time; the watcher reads the process ID and creation time, and shows the CPU and memory use of the process that matches both beside its own.
   Settled in node 1.2 by the user, 2026-10-08, and the creation time in node 1.2 by the user, 2026-10-09, after node 1's walk through a session reopened it.
@@ -159,6 +186,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - A crashed core leaves its port file behind, and a process's ID "may be reused" once "all handles to the process are closed and the process object is freed" (documented, [PROCESS_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/ns-processthreadsapi-process_information)), so the ID alone could name another program, and a restarted core could find it and exit.
 
 ## The watcher reads what its jobs need from files the core writes
+
+Numbered as [decision 015](../../decisions/015-watcher-reads-files-core-writes.md) on 2026-10-13.
 
 - **Decided:** beside the port file, the core writes what the watcher's jobs need, the date of the pilot's last session.
   The watcher reads it, and opens no socket to the core.
@@ -170,6 +199,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - plugins' changes to aircraft files, which the watcher would apply before the sim boots from files the core writes, and which wait with how a plugin changes an aircraft's files ([plugin code runs only in the core](#plugin-code-runs-only-in-the-core))
 
 ## The core keeps the pilot's settings
+
+Numbered as [decision 016](../../decisions/016-core-keeps-pilots-settings.md) on 2026-10-13.
 
 - **Decided:** the core keeps the pilot's settings in its data folder, such as the take-control binding, the output device, and the recording mode, and reads them when it starts.
   The desktop app edits them by command, and decides nothing ([01-spine](01-spine.md#components)); the EFB app offers no setting in v1 ([EFB app](../product/03-v1-scope.md#efb-app)).
@@ -184,6 +215,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The core writes the WASM module's control slot every 200ms
 
+Numbered as [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md) on 2026-10-13.
+
 - **Decided:** in a session, the core writes the WASM module's control slot every 200ms, with the session's state and a counter, and each kind of message has a SimConnect client data area, a data slot, of its own.
   The module leaves its version in a slot when it loads, and writes a counter every second.
   Settled in node 1.2 by the user, 2026-10-08.
@@ -194,6 +227,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - A slot keeps its last value after its writer restarts (documented, same chapter), so a value that stays put can't show that the module still runs, and only a counter that moves tells the core it does.
 
 ## Crosscheck is written in Rust, and in TypeScript where an engine runs it
+
+Numbered as [decision 018](../../decisions/018-rust-and-typescript.md) on 2026-10-13.
 
 - **Decided:** the core, the helper, the watcher, the desktop app's program, and the WASM module are Rust.
   TypeScript is for the code in Coherent GT, the desktop app's pages, plugins, and the backend ([01-spine](01-spine.md#language-and-toolchains)), and a profile's script is JavaScript in its YAML, which TypeScript checks against our declarations ([01-format-and-delivery](../profiles/01-format-and-delivery.md#names)).
@@ -217,6 +252,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The core's input and audio work runs in a helper it starts
 
+Numbered as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) on 2026-10-13.
+
 - **Decided:** the core's work with Windows input and audio, through Raw Input, the microphone, ATC capture, playback, and the speech recognizer, runs in the helper, a program of its own.
   The core starts the helper in a session and while the desktop app binds a key or lists the output devices, starts it again if it exits, and talks to it over its standard input and output.
   Settled in node 1.3 by the user, 2026-10-08.
@@ -226,6 +263,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** the fields of the helper's messages, which the crate the Rust components share defines for both ends ([01-spine](01-spine.md#messages-between-components)), and their binary format, a choice inside the core and the helper ([01-spine](01-spine.md#left-open)).
 
 ## Plugin code runs only in the core
+
+Numbered as [decision 020](../../decisions/020-plugin-code-runs-only-in-core.md) on 2026-10-13.
 
 - **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS-ng embedded there under memory and time limits ([above](#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, and the sim only through APIs our own code carries out, and never the pilot's files or the network.
   Nothing a plugin ships runs in a panel or in the module: for something inside the sim's frame, our module offers mechanisms the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, and for something in a panel, our panel bridge offers generic operations.
@@ -244,6 +283,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
   - how a plugin changes an aircraft's files, which waits until a plugin needs it, with [decision 001](../../decisions/001-changing-other-developers-packages.md) holding meanwhile (user, 2026-10-11)
 
 ## Profiles and plugins reach pilots apart from Crosscheck's releases
+
+Numbered as [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md) on 2026-10-13.
 
 - **Decided:** profiles and plugins update apart from Crosscheck's releases.
   They live in one public repository of flat files, and on each merge CI builds each profile into a bundle, one YAML file with its modules merged in and its plugin compiled to JavaScript under a `plugin:` key only the builder writes, checks it, works out its level, and publishes it on GitHub Pages: an index of every published bundle, with its profile's path, the variants it covers, its hash, the date CI published it, and its level, and every bundle under its hash, kept for good.
@@ -269,6 +310,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them
 
+Numbered as [decision 022](../../decisions/022-random-uuids-as-text.md) on 2026-10-13.
+
 - **Decided:** a session's ID and a pilot's ID are each a version 4 UUID, which has 122 random bits.
   The host's core draws the session's when it starts the session, and each pilot's core draws theirs when they start or join a session, and keeps it through every rejoin of it; each crosses as its lowercase text wherever JSON or TypeScript reads it.
   A run of the sim is named by its process's ID and the time the process was created.
@@ -283,6 +326,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** how the cores pack each vector clock counter's key, by pilot ID and restart count or by place in the member list ([01-spine](01-spine.md#left-open)).
 
 ## A pilot keeps their ID through a core restart, and the core counts its restarts
+
+Numbered as [decision 023](../../decisions/023-pilot-id-and-restart-count.md) on 2026-10-13.
 
 - **Decided:** the core keeps a session file in its data folder, from when the pilot starts or first joins a session until they press Leave session, the session ends for them after 30 minutes cut off ([01-between-machines](../network/01-between-machines.md#coming-back)), or the core learns the session has ended.
   The file holds the session's ID and invite code, the pilot's ID, the core's restart count, the run of the sim the pilot was in, the core's endpoint key for the session, the crew's endpoint IDs, and the session's relay list with its tokens ([01-between-machines](../network/01-between-machines.md#joining)).
@@ -308,6 +353,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A time in a message is µs on the sender's PC's monotonic clock
 
+Numbered as [decision 024](../../decisions/024-times-in-microseconds-on-monotonic-clock.md) on 2026-10-13.
+
 - **Decided:** every stamp in a message, the moment a value was read, is a whole number of µs on Windows' `QueryPerformanceCounter` on the sender's PC, whose ticks become µs through `QueryPerformanceFrequency`, and every span in a message is a whole number of µs, whatever clock measured it.
   The conversion to µs runs in 128 bits, so it doesn't overflow on a PC that has run for weeks.
   A value is stamped when it's read, and the core stamps each message from a page in the sim or a plugin, and each value it requests through SimConnect, as it arrives, since a page can't read the counter, and the clocks a plugin can read, QuickJS-ng's `Date.now()` and `performance.now()`, aren't shown to count the same ticks; a page that needs a span measures it on its own clock and sends the span.
@@ -326,6 +373,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Messages are defined in one Rust crate: JSON typed by ts-rs for TypeScript, fixed-width structs in data slots, and length-prefixed binary to the helper
 
+Numbered as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) on 2026-10-13.
+
 - **Decided:** over a WebSocket, into a plugin, and both ways between the desktop app's Rust side and its pages, as a string each side parses, a message is JSON that serde_json writes, and the TypeScript sides take their types from ts-rs, generated from the crate that defines the messages, with ts-rs's large-integer setting at `number`, which types `i64`, `u64`, `i128`, and `u128` alike, so an integer field that can pass 2^53 crosses as text, as the IDs do.
   In a data slot, a message is a struct of fixed-width fields, with its size and field offsets asserted in the crate, which builds for x86_64 and wasm32.
   Over the helper's standard input and output, a message is binary and prefixed with its length.
@@ -339,6 +388,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** the encoding between cores, for the node on how the cores reach each other; whether the desktop app's pages and its Rust side trade the messages' text through Tauri's commands or its events, and whether tauri-specta types the command calls; and the choices inside the crate's build ([01-spine](01-spine.md#left-open)).
 
 ## Every first message carries one version number and a hash of the message crate
+
+Numbered as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) on 2026-10-13.
 
 - **Decided:** the watcher, the core, the helper, the desktop app, and the Community package, with the WASM module in it, carry one version number, which the build writes into each from one place.
   Each first message, the module's version slot, and each pilot's join carry that version and a hash of the message crate, both as text.
@@ -355,6 +406,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The core runs on tokio
 
+Numbered as [decision 027](../../decisions/027-core-runs-on-tokio.md) on 2026-10-13.
+
 - **Decided:** the core's Rust code runs its sockets, timers, and other waiting work on tokio, the async runtime.
   Its WebSocket library is a choice inside the core, which accepts a connection only with the `Origin` it allows ([above](#the-core-accepts-a-websocket-only-with-the-sims-origin-or-none)) and can listen beyond the PC, off by default ([01-spine](01-spine.md#left-open)).
   Settled in node 1.6 by the user, 2026-10-09.
@@ -366,6 +419,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The desktop app's pages are React, built with Vite and styled with Tailwind
 
+Numbered as [decision 028](../../decisions/028-desktop-pages-react-vite-tailwind.md) on 2026-10-13.
+
 - **Decided:** the desktop app's pages are TypeScript and React, built with Vite and styled with Tailwind.
   They share no interface with the EFB app, only TypeScript logic and the types ts-rs generates from the message crate.
   Settled in node 1.6 by the user, 2026-10-09.
@@ -376,6 +431,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** nothing; the shared logic's compiling is settled [below](#our-code-in-the-sim-is-type-checked-against-es2017-and-bundled-by-esbuild-at-es2017).
 
 ## Our interface in the sim is built on the MSFS Avionics Framework
+
+Numbered as [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md) on 2026-10-13.
 
 - **Decided:** the EFB app and the banner panel draw their interface with the MSFS Avionics Framework's FSComponent, in TypeScript, and the EFB app registers with the sim's EFB through Asobo's EFB API.
   The banner panel bundles our own copy of `@microsoft/msfs-sdk`, pinned to one exact version, not the copy the sim provides.
@@ -392,6 +449,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Our code in the sim is type-checked against ES2017 and bundled by esbuild at es2017
 
+Numbered as [decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md) on 2026-10-13.
+
 - **Decided:** TypeScript checks the types of our code in the sim with its `lib` set to `DOM`, `DOM.Iterable`, `ES2017`, and `ES2021.WeakRef`, and esbuild bundles each page's code, our pinned framework included, at `es2017`.
   The EFB app and the desktop app's pages share TypeScript logic and ts-rs's types, compiled this way for the EFB app.
   Settled in node 1.6 by the user, 2026-10-09.
@@ -404,6 +463,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** whether the framework's `for`-`of` rewrite, which esbuild can't run, pays for itself in our interface ([01-spine](01-spine.md#left-open)).
 
 ## A tool of our own checks every file we ship into the sim against Coherent GT's measured limits
+
+Numbered as [decision 031](../../decisions/031-coherent-gt-check-tool.md) on 2026-10-13.
 
 - **Decided:** every JavaScript file we ship into the sim, experiments' files included, passes a check run after every edit and in CI.
   The check parses each file at ECMAScript 2017, with the pattern of each regex literal and of each `new RegExp(...)` given a fixed string, and fails any use of a built-in or web API [Coherent GT's JavaScript](coherent-gt.md) lists as missing or filled in only in some documents.
@@ -418,6 +479,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** a regex built from a pattern computed at run time, which a parse can't see; and how the tool is built, for the build's stage of step 8 ([01-spine](01-spine.md#left-open)).
 
 ## Every pair of cores holds one QUIC connection through iroh 1.3, directly or through our relays
+
+Numbered as [decision 032](../../decisions/032-one-quic-connection-through-iroh.md) on 2026-10-13.
 
 - **Decided:** each core runs one iroh 1.3 endpoint, under a key drawn fresh for each session and kept in the session file, and holds one QUIC connection to every other core in the session.
   iroh makes the connection directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't, and moves it between the two.
@@ -441,6 +504,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck
 
+Numbered as [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) on 2026-10-13.
+
 - **Decided:** a relay runs n0's `iroh-relay`, in Rust, with nothing of ours on it, in at least two regions.
   It admits only clients that present one of its shared tokens, and caps each client's rate.
   Each release carries the default relay list, each entry with its URL, token, and cap, and a setting overrides the list; a token changes only with a release, and a relay lists the old token and the new one until the old release is out of use.
@@ -460,6 +525,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## The backend matches invite codes to the crew's endpoint IDs, and no running session waits on it
 
+Numbered as [decision 034](../../decisions/034-backend-matches-invite-codes.md) on 2026-10-13.
+
 - **Decided:** the backend draws each invite code and keeps the session under it: its ID, the host's Crosscheck version and message crate hash, its relay list with each relay's token, and each member's pilot ID, display name, kind, crew in v1, and endpoint ID ([01-between-machines](../network/01-between-machines.md#joining)).
   A joining core looks up the code; the backend refuses a joiner whose version or message crate hash differs from the session's, naming who is behind, and otherwise answers with the session's ID, its relay list, and the crew, and lists the joiner only once the joiner registers itself, after its first message has passed with a member.
   A joining core dials each member by endpoint ID through every relay in the session's list, and iroh finds the direct path, so the backend and the session file keep endpoint IDs and no addresses.
@@ -478,6 +545,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** what the backend runs on, for which the spine's candidate is a Cloudflare Worker ([01-spine](01-spine.md#components)).
 
 ## Each channel declares how it travels, and only the cockpit stream is replayed
+
+Numbered as [decision 035](../../decisions/035-channels-declare-how-they-travel.md) on 2026-10-13.
 
 - **Decided:** the core keeps a registry of the session's channels, each declaring who sends and receives it, its delivery, its priority, and whether it joins the cockpit's shared order.
   v1's channels have fixed numbers in the message crate, each stream opens with a header naming its channel, a channel in the cockpit's shared order rides the cockpit stream tagged with its channel, and a plugin opens only instances of the kinds Crosscheck provides, announcing each on the session channel.
@@ -506,11 +575,13 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Control is one value, a generation and the PF's pilot ID
 
+Numbered as [decision 036](../../decisions/036-control-is-one-value.md) on 2026-10-13.
+
 - **Decided:** every change of PF, by the take-control key, by voice, by a PF leaving the flight, or by a takeover while a link is lost, raises the generation one past the highest its maker has seen, and of two changes with the same generation, the one naming the lower pilot ID wins.
   The value rides the session channel as one key, in a new connection's first message, and every cockpit message and flight-model sample carries the whole value it was made under.
   A receiver drops a sample made under an older value than the newest it knows, and of cockpit messages only those a superseded value's PF made under it that the change of control's vector clock doesn't include, live or in a replay (changed in node 3, [04-order-and-recovery](../sync/04-order-and-recovery.md#a-change-of-control)); a dropped message counts as delivered for the cockpit's causal order.
   A receiver that meets a newer value on any message or sample adopts it.
-  A PF who leaves the flight or the session, or quits, passes control as an ordinary handover to a pilot still in the flight, in v1 the PM, and leaves only once that pilot's messages carry the new value or 1s has passed; a PF whose sim closes, by a crash or otherwise, has left the flight, and its core, which stays up, passes control the same way (user, 2026-10-11, in node 3; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)); and if no pilot is in the flight, the session ends ([below](#v1s-table-of-roles-holds-the-pf-and-the-traffic-and-atc-host-whom-a-pilot-chooses-by-hand)).
+  A PF who leaves the flight or the session, or quits, passes control as an ordinary handover to a pilot still in the flight, in v1 the PM, and leaves only once that pilot's messages carry the new value or 1s has passed; a PF whose sim closes, by a crash or otherwise, has left the flight, and its core, which stays up, passes control the same way (user, 2026-10-11, in node 3; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)); and if no pilot is in the flight once preflight has ended, the session ends ([below](#v1s-table-of-roles-holds-the-pf-and-the-traffic-and-atc-host-whom-a-pilot-chooses-by-hand)).
   This replaces [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the earlier press wins, however small the gap.
   Settled in node 2 by the user, 2026-10-11.
 - **Because:**
@@ -523,6 +594,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** who may change control and when, which the table of roles sets ([roles and members](../session/01-roles-and-members.md#the-pf)).
 
 ## While a link is lost, the PF flies on, a PM that lost the flying machine locks, and any pilot can take control
+
+Numbered as [decision 037](../../decisions/037-while-a-link-is-lost.md) on 2026-10-13.
 
 - **Decided:** iroh's path idle timeout is 2s and its path keep-alive 0.67s, and the core sends no copies over a second path.
   Through a short gap, the following machine carries the aircraft on its last velocities and eases it to the true position when samples come again.
@@ -544,6 +617,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A receiver estimates each sender's clock offset from one timed exchange a second
 
+Numbered as [decision 038](../../decisions/038-clock-offset-from-timed-exchange.md) on 2026-10-13.
+
 - **Decided:** each core's heartbeat carries one clock exchange a second with each other core; it takes the offset as NTP does, ½[(T2 − T1) + (T3 − T4)], from the exchange with the shortest round trip of the last 8, and starts afresh when the sender's restart count rises.
   The recording keeps each sender's offset estimate and restart count once a second.
   This answers the spine's questions of how a receiver estimates a sender's offset, what a higher restart count does to it, and how far two PCs' counters part ([01-spine](01-spine.md#left-open)).
@@ -554,6 +629,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** the error when a connection's two directions take unequal times, which is half the difference; and easing the offset the following machine applies when it steps, for the flight-model sync ([01-between-machines](../network/01-between-machines.md#clock-offsets)).
 
 ## A cut link comes back by replay, and a sim, core, or PC that went down comes back as a late joiner
+
+Numbered as [decision 039](../../decisions/039-cut-link-replays-others-late-join.md) on 2026-10-13.
 
 - **Decided:** after a cut link, with the sim and the core still running, a pilot gets a replay of every missed change in causal order, each after the gap the PF left, capped at 2s, except that of each run of changes to a PF-owned entry with only PF-owned changes between them, it applies only the last, in its place.
   That pacing holds for every cockpit message, live or replayed: each waits the gap its sender left before it, capped at 2s, counted from when the one before it applied, so it waits only what's left, and the core alone paces, with our panel bridge playing each press when the core hands it over.
@@ -572,6 +649,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## Catch-up writes in the order the flying machine's cockpit first took each value
 
+Numbered as [decision 040](../../decisions/040-catch-up-first-final-value-order.md) on 2026-10-13.
+
 - **Decided:** catch-up writes each entry at the flying machine's value, in the order the flying machine's cockpit first took each of those values, read from its recording, with entries it took before the session or never changed first.
   It carries the flying machine's vector clock, which the catching-up machine takes for every counter but its own, which never goes back, so every message the state already holds drops as a copy, and it starts again from a new flying machine, skipping what already matches, if control passes between other pilots.
   v1's catch-up pipeline has one step, catching up state; the simulation rate and pause reach a late joiner as session keys, the time and date aren't synced in v1, and traffic reaches them as the host's objects, which a receiver spawns whenever its sim is in a flight.
@@ -589,6 +668,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A core that crashes comes back as a late joiner
 
+Numbered as [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) on 2026-10-13.
+
 - **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
   Because the aircraft didn't reload, each shadow value starts at the flying machine's, and the aircraft counts as settled at once.
   The recording's minimal mode keeps the cockpit stream, from which catch-up takes its order.
@@ -600,6 +681,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** a shadow value's turns its pilot made while the core was down; and the presses either pilot made in that window, which are lost.
 
 ## A machine's vector clock is its record of what it applied, and a skipped message counts as applied
+
+Numbered as [decision 042](../../decisions/042-vector-clock-records-what-applied.md) on 2026-10-13.
 
 - **Decided:** a receiver's vector clock is its one record of what it applied: a message the clock already covers is a copy and drops, the sender's own counter is a message's number, and the heartbeat acknowledges by carrying the clock.
   A message counts as applied once its write is made, its event fired, or its press played by the display's panel through to its release.
@@ -618,6 +701,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A shared entry every machine's aircraft keeps changing stops syncing, and a machine puts back what it may not send
 
+Numbered as [decision 043](../../decisions/043-driven-entries-and-putting-back.md) on 2026-10-13.
+
 - **Decided:** a machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Crosscheck's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notice of a write that never lands.
   When a machine's sim reports a change Crosscheck didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
   Settled in node 3 by the user, 2026-10-11, and the test's reach to event entries by the user, 2026-10-13 ([04-order-and-recovery](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
@@ -629,6 +714,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** tuning the 3s and the 30s from v1's recordings.
 
 ## v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand
+
+Numbered as [decision 044](../../decisions/044-table-of-roles.md) on 2026-10-13.
 
 - **Decided:** each member writes its own entry on the session channel, crew in v1 and passenger later; crew members hold vector clock counters and acknowledge on the heartbeat, and a passenger, on a one-way feed off the crew's links, holds nothing up.
   The table of roles gives each role who may hold it, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.
@@ -648,6 +735,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 
 ## A profile is YAML whose script is JavaScript, where names only name and only `write()` writes
 
+Numbered as [decision 045](../../decisions/045-profile-format-yaml-and-javascript.md) on 2026-10-13.
+
 - **Decided:** a profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Crosscheck's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included; a run's plain `write()` calls go out together, in call order, and only a chain spaces them.
   Every entry's `write:` is required, and is a name, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function `(value) => …` that reads the global `state` and returns nothing, or, on a state entry, `none` for a watch-only entry.
   A state entry whose value no variable shows counts events into a shadow value starting from `default`, and `wrap` and `range` appear only in a map that steps or counts, `wrap` required in each but a counted entry's stepping write, which takes the count's.
@@ -666,6 +755,8 @@ The watcher and the core are the two long-running processes in [the spine](01-sp
 - **Leaves out:** whether the core tells which preset loaded from the path the sim reports or from `A:TITLE`, for the core's stage of step 8; settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, reading client data, and locations for a module's entries, each until a profile or plugin needs it; and how the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, which sync's stage of step 8 settles on a two-instance bench, starting from one attempt per write and one run of a function per value, with the cases [01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write) lists (user, 2026-10-12).
 
 ## Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value
+
+Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) on 2026-10-13.
 
 - **Decided:** each loaded aircraft gets two QuickJS-ng runtimes in the core, one for its profile's script and one for its plugin, each limited to 64 MB of memory and 100ms a call by the clock, and an entry's value is capped at 4 KB as sent, with no cap of its own on the state object.
   A write function at a limit fails that write and its entry is flagged; a plugin at a limit is turned off for the rest of the session, and every machine stops syncing its entries; and a value over 4 KB isn't sent and its entry is flagged.

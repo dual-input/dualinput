@@ -1,0 +1,14 @@
+[package]
+name = "p10-capture"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p10-common = { path = "../common" }
+
+[dependencies.windows-sys]
+version = "0.59"
+features = ["Win32_Foundation", "Win32_Security", "Win32_System_Performance", "Win32_System_Threading"]
+
+[build-dependencies]
+bindgen = "0.72"

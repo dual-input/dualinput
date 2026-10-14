@@ -1,0 +1,9 @@
+[package]
+name = "p10-loop"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+p10-common = { path = "../common" }
+rquickjs = "=0.14.0"
+zstd = "0.13"

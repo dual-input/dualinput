@@ -584,6 +584,7 @@ Each child's answer goes in a design doc in its system's area.
 Exit: every child is done.
 Waits on 5.
 Raised elsewhere: by 5.1, which of the host's hooks, and which features' own moments, plugins reach through QuickJS-ng, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
+Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, for the child that designs recording, since the one loop of [5.1.1's entry](log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc) replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
 
 ## 7 Testing
 
@@ -602,6 +603,7 @@ It reads 5.2's answer, the [bench cases for checking a write](../profiles/01-for
 Its answer goes in a design doc in the build area, `record/areas/build/01-testing.md`, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
 Exit: the user agrees to that design doc.
 Waits on 5.
+Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
 
 ## 8 The build order
 

@@ -1,0 +1,9 @@
+# p10's programs (node 5.1.2 of record/areas/architecture/plan.md): the capture,
+# which records what a flying machine's core would read from the sim, and the
+# loop, which runs a core's load on one thread and replays its own recording.
+[workspace]
+members = ["common", "capture", "loop"]
+resolver = "2"
+
+[profile.release]
+debug = false

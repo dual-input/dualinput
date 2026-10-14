@@ -774,8 +774,8 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## Crosscheck's code is a host, engines, and features, and deleting a feature's crate leaves the rest whole
 
 - **Decided:** Crosscheck's code is in three tiers: the host, the services every feature uses, in the core and, through the panel bridge and our WASM module, in the sim; engines, libraries that know nothing of the app; and features, each one thing a pilot gets.
-  Three tests stand in for a definition of clean: deleting a feature's crate and its one registration leaves everything else building and passing its tests; an engine builds and runs outside the core; and CI checks each crate's dependencies against the ones the code map allows.
-  A feature's messages stay in the one message crate, and its profile block in the profile engine, so deleting a feature also deletes its module in each.
+  Three tests stand in for a definition of clean: deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, and its section in each app, leaves everything else building and passing its tests; an engine builds and runs outside the core; and CI checks each crate's dependencies against the ones the code map allows.
+  A feature's messages stay in the one message crate, and its profile block in the profile engine, which is why deleting a feature deletes a module in each.
   Settled in node 5 by the user, 2026-10-14 ([02-code-map](02-code-map.md#tiers)).
 - **Because:**
   - The user wants each system clean, "almost like you could take it out of the project", with confidence in it before any product code, and without a definition in prose that agents would enforce where it doesn't fit (user, 2026-10-14).
@@ -791,7 +791,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Everything the loop reads from disk, the settings, the session file, and the profile's bundle, arrives as an input.
   Handlers are synchronous, read no clock, do no I/O, and iterate no `HashMap`; time arrives with each input, and timers and slow work leave as outputs and come back as inputs.
   A profile's script and a plugin get no clock: their QuickJS-ng contexts leave out `Date`, `performance`, and `Math.random`, and one that has to wait asks the host for a timer; the 100ms limit stays by the clock, and the recording keeps the count of interrupt calls at which it fired.
-  The host records the queue under a header that names the build and a seed, so the same build replays a whole run, and only that build reads it as a replay; what a later version reads from a recording is a separate, self-describing record with named fields.
+  The host records the queue under a header that names the build, so the same build replays a whole run, and only that build reads it as a replay; what a later version reads from a recording is a separate, self-describing record with named fields.
   Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#one-loop)).
 - **Because:**
   - Sans-IO cores, LMAX, and TigerBeetle run this way, game studios replayed matches from recorded inputs to reproduce bugs, while actors leave the order between features to the scheduler and simulation runtimes replay a seeded world, not a pilot's run ([architecture log, 5.1.1][a511]).

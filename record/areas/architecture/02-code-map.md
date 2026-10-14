@@ -7,7 +7,7 @@ Decides:     The tiers and the tests that keep each unit apart (node 5); how the
 ```
 
 Crosscheck's code is a host, engines, and features.
-The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature's crate and its registration leaves everything else building and passing its tests (user, 2026-10-14).
+The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the host's state, reaches other features only through moments the host raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the host check on it.
 
 This answers node 5 of the [architecture plan](plan.md#5-the-code-map), whose children settle its parts; the plan says which are settled.
@@ -23,12 +23,14 @@ The tentative decisions behind it start at [decisions.md](decisions.md#crosschec
 
 Three tests stand in for a definition of clean, because a definition in prose invites an agent to enforce it where it doesn't fit (user, 2026-10-14):
 
-- Deleting a feature's crate and its one registration leaves everything else building and passing its tests.
+- Deleting a feature leaves everything else building and passing its tests: its crate, its one registration, its module in the message crate and its module in the profile engine (below), and its section in each app.
 - An engine builds and runs outside the core.
 - CI checks each crate's dependencies against the ones this map allows.
 
+So far the map allows these: an engine depends on no host or feature crate; no feature depends on another feature's crate ([what a handler sees and does](#what-a-handler-sees-and-does)); and the loop's crates depend on neither tokio nor any crate that does I/O ([one loop](#one-loop)).
+
 A system is the units one design doc designs, in one area, and [node 6](plan.md#6-systems) of the plan designs each.
-Each contract is defined once and linked or generated wherever it's used: a feature's messages stay in the message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), and its profile block, such as pointer sync's `displays`, stays in the profile engine, which the core, CI, and the IDE share ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), so deleting a feature also deletes its module in each (user, 2026-10-14).
+Each contract is defined once and linked or generated wherever it's used: a feature's messages stay in the message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), and its profile block, such as pointer sync's `displays`, stays in the profile engine, which the core, CI, and the IDE share ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), so deleting a feature deletes its module in the message crate and its module in the profile engine too (user, 2026-10-14).
 
 ## The host's interface
 
@@ -64,7 +66,7 @@ A feature plugs in by registering what it handles, what it declares, and what it
   One that has to wait asks the host for a timer.
 - The one clock read on the loop is QuickJS-ng's 100ms limit, which runs by the clock ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)) in the host's interrupt handler; the recording keeps the count of interrupt calls at which a limit fired, so a replay stops that call at the same point.
 
-The host records its queue, every input with its kind and stamp, under a header that names the build and a seed, so the same build replays a whole run from it, and a bug report names the build to check out.
+The host records its queue, every input with its kind and stamp, under a header that names the build, so the same build replays a whole run from it, and a bug report names the build to check out.
 Only the build that wrote a recording reads it as a replay.
 What a later version reads from a recording, such as the report page's list of sessions, the debrief timeline, and plugin tests, is a separate record in a self-describing format with named fields, so adding a field breaks no older reader, and the recording's design in [node 6](plan.md#6-systems) shapes it, with how much of the queue a recording keeps.
 
@@ -93,7 +95,7 @@ pub fn register(host: &mut Registry) {
 | Hook | The feature declares | A v1 example |
 | --- | --- | --- |
 | Moments | Which of the host's it handles | Pointer sync locks its displays on "link lost" ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)) |
-| Session keys | Each key; whether one member or the whole session writes it; and whether its value names a member, whom the host clears it of when that member leaves the session | Rate and pause owns the pause and the simulation rate ([01-between-machines](../network/01-between-machines.md#channels)) |
+| Session keys | Each key; whether one member or the whole session writes it; and whether its value names a member, in which case the host clears the key when that member leaves the session | Rate and pause owns the pause and the simulation rate ([01-between-machines](../network/01-between-machines.md#channels)) |
 | Channels | Who sends and receives it, its delivery, and its priority | The flight model, as one-off packets ahead of every stream |
 | Cockpit stream kinds | A kind, and the handler that applies it and says when it counts as applied ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)) | Pointer sync's press counts as applied once its panel has played it through to the release |
 | Catch-up steps | A step, and the steps it runs after ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)) | State sync's catching up state |
@@ -102,7 +104,8 @@ pub fn register(host: &mut Registry) {
 | Settings, notices, and items for the match check | Each one | The take-control binding; "Couldn't sync the beacon" |
 | The helper's input and audio | The bindings, captures, and sounds it needs | The take-control key; capturing the ATC app |
 
-A role a feature holds is one of its session keys, naming the member who holds it, as traffic's names the traffic host and ATC audio's the ATC host; who may hold a role, where a later role limits it, is a guard on writing its key.
+A role is a session key a feature declares, whose value names the member who holds the role: traffic's key names the traffic host, and ATC audio's names the ATC host.
+Where a later role limits who may hold it, its feature registers a guard on writing that role's key.
 [Roles and members](../session/01-roles-and-members.md#the-table-of-roles) keeps the table of roles as the session's documentation, and the code holds no registry of them.
 A feature whose messages must apply in order with the cockpit's, such as a later bus bridge carrying a message that opens a page ([04-room-for-later](../product/04-room-for-later.md#channels)), registers cockpit stream kinds rather than a channel, so no channel declares a place in the cockpit's order.
 
@@ -147,7 +150,8 @@ me.guard::<TakeControl>(Instructor::only_the_instructor);   // Allow, or Deny("O
 Traffic and ATC audio each declare a role's key, the traffic host's and the ATC host's (user, 2026-10-14).
 The host offers one request that claims several keys together, refused whole if any guard denies one, and the apps' "Share my traffic and ATC" switch sends it with both keys, and shows on while this pilot holds both.
 The host never knows what either key is for, and deleting traffic removes its key from the switch in the apps, as deleting a feature removes its section in each app.
-Both keys go out in one message on the session channel, and each key's stamp counts that key's own changes ([01-between-machines](../network/01-between-machines.md#channels)), so two keys always written together settle two pilots' claims made at once on the same pilot (inference).
+Both keys go out in one message on the session channel, and each key's stamp counts that key's own changes ([01-between-machines](../network/01-between-machines.md#channels)).
+When both pilots flip the switch at once, both keys carry the same counts, so both settle on the same pilot (unverified; a [node 7](plan.md#7-testing) bench case in which both pilots claim at once settles it).
 This changes [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), which gives the two one role that can split, and [decision 044](../../decisions/044-table-of-roles.md) once step 8's decisions are numbered.
 
 ### Budgets
@@ -156,7 +160,7 @@ Each is a starting value, which [node 7](plan.md#7-testing)'s bench measures:
 
 - The queue stays under one sim frame at p99: 11.2ms at the 89 sim updates a second our module saw in a flight ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
 - A handler takes at most 1ms, apart from calls into QuickJS-ng, which keep their 100ms limit ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)).
-  One call at that limit holds back about 9 sim updates, in order, and about 5 frames of ATC audio, which reach the playback buffer after their turn and are dropped (arithmetic; inference).
+  One call at that limit holds back about 9 sim updates, in order (arithmetic), and about 5 of ATC audio's 20ms frames, which would reach the playback buffer after their turn and be dropped if the buffer holds less than 100ms (unverified; the ATC design sets the buffer, and the bench measures it).
 - A write function that hits its limit fails that write, and its entry stops syncing on every machine for the rest of the load, as a plugin at its limit is turned off, because on one loop a stuck call holds up every input behind it, where [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-sandbox) counted only the writes behind it.
   This changes decision 046 for write functions once step 8's decisions are numbered.
 - The loop is busy less than 20% of one CPU core through a busy flight.
@@ -167,7 +171,9 @@ Each is a starting value, which [node 7](plan.md#7-testing)'s bench measures:
 - How features reach the sim, and the seam a stand-in sim fills: [5.2](plan.md#52-the-sim-seam).
 - How features add work to our WASM module and the panel bridge, and how each piece tears itself down: [5.3](plan.md#53-work-in-the-sim).
 - Which crates hold the registry and the moments: [5.4](plan.md#54-the-workspace).
-- Which hooks, and which features' own moments, plugins reach through QuickJS-ng: [node 6](plan.md#6-systems).
+- Which crate each unit is, and what each may depend on: node 5, once 5.2 to 5.4 answer.
+- Whether QuickJS-ng's hash seed, which it takes from the wall clock when it makes a context ([5.1.1]), changes anything a script sees: a replay run twice settles it.
+- Which of the host's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which this design gives no feature: [node 6](plan.md#6-systems).
 - How much of the queue a recording keeps, which the parked probe [p10](../../../experiments/areas/architecture/p10-recording.mjs) sizes, and the self-describing record a later version reads: [node 6](plan.md#6-systems).
 - Whether one loop meets its budgets, which p10's loop measures offline: [node 7](plan.md#7-testing).
 

@@ -501,7 +501,7 @@ The spine names the components and the parts ([01-spine](01-spine.md#parts)), an
 
 Three tests stand in for a definition of clean, because a definition in prose invites an agent to enforce it where it doesn't fit (user, 2026-10-14):
 
-- Deleting a feature's crate and its one registration leaves everything else building and passing its tests.
+- Deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, and its section in each app, leaves everything else building and passing its tests.
 - An engine builds and runs outside the core.
 - CI checks each crate's dependencies against the ones the map allows.
 
@@ -583,7 +583,7 @@ Its children, proposed once 5 names the systems, are one for each system the rec
 Each child's answer goes in a design doc in its system's area.
 Exit: every child is done.
 Waits on 5.
-Raised elsewhere: by 5.1, which of the host's hooks, and which features' own moments, plugins reach through QuickJS-ng, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
+Raised elsewhere: by 5.1, which of the host's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, for the child that designs recording, since the one loop of [5.1.1's entry](log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc) replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
 
 ## 7 Testing

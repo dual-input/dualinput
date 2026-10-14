@@ -1,6 +1,7 @@
 # Architecture: plan
 
-This plan designs Crosscheck's v1 architecture, step 7 of [the product plan](../product/plan.md#7-tech-stack-and-architecture), and goes deeper until every detail rests on a fact, by the rule in [When a node is done](#when-a-node-is-done).
+This plan designs Crosscheck's v1 architecture in nodes 1 to 4, for [step 7](../product/plan.md#7-tech-stack-and-architecture) of the product plan, and v1's code map, systems, tests, and build order in nodes 5 to 8, for [step 8](../product/plan.md#8-v1-build-plan).
+Each goes deeper until every detail rests on a fact, by the rules in [When a node is done](#when-a-node-is-done).
 It grows as a tree of questions.
 A question we can't answer yet gets child questions for what it needs first, so each level's detail comes from the work on the level above it.
 
@@ -32,9 +33,10 @@ When working one node turns up something another node has to settle, add it unde
 That node's answer settles each such line before it's marked done, and a line added under a done node reopens it, as [Reopening a node](#reopening-a-node) says.
 If no node covers it, propose a new node for it, as step 2 says.
 
-The tree's root is step 7 of the product plan: its question is step 7's exit, and its children are the top-level nodes.
-When every top-level node is done and their answers don't yet give each decision step 7's exit names, propose the next top-level node, as step 2 does.
-When they do, check the top-level answers as step 4 does, number this area's tentative decisions as [Where answers go](#where-answers-go) says, and mark step 7 done in [the product plan](../product/plan.md#7-tech-stack-and-architecture).
+The tree has two roots, steps 7 and 8 of the product plan, and each root's question is its step's exit.
+Step 7's top-level nodes are 1 to 4, and step 8's are 5 to 8.
+When every top-level node under a root is done and their answers don't yet give what its step's exit names, propose the next top-level node under it, as step 2 does.
+When they do, check the top-level answers as step 4 does, run the other checks its step's exit names, number this area's tentative decisions as [Where answers go](#where-answers-go) says, and mark the step done in [the product plan](../product/plan.md).
 
 ## When a node is done
 
@@ -44,6 +46,13 @@ A node is marked done only when all of these hold:
   A documented or unverified claim needs a child that settles it, such as a read, a search of our prior work, or a probe in `experiments/`, proposed as step 2 says.
 - Every choice the answer leaves open can be made later inside one part of Crosscheck without changing another, as the core's WebSocket library could be if no client sees it (a hypothetical example).
 - Its answer settles each `Raised elsewhere:` line under it.
+
+A node under step 8 goes one level below the spine, so it also meets these:
+
+- Every choice its answer leaves open can be made later inside one crate or package without changing another's interface, where the second rule above asks only for one part.
+- Every rule its answer leaves open that turns on frame timing is a named test case, owned by one crate, for [node 7](#7-testing)'s tests in the sim, because frame timing is settled in the sim, not on paper ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
+- Its answer sets a budget for the code it designs: frame time for code in the sim, and CPU and memory for code that runs all day on the pilot's PC (user, 2026-10-14).
+- Its answer has had one review round: a scenario walker, a simplifier, and a fact-check.
 
 ## Where answers go
 
@@ -56,7 +65,7 @@ An answer goes in one of these documents, never in this plan:
 
 This plan holds each node's question, its status, and its `Raised elsewhere:` lines.
 
-Once the top-level answers pass the root's walk through a session ([how the tree grows](#how-the-tree-grows)), write each tentative decision in this area's `decisions.md` as a numbered decision in `record/decisions/`, and link the tentative one to it; those are the decisions step 7's exit names.
+Once a root's top-level answers pass its walk through a session ([how the tree grows](#how-the-tree-grows)), write each tentative decision from its nodes in this area's `decisions.md` as a numbered decision in `record/decisions/`, and link the tentative one to it.
 A node's answer isn't checked against every other node's until that walk, and a numbered decision can't be edited, so numbering waits for it.
 
 ## Reopening a node
@@ -479,3 +488,107 @@ Reopened on 2026-10-13, by node 3's second review, which made a session fly one 
 Done on 2026-10-13.
 Raised elsewhere: by 1.1 and 1.3, where profiles and plugins are served from, how their signing keys are kept, and how often the core checks for new versions ([01-spine](01-spine.md#left-open)).
 Raised elsewhere: by 1.4, how the version of our plugin API that each profile and plugin declares relates to Crosscheck's version ([01-spine](01-spine.md#left-open)).
+
+## 5 The code map
+
+Question: what are the units of Crosscheck's code, its crates and packages; which tier is each in; what does each own; what is its interface; which units may it depend on; and which units make up each system?
+Step 8 can't design a system, a test, or a stage until it knows which units exist and what each may reach.
+The spine names the components and the parts ([01-spine](01-spine.md#parts)), and the code map names the units inside them, each in one of three tiers (user, 2026-10-14):
+
+- **The host:** the services every feature uses, in the core, such as the session, control, channels, and recording, and in the sim, the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)).
+- **Engines:** libraries that know nothing of the app, so another program, such as the [Crosscheck IDE](../product/ideas.md#crosscheck-ide), can link them.
+- **Features:** each one thing a pilot gets, such as pointer sync or the PF's spot on the world map.
+
+Three tests stand in for a definition of clean, because a definition in prose invites an agent to enforce it where it doesn't fit (user, 2026-10-14):
+
+- Deleting a feature's crate and its one registration leaves everything else building and passing its tests.
+- An engine builds and runs outside the core.
+- CI checks each crate's dependencies against the ones the map allows.
+
+A system is the units one design doc designs, in one area, and [node 6](#6-systems) designs each system.
+A feature's messages stay in the one message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), so deleting a feature also deletes its module there (user, 2026-10-14).
+Each contract is defined once, and linked or generated wherever it's used, because every hand-kept copy in our earlier work bred bugs.
+fsc-editor's Trace copied eight of FS Copilot's C# functions into TypeScript, and of the bugs in its first cut, "All three were found by re-reading, not by any check" (fsc-editor, `docs/help/trace-panel.md`, "The problem, stated honestly").
+An IDE that links the sync engine runs the core's own code instead.
+It reads the spine, decisions 001 to 046, the design docs in the [network](../network/01-between-machines.md), [sync](../sync/01-profile-entries.md), [session](../session/01-roles-and-members.md), and [profiles](../profiles/01-format-and-delivery.md) areas, [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), and the [avatars' tentative decisions](../avatars/decisions.md).
+Its answer goes in `02-code-map.md`, in this area.
+Exit: the user agrees to `02-code-map.md`.
+Waits on 5.1, 5.2, 5.3, and 5.4.
+
+## 5.1 The host's interface
+
+Question: what does a feature register with the host, and what may it call, among session moments, channels, catch-up steps, message kinds on the cockpit stream, client commands and state, notices, settings, recording, and work in the sim; and do plugins reach the same interface through QuickJS-ng?
+5 can't give any feature its dependencies without it, since every feature's crate is written against it.
+[04-room-for-later](../product/04-room-for-later.md#plugins) names the hooks, moments in a session, channels, catch-up steps, and code inside the sim, and says "v1's own features are built on the hooks plugins use", but gives them no shape.
+It also settles how an ID that's stored, or crosses between versions, is named, such as a message's kind in the recording, which later versions of Crosscheck still read ([04-room-for-later](../product/04-room-for-later.md#recording)).
+postcard writes an enum's variant as its position (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`), so deleting one feature's variant would shift every variant after it.
+It reads 04-room-for-later, the [channels](../network/01-between-machines.md#channels) of 01-between-machines, [04-order-and-recovery](../sync/04-order-and-recovery.md), the [plugins](../profiles/01-format-and-delivery.md#plugins) of 01-format-and-delivery, and the spine's [components](01-spine.md#components).
+Its answer goes in its own section of `02-code-map.md`.
+Exit: the user agrees to that section.
+
+## 5.2 The sim seam
+
+Question: through what interface do the host, the features, and the engines reach the sim, so that a stand-in can fill it on the bench, a recording can replay through it, and the IDE can link it; and do features share one SimConnect connection, or hold one each?
+5 can't place sim access or the sync engine without it, and [node 7](#7-testing) can't design the bench.
+fsc-editor kept the raw events it got from the sim apart from the state it built from them, recorded the raw events, and replayed them through the same code: its replay "swaps the source of events and changes nothing else" (fsc-editor, `src/main/sim/replay.ts`).
+FS Copilot's traffic plan gave traffic a SimConnect connection of its own, so "disposing it is a complete cleanup" (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`), and a client's masks end with its connection ([flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
+It reads the spine's [the core](01-spine.md#the-core) and [the WASM module](01-spine.md#the-wasm-module), the foundations chapters [04-01](../../learn/foundations/04-01-connection-and-data.md) and [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), this area's [2026-10-09 flight entry](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start), and fsc-editor's `src/main/sim/`.
+Its answer goes in its own section of `02-code-map.md`.
+Exit: the user agrees to that section.
+
+## 5.3 Work in the sim
+
+Question: how does a feature add work to our WASM module, one binary the sim loads when it mounts our package, and to the panel bridge, which loads a module for each instrument a feature or a plugin names; and how does each piece tear itself down when its session ends or the core goes quiet?
+5 can't run its first test, deleting a feature's crate, on a feature with code in the sim without it, and the spine leaves each module's teardown to the parts that design the panel bridge and the WASM module ([01-spine](01-spine.md#left-open)).
+Anything in the pilot's input path must fail open, so the answer gives every such piece the three things [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) asks for.
+It reads the spine's [what moves them](01-spine.md#what-moves-them) and [code in the sim](01-spine.md#code-in-the-sim), 04-room-for-later's [code inside the sim](../product/04-room-for-later.md#code-inside-the-sim), and the FS Copilot fork's `FsCopilot.Bridge.Wasm/wasm_module.cpp` and `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`.
+Its answer goes in its own section of `02-code-map.md`.
+Exit: the user agrees to that section.
+
+## 5.4 The workspace
+
+Question: where does each unit live in the repository; how does one repository build the Windows programs for x86_64, the WASM module for wasm32 through cargo-msfs, our code in the sim through esbuild at `es2017`, the desktop app's pages through Vite, plugins and write functions for QuickJS-ng, and the backend for its Worker, with the message crate built for both of Rust's targets; and how does CI run the code map's third test?
+5 can't give a unit its place, or run that test, without it.
+p08 built its module outside its Cargo workspace, with `exclude = ["module"]` (read in `experiments/areas/architecture/flight/Cargo.toml`), so whether the module builds inside one, against the message crate the core also uses, is untried.
+It reads the spine's [language and toolchains](01-spine.md#language-and-toolchains) and [frameworks](01-spine.md#frameworks), decisions [018](../../decisions/018-rust-and-typescript.md), [025](../../decisions/025-messages-in-one-rust-crate.md), and [028](../../decisions/028-desktop-pages-react-vite-tailwind.md) to [031](../../decisions/031-coherent-gt-check-tool.md), and the probes [p03](../../../experiments/areas/architecture/p03-rust-module.mjs), [p07](../../../experiments/areas/architecture/p07-types.mjs), and p08's [build.mjs](../../../experiments/areas/architecture/flight/build.mjs).
+It may end in a build probe.
+Its answer goes in its own section of `02-code-map.md`.
+Exit: the user agrees to that section.
+
+## 6 Systems
+
+Question: what is the design of each system the code map names, deep enough that every choice it leaves open stays inside its own units?
+Step 8 can't lay out stages for code nobody has designed, and every system is designed before any product code (user, 2026-10-14).
+The spine leaves the design of 11 parts to step 8, and more of sync and the session ([parts](01-spine.md#parts)), and files open items under each ([left open](01-spine.md#left-open)).
+The design docs written after it leave more: [01-between-machines](../network/01-between-machines.md#left-open)'s checks, the sync engine's rules for checking a write and the bench cases they start from ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)), and 01-format-and-delivery's [left open](../profiles/01-format-and-delivery.md#left-open).
+Its children, proposed once 5 names the systems, are one for each system the record hasn't designed, and one check against the code map for each design doc already written.
+Each child's answer goes in a design doc in its system's area.
+Exit: every child is done.
+Waits on 5.
+
+## 7 Testing
+
+Question: how is each unit tested: without the sim; on a bench of two cores on one PC, where a stand-in plays the second pilot's sim; in the sim; and on two PCs with friends; and how is each unit's budget measured?
+Step 8 can't order the stages without knowing what proves each one done.
+Tests that need two sims run on two PCs with friends (user, 2026-10-14), so a friend session checks many things at once, comes rarely, and needs no video call, since each machine's recording brings its data back.
+Two rules come from our earlier benches:
+
+- No development mode skips the real path.
+  FS Copilot's `--dev` "builds no Coordinator and no network", so "The wire, the acks, the resend history and the session state machine never run" in it (FS Copilot fork, `record/exerciser/docs/01-design.md`, "Session: the exerciser is a peer").
+- A bench drives the product only through the sim seam and pinned builds, never through its internals.
+  FS Copilot's bench drove whatever its checkout had compiled last, and "a stale build is a working build, and it cost two sessions" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
+
+A bench also forces each network path, as [two cores on one PC](../network/01-between-machines.md#two-cores-on-one-pc) requires.
+It reads 5.2's answer, the [bench cases for checking a write](../profiles/01-format-and-delivery.md#checking-a-write), and the FS Copilot fork's `record/pointer-forwarding/docs/14-test-bench.md` and `record/exerciser/docs/01-design.md`.
+Its answer goes in a design doc in the build area, `record/areas/build/01-testing.md`, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
+Exit: the user agrees to that design doc.
+Waits on 5.
+
+## 8 The build order
+
+Question: which stages build v1, in what order, each with what it builds, what it needs first, its tests, and an exit you can watch happen?
+It's step 8's last output, and where the stages and their status live is this node's to decide, since a plan is the one place status lives ([writing.md](../../../.claude/rules/writing.md#design-plan-and-log)).
+It reads 6's and 7's answers.
+Its answer goes in the plan or plans it chooses, which hold v1's build stages.
+Exit: the user agrees to those plans.
+Waits on 6 and 7.

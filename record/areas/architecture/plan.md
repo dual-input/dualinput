@@ -517,14 +517,31 @@ Waits on 5.1, 5.2, 5.3, and 5.4.
 
 ## 5.1 The host's interface
 
-Question: what does a feature register with the host, and what may it call, among session moments, channels, catch-up steps, message kinds on the cockpit stream, client commands and state, notices, settings, recording, and work in the sim; and do plugins reach the same interface through QuickJS-ng?
+Question: how does the host run its features, and what does a feature register with it and call, among moments in the session, session keys, roles, channels, message kinds on the cockpit stream, catch-up steps, profile blocks, client state and commands, notices, settings, items for the match check, recording, and the helper's input and audio?
 5 can't give any feature its dependencies without it, since every feature's crate is written against it.
 [04-room-for-later](../product/04-room-for-later.md#plugins) names the hooks, moments in a session, channels, catch-up steps, and code inside the sim, and says "v1's own features are built on the hooks plugins use", but gives them no shape.
+Features reach each other only through the host's moments and registries, so deleting one leaves the others whole.
+Traffic and ATC audio each register a role of their own, and one switch grants and releases both (user, 2026-10-14), where [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host) gives them one role that can split.
+A feature's profile block, such as pointer sync's `displays` or avatars' `seats`, stays in the profile engine, as its messages stay in the message crate, because CI and the IDE check a profile without the core (user, 2026-10-14).
 It also settles how an ID that's stored, or crosses between versions, is named, such as a message's kind in the recording, which later versions of Crosscheck still read ([04-room-for-later](../product/04-room-for-later.md#recording)).
 postcard writes an enum's variant as its position (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`), so deleting one feature's variant would shift every variant after it.
 It reads 04-room-for-later, the [channels](../network/01-between-machines.md#channels) of 01-between-machines, [04-order-and-recovery](../sync/04-order-and-recovery.md), the [plugins](../profiles/01-format-and-delivery.md#plugins) of 01-format-and-delivery, and the spine's [components](01-spine.md#components).
 Its answer goes in its own section of `02-code-map.md`.
 Exit: the user agrees to that section.
+Waits on 5.1.1.
+
+## 5.1.1 How hosts run and extend themselves
+
+Question: how do current designs run an app's core and its extensions, on one ordered loop or as concurrent tasks, with extensions registered at compile time, so that deleting one leaves the rest whole, a run replays exactly from its recorded inputs, order holds at the sim's frame rate, and plugins in an embedded JavaScript engine reach a subset of the same hooks?
+5.1 can't choose how the host runs its features without it, and the choice sets the shape of every hook: a call on one loop, or a message between tasks.
+fsc-editor replayed its recorded sim events through the same code, and its replay "swaps the source of events and changes nothing else" (fsc-editor, `src/main/sim/replay.ts`).
+Replaying every input of the core, from the sim, the other cores, the clients, the helper, the clock, and slow work such as a QuickJS-ng call, would carry that to the whole core, so a bug report's recording could reproduce a bug in the core on our own PC.
+A research read settles it.
+It reads sans-IO protocol cores such as quinn-proto and str0m, deterministic simulation testing in Rust, such as madsim, turmoil, and shuttle, actor patterns on tokio, Bevy's plugins and schedules, and VS Code's and Zed's extension APIs.
+It judges each on registering at compile time, deleting an extension, replaying a run from recorded inputs, keeping order at the sim's frame rate, and giving plugins in QuickJS-ng a second face.
+It reads the spine's [the core](01-spine.md#the-core), [decision 027](../../decisions/027-core-runs-on-tokio.md), and 5.1's question.
+Its answer goes in an entry in this area's log, which 5.1's section of `02-code-map.md` cites.
+Exit: a log entry in this area answers the question.
 
 ## 5.2 The sim seam
 
@@ -565,6 +582,7 @@ Its children, proposed once 5 names the systems, are one for each system the rec
 Each child's answer goes in a design doc in its system's area.
 Exit: every child is done.
 Waits on 5.
+Raised elsewhere: by 5.1, which of the host's hooks, and which features' own moments, plugins reach through QuickJS-ng, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
 
 ## 7 Testing
 

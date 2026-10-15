@@ -650,6 +650,7 @@ It settles how much of the queue a recording keeps ([02-code-map](02-code-map.md
 Its answer goes in `record/areas/recording/01-recording-and-bug-reports.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, since the one loop of [5.1.1's entry][5.1.1] replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
+Raised elsewhere: by 6.1, the edge writes a log of every input from the core's first, in every run, with or without a session, since a replay can't start mid-run, so 6.6 keeps or deletes a run's log whole, and a minimal recording, which [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) offers, replays nothing, where the spine's [components with no session](01-spine.md#components-with-no-session) has the core record only in a session ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)).
 
 ## 6.7 The session
 
@@ -659,6 +660,7 @@ It reads 01-roles-and-members, 6.3's, 6.4's, and 6.6's answers, 03-v1-scope's [s
 It settles which pilot's bundle a session pins, and where the core reads a streamed Marketplace aircraft's version ([01-format-and-delivery](../profiles/01-format-and-delivery.md#left-open)).
 Its answer goes in `record/areas/session/02-units.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.1, the session crate decides when the core exits, by the spine's rule, and runs a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, as a Leave before the exit, within 3s of Windows' `WM_QUERYENDSESSION`; it registers the source through which the core hears Windows end the session ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 
 ## 6.8 Profiles
 
@@ -741,6 +743,7 @@ It reads 03-v1-scope's [EFB app](../product/03-v1-scope.md#efb-app) and [notific
 It settles the spine's open items under the apps ([01-spine](01-spine.md#left-open)), and how the status list looks ([01-between-machines](../network/01-between-machines.md#left-open)).
 Its answer goes in `record/areas/interface/01-apps.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosscheck, which the core runs as a Leave before it exits ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 
 ## 6.17 Installing and updating
 
@@ -750,6 +753,7 @@ It reads 03-v1-scope's [installing and updating](../product/03-v1-scope.md#insta
 Its answer goes in `record/areas/install/01-installing-and-updating.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5, where the installer lives, and whether it's a program of ours ([02-code-map](02-code-map.md#left-open)).
+Raised elsewhere: by 6.1, the watcher starts the core again only when it exits with a code other than 0, since every deliberate exit returns 0 and a panic's abort never does; and how the watcher's tray asks the core to quit ([01-loop-and-edge](../core/01-loop-and-edge.md#exiting)).
 
 ## 6.18 The build
 
@@ -760,6 +764,7 @@ It settles the spine's open items under the build, except the check on ts-rs's f
 Its answer goes in `record/areas/build/01-the-build.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.4, what the build does when cargo-msfs, which installs only the newest SDK, has installed one newer than a release's, and how long CI takes on Windows runners, against [5.4's budget](02-code-map.md#budgets-for-the-workspace) ([02-code-map](02-code-map.md#left-open)).
+Raised elsewhere: by 6.1, how the core links the C runtime statically, since `+crt-static` is a target's feature rather than a crate's and 5.4 sets no `RUSTFLAGS`, and whether the watcher, the core helper, and the desktop app link it statically too; and the map check's search of `features/` for `impl Moment`, and its allowance for the one foreign function `apps/core` declares ([01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)).
 
 ## 7 Testing
 

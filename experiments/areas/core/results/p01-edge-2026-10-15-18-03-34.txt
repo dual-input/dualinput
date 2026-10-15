@@ -1,0 +1,68 @@
+p01-edge on Windows 11 Pro 10.0.26200, rustc 1.95.0 (59807616e 2026-04-14)
+MATH	imports of experiments/areas/core/edge/target/release/math.exe, the DLLs and the math functions only:
+MATH	api-ms-win-core-synch-l1-2-0.dll
+MATH	KERNEL32.dll
+MATH	ntdll.dll
+MATH	VCRUNTIME140.dll
+MATH	api-ms-win-crt-math-l1-1-0.dll
+MATH	  tan
+MATH	  exp
+MATH	  log
+MATH	  pow
+MATH	  cos
+MATH	  atan2
+MATH	  sin
+MATH	api-ms-win-crt-runtime-l1-1-0.dll
+MATH	api-ms-win-crt-stdio-l1-1-0.dll
+MATH	api-ms-win-crt-locale-l1-1-0.dll
+MATH	api-ms-win-crt-heap-l1-1-0.dll
+FMA3	the C runtime's DLL	_get_FMA3_enable() at start: 1
+FMA3	the C runtime's DLL	_set_FMA3_enable(0) returned 0; _get_FMA3_enable() now 0
+FMA3	the C runtime's DLL	_set_FMA3_enable(1) returned 1
+FMA3	the C runtime's DLL	1400000 results each, from sin, cos, tan, exp, log, pow, and atan2 over 200000 values
+FMA3	the C runtime's DLL	Rust, FMA3 at start against off: 9536 differ
+FMA3	the C runtime's DLL	QuickJS-ng, FMA3 at start against off: 9536 differ
+FMA3	the C runtime's DLL	Rust against QuickJS-ng, FMA3 at start: 0 differ
+FMA3	the C runtime's DLL	Rust against QuickJS-ng, FMA3 off: 0 differ
+FMA3	the C runtime's DLL	Rust, at start against back on again: 0 differ
+FMA3	the C runtime's DLL	hash of Rust's results with FMA3 at start: 42ed034d1b9c470c
+FMA3	the C runtime's DLL	hash of Rust's results with FMA3 off: 18529f0357777f4a
+FMA3	static C runtime	_get_FMA3_enable() at start: 1
+FMA3	static C runtime	_set_FMA3_enable(0) returned 0; _get_FMA3_enable() now 0
+FMA3	static C runtime	_set_FMA3_enable(1) returned 1
+FMA3	static C runtime	1400000 results each, from sin, cos, tan, exp, log, pow, and atan2 over 200000 values
+FMA3	static C runtime	Rust, FMA3 at start against off: 9810 differ
+FMA3	static C runtime	QuickJS-ng, FMA3 at start against off: 9810 differ
+FMA3	static C runtime	Rust against QuickJS-ng, FMA3 at start: 0 differ
+FMA3	static C runtime	Rust against QuickJS-ng, FMA3 off: 0 differ
+FMA3	static C runtime	Rust, at start against back on again: 0 differ
+FMA3	static C runtime	hash of Rust's results with FMA3 at start: bba04894f44e0f85
+FMA3	static C runtime	hash of Rust's results with FMA3 off: 87856d1dc5f95859
+FMA3	static C runtime	its imports: bcryptprimitives.dll, api-ms-win-core-synch-l1-2-0.dll, KERNEL32.dll, ntdll.dll
+TIMER	tokio, default resolution	sleep 1ms	60 runs	late by p50 14.34ms	p99 15.45ms	max 15.45ms
+TIMER	tokio, default resolution	sleep 2ms	60 runs	late by p50 13.39ms	p99 14.76ms	max 14.76ms
+TIMER	tokio, default resolution	sleep 5ms	60 runs	late by p50 10.51ms	p99 11.42ms	max 11.42ms
+TIMER	tokio, default resolution	sleep 10ms	60 runs	late by p50 5.54ms	p99 6.54ms	max 6.54ms
+TIMER	tokio, default resolution	sleep 16ms	60 runs	late by p50 15.03ms	p99 16.02ms	max 16.02ms
+TIMER	tokio, default resolution	sleep 20ms	60 runs	late by p50 11.01ms	p99 12.21ms	max 12.21ms
+TIMER	tokio, default resolution	sleep 50ms	20 runs	late by p50 12.36ms	p99 14.42ms	max 14.42ms
+TIMER	tokio, default resolution	sleep 200ms	20 runs	late by p50 2.31ms	p99 16.26ms	max 16.26ms
+TIMER	tokio, default resolution	40 deadlines 50ms apart took 2001.1ms
+TIMER	timeBeginPeriod(1) returned 0
+TIMER	tokio, after timeBeginPeriod(1)	sleep 1ms	60 runs	late by p50 14.47ms	p99 15.48ms	max 15.48ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 2ms	60 runs	late by p50 13.39ms	p99 14.52ms	max 14.52ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 5ms	60 runs	late by p50 10.33ms	p99 11.34ms	max 11.34ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 10ms	60 runs	late by p50 5.57ms	p99 6.59ms	max 6.59ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 16ms	60 runs	late by p50 15.18ms	p99 16.61ms	max 16.61ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 20ms	60 runs	late by p50 11.05ms	p99 12.42ms	max 12.42ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 50ms	20 runs	late by p50 11.92ms	p99 13.85ms	max 13.85ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 200ms	20 runs	late by p50 2.09ms	p99 16.94ms	max 16.94ms
+TIMER	tokio, after timeBeginPeriod(1)	40 deadlines 50ms apart took 2011.2ms
+TIMER	high-resolution waitable timer	sleep 1ms	60 runs	late by p50 0.52ms	p99 1.46ms	max 1.46ms
+TIMER	high-resolution waitable timer	sleep 2ms	60 runs	late by p50 0.48ms	p99 0.92ms	max 0.92ms
+TIMER	high-resolution waitable timer	sleep 5ms	60 runs	late by p50 0.14ms	p99 0.61ms	max 0.61ms
+TIMER	high-resolution waitable timer	sleep 10ms	60 runs	late by p50 0.15ms	p99 0.65ms	max 0.65ms
+TIMER	high-resolution waitable timer	sleep 16ms	60 runs	late by p50 0.19ms	p99 0.82ms	max 0.82ms
+TIMER	high-resolution waitable timer	sleep 20ms	60 runs	late by p50 0.25ms	p99 0.74ms	max 0.74ms
+TIMER	high-resolution waitable timer	sleep 50ms	20 runs	late by p50 0.30ms	p99 0.47ms	max 0.47ms
+TIMER	high-resolution waitable timer	sleep 200ms	20 runs	late by p50 0.25ms	p99 0.55ms	max 0.55ms

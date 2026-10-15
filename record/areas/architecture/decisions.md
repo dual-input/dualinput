@@ -986,13 +986,13 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** the loop's crates are a rule on folders: every crate outside `apps/`, `sim-package/`, `tools/`, the transport, and the sim edge keeps [the loop's rules](02-code-map.md#one-loop), which forbid drawing randomness from the operating system as well as reading a clock, the routine host among them though it never runs on the loop, and the stand-in sim until node 7 decides otherwise.
   A random ID the core draws, such as the session's, comes from a ChaCha20 generator in the kernel, which the core's edge seeds once, with 256 bits from the operating system in the core's first input, so a replay draws the same IDs (node 6.1, user, 2026-10-15; [01-loop-and-edge](../core/01-loop-and-edge.md#timers-jobs-and-ids)); and the core's edge hands the sandbox the check behind QuickJS-ng's 100ms limit, so no loop crate reads the clock itself.
   The map check fails a loop crate that reaches, through any crate, one on [its list of crates that do I/O](02-code-map.md#the-map-check), which holds `getrandom` and the Windows crates beside tokio and the networking crates; it reads normal dependencies only, and a listed crate it lets a loop crate reach anyway carries its reason in the script.
-  Only the two edges, the sim edge and our WASM module's, declare foreign functions, and the map check searches our crates' source for any other; the bindings crate holds SimConnect's types and constants.
+  Only the two edges, the sim edge and our WASM module's, declare foreign functions, and `apps/core` the C runtime's `_set_FMA3_enable` alone, which no binding crate has (node 6.1, 2026-10-15; [01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)), and the map check searches our crates' source for any other; the bindings crate holds SimConnect's types and constants.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-map-check)).
 - **Because:**
   - A replay that drew its own random IDs would name the session differently from the run it replays, and [decision 022](../../decisions/022-random-uuids-as-text.md) has the host's core draw the session's ID (node 5's map, 2026-10-15).
   - The edge can't tell which input will ask for an ID, since the loop parses every input's bytes, so a generator seeded once spares each unit that draws an ID a round trip to the edge (node 6.1, 2026-10-15).
   - A rule on folders needs no edit when a feature is added.
-  - p10's loop, with rquickjs and zstd, has 11 other crates among its normal dependencies, none on the list (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)), while p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off.
+  - p10's loop has 11 crates besides itself among its normal dependencies, rquickjs and zstd among them, none on the list (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)), while p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off.
   - With SimConnect's functions declared in the edges alone, the crate graph shows which crate can call `SimConnect.dll`, which one bindings crate holding both would hide, and the source search catches a crate that declares its own.
 - **Leaves out:** an outside crate that calls std's file, socket, or clock functions itself, which passes the check and which we review as each dependency is added; and whether [node 7](plan.md#7-testing) frees the stand-in sim from the loop's rules.
 
@@ -1000,32 +1000,29 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** every thread that feeds the loop pushes through one queue, which reads the counter, stamps the input, and gives it the next sequence number under its lock, so the stamps rise in the order the loop takes the inputs.
   An input is its sequence number, its stamp, the source a unit registered for it, and the bytes that came in, which the unit that owns the source parses on the loop.
-  The queue is unbounded, and the edge logs an input that waits more than 100ms.
-  The kernel hands each handler its unit's state, taken out of its slot, and `&` to any other unit's; hooks beyond the kernel's own are extension traits a crate of the platform's adds, calling handlers through the kernel; outputs go to a sink for each type, in order within each edge; and timers, jobs, and calls take their handles from counters on the loop.
+  The edge records every input from the core's first, in every run, with or without a session.
   Settled in node 6.1, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md)).
 - **Because:**
-  - Two threads that stamp and then push can push in the other order: FS Copilot's resend history recorded two events with their times opposite to their sequence numbers, and the receiver dropped one as a copy (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, "R15 · History is ordered by wall clock, not by Seq").
+  - Two threads that stamp and then push can push in the other order: FS Copilot's pre-PR review found, by reading its code, that its resend history could record two events with their times opposite to their sequence numbers, and the receiver would drop one as a copy (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, "R15 · History is ordered by wall clock, not by Seq").
   - With the bytes parsed on the loop, the only code that runs live and never in a replay is the edge's copying, where fsc-editor's replay ran a path of its own and a bug shipped ([02-code-map](02-code-map.md#why-the-seam-sits-at-simconnects-calls)).
-  - The sim thread must go on dispatching, and tokio's tasks must never block on the loop.
-- **Leaves out:** which lock and which hash, choices inside one crate; and what a recording keeps by reference, for node 6's design of recording.
+  - A replay starts where the run did, since the seed, the handles, sim awareness, and the clients build up from the first input.
+- **Leaves out:** which lock, a choice inside `apps/core`; and what a run's log is kept for, for node 6's design of recording.
 
-## The core's timers wait on a high-resolution waitable timer, and the core turns the C runtime's FMA3 math off
+## The core's timers wait on a high-resolution waitable timer, and the core links the C runtime statically with its FMA3 math off
 
-- **Decided:** the core's edge runs the loop's timers on a thread of its own that waits on a high-resolution waitable timer, and asks nothing of `timeBeginPeriod`; and `main` calls `_set_FMA3_enable(0)` before it starts any thread, in a live run and a replay.
-  Settled in node 6.1, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#threads)).
+- **Decided:** the core's edge runs the loop's timers on a thread of its own that waits on a high-resolution waitable timer, and asks nothing of `timeBeginPeriod`, which changes [decision 027](../../decisions/027-core-runs-on-tokio.md) for the loop's timers once step 8's decisions are numbered.
+  The core links the C runtime statically, and `main` calls `_set_FMA3_enable(0)` before it starts any thread, in a live run and a replay.
+  Settled in node 6.1, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)).
 - **Because:**
-  - tokio's sleep woke up to 16.9ms late, and after `timeBeginPeriod(1)` as late in one of two runs, while a high-resolution waitable timer woke at most 1.13ms late (measured on our development machine, 2026-10-15, [core log][c01]).
-  - Rust's `f64` math imports `sin`, `pow`, and the rest from the Universal C Runtime, and QuickJS-ng's `Math.sin` calls C's `sin`, so one call reaches both, where a pure-Rust math library would reach only Rust's (same entry).
-- **Leaves out:** whether every PC computes the same results with FMA3 off, which replaying a friend's recording on ours settles; and the timers with the sim running and the PC busy, for [node 7](plan.md#7-testing)'s bench.
+  - tokio's sleep woke up to 16.9ms late, and after `timeBeginPeriod(1)` as late in three of four runs, while a high-resolution waitable timer woke at most 1.46ms late (measured on our development machine, 2026-10-15, [core log][c01]).
+  - Rust's `f64` math and QuickJS-ng's `Math` both call the C runtime's functions, whose results changed with the FMA3 switch, alike in both, and differed between the runtime's DLL that comes with Windows and the one linked into the program, even with FMA3 off (same entry).
+- **Leaves out:** whether two CPUs give the same bits from one build with FMA3 off, which replaying a friend's recording on ours settles; and the timers with the sim running and the PC busy, for [node 7](plan.md#7-testing)'s bench.
 
 ## A panic crashes the core, which comes back as a late joiner
 
-- **Decided:** a release build sets `panic = "abort"`, and the panic hook logs the panic, its input, and the unit that ran, and has the recording's writer end its frame, waiting at most 500ms, before the process ends; the watcher starts the core again, and the pilot comes back as a late joiner, as [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) has it.
+- **Decided:** a release build sets `panic = "abort"`, and the panic hook logs the panic, its input, and the unit that ran, and has the recording's writer end its frame, waiting at most 500ms; the crash then takes [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)'s path.
   Settled in node 6.1 by the user, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#a-panic)).
-- **Because:**
-  - Catching a feature's panic and turning the feature off would be a mechanism for recovering from our own bugs, which Crosscheck doesn't build (user, 2026-10-15).
-  - A feature turned off leaves a session half working, as a following machine flying on its own with its flight-model feature off would, where a restart and a late join bring every feature back.
-  - A replay of the recording reproduces the panic at the same input.
+- **Because:** turning a panicking feature off would recover from our own bug and leave a session half working, as a following machine with its flight-model feature off would fly on its own, where decision 041's late join brings every feature back, and a replay of the log reproduces the panic at the same input (user, 2026-10-15).
 
 ## A recording keeps a hash of the core's outputs once a second, so a replay finds the second it diverged
 
@@ -1034,10 +1031,19 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.1 by the user, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)).
 - **Because:**
   - A recording of inputs alone can't show whether a replay diverged from the run it replays.
-  - A hash before every input would cost about 8 MB an hour at about 300 inputs a second, and hashes don't compress, while one a second costs about 58 KB an hour (arithmetic).
-- **Leaves out:** what else a recording keeps, for node 6's design of recording.
+  - A hash before every input would cost about 8.6 MB an hour at an assumed 300 inputs a second (unverified, since p10 never ran), and hashes don't compress, while one a second costs about 58 KB an hour (arithmetic).
 
-[c01]: ../core/log.md#2026-10-15-tokios-timers-wake-up-to-17ms-late-on-windows-a-high-resolution-waitable-timer-wakes-within-12ms-and-rusts-f64-math-calls-the-c-runtimes
+## A quit leaves the session before the core exits, and a deliberate exit returns 0
+
+- **Decided:** a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, which the core hears through a top-level window it never shows, runs as a Leave before the core exits; every deliberate exit drains the edges' outputs within 750ms and returns 0, and a panic's abort never does.
+  Settled in node 6.1, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
+- **Because:**
+  - A core killed in a session looks like an outage to the crew, and FS Copilot's quit did: its goodbye was queued and "the process exits before LiteNetLib's update thread sends it" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-12 — A deliberate quit reaches the peer as an outage").
+  - Windows sends `WM_QUERYENDSESSION` to a window, and a core with no window would end without hearing it (documented, [WM_QUERYENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-queryendsession)).
+  - The watcher starts the core again when it exits while the sim runs ([decision 002](../../decisions/002-core-starts-with-every-sim-run.md)), so it needs the exit code to tell a quit from a crash.
+- **Leaves out:** whether Windows sends those messages to a window that's never shown, for [node 7](plan.md#7-testing)'s bench; and how the pilot asks for a quit, for node 6's designs of the apps and of installing and updating.
+
+[c01]: ../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

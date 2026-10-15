@@ -6,6 +6,9 @@
  *   timeBeginPeriod(1), and how late a high-resolution waitable timer wakes.
  * - Which C runtime functions Rust's f64 math reaches, from a release build's
  *   imports, since Windows' C runtime picks its FMA3 math by CPU.
+ * - Whether _set_FMA3_enable(0) changes what Rust's f64 math and QuickJS-ng's
+ *   Math compute, and whether the two compute the same bits, with the C
+ *   runtime's DLL and with the C runtime linked into the program.
  *
  * No sim. Run it with the PC otherwise idle:
  *
@@ -61,6 +64,31 @@ if (!dumpbin) {
     if (dll) say(`MATH\t${dll[1]}`)
     if (fn) say(`MATH\t  ${fn[1]}`)
   }
+}
+
+for (const line of run(path.join(RELEASE, "fma3.exe"), []).split(/\r?\n/)) {
+  if (line.trim()) say(`FMA3\tthe C runtime's DLL\t${line}`)
+}
+
+// The same check with the C runtime linked into the program, which the Windows
+// SDK's static library gives, where the DLL comes with Windows. RUSTFLAGS is set
+// for this build alone, in a target folder of its own.
+const STATIC = path.join(EDGE, "target", "crt-static")
+run("cargo", ["build", "--release", "--quiet", "--bin", "fma3", "--target-dir", STATIC], {
+  cwd: EDGE,
+  env: { ...process.env, RUSTFLAGS: "-C target-feature=+crt-static" },
+  stdio: ["ignore", "pipe", "inherit"],
+})
+const staticExe = path.join(STATIC, "release", "fma3.exe")
+for (const line of run(staticExe, []).split(/\r?\n/)) {
+  if (line.trim()) say(`FMA3\tstatic C runtime\t${line}`)
+}
+if (dumpbin) {
+  const dlls = run(dumpbin, ["/imports", staticExe])
+    .split(/\r?\n/)
+    .map((l) => /^\s+(\S+\.dll)\s*$/i.exec(l)?.[1])
+    .filter(Boolean)
+  say(`FMA3\tstatic C runtime\tits imports: ${dlls.join(", ")}`)
 }
 
 // ---------------------------------------------------------------- timers

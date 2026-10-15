@@ -7,8 +7,12 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 ```
 
 > **Note**
-> Since 2026-10-15, a random ID the core draws comes from a ChaCha20 generator in the kernel, which the core's edge seeds once, in the core's first input, where [one loop](#one-loop) has the edge hand each ID in with the input that asks for it; the queue stamps each input under its lock; and a recording also holds the sandbox's stops and a hash of the core's outputs once a second ([01-loop-and-edge](../core/01-loop-and-edge.md)).
-> The core turns the C runtime's FMA3 math off before it starts any thread, which settles [left open](#left-open)'s item on replaying a recording on a PC with another CPU once a recording from a friend's PC replays on ours ([core log](../core/log.md#2026-10-15-tokios-timers-wake-up-to-17ms-late-on-windows-a-high-resolution-waitable-timer-wakes-within-12ms-and-rusts-f64-math-calls-the-c-runtimes)).
+> Since 2026-10-15, [01-loop-and-edge](../core/01-loop-and-edge.md) changes this document in four places:
+>
+> - The loop's timers run on a thread of the core's edge that waits on a high-resolution waitable timer, where [one loop](#one-loop) and the `apps/core` row in [the units](#apps-the-sim-package-and-tools) have tokio run them.
+> - A random ID the core draws comes from a ChaCha20 generator in the kernel, which the edge seeds once in the core's first input, where [one loop](#one-loop) has the edge hand each ID in with the input that asks for it; the `apps/core` row's random IDs are that seed.
+> - `apps/core` declares one foreign function, the C runtime's `_set_FMA3_enable`, beside the two edges [tiers](#tiers) names, and links the C runtime statically with FMA3 off; Rust's `f64` functions reach the C runtime's math, which [left open](#left-open) and [CI](#ci) call unverified ([core log](../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version)), so left open's item on another CPU waits only on replaying a friend's recording on ours.
+> - The map check also searches `features/` for `impl Moment` ([the map check](#the-map-check)), and a unit registers through `r.unit::<S>(name)`, where the sketch in [what a feature registers](#what-a-feature-registers) has `platform.feature`.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
@@ -726,7 +730,7 @@ The code map's [third test](#tiers) is a script in `tools/` that CI and a develo
   - ours: the transport and the sim edge
 - The script reads normal dependencies only, so a build dependency such as bindgen, which reads the SDK's headers while simconnect-types builds, never trips it.
   A listed crate the script lets a loop crate reach anyway carries its reason in the script.
-- p10's loop, with rquickjs and zstd, has 11 other crates among its normal dependencies, none on the list (measured on our development machine, 2026-10-15, [architecture log][map]).
+- p10's loop has 11 crates besides itself among its normal dependencies, rquickjs and zstd among them, none on the list (measured on our development machine, 2026-10-15, [architecture log][map]).
   p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off, as p11's did ([architecture log][p11]), and the core's edge draws the IDs.
 - The script also searches our crates' source for a foreign function's declaration outside the two edges, which the crate graph can't show.
 - An outside crate that calls std's file, socket, or clock functions itself, rather than through a crate on the list, passes the check, so we review each new dependency of a loop crate before it's added.

@@ -1,0 +1,54 @@
+p01-edge on Windows 11 Pro 10.0.26200, rustc 1.95.0 (59807616e 2026-04-14)
+MATH	imports of experiments/areas/core/edge/target/release/math.exe, the DLLs and the math functions only:
+MATH	api-ms-win-core-synch-l1-2-0.dll
+MATH	KERNEL32.dll
+MATH	ntdll.dll
+MATH	VCRUNTIME140.dll
+MATH	api-ms-win-crt-math-l1-1-0.dll
+MATH	  tan
+MATH	  exp
+MATH	  log
+MATH	  pow
+MATH	  cos
+MATH	  atan2
+MATH	  sin
+MATH	api-ms-win-crt-runtime-l1-1-0.dll
+MATH	api-ms-win-crt-stdio-l1-1-0.dll
+MATH	api-ms-win-crt-locale-l1-1-0.dll
+MATH	api-ms-win-crt-heap-l1-1-0.dll
+FMA3	_get_FMA3_enable() at start: 1
+FMA3	_set_FMA3_enable(0) returned 0; _get_FMA3_enable() now 0
+FMA3	_set_FMA3_enable(1) returned 1
+FMA3	1400000 results each, from sin, cos, tan, exp, log, pow, and atan2 over 200000 values
+FMA3	Rust, FMA3 at start against off: 9536 differ
+FMA3	QuickJS-ng, FMA3 at start against off: 9536 differ
+FMA3	Rust against QuickJS-ng, FMA3 at start: 0 differ
+FMA3	Rust against QuickJS-ng, FMA3 off: 0 differ
+FMA3	Rust, at start against back on again: 0 differ
+TIMER	tokio, default resolution	sleep 1ms	60 runs	late by p50 14.53ms	p99 16.11ms	max 16.11ms
+TIMER	tokio, default resolution	sleep 2ms	60 runs	late by p50 13.52ms	p99 14.57ms	max 14.57ms
+TIMER	tokio, default resolution	sleep 5ms	60 runs	late by p50 10.51ms	p99 11.55ms	max 11.55ms
+TIMER	tokio, default resolution	sleep 10ms	60 runs	late by p50 5.45ms	p99 6.33ms	max 6.33ms
+TIMER	tokio, default resolution	sleep 16ms	60 runs	late by p50 14.91ms	p99 16.60ms	max 16.60ms
+TIMER	tokio, default resolution	sleep 20ms	60 runs	late by p50 11.04ms	p99 12.57ms	max 12.57ms
+TIMER	tokio, default resolution	sleep 50ms	20 runs	late by p50 11.96ms	p99 13.63ms	max 13.63ms
+TIMER	tokio, default resolution	sleep 200ms	20 runs	late by p50 2.06ms	p99 15.35ms	max 15.35ms
+TIMER	tokio, default resolution	40 deadlines 50ms apart took 2008.2ms
+TIMER	timeBeginPeriod(1) returned 0
+TIMER	tokio, after timeBeginPeriod(1)	sleep 1ms	60 runs	late by p50 14.55ms	p99 15.55ms	max 15.55ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 2ms	60 runs	late by p50 13.53ms	p99 14.62ms	max 14.62ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 5ms	60 runs	late by p50 10.41ms	p99 11.51ms	max 11.51ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 10ms	60 runs	late by p50 5.51ms	p99 6.54ms	max 6.54ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 16ms	60 runs	late by p50 15.05ms	p99 16.48ms	max 16.48ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 20ms	60 runs	late by p50 11.00ms	p99 12.08ms	max 12.08ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 50ms	20 runs	late by p50 11.96ms	p99 13.28ms	max 13.28ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 200ms	20 runs	late by p50 3.31ms	p99 16.74ms	max 16.74ms
+TIMER	tokio, after timeBeginPeriod(1)	40 deadlines 50ms apart took 2003.1ms
+TIMER	high-resolution waitable timer	sleep 1ms	60 runs	late by p50 0.52ms	p99 0.91ms	max 0.91ms
+TIMER	high-resolution waitable timer	sleep 2ms	60 runs	late by p50 0.50ms	p99 0.92ms	max 0.92ms
+TIMER	high-resolution waitable timer	sleep 5ms	60 runs	late by p50 0.29ms	p99 0.74ms	max 0.74ms
+TIMER	high-resolution waitable timer	sleep 10ms	60 runs	late by p50 0.19ms	p99 0.90ms	max 0.90ms
+TIMER	high-resolution waitable timer	sleep 16ms	60 runs	late by p50 0.22ms	p99 0.54ms	max 0.54ms
+TIMER	high-resolution waitable timer	sleep 20ms	60 runs	late by p50 0.21ms	p99 0.57ms	max 0.57ms
+TIMER	high-resolution waitable timer	sleep 50ms	20 runs	late by p50 0.20ms	p99 0.51ms	max 0.51ms
+TIMER	high-resolution waitable timer	sleep 200ms	20 runs	late by p50 0.24ms	p99 0.60ms	max 0.60ms

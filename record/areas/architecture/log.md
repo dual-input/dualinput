@@ -12,7 +12,7 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
 **Found:** on our development machine, with Cargo 1.95.0 ([results](../../../experiments/areas/architecture/results/map-checks-2026-10-15.txt)):
 
 - A workspace with two members both named `helper` failed `cargo metadata` with "two packages named `helper` in this workspace".
-- p10's loop, with rquickjs 0.14.0 and zstd 0.13.3, has 11 other crates among its normal dependencies, none of them tokio, a Windows crate, or `getrandom`.
+- p10's loop has 11 crates besides itself among its normal dependencies, rquickjs 0.14.0 and zstd 0.13.3 among them, none of them tokio, a Windows crate, or `getrandom`.
 
 **Changed:** each crate in `apps/` is named `crosscheck-` and its folder, and the I/O list holds the Windows crates and `getrandom`.
 

@@ -495,7 +495,7 @@ Question: what are the units of Crosscheck's code, its crates and packages; whic
 Step 8 can't design a system, a test, or a stage until it knows which units exist and what each may reach.
 The spine names the components and the parts ([01-spine](01-spine.md#parts)), and the code map names the units inside them, each in one of three tiers (user, 2026-10-14):
 
-- **The host:** the services every feature uses, in the core, such as the session, control, channels, and recording, and in the sim, the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)).
+- **The platform:** the services every feature uses, in the core, such as the session, control, channels, and recording, and in the sim, the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)).
 - **Engines:** libraries that know nothing of the app, so another program, such as the [Crosscheck IDE](../product/ideas.md#crosscheck-ide), can link them.
 - **Features:** each one thing a pilot gets, such as pointer sync or the PF's spot on the world map.
 
@@ -515,12 +515,12 @@ Its answer goes in `02-code-map.md`, in this area.
 Exit: the user agrees to `02-code-map.md`.
 Waits on 5.1, 5.2, 5.3, and 5.4.
 
-## 5.1 The host's interface
+## 5.1 The platform's interface
 
-Question: how does the host run its features, and what does a feature register with it and call, among moments in the session, session keys, roles, channels, message kinds on the cockpit stream, catch-up steps, profile blocks, client state and commands, notices, settings, items for the match check, recording, and the helper's input and audio?
+Question: how does the platform run its features, and what does a feature register with it and call, among moments in the session, session keys, roles, channels, message kinds on the cockpit stream, catch-up steps, profile blocks, client state and commands, notices, settings, items for the match check, recording, and the helper's input and audio?
 5 can't give any feature its dependencies without it, since every feature's crate is written against it.
 [04-room-for-later](../product/04-room-for-later.md#plugins) names the hooks, moments in a session, channels, catch-up steps, and code inside the sim, and says "v1's own features are built on the hooks plugins use", but gives them no shape.
-Features reach each other only through the host's moments and registries, so deleting one leaves the others whole.
+Features reach each other only through the platform's moments and registries, so deleting one leaves the others whole.
 Traffic and ATC audio each register a role of their own, and one switch grants and releases both (user, 2026-10-14), where [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host) gives them one role that can split.
 A feature's profile block, such as pointer sync's `displays` or avatars' `seats`, stays in the profile engine, as its messages stay in the message crate, because CI and the IDE check a profile without the core (user, 2026-10-14).
 It also settles how an ID that's stored, or crosses between versions, is named, such as a message's kind in the recording, which later versions of Crosscheck still read ([04-room-for-later](../product/04-room-for-later.md#recording)).
@@ -534,7 +534,7 @@ Done on 2026-10-14.
 ## 5.1.1 How hosts run and extend themselves
 
 Question: how do current designs run an app's core and its extensions, on one ordered loop or as concurrent tasks, with extensions registered at compile time, so that deleting one leaves the rest whole, a run replays exactly from its recorded inputs, order holds at the sim's frame rate, and plugins in an embedded JavaScript engine reach a subset of the same hooks?
-5.1 can't choose how the host runs its features without it, and the choice sets the shape of every hook: a call on one loop, or a message between tasks.
+5.1 can't choose how the platform runs its features without it, and the choice sets the shape of every hook: a call on one loop, or a message between tasks.
 fsc-editor replayed its recorded sim events through the same code, and its replay "swaps the source of events and changes nothing else" (fsc-editor, `src/main/sim/replay.ts`).
 Replaying every input of the core, from the sim, the other cores, the clients, the helper, the clock, and slow work such as a QuickJS-ng call, would carry that to the whole core, so a bug report's recording could reproduce a bug in the core on our own PC.
 A research read settles it.
@@ -547,7 +547,7 @@ Done on 2026-10-14.
 
 ## 5.2 The sim seam
 
-Question: through what interface do the host, the features, and the engines reach the sim, so that a stand-in can fill it on the bench, a recording can replay through it, and the IDE can link it; and do features share one SimConnect connection, or hold one each?
+Question: through what interface do the platform, the features, and the engines reach the sim, so that a stand-in can fill it on the bench, a recording can replay through it, and the IDE can link it; and do features share one SimConnect connection, or hold one each?
 5 can't place sim access or the sync engine without it, and [node 7](#7-testing) can't design the bench.
 fsc-editor kept the raw events it got from the sim apart from the state it built from them, recorded the raw events, and replayed them through the same code: its replay "swaps the source of events and changes nothing else" (fsc-editor, `src/main/sim/replay.ts`).
 FS Copilot's traffic plan gave traffic a SimConnect connection of its own, so "disposing it is a complete cleanup" (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`), and a client's masks end with its connection ([flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
@@ -588,11 +588,12 @@ Its children, proposed once 5 names the systems, are one for each system the rec
 Each child's answer goes in a design doc in its system's area.
 Exit: every child is done.
 Waits on 5.
-Raised elsewhere: by 5.1, which of the host's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
+Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, for the child that designs recording, since the one loop of [5.1.1's entry](log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc) replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
 Raised elsewhere: by 5.2, for the child that designs sim awareness, how it makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
-Raised elsewhere: by 5.3, for the child that designs plugins and the hosts in the sim, which of the sim's APIs carries each want of our WASM module's host, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
+Raised elsewhere: by 5.3, for the child that designs plugins and the hosts in the sim, which of the sim's APIs carries each want of the routine host, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
 Raised elsewhere: by 5.4, for the child that designs the profile engine, whether CI holds a released level's builder output to its release tag as it holds the level's schema and declarations; and for the child that designs the build, what it does when cargo-msfs, which installs only the newest SDK, has installed one newer than a release's, and how long CI takes on Windows runners, against 5.4's budget of 20 minutes with a warm cache ([02-code-map](02-code-map.md#left-open)).
+Raised elsewhere: by 5, the systems its children design, each with its area and units, in [02-code-map](02-code-map.md#systems); and for the children that design installing and updating and the network, where the installer lives, and where the relays' configuration lives, since they run `iroh-relay` with no code of ours.
 
 ## 7 Testing
 
@@ -611,6 +612,7 @@ It reads 5.2's and 5.3's answers, the [bench cases for checking a write](../prof
 Its answer goes in a design doc in the build area, `record/areas/build/01-testing.md`, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
 Exit: the user agrees to that design doc.
 Waits on 5.
+Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `apps/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
 
 ## 8 The build order

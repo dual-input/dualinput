@@ -1,0 +1,32 @@
+Node 5's map: two checks run by hand on our development machine, 2026-10-15.
+Paths outside the repository are shortened to <scratch>.
+
+== 1. Two crates of one name in a workspace ==
+
+Workspace: [workspace] members = ["a/helper", "b/helper"], resolver = "3";
+each member: [package] name = "helper", version = "0.1.0", edition = "2024", src/main.rs "fn main() {}".
+
+> cargo metadata --manifest-path <scratch>\dupname\Cargo.toml --format-version 1 --offline --no-deps
+error: two packages named `helper` in this workspace:
+- <scratch>\dupname\a\helper\Cargo.toml
+- <scratch>\dupname\b\helper\Cargo.toml
+exit: 101
+
+> cargo --version
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+
+== 2. p10's loop crate, normal dependencies only ==
+
+> cargo tree --manifest-path experiments/areas/architecture/recording/Cargo.toml -p p10-loop -e normal --prefix none --offline | Sort-Object -Unique
+allocator-api2 v0.2.21
+equivalent v1.0.3
+foldhash v0.2.0
+hashbrown v0.17.1
+p10-common v0.1.0 (experiments\areas\architecture\recording\common)
+p10-loop v0.1.0 (experiments\areas\architecture\recording\loop)
+rquickjs v0.14.0
+rquickjs-core v0.14.0
+rquickjs-sys v0.14.0
+zstd v0.13.3
+zstd-safe v7.3.0
+zstd-sys v2.1.1+zstd.1.5.7

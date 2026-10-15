@@ -3,6 +3,21 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-15: Cargo refuses two crates of one name in a workspace, and p10's loop reaches no crate that does I/O
+
+**Asked:** can the platform's `helper` crate and the helper's program share a name in one workspace, and does the heaviest loop crate we've built reach any crate on the map check's list of crates that do I/O (node 5's map)?
+
+**Expected:** no to the first; and no to the second, since rquickjs and zstd build their C code themselves.
+
+**Found:** on our development machine, with Cargo 1.95.0 ([results](../../../experiments/areas/architecture/results/map-checks-2026-10-15.txt)):
+
+- A workspace with two members both named `helper` failed `cargo metadata` with "two packages named `helper` in this workspace".
+- p10's loop, with rquickjs 0.14.0 and zstd 0.13.3, has 11 other crates among its normal dependencies, none of them tokio, a Windows crate, or `getrandom`.
+
+**Changed:** each crate in `apps/` is named `crosscheck-` and its folder, and the I/O list holds the Windows crates and `getrandom`.
+
+**Affects:** [02-code-map](02-code-map.md#the-units).
+
 ## 2026-10-15: Cargo takes globs in `default-members` too, and esbuild's metafile leaves out a type-only import
 
 **Asked:** can the root `Cargo.toml` name its members and default members by globs, so deleting a feature's folder needs no edit there, and can the map check read one feature's import of another's types from esbuild's metafile (node 5.4)?
@@ -88,7 +103,7 @@ Its costs come with it:
   Clippy's [`disallowed_methods`](https://rust-lang.github.io/rust-clippy/master/index.html#disallowed_methods) fails a build that calls a listed function, and its `iter_over_hash_type` one that loops over a `HashMap`, but no lint catches `.await` or I/O, so keeping tokio and every crate that does I/O out of the loop's crates is what stops them.
 - QuickJS-ng's `Math.random` and `Date.now` become host functions on the loop's time and a recorded seed, and its time limit becomes a count of interrupt calls, recorded where it fired.
 
-**Affects:** node 5.1 of the [architecture plan](plan.md#51-the-hosts-interface); and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)' open question of how big a flight's recording is, since the loop's inputs are what a recording would keep.
+**Affects:** node 5.1 of the [architecture plan](plan.md#51-the-platforms-interface); and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)' open question of how big a flight's recording is, since the loop's inputs are what a recording would keep.
 
 **Evidence:** [results/2026-10-14-host-research.txt](results/2026-10-14-host-research.txt), the research agent's report, and the four lines marked checked, read on 2026-10-14.
 

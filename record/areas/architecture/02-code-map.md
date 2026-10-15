@@ -31,7 +31,7 @@ So far the map allows these:
 
 - An engine depends on no host or feature code.
 - No feature depends on another feature's code, nor names another feature's module in the message crate or the profile engine ([what a handler sees and does](#what-a-handler-sees-and-does)).
-- The loop's crates depend on neither tokio nor any crate that does I/O, which only the programs in `apps/` and the edges may ([one loop](#one-loop)).
+- The loop's crates, which the map check names, depend on neither tokio nor any crate on the map check's list of crates that do I/O, which only the programs in `apps/`, the transport, and the sim's edge may ([one loop](#one-loop)).
 - Only the sim's edge calls `SimConnect.dll` ([the sim seam](#the-sim-seam)).
 - In our WASM module, only its edge calls the sim's APIs, and a routine depends only on the message crate and the module's host ([work in the sim](#work-in-the-sim)).
 
@@ -456,7 +456,7 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 
 One repository holds all of Crosscheck: its programs, our WASM module, our code in the sim, the backend, and the profiles (user, 2026-10-15).
 Its folders follow the [tiers](#tiers), and each feature keeps every part it has in one folder.
-One Cargo workspace builds every Rust crate, the module's among them, one npm lockfile covers every TypeScript folder, and build tools in TypeScript, run by Node, build every target from the one copy of the SDK that cargo-msfs installs.
+One Cargo workspace builds every Rust crate, the module's among them, and one npm lockfile covers every TypeScript folder; `tools/build.ts`, run by Node, builds every target but the backend and the profiles, and every build that reads the SDK reads the one copy cargo-msfs installs.
 CI runs on Windows, and one script checks both the crates and the TypeScript imports against this map.
 
 ```text
@@ -482,7 +482,8 @@ crosscheck/
 ```
 
 A feature has only the parts it needs: pointer sync has a crate in the core, panel modules, and sections in the apps, and no routines.
-Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each program in `apps/`, while the workspace names its members by globs, such as `features/*/core`, which Cargo 1.95 took in both `members` and `default-members` (measured on our development machine, 2026-10-15, in node 5.4's review).
+Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each program in `apps/`.
+The root `Cargo.toml` names its members by globs, such as `features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` names `apps/`'s folders one by one, since a glob there would take in `apps/wasm-module/`; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
 A feature's block that a released level of the profile format holds stays in the profile engine after the feature goes, since levels only add ([levels](../profiles/01-format-and-delivery.md#levels)).
 
 ### Building every target
@@ -507,7 +508,7 @@ A feature's block that a released level of the profile format holds stays in the
   cargo-msfs installs only the newest SDK, with no way to name a version (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`, `install_latest_sdk`), so the build prints the version it built against, from the `version.txt` cargo-msfs writes beside the SDK, and CI keys its cache on it.
 - **`RUSTFLAGS` is never set,** in CI or in our tools, because cargo-msfs hands the build its caller's environment after setting `RUSTFLAGS` to its own link arguments (same function as above, Build), and ours would replace them; Clippy's `-D warnings` goes on Clippy's own command line.
 - **The release profile is the root's,** with `lto` and `strip` on, as cargo-msfs's README asks, since a workspace reads profiles only from its root.
-- **The messages' TypeScript types** are generated into a folder of the message crate, which the generation empties first, since ts-rs removes no file it wrote before (read in ts-rs 12.0.1, in node 5.4's review), and they're committed and imported from there; CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
+- **The messages' TypeScript types** are generated into `engines/messages/ts/`, the folder `TS_RS_EXPORT_DIR` names, which `tools/build.ts` deletes before it runs the message crate's tests, since ts-rs removes no file it wrote before, so a deleted message's type would stay (read in ts-rs 12.0.1's source, which calls no `remove_file`); they're committed and imported from there; CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
   ts-rs's derives built into the module in p11, so the message crate needs no second form for wasm32.
 - **TypeScript** has one lockfile at the root, and two npm workspaces, each with a `package.json` of its own beside the root's: `apps/desktop/`, because the Tauri CLI takes the folder it runs in when that holds a `package.json` (read in tauri-apps/tauri, its default branch on 2026-10-15, `crates/tauri-cli/src/helpers/app_paths.rs`), and `backend/`, since Cloudflare recommends installing wrangler in the project (documented, [Wrangler's commands](https://developers.cloudflare.com/workers/wrangler/commands/)).
   A feature's TypeScript folders have no `package.json` of their own.
@@ -516,8 +517,17 @@ A feature's block that a released level of the profile format holds stays in the
 - **One version** lives in the root `Cargo.toml`'s `[workspace.package]`, which every crate inherits, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks; Tauri takes the desktop app's from its crate when `tauri.conf.json` names none (documented, [Tauri's configuration](https://v2.tauri.app/reference/config/#version)), and the build writes it into the Community package's `manifest.json`, where p08's build script wrote a fixed one (read in `experiments/areas/architecture/flight/build.mjs`, `finish`).
 - **`tools/build.ts`** builds every row of the table but the backend's and the profiles', then lays out the Community package with its `layout.json` and `manifest.json`, as p08's build script does.
   Node 22.18 or later runs it by stripping its types, so our build scripts use no `enum` and name each import's `.ts` (documented, [Node's TypeScript support](https://nodejs.org/api/typescript.html)).
-- **A new PC** builds after these, in order: Visual Studio's Build Tools; rustup, with the toolchain and the `wasm32-wasip1` target that `rust-toolchain.toml` pins; LLVM, for bindgen; cargo-msfs at the tag the build names, then `cargo-msfs install msfs2024`; Node, at the version `package.json`'s `engines` names; and `npm ci`.
-  Then `cargo build`, `cargo test`, and `node tools/build.ts` each run.
+- **`tools/setup.ts`** installs cargo-msfs at the tag it names, the one CI installs too, then runs `cargo-msfs install msfs2024`.
+
+On a new PC, in order:
+
+1. Install Visual Studio's Build Tools, with its C++ workload.
+2. Install rustup, then run `rustup toolchain install` in the repository, for the toolchain and the `wasm32-wasip1` target that `rust-toolchain.toml` names.
+3. Install LLVM, for bindgen.
+4. Install Node, at the version `package.json`'s `engines` names.
+5. Run `npm ci` at the root.
+6. Run `node tools/setup.ts`; `%APPDATA%\cargo-msfs\data\msfs2024\version.txt` appears.
+7. Run `cargo build`, `cargo test`, and `node tools/build.ts`; each finishes without an error.
 
 ### Profiles in this repository
 
@@ -527,8 +537,8 @@ The profiles, plugins, and modules that [01-format-and-delivery](../profiles/01-
 - CI checks and builds the profiles against the profile engine at the same commit, and fails when a released level's schema or declarations differ from what its release tag holds, so a bundle it publishes loads in every released core at its level.
   It publishes them on this repository's GitHub Pages site on each merge that changes a bundle, apart from Crosscheck's releases.
   A repository has one Pages site (documented, [About GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages)), which the profiles take, and an account on GitHub Free for organizations serves one only from a public repository (documented, [Creating a GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)), which this one is from v1 (user, 2026-10-15).
-- A profile's maintainers, whom `CODEOWNERS` names, need write access to the repository (documented, [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)), and anyone with write access can read every secret the repository holds (documented, [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)).
-  So the repository holds no secret of its own: release and deploy secrets live in GitHub environments, which give them only to jobs that use the environment, from the branches and tags it names (documented, [Managing environments for deployment](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)), and rulesets keep `main` and the release tags to the core team, before anyone outside it gets write access.
+- Nobody outside the core team gets write access (user, 2026-10-15), so the profiles have no `CODEOWNERS` file, whose code owners must have write access (documented, [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)), and a role narrower than write takes GitHub Enterprise Cloud (documented, [About custom repository roles](https://docs.github.com/en/organizations/managing-user-access-to-your-organizations-repositories/managing-repository-roles/about-custom-repository-roles)).
+  The core team reviews and merges every profile's pull request, and the people a profile's `authors` names review it as anyone with read access can (documented, [About pull request reviews](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/about-pull-request-reviews)), without their approval counting toward a merge, since only approvals from people with write access count (documented, [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)).
 - An author can clone the repository without file contents and check out only `profiles/` and the files at its root, which git's sparse checkout keeps in its default cone mode (documented, [git sparse-checkout](https://git-scm.com/docs/git-sparse-checkout)), or edit a profile on GitHub's site, which forks the repository and proposes the change as a pull request (documented, [Editing files](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files)); the profiles' contributor documentation shows both:
 
   ```bash
@@ -561,8 +571,9 @@ A pull request that changes only `profiles/` runs the profiles' job alone, throu
 The code map's [third test](#tiers) is a script in `tools/` that CI and a developer both run, and it checks each rule [tiers](#tiers) lists.
 
 - A crate's tier is its folder, from the `manifest_path` that `cargo metadata` gives each crate, and the script reads the resolved graph, crates from outside the workspace included, so a routine that reaches tokio through any crate fails.
-- A TypeScript file's tier is its folder, and the script takes each file's imports, type-only ones included, from the TypeScript compiler's own resolution, since esbuild drops a type-only import from its metafile (measured on our development machine, 2026-10-15, esbuild 0.28.2, in node 5.4's review).
-- A feature's code naming another feature's module in the message crate or the profile engine, where both features' code sits in one crate, the script finds by the module's name in the feature's source.
+- A TypeScript file's tier is its folder, and the script takes each file's imports, type-only ones included, from the TypeScript compiler's own resolution, since esbuild's metafile listed no import for a file whose only import was `import type` (measured on our development machine, 2026-10-15, esbuild 0.28.2, [architecture log][p12]).
+- The message crate and the profile engine each hold every feature's module, so the crate graph can't show one feature using another's there; the script searches each feature's source for the names of other features' modules.
+- The loop's crates and the outside crates that do I/O, which the rules name, are lists in the script, which node 5's map fills in.
 
 cargo-deny can ban a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), so it would hold one entry per crate where the script holds each rule once.
 
@@ -592,3 +603,4 @@ A pull request's CI finishes within 20 minutes with a warm cache, a starting val
 [flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [5.1.1]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [p11]: log.md#2026-10-15-our-wasm-module-builds-with-cargo-msfs-from-inside-the-cores-cargo-workspace-against-the-same-message-crate-and-neither-build-disturbs-the-others
+[p12]: log.md#2026-10-15-cargo-takes-globs-in-default-members-too-and-esbuilds-metafile-leaves-out-a-type-only-import

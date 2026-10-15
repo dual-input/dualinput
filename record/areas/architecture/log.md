@@ -3,6 +3,21 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-15: Cargo takes globs in `default-members` too, and esbuild's metafile leaves out a type-only import
+
+**Asked:** can the root `Cargo.toml` name its members and default members by globs, so deleting a feature's folder needs no edit there, and can the map check read one feature's import of another's types from esbuild's metafile (node 5.4)?
+
+**Expected:** yes to the first, since Cargo documents globs in `members`; and no to the second, as node 5.4's review had found in a scratch run.
+
+**Found:** on our development machine, with Cargo 1.95.0 and esbuild 0.28.2 ([p12](../../../experiments/areas/architecture/p12-map-inputs.mjs), [results](../../../experiments/areas/architecture/results/p12-map-inputs-2026-10-15-13-42-40.txt)):
+
+- A workspace naming `features/*/core` in both `members` and `default-members` built both features' crates and the program that lists them, and left out a member named only in `members`, whose build script would have failed.
+- A file whose only import of another feature's file was `import type` got a metafile listing no import, while a file importing a value from it got one.
+
+**Changed:** the map check reads TypeScript imports through the TypeScript compiler rather than esbuild's metafile, and the workspace names its members by globs.
+
+**Affects:** [02-code-map](02-code-map.md#the-workspace).
+
 ## 2026-10-15: Our WASM module builds with cargo-msfs from inside the core's Cargo workspace, against the same message crate, and neither build disturbs the other's
 
 **Asked:** can one Cargo workspace hold the core's crates and our WASM module, so the module, its host, and its routines build against the message crate the core uses (node 5.4)?

@@ -12,7 +12,7 @@ The probes are in [experiments/areas/core](../../../experiments/areas/core), and
 **Found:** the sim's `IncludeMgr` (read in the sim's `common.js` as captured from MSFS 2024 on 2026-08-30, FS Copilot profiles, `sim-sources/vcockpit02-displayunits/html_UI_JS_common.js`; not run):
 
 - `requestScript` sets the script element's `onload` and no `onerror`, and `onScriptLoaded` takes a script off the loader's list only when it loads.
-- While `loadScriptAsync` is false, `addScript` requests a script at once only if the list is empty, and `onScriptLoaded` requests the next only after one loads; stock `VCockpit.js` turns it off with `Include.setAsyncLoading(false)` before it loads each instrument's scripts (read in the same capture, `html_UI_Pages_VCockpit_Core_VCockpit.js`, `loadNextInstrument`).
+- While `loadScriptAsync` is false, `addScript` requests a script at once only if the list is empty, and `onScriptLoaded` requests the next only after one loads; stock `VCockpit.js` turns it off with `Include.setAsyncLoading(false)` before it loads each instrument's scripts (read in FS Copilot's copy of the stock file in the same capture, `html_UI_Pages_VCockpit_Core_VCockpit.js`, `loadNextInstrument`, outside its FS Copilot blocks).
 
 So a script of ours that never loads, such as one the sim can't find, stays at the head of the list, and an instrument's scripts queued behind it may never be requested (inference, from the code read).
 

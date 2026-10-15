@@ -30,7 +30,8 @@ The spine's [communication](../architecture/01-spine.md#communication), decision
   The core turns on its `server` feature, which iroh-relay leaves off and which adds no crate (same entry).
 - **`Origin`:** `ServerBuilder::accept` writes the upgrade before it returns the request ([core log][p02]), so the edge reads `Origin` from that request at once, and closes a socket whose `Origin` is neither `coui://html_ui` nor absent with code 1008, `CloseCode::POLICY_VIOLATION` (read in tokio-websockets 0.13.3, `src/proto/types.rs`), before reading anything from it.
   No message from it reaches the loop, so [decision 013](../../decisions/013-core-accepts-sim-origin-or-none.md)'s rule holds.
-- **Limits:** `Limits` cap a message at 64 MiB by default ([core log][p02]), so the edge sets 1 MiB, and a message past it closes the socket; only text is taken, and a binary message closes the socket.
+- **Limits:** tokio-websockets' `Limits` cap a message at 64 MiB by default ([core log][p02]); the edge sets 1 MiB, sixteen times the [budget](#budgets)'s 64 KiB, so a message over budget still arrives and the bench catches it, while a runaway closes the socket.
+  Only text is taken, and a binary message closes the socket.
 - **Socket IDs** come from a counter at the edge, inside each input, so a replay sees the same IDs.
 
 ## The protocol
@@ -48,9 +49,10 @@ Each message is JSON with a `t` tag, defined in the message crate's clients modu
 | `load`, `stop`, `none` | The core, to a cockpit panel | The panel modules to load or to stop, or nothing for this panel, after which it closes its socket ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
 | `bye` | The core | Nothing: the core sends it as it quits ([01-loop-and-edge](01-loop-and-edge.md#quitting)) |
 
-- **Each side sends at least every 2s, and only the core closes a socket that has been quiet for 8s,** as [decision 010](../../decisions/010-clients-message-core-every-2s.md) has it.
-  A client notes the core's silence and keeps its socket: the EFB app can show it, and the bridge turns a visible lock into a warning 8s to 10s after the core's last message, as the code map's [how work in the sim ends](../architecture/02-code-map.md#how-work-in-the-sim-ends) has it for a core that hangs, since any message from the core renews a panel's locks.
-  The core's half adds to decision 010 once step 8's decisions are numbered.
+- **Each side sends at least every 2s, and only the core closes a socket that has been quiet for 8s.**
+  [Decision 010](../../decisions/010-clients-message-core-every-2s.md) has the clients' message every 2s and the core's close after 8s; the core's own message every 2s is this design's, and adds to decision 010 once step 8's decisions are numbered.
+  A client notes the core's silence and keeps its socket, and the EFB app can show it.
+  Any message from the core renews a panel's locks, so when the core hangs, the bridge turns a visible lock into a warning 8s to 10s after the core's last message, as the code map's [how work in the sim ends](../architecture/02-code-map.md#how-work-in-the-sim-ends) has it.
 - **A command's answer says only whether the command was taken.**
   What it led to shows in state: a join, for one, answers at once, and its progress shows in the session's slice.
 - **`bye`** goes to every client when the session crate quits, which asks `clients` for it in the handler that puts out the exit; the apps use it to tell the pilot that Crosscheck quit rather than stopped, as FS Copilot's panels told a deliberate shutdown from a crash by its goodbye (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`).
@@ -73,12 +75,13 @@ cx.send(To::Component("menu-script"), body);                  // a message to a 
 cx.notice(id, Notice { level, text, action });                // a notice, and cx.clear_notice(id)
 ```
 
-- **Client state:** every 50ms, a starting value, while any client is connected, a timer has `clients` build each slice some client shows, and send each client the slices that changed since it last sent them; a client that starts showing a slice gets it at once.
+- **Client state:** while any client is connected, `clients` runs a timer every 50ms, a starting value, and each time it fires, `clients` builds each slice some client shows, and sends each client the slices whose value differs from the one it last sent that client.
+  A client that starts showing a slice gets it at once.
   The timer bounds the work however many inputs arrive, and needs no unit to mark what changed.
   A slice no unit registered, such as a deleted feature's, is ignored.
 - **Commands:** `clients` calls a command's handler by name, through the kernel, once its own handler returns ([01-loop-and-edge](01-loop-and-edge.md#hooks)); a name no unit registered answers "unknown".
 - **Messages to a client:** `cx.send` puts out a `unit` message to every client of a component, or to a panel module, and a client's `unit` message reaches the unit that registered its name.
-  Unlike a slice, a message goes once, so a client that connects later never gets it: the EFB app that reconnects doesn't open onto an old notice.
+  Unlike a slice, a message goes once, so a client that connects later never gets it: a menu script that reconnects never gets a world-map request the sim service sent before it.
 - **Notices:** a notice's ID is its unit's own, its feature writes its text, its level is information, a warning, or trouble, and its action, if it has one, is the command a click on it sends.
   The notices are a slice of `clients`' own, and where each one shows is [6.16](../architecture/plan.md#616-the-apps)'s.
 - **Settings:** a unit registers each setting with a key, a type, and a default, and `clients` keeps them in `settings.json` in the data folder, whose bytes come with the core's first input ([01-loop-and-edge](01-loop-and-edge.md#starting-and-stopping)).
@@ -112,8 +115,8 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
 
 1. It listens for the core's announcement, a CommBus event named `CROSSCHECK_CORE` whose payload holds the core's port and whether a session runs, by each kind of page's route in [finding the core](../architecture/01-spine.md#finding-the-core).
    The event's name is new in this design.
-2. When it hears one and has no socket open, it connects to that port and sends its `hello`, a cockpit panel only in a session ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)).
-3. When its socket closes, it connects again on the next announcement, so it needs no backoff, and an announcement with another port moves it there.
+2. When it hears an announcement with no socket open, or one naming a port other than its socket's, it connects to that port and sends its `hello`; a cockpit panel connects only to an announcement that says a session runs ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)).
+3. When its socket closes, it connects again on the next announcement, so it needs no backoff.
 4. It queues nothing while it has no socket, and a send then is dropped: a core that restarted comes back as a late joiner ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)), and a press played into a cockpit already caught up would undo the catch-up.
    FS Copilot's channel kept up to 200 messages for at most 30s, since "stale input is worse than none" (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`, `MAX_QUEUE` and `MAX_QUEUE_AGE_MS`); ours keeps none.
 
@@ -126,7 +129,8 @@ Our `VCockpit.js` is the stock file with two blocks between markers, as FS Copil
 - The block at the top sets `CROSSCHECK_PENDING = []` and, in a `try`, adds a script element of its own for `/Crosscheck/bridge.js`, one esbuild bundle of the bridge and page-client, which loads the sim's `CommBus.js` the same way where the panel lacks it.
 - The block in `createInstrument`, after the sim's code has set the instrument up, runs `try { if (window.CROSSCHECK_BRIDGE) CROSSCHECK_BRIDGE.add(template); else CROSSCHECK_PENDING.push(template); } catch (e) {}`, and the bridge takes every instrument waiting in `CROSSCHECK_PENDING` when it loads.
 
-Our files never go through the sim's `Include.addImports`, which FS Copilot's copy uses: the sim's loader holds every later script behind one that never loads while it loads one at a time, as it does for each instrument's scripts ([core log][include]).
+Our files never go through the sim's `Include.addImports`, which FS Copilot's copy uses.
+Stock `VCockpit.js` sets the sim's loader to one script at a time before it loads each instrument's scripts, and in that mode the loader requests a script only once the one before it fires `onload`, so a file of ours that never loads would keep every instrument script behind it from being requested (read in the sim's `common.js`, `IncludeMgr`, not run; [core log][include]).
 So the sim creates each instrument exactly as it would without us, and if `bridge.js` never loads, the cockpit should run as if Crosscheck weren't installed (unverified; a case for the bench settles it).
 The build makes our copy by putting the two blocks into the stock file at named anchors, and refuses when an anchor is missing, as our prototype refused when one of FS Copilot's markers was (same chapter).
 The sim streams its stock file rather than keeping it on disk (same chapter), so how the build gets it after each sim update is [6.18](../architecture/plan.md#618-the-build)'s.

@@ -1093,37 +1093,39 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## Sim awareness is an engine, whose stages each load enters once
 
 - **Decided:** sim awareness is an engine, `sim-awareness`: one step function, with no clock and no I/O, from the sim's signals to its state, the stage, the aircraft, the pause flags, the run of the sim, and how the last run ended.
-  The stages are Closed, Starting, Menu, Loading, Ready to fly, and Flying; a load starts at `FlightLoaded` or `FLT_LOAD`, Ready to fly at `RTC_START`, and Flying at `RTC_END`, and every other signal leaves the stage as it is.
+  The stages are Closed, Starting, Menu, Loading, Ready to fly, and Flying; a load starts at `FlightLoaded`, Ready to fly at `RTC_START`, Flying at `RTC_END`, and Menu at `BACK_TO_MAIN_MENU`, and every other signal, `FLIGHT_END` among them, leaves the stage as it is.
+  A core that connects mid-run leaves Starting by the menu script's master page, `MasterPage` for Menu and `MasterPage_InGame` for Flying, or by a load's signal.
   The aircraft is the last `AircraftLoaded` path heard while Loading, lowercased and cut below `simobjects/airplanes/`, which names the folder and the preset, and the core logs `A:TITLE` beside it.
   The sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading.
   Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
 - **Because:**
   - The IDE can link it, as it links the sim client, where fsc-editor worked the sim's state out again on every `AircraftLoaded` (read in fsc-editor, `src/main/sim/session.ts`, `aircraftChanged`), and the bench can feed it recorded signals with nothing else running (user, 2026-10-15).
-  - p08's client heard two of its three `AircraftLoaded` in the main menu, and `FLT_LOAD` twice in one load ([core log][c05]).
+  - p08's client heard two of its three `AircraftLoaded` in the main menu, and `FLT_LOAD` three times in one load ([core log][c05]).
+  - `Sim` read 1 in the main menu and through a load's screen, and a Restart sent `FLIGHT_END` inside its load ([core log][c06]).
   - The path names the preset on the PA-24 and the A350, and a profile names a preset by that path ([01-format-and-delivery](../profiles/01-format-and-delivery.md#the-aircraft-and-its-variants)), while `A:TITLE` carries the livery in an aircraft that isn't modular ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
-- **Leaves out:** what `Sim` answers to a connection made in a flight, during a load, or on the Ready to fly screen, and whether `Pause_EX1` reports each pause on MSFS 2024, for [node 7](plan.md#7-testing)'s tests in the sim.
+- **Leaves out:** a core that connects mid-flight without our copy of BlurPage, which brings the menu script, stays Starting until the next load.
 
 ## The core's edge watches the sim's process, and a sim whose process ends with no quit message before it crashed
 
 - **Decided:** the sim edge looks for `FlightSimulator2024.exe` every 2s while it holds no process, and hands up the process's ID and creation time when it finds it and its exit code when it ends, a fourth kind of input through the sim seam.
-  A run of the sim ends as a quit when the sim's quit message arrives on the platform's connection, and as a crash when, with no quit message before it, the process exits, or, with no process held, a lost connection is followed by an open that fails.
+  A run of the sim ends as a close when the sim's quit message arrives on the platform's connection, and as a crash when its process exits with no quit message before it; after the quit message, the core opens nothing until another process is found.
   Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#a-crash-and-a-close)).
 - **Because:**
   - Every sim crash in our aircraft harness closed SimConnect's connection with no quit message before it ([core log][c04]).
   - The session file holds the run of the sim, which the spine names by its process's ID and creation time ([IDs](01-spine.md#ids)), and the process's end ends a run even when SimConnect reports nothing.
-- **Leaves out:** whether a clean close sends the quit message, for [node 7](plan.md#7-testing)'s tests in the sim, after which the exit code decides if it doesn't; and the Microsoft Store edition's process name.
+- **Leaves out:** whether a clean close sends the quit message, for [node 7](plan.md#7-testing)'s tests in the sim, after which the exit code decides if it doesn't; and whether the Microsoft Store edition's process has the same name, which a pilot's crash report on the SDK's forum gives (unverified, [CTD always on startup](https://devsupport.flightsimulator.com/t/ctd-always-on-startup/10774)).
 
 ## Our WASM module runs no routine on a feed from another build, and carries each want through the sim's fsVars and fsEvents APIs
 
-- **Decided:** the module leaves a magic number, its version, a hash of the slots' layouts, and its counter in `CROSSCHECK_MODULE_STATUS`, and each routine's slot header carries the same hash; the routine host ignores a feed whose hash isn't its own, and the sim service logs both versions and reports the module as differing.
-  The routine host reads and writes `A:`, `L:`, and `Z:` variables through `fsVarsAVarGet`, `fsVarsAVarSet`, `fsVarsLVarGet`, `fsVarsLVarSet`, and `fsVarsZVarSet`, freezes through `fsEventsTriggerKeyEvent` with the SDK's `KEY_FREEZE_*_SET` numbers, and runs a plugin's calculator code through `execute_calculator_code`.
-  The core unfreezes the aircraft after 3s with the counter still only in Flying, unpaused, with a routine of ours live.
+- **Decided:** the module leaves its version, the slots hash, a hash of the slot structs alone, and its counter in `CROSSCHECK_MODULE_STATUS`, in a layout that never changes, and each routine's slot header carries the slots hash; the routine host ignores a feed whose slots hash isn't its own, and the sim service logs both versions and reports the module as differing.
+  The routine host reads and writes `A:`, `L:`, and `Z:` variables through `fsVarsAVarGet`, `fsVarsAVarSet`, `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarGet`, and `fsVarsZVarSet`, freezes through `fsEventsTriggerKeyEvent` with the SDK's `KEY_FREEZE_*_SET` numbers, and runs a plugin's calculator code through `execute_calculator_code`.
+  The core unfreezes the aircraft once the counter has been still for 3s spent in Flying, unpaused, with a routine of ours live.
   Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#our-wasm-module)).
 - **Because:**
   - A routine reads its slot in place, so a struct laid out by another build could become wrong values written into the pilot's aircraft, and a hash of the slot structs alone spares a developer a sim restart for a change to a WebSocket message.
   - p12 read and wrote `A:` variables through `fsVarsAVarGet` and `fsVarsAVarSet` in the sim (read in `experiments/areas/avatars/wasm/src/follow.cpp`, `read_pose` and `write_pose`), and SDK 1.7.3 marks `execute_calculator_code` deprecated while nothing else runs calculator code (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/Legacy/gauges.h`).
   - The session sits above the sim service, which can't read it, and a module with no routine live froze nothing.
-- **Leaves out:** whether `fsVarsAVarSet` holds the pilot's own aircraft's pose and whether `fsEventsTriggerKeyEvent` freezes it, for [node 7](plan.md#7-testing)'s tests in the sim, after which calculator code carries either that fails, as FS Copilot's module writes its pose and freeze.
+- **Leaves out:** whether `fsVarsAVarSet` holds the pilot's own aircraft's pose and whether `fsEventsTriggerKeyEvent` freezes it, for [node 7](plan.md#7-testing)'s tests in the sim, after which calculator code carries either that fails, as FS Copilot's module writes its pose and freeze; and whether bindgen brings in the freeze events' numbers, since p08's build generated bindings only from `SimConnect.h` and `MSFS_Vars.h`.
 
 ## Every name the sim shares is CROSSCHECK_, a kind, and a name
 
@@ -1135,6 +1137,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
+[c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load
 [c02]: ../core/log.md#2026-10-15-iroh-13-already-brings-tokio-websockets-into-the-core-so-serving-the-clients-with-it-keeps-the-core-at-one-websocket-implementation
 [c03]: ../core/log.md#2026-10-15-the-sims-script-loader-holds-every-later-script-behind-one-that-never-loads-while-it-loads-one-at-a-time
 [c01]: ../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version

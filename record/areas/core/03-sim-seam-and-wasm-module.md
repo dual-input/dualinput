@@ -9,18 +9,17 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.
-Our WASM module runs a routine only on feeds from its own build, which it tells by a hash of the slots' layouts, and carries each want through the sim's `fsVars` and `fsEvents` APIs, with calculator code only for a plugin's calculator code.
+Our WASM module runs a routine only on feeds from its own build, which it tells by the slots hash, and carries each want through the sim's `fsVars` and `fsEvents` APIs, with calculator code only for a plugin's calculator code.
 
 This answers node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module).
-The code map's [sim seam](../architecture/02-code-map.md#the-sim-seam) and [work in the sim](../architecture/02-code-map.md#work-in-the-sim), the spine's [sim awareness](../architecture/01-spine.md#sim-awareness), [01-loop-and-edge](01-loop-and-edge.md), and [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
-Every name the sim shares is `CROSSCHECK_<KIND>_<NAME>` (user, 2026-10-15), and the code map's [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares) lists the kinds.
+The code map's [sim seam](../architecture/02-code-map.md#the-sim-seam), [work in the sim](../architecture/02-code-map.md#work-in-the-sim), and [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares), the spine's [sim awareness](../architecture/01-spine.md#sim-awareness), [01-loop-and-edge](01-loop-and-edge.md), and [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
 
 ## The units
 
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
 | `sim-edge` | Engine | One thread holding every SimConnect connection and the sim's process: it makes each call, tags each exception, and hands up each message, open, loss, and change of the process as an input | Off the loop, in the core and the IDE |
-| `sim-client` | Engine | For each connection: its IDs, the calls that set it up, which it makes again on a new connection, a feature's call turned into SimConnect's calls, and each message parsed and routed to the call that caused it | On the loop, and in the IDE |
+| `sim-client` | Engine | For each connection: its IDs, the calls that set it up, which it makes again on a new connection, and a feature's call turned into SimConnect's calls | On the loop, and in the IDE |
 | `sim-awareness` | Engine | One step function from a sim signal to the sim's state, with no clock and no I/O | On the loop, on the bench, and in the IDE |
 | `sim-service` | Platform | The connections, the calls features make, routines' feeds, the module's status and the unfreeze, the masking group, the announcement, and the world map's requests; it raises `SimChanged` | On the loop |
 | `routine-host` | Platform, outside the core | Routines, their slots and wants, the freeze, and the module's status slot | In our WASM module, and natively on the bench |
@@ -32,13 +31,12 @@ Sim awareness is an engine so that the IDE can link it, as it links the sim clie
 
 ### Its thread
 
-- One thread, the sim thread of [01-loop-and-edge](01-loop-and-edge.md#threads), holds every connection's handle, since SimConnect's clients "are not currently thread-safe" ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+- One thread, the sim thread of [01-loop-and-edge](01-loop-and-edge.md#threads), holds every connection's handle, as the code map's edge requires.
 - It waits in `WaitForMultipleObjects` on each connection's event, the one it passes to `SimConnect_Open`, on the sim's process, and on an event that the loop's sink for `SimCall` sets when it queues calls.
   It waits at most 2ms, as p08's client waited on its connection's event in a flight (read in `experiments/areas/architecture/flight/client/src/main.rs`; [architecture log][flight]), since the SDK says only that a client "can be written to respond to Windows Events" ([SimConnect_Open](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_Open.htm)), not when it signals one.
 - On each wake it makes the queued calls in their order, then takes each connection's messages through `SimConnect_GetNextDispatch` until none is left.
 - After each call it reads `SimConnect_GetLastSentPacketID`, and keeps each packet ID with its call's handle for the last 4,096 calls on each connection, about 1s of traffic's writes with 132 copies at 32.5 fps (arithmetic, from [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
   An exception whose packet ID it holds goes up tagged with that handle.
-- Each connection's name in `SimConnect_Open` is `Crosscheck` for the platform's and `Crosscheck ` and the unit's name for a feature's, so Developer Mode's SimConnect Inspector, which shows each client's calls ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)), names whose they are.
 
 ### Its inputs
 
@@ -51,13 +49,16 @@ Four kinds of input come up through the seam, each stamped and recorded ([inputs
 | A loss | The connection's number, after a call on it returned an error |
 | The sim's process | Found, with its ID and creation time; or exited, with its exit code |
 
-The sim's process is the fourth, beside the three the code map names.
-It gives the session file the run of the sim, which the spine names by the process's ID and creation time ([IDs](../architecture/01-spine.md#ids)), and it ends a run of the sim even when SimConnect reports nothing.
-Whether a crashed sim's connection fails the next call, or reports nothing until the process is gone, is unmeasured, and node 7's test that kills the sim shows which comes first.
+- The code map also counts the quit message and a failed dispatch as a loss.
+  The quit message comes up as a message, which the sim service takes as its connection's loss, and the edge can't tell a failed dispatch from an empty queue, since p08's client took any result of `SimConnect_GetNextDispatch` but `S_OK` to mean none was left (same file).
+- The sim's process is the fourth kind, beside the three the code map names.
+  It gives the session file the run of the sim, which the spine names by the process's ID and creation time ([IDs](../architecture/01-spine.md#ids)), and it ends a run of the sim even when SimConnect reports nothing.
+- Whether a crashed sim's connection fails the next call, or reports nothing until the process is gone, is unmeasured, and node 7's test that kills the sim shows which comes first.
 
 ### The sim's process
 
-- While it holds no process, the edge looks for one each time the sim service asks, every 2s: it walks a `CreateToolhelp32Snapshot` of the processes for `FlightSimulator2024.exe`, ignoring case, the name the Windows Application log gave each sim that crashed in our aircraft harness ([crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv)).
+- While it holds no process, the edge looks for one each time the sim service asks, every 2s: it walks a `CreateToolhelp32Snapshot` of the processes for `FlightSimulator2024.exe`, ignoring case.
+  That's the name the Windows Application log gave each sim that crashed in our aircraft harness, on the Steam edition ([crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv)), and the name a pilot's crash report gave the Microsoft Store edition, under `C:\Program Files\WindowsApps\Microsoft.Limitless_1.0.77.0_x64__8wekyb3d8bbwe` (unverified, a forum post: [CTD always on startup](https://devsupport.flightsimulator.com/t/ctd-always-on-startup/10774)).
 - It opens the process with `PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE`, reads its creation time with `GetProcessTimes`, hands both up, and waits on the process with its connections.
 - When the process ends, it hands up `GetExitCodeProcess`'s code, which for a crash is "the exception value for an unhandled exception that caused the process to terminate" (documented, [GetExitCodeProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getexitcodeprocess)), for the log.
 
@@ -66,10 +67,8 @@ Whether a crashed sim's connection fails the next call, or reports nothing until
 - **Calls:** `SimCall`, the output type the edge carries out, has a variant for each SimConnect function our code calls, with its arguments owned, so the edge maps each variant to one call, and the stand-in sim answers each ([node 7](../architecture/plan.md#7-testing)).
 - **IDs:** each connection counts its definitions, requests, client events, groups, and client data from 1, on the loop, so a replay hands out the same.
 - **Setup:** it keeps, in order, each call that set something up on a connection, and makes them all again on that connection's next open, as FS Copilot keeps a list of setup actions for each connection ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
-- **Watches:** a feature's names become one data definition, with a datum ID for each name, requested `TAGGED`, so each value arrives with its name's ID, and a name the sim rejects leaves the others whole ([why the seam sits at SimConnect's calls](../architecture/02-code-map.md#why-the-seam-sits-at-simconnects-calls)).
-  A number is `FLOAT64`, and a string `STRING256`.
+- **Watches:** a watch's datum IDs are its names' places in it, so each tagged value names its variable; a number is `FLOAT64`, and a string `STRING256`.
 - **`B:` names:** at a connection's first `B:` name, it enumerates the input events, holds the connection's `B:` calls until the list is whole, then makes each by its hash, as fsc-editor's cycle does ([04-02](../../learn/foundations/04-02-events.md#the-input-events-api)); a name not on the list answers its call with an error.
-- **Messages:** it parses each record by its `dwID`, and routes it by its request ID, event ID, or the edge's tag to the handle of the call that caused it.
 
 ## The sim service
 
@@ -107,16 +106,16 @@ fn start(me: &mut FlightModel, _: &ProfileLoaded, cx: &mut Cx) {
 
 ### Connections
 
-- While the platform's connection is closed, the sim service asks the edge every 2s to open it and to look for the sim's process, as FS Copilot tries again every 2s ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
-- A connection lost while the sim's process runs, the platform's or a feature's, opens again at once, and its feature hears the loss, since its objects went with it ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
-- As a load starts, the profile unloads, and the sim service ends each feature's routines and then closes its connection (same section).
+- Every 2s, the sim service asks the edge to look for the sim's process while it holds none, and to open the platform's connection while it holds a process whose run hasn't ended and that connection is closed, as FS Copilot tries again every 2s ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+- So after the quit message, it opens nothing until that process has exited and another is found, since `SimConnect_Open` can return `S_OK` long before the sim answers: 46s before its open reply as it booted ([architecture log][flight]).
+- A connection lost while its run hasn't ended, the platform's or a feature's, opens again at once, as [a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load) has it.
 
 ### What the platform's connection holds
 
 At `S_OK`, before the sim's open reply, whose wait the calls made in it survive ([the core](../architecture/01-spine.md#the-core)), the platform's connection:
 
 - takes masking group A, as [the spine](../architecture/01-spine.md#components-with-no-session) has it;
-- subscribes to `AircraftLoaded`, `FlightLoaded`, `Pause_EX1`, and the flow events, and asks `RequestSystemState` for `Sim` and `AircraftLoaded`;
+- subscribes to `AircraftLoaded`, `FlightLoaded`, `Pause_EX1`, and the flow events, and asks `RequestSystemState` for `AircraftLoaded`;
 - maps `CROSSCHECK_MODULE_STATUS`, and requests it `ON_SET`;
 - starts the [announcement](#the-announcement).
 
@@ -125,9 +124,9 @@ At `S_OK`, before the sim's open reply, whose wait the calls made in it survive 
 ```rust
 // a sketch
 pub enum Signal<'a> {
-    Process(Process), Opened, OpenFailed, OpenReply, Quit, Lost,
-    AircraftLoaded(&'a str), FlightLoaded(&'a str), Pause(u32), Flow(Flow),
-    SimState(i32), AircraftState(&'a str), Page(MenuPage),
+    Process(Process), Quit,
+    AircraftLoaded(&'a str), AircraftState(&'a str), FlightLoaded,
+    Flow(Flow), Pause(u32), Page(MenuPage),
 }
 
 pub struct SimAwareness {
@@ -136,8 +135,7 @@ pub struct SimAwareness {
     pub aircraft: Option<Aircraft>,   // its folder and preset
     pub pause: Pause,                 // Pause_EX1's flags
     pub run: Option<SimRun>,          // the sim process's ID and creation time
-    pub ended: Option<Ending>,        // Quit or Crash, for the run that ended last
-    pub loads: u32,                   // loads in this run
+    pub ended: Option<Ending>,        // Close or Crash, for the run that ended last
 }
 
 impl SimAwareness {
@@ -151,22 +149,24 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 
 | Stage | Entered on | From |
 | --- | --- | --- |
-| Closed | The quit message on the platform's connection, or the run's end, [below](#a-crash-and-a-close) | Any |
-| Starting | The sim's process found, or `SimConnect_Open` returning `S_OK` | Closed |
-| Menu | `Sim`'s answer of 0 after the open reply, `FLIGHT_END`, or `BACK_TO_MAIN_MENU` | Starting, Loading, Ready to fly, Flying |
-| Loading | `FlightLoaded` or `FLT_LOAD` | Menu, Flying |
-| Ready to fly | `RTC_START` | Loading |
-| Flying | `RTC_END`, or `Sim`'s answer of 1 after the open reply | Ready to fly, Starting |
+| Closed | The quit message on the platform's connection, or the sim's process exiting, [below](#a-crash-and-a-close) | Any |
+| Starting | The sim's process found | Closed |
+| Menu | `BACK_TO_MAIN_MENU`, or the menu script's master page `MasterPage` | Any but Closed |
+| Loading | `FlightLoaded` | Starting, Menu, Flying |
+| Ready to fly | `RTC_START` | Starting, Loading |
+| Flying | `RTC_END`, or the menu script's master page `MasterPage_InGame` | Starting, Ready to fly |
 
-- Every other signal leaves the stage as it is: a second `FLT_LOAD` inside a load, `FLT_LOADED`, `FLIGHT_START`, and a teleport among them.
-- p08 heard `FlightLoaded`, then `FLT_LOAD`, then at `FLIGHT_START` a second `FLT_LOAD` and `RTC_START`, and `RTC_END` 57.7s later when the pilot pressed Ready to fly ([core log][signals]).
-- A Restart also reached Ready to fly: the Baron's values settled 44.8s after Ready on a Restart (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
-- The sim sent `FLIGHT_END` and `BACK_TO_MAIN_MENU` 4s after the prompt to leave the flight (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
+- The master page counts only while Starting: it tells a core that connects mid-run where the sim is ([connecting mid-run](#connecting-mid-run)).
+- Every other signal leaves the stage as it is, among them `FLT_LOAD`, `FLT_LOADED`, `FLIGHT_START`, `FLIGHT_END`, and a teleport.
+- p08 heard `FlightLoaded`, then `FLT_LOAD` three times through the load, `RTC_START`, and `RTC_END` 57.7s later, when the pilot pressed Ready to fly ([core log][signals]).
+- A Restart from the pause menu sent `FlightLoaded`, then `FLIGHT_END` 72ms later, then `FLT_LOAD`, and later `RTC_START` and `RTC_END` ([core log][sim-state]), so `FLIGHT_END` moves no stage, and a Restart is one load.
+- The sim sent `BACK_TO_MAIN_MENU`, with `FLIGHT_END`, 4s after the prompt to leave the flight (measured on MSFS 2024, 2026-10-08, [interface log][coverage]).
 
 ### The aircraft
 
 - The aircraft is the last `AircraftLoaded` path heard while Loading.
   One heard in any other stage changes nothing: the main menu's own aircraft, which p08 heard twice ([core log][signals]), or one from Developer Mode's Aircraft Selector, which Crosscheck doesn't support (user, 2026-10-15).
+- When Starting gives way to Ready to fly or Flying, the aircraft is the `AircraftLoaded` state's answer, which the platform's connection asked for at `S_OK`.
 - The engine lowercases the path, turns `\` into `/`, keeps what follows `simobjects/airplanes/`, and drops a final `config/aircraft.cfg` or `aircraft.cfg`.
   So the PA-24's `SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` becomes `pa24-250/presets/a2a/pa24-250`, whose first part is the folder ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
 - So the A350's two reports of one load, 1ms apart, one relative and mixed-case and one absolute and lowercase (same chapter), name one aircraft, and a profile's preset path, compared ignoring case, matches it ([the aircraft and its variants](../profiles/01-format-and-delivery.md#the-aircraft-and-its-variants)).
@@ -179,21 +179,21 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 - The sim service raises `SimChanged`, which carries the state before, once for each step that changes the state, so a load is one entry into Loading, however many signals it brings.
 - A feature reads the state through `cx.read::<SimAwareness>()`.
 
-### Connecting to a sim in a flight
+### Connecting mid-run
 
-- A system event reports only what happens after the subscription ([04-02](../../learn/foundations/04-02-events.md#system-events-and-state)), so the stage stays Starting until `Sim` answers: 0 is Menu, and 1 is Flying with `AircraftLoaded`'s answer for its aircraft, as one load.
-- The SDK says `Sim` is 1 while the user controls the aircraft and 0 in the menus, and nothing of ours has read it (same section).
-  If it misreads, the menu script's master page tells a flight from the menu, `MasterPage_InGame` against `MasterPage` (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
+- `AircraftLoaded` reports only what happens after the subscription ([04-02](../../learn/foundations/04-02-events.md#system-events-and-state)), so a core that connects mid-run, after its own restart or when the desktop app started it before the sim, stays Starting until the menu script reports its master page, or until a load's signal arrives.
+- The menu script reports its master page when the sim service asks, as its socket joins: `MasterPage` in the main menu and `MasterPage_InGame` in a flight (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
+- The `Sim` state can't tell them apart: it read 1 in the main menu, and again 1s into a load's screen ([core log][sim-state]).
+- Without our copy of BlurPage, which brings the menu script ([preflight](../product/03-v1-scope.md#preflight)), a core that connects mid-flight stays Starting until the next load.
 
 ### A crash and a close
 
-- A run ends as a quit when the sim's quit message arrives on the platform's connection, and the stage goes to Closed at once, since the sim is going.
-- It ends as a crash when, with no quit message before it, the sim's process exits, or, with no process held, a lost connection is followed by an open that fails.
+- A run ends as a close when the sim's quit message, which "Specifies that the user has exited from Microsoft Flight Simulator 2024" (documented, [SIMCONNECT_RECV_ID](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_ID.htm)), arrives on the platform's connection, and the stage goes to Closed at once.
+- It ends as a crash when the sim's process exits with no quit message before it.
   Every sim crash in our aircraft harness closed SimConnect's connection with no quit message before it ([core log][crashes]).
 - A connection lost while the process runs ends nothing: the sim service opens it again.
 - The exit code goes in the log either way, and the session's notice to the crew reads `ended` ([a sim that closed](../sync/04-order-and-recovery.md#a-sim-that-closed)).
-- No run of ours has recorded a clean close, which SimConnect announces with `SIMCONNECT_RECV_ID_QUIT` (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`) and FS Copilot's managed wrapper reports as `OnRecvQuit` when the sim closes ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
-  If node 7's test finds a clean close sends none, the exit code decides instead, since the edge already holds the process (user, 2026-10-15).
+- No run of ours has recorded a clean close; if node 7's test finds one sends no quit message, the exit code decides instead, since the edge already holds the process (user, 2026-10-15).
 
 ## Our WASM module
 
@@ -201,7 +201,7 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 
 | Slot | Created by | Written by | Holds |
 | --- | --- | --- | --- |
-| `CROSSCHECK_MODULE_STATUS` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY` | The module | A magic number; this slot's layout number, which never changes; the module's version; the slots hash; and the counter |
+| `CROSSCHECK_MODULE_STATUS` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY` | The module | The module's version, the slots hash, and the counter, in a layout that never changes, so any build reads any other's |
 | `CROSSCHECK_ROUTINE_<ID>` | The module | The sim service | A header of the feed count (`u32`), the end mark (`u32`), and the slots hash (`u64`), then the routine's struct |
 
 - The module creates every slot in `module_init`, as fsc-editor's and p08's modules create theirs (read in fsc-editor, `link/src/module.cpp`, `module_init`, and `experiments/areas/architecture/flight/module/src/lib.rs`), and subscribes to each routine's slot `ON_SET`.
@@ -213,7 +213,6 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 - The slots hash is a hash of the slot structs alone, which the build computes as it computes the message crate's ([versions](../architecture/01-spine.md#versions)), so a change to a WebSocket message leaves it as it was, and a developer needn't restart the sim for one.
 - The routine host ignores a feed whose header carries another slots hash, so no routine runs on a struct laid out by another build, which it would read in place ([messages and their types](../architecture/01-spine.md#messages-and-their-types)) and could turn into wrong values written into the pilot's aircraft (user, 2026-10-15).
 - The sim service compares the status slot's hash with its own, and when they differ, logs both versions and reports the module as differing, as [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md#a-client-whose-version-differs) logs a client whose version differs.
-- The watcher updates our package only while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a module from another build to mean a developer's stale package (inference).
 
 ### Wants and the sim's APIs
 
@@ -221,53 +220,46 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 | --- | --- | --- |
 | Read an `A:` variable, of the pilot's aircraft or of an object by its ID | `fsVarsAVarGet` | p12 read both in the sim (read in `experiments/areas/avatars/wasm/src/follow.cpp`, `read_pose`) |
 | Write an `A:` variable | `fsVarsAVarSet` | p12 wrote another object's pose each frame (same file, `write_pose`); on the pilot's own aircraft, unrun |
-| Read or write an `L:` or `Z:` variable | `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarSet` | p08 and p12 ran them in the sim (same file; `experiments/areas/architecture/flight/module/src/lib.rs`) |
+| Read or write an `L:` or `Z:` variable | `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarGet`, and `fsVarsZVarSet` | p08 and p12 ran them in the sim (same file; `experiments/areas/architecture/flight/module/src/lib.rs`) |
 | Freeze the pilot's aircraft | The three `A:IS ... FREEZE ON` flags through `fsVarsAVarGet`, and `fsEventsTriggerKeyEvent` with `KEY_FREEZE_LATITUDE_LONGITUDE_SET`, `KEY_FREEZE_ALTITUDE_SET`, and `KEY_FREEZE_ATTITUDE_SET` | Unrun; FS Copilot's module sends the same events as calculator code (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_control`) |
 | Run calculator code, for a plugin | `execute_calculator_code` | Ran on MSFS 2024 on 2026-08-25 ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)) |
 
-- The routine host looks each ID up once, through `fsVarsGetAVarId`, `fsVarsGetLVarId`, `fsVarsRegisterZVar`, and `fsVarsGetUnitId`, and keeps it.
-  It forgets them all when the handler it registers with `fsVarsRegisterVarsStatusUpdateHandler` reports a `REMOVE` or a `RESET`, which fsc-editor's module heard on an aircraft change (measured on MSFS 2024, 2026-08-27, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-27 — The typed variable API works, and the sim announces invalidation").
-- `fsEventsTriggerKeyEvent` takes an event's number, which bindgen generates from the SDK's `MSFS_EventsEnum.h` (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h` and `Types/MSFS_EventsEnum.h`), so the module needs no table of names for the freeze.
+- The routine host looks each ID up once and keeps it: an `A:` variable's through `fsVarsGetAVarId`, an `L:` variable's through `fsVarsRegisterLVar`, since `fsVarsGetLVarId` returns -1 for one that doesn't exist yet and doesn't create it, a `Z:` variable's through `fsVarsRegisterZVar`, and a unit's through `fsVarsGetUnitId`.
+  It forgets them all when the handler it registers with `fsVarsRegisterVarsStatusUpdateHandler` reports a `REMOVE` or a `RESET`, which fsc-editor's module heard on an aircraft change (measured on MSFS 2024, 2026-08-27, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-27 — The typed variable API works, and the sim announces invalidation", for both).
+- `fsEventsTriggerKeyEvent` takes an event's number, and `MSFS_EventsEnum.h` defines the freeze events' numbers (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h` and `Types/MSFS_EventsEnum.h`), so the module needs no table of names for the freeze.
+  p08's build generated bindings only from `SimConnect.h` and `MSFS_Vars.h` (read in `experiments/areas/architecture/flight/module/build.rs`), so whether bindgen brings in these numbers is unverified until the module's build adds `MSFS_Events.h`.
 - SDK 1.7.3 marks `execute_calculator_code` deprecated, "Panels API is now deprecated" (read in `WASM/include/MSFS/Legacy/gauges.h`), and nothing else runs calculator code ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)), so it carries only a plugin's.
 - A later want that fires an `H:` event has `fsEventsRegisterHEvent`, which takes the event's name, and `fsEventsHEventCall` (read in `MSFS_Events.h`).
 - If node 7's tests in the sim find that `fsVarsAVarSet` doesn't hold the pilot's own aircraft's pose, or that `fsEventsTriggerKeyEvent` doesn't freeze it, calculator code carries that want, as FS Copilot's module writes its pose and its freeze (read in `wasm_module.cpp`, `apply_physics` and `apply_control`), and no routine changes.
 
 ### Each frame
 
-In `Update_StandAlone`, the module:
-
-1. calls `SimConnect_CallDispatch`, as fsc-editor's, p08's, and p12's modules do at the top of each update, and copies each slot delivered into the routine host;
-2. drops each routine whose end mark arrived or that has gone 1s with no write, and makes a routine new at its first feed after that;
-3. runs each live routine's frame, collecting its wants;
-4. reads the three freeze flags, freezes the aircraft while any routine asks and it isn't frozen, and unfreezes it, if it froze it, once none asks;
-5. makes the writes, once every routine's frame has run;
-6. writes its status slot, once a second has passed since the last.
+In `Update_StandAlone`, the module calls `SimConnect_CallDispatch` before any routine runs, as fsc-editor's, p08's, and p12's modules call it before their own work with the sim, and copies each slot delivered into the routine host.
+The routine host then runs its frame, as the code map's [routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module) and [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for) have it, and the module writes its status slot once a second has passed since the last.
 
 ### Through a flight load
 
-- The routine host takes nothing up after a load but its IDs, after the `RESET`:
-  - The slots outlive the clients that created them, for the rest of the sim's run ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)).
-  - The module's own connection carried it through p08's load ([architecture log][flight]).
-  - Each routine starts new at its first feed after the load ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module)).
-- Nothing feeds it through the load, since the profile unloads as the load starts, and the sim service ends every routine first.
-- p08's round trips through the module reached 2.8s during the load ([architecture log][flight]), and the sim service judges the counter only in Flying, so a still counter through a load counts for nothing.
+- The routine host takes nothing up after a load but its IDs, after the `RESET`: the slots outlive the clients that created them, for the rest of the sim's run ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)), and the module's own connection carried it through p08's load ([architecture log][flight]).
+- p08's round trips through the module reached 2.8s during the load (same entry), and the sim service judges the counter only in Flying, so a still counter through a load counts for nothing.
 
 ### The module's status
 
 | Status | When |
 | --- | --- |
-| Missing | No write to the status slot 3s after the sim's open reply |
+| Missing | No write to the status slot heard yet |
 | Differs | Its slots hash isn't the core's |
 | Running | Its counter moves |
-| Stopped | Its counter has been still for 3s, in Flying, with no pause and a routine live |
+| Stopped | Its counter has been still for 3s spent in Flying, unpaused, with a routine live |
 
-- On Stopped, the sim service unfreezes the aircraft through its own connection, as the code map's [when the module stops](../architecture/02-code-map.md#when-the-module-stops) has it.
+- On Stopped, the sim service unfreezes the aircraft through the platform's connection, as the code map's [when the module stops](../architecture/02-code-map.md#when-the-module-stops) has it.
+- The 3s count only while all three hold, so an aircraft unpaused after a long pause isn't unfrozen before the module's next write.
+- "Unpaused" means `Pause_EX1` reads 0: the pause menu raised 8, active pause and the pilot's pause key 4, and `K:PAUSE_SET` 1 (measured on MSFS 2024, 2026-10-03, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)), and whether the module's update runs in each pause is unmeasured ([when the module stops](../architecture/02-code-map.md#when-the-module-stops)).
 - "A routine live" takes the place of the code map's "in a session", since the session sits above the sim service, which can't read it, and a module with no routine live froze nothing.
-- How the pilot sees a module that's missing, differs, or stopped is [6.16](../architecture/plan.md#616-the-apps)'s.
+- When the pilot sees a module that's missing, differs, or stopped, and how, is [6.16](../architecture/plan.md#616-the-apps)'s.
 
 ## The announcement
 
-- The platform's connection calls `SimConnect_CallCommBusEvent` with `CROSSCHECK_CORE_ANNOUNCE`, `SIMCONNECT_COMM_BUS_BROADCAST_TO_JS`, and a JSON body, such as `{"port":51234,"session":false}`, a type of the message crate ([page-client](02-clients-and-panel-bridge.md#page-client)).
+- The platform's connection calls `SimConnect_CallCommBusEvent` with `CROSSCHECK_CORE_ANNOUNCE`, `SIMCONNECT_COMM_BUS_BROADCAST_TO_JS`, and a JSON body of the core's port and whether a session runs ([page-client](02-clients-and-panel-bridge.md#page-client)), a type of the message crate, such as a hypothetical `{"port":51234,"session":false}`.
 - It calls it every 2s from `S_OK`, and at once when the session crate calls `sim_service::announce(cx, session)` as a session starts or ends; the port is the clients crate's.
 
 ## Budgets
@@ -276,8 +268,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 | What | Budget |
 | --- | --- |
-| Closed, after the sim's process exits | Within 100ms |
-| Closed, with no process held | Within 2s of the loss, one failed open |
+| Closed, after the quit message or the sim's process exiting | Within 100ms |
 | The platform's connection | Open within 2s of the sim taking connections |
 | The announcement | Within one input of the session crate's call |
 
@@ -285,12 +276,13 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 [Node 7](../architecture/plan.md#7-testing) turns each into a test:
 
-- p08's recorded signals ([core log][signals]) raise one Loading, one Ready to fly, and one Flying, with the PA-24's folder and preset, and the main menu's two `AircraftLoaded` raise nothing.
+- p08's recorded signals ([core log][signals]), after the sim's process is found, raise one Loading, one Ready to fly, and one Flying, with the PA-24's folder and preset, and the main menu's two `AircraftLoaded` raise nothing.
+- The Restart's recorded signals ([core log][sim-state]) raise one Loading, and no Menu.
 - The A350's two paths for one load name one aircraft.
-- A connection to a sim in a flight raises one load, into Flying.
-- The quit message, then the process exiting, ends the run as a quit; the process exiting with no quit message ends it as a crash; a loss with no quit message, then an open that succeeds, changes no stage, and each feature hears its own connection's loss.
+- A connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page.
+- The quit message, then the process exiting, ends the run as a close, and nothing opens between the two; the process exiting with no quit message ends it as a crash; a loss with no quit message, then an open that succeeds, changes no stage, and each feature hears its own connection's loss.
 - A feed whose slots hash differs runs no routine, and the sim service reports the module as differing.
-- The counter still for 3s in Flying, unpaused, with a routine live, unfreezes the aircraft; still while Loading, while paused, or with no routine live, it does nothing.
+- The counter still for 3s in Flying, unpaused, with a routine live, unfreezes the aircraft; still while Loading, while paused, with no routine live, or for under 3s since a pause ended, it does nothing.
 - After a `RESET`, `Figure`'s `Z:` writes still land.
 
 In the sim:
@@ -299,18 +291,16 @@ In the sim:
 - Killing the sim: which of a failed call, the quit message, and the process's exit reaches the edge first, and how soon.
 - A second flight load in one run of the sim: the module's own connection and its slots carry on, and `Follow` starts new at its first feed.
 - `fsVarsAVarSet` holds the pilot's own aircraft's pose, and `fsEventsTriggerKeyEvent` freezes and unfreezes it.
-- `Sim` answers 1 to a connection made in a flight.
 - A Marketplace aircraft's path names its folder and preset, and each of the L-1011's four presets gives a path of its own ([L-1011 study](../aircraft/inibuilds-l1011/study.md), sim question 13).
 - A connection's event wakes the edge within the 1ms budget without the 2ms timeout.
+- The Microsoft Store edition's process is `FlightSimulator2024.exe`.
 
 ## Left open
 
-- The Microsoft Store edition's process name, since our runs used the Steam edition; with no process found, the core still opens SimConnect, and a failed open ends a run.
-- Whether `Pause_EX1` reports each pause on MSFS 2024, which forum reports doubt ([02-03](../../learn/foundations/02-03-the-running-sim.md#the-sim-loop)); the module's Stopped status and its unfreeze lean on it.
-- A connection made during a load or on the Ready to fly screen, where what `Sim` answers is unknown.
 - `module_init` also runs "after sign-in", so it may run twice in one run of the sim ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#lifecycle-init-per-frame-update-deinit)); whether a second run finds its slots already created is unverified.
 
 [flight]: ../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [signals]: log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [crashes]: log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
+[sim-state]: log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load
 [coverage]: ../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel

@@ -764,7 +764,7 @@ Its answer goes in `record/areas/install/01-installing-and-updating.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5, where the installer lives, and whether it's a program of ours ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 6.1, the watcher starts the core again only when it exits with a code other than 0, since every deliberate exit returns 0 and a panic's abort never does; and how the watcher's tray asks the core to quit ([01-loop-and-edge](../core/01-loop-and-edge.md#exiting)).
-Raised elsewhere: by 6.3, the core finds the sim's process by the name `FlightSimulator2024.exe`, which our Steam edition's runs gave, while the Microsoft Store edition's name is unverified, as it is for the watcher noticing the sim's start ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#left-open)).
+Raised elsewhere: by 6.3, the core finds the sim's process by the name `FlightSimulator2024.exe`, which our Steam edition's runs gave, and which a pilot's crash report gave the Microsoft Store edition (unverified), as the watcher noticing the sim's start can ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-sims-process)).
 
 ## 6.18 The build
 

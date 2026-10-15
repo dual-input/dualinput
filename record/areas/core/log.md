@@ -3,17 +3,37 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-15: The `Sim` state reads 1 in the main menu and through a load's screen, and a Restart sends `FLIGHT_END` inside its load
+
+**Asked:** can sim awareness tell the main menu from a flight by the `Sim` state when the core connects mid-run, and does `FLIGHT_END` mean the pilot left the flight, for node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)?
+The SDK says `Sim` is 1 while the user controls the aircraft and 0 in the menus ([04-02](../../learn/foundations/04-02-events.md#system-events-and-state)), and 6.3's review found sync's p01 probe had recorded both.
+
+**Expected:** `Sim` 0 in the main menu, and `FLIGHT_END` only on leaving a flight.
+
+**Found:** in sync's p01 runs, which subscribed to `Sim` and the flow events (read in `experiments/areas/sync/results/p01-guided-load-2026-10-05-17-29-24.ndjson` and `-16-54-34.ndjson`; seconds from each probe's start):
+
+- **`Sim` in the main menu:** it read 1 as the probe connected, at 1.6s, 15s before a load from the main menu with no `FLIGHT_END` before it, and read 1 again at 17.8s, 1s after that load's `FlightLoaded` and 17s before its `RTC_START`.
+- **A Restart from the pause menu,** at 384.0s in the first run: `Sim` 0, `FlightLoaded` at 384.1s, `FLIGHT_END` and `FLT_LOAD` 72ms later, then `RTC_START` at 396.5s and `RTC_END` at 397.6s.
+- **The A350's reload,** at 874.3s in the second run, sent `FlightLoaded`, then `FLIGHT_END` 50ms later, then `FLT_LOAD`.
+
+**Changed:** sim awareness tells the menu from a flight while it's starting by the menu script's master page, not by `Sim`, and `FLIGHT_END` moves it to no stage, so a Restart is one load.
+
+**Affects:** [03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md#stages).
+
+**Evidence:** the two `.ndjson` files named above, read on 2026-10-15.
+
 ## 2026-10-15: Every sim crash our aircraft harness saw closed SimConnect's connection with no quit message before it
 
 **Asked:** what reaches a SimConnect client when the sim crashes, so the core can tell a crash from the pilot closing the sim, for node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)?
 
 **Expected:** a lost connection with no quit message, since a crashed process sends nothing.
 
-**Found:** the aircraft harness ([aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)) recorded the first of node-simconnect's `quit`, `close`, and `error` as the reason a connection ended, "the sim quit" for `quit` (read in `experiments/areas/aircraft/lib/sim.mjs`, `lost`).
+**Found:** the aircraft harness ([aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)) recorded the first of node-simconnect's `quit`, `close`, and `error` as the reason a connection ended, "the sim quit" for `quit` (read in `experiments/areas/aircraft/lib/sim.mjs`, the constructor's handlers and `lost`).
 The report of each of the 5 runs in which the sim crashed, each crash with exception `0xc0000005` in the Windows Application log ([crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv)), reads "The connection was lost: the SimConnect connection closed." (read in the five `run-*-2026-10-01-*.txt` reports in `experiments/areas/aircraft/results/`).
-So in each crash, the pipe closed with no quit message before it.
+So in each crash, the connection closed with no quit message before it.
 
-No run of ours has recorded a clean close, which SimConnect's `SIMCONNECT_RECV_ID_QUIT` announces (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`), and neither fsc-editor nor FS Copilot tells the two apart (read in fsc-editor, `src/main/sim/session.ts`, `ready` and `dropped`).
+No run of ours has recorded a clean close, which the quit message reports: it "Specifies that the user has exited from Microsoft Flight Simulator 2024" (documented, [SIMCONNECT_RECV_ID](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_ID.htm)).
+fsc-editor logs the two with different reasons and acts the same on both (read in fsc-editor, `src/main/sim/session.ts`, `ready` and `dropped`).
 
 **Changed:** the core takes a sim whose process exits with no quit message before it as crashed.
 
@@ -43,9 +63,9 @@ The [architecture log][flight] reports `AircraftLoaded` three times through the 
 | 236.6 | `FLIGHT_START`, `FLT_LOAD` and `FLT_LOADED` for `apron.flt`, `RTC_START` |
 | 294.3 | `RTC_END`, as the pilot pressed Ready to fly |
 
-So two `AircraftLoaded` came in the main menu, 48s and 16s before the flight's `FlightLoaded`, and one inside the load, while `FLT_LOAD` came twice inside the load.
+So two `AircraftLoaded` came in the main menu, 49s and 16s before the flight's `FlightLoaded`, and one inside the load, while `FLT_LOAD` came three times inside the load.
 
-**Changed:** sim awareness starts a load at `FlightLoaded` or `FLT_LOAD`, takes the aircraft from the `AircraftLoaded` heard while loading, and ignores one heard anywhere else.
+**Changed:** sim awareness starts a load at `FlightLoaded`, takes the aircraft from the `AircraftLoaded` heard while loading, and ignores one heard anywhere else.
 
 **Affects:** [03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md#sim-awareness); the code map's [cases for the bench](../architecture/02-code-map.md#cases-for-the-bench), whose first case reads the run as three in one load.
 

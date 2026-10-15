@@ -576,6 +576,7 @@ It reads the spine's [language and toolchains](01-spine.md#language-and-toolchai
 It may end in a build probe.
 Its answer goes in its own section of `02-code-map.md`.
 Exit: the user agrees to that section.
+Done on 2026-10-15.
 
 ## 6 Systems
 

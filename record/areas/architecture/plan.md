@@ -563,6 +563,7 @@ Anything in the pilot's input path must fail open, so the answer gives every suc
 It reads the spine's [what moves them](01-spine.md#what-moves-them) and [code in the sim](01-spine.md#code-in-the-sim), 04-room-for-later's [code inside the sim](../product/04-room-for-later.md#code-inside-the-sim), and the FS Copilot fork's `FsCopilot.Bridge.Wasm/wasm_module.cpp` and `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`.
 Its answer goes in its own section of `02-code-map.md`.
 Exit: the user agrees to that section.
+Raised elsewhere: by 5.2, a SimConnect client hears only the CommBus calls whose sender set the SimConnect flag, and the A220's module sets only JavaScript's, by its code, so reading such an aircraft's bus likely takes panel JavaScript (unverified; [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#unverified-claims) says what settles it).
 
 ## 5.4 The workspace
 
@@ -586,6 +587,7 @@ Exit: every child is done.
 Waits on 5.
 Raised elsewhere: by 5.1, which of the host's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, for the child that designs recording, since the one loop of [5.1.1's entry](log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc) replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
+Raised elsewhere: by 5.2, for the child that designs sim awareness, how it makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
 
 ## 7 Testing
 

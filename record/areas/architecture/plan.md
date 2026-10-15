@@ -514,6 +514,7 @@ It reads the spine, decisions 001 to 046, the design docs in the [network](../ne
 Its answer goes in `02-code-map.md`, in this area.
 Exit: the user agrees to `02-code-map.md`.
 Waits on 5.1, 5.2, 5.3, and 5.4.
+Done on 2026-10-15.
 
 ## 5.1 The platform's interface
 

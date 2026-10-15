@@ -1,0 +1,45 @@
+p01-edge on Windows 11 Pro 10.0.26200, rustc 1.95.0 (59807616e 2026-04-14)
+MATH	imports of experiments/areas/core/edge/target/release/math.exe, the DLLs and the math functions only:
+MATH	api-ms-win-core-synch-l1-2-0.dll
+MATH	KERNEL32.dll
+MATH	ntdll.dll
+MATH	VCRUNTIME140.dll
+MATH	api-ms-win-crt-math-l1-1-0.dll
+MATH	  tan
+MATH	  exp
+MATH	  log
+MATH	  pow
+MATH	  cos
+MATH	  atan2
+MATH	  sin
+MATH	api-ms-win-crt-runtime-l1-1-0.dll
+MATH	api-ms-win-crt-stdio-l1-1-0.dll
+MATH	api-ms-win-crt-locale-l1-1-0.dll
+MATH	api-ms-win-crt-heap-l1-1-0.dll
+TIMER	tokio, default resolution	sleep 1ms	60 runs	late by p50 14.54ms	p99 15.51ms	max 15.51ms
+TIMER	tokio, default resolution	sleep 2ms	60 runs	late by p50 13.66ms	p99 14.55ms	max 14.55ms
+TIMER	tokio, default resolution	sleep 5ms	60 runs	late by p50 10.62ms	p99 11.59ms	max 11.59ms
+TIMER	tokio, default resolution	sleep 10ms	60 runs	late by p50 5.51ms	p99 6.61ms	max 6.61ms
+TIMER	tokio, default resolution	sleep 16ms	60 runs	late by p50 15.19ms	p99 16.62ms	max 16.62ms
+TIMER	tokio, default resolution	sleep 20ms	60 runs	late by p50 11.05ms	p99 12.60ms	max 12.60ms
+TIMER	tokio, default resolution	sleep 50ms	20 runs	late by p50 12.20ms	p99 13.72ms	max 13.72ms
+TIMER	tokio, default resolution	sleep 200ms	20 runs	late by p50 3.01ms	p99 16.33ms	max 16.33ms
+TIMER	tokio, default resolution	40 deadlines 50ms apart took 2004.1ms
+TIMER	timeBeginPeriod(1) returned 0
+TIMER	tokio, after timeBeginPeriod(1)	sleep 1ms	60 runs	late by p50 14.55ms	p99 15.61ms	max 15.61ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 2ms	60 runs	late by p50 13.49ms	p99 14.61ms	max 14.61ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 5ms	60 runs	late by p50 10.60ms	p99 11.22ms	max 11.22ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 10ms	60 runs	late by p50 5.53ms	p99 6.63ms	max 6.63ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 16ms	60 runs	late by p50 14.99ms	p99 16.50ms	max 16.50ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 20ms	60 runs	late by p50 11.12ms	p99 12.69ms	max 12.69ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 50ms	20 runs	late by p50 12.89ms	p99 14.30ms	max 14.30ms
+TIMER	tokio, after timeBeginPeriod(1)	sleep 200ms	20 runs	late by p50 2.03ms	p99 14.51ms	max 14.51ms
+TIMER	tokio, after timeBeginPeriod(1)	40 deadlines 50ms apart took 2008.1ms
+TIMER	high-resolution waitable timer	sleep 1ms	60 runs	late by p50 0.52ms	p99 0.95ms	max 0.95ms
+TIMER	high-resolution waitable timer	sleep 2ms	60 runs	late by p50 0.47ms	p99 0.92ms	max 0.92ms
+TIMER	high-resolution waitable timer	sleep 5ms	60 runs	late by p50 0.17ms	p99 0.58ms	max 0.58ms
+TIMER	high-resolution waitable timer	sleep 10ms	60 runs	late by p50 0.20ms	p99 0.60ms	max 0.60ms
+TIMER	high-resolution waitable timer	sleep 16ms	60 runs	late by p50 0.27ms	p99 0.52ms	max 0.52ms
+TIMER	high-resolution waitable timer	sleep 20ms	60 runs	late by p50 0.24ms	p99 0.61ms	max 0.61ms
+TIMER	high-resolution waitable timer	sleep 50ms	20 runs	late by p50 0.21ms	p99 0.69ms	max 0.69ms
+TIMER	high-resolution waitable timer	sleep 200ms	20 runs	late by p50 0.25ms	p99 0.56ms	max 0.56ms

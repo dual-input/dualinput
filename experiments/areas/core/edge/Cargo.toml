@@ -1,0 +1,13 @@
+[package]
+name = "p01-edge"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+tokio = { version = "=1.53.2", features = ["rt-multi-thread", "time", "macros"] }
+
+[profile.release]
+lto = true

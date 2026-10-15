@@ -6,6 +6,10 @@ Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.m
 Decides:     The tiers, the tests that keep each unit apart, every unit with its folder and what it may depend on, and the systems node 6 designs (node 5); how the platform runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3); where each unit lives, how one repository builds every target, and how CI checks the map (node 5.4).
 ```
 
+> **Note**
+> Since 2026-10-15, a random ID the core draws comes from a ChaCha20 generator in the kernel, which the core's edge seeds once, in the core's first input, where [one loop](#one-loop) has the edge hand each ID in with the input that asks for it; the queue stamps each input under its lock; and a recording also holds the sandbox's stops and a hash of the core's outputs once a second ([01-loop-and-edge](../core/01-loop-and-edge.md)).
+> The core turns the C runtime's FMA3 math off before it starts any thread, which settles [left open](#left-open)'s item on replaying a recording on a PC with another CPU once a recording from a friend's PC replays on ours ([core log](../core/log.md#2026-10-15-tokios-timers-wake-up-to-17ms-late-on-windows-a-high-resolution-waitable-timer-wakes-within-12ms-and-rusts-f64-math-calls-the-c-runtimes)).
+
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.

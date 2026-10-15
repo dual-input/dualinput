@@ -80,3 +80,5 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes settled, and on what findings, each numbered as one of decisions 002 to 046.
 - [areas/architecture/log.md](areas/architecture/log.md): what our experiments found for the architecture plan's nodes.
 - [areas/architecture/coherent-gt.md](areas/architecture/coherent-gt.md): the syntax, built-ins, and web APIs Coherent GT has, as measured, which our code in the sim keeps within.
+- [areas/core/01-loop-and-edge.md](areas/core/01-loop-and-edge.md): how the kernel runs the core's loop, and how the core's edge stamps its inputs, carries out its outputs, records it, replays it, starts it, and stops it.
+- [areas/core/log.md](areas/core/log.md): what we found about the core's own process, such as how precisely its timers wake on Windows.

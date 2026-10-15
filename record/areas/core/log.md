@@ -3,7 +3,28 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
-## 2026-10-15: iroh 1.3 already brings tokio-websockets into the core, with 15 fewer crates than tokio-tungstenite would add
+## 2026-10-15: The sim's script loader holds every later script behind one that never loads, while it loads one at a time
+
+**Asked:** if a file of ours that `VCockpit.js` loads through the sim's `Include.addImports`, as FS Copilot's copy loads its own, never loads, does the cockpit still load as if Crosscheck weren't installed, for node 6.2 of the [architecture plan](../architecture/plan.md#62-clients-and-the-panel-bridge)?
+
+**Expected:** yes, since FS Copilot's copy loads seven files of its own that way ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+
+**Found:** the sim's `IncludeMgr` (read in the sim's `common.js` as captured from MSFS 2024 on 2026-08-30, FS Copilot profiles, `sim-sources/vcockpit02-displayunits/html_UI_JS_common.js`; not run):
+
+- `requestScript` sets the script element's `onload` and no `onerror`, and `onScriptLoaded` takes a script off the loader's list only when it loads.
+- While `loadScriptAsync` is false, `addScript` requests a script at once only if the list is empty, and `onScriptLoaded` requests the next only after one loads; stock `VCockpit.js` turns it off with `Include.setAsyncLoading(false)` before it loads each instrument's scripts (read in the same capture, `html_UI_Pages_VCockpit_Core_VCockpit.js`, `loadNextInstrument`).
+
+So a script of ours that never loads, such as one the sim can't find, stays at the head of the list, and an instrument's scripts queued behind it may never be requested (inference, from the code read).
+
+**Changed:** our `VCockpit.js` and the panel bridge load our files through script elements of their own, outside the sim's loader, so a file of ours that fails touches nothing the sim loads.
+
+What we haven't run: a Community package whose `VCockpit.js` loads a file that doesn't exist, through `Include.addImports` and through a script element of its own, with the panel's instruments listed through the inspector, which settles both the risk and the fix.
+
+**Affects:** [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md#our-vcockpitjs).
+
+**Evidence:** the capture's `html_UI_JS_common.js`, `IncludeMgr`, lines 646 to 720, read on 2026-10-15.
+
+## 2026-10-15: iroh 1.3 already brings tokio-websockets into the core, so serving the clients with it keeps the core at one WebSocket implementation
 
 **Asked:** which WebSocket library should the core serve its clients with, once refusing a connection during the handshake isn't a priority (user, 2026-10-15), for node 6.2 of the [architecture plan](../architecture/plan.md#62-clients-and-the-panel-bridge)?
 
@@ -11,15 +32,17 @@ The probes are in [experiments/areas/core](../../../experiments/areas/core), and
 
 **Found:**
 
-- **What each brings:** [p02-websocket-crates.mjs](../../../experiments/areas/core/p02-websocket-crates.mjs) ran `cargo tree` on two empty programs with tokio 1.53.2's `net`, each with its library's server and client on.
-  tokio-tungstenite 0.30.0 brought 38 crates besides the program, among them tungstenite, sha1 with its digest crates, futures-util, and thiserror with syn; tokio-websockets 0.13.3 brought 23, tokio's own included in both counts.
-- **What the core already links:** in the lockfiles of every network probe that builds iroh 1.3, `two-cores`, p03, p05, p06, and p07, iroh 1.3.0 depends on iroh-relay 1.3.0, which depends on tokio-websockets 0.13.3, and no crate brings tungstenite.
-- **Why tokio-tungstenite has more users:** it's had them longer, and frameworks bring it in.
-  Its first release was on 2017-03-17 and tokio-websockets' on 2022-12-06; among the crates that depend on tokio-tungstenite are axum's WebSocket support, ethers-providers, poem, and warp, while tokio-websockets has 34 dependents, async-nats, twilight-gateway, and iroh-relay the most downloaded (documented, crates.io's API, as of 2026-10-15).
-- **What each says of itself:** tokio-websockets "passes the Autobahn test suite without relaxations by default" ([tokio-websockets](https://github.com/Gelbpunkt/tokio-websockets)), and tokio-tungstenite is "definitely not the fastest WebSocket library in the world at the moment of writing this note" ([tokio-tungstenite](https://github.com/snapview/tokio-tungstenite)) (documented, as of 2026-10-15).
-- **Where each can check `Origin`:** tungstenite 0.30.0's `Callback::on_request` can refuse a connection before the upgrade (read in tungstenite 0.30.0, `src/handshake/server.rs`), while tokio-websockets 0.13.3's `ServerBuilder::accept` writes the upgrade before it returns the request (read in tokio-websockets 0.13.3, `src/server.rs`), and its `max_payload_len` has no limit unless set (same crate, `src/proto/types.rs`, `Limits`).
+- **What the core already links:** in the lockfiles of every network probe that builds iroh 1.3, `two-cores`, p03, p05, p06, and p07, iroh 1.3.0 depends on iroh-relay 1.3.0, which depends on tokio-websockets 0.13.3, and no crate brings tungstenite ([p02-websocket-crates.mjs](../../../experiments/areas/core/p02-websocket-crates.mjs)).
+  iroh-relay turns on tokio-websockets' `client` for every target but WebAssembly in a browser, and its `server` only through iroh-relay's own `server` feature (read in iroh-relay 1.3.0, `Cargo.toml`); tokio-websockets' `server` needs `base64`, `http`, `httparse`, and tokio's `io-util`, which its `client` needs too (read in tokio-websockets 0.13.3, `Cargo.toml`), so the core turns `server` on and adds no crate.
+- **What each would add:** in `two-cores`' lockfile, tokio-tungstenite 0.30.0 would add three crates, `tokio-tungstenite`, `tungstenite`, and `sha1`, since iroh brings the rest (read, comparing p02's list with the lockfile), and a second WebSocket implementation beside iroh's.
+  In empty programs with tokio 1.53.2's `net`, tokio-tungstenite brought 38 crates and tokio-websockets 23, tokio's own included in both (p02).
+- **Why tokio-tungstenite has more users:** 3,512 crates depend on it, against 34 on tokio-websockets, among them axum's WebSocket support, ethers-providers, poem, and warp, while async-nats, twilight-gateway, and iroh-relay are tokio-websockets' most downloaded; its first release was on 2017-03-17, and tokio-websockets' on 2022-12-06 (documented, crates.io's API, as of 2026-10-15).
+  That the head start and those frameworks account for the gap is our inference.
+- **Conformance:** tokio-websockets "passes the Autobahn test suite without relaxations by default" (documented, [tokio-websockets](https://github.com/Gelbpunkt/tokio-websockets), as of 2026-10-15).
+- **Where each can check `Origin`:** tungstenite 0.30.0's `Callback::on_request` can refuse a connection before the upgrade (read in tungstenite 0.30.0, `src/handshake/server.rs`), while tokio-websockets 0.13.3's `ServerBuilder::accept` writes the upgrade before it returns the request, and its `serve` takes a stream after a handshake the caller does itself (read in tokio-websockets 0.13.3, `src/server.rs`).
+  Its `Limits` cap a message at 64 MiB by default (same crate, `src/proto/types.rs`).
 
-**Changed:** the core serves its clients with tokio-websockets, which it links already, and checks `Origin` the moment `accept` returns, closing a socket with another before reading anything from it.
+**Changed:** the core serves its clients with tokio-websockets, its `server` turned on, and checks `Origin` the moment `accept` returns, closing a socket with another before reading anything from it.
 
 **Affects:** [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md).
 

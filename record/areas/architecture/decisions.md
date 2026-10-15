@@ -1045,46 +1045,50 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The core serves its clients with tokio-websockets, and closes a socket with another Origin before reading it
 
-- **Decided:** the core's edge serves the WebSockets of its clients with tokio-websockets, reads `Origin` from the request its `accept` returns, and closes a socket whose `Origin` is neither `coui://html_ui` nor absent with code 1008 before reading anything from it; each message is limited to 1 MiB, and only text is taken.
+- **Decided:** the core's edge serves the WebSockets of its clients with tokio-websockets, its `server` feature turned on, reads `Origin` from the request its `accept` returns, and closes a socket whose `Origin` is neither `coui://html_ui` nor absent with code 1008 before reading anything from it.
   Settled in node 6.2 by the user, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#the-websocket-server)).
 - **Because:**
-  - iroh 1.3 already brings tokio-websockets 0.13.3 into the core through iroh-relay, so serving the clients with it adds no crate, where tokio-tungstenite 0.30.0 would add a second WebSocket implementation and 15 more crates (measured on our development machine, 2026-10-15, [core log][c02]).
-  - Refusing a connection during the handshake, which tungstenite's callback can and tokio-websockets can't, isn't a priority, since no message from a closed socket reaches the core either way (user, 2026-10-15).
-  - tokio-tungstenite's larger user base comes from a six-year head start and the frameworks that bring it in, such as axum (documented, crates.io's API, as of 2026-10-15; same entry).
+  - iroh 1.3 already brings tokio-websockets 0.13.3 into the core through iroh-relay, so serving the clients with it keeps the core at one WebSocket implementation and adds no crate, where tokio-tungstenite 0.30.0 would add a second implementation, three crates beyond what iroh brings (read in our network probes' lockfiles, 2026-10-15, [core log][c02]).
+  - Refusing a connection during the handshake, which tungstenite's callback does and tokio-websockets' `accept` doesn't, isn't a priority, since no message from a closed socket reaches the core either way (user, 2026-10-15).
+  - tokio-tungstenite has 3,512 dependents to tokio-websockets' 34, and a head start of nearly six years (documented, crates.io's API, as of 2026-10-15; same entry), which says how widely it's run, not which is better made.
 - **Leaves out:** the WebSocket client in the desktop app's Rust side, for node 6's design of the apps.
 
-## The core and each client send at least every 2s, and a slice of client state reaches the clients that show it at most every 50ms
+## The core and each client send at least every 2s, only the core closes a quiet socket, and client state reaches the clients that show it on a timer
 
-- **Decided:** the core, as well as each client, sends a message at least every 2s, and either side closes after 8s of silence, which adds the core's half to [decision 010](../../decisions/010-clients-message-core-every-2s.md) once step 8's decisions are numbered; any message from the core renews a panel's locks.
-  A feature reaches the apps through slices of state, which `clients` builds and sends every 50ms to the clients that named them, and through commands, whose answer says only whether each was taken.
+- **Decided:** the core, as well as each client, sends a message at least every 2s, which adds the core's half to [decision 010](../../decisions/010-clients-message-core-every-2s.md) once step 8's decisions are numbered; only the core closes a socket that has been quiet for 8s, and a client keeps its socket through the core's silence, while any message from the core renews a panel's locks.
+  A unit reaches the clients through slices of state, which `clients` builds and sends on a timer to the clients that watch them, through commands, whose answer says only whether each was taken, and through messages of its own to a client by name; `clients` raises a client joining or leaving, a panel's socket replaced, and a setting changed, and logs and drops a message that doesn't parse.
   page-client queues nothing while it has no socket, and connects again on the core's next announcement.
   Settled in node 6.2, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#the-protocol)).
 - **Because:**
-  - With only the clients sending, a client can't see a core that hangs, and a panel's locks need the core's renewals anyway ([02-code-map](02-code-map.md#what-the-bridge-owns)).
-  - A timer bounds the work of client state to 20 rounds a second however many inputs arrive, and needs no feature to mark what it changed.
-  - "stale input is worse than none" for a press made while the core was gone, and a core that restarted comes back as a late joiner (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`; [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)).
+  - With only the clients sending, a client can't see a core that hangs; and a client that closed on the core's silence would drop a panel's locks and modules through a hang, where the code map turns a visible lock into a warning ([02-code-map](02-code-map.md#how-work-in-the-sim-ends)).
+  - A timer bounds the work of client state however many inputs arrive, and needs no unit to mark what it changed.
+  - A core that restarted comes back as a late joiner ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)), so a press kept through the restart would play into a cockpit already caught up; FS Copilot's channel kept up to 200 messages for 30s (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`).
+  - `clients` sits below the session crate, pointer sync, and the core-helper-service in the code map's units, so it tells them through moments.
 
-## A component whose version differs from the core's is logged, and the core goes on talking to it
+## A client whose version differs from the core's is logged, and the core goes on talking to it
 
-- **Decided:** a first message whose version or message crate hash differs from the core's is logged by the component's name with both versions, and nothing else changes; whether the pilot sees it is part of what counts as trouble.
-  Settled in node 6.2 by the user, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#a-component-whose-version-differs)).
-- **Because:** the watcher updates the Community package with Crosscheck while the sim is closed, so a mismatch mostly means a developer's stale package ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
-- **Leaves out:** what the pilot sees, for node 6's design of the apps.
+- **Decided:** a `hello` whose version or message crate hash differs from the core's is logged by the client's name with both versions, and nothing else changes, for the clients on WebSockets.
+  Settled in node 6.2 by the user, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs)).
+- **Because:** the watcher updates the Community package with Crosscheck while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
+- **Leaves out:** our WASM module, whose data slots are read in place, for node 6's design of the sim seam; and what the pilot sees, for node 6's design of the apps.
 
 ## v1 builds no listener beyond the PC, and the protocol leaves room for one
 
-- **Decided:** the protocol takes nothing about a client from its address, and its first message carries a `token` field v1 leaves empty, while v1 binds no listener beyond 127.0.0.1; this changes [04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client), which has v1 build that listener, off by default.
+- **Decided:** the protocol takes nothing about a client from its address, and v1 binds no listener beyond 127.0.0.1; this changes [04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client), which has v1 build that listener, off by default, and [decision 027](../../decisions/027-core-runs-on-tokio.md)'s core that "can listen beyond the PC, off by default", once step 8's decisions are numbered.
   Settled in node 6.2 by the user, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#clients-beyond-the-pc)).
-- **Because:** no v1 client could use or test the listener, and the tablet's own design decides how its page is served, its `Origin`, and how its token travels on the home network.
+- **Because:** no v1 client could use or test the listener, and the tablet's own design decides how its page is served, its `Origin`, and how its token travels.
 
-## Our VCockpit.js hands each instrument to the bridge without ever delaying it
+## Our VCockpit.js hands each instrument to the bridge without ever delaying it, and loads our files outside the sim's loader
 
-- **Decided:** our `VCockpit.js` is the stock file with two blocks between markers: one loads `CommBus.js` and then the bridge in a `try`, and one, after the sim has set each instrument up, hands it to the bridge, or queues it for the bridge if the bridge hasn't loaded, in a `try`; the build puts the blocks in at named anchors and refuses when one is missing.
+- **Decided:** our `VCockpit.js` is the stock file with two blocks between markers: one adds a script element of its own for the bridge in a `try`, and one, after the sim has set each instrument up, hands it to the bridge, or queues it for the bridge if the bridge hasn't loaded, in a `try`; the bridge loads `CommBus.js` and each panel module through script elements of its own too, never through `Include.addImports`; the build puts the blocks in at named anchors and refuses when one is missing.
   Settled in node 6.2, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#our-vcockpitjs)).
-- **Because:** code there runs inside the loading of every instrument, so a bridge that never loads has to leave the cockpit as if Crosscheck weren't installed ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
-- **Leaves out:** how the build gets the stock file after each sim update, since the sim streams it, for node 6's design of the build.
+- **Because:**
+  - Code there runs inside the loading of every instrument, so a bridge that never loads has to leave the cockpit as if Crosscheck weren't installed ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+  - The sim's loader holds every later script behind one that never loads, while it loads one at a time as it does for each instrument (read in the sim's `common.js`, `IncludeMgr`, not run; [core log][c03]).
+- **Leaves out:** how the build gets the stock file after each sim update, since the sim streams it, for node 6's design of the build; and whether a script element's `onerror` fires in Coherent GT, for [node 7](plan.md#7-testing)'s bench.
 
-[c02]: ../core/log.md#2026-10-15-iroh-13-already-brings-tokio-websockets-into-the-core-with-15-fewer-crates-than-tokio-tungstenite-would-add
+[c02]: ../core/log.md#2026-10-15-iroh-13-already-brings-tokio-websockets-into-the-core-so-serving-the-clients-with-it-keeps-the-core-at-one-websocket-implementation
+[c03]: ../core/log.md#2026-10-15-the-sims-script-loader-holds-every-later-script-behind-one-that-never-loads-while-it-loads-one-at-a-time
 [c01]: ../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast

@@ -622,7 +622,8 @@ Its answer goes in `record/areas/core/03-sim-seam-and-wasm-module.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.2, how sim awareness makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log][flight]), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
 Raised elsewhere: by 5.3, which of the sim's APIs carries each want of the routine host ([02-code-map](02-code-map.md#what-a-routine-can-ask-for)).
-Raised elsewhere: by 6.2, the sim service sends the core's announcement, a CommBus event named `CROSSCHECK_CORE` whose payload holds the core's port, whether a session runs, and the core's version, every 2s and at once when a session starts or ends ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#page-client)).
+Raised elsewhere: by 6.2, the sim service sends the core's announcement, a CommBus event named `CROSSCHECK_CORE` whose payload holds the core's port and whether a session runs, every 2s and at once when the session crate asks, as a session starts or ends, since the sim service sits below the session in the code map's units ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#page-client)).
+Raised elsewhere: by 6.2, what the core does with our WASM module when the version or hash it leaves in its slot differs from the core's, since its data slots are structs the module reads in place, where 6.2 has the core log a WebSocket client that differs and go on talking to it ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs)).
 
 ## 6.4 The network
 

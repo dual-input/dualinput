@@ -554,6 +554,7 @@ FS Copilot's traffic plan gave traffic a SimConnect connection of its own, so "d
 It reads the spine's [the core](01-spine.md#the-core) and [the WASM module](01-spine.md#the-wasm-module), the foundations chapters [04-01](../../learn/foundations/04-01-connection-and-data.md) and [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md), this area's [2026-10-09 flight entry](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start), and fsc-editor's `src/main/sim/`.
 Its answer goes in its own section of `02-code-map.md`.
 Exit: the user agrees to that section.
+Done on 2026-10-15.
 
 ## 5.3 Work in the sim
 

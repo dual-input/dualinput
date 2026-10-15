@@ -38,7 +38,7 @@ The code map's [one loop](../architecture/02-code-map.md#one-loop), [what a feat
 | The loop | The kernel, with a 16 MB stack | p10 gave its loop thread 16 MB (read in `experiments/areas/architecture/recording/loop/src/main.rs`, `STACK`), whose source gives no reason, so the bench finds what QuickJS-ng needs |
 | tokio, with two worker threads | The WebSocket server and its sockets ([6.2](../architecture/plan.md#62-clients-and-the-panel-bridge)), the transport ([6.4](../architecture/plan.md#64-the-network)), HTTPS, and the core helper's pipe ([6.5](../architecture/plan.md#65-the-core-helper)) | The core runs its sockets on tokio ([decision 027](../../decisions/027-core-runs-on-tokio.md)) |
 | tokio's blocking pool, at most 4 threads | Jobs | One pool, where a second of ours would do the same work |
-| The timer thread | A heap of deadlines, waiting through windows-sys's `CreateWaitableTimerExW` on a high-resolution waitable timer for the nearest, or on an event that wakes it when the heap changes | tokio's sleep woke up to 16.9ms late, and a high-resolution waitable timer at most 1.46ms ([log][p01]); so this changes decision 027 for the loop's timers, once step 8's decisions are numbered |
+| The timer thread | A heap of deadlines, waiting through windows-sys's `CreateWaitableTimerExW` on a high-resolution waitable timer for the nearest, or on an event that wakes it when the heap changes | tokio's sleep woke up to 16.9ms late, and a high-resolution waitable timer at most 1.46ms ([core log][p01]); so this changes decision 027 for the loop's timers, once step 8's decisions are numbered |
 | The window thread | A top-level window the core never shows, which hears Windows end the session, [below](#quitting) | Windows sends `WM_QUERYENDSESSION` to a window, through its `WindowProc` (documented, [WM_QUERYENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-queryendsession)), and the core has none otherwise |
 | The recording's writer | Each record, encoded by the recording-format engine, in zstd frames, one ended each second | Each zstd frame "can be decompressed independently of other frames" (documented, [RFC 8878](https://www.rfc-editor.org/rfc/rfc8878#section-3.1)) |
 | The sim thread | The sim edge, which [6.3](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module) designs | |
@@ -98,9 +98,10 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
 
 ### Requests and guards
 
-- A crate of the platform's declares each request it decides with `r.request::<R>()`, with the function that decides it and the function that gives the request this pilot would make now, and a unit adds a guard with `me.guard::<R>(f)`.
+- A crate of the platform's declares each request it decides with `r.request::<R>()`, passing two functions: one decides a request, and one builds the request this pilot would make if they asked now, such as taking control.
+  A unit adds a guard with `me.guard::<R>(f)`.
 - `cx.ask(r)` asks; the kernel runs the request's guards, any denial refuses it, and otherwise its crate decides it, before the next input.
-- The verdicts that [guards](../architecture/02-code-map.md#guards) keeps come from running each request's guards on what that second function gives.
+- After each input, the kernel builds each declared request as this pilot would make it now and runs its guards on it, and those results are the verdicts [guards](../architecture/02-code-map.md#guards) keeps.
   v1 declares about three requests, so this costs microseconds after each input (unverified, the bench measures it).
 
 ### Outputs
@@ -127,14 +128,14 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
 ### What a recording holds
 
 The writer records every input from the core's first, in every run of the core, with or without a session, because a replay has to start where the run did: the seed, the handles, sim awareness, and the clients all build up from the first input.
-What a run's log is kept for, and for how long, is [6.6](../architecture/plan.md#66-recording-and-bug-reports)'s, which keeps or deletes a log whole.
+What a run's recording is kept for, and for how long, is [6.6](../architecture/plan.md#66-recording-and-bug-reports)'s, which keeps or deletes a recording whole.
 
-A log starts with a header, then holds three kinds of record, in the order they happened:
+A recording starts with a header, then holds three kinds of record, in the order they happened:
 
 - **Inputs,** each before the loop handles it.
 - **The sandbox's stops,** each a script call's number and the count of interrupt calls at which [one loop](../architecture/02-code-map.md#one-loop)'s check stopped it.
 - **Checkpoints:** when an input's stamp starts a new second since the core's first input, the edge records the running hash of the outputs and the input's sequence number, 8 bytes each, before the loop handles it, about 58 KB an hour before framing (arithmetic).
-  A log can instead hold a checkpoint before every input, which its header says, for the bench.
+  A recording can instead hold a checkpoint before every input, which its header says, for the bench.
 
 The header names the build: its commit, a hash of its diff when it's uncommitted, its profile, the versions of `rustc`, of the MSVC compiler `cc` builds QuickJS-ng with, and of the Windows SDK, whose C runtime the core links ([the core's math](#the-cores-math)), and the SimConnect SDK the build printed ([building every target](../architecture/02-code-map.md#building-every-target)).
 It doesn't name the program's bytes, since a build of one commit on two PCs needn't match byte for byte (unverified for ours).
@@ -145,14 +146,19 @@ How the records are encoded is the recording-format engine's.
 
 1. Run `crosscheck-core replay <file>`, the same program, built at the commit the header names.
    A program of another build refuses, naming the commit to check out, and one on a PC whose CPU differs from the header's says so before it runs.
-2. The replay takes its data folder beside the recording, so it neither checks for nor writes the port file, and logs there; it takes the seed, the settings, and the session file from the recorded first input.
+2. The replay starts none of the edge's threads, so it binds no server and writes no port file, and takes a folder beside the recording as its data folder, for its named mutex and its log file, so it can run while Crosscheck does; it takes the seed, the settings, and the session file from the recorded first input.
 3. Its queue fills from the file as fast as the loop takes inputs, each output's sink drops it, no timer or job runs, since their results come from the file, and the sandbox's check reads its stops from the file.
 4. At each checkpoint the replay compares its hash with the recorded one; at the first that differs, it names that checkpoint and the inputs since the one before it.
 
 ### The core's math
 
-The core links the C runtime statically, so its math is its build's, and `main` calls `_set_FMA3_enable(0)` before it starts any thread, in a live run and a replay.
-Rust's `f64` math and QuickJS-ng's `Math` both call the C runtime's functions, and both gave different bits with FMA3 on and off, and through the runtime's DLL that comes with Windows and through the one linked into the program, even with FMA3 off ([log][p01]).
+Rust's `f64` math and QuickJS-ng's `Math` both call the C runtime's functions, and two things changed the bits they returned, alike in both ([core log][p01]):
+
+- the FMA3 switch, which the runtime turns on at startup on a CPU that has FMA3
+- the runtime's version: with FMA3 off, Windows' `ucrtbase.dll` and the Windows SDK's static library still gave different bits
+
+Windows always loads its own `ucrtbase.dll`, whose version follows each pilot's Windows, even when a program ships its own copy beside it (documented, [Universal CRT deployment](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment)).
+So the core links the C runtime statically, which puts the math in our program, and `main` calls `_set_FMA3_enable(0)` before it starts any thread, in a live run and a replay.
 That two CPUs give the same bits from one build with FMA3 off is unverified, and replaying a recording made on a friend's PC on ours settles it, which then answers 02-code-map's item in [left open](../architecture/02-code-map.md#left-open) on a PC with another CPU.
 
 `_set_FMA3_enable` is in neither windows-sys 0.61.2 nor libc 0.2.190 (read in each crate's source), so `apps/core` declares that one foreign function itself, the third crate the code map's [tiers](../architecture/02-code-map.md#tiers) let declare one, for that function alone; the timer thread takes its functions from windows-sys.
@@ -161,7 +167,7 @@ That two CPUs give the same bits from one build with FMA3 off is unverified, and
 
 A release build sets `panic = "abort"`, so a panic on any thread ends the core (documented, [Cargo's profiles](https://doc.rust-lang.org/cargo/reference/profiles.html#panic)), and the process exits with a code other than 0 (unverified; a bench case checks it).
 The panic hook in `apps/core` runs first, as std runs it "with both the aborting and unwinding runtimes" (documented, [`std::panic::set_hook`](https://doc.rust-lang.org/std/panic/fn.set_hook.html)): it logs the panic, the input's sequence number, and the unit that was running, and has the writer end its zstd frame, waiting at most 500ms.
-The crash then takes [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)'s path: the watcher starts the core again, and the pilot comes back as a late joiner, while a replay of the log reproduces the panic at the same input.
+The crash then takes [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)'s path: the watcher starts the core again, and the pilot comes back as a late joiner, while a replay of the recording reproduces the panic at the same input.
 
 Catching a feature's panic and turning that feature off for the session would be a mechanism for recovering from our own bugs, and would leave a session half working: a following machine whose flight-model feature was off would fly on its own, where a restart and a late join bring every feature back (user, 2026-10-15).
 
@@ -192,7 +198,7 @@ A quit comes from the pilot, from the desktop app or the watcher's tray, which [
 The session crate runs a quit as a Leave, so the crew sees the pilot leave rather than lose the link ([leaving](../network/01-between-machines.md#leaving)), and then exits.
 
 - Windows sends `WM_QUERYENDSESSION` to the core's window, which returns `TRUE` at once and pushes the quit, since "Each application should return TRUE or FALSE immediately upon receiving this message, and defer any cleanup operations until it receives the WM_ENDSESSION message" (documented, [WM_QUERYENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-queryendsession)).
-- It then holds `WM_ENDSESSION` until the core has exited, since with it "the session can end any time after all applications have returned from processing this message" (documented, [WM_ENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-endsession)).
+- The window procedure doesn't return from `WM_ENDSESSION`: it waits there while [exiting](#exiting) runs, and the process ends with the call still open, because Windows may end the session "any time after all applications have returned from processing this message" (documented, [WM_ENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-endsession)).
 - After 5s Windows shows the applications that hold up the shutdown (same page as `WM_QUERYENDSESSION`), so a quit finishes within 3s.
 - Whether Windows sends these to a window that's never shown is unverified, and a bench case settles it.
 
@@ -210,9 +216,9 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 | The queue, a handler, and the loop's CPU | [The code map's](../architecture/02-code-map.md#budgets) |
 | The edge's threads, beside the loop | Under 2% of one CPU core through a busy flight, and under 0.5% with no session |
 | Memory | Under 30 MB of private working set with no session, and under 100 MB in a busy session, beside QuickJS-ng's runtimes, which their 64 MB limits cap ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)) |
-| A timer | Fires within 2ms of its deadline at p99, where p01 saw at most 1.46ms on an idle PC ([log][p01]) |
-| A crash | Loses at most the log's last second |
-| A replay | Runs an hour's log in under 6 minutes |
+| A timer | Fires within 2ms of its deadline at p99, where p01 saw at most 1.46ms on an idle PC ([core log][p01]) |
+| A crash | Loses at most the recording's last second |
+| A replay | Runs an hour's recording in under 6 minutes |
 | Exiting | Done within 1s of the exit going out, and a quit within 3s of Windows' `WM_QUERYENDSESSION` |
 
 ## Cases for the bench
@@ -223,7 +229,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A feature's command handler reads the clients crate's settings while the clients crate dispatches it.
 - A pilot quits Crosscheck in a session, and the other core sees a leave, not an outage.
 - Windows signs the pilot out with a session held, and the other core sees a leave.
-- The core is killed, and its log reads up to its last full frame.
+- The core is killed, and its recording reads up to its last full frame.
 - A handler panics: the process exits with a code other than 0, the watcher starts it again, the pilot comes back as a late joiner, and the replay panics at the same input.
 - The core exits on its own, with 0, and the watcher doesn't start it again.
 - A test unit raises moments in a cycle, and the kernel panics after 1,000.
@@ -233,7 +239,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 ## Left open
 
-- Which lock the queue takes, which 64-bit hash folds the outputs, and how big the log file grows: choices inside `apps/core` or the kernel.
+- Which lock the queue takes, which 64-bit hash folds the outputs, and how big the `tracing` log file grows: choices inside `apps/core` or the kernel.
 - Which crate gives ChaCha20, inside the kernel, where the map check fails one that turns on `getrandom`.
 - Whether two CPUs give the same bits from one build with FMA3 off, which replaying a friend's recording on ours settles.
 

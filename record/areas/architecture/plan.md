@@ -565,6 +565,7 @@ It reads the spine's [what moves them](01-spine.md#what-moves-them) and [code in
 Its answer goes in its own section of `02-code-map.md`.
 Exit: the user agrees to that section.
 Raised elsewhere: by 5.2, a SimConnect client hears only the CommBus calls whose sender set the SimConnect flag, and the A220's module sets only JavaScript's, by its code, so reading such an aircraft's bus likely takes panel JavaScript (unverified; [05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#unverified-claims) says what settles it).
+Done on 2026-10-15.
 
 ## 5.4 The workspace
 

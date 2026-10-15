@@ -501,7 +501,7 @@ The spine names the components and the parts ([01-spine](01-spine.md#parts)), an
 
 Three tests stand in for a definition of clean, because a definition in prose invites an agent to enforce it where it doesn't fit (user, 2026-10-14):
 
-- Deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, and its section in each app, leaves everything else building and passing its tests.
+- Deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, its routines in our WASM module and their line in the module's list, its panel modules, and its section in each app, leaves everything else building and passing its tests.
 - An engine builds and runs outside the core.
 - CI checks each crate's dependencies against the ones the map allows.
 
@@ -589,6 +589,7 @@ Waits on 5.
 Raised elsewhere: by 5.1, which of the host's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, for the child that designs recording, since the one loop of [5.1.1's entry](log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc) replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
 Raised elsewhere: by 5.2, for the child that designs sim awareness, how it makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
+Raised elsewhere: by 5.3, for the child that designs plugins and the hosts in the sim, which of the sim's APIs carries each want of our WASM module's host, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
 
 ## 7 Testing
 
@@ -603,7 +604,7 @@ Two rules come from our earlier benches:
   FS Copilot's bench drove whatever its checkout had compiled last, and "a stale build is a working build, and it cost two sessions" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
 
 A bench also forces each network path, as [two cores on one PC](../network/01-between-machines.md#two-cores-on-one-pc) requires.
-It reads 5.2's answer, the [bench cases for checking a write](../profiles/01-format-and-delivery.md#checking-a-write), and the FS Copilot fork's `record/pointer-forwarding/docs/14-test-bench.md` and `record/exerciser/docs/01-design.md`.
+It reads 5.2's and 5.3's answers, the [bench cases for checking a write](../profiles/01-format-and-delivery.md#checking-a-write), and the FS Copilot fork's `record/pointer-forwarding/docs/14-test-bench.md` and `record/exerciser/docs/01-design.md`.
 Its answer goes in a design doc in the build area, `record/areas/build/01-testing.md`, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
 Exit: the user agrees to that design doc.
 Waits on 5.

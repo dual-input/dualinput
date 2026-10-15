@@ -774,7 +774,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## Crosscheck's code is a host, engines, and features, and deleting a feature's crate leaves the rest whole
 
 - **Decided:** Crosscheck's code is in three tiers: the host, the services every feature uses, in the core and, through the panel bridge and our WASM module, in the sim; engines, libraries that know nothing of the app; and features, each one thing a pilot gets.
-  Three tests stand in for a definition of clean: deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, and its section in each app, leaves everything else building and passing its tests; an engine builds and runs outside the core; and CI checks each crate's dependencies against the ones the code map allows.
+  Three tests stand in for a definition of clean: deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, its routines in our WASM module and their line in the module's list, its panel modules, and its section in each app, leaves everything else building and passing its tests; an engine builds and runs outside the core; and CI checks each crate's dependencies against the ones the code map allows.
   A feature's messages stay in the one message crate, and its profile block in the profile engine, which is why deleting a feature deletes a module in each.
   Settled in node 5 by the user, 2026-10-14 ([02-code-map](02-code-map.md#tiers)).
 - **Because:**
@@ -859,14 +859,14 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   The edge, an engine the core and the IDE both link, makes each call through `SimConnect.dll` and tags each exception with its call's handle; the sim client, an engine on the loop, hands out SimConnect's IDs, parses each message, routes it to the call that caused it, and makes a lost connection's definitions, requests, and subscriptions again when the host opens it again.
   A stand-in sim in the edge's place, or a replay of the recorded queue, takes the sim's place below the seam.
   A feature calls the sim through its outbox, naming variables and events as the sim spells them, and gets back each value, object ID, and exception with the handle of the call that caused it.
-  Masking, the WASM module's slots, and the CommBus event that announces the core's port stay the host's, and sim awareness raises one moment for each load, and one for the load it finds when the host connects to a sim already in a flight.
+  Masking, the WASM module's version and counter, and the CommBus event that announces the core's port stay the host's, and sim awareness raises one moment for each load, and one for the load it finds when the host connects to a sim already in a flight.
   Settled in node 5.2 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-sim-seam)).
 - **Because:** each failure our earlier sim layers had sits above the seam, where the bench runs it and a replay runs it again: values read in definition order, which a rejected variable cut short ([04-01](../../learn/foundations/04-01-connection-and-data.md#data-definitions-and-requests)); a watch set never defined on a new connection, and a replay that ran its steps beside the live path, where a bug shipped (fsc-editor, `src/main/sim/session.ts` and `src/main/sim/fixtures/README.md`); and exceptions FS Copilot's `SimClient` never read, and a bench that couldn't run with the sim open (FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs` and `record/pointer-forwarding/docs/14-test-bench.md`); [02-code-map](02-code-map.md#why-the-seam-sits-at-simconnects-calls) quotes each.
 - **Leaves out:** the stand-in's model, and whether tagging exceptions through `SimConnect_GetLastSentPacketID`, which the SDK intends for debugging and testing, holds among writes each frame, for node 7; whether the logic in sim awareness that reads a load's signals is an engine of its own, for node 6 (user, 2026-10-15); and which crates hold the bindings, the sim client, and the edge, for node 5.4.
 
 ## Each feature reaches the sim on a connection of its own for each load, beside the host's
 
-- **Decided:** the host holds one SimConnect connection from the moment `SimConnect_Open` succeeds until the sim closes, for sim awareness, masking, the module's slots, and the core's CommBus announcement.
+- **Decided:** the host holds one SimConnect connection from the moment `SimConnect_Open` succeeds until the sim closes, for sim awareness, masking, the module's version and counter, and the core's CommBus announcement.
   It opens one for each feature at the feature's first sim call after its profile loads, and closes it when the profile unloads or the feature closes it, and a closed connection's setup goes with it.
   No feature sees a connection, so the host can put features on one connection without any feature changing.
   Settled in node 5.2 by the user, 2026-10-15 ([02-code-map](02-code-map.md#a-connection-for-each-feature-for-each-load)).
@@ -875,6 +875,40 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - In one client, clearing one group cut another group off from the sim event both held ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), so on a shared connection one feature's teardown could silence another's listener; that a group on another connection keeps hearing is unverified.
   - A masking group that registers after an aircraft's module sits behind it ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)), so the host's connection opens as the sim starts and holds the group from then.
 - **Leaves out:** whether closing a connection removes what killing its client did, whether a group on another connection keeps hearing, and what a connection costs the sim's frame, for [node 7](plan.md#7-testing)'s tests in the sim; if closing leaves objects or masks behind, the sim service removes each feature's objects before closing its connection, and if connections cost too much, it puts the features on one.
+
+## A feature's work in the sim is routines in our WASM module and panel modules, each its own
+
+- **Decided:** a feature adds work to our WASM module as routines, each a crate of its own built into the module's one binary through one line in the module's list, and to the panel bridge as panel modules, each a TypeScript file the bridge loads by name when the core answers a panel's first message, so deleting a feature deletes its routines, their line in the list, and its panel modules.
+  A routine never calls the sim: each frame it asks the module's host to read or write named variables, of the pilot's aircraft or of an object by its ID, to freeze the aircraft, or to run calculator code, and only the host's edge calls the sim's APIs, so the stand-in sim runs the host and the routines natively on the bench.
+  A plugin ships no code into the sim, and drives the same mechanisms through the host.
+  Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#work-in-the-sim)).
+- **Because:**
+  - A following aircraft's smoothing and a figure's place in the cockpit are each one feature's logic, so generic mechanisms driven from the core would put that logic in the host, where deleting the feature would leave it behind (user, 2026-10-15).
+  - A syntax error in a panel file takes out the whole file ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)), so a file for each panel module keeps one module's mistake from reaching another.
+- **Leaves out:** which of the sim's APIs carries each want, and which operations the bridge's `ops` module offers plugins, for [node 6](plan.md#6-systems); where routines and panel modules live, and whether the module builds in the core's Cargo workspace, for [5.4](plan.md#54-the-workspace).
+
+## A routine runs while its feature feeds it, and the module's host undoes only the freeze
+
+- **Decided:** a routine runs while its feature writes its slot.
+  The sim service writes each feed on the feature's own connection and writes the last one again every 200ms, and the module's host makes a routine new at its first feed and drops it at the feature's end mark or 1s after the last write.
+  Each frame a routine asks for what it wants, and the host freezes the aircraft while any routine asks, and unfreezes it, if the host froze it, once none does, so no routine keeps a flag the host must clear.
+  The host ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s outside a load, the core unfreezes the aircraft through its own connection.
+  The module never learns the session's state, which changes [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md), whose control slot carries it, once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
+  Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#routines-in-our-wasm-module)).
+- **Because:**
+  - Taking control, unloading, and the core going quiet become one path for a routine: the writes stop (user, 2026-10-15).
+  - FS Copilot's module, on its timeout, sends the unfreeze whoever froze the aircraft and leaves its own `frz_by_me` set, so it goes on writing the last pose into the aircraft it unfroze (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `Update_StandAlone` and `interpolate`).
+  - A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), which leaves nothing in the sim to unfreeze the aircraft.
+- **Leaves out:** two cores in sessions on one sim, which would write the same slots, and which a developer doesn't run (user, 2026-10-15); whether the freeze events the core sends from outside the sim take effect, for [node 7](plan.md#7-testing)'s tests in the sim.
+
+## The panel bridge owns only what can block the pilot's input
+
+- **Decided:** a panel module adds its own listeners, removes them in its own `stop`, and wraps none of the sim's APIs.
+  The bridge owns the lock, a visible overlay held only while the bridge hears from the core and turned into a warning that blocks nothing 8s after the core's last word; any API a later feature has wrapped, suppressed for one dispatch at a time, with its original at a fixed global and a 120s deadman; each CommBus handler of ours, run in a `try`; and `window.CROSSCHECK_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module.
+  Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#what-the-bridge-owns)).
+- **Because:**
+  - A listener a buggy `stop` leaves behind reads clicks and blocks none, while a wrapper left behind took every click on an A350 display, with the only handle to the original deleted ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+  - `Coherent._trigger` calls a name's handlers with no `try`, so a handler of ours that throws stops the aircraft's own handlers after it ([CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered)).
 
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast

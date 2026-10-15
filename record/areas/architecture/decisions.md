@@ -853,6 +853,32 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** on one loop, a stuck call holds up every input behind it.
   A write function that loops forever on a knob the PF turns would take 100ms for each of up to 20 values a second, so within 1s the PM's WASM module would stop hearing from the core and unfreeze the aircraft, and within 5s the link would count as lost (node 5.1's review, 2026-10-14; [04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream); [01-between-machines](../network/01-between-machines.md#the-link-between-two-cores)).
 
+## The core meets the sim at SimConnect's own calls, and makes sense of them on the loop
+
+- **Decided:** the seam between the core's code and the sim is SimConnect's calls and messages.
+  An edge thread makes each call through `SimConnect.dll` and copies each message onto the queue whole, stamped, and an engine on the loop, the sim client, hands out IDs, keeps each connection's definitions, requests, and subscriptions and makes them again on a new connection, parses each message, and matches each exception to the call that caused it.
+  A stand-in sim that answers the same calls, or a replay of the recorded queue, takes the sim's place below the seam, and the IDE links the sim client and the edge.
+  A feature calls the sim through its outbox, naming variables and events as the sim spells them, and gets back each value, object ID, and exception with the handle of the call that caused it.
+  Masking, the WASM module's slots, and the CommBus event that announces the core's port stay the host's, and sim awareness alone reads the sim's signals for a load and raises one moment for each.
+  Settled in node 5.2 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-sim-seam)).
+- **Because:**
+  - Each failure our earlier sim layers had sits above the seam, where the bench runs it and a replay runs it again: values read in definition order, which a variable the sim rejected shifted or cut short ([04-01](../../learn/foundations/04-01-connection-and-data.md#data-definitions-and-requests)); a watch set that "stopped at the connection check and was never defined" (fsc-editor, `src/main/sim/session.ts`); and exceptions nobody read (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs` and `SimConnectProducer.cs`).
+  - fsc-editor's replay took the source's place after its own parsing and rebuilt the steps after it beside the live path, and "the bug it now catches shipped" in the difference (fsc-editor, `src/main/sim/fixtures/README.md`, `pa24-beacon-input`).
+  - FS Copilot's bench couldn't run with the sim open, since keeping it out "means making `SimClient` inert under `--bench`, which is real surface inside a shipping class" (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
+- **Leaves out:** the stand-in's model, for node 7; whether the logic in sim awareness that reads a load's signals is an engine of its own, for node 6 (user, 2026-10-15); and which crates hold the bindings, the sim client, and the edge, for node 5.4.
+
+## Each feature reaches the sim on a connection of its own for each load, beside the host's
+
+- **Decided:** the host holds one SimConnect connection from the moment `SimConnect_Open` succeeds until the sim closes, for sim awareness, masking, the module's slots, and the core's CommBus announcement.
+  It opens one for each feature at the feature's first sim call after its profile loads, and closes it when the profile unloads, or earlier if the feature closes it.
+  One edge thread holds every connection's handle, and no feature sees a connection, so the host can put features on one connection without any feature changing.
+  Settled in node 5.2 by the user, 2026-10-15 ([02-code-map](02-code-map.md#a-connection-for-each-feature-for-each-load)).
+- **Because:**
+  - Closing a connection ends a feature's work in the sim: the sim removed FS Copilot's injected traffic once its killed process went (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 0 capture read; TrafficInject built and smoke-tested — Q01, Q08 settled"), a client's masks end with it ([flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)), and its definitions, requests, and subscriptions belong to it ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+  - In one client, clearing one group cut another group off from the sim event both held ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), so on a shared connection one feature's teardown could silence another's listener.
+  - The masking group takes its priority only as the sim starts ([flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)), so the host's connection opens then and holds it.
+- **Leaves out:** whether `SimConnect_Close` removes a client's AI objects as a killed process's are, and what a connection costs the sim's frame, for [node 7](plan.md#7-testing)'s tests in the sim; if connections cost too much, the sim service puts the features on one and removes each feature's objects itself.
+
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

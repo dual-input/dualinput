@@ -3,7 +3,7 @@
 ```text
 Purpose:     The units of Crosscheck's code, which tier each is in, what each owns, its interface, and what it may depend on.
 Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.md, ../sync/04-order-and-recovery.md, ../session/01-roles-and-members.md, ../profiles/01-format-and-delivery.md, ../product/04-room-for-later.md
-Decides:     The tiers and the tests that keep each unit apart (node 5); how the host runs its features, and what a feature registers with it, calls, and guards (node 5.1).
+Decides:     The tiers and the tests that keep each unit apart (node 5); how the host runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2).
 ```
 
 Crosscheck's code is a host, engines, and features.
@@ -17,8 +17,8 @@ The tentative decisions behind it start at [decisions.md](decisions.md#crosschec
 
 | Tier | What it is | Examples |
 | --- | --- | --- |
-| Host | The services every feature uses: in the core, and in the sim through the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)) | The session and its keys, control, channels, the cockpit stream, catch-up, the client protocol, settings, notices, recording |
-| Engines | Libraries that know nothing of the app, so another program can link them, such as the [Crosscheck IDE](../product/ideas.md#crosscheck-ide) | The message crate, the profile format, the sync engine, the transport, the recording format |
+| Host | The services every feature uses: in the core, and in the sim through the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)) | The session and its keys, control, channels, the cockpit stream, catch-up, the client protocol, settings, notices, recording, the sim service, sim awareness |
+| Engines | Libraries that know nothing of the app, so another program can link them, such as the [Crosscheck IDE](../product/ideas.md#crosscheck-ide) | The message crate, the profile format, the sync engine, the transport, the recording format, the sim client, the stand-in sim |
 | Features | Each one thing a pilot gets | Pointer sync, avatars, traffic, ATC audio, the take-control key, rate and pause, the PF's spot on the world map |
 
 Three tests stand in for a definition of clean, because a definition in prose invites an agent to enforce it where it doesn't fit (user, 2026-10-14):
@@ -27,7 +27,7 @@ Three tests stand in for a definition of clean, because a definition in prose in
 - An engine builds and runs outside the core.
 - CI checks each crate's dependencies against the ones this map allows.
 
-So far the map allows these: an engine depends on no host or feature crate; no feature depends on another feature's crate ([what a handler sees and does](#what-a-handler-sees-and-does)); and the loop's crates depend on neither tokio nor any crate that does I/O ([one loop](#one-loop)).
+So far the map allows these: an engine depends on no host or feature crate; no feature depends on another feature's crate ([what a handler sees and does](#what-a-handler-sees-and-does)); the loop's crates depend on neither tokio nor any crate that does I/O ([one loop](#one-loop)); and only the sim's edge calls `SimConnect.dll` ([the sim seam](#the-sim-seam)).
 
 A system is the units one design doc designs, in one area, and [node 6](plan.md#6-systems) of the plan designs each.
 Each contract is defined once and linked or generated wherever it's used: a feature's messages stay in the message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), and its profile block, such as pointer sync's `displays`, stays in the profile engine, which the core, CI, and the IDE share ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), so deleting a feature deletes its module in the message crate and its module in the profile engine too (user, 2026-10-14).
@@ -109,7 +109,7 @@ Where a later role limits who may hold it, its feature registers a guard on writ
 [Roles and members](../session/01-roles-and-members.md#the-table-of-roles) keeps the table of roles as the session's documentation, and the code holds no registry of them.
 A feature whose messages must apply in order with the cockpit's, such as a later bus bridge carrying a message that opens a page ([04-room-for-later](../product/04-room-for-later.md#channels)), registers cockpit stream kinds rather than a channel, so no channel declares a place in the cockpit's order.
 
-How a feature reaches the sim is [node 5.2](plan.md#52-the-sim-seam)'s, how it adds work to our WASM module and the panel bridge is [5.3](plan.md#53-work-in-the-sim)'s, and which crates hold the registry and the moments is [5.4](plan.md#54-the-workspace)'s.
+How a feature reaches the sim is in [the sim seam](#the-sim-seam), how it adds work to our WASM module and the panel bridge is [5.3](plan.md#53-work-in-the-sim)'s, and which crates hold the registry and the moments is [5.4](plan.md#54-the-workspace)'s.
 
 ### What a handler sees and does
 
@@ -165,10 +165,129 @@ Each is a starting value, which [node 7](plan.md#7-testing)'s bench measures:
   This changes decision 046 for write functions once step 8's decisions are numbered.
 - The loop is busy less than 20% of one CPU core through a busy flight.
 
-### Left open
+## The sim seam
+
+The core's code meets the sim at SimConnect's own calls and messages, and everything that makes sense of them runs on the loop, so the sim, a stand-in, or a replay can sit below the seam and nothing above it changes (user, 2026-10-15).
+The host holds one SimConnect connection from the sim's start, and gives each feature that reaches the sim a connection of its own for each load, so closing that connection takes the feature's work in the sim with it.
+
+```text
+ features              sim calls out; values, replies, exceptions, and frames back
+    │
+ host's sim service    its own connection, and one per feature per load
+    │
+ sim client (engine)   IDs, setup kept and run again, tagged data parsed,
+    │                  each exception matched to its call
+ ════════ the seam: each connection's calls out, its messages' bytes in ════════
+    │
+ the edge on SimConnect.dll, a stand-in sim, or a replay of the recorded queue
+```
+
+| Unit | Tier | What it does | Runs |
+| --- | --- | --- | --- |
+| Sim service | Host | Opens and closes the connections and knows which feature holds each; keeps the host's own uses of the sim, [below](#what-the-host-keeps) | On the loop |
+| Sim client | Engine | For each connection: hands out IDs; keeps every definition, request, and subscription, and makes them again on a new connection; parses each message; matches each exception to the call that caused it | On the loop, and in the IDE |
+| Edge | Host | One thread owns every connection's handle, makes each call through `SimConnect.dll`, and copies each message SimConnect hands it onto the queue whole, stamped | Off the loop |
+| Stand-in sim | Engine | A modeled sim that answers each call with SimConnect's own messages, which [node 7](plan.md#7-testing) designs | Off the loop, on the bench |
+| Bindings | Engine | SimConnect's declarations, which bindgen generates from the SDK's headers ([01-spine](01-spine.md#the-core)) | Wherever the edge, the sim client, or the stand-in uses them |
+
+The edge reads `SimConnect_GetLastSentPacketID` after each call, as FS Copilot's traffic code does ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), and puts the matching call's handle on any exception that names that packet, so the exception reaches the queue, and the recording, already matched.
+
+### Why the seam sits at SimConnect's calls
+
+- Each failure our earlier sim layers had sits above the seam, where the bench runs it and a replay runs it again:
+  - fsc-editor read values in definition order, and a variable the sim rejected after the call had returned shifted or cut off the values after it ([04-01](../../learn/foundations/04-01-connection-and-data.md#data-definitions-and-requests)).
+  - fsc-editor defined a watch set only when it changed, so one that arrived while the sim was closed "stopped at the connection check and was never defined" (fsc-editor, `src/main/sim/session.ts`).
+  - FS Copilot's `SimClient` never saw an exception: its reading connections handle none, and its writing connection reads no message (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs` and `SimConnectProducer.cs`).
+- fsc-editor's replay took the source's place after its own parsing, and rebuilt the steps after it beside the live path, and a bug lived in the difference: "the bug it now catches shipped", because the input event handlers "captured every value, recorded it as evidence, and showed none of it" (fsc-editor, `src/main/sim/fixtures/README.md`, `pa24-beacon-input`).
+  Below our seam, the only code that runs live and never in a replay is the edge, which makes calls and copies bytes.
+- A replay needs no record of the calls the core made, because the same build makes the same calls from the same inputs.
+- The bench runs the real path, as [node 7](plan.md#7-testing) requires: FS Copilot's bench couldn't run with the sim open, since keeping it out "means making `SimClient` inert under `--bench`, which is real surface inside a shipping class" (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
+
+It costs a stand-in that answers each kind of call our code makes with SimConnect's own messages, so each call a feature adds is one more for the stand-in to model.
+
+### A connection for each feature, for each load
+
+The host's connection opens as soon as `SimConnect_Open` succeeds, because the masking group takes its priority then ([flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)), and it stays open until the sim closes.
+A feature's connection opens at the feature's first sim call after its profile loads, and closes when the profile unloads, or earlier if the feature closes it, as traffic could when the pilot becomes the traffic host and the copies in their sim have to go (hypothetical).
+A message the edge brings for a connection the host has closed is dropped.
+
+Closing a connection is how a feature's work in the sim ends:
+
+- The sim removes the AI objects a client created once the client goes: FS Copilot's injected traffic was gone after its process was killed before its cleanup ran (measured on MSFS 2024, 2026-09-06, FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 0 capture read; TrafficInject built and smoke-tested — Q01, Q08 settled").
+  That `SimConnect_Close` does the same is unverified, and a [node 7](plan.md#7-testing) test in the sim settles it; if it doesn't, the sim service removes the objects it saw the connection create before closing it.
+- A client's masks end with it ([flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
+- Its definitions, requests, and subscriptions belong to the connection ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+
+Connections of their own also keep features apart.
+In one client, clearing one group cut another group off from the sim event both held ([architecture log][flight]), so on a shared connection one feature's teardown could silence another's listener.
+An exception on a feature's connection can come only from that feature's calls, and a feature's IDs don't depend on which other features exist.
+
+Three costs come with them:
+
+- The sim's order between two connections' messages is lost, and the queue orders them by the edge's stamps.
+  No feature needs another's order, since features reach each other only through the host.
+- What a connection costs the sim's frame is unmeasured.
+  v1 holds one for the host and one for each feature that reaches the sim, about six, as FS Copilot's app held five and its module a sixth ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), and nothing in our records says what FS Copilot's split cost or gained ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+  If the bench finds connections too costly, the sim service puts the features on one connection and removes each feature's objects itself, and no feature changes, since no feature sees a connection.
+- One thread holds every handle, and waits on all their events, since SimConnect's clients "are not currently thread-safe" ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)): a handle stays on one thread, and one thread may hold several.
+
+### What a feature sees
+
+```rust
+// a sketch
+// in register:
+me.on_sim(Traffic::on_sim);   // a value, a created object's ID, an exception with its call, a frame
+
+// in a handler:
+let sim = out.sim();                                        // this feature's connection, opened on first use
+self.copies.insert(key, sim.create_ai(title, livery, at));  // a handle now; the object's ID arrives as an input
+```
+
+- A feature names variables and events as the sim spells them, `A:`, `L:`, `B:`, and `K:` among them, as a profile names them ([01-format-and-delivery](../profiles/01-format-and-delivery.md#names)).
+  A fixed set, such as the flight model's pose, is a struct whose fields name its variables, and both reach the sim as one tagged watch.
+- Each call returns a handle at once, so whatever comes back, a value, an object's ID, or an exception, reaches the handler with the handle of the call that caused it.
+- A feature never sees a connection, an ID, or SimConnect's message layouts.
+
+### What the host keeps
+
+- **Masking:** the group takes its priority at the sim's start, so only the host's connection can hold it, and a later feature that masks asks the host.
+- **The module's slots:** our WASM module is the host's, and [5.3](plan.md#53-work-in-the-sim) decides how a feature adds work to it.
+- **The CommBus event that announces the core's port** ([01-spine](01-spine.md#finding-the-core)).
+  Any other CommBus event a feature subscribes to or calls goes through the feature's own connection, as any sim call does.
+  A SimConnect client hears only calls whose sender set the SimConnect flag, and the A220's module sets only JavaScript's, by its code ([05-02](../../learn/foundations/05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)), so reading such an aircraft's bus takes panel JavaScript, which is [5.3](plan.md#53-work-in-the-sim)'s.
+  A plugin reaches the CommBus only through the plugin API, which [node 6](plan.md#6-systems) designs.
+- **Sim awareness** ([01-spine](01-spine.md#sim-awareness)): it alone reads the sim's signals for a load and the page the menu script reports, and raises one moment for each load, after which a feature opens its connection.
+  One load sends many signals: our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log][flight]), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
+  Whether the logic that reads them is an engine of its own, which the bench could test alone and the IDE could link, is for its design in [node 6](plan.md#6-systems) (user, 2026-10-15).
+
+The IDE links the bindings, the sim client, and the edge, and opens a connection of its own, for Trace among other things.
+
+### The sim seam's budgets
+
+Each is a starting value, which [node 7](plan.md#7-testing) measures:
+
+- The edge puts a message on the queue within 1ms of SimConnect signaling it, at p99.
+- v1's connections and their watches add under 0.2ms to the sim's frame, about the 0.18ms between two runs with nothing of ours in the A2A PA-24 ([01-spine](01-spine.md#the-sims-pages)), leaving out traffic's copies, whose models cost frames whoever drives them ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+
+### Cases for the bench
+
+Node 7 turns each into a test:
+
+- `AircraftLoaded` arriving several times for one load raises one moment.
+- Several `Frame` events in one read, which FS Copilot's traffic thread got "for frames already rendered" when the sim outpaced it (read in the FS Copilot fork, `FsCopilot/Connection/SimTraffic.cs`).
+- A message for a connection the host has closed.
+- An AI create with a title the sim lacks, whose exception reaches the call ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#the-ai-objects-api-and-the-facilities-api)).
+- A definition the sim rejects after the call returned, while the other values still arrive.
+- The host's connection opening as the sim boots: `SimConnect_Open` returns `E_FAIL` until it returns `S_OK`, the sim's open reply comes 46s after that, and the calls made in between take effect ([architecture log][flight]).
+- A connection that opens again makes its definitions, requests, and subscriptions again.
+
+## Left open
 
 - Whether a recording replays on a PC with a different CPU: Windows' C runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" ([5.1.1]), while whether Rust's `f64` functions reach that math on our target is unverified; replaying a recording made on one PC on a PC with another CPU settles it.
-- How features reach the sim, and the seam a stand-in sim fills: [5.2](plan.md#52-the-sim-seam).
+- Whether `SimConnect_Close` removes a client's AI objects as a killed process's are, and what a connection costs the sim's frame: [node 7](plan.md#7-testing)'s tests in the sim.
+- Which client writes the module's slots when another connects to the same sim, since every client that maps a client data area sees it: a development core beside the pilot's, or the IDE: [5.3](plan.md#53-work-in-the-sim).
+- The stand-in sim's model, how it paces frames, and how it plays our WASM module: [node 7](plan.md#7-testing).
+- Which crates hold the bindings, the sim client, and the edge, so that only the edge calls `SimConnect.dll`: [5.4](plan.md#54-the-workspace).
 - How features add work to our WASM module and the panel bridge, and how each piece tears itself down: [5.3](plan.md#53-work-in-the-sim).
 - Which crates hold the registry and the moments: [5.4](plan.md#54-the-workspace).
 - Which crate each unit is, and what each may depend on: node 5, once 5.2 to 5.4 answer.
@@ -177,4 +296,5 @@ Each is a starting value, which [node 7](plan.md#7-testing)'s bench measures:
 - How much of the queue a recording keeps, which the parked probe [p10](../../../experiments/areas/architecture/p10-recording.mjs) sizes, and the self-describing record a later version reads: [node 6](plan.md#6-systems).
 - Whether one loop meets its budgets, which p10's loop measures offline: [node 7](plan.md#7-testing).
 
+[flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [5.1.1]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc

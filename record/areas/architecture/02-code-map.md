@@ -287,7 +287,8 @@ Node 7 turns each into a test, on the bench or in the sim:
 ## Work in the sim
 
 A feature's work in the sim is code of its own: routines in our WASM module, built into the module's one binary, and panel modules, each a file the panel bridge loads by name (user, 2026-10-15).
-A routine runs only while its feature keeps writing its data slot, and each frame it asks the module's host for what it wants, so when the writes stop, the work stops, and the host undoes the one want that outlasts the asking, a freeze.
+A routine runs from its feature's first feed until the feature ends it, or until 1s passes with no write to its data slot, which the sim service writes again every 200ms while the core runs.
+Each frame it asks the module's host for what it wants, and the module's host undoes the one want that lasts past the frame that asked for it: the freeze.
 In a cockpit panel, the bridge owns only what can block the pilot's input, and gives each of those the three protections [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) asks for.
 A plugin ships no code into the sim, and drives mechanisms the two hosts own ([decision 020](../../decisions/020-plugin-code-runs-only-in-core.md)).
 
@@ -302,7 +303,7 @@ A plugin ships no code into the sim, and drives mechanisms the two hosts own ([d
 ### Routines in our WASM module
 
 A routine is a small crate of its feature's, built for wasm32 into the module's one binary through one line in the module's list, and natively for its tests and for [node 7](plan.md#7-testing)'s stand-in sim, which runs the module's host and routines on the bench.
-It never calls the sim: the host hands it its slot's values and each frame, and does what it asks.
+It never calls the sim: the module's host hands it its slot's values and each frame, and does what it asks.
 
 ```rust
 // a sketch: flight-model sync's routine
@@ -334,36 +335,37 @@ out.module().end(routine::FOLLOW);                              // when this pil
 
 - **Its slot:** the module creates each routine's slot when it loads, named `CROSSCHECK_` and the routine's ID, such as `CROSSCHECK_FOLLOW`.
   A feed goes out on the feature's own connection, as every sim call of a feature's does ([a connection for each feature](#a-connection-for-each-feature-for-each-load)), and the sim service writes the last feed again every 200ms until the feature feeds another or ends the routine, so no feature keeps its routine alive by hand.
-- **Its header:** each slot opens with a header the host owns, a count of the feature's feeds and an end mark, so a routine hears `on_slot` only for a new feed, not for the sim service's rewrite, and an ended slot holds its end mark until the next feed.
-- **Its life:** the host makes a routine new at the first feed after it was ended or went unfed, and drops it at its end mark or once 1s passes with no write, so no routine carries state from one feeding into the next.
+- **Its header:** each slot opens with a header the sim service writes and the module's host reads, a count of the feature's feeds and an end mark, so a routine hears `on_slot` only for a new feed, not for the sim service's rewrite, and an ended slot holds its end mark until the next feed.
+- **Its life:** the module's host makes a routine new at the first feed after it was ended or went unfed, and drops it at its end mark or once 1s passes with no write, so no routine carries state from one feeding into the next.
   A feature ends its routine when it's done with the work, as flight-model sync does when its pilot takes control, and the host ends each of a feature's routines before it closes the feature's connection at unload, so the 1s timeout is only for a core that's gone.
 - **How many:** a feature has a routine for each piece of work that starts and stops on its own, so following is one routine, `Follow`, and avatars' figure and its hand, which never exist apart, are one, `Figure`, with every figure in one slot of up to 8,192 bytes ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)).
-- **The host's own:** preflight's `Hold`, which asks only for the freeze, and the plugins' `Mechanisms` are the host's routines, fed on the host's connection, and the host ends them when preflight ends, when the profile unloads, and when the session ends.
+- **The host's own:** preflight's `Hold`, which asks only for the freeze, and the plugins' `Mechanisms` are the host's own routines, fed on the host's connection.
+  The host ends `Hold` when preflight ends and `Mechanisms` when the profile unloads, and ends both when the session ends.
 - **Through a gap:** `Follow` asks for the freeze in every frame it runs, so the aircraft stays frozen before its first sample is old enough to write and after it runs past its newest one; what it writes through a gap in the flying machine's data is flight-model sync's design ([softening a short gap](../network/01-between-machines.md#softening-a-short-gap)).
 
-The module never learns the session's state, so this replaces decision 017's control slot, which the core writes every 200ms with the session's state and a counter, once step 8's decisions are numbered.
-[Decision 005](../../decisions/005-wasm-module-writes-following-aircraft.md)'s 1s undoing holds, since no v1 routine holds a variable of ours.
+The module never learns the session's state, so routines' slots replace the control slot of [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md), which the core writes every 200ms with the session's state and a counter, and a numbered decision records the change when step 8's decisions are numbered.
+[Decision 005](../../decisions/005-wasm-module-writes-following-aircraft.md)'s 1s timeout stands with less to undo: it also clears every variable of ours that holds something back, and no v1 routine sets one, so the freeze is all that's left.
 
 ### What a routine can ask for
 
-| A want | The host | When no running routine asks for it |
+| A want | The module's host | When no running routine asks for it |
 | --- | --- | --- |
 | Read named variables, of the pilot's aircraft or of an object by its ID | Reads them during the routine's frame | Nothing to undo |
 | Write named variables, on the pilot's aircraft or on an object by its ID | Writes them once every routine's frame has run | Nothing to undo: the sim's physics, or the object's last place, carries on |
-| Freeze the pilot's aircraft | Reads the three freeze flags each frame, and freezes the aircraft when it isn't frozen | Unfreezes it, if the host froze it |
+| Freeze the pilot's aircraft | Reads the three freeze flags each frame, and freezes the aircraft when it isn't frozen | Unfreezes it, if it froze it |
 | Run calculator code, for a plugin | Runs it | Nothing to undo |
 
-- The freeze is the one want that outlasts the asking, so it's the one the host undoes, and the host releases only a freeze it set.
+- The freeze is the one want that outlasts the asking, so it's the one the module's host undoes, and it releases only a freeze it set.
   FS Copilot's module shows what goes wrong otherwise: its timeout sends the unfreeze whoever froze the aircraft, and leaves the module's own `frz_by_me` set, so `interpolate` stays armed and writes whatever pose its buffer returns into the aircraft it unfroze (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `Update_StandAlone` and `interpolate`, and `stream_buffer.h`; not run).
-  Our host keeps no flag for a routine, since a routine that isn't running asks for nothing.
-- Preflight's hold and `Follow` both ask for the freeze, and the host freezes while either asks, so when preflight ends and following starts in one frame, the aircraft never unfreezes between them.
+  Our module's host keeps no flag for a routine, since a routine that isn't running asks for nothing.
+- Preflight's hold and `Follow` both ask for the freeze, and the module's host freezes while either asks, so when preflight ends and following starts in one frame, the aircraft never unfreezes between them.
 - No two of v1's routines write the same variable.
-- Which of the sim's APIs carries each want is the module host's choice, and no routine sees it.
-- A routine that needs a want this table lacks, such as firing an `H:` event, adds it to the host, and that's the only change to the host a new routine makes.
+- Which of the sim's APIs carries each want is for the module's host to choose, and no routine sees it.
+- A routine that needs a want this table lacks, such as firing an `H:` event, adds it to the module's host, and that's the only change to the module's host a new routine makes.
 
 ### When the module stops
 
-A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), so one routine's error would stop every routine, and the host that would unfreeze the aircraft with them; whether a Rust panic, which traps, puts our module there is unverified, since our records hold no module crash.
+A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), so one routine's error would stop every routine, and with them the module's host, which would unfreeze the aircraft; whether a Rust panic, which traps, puts our module there is unverified, since our records hold no module crash.
 So the core unfreezes it.
 When the module's counter hasn't moved for 3s, in a flight that's neither loading nor paused, the host's connection reads `A:IS LATITUDE LONGITUDE FREEZE ON`, `A:IS ALTITUDE FREEZE ON`, and `A:IS ATTITUDE FREEZE ON`, the flags FS Copilot's module reads (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `module_init`), and sends `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, or `K:FREEZE_ATTITUDE_SET` with 0 for each that's on, as a client outside the sim released a frozen Baron that way (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
 In a session, the core takes any freeze to be ours.
@@ -375,12 +377,14 @@ Each routine's crate denies Clippy's `unwrap_used`, `expect_used`, `panic`, and 
 - The sim loads our `VCockpit.js` override into every cockpit panel, and the override is the sim's file plus a few guarded lines, which load the bridge's own file and queue each instrument the sim creates before that file has loaded, as FS Copilot's copy does ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
   Everything of ours beyond those lines is in files of its own, so a mistake in one of them stops no instrument.
 - A feature registers each panel module with a rule for which panels get it, as pointer sync's takes the panels its profile's [`displays`](../profiles/01-format-and-delivery.md#displays) names, and the core answers a panel's first message with the modules to load ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) once the profile has loaded, since a panel can connect before it does ([01-spine](01-spine.md#the-sims-pages)).
-- A first message naming the instruments another socket holds replaces that socket, and the core closes the old one, since a page's socket stays open after a reload ([decision 010](../../decisions/010-clients-message-core-every-2s.md)); a press the old socket never played counts as one for a panel that hasn't announced itself ([the cockpit stream](../sync/04-order-and-recovery.md#the-cockpit-stream)).
+- A first message naming the instruments another socket holds replaces that socket, and the core closes the old one, since a page's socket stays open after a reload ([decision 010](../../decisions/010-clients-message-core-every-2s.md)).
+  A press sent to the old socket that its panel never played is skipped and counts as applied, as a press for a display whose panel hasn't announced itself does ([the cockpit stream](../sync/04-order-and-recovery.md#the-cockpit-stream)).
 - The bridge loads each panel module from its own file and calls its `start` and `stop` each in a `try`, so one that throws stops only itself.
   Whether a file that fails to parse stops the bridge's later loads in its panel is unverified, and a case for the bench settles it.
 - A panel module and its feature trade messages from the message crate over the panel's socket, tagged with the module's name ([decision 025](../../decisions/025-messages-in-one-rust-crate.md)).
-- A plugin ships no panel code: its operations, such as reading a setting in a gauge's JavaScript, run in `ops`, a panel module of the host's, which the core loads into the panels the plugin's operations name, so the plugin's API names those panels when its profile loads.
-- A panel module can read an aircraft's CommBus: a listener of ours in one of the A220's panels heard all 39 of the 43 names only other panels listen on that sent anything during the run, and asked for the aircraft's full state with `A22X.Resync` (measured on MSFS 2024, 2026-09-28, [CommBus log](../commbus/log.md#2026-09-28-a22xresync-returns-the-a220s-full-state-and-one-listener-hears-every-channel)).
+- A plugin ships no panel code: its operations, such as reading a setting in a gauge's JavaScript, run in `ops`, the bridge's own panel module, which the core loads into the panels the plugin's operations name, so the plugin's API names those panels when its profile loads.
+- A panel module can read an aircraft's CommBus.
+  Of the 43 CommBus names that only the A220's other panels listen on, 39 sent something during the run, and a listener of ours in one panel heard all 39; it also asked for the aircraft's full state with `A22X.Resync` (measured on MSFS 2024, 2026-09-28, [CommBus log](../commbus/log.md#2026-09-28-a22xresync-returns-the-a220s-full-state-and-one-listener-hears-every-channel)).
   So the bus bridge and the A220's adapter, which come after v1, read the A220's bus from a panel module, whether or not a SimConnect client can hear it.
 
 ```ts
@@ -398,11 +402,12 @@ CROSSCHECK_BRIDGE.define("pointer-sync", {
 
 The bridge owns only what can block the pilot's input:
 
-- **Locks:** pointer sync asks the bridge for each overlay it needs, a visible one over a display locked through an outage and an unseen one while another pilot's gesture replays, as FS Copilot's panel code places both ([pointer sync](../product/03-v1-scope.md#pointer-sync); [06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
-  The bridge's hit test looks past its own overlays, as FS Copilot's sets its overlay's `pointer-events` to `none` around `elementFromPoint` (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/overlay.js`, `hitTest`), so a gesture replayed into a locked display still reaches the display.
-  A lock holds only while the core renews it over the panel's socket every 2s, and turns into a warning that blocks nothing 8s to 10s after the last renewal, as FS Copilot's does ([01-spine](01-spine.md#what-moves-them)); the panel module that asked for it stopping, or the socket closing, drops it at once.
+- **Locks:** a lock is an overlay the bridge places for pointer sync, either a visible one over a display blocked through an outage, or an unseen one while another pilot's gesture replays, as FS Copilot's panel code places both ([pointer sync](../product/03-v1-scope.md#pointer-sync); [06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+  The bridge's hit test looks past its own overlays, as FS Copilot's sets its overlay's `pointer-events` to `none` around `elementFromPoint` (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/overlay.js`, `hitTest`), so a gesture replayed under either lock still reaches the display.
+  A lock holds only while the core renews it over the panel's socket every 2s; 8s to 10s after the last renewal, a visible lock turns into a warning that blocks nothing, as FS Copilot's does ([01-spine](01-spine.md#what-moves-them)), and an unseen one goes; the panel module that asked for it stopping, or the socket closing, drops it at once.
 - **Later wrappers and CommBus handlers:** no v1 panel module wraps one of the sim's APIs or listens on the CommBus.
-  A later one asks the bridge, which suppresses a wrapped call for one dispatch at a time, keeps the original at a fixed global, and uninstalls the wrapper after 120s idle, the rules the FS Copilot fork took from a probe whose wrapper left an A350 display taking no clicks ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)), and runs each CommBus handler in a `try`, since `Coherent._trigger` calls a name's handlers with no `try`, so one that throws would stop the aircraft's own handlers after it (read in the sim's `Coherent._trigger`, [CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered); not run).
+  A later one asks the bridge to install a wrapper, and the bridge suppresses the wrapped call only for one dispatch and clears that unconditionally afterward, restores the original through `window.CROSSCHECK_UNLOCK()`, and uninstalls the wrapper after 120s idle: the rules the FS Copilot fork took from a probe whose wrapper left an A350 display taking no clicks ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+  The bridge also runs each CommBus handler of ours in a `try`, since `Coherent._trigger` calls a name's handlers with no `try`, so one that throws would stop the aircraft's own handlers after it (read in the sim's `Coherent._trigger`, [CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered); not run).
 - **The fixed global:** `window.CROSSCHECK_UNLOCK()` removes every lock and wrapper in its document and stops every panel module, from the inspector or any other console.
 
 Anything else a panel module adds, such as pointer sync's listeners, its own `stop` removes, and one it leaves behind reads clicks and sends to a closed socket, blocking nothing.
@@ -412,18 +417,18 @@ FS Copilot's panel code, by contrast, replaces `EventTarget.prototype.addEventLi
 
 | What happens | Our WASM module | Panel bridge |
 | --- | --- | --- |
-| A feature is done with some work, such as its pilot taking control | The feature ends the routine, and the host drops it on the next frame | The feature stops the panel module, and the bridge drops the module's locks |
+| A feature is done with some work, such as its pilot taking control | The feature ends the routine, and the module's host drops it on the next frame | The feature stops the panel module, and the bridge drops the module's locks |
 | The profile unloads, or the session ends | The host ends each of the feature's routines, then closes its connection | The core stops each panel module, and a panel left with none closes its socket |
 | The core hangs | 1s with no write leaves every routine unfed | Each lock turns into a warning 8s to 10s after its last renewal |
 | The core exits | The same | Its socket closes, and the bridge stops every panel module and drops every lock |
-| The host itself stops | The module goes `DIRTY`, and the core unfreezes the aircraft | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
+| Our own code in the sim stops | The module goes `DIRTY`, and the core unfreezes the aircraft | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
 | A person steps in | Nothing to call | `window.CROSSCHECK_UNLOCK()` |
 
 ### Budgets for work in the sim
 
 Each is a starting value, which [node 7](plan.md#7-testing) measures:
 
-- Our module's update, every routine's frame and the host's work together, takes under 0.1ms a frame at p99; the sim's WASM Debug window graphs each module's time per update (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)).
+- Our module's update, every routine's frame and the module's host's work together, takes under 0.1ms a frame at p99; the sim's WASM Debug window graphs each module's time per update (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)).
 - The panel modules add no frame time we can measure.
   Only sockets are measured so far: one in each of the PA-24's 16 cockpit panels added none ([01-spine](01-spine.md#the-sims-pages)).
 

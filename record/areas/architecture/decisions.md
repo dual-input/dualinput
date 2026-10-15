@@ -889,12 +889,12 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A routine runs while its feature feeds it, and the module's host undoes only the freeze
 
-- **Decided:** a routine runs while its feature writes its slot.
-  The sim service writes each feed on the feature's own connection and writes the last one again every 200ms until the feature feeds another or ends the routine, and the module's host makes a routine new at its first feed and drops it at the feature's end mark or 1s after the last write.
-  Preflight's hold and the plugins' mechanisms are the host's own routines, fed on the host's connection.
-  Each frame a routine asks for what it wants, and the host freezes the aircraft while any routine asks, and unfreezes it, if the host froze it, once none does, so no routine keeps a flag the host must clear; following asks for the freeze in every frame it runs, with a pose to write or not.
-  The host ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, the core unfreezes the aircraft through its own connection.
-  The module never learns the session's state, which changes [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md), whose control slot carries it, once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
+- **Decided:** a routine runs from its feature's first feed until the feature's end mark, or until 1s passes with no write to its slot.
+  The sim service writes each feed on the feature's own connection and writes the last one again every 200ms until the feature feeds another or ends the routine, and the module's host makes a routine new at its first feed.
+  Preflight's hold and the plugins' mechanisms are the core's host's own routines, fed on its connection.
+  Each frame a routine asks for what it wants, and the module's host freezes the aircraft while any routine asks, and unfreezes it, if it froze it, once none does, so no routine keeps a flag the module's host must clear; following asks for the freeze in every frame it runs, with a pose to write or not.
+  The core's host ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, the core unfreezes the aircraft through its own connection.
+  The module never learns the session's state, so routines' slots replace [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md)'s control slot, which carries that state, and a numbered decision makes the change once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#routines-in-our-wasm-module)).
 - **Because:**
   - A routine's life is its feeding: it starts at the first write, and ends at its feature's end mark, or 1s after the last write when the core is gone, so nothing in the module needs the session's state (user, 2026-10-15).
@@ -906,8 +906,8 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## The panel bridge owns only what can block the pilot's input
 
 - **Decided:** a panel module adds its own listeners, removes them in its own `stop`, and wraps none of the sim's APIs.
-  The bridge owns the locks, the overlays pointer sync asks for, a visible one over a display locked through an outage and an unseen one while another pilot's gesture replays, with a hit test that looks past them; a lock holds only while the core renews it over the panel's socket every 2s, turns into a warning that blocks nothing 8s to 10s after the last renewal, and drops at once when the panel module that asked for it stops or the socket closes.
-  It also owns any API a later feature has wrapped, suppressed for one dispatch at a time, with its original at a fixed global and a 120s deadman; each CommBus handler of ours, run in a `try`; and `window.CROSSCHECK_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module.
+  The bridge owns the locks, the overlays it places for pointer sync, a visible one over a display blocked through an outage and an unseen one while another pilot's gesture replays, with a hit test that looks past them; a lock holds only while the core renews it over the panel's socket every 2s, 8s to 10s after the last renewal a visible lock turns into a warning that blocks nothing and an unseen one goes, and a lock drops at once when the panel module that asked for it stops or the socket closes.
+  It also owns any API a later feature has wrapped, suppressed only for one dispatch and cleared unconditionally after it, restored by `window.CROSSCHECK_UNLOCK()`, and uninstalled after 120s idle; each CommBus handler of ours, run in a `try`; and `window.CROSSCHECK_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module.
   A panel's first message naming the instruments another socket holds replaces that socket, which the core closes.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#what-the-bridge-owns)).
 - **Because:**

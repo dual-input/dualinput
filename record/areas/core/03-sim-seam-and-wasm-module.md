@@ -33,9 +33,10 @@ Sim awareness is an engine so that the IDE can link it, as it links the sim clie
 
 - One thread, the sim thread of [01-loop-and-edge](01-loop-and-edge.md#threads), holds every connection's handle, as the code map's edge requires.
 - It waits in `WaitForMultipleObjects` on each connection's event, the one it passes to `SimConnect_Open`, on the sim's process, and on an event that the loop's sink for `SimCall` sets when it queues calls.
-  It waits at most 2ms, as p08's client waited on its connection's event in a flight (read in `experiments/areas/architecture/flight/client/src/main.rs`; [architecture log][flight]), since the SDK says only that a client "can be written to respond to Windows Events" ([SimConnect_Open](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_Open.htm)), not when it signals one.
+  It waits at most 2ms, so the edge still reads a connection whose event never fires, because the SDK says only that a client "can be written to respond to Windows Events" ([SimConnect_Open](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_Open.htm)), not when the sim signals one.
+  p08's client waited the same way through a flight (read in `experiments/areas/architecture/flight/client/src/main.rs`; [architecture log][flight]).
 - On each wake it makes the queued calls in their order, then takes each connection's messages through `SimConnect_GetNextDispatch` until none is left.
-- After each call it reads `SimConnect_GetLastSentPacketID`, and keeps each packet ID with its call's handle for the last 4,096 calls on each connection, about 1s of traffic's writes with 132 copies at 32.5 fps (arithmetic, from [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+- After each call it reads `SimConnect_GetLastSentPacketID`, and keeps each packet ID with its call's handle for the last 4,096 calls on each connection, about 1s of writes while traffic writes 132 injected objects every frame at 32.5 fps, 4,290 a second (arithmetic, from [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
   An exception whose packet ID it holds goes up tagged with that handle.
 
 ### Its inputs
@@ -49,15 +50,16 @@ Four kinds of input come up through the seam, each stamped and recorded ([inputs
 | A loss | The connection's number, after a call on it returned an error |
 | The sim's process | Found, with its ID and creation time; or exited, with its exit code |
 
-- The code map also counts the quit message and a failed dispatch as a loss.
-  The quit message comes up as a message, which the sim service takes as its connection's loss, and the edge can't tell a failed dispatch from an empty queue, since p08's client took any result of `SimConnect_GetNextDispatch` but `S_OK` to mean none was left (same file).
+- The code map also counts the quit message and a failed dispatch as a loss, and the edge raises neither as one:
+  - The quit message comes up as a message, and the sim service takes it as its connection's loss.
+  - A failed dispatch raises nothing: p08's client took any result of `SimConnect_GetNextDispatch` but `S_OK` to mean no message was left (read in `experiments/areas/architecture/flight/client/src/main.rs`), and whether a failure returns anything else is unverified.
 - The sim's process is the fourth kind, beside the three the code map names.
   It gives the session file the run of the sim, which the spine names by the process's ID and creation time ([IDs](../architecture/01-spine.md#ids)), and it ends a run of the sim even when SimConnect reports nothing.
-- Whether a crashed sim's connection fails the next call, or reports nothing until the process is gone, is unmeasured, and node 7's test that kills the sim shows which comes first.
+- How a crash reaches a `SimConnect.dll` connection, as a failed call or as nothing until the process is gone, is unmeasured, and node 7's test that kills the sim shows which comes first.
 
 ### The sim's process
 
-- While it holds no process, the edge looks for one each time the sim service asks, every 2s: it walks a `CreateToolhelp32Snapshot` of the processes for `FlightSimulator2024.exe`, ignoring case.
+- While it holds no process, the edge looks for one each time the sim service asks ([connections](#connections)): it walks a `CreateToolhelp32Snapshot` of the processes for `FlightSimulator2024.exe`, ignoring case.
   That's the name the Windows Application log gave each sim that crashed in our aircraft harness, on the Steam edition ([crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv)), and the name a pilot's crash report gave the Microsoft Store edition, under `C:\Program Files\WindowsApps\Microsoft.Limitless_1.0.77.0_x64__8wekyb3d8bbwe` (unverified, a forum post: [CTD always on startup](https://devsupport.flightsimulator.com/t/ctd-always-on-startup/10774)).
 - It opens the process with `PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE`, reads its creation time with `GetProcessTimes`, hands both up, and waits on the process with its connections.
 - When the process ends, it hands up `GetExitCodeProcess`'s code, which for a crash is "the exception value for an unhandled exception that caused the process to terminate" (documented, [GetExitCodeProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getexitcodeprocess)), for the log.
@@ -107,12 +109,13 @@ fn start(me: &mut FlightModel, _: &ProfileLoaded, cx: &mut Cx) {
 ### Connections
 
 - Every 2s, the sim service asks the edge to look for the sim's process while it holds none, and to open the platform's connection while it holds a process whose run hasn't ended and that connection is closed, as FS Copilot tries again every 2s ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
-- So after the quit message, it opens nothing until that process has exited and another is found, since `SimConnect_Open` can return `S_OK` long before the sim answers: 46s before its open reply as it booted ([architecture log][flight]).
+- So after the quit message, it opens nothing until that process has exited and another is found.
+  A sim that is shutting down may still return `S_OK` (unverified), and `S_OK` came 46s before the open reply as the sim booted ([architecture log][flight]), so the core couldn't tell that connection from one to a sim starting up.
 - A connection lost while its run hasn't ended, the platform's or a feature's, opens again at once, as [a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load) has it.
 
 ### What the platform's connection holds
 
-At `S_OK`, before the sim's open reply, whose wait the calls made in it survive ([the core](../architecture/01-spine.md#the-core)), the platform's connection:
+The platform's connection makes these calls at `S_OK`, without waiting for the sim's open reply, because in p08 the calls made before the reply took effect ([the core](../architecture/01-spine.md#the-core)):
 
 - takes masking group A, as [the spine](../architecture/01-spine.md#components-with-no-session) has it;
 - subscribes to `AircraftLoaded`, `FlightLoaded`, `Pause_EX1`, and the flow events, and asks `RequestSystemState` for `AircraftLoaded`;
@@ -156,7 +159,7 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 | Ready to fly | `RTC_START` | Starting, Loading |
 | Flying | `RTC_END`, or the menu script's master page `MasterPage_InGame` | Starting, Ready to fly |
 
-- The master page counts only while Starting: it tells a core that connects mid-run where the sim is ([connecting mid-run](#connecting-mid-run)).
+- The master page counts only while Starting ([leaving Starting](#leaving-starting)).
 - Every other signal leaves the stage as it is, among them `FLT_LOAD`, `FLT_LOADED`, `FLIGHT_START`, `FLIGHT_END`, and a teleport.
 - p08 heard `FlightLoaded`, then `FLT_LOAD` three times through the load, `RTC_START`, and `RTC_END` 57.7s later, when the pilot pressed Ready to fly ([core log][signals]).
 - A Restart from the pause menu sent `FlightLoaded`, then `FLIGHT_END` 72ms later, then `FLT_LOAD`, and later `RTC_START` and `RTC_END` ([core log][sim-state]), so `FLIGHT_END` moves no stage, and a Restart is one load.
@@ -179,19 +182,23 @@ The stage, the page, and the aircraft are types of the message crate, since the 
 - The sim service raises `SimChanged`, which carries the state before, once for each step that changes the state, so a load is one entry into Loading, however many signals it brings.
 - A feature reads the state through `cx.read::<SimAwareness>()`.
 
-### Connecting mid-run
+### Leaving Starting
 
-- `AircraftLoaded` reports only what happens after the subscription ([04-02](../../learn/foundations/04-02-events.md#system-events-and-state)), so a core that connects mid-run, after its own restart or when the desktop app started it before the sim, stays Starting until the menu script reports its master page, or until a load's signal arrives.
-- The menu script reports its master page when the sim service asks, as its socket joins: `MasterPage` in the main menu and `MasterPage_InGame` in a flight (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
-- The `Sim` state can't tell them apart: it read 1 in the main menu, and again 1s into a load's screen ([core log][sim-state]).
-- Without our copy of BlurPage, which brings the menu script ([preflight](../product/03-v1-scope.md#preflight)), a core that connects mid-flight stays Starting until the next load.
+A core stays Starting until the menu script reports its master page, or until `FlightLoaded`, `RTC_START`, or `RTC_END` arrives, whichever way it found the sim:
+
+- It found the sim booting, and between `S_OK` and the first `FlightLoaded`, p08 heard nothing that marks the main menu ([core log][signals]).
+- It connected to a sim already running, after its own restart or when the desktop app started it then, and `AircraftLoaded` reports only what happens after the subscription ([04-02](../../learn/foundations/04-02-events.md#system-events-and-state)).
+
+The menu script reports its master page when the sim service asks, as its socket joins: `MasterPage` in the main menu and `MasterPage_InGame` in a flight (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
+The `Sim` state can't tell them apart: it read 1 in the main menu, and again 1s into a load's screen ([core log][sim-state]).
+Without our copy of BlurPage, which brings the menu script ([preflight](../product/03-v1-scope.md#preflight)), the core stays Starting until the next load.
 
 ### A crash and a close
 
 - A run ends as a close when the sim's quit message, which "Specifies that the user has exited from Microsoft Flight Simulator 2024" (documented, [SIMCONNECT_RECV_ID](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_ID.htm)), arrives on the platform's connection, and the stage goes to Closed at once.
 - It ends as a crash when the sim's process exits with no quit message before it.
-  Every sim crash in our aircraft harness closed SimConnect's connection with no quit message before it ([core log][crashes]).
-- A connection lost while the process runs ends nothing: the sim service opens it again.
+  Every sim crash in our aircraft harness closed its node-simconnect connection with no quit message before it ([core log][crashes]); we haven't seen a `SimConnect.dll` connection through a crash.
+- A lost connection alone ends no run.
 - The exit code goes in the log either way, and the session's notice to the crew reads `ended` ([a sim that closed](../sync/04-order-and-recovery.md#a-sim-that-closed)).
 - No run of ours has recorded a clean close; if node 7's test finds one sends no quit message, the exit code decides instead, since the edge already holds the process (user, 2026-10-15).
 
@@ -239,7 +246,8 @@ The routine host then runs its frame, as the code map's [routines in our WASM mo
 
 ### Through a flight load
 
-- The routine host takes nothing up after a load but its IDs, after the `RESET`: the slots outlive the clients that created them, for the rest of the sim's run ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)), and the module's own connection carried it through p08's load ([architecture log][flight]).
+- After a load, the routine host looks up its variable and unit IDs again once the `RESET` arrives, and sets up nothing else.
+  The slots last for the rest of the sim's run after the clients that created them are gone ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)), and the module's own connection echoed every write through p08's load ([architecture log][flight]).
 - p08's round trips through the module reached 2.8s during the load (same entry), and the sim service judges the counter only in Flying, so a still counter through a load counts for nothing.
 
 ### The module's status
@@ -292,7 +300,7 @@ In the sim:
 - A second flight load in one run of the sim: the module's own connection and its slots carry on, and `Follow` starts new at its first feed.
 - `fsVarsAVarSet` holds the pilot's own aircraft's pose, and `fsEventsTriggerKeyEvent` freezes and unfreezes it.
 - A Marketplace aircraft's path names its folder and preset, and each of the L-1011's four presets gives a path of its own ([L-1011 study](../aircraft/inibuilds-l1011/study.md), sim question 13).
-- A connection's event wakes the edge within the 1ms budget without the 2ms timeout.
+- A connection's event, not the 2ms timeout, wakes the edge within the code map's 1ms budget ([the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets)).
 - The Microsoft Store edition's process is `FlightSimulator2024.exe`.
 
 ## Left open

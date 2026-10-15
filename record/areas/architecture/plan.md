@@ -622,6 +622,7 @@ Its answer goes in `record/areas/core/03-sim-seam-and-wasm-module.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.2, how sim awareness makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log][flight]), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
 Raised elsewhere: by 5.3, which of the sim's APIs carries each want of the routine host ([02-code-map](02-code-map.md#what-a-routine-can-ask-for)).
+Raised elsewhere: by 6.2, the sim service sends the core's announcement, a CommBus event named `CROSSCHECK_CORE` whose payload holds the core's port, whether a session runs, and the core's version, every 2s and at once when a session starts or ends ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#page-client)).
 
 ## 6.4 The network
 
@@ -681,6 +682,7 @@ It reads the four sync docs and the [sync log](../sync/log.md), 6.4's, 6.7's, an
 It settles whether the profile engine fires `H:` events through SimConnect's client events or through calculator code ([01-spine](01-spine.md#left-open)), whether the legacy transmit call reaches every aircraft's handlers ([01-format-and-delivery](../profiles/01-format-and-delivery.md#left-open)), and what [02-live-sync](../sync/02-live-sync.md#open-questions)'s and [03-catch-up](../sync/03-catch-up.md#open-questions)'s open questions still hold, each as a case for the bench where it turns on frame timing.
 Its answer goes in `record/areas/sync/05-units.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.2, which panel listens for `H:` events, and how, since [decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md) keeps one panel for them, as a panel module whose rule picks that panel ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#cockpit-panels-and-their-modules)).
 
 ## 6.10 Flight-model sync
 
@@ -745,6 +747,7 @@ It settles the spine's open items under the apps ([01-spine](01-spine.md#left-op
 Its answer goes in `record/areas/interface/01-apps.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosscheck, which the core runs as a Leave before it exits ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
+Raised elsewhere: by 6.2, where each notice shows, by its level; which slices each app's frame shows; what the apps tell the pilot after a `bye` and after a socket that closed without one; whether a component whose version differs counts as trouble; and the WebSocket client in the desktop app's Rust side, which sends no `Origin` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
 
 ## 6.17 Installing and updating
 
@@ -766,6 +769,7 @@ Its answer goes in `record/areas/build/01-the-build.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.4, what the build does when cargo-msfs, which installs only the newest SDK, has installed one newer than a release's, and how long CI takes on Windows runners, against [5.4's budget](02-code-map.md#budgets-for-the-workspace) ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 6.1, how the core links the C runtime statically, since `+crt-static` is a target's feature rather than a crate's and 5.4 sets no `RUSTFLAGS`, and whether the watcher, the core helper, and the desktop app link it statically too; and the map check's search of `features/` for `impl Moment`, and its allowance for the one foreign function `apps/core` declares ([01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)).
+Raised elsewhere: by 6.2, how the build gets the sim's stock `VCockpit.js` after each sim update, since the sim streams it rather than keeping it on disk, to put our two blocks into at their anchors ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#our-vcockpitjs)).
 
 ## 7 Testing
 

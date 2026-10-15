@@ -1,0 +1,9 @@
+tokio-tungstenite	38 crates besides the program, tokio's own among them
+tokio-tungstenite	block-buffer v0.12.1, bytes v1.12.1, cfg-if v1.0.5, chacha20 v0.10.2, const-oid v0.10.2, cpufeatures v0.3.1, crypto-common v0.2.2, data-encoding v2.11.1, digest v0.11.3, futures-core v0.3.34, futures-sink v0.3.34, futures-task v0.3.34, futures-util v0.3.34, getrandom v0.4.3, http v1.5.0, httparse v1.10.1, hybrid-array v0.4.15, itoa v1.0.18, log v0.4.34, mio v1.2.4, pin-project-lite v0.2.17, proc-macro2 v1.0.107, quote v1.0.47, rand v0.10.3, rand_core v0.10.1, sha1 v0.11.0, slab v0.4.12, socket2 v0.6.5, syn v3.0.9, thiserror v2.0.21, thiserror-impl v2.0.21, tokio v1.53.2, tokio-tungstenite v0.30.0, tungstenite v0.30.0, typenum v1.20.1, unicode-ident v1.0.27, windows-link v0.2.1, windows-sys v0.61.2
+tokio-websockets	23 crates besides the program, tokio's own among them
+tokio-websockets	base64 v0.22.1, bytes v1.12.1, cfg-if v1.0.5, chacha20 v0.10.2, cpufeatures v0.3.1, futures-core v0.3.34, futures-sink v0.3.34, getrandom v0.4.3, http v1.5.0, httparse v1.10.1, itoa v1.0.18, mio v1.2.4, pin-project-lite v0.2.17, rand v0.10.3, rand_core v0.10.1, sha1_smol v1.0.1, simdutf8 v0.1.5, socket2 v0.6.5, tokio v1.53.2, tokio-util v0.7.20, tokio-websockets v0.13.3, windows-link v0.2.1, windows-sys v0.61.2
+two-cores	tokio-websockets 0.13.3, depended on by iroh-relay 1.3.0
+p03-home-networks	tokio-websockets 0.13.3, depended on by iroh-relay 1.3.0
+p05-relay-homes	tokio-websockets 0.13.3, depended on by iroh-relay 1.3.0
+p06-relay-mix	tokio-websockets 0.13.3, depended on by iroh-relay 1.3.0
+p07-outage	tokio-websockets 0.13.3, depended on by iroh-relay 1.3.0

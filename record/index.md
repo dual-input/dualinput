@@ -81,4 +81,5 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/architecture/log.md](areas/architecture/log.md): what our experiments found for the architecture plan's nodes.
 - [areas/architecture/coherent-gt.md](areas/architecture/coherent-gt.md): the syntax, built-ins, and web APIs Coherent GT has, as measured, which our code in the sim keeps within.
 - [areas/core/01-loop-and-edge.md](areas/core/01-loop-and-edge.md): how the kernel runs the core's loop, and how the core's edge stamps its inputs, carries out its outputs, records it, replays it, starts it, and stops it.
+- [areas/core/02-clients-and-panel-bridge.md](areas/core/02-clients-and-panel-bridge.md): how the core's clients reach it over one WebSocket protocol, how a feature's state and commands reach the apps, and how our `VCockpit.js` and the panel bridge load what features run in a cockpit panel.
 - [areas/core/log.md](areas/core/log.md): what we found about the core's own process, such as how precisely its timers wake on Windows.

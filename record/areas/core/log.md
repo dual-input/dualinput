@@ -3,6 +3,28 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-15: iroh 1.3 already brings tokio-websockets into the core, with 15 fewer crates than tokio-tungstenite would add
+
+**Asked:** which WebSocket library should the core serve its clients with, once refusing a connection during the handshake isn't a priority (user, 2026-10-15), for node 6.2 of the [architecture plan](../architecture/plan.md#62-clients-and-the-panel-bridge)?
+
+**Expected:** tokio-tungstenite, the one our Tauri probe's Rust side already ran as a client ([architecture log](../architecture/log.md#2026-10-08-a-tauri-2-window-takes-723-mb-of-memory-over-seven-processes-against-electrons-665-mb-over-four-its-program-is-80-mb-against-3474-mb-and-its-rust-sides-websocket-sends-no-origin)).
+
+**Found:**
+
+- **What each brings:** [p02-websocket-crates.mjs](../../../experiments/areas/core/p02-websocket-crates.mjs) ran `cargo tree` on two empty programs with tokio 1.53.2's `net`, each with its library's server and client on.
+  tokio-tungstenite 0.30.0 brought 38 crates besides the program, among them tungstenite, sha1 with its digest crates, futures-util, and thiserror with syn; tokio-websockets 0.13.3 brought 23, tokio's own included in both counts.
+- **What the core already links:** in the lockfiles of every network probe that builds iroh 1.3, `two-cores`, p03, p05, p06, and p07, iroh 1.3.0 depends on iroh-relay 1.3.0, which depends on tokio-websockets 0.13.3, and no crate brings tungstenite.
+- **Why tokio-tungstenite has more users:** it's had them longer, and frameworks bring it in.
+  Its first release was on 2017-03-17 and tokio-websockets' on 2022-12-06; among the crates that depend on tokio-tungstenite are axum's WebSocket support, ethers-providers, poem, and warp, while tokio-websockets has 34 dependents, async-nats, twilight-gateway, and iroh-relay the most downloaded (documented, crates.io's API, as of 2026-10-15).
+- **What each says of itself:** tokio-websockets "passes the Autobahn test suite without relaxations by default" ([tokio-websockets](https://github.com/Gelbpunkt/tokio-websockets)), and tokio-tungstenite is "definitely not the fastest WebSocket library in the world at the moment of writing this note" ([tokio-tungstenite](https://github.com/snapview/tokio-tungstenite)) (documented, as of 2026-10-15).
+- **Where each can check `Origin`:** tungstenite 0.30.0's `Callback::on_request` can refuse a connection before the upgrade (read in tungstenite 0.30.0, `src/handshake/server.rs`), while tokio-websockets 0.13.3's `ServerBuilder::accept` writes the upgrade before it returns the request (read in tokio-websockets 0.13.3, `src/server.rs`), and its `max_payload_len` has no limit unless set (same crate, `src/proto/types.rs`, `Limits`).
+
+**Changed:** the core serves its clients with tokio-websockets, which it links already, and checks `Origin` the moment `accept` returns, closing a socket with another before reading anything from it.
+
+**Affects:** [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md).
+
+**Evidence:** `experiments/areas/core/results/p02-websocket-crates-2026-10-15-20-09-12.txt`, and the files and pages named above, read on 2026-10-15.
+
 ## 2026-10-15: A high-resolution waitable timer wakes within 1.5ms where tokio's wake up to 17ms late, and the core's math changes with the C runtime's FMA3 switch and with its version
 
 **Asked:** how close to its deadline can the core's edge wake a timer on Windows; and does the C runtime's FMA3 math, which Windows picks by CPU ([architecture log, 5.1.1][a511]), reach Rust's `f64` math and QuickJS-ng's, so that a recording made on one PC replays on another; for node 6.1 of the [architecture plan](../architecture/plan.md#61-the-cores-loop-and-edge)?

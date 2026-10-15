@@ -1,0 +1,11 @@
+[package]
+name = "p02-tokio-websockets"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+tokio = { version = "=1.53.2", features = ["net"] }
+tokio-websockets = { version = "=0.13.3", default-features = false, features = ["server", "client", "sha1_smol", "rand"] }

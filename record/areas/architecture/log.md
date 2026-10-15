@@ -13,11 +13,11 @@ p08 kept its module out of its workspace, with `exclude = ["module"]` (read in `
 **Found:** yes, on our development machine, with Rust 1.95.0 and edition 2024 ([p11](../../../experiments/areas/architecture/p11-workspace.mjs), [results](../../../experiments/areas/architecture/results/p11-workspace-2026-10-15-12-35-57.txt)).
 
 - The workspace held a message crate, the module's host, one routine, the module as a cdylib, and a Windows program, with the module left out of `default-members`, because its build script needs the SDK that cargo-msfs names in `MSFS_SDK`.
-- From cold, `cargo build --release` built the Windows side in 5.4s, `cargo test` passed its 3 tests, and cargo-msfs built the module from its folder in 6.6s, 61,157 bytes, with every export the sim calls.
+- From cold, `cargo build --release` built the Windows side in 5.4s, `cargo test` passed its 3 tests, and cargo-msfs built the module from its folder in 6.6s, 61,157 bytes, with every export on the list p03 checks.
 - Building each side again after the other compiled no crate, so the two targets share one `target/` folder and one `Cargo.lock` without rebuilding each other.
-- The core's crate turned on uuid's `v4` for itself, and the module's imports held no WASI call for random numbers, so a feature one member turns on stayed out of the module's build.
+- The core's crate turned on uuid's `v4` for itself, and the module's build compiled no `getrandom`, which the Windows side's did (read in the build's `target/` folder), so a feature one member turns on stayed out of the module's build.
   The module's imports were p08's, which ran in the sim, plus the SimConnect and Vars API calls its own code made: `SimConnect_TransmitClientEvent`, `SimConnect_MapClientEventToSimEvent`, `fsVarsGetAVarId`, and `fsVarsAVarSet`.
-- The Windows program ran the module's host and the routine natively, fed the same slot bytes the module reads: the routine asked for the freeze in its first frame, and the host released it 1.1s after the last write.
+- The Windows program ran the module's host and the routine natively, fed the same slot bytes the module reads: the routine asked for the freeze in its first frame, and the host released it at the first frame sampled more than 1s after the last write, 1.1s after it.
 - cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so the module's cdylib can't also be the rlib the stand-in links; the host and the routines are crates of their own.
 - cargo-msfs hands the build its caller's environment after setting `RUSTFLAGS` (same function), so a `RUSTFLAGS` of ours, in CI or a shell, would replace its flags.
 

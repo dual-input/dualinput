@@ -919,37 +919,42 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** one repository holds Crosscheck's programs, our WASM module, our code in the sim, the backend, the Crosscheck IDE once it's built, and the profiles.
   Its folders are `engines/`, `host/`, `features/<name>/`, which holds every part a feature has, its crate in the core, its routines, its panel modules, and its sections of the two apps, `apps/`, with a folder for each program, `apps/wasm-module/` and `apps/sim-pages/` among them, `profiles/`, `backend/`, and `tools/`.
-  The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit and publishes them on this repository's GitHub Pages site, apart from Crosscheck's releases.
+  The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit, fails when a released level's schema or declarations differ from its release tag, and publishes them on this repository's GitHub Pages site, apart from Crosscheck's releases.
+  The repository holds no secret of its own: release and deploy secrets live in GitHub environments limited to `main` and the release tags, and rulesets keep those to the core team, before a profile's maintainer outside it gets the write access `CODEOWNERS` needs.
   This changes [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository), which gives the profiles a public repository of their own; [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)'s "one public repository" holds, since Crosscheck's is public from v1.
   Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-workspace)).
 - **Because:**
   - Deleting a feature is then deleting its folder, its modules in the message crate and the profile engine, and its line in each program's list, the code map's first test.
   - One pull request can change the profile engine, a new level's declarations, and the profiles that use it, and no package of our tools has to be published for another repository's CI (user, 2026-10-15).
-  - An author can clone the repository without file contents and check out `profiles/` alone, with git's partial clone and sparse checkout, or edit a profile on GitHub's site, and the repository is public from v1, as GitHub's Free plan needs for its Pages site (user, 2026-10-15; documented, [GitHub's plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans)).
-- **Leaves out:** which crates each tier folder holds, for node 5's map; and which build of the profile engine CI builds the bundles with, for node 6's design of the profile engine.
+  - An author can clone the repository without file contents and check out only `profiles/` and the root's files, with git's partial clone and sparse checkout, or edit a profile on GitHub's site, and the repository is public from v1, as GitHub Free for organizations needs for a Pages site (user, 2026-10-15; documented, [Creating a GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)).
+  - A released level frozen at its release tag lets CI check against the engine at the same commit, while a schema edited after its release would pass that check and fail the load in released cores (node 5.4's review, 2026-10-15).
+  - Anyone with write access can read every secret the repository holds (documented, [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)), while an environment gives its secrets only to jobs that use it, from the branches and tags it names (documented, [Managing environments for deployment](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)).
+- **Leaves out:** which crates each tier folder holds, for node 5's map; and whether a released level's builder output is held to its tag too, for node 6's design of the profile engine.
 
 ## One Cargo workspace and one npm lockfile build every target, from the SDK cargo-msfs installs
 
 - **Decided:** every Rust crate is a member of one Cargo workspace, our WASM module's cdylib among them, left out of `default-members` and built by cargo-msfs from its own folder; the module's host and the routines are crates of their own.
-  The bindings' build scripts read the SDK from the copy cargo-msfs installs, and bindgen generates them at each build, so nothing derived from the SDK's headers is in the repository; nothing sets `RUSTFLAGS`.
-  TypeScript has one `package.json` and one lockfile, with npm workspaces only in `apps/desktop/` and `backend/`, and a tsconfig for each target's `lib`; the messages' TypeScript types are committed, and CI fails on a difference when it generates them again.
+  The bindings' build scripts read the SDK from the copy cargo-msfs installs, and bindgen generates them at each build, telling Cargo every header it read, so nothing derived from the SDK's headers is in the repository; the build prints the SDK version it built against; nothing sets `RUSTFLAGS`.
+  TypeScript has one lockfile, with npm workspaces only in `apps/desktop/` and `backend/`, and a tsconfig for each target's `lib`; the messages' TypeScript types are generated into a folder emptied first, committed, and checked by CI, which fails on a difference when it generates them again.
   The one version lives in the root `Cargo.toml`'s `[workspace.package]`, and the build tools, TypeScript run by Node, build every target and lay out the Community package.
   Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#building-every-target)).
 - **Because:**
   - Our module built that way against the same message crate as a Windows program, in one `target/` folder and one `Cargo.lock`, and building either side after the other compiled no crate (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-our-wasm-module-builds-with-cargo-msfs-from-inside-the-cores-cargo-workspace-against-the-same-message-crate-and-neither-build-disturbs-the-others)).
   - cargo-msfs refuses a crate whose build outputs more than one file, and hands the build its caller's environment after setting `RUSTFLAGS` (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build).
-  - cargo-msfs's copy of the SDK holds SimConnect's header, import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15).
+  - cargo-msfs's copy of the SDK holds SimConnect's header, import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15), and it installs only the newest SDK (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`, `install_latest_sdk`).
+  - ts-rs removes no file it wrote before, so a deleted message's type would stay behind (read in ts-rs 12.0.1, in node 5.4's review).
   - esbuild, Vite, wrangler, and our packaging script are all Node's, as p08's build script is (user, 2026-10-15).
-- **Leaves out:** whether cargo-msfs can install a given SDK version, and whether Tauri 2 reads a version a crate inherits, for the build's design ([02-code-map](02-code-map.md#left-open)).
+- **Leaves out:** whether the one copy of the SDK serves the Windows side's bindings, which the first build of the sim's edge settles; what the build does with an SDK newer than a release's, and whether Tauri 2 reads a version a crate inherits, for the build's design ([02-code-map](02-code-map.md#left-open)).
 
 ## CI runs on Windows, and one script checks crates and TypeScript imports against the code map
 
-- **Decided:** every CI job runs on Windows runners.
-  The code map's third test is a script in `tools/` that reads each crate's tier from its `Cargo.toml` and its dependencies from `cargo metadata`, reads each TypeScript entry's imports from an esbuild metafile, and checks both against the code map's rules.
+- **Decided:** every CI job runs on Windows runners, and a pull request that changes only `profiles/` runs the profiles' job alone.
+  The code map's third test is a script in `tools/` that takes each crate's tier from its folder and reads the resolved graph from `cargo metadata`, crates from outside the workspace included, takes each TypeScript file's imports, type-only ones included, from the TypeScript compiler's own resolution, finds a feature naming another feature's module in the message crate or the profile engine by name, and checks all of it against the code map's rules.
   Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#ci)).
 - **Because:**
-  - Crosscheck runs only on Windows, so CI runs our code as a pilot's PC does, which matters since Windows' C runtime picks its floating-point math by CPU ([architecture log, 5.1.1][a511]), and builds bundles on the system the core builds a local one on, whose hash two testers compare ([01-format-and-delivery](../profiles/01-format-and-delivery.md#testing-an-edit)).
-  - Standard runners are free for a public repository (documented, [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)), as this one is when CI starts (user, 2026-10-15); Windows runners run slower, by reports up to about 2x (unverified).
+  - Crosscheck runs only on Windows, so CI runs our code on the system pilots run it on, and builds bundles on the system the core builds a local one on, whose hash two testers compare ([01-format-and-delivery](../profiles/01-format-and-delivery.md#testing-an-edit)).
+  - Standard runners are free for a public repository (documented, [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)), as this one is when CI starts (user, 2026-10-15); Windows runners build slower, a whole build nearly 70% slower in one report (documented, [rust-lang/rust#66192](https://github.com/rust-lang/rust/issues/66192)).
+  - esbuild drops a type-only import from its metafile (measured on our development machine, 2026-10-15, esbuild 0.28.2, in node 5.4's review).
   - cargo-deny bans a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), where the script holds each rule once, and one script covers both languages (user, 2026-10-15).
 - **Leaves out:** how long CI takes, which the build's design measures.
 

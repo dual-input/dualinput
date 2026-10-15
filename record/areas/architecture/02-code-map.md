@@ -3,7 +3,7 @@
 ```text
 Purpose:     The units of Crosscheck's code, which tier each is in, what each owns, its interface, and what it may depend on.
 Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.md, ../sync/04-order-and-recovery.md, ../session/01-roles-and-members.md, ../profiles/01-format-and-delivery.md, ../product/04-room-for-later.md
-Decides:     The tiers and the tests that keep each unit apart (node 5); how the host runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3).
+Decides:     The tiers and the tests that keep each unit apart (node 5); how the host runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3); where each unit lives, how one repository builds every target, and how CI checks the map (node 5.4).
 ```
 
 Crosscheck's code is a host, engines, and features.
@@ -25,7 +25,7 @@ Three tests stand in for a definition of clean, because a definition in prose in
 
 - Deleting a feature leaves everything else building and passing its tests: its crate, its one registration, its module in the message crate and its module in the profile engine (below), its routines in our WASM module with their line in the module's list, its files for the panel bridge ([work in the sim](#work-in-the-sim)), and its section in each app.
 - An engine builds and runs outside the core.
-- CI checks each crate's dependencies against the ones this map allows.
+- CI checks each crate's dependencies against the ones this map allows, and each TypeScript folder's imports too ([the map check](#the-map-check)).
 
 So far the map allows these: an engine depends on no host or feature crate; no feature depends on another feature's crate ([what a handler sees and does](#what-a-handler-sees-and-does)); the loop's crates depend on neither tokio nor any crate that does I/O ([one loop](#one-loop)); only the sim's edge calls `SimConnect.dll` ([the sim seam](#the-sim-seam)); and in our WASM module, only its edge calls the sim's APIs, and a feature's unit there shares only the message crate with the feature's crate in the core ([work in the sim](#work-in-the-sim)).
 
@@ -446,19 +446,132 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 - A panel that reloads mid-session gets its panel modules again on its new socket, and the core closes the old one.
 - A CommBus handler of ours that throws leaves the aircraft's handlers after it running.
 
+## The workspace
+
+One repository holds all of Crosscheck: its programs, our WASM module, our code in the sim, the backend, and the profiles (user, 2026-10-15).
+Its folders follow the [tiers](#tiers), and each feature keeps every part it has in one folder, so deleting a feature is deleting that folder, its modules in the message crate and the profile engine, and its line in each program's list.
+One Cargo workspace builds every Rust crate, the module's among them, one npm lockfile covers every TypeScript folder, and build tools in TypeScript, run by Node, build every target from the one copy of the SDK that cargo-msfs installs.
+CI runs on Windows, and one script checks both the crates and the TypeScript imports against this map.
+
+```text
+crosscheck/
+  Cargo.toml  Cargo.lock  package.json  package-lock.json  rust-toolchain.toml
+  engines/<name>/        messages, profile, sync, transport, recording, sim client,
+                         sim edge, stand-in sim, the SDK's bindings
+  host/<name>/           the core's host, our WASM module's host, the panel bridge
+  features/<name>/
+    core/                its crate in the core
+    routines/            its routines in our WASM module
+    panel/               its panel modules
+    desktop/  efb/       its sections of the desktop app and the EFB app
+  apps/
+    core/  watcher/  helper/   each program's main, and its list of features
+    desktop/             Tauri: its Rust side, and its pages built by Vite
+    wasm-module/         the cdylib cargo-msfs builds: the edge, and the routines' list
+    sim-pages/           the VCockpit.js override, the EFB app, the banner, the menu script
+    ide/                 the Crosscheck IDE, once it's built
+  profiles/              aircraft/ and modules/, as 01-format-and-delivery's repository
+  backend/               the Cloudflare Worker
+  tools/                 the build, the packaging, and the map check
+```
+
+A feature has only the parts it needs: pointer sync has a crate in the core, panel modules, and sections in the apps, and no routines.
+Which crates each tier folder holds is node 5's, once the systems are named.
+
+### Building every target
+
+| Target | Built by | From |
+| --- | --- | --- |
+| The core, the watcher, the helper, and the desktop app's Rust side | `cargo build`, for x86_64 | The workspace's root |
+| Our WASM module | cargo-msfs, for wasm32 | `apps/wasm-module/` |
+| Our code in the sim: the bridge, panel modules, and the sim's pages | esbuild at `es2017` ([decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md)), then the Coherent GT check ([decision 031](../../decisions/031-coherent-gt-check-tool.md)) | `tools/` |
+| The desktop app's pages | Vite, which Tauri runs | `apps/desktop/` |
+| The backend | wrangler | `backend/` |
+| The messages' TypeScript types | ts-rs, during `cargo test` of the message crate | `engines/messages/` |
+| The profiles' bundles | The profile engine's builder | `profiles/` |
+
+- **Our WASM module is a member of the workspace,** left out of `default-members` because its build script needs what cargo-msfs sets, and cargo-msfs builds it from its own folder.
+  p11 built it that way against the same message crate as the Windows side, sharing one `target/` folder and one `Cargo.lock`, and building either side after the other compiled no crate ([architecture log][p11]).
+  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `apps/wasm-module/` is a cdylib alone, and the module's host and the routines are crates of their own, which the stand-in sim links natively.
+  A feature turned on by a crate of the core's stayed out of the module's build ([architecture log][p11]).
+- **One copy of the SDK** serves both: cargo-msfs installs it in its data folder, `%APPDATA%\cargo-msfs\data\msfs2024`, and that copy holds SimConnect's header, its import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15).
+  The bindings' build scripts read the SDK from `MSFS_SDK`, which cargo-msfs sets for the module and which falls back to that folder for the Windows side, so `cargo build` needs no setting of its own.
+  bindgen generates the bindings at each build, through libclang, so no file derived from the SDK's headers is in the repository.
+- **`RUSTFLAGS` is never set,** in CI or in our tools, because cargo-msfs hands the build its caller's environment after setting `RUSTFLAGS` to its own link arguments (same function), and ours would replace them; Clippy's `-D warnings` goes on Clippy's own command line.
+- **The release profile is the root's,** with `lto` and `strip` on, as cargo-msfs's README asks, since a workspace reads profiles only from its root.
+- **The messages' TypeScript types** are generated into `engines/messages/`, committed, and imported from there by every TypeScript folder; CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
+  The derives that generate them built into the module in p11, so the message crate needs no second form for wasm32.
+- **TypeScript** has one `package.json` and one lockfile at the root, and npm workspaces only in `apps/desktop/` and `backend/`, whose tools each take a folder of their own: the Tauri CLI uses the folder it runs in when that holds a `package.json` (read in tauri-apps/tauri, its default branch on 2026-10-15, `crates/tauri-cli/src/helpers/app_paths.rs`).
+  A feature's TypeScript folders have no `package.json` of their own.
+  Each target's tsconfig sets its own `lib`: ES2017 for our code in the sim, as [decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md) sets it, the latest with the DOM for the desktop app's pages, and the Workers' types for the backend.
+- **One version** lives in the root `Cargo.toml`'s `[workspace.package]`, which every crate inherits, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks; Tauri takes the desktop app's from its crate when `tauri.conf.json` names none (documented, [Tauri's configuration](https://v2.tauri.app/reference/config/#version)), and the build writes it into the Community package's `manifest.json`, as p08's build script writes its manifest (read in `experiments/areas/architecture/flight/build.mjs`, `finish`).
+- **`tools/build.ts`** builds the Windows programs, generates the messages' types, builds the module, bundles our code in the sim, checks it, builds the desktop app, and lays out the Community package with its `layout.json` and `manifest.json`, as p08's build script does.
+
+### Profiles in this repository
+
+The profiles, plugins, and modules that [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository) puts in a public repository of their own live in `profiles/` here instead, with `aircraft/` where that repository has `profiles/` (user, 2026-10-15).
+
+- An import still names a module's path without `.yaml`, from `profiles/`, so `modules/gns-430` names `profiles/modules/gns-430.yaml`.
+- `CODEOWNERS` names each profile's maintainers by its path, as it would in a repository of their own.
+- CI checks and builds the profiles on every pull request that changes `profiles/` or the profile engine, against the engine at the same commit, and publishes them on this repository's GitHub Pages site on each merge that changes a bundle, apart from Crosscheck's releases.
+  A repository has one Pages site (documented, [About GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages)), which the profiles take, and a Free organization serves Pages only from a public repository (documented, [GitHub's plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans)), which this one is from v1 (user, 2026-10-15).
+- One pull request can change the profile engine, the declarations for a new level, and the profiles that use it, and no package of our tools has to be published for another repository's CI.
+- An author who wants only the profiles clones without file contents and checks out `profiles/` alone, as git offers, and the profiles' contributor documentation shows how:
+
+  ```bash
+  git clone --filter=blob:none --sparse https://github.com/<org>/crosscheck.git
+  ```
+
+  ```bash
+  git sparse-checkout set profiles
+  ```
+
+  An author can also edit a profile on GitHub's site, which forks the repository and opens the pull request, and tests in the sim from a local profiles folder either way ([testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit)).
+
+### CI
+
+CI runs on Windows runners only (user, 2026-10-15), because Crosscheck runs only on Windows:
+
+- Our code runs in CI as it runs on a pilot's PC, which matters since Windows' C runtime picks its floating-point math by CPU ([5.1.1]).
+- The core builds a local bundle with the same builder code CI uses, and equal hashes prove two testers run the same copy ([testing an edit](../profiles/01-format-and-delivery.md#testing-an-edit)), so CI builds bundles on the system the core does.
+- One toolchain setup serves every job: Visual Studio's linker, LLVM for bindgen, cargo-msfs and its SDK, and Node.
+
+Windows runners cost more where minutes are billed (documented, [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)), and standard runners are free for a public repository (same page), as this one is when CI starts.
+They also run slower: reports put builds on Windows at up to about 2x their time elsewhere (unverified; [rust-lang/rust#66192](https://github.com/rust-lang/rust/issues/66192) compared two local machines, and [runner-images#5166](https://github.com/actions/runner-images/issues/5166) a .NET project), and the build's design measures ours with `cargo build --timings`.
+
+Each pull request runs Rustfmt, Clippy, and the tests of the default members; builds the module and checks its exports against the list p03 checked; type-checks each tsconfig and runs the Coherent GT check on every file we ship into the sim; generates the messages' types and checks for a difference; runs the map check; and checks and builds the profiles.
+
+### The map check
+
+The code map's [third test](#tiers) is a script in `tools/` that CI and a developer both run.
+
+- Each crate names its tier in its `Cargo.toml`, under `[package.metadata.crosscheck]`, and the script reads every crate's dependencies within the workspace from `cargo metadata`.
+- A TypeScript folder's tier is its place in the tree, and the script runs esbuild over each TypeScript entry with its metafile on and nothing written, so the metafile lists every file the entry pulls in and what each imports.
+- It checks the rules [tiers](#tiers) gives, against both: an engine depends on no host or feature; no feature depends on another feature's code; the loop's crates depend on neither tokio nor any crate that does I/O; only the sim's edge depends on the bindings to `SimConnect.dll`; and a routine depends only on the message crate and our WASM module's host.
+
+cargo-deny can ban a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), so it would hold one entry per crate where the script holds the rules once; rust-analyzer's tidy check and Zed's conformity check test no layering (read in rust-analyzer at 442835b, `xtask/src/tidy.rs`, and Zed at 780ac03, `tooling/xtask/src/tasks/package_conformity.rs`).
+
+### Budgets for the workspace
+
+Each is a starting value, which the build's design measures:
+
+- A pull request's CI finishes within 20 minutes with a warm cache.
+- `cargo build` of the default members, after a change to one feature's crate, finishes within 1 minute on our development machine.
+
 ## Left open
 
 - Whether a recording replays on a PC with a different CPU: Windows' C runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" ([5.1.1]), while whether Rust's `f64` functions reach that math on our target is unverified; replaying a recording made on one PC on a PC with another CPU settles it.
 - What [a connection for each feature](#a-connection-for-each-feature-for-each-load) leaves unmeasured, and whether the edge's exception tags hold among writes each frame: [node 7](plan.md#7-testing)'s tests in the sim.
 - If traffic's copies, written each frame through the loop, move less smoothly than FS Copilot's ([cases for the bench](#cases-for-the-bench)), writes each frame move into the edge, which changes the seam: [node 7](plan.md#7-testing).
 - The stand-in sim's model, how it paces frames, how it plays our WASM module, and how a core on a stand-in reaches the sim's pages, which connect to the core beside this seam, so its pilot can reach Ready to fly and use Go to: [node 7](plan.md#7-testing).
-- Which crates hold the bindings, the sim client, and the edge, so that only the edge calls `SimConnect.dll`: [5.4](plan.md#54-the-workspace).
 - Which of the sim's APIs carries each want of the module's host, which operations the bridge's `ops` module offers plugins, and how a plugin's API names the panels they reach: [node 6](plan.md#6-systems).
-- Where routines and panel modules live, and whether the module and its routines build for wasm32 in the same Cargo workspace as the core, which p08 didn't try ([5.4](plan.md#54-the-workspace)).
 - Two cores in sessions on one sim would feed the same slots, which a developer running a development core beside the installed one doesn't do, so nothing guards against it (user, 2026-10-15).
 - Which host loads the EventBus bridge's listener into the EFB's document, which [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim) leaves open, for after v1.
-- Which crates hold the registry and the moments: [5.4](plan.md#54-the-workspace).
-- Which crate each unit is, and what each may depend on: node 5, once 5.4 answers.
+- Which crate each unit is, which tier folder holds it, and what each may depend on, the registry and the moments among them: node 5's map.
+- Which build of the profile engine CI builds the profiles' bundles with, since every bundle it publishes must load in released cores: the engine at the same commit, if the level rule covers the builder's output, or the latest released one: [node 6](plan.md#6-systems)'s design of the profile engine.
+- Whether cargo-msfs can install a given version of the SDK, since its install command fetches the newest (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, `install_latest_sdk`), so two builds a month apart could compile against two SDKs: the build's design in [node 6](plan.md#6-systems).
+- Whether Tauri 2 reads a version a crate inherits from the workspace, which the first build of the desktop app settles; if it doesn't, the build writes the version into `tauri.conf.json` too.
+- How long CI takes on Windows runners, and how much a warm cache saves: the build's design measures it with `cargo build --timings`.
 - Whether QuickJS-ng's hash seed, which it takes from the wall clock when it makes a context ([5.1.1]), changes anything a script sees: a replay run twice settles it.
 - Which of the host's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which this design gives no feature: [node 6](plan.md#6-systems).
 - How much of the queue a recording keeps, which the parked probe [p10](../../../experiments/areas/architecture/p10-recording.mjs) sizes, and the self-describing record a later version reads: [node 6](plan.md#6-systems).
@@ -466,3 +579,4 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 
 [flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [5.1.1]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
+[p11]: log.md#2026-10-15-our-wasm-module-builds-with-cargo-msfs-from-inside-the-cores-cargo-workspace-against-the-same-message-crate-and-neither-build-disturbs-the-others

@@ -915,6 +915,44 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - `Coherent._trigger` calls a name's handlers with no `try`, so a handler of ours that throws would stop the aircraft's own handlers after it (read in the sim's `Coherent._trigger`, [CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered); not run).
   - The core's CommBus announcement goes on with no session, so it can't renew a lock; and a page's socket stays open after the page reloads ([decision 010](../../decisions/010-clients-message-core-every-2s.md)), so without the replacement a reloaded panel's presses could go to its old socket (node 5.3's review, 2026-10-15).
 
+## One repository holds all of Crosscheck, its folders by tier, with each feature's parts in one folder
+
+- **Decided:** one repository holds Crosscheck's programs, our WASM module, our code in the sim, the backend, the Crosscheck IDE once it's built, and the profiles.
+  Its folders are `engines/`, `host/`, `features/<name>/`, which holds every part a feature has, its crate in the core, its routines, its panel modules, and its sections of the two apps, `apps/`, with a folder for each program, `apps/wasm-module/` and `apps/sim-pages/` among them, `profiles/`, `backend/`, and `tools/`.
+  The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit and publishes them on this repository's GitHub Pages site, apart from Crosscheck's releases.
+  This changes [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository), which gives the profiles a public repository of their own; [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)'s "one public repository" holds, since Crosscheck's is public from v1.
+  Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-workspace)).
+- **Because:**
+  - Deleting a feature is then deleting its folder, its modules in the message crate and the profile engine, and its line in each program's list, the code map's first test.
+  - One pull request can change the profile engine, a new level's declarations, and the profiles that use it, and no package of our tools has to be published for another repository's CI (user, 2026-10-15).
+  - An author can clone the repository without file contents and check out `profiles/` alone, with git's partial clone and sparse checkout, or edit a profile on GitHub's site, and the repository is public from v1, as GitHub's Free plan needs for its Pages site (user, 2026-10-15; documented, [GitHub's plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans)).
+- **Leaves out:** which crates each tier folder holds, for node 5's map; and which build of the profile engine CI builds the bundles with, for node 6's design of the profile engine.
+
+## One Cargo workspace and one npm lockfile build every target, from the SDK cargo-msfs installs
+
+- **Decided:** every Rust crate is a member of one Cargo workspace, our WASM module's cdylib among them, left out of `default-members` and built by cargo-msfs from its own folder; the module's host and the routines are crates of their own.
+  The bindings' build scripts read the SDK from the copy cargo-msfs installs, and bindgen generates them at each build, so nothing derived from the SDK's headers is in the repository; nothing sets `RUSTFLAGS`.
+  TypeScript has one `package.json` and one lockfile, with npm workspaces only in `apps/desktop/` and `backend/`, and a tsconfig for each target's `lib`; the messages' TypeScript types are committed, and CI fails on a difference when it generates them again.
+  The one version lives in the root `Cargo.toml`'s `[workspace.package]`, and the build tools, TypeScript run by Node, build every target and lay out the Community package.
+  Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#building-every-target)).
+- **Because:**
+  - Our module built that way against the same message crate as a Windows program, in one `target/` folder and one `Cargo.lock`, and building either side after the other compiled no crate (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-our-wasm-module-builds-with-cargo-msfs-from-inside-the-cores-cargo-workspace-against-the-same-message-crate-and-neither-build-disturbs-the-others)).
+  - cargo-msfs refuses a crate whose build outputs more than one file, and hands the build its caller's environment after setting `RUSTFLAGS` (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build).
+  - cargo-msfs's copy of the SDK holds SimConnect's header, import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15).
+  - esbuild, Vite, wrangler, and our packaging script are all Node's, as p08's build script is (user, 2026-10-15).
+- **Leaves out:** whether cargo-msfs can install a given SDK version, and whether Tauri 2 reads a version a crate inherits, for the build's design ([02-code-map](02-code-map.md#left-open)).
+
+## CI runs on Windows, and one script checks crates and TypeScript imports against the code map
+
+- **Decided:** every CI job runs on Windows runners.
+  The code map's third test is a script in `tools/` that reads each crate's tier from its `Cargo.toml` and its dependencies from `cargo metadata`, reads each TypeScript entry's imports from an esbuild metafile, and checks both against the code map's rules.
+  Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#ci)).
+- **Because:**
+  - Crosscheck runs only on Windows, so CI runs our code as a pilot's PC does, which matters since Windows' C runtime picks its floating-point math by CPU ([architecture log, 5.1.1][a511]), and builds bundles on the system the core builds a local one on, whose hash two testers compare ([01-format-and-delivery](../profiles/01-format-and-delivery.md#testing-an-edit)).
+  - Standard runners are free for a public repository (documented, [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)), as this one is when CI starts (user, 2026-10-15); Windows runners run slower, by reports up to about 2x (unverified).
+  - cargo-deny bans a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), where the script holds each rule once, and one script covers both languages (user, 2026-10-15).
+- **Leaves out:** how long CI takes, which the build's design measures.
+
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast
 [n22]: ../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does

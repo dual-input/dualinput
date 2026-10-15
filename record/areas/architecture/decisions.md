@@ -884,31 +884,36 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#work-in-the-sim)).
 - **Because:**
   - A following aircraft's smoothing and a figure's place in the cockpit are each one feature's logic, so generic mechanisms driven from the core would put that logic in the host, where deleting the feature would leave it behind (user, 2026-10-15).
-  - A syntax error in a panel file takes out the whole file ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)), so a file for each panel module keeps one module's mistake from reaching another.
+  - A syntax error in a panel file takes out the whole file ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)), so a file for each panel module keeps one module's mistake out of the others' files; whether a file that fails to parse stops the bridge's later loads is unverified, and a bench case settles it.
 - **Leaves out:** which of the sim's APIs carries each want, and which operations the bridge's `ops` module offers plugins, for [node 6](plan.md#6-systems); where routines and panel modules live, and whether the module builds in the core's Cargo workspace, for [5.4](plan.md#54-the-workspace).
 
 ## A routine runs while its feature feeds it, and the module's host undoes only the freeze
 
 - **Decided:** a routine runs while its feature writes its slot.
-  The sim service writes each feed on the feature's own connection and writes the last one again every 200ms, and the module's host makes a routine new at its first feed and drops it at the feature's end mark or 1s after the last write.
-  Each frame a routine asks for what it wants, and the host freezes the aircraft while any routine asks, and unfreezes it, if the host froze it, once none does, so no routine keeps a flag the host must clear.
-  The host ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s outside a load, the core unfreezes the aircraft through its own connection.
+  The sim service writes each feed on the feature's own connection and writes the last one again every 200ms until the feature feeds another or ends the routine, and the module's host makes a routine new at its first feed and drops it at the feature's end mark or 1s after the last write.
+  Preflight's hold and the plugins' mechanisms are the host's own routines, fed on the host's connection.
+  Each frame a routine asks for what it wants, and the host freezes the aircraft while any routine asks, and unfreezes it, if the host froze it, once none does, so no routine keeps a flag the host must clear; following asks for the freeze in every frame it runs, with a pose to write or not.
+  The host ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, the core unfreezes the aircraft through its own connection.
   The module never learns the session's state, which changes [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md), whose control slot carries it, once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#routines-in-our-wasm-module)).
 - **Because:**
-  - Taking control, unloading, and the core going quiet become one path for a routine: the writes stop (user, 2026-10-15).
-  - FS Copilot's module, on its timeout, sends the unfreeze whoever froze the aircraft and leaves its own `frz_by_me` set, so it goes on writing the last pose into the aircraft it unfroze (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `Update_StandAlone` and `interpolate`).
-  - A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), which leaves nothing in the sim to unfreeze the aircraft.
-- **Leaves out:** two cores in sessions on one sim, which would write the same slots, and which a developer doesn't run (user, 2026-10-15); whether the freeze events the core sends from outside the sim take effect, for [node 7](plan.md#7-testing)'s tests in the sim.
+  - A routine's life is its feeding: it starts at the first write, and ends at its feature's end mark, or 1s after the last write when the core is gone, so nothing in the module needs the session's state (user, 2026-10-15).
+  - FS Copilot's module, on its timeout, sends the unfreeze whoever froze the aircraft and leaves its own `frz_by_me` set, so `interpolate` stays armed and writes whatever pose its buffer returns into the aircraft it unfroze (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `Update_StandAlone` and `interpolate`, and `stream_buffer.h`; not run).
+  - A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), which would leave nothing in the sim to unfreeze the aircraft; whether a Rust panic puts our module there is unverified.
+  - A client outside the sim released a frozen Baron by sending the three freeze events with 0 (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
+- **Leaves out:** two cores in sessions on one sim, which would write the same slots, and which a developer doesn't run (user, 2026-10-15); whether the sim runs a standalone module's update during a pause, for [node 7](plan.md#7-testing)'s tests in the sim.
 
 ## The panel bridge owns only what can block the pilot's input
 
 - **Decided:** a panel module adds its own listeners, removes them in its own `stop`, and wraps none of the sim's APIs.
-  The bridge owns the lock, a visible overlay held only while the bridge hears from the core and turned into a warning that blocks nothing 8s after the core's last word; any API a later feature has wrapped, suppressed for one dispatch at a time, with its original at a fixed global and a 120s deadman; each CommBus handler of ours, run in a `try`; and `window.CROSSCHECK_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module.
+  The bridge owns the locks, the overlays pointer sync asks for, a visible one over a display locked through an outage and an unseen one while another pilot's gesture replays, with a hit test that looks past them; a lock holds only while the core renews it over the panel's socket every 2s, turns into a warning that blocks nothing 8s to 10s after the last renewal, and drops at once when the panel module that asked for it stops or the socket closes.
+  It also owns any API a later feature has wrapped, suppressed for one dispatch at a time, with its original at a fixed global and a 120s deadman; each CommBus handler of ours, run in a `try`; and `window.CROSSCHECK_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module.
+  A panel's first message naming the instruments another socket holds replaces that socket, which the core closes.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#what-the-bridge-owns)).
 - **Because:**
   - A listener a buggy `stop` leaves behind reads clicks and blocks none, while a wrapper left behind took every click on an A350 display, with the only handle to the original deleted ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
-  - `Coherent._trigger` calls a name's handlers with no `try`, so a handler of ours that throws stops the aircraft's own handlers after it ([CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered)).
+  - `Coherent._trigger` calls a name's handlers with no `try`, so a handler of ours that throws would stop the aircraft's own handlers after it (read in the sim's `Coherent._trigger`, [CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered); not run).
+  - The core's CommBus announcement goes on with no session, so it can't renew a lock; and a page's socket stays open after the page reloads ([decision 010](../../decisions/010-clients-message-core-every-2s.md)), so without the replacement a reloaded panel's presses could go to its old socket (node 5.3's review, 2026-10-15).
 
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast

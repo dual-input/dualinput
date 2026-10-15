@@ -3,6 +3,54 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-15: Every sim crash our aircraft harness saw closed SimConnect's connection with no quit message before it
+
+**Asked:** what reaches a SimConnect client when the sim crashes, so the core can tell a crash from the pilot closing the sim, for node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)?
+
+**Expected:** a lost connection with no quit message, since a crashed process sends nothing.
+
+**Found:** the aircraft harness ([aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)) recorded the first of node-simconnect's `quit`, `close`, and `error` as the reason a connection ended, "the sim quit" for `quit` (read in `experiments/areas/aircraft/lib/sim.mjs`, `lost`).
+The report of each of the 5 runs in which the sim crashed, each crash with exception `0xc0000005` in the Windows Application log ([crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv)), reads "The connection was lost: the SimConnect connection closed." (read in the five `run-*-2026-10-01-*.txt` reports in `experiments/areas/aircraft/results/`).
+So in each crash, the pipe closed with no quit message before it.
+
+No run of ours has recorded a clean close, which SimConnect's `SIMCONNECT_RECV_ID_QUIT` announces (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`), and neither fsc-editor nor FS Copilot tells the two apart (read in fsc-editor, `src/main/sim/session.ts`, `ready` and `dropped`).
+
+**Changed:** the core takes a sim whose process exits with no quit message before it as crashed.
+
+**Affects:** [03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md#a-crash-and-a-close).
+
+**Evidence:** the five run reports and `crashes.tsv` named above, read on 2026-10-15.
+
+## 2026-10-15: Two of the three `AircraftLoaded` our client heard around a flight load came in the main menu
+
+**Asked:** which of the sim's signals mark a load, so sim awareness raises one moment for it, for node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)?
+The [architecture log][flight] reports `AircraftLoaded` three times through the load, which the code map read as three for one load.
+
+**Expected:** three `AircraftLoaded` inside the load.
+
+**Found:** p08's client stamped each signal (read in `experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.ndjson`; seconds from the probe's start):
+
+| s | Signal |
+| --- | --- |
+| 109.9 | `SimConnect_Open` returns `S_OK`, and the client subscribes |
+| 163.4 | `TELEPORT_START`, `TELEPORT_DONE` |
+| 171.8 | `AircraftLoaded`, the PA-24's preset path, about when the main menu's PA-24 loaded, 16s after the sim's open reply |
+| 199.6 | `TELEPORT_START`, `TELEPORT_DONE` |
+| 204.5 | `AircraftLoaded`, the same path |
+| 220.3 | `FlightLoaded`, `CustomFlight.FLT` |
+| 220.4 | `FLT_LOAD` and `FLT_LOADED` for `apron.flt`, then for `CustomFlight.FLT`, then `TELEPORT_START`, `TELEPORT_DONE` |
+| 227.1 | `AircraftLoaded`, the same path |
+| 236.6 | `FLIGHT_START`, `FLT_LOAD` and `FLT_LOADED` for `apron.flt`, `RTC_START` |
+| 294.3 | `RTC_END`, as the pilot pressed Ready to fly |
+
+So two `AircraftLoaded` came in the main menu, 48s and 16s before the flight's `FlightLoaded`, and one inside the load, while `FLT_LOAD` came twice inside the load.
+
+**Changed:** sim awareness starts a load at `FlightLoaded` or `FLT_LOAD`, takes the aircraft from the `AircraftLoaded` heard while loading, and ignores one heard anywhere else.
+
+**Affects:** [03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md#sim-awareness); the code map's [cases for the bench](../architecture/02-code-map.md#cases-for-the-bench), whose first case reads the run as three in one load.
+
+**Evidence:** the `.ndjson` named above, read on 2026-10-15.
+
 ## 2026-10-15: The sim's script loader holds every later script behind one that never loads, while it loads one at a time
 
 **Asked:** if a file of ours that `VCockpit.js` loads through the sim's `Include.addImports`, as FS Copilot's copy loads its own, never loads, does the cockpit still load as if Crosscheck weren't installed, for node 6.2 of the [architecture plan](../architecture/plan.md#62-clients-and-the-panel-bridge)?
@@ -83,4 +131,5 @@ What we haven't run: timers with the sim running and the PC busy, which [node 7]
 
 **Evidence:** `experiments/areas/core/results/p01-edge-2026-10-15-17-43-10.txt`, `-17-43-58.txt`, `-17-59-07.txt`, and `-18-03-34.txt`, each with the timers and the imports; the last two with the FMA3 switch, and the last with the C runtime linked statically too.
 
+[flight]: ../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [a511]: ../architecture/log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc

@@ -67,9 +67,10 @@ A prototype that works reaches the product through a plan stage that rebuilds it
 An experiment needs no plan and no decision on language: run it, and write down only what's worth keeping.
 Probes are Node `.mjs` files and panel `.js` files.
 
-**Prefix every name the sim shares with `CROSSCHECK_`.**
+**Name everything the sim shares `CROSSCHECK_<KIND>_<NAME>`.**
 That covers panel globals, CommBus events, client data areas, and `L:` variables.
 Every package in the Community folder shares these namespaces, and FS Copilot's `FSC_` and fsc-editor's `FSCEDITOR_` are already in use there.
+The kind is what owns the name, from the list in [02-code-map](record/areas/architecture/02-code-map.md#names-the-sim-shares), or a probe's ID such as `P08`, so a reader can tell a routine's slot from the module's own, and names of two kinds never collide.
 
 **Never delete as a side effect.**
 Deleting a file, or running `git checkout`, `restore`, `stash`, or `reset` on a path, is its own proposal: ask first, and say why.

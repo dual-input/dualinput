@@ -15,6 +15,17 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The map check also searches `features/` for `impl Moment` ([the map check](#the-map-check)), and a unit registers through `r.unit::<S>(name)`, where the sketch in [what a feature registers](#what-a-feature-registers) has `platform.feature`.
 >
 > Since 2026-10-15, [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes) has the clients crate raise a client joining or leaving, a panel's socket replaced, and a setting changed, where [the platform](#the-platform)'s table gives it no moment.
+>
+> Since 2026-10-15, [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) changes this document in six places:
+>
+> - The sim's process, found with its ID and creation time or exited with its exit code, is a fourth kind of input through [the sim seam](#the-sim-seam), which names three.
+> - Sim awareness is an engine of its own, `sim-awareness`, beside `sim-client` in [engines](#engines) and in the sim seam's row of [systems](#systems), which [what the platform keeps](#what-the-platform-keeps) leaves open; the sim service raises `SimChanged` for each change of the sim's state, which covers the load [the platform](#the-platform)'s table has it raise.
+> - Of the three `AircraftLoaded` that the first of [cases for the bench](#cases-for-the-bench) counts in one load, two came in the main menu ([core log](../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu)).
+> - A routine's slot is `CROSSCHECK_ROUTINE_` and its ID, where [routines in our WASM module](#routines-in-our-wasm-module) has `CROSSCHECK_FOLLOW`; its header also carries a hash of the slots' layouts; and the module leaves its version and counter in `CROSSCHECK_MODULE_STATUS`.
+> - The core unfreezes the aircraft when the module's counter stops only while a routine of ours is live, where [when the module stops](#when-the-module-stops) takes any freeze in a session to be ours.
+> - The bridge's globals are `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `window.CROSSCHECK_BRIDGE_UNLOCK()`, where [modules in the panel bridge](#modules-in-the-panel-bridge) and [what the bridge owns](#what-the-bridge-owns) have `CROSSCHECK_BRIDGE` and `window.CROSSCHECK_UNLOCK()`, by [names the sim shares](#names-the-sim-shares).
+>
+> It also settles [left open](#left-open)'s item on which of the sim's APIs carries each want of the routine host.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
@@ -598,6 +609,22 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 - With the core's socket closed, every lock drops and every panel module stops at once.
 - A panel that reloads mid-session gets its panel modules again on its new socket, and the core closes the old one.
 - A CommBus handler of ours that throws leaves the aircraft's handlers after it running.
+
+## Names the sim shares
+
+Every name of ours in a namespace the sim shares with other packages, a panel's globals, the CommBus, client data areas, SimObject titles, and `L:` and `Z:` variables, is `CROSSCHECK_`, a kind, `_`, and a name, so a reader can tell what owns it at a glance, and names of two kinds never collide (user, 2026-10-15).
+Without the kind, a routine whose ID was `MODULE` would take the client data area of the module's own status.
+A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO` ([architecture log][flight]).
+
+| Kind | Where the sim shares it | Owner | Names |
+| --- | --- | --- | --- |
+| `ROUTINE` | Client data areas | routine-host | One for each routine, by its ID: `CROSSCHECK_ROUTINE_HOLD`, `CROSSCHECK_ROUTINE_MECHANISMS`, `CROSSCHECK_ROUTINE_FOLLOW`, and `CROSSCHECK_ROUTINE_FIGURE` |
+| `MODULE` | Client data areas | routine-host | `CROSSCHECK_MODULE_STATUS` |
+| `CORE` | The CommBus | sim-service | `CROSSCHECK_CORE_ANNOUNCE` |
+| `BRIDGE` | A cockpit panel's `window` | panel-bridge | `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `CROSSCHECK_BRIDGE_UNLOCK` |
+
+A unit that needs a name of a new kind adds the kind to this table.
+The figure's SimObject title, `CROSSCHECK_Figure` ([avatars' tentative decisions](../avatars/decisions.md)), is [6.13](plan.md#613-avatars)'s to rename.
 
 ## The workspace
 

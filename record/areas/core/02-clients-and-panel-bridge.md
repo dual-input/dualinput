@@ -6,6 +6,9 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notices and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; the transport for ops; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
 ```
 
+> **Note**
+> Since 2026-10-15, every name the sim shares is `CROSSCHECK_<KIND>_<NAME>` ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)), so the core's announcement is `CROSSCHECK_CORE_ANNOUNCE`, where [page-client](#page-client) has `CROSSCHECK_CORE`, and the bridge's globals are `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `window.CROSSCHECK_BRIDGE_UNLOCK()`, where [the units](#the-units) and [our VCockpit.js](#our-vcockpitjs) have `CROSSCHECK_BRIDGE`, `CROSSCHECK_PENDING`, and `window.CROSSCHECK_UNLOCK()` ([03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md)).
+
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends something at least every 2s, while only the core closes a socket that goes quiet.
 A unit reaches the clients through slices of state, which the `clients` crate sends on a timer to the clients that show them, through commands the clients send it, and through messages of its own to a client by name.

@@ -665,6 +665,7 @@ It settles which pilot's bundle a session pins, and where the core reads a strea
 Its answer goes in `record/areas/session/02-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, the session crate decides when the core exits, by the spine's rule, and runs a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, as a Leave before the exit, within 3s of Windows' `WM_QUERYENDSESSION`; it registers the source through which the core hears Windows end the session ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
+Raised elsewhere: by 6.3, the session crate calls `sim_service::announce(cx, session)` as a session starts or ends; it takes the run of the sim for the session file, and whether the last run ended as a quit or a crash for the crew's notice, from sim awareness's state; and the menu script reports its master page and page to the sim service for sim awareness ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
 
 ## 6.8 Profiles
 
@@ -685,6 +686,7 @@ It settles whether the profile engine fires `H:` events through SimConnect's cli
 Its answer goes in `record/areas/sync/05-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.2, which panel listens for `H:` events, and how, since [decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md) keeps one panel for them, as a panel module whose rule picks that panel ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#cockpit-panels-and-their-modules)).
+Raised elsewhere: by 6.3, SDK 1.7.3 has `fsEventsRegisterHEvent`, which takes an `H:` event's name, and `fsEventsHEventCall`, so our module can fire an `H:` event by name without calculator code, for the item on how the profile engine fires them ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis)).
 
 ## 6.10 Flight-model sync
 
@@ -720,6 +722,7 @@ It's the one feature that reads an aircraft's own models, so its design also des
 It reads avatars' tentative decisions and the [avatars log](../avatars/log.md), 03-v1-scope's [avatar sync](../product/03-v1-scope.md#avatar-sync), 01-format-and-delivery's [seats](../profiles/01-format-and-delivery.md#seats), 6.3's, 6.5's, 6.8's, and 6.9's answers, and [decision 004](../../decisions/004-core-works-out-figures-hand.md).
 Its answer goes in `record/areas/avatars/01-avatars.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.3, the figure's SimObject title, `CROSSCHECK_Figure`, takes a kind, as [names the sim shares](02-code-map.md#names-the-sim-shares) requires.
 
 ## 6.14 Traffic and ATC
 
@@ -750,6 +753,7 @@ Its answer goes in `record/areas/interface/01-apps.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosscheck, which the core runs as a Leave before it exits ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 Raised elsewhere: by 6.2, where each notice shows, by its level; which slices each app's frame shows; what the apps tell the pilot after a `bye` and after a socket that closed without one; whether a component whose version differs counts as trouble; and the WebSocket client in the desktop app's Rust side, which sends no `Origin` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
+Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, differs, or stopped, and which of sim awareness's state the apps show ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
 
 ## 6.17 Installing and updating
 
@@ -760,6 +764,7 @@ Its answer goes in `record/areas/install/01-installing-and-updating.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5, where the installer lives, and whether it's a program of ours ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 6.1, the watcher starts the core again only when it exits with a code other than 0, since every deliberate exit returns 0 and a panic's abort never does; and how the watcher's tray asks the core to quit ([01-loop-and-edge](../core/01-loop-and-edge.md#exiting)).
+Raised elsewhere: by 6.3, the core finds the sim's process by the name `FlightSimulator2024.exe`, which our Steam edition's runs gave, while the Microsoft Store edition's name is unverified, as it is for the watcher noticing the sim's start ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#left-open)).
 
 ## 6.18 The build
 

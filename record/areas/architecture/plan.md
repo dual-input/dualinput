@@ -611,6 +611,7 @@ It reads 6.1's answer, 02-code-map's [modules in the panel bridge](02-code-map.m
 It settles the spine's open items on the core's WebSocket library, on a component whose version or hash differs from the core's, and on how a client beyond the PC is let in ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/core/02-clients-and-panel-bridge.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-15.
 
 ## 6.3 The sim seam and our WASM module
 

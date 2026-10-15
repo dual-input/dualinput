@@ -601,6 +601,7 @@ It reads 02-code-map's [platform's interface](02-code-map.md#the-platforms-inter
 It settles whether a recording replays on a PC with another CPU ([02-code-map](02-code-map.md#left-open)).
 Its answer goes in `record/areas/core/01-loop-and-edge.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-15.
 
 ## 6.2 Clients and the panel bridge
 

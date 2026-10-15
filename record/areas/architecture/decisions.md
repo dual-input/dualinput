@@ -783,7 +783,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
     fsc-editor's module keeps its wire format in TypeScript and in C++, and "nothing but `src/main/sim/link.test.ts` notices when the two" drift (read in fsc-editor, `link/README.md`).
     An engine that the core and the IDE both link leaves nothing to copy.
   - The core, CI, and the IDE already run one checker for profiles ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), and CI and the IDE check a profile without the core.
-  - The tier is the platform, not the host, because "the host" already names the pilot who starts a session, as "the traffic host" and "the ATC host" name pilots ([03-v1-scope](../product/03-v1-scope.md#take-control-key)), and because a newcomer opening the repository reads `platform/` as what the features are built on (user, 2026-10-15).
+  - The tier is the platform, not the host, because "the host" already names the pilot who starts a session ([invite code](../product/03-v1-scope.md#invite-code)), as "the traffic host" and "the ATC host" name pilots ([traffic sync](../product/03-v1-scope.md#traffic-sync), [hearing ATC](../product/03-v1-scope.md#hearing-atc)), and because a newcomer opening the repository reads `platform/` as what the features are built on (user, 2026-10-15).
 - **Leaves out:** the units themselves, which [the units](02-code-map.md#the-units) names.
 
 ## The core runs as one loop that takes every input, stamped, from one recorded queue
@@ -892,7 +892,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** a routine runs from its feature's first feed until the feature's end mark, or until 1s passes with no write to its slot.
   The sim service writes each feed on the feature's own connection and writes the last one again every 200ms until the feature feeds another or ends the routine, and the routine host makes a routine new at its first feed.
-  Preflight's hold and the plugins' mechanisms are the platform's own routines, fed on its connection.
+  Preflight's hold and the plugins' mechanisms are the platform's own routines, which live in the routine host and are fed on the platform's connection.
   Each frame a routine asks for what it wants, and the routine host freezes the aircraft while any routine asks, and unfreezes it, if it froze it, once none does, so no routine keeps a flag the routine host must clear; following asks for the freeze in every frame it runs, with a pose to write or not.
   The platform ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, the core unfreezes the aircraft through its own connection.
   The module never learns the session's state, so routines' slots replace [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md)'s control slot, which carries that state, and a numbered decision makes the change once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
@@ -961,36 +961,39 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - cargo-deny bans a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), where the script holds each rule once, and one script covers both languages (user, 2026-10-15).
 - **Leaves out:** how long CI takes, which the build's design measures.
 
-## The platform is a crate for each of its systems over a kernel that names none of them, and each moment lives in the crate that raises it
+## The platform in the core is a kernel and a crate for each of its services, which the kernel never names, and each moment lives in the crate that raises it
 
-- **Decided:** the platform in the core is a crate for each of its systems, the kernel, sim-service, network, clients, helper, recording, session, profile-loader, cockpit-stream, and plugins, each depending only on the crates below it, and each registering with the kernel through the same `register` a feature uses, before the features.
+- **Decided:** the platform in the core is the kernel and a crate for each of its services, as [the units](02-code-map.md#the-units) lists them, each depending only on the lines below its own in the code map's picture, and each registering with the kernel through the same `register` a feature uses, before the features.
   The kernel holds the registry, moments, requests and their guards, the outbox, timers, jobs, and the store of each unit's state, and each crate adds the hooks it runs, so the kernel names no service.
   Each moment's type lives in the crate that raises it, and each unit's state is written by its own handlers alone.
-  Outside the core, the platform is the routine host, the panel bridge, and the shells of the EFB app and the desktop app, so a feature's section imports its app's shell and never an app.
-  The engines are the message crate, simconnect-types, the sandbox, the profile engine, the recording format, aircraft-model, the sim client, the sync engine, the transport, the sim edge, the stand-in sim, and core-client; each crate in `apps/` is named `crosscheck-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
-  [The units](02-code-map.md#the-units) names every unit, what it may depend on, and the systems [node 6](plan.md#6-systems) designs.
+  Outside the core, the platform is the routine host, the panel bridge, and the shells of the EFB app and the desktop app.
+  The routine host also holds the platform's own routines, `Hold` and `Mechanisms`.
+  A feature's section imports its app's shell and never an app, and neither half of the platform depends on the other.
+  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `apps/` is named `crosscheck-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
+  [The units](02-code-map.md#the-units) names every unit, what it uses, and the systems [node 6](plan.md#6-systems) designs.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-units)).
 - **Because:**
   - Node 6 designs each system as whole units, the map check holds the platform's own layering, and a change to one crate rebuilds only the crates that depend on it (user, 2026-10-15).
   - A moment's type in the crate that raises it puts it in a crate the handling feature already reads, and keeps a list of moments out of the kernel.
   - A section that imported from its app would tie the app and the feature both ways, while with the shell in the platform, `apps/` depends on the features and nothing depends on `apps/`.
   - Bug reports as a feature would need a part in `backend/` for their routes, a folder no feature has (user, 2026-10-15).
-  - Cargo refuses a workspace with two crates of one name, which the platform's `helper` and the helper's program would be, and names a program after its crate (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)).
+  - The module can't link a crate in the core, so the routines the platform feeds from the core live in the routine host (node 5's review, 2026-10-15).
+  - Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), and refuses a workspace with two crates of one name (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)).
 - **Leaves out:** where the installer lives, and where the relays' configuration lives, for node 6; and where the list of routines lives if node 7's bench runs them natively.
 
 ## Every crate outside apps/, tools/, the transport, and the sim edge keeps the loop's rules, and none draws a random number
 
-- **Decided:** the loop's crates are a rule on folders: every crate outside `apps/`, `tools/`, the transport, and the sim edge reads no clock, draws no random number, does no I/O, starts no thread, and iterates no `HashMap`, the routine host and the profile engine among them, though neither runs on the loop.
-  A random ID the core draws, such as the session's, comes from the edge with the input that asks for it.
-  The map check fails a loop crate that reaches, through any crate, one on its list of crates that do I/O: tokio and the other runtimes, the networking crates iroh among them, `windows`, `windows-sys`, and `winapi`, `getrandom`, the crates for files and the system, logging's output, Tauri and the audio crates, and our transport and sim edge; it reads normal dependencies only, and a crate it allows anyway names its reason in the script.
-  The bindings crate holds SimConnect's types and constants, and the sim edge alone declares SimConnect's functions.
+- **Decided:** the loop's crates are a rule on folders: every crate outside `apps/`, `tools/`, the transport, and the sim edge keeps [the loop's rules](02-code-map.md#one-loop), which forbid drawing a random number as well as reading a clock, the routine host among them though it never runs on the loop, and the stand-in sim until node 7 decides otherwise.
+  A random ID the core draws, such as the session's, comes from the core's edge with the input that asks for it, and the core's edge hands the sandbox the check behind QuickJS-ng's 100ms limit, so no loop crate reads the clock itself.
+  The map check fails a loop crate that reaches, through any crate, one on [its list of crates that do I/O](02-code-map.md#the-map-check), which holds `getrandom` and the Windows crates beside tokio and the networking crates; it reads normal dependencies only, and a listed crate it lets a loop crate reach anyway carries its reason in the script.
+  Only the two edges, the sim edge and our WASM module's, declare foreign functions, and the map check searches our crates' source for any other; the bindings crate holds SimConnect's types and constants.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-map-check)).
 - **Because:**
   - A replay that drew its own random IDs would name the session differently from the run it replays, and [decision 022](../../decisions/022-random-uuids-as-text.md) has the host's core draw the session's ID (node 5's map, 2026-10-15).
   - A rule on folders needs no edit when a feature is added.
-  - p10's loop, with rquickjs and zstd, has 11 other crates among its normal dependencies, none on the list (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)), so the list fits the heaviest loop crate we've built.
-  - With SimConnect's functions declared in the edge alone, the crate graph shows which crate can call `SimConnect.dll`, which one bindings crate holding both would hide.
-- **Leaves out:** an outside crate that calls std's file, socket, or clock functions itself, which passes the check and which we review as each dependency is added; and whether the stand-in sim keeps the loop's rules, for [node 7](plan.md#7-testing).
+  - p10's loop, with rquickjs and zstd, has 11 other crates among its normal dependencies, none on the list (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)), while p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off.
+  - With SimConnect's functions declared in the edges alone, the crate graph shows which crate can call `SimConnect.dll`, which one bindings crate holding both would hide, and the source search catches a crate that declares its own.
+- **Leaves out:** an outside crate that calls std's file, socket, or clock functions itself, which passes the check and which we review as each dependency is added; and whether [node 7](plan.md#7-testing) frees the stand-in sim from the loop's rules.
 
 [a511]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [n21]: ../network/log.md#2026-10-10-iroh-13-leads-for-carrying-a-session-between-home-pcs-provided-its-tcp-relays-stalls-dont-show-and-its-switch-to-the-relay-can-be-made-fast

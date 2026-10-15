@@ -5,7 +5,7 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
 
 ## 2026-10-15: Cargo refuses two crates of one name in a workspace, and p10's loop reaches no crate that does I/O
 
-**Asked:** can the platform's `helper` crate and the helper's program share a name in one workspace, and does the heaviest loop crate we've built reach any crate on the map check's list of crates that do I/O (node 5's map)?
+**Asked:** can the platform's `helper` crate and the helper's program share a name in one workspace, and does p10's loop, which embeds QuickJS-ng, reach any crate on the map check's list of crates that do I/O (node 5's map)?
 
 **Expected:** no to the first; and no to the second, since rquickjs and zstd build their C code themselves.
 

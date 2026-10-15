@@ -788,7 +788,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The core runs as one loop that takes every input, stamped, from one recorded queue
 
-- **Decided:** one thread owns the platform's services, every feature's state, and the QuickJS-ng runtimes, and handles one input at a time from one queue, which edge tasks for SimConnect, tokio's sockets and timers, the helper's pipe, and a pool for slow work fill, each stamping an input as it pushes it.
+- **Decided:** one thread owns the platform's services, every feature's state, and the QuickJS-ng runtimes, and handles one input at a time from one queue, which edge tasks for SimConnect, tokio's sockets and timers, the core helper's pipe, and a pool for slow work fill, each stamping an input as it pushes it.
   Everything the loop reads from disk, the settings, the session file, and the profile's bundle, arrives as an input.
   Handlers are synchronous, read no clock, draw no random number, do no I/O, and iterate no `HashMap`; time and any random ID arrive with an input, and timers and slow work leave as outputs and come back as inputs.
   A profile's script and a plugin get no clock: their QuickJS-ng contexts leave out `Date`, `performance`, and `Math.random`, and one that has to wait asks the platform for a timer; the 100ms limit stays by the clock, and the recording keeps the count of interrupt calls at which it fired.
@@ -806,7 +806,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A feature reaches other features only through the platform, and blocks a request only through a guard
 
-- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the platform's moments it handles, its session keys, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notices, items for the match check, and the helper's input and audio it needs.
+- **Decided:** each feature's crate exposes one `register` function, which the core's `main` calls from one list, and through which the feature declares the platform's moments it handles, its session keys, channels, cockpit stream kinds, catch-up steps, guards, client state and commands, settings, notices, items for the match check, and the core helper's input and audio it needs.
   A handler writes only its own feature's state, reads the platform's, and acts through an outbox, asking the platform for any change to the platform's state, which the platform decides before the next input.
   Features reach each other only through moments the platform raises, and no feature raises one of its own.
   A feature that can block a request the platform decides, such as taking control or claiming a role's key, registers a guard, a quick check that allows the request or denies it with a reason, and any denial refuses it.
@@ -919,9 +919,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## One repository holds all of Crosscheck, its folders by tier, with each feature's parts in one folder
 
 - **Decided:** one repository holds Crosscheck's programs, our WASM module, our code in the sim, the backend, the Crosscheck IDE once it's built, and the profiles.
-  Its top-level folders are `engines/`, `platform/`, `features/`, `apps/`, `profiles/`, `backend/`, and `tools/`.
+  Its top-level folders are `engines/`, `platform/`, `features/`, `apps/`, `sim-package/`, `profiles/`, `backend/`, and `tools/`.
   `features/<name>/` holds every part a feature has: its crate in the core, its routines, its panel modules, and its sections of the desktop app and the EFB app.
-  `apps/` holds a folder for each program we ship, `apps/wasm-module/` and `apps/sim-pages/` among them, and `tools/` holds what builds, checks, and tests them, the profile builder among it (user, 2026-10-15).
+  `apps/` holds a folder for each program on the pilot's PC, the core helper's among them as `apps/core-helper/`; `sim-package/` holds what the sim loads from our Community package, `wasm-module/` and `pages/`; and `tools/` holds what builds, checks, and tests them, the profile builder among it (user, 2026-10-15).
   The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit, fails when a released level's schema or declarations differ from its release tag, and publishes them on this repository's GitHub Pages site, apart from Crosscheck's releases.
   Nobody outside the core team gets write access, so the profiles have no `CODEOWNERS` file; the core team reviews and merges every profile's pull request, and a profile's authors review it without their approval counting toward a merge.
   This changes [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository), which gives the profiles a public repository of their own; [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)'s "one public repository" holds, since Crosscheck's is public from v1.
@@ -936,7 +936,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## One Cargo workspace and one npm lockfile build every target, from the SDK cargo-msfs installs
 
-- **Decided:** every Rust crate is a member of one Cargo workspace, our WASM module's cdylib among them, left out of `default-members` and built by cargo-msfs from its own folder; the routine host and the routines are crates of their own.
+- **Decided:** every Rust crate is a member of one Cargo workspace, our WASM module's cdylib among them, left out of `default-members` with the rest of `sim-package/` and built by cargo-msfs from its own folder; the routine host and the routines are crates of their own.
   The bindings' build scripts read the SDK from the copy cargo-msfs installs, and bindgen generates them at each build, telling Cargo every header it read, so nothing derived from the SDK's headers is in the repository; the build prints the SDK version it built against; nothing sets `RUSTFLAGS`.
   TypeScript has one lockfile, with npm workspaces only in `apps/desktop/` and `backend/`, and a tsconfig for each target's `lib`; the messages' TypeScript types are generated into a folder emptied first, committed, and checked by CI, which fails on a difference when it generates them again.
   The one version lives in the root `Cargo.toml`'s `[workspace.package]`, and `tools/build.ts`, run by Node, builds every target but the backend and the profiles, and lays out the Community package.
@@ -969,21 +969,21 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Outside the core, the platform is the routine host, the panel bridge, and the shells of the EFB app and the desktop app.
   The routine host also holds the platform's own routines, `Hold` and `Mechanisms`.
   A feature's section imports its app's shell and never an app, and neither half of the platform depends on the other.
-  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `apps/` is named `crosscheck-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
+  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `apps/` and `sim-package/` is named `crosscheck-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
   [The units](02-code-map.md#the-units) names every unit, what it uses, and the systems [node 6](plan.md#6-systems) designs.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-units)).
 - **Because:**
   - Node 6 designs each system as whole units, the map check holds the platform's own layering, and a change to one crate rebuilds only the crates that depend on it (user, 2026-10-15).
   - A moment's type in the crate that raises it puts it in a crate the handling feature already reads, and keeps a list of moments out of the kernel.
-  - A section that imported from its app would tie the app and the feature both ways, while with the shell in the platform, `apps/` depends on the features and nothing depends on `apps/`.
+  - A section that imported from its app would tie the app and the feature both ways, while with the shell in the platform, the assemblies in `apps/` and `sim-package/` depend on the features and nothing depends on them.
   - Bug reports as a feature would need a part in `backend/` for their routes, a folder no feature has (user, 2026-10-15).
   - The module can't link a crate in the core, so the routines the platform feeds from the core live in the routine host (node 5's review, 2026-10-15).
   - Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), and refuses a workspace with two crates of one name (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)).
 - **Leaves out:** where the installer lives, and where the relays' configuration lives, for node 6; and where the list of routines lives if node 7's bench runs them natively.
 
-## Every crate outside apps/, tools/, the transport, and the sim edge keeps the loop's rules, and none draws a random number
+## Every crate outside the assemblies, the tools, the transport, and the sim edge keeps the loop's rules, and none draws a random number
 
-- **Decided:** the loop's crates are a rule on folders: every crate outside `apps/`, `tools/`, the transport, and the sim edge keeps [the loop's rules](02-code-map.md#one-loop), which forbid drawing a random number as well as reading a clock, the routine host among them though it never runs on the loop, and the stand-in sim until node 7 decides otherwise.
+- **Decided:** the loop's crates are a rule on folders: every crate outside `apps/`, `sim-package/`, `tools/`, the transport, and the sim edge keeps [the loop's rules](02-code-map.md#one-loop), which forbid drawing a random number as well as reading a clock, the routine host among them though it never runs on the loop, and the stand-in sim until node 7 decides otherwise.
   A random ID the core draws, such as the session's, comes from the core's edge with the input that asks for it, and the core's edge hands the sandbox the check behind QuickJS-ng's 100ms limit, so no loop crate reads the clock itself.
   The map check fails a loop crate that reaches, through any crate, one on [its list of crates that do I/O](02-code-map.md#the-map-check), which holds `getrandom` and the Windows crates beside tokio and the networking crates; it reads normal dependencies only, and a listed crate it lets a loop crate reach anyway carries its reason in the script.
   Only the two edges, the sim edge and our WASM module's, declare foreign functions, and the map check searches our crates' source for any other; the bindings crate holds SimConnect's types and constants.

@@ -517,7 +517,7 @@ Waits on 5.1, 5.2, 5.3, and 5.4.
 
 ## 5.1 The platform's interface
 
-Question: how does the platform run its features, and what does a feature register with it and call, among moments in the session, session keys, roles, channels, message kinds on the cockpit stream, catch-up steps, profile blocks, client state and commands, notices, settings, items for the match check, recording, and the helper's input and audio?
+Question: how does the platform run its features, and what does a feature register with it and call, among moments in the session, session keys, roles, channels, message kinds on the cockpit stream, catch-up steps, profile blocks, client state and commands, notices, settings, items for the match check, recording, and the core helper's input and audio?
 5 can't give any feature its dependencies without it, since every feature's crate is written against it.
 [04-room-for-later](../product/04-room-for-later.md#plugins) names the hooks, moments in a session, channels, catch-up steps, and code inside the sim, and says "v1's own features are built on the hooks plugins use", but gives them no shape.
 Features reach each other only through the platform's moments and registries, so deleting one leaves the others whole.
@@ -536,7 +536,7 @@ Done on 2026-10-14.
 Question: how do current designs run an app's core and its extensions, on one ordered loop or as concurrent tasks, with extensions registered at compile time, so that deleting one leaves the rest whole, a run replays exactly from its recorded inputs, order holds at the sim's frame rate, and plugins in an embedded JavaScript engine reach a subset of the same hooks?
 5.1 can't choose how the platform runs its features without it, and the choice sets the shape of every hook: a call on one loop, or a message between tasks.
 fsc-editor replayed its recorded sim events through the same code, and its replay "swaps the source of events and changes nothing else" (fsc-editor, `src/main/sim/replay.ts`).
-Replaying every input of the core, from the sim, the other cores, the clients, the helper, the clock, and slow work such as a QuickJS-ng call, would carry that to the whole core, so a bug report's recording could reproduce a bug in the core on our own PC.
+Replaying every input of the core, from the sim, the other cores, the clients, the core helper, the clock, and slow work such as a QuickJS-ng call, would carry that to the whole core, so a bug report's recording could reproduce a bug in the core on our own PC.
 A research read settles it.
 It reads sans-IO protocol cores such as quinn-proto and str0m, deterministic simulation testing in Rust, such as madsim, turmoil, and shuttle, actor patterns on tokio, Bevy's plugins and schedules, and VS Code's and Zed's extension APIs.
 It judges each on registering at compile time, deleting an extension, replaying a run from recorded inputs, keeping order at the sim's frame rate, and giving plugins in QuickJS-ng a second face.
@@ -612,7 +612,7 @@ It reads 5.2's and 5.3's answers, the [bench cases for checking a write](../prof
 Its answer goes in a design doc in the build area, `record/areas/build/01-testing.md`, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
 Exit: the user agrees to that design doc.
 Waits on 5.
-Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `apps/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
+Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
 
 ## 8 The build order

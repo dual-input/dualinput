@@ -35,9 +35,9 @@ The map allows these, and [the map check](#the-map-check) holds each:
 - The platform outside the core depends on no crate of the core's, nor the core's on it, and the routine host depends on the message crate alone.
 - No feature depends on another feature's code, nor names another feature's module in the message crate or the profile engine ([what a handler sees and does](#what-a-handler-sees-and-does)).
 - Of our code, a feature's routines depend on the message crate and the routine host alone ([work in the sim](#work-in-the-sim)), its panel modules on the panel bridge and the message crate's types, and its sections on its app's shell and the message crate's types.
-- Nothing depends on `apps/` or `tools/`.
-- The loop's crates, every crate outside `apps/`, `tools/`, the transport, and the sim edge, keep [the loop's rules](#one-loop), and depend on neither tokio nor any crate on the map check's list of crates that do I/O; the stand-in sim is held to them until [node 7](plan.md#7-testing) decides otherwise.
-- Only the two edges, the sim edge and our WASM module's in `apps/wasm-module/`, declare foreign functions, so only they call `SimConnect.dll` and the sim's APIs ([the sim seam](#the-sim-seam)).
+- Nothing depends on `apps/`, `sim-package/`, or `tools/`.
+- The loop's crates, every crate outside `apps/`, `sim-package/`, `tools/`, the transport, and the sim edge, keep [the loop's rules](#one-loop), and depend on neither tokio nor any crate on the map check's list of crates that do I/O; the stand-in sim is held to them until [node 7](plan.md#7-testing) decides otherwise.
+- Only the two edges, the sim edge and our WASM module's in `sim-package/wasm-module/`, declare foreign functions, so only they call `SimConnect.dll` and the sim's APIs ([the sim seam](#the-sim-seam)).
 
 A system is the units one design doc designs, in one area, and [node 6](plan.md#6-systems) of the plan designs each of [the systems](#systems).
 Each contract is defined once and linked or generated wherever it's used: a feature's messages stay in the message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), and its profile block, such as pointer sync's `displays`, stays in the profile engine, which the core, CI, and the IDE share ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), so deleting a feature deletes its module in the message crate and its module in the profile engine too (user, 2026-10-14).
@@ -46,23 +46,24 @@ Each contract is defined once and linked or generated wherever it's used: a feat
 
 Each unit is a folder in its tier's folder, named as in the picture below.
 The tables say what each owns and what it uses; the map check holds [the rules in tiers](#tiers), not these columns, so CI passes a dependency a table doesn't list when the rules allow it.
-`apps/` holds what we ship, and `tools/` what builds, checks, and tests it (user, 2026-10-15).
+`apps/` holds the programs on the pilot's PC, `sim-package/` what the sim loads from our Community package, and `tools/` what builds, checks, and tests them (user, 2026-10-15).
 
 ```text
-apps/       core  watcher  helper  desktop  wasm-module  sim-pages  ide (later)
-tools/      profile-builder  bench (node 7)  build.ts  setup.ts  the map check
-features/   state-sync  pointer-sync  flight-model  avatars  traffic
-            atc-audio  take-control  voice  rate-and-pause  go-to
-platform/   in the core                                      outside the core
-            plugins                                          routine-host
-            profile-loader  cockpit-stream                   panel-bridge
-            session                                          efb-shell  desktop-shell
-            sim-service  network  helper-service  recording
-            clients
-            kernel
-engines/    sync-engine  sim-edge  stand-in-sim
-            sandbox  profile-engine  recording-format  aircraft-model  sim-client  transport  page-client
-            messages  simconnect-types
+apps/         core  watcher  core-helper  desktop  ide (later)
+sim-package/  wasm-module  pages
+tools/        profile-builder  bench (node 7)  build.ts  setup.ts  the map check
+features/     state-sync  pointer-sync  flight-model  avatars  traffic
+              atc-audio  take-control  voice  rate-and-pause  go-to
+platform/     in the core                                          outside the core
+              plugins                                              routine-host
+              profile-loader  cockpit-stream                       panel-bridge
+              session                                              efb-shell  desktop-shell
+              sim-service  network  core-helper-service  recording
+              clients
+              kernel
+engines/      sync-engine  sim-edge  stand-in-sim
+              sandbox  profile-engine  recording-format  aircraft-model  sim-client  transport  page-client
+              messages  simconnect-types
 ```
 
 The platform outside the core runs in our WASM module, in each cockpit panel, and in the two apps that take features' sections.
@@ -93,7 +94,7 @@ The platform is split this way, and named the platform rather than the host, bec
 | clients | The client protocol: each client's socket and first message, client state and commands, which panel modules each panel loads, lock renewals, settings, and notices | | kernel |
 | sim-service | The sim service, sim awareness, masking, the module's version and counter and the unfreeze, and the CommBus event that announces the core's port ([what the platform keeps](#what-the-platform-keeps)), and the world map's requests, which the menu script runs for whichever feature asks | Each load | kernel, clients, sim-client |
 | network | Each link's state, the channels, the heartbeat, clock offsets, coming back, and the backend's invite codes | "Link lost", and the link's return | kernel, clients |
-| helper-service | Starting the helper and starting it again, and the bindings, captures, and sounds features register with it | | kernel, clients |
+| core-helper-service | Starting the core helper and starting it again, and the bindings, captures, and sounds features register with it | | kernel, clients |
 | recording | What's recorded beyond the queue, as other units ask, the recording's settings, the recorded sessions, and bug reports, whose upload the core's edge runs as a job | | kernel, clients, recording-format |
 | session | Members, session keys, control, the session file, joining and leaving, preflight, the match check, and the version check at join | A session starting and ending, a member joining or leaving, a session key changing, control passing, and preflight ending | kernel, clients, sim-service, network, recording |
 | profile-loader | Fetching a profile's bundle by hash, the cache, and loading it on the pilot's aircraft | The profile's load and unload | kernel, clients, sim-service, recording, session, profile-engine |
@@ -113,27 +114,27 @@ Each feature is a folder in `features/`, its crate in the core named for it and 
 | state-sync | core | cockpit-stream, session, sim-service, profile-loader, plugins, clients, sync-engine |
 | pointer-sync | core, panel, efb, desktop | cockpit-stream, clients, network |
 | flight-model | core, routines (`Follow`) | network, session, sim-service |
-| avatars | core, routines (`Figure`), efb | cockpit-stream, helper-service, sim-service, profile-loader, network, aircraft-model |
+| avatars | core, routines (`Figure`), efb | cockpit-stream, core-helper-service, sim-service, profile-loader, network, aircraft-model |
 | traffic | core, desktop | session, sim-service, network |
-| atc-audio | core, desktop | session, helper-service, network |
-| take-control | core, efb, desktop | session, helper-service, clients |
-| voice | core | session, helper-service |
+| atc-audio | core, desktop | session, core-helper-service, network |
+| take-control | core, efb, desktop | session, core-helper-service, clients |
+| voice | core | session, core-helper-service |
 | rate-and-pause | core | session, sim-service, clients |
 | go-to | core, desktop | session, sim-service, clients |
 
-### Apps and tools
+### Apps, the sim package, and tools
 
 | Unit | What it is | Uses, of ours |
 | --- | --- | --- |
-| `apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets and timers, the WebSocket server, the helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the random IDs | Every crate on the core's side, the transport, and the sim edge |
+| `apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets and timers, the WebSocket server, the core helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the random IDs | Every crate on the core's side, the transport, and the sim edge |
 | `apps/watcher` | The watcher | messages |
-| `apps/helper` | The helper: Raw Input, audio, and speech | messages |
+| `apps/core-helper` | The core helper: Raw Input, audio, and speech | messages |
 | `apps/desktop` | Tauri's Rust side, Vite's entry, and the list of the desktop app's sections | desktop-shell, each feature's `desktop/`, messages |
-| `apps/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers, and the list of routines | routine-host, each feature's `routines/` |
-| `apps/sim-pages` | The `VCockpit.js` override, the EFB app's entry and its list of sections, the banner, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, page-client, each feature's `efb/` |
+| `sim-package/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers, and the list of routines | routine-host, each feature's `routines/` |
+| `sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of sections, the banner, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, page-client, each feature's `efb/` |
 | `tools/profile-builder` | Checks each profile and builds its bundle, for CI and for authors, as the core does with the same engine | profile-engine |
 
-Each crate in `apps/` is named `crosscheck-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Crosscheck's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
+Each crate in `apps/` and `sim-package/` is named `crosscheck-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Crosscheck's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
 
 ### The registry and moments
 
@@ -151,9 +152,9 @@ Each system is one of [the spine's parts](01-spine.md#parts), with two changes: 
 | System | Area | Units | Designed so far in |
 | --- | --- | --- | --- |
 | The core's loop and edge | `core/` | kernel, `apps/core` | [One loop](#one-loop) |
-| The sim seam and our WASM module | `core/` | sim-service, sim-client, sim-edge, simconnect-types, routine-host, `apps/wasm-module` | [The sim seam](#the-sim-seam), [work in the sim](#work-in-the-sim) |
+| The sim seam and our WASM module | `core/` | sim-service, sim-client, sim-edge, simconnect-types, routine-host, `sim-package/wasm-module` | [The sim seam](#the-sim-seam), [work in the sim](#work-in-the-sim) |
 | Clients and the panel bridge | `core/` | clients, page-client, panel-bridge | [What the bridge owns](#what-the-bridge-owns) |
-| The helper | `core/` | helper-service, `apps/helper` | |
+| The core helper | `core/` | core-helper-service, `apps/core-helper` | |
 | The network | `network/` | network, transport, `backend/`'s invite codes | [01-between-machines](../network/01-between-machines.md) |
 | Sync | `sync/` | cockpit-stream, sync-engine, state-sync | [01-profile-entries](../sync/01-profile-entries.md) to [04-order-and-recovery](../sync/04-order-and-recovery.md) |
 | The session | `session/` | session, rate-and-pause, go-to, the menu script | [01-roles-and-members](../session/01-roles-and-members.md) |
@@ -164,7 +165,7 @@ Each system is one of [the spine's parts](01-spine.md#parts), with two changes: 
 | Pointer sync | `pointer-sync/` | pointer-sync | |
 | Avatars | `avatars/` | avatars, aircraft-model | [Avatars' tentative decisions](../avatars/decisions.md) |
 | Traffic and ATC | `traffic-atc/` | traffic, atc-audio | |
-| The apps | `interface/` | efb-shell, desktop-shell, `apps/desktop`, `apps/sim-pages` | |
+| The apps | `interface/` | efb-shell, desktop-shell, `apps/desktop`, `sim-package/pages` | |
 | Recording and bug reports | `recording/` | recording, recording-format, `backend/`'s reports | |
 | Installing and updating | `install/` | `apps/watcher`, the installer | |
 | The build | `build/` | `tools/`, CI, the map check | [The workspace](#the-workspace) |
@@ -179,7 +180,7 @@ A feature plugs in by registering what it handles, what it declares, and what it
 ```text
  SimConnect thread ───────────────┐
  tokio: iroh, WebSockets, timers ─┤                             ┌─ the platform's services
- the helper's pipe ───────────────┼─▶ queue ─▶ recording ─▶ loop ┤
+ the core helper's pipe ──────────┼─▶ queue ─▶ recording ─▶ loop ┤
  worker pool ─────────────────────┘   each input stamped        └─ features' handlers,
                                       as it's pushed                  in registration order
                                                                 │
@@ -244,7 +245,7 @@ pub fn register(platform: &mut Registry) {
 | Guards | A check on a request the platform decides, [below](#guards) | None in v1 beyond the platform's own |
 | Client state and commands | A slice of state the apps show, and the commands they send | The take-control key's command to take control |
 | Settings, notices, and items for the match check | Each one | The take-control binding; "Couldn't sync the beacon" |
-| The helper's input and audio | The bindings, captures, and sounds it needs | The take-control key; capturing the ATC app |
+| The core helper's input and audio | The bindings, captures, and sounds it needs | The take-control key; capturing the ATC app |
 
 A role is a session key a feature declares, whose value names the member who holds the role: traffic's key names the traffic host, and ATC audio's names the ATC host.
 Where a later role limits who may hold it, its feature registers a guard on writing that role's key.
@@ -259,7 +260,7 @@ A handler gets three things:
 
 - its own feature's state, which it alone writes
 - the platform's state, read-only: the session and its keys, its members, control, each link's state, preflight, the loaded profile's blocks, the settings, sim awareness, and each request's verdict from the [guards](#guards)
-- an outbox, for sends on channels, calls to the sim, work in the sim, requests to the helper, client state, notices, timers, jobs, and requests to the platform
+- an outbox, for sends on channels, calls to the sim, work in the sim, requests to the core helper, client state, notices, timers, jobs, and requests to the platform
 
 A feature never changes the platform's state itself: it asks, and the platform decides.
 The take-control key asks for control, and the platform's [guards](#guards) decide whether the pilot gets it.
@@ -606,36 +607,37 @@ crosscheck/
     panel/               its panel modules
     desktop/  efb/       its sections of the desktop app and the EFB app
   apps/
-    core/  watcher/  helper/   each program's main, and its list of features
+    core/  watcher/  core-helper/   each program's main, and its list of features
     desktop/             Tauri: its Rust side, and its pages built by Vite
-    wasm-module/         the cdylib cargo-msfs builds: the edge, and the routines' list
-    sim-pages/           the VCockpit.js override, the EFB app, the banner, the menu script
     ide/                 the Crosscheck IDE, once it's built
+  sim-package/
+    wasm-module/         the cdylib cargo-msfs builds: the edge, and the routines' list
+    pages/               the VCockpit.js override, the EFB app, the banner, the menu script
   profiles/              aircraft/ and modules/, as 01-format-and-delivery's repository
   backend/               the Cloudflare Worker
   tools/                 build.ts, setup.ts, the map check, profile-builder/, the bench
 ```
 
 A feature has only the parts it needs: pointer sync has a crate in the core, panel modules, and sections in the apps, and no routines.
-Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each program in `apps/`.
-The root `Cargo.toml` names its members by globs, such as `features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` names the crates of `apps/` and `tools/` one by one, since a glob there would take in `apps/wasm-module/`; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
+Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each assembly in `apps/` and `sim-package/`.
+The root `Cargo.toml` names its members by globs, such as `features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` takes the same globs but leaves out `sim-package/`, whose module's build script needs what cargo-msfs sets; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
 A feature's block that a released level of the profile format holds stays in the profile engine after the feature goes, since levels only add ([levels](../profiles/01-format-and-delivery.md#levels)).
 
 ### Building every target
 
 | Target | Built by | From |
 | --- | --- | --- |
-| The core, the watcher, the helper, the desktop app's Rust side, and the profile builder | `cargo build`, for x86_64 | The workspace's root |
-| Our WASM module | cargo-msfs, for wasm32 | `apps/wasm-module/` |
+| The core, the watcher, the core helper, the desktop app's Rust side, and the profile builder | `cargo build`, for x86_64 | The workspace's root |
+| Our WASM module | cargo-msfs, for wasm32 | `sim-package/wasm-module/` |
 | Our code in the sim: the bridge, panel modules, and the sim's pages | esbuild at `es2017` ([decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md)), then the Coherent GT check ([decision 031](../../decisions/031-coherent-gt-check-tool.md)) | `tools/` |
 | The desktop app's pages | Vite, which Tauri runs | `apps/desktop/` |
 | The backend | wrangler | `backend/` |
 | The messages' TypeScript types | ts-rs, which writes them during `cargo test` into the folder `TS_RS_EXPORT_DIR` names (documented, [ts-rs 12.0.1](https://docs.rs/ts-rs/12.0.1/ts_rs/)) | `engines/messages/` |
 | The profiles' bundles | `tools/profile-builder`, on the profile engine | `profiles/` |
 
-- **Our WASM module is a member of the workspace,** left out of `default-members` because its build script needs what cargo-msfs sets, and cargo-msfs builds it from its own folder.
+- **Our WASM module is a member of the workspace,** left out of `default-members` with the rest of `sim-package/` because its build script needs what cargo-msfs sets, and cargo-msfs builds it from its own folder.
   p11 built it that way against the same message crate as the Windows side, in one `target/` folder and one `Cargo.lock`, and building either side after the other compiled no crate ([architecture log][p11]).
-  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `apps/wasm-module/` is a cdylib alone, and the routine host and the routines are crates of their own, which node 7's bench can link natively.
+  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `sim-package/wasm-module/` is a cdylib alone, and the routine host and the routines are crates of their own, which node 7's bench can link natively.
 - **One copy of the SDK** is the one cargo-msfs installs in its data folder, `%APPDATA%\cargo-msfs\data\msfs2024`, which holds SimConnect's header, its import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15).
   The bindings' build scripts read the SDK from `MSFS_SDK`, which cargo-msfs sets for the module, fall back to that folder for the Windows side, and fail with a message naming `cargo-msfs install msfs2024` when it's missing.
   That the one copy serves the Windows side is unverified, since p11 generated no bindings for it, and the first build of the sim's edge settles it.
@@ -742,7 +744,7 @@ A pull request's CI finishes within 20 minutes with a warm cache, a starting val
 - Which unit of the platform loads the EventBus bridge's listener into the EFB's document, which [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim) leaves open, for after v1.
 - Where the installer lives, and whether it's a program of ours: node 6's design of installing and updating.
 - Where the relays' configuration lives, since they run `iroh-relay` with no code of ours ([01-between-machines](../network/01-between-machines.md#the-relays)): node 6's design of the network.
-- Whether the stand-in sim keeps the loop's rules, which [tiers](#tiers) holds it to until then, and where the list of routines lives if the bench runs them natively, since the bench can't link `apps/wasm-module/`, a cdylib alone: [node 7](plan.md#7-testing).
+- Whether the stand-in sim keeps the loop's rules, which [tiers](#tiers) holds it to until then, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone: [node 7](plan.md#7-testing).
 - Whether a released level's builder output, as well as its schema and declarations, needs CI to hold it to its release tag, so a bundle built at a later commit still loads in that release: [node 6](plan.md#6-systems)'s design of the profile engine.
 - What the build does when cargo-msfs has installed an SDK newer than the one a release was built against, since it can't install an older one ([building every target](#building-every-target)): the build's design in [node 6](plan.md#6-systems).
 - Whether Tauri 2 reads a version a crate inherits from the workspace, which the first build of the desktop app settles; if it doesn't, the build writes the version into `tauri.conf.json` too.

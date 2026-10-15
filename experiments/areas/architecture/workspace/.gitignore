@@ -1,0 +1,4 @@
+# cargo's build output, the module's .wasm, and what ts-rs writes.
+target/
+build/
+messages/bindings/

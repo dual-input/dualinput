@@ -3,6 +3,30 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-15: Our WASM module builds with cargo-msfs from inside the core's Cargo workspace, against the same message crate, and neither build disturbs the other's
+
+**Asked:** can one Cargo workspace hold the core's crates and our WASM module, so the module, its host, and its routines build against the message crate the core uses (node 5.4)?
+p08 kept its module out of its workspace, with `exclude = ["module"]` (read in `experiments/areas/architecture/flight/Cargo.toml`).
+
+**Expected:** yes, since cargo-msfs runs `cargo build --release --target wasm32-wasip1` in the crate's folder, with its own `RUSTFLAGS` (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build).
+
+**Found:** yes, on our development machine, with Rust 1.95.0 and edition 2024 ([p11](../../../experiments/areas/architecture/p11-workspace.mjs), [results](../../../experiments/areas/architecture/results/p11-workspace-2026-10-15-12-35-57.txt)).
+
+- The workspace held a message crate, the module's host, one routine, the module as a cdylib, and a Windows program, with the module left out of `default-members`, because its build script needs the SDK that cargo-msfs names in `MSFS_SDK`.
+- From cold, `cargo build --release` built the Windows side in 5.4s, `cargo test` passed its 3 tests, and cargo-msfs built the module from its folder in 6.6s, 61,157 bytes, with every export the sim calls.
+- Building each side again after the other compiled no crate, so the two targets share one `target/` folder and one `Cargo.lock` without rebuilding each other.
+- The core's crate turned on uuid's `v4` for itself, and the module's imports held no WASI call for random numbers, so a feature one member turns on stayed out of the module's build.
+  The module's imports were p08's, which ran in the sim, plus the SimConnect and Vars API calls its own code made: `SimConnect_TransmitClientEvent`, `SimConnect_MapClientEventToSimEvent`, `fsVarsGetAVarId`, and `fsVarsAVarSet`.
+- The Windows program ran the module's host and the routine natively, fed the same slot bytes the module reads: the routine asked for the freeze in its first frame, and the host released it 1.1s after the last write.
+- cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so the module's cdylib can't also be the rlib the stand-in links; the host and the routines are crates of their own.
+- cargo-msfs hands the build its caller's environment after setting `RUSTFLAGS` (same function), so a `RUSTFLAGS` of ours, in CI or a shell, would replace its flags.
+
+Nothing p11 built ran in the sim.
+
+**Changed:** 5.4 can put the module in the core's workspace, kept out of `default-members`, with its host and routines as crates beside it.
+
+**Affects:** [5.4](plan.md#54-the-workspace), whose question names this as untried.
+
 ## 2026-10-14: A core replays a whole run when one ordered loop owns its state and takes every input stamped through one queue, as sans-IO cores, LMAX, and TigerBeetle run, and neither actors nor simulation runtimes can replay a run from a pilot's PC
 
 **Asked:** how do current designs run an app's core and its extensions, on one ordered loop or as concurrent tasks, so that deleting an extension leaves the rest whole, a run replays exactly from its recorded inputs, order holds at the sim's frame rate, and plugins in QuickJS-ng reach a subset of the same hooks (node 5.1.1)?

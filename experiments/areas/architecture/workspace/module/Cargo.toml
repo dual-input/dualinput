@@ -1,0 +1,18 @@
+[package]
+name = "crosscheck-p11"
+version.workspace = true
+edition.workspace = true
+
+# A cdylib alone: cargo-msfs refuses a crate whose build outputs more than one
+# file (read in navigraph/cargo-msfs v1.1.0, src/main.rs, Build), so the host and
+# the routines are rlibs of their own that the stand-in links natively.
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+messages.workspace = true
+module-host.workspace = true
+follow.workspace = true
+
+[build-dependencies]
+bindgen.workspace = true

@@ -1,0 +1,7 @@
+[package]
+name = "module-host"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+messages.workspace = true

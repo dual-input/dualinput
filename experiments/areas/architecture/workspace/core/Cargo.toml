@@ -1,0 +1,12 @@
+[package]
+name = "p11-core"
+version.workspace = true
+edition.workspace = true
+
+# The core draws IDs, so it alone turns on uuid's v4.
+[dependencies]
+messages.workspace = true
+module-host.workspace = true
+follow.workspace = true
+serde_json.workspace = true
+uuid = { workspace = true, features = ["v4"] }

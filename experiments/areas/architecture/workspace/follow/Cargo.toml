@@ -1,0 +1,8 @@
+[package]
+name = "follow"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+messages.workspace = true
+module-host.workspace = true

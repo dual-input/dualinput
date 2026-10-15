@@ -1,0 +1,45 @@
+p11 2026-10-15T12:35:40.550Z
+rust: rustc 1.95.0 (59807616e 2026-04-14)
+
+1. The Windows side and the module, each built once
+cargo build --release, the default members: ok, 5.4s, 27 crates compiled
+cargo test, the default members: ok, 4.6s, 27 crates compiled
+  tests passed: 3
+cargo-msfs build msfs2024, from module/: ok, 6.6s, 30 crates compiled
+
+2. The module's shape
+  size: 61157 bytes
+  required exports missing: none
+  imports: 18
+    env.SimConnect_CallDispatch
+    env.SimConnect_TransmitClientEvent
+    env.fsVarsGetUnitId
+    env.fsVarsGetAVarId
+    env.fsVarsAVarSet
+    env.SimConnect_Close
+    env.SimConnect_Open
+    env.SimConnect_MapClientDataNameToID
+    env.SimConnect_CreateClientData
+    env.SimConnect_AddToClientDataDefinition
+    env.SimConnect_RequestClientData
+    env.SimConnect_MapClientEventToSimEvent
+    wasi_snapshot_preview1.environ_get
+    wasi_snapshot_preview1.environ_sizes_get
+    wasi_snapshot_preview1.clock_time_get
+    wasi_snapshot_preview1.fd_write
+    wasi_snapshot_preview1.proc_exit
+    wasi_snapshot_preview1.commit_pages
+  imports p08's module, which ran in the sim, lacks: env.SimConnect_TransmitClientEvent, env.fsVarsGetAVarId, env.fsVarsAVarSet, env.SimConnect_MapClientEventToSimEvent
+
+3. Switching between the two builds
+cargo build --release again: ok, 0.1s, 0 crates compiled
+cargo-msfs build again: ok, 0.2s, 0 crates compiled
+cargo build --release once more: ok, 0.1s, 0 crates compiled
+
+4. The module's host and Follow, run natively by the Windows program
+cargo run --release -p p11-core: ok, 0.1s, 0 crates compiled
+  frame at 100000µs: freeze Some(true), writes [("A:PLANE LATITUDE", 47.001), ("A:PLANE LONGITUDE", 0.0), ("A:PLANE ALTITUDE", 0.0)]
+  frame at 450000µs: freeze None, writes [("A:PLANE LATITUDE", 47.001), ("A:PLANE LONGITUDE", 0.0), ("A:PLANE ALTITUDE", 0.0)]
+  frame at 900000µs: freeze None, writes [("A:PLANE LATITUDE", 47.003), ("A:PLANE LONGITUDE", 0.0), ("A:PLANE ALTITUDE", 0.0)]
+  frame at 1500000µs: freeze Some(false), writes []
+  {"kind":"pilot","id":"16b1e329-b014-45d9-818e-9e19ac46e5d6","version":"0.1.0"}

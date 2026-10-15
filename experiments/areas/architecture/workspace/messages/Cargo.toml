@@ -1,0 +1,11 @@
+[package]
+name = "messages"
+version.workspace = true
+edition.workspace = true
+
+# uuid without v4: drawing an ID is the core's, which turns v4 on for itself,
+# so the module never pulls in a random-number source (p11 checks its imports).
+[dependencies]
+serde.workspace = true
+uuid.workspace = true
+ts-rs.workspace = true

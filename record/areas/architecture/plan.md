@@ -585,16 +585,181 @@ Question: what is the design of each system the code map names, deep enough that
 Step 8 can't lay out stages for code nobody has designed, and every system is designed before any product code (user, 2026-10-14).
 The spine leaves the design of 11 parts to step 8, and more of sync and the session ([parts](01-spine.md#parts)), and files open items under each ([left open](01-spine.md#left-open)).
 The design docs written after it leave more: [01-between-machines](../network/01-between-machines.md#left-open)'s checks, the sync engine's rules for checking a write and the bench cases they start from ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)), and 01-format-and-delivery's [left open](../profiles/01-format-and-delivery.md#left-open).
-Its children, proposed once 5 names the systems, are one for each system the record hasn't designed, and one check against the code map for each design doc already written.
-Each child's answer goes in a design doc in its system's area.
+Its children are one for each of [the code map's systems](02-code-map.md#systems), in the order of the platform's rows from the kernel up, then the features, then plugins and the apps, which reach into the features, then installing and updating, and the build (user, 2026-10-15).
+No system is designed yet down to its units' interfaces, budgets, and cases for the bench, so a child whose system has design docs checks them against the code map first, and adds a blockquote at the top of each whose text the map changes, naming the section of 02-code-map that changes it.
+A child whose system 02-code-map designs in part, as it does 6.1 to 6.3 and 6.18, links to those sections, and its design doc holds only what they leave out.
+Each child's answer goes in a design doc in its system's area, which gives its units and their interfaces, its budgets, its cases for the bench, and what it leaves open, as 02-code-map's sections do.
+Each child also settles the open items its section names, from the spine's [left open](01-spine.md#left-open), 02-code-map's [left open](02-code-map.md#left-open), and the design docs above.
 Exit: every child is done.
-Waits on 5.
-Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, for the child that designs plugins, once the features they may plug into are designed (user, 2026-10-14).
-Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, for the child that designs recording, since the one loop of [5.1.1's entry](log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc) replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
-Raised elsewhere: by 5.2, for the child that designs sim awareness, how it makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
-Raised elsewhere: by 5.3, for the children that design plugins, the sim seam and our WASM module, and clients and the panel bridge, which of the sim's APIs carries each want of the routine host, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
-Raised elsewhere: by 5.4, for the child that designs the profile engine, whether CI holds a released level's builder output to its release tag as it holds the level's schema and declarations; and for the child that designs the build, what it does when cargo-msfs, which installs only the newest SDK, has installed one newer than a release's, and how long CI takes on Windows runners, against 5.4's budget of 20 minutes with a warm cache ([02-code-map](02-code-map.md#left-open)).
-Raised elsewhere: by 5, the systems its children design, each with its area and units, in [02-code-map](02-code-map.md#systems); and for the children that design installing and updating and the network, where the installer lives, and where the relays' configuration lives, since they run `iroh-relay` with no code of ours.
+Waits on 5, and 6.1 to 6.18.
+
+## 6.1 The core's loop and edge
+
+Question: what are the kernel's interfaces for the loop, the registry, moments, requests and their guards, the outbox, timers, jobs, and each unit's state; and how does the core's edge in `apps/core` stamp each input into the queue, carry out each output and job, write the replay log, and replay a run from it?
+Every other system in the core registers with the kernel and reaches the world through the edge, so none can give its units' interfaces before this one.
+It reads 02-code-map's [platform's interface](02-code-map.md#the-platforms-interface) and [registry and moments](02-code-map.md#the-registry-and-moments), [5.1.1's entry][5.1.1], [decision 027](../../decisions/027-core-runs-on-tokio.md), and the spine's [the core](01-spine.md#the-core) and [shared conventions](01-spine.md#shared-conventions).
+It settles whether a recording replays on a PC with another CPU ([02-code-map](02-code-map.md#left-open)).
+Its answer goes in `record/areas/core/01-loop-and-edge.md`.
+Exit: the user agrees to that design doc.
+
+## 6.2 Clients and the panel bridge
+
+Question: what are the clients crate's interfaces for each client's socket and first message, client state and commands, settings, notices, lock renewals, and the panel modules each panel loads; how does page-client find the core, open its connection, and connect again; and how does the panel bridge load panel modules and run `ops`?
+Every crate above the kernel shows state or takes commands through the clients crate, and every page in the sim reaches the core through page-client.
+It reads 6.1's answer, 02-code-map's [modules in the panel bridge](02-code-map.md#modules-in-the-panel-bridge), the spine's [communication](01-spine.md#communication) and [messages between components](01-spine.md#messages-between-components), decisions [008](../../decisions/008-every-link-ends-at-core.md) to [011](../../decisions/011-cockpit-panels-connect-only-in-session.md), [013](../../decisions/013-core-accepts-sim-origin-or-none.md), [014](../../decisions/014-apps-find-core-through-port-file.md), and [016](../../decisions/016-core-keeps-pilots-settings.md), 04-room-for-later's [one protocol for every client](../product/04-room-for-later.md#one-protocol-for-every-client), and the FS Copilot fork's panel code in `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/`.
+It settles the spine's open items on the core's WebSocket library, on a component whose version or hash differs from the core's, and on how a client beyond the PC is let in ([01-spine](01-spine.md#left-open)).
+Its answer goes in `record/areas/core/02-clients-and-panel-bridge.md`.
+Exit: the user agrees to that design doc.
+
+## 6.3 The sim seam and our WASM module
+
+Question: what are the interfaces of the sim service, the sim client, and the sim edge; how does sim awareness make one moment of a load's many signals; how does the routine host carry each want through the sim's APIs and take the session up again after a flight load; and how does the sim service keep the module's counter going quiet during a load from counting as trouble?
+Every feature that reaches the sim does it through these units, and the bench's stand-in fills the seam they define ([node 7](#7-testing)).
+It reads 6.1's and 6.2's answers, 02-code-map's [sim seam](02-code-map.md#the-sim-seam) and [work in the sim](02-code-map.md#work-in-the-sim), the spine's [sim awareness](01-spine.md#sim-awareness) and [the WASM module](01-spine.md#the-wasm-module), decision [017](../../decisions/017-core-writes-control-slot-every-200ms.md), this area's [2026-10-09 flight entry][flight], the [CommBus log](../commbus/log.md), the [interface log](../interface/log.md), fsc-editor's `src/main/sim/` and `link/`, and the FS Copilot fork's `FsCopilot.Bridge.Wasm/wasm_module.cpp`.
+It settles the spine's open items on telling a sim crash from the pilot closing the sim, and on our WASM module after a flight load ([01-spine](01-spine.md#left-open)), and 01-format-and-delivery's on telling which preset loaded ([left open](../profiles/01-format-and-delivery.md#left-open)).
+Its answer goes in `record/areas/core/03-sim-seam-and-wasm-module.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5.2, how sim awareness makes one moment of a load's many signals, and whether that logic is an engine of its own (user, 2026-10-15): our client heard `AircraftLoaded` three times and `FlightLoaded` once through one load ([architecture log][flight]), and fsc-editor saw every input event it watched report its value 4.1s to 8.2s before the sim announced the aircraft (measured on MSFS 2024, 2026-08-23, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — An aircraft change snapshots every input event before it announces itself").
+Raised elsewhere: by 5.3, which of the sim's APIs carries each want of the routine host ([02-code-map](02-code-map.md#what-a-routine-can-ask-for)).
+
+## 6.4 The network
+
+Question: what are the interfaces of the network crate, with its channels, moments, heartbeat, clock offsets, and coming back, and of the transport; how does the backend draw invite codes and match each to the crew's endpoint IDs; where does the relays' configuration live; and what in [01-between-machines](../network/01-between-machines.md) does the code map change?
+The session, sync, and every feature that sends between machines reach the other cores through these units.
+It reads 01-between-machines, the [network log](../network/log.md), 6.1's and 6.2's answers, decisions [032](../../decisions/032-one-quic-connection-through-iroh.md) to [039](../../decisions/039-cut-link-replays-others-late-join.md), the FS Copilot fork's `record/self-hosted-relay/`, and fsc-editor's `relay/`.
+It settles who hosts the relays, and the framework and storage of the Cloudflare Worker that 02-code-map's [workspace](02-code-map.md#the-workspace) puts in `backend/` ([01-spine](01-spine.md#left-open)), and turns 01-between-machines' checks for the network's stage into cases for the bench ([left open](../network/01-between-machines.md#left-open)).
+Its answer goes in `record/areas/network/02-units.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5, where the relays' configuration lives, since they run `iroh-relay` with no code of ours ([02-code-map](02-code-map.md#left-open)).
+
+## 6.5 The core helper
+
+Question: how does the core-helper-service crate start the core helper, start it again, and pass it the bindings, captures, and sounds features register; and what does `apps/core-helper` run for Raw Input, audio, and speech, behind which interface?
+Control, avatars, and ATC audio reach the pilot's input and speakers only through it.
+It reads 6.1's and 6.2's answers, the spine's [the helper](01-spine.md#the-helper), decisions [006](../../decisions/006-core-catches-take-control-input.md), [007](../../decisions/007-core-runs-audio.md), and [019](../../decisions/019-input-and-audio-run-in-helper.md), and this area's [2026-10-08 entry on Raw Input and audio](log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker).
+It settles the binary format on the core helper's standard input and output ([01-spine](01-spine.md#left-open)).
+Its answer goes in `record/areas/core/04-core-helper.md`.
+Exit: the user agrees to that design doc.
+
+## 6.6 Recording and bug reports
+
+Question: what does the recording crate keep beyond the queue, and for how long; how are the replay log and the self-describing record a later version reads encoded; and how does a bug report leave the pilot's PC and reach us through the backend?
+The session, the profile loader, the cockpit stream, and plugins ask the recording crate to record, and each machine's recording is how a friend session's data comes back ([node 7](#7-testing)).
+It reads 6.1's and 6.4's answers, 03-v1-scope's [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports), 04-room-for-later's [recording](../product/04-room-for-later.md#recording), [5.1.1's entry][5.1.1], and fsc-editor's `src/main/sim/replay.ts`.
+It settles how much of the queue a recording keeps ([02-code-map](02-code-map.md#left-open)).
+Its answer goes in `record/areas/recording/01-recording-and-bug-reports.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, since the one loop of [5.1.1's entry][5.1.1] replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
+
+## 6.7 The session
+
+Question: what are the session crate's interfaces for members, session keys, control, the session file, joining and leaving, preflight, the match check, and the version check at join; how do rate and pause, and Go to, work as features; what does the menu script report and run; and what in [01-roles-and-members](../session/01-roles-and-members.md) does the code map change?
+Profiles, sync, and most features act on the session's keys and moments.
+It reads 01-roles-and-members, 6.3's, 6.4's, and 6.6's answers, 03-v1-scope's [session](../product/03-v1-scope.md#session) and [time, date, sim rate, and pause](../product/03-v1-scope.md#time-date-sim-rate-and-pause), 04-room-for-later's [roles](../product/04-room-for-later.md#roles) and [people beyond the crew](../product/04-room-for-later.md#people-beyond-the-crew), the [environment log](../environment/log.md), and the [interface log](../interface/log.md).
+It settles which pilot's bundle a session pins, and where the core reads a streamed Marketplace aircraft's version ([01-format-and-delivery](../profiles/01-format-and-delivery.md#left-open)).
+Its answer goes in `record/areas/session/02-units.md`.
+Exit: the user agrees to that design doc.
+
+## 6.8 Profiles
+
+Question: what are the profile engine's, the profile loader's, and the profile builder's interfaces; how does the loader fetch a bundle, cache it, and load it on the pilot's aircraft; and what in [01-format-and-delivery](../profiles/01-format-and-delivery.md) does the code map change?
+Sync, pointer sync, avatars, and plugins act on what a loaded profile gives them.
+It reads 01-format-and-delivery, 6.3's and 6.7's answers, 02-code-map's [profiles in this repository](02-code-map.md#profiles-in-this-repository), decisions [021](../../decisions/021-profiles-and-plugins-apart-from-releases.md), [045](../../decisions/045-profile-format-yaml-and-javascript.md), and [046](../../decisions/046-sandbox-runtimes-and-limits.md), and FS Copilot's profiles in `../fsc/profiles/`.
+It settles which compiler the core embeds to build a local bundle's plugin ([left open](../profiles/01-format-and-delivery.md#left-open)).
+Its answer goes in `record/areas/profiles/02-units.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5.4, whether CI holds a released level's builder output to its release tag as it holds the level's schema and declarations ([02-code-map](02-code-map.md#left-open)).
+
+## 6.9 Sync
+
+Question: what are the cockpit stream's, the sync engine's, and state sync's interfaces; how does the sync engine check a write, tell its own echo from a pilot's change, retry, follow a moving knob, and run write functions; and what in the sync design docs, [01-profile-entries](../sync/01-profile-entries.md) to [04-order-and-recovery](../sync/04-order-and-recovery.md), does the code map change?
+Pointer sync, avatars, and plugins send on the cockpit stream, and state sync carries most of what a crew shares.
+It reads the four sync docs and the [sync log](../sync/log.md), 6.4's, 6.7's, and 6.8's answers, 01-format-and-delivery's [checking a write](../profiles/01-format-and-delivery.md#checking-a-write), and decisions [039](../../decisions/039-cut-link-replays-others-late-join.md) to [043](../../decisions/043-driven-entries-and-putting-back.md).
+It settles whether the profile engine fires `H:` events through SimConnect's client events or through calculator code ([01-spine](01-spine.md#left-open)), whether the legacy transmit call reaches every aircraft's handlers ([01-format-and-delivery](../profiles/01-format-and-delivery.md#left-open)), and what [02-live-sync](../sync/02-live-sync.md#open-questions)'s and [03-catch-up](../sync/03-catch-up.md#open-questions)'s open questions still hold, each as a case for the bench where it turns on frame timing.
+Its answer goes in `record/areas/sync/05-units.md`.
+Exit: the user agrees to that design doc.
+
+## 6.10 Flight-model sync
+
+Question: how does the flight-model feature carry the flying machine's pose and velocities to the following machines, from the samples the core reads and sends to the `Follow` routine that writes them each frame, and on which clock is each sample stamped?
+A following machine flies only by the flight-model feature's writes, and the PF's yoke, rudder, and toe brakes travel in that feature's samples rather than in the cockpit stream ([02-live-sync](../sync/02-live-sync.md)).
+It reads 03-v1-scope's [flight-model sync](../product/03-v1-scope.md#flight-model-sync), the [flight-model log](../flight-model/log.md), 6.3's, 6.4's, and 6.7's answers, the spine's [times](01-spine.md#times), and decisions [005](../../decisions/005-wasm-module-writes-following-aircraft.md), [024](../../decisions/024-times-in-microseconds-on-monotonic-clock.md), and [038](../../decisions/038-clock-offset-from-timed-exchange.md).
+It settles the spine's open items under flight-model sync, on the module's clock and on how far the core's arrival stamp trails the sim's read ([01-spine](01-spine.md#left-open)).
+Its answer goes in `record/areas/flight-model/01-flight-model-sync.md`.
+Exit: the user agrees to that design doc.
+
+## 6.11 Pointer sync
+
+Question: how does a press on a display or a panel reach the other cockpits and play there, through the panel bridge, the cockpit stream, the EFB app, and the desktop app; and on which clock does the panel bridge measure a span?
+It's v1's one feature with a panel module ([02-code-map](02-code-map.md#features)), so it's the first to load one through 6.2's panel bridge.
+It reads 03-v1-scope's [pointer sync](../product/03-v1-scope.md#pointer-sync), 6.2's and 6.9's answers, 01-format-and-delivery's [displays](../profiles/01-format-and-delivery.md#displays), and the FS Copilot fork's `record/pointer-forwarding/` and `record/wasm-pointer/`.
+It settles the spine's open item on which clock the panel bridge measures a span on ([01-spine](01-spine.md#left-open)).
+Its answer goes in `record/areas/pointer-sync/01-pointer-sync.md`.
+Exit: the user agrees to that design doc.
+
+## 6.12 Control
+
+Question: how do the take-control key and buttons, and voice phrases, reach the session's control, from the core helper's captures and speech to the request the session guards; and how does voice tell speech from noise, with which recognizer?
+The PF is the session's first role, and the take-control key is how it moves ([01-roles-and-members](../session/01-roles-and-members.md#the-pf)).
+It reads 03-v1-scope's [take-control key](../product/03-v1-scope.md#take-control-key) and [voice phrases](../product/03-v1-scope.md#voice-phrases), 6.5's and 6.7's answers, and decisions [006](../../decisions/006-core-catches-take-control-input.md) and [036](../../decisions/036-control-is-one-value.md).
+It settles the spine's open item on telling speech from noise ([01-spine](01-spine.md#left-open)).
+Its answer goes in `record/areas/control/01-take-control-and-voice.md`.
+Exit: the user agrees to that design doc.
+
+## 6.13 Avatars
+
+Question: how does the avatars feature seat each pilot's figure and bring its hand to what they click, from the click through the ray the aircraft model casts to the `Figure` routine that poses it; and which of [avatars' tentative decisions](../avatars/decisions.md) does its design confirm?
+It's the one feature that reads an aircraft's own models, so its design also designs the aircraft-model engine ([02-code-map](02-code-map.md#systems)).
+It reads avatars' tentative decisions and the [avatars log](../avatars/log.md), 03-v1-scope's [avatar sync](../product/03-v1-scope.md#avatar-sync), 01-format-and-delivery's [seats](../profiles/01-format-and-delivery.md#seats), 6.3's, 6.5's, 6.8's, and 6.9's answers, and [decision 004](../../decisions/004-core-works-out-figures-hand.md).
+Its answer goes in `record/areas/avatars/01-avatars.md`.
+Exit: the user agrees to that design doc.
+
+## 6.14 Traffic and ATC
+
+Question: how does the traffic host's traffic reach the other machines as AI objects, and its ATC as audio, under the traffic host's and the ATC host's roles, which one switch claims together ([02-code-map](02-code-map.md#the-traffic-and-atc-switch))?
+Traffic and ATC audio each hold a role of their own, and traffic creates AI objects on a SimConnect connection of its own ([02-code-map](02-code-map.md#a-connection-for-each-feature-for-each-load)).
+It reads 03-v1-scope's [traffic sync](../product/03-v1-scope.md#traffic-sync) and [hearing ATC](../product/03-v1-scope.md#hearing-atc), 01-roles-and-members' [traffic and ATC host](../session/01-roles-and-members.md#the-traffic-and-atc-host), 6.3's, 6.4's, 6.5's, and 6.7's answers, and the FS Copilot fork's `record/traffic-atc/`.
+Its answer goes in `record/areas/traffic-atc/01-traffic-and-atc.md`.
+Exit: the user agrees to that design doc.
+
+## 6.15 Plugins
+
+Question: which of the platform's hooks and moments, `ops`' operations, and the routine host's wants do plugins reach through QuickJS-ng, and how does the plugins crate run a plugin under the sandbox's limits?
+The Baron 58P's plugin is v1's first, and its profile settles what the plugin needs ([01-spine](01-spine.md#left-open)).
+It reads 03-v1-scope's [plugins](../product/03-v1-scope.md#plugins), 04-room-for-later's [plugins](../product/04-room-for-later.md#plugins) and [code inside the sim](../product/04-room-for-later.md#code-inside-the-sim), 01-format-and-delivery's [plugins](../profiles/01-format-and-delivery.md#plugins) and [deferred](../profiles/01-format-and-delivery.md#deferred), decisions [020](../../decisions/020-plugin-code-runs-only-in-core.md) and [046](../../decisions/046-sandbox-runtimes-and-limits.md), 6.2's answer for `ops`, 6.3's for the routine host's wants, 6.6's, and the answers of 6.8 to 6.14.
+It settles the spine's open item on which APIs the panel bridge and our WASM module offer plugins ([01-spine](01-spine.md#left-open)), whether the 58P's plugin needs any of 01-format-and-delivery's deferred APIs, and whether QuickJS-ng's hash seed changes anything a script sees ([02-code-map](02-code-map.md#left-open)).
+Its answer goes in `record/areas/plugins/01-plugins.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, once the features they may plug into are designed (user, 2026-10-14).
+Raised elsewhere: by 5.3, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
+
+## 6.16 The apps
+
+Question: what are the EFB app's and the desktop app's shells, the API their sections use, and the banner; how does a feature's section plug in and come out; and what counts as trouble for each component, and where does the pilot see it?
+Each feature shows itself to the pilot through its sections in these apps, so deleting a feature deletes its section in each ([tiers](02-code-map.md#tiers)).
+It reads 03-v1-scope's [EFB app](../product/03-v1-scope.md#efb-app) and [notification banner](../product/03-v1-scope.md#notification-banner), 02-code-map's [platform](02-code-map.md#the-platform), the spine's [the desktop app](01-spine.md#the-desktop-app) and [frameworks](01-spine.md#frameworks), decisions [012](../../decisions/012-efb-app-opens-banner-panel.md) and [028](../../decisions/028-desktop-pages-react-vite-tailwind.md) to [030](../../decisions/030-in-sim-code-es2017-esbuild.md), the [interface log](../interface/log.md), 01-between-machines' [left open](../network/01-between-machines.md#left-open), and the answers of 6.2 to 6.7 and 6.10 to 6.14.
+It settles the spine's open items under the apps ([01-spine](01-spine.md#left-open)), and how the status list looks ([01-between-machines](../network/01-between-machines.md#left-open)).
+Its answer goes in `record/areas/interface/01-apps.md`.
+Exit: the user agrees to that design doc.
+
+## 6.17 Installing and updating
+
+Question: how does a pilot install Crosscheck and get its updates, what does the watcher do between runs of the sim, and where does the installer live?
+Every program and the sim package reach the pilot's PC through it.
+It reads 03-v1-scope's [installing and updating](../product/03-v1-scope.md#installing-and-updating), the spine's [the watcher](01-spine.md#the-watcher), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md), [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and [015](../../decisions/015-watcher-reads-files-core-writes.md), and 6.16's answer.
+Its answer goes in `record/areas/install/01-installing-and-updating.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5, where the installer lives, and whether it's a program of ours ([02-code-map](02-code-map.md#left-open)).
+
+## 6.18 The build
+
+Question: how is the Coherent GT check's tool built, how does the build hash the message crate, and how does CI release every target, beyond what 02-code-map's [workspace](02-code-map.md#the-workspace) gives for `tools/build.ts`, `tools/setup.ts`, the map check, and the check on ts-rs's files?
+Every stage of [node 8](#8-the-build-order) is built and checked by it.
+It reads 02-code-map's workspace, 6.8's answer for the profile builder, 6.17's for what a release delivers, the spine's [compiling our code in the sim](01-spine.md#compiling-our-code-in-the-sim) and [the check](01-spine.md#the-check), decisions [025](../../decisions/025-messages-in-one-rust-crate.md), [026](../../decisions/026-first-message-carries-version-and-hash.md), [030](../../decisions/030-in-sim-code-es2017-esbuild.md), and [031](../../decisions/031-coherent-gt-check-tool.md), and this area's [Coherent GT reference](coherent-gt.md).
+It settles the spine's open items under the build, except the check on ts-rs's files, which 02-code-map settles, and the stand-in, which [node 7](#7-testing) takes ([01-spine](01-spine.md#left-open)).
+Its answer goes in `record/areas/build/01-the-build.md`.
+Exit: the user agrees to that design doc.
+Raised elsewhere: by 5.4, what the build does when cargo-msfs, which installs only the newest SDK, has installed one newer than a release's, and how long CI takes on Windows runners, against [5.4's budget](02-code-map.md#budgets-for-the-workspace) ([02-code-map](02-code-map.md#left-open)).
 
 ## 7 Testing
 
@@ -609,10 +774,10 @@ Two rules come from our earlier benches:
   FS Copilot's bench drove whatever its checkout had compiled last, and "a stale build is a working build, and it cost two sessions" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
 
 A bench also forces each network path, as [two cores on one PC](../network/01-between-machines.md#two-cores-on-one-pc) requires.
-It reads 5.2's and 5.3's answers, the [bench cases for checking a write](../profiles/01-format-and-delivery.md#checking-a-write), and the FS Copilot fork's `record/pointer-forwarding/docs/14-test-bench.md` and `record/exerciser/docs/01-design.md`.
-Its answer goes in a design doc in the build area, `record/areas/build/01-testing.md`, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
+It reads 5.2's and 5.3's answers, the cases for the bench that 6's children name, the [bench cases for checking a write](../profiles/01-format-and-delivery.md#checking-a-write), and the FS Copilot fork's `record/pointer-forwarding/docs/14-test-bench.md` and `record/exerciser/docs/01-design.md`.
+Its answer goes in a design doc in the build area, `record/areas/build/02-testing.md`, beside 6.18's design of the build, since the spine gives the test bench to the build ([parts](01-spine.md#parts)).
 Exit: the user agrees to that design doc.
-Waits on 5.
+Waits on 5 and 6.
 Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
 
@@ -624,3 +789,6 @@ It reads 6's and 7's answers.
 Its answer goes in the plan or plans it chooses, which hold v1's build stages.
 Exit: the user agrees to those plans.
 Waits on 6 and 7.
+
+[5.1.1]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
+[flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start

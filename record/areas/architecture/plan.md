@@ -625,6 +625,7 @@ Raised elsewhere: by 5.2, how sim awareness makes one moment of a load's many si
 Raised elsewhere: by 5.3, which of the sim's APIs carries each want of the routine host ([02-code-map](02-code-map.md#what-a-routine-can-ask-for)).
 Raised elsewhere: by 6.2, the sim service sends the core's announcement, a CommBus event named `CROSSCHECK_CORE` whose payload holds the core's port and whether a session runs, every 2s and at once when the session crate asks, as a session starts or ends, since the sim service sits below the session in the code map's units ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#page-client)).
 Raised elsewhere: by 6.2, what the core does with our WASM module when the version or hash it leaves in its slot differs from the core's, since its data slots are structs the module reads in place, where 6.2 has the core log a WebSocket client that differs and go on talking to it ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs)).
+Done on 2026-10-15.
 
 ## 6.4 The network
 

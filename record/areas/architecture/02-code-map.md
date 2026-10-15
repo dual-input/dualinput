@@ -183,8 +183,8 @@ The host holds one SimConnect connection from the sim's start, and gives each fe
 
 | Unit | Tier | What it does | Runs |
 | --- | --- | --- | --- |
-| Sim service | Host | Opens and closes the connections, knows which feature holds each, drops a message for a connection it closed, and keeps the host's own uses of the sim, [below](#what-the-host-keeps) | On the loop |
-| Sim client | Engine | For each connection: hands out SimConnect's IDs, parses each message, and routes it to the call that caused it; on a connection the sim dropped and the host opened again, makes its definitions, requests, and subscriptions again | On the loop, and in the IDE |
+| Sim service | Host | Opens and closes the connections, knows which feature holds each, discards a message for a connection it closed, and keeps the host's own uses of the sim, [below](#what-the-host-keeps) | On the loop |
+| Sim client | Engine | For each connection: hands out SimConnect's IDs, parses each message, and routes it to the call that caused it; on a lost connection the host opens again, makes its definitions, requests, and subscriptions again | On the loop, and in the IDE |
 | Edge | Engine | Keeps each connection's handle on one thread, since SimConnect's clients "are not currently thread-safe" ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)); makes each call through `SimConnect.dll`; tags each exception with the handle of its call; and hands what comes up, stamped, to the program it runs in | Off the loop, in the core and the IDE |
 | Stand-in sim | Engine | Takes the edge's place on the bench, and answers each call as the sim would, with SimConnect's own messages and its exceptions already tagged; [node 7](plan.md#7-testing) designs it | On the bench |
 | Bindings | Engine | SimConnect's declarations, which bindgen generates from the SDK's headers ([01-spine](01-spine.md#the-core)) | With the edge, the sim client, and the stand-in |
@@ -193,7 +193,7 @@ Three kinds of input come up through the seam, each stamped and recorded: a mess
 So the loop decides when to open a connection and when to try again, by timer, and a replay runs a sim's boot and restart too.
 
 The edge tags an exception by reading `SimConnect_GetLastSentPacketID` after each call and matching the packet ID the exception names, as the SDK documents, though it intends the function "while debugging and testing the client application" rather than "in a final retail build" (documented, [SimConnect_GetLastSentPacketID](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Debug/SimConnect_GetLastSentPacketID.htm)).
-FS Copilot's traffic code reads it after its one-off calls, not after its writes each frame (read in the FS Copilot fork, `FsCopilot/Connection/SimTraffic.cs`, `Call`, and `FsCopilot/Simulation/TrafficReceiver.cs`, `Render`), and no run of ours has matched an exception this way.
+Whether the tag holds among writes each frame is unverified: FS Copilot's traffic code read the packet ID only after its one-off calls (read in the FS Copilot fork, `FsCopilot/Connection/SimTraffic.cs`, `Call`, and `FsCopilot/Simulation/TrafficReceiver.cs`, `Render`), and no run of ours has matched an exception this way; [node 7](plan.md#7-testing)'s tests in the sim settle it.
 An exception the edge can't match, such as one whose packet ID is 0, `UNKNOWN_SENDID` (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`), still reaches the feature whose connection it came on.
 
 ### Why the seam sits at SimConnect's calls
@@ -202,7 +202,8 @@ An exception the edge can't match, such as one whose packet ID is 0, `UNKNOWN_SE
   - fsc-editor read values in definition order, so a variable the sim rejected after the call had returned cut short the values after it, and one rejected mid-definition would have shifted them ([04-01](../../learn/foundations/04-01-connection-and-data.md#data-definitions-and-requests)).
   - fsc-editor defined a watch set only when it changed, so one that arrived while the sim was closed "stopped at the connection check and was never defined" (fsc-editor, `src/main/sim/session.ts`).
   - FS Copilot's `SimClient` never saw an exception: its reading connections handle none, and its writing connection reads no message (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs` and `SimConnectProducer.cs`).
-- fsc-editor's replay took the source's place after its own parsing, and ran the steps after it beside the live path (read in fsc-editor, `src/main/sim/session.ts`, `startSim`), and a bug lived in the difference: "the bug it now catches shipped", because the input event handlers "captured every value, recorded it as evidence, and showed none of it" (fsc-editor, `src/main/sim/fixtures/README.md`, `pa24-beacon-input`).
+- fsc-editor's replay entered after its own parsing and ran a path of its own beside the live one (read in fsc-editor, `src/main/sim/session.ts`, `startSim`).
+  The replay's path fed the store of live values, while each live SimConnect handler had to feed it itself, and the input event handlers didn't, so they "captured every value, recorded it as evidence, and showed none of it", and that bug shipped (fsc-editor, `src/main/sim/fixtures/README.md`, `pa24-beacon-input`).
   Below our seam, the only code that runs live and never in a replay is the edge, which makes calls, tags exceptions, and copies bytes.
 - A replay needs no record of the calls the core made, because the same build makes the same calls from the same inputs.
 - The bench runs the real path, as [node 7](plan.md#7-testing) requires: FS Copilot's bench couldn't run with the sim open, since keeping it out "means making `SimClient` inert under `--bench`, which is real surface inside a shipping class" (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Do not run the simulator during a bench run").
@@ -213,7 +214,8 @@ It costs a stand-in that answers each kind of call our code makes with SimConnec
 
 The host's connection opens as soon as `SimConnect_Open` returns `S_OK`, before the sim's open reply arrives ([architecture log][flight]), and stays open until the sim closes, for the host's own uses ([below](#what-the-host-keeps)).
 A feature's connection opens at the feature's first sim call after its profile loads, and closes when the profile unloads or when the feature closes it.
-A closed connection takes its definitions, requests, and subscriptions with it, so the feature's next call opens a new, empty one, and a message the edge brings for a closed connection is dropped.
+A closed connection takes its definitions, requests, and subscriptions with it, so the feature's next call opens a new, empty one, and the sim service discards a message the edge brings for a closed connection.
+A connection the sim loses while the sim runs on, the host's or a feature's, the host opens again at once, and the host's own, lost when the sim closes, on the sim's next run; the sim client makes the lost connection's setup again on the new one, and a feature hears of the loss, since the objects it created went with the connection.
 
 Closing a connection is how a feature's work in the sim ends.
 The SDK says that when a client closes, "the server will remove all objects, menu items, group definitions and so on" that the client defined or requested (documented, [SimConnect_Close](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_Close.htm)).
@@ -228,7 +230,10 @@ Two costs come with them:
 - v1 holds one connection for the host and one for each feature that reaches the sim, about six, as FS Copilot's app held five and its module a sixth ([04-01](../../learn/foundations/04-01-connection-and-data.md#what-it-is)), and what a connection costs the sim's frame is unmeasured.
 
 [Node 7](plan.md#7-testing)'s tests in the sim settle what's unmeasured: whether closing a connection removes its AI objects and masks as killing its client did, whether a group on one connection keeps hearing an event while a group on another is cleared, and what a connection costs the sim's frame.
-If one goes against us, the sim service puts the features on one connection, or removes each feature's objects before closing its connection, and no feature changes, since no feature sees a connection.
+If closing a connection leaves its AI objects or masks behind, the sim service removes each feature's objects before closing its connection.
+If connections cost the frame too much, it puts the features on one connection.
+If a group on one connection stops hearing when a group on another is cleared, the spine's rule that the core clears no group while another of its groups hears that sim event ([01-spine](01-spine.md#the-core)) covers all of the core's connections.
+In each case no feature changes, since no feature sees a connection.
 
 ### What a feature sees
 
@@ -244,7 +249,7 @@ self.copies.insert(key, sim.create_ai(title, livery, at));  // a handle now; the
 
 - A feature names variables and events as the sim spells them, `A:`, `L:`, `B:`, and `K:` among them, as a profile names them ([01-format-and-delivery](../profiles/01-format-and-delivery.md#names)).
   A list of names, or a struct whose fields name its variables, such as the flight model's pose, reaches the sim as one tagged watch.
-- Each call returns a handle at once, so whatever comes back, a value, an object's ID, or an exception, reaches the handler with the handle of the call that caused it.
+- Each call returns a handle at once, so whatever comes back, a value, an object's ID, or an exception, reaches the handler with the handle of the call that caused it, though for an exception among writes each frame that's unverified ([above](#the-sim-seam)).
 - A feature gets the ID the sim gives each object it creates, as our avatar probe handed the figure's ID to the module that placed it (read in `experiments/areas/avatars/p12-wasm.mjs`, `setModule`).
   It never sees a connection, the numbers that name its definitions, requests, events, and groups, or SimConnect's message layouts.
 
@@ -272,12 +277,12 @@ Node 7 turns each into a test, on the bench or in the sim:
 - `AircraftLoaded` arriving several times for one load, as it came three times in one load to our client ([architecture log][flight]), raises one moment.
 - The host's connection opening on a sim already in a flight raises one moment, for the load it finds.
 - Several `Frame` events in one read, which FS Copilot's traffic thread got "for frames already rendered" when the sim outpaced it (read in the FS Copilot fork, `FsCopilot/Connection/SimTraffic.cs`), each reach the loop as an input of its own.
-- Traffic's copies, written each `Frame` through the loop, move as smoothly as FS Copilot's, which it wrote inside its own `Frame` handler and which scored 0.17 on our traffic tool's jitter score ([04-01](../../learn/foundations/04-01-connection-and-data.md#writing-data)), with a write function at its limit in the same load.
-- A message for a closed connection is dropped.
+- Traffic's copies, written each `Frame` through the loop while a write function hits its limit in the same load, move as smoothly as FS Copilot's, which it wrote inside its own `Frame` handler at a median jitter of 0.17, where 0 is constant motion and near 1 is stop-and-snap ([04-01](../../learn/foundations/04-01-connection-and-data.md#writing-data)).
+- A message for a closed connection is discarded.
 - An AI create with a title the sim lacks: its exception reaches the call, through the stand-in's tag on the bench and the edge's in the sim ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#the-ai-objects-api-and-the-facilities-api)).
-- A definition the sim rejects after the call returned, while the other values still arrive.
-- The host's connection opening as the sim boots, as [the spine](01-spine.md#the-core) measured it.
-- The host's connection, lost when the sim closes and opened again on the sim's next run, makes its definitions, requests, and subscriptions again.
+- A variable the sim rejects from a definition after the call returned: the definition's other values still arrive.
+- The host's connection, opened as the sim boots, takes its masking group as soon as `SimConnect_Open` returns `S_OK`, and the calls it makes before the sim's open reply arrives take effect, as [the spine](01-spine.md#the-core) measured.
+- A connection the sim loses, and the host opens again, has its definitions, requests, and subscriptions made again, as the host's does when the sim closes and starts again.
 
 ## Left open
 

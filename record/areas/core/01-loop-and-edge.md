@@ -17,6 +17,8 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 > - A recording also holds marks, and writes each input's numbers as varints, in a folder for each run in `recordings\` with the run's log file.
 > - The panic hook has the writer record the input being handled, even an unrecorded one, and a replay reproduces a panic only in a whole unit, where [a panic](#a-panic) promises it for any.
 > - The edge puts a same-length placeholder in place of the home folder's path in every input, and the real path back in each output that names a file, and hands up the clipboard only when it holds an invite code.
+>
+> Since 2026-10-16, a job may also run an engine's work on what it read, as the profile loader's job reads, parses, and checks a bundle and hands up the checked profile encoded with postcard, beside the jobs [timers, jobs, and IDs](#timers-jobs-and-ids) lists; and the edge fetches over HTTPS through reqwest 0.13 with rustls, which iroh already brings into the core ([the profiles' units](../profiles/02-units.md#fetching)).
 
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.

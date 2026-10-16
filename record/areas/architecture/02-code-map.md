@@ -46,6 +46,13 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The session crate also raises a member entering or leaving the flight, beside what [the platform](#the-platform)'s table has it raise.
 > - Rate and pause has a part in the EFB app, where [features](#features) gives it only one in the core, since the one way we found to set active pause is the toolbar's own call, from the toolbar's or the EFB's document ([environment log](../environment/log.md#2026-10-16-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off-and-no-simconnect-event-we-tried-does)).
 > - The profile loader writes the bundle a session pins, as a session key the PF's core writes, and state sync and the cockpit stream guard the session crate's Ready and control requests, so the session crate reads none of the three.
+>
+> Since 2026-10-16, [the profiles' units](../profiles/02-units.md) changes this document in four places:
+>
+> - An engine of its own, `profile-build`, on the engines' top line, holds the builder, which [engines](#engines) gives to `profile-engine`; it type-checks and compiles with TypeScript 6.0.3 inside QuickJS-ng, `tools/profile-builder` and later the IDE use it, and the core links `profile-engine` alone.
+> - The core builds no bundle, so of [CI](#ci)'s reasons for Windows runners, the core building a local bundle with CI's code no longer holds.
+> - CI publishes from a `pages` branch it only adds files to, on each merge that changes a bundle and on each release, and only bundles at levels a release supports, where [profiles in this repository](#profiles-in-this-repository) publishes on each merge.
+> - CI reads each bundle back against its level's frozen schema and compiles every script at one target, which settles [left open](#left-open)'s item on holding a released level's builder output to its release tag: nothing holds the bytes.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

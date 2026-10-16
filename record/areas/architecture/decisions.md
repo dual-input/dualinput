@@ -1344,6 +1344,43 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** on our development machine, none of 1,221 streamed packages had a `manifest.json`, the sim's `Content.xml` lists only names and activation, and the world map's aircraft list carried no version ([aircraft log](../aircraft/log.md#2026-10-16-a-streamed-package-keeps-no-version-on-disk-while-every-installed-one-with-a-manifest-has-its-package_version)).
 - **Leaves out:** nothing.
 
+## The core loads only bundles, which the profile builder builds with TypeScript 6.0.3 inside QuickJS-ng
+
+- **Decided:** the core never builds a bundle: a published one comes from Pages, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
+  An engine of its own, `profile-build`, type-checks and compiles with TypeScript 6.0.3's `typescript.js` inside QuickJS-ng through rquickjs, the same in CI, in the `crosscheck-profile-builder` program with its watch mode, and later in the IDE, which rebuilds on each save; the profile engine parses YAML with saphyr's tree and our own checker, and a bundle's hash is SHA-256.
+  This changes [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md), whose core builds a local bundle itself, once step 8's decisions are numbered.
+  Settled in node 6.8 by the user, 2026-10-16 ([the profiles' units](../profiles/02-units.md#the-builder)).
+- **Because:**
+  - A compiler in the core would ship to every pilot for the few who author, while a crewmate testing with an author can take the author's one bundle file instead of the sources (user, 2026-10-16).
+  - The IDE carries a TypeScript anyway, for errors and completions as an author types, so the size of the one it carries counts: `typescript.js` is 1.2 MB under zstd, against 7.7 MB for tsgo 7.0.2's program, which has no stable programmatic API until 7.1 ([profiles log][pr02]; user, 2026-10-16).
+  - It ran inside QuickJS-ng unmodified, with errors and output matching Node's byte for byte, and checked 300 write functions in about 0.9s with its load ([profiles log][pr02]).
+  - A level's declarations and the one compile target are what a released core relies on, so moving the builder to TypeScript 7 later changes no released core (user, 2026-10-16).
+  - saphyr makes a repeated key an error and carries a span on every node, and a field's level is a check serde can't express.
+- **Leaves out:** the builder program's name and how authors get it, for [6.18](plan.md#618-the-build); the TypeScript the IDE's editor runs, for the IDE's design.
+
+## CI publishes bundles from a branch it only adds to, at released levels, and the index lists the bundle each level takes
+
+- **Decided:** CI's profiles job commits each new bundle and the index to a `pages` branch that Pages serves from a subdomain of ours, and never deletes a file there; it publishes only bundles at levels a release supports, and runs on each release too; it reads each bundle back against its level's frozen schema, and compiles every script at ES2020, and nothing holds the builder's bytes to a release tag; the index lists, for each profile, only the bundles some level takes, the newest at or below it.
+  This answers the line 5.4 raised, and changes [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md), whose index lists every published bundle, once step 8's decisions are numbered.
+  Settled in node 6.8 by the user, 2026-10-16 ([publishing](../profiles/02-units.md#publishing)).
+- **Because:**
+  - Pages publishes a branch's folder on each push, so a bundle stays as long as the branch keeps its file.
+  - A level still on `main` can change before its release, so a bundle published at it could be kept for good under a schema its release doesn't hold.
+  - Reading the bundle back checks the bytes a released loader reads, and one target keeps the syntax it parses fixed, without one cached builder per release.
+  - Pages answered a repeat fetch of an unchanged file with a 304 and no body ([profiles log][pr01]), so an index fetched at each start costs headers when nothing changed, and an index of the bundles each level takes grows with profiles and levels, not merges.
+  - A core that's never updated fetches from the address it shipped with, so the address is ours, to outlive a move off Pages (user, 2026-10-16).
+- **Leaves out:** expiring superseded bundles, if the site nears its 1 GB.
+
+## The profile loader parses a bundle in a job, and the recording keeps the decoded profile
+
+- **Decided:** a job reads the pinned bundle, parses and checks it with the profile engine at the core's level, and hands up the checked profile encoded with postcard; the loop decodes it, finds the variant, and raises `ProfileLoaded`; the recording keeps the job's result, so a replay decodes the same profile with no file read, and a bug report carries a local bundle's text, since a published one stays on Pages.
+  The PF's loader also writes the pin when the key holds none and its cache gains a bundle, and the match check's profile item has four values, "Couldn't get the session's profile" among them.
+  Settled in node 6.8 by the user, 2026-10-16 ([loading](../profiles/02-units.md#loading)).
+- **Because:**
+  - Our profiles carry seats, possibly hundreds on an airliner, and plugins of any length, so a bundle's size has no cap, and a parse on the loop would hold up every input behind it (user, 2026-10-16).
+  - A replay runs no job, so a recording that kept only the hash would need the replay to fetch and parse, and a local bundle isn't on Pages to fetch (user, 2026-10-16).
+- **Leaves out:** nothing.
+
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load
@@ -1362,3 +1399,5 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 [p10]: log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly
 [lean]: log.md#2026-10-16-reading-traffic-only-as-it-changes-within-50km-once-a-second-and-the-flight-model-and-camera-at-their-send-rates-would-shrink-p10s-recording-from-45-to-13-mb-an-hour
 [p02]: ../environment/log.md#2026-10-16-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off-and-no-simconnect-event-we-tried-does
+[pr01]: ../profiles/log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked
+[pr02]: ../profiles/log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack

@@ -6,6 +6,9 @@ Depends on:  ../core/01-loop-and-edge.md, ../architecture/02-code-map.md, ../net
 Decides:     Which inputs a recording leaves out, and how a feature declares them; what a replay runs and checks, and what keeps a partly recorded unit's drift to itself; how the recording and its index are encoded; what keeps a home folder's path and the clipboard out; what each PC keeps; how a bug report is uploaded, admitted, kept, and fetched; the budgets; and the cases for the bench (node 6.6).
 ```
 
+> **Note**
+> Since 2026-10-16, a bug report also carries the text of a local bundle its run loaded, since a published one stays on Pages under its hash, and the profile loader tells the recording crate each loaded bundle's hash and whether it's local; the recording holds the loaded profile as the decoded result of the job that read it ([in the recording](../profiles/02-units.md#in-the-recording)).
+
 A recording is a replay log of the core's inputs, less the high-rate samples a feature marks as unrecorded, such as traffic's positions and the flight model's, so their bytes never reach the disk while the events around them do.
 A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform's, and the features state sync, pointer sync, take-control, voice, rate and pause, and Go to.
 Each PC keeps its runs whole within 1 GB, and each pilot uploads their part of a report to R2 through our Worker, signed with the key they held in that session.

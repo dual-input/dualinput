@@ -1,0 +1,25 @@
+p02-typescript-in-quickjs, 2026-10-16T18:38:27.926Z
+TypeScript 6.0.3, rquickjs 0.14.0, rquickjs-sys 0.14.0, Node v22.23.1, AMD Ryzen 7 7800X3D 8-Core Processor           
+typescript.js: 9144216 bytes, 1641628 gzip -9, 1160209 zstd -19
+target ES2020, noLib with a lib of our own; "profile" is 300 write functions, 51172 bytes
+
+plugin:
+  QuickJS-ng: load 240.5ms, runs 7.8, 7.6, 7.3, 7.4, 7.3ms, memory 35.2 MB
+  Node:       runs 51.7, 4.7, 4.3, 3.0, 4.5ms
+  same diagnostics and output as Node: yes, byte for byte
+  /plugin.ts:2:77 TS2345 Argument of type 'string' is not assignable to parameter of type 'number'.
+  emitted 1 file(s): /out/plugin.js 168 bytes
+
+profile:
+  QuickJS-ng: load 242.4ms, runs 654.6, 675.4, 678.2, 676.8, 663.4ms, memory 57.1 MB
+  Node:       runs 120.1, 83.5, 57.0, 47.8, 40.8ms
+  same diagnostics and output as Node: yes, byte for byte
+  /profile.ts:1199:13 TS2339 Property 'pump_missing' does not exist on type '{ readonly pump_1: number; readonly pump_2: number; readonly pump_3: number; readonly pump_4: number; readonly pump_5: number; readonly pump_6: number; readonly pump_7: number; readonly pump_8: number; ... 291 more ...; readonly pump_300: number; }'.
+  emitted 1 file(s): /out/profile.js 48172 bytes
+
+stack, "profile" once:
+   1 MB thread: ok, run 658.2ms
+   2 MB thread: ok, run 649.0ms
+   4 MB thread: ok, run 650.4ms
+   8 MB thread: ok, run 656.1ms
+  16 MB thread: ok, run 653.5ms

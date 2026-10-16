@@ -21,6 +21,8 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/sync/04-order-and-recovery.md](areas/sync/04-order-and-recovery.md): what comes back after a link, a core, a sim, or a PC goes down, and how the cockpit stream, its replay, and catch-up keep their order.
 - [areas/session/01-roles-and-members.md](areas/session/01-roles-and-members.md): who is in a session, the table of roles with the PF and the traffic and ATC host, and how each role moves.
 - [areas/profiles/01-format-and-delivery.md](areas/profiles/01-format-and-delivery.md): how a profile and its plugin are written, checked, and limited, and how CI publishes them and the core fetches them.
+- [areas/profiles/02-units.md](areas/profiles/02-units.md): the profile engine's, the profile builder's, and the profile loader's interfaces, and how a bundle is built, published, fetched, cached, pinned, and loaded.
+- [areas/profiles/log.md](areas/profiles/log.md): what our experiments found about building profiles' bundles with TypeScript inside QuickJS-ng, and fetching them from GitHub Pages.
 - [areas/sync/log.md](areas/sync/log.md): what our experiments found about settling after a load, write order, the double-fire, and how aircraft take stepped writes.
 - [areas/product/plan.md](areas/product/plan.md): Crosscheck's master plan, the steps from ideas to a released v1, and where each one stands.
 - [areas/product/01-aims.md](areas/product/01-aims.md): who Crosscheck is for, what it aims at, what it won't do, and its relay and license commitments.

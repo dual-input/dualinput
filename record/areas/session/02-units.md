@@ -7,7 +7,12 @@ Decides:     The session crate's members, session keys, control, session file, j
 ```
 
 > **Note**
-> Since 2026-10-16, [the profiles' units](../profiles/02-units.md#the-pin) has the PF's loader also write the pin when the key holds none and its cache gains a bundle for the session's aircraft, and prefer a local bundle, which the pin marks so no core fetches it from Pages, where [which bundle a session pins](#which-bundle-a-session-pins) writes it only when the aircraft changes; and the match check's profile item takes a fourth value, "Couldn't get the session's profile", for a pinned bundle a core couldn't fetch, find, or read ([the match check's item](../profiles/02-units.md#the-match-checks-item)).
+> Since 2026-10-16, [the profiles' units](../profiles/02-units.md#the-pin) changes this document in three places:
+>
+> - The PF's loader also writes the pin when the key holds none and its choice becomes one, after preflight ends too, where [which bundle a session pins](#which-bundle-a-session-pins) writes it only when the aircraft changes, and keeps it once preflight ends.
+>   Its choice is a local bundle that covers the aircraft, which the pin marks so no core fetches it from Pages, or else the bundle its cached index gives its level, where that section takes the newest its cache holds.
+> - The session crate writes this member's `match` key again whenever one of its values changes, where [members](#members)' table rewrites it only when a member enters the flight, so a profile that loads after its member entered the flight shows as loaded.
+> - The match check's profile item takes a fourth value, "Couldn't get the session's profile", for a pinned bundle a core couldn't fetch, find, or read, and it and "No profile for this aircraft" are errors even when every member shows them ([the match check's item](../profiles/02-units.md#the-match-checks-item)).
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

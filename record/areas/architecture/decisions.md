@@ -1352,7 +1352,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.8 by the user, 2026-10-16 ([the profiles' units](../profiles/02-units.md#the-builder)).
 - **Because:**
   - A compiler in the core would ship to every pilot for the few who author, while a crewmate testing with an author can take the author's one bundle file instead of the sources (user, 2026-10-16).
-  - The IDE carries a TypeScript anyway, for errors and completions as an author types, so the size of the one it carries counts: `typescript.js` is 1.2 MB under zstd, against 7.7 MB for tsgo 7.0.2's program, which has no stable programmatic API until 7.1 ([profiles log][pr02]; user, 2026-10-16).
+  - The IDE carries a TypeScript anyway, for errors and completions as an author types, so the size of the one it carries counts: `typescript.js` is 1.2 MB under zstd, against 7.7 MB for tsgo 7.0.2's program, whose 7.0 has no stable programmatic API ([profiles log][pr02]; user, 2026-10-16).
   - It ran inside QuickJS-ng unmodified, with errors and output matching Node's byte for byte, and checked 300 write functions in about 0.9s with its load ([profiles log][pr02]).
   - A level's declarations and the one compile target are what a released core relies on, so moving the builder to TypeScript 7 later changes no released core (user, 2026-10-16).
   - saphyr makes a repeated key an error and carries a span on every node, and a field's level is a check serde can't express.
@@ -1374,7 +1374,6 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## The profile loader parses a bundle in a job, and the recording keeps the decoded profile
 
 - **Decided:** a job reads the pinned bundle, parses and checks it with the profile engine at the core's level, and hands up the checked profile encoded with postcard; the loop decodes it, finds the variant, and raises `ProfileLoaded`; the recording keeps the job's result, so a replay decodes the same profile with no file read, and a bug report carries a local bundle's text, since a published one stays on Pages.
-  The PF's loader also writes the pin when the key holds none and its cache gains a bundle, and the match check's profile item has four values, "Couldn't get the session's profile" among them.
   Settled in node 6.8 by the user, 2026-10-16 ([loading](../profiles/02-units.md#loading)).
 - **Because:**
   - Our profiles carry seats, possibly hundreds on an airliner, and plugins of any length, so a bundle's size has no cap, and a parse on the loop would hold up every input behind it (user, 2026-10-16).

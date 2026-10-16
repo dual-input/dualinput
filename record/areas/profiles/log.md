@@ -1,7 +1,7 @@
 # Profiles: log
 
 What our experiments found about building profiles' bundles and delivering them to pilots, newest entry first.
-TypeScript's own compiler type-checks and compiles inside the QuickJS-ng we embed, with the same results as under Node, in about 0.9s for a profile of 300 write functions.
+TypeScript's own compiler type-checks and compiles inside the QuickJS-ng we embed, with the same results as under Node, in about 0.66s for a profile of 300 write functions once it's loaded, which takes 0.24s.
 GitHub Pages answers a repeat fetch of an unchanged file with a 304 and no body.
 The probes are [p01-pages-conditional.mjs](../../../experiments/areas/profiles/p01-pages-conditional.mjs) and [p02-typescript-in-quickjs.mjs](../../../experiments/areas/profiles/p02-typescript-in-quickjs.mjs), and their raw output is in [experiments/areas/profiles/results](../../../experiments/areas/profiles/results).
 Neither needs the sim.
@@ -26,15 +26,15 @@ It ran unmodified.
 - With `noLib`, TypeScript still needs ten global types to exist, `Array`, `Boolean`, `CallableFunction`, `Function`, `IArguments`, `NewableFunction`, `Number`, `Object`, `RegExp`, and `String`, so our declarations declare them.
 - `typescript.js` is 9,144,216 bytes, 1,641,628 under gzip -9, and 1,160,209 under zstd -19.
 
-A research pass the same day, whose probes stayed in a scratch folder, measured the alternatives, on the same machine:
+A research pass the same day measured the alternatives on the same machine, in a scratch folder whose raw output we didn't keep:
 
-- tsgo 7.0.2's `tsc.exe` is 24,520,544 bytes, 7,669,581 under zstd -19, and checked a one-file project in 14ms to 26ms; TypeScript 7 has no stable programmatic API until 7.1 (documented, [Announcing TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)), and npm lists no WebAssembly build of 7.0.2 among its packages for each platform (read with `npm view typescript@7.0.2 optionalDependencies`).
-- oxc 0.146.0's parser, transformer, and code generator added 2.2 MB to a release build and swc's TypeScript stripping 6.2 MB; neither type-checks.
+- tsgo 7.0.2's `tsc.exe` is 24,520,544 bytes, 7,669,581 under zstd -19, and checked a one-file project in 14ms to 26ms; TypeScript 7.0 "does not yet expose a stable programmatic API", and 7.1 is expected to ship a new, different one (documented, [Announcing TypeScript 7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)), and npm lists no WebAssembly build of 7.0.2 among its packages for each platform (read with `npm view typescript@7.0.2 optionalDependencies`).
+- oxc 0.146.0's parser, transformer, and code generator added 2.2 MB to a release build, and swc_ecma_transforms_typescript 56.0.0's stripping 6.2 MB; neither type-checks.
 - Monaco 0.57.0, VS Code's editor, ships TypeScript 5.9's compiler as `typescriptServices.js`, 9,075,748 bytes (read in its npm package).
 
 **Changed:** the profile builder type-checks and compiles with TypeScript 6.0.3 inside QuickJS-ng, and the core builds no bundle, so `typescript.js` never ships to pilots ([02-units](02-units.md#the-builder)).
-A build of a profile of 300 write functions takes about 0.9s, with the load, which is CI's cost per profile and level, and the IDE's on each save.
-TypeScript 6 gets only patches "infrequent, and only issued when absolutely necessary" (documented, [Progress on TypeScript 7](https://devblogs.microsoft.com/typescript/progress-on-typescript-7-december-2025/)), so its output stays put.
+A profile of 300 write functions takes about 0.66s once the compiler is loaded, which is CI's cost per profile and level after one load of 0.24s, and the IDE's on each save.
+Pinned at 6.0.3 exactly, its output stays put, and as of Microsoft's post of 2025-12-02, TypeScript 6.0's patches are to be "infrequent, and only issued when absolutely necessary" (documented, [Progress on TypeScript 7](https://devblogs.microsoft.com/typescript/progress-on-typescript-7-december-2025/)).
 
 **Affects:** [02-units](02-units.md); [01-format-and-delivery](01-format-and-delivery.md#testing-an-edit), whose core built a local bundle itself; [the code map](../architecture/02-code-map.md#engines), which gains an engine.
 
@@ -53,8 +53,9 @@ TypeScript 6 gets only patches "infrequent, and only issued when absolutely nece
 
 Every answer carried `Cache-Control: max-age=600`.
 The ETag is weak on the compressed answer and strong on the plain one.
+p01 fetched two unchanged HTML pages; that a JSON file on our own branch, served at our own domain, answers the same is unverified until that site exists.
 
 **Changed:** the core fetches the index with the ETag it kept, so a start with nothing new published costs one answer of headers ([02-units](02-units.md#fetching)).
-A merge reaches a pilot's next start within 10 minutes of CI publishing it, as `max-age=600` lets a cache hold the old index that long.
+A cache may hold the old index for up to 10 minutes after Pages serves a new one, as `max-age=600` allows (inference), on top of the time Pages takes to serve a push.
 
 **Affects:** [delivery](01-format-and-delivery.md#delivery), whose unverified line this settles.

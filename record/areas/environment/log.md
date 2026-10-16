@@ -30,9 +30,9 @@ The sim's toolbar sets it with `Coherent.call("TOOLBAR_SET_ACTIVE_PAUSE", paused
 | The same in mainUi, by `engine.call` | Nothing: the same "not bound", and `engine.trigger` raised nothing | Ran |
 
 The clock under the toolbar's call read as it did under the pilot's own active pause in the entry below, -0.14x to 0.32x across a window that takes in the moments around the change.
-p02 ran its calls in each document through the inspector; it didn't note whether the EFB was open.
+p02 ran its calls in each document through the inspector, with the EFB closed (user, 2026-10-16).
 
-**Changed:** a following machine sets active pause through the EFB app's code, which runs in the EFB's document from the sim's start, with the EFB closed ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)); that the call works while the EFB is closed is unverified.
+**Changed:** a following machine sets active pause through the EFB app's code, which runs in the EFB's document from the sim's start, with the EFB closed ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
 No cockpit panel and no SimConnect client can.
 `K:PAUSE_ON` raises the sim pause, which the pause menu raises too, where `K:PAUSE_SET` 1 raised the full pause.
 

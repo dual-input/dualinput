@@ -37,6 +37,8 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The backend in `backend/` is a Worker on D1, with no framework.
 >
 > Since 2026-10-16, [04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls) has `core-helper-service` also hold the next press, the mouse, playback streams, phrases, the output device and microphone settings, and the slice of devices and programs, beside the bindings, captures, and sounds [the platform](#the-platform)'s table names; avatars hands it the sim's process ID for the mouse, since the service sits on the sim service's line.
+>
+> Since 2026-10-16, [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) settles [left open](#left-open)'s item on how much of the queue a recording keeps: every input but those a feature declares unrecorded, on a channel, a sim call, a core helper want, or a job, where [one loop](#one-loop) records the whole queue; a unit with an unrecorded input runs in a replay on what was recorded, unchecked, and may register no guard, catch-up step, or cockpit kind. The `recording` crate also holds each run's index, marks, which runs to keep, and uploads; and each unit draws its own handles and IDs, where [the registry and moments](#the-registry-and-moments) gives the kernel one store of them.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

@@ -86,3 +86,4 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/core/03-sim-seam-and-wasm-module.md](areas/core/03-sim-seam-and-wasm-module.md): how the core reaches the sim and knows what it's doing, how it tells a crash from a close, and how our WASM module runs the routines features feed it.
 - [areas/core/04-core-helper.md](areas/core/04-core-helper.md): how the core runs the core helper, what features ask of it, what crosses its pipe, and what it runs for Raw Input, audio, Opus, and speech.
 - [areas/core/log.md](areas/core/log.md): what we found about the core's own process, such as how precisely its timers wake on Windows.
+- [areas/recording/01-recording-and-bug-reports.md](areas/recording/01-recording-and-bug-reports.md): what each machine records for a replay and what it leaves out, how long it keeps it, and how a bug report reaches us through the backend.

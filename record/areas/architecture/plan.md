@@ -671,6 +671,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, the session crate decides when the core exits, by the spine's rule, and runs a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, as a Leave before the exit, within 3s of Windows' `WM_QUERYENDSESSION`; it registers the source through which the core hears Windows end the session ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 Raised elsewhere: by 6.3, the session crate calls `sim_service::announce(cx, session)` as a session starts or ends; it takes the run of the sim for the session file, and whether the last run ended as a quit or a crash for the crew's notice, from sim awareness's state; and the menu script reports its master page and page to the sim service for sim awareness ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
 Raised elsewhere: by 6.4, the network checks the version at join, at the backend and in each first message, and the session crate shows the backend's refusal; the session crate registers the session channel as each connection's opener, sends its keys whole on every `LinkUp`, counts a member out on `MemberLeft` and `MemberOut`, asks `Host`, `Join`, `Open`, `Dial`, and `Leave`, writes the session file between `BackendAnswered` and `Open`, with the endpoint key, the relay list and its tokens, and the crew's endpoint IDs, and hands control over before a PF's `Leave` ([02-units](../network/02-units.md#requests-the-session-crate-makes)).
+Raised elsewhere: by 6.6, the session crate tells the recording crate when a session starts, with its ID, its endpoint key, the crew's display names, the aircraft, and the departure airport from the flight file it reads at preflight, and when it ends ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#the-index)).
 
 ## 6.8 Profiles
 
@@ -693,6 +694,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.2, which panel listens for `H:` events, and how, since [decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md) keeps one panel for them, as a panel module whose rule picks that panel ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#cockpit-panels-and-their-modules)).
 Raised elsewhere: by 6.3, SDK 1.7.3 has `fsEventsRegisterHEvent`, which takes an `H:` event's name, and `fsEventsHEventCall`, so our module can fire an `H:` event by name without calculator code, for the item on how the profile engine fires them ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis)).
 Raised elsewhere: by 6.4, the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own, not on the heartbeat, and sends what a member lacks on every `LinkUp` with `again`, which a link moved onto a second connection raises again, and which a restarted core's link never carries ([02-units](../network/02-units.md#links)).
+Raised elsewhere: by 6.6, state sync marks the recording, through `cx.recording().mark`, when a write never lands, with the entry, both machines' values, and the retries, and when a watch-only entry's values differ between machines; and the cockpit stream, state sync, and the sync engine stay whole in the recording, so a replay checks them ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#marks)).
 
 ## 6.10 Flight-model sync
 
@@ -703,6 +705,7 @@ It settles the spine's open items under flight-model sync, on the module's clock
 Its answer goes in `record/areas/flight-model/01-flight-model-sync.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.4, each sender's clock offset sits in the network's state by pilot ID and restart count, and the flight model's channel handler, not the network, drops a sample made under an older control value ([02-units](../network/02-units.md#channels-and-sends)).
+Raised elsewhere: by 6.6, the flight model's pose read every frame and its samples' channel are declared unrecorded, so flight-model sync is partly recorded: it runs in a replay on what was recorded, unchecked, and may register no guard, catch-up step, or cockpit kind, or make a request the platform decides ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
 
 ## 6.11 Pointer sync
 
@@ -732,6 +735,7 @@ Its answer goes in `record/areas/avatars/01-avatars.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.3, the figure's SimObject title, `CROSSCHECK_Figure`, takes a kind, as [names the sim shares](02-code-map.md#names-the-sim-shares) requires.
 Raised elsewhere: by 6.5, avatars turns the mouse on with the sim's process ID, read from sim awareness, and gets the left and right buttons' presses and releases and at most one move every 16ms while the left is held, each with the cursor's place in the sim's main window and the window's size, only while that window itself is in front, so a click in a popped-out display crosses nothing ([04-core-helper](../core/04-core-helper.md#raw-input)).
+Raised elsewhere: by 6.6, avatars' camera read every frame, its poses' channel, and its job that reads an aircraft's models are declared unrecorded, while the figure's create answer and the core helper's clicks stay recorded, so avatars is partly recorded and may register no guard, catch-up step, or cockpit kind ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
 
 ## 6.14 Traffic and ATC
 
@@ -742,6 +746,7 @@ Its answer goes in `record/areas/traffic-atc/01-traffic-and-atc.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.4, ATC audio's channel takes `Deadline` delivery, each frame dropped once its turn to play has passed, and traffic sends its identities whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
 Raised elsewhere: by 6.5, ATC audio registers a capture by program name with its bitrate, gate level, and hangover, and gets 20ms Opus frames, each stamped at its first sample, only above the gate; it opens a playback stream with its buffer's rule and hands it frames by number; the helper lists the programs that own an audio session, for picking the ATC app; and FS Copilot's 24 kbps, −50dBFS gate, and 300ms hangover are the starting values ([04-core-helper](../core/04-core-helper.md#capturing-a-program)).
+Raised elsewhere: by 6.6, traffic's polls and its states' channel, and ATC audio's capture and its frames' channel, are declared unrecorded, while traffic's identities and its creates' answers stay recorded, so both features are partly recorded and may register no guard, catch-up step, or cockpit kind; and traffic's poll is a call to add to 6.3's sim calls, for `SimConnect_RequestDataOnSimObjectType` ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
 
 ## 6.15 Plugins
 
@@ -754,6 +759,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.3, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
 Raised elsewhere: by 6.4, how a plugin's channel instance gets its number and announces it on the session channel, since every other channel is a constant in the message crate, and a receiver drops a channel no unit registered ([02-units](../network/02-units.md#channels-and-sends)).
+Raised elsewhere: by 6.6, plugins stay whole in the recording, so a replay checks them, and whether plugin tests, a Later pick, need a plugin's exported values marked in the recording is this design's ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#left-open)).
 
 ## 6.16 The apps
 
@@ -768,6 +774,7 @@ Raised elsewhere: by 6.2, where each notice shows, by its level; which slices ea
 Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, differs, or stopped, and which of sim awareness's state the apps show ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
 Raised elsewhere: by 6.4, the network's slice of client state for the status list: each member's link and path, and whether this PC reaches the internet ([02-units](../network/02-units.md#what-the-pilot-sees-and-settings)).
 Raised elsewhere: by 6.5, the output device and microphone settings, each Windows' default or a device the pilot picks; the slice listing devices and programs that own an audio session; and the notices for a core helper that's down, a want it can't carry out, and a picked device that's missing ([04-core-helper](../core/04-core-helper.md#the-devices)).
+Raised elsewhere: by 6.6, the report page lists the recorded sessions from each run's index and uploads one; the desktop app lists the recordings with each one's size and a way to delete it (user, 2026-10-16); the EFB app's button that marks the moment sends the recording crate's command; and the notices offering a missing pilot's part, and refusing a file too large to upload ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
 
 ## 6.17 Installing and updating
 
@@ -816,6 +823,7 @@ Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an 
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
 Raised elsewhere: by 6.4, the bench's local `iroh-relay` binds `127.0.0.1`, since in dev mode it answered on IPv6 loopback only, and whether it answers there is untried; a TCP proxy in front of it stands in for a relay's loss and cuts; the bench's cores reach a local backend through a development setting; and v1's full mix on a direct path under loss runs by hand on our droplets, in a program built on the network crate and the transport ([02-units](../network/02-units.md#cases-for-the-bench)).
 Raised elsewhere: by 6.5, a development setting naming the program the core starts as its helper, so the bench can run a stand-in that scripts presses and frames, and whether that keeps to the rule that no development mode skips the real path; and a check of opus-rs on recorded ATC speech at 5% loss ([04-core-helper](../core/04-core-helper.md#cases-for-the-bench)).
+Raised elsewhere: by 6.6, a replay checks only whole units, so the bench's replays of a session check the platform, state sync, pointer sync, take-control, voice, rate and pause, and Go to, and its runs with the setting that records everything check every unit; and v1's friend sessions measure a following machine's recording ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
 
 ## 8 The build order
 

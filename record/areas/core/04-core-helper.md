@@ -6,6 +6,9 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     What runs in the helper and what on the loop; what a feature registers and turns on; the pipe's format and messages; when the helper starts, stops, and starts again; what crosses the pipe; the helper's threads, its Raw Input, devices, capture, playback, and speech; its Opus codec and dependencies; the budgets; and the cases for the bench (node 6.5).
 ```
 
+> **Note**
+> Since 2026-10-16, the helper sends `Alive` every 2s whatever else it sends, where [the pipe](#the-pipe) has it send `Alive` only after 2s of nothing, so its silence counts only recorded messages; and a capture can be registered unrecorded, as ATC audio's is ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.
 Across the helper's standard input and output go postcard messages, each after a 4-byte length, and only what a feature asked for crosses: a bound key's or button's press, the next press while the pilot binds one, the mouse while the sim's main window is in front, a phrase heard, and Opus frames.

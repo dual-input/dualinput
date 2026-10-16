@@ -8,6 +8,14 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 
 > **Note**
 > Since 2026-10-16, the kernel also hands out random bytes, through `cx.random_bytes()` from the same ChaCha20 generator as `cx.new_id()`, for the network's endpoint key, where [timers, jobs, and IDs](#timers-jobs-and-ids) has the generator draw only UUIDs ([02-units](../network/02-units.md#the-endpoint-key)).
+>
+> Since 2026-10-16, [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) changes this document in five places:
+>
+> - The writer leaves out the inputs a feature declares unrecorded, so [what a recording holds](#what-a-recording-holds) is every input but those; a unit with one runs in a replay on what was recorded, and its outputs aren't checked.
+> - Each unit counts its own timers, jobs, and calls, and draws its IDs and random bytes from a generator of its own, seeded from the one seed and its place in the registry, where [timers, jobs, and IDs](#timers-jobs-and-ids) has one counter and one generator; and each output names its unit, so the checkpoints' hash folds only whole units' outputs.
+> - A replay on the same commit with uncommitted changes warns and runs, where [running a replay](#running-a-replay) has any other build refuse.
+> - A recording also holds marks, and writes each input's numbers as varints, in a folder for each run in `recordings\` with the run's log file.
+> - The edge puts a same-length placeholder in place of the home folder's path in every input, and the real path back in each output that names a file, and hands up the clipboard only when it holds an invite code.
 
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.

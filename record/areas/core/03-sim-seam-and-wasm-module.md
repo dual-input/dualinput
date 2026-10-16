@@ -6,6 +6,9 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     The sim edge's thread and its inputs, the sim's process among them; the sim client's and the sim service's interfaces; sim awareness's stages and its one moment, and that it's an engine; how the core tells a crash from a close, and which aircraft and preset loaded; our WASM module's slots, its status, and what happens to a module from another build; which of the sim's APIs carries each want; the module through a flight load; the core's announcement; and the budgets (node 6.3).
 ```
 
+> **Note**
+> Since 2026-10-16, a watch or a camera read in [what a feature calls](#what-a-feature-calls) can be declared `.unrecorded()`, and the sim service hands the edge each such request's connection and ID before the call goes out, so the recording leaves out its answers; the sim service decides nothing on such an answer beyond routing it to its feature ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.

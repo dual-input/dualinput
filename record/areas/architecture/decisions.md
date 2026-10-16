@@ -1254,6 +1254,46 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** on the wrong microphone, a voice handover fails with no sign of why.
 - **Leaves out:** nothing.
 
+## A recording is a replay log less the high-rate samples a feature marks, and a replay checks only the units whose inputs are whole
+
+- **Decided:** a channel, a sim call, a core helper want, or a job can be declared unrecorded, and the edge's writer leaves its inputs out of the recording.
+  A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked; it may register no guard, catch-up step, or cockpit kind, or make a request the platform decides, and the kernel refuses one that tries.
+  Each unit counts its own handles and draws its own IDs, each output names its unit, and a platform crate decides nothing on an unrecorded input beyond handing it to its unit, so the network's lost-link timer counts only recorded inputs and the core helper sends `Alive` every 2s.
+  A development setting records everything, and a replay on the same commit with uncommitted changes warns and runs.
+  v1's partly recorded units are traffic, ATC audio, avatars, and flight-model sync.
+  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+- **Because:**
+  - A flying machine that hosts traffic at EGLL took in 285 MB of inputs an hour, 45 MB with zstd, 87% of the raw bytes traffic's positions ([architecture log][p10]), and without its traffic, flight model, and camera its sim inputs came to 0.78 MB an hour.
+  - Reading less would have cut it to 13 MB an hour ([architecture log][lean]), but a recording is a debugging tool, and mustn't set traffic's radius or rate, or anything else a pilot feels (user, 2026-10-16).
+  - The line that matters runs between a feature's events and its samples, not between features, so traffic's identities and the figure's creation stay in the recording (user, 2026-10-16).
+  - Splitting a feature into a replayed unit for its events and an unrecorded one for its samples would have let the recorder shape the feature's code, for exact replay of traffic's spawns alone, since flight-model sync and avatars decide sample by sample.
+- **Leaves out:** how big a following machine's recording is, which v1's friend sessions show.
+
+## The edge keeps the home folder's path, and anything but an invite code on the clipboard, out of every input
+
+- **Decided:** the edge puts a run of `~` the length of the home folder's path in its place wherever it appears in an input, and the real path back in each output that names a file; the clipboard's job hands up only six characters from the invite code's alphabet; and an upload scrubs the run's log of the home folder's path and the Windows username.
+  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-stays-out)).
+- **Because:**
+  - `AircraftLoaded` and `FlightLoaded` name paths under `%APPDATA%`, in the pilot's home folder (measured on MSFS 2024, 2026-10-09, `experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.txt`), and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) scrubs home folders from every report.
+  - Scrubbing a recording after the fact would change its inputs and break its replay, while a placeholder of the same length keeps every SimConnect record's size, and a replay opens no file.
+- **Leaves out:** nothing.
+
+## Each PC keeps whole runs within 1 GB, with no minimal recording
+
+- **Decided:** the recording crate deletes runs with no session beyond the 3 newest runs, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions is the one record a later Crosscheck reads; and no setting chooses full or minimal recording.
+  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
+- **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), and at a few MB an hour of session, 1 GB holds hundreds of hours, so size no longer calls for a minimal mode (user, 2026-10-16).
+- **Leaves out:** the desktop app's list of recordings with their sizes and a way to delete them, for [6.16](plan.md#616-the-apps).
+
+## A bug report's parts go to R2 through our Worker, only from the session's members, for 30 days
+
+- **Decided:** each pilot's core uploads each file of their part to `POST /v1/reports`, signed with the endpoint key it held in the session; the Worker checks the signature against the endpoint ID and the members it kept for that session, stores the file in R2, and R2 deletes it after 30 days; the hourly Cron Trigger keeps sessions' and members' rows 30 days after their last renewal; a core offers a missing pilot's part when a crewmate has sent one; and `tools/reports.ts`, with a secret the Worker holds, lists, fetches, and deletes reports.
+  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
+- **Because:**
+  - Blobs split across D1's rows of at most 2 MB would be a hack (user, 2026-10-16), while R2 keeps 10 GB a month free and costs $0.015 a GB-month past it (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)).
+  - A member's own endpoint key already signs the backend's requests ([02-units](../network/02-units.md#its-requests)), so admitting only members keeps out junk with no accounts.
+- **Leaves out:** whether Cloudflare asks for a card to turn R2 on (unverified), which turning it on shows.
+
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load
@@ -1269,3 +1309,5 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 [p06]: ../network/log.md#2026-10-11-on-irohs-relay-under-loss-v1s-streams-run-as-late-as-its-one-off-packets-and-no-later-because-quic-never-sees-a-loss-there-so-a-sender-that-keeps-only-each-channels-newest-packet-changes-nothing
 [p07]: ../network/log.md#2026-10-11-after-a-total-outage-a-redialed-connection-carries-data-03s-to-14s-after-the-link-returns-while-one-that-lived-through-a-10s-outage-takes-5s-to-7s
 [nwin]: ../network/log.md#2026-10-16-iroh-relay-130-builds-and-runs-on-windows-and-in-dev-mode-answers-on-ipv6-loopback-only
+[p10]: log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly
+[lean]: log.md#2026-10-16-reading-traffic-only-as-it-changes-within-50km-once-a-second-and-the-flight-model-and-camera-at-their-send-rates-would-shrink-p10s-recording-from-45-to-13-mb-an-hour

@@ -683,6 +683,7 @@ It reads 01-format-and-delivery, 6.3's and 6.7's answers, 02-code-map's [profile
 It settles which compiler the core embeds to build a local bundle's plugin ([left open](../profiles/01-format-and-delivery.md#left-open)).
 Its answer goes in `record/areas/profiles/02-units.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-16.
 Raised elsewhere: by 5.4, whether CI holds a released level's builder output to its release tag as it holds the level's schema and declarations ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 6.7, the profile loader on the PF's core writes the pinned bundle's hash as a `Pf` session key of its own, the newest its cache holds for the session's aircraft, whenever that aircraft changes before preflight ends, and every other loader loads it by hash; the loader registers the match check's item for the bundle each core loaded, "unpublished" for a local one, and "No profile for this aircraft" as an error when none is published, in which case the session flies without one ([the session's units](../session/02-units.md#which-bundle-a-session-pins)).
 

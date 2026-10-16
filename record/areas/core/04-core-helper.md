@@ -39,12 +39,12 @@ Decisions [004](../../decisions/004-core-works-out-figures-hand.md), [006](../..
 // a sketch: the take-control key and its cue, beside 01-loop-and-edge's
 pub fn register(r: &mut Registry) {
     let me = r.unit::<TakeControl>("take-control");
-    me.binding(setting::KEY, TakeControl::on_press);   // a setting of the feature's, holding a key or a button
+    me.binding(setting::TAKE_CONTROL_INPUT, TakeControl::on_press);   // a setting of the feature's, holding a keyboard key or a button
     me.sound(sound::CONTROL_PASSED, include_bytes!("sounds/control-passed.opus"));
 }
 
 fn start(me: &mut TakeControl, cx: &mut Cx) {
-    cx.helper().watch(setting::KEY, true);             // the helper runs while anything is on
+    cx.helper().watch(setting::TAKE_CONTROL_INPUT, true);             // the helper runs while anything is on
 }
 
 fn on_press(me: &mut TakeControl, press: &Press, cx: &mut Cx) {
@@ -56,7 +56,7 @@ Each want is registered once and is off until its feature turns it on:
 
 | Want | Registered with | Turned on by | What comes back | v1's user |
 | --- | --- | --- | --- | --- |
-| A binding | A setting's key, whose value is a key or a button, and a handler | `watch(key, on)` | Each press and release, with its stamp | Take-control |
+| A binding | A setting key, whose value is a keyboard key or a button, and a handler | `watch(setting, on)` | Each press and release, with its stamp | Take-control |
 | The next press | Nothing | `next_press(on)` | The next key or button pressed, with a name to show it by, after which it turns itself off | Take-control, while the desktop app binds its key |
 | The mouse | A handler | `mouse(Some(pid))`, with the sim's process ID | Left and right presses and releases, and at most one move every 16ms while the left button is held, each with the cursor's place in the sim's main window and the window's size | Avatars |
 | A capture | An ID and a handler | `capture(id, Some(source))`, with a program's name, a bitrate, and a gate | 20ms Opus frames, each stamped at its first sample, only above the gate; and whether the program is running and captured | ATC audio, on the ATC host |
@@ -64,7 +64,7 @@ Each want is registered once and is off until its feature turns it on:
 | Phrases | A list of phrases and a handler | `listen(on)` | The phrase heard, with stamps for when it began and ended | Voice |
 
 - The service numbers each registration in the order units register, as sources are numbered, and only the same build reads those numbers, in the helper and in a replay ([inputs](01-loop-and-edge.md#inputs)).
-- When the clients crate raises a setting changed whose key a binding names, the service sends the wants again, as [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes) has it.
+- When the clients crate raises a setting changed whose setting key a binding names, the service sends the wants again, as [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes) has it.
 - Avatars passes the sim's process ID, read from sim awareness, because the service sits on the sim service's line in the code map's [units](../architecture/02-code-map.md#the-units), and a crate depends only on the lines below its own ([tiers](../architecture/02-code-map.md#tiers)).
 - A feature also registers sounds, each an ID and an Ogg Opus file embedded in its crate, which the service sends after each `Hello`.
   A sound isn't a want and keeps no helper running: `play(id)` plays it while the helper runs, and a `play` while it's stopped is logged and dropped.
@@ -156,7 +156,8 @@ The helper runs on std's threads and channels, with no async runtime, since each
 
 ### Raw Input
 
-- The helper registers keyboards, joysticks, and gamepads in sink mode, delivered to a hidden window of its own, as p08's did (read in `experiments/areas/architecture/flight/helper/src/main.rs`), and multi-axis controllers, the Generic Desktop page's usage 8 (documented, [HID Usage Tables 1.5](https://usb.org/sites/default/files/hut1_5.pdf)), while a binding or the next press is on, and the mouse while the mouse is on.
+- While a binding or the next press is on, the helper registers keyboards, joysticks, gamepads, and multi-axis controllers, the Generic Desktop page's usage 8 (documented, [HID Usage Tables 1.5](https://usb.org/sites/default/files/hut1_5.pdf)), and while the mouse is on, the mouse.
+  Each registration is in sink mode, delivered to a hidden window of the helper's own, as p08 registered keyboards, joysticks, and gamepads (read in `experiments/areas/architecture/flight/helper/src/main.rs`).
   In sink mode, with the sim in front, p08's helper got all 3 Page Down presses a person made and 22 changes of a flight-hardware button's state in 10s (measured on MSFS 2024, 2026-10-09, [architecture log][flight]).
 - **A key** is bound by its scan code and its E0 flag, the physical key, whatever the keyboard's layout, and the helper names it for the next press through `GetKeyNameTextW`.
   The helper reports a press only for a key that isn't already down, so a held key that repeats its press crosses once.
@@ -178,7 +179,8 @@ The helper runs on std's threads and channels, with no async runtime, since each
 - When no device has the picked endpoint ID, the helper takes one with the picked name, since Windows may give a USB headset plugged into another port a new endpoint ID (unverified); with neither, it plays or listens on Windows' default instead, and moves back when the device returns.
   The helper reports what it uses in `InUse`, which the core logs, so a bug report shows where sound went, and the service shows a warning naming the missing device while it's gone.
 - While `lists` is on, the helper answers with the output devices, the microphones, and the programs that own an audio session, which FS Copilot's "Choose another…" lists for the ATC app (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Choosing the ATC app"), and the service puts them in a slice for the desktop app.
-- Every stream runs in shared mode at 48 kHz, mono, and lets WASAPI convert from the device's format (documented, [wasapi 0.25.0](https://docs.rs/wasapi/0.25.0/wasapi/enum.StreamMode.html), `autoconvert`); the microphone runs at the rate the recognizer takes.
+- The output stream runs in shared mode at 48 kHz, mono, and lets WASAPI convert to the device's format (documented, [wasapi 0.25.0](https://docs.rs/wasapi/0.25.0/wasapi/enum.StreamMode.html), `autoconvert`).
+  A capture asks for the same, though whether WASAPI converts a process-loopback stream is unverified until the helper's first build, and the microphone runs at the rate the recognizer takes, which 6.12 sets.
 
 ### Capturing a program
 
@@ -186,9 +188,9 @@ The helper runs on std's threads and channels, with no async runtime, since each
 - It watches that process, because a loopback whose program has exited delivers silence at −90dBFS with no error (same document), and looks for the program again once it's gone.
 - It divides the program's level in the Windows mixer back out, up to +20dB, since Windows applies it before the capture, which FS Copilot measured with a test tone on 2026-09-06 and reported holding against BeyondATC in a live flight (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Stage 3: the audio path works on one machine").
   It reads that level through the session's `ISimpleAudioVolume`, which `wasapi` 0.25.0 doesn't wrap (read in its docs, `AudioSessionControl`), so the helper calls it through `windows`.
-- It encodes 20ms frames at the capture's bitrate, sends a frame only while its level is above the gate, keeps sending for the gate's hangover after it falls below, and sends the frame before an onset with it, so the onset isn't clipped, as FS Copilot's capture does (same document, "Encoding and transport").
+- It encodes 20ms frames at the capture's bitrate, sends a frame only while its level is above the gate, keeps sending for the gate's hangover after it falls below, and sends the frame before an onset with it, so the onset isn't clipped, as FS Copilot's capture does (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Encoding and transport").
 - Each frame's stamp is the counter value WASAPI reports for its first sample, which `IAudioCaptureClient::GetBuffer` gives in 100ns units (documented, [GetBuffer](https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudiocaptureclient-getbuffer)), converted to µs.
-- FS Copilot's 24 kbps VBR, −50dBFS gate, and 300ms hangover (same document) are ATC audio's starting values, which [6.14](../architecture/plan.md#614-traffic-and-atc) sets.
+- FS Copilot's 24 kbps VBR, −50dBFS gate, and 300ms hangover (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Encoding and transport") are ATC audio's starting values, which [6.14](../architecture/plan.md#614-traffic-and-atc) sets.
 - A capture's source is a program in v1, and the source is an enum, so the microphone sent to the ATC host that [04-room-for-later](../product/04-room-for-later.md#channels) lists adds a variant, and a plugin's own sound is a program as v1's is.
 
 ### Playing
@@ -215,7 +217,7 @@ The helper runs on std's threads and channels, with no async runtime, since each
 The helper encodes and decodes Opus through opus-rs, a pure-Rust port of libopus 1.6, at the version the helper's stage of the build pins (user, 2026-10-16).
 
 - Nothing else in Crosscheck depends on ATC audio or the cues, so we take a young codec there, and the codec sits behind three calls, to encode a frame, decode one, and conceal a lost one, with the same build at both ends.
-  If the bench finds it falls short, `opus` 0.4.0, bindings to libopus 1.6.1, takes its place, which changes one crate and no message, and puts CMake on every build machine, since its bundled build compiles libopus through CMake (documented, [opusic-sys](https://github.com/DoumanAsh/opusic-sys)).
+  If the bench finds it falls short, `opus` 0.4.0, bindings to libopus 1.6.1, takes its place, which changes one crate and no message, and puts CMake on every build machine, since `opus` 0.4.0 builds libopus through opusic-sys 0.7, whose bundled build runs CMake (read on crates.io, 2026-10-16; documented, [opusic-sys](https://github.com/DoumanAsh/opusic-sys)).
   Every libopus binding we found builds that way (read 2026-10-16 in the dependencies crates.io lists for opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0, each with `cmake`), and nothing else in our build uses CMake (read in our probes' `Cargo.lock` files, which hold `cc` and `ring` and no `cmake`).
 - opus-rs claims test suites against libopus, 13 fuzz targets, loss concealment "as libopus does", and speed "competitive with C libopus", and has 53 stars and one maintaining organization (documented, [opus-rs](https://github.com/restsend/opus-rs), read 2026-10-16); we've checked none of it.
 - Its notes name a gap in CELT packets of 5 to 6 bytes, which differ from libopus's at their tail and lose some SNR (same page).
@@ -259,7 +261,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A key nobody bound, typed into another program, never crosses the pipe, which the recording shows.
 - While the desktop app binds a key, with a switch on a throttle quadrant held on, only the button the pilot presses crosses, and then nothing.
 - Clicks with another program in front, or in a popped-out display, never cross.
-- On a monitor scaled to 150%, a click in the sim's window's corner crosses as −1 and 1, or 1 and −1.
+- On a monitor scaled to 150%, a click in the top-left corner of the sim's window's client area crosses as x −1, y 1, and one in the bottom-right as x 1, y −1.
 - Windows' default output device changes while a sound plays, and the sound carries on in the new device; Windows' default microphone changes, and a phrase is still heard.
 - A picked headset is unplugged: Crosscheck plays on Windows' default and warns, and goes back to the headset when it's plugged into another port.
 - Our recorded "you have control" plays through desk speakers beside the microphone, and opens no offer.

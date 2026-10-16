@@ -1215,7 +1215,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 - **Because:**
   - A started-again helper gets everything in one round, as the session crate sends its keys whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
-  - Features turn their wants on only in a session, so [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)'s rule for when the helper runs holds without the service knowing what a session is.
+  - Take-control turns its binding on only in a session, and the next press and the lists are on only while the desktop app binds a key or lists devices, so [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)'s rule for when the helper runs holds without the service knowing what a session is.
   - Starting it again every 2s adds no mechanism beyond the notice, which the pilot needs either way.
 - **Leaves out:** whether a Windows program with no console reads a piped standard input, which p08's helper never had (read in `experiments/areas/architecture/p08-flight.mjs`), and whether it closes when the core crashes, which the helper's first build and a bench case settle.
 
@@ -1228,7 +1228,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - postcard writes an enum's variant as its position (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`), which is safe because the core starts the helper from its own folder, and the `Hello` catches a helper of another build.
 - **Leaves out:** nothing.
 
-## Only bound presses, the next press while binding, and the mouse in the sim's window cross the core helper's pipe, and the microphone's audio never does
+## Of the pilot's input, only bound presses, the next press while binding, and the mouse in the sim's window cross the core helper's pipe, and of the microphone only the phrase heard does
 
 - **Decided:** the helper reports a bound key's or button's press and release, the next press while the desktop app binds a key, and the mouse only while the sim's main window itself is in front, not a popped-out display; every other key, button, and click stays in the helper.
   The helper tells speech from noise and recognizes phrases itself, so only the phrase heard crosses.
@@ -1243,7 +1243,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#opus)).
 - **Because:**
   - At 24 kbps a frame averages 60 bytes, about 3 KB/s, where 48 kHz mono 16-bit audio would put 96 KB/s, about 345 MB an hour, in every recording (arithmetic), and the codec's native code stays out of the core, as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) wants.
-  - Every libopus binding we found builds through CMake (read 2026-10-16 in the dependencies crates.io lists for opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0), which nothing else in our build uses, while opus-rs needs no CMake; nothing else in Crosscheck depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
+  - Every libopus binding we found builds through CMake, `opus` 0.4.0 among them through opusic-sys (read 2026-10-16 in the dependencies crates.io lists for `opus` 0.4.0, opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0), which nothing else in our build uses, while opus-rs needs no CMake; nothing else in Crosscheck depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
 - **Leaves out:** whether opus-rs holds up, which a bench case and a listen at the helper's stage of the build settle.
 
 ## A microphone setting sits beside the output device, and each follows Windows' default unless the pilot picks one

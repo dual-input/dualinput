@@ -14,6 +14,12 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > - The sim service reads, as a job, the flight file each `FlightLoaded` names, and gives sim awareness its `[Departure]` section's airport, stand name, and stand number as a signal of its own, beside the signals in [sim awareness](#sim-awareness), since the session crate and Go to both read it ([preflight](../session/02-units.md#preflight)).
 > - The `world_map` requests in [what a feature calls](#what-a-feature-calls) are `free_flight`, `departure_airport`, `departure_stand`, and `departure_runway` ([the menu script](../session/02-units.md#the-menu-script)).
 > - In a session, the menu script reads the page every 500ms and reports a change, beside its report when its socket joins in [leaving Starting](#leaving-starting).
+>
+> Since 2026-10-16, [the sync units](../sync/05-units.md#reaching-the-sim) changes this document in three places:
+>
+> - `key` sends with SimConnect's legacy call when the event carries one value or none, and with `_EX1` only when it carries more, where [what a feature calls](#what-a-feature-calls) always sends `_EX1`.
+> - The sim service gains `listen(event)`, which maps the event, adds it to a group that never masks, and gives the group the highest priority.
+> - State sync fires `H:` events from a routine of its own, `HEvents`, and the routine host carries that want with `fsEventsRegisterHEvent` and `fsEventsHEventCall`, a row [wants and the sim's APIs](#wants-and-the-sims-apis) lacks, which settles what a feature calls' line on `H:` events ([`H:` events](../sync/05-units.md#h-events)).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

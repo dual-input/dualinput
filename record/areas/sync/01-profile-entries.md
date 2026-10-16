@@ -16,6 +16,8 @@ Decides:     The profile's two blocks, the fields of an entry, the writer API, a
 > A plugin's values are `plugin.state.<name>`, and its writes `plugin.write.<name>(…)`, each the whole write; an aircraft's client data is read by its plugin, not watched by name.
 > An event entry's `run` is named `write`.
 > The settings for following machines wait until a profile needs them; a profile names no transport, since the engine picks the call by how many values an event carries; a pace is written `2 frames` or `40ms`, for the whole aircraft in the profile's header; and the engine caps one entry's value, not the whole state object, since a profile fixes its entries when it loads.
+>
+> Since 2026-10-16, [the sync units](05-units.md) settles two of this document's open lines: state sync fires `H:` events from a routine of its own in our WASM module through `fsEventsHEventCall`, since SimConnect's client events offer no route to them, which [the writer API](#the-writer-api) leaves unverified ([`H:` events](05-units.md#h-events)); and a write function runs once for each value it's given, and never again when an entry it read changes, where the writer API runs it again ([write functions](05-units.md#write-functions)).
 
 A profile describes an aircraft's cockpit in two blocks.
 `state:` holds the controls whose value Crosscheck can read, or can track by counting the events that change it: it syncs them as values, checks that each write landed, and brings a cockpit that missed changes back to the flying machine's state.

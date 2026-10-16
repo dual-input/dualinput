@@ -6,6 +6,9 @@ Depends on:  01-format-and-delivery.md, ../architecture/02-code-map.md, ../core/
 Decides:     Which compiler builds a bundle, and where it runs; the YAML parser; a bundle's exact bytes and its hash; the index; how CI publishes and keeps every bundle, and at which levels; whether CI holds a released level's builder output to its release tag; where the core fetches from; the cache; the local folder; the pin's key; how a bundle loads; the match check's item; the budgets; and the cases for the bench (node 6.8).
 ```
 
+> **Note**
+> Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) answers [the pin](#the-pin)'s question on a late load: a following machine asks for a catch-up whenever its profile loads after preflight has ended, so a pin that goes from none to a bundle after preflight brings every following cockpit to the flying machine's.
+
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
 The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `crosscheck-profile-builder` program authors run, and later in the IDE, so `typescript.js` never ships to pilots.

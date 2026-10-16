@@ -721,6 +721,7 @@ It reads 03-v1-scope's [pointer sync](../product/03-v1-scope.md#pointer-sync), 6
 It settles the spine's open item on which clock the panel bridge measures a span on ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/pointer-sync/01-pointer-sync.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.9, state sync has a panel module too, `h-events`, so pointer sync isn't v1's one feature with a panel module; pointer sync's press kind answers `Pending` until its panel has played the press through to its release, then calls `cx.cockpit().applied`, and `Skipped` while the cockpit stream's catch-up runs or for a display whose panel hasn't announced itself, reading the stream's state ([the sync units](../sync/05-units.md#kinds)).
 
 ## 6.12 Control
 
@@ -768,6 +769,7 @@ Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reac
 Raised elsewhere: by 5.3, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
 Raised elsewhere: by 6.4, how a plugin's channel instance gets its number and announces it on the session channel, since every other channel is a constant in the message crate, and a receiver drops a channel no unit registered ([02-units](../network/02-units.md#channels-and-sends)).
 Raised elsewhere: by 6.6, plugins stay whole in the recording, so a replay checks them, and whether plugin tests, a Later pick, need a plugin's exported values marked in the recording is this design's ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#left-open)).
+Raised elsewhere: by 6.9, state sync reads a plugin's values as entries and calls its write methods through the plugins crate; how a plugin's own `write()` reaches the sync engine, so its echoes are known; how state sync hears that a plugin was turned off, to stop its entries; and the form of a plugin's value that's neither a number nor text, since an entry's value is one of those two ([the sync units](../sync/05-units.md#left-open)).
 
 ## 6.16 The apps
 
@@ -785,6 +787,7 @@ Raised elsewhere: by 6.5, the output device and microphone settings, each Window
 Raised elsewhere: by 6.6, the report page lists the recorded sessions from each run's index and uploads one; the desktop app lists the recordings with each one's size and a way to delete it (user, 2026-10-16); the EFB app's button that marks the moment sends the recording crate's command; and the notices offering a missing pilot's part, and refusing a file too large to upload ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
 Raised elsewhere: by 6.7, where and how Crosscheck asks for the display name before a first Host or Join (user, 2026-10-16); rate and pause's part in the EFB app, code with no screen that calls `TOOLBAR_SET_ACTIVE_PAUSE`; Go to's section in the desktop app; the notices for a pilot out of the flight, a PF in the pause menu, and the backend's refusal; and the match check's wording, a streamed copy's warning among it ([the session's units](../session/02-units.md)).
 Raised elsewhere: by 6.8, the profile loader's local folder setting, and the match check's profile item, whose values are a published hash, a local one shown as "unpublished", "No profile for this aircraft", and "Couldn't get the session's profile"; the apps show no profile's build report, since the core builds nothing ([the profiles' units](../profiles/02-units.md#the-match-checks-item)).
+Raised elsewhere: by 6.9, the cockpit stream's slice of whether a catch-up or a replay runs, for the banner; the wording of state sync's reason on its guard of Ready; state sync's notice, once per entry for each load, for a write that never landed, an entry the driven-entry test stopped, and an entry a write function's limit stopped; and the PF's checklist, each counting entry's `name` and `default`, a slice of state sync's while preflight runs ([the sync units](../sync/05-units.md#ready-notices-marks-and-the-checklist)).
 
 ## 6.17 Installing and updating
 
@@ -813,6 +816,7 @@ Raised elsewhere: by 6.1, how the core links the C runtime statically, since `+c
 Raised elsewhere: by 6.2, how the build gets the sim's stock `VCockpit.js` after each sim update, since the sim streams it rather than keeping it on disk, to put our two blocks into at their anchors ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#our-vcockpitjs)).
 Raised elsewhere: by 6.4, the network crate compiles each release's default relay list from `relays/relays.toml`, and CI runs the backend's tests against a local D1 ([02-units](../network/02-units.md#the-relays)).
 Raised elsewhere: by 6.8, the profile builder program's name and how authors get it; its `typescript.js`, TypeScript 6.0.3, pinned in the builder; CI's profiles job, which runs on each merge that changes `profiles/` or either profile engine and on each release, reads which levels are released from the release tags, and commits to a `pages` branch holding `.nojekyll` that never loses a file; and that the core builds no bundle, so CI's reason for Windows runners of building bundles as the core does falls away ([the profiles' units](../profiles/02-units.md#publishing)).
+Raised elsewhere: by 6.9, state sync's routine crate, `HEvents`, goes in the module's list, and its panel module, `h-events`, builds into `/Crosscheck/modules/`; the module's bindgen reads `MSFS_Events.h` for `fsEventsRegisterHEvent` and `fsEventsHEventCall` ([the sync units](../sync/05-units.md#h-events)).
 
 ## 7 Testing
 

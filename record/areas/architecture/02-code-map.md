@@ -53,6 +53,13 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The core builds no bundle, which drops one of [CI](#ci)'s reasons for Windows runners: the core building a local bundle with CI's code.
 > - CI publishes from a `pages` branch it only adds files to, on each merge that changes a bundle and on each release, and only bundles at levels a release supports, where [profiles in this repository](#profiles-in-this-repository) publishes on each merge.
 > - CI reads each bundle back against its level's frozen schema and compiles every script at one target, which settles [left open](#left-open)'s item on holding a released level's builder output to its release tag: nothing holds the bytes.
+>
+> Since 2026-10-16, [the sync units](../sync/05-units.md) changes this document in four places:
+>
+> - State sync has a routine, `HEvents`, and a panel module, `h-events`, where [features](#features) gives it a part in the core alone, so pointer sync isn't v1's one feature with a panel module; the routine's slot, `CROSSCHECK_ROUTINE_H_EVENTS`, joins [names the sim shares](#names-the-sim-shares), and firing an `H:` event joins [what a routine can ask for](#what-a-routine-can-ask-for).
+> - A cockpit stream kind also declares whether the stream holds each key's newest message, and whether a replay collapses its runs, beside what [what a feature registers](#what-a-feature-registers) has a kind declare; a catch-up step gives its payload on the flying machine and takes it on the catching-up one; and "cockpit sent" carries the message's clock.
+> - The sync engine also keeps the settle rule, the driven-entry test, putting back, and catch-up's order, beside what [engines](#engines)' row gives it.
+> - The sim service gains `listen(event)` for hearing a `K:` event ([reaching the sim](../sync/05-units.md#reaching-the-sim)).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

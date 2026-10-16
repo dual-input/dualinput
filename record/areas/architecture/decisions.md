@@ -1380,6 +1380,39 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A replay runs no job, so a recording that kept only the hash would need the replay to fetch and parse, and a local bundle isn't on Pages to fetch (user, 2026-10-16).
 - **Leaves out:** nothing.
 
+## The catching-up machine asks for its catch-up, whose order each machine keeps in memory
+
+- **Decided:** a following machine asks the flying machine for its catch-up whenever its profile loads after preflight has ended, when preflight ends with its profile loaded, when control passes to another pilot during it, and after a change of control drops a message it applied; each machine's sync engine keeps when its cockpit first took each of an entry's last 16 distinct values, and the flying machine's gives catch-up its order.
+  This changes [decision 040](../../decisions/040-catch-up-first-final-value-order.md), which reads the order from the flying machine's recording, once step 8's decisions are numbered.
+  Settled in node 6.9 by the user, 2026-10-16 ([the sync units](../sync/05-units.md#catch-up)).
+- **Because:**
+  - After a pass, only the catching-up machine knows that a catch-up was running.
+  - A joiner's profile loads only once it's in the flight, and a pin that goes from none to a bundle after an airborne start finds cockpits that drifted while no profile was loaded, so one trigger covers both.
+  - The recording holds the inputs, not when the cockpit took each value, so reading the order from it would mean running the sync engine over the run at each catch-up.
+- **Leaves out:** nothing.
+
+## State sync fires `H:` events from a routine in our WASM module, and hears them through one panel's own handler
+
+- **Decided:** state sync's routine `HEvents` fires each name fed to it with `fsEventsRegisterHEvent` and `fsEventsHEventCall`; its panel module `h-events`, in the first panel asked about once a profile that watches an `H:` event loads, registers its own handler with `Coherent.on("OnInteractionEvent", …)`.
+  This settles the spine's item on how the profile engine fires `H:` events ([left open](01-spine.md#left-open)).
+  Settled in node 6.9 by the user, 2026-10-16 ([`H:` events](../sync/05-units.md#h-events)).
+- **Because:**
+  - The SDK documents that `fsEventsHEventCall` reaches `OnInteractionEvent` in every JavaScript VCockpit ([fsEventsHEventCall](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/wasm/event-api/fseventsheventcall/index.md)), and documents no SimConnect route to an `H:` event ([SimConnect_MapClientEventToSimEvent](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_MapClientEventToSimEvent.htm)).
+  - A handler beside the stock one blocks nothing, where wrapping each instrument's `onInteractionEvent`, as FS Copilot does, puts our code in the path of the pilot's input ([03-02](../../learn/foundations/03-02-events-and-other-namespaces.md#h-html-events)).
+- **Leaves out:** whether `fsEventsHEventCall` reaches an instrument, with calculator code in the routine if not, and whether an event sent to one instrument reaches another document, which cases in the sim settle.
+
+## The sync engine starts the bench from a pending write, one attempt checked within 1.5s, and steps it counts itself
+
+- **Decided:** a value the engine writes is pending until a reading equals it, and a reading that equals no pending value is a pilot's change; a write gets one attempt, and one still pending 1.5s later is flagged; a stepping write counts from its own steps; a write function runs once for each value, and is checked whatever it wrote; an unused echo token lasts 1s; an event with one value or none goes by SimConnect's legacy call; the sim service hears a `K:` event through a group that never masks, at the highest priority; and the cockpit stream holds each state entry's newest value, which state sync withdraws when an arriving change beats it.
+  Settled in node 6.9 by the user, 2026-10-16 ([the sync engine](../sync/05-units.md#the-sync-engine); [the cockpit stream](../sync/05-units.md#the-cockpit-stream)).
+- **Because:**
+  - Each pending value clears within 2 frames of a write that lands ([sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)), so a pilot turning a knob back is heard, where a rule that remembered written values for a time would swallow the turn.
+  - The engine can't tell which entries read a computed readout, and 1.5s covers the slowest measured, the Fenix's battery lamp at 1.2s ([sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
+  - A stepping write that read a lagging value again would overshoot ([checking a write](../profiles/01-format-and-delivery.md#checking-a-write)).
+  - The PMDG 777's module acted on a masked axis event sent by the legacy call and dropped it sent by `_EX1` ([flight-controls log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)).
+  - The held value lives in the stream because the press it goes out before is pointer sync's.
+- **Leaves out:** retries, running a function again when an entry it read lands, a longer check for a computed readout, and stepping inside a routine, which the bench's cases decide.
+
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load

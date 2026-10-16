@@ -19,6 +19,9 @@ Decides:     Which catch-up runs when, the order state applies in, what happens 
 > - What queues while catch-up runs applies on top paced as every cockpit message is, each waiting only what's left of the gap its sender left before it, capped at 2s ([the replay](../sync/04-order-and-recovery.md#the-replay)).
 > - When a session starts, or its profile loads, after Ready to fly, [settling after a load](#settling-after-a-load)'s 30s floor still counts from Ready to fly, and its 15s quiet window from the profile's load ([an aircraft that loaded before its session](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session)).
 > - An entry that changes more than 5 times since the load just leaves the quiet check for that load; "driven by the aircraft" means only 04-order-and-recovery's test, which stops an entry syncing ([entries the aircraft drives itself](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
+>
+> Since 2026-10-16, [the sync units](05-units.md#catch-up) has the catching-up machine ask the flying machine for its catch-up: whenever its profile loads after preflight has ended, which covers a late joiner, a pilot back after a sim restart, and a profile that loaded late; when preflight ends with its profile loaded; and again when control passes during it ([which catch-up runs when](#which-catch-up-runs-when)).
+> Step 4 of [catching up state](#catching-up-state) runs a write function once, never again when an entry it read lands ([write functions](05-units.md#write-functions)); what queued during a catch-up applies once its writes are made; and [what the open questions still hold](05-units.md#what-the-open-questions-still-hold) answers [open questions](#open-questions).
 
 A cockpit catches up in one of two ways.
 After a short outage with the sim still running, it replays the changes it missed, in order.

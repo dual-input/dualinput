@@ -19,6 +19,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/sync/02-live-sync.md](areas/sync/02-live-sync.md): how a change reaches every cockpit during a session, how conflicts resolve, and how Crosscheck checks a write landed.
 - [areas/sync/03-catch-up.md](areas/sync/03-catch-up.md): how a cockpit that missed changes comes to the flying machine's state, and when a loaded aircraft counts as settled.
 - [areas/sync/04-order-and-recovery.md](areas/sync/04-order-and-recovery.md): what comes back after a link, a core, a sim, or a PC goes down, and how the cockpit stream, its replay, and catch-up keep their order.
+- [areas/sync/05-units.md](areas/sync/05-units.md): the sync engine's, the cockpit stream's, and state sync's interfaces, how `H:` events are fired and heard, and the rules the bench starts from.
 - [areas/session/01-roles-and-members.md](areas/session/01-roles-and-members.md): who is in a session, the table of roles with the PF and the traffic and ATC host, and how each role moves.
 - [areas/profiles/01-format-and-delivery.md](areas/profiles/01-format-and-delivery.md): how a profile and its plugin are written, checked, and limited, and how CI publishes them and the core fetches them.
 - [areas/profiles/02-units.md](areas/profiles/02-units.md): the profile engine's, the profile builder's, and the profile loader's interfaces, and how a bundle is built, published, fetched, cached, pinned, and loaded.

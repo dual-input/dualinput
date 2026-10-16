@@ -1149,12 +1149,14 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## The network owns everything between machines, and the session crate fills each first message through one hook
 
 - **Decided:** the network crate owns the endpoint and its key, each link, the first message's header, the version check at join, and every request to the backend.
-  The session crate registers the session channel as the one opener, whose keys fill each connection's first message, and asks the network to host, join, open links, dial a member, and leave; the network raises `LinkUp`, `LinkLost`, `MemberOut`, and `BackendAnswered`.
+  The session crate registers the session channel as the one opener, whose keys fill each connection's first message, and asks the network to host, join, open links, dial a member, and leave; the network raises `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered`.
+  The network keeps one link for each pilot ID, which starts lost, so a first join redials every 2s as a lost link does; `LinkUp` comes each time the link takes a connection, with `again` false after a higher restart count, so a restarted core gets a late join and no replay.
   The endpoint key comes from the kernel's ChaCha20 generator, through `cx.random_bytes()`, and the network signs the backend's requests with it on the loop.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-network-crate)).
 - **Because:**
   - The session crate sits above the network in the code map, so the network can't read the session's keys, and a key's stamp compares control values first, which are the session's ([channels](../network/01-between-machines.md#channels)).
   - Signing the backend's requests and renewing them as links come up both need the network's key and links.
+  - Two dials that land at once can move a link onto a second connection after its first `LinkUp`, and what went out on the closed one may be lost (noq, [leaving](../network/01-between-machines.md#leaving)), and [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) gives a restarted core a late join.
 - **Leaves out:** whether ed25519-dalek reaches `getrandom` with its `rand_core` feature off, which the map check shows at the first build.
 
 ## A channel declares its delivery and priority, and the heartbeat carries only the clock exchange
@@ -1170,37 +1172,38 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Our relays run on two servers of ours, configured from relays/
 
-- **Decided:** two DigitalOcean droplets, in New York and Frankfurt, run `iroh-relay` 1.3, at $4 to $6 a month each.
+- **Decided:** two DigitalOcean droplets, in New York and Frankfurt, run `iroh-relay` 1.3, at $4 to $6 a month each (documented, [research report 06](../network/results/2026-10-10-transport-research-reports/06-relay-hosting-and-cost.txt), prices fetched 2026-10-09).
   `relays/relays.toml` lists each relay's region, URL, tokens, and cap once; each release's default relay list compiles in from it, and `relays/deploy.ts` renders each relay's configuration from it; a relay of our own, if we ever write one, lives there too.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-relays)).
 - **Because:**
-  - n0's shared relays admit an endpoint through a token n0's own preset mints from a project API key, describe no cap for each client, and lock no version below Dedicated, at $199 a month for each region (documented, [shared relays](https://docs.iroh.computer/iroh-services/relays/shared), [pricing](https://www.iroh.computer/pricing), undated, read 2026-10-16), where [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) has tokens of our own, a cap for each client, and pinned versions.
-  - p03 to p07 measured iroh through droplets in those two cities ([network log, 2.3][n23]; [network log, p07][p07]).
+  - n0's shared relays admit an endpoint through a token n0's own preset mints from a project API key, state a 5 MB/s limit without saying what it applies to, and lock no version, which only Dedicated relays do, at $199 a month for each region (documented, [shared relays](https://docs.iroh.computer/iroh-services/relays/shared), [dedicated relays](https://docs.iroh.computer/iroh-services/relays/managed), [pricing](https://www.iroh.computer/pricing), undated, read 2026-10-16), where [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) has tokens of our own, a cap for each client, and pinned versions.
+  - p03, p05, p06, and p07 measured iroh through droplets in those two cities, of 2 vCPUs and 2 GiB ([network log, 2.3][n23]; [network log, p07][p07]).
   - The tokens are public either way, since each release carries them.
-- **Leaves out:** whether a $4 droplet's 512 MiB holds `iroh-relay`, which the first deployment shows, and whether pilots in Asia and Oceania need a third region, which v1's recordings show.
+- **Leaves out:** whether a droplet with 1 vCPU and 512 MiB carries `iroh-relay`, which the first deployment shows, and whether pilots in Asia and Oceania need a third region, which v1's recordings show.
 
 ## The backend is a Worker on D1, which counts only wrong codes against an address
 
 - **Decided:** the backend is a Cloudflare Worker in TypeScript, with a plain `fetch` handler and no framework, on D1 with no Durable Object.
-  It serves five requests, and every request but a lookup carries the member's endpoint ID, a counter one past the last it took, and an Ed25519 signature by the endpoint key.
-  A lookup reads its address's count of wrong codes for the hour first, refuses at 20, and adds one only for a wrong code.
+  It serves four requests, and every request but a lookup carries the member's endpoint ID and an Ed25519 signature by the endpoint key.
+  A lookup reads its address's count of wrong codes for the hour first, refuses at 20, and adds one only for a wrong code; it answers a session with no member renewed within 30 minutes as no such code.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-backend)).
 - **Because:**
   - The backend holds no connection, where fsc-editor's Worker holds a Durable Object for each code because it holds each session's WebSockets (read in fsc-editor, `relay/src/index.ts`, `Session`).
-  - D1's Workers Free plan allows 100,000 rows written a day ([D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), as of 2026-04-21), about 16,000 pilot-hours of renewals (arithmetic).
-  - Reading the count before the lookup refuses an address at its limit even when it guesses right, where fsc-editor's Worker counts every join (same file, `join`).
+  - D1's Workers Free plan allows 100,000 rows written a day, a write counting one more row for each index it touches ([D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), as of 2026-04-21), and Workers Free 100,000 requests a day ([Workers limits](https://developers.cloudflare.com/workers/platform/limits/)), about 8,000 to 16,000 pilot-hours of renewals (arithmetic).
+  - Reading the count before the lookup refuses an address at its limit even when it guesses right, where fsc-editor's Worker counts every well-formed join (same file, `join`).
+  - A counter against replayed requests would be lost with a restarted core, whose renewals it would then refuse, and a captured request carries the code, which admits its holder anyway.
 - **Leaves out:** bug reports' files, which may pass D1's 2 MB a row ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)), for node 6.6; and whether Workers verify Ed25519 as [Web Crypto](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/) lists, which the backend's tests settle.
 
 ## The bench stands in for a relay's loss with a proxy, and a direct path's loss runs by hand
 
-- **Decided:** in CI and on a developer's PC, two cores run through a local `iroh-relay` bound to `127.0.0.1`, behind a TCP proxy that holds bytes back as TCP's resend after a loss would, or cuts a core's connection.
+- **Decided:** in CI and on a developer's PC, two cores run through a local `iroh-relay` bound to `127.0.0.1`, behind a TCP proxy that holds bytes back as TCP's resend after a loss would, or cuts a core's connection, and against a local backend.
   v1's full mix on a direct path under loss runs by hand, through `tc netem` on our droplets, at the network's stage of the build and whenever iroh's or noq's pinned version changes.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#cases-for-the-bench)).
 - **Because:**
   - CI runs on Windows only ([CI](02-code-map.md#ci)), and `iroh-relay` 1.3.0 builds and runs there, answering on IPv6 loopback only in dev mode ([network log][nwin]).
   - On iroh's relay QUIC sees no loss, only late packets ([network log, p06][p06]), so holding bytes back stands in for loss there.
   - Only a direct path's loss needs packets dropped, and the core runs only on Windows.
-- **Leaves out:** whether the network crate and the transport build on Linux for the case run by hand, which that program's first build settles.
+- **Leaves out:** whether the network crate and the transport build on Linux for the case run by hand, which that program's first build settles; and whether `iroh-relay` answers on `127.0.0.1` when its configuration binds it there, which no run has tried.
 
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

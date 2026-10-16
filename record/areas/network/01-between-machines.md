@@ -14,6 +14,8 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > Since 2026-10-12, the session channel's keys hold no time of day or date, which leave v1, and a machine sends each state entry's newest value at most 20 times a second, which caps a lever that jitters with no dead zone, though the 58P's six engine levers jittering at once could still send 120 changes a second against the 5 to 20 this document assumes ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
 > Since 2026-10-14, a feature whose messages must apply in order with the cockpit's registers kinds on the cockpit stream rather than a channel, so no channel declares whether it joins the cockpit's shared order, as [channels](#channels) below has one do, and a cockpit message carries its kind and no channel's tag; and the traffic host and the ATC host are two session keys, which one request claims together ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
 >
+> Since 2026-10-12, a core that restarts while its sim keeps running comes back as a late joiner, with a catch-up and no replay ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)), where [a session file after a long outage](#a-session-file-after-a-long-outage) gives it a replay when the sim is still on the run the file names.
+>
 > Since 2026-10-16, [02-units](02-units.md) changes this document in five places:
 >
 > - The heartbeat carries the clock exchange alone, and the cockpit-stream crate acknowledges on a one-off channel of its own once a second, where [channels](#channels) has the heartbeat carry the acknowledgment.

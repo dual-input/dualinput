@@ -668,7 +668,7 @@ Its answer goes in `record/areas/session/02-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, the session crate decides when the core exits, by the spine's rule, and runs a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, as a Leave before the exit, within 3s of Windows' `WM_QUERYENDSESSION`; it registers the source through which the core hears Windows end the session ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 Raised elsewhere: by 6.3, the session crate calls `sim_service::announce(cx, session)` as a session starts or ends; it takes the run of the sim for the session file, and whether the last run ended as a quit or a crash for the crew's notice, from sim awareness's state; and the menu script reports its master page and page to the sim service for sim awareness ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
-Raised elsewhere: by 6.4, the network checks the version at join, at the backend and in each first message, and the session crate shows what it reports; the session crate registers the session channel as each connection's opener, asks `Host`, `Join`, `Open`, `Dial`, and `Leave`, writes the session file between `BackendAnswered` and `Open`, with the endpoint key, the relay list and its tokens, and the crew's endpoint IDs, and hands control over before a PF's `Leave` ([02-units](../network/02-units.md#requests-the-session-crate-makes)).
+Raised elsewhere: by 6.4, the network checks the version at join, at the backend and in each first message, and the session crate shows the backend's refusal; the session crate registers the session channel as each connection's opener, sends its keys whole on every `LinkUp`, counts a member out on `MemberLeft` and `MemberOut`, asks `Host`, `Join`, `Open`, `Dial`, and `Leave`, writes the session file between `BackendAnswered` and `Open`, with the endpoint key, the relay list and its tokens, and the crew's endpoint IDs, and hands control over before a PF's `Leave` ([02-units](../network/02-units.md#requests-the-session-crate-makes)).
 
 ## 6.8 Profiles
 
@@ -690,7 +690,7 @@ Its answer goes in `record/areas/sync/05-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.2, which panel listens for `H:` events, and how, since [decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md) keeps one panel for them, as a panel module whose rule picks that panel ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#cockpit-panels-and-their-modules)).
 Raised elsewhere: by 6.3, SDK 1.7.3 has `fsEventsRegisterHEvent`, which takes an `H:` event's name, and `fsEventsHEventCall`, so our module can fire an `H:` event by name without calculator code, for the item on how the profile engine fires them ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis)).
-Raised elsewhere: by 6.4, the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own, not on the heartbeat, and starts its replay on `LinkUp` with `again` ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
+Raised elsewhere: by 6.4, the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own, not on the heartbeat, and sends what a member lacks on every `LinkUp` with `again`, which a link moved onto a second connection raises again, and which a restarted core's link never carries ([02-units](../network/02-units.md#links)).
 
 ## 6.10 Flight-model sync
 
@@ -736,7 +736,7 @@ Traffic and ATC audio each hold a role of their own, and traffic creates AI obje
 It reads 03-v1-scope's [traffic sync](../product/03-v1-scope.md#traffic-sync) and [hearing ATC](../product/03-v1-scope.md#hearing-atc), 01-roles-and-members' [traffic and ATC host](../session/01-roles-and-members.md#the-traffic-and-atc-host), 6.3's, 6.4's, 6.5's, and 6.7's answers, and the FS Copilot fork's `record/traffic-atc/`.
 Its answer goes in `record/areas/traffic-atc/01-traffic-and-atc.md`.
 Exit: the user agrees to that design doc.
-Raised elsewhere: by 6.4, ATC audio's channel takes `Deadline` delivery, each frame dropped once its turn to play has passed, and traffic sends its identities whole on `LinkUp` with `again` ([02-units](../network/02-units.md#channels-and-sends)).
+Raised elsewhere: by 6.4, ATC audio's channel takes `Deadline` delivery, each frame dropped once its turn to play has passed, and traffic sends its identities whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
 
 ## 6.15 Plugins
 
@@ -807,7 +807,7 @@ Exit: the user agrees to that design doc.
 Waits on 5 and 6.
 Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
-Raised elsewhere: by 6.4, the bench's local `iroh-relay` binds `127.0.0.1`, since in dev mode it answered on IPv6 loopback only; a TCP proxy in front of it stands in for a relay's loss and cuts; and v1's full mix on a direct path under loss runs by hand on our droplets, in a program built on the network crate and the transport ([02-units](../network/02-units.md#cases-for-the-bench)).
+Raised elsewhere: by 6.4, the bench's local `iroh-relay` binds `127.0.0.1`, since in dev mode it answered on IPv6 loopback only, and whether it answers there is untried; a TCP proxy in front of it stands in for a relay's loss and cuts; the bench's cores reach a local backend through a development setting; and v1's full mix on a direct path under loss runs by hand on our droplets, in a program built on the network crate and the transport ([02-units](../network/02-units.md#cases-for-the-bench)).
 
 ## 8 The build order
 

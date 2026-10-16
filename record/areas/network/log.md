@@ -12,10 +12,10 @@ What we found about connecting the crew's machines, directly or through our rela
 
 - `cargo install iroh-relay --version =1.3.0 --features server --locked` built a 9.7 MB `iroh-relay.exe` in 50s.
 - Started with `--dev`, it answered `/` with 200, `/ping` with 200 and an empty body, and `/generate_204` with 204 on `http://[::1]:3340`, while every request to `http://127.0.0.1:3340` timed out.
-- Dev mode binds `[::]:3340` (read in iroh-relay 1.3.0, `src/main.rs`, `DEV_MODE_HTTP_PORT`), and on Windows "an IPv6 socket created on Windows Vista and later only operates over the IPv6 protocol" unless the program turns `IPV6_V6ONLY` off (documented, [Dual-stack sockets](https://learn.microsoft.com/en-us/windows/win32/winsock/dual-stack-sockets)), which fits the timeouts.
+- Dev mode binds `[::]:3340` (read in iroh-relay 1.3.0, `src/main.rs`, `DEV_MODE_HTTP_PORT`), and on Windows "an IPv6 socket created on Windows Vista and later only operates over the IPv6 protocol" unless the program turns `IPV6_V6ONLY` off (documented, [Dual-stack sockets](https://learn.microsoft.com/en-us/windows/win32/winsock/dual-stack-sockets)), which fits the timeouts (inference; `netstat -ano` showing only `[::]:3340` would settle it).
 - `/ping` answers anyone, with no check of the relay's tokens (read in iroh-relay 1.3.0, `src/server.rs`, `probe_handler`).
 
-**Changed:** CI can run `iroh-relay` on Windows, bound to an address the cores dial, such as `http_bind_addr` set to `127.0.0.1:3340`.
+**Changed:** CI can build and run `iroh-relay` on Windows, and should bind it to an address the cores dial, such as `http_bind_addr` set to `127.0.0.1:3340` (read in iroh-relay 1.3.0, `src/main.rs`), which no run has tried yet.
 A core can ask any of our relays for `/ping` with no token, to tell whether the PC reaches the internet.
 
 **Affects:** [02-units](02-units.md)'s cases for the bench, and its internet check.

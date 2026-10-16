@@ -27,10 +27,11 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > It also settles [left open](#left-open)'s item on which of the sim's APIs carries each want of the routine host.
 >
-> Since 2026-10-16, [02-units](../network/02-units.md) changes this document in five places:
+> Since 2026-10-16, [02-units](../network/02-units.md) changes this document in six places:
 >
-> - The network crate checks the version at join, at the backend and in each connection's first message, and the session crate shows what it reports, where [the platform](#the-platform)'s table gives the check to the session crate.
-> - The network crate raises `LinkUp`, `LinkLost`, `MemberOut`, and `BackendAnswered`, where [the platform](#the-platform)'s table names "link lost" and the link's return.
+> - The network crate checks the version at join, at the backend and in each connection's first message, and the session crate shows the backend's refusal, where [the platform](#the-platform)'s table gives the check to the session crate.
+> - The network crate raises `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered`, where [the platform](#the-platform)'s table names "link lost" and the link's return.
+> - A channel declares its delivery and priority, each send names its receivers, and the receiving handler checks who may send, where [what a feature registers](#what-a-feature-registers) has a channel declare who sends and receives it.
 > - The message crate also holds the transport's commands and events, since the network crate may not depend on the transport, which [the map check](#the-map-check) lists among the crates that do I/O.
 > - `relays/` joins [the workspace](#the-workspace), with each relay's region, URL, tokens, and cap, and the script that deploys them, which settles [left open](#left-open)'s item on where the relays' configuration lives.
 > - The backend in `backend/` is a Worker on D1, with no framework.

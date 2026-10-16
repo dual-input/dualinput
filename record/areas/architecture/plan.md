@@ -646,6 +646,7 @@ It reads 6.1's and 6.2's answers, the spine's [the helper](01-spine.md#the-helpe
 It settles the binary format on the core helper's standard input and output ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/core/04-core-helper.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-16.
 
 ## 6.6 Recording and bug reports
 

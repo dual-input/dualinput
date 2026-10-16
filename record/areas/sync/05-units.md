@@ -55,7 +55,7 @@ pub enum Action { Set(Name, Value), Key(Name, Vec<f64>), Fire(Name), Plugin(Stri
 
 - The engine takes the time and the roles in `Ctx` with each call, reads no clock, and makes no call itself: state sync carries out each `Out`.
 - It compiles the profile's write functions, which the bundle holds as JavaScript compiled at ES2020 ([the profiles' units](../profiles/02-units.md#the-builder)), when it loads, in the profile's own runtime from the sandbox ([the sandbox](../profiles/01-format-and-delivery.md#the-sandbox)).
-- `Load` carries the stamp of the profile's load, and of this aircraft's Ready to fly when it came first, or says this core missed it, when the core found the sim already flying, as after a core restart.
+- `Load` carries the stamp of the profile's load, and either the stamp of this aircraft's Ready to fly, when that came first, or a mark that this core missed it, having found the sim already flying, as after a core restart.
   A member is in the flight from the Ready-to-fly screen ([in the flight](../session/02-units.md#in-the-flight)), so its profile usually loads before `RTC_END`, and state sync calls `ready_to_fly` when it comes.
 
 ### Watching and the state object
@@ -120,7 +120,7 @@ A rule that remembered written values for a time would have swallowed that turn 
 ### Who sends, and putting back
 
 - Before preflight ends, the engine reads and keeps its order, and sends nothing and puts nothing back, since the rest of sync starts at its end ([preflight](../product/03-v1-scope.md#preflight)).
-- After it, a change to an entry that has stopped syncing goes nowhere, and any other change goes out as `Send`, unless [putting back](04-order-and-recovery.md#putting-back) says this machine may not send it, when the engine puts back the value it holds at once.
+- After it, a change to an entry that has stopped syncing goes nowhere, and any other change goes out as `Send`, unless [putting back](04-order-and-recovery.md#putting-back) says this machine may not send it, in which case the engine puts back the value it holds at once.
 - A put-back leaves nothing pending, since what it brings back is a reading this machine may not send anyway, so a hand that keeps moving a PF-owned lever flags nothing.
 
 ### The conflict rule
@@ -212,7 +212,8 @@ me.cockpit_kind(state_sync::STOPPED, StateSync::stop);
 
 ### Kept messages and a replay
 
-- The stream keeps every message it sent or applied until the clock each member of the session sends once a second covers it, on a `Newest` channel of the stream's own ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)), so normally a message goes within a second, and during a cut, kept messages grow until the link returns or the member is counted out at 30 minutes.
+- The stream keeps every message it sent or applied until every member's clock covers it, and each member sends its clock once a second on a `Newest` channel of the stream's own ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
+  So a message normally goes within a second, and during a cut, kept messages grow until the link returns or the member is counted out at 30 minutes.
 - On `LinkUp { again }`, the stream sends the member `Replay` with its own clock, then every kept message that member's last clock doesn't cover, in causal order, on the stream's one channel ([links](../network/02-units.md#links)).
 - The receiving machine's replay runs until its clock covers the clock `Replay` carried.
   Within it, a message of a kind that collapses is skipped when a later message of the same kind and key follows it in the replay with only collapsing messages between them.
@@ -228,8 +229,12 @@ me.cockpit_kind(state_sync::STOPPED, StateSync::stop);
 
 The catching-up machine asks for its catch-up, since after a pass only it knows that one was running:
 
-- It asks the flying machine with `CatchUpAsk` when its profile loads after preflight has ended, when preflight ends with its profile loaded, when control passes to another pilot while its catch-up runs, after a change of control drops a message it applied, and again when its link to the flying machine comes up while it waits for an answer, as [while a link is lost](../network/01-between-machines.md#while-a-link-is-lost) starts a cut catch-up again.
-  The first covers a late joiner, a pilot back from a sim, core, or PC that went down, and a session whose pin went from none to a bundle after preflight ([the pin](../profiles/02-units.md#the-pin)).
+- It asks the flying machine with `CatchUpAsk`:
+  - when its profile loads after preflight has ended, which covers a late joiner, a pilot back from a sim, core, or PC that went down, and a session whose pin went from none to a bundle after preflight ([the pin](../profiles/02-units.md#the-pin));
+  - when preflight ends with its profile loaded;
+  - when control passes to another pilot while its catch-up runs;
+  - after a change of control drops a message it applied;
+  - and again when its link to the flying machine comes up while it waits for an answer, as [while a link is lost](../network/01-between-machines.md#while-a-link-is-lost) starts a cut catch-up again.
 - The PF never asks, and a pilot whose catch-up runs when control reaches them stops it, since they're the source ([catch-up](04-order-and-recovery.md#catch-up)).
 - The flying machine answers once its own profile has loaded, with each catch-up step's payload, its clock, and its control value, on the stream's channel to that member alone.
   An answer made under a control value other than the session's current one is dropped, and the catching-up machine asks the new PF.
@@ -312,7 +317,8 @@ State sync hears `H:` events in one cockpit panel, through its panel module `h-e
 
 - Its rule gives the module to the first panel it's asked about after the profile loads, and to that panel again, by its instruments' keys, after the panel reloads ([cockpit panels and their modules](../core/02-clients-and-panel-bridge.md#cockpit-panels-and-their-modules)).
 - The module registers its own handler with `Coherent.on("OnInteractionEvent", …)`, the call through which stock `VCockpit.js` hands each event to its instruments (read in the FS Copilot fork's copy of MSFS 2024's file, `record/pointer-forwarding/module/vendor/VCockpit.stock.js`, at a sim version it doesn't name), runs it in a `try`, sends each event's name and target to state sync, and removes its handler in `stop`.
-  FS Copilot instead wraps each instrument's `onInteractionEvent` ([03-02](../../learn/foundations/03-02-events-and-other-namespaces.md#h-html-events)), which puts its code in the path of the pilot's input, where a handler beside the stock one wraps nothing; that Coherent runs both handlers of one event is unverified, and a case in the sim settles it.
+  FS Copilot instead wraps each instrument's `onInteractionEvent` ([03-02](../../learn/foundations/03-02-events-and-other-namespaces.md#h-html-events)), which puts its code in the path of the pilot's input; a handler beside the stock one wraps nothing.
+  That Coherent runs both handlers of one event is unverified, and a case in the sim settles it.
 - Stock `VCockpit.js` skips an instrument when the event names a target other than its `Guid`, or when its `urlConfig.noEvent` is set, so whether an event sent to one instrument reaches a document other than that instrument's is unverified, and a case in the sim settles it.
 - One panel's handler hears each event once, where a handler in every panel would hear it once in each.
 

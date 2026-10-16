@@ -13,6 +13,14 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > The heartbeat's acknowledgment is the receiver's vector clock, a cockpit message carries no number beside its clock, and it names its entry and its clock's counters in full ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)); a receiver merges traffic's identity set rather than replacing its own, since a copy with no sample for 15s is removed, and its identity forgotten ([roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)).
 > Since 2026-10-12, the session channel's keys hold no time of day or date, which leave v1, and a machine sends each state entry's newest value at most 20 times a second, which caps a lever that jitters with no dead zone, though the 58P's six engine levers jittering at once could still send 120 changes a second against the 5 to 20 this document assumes ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
 > Since 2026-10-14, a feature whose messages must apply in order with the cockpit's registers kinds on the cockpit stream rather than a channel, so no channel declares whether it joins the cockpit's shared order, as [channels](#channels) below has one do, and a cockpit message carries its kind and no channel's tag; and the traffic host and the ATC host are two session keys, which one request claims together ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
+>
+> Since 2026-10-16, [02-units](02-units.md) changes this document in five places:
+>
+> - The heartbeat carries the clock exchange alone, and the cockpit-stream crate acknowledges on a one-off channel of its own once a second, where [channels](#channels) has the heartbeat carry the acknowledgment.
+> - A channel declares its delivery and priority, each send names its receivers, and the receiving handler checks who may send, where [channels](#channels) has a channel declare who sends and receives it.
+> - Our relays run on two servers of ours, DigitalOcean droplets in New York and Frankfurt, which settles [left open](#left-open)'s item on who hosts them.
+> - The backend is a Cloudflare Worker on D1, which [who does what](#who-does-what) calls a candidate.
+> - The tests [two cores on one PC](#two-cores-on-one-pc) gives CI stand in for a relay's loss with a proxy that holds bytes back, and [left open](#left-open)'s check of v1's full mix on a direct path under loss runs by hand on our droplets.
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

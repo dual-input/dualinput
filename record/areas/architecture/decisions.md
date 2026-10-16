@@ -1135,6 +1135,73 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** a reader can tell what owns a name at a glance, and names of two kinds in one namespace never collide, where without the kind a routine whose ID was `MODULE` would take the module's own status slot (user, 2026-10-15).
 - **Leaves out:** the figure's SimObject title, `CROSSCHECK_Figure`, for node 6's design of avatars.
 
+## The network decides on the loop, and the transport keeps only what turns on time and bytes
+
+- **Decided:** the network crate, on the loop, decides each link's state and timers, every dial and close, which of two connections stays, whether a first message passes, each sender's clock offset, and what goes out on which channel to whom.
+  The transport, an engine at the core's edge, runs iroh, keeps the newest packet of each channel and key until QUIC's queue has room, paces what goes through a relay below its cap, writes the heartbeat's send stamp, and binds under a timeout; its commands and events live in the message crate.
+  Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#what-runs-where)).
+- **Because:**
+  - A replay reproduces a decision only when the loop makes it ([one loop](02-code-map.md#one-loop)).
+  - The map check lists the transport among the crates that do I/O, so the network crate can't depend on it ([the map check](02-code-map.md#the-map-check)).
+  - QUIC's room for one-off packets changes with every packet it carries, which the loop never sees.
+- **Leaves out:** whether the newest-only slots change anything on a direct path, which a case run by hand on our droplets settles.
+
+## The network owns everything between machines, and the session crate fills each first message through one hook
+
+- **Decided:** the network crate owns the endpoint and its key, each link, the first message's header, the version check at join, and every request to the backend.
+  The session crate registers the session channel as the one opener, whose keys fill each connection's first message, and asks the network to host, join, open links, dial a member, and leave; the network raises `LinkUp`, `LinkLost`, `MemberOut`, and `BackendAnswered`.
+  The endpoint key comes from the kernel's ChaCha20 generator, through `cx.random_bytes()`, and the network signs the backend's requests with it on the loop.
+  Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-network-crate)).
+- **Because:**
+  - The session crate sits above the network in the code map, so the network can't read the session's keys, and a key's stamp compares control values first, which are the session's ([channels](../network/01-between-machines.md#channels)).
+  - Signing the backend's requests and renewing them as links come up both need the network's key and links.
+- **Leaves out:** whether ed25519-dalek reaches `getrandom` with its `rand_core` feature off, which the map check shows at the first build.
+
+## A channel declares its delivery and priority, and the heartbeat carries only the clock exchange
+
+- **Decided:** a channel is a constant in its owner's module of the message crate, with its number, message type, delivery (`Stream`, `Newest`, or `Deadline`), and priority; each send names its receivers, the crew or one member, and the receiving handler checks who may send.
+  The heartbeat carries the clock exchange alone, with send stamps the transport writes, and the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own.
+  Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#channels-and-sends)).
+- **Because:**
+  - The network can't evaluate a role such as the flying machine, because the session crate that knows it sits above the network.
+  - A send stamp taken as the packet goes to QUIC leaves the loop's own delay out of the time on the path.
+  - The acknowledgment's own channel costs up to one packet a second, about 58 bytes of headers ([network log, 2.2][n22]), and the heartbeat knows nothing of the cockpit stream.
+- **Leaves out:** nothing.
+
+## Our relays run on two servers of ours, configured from relays/
+
+- **Decided:** two DigitalOcean droplets, in New York and Frankfurt, run `iroh-relay` 1.3, at $4 to $6 a month each.
+  `relays/relays.toml` lists each relay's region, URL, tokens, and cap once; each release's default relay list compiles in from it, and `relays/deploy.ts` renders each relay's configuration from it; a relay of our own, if we ever write one, lives there too.
+  Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-relays)).
+- **Because:**
+  - n0's shared relays admit an endpoint through a token n0's own preset mints from a project API key, describe no cap for each client, and lock no version below Dedicated, at $199 a month for each region (documented, [shared relays](https://docs.iroh.computer/iroh-services/relays/shared), [pricing](https://www.iroh.computer/pricing), undated, read 2026-10-16), where [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) has tokens of our own, a cap for each client, and pinned versions.
+  - p03 to p07 measured iroh through droplets in those two cities ([network log, 2.3][n23]; [network log, p07][p07]).
+  - The tokens are public either way, since each release carries them.
+- **Leaves out:** whether a $4 droplet's 512 MiB holds `iroh-relay`, which the first deployment shows, and whether pilots in Asia and Oceania need a third region, which v1's recordings show.
+
+## The backend is a Worker on D1, which counts only wrong codes against an address
+
+- **Decided:** the backend is a Cloudflare Worker in TypeScript, with a plain `fetch` handler and no framework, on D1 with no Durable Object.
+  It serves five requests, and every request but a lookup carries the member's endpoint ID, a counter one past the last it took, and an Ed25519 signature by the endpoint key.
+  A lookup reads its address's count of wrong codes for the hour first, refuses at 20, and adds one only for a wrong code.
+  Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-backend)).
+- **Because:**
+  - The backend holds no connection, where fsc-editor's Worker holds a Durable Object for each code because it holds each session's WebSockets (read in fsc-editor, `relay/src/index.ts`, `Session`).
+  - D1's Workers Free plan allows 100,000 rows written a day ([D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), as of 2026-04-21), about 16,000 pilot-hours of renewals (arithmetic).
+  - Reading the count before the lookup refuses an address at its limit even when it guesses right, where fsc-editor's Worker counts every join (same file, `join`).
+- **Leaves out:** bug reports' files, which may pass D1's 2 MB a row ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)), for node 6.6; and whether Workers verify Ed25519 as [Web Crypto](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/) lists, which the backend's tests settle.
+
+## The bench stands in for a relay's loss with a proxy, and a direct path's loss runs by hand
+
+- **Decided:** in CI and on a developer's PC, two cores run through a local `iroh-relay` bound to `127.0.0.1`, behind a TCP proxy that holds bytes back as TCP's resend after a loss would, or cuts a core's connection.
+  v1's full mix on a direct path under loss runs by hand, through `tc netem` on our droplets, at the network's stage of the build and whenever iroh's or noq's pinned version changes.
+  Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#cases-for-the-bench)).
+- **Because:**
+  - CI runs on Windows only ([CI](02-code-map.md#ci)), and `iroh-relay` 1.3.0 builds and runs there, answering on IPv6 loopback only in dev mode ([network log][nwin]).
+  - On iroh's relay QUIC sees no loss, only late packets ([network log, p06][p06]), so holding bytes back stands in for loss there.
+  - Only a direct path's loss needs packets dropped, and the core runs only on Windows.
+- **Leaves out:** whether the network crate and the transport build on Linux for the case run by hand, which that program's first build settles.
+
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load
@@ -1149,3 +1216,4 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 [p05]: ../network/log.md#2026-10-11-when-two-endpoints-home-at-different-relays-iroh-carries-both-directions-through-the-dialed-endpoints-home-relay-so-whoever-dials-picks-the-relay
 [p06]: ../network/log.md#2026-10-11-on-irohs-relay-under-loss-v1s-streams-run-as-late-as-its-one-off-packets-and-no-later-because-quic-never-sees-a-loss-there-so-a-sender-that-keeps-only-each-channels-newest-packet-changes-nothing
 [p07]: ../network/log.md#2026-10-11-after-a-total-outage-a-redialed-connection-carries-data-03s-to-14s-after-the-link-returns-while-one-that-lived-through-a-10s-outage-takes-5s-to-7s
+[nwin]: ../network/log.md#2026-10-16-iroh-relay-130-builds-and-runs-on-windows-and-in-dev-mode-answers-on-ipv6-loopback-only

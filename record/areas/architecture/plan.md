@@ -656,6 +656,7 @@ Its answer goes in `record/areas/recording/01-recording-and-bug-reports.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.1, how many bytes an hour a recording of every input the core takes in comes to, raw and compressed, since the one loop of [5.1.1's entry][5.1.1] replays a run only from such a recording; the probe [p10](../../../experiments/areas/architecture/p10-recording.mjs), built on 2026-10-14 and parked before it ran, captures a flying machine's inputs from the sim in the 58P for about 10 minutes (user, 2026-10-14).
 Raised elsewhere: by 6.1, the edge writes a log of every input from the core's first, in every run, with or without a session, since a replay can't start mid-run, so 6.6 keeps or deletes a run's log whole, and a minimal recording, which [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) offers, replays nothing, where the spine's [components with no session](01-spine.md#components-with-no-session) has the core record only in a session ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)).
+Raised elsewhere: by 6.4, where bug reports' files go, since a D1 row holds at most 2 MB and a free database at most 500 MB, and R2 needs a subscription; and whether the self-describing record keeps each connection's path and loss and each sender's clock offset, which the queue holds as the transport's events and the heartbeats ([02-units](../network/02-units.md#the-backend)).
 
 ## 6.7 The session
 
@@ -667,6 +668,7 @@ Its answer goes in `record/areas/session/02-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, the session crate decides when the core exits, by the spine's rule, and runs a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, as a Leave before the exit, within 3s of Windows' `WM_QUERYENDSESSION`; it registers the source through which the core hears Windows end the session ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 Raised elsewhere: by 6.3, the session crate calls `sim_service::announce(cx, session)` as a session starts or ends; it takes the run of the sim for the session file, and whether the last run ended as a quit or a crash for the crew's notice, from sim awareness's state; and the menu script reports its master page and page to the sim service for sim awareness ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
+Raised elsewhere: by 6.4, the network checks the version at join, at the backend and in each first message, and the session crate shows what it reports; the session crate registers the session channel as each connection's opener, asks `Host`, `Join`, `Open`, `Dial`, and `Leave`, writes the session file between `BackendAnswered` and `Open`, with the endpoint key, the relay list and its tokens, and the crew's endpoint IDs, and hands control over before a PF's `Leave` ([02-units](../network/02-units.md#requests-the-session-crate-makes)).
 
 ## 6.8 Profiles
 
@@ -688,6 +690,7 @@ Its answer goes in `record/areas/sync/05-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.2, which panel listens for `H:` events, and how, since [decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md) keeps one panel for them, as a panel module whose rule picks that panel ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#cockpit-panels-and-their-modules)).
 Raised elsewhere: by 6.3, SDK 1.7.3 has `fsEventsRegisterHEvent`, which takes an `H:` event's name, and `fsEventsHEventCall`, so our module can fire an `H:` event by name without calculator code, for the item on how the profile engine fires them ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis)).
+Raised elsewhere: by 6.4, the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own, not on the heartbeat, and starts its replay on `LinkUp` with `again` ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
 
 ## 6.10 Flight-model sync
 
@@ -697,6 +700,7 @@ It reads 03-v1-scope's [flight-model sync](../product/03-v1-scope.md#flight-mode
 It settles the spine's open items under flight-model sync, on the module's clock and on how far the core's arrival stamp trails the sim's read ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/flight-model/01-flight-model-sync.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.4, each sender's clock offset sits in the network's state by pilot ID and restart count, and the flight model's channel handler, not the network, drops a sample made under an older control value ([02-units](../network/02-units.md#channels-and-sends)).
 
 ## 6.11 Pointer sync
 
@@ -732,6 +736,7 @@ Traffic and ATC audio each hold a role of their own, and traffic creates AI obje
 It reads 03-v1-scope's [traffic sync](../product/03-v1-scope.md#traffic-sync) and [hearing ATC](../product/03-v1-scope.md#hearing-atc), 01-roles-and-members' [traffic and ATC host](../session/01-roles-and-members.md#the-traffic-and-atc-host), 6.3's, 6.4's, 6.5's, and 6.7's answers, and the FS Copilot fork's `record/traffic-atc/`.
 Its answer goes in `record/areas/traffic-atc/01-traffic-and-atc.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.4, ATC audio's channel takes `Deadline` delivery, each frame dropped once its turn to play has passed, and traffic sends its identities whole on `LinkUp` with `again` ([02-units](../network/02-units.md#channels-and-sends)).
 
 ## 6.15 Plugins
 
@@ -743,6 +748,7 @@ Its answer goes in `record/areas/plugins/01-plugins.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.3, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
+Raised elsewhere: by 6.4, how a plugin's channel instance gets its number and announces it on the session channel, since every other channel is a constant in the message crate, and a receiver drops a channel no unit registered ([02-units](../network/02-units.md#channels-and-sends)).
 
 ## 6.16 The apps
 
@@ -755,6 +761,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosscheck, which the core runs as a Leave before it exits ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 Raised elsewhere: by 6.2, where each notice shows, by its level; which slices each app's frame shows; what the apps tell the pilot after a `bye` and after a socket that closed without one; whether a component whose version differs counts as trouble; and the WebSocket client in the desktop app's Rust side, which sends no `Origin` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
 Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, differs, or stopped, and which of sim awareness's state the apps show ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
+Raised elsewhere: by 6.4, the network's slice of client state for the status list: each member's link and path, and whether this PC reaches the internet ([02-units](../network/02-units.md#what-the-pilot-sees-and-settings)).
 
 ## 6.17 Installing and updating
 
@@ -766,6 +773,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 5, where the installer lives, and whether it's a program of ours ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 6.1, the watcher starts the core again only when it exits with a code other than 0, since every deliberate exit returns 0 and a panic's abort never does; and how the watcher's tray asks the core to quit ([01-loop-and-edge](../core/01-loop-and-edge.md#exiting)).
 Raised elsewhere: by 6.3, the core finds the sim's process by the name `FlightSimulator2024.exe`, which our Steam edition's runs gave, and which a pilot's crash report gave the Microsoft Store edition (unverified), as the watcher noticing the sim's start can ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-sims-process)).
+Raised elsewhere: by 6.4, the installer's Windows Firewall rule for the core's path, and which program checks for it, comparing paths without regard to letter case, which [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) gives to the installer and the core.
 
 ## 6.18 The build
 
@@ -778,6 +786,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.4, what the build does when cargo-msfs, which installs only the newest SDK, has installed one newer than a release's, and how long CI takes on Windows runners, against [5.4's budget](02-code-map.md#budgets-for-the-workspace) ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 6.1, how the core links the C runtime statically, since `+crt-static` is a target's feature rather than a crate's and 5.4 sets no `RUSTFLAGS`, and whether the watcher, the core helper, and the desktop app link it statically too; and the map check's search of `features/` for `impl Moment`, and its allowance for the one foreign function `apps/core` declares ([01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)).
 Raised elsewhere: by 6.2, how the build gets the sim's stock `VCockpit.js` after each sim update, since the sim streams it rather than keeping it on disk, to put our two blocks into at their anchors ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#our-vcockpitjs)).
+Raised elsewhere: by 6.4, the network crate compiles each release's default relay list from `relays/relays.toml`, and CI runs the backend's tests against a local D1 ([02-units](../network/02-units.md#the-relays)).
 
 ## 7 Testing
 
@@ -798,6 +807,7 @@ Exit: the user agrees to that design doc.
 Waits on 5 and 6.
 Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
+Raised elsewhere: by 6.4, the bench's local `iroh-relay` binds `127.0.0.1`, since in dev mode it answered on IPv6 loopback only; a TCP proxy in front of it stands in for a relay's loss and cuts; and v1's full mix on a direct path under loss runs by hand on our droplets, in a program built on the network crate and the transport ([02-units](../network/02-units.md#cases-for-the-bench)).
 
 ## 8 The build order
 

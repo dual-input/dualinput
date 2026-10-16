@@ -2,6 +2,26 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-16: iroh-relay 1.3.0 builds and runs on Windows, and in dev mode answers on IPv6 loopback only
+
+**Asked:** for node 6.4, can CI's Windows runners build and run the `iroh-relay` that the network's tests run through ([01-between-machines](01-between-machines.md#two-cores-on-one-pc)), since CI runs on Windows only ([02-code-map](../architecture/02-code-map.md#ci))?
+
+**Expected:** no prediction; our relays ran on Linux droplets, and nobody had built `iroh-relay` on Windows.
+
+**Found:** on our development machine, on 2026-10-16:
+
+- `cargo install iroh-relay --version =1.3.0 --features server --locked` built a 9.7 MB `iroh-relay.exe` in 50s.
+- Started with `--dev`, it answered `/` with 200, `/ping` with 200 and an empty body, and `/generate_204` with 204 on `http://[::1]:3340`, while every request to `http://127.0.0.1:3340` timed out.
+- Dev mode binds `[::]:3340` (read in iroh-relay 1.3.0, `src/main.rs`, `DEV_MODE_HTTP_PORT`), and on Windows "an IPv6 socket created on Windows Vista and later only operates over the IPv6 protocol" unless the program turns `IPV6_V6ONLY` off (documented, [Dual-stack sockets](https://learn.microsoft.com/en-us/windows/win32/winsock/dual-stack-sockets)), which fits the timeouts.
+- `/ping` answers anyone, with no check of the relay's tokens (read in iroh-relay 1.3.0, `src/server.rs`, `probe_handler`).
+
+**Changed:** CI can run `iroh-relay` on Windows, bound to an address the cores dial, such as `http_bind_addr` set to `127.0.0.1:3340`.
+A core can ask any of our relays for `/ping` with no token, to tell whether the PC reaches the internet.
+
+**Affects:** [02-units](02-units.md)'s cases for the bench, and its internet check.
+
+**Evidence:** [results/2026-10-16-iroh-relay-on-windows.txt](results/2026-10-16-iroh-relay-on-windows.txt), the build's last lines and each request's result.
+
 ## 2026-10-11: after a total outage, a redialed connection carries data 0.3s to 1.4s after the link returns, while one that lived through a 10s outage takes 5s to 7s
 
 **Asked:** for node 2's revision, when everything between two pilots stops for 10s, 30s, 60s, or 120s, how long after the link returns does data flow again, on the same connection where it lives and through a redial where it doesn't, and when does iroh's relay connection come back ([architecture plan, 2](../architecture/plan.md#2-how-the-cores-reach-each-other))?

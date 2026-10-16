@@ -1,0 +1,32 @@
+iroh-relay 1.3.0 on Windows, our development machine, 2026-10-16.
+<scratch> stands for a scratch folder outside the repository.
+
+Build:
+
+  cargo install iroh-relay --version =1.3.0 --features server --locked --root <scratch> --target-dir <scratch>\target
+
+     Compiling tokio-websockets v0.13.3
+     Compiling tokio-rustls-acme v0.9.1
+     Compiling iroh-metrics v1.0.2
+     ...
+      Finished `release` profile [optimized] target(s) in 49.72s
+    Installing <scratch>\bin\iroh-relay.exe
+     Installed package `iroh-relay v1.3.0` (executable `iroh-relay.exe`)
+
+  iroh-relay.exe: 9,708,032 bytes
+
+Run 1: iroh-relay.exe --dev, then GET each path on IPv4 loopback, 2s timeout each:
+
+  http://127.0.0.1:3340/              -> The operation has timed out.
+  http://127.0.0.1:3340/ping          -> The operation has timed out.
+  http://127.0.0.1:3340/generate_204  -> The operation has timed out.
+  http://127.0.0.1:3340/healthz       -> The operation has timed out.
+
+Run 2: iroh-relay.exe --dev, then GET each path on IPv6 loopback, 3s timeout each:
+
+  http://[::1]:3340/              -> 200 [111 bytes]
+  http://[::1]:3340/ping          -> 200 [0 bytes]
+  http://[::1]:3340/generate_204  -> 204 [0 bytes]
+  process still running after the requests: True
+
+Neither run wrote anything to standard output or standard error.

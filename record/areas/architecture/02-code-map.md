@@ -26,6 +26,14 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The bridge's globals are `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `window.CROSSCHECK_BRIDGE_UNLOCK()`, where [modules in the panel bridge](#modules-in-the-panel-bridge) and [what the bridge owns](#what-the-bridge-owns) have `CROSSCHECK_BRIDGE` and `window.CROSSCHECK_UNLOCK()`, by [names the sim shares](#names-the-sim-shares).
 >
 > It also settles [left open](#left-open)'s item on which of the sim's APIs carries each want of the routine host.
+>
+> Since 2026-10-16, [02-units](../network/02-units.md) changes this document in five places:
+>
+> - The network crate checks the version at join, at the backend and in each connection's first message, and the session crate shows what it reports, where [the platform](#the-platform)'s table gives the check to the session crate.
+> - The network crate raises `LinkUp`, `LinkLost`, `MemberOut`, and `BackendAnswered`, where [the platform](#the-platform)'s table names "link lost" and the link's return.
+> - The message crate also holds the transport's commands and events, since the network crate may not depend on the transport, which [the map check](#the-map-check) lists among the crates that do I/O.
+> - `relays/` joins [the workspace](#the-workspace), with each relay's region, URL, tokens, and cap, and the script that deploys them, which settles [left open](#left-open)'s item on where the relays' configuration lives.
+> - The backend in `backend/` is a Worker on D1, with no framework.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

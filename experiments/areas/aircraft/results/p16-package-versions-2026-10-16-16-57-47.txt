@@ -1,0 +1,15 @@
+p16 · Where an aircraft's version can be read on disk
+2026-10-16T16:57:46.194Z, UserCfg.opt at %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt
+InstalledPackagesPath: %APPDATA%\Microsoft Flight Simulator 2024\Packages
+
+Community: 137 packages, 133 with a manifest.json, 133 with a package_version; 27 whose name has "aircraft" and not "livery"
+Community2024: 5 packages, 5 with a manifest.json, 5 with a package_version; 0 whose name has "aircraft" and not "livery"
+Official2020: 5 packages, 4 with a manifest.json, 4 with a package_version; 0 whose name has "aircraft" and not "livery"
+Official2024: 4 packages, 3 with a manifest.json, 3 with a package_version; 2 whose name has "aircraft" and not "livery"
+StreamedPackages: 1221 packages, 0 with a manifest.json, 0 with a package_version; 297 whose name has "aircraft" and not "livery"
+  1219 hold at their top: content
+  2 hold at their top: content, on-demand.json (fs20-topmachstudios-f22a-raptor-premium, fs24-microsoft-aircraft-a320neo)
+  fs20-topmachstudios-f22a-raptor-premium's on-demand.json has the keys: content
+  fs24-microsoft-aircraft-a320neo's on-demand.json has the keys: content
+
+Content.xml beside the packages folder gives each package the attributes: name, active

@@ -3,6 +3,34 @@
 What the sim found about the studied aircraft, newest entry first.
 The probes, the harness, and their raw output are in [experiments/areas/aircraft](../../../experiments/areas/aircraft), with the results in its `results/` folder.
 
+## 2026-10-16: A streamed package keeps no version on disk, while every installed one with a manifest has its `package_version`
+
+**Asked:** the preflight match check compares two pilots' aircraft versions ([preflight match check](../product/03-v1-scope.md#preflight-match-check)), and a package's version is `package_version` in its `manifest.json` ([07](../../learn/foundations/07-aircraft-specific-systems.md)); 03-v1-scope says a streamed Marketplace copy has no `manifest.json` in its folder, with no source.
+Where can the core read each kind of copy's version?
+
+**Expected:** a manifest in every Community and Official package, and none in a streamed one.
+
+**Found:** with no sim running, p16 listed every folder under `UserCfg.opt`'s `InstalledPackagesPath` on our development machine:
+
+| Folder | Packages | With a `manifest.json` and a `package_version` |
+| --- | --- | --- |
+| `Community` | 137 | 133 |
+| `Community2024` | 5 | 5 |
+| `Official2020` | 5 | 4 |
+| `Official2024`, in its `Steam` folder | 4 | 3 |
+| `StreamedPackages` | 1,221 | 0 |
+
+- 1,219 streamed packages held only a `content` folder at their top, and 2 also an `on-demand.json` whose one key is `content`: the Microsoft A320neo's and Top Mach Studios' F-22A.
+- 297 streamed packages' names hold "aircraft" and not "livery", among them iniBuilds' A380 and L-1011, FSReborn's Phenom 300E, and the stock Baron G58.
+- The sim's `Content.xml` gives each package only a `name` and whether it's `active`.
+- The world map's aircraft list, as p08 captured it, carries each aircraft's `creator` and no version (read in `experiments/areas/interface/results/p08-world-map-aircraft-2026-10-05-19-32-47.ndjson`).
+
+**Changed:** the match check reads an installed copy's version from its manifest, and has none for a streamed copy, so it shows a streamed copy against an installed one as a warning that the streamed copy's version can't be read.
+
+**Affects:** the match check in [the session's units](../session/02-units.md#the-match-check), and [preflight match check](../product/03-v1-scope.md#preflight-match-check)'s open question on what identifies a copy.
+
+**Evidence:** [p16's run](../../../experiments/areas/aircraft/results/p16-package-versions-2026-10-16-16-57-47.txt).
+
 ## 2026-10-04: Key presses a program sends move the cockpit eye, with the sim window in front, and leave the pilot their camera
 
 **Asked:** does pressing the pilot's own camera keys for them, from a program, move the cockpit eye, since SimConnect can't send the camera's slide actions ([entry below](#2026-10-04-simconnect-doesnt-know-the-sims-cockpit-camera-slide-actions-by-name))?

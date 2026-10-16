@@ -44,7 +44,7 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > - A session key's writer is a member, anyone, or the PF alone, where [what a feature registers](#what-a-feature-registers) has one member or the whole session, and every write is a request the session crate decides.
 > - The session crate also raises a member entering or leaving the flight, beside what [the platform](#the-platform)'s table has it raise.
-> - Rate and pause has a part in the EFB app, where [features](#features) gives it only one in the core, since only the toolbar's own call, from the toolbar's or the EFB's document, sets active pause ([environment log](../environment/log.md#2026-10-16-only-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off)).
+> - Rate and pause has a part in the EFB app, where [features](#features) gives it only one in the core, since the one way we found to set active pause is the toolbar's own call, from the toolbar's or the EFB's document ([environment log](../environment/log.md#2026-10-16-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off-and-no-simconnect-event-we-tried-does)).
 > - The profile loader writes the bundle a session pins, as a session key the PF's core writes, and state sync and the cockpit stream guard the session crate's Ready and control requests, so the session crate reads none of the three.
 
 Crosscheck's code is a platform, engines, and features.

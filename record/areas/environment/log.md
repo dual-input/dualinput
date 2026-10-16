@@ -2,13 +2,14 @@
 
 What our experiments found about the sim's pause, simulation rate, and time of day, newest entry first.
 The pause menu raises the sim pause and lets the sim's clock run, active pause stops the clock, and only SimConnect raised a full pause.
-Code turns active pause on and off only through the toolbar's own call, from the toolbar's or the EFB's document; no SimConnect event does.
+The one way we found for code to turn active pause on and off is the toolbar's own call, from the toolbar's or the EFB's document; no SimConnect event we tried did it.
 The rate steps and the time events work from SimConnect, and `K:SIM_RATE_SET` doesn't.
 The date events work too, with `K:ZULU_DAY_SET` taking a day of the year.
 The probes are [p01-clock.mjs](../../../experiments/areas/environment/p01-clock.mjs) and [p02-active-pause.mjs](../../../experiments/areas/environment/p02-active-pause.mjs), and their raw output is in [experiments/areas/environment/results](../../../experiments/areas/environment/results).
+They read the sim's environment variables, such as `E:ZULU TIME` and `E:SIMULATION RATE`, through SimConnect by their names without the `E:` prefix.
 Every entry was measured on MSFS 2024 SunRise 12.2.282174.999, with the aircraft parked.
 
-## 2026-10-16: Only the toolbar's `TOOLBAR_SET_ACTIVE_PAUSE`, called from the toolbar's or the EFB's document, turns active pause on and off
+## 2026-10-16: The toolbar's `TOOLBAR_SET_ACTIVE_PAUSE`, called from the toolbar's or the EFB's document, turns active pause on and off, and no SimConnect event we tried does
 
 **Asked:** v1 syncs active pause from any pilot ([03-v1-scope](../product/03-v1-scope.md#time-date-sim-rate-and-pause)), so a following machine's core has to set it, and the entries below found only that `K:PAUSE_SET` raises the full pause.
 Can code set active pause, and from where?
@@ -32,8 +33,8 @@ The sim's toolbar sets it with `Coherent.call("TOOLBAR_SET_ACTIVE_PAUSE", paused
 The clock under the toolbar's call read as it did under the pilot's own active pause in the entry below, -0.14x to 0.32x across a window that takes in the moments around the change.
 p02 ran its calls in each document through the inspector, with the EFB closed (user, 2026-10-16).
 
-**Changed:** a following machine sets active pause through the EFB app's code, which runs in the EFB's document from the sim's start, with the EFB closed ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
-No cockpit panel and no SimConnect client can.
+**Changed:** a following machine sets active pause through the EFB app's code, which runs in the EFB's document from the sim's start, with the EFB closed ([interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)); that the app's own code can make the call, as the inspector made it in the EFB's document, is unverified.
+None of the SimConnect events we tried could, nor the one cockpit panel and mainUi.
 `K:PAUSE_ON` raises the sim pause, which the pause menu raises too, where `K:PAUSE_SET` 1 raised the full pause.
 
 **Affects:** rate and pause in [6.7](../architecture/plan.md#67-the-session), which gains a part in the EFB app; time, date, sim rate, and pause in [03-v1-scope](../product/03-v1-scope.md#time-date-sim-rate-and-pause).

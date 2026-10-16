@@ -636,6 +636,7 @@ It settles who hosts the relays, and the framework and storage of the Cloudflare
 Its answer goes in `record/areas/network/02-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5, where the relays' configuration lives, since they run `iroh-relay` with no code of ours ([02-code-map](02-code-map.md#left-open)).
+Done on 2026-10-16.
 
 ## 6.5 The core helper
 

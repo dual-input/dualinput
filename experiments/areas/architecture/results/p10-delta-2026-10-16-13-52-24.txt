@@ -1,0 +1,16 @@
+p10-delta on experiments/areas/architecture/results/p10-capture-2026-10-16-13-52-24.bin, 2026-10-16, node v22.23.1's zstd
+
+ROUNDTRIP	every byte back
+INPUTS	307,303 of them XORed with an earlier record
+LEVEL 3	raw 7.57 MB, 45.4 MB an hour	delta 7.10 MB, 42.6 MB an hour	1.07x smaller
+LEVEL 19	raw 6.79 MB, 40.7 MB an hour	delta 6.23 MB, 37.4 MB an hour	1.09x smaller
+KIND	flight model	level 3: raw 1.84 MB, delta 1.72 MB	1.07x
+KIND	profile entries	level 3: raw 0.02 MB, delta 0.02 MB	0.90x
+KIND	input events	level 3: raw 0.00 MB, delta 0.00 MB	0.99x
+KIND	traffic, aircraft	level 3: raw 3.61 MB, delta 3.62 MB	1.00x
+KIND	traffic, ground	level 3: raw 0.20 MB, delta 0.22 MB	0.87x
+KIND	traffic identities	level 3: raw 0.01 MB, delta 0.01 MB	1.00x
+KIND	camera	level 3: raw 0.42 MB, delta 0.46 MB	0.93x
+KIND	module slot	level 3: raw 0.07 MB, delta 0.06 MB	1.15x
+KIND	11	level 3: raw 0.00 MB, delta 0.00 MB	1.00x
+KIND	12	level 3: raw 0.00 MB, delta 0.00 MB	1.00x

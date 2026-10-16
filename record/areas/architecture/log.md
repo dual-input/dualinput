@@ -3,6 +3,52 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-16: A flying machine that hosts traffic at EGLL takes in 285 MB of inputs an hour, 45 MB with zstd, mostly traffic, and one loop carries them at 0.5% of a core and replays them exactly
+
+**Asked:** how many bytes an hour a recording of every input a flying machine's core takes in comes to, raw and compressed, which [6.6](plan.md#66-recording-and-bug-reports) needs to size what each PC keeps and what a bug report uploads; and does one loop carry that load and replay it, which [node 7](plan.md#7-testing) measures (both raised by 5.1)?
+
+**Expected:** tens of MB an hour compressed: fsc-editor's capture of every `L:` variable of a PA-24 came to about 56 MB an hour as gzipped NDJSON ([5.1.1's entry](#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc)).
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, whose program reports version 1.9.18.0, in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, at EGLL with AI traffic on, while the user taxied and flew around the airport for 600s:
+
+- p10's capture subscribed as the core of a flying machine that also hosts traffic would: the flight model and the camera every sim frame, 298 of the 309 names FS Copilot's 58P profile watches, as they change, AI aircraft within 200km and ground vehicles within 5km every 500ms, and p08's module's slot.
+  The sim ran at 22.5 to 29.8 fps, with 142 to 153 aircraft and 0 to 248 ground vehicles around.
+- It took in 312,702 inputs, 47.5 MB raw, 285 MB an hour: 7.57 MB with zstd at level 3, 45.4 MB an hour, and 6.79 MB at level 19, 40.7 MB an hour.
+
+  | Inputs | A second | Raw, an hour | With zstd at level 3, of the 600s |
+  | --- | --- | --- | --- |
+  | AI aircraft | 291.2 | 157.2 MB | 3.61 MB |
+  | Ground vehicles | 166.8 | 90.0 MB | 0.20 MB |
+  | Flight model | 26.0 | 20.8 MB | 1.84 MB |
+  | Camera | 26.0 | 10.3 MB | 0.42 MB |
+  | Traffic identities | 1.7 | 3.7 MB | 0.01 MB |
+  | Module slot | 4.9 | 1.8 MB | 0.07 MB |
+  | Profile entries | 4.5 | 1.2 MB | 0.02 MB |
+
+  Each kind was compressed apart, and the 14 bytes each input carries for its time, kind, and length take the rest of the 7.57 MB.
+- Storing each record as its XOR with the last record of the same kind and object, and each time as its gap from the one before, shrank the whole by 1.07x at level 3 and 1.09x at level 19, and every byte came back ([p10-delta](../../../experiments/areas/architecture/p10-delta.mjs)).
+- p10's loop ran the capture at its own pace for 600s, with made-up inputs at a session's rates beside it: 20 cockpit changes, 30 avatar poses, 10 panel messages, 50 ATC frames, 6 cursor reports, and 5 timer firings a second, a heartbeat each second, 19 job results, and 9 plugin calls stopped at their 100ms limit.
+  Each flight-model input ran p04's 100 write functions in QuickJS-ng.
+  - It took 385,929 inputs, 643 a second, and was busy 0.5% of the time.
+  - An input waited in the queue 11µs at the median, 92µs at p99, 53.7ms at p99.9, and 100ms at most, the stops at the plugin's limit holding back the inputs behind them.
+  - A flight-model input took 98.7µs on average to handle, and 2.97ms at most.
+  - Its recording came to 12.95 MB with zstd at level 3, 77.7 MB an hour, more than the capture alone because the made-up inputs' bytes are random (read in `recording/loop/src/main.rs`, `Noise::bytes`).
+  - It replayed that recording twice, in 1.8s and 1.9s, 331 and 324 times faster than it ran, and both replays put out 1,929,091 outputs whose hash matched the live run's.
+
+**Changed:**
+
+- A flying machine that hosts traffic in a busy area records about 45 MB an hour with zstd, and traffic is most of it: 87% of the raw bytes, and half of the compressed.
+  So the reading radius and rate that traffic sync's design picks ([6.14](plan.md#614-traffic-and-atc)) set a recording's size more than its encoding does.
+- The flight model and the camera come every sim frame, so at the 89 updates a second of p08's flight in a PA-24 they would take about 3 times the bytes they took at 26 fps (arithmetic, unmeasured).
+- Plain zstd stays: storing records as differences gained under 10%.
+- One loop carried a busy flying machine's load at 0.5% of a core, and replayed it exactly, an hour in about 11s at this rate, against the budgets of 20% of a core ([02-code-map](02-code-map.md#budgets)) and an hour in under 6 minutes ([01-loop-and-edge](../core/01-loop-and-edge.md#budgets)).
+
+What we haven't run: a following machine, whose inputs are the crew's messages rather than the sim's flight model and traffic; a flight longer than 10 minutes; a frame rate near 89; and an area with little traffic.
+
+**Affects:** [6.6](plan.md#66-recording-and-bug-reports)'s and [node 7](plan.md#7-testing)'s items raised by 5.1, 02-code-map's [left open](02-code-map.md#left-open) items on how much of the queue a recording keeps and whether one loop meets its budgets, and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)' open question of how big a flight's recording is.
+
+**Evidence:** [the capture's report](../../../experiments/areas/architecture/results/p10-recording-2026-10-16-13-52-24.txt), the capture itself compressed with zstd as `results/p10-capture-2026-10-16-13-52-24.bin.zst`, [p10-delta's output](../../../experiments/areas/architecture/results/p10-delta-2026-10-16-13-52-24.txt), and [the loop's report](../../../experiments/areas/architecture/results/p10-loop-2026-10-16-13-52-24/p10-loop-run.txt).
+
 ## 2026-10-15: Cargo refuses two crates of one name in a workspace, and p10's loop reaches no crate that does I/O
 
 **Asked:** can the platform's `helper` crate and the helper's program share a name in one workspace, and does p10's loop, which embeds QuickJS-ng, reach any crate on the map check's list of crates that do I/O (node 5's map)?

@@ -1,0 +1,47 @@
+p10: the size of a recording of every input a flying machine's core takes in, 2026-10-16-13-52-24 UTC
+
+Watched: 309 names from FS Copilot's 58P profile (197 L:, 101 A:, 11 B:), listed in experiments/areas/architecture/results/p10-names-2026-10-16-13-52-24.tsv.
+Capture: experiments/areas/architecture/results/p10-capture-2026-10-16-13-52-24.bin
+
+== The capture, by kind: count, bytes ==
+flight model	15617	3466974
+profile entries	2676	202692
+input events	8	368
+traffic, aircraft	174715	26207250
+traffic, ground	100088	15000504
+traffic identities	1023	611754
+camera	15616	1717760
+module slot	2957	301614
+exceptions	1	38
+input event list	1	9770
+total	600.0 s	312702 records	47518724 bytes	1023 traffic objects seen
+
+== The capture's size ==
+CAPTURE	600.0 s	312702 inputs	47.52 MB raw
+KIND	flight model	15617	26.0 a second	3.47 MB raw	20.8 MB an hour raw
+KIND	profile entries	2676	4.5 a second	0.20 MB raw	1.2 MB an hour raw
+KIND	input events	8	0.0 a second	0.00 MB raw	0.0 MB an hour raw
+KIND	traffic, aircraft	174715	291.2 a second	26.21 MB raw	157.2 MB an hour raw
+KIND	traffic, ground	100088	166.8 a second	15.00 MB raw	90.0 MB an hour raw
+KIND	traffic identities	1023	1.7 a second	0.61 MB raw	3.7 MB an hour raw
+KIND	camera	15616	26.0 a second	1.72 MB raw	10.3 MB an hour raw
+KIND	module slot	2957	4.9 a second	0.30 MB raw	1.8 MB an hour raw
+KIND	exceptions	1	0.0 a second	0.00 MB raw	0.0 MB an hour raw
+KIND	input event list	1	0.0 a second	0.01 MB raw	0.1 MB an hour raw
+ZSTD	level 3	7.57 MB	45.4 MB an hour	6.3x
+ZSTD	level 19	6.79 MB	40.7 MB an hour	7.0x
+
+
+== The capture program's other lines ==
+19404775914	CONNECTED
+19404775974	READY
+19408038696	PROFILE	298
+19408039442	STARTED
+19408041474	EXCEPTION	7	258	3
+19408043126	INPUTS	11	11
+20008058782	TOTAL	600.0	312702	47518724	1023
+20008064753	LETGO	asked to quit
+20008174963	CLOSED
+
+== Next, offline ==
+experiments/areas/architecture/recording/target/release/p10-loop.exe run experiments/areas/architecture/results/p10-capture-2026-10-16-13-52-24.bin experiments/areas/architecture/engine/dist/writers.js experiments/areas/architecture/results/p10-loop-2026-10-16-13-52-24 10

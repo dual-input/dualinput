@@ -1,0 +1,309 @@
+A	GENERAL ENG THROTTLE LEVER POSITION:1	Position 16k
+A	GENERAL ENG THROTTLE LEVER POSITION:2	Position 16k
+A	GENERAL ENG PROPELLER LEVER POSITION:1	Position 16k
+A	GENERAL ENG PROPELLER LEVER POSITION:2	Position 16k
+A	GENERAL ENG MIXTURE LEVER POSITION:1	Position 16k
+A	GENERAL ENG MIXTURE LEVER POSITION:2	Position 16k
+L	BKSQ_MixtureLeverPosition_1	Percent
+L	BKSQ_MixtureLeverPosition_2	Percent
+L	var_oxygenPressure	number
+L	var_PulseOxyPercent	number
+L	var_RadarBrightness	number
+L	var_radarMode	number
+L	var_RadarGain	number
+L	var_RadarTilt	number
+A	AUTOPILOT FLIGHT DIRECTOR ACTIVE	Bool
+A	AUTOPILOT ALTITUDE LOCK	Bool
+A	AUTOPILOT HEADING LOCK	Bool
+A	AUTOPILOT NAV1 LOCK	Bool
+A	AUTOPILOT APPROACH HOLD	Bool
+A	AUTOPILOT BACKCOURSE HOLD	Bool
+L	var_AutopilotStartupCounter	number
+A	AUTOPILOT MASTER	bool
+L	BKSQ_NewStrobeEffect	number
+L	BKSQ_LoadWithCovers	number
+L	BKSQ_HideRadarPod	number
+L	BKSQ_ForceToggleWinglets	number
+L	BKSQ_ForceToggleWinglets	number
+L	BKSQ_VatsimClientMonitorBoth	number
+L	BKSQ_TabletPayloadUnitKg	number
+L	BKSQ_UnrestrictedBeta	number
+L	BKSQ_ShowBetaAnnunciator	number
+L	BKSQ_InstantBetaOnTouchdown	number
+L	BKSQ_ShowCopilotInterior	number
+L	var_radio1Mode	number
+L	var_radio2Mode	number
+L	var_yokeChronoMode_L	number
+L	var_yokeChronoMode_R	number
+A	AILERON TRIM PCT	number
+A	ELEVATOR TRIM PCT	percent
+A	RUDDER TRIM PCT	Percent
+L	bksq_SolarBrightness	number
+L	bksq_CabinDoor	number
+L	bksq_PilotDoor	number
+L	bksq_WheelChocks	number
+L	bksq_PitotCovers	number
+L	bksq_EngineCovers	number
+L	var_PreflightFlapPlay	number
+A	EXTERNAL POWER ON:1	Bool
+L	bksq_PreHeater	number
+L	bksq_NoseDoor	number
+A	CIRCUIT CONNECTION ON:1	Bool
+A	CIRCUIT CONNECTION ON:32	Bool
+A	CIRCUIT CONNECTION ON:4	Bool
+A	CIRCUIT CONNECTION ON:5	Bool
+A	CIRCUIT CONNECTION ON:7	Bool
+A	CIRCUIT CONNECTION ON:9	Bool
+A	CIRCUIT CONNECTION ON:10	Bool
+A	CIRCUIT CONNECTION ON:11	Bool
+A	CIRCUIT CONNECTION ON:12	Bool
+A	CIRCUIT CONNECTION ON:13	Bool
+A	CIRCUIT CONNECTION ON:14	Bool
+A	CIRCUIT CONNECTION ON:15	Bool
+A	CIRCUIT CONNECTION ON:16	Bool
+A	CIRCUIT CONNECTION ON:17	Bool
+A	CIRCUIT CONNECTION ON:18	Bool
+A	CIRCUIT CONNECTION ON:19	Bool
+A	CIRCUIT CONNECTION ON:20	Bool
+A	CIRCUIT CONNECTION ON:21	Bool
+A	CIRCUIT CONNECTION ON:22	Bool
+A	CIRCUIT CONNECTION ON:23	Bool
+A	CIRCUIT CONNECTION ON:24	Bool
+A	CIRCUIT CONNECTION ON:36	Bool
+A	CIRCUIT CONNECTION ON:25	Bool
+A	CIRCUIT CONNECTION ON:26	Bool
+A	CIRCUIT CONNECTION ON:27	Bool
+A	CIRCUIT CONNECTION ON:28	Bool
+A	CIRCUIT CONNECTION ON:31	Bool
+A	CIRCUIT CONNECTION ON:33	Bool
+A	CIRCUIT CONNECTION ON:34	Bool
+A	CIRCUIT CONNECTION ON:45	Bool
+A	CIRCUIT CONNECTION ON:46	Bool
+A	CIRCUIT CONNECTION ON:47	Bool
+A	CIRCUIT CONNECTION ON:48	Bool
+A	CIRCUIT CONNECTION ON:49	Bool
+A	CIRCUIT CONNECTION ON:50	Bool
+A	CIRCUIT CONNECTION ON:51	Bool
+A	CIRCUIT CONNECTION ON:52	Bool
+A	CIRCUIT CONNECTION ON:53	Bool
+A	CIRCUIT CONNECTION ON:54	Bool
+L	var_Breaker_LandingGearRelay_readonly	Bool
+A	CIRCUIT CONNECTION ON:6	Bool
+L	var_Breaker_FlapRelay_readonly	Bool
+A	CIRCUIT CONNECTION ON:3	Bool
+A	CIRCUIT CONNECTION ON:60	Bool
+A	CIRCUIT CONNECTION ON:61	Bool
+A	CIRCUIT CONNECTION ON:63	Bool
+A	CIRCUIT CONNECTION ON:64	Bool
+A	CIRCUIT CONNECTION ON:67	Bool
+A	CIRCUIT CONNECTION ON:68	Bool
+A	CIRCUIT CONNECTION ON:69	Bool
+A	CIRCUIT CONNECTION ON:71	Bool
+A	CIRCUIT CONNECTION ON:72	Bool
+A	CIRCUIT CONNECTION ON:73	Bool
+A	CIRCUIT CONNECTION ON:74	Bool
+A	CIRCUIT CONNECTION ON:75	Bool
+A	CIRCUIT CONNECTION ON:76	Bool
+A	CIRCUIT CONNECTION ON:77	Bool
+A	CIRCUIT CONNECTION ON:78	Bool
+A	CIRCUIT CONNECTION ON:79	Bool
+A	CIRCUIT CONNECTION ON:80	Bool
+A	CIRCUIT CONNECTION ON:83	Bool
+L	var_Breaker_AvionicsPowerRelay_readonly	Bool
+A	FUEL TANK SELECTOR:1	Number
+A	FUEL TANK SELECTOR:2	Number
+L	var_OatNeedle_GlassTap	number
+L	var_PropAmpsNeedle_GlassTap	number
+L	var_SuctionNeedle_GlassTap	number
+L	var_RadarAltimeterNeedle_GlassTap	number
+L	var_AirspeedNeedle_L_Glasstap	number
+L	var_TurnCoordinator_L_Glasstap	number
+L	var_RmiGlassTap	number
+L	var_Attitude_L_Glasstap	number
+L	var_Hsi_GlassTap	number
+L	var_Altimeter_L_Glasstap	number
+L	var_VerticalSpeedNeedle_L_Glasstap	number
+L	var_Localizer_L_GlassTap	number
+L	var_ManifoldPressureNeedle_L_GlassTap	number
+L	var_ManifoldPressureNeedle_R_GlassTap	number
+L	var_PropellerRpmNeedle_L_GlassTap	number
+L	var_PropellerRpmNeedle_R_GlassTap	number
+L	var_FuelFlowNeedle_L_GlassTap	number
+L	var_FuelFlowNeedle_R_GlassTap	number
+L	var_EngineTemperatures_L_GlassTap	number
+L	var_EngineTemperatures_R_GlassTap	number
+L	var_EnginePressures_L_GlassTap	number
+L	var_EnginePressures_R_GlassTap	number
+L	var_FuelNeedle_L_GlassTap	number
+L	var_FuelNeedle_R_GlassTap	number
+L	var_AltLoadNeedle_L_GlassTap	number
+L	var_AltLoadNeedle_R_GlassTap	number
+L	var_BusVoltsNeedle_GlassTap	number
+L	var_BootPressureNeedle_GlassTap	number
+L	var_CabinAltitude_GlassTap	number
+L	var_CabinClimbNeedle_GlassTap	number
+L	var_AirspeedNeedle_R_Glasstap	number
+L	var_Attitude_R_Glasstap	number
+L	var_Altimeter_R_Glasstap	number
+L	var_rnavDrivesHsi	number
+L	var_GyroSlaveModeSwitch	number
+A	GPS DRIVES NAV1	Bool
+A	GPS APPROACH MODE	enum
+A	GPS OBS ACTIVE	Bool
+L	var_md41Test	number
+A	DECISION HEIGHT	number
+L	var_TrueAirspeedKnob_L	number
+L	var_TrueAirspeedKnob_R	number
+A	NAV OBS:1	number
+A	AUTOPILOT HEADING LOCK DIR:1	degrees
+A	NAV OBS:2	degrees
+L	var_dmeMode	number
+A	AUTOPILOT ALTITUDE LOCK VAR	number
+A	AUTOPILOT VERTICAL HOLD VAR:1	number
+L	var_VsAdjustMode	Bool
+A	AUTOPILOT VERTICAL HOLD	Bool
+L	INSTRUMENT_Altimeter_1	number
+L	INSTRUMENT_Altimeter_2	number
+L	var_JpiMode	number
+L	var_CabinTempUnitMode	number
+L	XMLVAR_ELT_STATE	number
+L	bksq_stormWindow	number
+L	bksq_controlLocks	number
+L	var_Visor_L	number
+L	var_Visor_R	number
+L	var_FreshAirKnob	number
+L	var_LIGHTING_Push_Cockpit_1	number
+L	var_LIGHTING_Push_Cockpit_2	number
+L	var_LIGHTING_Push_Cockpit_3	number
+L	var_LIGHTING_Push_Cockpit_4	number
+L	var_LIGHTING_Push_Cockpit_5	number
+L	var_LIGHTING_Push_Cockpit_6	number
+L	bksq_CabinTable	number
+L	var_CoTest	number
+L	var_CoTest_IsDown	number
+A	ALTERNATE STATIC SOURCE OPEN	Bool
+L	var_FootwellVentKnob_L	number
+L	var_FootwellVentKnob_R	number
+L	var_FrontArmrest	number
+L	var_RearArmrest	number
+L	var_manualExtensionHandleDeployed	number
+L	var_manualExtensionHandleTurns	number
+L	var_PilotDoorPressureBypass	number
+L	var_CabinDoorPressureBypass	number
+L	var_PilotDoorLatchingFailure	number
+L	var_CabinDoorLatchingFailure	number
+L	var_doorSealFailure	number
+L	XMLVAR_ELT_STATE	number
+B	ELECTRICAL_Battery_1
+B	ELECTRICAL_Alternator_1
+B	ELECTRICAL_Alternator_2
+B	ELECTRICAL_Avionics_Bus_1
+L	var_PropSyncSwitch	number
+L	var_FUEL_Switch_Pump_1	number
+L	var_FUEL_Switch_Pump_2	number
+A	CIRCUIT SWITCH ON:29	Bool
+A	CIRCUIT SWITCH ON:37	Bool
+L	var_FuelVentHeatSwitch	number
+L	var_StallWarningHeatSwitch	number
+L	var_windshieldHeatSwitch	number
+L	var_PropHeatSwitch	number
+L	var_SurfaceDeiceSwitch	number
+L	var_VentBlowersSwitch	number
+L	var_AirConditionerSwitch	number
+L	var_AirConditioningBlowerSwitch	number
+L	var_CabinHeaterIgnitionSwitch	number
+L	var_CabinHeaterBlowerSwitch	number
+L	var_AnnunciatorTestButton	number
+L	var_AnnunciatorTestButton_IsDown	number
+L	BKSQ_IgnitionPosition_1	number
+L	BKSQ_IgnitionPosition_1	number
+L	BKSQ_IgnitionPosition_2	number
+L	BKSQ_IgnitionPosition_2	number
+B	LIGHTING_WING_1
+B	LIGHTING_STROBE_1
+B	LIGHTING_BEACON_1
+B	LIGHTING_NAV_1
+L	bksq_MasterGlareshieldLights	number
+L	bksq_MasterPanelLights	number
+B	LIGHTING_TAXI_1
+B	LIGHTING_LANDING_1
+B	LIGHTING_LANDING_2
+L	LANDING_GEAR_Gear	number
+L	var_pressurizationClimbRate	number
+L	var_pressurizationGoal	number
+L	var_pressurizationTest	number
+L	var_pressurizationTest_IsDown	number
+L	var_pressurizationPress	number
+L	var_doorSealStandbyInflate	number
+L	var_doorSealStandbyInflate_IsDown	number
+L	var_doorSealPrimaryInflate	number
+A	FLAPS HANDLE PERCENT	Position 16k, Number
+L	var_FlightInstrumentsLightingKnob	number
+L	var_GlareshieldLightingKnob	number
+L	var_EngineInstrumentsLightingKnob	number
+L	var_SubpanelLightingKnob	number
+L	var_PilotAirHandle	Number
+L	var_CopilotAirHandle	Number
+L	var_CabinHeatHandle	Number
+L	var_DefrosterHandle	Number
+L	var_PressurizationAirShutoffHandle_L	number
+L	var_PressurizationAirShutoffHandle_R	number
+L	var_doorSealStandbyAirValve	number
+L	ParkingBrake_Position	Number
+L	var_FireDetectorTestButton	number
+L	var_GeneratorResetButton	number
+L	var_DoorSealSwitch	number
+L	var_IceDeflectorSwitch	number
+L	var_OilDoorHandle	number
+L	var_P3BleedHandle	number
+L	var_FuelControlManualOverride	number
+L	var_FuelControlManualOverride_Cover	number
+L	XMLVAR_AllThrottlesHidden	number
+L	XMLVAR_LeverThrottleHidden1	number
+L	XMLVAR_LeverPropellerHidden1	number
+L	var_FrictionLock	number
+A	RECIP ENG COWL FLAP POSITION:1	Position 16k
+A	RECIP ENG COWL FLAP POSITION:2	Position 16k
+L	var_engineDamage_L	number
+L	var_engineDamage_R	number
+A	ENG FAILED:1	bool
+A	ENG FAILED:2	bool
+A	ENG ON FIRE:1	bool
+A	ENG ON FIRE:2	bool
+A	RECIP ENG TURBOCHARGER FAILED:1	bool
+A	RECIP ENG TURBOCHARGER FAILED:2	bool
+L	var_magnetoFailure_1_L	bool
+L	var_magnetoFailure_1_R	bool
+L	var_magnetoGroundingFailure_1_L	bool
+L	var_magnetoGroundingFailure_1_R	bool
+L	var_switchGroundingFailure_1	bool
+L	var_alternatorFailure_L	bool
+L	var_engineDrivenFuelPumpFailure_L	bool
+L	var_OilPumpFailure_L	bool
+L	var_unfeatheringAccumulatorFailure_L	bool
+L	var_magnetoFailure_2_L	bool
+L	var_magnetoFailure_2_R	bool
+L	var_magnetoGroundingFailure_2_L	bool
+L	var_magnetoGroundingFailure_2_R	bool
+L	var_switchGroundingFailure_2	bool
+L	var_alternatorFailure_R	bool
+L	var_engineDrivenFuelPumpFailure_R	bool
+L	var_OilPumpFailure_R	bool
+L	var_unfeatheringAccumulatorFailure_R	bool
+A	SUCTION PRESSURE	inHg
+L	var_PartialVacuumFailure	bool
+L	var_pressurizationSafetyValveFailure	bool
+L	var_pressurizationOutflowValveFailure	bool
+L	var_pressurizationInflowFailure	bool
+L	var_doorSealPrimaryFailure	bool
+L	var_doorSealStandbyFailure	bool
+L	var_CoLeak_L	bool
+L	var_CoLeak_R	bool
+L	var_CoLeak_H	bool
+L	var_CoDetectFailure	bool
+L	var_combustionHeaterFailure	bool
+L	var_condenserLimitFailure	bool
+L	var_airframeDeiceFailure	bool
+L	var_NoseDoorLatchingFailure	bool
+L	var_PilotDoorLatchingFailure	bool
+L	var_CabinDoorLatchingFailure	bool

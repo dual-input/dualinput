@@ -99,12 +99,15 @@ const send = (cmd) => { try { capture.stdin.write(cmd + "\n") } catch { /* exite
 const next = (kind) => new Promise((resolve) => waiters.add({ kind, resolve }))
 const alive = setInterval(() => send("alive"), KEEPALIVE_MS)
 capture.on("exit", (code) => { clearInterval(alive); if (code) console.log(`capture exited with code ${code}`) })
+// With the sim already running, the capture connects before the keys and the
+// speaker are ready, so the wait has to start before them or it misses the line.
+const connected = next("CONNECTED")
 
 const keys = await startKeys()
 const beep = startBeeper()
 const speak = startSpeaker()
 
-await next("CONNECTED")
+await connected
 console.log(`\nLoad the Black Square Baron 58P with AI traffic on, and get ready to fly.`)
 console.log(`Press ${START} to start ${MINUTES} minutes of recording; ${SKIP} stops it early.`)
 speak(`Load the Baron 58P with traffic on. Press Page Down to start recording.`)

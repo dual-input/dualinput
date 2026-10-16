@@ -1,0 +1,27 @@
+RUN	600.0 s	385929 inputs	643 a second	busy 0.5%	1929091 outputs	0 write errors
+LATENCY	all	p50 11 us	p99 92 us	p99.9 53700 us	max 100063 us
+KIND	flight model	15616 inputs	26.0 a second	queue p50 10 us	p99 120 us	max 97636 us	handled in 98.7 us on average, 2972 us at most
+KIND	profile entries	2676 inputs	4.5 a second	queue p50 10 us	p99 37 us	max 95039 us	handled in 5.9 us on average, 1104 us at most
+KIND	input events	8 inputs	0.0 a second	queue p50 96 us	p99 199 us	max 199 us	handled in 3.0 us on average, 4 us at most
+KIND	traffic, aircraft	174715 inputs	291.2 a second	queue p50 12 us	p99 82 us	max 70084 us	handled in 0.4 us on average, 1846 us at most
+KIND	traffic, ground	100088 inputs	166.8 a second	queue p50 12 us	p99 56 us	max 69069 us	handled in 0.3 us on average, 1619 us at most
+KIND	traffic identities	1023 inputs	1.7 a second	queue p50 12 us	p99 57 us	max 107 us	handled in 0.7 us on average, 21 us at most
+KIND	camera	15615 inputs	26.0 a second	queue p50 10 us	p99 37 us	max 90517 us	handled in 5.4 us on average, 1671 us at most
+KIND	module slot	2957 inputs	4.9 a second	queue p50 10 us	p99 39 us	max 52100 us	handled in 1.2 us on average, 59 us at most
+KIND	exceptions	1 inputs	0.0 a second	queue p50 11 us	p99 11 us	max 11 us	handled in 11.0 us on average, 11 us at most
+KIND	input event list	1 inputs	0.0 a second	queue p50 15 us	p99 15 us	max 15 us	handled in 8.0 us on average, 8 us at most
+KIND	net: cockpit	12000 inputs	20.0 a second	queue p50 10 us	p99 119 us	max 100052 us	handled in 14.1 us on average, 1610 us at most
+KIND	net: avatar	18001 inputs	30.0 a second	queue p50 9 us	p99 232 us	max 100044 us	handled in 5.6 us on average, 1604 us at most
+KIND	net: heartbeat	600 inputs	1.0 a second	queue p50 14 us	p99 800 us	max 100057 us	handled in 1.7 us on average, 12 us at most
+KIND	panels	6000 inputs	10.0 a second	queue p50 13 us	p99 114 us	max 100063 us	handled in 2.4 us on average, 210 us at most
+KIND	helper: ATC audio	30000 inputs	50.0 a second	queue p50 9 us	p99 255 us	max 100049 us	handled in 6.0 us on average, 2477 us at most
+KIND	helper: cursor	3600 inputs	6.0 a second	queue p50 9 us	p99 32138 us	max 99075 us	handled in 5.1 us on average, 512 us at most
+KIND	timer: control slot	3000 inputs	5.0 a second	queue p50 11 us	p99 66 us	max 100052 us	handled in 2.6 us on average, 233 us at most
+KIND	timer: plugin stall	9 inputs	0.0 a second	queue p50 11 us	p99 15 us	max 15 us	handled in 100026.2 us on average, 100035 us at most
+KIND	slow job result	19 inputs	0.0 a second	queue p50 11 us	p99 39 us	max 39 us	handled in 4.7 us on average, 8 us at most
+RECORDING	54.06 MB raw	12.95 MB with zstd at level 3	324.4 MB an hour raw	77.7 MB an hour compressed
+LIVE	hash 3089de01201511e6	1929091 outputs
+REPLAY	1	385929 inputs in 1.8 s, 331x the recording's 600 s	hash 3089de01201511e6	1929091 outputs	matches the live run
+REPLAY	2	385929 inputs in 1.9 s, 324x the recording's 600 s	hash 3089de01201511e6	1929091 outputs	matches the live run
+
+[exited with code 0]

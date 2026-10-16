@@ -22,7 +22,7 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > - A channel declares its delivery and priority, each send names its receivers, and the receiving handler checks who may send, where [channels](#channels) has a channel declare who sends and receives it.
 > - Our relays run on two servers of ours, DigitalOcean droplets in New York and Frankfurt, which settles [left open](#left-open)'s item on who hosts them.
 > - The backend is a Cloudflare Worker on D1, which [who does what](#who-does-what) calls a candidate.
-> - The tests [two cores on one PC](#two-cores-on-one-pc) gives CI stand in for a relay's loss with a proxy that holds bytes back, and [left open](#left-open)'s check of v1's full mix on a direct path under loss runs by hand on our droplets.
+> - In the CI tests that [two cores on one PC](#two-cores-on-one-pc) describes, a proxy that holds bytes back stands in for a relay's loss, and [left open](#left-open)'s check of v1's full mix on a direct path under loss runs by hand on our droplets.
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

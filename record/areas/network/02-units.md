@@ -62,13 +62,14 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - **Delivery is one of three:**
   - `Stream`: every message in order and resent, on a QUIC stream of the sender's that opens with the channel's number.
   - `Newest`: one-off packets, of which only the newest for each key waits to go, the key named by the message type, such as a pose's figure.
-  - `Deadline`: one-off packets in a short queue, each dropped once the deadline its sender gave it passes, which ATC audio uses.
+  - `Deadline`: one-off packets in a short queue, each dropped once its deadline passes, the deadline named by the message type, such as an ATC frame's turn to play.
+  - The network reads the key or the deadline from the message on the loop, and hands it to the transport with the packet's bytes.
 - **Priority** orders streams among streams and one-off packets among one-off packets, as [channels](01-between-machines.md#channels) ranks them, and QUIC puts waiting one-off packets ahead of stream data in every packet it builds ([sending](01-between-machines.md#sending)).
 - **A send names its receivers:** `To::Crew`, every member whose link is up, or `To::Member(pilot)`, as catch-up's stream goes only to the machine catching up.
 - **A received message reaches its channel's handler** with its sender's pilot ID and restart count and its input's stamp.
   The handler checks who may send it, since only units above the network can read control, as a flight-model sample made under an older control value is dropped by flight-model sync ([control](01-between-machines.md#control)).
   A message on a channel no unit registered, such as a plugin's that runs only on the other machine, is dropped.
-- A channel declares no sender or receiver beyond this, which changes [decision 035](../../decisions/035-channels-declare-how-they-travel.md)'s "who sends and receives it": the network can't evaluate a role such as "the flying machine", because the session crate that knows it sits above the network.
+- A channel declares no sender or receiver beyond this, which changes [decision 035](../../decisions/035-channels-declare-how-they-travel.md)'s "who sends and receives it" once step 8's decisions are numbered: the network can't evaluate a role such as "the flying machine", because the session crate that knows it sits above the network.
 
 ### The first message
 
@@ -84,8 +85,9 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 ### Links
 
 - The network keeps one link for each member's pilot ID, holding at most one connection, the one [the link between two cores](01-between-machines.md#the-link-between-two-cores)'s rule keeps.
-- A member that `Open` or `Dial` names starts lost, so the network dials it every 2s, each dial replacing the one running, until its first message passes, and its 30-minute timer runs from then; a first join and a redial take the same path.
-- One timer per link fires at its connection's last-heard time plus 5s, counting a stream's bytes and a one-off packet alike; when it fires and something has arrived since, it's set again for the new time plus 5s, and otherwise the network raises `LinkLost`, closes the connection, and dials every 2s again.
+- A member that `Open` or `Dial` names starts lost, so a first join and a redial take one path.
+  While a link is lost, the network dials its member every 2s, each dial replacing the one running, until a first message passes, and raises `MemberOut` once the link has been lost for 30 minutes.
+- One timer per link fires at its connection's last-heard time plus 5s, counting a stream's bytes and a one-off packet alike; when it fires and something has arrived since, it's set again for the new time plus 5s, and otherwise the network raises `LinkLost`, closes the connection, and the link is lost again.
 - `LinkUp` is raised each time the link takes a connection whose first message has passed: when it first comes up, when it comes back, and when the rule moves it onto the other of two connections, since what went out on the connection it closes may be lost.
 - `again` is true when the link was up before under the same restart count.
   A first message with a higher restart count ends the old count's link with no `LinkLost` or `MemberOut`, and its `LinkUp` has `again` false, so the restarted core gets a late join and no replay, as [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) has it.
@@ -118,7 +120,8 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - The session crate writes its session file between `BackendAnswered` and `Open`, because it opens links only once the file is written ([outputs](../core/01-loop-and-edge.md#outputs)).
   The key it writes is in the network's state, which the session crate reads.
 - A core back from a restart sends `Open` with the crew from its session file; when no member's first message has passed within 10s, the network looks the code up, and `BackendAnswered` says whether a member other than this core still holds the session ([a session file after a long outage](01-between-machines.md#a-session-file-after-a-long-outage)).
-- The backend lists a host from `Host`, and the network sends a joiner's entry at its first `LinkUp` and every member's every 10 minutes after, which lists the member if the backend doesn't yet ([joining](01-between-machines.md#joining)).
+- The backend lists the host when it answers `Host`.
+  A joiner's core posts its own entry to `/v1/members` at its first `LinkUp`, and every core posts its own entry every 10 minutes after; the backend lists an entry it doesn't hold and renews one it does ([joining](01-between-machines.md#joining)).
 - A PF who leaves hands over control before asking `Leave`, which is the session crate's ([leaving](01-between-machines.md#leaving)).
 
 ### The heartbeat and clock offsets
@@ -127,8 +130,8 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
   The transport adds the packet's own send stamp as it hands the packet to QUIC, 8 bytes of µs on the PC's counter.
 - From a heartbeat, the receiver takes T1 as its own earlier send stamp, echoed back, T2 as the other core's receive stamp of it, T3 as this packet's send stamp, and T4 as this input's stamp, and keeps the offset ½[(T2 − T1) + (T3 − T4)] with the shortest round trip of the last 8, as [decision 038](../../decisions/038-clock-offset-from-timed-exchange.md) has it.
 - Receive stamps are the queue's, read as the edge pushes the input ([the queue](../core/01-loop-and-edge.md#the-queue)), so the error left is the time between the socket and the queue, and between QUIC and the wire, which the shortest round trip keeps small.
-- The heartbeat carries no acknowledgment of the cockpit stream: the cockpit-stream crate sends its vector clock once a second on a `Newest` channel of its own, which [04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream) has ride the heartbeat.
-  It costs up to one more packet a second, about 58 bytes of headers ([2.2]), and the heartbeat then knows nothing of the cockpit stream.
+- The heartbeat carries no acknowledgment of the cockpit stream, because the network sits below the cockpit-stream crate, and carrying its vector clock would take a second hook like the session's opener.
+  The cockpit-stream crate sends its clock once a second on a `Newest` channel of its own, at up to one more packet a second, about 58 bytes of headers ([2.2]), where [04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream) and decisions [037](../../decisions/037-while-a-link-is-lost.md), [042](../../decisions/042-vector-clock-records-what-applied.md), and [044](../../decisions/044-table-of-roles.md) have it ride the heartbeat, which this changes once step 8's decisions are numbered.
 - Each sender's offset sits in the network's state, by pilot ID and restart count, for flight-model sync to read.
 
 ### The endpoint key
@@ -154,7 +157,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 | `Dial { endpoint }` | Dials the endpoint through every relay in the list it bound with, and drops any dial still running to that endpoint |
 | `Close { conn, code }` | Closes the connection with that application code |
 | `Stream { conn, channel, priority, bytes }` | Writes to the channel's stream on that connection, opening it with the channel's number and its priority on first use |
-| `OneOff { conn, channel, priority, delivery, bytes, stamp }` | Puts the packet in its slot for its key, or in its channel's queue with its deadline, and adds the send stamp when `stamp` is set |
+| `OneOff { conn, channel, priority, delivery, bytes, stamp }` | Puts the packet in its slot when `delivery` is `Newest { key }`, or in its channel's queue when it's `Deadline { at }`, and adds the send stamp when `stamp` is set |
 | `Shutdown` | Awaits `Endpoint::close`, within the 750ms [exiting](../core/01-loop-and-edge.md#exiting) gives the edges when the core exits |
 
 ### Its events
@@ -164,7 +167,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 | `Bound` | The endpoint ID, or the error, or the timeout |
 | `Connected` | The connection's number, the other endpoint's ID, and whether this side dialed |
 | `Stream` | The connection, the channel's number, and the bytes |
-| `OneOff` | The connection and the bytes |
+| `OneOff` | The connection, the channel's number, and the bytes |
 | `Closed` | The connection, and its application code or the error |
 | `Path` | The connection, and direct or the relay's URL |
 | `Stats` | Once a second for each connection: packets sent and lost, the round trip, and the congestion window |
@@ -228,10 +231,10 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - The tokens go public with the repository, the same exposure as a token read out of a release ([the relays](01-between-machines.md#the-relays)).
 - A relay of our own, if we ever write one, lives in `relays/` too (user, 2026-10-16).
 
-## 01-between-machines and the code map
+## What the code map changes in 01-between-machines
 
-The code map changes nothing in 01-between-machines beyond its note of 2026-10-14, because that document names components and never units, and the split above adds detail to it.
-This design changes it in the places its note of 2026-10-16 lists.
+Nothing beyond the note of 2026-10-14 at the top of 01-between-machines, because that document names components, never units, and the units above add detail to its components without changing them.
+This design's own changes to it are the five its note of 2026-10-16 lists.
 
 ## Budgets
 
@@ -249,16 +252,18 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 ## Cases for the bench
 
 [Node 7](../architecture/plan.md#7-testing) turns each into a test.
-In CI and on a developer's PC, on Windows, two cores run through a local `iroh-relay` with the production token and cap, and each core's IP transports cleared ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)), bound to `127.0.0.1` since `--dev` answered on IPv6 loopback only, which no run has tried yet ([network log][win]).
+In CI and on a developer's PC, on Windows, two cores run through a local `iroh-relay` with the production token and cap, each core's IP transports cleared ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)).
+The relay binds `127.0.0.1:3340` through `http_bind_addr`, because in `--dev` mode it answered on IPv6 loopback only; no run has tried that binding yet ([network log][win]).
 A TCP proxy sits in front of the relay, and both cores' relay list names the proxy, since a session uses one list ([joining](01-between-machines.md#joining)); the proxy can hold back or cut each core's connection through it on its own.
 The cores' backend is a local one on a local D1.
-On iroh's relay a lost packet only holds back the packets behind it until TCP resends it, and QUIC sees no loss ([p06]), so the proxy stands in for loss by holding bytes back as TCP's resend would, about a round trip and a quarter ([2.1]), at a 1% and a 3% rate:
+On iroh's relay a lost packet only holds back the packets behind it until TCP resends it, and QUIC sees no loss ([p06]), so the proxy stands in for a lost packet by holding it, and every byte behind it, for a round trip and a quarter ([2.1]) of the 22ms and 84ms round trips [p06] ran through Frankfurt and New York, at a 1% and a 3% rate:
 
 - Every v1 channel through the relay at both rates: the streams' p99 lateness stays within 17ms of the one-off packets', as [p06] saw.
 - A core suspended for 60s: `LinkLost` after 5s; on resuming, a redial, a first message, `LinkUp` with `again`, and the cockpit stream's replay.
 - A core killed and restarted: its higher restart count ends the old link, `LinkUp` has `again` false, no replay goes out, and no `MemberOut` fires for the old count.
-- The proxy cutting both cores for 10s, 30s, 60s, and 120s: the time from the cut's end to data again, the redial between relayed pilots that [p07] didn't test.
-- The relay down for 40s, and a core's home relay moved.
+- The proxy cutting both cores for 10s, 30s, 60s, and 120s: the time from the cut's end to data again, the redial between relayed pilots that [p07] didn't test, recorded with no bound until the bench's first run.
+- The relay down for 40s: `LinkLost` on both cores after 5s, then a redial and `LinkUp` with `again` once the relay is back, and the time from its return to data again.
+- A core's home relay moved mid-session: the link stays up or comes back by a redial, and the time without data is recorded, since whether iroh moves a relayed connection to the new home relay is unmeasured ([p05]).
 - Two relays, with the two cores homed at different ones: both directions cross the dialed core's home relay ([p05]).
 - Both cores redialing at once after a cut, each pair of dials in either order: both sides keep the same connection, and the replay arrives whole.
 - A joiner whose first dials fail redials every 2s and links once the proxy lets it through.

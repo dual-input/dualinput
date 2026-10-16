@@ -1163,6 +1163,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** a channel is a constant in its owner's module of the message crate, with its number, message type, delivery (`Stream`, `Newest`, or `Deadline`), and priority; each send names its receivers, the crew or one member, and the receiving handler checks who may send.
   The heartbeat carries the clock exchange alone, with send stamps the transport writes, and the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own.
+  This changes [decision 035](../../decisions/035-channels-declare-how-they-travel.md)'s channels that declare who sends and receives them, and decisions [037](../../decisions/037-while-a-link-is-lost.md), [042](../../decisions/042-vector-clock-records-what-applied.md), and [044](../../decisions/044-table-of-roles.md)'s acknowledgment on the heartbeat, once step 8's decisions are numbered.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#channels-and-sends)).
 - **Because:**
   - The network can't evaluate a role such as the flying machine, because the session crate that knows it sits above the network.

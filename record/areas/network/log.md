@@ -15,7 +15,8 @@ What we found about connecting the crew's machines, directly or through our rela
 - Dev mode binds `[::]:3340` (read in iroh-relay 1.3.0, `src/main.rs`, `DEV_MODE_HTTP_PORT`), and on Windows "an IPv6 socket created on Windows Vista and later only operates over the IPv6 protocol" unless the program turns `IPV6_V6ONLY` off (documented, [Dual-stack sockets](https://learn.microsoft.com/en-us/windows/win32/winsock/dual-stack-sockets)), which fits the timeouts (inference; `netstat -ano` showing only `[::]:3340` would settle it).
 - `/ping` answers anyone, with no check of the relay's tokens (read in iroh-relay 1.3.0, `src/server.rs`, `probe_handler`).
 
-**Changed:** CI can build and run `iroh-relay` on Windows, and should bind it to an address the cores dial, such as `http_bind_addr` set to `127.0.0.1:3340` (read in iroh-relay 1.3.0, `src/main.rs`), which no run has tried yet.
+**Changed:** a Windows PC builds and runs `iroh-relay` 1.3.0, so CI's Windows runners likely can too (unverified until CI's first run).
+CI should bind it to an address the cores dial, such as `http_bind_addr` set to `127.0.0.1:3340` (read in iroh-relay 1.3.0, `src/main.rs`), which no run has tried yet.
 A core can ask any of our relays for `/ping` with no token, to tell whether the PC reaches the internet.
 
 **Affects:** [02-units](02-units.md)'s cases for the bench, and its internet check.

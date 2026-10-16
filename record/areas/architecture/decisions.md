@@ -1206,6 +1206,53 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Only a direct path's loss needs packets dropped, and the core runs only on Windows.
 - **Leaves out:** whether the network crate and the transport build on Linux for the case run by hand, which that program's first build settles; and whether `iroh-relay` answers on `127.0.0.1` when its configuration binds it there, which no run has tried.
 
+## The core helper runs while a feature wants something of it, and the core sends it every want whole
+
+- **Decided:** each feature registers its bindings, captures, playback streams, sounds, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
+  When the helper exits while something is wanted, or goes 8s without a message, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming what's off once 5s pass with no `Hello`; a helper whose version or hash differs is stopped and not started again while that core runs.
+  The helper exits when its standard input closes.
+  Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
+- **Because:**
+  - A started-again helper gets everything in one round, as the session crate sends its keys whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
+  - Features turn their wants on only in a session, so [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)'s rule for when the helper runs holds without the service knowing what a session is.
+  - Starting it again every 2s adds no mechanism beyond the notice, which the pilot needs either way.
+- **Leaves out:** whether the helper's standard input closes when the core crashes, which a bench case settles.
+
+## Messages on the core helper's pipe are postcard after a 4-byte length
+
+- **Decided:** each message on the core helper's standard input and output is a 4-byte little-endian length, then a `ToHelper` or `FromHelper` in postcard, at most 1 MiB.
+  Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-pipe)).
+- **Because:**
+  - Every message between cores is postcard ([decision 035](../../decisions/035-channels-declare-how-they-travel.md)), and the kernel already hashes outputs' postcard ([01-loop-and-edge](../core/01-loop-and-edge.md#outputs)).
+  - postcard writes an enum's variant as its position (read in postcard 1.1.3, `src/ser/serializer.rs`, `serialize_unit_variant`), which is safe because the core starts the helper from its own folder, and the `Hello` catches a helper of another build.
+- **Leaves out:** nothing.
+
+## Only bound presses, the next press while binding, and the mouse in the sim's window cross the core helper's pipe, and the microphone's audio never does
+
+- **Decided:** the helper reports a bound key's or button's press and release, the next press while the desktop app binds a key, and the mouse only while the sim's window is in front; every other key, button, and click stays in the helper.
+  The helper tells speech from noise and recognizes phrases itself, so only the phrase heard crosses.
+  Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#raw-input)).
+- **Because:** every input the core takes is recorded ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), so a keystroke typed into another program would otherwise reach a bug report, and [voice phrases](../product/03-v1-scope.md#voice-phrases) keeps a pilot's audio on their machine.
+- **Leaves out:** whether Raw Input sees an Xbox controller's buttons, which reach Windows through XInput.
+
+## Opus, its gate, and the playback buffer run in the core helper, through opus-rs
+
+- **Decided:** the helper encodes a captured program's audio into 20ms Opus frames, sends only those above the gate, and decodes, conceals, buffers, and mixes what it plays, through opus-rs, a pure-Rust port of libopus 1.6, behind three calls; ATC audio sets the bitrate, the gate, and the buffer's rule.
+  Sounds are Ogg Opus files in each feature's crate, read with `ogg` 0.9.2.
+  Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#opus)).
+- **Because:**
+  - At 24 kbps a frame is 60 bytes, 3 KB/s, where 48 kHz mono 16-bit audio would put 96 KB/s, about 345 MB an hour, in every recording (arithmetic), and the codec's native code stays out of the core, as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) wants.
+  - Every libopus binding we found builds through CMake, which nothing else in our build uses, while opus-rs needs no C toolchain; nothing else in Crosscheck depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
+- **Leaves out:** whether opus-rs holds up, which a bench case and a listen at the helper's stage of the build settle.
+
+## A microphone setting sits beside the output device, and each follows Windows' default unless the pilot picks one
+
+- **Decided:** `core-helper-service` keeps an output device and a microphone setting, each Windows' default device or one the pilot picked, by its endpoint ID; the helper follows Windows' default when it changes, and plays or listens on the default while a picked device is missing, which the service shows as a warning.
+  This adds a setting to [03-v1-scope](../product/03-v1-scope.md#hearing-atc), and settles its open question on following Windows' default output device.
+  Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-devices)).
+- **Because:** on the wrong microphone, a voice handover fails with no sign of why.
+- **Leaves out:** nothing.
+
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load

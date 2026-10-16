@@ -720,6 +720,7 @@ It reads 03-v1-scope's [take-control key](../product/03-v1-scope.md#take-control
 It settles the spine's open item on telling speech from noise ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/control/01-take-control-and-voice.md`.
 Exit: the user agrees to that design doc.
+Raised elsewhere: by 6.5, take-control registers its binding by its setting's key and gets each press and release with the helper's stamp, so it times a long press itself; the next press crosses while the desktop app binds the key, named for showing; voice registers its phrases and gets each heard phrase's index with when it began and ended; the detector and the recognizer fill one trait inside `apps/core-helper`, so the microphone's audio never leaves the helper; and the cues and recorded lines are Ogg Opus files in each feature's crate ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
 
 ## 6.13 Avatars
 
@@ -729,6 +730,7 @@ It reads avatars' tentative decisions and the [avatars log](../avatars/log.md), 
 Its answer goes in `record/areas/avatars/01-avatars.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.3, the figure's SimObject title, `CROSSCHECK_Figure`, takes a kind, as [names the sim shares](02-code-map.md#names-the-sim-shares) requires.
+Raised elsewhere: by 6.5, avatars turns the mouse on with the sim's process ID, read from sim awareness, and gets the left and right buttons' presses and releases and a move every 16ms while the left is held, each with the cursor's place in the sim's window and the window's size, only while that window is in front ([04-core-helper](../core/04-core-helper.md#raw-input)).
 
 ## 6.14 Traffic and ATC
 
@@ -738,6 +740,7 @@ It reads 03-v1-scope's [traffic sync](../product/03-v1-scope.md#traffic-sync) an
 Its answer goes in `record/areas/traffic-atc/01-traffic-and-atc.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.4, ATC audio's channel takes `Deadline` delivery, each frame dropped once its turn to play has passed, and traffic sends its identities whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
+Raised elsewhere: by 6.5, ATC audio registers a capture by program name with its bitrate, gate level, and hangover, and gets 20ms Opus frames, each stamped at its first sample, only above the gate; it opens a playback stream with its buffer's rule and hands it frames by number; the helper lists the programs that own an audio session, for picking the ATC app; and FS Copilot's 24 kbps, −50dBFS gate, and 300ms hangover are the starting values ([04-core-helper](../core/04-core-helper.md#capturing-a-program)).
 
 ## 6.15 Plugins
 
@@ -763,6 +766,7 @@ Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosschec
 Raised elsewhere: by 6.2, where each notice shows, by its level; which slices each app's frame shows; what the apps tell the pilot after a `bye` and after a socket that closed without one; whether a component whose version differs counts as trouble; and the WebSocket client in the desktop app's Rust side, which sends no `Origin` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
 Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, differs, or stopped, and which of sim awareness's state the apps show ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
 Raised elsewhere: by 6.4, the network's slice of client state for the status list: each member's link and path, and whether this PC reaches the internet ([02-units](../network/02-units.md#what-the-pilot-sees-and-settings)).
+Raised elsewhere: by 6.5, the output device and microphone settings, each Windows' default or a device the pilot picks; the slice listing devices and programs that own an audio session; and the notices for a core helper that's down, one of another build, and a picked device that's missing ([04-core-helper](../core/04-core-helper.md#the-devices)).
 
 ## 6.17 Installing and updating
 
@@ -775,6 +779,7 @@ Raised elsewhere: by 5, where the installer lives, and whether it's a program of
 Raised elsewhere: by 6.1, the watcher starts the core again only when it exits with a code other than 0, since every deliberate exit returns 0 and a panic's abort never does; and how the watcher's tray asks the core to quit ([01-loop-and-edge](../core/01-loop-and-edge.md#exiting)).
 Raised elsewhere: by 6.3, the core finds the sim's process by the name `FlightSimulator2024.exe`, which our Steam edition's runs gave, and which a pilot's crash report gave the Microsoft Store edition (unverified), as the watcher noticing the sim's start can ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-sims-process)).
 Raised elsewhere: by 6.4, the installer's Windows Firewall rule for the core's path, and which program checks for it, comparing paths without regard to letter case, which [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) gives to the installer and the core.
+Raised elsewhere: by 6.5, the core starts `crosscheck-core-helper.exe` from its own folder, so the installer puts the two side by side ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 
 ## 6.18 The build
 
@@ -809,6 +814,7 @@ Waits on 5 and 6.
 Raised elsewhere: by 5, the bench lives in `tools/`, and the stand-in sim is an engine, which depends on no platform or feature code; whether the stand-in keeps the loop's rules, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone ([02-code-map](02-code-map.md#left-open)).
 Raised elsewhere: by 5.1, whether one loop keeps its queue under one sim frame at p99 with a busy core's load, write functions in QuickJS-ng and a plugin call held to its 100ms limit among it, and replays its own recording to the same outputs, as a budget the bench measures; p10's [loop](../../../experiments/areas/architecture/recording/loop/src/main.rs), built on 2026-10-14 and parked before it ran, runs that load offline on a capture or made-up inputs (user, 2026-10-14).
 Raised elsewhere: by 6.4, the bench's local `iroh-relay` binds `127.0.0.1`, since in dev mode it answered on IPv6 loopback only, and whether it answers there is untried; a TCP proxy in front of it stands in for a relay's loss and cuts; the bench's cores reach a local backend through a development setting; and v1's full mix on a direct path under loss runs by hand on our droplets, in a program built on the network crate and the transport ([02-units](../network/02-units.md#cases-for-the-bench)).
+Raised elsewhere: by 6.5, a development setting naming the program the core starts as its helper, so the bench can run a stand-in that scripts presses and frames, and whether that keeps to the rule that no development mode skips the real path; and a check of opus-rs on recorded ATC speech at 5% loss ([04-core-helper](../core/04-core-helper.md#cases-for-the-bench)).
 
 ## 8 The build order
 

@@ -35,6 +35,8 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The message crate also holds the transport's commands and events, since the network crate may not depend on the transport, which [the map check](#the-map-check) lists among the crates that do I/O.
 > - `relays/` joins [the workspace](#the-workspace), with each relay's region, URL, tokens, and cap, and the script that deploys them, which settles [left open](#left-open)'s item on where the relays' configuration lives.
 > - The backend in `backend/` is a Worker on D1, with no framework.
+>
+> Since 2026-10-16, [04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls) has `core-helper-service` also hold the next press, the mouse, playback streams, phrases, the output device and microphone settings, and the slice of devices and programs, beside the bindings, captures, and sounds [the platform](#the-platform)'s table names; avatars hands it the sim's process ID for the mouse, since the service sits on the sim service's line.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

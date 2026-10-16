@@ -84,4 +84,5 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/core/01-loop-and-edge.md](areas/core/01-loop-and-edge.md): how the kernel runs the core's loop, and how the core's edge stamps its inputs, carries out its outputs, records it, replays it, starts it, and stops it.
 - [areas/core/02-clients-and-panel-bridge.md](areas/core/02-clients-and-panel-bridge.md): how the core's clients reach it over one WebSocket protocol, how a feature's state and commands reach the apps, and how our `VCockpit.js` and the panel bridge load what features run in a cockpit panel.
 - [areas/core/03-sim-seam-and-wasm-module.md](areas/core/03-sim-seam-and-wasm-module.md): how the core reaches the sim and knows what it's doing, how it tells a crash from a close, and how our WASM module runs the routines features feed it.
+- [areas/core/04-core-helper.md](areas/core/04-core-helper.md): how the core runs the core helper, what features ask of it, what crosses its pipe, and what it runs for Raw Input, audio, Opus, and speech.
 - [areas/core/log.md](areas/core/log.md): what we found about the core's own process, such as how precisely its timers wake on Windows.

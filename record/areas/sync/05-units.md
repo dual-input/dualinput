@@ -382,7 +382,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A restarted core: settled at once, and its shadows take the flying machine's values.
 - An entry the stand-in changes every 3s on both machines: it stops syncing within 30s on both.
 - The PM's throttle on a following machine: put back at once, and nothing sent; moved for 3s, put back throughout, and nothing flagged.
-- An event entry that watches an `H:` event and writes an input event: the `H:` event its write makes the aircraft fire isn't sent back.
+- An event entry that watches an `H:` event and writes an input event: the `H:` event its write makes the aircraft fire isn't sent back; and when the stand-in fires it 2s after the write, past the token, the driven-entry test stops the entry within 30s, with its notice.
 - A write function stuck past 100ms: its entry stops on both machines.
 - An input event reported twice a frame apart: one goes out; the same report 261ms later goes out; at 4 fps, where a frame passes 200ms, both go out.
 - A token nothing uses: it expires after 1s, and the pilot's press after that goes out.

@@ -1208,15 +1208,16 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The core helper runs while a feature wants something of it, and the core sends it every want whole
 
-- **Decided:** each feature registers its bindings, captures, playback streams, sounds, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
-  When the helper exits while something is wanted, or goes 8s without a message, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming what's off once 5s pass with no `Hello`; a helper whose version or hash differs is stopped and not started again while that core runs.
+- **Decided:** each feature registers its bindings, captures, playback streams, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on, and its sounds, which the service sends after each `Hello`; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
+  A want the helper can't carry out it reports, and runs the rest, and the service shows a warning naming the feature.
+  When the helper exits while something is wanted, or goes 8s without a message, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
   The helper exits when its standard input closes.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 - **Because:**
   - A started-again helper gets everything in one round, as the session crate sends its keys whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
   - Features turn their wants on only in a session, so [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)'s rule for when the helper runs holds without the service knowing what a session is.
   - Starting it again every 2s adds no mechanism beyond the notice, which the pilot needs either way.
-- **Leaves out:** whether the helper's standard input closes when the core crashes, which a bench case settles.
+- **Leaves out:** whether a Windows program with no console reads a piped standard input, which p08's helper never had (read in `experiments/areas/architecture/p08-flight.mjs`), and whether it closes when the core crashes, which the helper's first build and a bench case settle.
 
 ## Messages on the core helper's pipe are postcard after a 4-byte length
 
@@ -1229,7 +1230,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Only bound presses, the next press while binding, and the mouse in the sim's window cross the core helper's pipe, and the microphone's audio never does
 
-- **Decided:** the helper reports a bound key's or button's press and release, the next press while the desktop app binds a key, and the mouse only while the sim's window is in front; every other key, button, and click stays in the helper.
+- **Decided:** the helper reports a bound key's or button's press and release, the next press while the desktop app binds a key, and the mouse only while the sim's main window itself is in front, not a popped-out display; every other key, button, and click stays in the helper.
   The helper tells speech from noise and recognizes phrases itself, so only the phrase heard crosses.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#raw-input)).
 - **Because:** every input the core takes is recorded ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), so a keystroke typed into another program would otherwise reach a bug report, and [voice phrases](../product/03-v1-scope.md#voice-phrases) keeps a pilot's audio on their machine.
@@ -1241,13 +1242,13 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Sounds are Ogg Opus files in each feature's crate, read with `ogg` 0.9.2.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#opus)).
 - **Because:**
-  - At 24 kbps a frame is 60 bytes, 3 KB/s, where 48 kHz mono 16-bit audio would put 96 KB/s, about 345 MB an hour, in every recording (arithmetic), and the codec's native code stays out of the core, as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) wants.
-  - Every libopus binding we found builds through CMake, which nothing else in our build uses, while opus-rs needs no C toolchain; nothing else in Crosscheck depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
+  - At 24 kbps a frame averages 60 bytes, about 3 KB/s, where 48 kHz mono 16-bit audio would put 96 KB/s, about 345 MB an hour, in every recording (arithmetic), and the codec's native code stays out of the core, as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) wants.
+  - Every libopus binding we found builds through CMake (read 2026-10-16 in the dependencies crates.io lists for opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0), which nothing else in our build uses, while opus-rs needs no CMake; nothing else in Crosscheck depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
 - **Leaves out:** whether opus-rs holds up, which a bench case and a listen at the helper's stage of the build settle.
 
 ## A microphone setting sits beside the output device, and each follows Windows' default unless the pilot picks one
 
-- **Decided:** `core-helper-service` keeps an output device and a microphone setting, each Windows' default device or one the pilot picked, by its endpoint ID; the helper follows Windows' default when it changes, and plays or listens on the default while a picked device is missing, which the service shows as a warning.
+- **Decided:** `core-helper-service` keeps an output device and a microphone setting, each Windows' default device or one the pilot picked, by its endpoint ID and name; the helper follows Windows' default when it changes, for the output and the microphone alike, takes a picked device by its name when no device has its ID, and plays or listens on the default while a picked device is missing, which the service shows as a warning.
   This adds a setting to [03-v1-scope](../product/03-v1-scope.md#hearing-atc), and settles its open question on following Windows' default output device.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-devices)).
 - **Because:** on the wrong microphone, a voice handover fails with no sign of why.

@@ -720,7 +720,7 @@ It reads 03-v1-scope's [take-control key](../product/03-v1-scope.md#take-control
 It settles the spine's open item on telling speech from noise ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/control/01-take-control-and-voice.md`.
 Exit: the user agrees to that design doc.
-Raised elsewhere: by 6.5, take-control registers its binding by its setting's key and gets each press and release with the helper's stamp, so it times a long press itself; the next press crosses while the desktop app binds the key, named for showing; voice registers its phrases and gets each heard phrase's index with when it began and ended; the detector and the recognizer fill one trait inside `apps/core-helper`, so the microphone's audio never leaves the helper; and the cues and recorded lines are Ogg Opus files in each feature's crate ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
+Raised elsewhere: by 6.5, take-control registers its binding by its setting's key and gets each press and release with the helper's stamp, so it times a long press itself; the next press crosses while the desktop app binds the key, named for showing; voice registers its phrases and gets each heard phrase's index with when it began and ended; the detector and the recognizer fill one trait inside `apps/core-helper`, so the microphone's audio never leaves the helper, and they hear nothing while a sound of ours plays; and the cues and recorded lines are Ogg Opus files in each feature's crate ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
 
 ## 6.13 Avatars
 
@@ -730,7 +730,7 @@ It reads avatars' tentative decisions and the [avatars log](../avatars/log.md), 
 Its answer goes in `record/areas/avatars/01-avatars.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.3, the figure's SimObject title, `CROSSCHECK_Figure`, takes a kind, as [names the sim shares](02-code-map.md#names-the-sim-shares) requires.
-Raised elsewhere: by 6.5, avatars turns the mouse on with the sim's process ID, read from sim awareness, and gets the left and right buttons' presses and releases and a move every 16ms while the left is held, each with the cursor's place in the sim's window and the window's size, only while that window is in front ([04-core-helper](../core/04-core-helper.md#raw-input)).
+Raised elsewhere: by 6.5, avatars turns the mouse on with the sim's process ID, read from sim awareness, and gets the left and right buttons' presses and releases and at most one move every 16ms while the left is held, each with the cursor's place in the sim's main window and the window's size, only while that window itself is in front, so a click in a popped-out display crosses nothing ([04-core-helper](../core/04-core-helper.md#raw-input)).
 
 ## 6.14 Traffic and ATC
 
@@ -766,7 +766,7 @@ Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosschec
 Raised elsewhere: by 6.2, where each notice shows, by its level; which slices each app's frame shows; what the apps tell the pilot after a `bye` and after a socket that closed without one; whether a component whose version differs counts as trouble; and the WebSocket client in the desktop app's Rust side, which sends no `Origin` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
 Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, differs, or stopped, and which of sim awareness's state the apps show ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
 Raised elsewhere: by 6.4, the network's slice of client state for the status list: each member's link and path, and whether this PC reaches the internet ([02-units](../network/02-units.md#what-the-pilot-sees-and-settings)).
-Raised elsewhere: by 6.5, the output device and microphone settings, each Windows' default or a device the pilot picks; the slice listing devices and programs that own an audio session; and the notices for a core helper that's down, one of another build, and a picked device that's missing ([04-core-helper](../core/04-core-helper.md#the-devices)).
+Raised elsewhere: by 6.5, the output device and microphone settings, each Windows' default or a device the pilot picks; the slice listing devices and programs that own an audio session; and the notices for a core helper that's down, a want it can't carry out, and a picked device that's missing ([04-core-helper](../core/04-core-helper.md#the-devices)).
 
 ## 6.17 Installing and updating
 

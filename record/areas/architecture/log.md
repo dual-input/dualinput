@@ -3,6 +3,39 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-16: Reading traffic only as it changes, within 50km, once a second, and the flight model and camera at their send rates, would shrink p10's recording from 45 to 13 MB an hour
+
+**Asked:** p10's 45 MB an hour ([below](#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly)) is too much to upload after every flight and to keep several flights of (user, 2026-10-16); how much smaller would the recording be if the core read less, since a replay needs every input it read?
+
+**Expected:** the most from traffic, which was 87% of the raw bytes.
+
+**Found:** [p10-lean](../../../experiments/areas/architecture/p10-lean.mjs) dropped from p10's capture the inputs each leaner read would never have taken in, and compressed the rest with zstd at level 3 ([results](../../../experiments/areas/architecture/results/p10-lean-2026-10-16-13-52-24.txt)):
+
+| Read | Inputs a second | MB an hour, raw | MB an hour, zstd |
+| --- | --- | --- | --- |
+| As p10 read it | 521.2 | 285.1 | 45.4 |
+| Each input's time, kind, and length as varints, in place of 14 fixed bytes | 521.2 | 266.5 | 42.5 |
+| Traffic only as it changes, by FS Copilot's change gate | 191.4 | 107.0 | 39.3 |
+| Traffic once a second | 292.5 | 161.7 | 31.1 |
+| AI aircraft within 100km | 519.3 | 284.1 | 45.1 |
+| AI aircraft within 50km | 445.5 | 244.2 | 31.0 |
+| The flight model at most 20 times a second and the camera 10 | 491.0 | 268.1 | 37.9 |
+| The gate, the varints, and the flight model and camera at those rates | 161.3 | 84.4 | 30.9 |
+| Those, and aircraft within 50km | 85.6 | 46.2 | 17.3 |
+| Those, and traffic once a second | 60.2 | 33.4 | 13.1 |
+
+- FS Copilot's change gate passes a state when position moves 0.1m, altitude 0.5ft, an angle 0.1°, or ground speed 0.5kt, or any switch changes (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Rate"), and p10-lean added 50ft/min of vertical speed.
+  It cut ground vehicles from 166.8 records a second to 2.9, and aircraft from 291.2 to 125.3, but the parked objects it dropped had compressed to little anyway.
+- Nearly all of the traffic was within 100km of EGLL, so a radius only cut much at 50km.
+- The flight model's cap kept 13.4 records a second of the 26.0, since frames came about 38ms apart.
+
+**Changed:** a recording shrinks only by the core reading less, since a replay needs every input it read: with traffic read only as it changes, within 50km, once a second, and the flight model and camera at the rates they're sent, this capture's 2 hours would be about 26 MB in place of 91 MB (arithmetic).
+These are reads that [6.10](plan.md#610-flight-model-sync), [6.13](plan.md#613-avatars), and [6.14](plan.md#614-traffic-and-atc) design, and v1's scope gives traffic a 200km radius by default ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+
+What we haven't run: SimConnect gating each object's reads itself, through a request for each object with its changed flag and each value's epsilon, which the gate stands in for; and the traffic a following machine receives over the network instead.
+
+**Affects:** [6.6](plan.md#66-recording-and-bug-reports), and the reads of 6.10, 6.13, and 6.14.
+
 ## 2026-10-16: A flying machine that hosts traffic at EGLL takes in 285 MB of inputs an hour, 45 MB with zstd, mostly traffic, and one loop carries them at 0.5% of a core and replays them exactly
 
 **Asked:** how many bytes an hour a recording of every input a flying machine's core takes in comes to, raw and compressed, which [6.6](plan.md#66-recording-and-bug-reports) needs to size what each PC keeps and what a bug report uploads; and does one loop carry that load and replay it, which [node 7](plan.md#7-testing) measures (both raised by 5.1)?

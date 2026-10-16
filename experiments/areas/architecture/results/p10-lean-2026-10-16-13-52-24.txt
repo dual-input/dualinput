@@ -1,0 +1,14 @@
+﻿p10-lean on experiments/areas/architecture/results/p10-capture-2026-10-16-13-52-24.bin, 10.0 minutes, node v22.23.1's zstd at level 3
+variant	inputs a second	aircraft a second	ground a second	fm a second	camera a second	raw MB an hour	zstd MB an hour
+as captured	521.2	291.2	166.8	26.0	26.0	285.1	45.4
+header	521.2	291.2	166.8	26.0	26.0	266.5	42.5
+gate	191.4	125.3	2.9	26.0	26.0	107.0	39.3
+1 Hz	292.5	145.6	83.8	26.0	26.0	161.7	31.1
+radius 100	519.3	289.4	166.8	26.0	26.0	284.1	45.1
+radius 50	445.5	215.5	166.8	26.0	26.0	244.2	31.0
+fm 20, cam 10	491.0	291.2	166.8	13.4	8.5	268.1	37.9
+gate, header	191.4	125.3	2.9	26.0	26.0	100.3	38.3
+gate, fm 20, cam 10, header	161.3	125.3	2.9	13.4	8.5	84.4	30.9
+gate, radius 100, fm 20, cam 10, header	159.5	123.5	2.9	13.4	8.5	83.4	30.6
+gate, radius 50, fm 20, cam 10, header	85.6	49.6	2.9	13.4	8.5	46.2	17.3
+gate, 1 Hz, radius 50, fm 20, cam 10, header	60.2	24.9	2.2	13.4	8.5	33.4	13.1

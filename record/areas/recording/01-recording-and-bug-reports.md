@@ -7,7 +7,7 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 ```
 
 A recording is a replay log of the core's inputs, less the high-rate samples a feature marks as unrecorded, such as traffic's positions and the flight model's, so their bytes never reach the disk while the events around them do.
-A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform, sync, the cockpit stream, catch-up, the session, control, and pointer sync.
+A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform's, and the features state sync, pointer sync, take-control, voice, rate and pause, and Go to.
 Each PC keeps its runs whole within 1 GB, and each pilot uploads their part of a report to R2 through our Worker, signed with the key they held in that session.
 
 This answers node 6.6 of the [architecture plan](../architecture/plan.md#66-recording-and-bug-reports).
@@ -88,7 +88,7 @@ Two crates count arrivals today, and count only recorded ones:
 
 - The network's lost-link timer counts a connection's recorded inputs: its streams, its heartbeat once a second, and its recorded one-off channels, where [links](../network/02-units.md#links) counts every packet.
   So a link that drops up to 1s after a heartbeat is found up to 1s sooner than a count of every packet would find it.
-- The core helper sends `Alive` every 2s whatever else it sends, where [the pipe](../core/04-core-helper.md#the-pipe) has it send `Alive` only after 2s of nothing, so its captured frames never count toward its silence.
+- The core helper sends `Alive` every 2s whatever else it sends, where [the pipe](../core/04-core-helper.md#the-pipe) has it send `Alive` only after 2s of nothing, so the core's check on the helper's silence counts only recorded messages, and still sees an `Alive` every 2s while the helper sends captured frames a replay never sees.
 
 ## A replay
 
@@ -110,7 +110,7 @@ Two crates count arrivals today, and count only recorded ones:
 - **A partly recorded unit is a leaf:** it registers no guard, catch-up step, or cockpit kind, and makes no request the platform decides, and the kernel refuses one that tries, at registration or at the call.
   No unit reads another feature's state anyway ([what a handler sees and does](../architecture/02-code-map.md#what-a-handler-sees-and-does)).
 
-v1's partly recorded units are traffic, ATC audio, avatars, and flight-model sync, so a replay checks the platform, state sync, pointer sync, take-control, voice, rate and pause, and Go to.
+v1's partly recorded units are traffic, ATC audio, avatars, and flight-model sync.
 
 ### A panic
 
@@ -119,7 +119,7 @@ A panic in a whole unit replays at the same input; one in a partly recorded unit
 
 ### Recording everything
 
-A development setting turns every unrecorded declaration off from the core's next start, for a pilot we're chasing a bug in one of those four features with, so that each is whole and its replay checked.
+When we're chasing a bug in one of those four features, we ask the pilot to turn on a development setting that records every input from the core's next start, so all four units are whole and their replays checked.
 The header says the setting was on.
 
 ### A replay on the same commit with local changes
@@ -200,7 +200,7 @@ The edge's job hands up only a string of six characters from the invite code's a
 
 - A run is kept or deleted whole, since a replay starts at the run's first input ([what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)).
 - When the core starts, the recording crate lists `recordings\`, with each folder's size, through a job, and deletes:
-  - each run that held no session, beyond the 3 newest runs, so a crash with no session still has its recording;
+  - each run that held no session and isn't among the 3 newest runs before this one, so a crash with no session still has its recording;
   - then, while all runs together pass 1 GB, the oldest, but never the newest run that held a session.
 - At under 4 MB an hour of session ([budgets](#budgets)), 1 GB holds over 250 hours.
 - The desktop app's list of recordings, with each one's size and a way to delete it, is [6.16](../architecture/plan.md#616-the-apps)'s.
@@ -214,19 +214,20 @@ The edge's job hands up only a string of six characters from the invite code's a
 3. The edge uploads each file as a job, in one request each, to `POST /v1/reports`, with the session's ID, this pilot's endpoint ID, the run's folder, the file's name, its size, and its SHA-256, and an Ed25519 signature over those by the session's endpoint key, from the run's `key`.
 4. The index records the upload, and the page shows it sent.
 
-A 2-hour session's part should come to under 10 MB, which takes about 40s at 2 Mbps (arithmetic).
+At the budget's 4 MB an hour, a 2-hour session's part is under 10 MB, which takes about 40s at 2 Mbps (arithmetic).
 A Worker takes a request body of up to 100 MB on the free plan (documented, [Workers limits](https://developers.cloudflare.com/workers/platform/limits/)).
-Only the setting that records everything passes that, at p10's 45 MB an hour after about 2 hours of run (arithmetic), so the page refuses a larger file with a notice, and we fetch it from that pilot by hand.
+Only a run with the setting that records everything reaches that, after about 2 hours 15 minutes at p10's 45 MB an hour (arithmetic).
+The page refuses a file over 100 MB with a notice, and we fetch it from that pilot by hand.
 
 ### What the backend admits
 
 - The Worker takes a part only when that endpoint was a member of that session within the last 30 days, checking the signature against the endpoint ID itself, the key's public half (read in iroh-base 1.3.0, `src/key.rs`, `EndpointId`), through `crypto.subtle`, which Cloudflare lists for Ed25519 (unverified until the backend's tests run, as [its requests](../network/02-units.md#its-requests) has it).
 - So the backend keeps a session's row and its members' rows for 30 days after the later of the last renewal and the member's leave:
   - A leave marks the member's row as left, with its time, where [its requests](../network/02-units.md#its-requests)' leave ends it.
-  - A lookup lists neither a left member nor one not renewed within 30 minutes, and answers a session with no such member as no such code, as [codes, lapses, and wrong codes](../network/02-units.md#codes-lapses-and-wrong-codes) has it.
-  - The hourly Cron Trigger deletes the rows 30 days on, where it deletes them as they lapse; a code stays taken those 30 days, which the Worker's redraw on a held code covers.
+  - A lookup lists only members who haven't left and renewed within 30 minutes, and answers a session with none as no such code.
+  - The hourly Cron Trigger deletes a row 30 days after the later of its last renewal and its leave, where [codes, lapses, and wrong codes](../network/02-units.md#codes-lapses-and-wrong-codes) has it delete a member as it lapses; a code stays taken those 30 days, which the Worker's redraw on a held code covers.
 - It stores the file in R2 at `reports/<session>/<endpoint>/<run>/<file>`.
-- R2 keeps 10 GB a month and 1 million writes free, past which it costs $0.015 a GB-month and $4.50 a million writes, with no charge for downloads' bytes (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)); Cloudflare has an R2 subscription added through its checkout before R2 can be used (documented, [R2 get started](https://developers.cloudflare.com/r2/get-started/)).
+- R2 stores 10 GB-month free each month and takes 1 million Class A operations free, the class that holds writes and listings, past which it costs $0.015 a GB-month and $4.50 a million Class A operations, with no charge for downloads' bytes (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)); an account adds an R2 subscription through Cloudflare's checkout before it can use R2 (documented, [R2 get started](https://developers.cloudflare.com/r2/get-started/)).
 - A lifecycle rule on `reports/` expires each file 30 days old, which R2 removes within about a day after (documented, [R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/)).
 
 ### Asking a missing pilot

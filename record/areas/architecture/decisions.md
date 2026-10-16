@@ -1258,7 +1258,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** a unit registered as partly recorded can declare a channel, a sim call, a core helper want, or a job unrecorded, and the edge's writer leaves its inputs out of the recording.
   Such a unit runs in a replay on what was recorded, and its outputs go unchecked; it may register no guard, catch-up step, or cockpit kind, or make a request the platform decides, and turns a core helper want on or off only on a recorded input.
-  Each unit counts its own handles, draws its own IDs, and numbers its own SimConnect connections; each output names its unit; and a platform crate decides nothing on an unrecorded input beyond handing it to its unit, so the network's lost-link timer counts only recorded inputs, and the core helper and the core's clients protocol send `alive` every 2s whatever else they send.
+  Each unit counts its own handles, draws its own IDs, and numbers its own SimConnect connections; each output names its unit; and a platform crate decides nothing on an unrecorded input beyond handing it to its unit, so the network's lost-link timer counts only recorded inputs, and the core helper sends `Alive`, and the core sends each client `alive`, every 2s whatever else it sends.
   The panic hook records the input being handled, even an unrecorded one; a development setting records everything; and a replay on the same commit with uncommitted changes warns and runs.
   v1's partly recorded units are traffic, ATC audio, avatars, and flight-model sync.
   Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
@@ -1280,7 +1280,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Each PC keeps whole runs within 1 GB, with no minimal recording
 
-- **Decided:** the recording crate deletes runs with no session beyond the 3 newest runs, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, crew, and upload, is the one record a later Crosscheck reads; and no setting chooses full or minimal recording.
+- **Decided:** the recording crate deletes each run with no session that isn't among the 3 newest runs before the one starting, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, crew, and upload, is the one record a later Crosscheck reads; and no setting chooses full or minimal recording.
   This changes [decision 016](../../decisions/016-core-keeps-pilots-settings.md)'s recording mode, once step 8's decisions are numbered.
   Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
 - **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), and at a few MB an hour of session, 1 GB holds hundreds of hours, so size no longer calls for a minimal mode (user, 2026-10-16).
@@ -1291,10 +1291,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** each pilot's core uploads each file of their part to `POST /v1/reports`, signed with the endpoint key it held in the session; the Worker checks the signature against the endpoint ID and the members it kept for that session, and stores the file in R2 under the session, the endpoint, and the run, where a lifecycle rule expires it at 30 days; a leave marks a member's row as left, and the hourly Cron Trigger keeps sessions' and members' rows 30 days after the later of their last renewal and their leave; a core offers a missing pilot's part when R2 holds a crewmate's; and `tools/reports.ts`, with a secret the Worker holds, lists and fetches reports from R2's listing.
   Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
 - **Because:**
-  - Blobs split across D1's rows of at most 2 MB (documented, [D1 limits](https://developers.cloudflare.com/d1/platform/limits/)) would be a hack (user, 2026-10-16), while R2 keeps 10 GB a month free and costs $0.015 a GB-month past it (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)).
+  - Blobs split across D1's rows of at most 2 MB (documented, [D1 limits](https://developers.cloudflare.com/d1/platform/limits/)) would be a hack (user, 2026-10-16), while R2 stores 10 GB-month free each month and costs $0.015 a GB-month past it (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)).
   - A member's own endpoint key already signs the backend's requests ([02-units](../network/02-units.md#its-requests)), so admitting only members keeps out junk with no accounts.
   - Every session ends in a leave, so a leave that ended a member's row would refuse their upload the next morning.
-- **Leaves out:** whether R2's subscription, which Cloudflare has added through its checkout ([R2 get started](https://developers.cloudflare.com/r2/get-started/)), needs a card on file, which subscribing shows.
+- **Leaves out:** whether the R2 subscription, which an account adds through Cloudflare's checkout ([R2 get started](https://developers.cloudflare.com/r2/get-started/)), needs a card on file, which subscribing shows.
 
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

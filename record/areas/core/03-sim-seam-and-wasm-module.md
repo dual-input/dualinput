@@ -7,7 +7,7 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 ```
 
 > **Note**
-> Since 2026-10-16, a watch or a camera read in [what a feature calls](#what-a-feature-calls) can be declared `.unrecorded()`, and the sim service hands the edge each such request's connection and ID before the call goes out, so the recording leaves out its answers; the sim service decides nothing on such an answer beyond routing it to its feature ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+> Since 2026-10-16, a watch, a camera read, or `frames` in [what a feature calls](#what-a-feature-calls) can be declared `.unrecorded()` by a unit registered as partly recorded, and the sim service hands the edge each such request's connection, kind, and ID before the call goes out, so the recording leaves out its answers; the sim service decides nothing on such an answer beyond routing it to its feature. Each unit numbers its own connections, by its place in the registry and its own count of opens, and the sim service drops an input for a connection it hasn't opened, as it does one for a connection it closed ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

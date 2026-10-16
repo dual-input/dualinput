@@ -23,14 +23,17 @@ The probes and their raw output are in [experiments/areas/architecture](../../..
 | The gate, the varints, and the flight model and camera at those rates | 161.3 | 84.4 | 30.9 |
 | Those, and aircraft within 50km | 85.6 | 46.2 | 17.3 |
 | Those, and traffic once a second | 60.2 | 33.4 | 13.1 |
+| None of traffic's positions, the flight model, or the camera, with traffic's identities kept | 11.1 | 6.8 | 0.9 |
 
-- FS Copilot's change gate passes a state when position moves 0.1m, altitude 0.5ft, an angle 0.1°, or ground speed 0.5kt, or any switch changes (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Rate"), and p10-lean added 50ft/min of vertical speed.
+- FS Copilot's change gate passes a state when position moves 0.1m, altitude 0.5ft, an angle 0.1°, or ground speed 0.5kt, or any switch changes, and when its 5s heartbeat is due, sending the last suppressed state first when motion resumes (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Rate"); p10-lean added 50ft/min of vertical speed and left out the heartbeat and the suppressed state, so its gated rows run a little small.
   It cut ground vehicles from 166.8 records a second to 2.9, and aircraft from 291.2 to 125.3, but the parked objects it dropped had compressed to little anyway.
+- The flight model's 20 a second is the rate its samples go out at ([01-between-machines](../network/01-between-machines.md#softening-a-short-gap)), and the camera's 10 is p10-lean's own choice, with no rate in the record behind it.
 - Nearly all of the traffic was within 100km of EGLL, so a radius only cut much at 50km.
 - The flight model's cap kept 13.4 records a second of the 26.0, since frames came about 38ms apart.
 
-**Changed:** a recording shrinks only by the core reading less, since a replay needs every input it read: with traffic read only as it changes, within 50km, once a second, and the flight model and camera at the rates they're sent, this capture's 2 hours would be about 26 MB in place of 91 MB (arithmetic).
+**Changed:** with every input it read kept for a replay, a recording shrinks only by the core reading less: with traffic read only as it changes, within 50km, once a second, the flight model and camera at 20 and 10 reads a second, and the varint header, this capture's 2 hours would be about 26 MB in place of 91 MB (arithmetic).
 These are reads that [6.10](plan.md#610-flight-model-sync), [6.13](plan.md#613-avatars), and [6.14](plan.md#614-traffic-and-atc) design, and v1's scope gives traffic a 200km radius by default ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+The last row is what [6.6](plan.md#66-recording-and-bug-reports) records instead: those samples left out of the recording, and nothing a pilot feels changed.
 
 What we haven't run: SimConnect gating each object's reads itself, through a request for each object with its changed flag and each value's epsilon, which the gate stands in for; and the traffic a following machine receives over the network instead.
 
@@ -42,10 +45,10 @@ What we haven't run: SimConnect gating each object's reads itself, through a req
 
 **Expected:** tens of MB an hour compressed: fsc-editor's capture of every `L:` variable of a PA-24 came to about 56 MB an hour as gzipped NDJSON ([5.1.1's entry](#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc)).
 
-**Found:** on MSFS 2024 SunRise 12.2.282174.999, whose program reports version 1.9.18.0, in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, at EGLL with AI traffic on, while the user taxied and flew around the airport for 600s:
+**Found:** on MSFS 2024, whose program is version 1.9.18.0 (read in Windows' Application log for the same day's crash, [crashes.tsv](../../../experiments/areas/aircraft/results/crashes.tsv)), in the Black Square Baron 58P, bksq-aircraft-baronpro 0.1.1, at EGLL with AI traffic on, while the user taxied and flew around the airport for 600s (user, 2026-10-16):
 
 - p10's capture subscribed as the core of a flying machine that also hosts traffic would: the flight model and the camera every sim frame, 298 of the 309 names FS Copilot's 58P profile watches, as they change, AI aircraft within 200km and ground vehicles within 5km every 500ms, and p08's module's slot.
-  The sim ran at 22.5 to 29.8 fps, with 142 to 153 aircraft and 0 to 248 ground vehicles around.
+  The sim ran at 22.5 to 29.8 fps, with 142 to 153 aircraft and 0 to 248 ground vehicles around ([its console](../../../experiments/areas/architecture/results/p10-console-2026-10-16-13-52-24.txt)).
 - It took in 312,702 inputs, 47.5 MB raw, 285 MB an hour: 7.57 MB with zstd at level 3, 45.4 MB an hour, and 6.79 MB at level 19, 40.7 MB an hour.
 
   | Inputs | A second | Raw, an hour | With zstd at level 3, of the 600s |

@@ -12,3 +12,5 @@ gate, fm 20, cam 10, header	161.3	125.3	2.9	13.4	8.5	84.4	30.9
 gate, radius 100, fm 20, cam 10, header	159.5	123.5	2.9	13.4	8.5	83.4	30.6
 gate, radius 50, fm 20, cam 10, header	85.6	49.6	2.9	13.4	8.5	46.2	17.3
 gate, 1 Hz, radius 50, fm 20, cam 10, header	60.2	24.9	2.2	13.4	8.5	33.4	13.1
+unrecorded: traffic positions, fm, camera	11.1	0.0	0.0	0.0	0.0	6.8	0.9
+unrecorded: traffic positions, fm, camera, header	11.1	0.0	0.0	0.0	0.0	6.4	0.9

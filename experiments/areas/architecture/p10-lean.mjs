@@ -18,6 +18,8 @@
  *   cam N     the camera at most N times a second
  *   header    each input's time as a varint gap from the one before, and its
  *             kind and length as varints, in place of 14 fixed bytes
+ *   unrecorded  traffic's positions, the flight model, and the camera left out
+ *             entirely, traffic's identities kept, as node 6.6 records
  *
  * A record's values start at byte 40 (SIMCONNECT_RECV_SIMOBJECT_DATA, read in
  * MSFS 2024 SDK 1.7.3, SimConnect.h); the object ID is at byte 16. Traffic
@@ -55,13 +57,14 @@ const changed = (a, b) => {
     Math.abs(a[6] - b[6]) > 0.5 || Math.abs(a[7] - b[7]) > 50 || [8, 9, 10, 11].some((i) => a[i] !== b[i])
 }
 
-function run({ gate = false, radiusKm = null, trafficHz = null, fmHz = null, camHz = null, header = false }) {
+function run({ gate = false, radiusKm = null, trafficHz = null, fmHz = null, camHz = null, header = false, drop = [] }) {
   const kept = []
   let own = null
   const lastKept = new Map()
   const lastAt = new Map()
   for (const input of all) {
     const { us, kind, bytes } = input
+    if (drop.includes(kind)) continue
     if (kind === FM && bytes.length >= DATA_AT + 16) {
       own = [bytes.readDoubleLE(DATA_AT) * 180 / Math.PI, bytes.readDoubleLE(DATA_AT + 8) * 180 / Math.PI]
     }
@@ -110,6 +113,9 @@ const variants = [
   ["gate, radius 100, fm 20, cam 10, header", { gate: true, radiusKm: 100, fmHz: 20, camHz: 10, header: true }],
   ["gate, radius 50, fm 20, cam 10, header", { gate: true, radiusKm: 50, fmHz: 20, camHz: 10, header: true }],
   ["gate, 1 Hz, radius 50, fm 20, cam 10, header", { gate: true, trafficHz: 1, radiusKm: 50, fmHz: 20, camHz: 10, header: true }],
+  // Node 6.6's rules: traffic's positions, the flight model, and the camera left out, identities kept.
+  ["unrecorded: traffic positions, fm, camera", { drop: [FM, AIR, GROUND, CAMERA] }],
+  ["unrecorded: traffic positions, fm, camera, header", { drop: [FM, AIR, GROUND, CAMERA], header: true }],
 ]
 console.log(`p10-lean on ${process.argv[2]}, ${(hours * 60).toFixed(1)} minutes, node ${process.version}'s zstd at level 3`)
 console.log(["variant", "inputs a second", "aircraft a second", "ground a second", "fm a second", "camera a second", "raw MB an hour", "zstd MB an hour"].join("\t"))

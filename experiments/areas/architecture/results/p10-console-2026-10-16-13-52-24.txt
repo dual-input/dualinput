@@ -1,0 +1,75 @@
+p10's console during the run of 2026-10-16-13-52-24 UTC, its STATUS lines, which p10-recording.mjs prints and leaves out of its report: copied from the terminal by read_terminal while the tab was open, the same day. The run was in the Black Square Baron 58P at EGLL with AI traffic on, the pilot taxiing and flying around the airport (user, 2026-10-16).
+
+PS <repo>> node experiments/areas/architecture/p10-recording.mjs
+Watching 309 names from FS Copilot's 58P profile: 197 L:, 101 A:, 11 B:.
+capture: CONNECTED
+capture: READY
+
+Load the Black Square Baron 58P with AI traffic on, and get ready to fly.
+Press Page Down to start 10 minutes of recording; Page Up stops it early.
+capture: PROFILE 298
+capture: STARTED
+Recording. Fly as you usually would: taxi, take off, work the switches and the radios, and look around.
+capture: EXCEPTION 7 258 3
+capture: INPUTS 11 11
+  recording 10s: 28.6 fps, 142 aircraft and 28 ground vehicles around, 4,171 records, 0.73 MB
+  recording 20s: 26.3 fps, 145 aircraft and 28 ground vehicles around, 8,176 records, 1.35 MB
+  recording 30s: 28.0 fps, 145 aircraft and 28 ground vehicles around, 12,233 records, 1.98 MB
+  recording 40s: 27.2 fps, 145 aircraft and 29 ground vehicles around, 16,124 records, 2.58 MB
+  recording 50s: 28.4 fps, 144 aircraft and 25 ground vehicles around, 20,194 records, 3.21 MB
+  recording 60s: 27.5 fps, 149 aircraft and 29 ground vehicles around, 24,306 records, 3.85 MB
+  recording 70s: 26.0 fps, 148 aircraft and 25 ground vehicles around, 28,409 records, 4.48 MB
+  recording 80s: 26.8 fps, 149 aircraft and 29 ground vehicles around, 32,551 records, 5.12 MB
+  recording 90s: 23.4 fps, 149 aircraft and 25 ground vehicles around, 36,436 records, 5.72 MB
+  recording 100s: 23.9 fps, 151 aircraft and 29 ground vehicles around, 40,543 records, 6.35 MB
+  recording 110s: 25.8 fps, 151 aircraft and 25 ground vehicles around, 44,694 records, 6.99 MB
+  recording 120s: 26.5 fps, 153 aircraft and 29 ground vehicles around, 48,896 records, 7.64 MB
+  recording 130s: 27.0 fps, 153 aircraft and 25 ground vehicles around, 52,986 records, 8.27 MB
+  recording 140s: 27.2 fps, 153 aircraft and 30 ground vehicles around, 57,225 records, 8.93 MB
+  recording 150s: 27.4 fps, 153 aircraft and 25 ground vehicles around, 61,514 records, 9.58 MB
+  recording 160s: 28.1 fps, 151 aircraft and 29 ground vehicles around, 65,754 records, 10.24 MB
+  recording 170s: 27.6 fps, 151 aircraft and 24 ground vehicles around, 69,758 records, 10.86 MB
+  recording 180s: 26.4 fps, 152 aircraft and 29 ground vehicles around, 73,935 records, 11.50 MB
+  recording 190s: 26.1 fps, 152 aircraft and 25 ground vehicles around, 78,122 records, 12.15 MB
+  recording 200s: 26.0 fps, 151 aircraft and 29 ground vehicles around, 82,291 records, 12.79 MB
+  recording 210s: 23.0 fps, 151 aircraft and 29 ground vehicles around, 86,322 records, 13.40 MB
+  recording 220s: 22.5 fps, 152 aircraft and 27 ground vehicles around, 90,525 records, 14.04 MB
+  recording 230s: 23.5 fps, 152 aircraft and 20 ground vehicles around, 94,574 records, 14.66 MB
+  recording 240s: 22.5 fps, 152 aircraft and 20 ground vehicles around, 98,615 records, 15.26 MB
+  recording 250s: 24.2 fps, 152 aircraft and 20 ground vehicles around, 102,435 records, 15.84 MB
+  recording 260s: 25.3 fps, 151 aircraft and 20 ground vehicles around, 106,519 records, 16.45 MB
+  recording 270s: 26.2 fps, 151 aircraft and 20 ground vehicles around, 110,648 records, 17.06 MB
+  recording 280s: 26.0 fps, 150 aircraft and 20 ground vehicles around, 114,701 records, 17.67 MB
+  recording 290s: 27.1 fps, 150 aircraft and 20 ground vehicles around, 118,546 records, 18.25 MB
+  recording 300s: 29.4 fps, 148 aircraft and 18 ground vehicles around, 122,582 records, 18.86 MB
+  recording 310s: 29.7 fps, 148 aircraft and 12 ground vehicles around, 126,516 records, 19.46 MB
+  recording 320s: 29.8 fps, 148 aircraft and 9 ground vehicles around, 130,465 records, 20.05 MB
+  recording 330s: 29.4 fps, 148 aircraft and 6 ground vehicles around, 134,064 records, 20.59 MB
+  recording 340s: 25.9 fps, 146 aircraft and 2 ground vehicles around, 137,675 records, 21.14 MB
+  recording 350s: 28.9 fps, 146 aircraft and 0 ground vehicles around, 141,269 records, 21.68 MB
+  recording 360s: 27.6 fps, 146 aircraft and 0 ground vehicles around, 144,832 records, 22.22 MB
+  recording 370s: 28.2 fps, 145 aircraft and 0 ground vehicles around, 148,403 records, 22.76 MB
+  recording 380s: 28.6 fps, 145 aircraft and 0 ground vehicles around, 151,826 records, 23.28 MB
+  recording 390s: 27.8 fps, 145 aircraft and 0 ground vehicles around, 155,374 records, 23.81 MB
+  recording 400s: 25.0 fps, 145 aircraft and 0 ground vehicles around, 158,863 records, 24.34 MB
+  recording 410s: 26.9 fps, 145 aircraft and 0 ground vehicles around, 162,476 records, 24.88 MB
+  recording 420s: 26.6 fps, 145 aircraft and 10 ground vehicles around, 165,945 records, 25.40 MB
+  recording 430s: 26.6 fps, 145 aircraft and 192 ground vehicles around, 171,368 records, 26.30 MB
+  recording 440s: 26.0 fps, 145 aircraft and 245 ground vehicles around, 179,441 records, 27.53 MB
+  recording 450s: 25.8 fps, 145 aircraft and 245 ground vehicles around, 187,873 records, 28.80 MB
+  recording 460s: 23.5 fps, 145 aircraft and 246 ground vehicles around, 196,257 records, 30.06 MB
+  recording 470s: 24.2 fps, 145 aircraft and 246 ground vehicles around, 204,248 records, 31.26 MB
+  recording 480s: 23.2 fps, 144 aircraft and 246 ground vehicles around, 212,593 records, 32.52 MB
+  recording 490s: 24.2 fps, 144 aircraft and 246 ground vehicles around, 220,948 records, 33.77 MB
+  recording 500s: 24.7 fps, 145 aircraft and 248 ground vehicles around, 229,390 records, 35.04 MB
+  recording 510s: 24.9 fps, 145 aircraft and 248 ground vehicles around, 237,469 records, 36.25 MB
+  recording 520s: 25.7 fps, 144 aircraft and 247 ground vehicles around, 245,890 records, 37.52 MB
+  recording 530s: 23.5 fps, 144 aircraft and 247 ground vehicles around, 254,253 records, 38.78 MB
+  recording 540s: 26.1 fps, 143 aircraft and 245 ground vehicles around, 262,788 records, 40.05 MB
+  recording 550s: 25.5 fps, 143 aircraft and 247 ground vehicles around, 270,918 records, 41.26 MB
+  recording 560s: 26.1 fps, 143 aircraft and 247 ground vehicles around, 279,474 records, 42.54 MB
+  recording 570s: 26.7 fps, 143 aircraft and 246 ground vehicles around, 287,997 records, 43.81 MB
+  recording 580s: 22.8 fps, 143 aircraft and 247 ground vehicles around, 296,411 records, 45.07 MB
+  recording 590s: 22.7 fps, 143 aircraft and 247 ground vehicles around, 304,420 records, 46.27 MB
+capture: LETGO asked to quit
+capture: CLOSED

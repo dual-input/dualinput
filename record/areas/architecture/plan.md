@@ -683,6 +683,7 @@ It settles which compiler the core embeds to build a local bundle's plugin ([lef
 Its answer goes in `record/areas/profiles/02-units.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5.4, whether CI holds a released level's builder output to its release tag as it holds the level's schema and declarations ([02-code-map](02-code-map.md#left-open)).
+Raised elsewhere: by 6.7, the profile loader on the PF's core writes the pinned bundle's hash as a `Pf` session key of its own, the newest its cache holds for the session's aircraft, whenever that aircraft changes before preflight ends, and every other loader loads it by hash; the loader registers the match check's item for the bundle each core loaded, "unpublished" for a local one, and "No profile for this aircraft" as an error when none is published, in which case the session flies without one ([the session's units](../session/02-units.md#which-bundle-a-session-pins)).
 
 ## 6.9 Sync
 
@@ -696,6 +697,7 @@ Raised elsewhere: by 6.2, which panel listens for `H:` events, and how, since [d
 Raised elsewhere: by 6.3, SDK 1.7.3 has `fsEventsRegisterHEvent`, which takes an `H:` event's name, and `fsEventsHEventCall`, so our module can fire an `H:` event by name without calculator code, for the item on how the profile engine fires them ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis)).
 Raised elsewhere: by 6.4, the cockpit-stream crate sends its vector clock once a second on a one-off channel of its own, not on the heartbeat, and sends what a member lacks on every `LinkUp` with `again`, which a link moved onto a second connection raises again, and which a restarted core's link never carries ([02-units](../network/02-units.md#links)).
 Raised elsewhere: by 6.6, state sync marks the recording, through `cx.recording().mark`, when a write never lands, with the entry, both machines' values, and the retries, and when a watch-only entry's values differ between machines; and the cockpit stream, state sync, and the sync engine stay whole in the recording, so a replay checks them ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#marks)).
+Raised elsewhere: by 6.7, the cockpit stream carries a change of control's vector clock as a message of its own kind, sent on `ControlPassed` by the core that made the change, since the session crate can't read the clock; it registers its guard on `TakeControl`, and starts a late joiner's catch-up on `FlightChanged`; state sync guards the session crate's `Ready` until the aircraft has settled; and catch-up writes switch positions and can't start an engine, so a joiner gets running engines from a runway start, which Go to picks while the PF's engines run ([the session's units](../session/02-units.md)).
 
 ## 6.10 Flight-model sync
 
@@ -707,6 +709,7 @@ Its answer goes in `record/areas/flight-model/01-flight-model-sync.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.4, each sender's clock offset sits in the network's state by pilot ID and restart count, and the flight model's channel handler, not the network, drops a sample made under an older control value ([02-units](../network/02-units.md#channels-and-sends)).
 Raised elsewhere: by 6.6, flight-model sync registers as partly recorded and declares its pose read every frame and its samples' channel unrecorded: it runs in a replay on what was recorded, unchecked, and may register no guard, catch-up step, or cockpit kind, or make a request the platform decides ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+Raised elsewhere: by 6.7, a following machine follows only while its pilot is in the flight, as `FlightChanged` tells, and in preflight its aircraft is frozen by both `Follow` and the session crate's `Hold`; a joiner of a PF whose engines run loads on a runway, so flight-model sync moves it from that runway to the PF, airborne or not ([the session's units](../session/02-units.md#go-to)).
 
 ## 6.11 Pointer sync
 
@@ -726,6 +729,7 @@ It settles the spine's open item on telling speech from noise ([01-spine](01-spi
 Its answer goes in `record/areas/control/01-take-control-and-voice.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.5, take-control registers its binding by its setting's key and gets each press and release with the helper's stamp, so it times a long press itself; the next press crosses while the desktop app binds the key, named for showing; voice registers its phrases and gets each heard phrase's index with when it began and ended; the detector and the recognizer fill one trait inside `apps/core-helper`, so the microphone's audio never leaves the helper, and they hear nothing while a sound of ours plays; and the cues and recorded lines are Ogg Opus files in each feature's crate ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
+Raised elsewhere: by 6.7, the take-control key and button and the voice handover's answer each ask the session crate's `TakeControl`, built as this pilot taking control now, whose verdict the apps show, and the cues play on `ControlPassed` ([the session's units](../session/02-units.md#control)).
 
 ## 6.13 Avatars
 
@@ -748,6 +752,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.4, ATC audio's channel takes `Deadline` delivery, each frame dropped once its turn to play has passed, and traffic sends its identities whole on every `LinkUp` ([02-units](../network/02-units.md#moments)).
 Raised elsewhere: by 6.5, ATC audio registers a capture by program name with its bitrate, gate level, and hangover, and gets 20ms Opus frames, each stamped at its first sample, only above the gate; it opens a playback stream with its buffer's rule and hands it frames by number; the helper lists the programs that own an audio session, for picking the ATC app; and FS Copilot's 24 kbps, −50dBFS gate, and 300ms hangover are the starting values ([04-core-helper](../core/04-core-helper.md#capturing-a-program)).
 Raised elsewhere: by 6.6, traffic and ATC audio register as partly recorded and declare traffic's polls, its `Frame` events, and its states' channel, and ATC audio's capture and its frames' channel, unrecorded, while traffic's identities and its creates' answers stay recorded; both may register no guard, catch-up step, or cockpit kind, and ATC audio turns its capture on or off only on a recorded input; and traffic's poll is a call to add to 6.3's sim calls, for `SimConnect_RequestDataOnSimObjectType` ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+Raised elsewhere: by 6.7, traffic's and ATC audio's role keys are `Anyone` session keys whose values name a member, written through `WriteKeys`, and traffic registers the match check's items for traffic packs, running injectors, and multiplayer with `match_item` ([the session's units](../session/02-units.md#the-match-check)).
 
 ## 6.15 Plugins
 
@@ -776,6 +781,7 @@ Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, diffe
 Raised elsewhere: by 6.4, the network's slice of client state for the status list: each member's link and path, and whether this PC reaches the internet ([02-units](../network/02-units.md#what-the-pilot-sees-and-settings)).
 Raised elsewhere: by 6.5, the output device and microphone settings, each Windows' default or a device the pilot picks; the slice listing devices and programs that own an audio session; and the notices for a core helper that's down, a want it can't carry out, and a picked device that's missing ([04-core-helper](../core/04-core-helper.md#the-devices)).
 Raised elsewhere: by 6.6, the report page lists the recorded sessions from each run's index and uploads one; the desktop app lists the recordings with each one's size and a way to delete it (user, 2026-10-16); the EFB app's button that marks the moment sends the recording crate's command; and the notices offering a missing pilot's part, and refusing a file too large to upload ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
+Raised elsewhere: by 6.7, where and how Crosscheck asks for the display name before a first Host or Join (user, 2026-10-16); rate and pause's part in the EFB app, code with no screen that calls `TOOLBAR_SET_ACTIVE_PAUSE`; Go to's section in the desktop app; the notices for a pilot out of the flight, a PF in the pause menu, and the backend's refusal; and the match check's wording, a streamed copy's warning among it ([the session's units](../session/02-units.md)).
 
 ## 6.17 Installing and updating
 
@@ -789,6 +795,7 @@ Raised elsewhere: by 6.1, the watcher starts the core again only when it exits w
 Raised elsewhere: by 6.3, the core finds the sim's process by the name `FlightSimulator2024.exe`, which our Steam edition's runs gave, and which a pilot's crash report gave the Microsoft Store edition (unverified), as the watcher noticing the sim's start can ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-sims-process)).
 Raised elsewhere: by 6.4, the installer's Windows Firewall rule for the core's path, and which program checks for it, comparing paths without regard to letter case, which [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) gives to the installer and the core.
 Raised elsewhere: by 6.5, the core starts `crosscheck-core-helper.exe` from its own folder, so the installer puts the two side by side ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
+Raised elsewhere: by 6.7, the session file is JSON in the core's data folder, and the watcher holds updates back while it exists ([the session's units](../session/02-units.md#the-session-file)).
 
 ## 6.18 The build
 

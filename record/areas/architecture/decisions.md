@@ -1296,6 +1296,53 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Every session ends in a leave, so a leave that ended a member's row would refuse their upload the next morning.
 - **Leaves out:** whether the R2 subscription, which an account adds through Cloudflare's checkout ([R2 get started](https://developers.cloudflare.com/r2/get-started/)), needs a card on file, which subscribing shows.
 
+## Every core works out who is in the flight from each member's own key, and a pilot in another aircraft joins out of the flight
+
+- **Decided:** each member writes its sim's stage and aircraft, how its last sim run ended, and its links, as a session key of its own, and every core counts a member in the flight while that key says Ready to fly or Flying in the session's aircraft; a pilot in another aircraft joins and waits out of the flight with a notice, which replaces the rule that such a pilot can't join; control passes, preflight counts, and the session ends by that one rule.
+  Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#in-the-flight)).
+- **Because:** refusing every join from a flight would make a pilot cut off for 30 minutes, or who pressed Leave by mistake, quit their flight to come back, and refusing only another aircraft would need the session's aircraft before the join (user, 2026-10-16).
+- **Leaves out:** nothing.
+
+## A session key is written by a member, anyone, or the PF alone, and every write is a request the session crate decides
+
+- **Decided:** a key declares its writer as each member of itself, any member, settled by the stamp, or the PF alone, whose key the session crate drops from anyone else; every write goes through `WriteKeys`, which any guard on one of its keys refuses whole; the session crate's own keys are `control`, `aircraft`, `preflight`, `go-without`, and each member's `member`, `sim`, `ready`, and `match`.
+  This adds a writer to [decision 035](../../decisions/035-channels-declare-how-they-travel.md)'s session keys once step 8's decisions are numbered.
+  Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#session-keys)).
+- **Because:** the simulation rate, the session's aircraft, and preflight's phase come only from the flying machine, the session's authority ([the connection](../product/03-v1-scope.md#the-connection)), and a key a follower could write would need each feature to check its writer.
+- **Leaves out:** two members writing `go-without` at once, which v1's two pilots never do.
+
+## The PF's core sets the session's aircraft and runs preflight, and its profile loader pins the newest bundle its cache holds
+
+- **Decided:** the PF's core writes the session's aircraft each time its pilot enters a flight, until preflight ends; runs the countdown, and ends preflight with a key every core follows; skips preflight when its aircraft is first in a flight with `A:SIM ON GROUND` at 0; and its profile loader writes, as a key of its own, the newest bundle its cache holds for that aircraft, which every other core loads by hash.
+  The crew can't go without a PF who dropped out, and a pass the platform makes goes to the member in the flight with the lowest pilot ID.
+  Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#preflight)).
+- **Because:**
+  - Every pilot in a session runs one release, so two caches differ only by when each core started, and the PF's choice settles it without the cores comparing caches.
+  - A host who loaded the wrong aircraft reloads before preflight ends (user, 2026-10-16).
+  - Two cores each running a countdown could end preflight apart, one before an un-ready reached it and one after.
+- **Leaves out:** preferring an up-to-date pilot for a pass, for the pick that brings larger crews.
+
+## Active pause is set through the EFB app's call to the toolbar's `TOOLBAR_SET_ACTIVE_PAUSE`
+
+- **Decided:** rate and pause has a part in the EFB app, which calls `Coherent.call("TOOLBAR_SET_ACTIVE_PAUSE", on)` when the core asks, so a following machine takes the crew's active pause; the simulation rate is stepped with `K:SIM_RATE_INCR` and `K:SIM_RATE_DECR` toward the flying machine's.
+  Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#rate-and-pause)).
+- **Because:** no SimConnect event set active pause, `K:PAUSE_ON` raised the sim pause, and the toolbar's call worked from the toolbar's and the EFB's documents, with the EFB closed, and from no cockpit panel or mainUi ([environment log][p02]).
+- **Leaves out:** nothing.
+
+## Go to puts a joiner at the PF's stand, or on a runway while the PF's engines run
+
+- **Decided:** the PF's core writes its departure airport and stand from its flight file's `[Departure]`, and whether any engine runs; Go to selects that stand while the PF's engines are off, and the first runway the world map lists for that airport while they run; it never names a stand the PF taxied to.
+  Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#go-to)).
+- **Because:** catch-up writes switch positions and can't start an engine, since a start takes time ([03-catch-up](../sync/03-catch-up.md#considered-and-dropped)), and a runway start runs the engines (user, 2026-10-16); a joiner is moved to the PF anyway, so the stand matters only for where they load.
+- **Leaves out:** how a gate's name in the world map's list matches the flight file's `GateName` and `GateNumber`, which a case in the sim settles.
+
+## The match check compares an aircraft's package, where it's installed, and its manifest's version, and a streamed copy has none
+
+- **Decided:** the match check reads an aircraft's version from its package's `manifest.json`, found under the sim's packages folder, and compares the package, whether it's in Community, Official, or streamed, and the version; a streamed copy against an installed one shows a warning that its version can't be read and asks both pilots to compare; a session in an aircraft with no published profile flies, with the missing profile shown as an error.
+  Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#the-match-check)).
+- **Because:** on our development machine, none of 1,221 streamed packages had a `manifest.json`, the sim's `Content.xml` lists only names and activation, and the world map's aircraft list carried no version (read on 2026-10-16).
+- **Leaves out:** nothing.
+
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [c06]: ../core/log.md#2026-10-15-the-sim-state-reads-1-in-the-main-menu-and-through-a-loads-screen-and-a-restart-sends-flight_end-inside-its-load
@@ -1313,3 +1360,4 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 [nwin]: ../network/log.md#2026-10-16-iroh-relay-130-builds-and-runs-on-windows-and-in-dev-mode-answers-on-ipv6-loopback-only
 [p10]: log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly
 [lean]: log.md#2026-10-16-reading-traffic-only-as-it-changes-within-50km-once-a-second-and-the-flight-model-and-camera-at-their-send-rates-would-shrink-p10s-recording-from-45-to-13-mb-an-hour
+[p02]: ../environment/log.md#2026-10-16-only-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off

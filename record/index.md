@@ -87,3 +87,4 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/core/04-core-helper.md](areas/core/04-core-helper.md): how the core runs the core helper, what features ask of it, what crosses its pipe, and what it runs for Raw Input, audio, Opus, and speech.
 - [areas/core/log.md](areas/core/log.md): what we found about the core's own process, such as how precisely its timers wake on Windows.
 - [areas/recording/01-recording-and-bug-reports.md](areas/recording/01-recording-and-bug-reports.md): what each machine records for a replay and what it leaves out, how long it keeps it, and how a bug report reaches us through the backend.
+- [areas/session/02-units.md](areas/session/02-units.md): the session crate's members, keys, control, session file, joining and leaving, preflight, and match check, who is in the flight, and how rate and pause, Go to, and the menu script work.

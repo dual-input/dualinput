@@ -8,6 +8,12 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 
 > **Note**
 > Since 2026-10-16, a watch, a camera read, or `frames` in [what a feature calls](#what-a-feature-calls) can be declared `.unrecorded()` by a unit registered as partly recorded, and the sim service hands the edge each such request's connection, kind, and ID before the call goes out, so the recording leaves out its answers; the sim service decides nothing on such an answer beyond routing it to its feature. Each unit numbers its own connections, by its place in the registry and its own count of opens, and the sim service drops an input for a connection it hasn't opened, as it does one for a connection it closed ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+>
+> Since 2026-10-16, [the session's units](../session/02-units.md) changes this document in three places:
+>
+> - The sim service reads, as a job, the flight file each `FlightLoaded` names, and gives sim awareness its `[Departure]` section's airport, stand name, and stand number as a signal of its own, beside the signals in [sim awareness](#sim-awareness), since the session crate and Go to both read it ([preflight](../session/02-units.md#preflight)).
+> - The `world_map` requests in [what a feature calls](#what-a-feature-calls) are `free_flight`, `departure_airport`, `departure_stand`, and `departure_runway` ([the menu script](../session/02-units.md#the-menu-script)).
+> - In a session, the menu script reads the page every 500ms and reports a change, beside its report when its socket joins in [leaving Starting](#leaving-starting).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

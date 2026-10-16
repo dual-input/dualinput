@@ -39,6 +39,13 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > Since 2026-10-16, [04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls) has `core-helper-service` also hold the next press, the mouse, playback streams, phrases, the output device and microphone settings, and the slice of devices and programs, beside the bindings, captures, and sounds [the platform](#the-platform)'s table names; avatars hands it the sim's process ID for the mouse, since the service sits on the sim service's line.
 >
 > Since 2026-10-16, [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) settles [left open](#left-open)'s item on how much of the queue a recording keeps: every input but those a feature declares unrecorded, on a channel, a sim call, a core helper want, or a job, where [one loop](#one-loop) records the whole queue; a unit with an unrecorded input runs in a replay on what was recorded, unchecked, and may register no guard, catch-up step, or cockpit kind. The `recording` crate also holds each run's index, marks, which runs to keep, and uploads; and each unit draws its own handles and IDs, where [the registry and moments](#the-registry-and-moments) gives the kernel one store of them.
+>
+> Since 2026-10-16, [the session's units](../session/02-units.md) changes this document in four places:
+>
+> - A session key's writer is a member, anyone, or the PF alone, where [what a feature registers](#what-a-feature-registers) has one member or the whole session, and every write is a request the session crate decides.
+> - The session crate also raises a member entering or leaving the flight, beside what [the platform](#the-platform)'s table has it raise.
+> - Rate and pause has a part in the EFB app, where [features](#features) gives it only one in the core, since only the toolbar's own call, from the toolbar's or the EFB's document, sets active pause ([environment log](../environment/log.md#2026-10-16-only-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off)).
+> - The profile loader writes the bundle a session pins, as a session key the PF's core writes, and state sync and the cockpit stream guard the session crate's Ready and control requests, so the session crate reads none of the three.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

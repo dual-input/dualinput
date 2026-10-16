@@ -9,12 +9,13 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 > **Note**
 > Since 2026-10-16, a receiver's vector clock goes out once a second on a one-off channel of the cockpit-stream crate's own, where [the cockpit stream](#the-cockpit-stream) has the heartbeat carry it, so the heartbeat knows nothing of the cockpit stream ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
 >
-> Since 2026-10-16, [the sync units](05-units.md) changes this document in four places:
+> Since 2026-10-16, [the sync units](05-units.md) changes this document in five places:
 >
-> - Catch-up's order comes from each machine's sync engine, which keeps when its cockpit first took each of an entry's last 16 distinct values, where [catch-up](#catch-up) reads it from the flying machine's recording, which holds the inputs, not that order ([catch-up's order](05-units.md#catch-ups-order)); so the reason [a core that restarts](#a-core-that-restarts) gives for keeping the cockpit stream in the recording's minimal mode goes, beside the minimal mode itself ([what each PC keeps](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
+> - Catch-up's order comes from each machine's sync engine, which keeps when its cockpit first took each of an entry's last 16 distinct values, where [catch-up](#catch-up) reads it from the flying machine's recording ([catch-up's order](05-units.md#catch-ups-order)); so the reason [a core that restarts](#a-core-that-restarts) gives for keeping the cockpit stream in the recording's minimal mode goes, as the minimal mode it names already has ([what each PC keeps](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
 > - The catching-up machine asks the flying machine for its catch-up ([catch-up](05-units.md#catch-up)).
-> - A replay opens with its sender's clock, and runs on the receiving machine until its clock covers that one, which bounds the replay [the replay](#the-replay) and the guard on control speak of ([kept messages and a replay](05-units.md#kept-messages-and-a-replay)).
+> - A replay opens with its sender's clock, and runs on the receiving machine until its clock covers that one, which is when [the replay](#the-replay) ends and the guard on control lifts ([kept messages and a replay](05-units.md#kept-messages-and-a-replay)).
 > - Of the machines that applied a message a change of control drops, the new PF never catches up from itself, where [a change of control](#a-change-of-control) has every one catch up ([a change of control](05-units.md#a-change-of-control)).
+> - A machine holds what arrives while it's out of the flight and while its catch-up waits for its answer, and in the flight with no profile loaded applies it, state sync skipping its own kinds, where [the cockpit stream](#the-cockpit-stream) holds it until its catch-up ([applying](05-units.md#applying)).
 
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.

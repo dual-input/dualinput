@@ -1,0 +1,23 @@
+p02 · Turning active pause on and off from code, on MSFS 2024
+2026-10-16T16:20:29.773Z, SunRise 12.2.282174.999, SimConnect 12.2.0.0, node-simconnect 4.2.0
+
+Raised active pause: TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar); TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)
+
+K:PAUSE_ON: 8 (sim pause); clock 1.00x, pause now 8 (sim pause)
+K:PAUSE_OFF: 0 (none); clock 1.00x, pause now 0 (none)
+K:PAUSE_TOGGLE: no Pause_EX1; clock 1.00x, pause now 0 (none)
+K:PAUSE_TOGGLE again: no Pause_EX1; clock 1.00x, pause now 0 (none)
+K:ACTIVE_PAUSE_TOGGLE: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_TOGGLE, parameter 2, ERROR (1) on K:ACTIVE_PAUSE_TOGGLE , parameter 2
+K:TOGGLE_ACTIVE_PAUSE: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:TOGGLE_ACTIVE_PAUSE, parameter 2, ERROR (1) on K:TOGGLE_ACTIVE_PAUSE , parameter 2
+K:ACTIVE_PAUSE_ON: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_ON, parameter 2, ERROR (1) on K:ACTIVE_PAUSE_ON , parameter 2
+K:ACTIVE_PAUSE_SET 1: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_SET, parameter 2, ERROR (1) on K:ACTIVE_PAUSE_SET 1, parameter 2
+TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar): 4 (active pause); clock -0.17x, pause now 4 (active pause); Coherent.call resolved
+TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar): 0 (none); clock 0.96x, pause now 0 (none); Coherent.call resolved
+TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag): 4 (active pause); clock -0.20x, pause now 4 (active pause); Coherent.call resolved
+TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag): 0 (none); clock 0.94x, pause now 0 (none); Coherent.call resolved
+TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int): no Pause_EX1; clock 1.00x, pause now 0 (none); Coherent.call rejected [{"first":"NoSuchMethod","second":"TOOLBAR_SET_ACTIVE_PAUSE not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."}]
+TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int): no Pause_EX1; clock 1.00x, pause now 0 (none); Coherent.trigger returned
+TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi): no Pause_EX1; clock 1.00x, pause now 0 (none); engine.call rejected [{"first":"NoSuchMethod","second":"TOOLBAR_SET_ACTIVE_PAUSE not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result."}]
+TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi): no Pause_EX1; clock 1.00x, pause now 0 (none); engine.trigger returned
+
+Pause at the end: 0 (none)

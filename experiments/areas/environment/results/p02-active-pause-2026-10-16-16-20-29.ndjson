@@ -1,0 +1,257 @@
+{"t":1792167629792,"s":0.019,"kind":"open","text":"SunRise 12.2.282174.999, SimConnect 12.2.0.0","app":"SunRise","appVersion":"12.2.282174.999","simConnectVersion":"12.2.0.0","nodeSimconnect":"4.2.0"}
+{"t":1792167629813,"s":0.04,"kind":"system","text":"Sim 1 (running)","event":"Sim","data":1}
+{"t":1792167629814,"s":0.041,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1792167629814,"s":0.041,"kind":"system","text":"View 2 (cockpit virtual)","event":"View","data":2}
+{"t":1792167629815,"s":0.042,"kind":"clock","text":"","step":"start","zulu":58829.81640625,"pause":0}
+{"t":1792167630015,"s":0.242,"kind":"clock","text":"","step":"start","zulu":58830.015625,"pause":0}
+{"t":1792167630215,"s":0.442,"kind":"clock","text":"","step":"start","zulu":58830.21484375,"pause":0}
+{"t":1792167630415,"s":0.642,"kind":"clock","text":"","step":"start","zulu":58830.4140625,"pause":0}
+{"t":1792167630624,"s":0.851,"kind":"clock","text":"","step":"start","zulu":58830.62109375,"pause":0}
+{"t":1792167630848,"s":1.075,"kind":"clock","text":"","step":"start","zulu":58830.84765625,"pause":0}
+{"t":1792167631048,"s":1.275,"kind":"clock","text":"","step":"start","zulu":58831.046875,"pause":0}
+{"t":1792167631248,"s":1.475,"kind":"clock","text":"","step":"start","zulu":58831.24609375,"pause":0}
+{"t":1792167631304,"s":1.531,"kind":"start","text":"clock 1.00x, rate 1, pause 0 (none)"}
+{"t":1792167631304,"s":1.531,"kind":"send","text":"K:PAUSE_ON  at priority highest, tagged","event":"PAUSE_ON","values":[],"priority":1,"tagged":true}
+{"t":1792167631314,"s":1.541,"kind":"system","text":"Pause_EX1 8 (sim pause)","event":"Pause_EX1","data":8}
+{"t":1792167631315,"s":1.542,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58831.3125,"pause":8}
+{"t":1792167631547,"s":1.774,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58831.546875,"pause":8}
+{"t":1792167631747,"s":1.974,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58831.74609375,"pause":8}
+{"t":1792167631948,"s":2.175,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58831.9453125,"pause":8}
+{"t":1792167632181,"s":2.408,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58832.1796875,"pause":8}
+{"t":1792167632381,"s":2.608,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58832.37890625,"pause":8}
+{"t":1792167632581,"s":2.808,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58832.58203125,"pause":8}
+{"t":1792167632781,"s":3.008,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58832.78125,"pause":8}
+{"t":1792167632981,"s":3.208,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58832.98046875,"pause":8}
+{"t":1792167633181,"s":3.408,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58833.1796875,"pause":8}
+{"t":1792167633381,"s":3.608,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58833.37890625,"pause":8}
+{"t":1792167633581,"s":3.808,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58833.58203125,"pause":8}
+{"t":1792167633781,"s":4.008,"kind":"clock","text":"","step":"K:PAUSE_ON","zulu":58833.78125,"pause":8}
+{"t":1792167633807,"s":4.034,"kind":"step","text":"K:PAUSE_ON: 8 (sim pause); clock 1.00x, pause now 8 (sim pause)"}
+{"t":1792167633808,"s":4.035,"kind":"send","text":"K:PAUSE_OFF  at priority highest, tagged","event":"PAUSE_OFF","values":[],"priority":1,"tagged":true}
+{"t":1792167633814,"s":4.041,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1792167633814,"s":4.041,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58833.8125,"pause":0}
+{"t":1792167634014,"s":4.241,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58834.01171875,"pause":0}
+{"t":1792167634214,"s":4.441,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58834.21484375,"pause":0}
+{"t":1792167634414,"s":4.641,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58834.4140625,"pause":0}
+{"t":1792167634614,"s":4.841,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58834.61328125,"pause":0}
+{"t":1792167634814,"s":5.041,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58834.8125,"pause":0}
+{"t":1792167635014,"s":5.241,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58835.015625,"pause":0}
+{"t":1792167635214,"s":5.441,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58835.21484375,"pause":0}
+{"t":1792167635414,"s":5.641,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58835.4140625,"pause":0}
+{"t":1792167635615,"s":5.842,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58835.61328125,"pause":0}
+{"t":1792167635847,"s":6.074,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58835.84765625,"pause":0}
+{"t":1792167636047,"s":6.274,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58836.046875,"pause":0}
+{"t":1792167636248,"s":6.475,"kind":"clock","text":"","step":"K:PAUSE_OFF","zulu":58836.24609375,"pause":0}
+{"t":1792167636314,"s":6.541,"kind":"step","text":"K:PAUSE_OFF: 0 (none); clock 1.00x, pause now 0 (none)"}
+{"t":1792167636315,"s":6.542,"kind":"send","text":"K:PAUSE_TOGGLE  at priority highest, tagged","event":"PAUSE_TOGGLE","values":[],"priority":1,"tagged":true}
+{"t":1792167636348,"s":6.575,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58836.34765625,"pause":0}
+{"t":1792167636548,"s":6.775,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58836.546875,"pause":0}
+{"t":1792167636748,"s":6.975,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58836.74609375,"pause":0}
+{"t":1792167636948,"s":7.175,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58836.94921875,"pause":0}
+{"t":1792167637148,"s":7.375,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58837.1484375,"pause":0}
+{"t":1792167637381,"s":7.608,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58837.37890625,"pause":0}
+{"t":1792167637581,"s":7.808,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58837.58203125,"pause":0}
+{"t":1792167637782,"s":8.009,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58837.78125,"pause":0}
+{"t":1792167638014,"s":8.241,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58838.015625,"pause":0}
+{"t":1792167638214,"s":8.441,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58838.21484375,"pause":0}
+{"t":1792167638414,"s":8.641,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58838.4140625,"pause":0}
+{"t":1792167638615,"s":8.842,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE","zulu":58838.61328125,"pause":0}
+{"t":1792167638828,"s":9.055,"kind":"step","text":"K:PAUSE_TOGGLE: no Pause_EX1; clock 1.00x, pause now 0 (none)"}
+{"t":1792167638828,"s":9.055,"kind":"send","text":"K:PAUSE_TOGGLE  at priority highest, tagged","event":"PAUSE_TOGGLE","values":[],"priority":1,"tagged":true}
+{"t":1792167638848,"s":9.075,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58838.84765625,"pause":0}
+{"t":1792167639048,"s":9.275,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58839.046875,"pause":0}
+{"t":1792167639248,"s":9.475,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58839.24609375,"pause":0}
+{"t":1792167639448,"s":9.675,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58839.4453125,"pause":0}
+{"t":1792167639648,"s":9.875,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58839.6484375,"pause":0}
+{"t":1792167639848,"s":10.075,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58839.84765625,"pause":0}
+{"t":1792167640048,"s":10.275,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58840.046875,"pause":0}
+{"t":1792167640248,"s":10.475,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58840.24609375,"pause":0}
+{"t":1792167640448,"s":10.675,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58840.44921875,"pause":0}
+{"t":1792167640648,"s":10.875,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58840.6484375,"pause":0}
+{"t":1792167640848,"s":11.075,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58840.84765625,"pause":0}
+{"t":1792167641048,"s":11.275,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58841.046875,"pause":0}
+{"t":1792167641248,"s":11.475,"kind":"clock","text":"","step":"K:PAUSE_TOGGLE again","zulu":58841.24609375,"pause":0}
+{"t":1792167641338,"s":11.565,"kind":"step","text":"K:PAUSE_TOGGLE again: no Pause_EX1; clock 1.00x, pause now 0 (none)"}
+{"t":1792167641339,"s":11.566,"kind":"send","text":"K:ACTIVE_PAUSE_TOGGLE  at priority highest, tagged","event":"ACTIVE_PAUSE_TOGGLE","values":[],"priority":1,"tagged":true}
+{"t":1792167641346,"s":11.573,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_TOGGLE, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":21,"index":2,"sent":"map K:ACTIVE_PAUSE_TOGGLE"}
+{"t":1792167641346,"s":11.573,"kind":"exception","text":"ERROR (1) on K:ACTIVE_PAUSE_TOGGLE , parameter 2","exception":1,"name":"ERROR","sendId":22,"index":2,"sent":"K:ACTIVE_PAUSE_TOGGLE "}
+{"t":1792167641347,"s":11.574,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58841.34765625,"pause":0}
+{"t":1792167641548,"s":11.775,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58841.546875,"pause":0}
+{"t":1792167641748,"s":11.975,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58841.74609375,"pause":0}
+{"t":1792167641948,"s":12.175,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58841.9453125,"pause":0}
+{"t":1792167642148,"s":12.375,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58842.1484375,"pause":0}
+{"t":1792167642382,"s":12.609,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58842.37890625,"pause":0}
+{"t":1792167642582,"s":12.809,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58842.58203125,"pause":0}
+{"t":1792167642783,"s":13.01,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58842.78125,"pause":0}
+{"t":1792167643014,"s":13.241,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58843.015625,"pause":0}
+{"t":1792167643214,"s":13.441,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58843.21484375,"pause":0}
+{"t":1792167643414,"s":13.641,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58843.4140625,"pause":0}
+{"t":1792167643615,"s":13.842,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58843.61328125,"pause":0}
+{"t":1792167643815,"s":14.042,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_TOGGLE","zulu":58843.8125,"pause":0}
+{"t":1792167643847,"s":14.074,"kind":"step","text":"K:ACTIVE_PAUSE_TOGGLE: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_TOGGLE, parameter 2, ERROR (1) on K:ACTIVE_PAUSE_TOGGLE , parameter 2"}
+{"t":1792167643848,"s":14.075,"kind":"send","text":"K:TOGGLE_ACTIVE_PAUSE  at priority highest, tagged","event":"TOGGLE_ACTIVE_PAUSE","values":[],"priority":1,"tagged":true}
+{"t":1792167643848,"s":14.075,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58843.84765625,"pause":0}
+{"t":1792167643879,"s":14.106,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:TOGGLE_ACTIVE_PAUSE, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":23,"index":2,"sent":"map K:TOGGLE_ACTIVE_PAUSE"}
+{"t":1792167643880,"s":14.107,"kind":"exception","text":"ERROR (1) on K:TOGGLE_ACTIVE_PAUSE , parameter 2","exception":1,"name":"ERROR","sendId":24,"index":2,"sent":"K:TOGGLE_ACTIVE_PAUSE "}
+{"t":1792167644049,"s":14.276,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58844.046875,"pause":0}
+{"t":1792167644282,"s":14.509,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58844.28125,"pause":0}
+{"t":1792167644517,"s":14.744,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58844.515625,"pause":0}
+{"t":1792167644749,"s":14.976,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58844.75,"pause":0}
+{"t":1792167644949,"s":15.176,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58844.94921875,"pause":0}
+{"t":1792167645182,"s":15.409,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58845.1796875,"pause":0}
+{"t":1792167645382,"s":15.609,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58845.3828125,"pause":0}
+{"t":1792167645585,"s":15.812,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58845.5859375,"pause":0}
+{"t":1792167645815,"s":16.042,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58845.8125,"pause":0}
+{"t":1792167646015,"s":16.242,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58846.015625,"pause":0}
+{"t":1792167646215,"s":16.442,"kind":"clock","text":"","step":"K:TOGGLE_ACTIVE_PAUSE","zulu":58846.21484375,"pause":0}
+{"t":1792167646348,"s":16.575,"kind":"step","text":"K:TOGGLE_ACTIVE_PAUSE: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:TOGGLE_ACTIVE_PAUSE, parameter 2, ERROR (1) on K:TOGGLE_ACTIVE_PAUSE , parameter 2"}
+{"t":1792167646348,"s":16.575,"kind":"send","text":"K:ACTIVE_PAUSE_ON  at priority highest, tagged","event":"ACTIVE_PAUSE_ON","values":[],"priority":1,"tagged":true}
+{"t":1792167646380,"s":16.607,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_ON, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":25,"index":2,"sent":"map K:ACTIVE_PAUSE_ON"}
+{"t":1792167646380,"s":16.607,"kind":"exception","text":"ERROR (1) on K:ACTIVE_PAUSE_ON , parameter 2","exception":1,"name":"ERROR","sendId":26,"index":2,"sent":"K:ACTIVE_PAUSE_ON "}
+{"t":1792167646382,"s":16.609,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58846.3828125,"pause":0}
+{"t":1792167646582,"s":16.809,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58846.58203125,"pause":0}
+{"t":1792167646783,"s":17.01,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58846.78125,"pause":0}
+{"t":1792167647015,"s":17.242,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58847.015625,"pause":0}
+{"t":1792167647215,"s":17.442,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58847.21484375,"pause":0}
+{"t":1792167647415,"s":17.642,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58847.4140625,"pause":0}
+{"t":1792167647615,"s":17.842,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58847.61328125,"pause":0}
+{"t":1792167647815,"s":18.042,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58847.8125,"pause":0}
+{"t":1792167648015,"s":18.242,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58848.015625,"pause":0}
+{"t":1792167648215,"s":18.442,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58848.21484375,"pause":0}
+{"t":1792167648449,"s":18.676,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58848.44921875,"pause":0}
+{"t":1792167648649,"s":18.876,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58848.6484375,"pause":0}
+{"t":1792167648848,"s":19.075,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_ON","zulu":58848.84765625,"pause":0}
+{"t":1792167648849,"s":19.076,"kind":"step","text":"K:ACTIVE_PAUSE_ON: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_ON, parameter 2, ERROR (1) on K:ACTIVE_PAUSE_ON , parameter 2"}
+{"t":1792167648849,"s":19.076,"kind":"send","text":"K:ACTIVE_PAUSE_SET 1 at priority highest, tagged","event":"ACTIVE_PAUSE_SET","values":[1],"priority":1,"tagged":true}
+{"t":1792167648880,"s":19.107,"kind":"exception","text":"NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_SET, parameter 2","exception":7,"name":"NAME_UNRECOGNIZED","sendId":27,"index":2,"sent":"map K:ACTIVE_PAUSE_SET"}
+{"t":1792167648880,"s":19.107,"kind":"exception","text":"ERROR (1) on K:ACTIVE_PAUSE_SET 1, parameter 2","exception":1,"name":"ERROR","sendId":28,"index":2,"sent":"K:ACTIVE_PAUSE_SET 1"}
+{"t":1792167648882,"s":19.109,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58848.8828125,"pause":0}
+{"t":1792167649115,"s":19.342,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58849.11328125,"pause":0}
+{"t":1792167649315,"s":19.542,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58849.3125,"pause":0}
+{"t":1792167649515,"s":19.742,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58849.515625,"pause":0}
+{"t":1792167649715,"s":19.942,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58849.71484375,"pause":0}
+{"t":1792167649915,"s":20.142,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58849.9140625,"pause":0}
+{"t":1792167650115,"s":20.342,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58850.11328125,"pause":0}
+{"t":1792167650315,"s":20.542,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58850.3125,"pause":0}
+{"t":1792167650515,"s":20.742,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58850.515625,"pause":0}
+{"t":1792167650715,"s":20.942,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58850.71484375,"pause":0}
+{"t":1792167650915,"s":21.142,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58850.9140625,"pause":0}
+{"t":1792167651115,"s":21.342,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58851.11328125,"pause":0}
+{"t":1792167651315,"s":21.542,"kind":"clock","text":"","step":"K:ACTIVE_PAUSE_SET 1","zulu":58851.3125,"pause":0}
+{"t":1792167651350,"s":21.577,"kind":"step","text":"K:ACTIVE_PAUSE_SET 1: no Pause_EX1; clock 1.00x, pause now 0 (none); exceptions: NAME_UNRECOGNIZED (7) on map K:ACTIVE_PAUSE_SET, parameter 2, ERROR (1) on K:ACTIVE_PAUSE_SET 1, parameter 2"}
+{"t":1792167656448,"s":26.675,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.44921875,"pause":0}
+{"t":1792167656515,"s":26.742,"kind":"system","text":"Pause_EX1 4 (active pause)","event":"Pause_EX1","data":4}
+{"t":1792167656648,"s":26.875,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03125,"pause":4}
+{"t":1792167656848,"s":27.075,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167657048,"s":27.275,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03125,"pause":4}
+{"t":1792167657248,"s":27.475,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167657448,"s":27.675,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167657648,"s":27.875,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167657848,"s":28.075,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167658048,"s":28.275,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167658248,"s":28.475,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03125,"pause":4}
+{"t":1792167658448,"s":28.675,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03125,"pause":4}
+{"t":1792167658648,"s":28.875,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167658848,"s":29.075,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167658985,"s":29.212,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE true in the toolbar (Toolbar): 4 (active pause); clock -0.17x, pause now 4 (active pause); Coherent.call resolved"}
+{"t":1792167659015,"s":29.242,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58856.03515625,"pause":4}
+{"t":1792167659081,"s":29.308,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1792167659215,"s":29.442,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58856.1328125,"pause":0}
+{"t":1792167659415,"s":29.642,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58856.33203125,"pause":0}
+{"t":1792167659615,"s":29.842,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58856.53515625,"pause":0}
+{"t":1792167659815,"s":30.042,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58856.734375,"pause":0}
+{"t":1792167660015,"s":30.242,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58856.93359375,"pause":0}
+{"t":1792167660215,"s":30.442,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58857.1328125,"pause":0}
+{"t":1792167660415,"s":30.642,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58857.33203125,"pause":0}
+{"t":1792167660615,"s":30.842,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58857.53515625,"pause":0}
+{"t":1792167660815,"s":31.042,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58857.734375,"pause":0}
+{"t":1792167661015,"s":31.242,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58857.93359375,"pause":0}
+{"t":1792167661215,"s":31.442,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58858.1328125,"pause":0}
+{"t":1792167661415,"s":31.642,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar)","zulu":58858.33203125,"pause":0}
+{"t":1792167661551,"s":31.778,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE false in the toolbar (Toolbar): 0 (none); clock 0.96x, pause now 0 (none); Coherent.call resolved"}
+{"t":1792167661615,"s":31.842,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.53515625,"pause":0}
+{"t":1792167661648,"s":31.875,"kind":"system","text":"Pause_EX1 4 (active pause)","event":"Pause_EX1","data":4}
+{"t":1792167661815,"s":32.042,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03125,"pause":4}
+{"t":1792167662015,"s":32.242,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167662216,"s":32.443,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167662448,"s":32.675,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167662648,"s":32.875,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03125,"pause":4}
+{"t":1792167662848,"s":33.075,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167663048,"s":33.275,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03125,"pause":4}
+{"t":1792167663248,"s":33.475,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167663448,"s":33.675,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167663649,"s":33.876,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03125,"pause":4}
+{"t":1792167663882,"s":34.109,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167664082,"s":34.309,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167664118,"s":34.345,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE true in the EFB (Electronic Flight Bag): 4 (active pause); clock -0.20x, pause now 4 (active pause); Coherent.call resolved"}
+{"t":1792167664148,"s":34.375,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58858.03515625,"pause":4}
+{"t":1792167664214,"s":34.441,"kind":"system","text":"Pause_EX1 0 (none)","event":"Pause_EX1","data":0}
+{"t":1792167664348,"s":34.575,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58858.1015625,"pause":0}
+{"t":1792167664548,"s":34.775,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58858.30078125,"pause":0}
+{"t":1792167664748,"s":34.975,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58858.5,"pause":0}
+{"t":1792167664948,"s":35.175,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58858.69921875,"pause":0}
+{"t":1792167665148,"s":35.375,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58858.8984375,"pause":0}
+{"t":1792167665348,"s":35.575,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58859.1015625,"pause":0}
+{"t":1792167665548,"s":35.775,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58859.30078125,"pause":0}
+{"t":1792167665748,"s":35.975,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58859.5,"pause":0}
+{"t":1792167665948,"s":36.175,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58859.69921875,"pause":0}
+{"t":1792167666148,"s":36.375,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58859.8984375,"pause":0}
+{"t":1792167666348,"s":36.575,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58860.1015625,"pause":0}
+{"t":1792167666548,"s":36.775,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag)","zulu":58860.30078125,"pause":0}
+{"t":1792167666685,"s":36.912,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE false in the EFB (Electronic Flight Bag): 0 (none); clock 0.94x, pause now 0 (none); Coherent.call resolved"}
+{"t":1792167666748,"s":36.975,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58860.5,"pause":0}
+{"t":1792167666948,"s":37.175,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58860.69921875,"pause":0}
+{"t":1792167667148,"s":37.375,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58860.8984375,"pause":0}
+{"t":1792167667348,"s":37.575,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58861.1015625,"pause":0}
+{"t":1792167667548,"s":37.775,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58861.30078125,"pause":0}
+{"t":1792167667748,"s":37.975,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58861.5,"pause":0}
+{"t":1792167667948,"s":38.175,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58861.69921875,"pause":0}
+{"t":1792167668148,"s":38.375,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58861.8984375,"pause":0}
+{"t":1792167668348,"s":38.575,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58862.1015625,"pause":0}
+{"t":1792167668548,"s":38.775,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58862.30078125,"pause":0}
+{"t":1792167668748,"s":38.975,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58862.5,"pause":0}
+{"t":1792167668948,"s":39.175,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58862.69921875,"pause":0}
+{"t":1792167669149,"s":39.376,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58862.8984375,"pause":0}
+{"t":1792167669285,"s":39.512,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE true in a cockpit panel (VCockpit60 - WeatherSquare4000_int): no Pause_EX1; clock 1.00x, pause now 0 (none); Coherent.call rejected [{\"first\":\"NoSuchMethod\",\"second\":\"TOOLBAR_SET_ACTIVE_PAUSE not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result.\"}]"}
+{"t":1792167669315,"s":39.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58863.06640625,"pause":0}
+{"t":1792167669515,"s":39.742,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58863.265625,"pause":0}
+{"t":1792167669715,"s":39.942,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58863.46484375,"pause":0}
+{"t":1792167669915,"s":40.142,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58863.66796875,"pause":0}
+{"t":1792167670115,"s":40.342,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58863.8671875,"pause":0}
+{"t":1792167670315,"s":40.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58864.06640625,"pause":0}
+{"t":1792167670515,"s":40.742,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58864.265625,"pause":0}
+{"t":1792167670715,"s":40.942,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58864.46484375,"pause":0}
+{"t":1792167670915,"s":41.142,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58864.66796875,"pause":0}
+{"t":1792167671115,"s":41.342,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58864.8671875,"pause":0}
+{"t":1792167671315,"s":41.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58865.06640625,"pause":0}
+{"t":1792167671515,"s":41.742,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58865.265625,"pause":0}
+{"t":1792167671715,"s":41.942,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int)","zulu":58865.46484375,"pause":0}
+{"t":1792167671852,"s":42.079,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in a cockpit panel (VCockpit60 - WeatherSquare4000_int): no Pause_EX1; clock 1.00x, pause now 0 (none); Coherent.trigger returned"}
+{"t":1792167671915,"s":42.142,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58865.6640625,"pause":0}
+{"t":1792167672115,"s":42.342,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58865.8671875,"pause":0}
+{"t":1792167672315,"s":42.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58866.06640625,"pause":0}
+{"t":1792167672515,"s":42.742,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58866.265625,"pause":0}
+{"t":1792167672715,"s":42.942,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58866.46484375,"pause":0}
+{"t":1792167672915,"s":43.142,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58866.6640625,"pause":0}
+{"t":1792167673115,"s":43.342,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58866.8671875,"pause":0}
+{"t":1792167673315,"s":43.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58867.06640625,"pause":0}
+{"t":1792167673515,"s":43.742,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58867.265625,"pause":0}
+{"t":1792167673715,"s":43.942,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58867.46484375,"pause":0}
+{"t":1792167673915,"s":44.142,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58867.66796875,"pause":0}
+{"t":1792167674115,"s":44.342,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58867.8671875,"pause":0}
+{"t":1792167674315,"s":44.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi)","zulu":58868.06640625,"pause":0}
+{"t":1792167674418,"s":44.645,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE true in mainUi (mainUi): no Pause_EX1; clock 1.00x, pause now 0 (none); engine.call rejected [{\"first\":\"NoSuchMethod\",\"second\":\"TOOLBAR_SET_ACTIVE_PAUSE not bound. Call engine.trigger instead of engine.call if you do not bind nor need the result.\"}]"}
+{"t":1792167674448,"s":44.675,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58868.19921875,"pause":0}
+{"t":1792167674648,"s":44.875,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58868.3984375,"pause":0}
+{"t":1792167674848,"s":45.075,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58868.6015625,"pause":0}
+{"t":1792167675048,"s":45.275,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58868.80078125,"pause":0}
+{"t":1792167675248,"s":45.475,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58869,"pause":0}
+{"t":1792167675449,"s":45.676,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58869.19921875,"pause":0}
+{"t":1792167675682,"s":45.909,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58869.43359375,"pause":0}
+{"t":1792167675882,"s":46.109,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58869.6328125,"pause":0}
+{"t":1792167676115,"s":46.342,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58869.8671875,"pause":0}
+{"t":1792167676315,"s":46.542,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58870.06640625,"pause":0}
+{"t":1792167676515,"s":46.742,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58870.265625,"pause":0}
+{"t":1792167676715,"s":46.942,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58870.46484375,"pause":0}
+{"t":1792167676915,"s":47.142,"kind":"clock","text":"","step":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi)","zulu":58870.66796875,"pause":0}
+{"t":1792167676985,"s":47.212,"kind":"step","text":"TOOLBAR_SET_ACTIVE_PAUSE true by trigger in mainUi (mainUi): no Pause_EX1; clock 1.00x, pause now 0 (none); engine.trigger returned"}

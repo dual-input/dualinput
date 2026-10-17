@@ -1,0 +1,223 @@
+FS Copilot's ATC audio, read in its code, 2026-10-17
+====================================================
+
+A research agent read the FS Copilot fork's ATC audio code in full for node
+6.14 of the architecture plan, with the fork's record/traffic-atc/docs/ for the
+reasons behind it. Paths are relative to the fork's src/. Coordinator.cs has no
+ATC code; ATC is wired in Program.cs lines 122 to 133, and ShareSwitch registers
+the packets.
+
+1. Capture
+----------
+
+- WASAPI process loopback by PID, built by hand around ActivateAudioInterfaceAsync
+  on "VAD\\Process_Loopback" with AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK = 1
+  (Audio/ProcessLoopback.cs, ctor lines 93 to 139). includeTree = true is the
+  default and AtcCapture never overrides it; ModeExcludeTargetProcessTree is
+  defined but unused. The comment says "Windows 10 2004+ in practice, documented
+  for build 20348+."
+- IAudioClient.Initialize(Shared, LOOPBACK | EVENTCALLBACK | AUTOCONVERTPCM |
+  SRC_DEFAULT_QUALITY, 2_000_000 (200 ms), 0, 48 kHz/16-bit/mono) (line 132). The
+  capture thread waits on the event with WaitOne(100), keeps a 1 s scratch
+  buffer, zero-fills packets flagged AUDCLNT_BUFFERFLAGS_SILENT, and raises Data
+  (Loop, lines 147 to 171). GetBuffer's devicePosition and qpcPosition are
+  thrown away (out _, out _, line 157).
+- 48,000 Hz, 1 channel, 16-bit, framed at FrameSamples = 960 (20 ms)
+  (AtcCapture.cs lines 15 and 16); OnPcm re-chunks WASAPI's packets into
+  960-sample frames across callbacks.
+- AtcApps.Known = ["BeyondATC", "SayIntentions", "Pilot2ATC", "PF3", "FSHud",
+  "VoxATC"] (AtcApps.cs line 18). Names match the exact ProcessName, ignoring
+  case, in one Process.GetProcesses() snapshot, keeping the oldest by StartTime
+  (OldestOf, lines 53 to 74): "a launcher's child tree is covered by include-tree
+  capture". Whether "SayIntentions" is SayIntentions' real program name is
+  unverified; the fork's Q11 says SayIntentions was never tested.
+- AtcHost.Target takes the preferred program if it's running, else the first
+  known app detected, in Known order (AtcHost.cs lines 76 to 83): "A preference,
+  not a lock". The dropdown lists the detected known apps plus "Other...", which
+  calls AtcApps.AudioSessionProcesses() once: every process with an audio
+  session on any active render endpoint, without PID 0 or FS Copilot itself,
+  sorted by name (lines 81 to 113). The pick is kept by program name in
+  settings.json as AtcApp. The dropdown shows only while the ATC toggle is on.
+- AtcHost ticks every 2 s, refreshing the detected list and attaching or
+  detaching only while hosting. Capture attaches as soon as the target exists,
+  even while it's silent. The process is watched, not the audio: "loopback goes
+  silent when its process exits". Tick detaches if the process exited or another
+  app became the target (lines 96 to 108).
+- No code handles the sim's built-in ATC. "Other..." would list
+  FlightSimulator2024, and capturing it would take all of the sim's sound.
+
+2. Encoding
+-----------
+
+- Concentus 2.2.2, CreateEncoder(48000, 1, OPUS_APPLICATION_VOIP), Bitrate =
+  24_000, UseVBR = true (AtcCapture ctor, lines 47 to 49), 960-sample frames.
+  Complexity, in-band FEC, DTX, packet-loss percentage, constrained VBR, and
+  signal type are left at the library's defaults, which the agent didn't check.
+  A new encoder is made for each attach and never reset between talkspurts.
+- Mixer compensation: ReadMixer every 500 ms (MixerPoll, line 21) reads the
+  lowest SimpleAudioVolume.Volume across the PID's sessions, and whether any is
+  muted (lines 116 to 137). Gain is min(10, 1/volume), or 1 when volume is 0:
+  MaxGain = 10f is "+20 dB; below a 10 % mixer level the audio is too quantised
+  to rescue". Gain is applied in OnPcm, before framing. Mute is only reported:
+  Status.MixerMuted shows "Capturing - muted in the volume mixer".
+- The gate: per frame, after compensation, rmsDb = 20*log10(sqrt(sum s^2/960)/
+  32768 + 1e-9); a frame is active above GateDbfs = -50; HangoverFrames = 15
+  (300 ms); on an onset the previous frame is encoded and sent first ("the frame
+  the onset started in", line 100). During silence nothing is sent: "~22 kbps
+  while ATC talks and nothing while it does not."
+
+3. Framing and stamps
+---------------------
+
+- AtcFrame(string Host, uint Seq, byte[] Opus), encoded as Host, Seq u32, Len
+  u16, then the Opus bytes (AtcFrame.cs, Codec, lines 21 to 40). MaxOpusBytes =
+  1023 - 16 = 1007; frames run "around 60 bytes" at 24 kbps.
+- AtcHost._seq starts at 0 per app run and rises once per frame sent, pre-roll
+  included (AtcHost.Send, lines 156 to 162). It's never reset, and silence
+  consumes no numbers, so Seq is contiguous across talkspurts.
+- No timestamp on the wire. The prototype carried one, Environment.TickCount64
+  in ms at send time, "shared clock for the latency figure"
+  (record/traffic-atc/tools/AtcAudio/Program.cs, Host.Send, lines 353 to 363);
+  the product dropped it.
+- 50 frames/s while the gate is open. The fork measured 16 to 27 kbps on the
+  wire with UDP/IP headers, with 44 to 72% of frames sent through a ring tone
+  with pauses (fork, build/log.md, "Stage 3").
+
+4. Delivery
+-----------
+
+- Sent once, never retransmitted: _net.SendAll(frame, Delivery.Unreliable)
+  (AtcHost.Send), LiteNetLib's Unreliable with no channel (Transport.cs lines 33
+  to 39). The MTU floor is 1024; LiteNetLib throws an unreliable packet over the
+  MTU rather than fragmenting it.
+- HybridNetwork.SendAll sends on both the direct and the relay transport (lines
+  112 to 118), so a duplicate frame is possible.
+- The plan had audio on Sequenced; the fork moved to Unreliable after a shared
+  Sequenced channel dropped a quarter of the traffic batches: "a late frame is
+  still playable; the jitter buffer and PLC are better than any transport
+  policy" (04-transport.md, "Delivery per stream"). Before relay protocol v2, ATC
+  audio never reached a relay peer (build/log.md, 2026-09-08).
+- No transport deadline; the receiver orders by Seq and drops a frame below
+  _next while playing. LiteNetLib's DisconnectTimeout = 15000 ms, so a silent
+  drop takes up to 15 s to show.
+
+5. Playback
+-----------
+
+- A Windows device, never the sim: AtcPlayer opens
+  MMDeviceEnumerator.GetDefaultAudioEndpoint(Render, Role.Multimedia) with
+  WasapiOut(device, Shared, eventSync: true, OutputLatencyMs = 50) (AtcPlayer.Open,
+  lines 87 to 104), through BufferedWaveProvider (48 kHz/16/mono, 2 s,
+  DiscardOnBufferOverflow) -> VolumeWaveProvider16 -> WasapiOut. No device
+  picker.
+- The buffer rule (Tick, lines 160 to 189): frames go into a SortedDictionary
+  keyed by Seq (Enqueue, lines 76 to 83), a duplicate overwriting the copy there;
+  a talkspurt starts once count x 20 ms >= BufferMs = 60, 3 frames, with _next
+  the lowest key; every 20 ms the player takes _next, concealing through
+  Decode(empty), Opus PLC, when _next is missing and later frames wait; an empty
+  buffer ends the talkspurt; a frame with seq < _next while playing counts as
+  Late and is dropped. The depth is fixed.
+- The play thread ticks on a Stopwatch every 20 ms with Sleep(2), and jumps ahead
+  if it falls more than 500 ms behind. The device's clock drains the provider,
+  and nothing corrects drift between the two clocks (the agent's reading).
+- A gap the agent found, not in the code's comments: a frame that comes in late
+  after a talkspurt ended is accepted, since _playing is false, counts toward the
+  next talkspurt's 3 frames, and plays first.
+- Every 2 s the player checks whether the default endpoint changed and reopens
+  on it, because changing the default "does not [raise an error] - WASAPI keeps
+  rendering happily into the old one". A playback exception closes the output,
+  and Loop retries Open every 2 s.
+- Volume linear 0 to 1, mute as volume 0, both persisted as AtcVolume and
+  AtcMuted (AtcReceiver, lines 50 to 70; Settings.cs lines 23 and 24). Nothing
+  ties volume to the sim's COM VOLUME.
+- Measured: about 126 to 155 ms from capture stamp to leaving the speaker,
+  against a budget of about 140 ms (capture 10 + frame 20 + buffer 60 + output
+  50); at 5% loss with 80 +/- 30 ms of added delay, 52 frames dropped, 50
+  concealed, none late (build/log.md, "Stage 3").
+- Played, Concealed, Late, FramesSent, PeakDbfs, and SilentPackets are counted
+  but never read, so the product logs no audio statistics.
+
+6. The receiver's own ATC
+-------------------------
+
+- No code mutes, ducks, or detects the receiver's own sim ATC or ATC app. If
+  both pilots run an ATC app, the non-host hears its own app and the host's
+  stream.
+- The host hears its own ATC normally, since loopback is a tap, and AtcReceiver
+  creates a player only when the host isn't this peer (ctor, lines 25 to 39).
+  Mixer compensation means "what the host sends must not depend on how loud
+  they like ATC locally" (ReadMixer comment).
+- No echo by construction: include-tree capture takes only the ATC app's tree,
+  and the receiver plays from FS Copilot's own process, which
+  AudioSessionProcesses leaves out.
+- Frames from anyone but the current host are dropped (f.Host != _host).
+
+7. Push-to-talk and the pilots' voices
+--------------------------------------
+
+- No microphone capture, push-to-talk, or speech-recognition code. The design:
+  the host pilot's own transmissions aren't carried, the others hear the
+  readback on their voice call, and "Capturing the mic on PTT is Discord's job"
+  (01-design.md, "What it deliberately does not carry").
+
+8. The switch
+-------------
+
+- Traffic and ATC are independent: ShareSwitch.Feature { Traffic = 0, Atc = 1 },
+  each with its own claim set (ShareSwitch.cs line 21), reversing 01-design.md's
+  one host for both (plan decision 1, 2026-09-06).
+- Request(Atc, true) returns early if another peer hosts ("there is no
+  take-over"), else adds itself and broadcasts ShareHost on Bulk. The host is
+  the ordinal-smallest claimant; a losing peer stands down and the card shows
+  "{name} is already sharing ATC audio." The toggle works only in a session,
+  only while nobody else hosts, and doesn't need the sim; toggles aren't
+  persisted.
+- On the old host, AtcHost detaches and disposes the capture; receivers dispose
+  the old player and build a new one, with a fresh decoder and buffer, for the
+  new host; the new host attaches to its own target.
+- OnPeers prunes claims of departed peers (the P2P peer list polls every 1 s),
+  and a pruned host makes receivers dispose their player. When the last peer
+  leaves, EndSession switches the toggles off and calls StopAll; hosting doesn't
+  resume on reconnect.
+
+9. Comments, dead ends, and measured numbers
+--------------------------------------------
+
+- ProcessLoopback.Dispose: if the loop is still inside WaitOne when the handle
+  goes, "it throws on a thread with no handler, which ends the process; leaking
+  one event is the better failure"; it releases the COM objects, because "a
+  session that loses and regains its ATC app goes round this more than once".
+- AtcHost.Attach: any exception shows "Audio capture needs Windows 10 2004 or
+  later", even when Windows isn't the cause; there's no OS-build check.
+- ILLink.Descriptors.xml: "Without this the published build crashes the moment
+  ATC capture starts", since the trimmer removed the COM interop.
+- In the fork's log: the mixer applies before the tap (25% mixer -> -12 dB, Q10);
+  menu silence reads -90 dBFS, so -50 stays the gate; Concentus took 0.1 to 0.2%
+  CPU (Q13); an elevated BeyondATC captures fine (Q18); Windows 10 (Q09) never
+  tested; no device-capture fallback, ever.
+
+Against Crosscheck's records (record/areas/core/04-core-helper.md)
+-------------------------------------------------------------------
+
+- Agrees: process loopback of the oldest process with its tree, a 2 s search,
+  watching the process because exit is silent at -90 dBFS; dividing the mixer
+  level back out, capped at +20 dB; 20 ms frames, 24 kbps VBR, the -50 dBFS
+  gate, 300 ms hangover, and one frame of pre-roll; dropping a late frame and
+  concealing gaps; a list of programs that own an audio session.
+- Partly answers 04's question on format conversion: FS Copilot asked for 48 kHz
+  16-bit mono with AUTOCONVERTPCM | SRC_DEFAULT_QUALITY and measured exact 20 ms
+  framing, 250 frames per 5 s, on build 26200. Whether the wasapi crate's
+  loopback client sets autoconvert is unverified.
+- Differs: 04 stamps each frame with GetBuffer's QPC value for its first
+  sample, where FS Copilot throws it away and sends Seq only; since it re-chunks
+  packets into 960-sample frames, a frame's first sample usually falls
+  mid-packet, so its stamp is the packet's plus the offset over 48,000
+  (inference). 04's buffer adapts and counts samples against the device's clock,
+  where FS Copilot's starts at a fixed 60 ms on a Stopwatch. FS Copilot plays on
+  the default device with Role.Multimedia, where wasapi's "used by most
+  applications" role is Role::Console (read in wasapi 0.25.0, src/api.rs, line
+  137); the two are usually the same endpoint (unverified). FS Copilot polls the
+  mixer every 500 ms and only reports a mute; 04 gives no poll rate and says
+  nothing of a mute.
+- Neither has anything for muting the receiver's own ATC, or for both pilots
+  running an ATC app.

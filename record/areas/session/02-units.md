@@ -17,6 +17,8 @@ Decides:     The session crate's members, session keys, control, session file, j
 > Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) starts a following machine's catch-up when its profile loads after preflight has ended, where [preflight](#preflight) starts a late joiner's on `FlightChanged`, since a joiner's profile loads only once it's in the flight; a member the crew went without still starts its catch-up at `PreflightEnded`.
 >
 > Since 2026-10-17, the session crate keeps in its state the folder of the package its match check's job found, which avatars reads to find the aircraft's models; and seat claims ride avatars' poses, so the session crate holds none ([avatars](../avatars/01-avatars.md#finding-the-files)).
+>
+> Since 2026-10-17, the match check has no item of traffic's, where [the match check](#the-match-check)'s table gives traffic one for traffic packs, injectors, and multiplayer: traffic is partly recorded, so an item it fed would part the recorded `match` key from its replay, and a receiving machine raises notices for other traffic and for missing copies instead, while a page lists the machine's traffic packs when asked ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#notices)).
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

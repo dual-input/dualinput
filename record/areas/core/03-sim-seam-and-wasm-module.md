@@ -29,6 +29,12 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > - The sketch in [what a feature calls](#what-a-feature-calls) has flight-model sync watch the pose each sim frame once a profile loads; it feeds its routine `Lead` instead, which reads the pose in the module, and loads no profile.
 >
 > Since 2026-10-17, a `watch` and a `key` in [what a feature calls](#what-a-feature-calls) can name an object by its ID rather than the pilot's aircraft, as avatars watches `SIMCONNECT_OBJECT_ID_USER_AVATAR` on foot and freezes each figure it creates; and the figure's SimObject title is `CROSSCHECK_FIGURE_PILOT`, of the kind `FIGURE` ([avatars](../avatars/01-avatars.md#names)).
+>
+> Since 2026-10-17, [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md) changes this document in three places:
+>
+> - [What a feature calls](#what-a-feature-calls) gains `poll(type, radius)`, one `SimConnect_RequestDataOnSimObjectType` for each call under a request ID of its own, which a partly recorded unit may declare `.unrecorded()`, as 6.6 asked ([polling](../traffic-atc/01-traffic-and-atc.md#polling)).
+> - A `watch` takes a period of once, which reads an object's variables one time, as traffic reads each new object's identity.
+> - Traffic's copies are written each frame by its routine `Traffic`, so traffic's connection makes a few calls a second, and the 4,096 packet IDs [its thread](#its-thread) keeps for each connection hold far more than the 1s it gives them.
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

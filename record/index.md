@@ -20,6 +20,8 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/avatars/log.md](areas/avatars/log.md): what our experiments found about reading the pilot's avatar and showing a figure in its place on the other machine, with its hand where the pilot clicks.
 - [areas/avatars/decisions.md](areas/avatars/decisions.md): what those experiments have settled for now about the figure's hands, and on what findings.
 - [areas/avatars/01-avatars.md](areas/avatars/01-avatars.md): how each pilot's figure takes its seat, looks, and reaches for what they click or change, on every machine, and how the core reads an aircraft's own models to find where a hand goes.
+- [areas/traffic-atc/log.md](areas/traffic-atc/log.md): what we found about carrying one pilot's AI traffic and ATC audio to the other pilots' machines, from our FS Copilot fork's code, the SDK, and our probes.
+- [areas/traffic-atc/01-traffic-and-atc.md](areas/traffic-atc/01-traffic-and-atc.md): how the traffic host's AI traffic appears as frozen copies drawn every frame on the other machines, and how the ATC host's ATC app plays in the crew's headsets.
 - [areas/sync/01-profile-entries.md](areas/sync/01-profile-entries.md): what a profile says about an aircraft's cockpit, its state and events blocks, and the writer API.
 - [areas/sync/02-live-sync.md](areas/sync/02-live-sync.md): how a change reaches every cockpit during a session, how conflicts resolve, and how Crosscheck checks a write landed.
 - [areas/sync/03-catch-up.md](areas/sync/03-catch-up.md): how a cockpit that missed changes comes to the flying machine's state, and when a loaded aircraft counts as settled.

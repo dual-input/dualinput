@@ -92,6 +92,15 @@ Decides:     The scope of every v1 feature.
 > - A wheel turn brings the hand as a tap does, and a change made without a click brings it only after 100ms with no other such change, and only past the entry's deadband ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
 > - On foot, past 3m, the arm points at the spot at 0.6m long.
 > - On a machine that can't read the aircraft's models, its pilot's clicks bring no hand and no figure holds a yoke, while seats, heads, and changes made without a click still show, which replaces the [preflight match check](#preflight-match-check)'s example of avatar sync staying off ([a machine that can't read the models](../avatars/01-avatars.md#a-machine-that-cant-read-the-models)).
+>
+> Since 2026-10-17, [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md) changes [traffic sync](#traffic-sync) and [hearing ATC](#hearing-atc) in six places:
+>
+> - Traffic carries a ground object only within 1km of the traffic host's aircraft and only when its title is on a list, which starts with the sim's pushback tugs, so GSX's vehicles and people wait for [ground operations sync](ideas.md#ground-operations-sync), where traffic sync carries ground vehicles, GSX's tugs, fuel trucks, and catering among them (user, 2026-10-17).
+> - The sim's pushback tugs that push AI aircraft are objects traffic finds, so whether it carries the tug of a pilot's own pushback rests on a check in the sim, which narrows the open question on the sim's own tug.
+> - The [preflight match check](#preflight-match-check)'s list names no traffic source, traffic pack, or multiplayer: a receiving machine raises a notice while its sim shows aircraft that aren't the traffic host's, and another while any of the traffic host's objects is missing or shown as a stand-in, and a page lists the machine's traffic packs when asked, which settles the open question on detecting them; whether the count sees multiplayer's other pilots is unverified.
+> - A pushback started in a following machine's sim goes undetected in v1, which settles that open question (user, 2026-10-17).
+> - Crosscheck finds BeyondATC and SayIntentions by itself, and SayIntentions works through our FS Copilot fork's capture (reported by the user, 2026-10-17), which answers part of the open question on other ATC apps; an ATC volume setting turns ATC down alone.
+> - ATC reaches the crew about 130ms after the app plays it, plus the network delay, plus whatever depth past 60ms the buffer picks at the start of a transmission, up to 300ms.
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

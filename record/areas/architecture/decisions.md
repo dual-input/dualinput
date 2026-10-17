@@ -1525,6 +1525,53 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** only the author knows an axis's units and travel, and a feature can't read another feature's types, so the kind gives the number.
 - **Leaves out:** nothing.
 
+## Traffic polls twice a second, and a receiving machine draws each frozen copy every frame from a routine of traffic's, 1s behind
+
+- **Decided:** while its pilot holds traffic's key and is in the flight, the traffic host polls every 500ms and sends an object's state past FS Copilot's gate or every 5s; a receiving machine creates each copy, releases it, freezes it through key events on its object ID, and writes its gear, flaps, lights, and engines on change, from traffic's crate in the core; and traffic's routine `Traffic`, fed each batch of states on the core's counter, writes each copy's pose every frame through `fsVarsAVarSet`, 1s behind the traffic host's reads, carrying it up to 600ms past its newest sample.
+  The gate and the playout are an engine, `object-mirror`, generic over the sample.
+  This changes [the code map](02-code-map.md#cases-for-the-bench), whose case for the bench writes the copies each `Frame` event through the loop, and whose left open moves the writes into the edge if those move less smoothly than FS Copilot's.
+  Settled in node 6.14 by the user, 2026-10-17 ([`Traffic`, each frame](../traffic-atc/01-traffic-and-atc.md#traffic-each-frame)).
+- **Because:**
+  - A frozen object moves only where it's written, and FS Copilot's copies scored 0.17 on its jitter measure written on each `Frame` event, and 1.65 written at 20Hz into a sim at about 33 fps (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Jitter measured, not eyeballed").
+  - SimConnect's writes from outside put a seat object about 2.3m behind a flying aircraft, and our module's writes held it ([avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)).
+  - Through the loop, 130 copies at 60 fps would be 7,800 SimConnect calls a second, each a `Frame` event's round trip through the queue, the loop, and the edge (arithmetic).
+  - `Traffic` places each sample by when the traffic host read it, through the clock offset, so its delay covers the trip, where FS Copilot's settled at its samples' spacing plus 200ms, measured from their arrival (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficInterpolator.cs`, `Push`).
+- **Leaves out:** `Traffic`'s cost a frame, which the bench measures.
+
+## Traffic carries aircraft and helicopters within its radius, and ground objects within 1km only by an allowlist of titles
+
+- **Decided:** the traffic host carries the AI aircraft and helicopters within its radius setting, 200km at most and at first, and the ground objects within 1km whose title starts with a prefix on a list in traffic's crate, which starts with `ASO_Pushback_`; it never carries the pilot's own aircraft or avatar, an object traffic created, or a title starting `CROSSCHECK_`.
+  This changes [traffic sync](../product/03-v1-scope.md#traffic-sync), which carries ground vehicles, GSX's tugs, fuel trucks, and catering among them (user, 2026-10-17).
+  Settled in node 6.14 by the user, 2026-10-17 ([which objects the host carries](../traffic-atc/01-traffic-and-atc.md#which-objects-the-host-carries)).
+- **Because:**
+  - At EGLL, 823 of the 850 ground objects within 5km were GSX's gate signs and walls, which each sim that runs GSX makes for itself, and 27 were the sim's pushback tugs ([traffic and ATC log](../traffic-atc/log.md)); nothing in an object's variables says who spawned it.
+  - GSX's people report `CATEGORY` `GroundVehicle` too, and come with GSX through [ground operations sync](../product/ideas.md#ground-operations-sync) (user, 2026-10-17).
+  - A 5m tug spans about 6 pixels at 1km on a 1,920-pixel screen with a 90° view (arithmetic).
+- **Leaves out:** the titles beyond `ASO_Pushback_`, which the build adds.
+
+## A receiving machine tells its pilot of other traffic and of missing copies by notices, and a page lists the machine's traffic packs on demand, so the match check has no traffic item
+
+- **Decided:** while another member holds traffic's key and its pilot is in the flight, a receiving machine counts every 10s the aircraft and helicopters within 200km that are neither its pilot's nor its copies, and raises a notice after two counts above 0; it raises another while any of the traffic host's objects shows as a stand-in or not at all; and when a page asks, a job lists this machine's traffic packs, from a list of known folder names in traffic's crate starting with `fsltl-traffic-base`, with each one's manifest version, into traffic's slice.
+  This changes [the session's units](../session/02-units.md#the-match-check), whose match check has an item of traffic's for traffic packs, injectors, and multiplayer, and [traffic sync](../product/03-v1-scope.md#traffic-sync), which puts them in the match check's list.
+  Settled in node 6.14 by the user, 2026-10-17 ([notices](../traffic-atc/01-traffic-and-atc.md#notices); [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
+- **Because:**
+  - Traffic leaves its polls out of the recording and its own count of jobs drifts in a replay, so a match item it fed would part the recorded `match` key from its replay ([avatars](../avatars/01-avatars.md#a-machine-that-cant-read-the-models)).
+  - The count catches the sim's own AI traffic and any injector by what shows, as FS Copilot's receiver did (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `ForeignPoll`), and the stand-ins catch the packs that differ by what the copies do.
+  - Folder names and manifests take no reading of the 2,690 `aircraft.cfg` and `livery.cfg` files that finding each title's package would, and traffic packs rarely rename their folders (user, 2026-10-17).
+- **Leaves out:** how a page shows the list, and whether it shows the crew's, the user's with [6.16](plan.md#616-the-apps); and whether the count sees multiplayer's other pilots, a check in the sim.
+
+## ATC audio finds its app by a list of program names, stamps each frame, and plays behind a depth picked at each transmission's start
+
+- **Decided:** the ATC app setting is Automatic, the first running of `BeyondATC` and `SayIntentionsAI`, or one program the pilot picks; each frame carries its number, counting the frames sent, and the stamp of its first sample, with a deadline 300ms after that stamp; a receiving helper holds each transmission's first frame for the smallest depth that would have played 98% of the last 10s of frames on time, between 60ms and 300ms, and keeps it through the transmission; and an ATC volume setting sets the stream's gain.
+  This settles what [04-core-helper](../core/04-core-helper.md#left-open) leaves to 6.14: the bitrate, the gate, the buffer's rule, and how the ATC app is picked.
+  Settled in node 6.14 by the user, 2026-10-17 ([ATC audio](../traffic-atc/01-traffic-and-atc.md#atc-audio)).
+- **Because:**
+  - SayIntentions' program is `SayIntentionsAI.exe`, which FS Copilot's `SayIntentions` never matched, and BeyondATC's is `BeyondATC.exe` (read on our development machine, 2026-10-17); the user has had reports of SayIntentions working well (reported by the user, 2026-10-17).
+  - At 3% loss through a relay 97ms to 131ms from the sender, 6% to 11% of frames came more than 170ms late ([the relays](../network/01-between-machines.md#the-relays)), so FS Copilot's fixed 60ms would conceal at least that many.
+  - A depth changed only between transmissions stretches no word.
+  - The helper mixes ATC and the sounds into one output stream, so the Windows mixer can't turn ATC down alone.
+- **Leaves out:** the buffer's limits, which friends' sessions tune from the helper's report on each transmission.
+
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

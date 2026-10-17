@@ -83,6 +83,14 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - `tools/` gains `profile-author`, the seat tool and the click tool, on `sim-client`, `sim-edge`, `aircraft-model`, and the message crate.
 > - [Names the sim shares](#names-the-sim-shares) gains the kind `FIGURE`, which avatars owns: the figure's title `CROSSCHECK_FIGURE_PILOT`, where that section names `CROSSCHECK_Figure`, and `Z:CROSSCHECK_FIGURE_` and each joint's channel.
 > - A cockpit stream kind whose key names an entry also declares how to read the entry's number from its body, and "cockpit sent" carries the entry and its number, which [what a handler sees and does](#what-a-handler-sees-and-does) needs for a change's `location`.
+>
+> Since 2026-10-17, [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md) changes this document in four places:
+>
+> - Traffic has a routine, `Traffic`, in `traffic-routines`, which writes every copy's pose each frame, so traffic reads no `Frame` event; the module's list in [routines in our WASM module](#routines-in-our-wasm-module) gains `traffic::Traffic`, and its slot, `CROSSCHECK_ROUTINE_TRAFFIC`, joins [names the sim shares](#names-the-sim-shares).
+>   So the case in the sim seam's [cases for the bench](#cases-for-the-bench) that writes traffic's copies each `Frame` event through the loop becomes `Traffic`'s, and [left open](#left-open)'s item on moving those writes into the edge falls away.
+> - The engines' bottom line gains `object-mirror`, the gate and the playout, generic over the sample, which traffic and `Traffic` use.
+> - Traffic's row in [features](#features) gains the routine, and uses `clients` and `object-mirror` beside its three; ATC audio's uses `clients` too.
+> - The module's 0.1ms a frame in [budgets for work in the sim](#budgets-for-work-in-the-sim) grows by `Traffic`'s, under 0.1ms with 25 moving copies.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

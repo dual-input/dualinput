@@ -1,0 +1,177 @@
+AI objects in MSFS 2024, from the SDK and from our probes, 2026-10-17
+=====================================================================
+
+A research agent gathered what the MSFS 2024 SDK documents and what our probes
+measured about AI objects, for node 6.14 of the architecture plan. SDK 1.7.3 at
+C:\MSFS 2024 SDK\ ships no local SimConnect documentation, only
+SimConnect SDK\include\SimConnect.h, so the pages below were read online on
+2026-10-17 under https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/.
+Paths in our repository are relative to its root.
+
+A. The SDK (documented)
+-----------------------
+
+SimConnect.h, SDK 1.7.3:
+- SIMCONNECT_SIMOBJECT_TYPE: USER = 0, USER_AIRCRAFT = 0, ALL, AIRCRAFT,
+  HELICOPTER, BOAT, GROUND, HOT_AIR_BALLOON, ANIMAL, USER_AVATAR, USER_CURRENT.
+  The SDK doesn't say which are new in 2024.
+- SIMCONNECT_OBJECT_ID_MAX = DWORD_MAX - 128; SIMCONNECT_OBJECT_ID_USER and
+  _USER_AIRCRAFT are both 0, _USER commented "deprecated";
+  SIMCONNECT_OBJECT_ID_USER_AVATAR = MAX+1 and SIMCONNECT_OBJECT_ID_USER_CURRENT
+  = MAX+2, both "proxy value".
+- The _EX1 creates add const char* szLivery after the title:
+  AICreateParkedATCAircraft_EX1(title, livery, tail, airportID, req),
+  AICreateEnrouteATCAircraft_EX1(title, livery, tail, flightNumber, planPath,
+  planPosition, touchAndGo, req), AICreateNonATCAircraft_EX1(title, livery, tail,
+  SIMCONNECT_DATA_INITPOSITION, req), AICreateSimulatedObject_EX1(title, livery,
+  INITPOSITION, req).
+- Also AIReleaseControl(obj, req), AIRemoveObject(obj, req),
+  AISetAircraftFlightPlan(obj, path, req), and
+  SimConnect_EnumerateSimObjectsAndLiveries(req, type).
+- SIMCONNECT_DATA_INITPOSITION holds lat/lon in degrees, altitude in feet,
+  pitch/bank/heading in degrees, DWORD OnGround, and DWORD Airspeed in knots;
+  INITPOSITION_AIRSPEED_CRUISE = -1 and _KEEP = -2.
+- SIMCONNECT_RECV_ASSIGNED_OBJECT_ID holds {dwRequestID, dwObjectID}.
+  SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE extends RECV_EVENT with eObjType; its
+  comment wrongly names SIMCONNECT_RECV_ID_EVENT_FILENAME.
+- Exceptions for AI objects: TOO_MANY_OBJECTS, CREATE_OBJECT_FAILED,
+  LOAD_FLIGHTPLAN_FAILED, OPERATION_INVALID_FOR_OBJECT_TYPE, ILLEGAL_OPERATION,
+  OUT_OF_BOUNDS, OBJECT_OUTSIDE_REALITY_BUBBLE, OBJECT_CONTAINER, OBJECT_AI,
+  OBJECT_ATC, OBJECT_SCHEDULE, INTERNAL.
+
+Pages under SimConnect/API_Reference/AI_Object/:
+- SimConnect_AICreateNonATCAircraft.htm (legacy) "only works with non-modular
+  aircraft"; the title "must be in an aircraft Preset", found with
+  EnumerateSimObjectsAndLiveries; the tail "should have a maximum of 12
+  characters"; "A non-ATC aircraft can be on the ground or airborne when it is
+  created".
+- SimConnect_AICreateNonATCAircraft_EX1.htm: szLivery "is only required when
+  checking modular SimObjects"; the call "will check for the folder first, then
+  the parameter name second", and when neither matches, "the default livery will
+  be used." Exception: CREATE_OBJECT_FAILED.
+- SimConnect_AICreateSimulatedObject_EX1.htm is "typically intended to create
+  simulation objects other than aircraft": ground vehicles, boats, whales, or a
+  stationary aircraft, with the same livery fallback.
+- SimConnect_AIReleaseControl.htm: without it "the AI system and client may
+  fight each other with unpredictable results"; to stop the sim updating
+  lat/lon/alt/attitude, the page points to the FREEZE_* key events.
+- SimConnect_AIRemoveObject.htm: "A client application can only remove AI
+  controlled objects that it created, not objects created by other clients" or
+  by the sim.
+- SIMCONNECT_EXCEPTION.htm: TOO_MANY_OBJECTS: "The maximum is 1000."
+  OUT_OF_BOUNDS is the radius error.
+
+Data and events:
+- SimConnect_RequestDataOnSimObjectType.htm: radius 0 returns only the user
+  aircraft; above 200,000m gives OUT_OF_BOUNDS. The page doesn't say whether
+  results come one message per object, or whether the user aircraft is included
+  at a radius above 0.
+- SIMCONNECT_SIMOBJECT_TYPE.htm: ALL is "all AI controlled objects"; the request
+  returns objects whichever client or the sim created them, but not objects the
+  AI doesn't control, "such as cars on freeways" (paraphrased by the fetch).
+- SimConnect_RequestDataOnSimObject.htm, multiplayer: "it is not safe to use the
+  ID number for the user aircraft", which "can change depending on several
+  factors".
+- SimConnect_SetDataOnSimObject.htm: the ObjectID can come from a _BYTYPE reply;
+  "An exception will be returned if an attempt is made to write to a variable
+  that cannot be set".
+- SimConnect_EnumerateSimObjectsAndLiveries.htm retrieves "the list of spawnable
+  SimObjects", "mandatory information" for the AICreate* calls, and sends the
+  list "or a part of the list", or an INTERNAL exception.
+- SimConnect_SubscribeToSystemEvent.htm: ObjectAdded "when an AI object is added
+  to the simulation", ObjectRemoved likewise; no multiplayer event.
+
+Simulation variables:
+- TITLE "Title from aircraft.cfg."; LIVERY NAME "Name from livery.cfg."; LIVERY
+  FOLDER; each a string of at most 128 characters. IS USER SIM "Is this the user
+  loaded aircraft." No other model or livery variable for 2024.
+- ATC ID 10 characters, ATC AIRLINE 50, ATC FLIGHT NUMBER 6, ATC MODEL 128, ATC
+  TYPE 128.
+- AI TRAFFIC STATE is a string, such as "push back 1/2", "taxi out", "enroute",
+  "landing", or "" with no flight plan; CATEGORY is one of Airplane, Helicopter,
+  Boat, GroundVehicle, ControlTower, SimpleObject, Viewer.
+- FREEZE_LATITUDE_LONGITUDE_SET, FREEZE_ALTITUDE_SET, FREEZE_ATTITUDE_SET, and
+  their toggles apply to "the aircraft (either user or AI controlled)"; the SDK
+  documents no event that moves an AI object.
+
+B. Our own records and probes
+-----------------------------
+
+p08 (record/areas/architecture/log.md, 2026-10-09; measured on MSFS 2024 SunRise
+12.2.282174.999, the A2A PA-24 parked; experiments/areas/architecture/flight/client/src/main.rs):
+- TITLE and LIVERY NAME read as STRING256, once; EnumerateSimObjectsAndLiveries
+  for AIRCRAFT listed 6,297 entries, 16 of them PA-24;
+  AICreateNonATCAircraft_EX1 40m ahead got object 56066048, TITLE "A2A Piper
+  PA-24-250 Comanche", LIVERY NAME "C-FCIO"; AICreateSimulatedObject_EX1
+  ("CROSSCHECK_Figure") 6m ahead got 56082432; all 66 calls S_OK, no exception
+  (experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.txt).
+- From the .ndjson stamps (arithmetic): enumeration to its last message 5.8ms;
+  aircraft create to ASSIGNED_OBJECT_ID 5.5ms; object create 4.8ms.
+
+p28 (record/areas/avatars/log.md, 2026-10-05; experiments/areas/avatars/p28-many-figures.mjs):
+- AICreateSimulatedObject_EX1("CROSSCHECK_FigureZ") on a grid, then
+  AIReleaseControl and the three FREEZE_*_SET with 1 on each; up to 1,000 figures
+  created, none failed; the module caps itself at 1,000, so the SDK's limit was
+  never passed.
+- 400 figures took 30.4s in p28's serial loop, about 76ms each, a loop of create,
+  await the ID, release, three freezes, and one L: write.
+- AIReleaseControl on every CROSSCHECK_ figure, of category StaticObject,
+  answered ERROR (1) on parameter 1: 180, 800, or 1,000 exceptions per run, in
+  p24 and p28, and on Marshaller_Stick in p01. Release gave no exception on GSX
+  people of category GroundVehicle, nor on ProceduralCharacter, SimpleObjectSim,
+  or aircraft. The freeze and the writes still held.
+
+Other avatars entries (record/areas/avatars/log.md):
+- 2026-10-02: GSX's people are listed among the ground vehicles as FSDT_ titles
+  of category GroundVehicle, and show; 930 per-frame writes to a released,
+  frozen GroundVehicle ran with no exception.
+- p01's raw results (experiments/areas/avatars/results/p01-avatar-2026-10-02-21-05-51.txt):
+  enumeration found 41 HELICOPTER titles, 3 HOT_AIR_BALLOON, and 934 ANIMAL;
+  USER_AVATAR and USER_CURRENT each gave INTERNAL (45). ObjectAdded fired for
+  our objects with eObjType ALL for simulated objects and AIRCRAFT for aircraft,
+  before the probe had stored the assigned ID, and fired again and again for two
+  objects the pilot didn't see. Created object IDs are large DWORDs that step by
+  16,384.
+- 2026-10-03, "Writes from outside the sim place an object in a moving cockpit
+  but can't hold it still": SimConnect put seat and avatar objects about 2.3m
+  behind a flying aircraft, and writes from a WASM module through fsVarsAVarSet
+  on the object's ID held them.
+
+p10 (record/areas/architecture/log.md, 2026-10-16;
+experiments/areas/architecture/recording/capture/src/main.rs):
+- RequestDataOnSimObjectType every 500ms for AIRCRAFT at 200,000m and GROUND at
+  5,000m, with TITLE, ATC ID, and LIVERY NAME read once per new object; at EGLL,
+  142 to 153 aircraft and 0 to 248 ground vehicles, 1,023 distinct objects in
+  600s.
+
+Design, not measurement: record/areas/core/03-sim-seam-and-wasm-module.md and
+record/areas/architecture/02-code-map.md map create_ai and remove to the four
+calls, give each feature a connection for each load, and leave unmeasured
+whether closing a connection, rather than killing its client, removes its AI
+objects. No run of ours has tested whether AI objects or their IDs survive a
+flight load.
+
+C. fsc-editor
+-------------
+
+- ../fsc-editor's docs/sim-vars/build/v1-log.md and src/main/sim/ hold nothing
+  measured about AI objects, traffic, object types, or add and remove events.
+
+Contradictions
+--------------
+
+1. AIReleaseControl: the SDK says it applies to "an aircraft, or other object";
+   we measured ERROR (1) on every StaticObject, and the freeze worked without
+   it. The measurement is the anchor.
+2. The tail: the SDK allows up to 12 characters, ATC ID is documented at 10, and
+   FS Copilot measured a cut to 9. The measurement is the anchor.
+3. EnumerateSimObjectsAndLiveries for USER_AVATAR: documented, but p01 got
+   INTERNAL for it.
+4. "Must be in an aircraft Preset": AICreateSimulatedObject_EX1 created
+   StaticObject and GroundVehicle titles.
+5. The FREEZE_*_SET parameters are marked "N/A", while FS Copilot and our probes
+   send 1, and FS Copilot read the variables back at 1/1/1.
+6. CATEGORY: the SDK lists 7 values, and we read others: StaticObject,
+   SimpleObjectSim, ProceduralCharacter, CharacterSim, VDGS.
+7. SimConnect_Close is documented to remove a client's objects; only a killed
+   client was measured.

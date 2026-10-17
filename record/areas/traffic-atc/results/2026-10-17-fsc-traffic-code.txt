@@ -1,0 +1,269 @@
+FS Copilot's traffic sharing, read in its code, 2026-10-17
+==========================================================
+
+A research agent read the FS Copilot fork's traffic code in full for node 6.14
+of the architecture plan: ../fsc/src on its main branch, last traffic commit
+22dbddd. Paths are relative to the fork's src/. Items marked (inference) are the
+agent's reading of the code and haven't been measured. Coordinator.cs,
+Definitions.cs, Settings.cs, SimClient.cs, SimConnectConsumer.cs,
+SimConnectProducer.cs, and Codecs.cs hold no traffic code. Traffic runs on its
+own SimConnect connection, Connection/SimTraffic.cs, named "FS Copilot
+(Traffic)".
+
+1. Reading the host's traffic
+-----------------------------
+
+- RequestDataOnSimObjectType(req, TrafficDef.State, 200_000 m, type), a one-shot
+  call repeated by an app timer: Observable.Interval(500 ms) -> PollTick
+  (TrafficHost ctor, StartPoll, Request). The rate is 2 Hz.
+- One poll at a time: a poll still outstanding under 2,000 ms makes the tick
+  skip; past that it's abandoned with no diff, and the batch is flushed
+  (PollTick, PollTimeoutMs).
+- Request IDs encode the poll, PollBase 100 + generation*3 + typeIndex over 8
+  generations, because SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE carries no send ID
+  or timestamp, so a late reply would otherwise be misfiled (TrafficDefinitions.cs,
+  TrafficReq, PollGenerations).
+- Types: AIRCRAFT and HELICOPTER always; GROUND only with the dev flag
+  --traffic-ground, off by default (StartPoll, TrafficOptions.Parse). The app
+  never polls BOAT; the TrafficRead tool can.
+- In the recordings, GSX/FSDT tugs, fuel trucks, catering, and Asobo baggage
+  carts and pushback tugs arrive under GROUND, with CATEGORY GroundVehicle.
+- Per-poll state (ObjectState.Define), FLOAT64 unless noted: PLANE LATITUDE and
+  LONGITUDE (Degrees), PLANE ALTITUDE (Feet); PLANE PITCH DEGREES, PLANE BANK
+  DEGREES, PLANE HEADING DEGREES TRUE (Degrees); VELOCITY BODY X/Y/Z (Feet per
+  second), ROTATION VELOCITY BODY X/Y/Z (Radians per second); GROUND VELOCITY
+  (Knots), VERTICAL SPEED (Feet per minute), GEAR HANDLE POSITION (Percent Over
+  100); INT32: SIM ON GROUND, IS USER SIM, FLAPS HANDLE INDEX, LIGHT STROBE ON,
+  LIGHT LANDING ON, LIGHT TAXI ON, LIGHT BEACON ON, LIGHT NAV ON, NUMBER OF
+  ENGINES, GENERAL ENG COMBUSTION:1..4.
+- Identity, once per new object (OnByType -> RequestDataOnSimObject(...,
+  PERIOD.ONCE)): TITLE (STRING256), ATC ID, ATC AIRLINE, ATC FLIGHT NUMBER, ATC
+  MODEL, CATEGORY (STRING64 each), and IS USER SIM. On 2024, LIVERY NAME
+  (STRING256) is read in its own one-shot definition, because 2020 rejects it
+  and an unknown datum shifts every later field (LiveryProbe).
+- The identity goes out when both replies have arrived, or after LiveryWait =
+  2s (OnObjectData, Announce). No state is sent before the identity (OnByType).
+- Exclusions: the host's own aircraft (IS USER SIM != 0) is tracked and never
+  announced; objects this instance's receiver created are skipped through
+  _receiver.OwnObjectIds; copies whose ATC ID starts with "~" are skipped, which
+  only the same-sim test bed creates. Nothing else the app might create, such as
+  avatars, is guarded.
+- Parked and taxiing aircraft are handled the same way. No ParkedATC, no
+  AI-state variable, and no MSFS 2024 AI flags were found.
+- The only 2024 branches are IsMsfs2024 (application major >= 12, from
+  OnRecvOpen), the LIVERY NAME read, the _EX1 creates,
+  EnumerateSimObjectsAndLiveries, and the fallback titles.
+
+2. Identity across machines
+---------------------------
+
+- The host's sim object ID maps to a compact ushort Index (_nextIndex++) in
+  TrafficHost._tracked; every newly seen ID takes one. All packets name the
+  Index, never the sim ID.
+- Receiver tables (TrafficReceiver): _byIndex, _byRequest, _bySim, and _own (the
+  set the host side reads). Request IDs: create 1000+index, release
+  70000+index, remove 140000+index, measure 210000+index (TrafficReq).
+- Disappear: an object missing from a complete poll is dropped from _tracked,
+  and if its identity had been announced, TrafficRemove goes out (FinishPoll).
+  An abandoned poll removes nothing.
+- Reappear: a new Tracked with a new index, so a new identity and a new create.
+  Indices are never reused within a run, and nothing handles a ushort wrap
+  (inference).
+- Receiver-side removal: TrafficRemove; no state for StaleAfter = 15s, three
+  heartbeats (Maintain); states that arrive before their identity wait in
+  _pending, dropped after PendingFor = 10s; a re-sent identity for a known index
+  only replaces Identity (OnIdentity).
+
+3. Creating on the receiver
+---------------------------
+
+- Create: Airplane or Helicopter: AICreateNonATCAircraft_EX1(title, livery, tail,
+  init, req) on 2024, AICreateNonATCAircraft on 2020; anything else:
+  AICreateSimulatedObject_EX1(title, livery, init, req), or the plain form.
+  ParkedATC and EnrouteATC aren't used.
+- SIMCONNECT_DATA_INITPOSITION from the newest sample: lat/lon/alt,
+  pitch/bank/heading, OnGround, Airspeed = (uint)max(0, ground speed in kt).
+- Tail is the host's ATC ID, or the index as text if that's empty. Ground
+  vehicles have empty tails. Airline, FlightNumber, and Model are carried but
+  never used.
+- Inventory (2024 only): EnumerateSimObjectsAndLiveries for AIRCRAFT and
+  HELICOPTER fills _knownTitles once both lists finish (OnLiveries). Until then
+  the real title is tried and the sim's exception drives the fallback.
+- Fallback (TrafficFallbacks.For), when the title is missing from the finished
+  set or after the first create exception: Airplane "Asobo PassiveAircraft
+  Citation CJ4" on 2024, "Airbus A320 Neo Asobo" on 2020; Helicopter "Asobo
+  PassiveAircraft Bell 407" on 2024, "Asobo Bell 407" on 2020; anything else
+  none, and the object is Failed. The livery is cleared on fallback. A second
+  exception marks it Failed, and Maintain retries a failed object from scratch
+  every 30s (OnException, Maintain).
+- Possible bug (inference): ground vehicles stop spawning on 2024, because the
+  inventory lists only aircraft and helicopters, so once it finishes every
+  GroundVehicle title reads as not installed, and its fallback is null. The
+  11-of-11 ground-vehicle spawn in the fork's log went through TrafficInject,
+  which has no inventory check.
+- On AssignedObjectId (OnAssigned): if the index was removed while the create
+  was in flight, AIRemoveObject at once; otherwise record the sim ID, add it to
+  _own, AIReleaseControl(id), then TransmitClientEvent FREEZE_LATITUDE_LONGITUDE_SET,
+  FREEZE_ALTITUDE_SET, and FREEZE_ATTITUDE_SET with data 1, group priority
+  highest and GROUPID_IS_PRIORITY, then one Drive pose and Dress.
+- Removal: AIRemoveObject(simId, 140000+index) (Remove), and RemoveAll on any
+  host change. On a traffic-connection drop, Clear() empties the tables. On app
+  exit, SimTraffic.Dispose: "Closing the traffic connection removes every AI
+  object it created" (App.axaml.cs:59), resting on Q08, two killed injector runs
+  that left none of their objects.
+
+4. Moving them
+--------------
+
+- Each Frame system event triggers Render, which takes the wall clock and calls
+  SetDataOnSimObject(TrafficDef.Drive, simId, DEFAULT, DriveState) for each live
+  object. These calls bypass _sim.Call, so their exceptions arrive unnamed.
+- DriveState is the pose plus VELOCITY BODY X/Y/Z and ROTATION VELOCITY BODY
+  X/Y/Z, which "only feed animations and sounds" because the object is frozen.
+- Sample time on the receiver's clock is sentAt - AgeMs, where sentAt = HostMs +
+  hostOffset, and hostOffset is the minimum of arrival - HostMs, creeping upward
+  by 0.002 x the excess per packet (OnStates).
+- TrafficInterpolator.Push rejects any sample at or before the newest. For a
+  non-quiet sample, spacing = clamp(dt, 50, 1500) + 200; the first such sample
+  seeds target and delay, after that target += 0.1 x (spacing - target). It keeps
+  at most 16 samples.
+- TryRender needs at least 2 samples. Each frame, delay += clamp(target - delay,
+  -2.0, +0.25) ms; renderTime = now - delay; samples are dropped while
+  samples[1].T <= renderTime; alpha = clamp((renderTime - ta)/seg, 0, 1 +
+  min(600, seg)/seg), so it extrapolates at most 600ms past the newest sample,
+  then holds. Lat, lon, and alt are lerped; angles use delta =
+  ((b-a)%360+540)%360-180. A pose identical to the last one written is skipped,
+  which covers parked objects. An object that has only ever been still renders
+  at zero delay.
+- AIReleaseControl plus the three freezes stop the receiver's own sim fighting
+  the writes. With --debug, a per-frame read-back warns if any IS ... FREEZE ON
+  reads 0.
+- OnGround is used only in INITPOSITION and the gate. Frozen objects aren't
+  ground-clamped.
+- Dress, for aircraft only, because ground vehicles return DATA_ERROR on every
+  one of these datums: GEAR HANDLE POSITION, FLAPS HANDLE INDEX, LIGHT STROBE,
+  LANDING, TAXI, BEACON, and NAV written when they change (the settable names;
+  the host reads the "... ON" forms); GENERAL ENG COMBUSTION:n through one-datum
+  definitions Eng1 to Eng4, written when the mask changes, since a created
+  aircraft comes with its engines running. FLAPS HANDLE PERCENT is read-only for
+  SetData (TrafficDefinitions.cs comments).
+- TrafficGate.Decide, per object per poll: the first sample is sent; a change
+  beyond any threshold sends: lat/lon > 1e-6 degrees, alt > 0.5 ft,
+  heading/pitch/bank > 0.1 degrees, GS > 0.5 kt, gear > 0.05, or any change in
+  on-ground, flaps index, engine mask, engine count, or light mask; with no
+  change, a heartbeat goes out every 5s; if a change follows held samples, the
+  last held one goes first, marked quiet and carrying its own age; the sample
+  that ends a run of motion is repeated on the next Repeats = 2 polls, marked
+  quiet; ForceResend makes the next sample count as a heartbeat.
+- MotionScore is diagnostics only (--debug): the median and worst over movers of
+  mean |d disp| / mean disp across a 150-frame window, with at least 30 frames
+  and a mean of at least 0.005 m. It decides nothing at runtime.
+
+5. The wire
+-----------
+
+- TrafficStates (Delivery.Unreliable): a header of the Host string (9 B for an
+  8-character ID), Seq u32, HostMs u32, and a count byte, 19 B with the packet
+  ID; then N x 43 B TrafficState: Index u16, AgeMs u16, lat and lon i32 in
+  1e-7 degrees, alt f32 ft, heading u16 in 0.01 degrees, pitch and bank i16 in
+  0.01 degrees, GS i16 in 0.1 kt, VS i16 in ft/min, body velocities i16 in 0.1
+  ft/s, rotation rates i16 in 0.001 rad/s, a flags byte (on-ground, quiet), gear
+  %, flaps index, lights, engines (count<<4 | mask).
+- MaxPerPacket = (1023 - 19)/43 = 23, set by Transport.MtuFloor = 1024. The relay
+  adds a frame-type byte.
+- A batch flushes at 23 states, at the end of a poll, or when a poll is
+  abandoned; at flush each sample's age gains now - readAt.
+- TrafficIdentity (Bulk, ReliableOrdered on channel 3): Host, Index, Title,
+  Livery, Tail, Airline, FlightNumber, Model as length-prefixed strings, and a
+  Category byte. TrafficRemove (Bulk): Host and Index. ShareHost (Bulk): Peer,
+  Feature, Hosting, so it stays in wire order with the identities.
+- The receiver's replay window is 64 wide over Seq and drops duplicates and
+  stragglers (Accept). Duplicates were real: two P2P links, and HybridNetwork
+  sending on both P2P and the relay.
+- From the gated capture: 58.9 states/s x 43 B, about 2.5 KB/s of payload for
+  about 120 aircraft (the agent's arithmetic). The design's "1.8 KB/s" assumed
+  32 B states.
+- On join, ShareSwitch.OnPeers re-broadcasts claims to new peers, then fires
+  PeerJoined, and the host runs ResendAll: every identity, plus
+  Gate.ForceResend so states follow on the next poll. A link that drops and
+  returns counts as a join again.
+- Possible race (inference): ShareHost and the identities reach the receiver
+  through separate ObserveOn(TaskPoolScheduler) chains, so an identity can be
+  filtered by p.Host == _host before _host updates, and the object would never
+  be created. The bed never showed it.
+
+6. The receiver's own traffic
+-----------------------------
+
+- No setting turns the receiver's own AI off, and nothing detects injectors,
+  traffic packs, or multiplayer by name.
+- ForeignPoll every 10s: RequestDataOnSimObjectType(Foreign, IS USER SIM, 200 km,
+  AIRCRAFT only), counting non-user objects not in _own, which drives
+  ForeignAiCount and, only while receiving, the warning "Detected existing AI
+  traffic in your sim. Disable to avoid duplicates." (Views/MainWindow.axaml:180).
+  It never deletes those objects.
+- A note shown while sharing: "Make sure everyone is on the same traffic pack and
+  scenery to avoid traffic issues." (MainWindow.axaml:240).
+
+7. The switch
+-------------
+
+- Each feature (Traffic 0, Atc 1) keeps a set of claimants; the host is the
+  ordinal-smallest peer ID. There's no take-over: Request(on) is refused while
+  another peer hosts. A losing claim stands down, sends Hosting=false, raises
+  Lost, and the UI reverts the toggle with "{name} is already sharing traffic."
+  Claims of departed peers are pruned. Hosting is independent of the physics
+  master.
+- The claim is toggle && sim connected && session active (ShareViewModel). A
+  host whose sim connection drops withdraws and re-claims on reconnect. When the
+  last peer leaves, EndSession calls StopAll.
+- On any change of host, the receiver runs RemoveAll. The old host runs Clear()
+  and sends no removes. A new host skips leftovers through OwnObjectIds. A host
+  that dies before its link times out is covered only by the 15s stale timeout.
+
+8. Comments and dead ends
+-------------------------
+
+- A render clock stepped by the sim's reported frame rate drifted, so Render
+  uses the wall clock. Several Frame events can land in one ReceiveMessage.
+- Sequenced delivery dropped about a quarter of batches. Samples must be aged
+  from the read, not from the send. A partial title inventory is worse than
+  none, because the fallback it causes is permanent. dwEntryNumber is
+  zero-based, and an empty enumeration reports dwOutOf = 0. A delay that follows
+  a single pair's spacing jumps; heartbeat spacing would drag the render point
+  about 1.5s back; a zero-length segment poisons the delay estimate. A lost final
+  sample means 600ms of overshoot, hence the repeat. Vehicles reject every
+  appearance datum; FLAPS HANDLE PERCENT is read-only; created aircraft come
+  with engines running. There are no TODOs.
+- In the fork's log: ObjectAdded fired for none of 109 aircraft that already
+  existed; BRAKE PARKING POSITION reads 0 and SetData on it was rejected 120
+  times; GC was ruled out at 0 to 3ms per 30s; the "FSC" tail marker was
+  removed; an echo on the same-sim bed reached 850 tracked and 1,020 injected
+  objects in a minute.
+
+9. Recordings (record/traffic-atc/recordings/, TrafficRead NDJSON, MSFS 2024
+   12.2 build 282174.999, at the SFO gate)
+----------------------------------------------------------------------------
+
+- Only traffic-2026-09-06-15-58-19-gated.ndjson is committed in the fork.
+
+  File                 Length  Objects                                       Within 1 nm  Moved  Airborne
+  15-03-11             88s     109 aircraft (101 FSLTL_*, 8 Asobo Passive-   104          10     4
+                               Aircraft, 57 distinct titles)
+  15-52-24             184s    116 aircraft + 15 ground vehicles             121          13     12
+  15-58-19 (pushback)  242s    122 aircraft + 18 ground vehicles (79         122          22     17
+                               titles), peak 139 at once
+  16-47-06             60s     73 aircraft                                   64           9      9
+
+- 1 to 3 objects at 1 to 20 nm and up to 14 at 20 to 60 nm; the farthest was 25
+  to 58 nm away. No helicopter in any capture. LIVERY NAME empty for every AI
+  object. The pushback capture had 11 adds (8 aircraft, 3 ASO_Pushback_White
+  tugs) and 6 removes (3 aircraft, 3 tugs), matching the ObjectAdded and
+  ObjectRemoved events.
+- Every-sample captures: 1.96 to 2.02 samples per object per second, gaps 503 to
+  512ms median, 529 to 534ms p95, 553ms max; 214 to 265 states/s for 110 to 140
+  objects. Gated capture: 14,225 of 64,079 samples (22.2%, 27 held-sample
+  resends), per object 0.20/s median (parked, on the heartbeat) and 1.96/s at p90
+  (movers). Poll cost 10 to 14ms average, 47ms worst at 139 objects, 0
+  incomplete polls; 37.8 fps median with BeyondATC's 74 objects.
+- The agent's scripts for these numbers stayed outside both repositories.

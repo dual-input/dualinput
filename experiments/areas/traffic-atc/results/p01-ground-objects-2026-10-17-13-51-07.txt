@@ -1,0 +1,8 @@
+p01: the ground objects in experiments/areas/architecture/results/p10-capture-2026-10-16-13-52-24.bin.zst
+
+850 ground objects and 172 AI aircraft objects over the capture, each counted once by its object ID.
+Distances are from the pilot's aircraft at the time of each poll; "moved" is more than 5m from where the object was first seen.
+
+Prefix	Objects	Within 100m	Within 1km	Moved	Titles, most common first
+FSDT_	823	169	705	0	FSDT_GSX_Font_BLED_VGDS_small_yellow (594); FSDT_SafeDock_TS24_wall_off (219); FSDT_DEICE_Wall_off (6); FSDT_SafeDock_TS24_LSupport_off (2); FSDT_SafeDock_TS24_wall (1); FSDT_Safedock_X_wall_off (1)
+ASO_	27	1	23	7	ASO_Pushback_White (14); ASO_Pushback_Blue (13)

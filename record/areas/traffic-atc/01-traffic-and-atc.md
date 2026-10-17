@@ -1,0 +1,326 @@
+# Traffic and ATC: traffic sync and hearing ATC
+
+```text
+Purpose:     How the traffic host's AI traffic appears in every other pilot's sim, and the ATC host's ATC app plays in every other pilot's headset.
+Depends on:  ../product/03-v1-scope.md, ../session/01-roles-and-members.md, ../session/02-units.md, ../architecture/02-code-map.md, ../core/03-sim-seam-and-wasm-module.md, ../core/04-core-helper.md, ../network/01-between-machines.md, ../network/02-units.md, ../recording/01-recording-and-bug-reports.md, ../flight-model/01-flight-model-sync.md, log.md
+Decides:     What the traffic host polls, how often, and which objects it carries; what an identity and a state carry; when a state goes out; how a receiving machine creates, freezes, dresses, and removes each copy, and how traffic's routine draws them; the object-mirror engine; traffic's notices and its list of traffic packs; how ATC audio picks the ATC app, sends its frames, and plays them; the settings; which of v1-scope's open questions this settles; the budgets; and the cases for the bench (node 6.14).
+```
+
+On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
+It sends each object's identity once, and its state when it changes or every 5s.
+Every other machine creates a frozen copy of each object, and traffic's routine `Traffic` in our WASM module draws each copy every frame, 1s behind the traffic host's reads.
+On the ATC host, the core helper captures the ATC app and sends its speech as stamped Opus frames, and every other machine plays them behind a depth it picks at the start of each transmission.
+
+This answers node 6.14 of the [architecture plan](../architecture/plan.md#614-traffic-and-atc), and holds only what these leave out: 03-v1-scope's [traffic sync](../product/03-v1-scope.md#traffic-sync) and [hearing ATC](../product/03-v1-scope.md#hearing-atc); 01-roles-and-members' [traffic and ATC host](../session/01-roles-and-members.md#the-traffic-and-atc-host); the code map's [traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch); 01-between-machines' [channels](../network/01-between-machines.md#channels) and [sending](../network/01-between-machines.md#sending); 04-core-helper's [capturing a program](../core/04-core-helper.md#capturing-a-program) and [playing](../core/04-core-helper.md#playing); and 01-recording-and-bug-reports' [unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs).
+Here a copy is the AI object a receiving machine creates for one of the traffic host's objects, and a receiving machine is any machine whose pilot isn't the traffic host.
+FS Copilot built both features, and this design carries over its measured mechanism: the copies frozen and written every frame, the poll at 2Hz, the gate, and the capture ([log](log.md)).
+
+## The units
+
+| Unit | Tier | Holds | Runs |
+| --- | --- | --- | --- |
+| `traffic` | Feature | On the traffic host, the objects it tracks and the gate's state for each; on a receiving machine, each sender's identities, each copy's object ID, kind, and dress, and the notices' counts; the radius setting; and the list of known traffic packs | Its crate in the core, and its routine `Traffic`, in `traffic-routines`, in our WASM module |
+| `object-mirror` | Engine | The gate, which decides which states the traffic host sends, and the playout, which gives a copy's pose at a time from its samples, both generic over the sample | Under traffic, in the core and in `Traffic`; natively on the bench |
+| `atc-audio` | Feature | The ATC app and ATC volume settings, the capture's state on the ATC host, and the playback stream on the other machines | Its crate in the core |
+| The message crate's `traffic` and `atc_audio` modules | Engine | The role keys, the channels and their messages, and `Traffic`'s slot | Wherever the message crate does |
+
+- Traffic depends on the session, for its key, the members, and who is in the flight; the sim service; the network, for its channels, each sender's clock offset, and `LinkUp`; `clients`, for its setting, notices, slice, and command; and `object-mirror`.
+  The code map's [features](../architecture/02-code-map.md#features) row lists the first three.
+- ATC audio depends on the session, the core helper's service, the network, and `clients`, where the code map's row lists all but `clients`.
+- `object-mirror` depends on nothing of ours, so it sits on the engines' bottom line beside `messages`.
+- Both register as partly recorded ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+  - Traffic's unrecorded inputs are its polls, its reads of each new object's identity, and its states' channel.
+    It reads no `Frame` event, since `Traffic` draws the copies.
+    Its identities' channel, its creates' answers, every exception, its pack list's job, and the session's, the network's, and the sim's moments stay recorded.
+  - ATC audio's unrecorded inputs are the captured frames and its frames' channel; the helper's reports on the capture and on each transmission played stay recorded.
+- Neither writes its own role key: the apps' "Share my traffic and ATC" switch sends one request claiming both, which the kernel builds ([session keys](../session/02-units.md#session-keys)).
+  So neither registers a guard, catch-up step, cockpit kind, or match item, nor makes a request the platform decides, and each turns its core helper wants on and off only on recorded inputs.
+  A notice either raises counts as its own output, as an avatars notice does ([avatars](../avatars/01-avatars.md#the-units)).
+
+## Names
+
+- `Traffic`'s slot is `CROSSCHECK_ROUTINE_TRAFFIC`, of the routine host's kind ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)).
+- The traffic host carries no object whose title starts `CROSSCHECK_`, so avatars' figures, `CROSSCHECK_FIGURE_PILOT` ([avatars](../avatars/01-avatars.md#names)), and any later object of ours, never become copies.
+- A copy's tail is the traffic host's `ATC ID`, as FS Copilot's was, with no marker: the sim removed a killed client's objects, so none of ours outlives its core ([log](log.md)).
+
+## What they register
+
+```rust
+// a sketch; the hooks' names follow the platform's units
+pub fn register(r: &mut Registry) {
+    let me = r.unit::<Traffic>("traffic").partly_recorded();
+    me.session_key(traffic::HOST);                            // Anyone, naming a member; the switch claims it
+    me.channel(traffic::IDENTITIES, Traffic::on_identity);    // a stream, recorded
+    me.channel(traffic::STATES, Traffic::on_states);          // Newest and unrecorded
+    me.on_sim(Traffic::on_sim);                               // poll answers, identities, a copy's ID, an exception
+    me.on::<KeyChanged>(Traffic::host);                       // the traffic host changed
+    me.on::<FlightChanged>(Traffic::flight);                  // this pilot entered or left the flight
+    me.on::<SimChanged>(Traffic::sim);                        // a load takes every copy with it
+    me.on::<LinkUp>(Traffic::link_up);                        // the identities whole, and every state again
+    me.setting(setting::RADIUS_KM, 200);
+    me.command(command::LIST_PACKS, Traffic::list_packs);
+}
+
+pub fn register(r: &mut Registry) {
+    let me = r.unit::<AtcAudio>("atc-audio").partly_recorded();
+    me.session_key(atc_audio::HOST);
+    me.channel(atc_audio::FRAMES, AtcAudio::on_frame);        // Deadline and unrecorded
+    me.capture(capture::ATC, AtcAudio::on_captured);          // registered unrecorded
+    me.stream(stream::ATC);
+    me.on::<KeyChanged>(AtcAudio::host);
+    me.setting(setting::ATC_APP, AtcApp::Automatic);
+    me.setting(setting::ATC_VOLUME, 100);
+}
+```
+
+## The traffic host
+
+### Polling
+
+- While this pilot holds traffic's key and is in the flight, traffic polls every 500ms, as FS Copilot did, for `SIMCONNECT_SIMOBJECT_TYPE_AIRCRAFT` and `HELICOPTER` within the radius setting, and for `GROUND` within 1km.
+  At 2Hz FS Copilot's copies moved uniformly, at 1Hz they held now and then at a sample's end, and at 0.5Hz they stalled and ran 2s behind (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Jitter measured, not eyeballed").
+- `poll(type, radius)` is the sim call 6.6 asked this design to add to 6.3's: one `SimConnect_RequestDataOnSimObjectType` for each call, under a request ID of its own, so an answer that arrives after the next poll still names its poll, which FS Copilot had to encode in its request IDs because the answer carries no send ID (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficDefinitions.cs`, `TrafficReq`).
+- A poll is complete once each type's answers reach their `dwoutof`, and an empty answer has `dwoutof` 0.
+  A poll still incomplete after 2s is dropped with no diff, and none starts while one is out, as in FS Copilot (read in `FsCopilot/Simulation/TrafficHost.cs`, `PollTick`).
+- Each answer is stamped by the edge as it reaches the queue, and that stamp, on this core's counter, is the sample's time, since FS Copilot found a sample must be aged from its read, not its send ([traffic report](results/2026-10-17-fsc-traffic-code.txt), point 8).
+- The state the poll reads is FS Copilot's: `PLANE LATITUDE` and `PLANE LONGITUDE` in degrees, `PLANE ALTITUDE` in feet, `PLANE PITCH DEGREES`, `PLANE BANK DEGREES`, and `PLANE HEADING DEGREES TRUE`, `VELOCITY BODY X`, `Y`, and `Z` in feet per second, `ROTATION VELOCITY BODY X`, `Y`, and `Z` in radians per second, `GROUND VELOCITY` in knots, `SIM ON GROUND`, `IS USER SIM`, `GEAR HANDLE POSITION`, `FLAPS HANDLE INDEX`, `LIGHT STROBE ON`, `LIGHT LANDING ON`, `LIGHT TAXI ON`, `LIGHT BEACON ON`, `LIGHT NAV ON`, `NUMBER OF ENGINES`, and `GENERAL ENG COMBUSTION:1` to `:4` (read in `FsCopilot/Simulation/TrafficDefinitions.cs`, `ObjectState`).
+- An object seen for the first time is read once for `TITLE`, `LIVERY NAME`, `ATC ID`, `ATC AIRLINE`, `ATC FLIGHT NUMBER`, and `CATEGORY`, through a `watch` on its object ID with a period of once, which this design adds to 6.3's periods, as FS Copilot read it with `SIMCONNECT_PERIOD_ONCE` (same report, point 1).
+  The object sends nothing until that read answers.
+
+### Which objects the host carries
+
+The traffic host skips, in this order:
+
+1. The pilot's own aircraft, by `IS USER SIM`, and the avatar on foot.
+2. Any object traffic itself created, which exists only on a machine whose pilot was receiving before taking the role, and goes once its removal lands ([which copies it shows](#which-copies-it-shows)).
+3. Any title starting `CROSSCHECK_`.
+4. Any ground object whose title isn't on the allowlist.
+
+The allowlist is a list of title prefixes in traffic's crate, which starts with `ASO_Pushback_` and grows as the build finds others worth carrying, such as GSX's tugs (user, 2026-10-17).
+At EGLL, p10's poll within 5km found 850 ground objects over 10 minutes: 823 of GSX's gate signs and walls, none of which moved, and 27 of the sim's pushback tugs, `ASO_Pushback_White` and `ASO_Pushback_Blue`, pushing AI aircraft ([log](log.md)).
+Each sim that runs GSX makes its own signs, and nothing in an object's variables tells one spawned for the crew's aircraft from one each sim makes itself, so carrying every ground object would show them twice.
+GSX's people report `CATEGORY` `GroundVehicle` too ([avatars log](../avatars/log.md#2026-10-02-a-gsx-person-shows-and-follows-where-we-write-it-and-the-sims-own-people-stay-invisible)), so the allowlist also keeps them out until [ground operations sync](../product/ideas.md#ground-operations-sync), which brings GSX through a plugin.
+Ground objects are polled within 1km because a pushback tug about 5m long spans about 6 pixels at 1km, and about 1 at 5km, on a 1,920-pixel screen with a 90° view (arithmetic).
+
+### The gate
+
+The gate is `object-mirror`'s, and its rules and thresholds are FS Copilot's (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficGate.cs`, `Decide`):
+
+- An object's first sample goes out.
+- A sample goes out when its position moved more than 1e-6° in latitude or longitude, its altitude more than 0.5ft, its heading, pitch, or bank more than 0.1°, its ground speed more than 0.5kt, or its gear more than 0.05, or when its on-ground flag, flaps index, lights, or engines changed.
+- Otherwise it goes out every 5s, which keeps a parked aircraft from going 15s without a sample ([roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)).
+- When a sample goes out after samples held back, the last one held goes first, with its own time, so a receiving machine doesn't spread the first step of a motion across the quiet before it.
+- The sample that ends a run of motion goes out again on the next two polls, since a lost last sample would leave a copy carried 600ms past where it stopped until the next 5s sample (FS Copilot fork, `record/traffic-atc/docs/04-transport.md`, "Delivery per stream").
+- On a capture of 120 aircraft at a gate, the gate sent 22.2% of the samples, and the states came to about 2.5KB/s ([traffic report](results/2026-10-17-fsc-traffic-code.txt), points 5 and 9).
+
+### What goes out
+
+- **An identity:** on traffic's identities stream, the newest value for each object, keyed by the traffic host's object ID: its title, livery, `ATC ID`, airline, flight number, and kind, aircraft, helicopter, or ground object; or that the object has gone, once a complete poll misses it.
+- **States:** on traffic's states channel, `Newest` and unrecorded, in batches of under 1,162 bytes ([sending](../network/01-between-machines.md#sending)), each keyed by its place among its poll's batches.
+  A batch carries a base time, in µs on the traffic host's counter, and each state its object ID, its time in ms after the base, and FS Copilot's fields at FS Copilot's precision: latitude and longitude in 1e-7°, altitude as a 32-bit float in feet, heading, pitch, and bank in 0.01°, ground speed in 0.1kt, the body velocities in 0.1ft/s and the rotation velocities in 0.001rad/s, and a byte each for the flags, gear, flaps, lights, and engines (read in `FsCopilot/Simulation/TrafficPackets.cs`).
+  That's about 45 bytes a state before postcard's varints, so about 25 states to a batch (arithmetic).
+- **On `LinkUp`:** the traffic host sends that member every identity, and marks every object for its 5s sample at the next poll, so a member that comes back or joins gets every copy within about 500ms of its identities.
+- **When this pilot leaves the flight,** traffic stops polling and sends every object as gone.
+  When the key stops naming this pilot, it stops polling, and the receiving machines remove its copies themselves.
+
+## A receiving machine
+
+### Which copies it shows
+
+- A receiving machine keeps each sender's identities apart, and shows the copies of the member traffic's key names, while its own pilot is in the flight ([roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)).
+- It creates a copy once it holds the object's identity, a state, and the traffic host's clock offset from the network ([the heartbeat and clock offsets](../network/02-units.md#the-heartbeat-and-clock-offsets)); a state that comes before its identity waits up to 10s, as FS Copilot's did ([traffic report](results/2026-10-17-fsc-traffic-code.txt), point 2).
+- It removes a copy:
+  - when its identity says it has gone;
+  - after 15s with no state, forgetting its identity, as [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host) has it;
+  - when the key stops naming its sender, the new traffic host's own machine included;
+  - when this pilot leaves the flight.
+- When its sim leaves Flying for a load, it removes every copy and forgets their object IDs, keeping the identities, and creates them again once its pilot is back in the flight; whether the sim keeps a client's AI objects through a load is unmeasured, so a removal the load made already answers with an exception, which traffic logs.
+- It removes each copy with `AIRemoveObject` rather than by closing its connection, since closing has been measured only as a killed client, as avatars removes its figures ([avatars](../avatars/01-avatars.md#the-figures-this-machine-draws)).
+
+### Creating a copy
+
+1. Traffic calls `create_ai` with the identity's title, livery, and `ATC ID` as the tail, at its newest state's position, attitude, and on-ground flag, and its ground speed as the airspeed, which 6.3 carries as `AICreateNonATCAircraft_EX1` for an aircraft or a helicopter and `AICreateSimulatedObject_EX1` for a ground object (read in `FsCopilot/Simulation/TrafficReceiver.cs`, `Create`).
+2. On the copy's object ID, it calls `AIReleaseControl`, then sends `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET` with 1 on that ID, through a `key` naming it, as avatars freezes its figures.
+   Released and frozen, FS Copilot's copies read `IS ... FREEZE ON` back as 1 on all three, and the sim stopped moving them (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Jitter measured, not eyeballed").
+   `AIReleaseControl` failed on every `StaticObject` our probes created, and their freeze held anyway ([SDK and probes report](results/2026-10-17-sdk-and-probes.txt), section B), so traffic logs that exception and goes on.
+3. For an aircraft or a helicopter, it writes the dress, through a `write` on the copy's ID: `GEAR HANDLE POSITION`, `FLAPS HANDLE INDEX`, `LIGHT STROBE`, `LIGHT LANDING`, `LIGHT TAXI`, `LIGHT BEACON`, `LIGHT NAV`, and each engine's `GENERAL ENG COMBUSTION`, and again whenever one changes.
+   A created aircraft comes with its engines running, and a ground object answers each of these with `DATA_ERROR`, so a ground object gets none (read in `FsCopilot/Simulation/TrafficDefinitions.cs`; FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "First visual replay; engines, pushback, ground vehicles").
+
+- A create whose title this sim lacks fails with `CREATE_OBJECT_FAILED` (documented, [SimConnect_AICreateNonATCAircraft_EX1](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/AI_Object/SimConnect_AICreateNonATCAircraft_EX1.htm)), and traffic creates it again, with no livery, as its kind's stand-in: "Asobo PassiveAircraft Citation CJ4" for an aircraft and "Asobo PassiveAircraft Bell 407" for a helicopter (read in `FsCopilot/Simulation/TrafficFallbacks.cs`); whether the Bell 407 stand-in creates on MSFS 2024 is unverified.
+  A ground object has no stand-in, and a stand-in that fails too leaves the copy missing, tried again every 30s, as FS Copilot did.
+- Traffic lists no titles first: the exception decides, because FS Copilot found "a partial title inventory is worse than none", since the stand-in it causes stays ([traffic report](results/2026-10-17-fsc-traffic-code.txt), point 8).
+- The sim refuses a client's objects past 1,000 with `TOO_MANY_OBJECTS` (documented, [SIMCONNECT_EXCEPTION](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_EXCEPTION.htm)), and a copy refused for it counts as missing; p10 counted 142 to 153 aircraft at EGLL ([architecture log](../architecture/log.md)).
+
+### `Traffic`, each frame
+
+- Traffic feeds `Traffic` each batch of states as it arrives, each state with its copy's object ID, its pose, and its time moved onto this core's counter by the traffic host's clock offset, as flight-model sync feeds `Follow` ([flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module)), and an entry for each copy it removes.
+- The slot holds up to 100 entries of about 76 bytes, under the 8,192 bytes of [a routine's slot](../architecture/02-code-map.md#routines-in-our-wasm-module) (arithmetic), and a batch is about 25.
+- Each frame, for each copy, `Traffic` asks the playout for its pose at `Frame::now` less 1s, and writes the six `A:PLANE` variables and the six velocities through `fsVarsAVarSet` on the copy's ID, as `Figure` places a figure ([avatars](../avatars/01-avatars.md#figure-each-frame)).
+- The playout is FS Copilot's, on a fixed delay rather than one that follows the samples' spacing (read in `FsCopilot/Simulation/TrafficInterpolator.cs`):
+  - between two samples, the position moves along the line between them, and each angle turns the short way round;
+  - past the newest, the copy carries along the last two samples' line for up to 600ms, then holds;
+  - a sample at or before the newest is dropped, so a repeated stop costs nothing;
+  - a copy whose pose hasn't changed since its last write isn't written, so a parked copy costs no writes.
+- `Traffic` drops a copy 15s after its newest sample, as traffic does, so a removal it missed stops its writes.
+- Traffic ends `Traffic` once it holds no copy, and feeds it again with the next.
+- **Why here:** the sim draws a frozen object only where it's written, so a copy must be written every frame: written at 20Hz into a sim at about 33 fps, FS Copilot's copies scored 1.65 on its jitter measure, against 0.17 written on each `Frame` event (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Jitter measured, not eyeballed").
+  `Traffic` writes inside the sim's frame, where SimConnect's writes from outside put a seat object about 2.3m behind a flying aircraft and our module's held it ([avatars log](../avatars/log.md#2026-10-03-writes-from-outside-the-sim-place-an-object-in-a-moving-cockpit-but-cant-hold-it-still)).
+  Through the loop, 130 copies at 60 fps would be 7,800 SimConnect calls a second, each a `Frame` event's round trip through the queue, the loop, and the edge (arithmetic).
+- **Why 1s:** FS Copilot's playout delay settled at its samples' spacing plus 200ms, about 700ms at 2Hz, measured from their arrival (read in `TrafficInterpolator.cs`, `Push`), while `Traffic` places each sample by when the traffic host read it, so its delay also covers the trip, whose 99th percentile reached 534ms through a far relay at 3% loss ([the relays](../network/01-between-machines.md#the-relays)).
+
+### Notices
+
+Traffic raises two notices on a receiving machine while another member holds its key and this pilot is in the flight; their words and where they show are [6.16](../architecture/plan.md#616-the-apps)'s:
+
+- **Aircraft that aren't the traffic host's:** every 10s, traffic polls `AIRCRAFT` and `HELICOPTER` within 200km for `IS USER SIM` alone, and counts the objects that are neither this pilot's aircraft nor its copies, as FS Copilot's receiver counted (read in `FsCopilot/Simulation/TrafficReceiver.cs`, `ForeignPoll`).
+  Two counts in a row above 0 raise the notice, with the count and the traffic host's name, so a copy created between a sweep and its answer doesn't, and a count of 0 clears it.
+  It covers the sim's own AI traffic and any injector running on this machine; whether multiplayer's other pilots show as objects it counts is unverified.
+- **Copies missing or shown as stand-ins:** the count of the traffic host's objects this machine shows as a stand-in or not at all, with the traffic host's name, raised while it's above 0.
+  Two groups of FS Copilot's testers flew with airliners missing because their traffic packs differed (from our experience with FS Copilot), and a stand-in is the same mismatch caught one step later.
+
+## Traffic packs
+
+- When a page sends traffic's `LIST_PACKS` command, traffic runs a job that lists the folders in each package folder the session crate's job reads ([the match check](../session/02-units.md#the-match-check)), keeps each whose name a known traffic pack matches, reads its `manifest.json`'s `package_version`, and puts the list in traffic's slice (user, 2026-10-17).
+  A streamed pack keeps no manifest on disk, so it shows with no version.
+- The known traffic packs are a list in traffic's crate, each a folder name or a prefix of one, which starts with `fsltl-traffic-base`, the one on our development machine (read on 2026-10-17), and grows as the build confirms others' folder names, such as AIG's.
+- The job reads folder names and manifests alone, where finding the package each of the traffic host's titles comes from would read every `aircraft.cfg` and `livery.cfg`: 2,690 files in our development machine's Community folder, 2,551 of them in `fsltl-traffic-base` (read on 2026-10-17).
+- The command and the job's answer, names and versions, are recorded, and nothing outside traffic reads the slice, so a replay that drifts there spreads nothing.
+- How a page shows the list, and whether it shows the crew's lists beside this machine's, is open (user, 2026-10-17); showing the crew's adds an ask and an answer between the cores on a channel of traffic's.
+
+## The object-mirror engine
+
+```rust
+// a sketch
+pub struct Gate<S: Sample> { /* each object's last sent sample, held sample, repeats, and heartbeat */ }
+impl<S: Sample> Gate<S> {
+    pub fn decide(&mut self, object: u32, sample: S, at: u64) -> Sends<S>;   // nothing, or a held sample and this one
+    pub fn heartbeat_all(&mut self);                                       // every object's next sample goes out
+}
+
+pub struct Playout<P: Pose> { /* each object's recent samples */ }
+impl<P: Pose> Playout<P> {
+    pub fn push(&mut self, object: u32, at: u64, pose: P) -> bool;         // false for a sample at or before the newest
+    pub fn at(&mut self, object: u32, t: u64) -> Option<P>;                // None when unchanged since the last call
+}
+```
+
+- It reads no clock and does no I/O, and builds for x86_64 in the core and for wasm32 in `Traffic`.
+- It's generic over the sample and the pose, so a later plugin's object mirroring, such as GSX's vehicles ([room for later](../product/04-room-for-later.md#channels)), runs the same gate and playout; how a plugin mirrors objects, and claims them so traffic skips them, is [6.15](../architecture/plan.md#615-plugins)'s.
+
+## ATC audio
+
+### The ATC host
+
+- While this pilot holds ATC audio's key and a session runs, in the flight or not, ATC audio turns its capture on with the ATC app setting's programs, 24 kbps, a gate at −50dBFS, and a hangover of 300ms, FS Copilot's values, which 6.5 made the starting ones ([capturing a program](../core/04-core-helper.md#capturing-a-program)).
+- The ATC app setting is Automatic or one program's name, which the pilot picks from the core helper's list of programs that own an audio session.
+  Automatic is the list `BeyondATC` and `SayIntentionsAI`, the process names of BeyondATC's and SayIntentions' programs on our development machine (read on 2026-10-17, from their Start menu shortcuts).
+  The helper captures the first on the list that's running, looking every 2s, so a capture names a list where 6.5's names one program.
+  SayIntentions works through FS Copilot's capture (reported by the user, 2026-10-17), whose automatic list named it `SayIntentions`, which never matches its process ([log](log.md)).
+  Other ATC apps join the list once their program names are confirmed: FS Copilot's list also named `Pilot2ATC`, `PF3`, `FSHud`, and `VoxATC`, which nobody has checked.
+- The helper reports which program it captures, or that it's waiting for one, and whether the Windows mixer mutes it, since a muted session reaches the capture as silence, which FS Copilot reported to its host rather than compensated (read in the FS Copilot fork, `FsCopilot/Audio/AtcCapture.cs`, `ReadMixer`).
+- Each captured frame goes to the crew on ATC audio's frames channel, `Deadline` and unrecorded: its number, counting the frames sent since the capture turned on, so silence takes no numbers; its stamp, the helper's counter value for its first sample on this core's timeline ([capturing a program](../core/04-core-helper.md#capturing-a-program)); and its Opus bytes.
+- A frame's deadline is its stamp plus 300ms, the delay at which a readback on Discord overtakes the call ([hearing ATC](../product/03-v1-scope.md#hearing-atc)), so a frame still in this core's queue then is dropped.
+
+### Every other machine
+
+- While another member holds ATC audio's key and a session runs, ATC audio opens the helper's playback stream with the buffer's rule and the ATC volume, and hands it each frame from that member with its number and stamp; a frame from anyone else is dropped.
+- When the key moves, it closes the stream and opens one for the new ATC host, with a fresh decoder and buffer, as FS Copilot's receiver did ([ATC report](results/2026-10-17-fsc-atc-code.txt), point 8).
+- The ATC volume setting runs from 0 to 100%, 100% at first, and sets the stream's gain, because the helper mixes ATC and every feature's sounds into one output stream ([inside the helper](../core/04-core-helper.md#inside-the-helper)), so the Windows mixer can't turn ATC down alone.
+
+### The buffer
+
+- A transmission is a run of frames whose stamps sit 20ms apart: a number missing inside it is a lost frame, which the codec conceals, and a stamp later than the numbers account for by more than 10ms starts a new transmission, since the gate's silence takes no numbers.
+- The helper holds a transmission's first frame for the depth, then plays a frame each 20ms by number; a frame that arrives after its turn is dropped and concealed, and the transmission ends when its frames run out.
+- At each transmission's first frame, the helper sets the depth to the smallest that would have played 98% of the last 10s of frames on time, each frame's lateness measured from its transmission's first frame plus 20ms for each frame since, between 60ms and 300ms, and 60ms with nothing heard yet.
+- The depth changes only between transmissions, so no word stretches, where adapting within one would have to stretch speech, as WebRTC's NetEq does (unverified).
+- At 3% loss through a relay 97ms to 131ms from the sender, 6% to 11% of frames came more than 170ms late ([the relays](../network/01-between-machines.md#the-relays)), so FS Copilot's fixed 60ms would conceal at least that many, where a depth that rises to 300ms conceals the worst 1%, which came 337ms to 534ms late.
+- A transmission that runs for minutes, such as an ATIS, keeps one depth throughout, and the drift between the ATC host's clock and this machine's output device stays a few ms a minute (unverified).
+- At each transmission's end the helper reports its frames played, concealed, and dropped late, and its depth, which the recording keeps, so friends' sessions tune the buffer's limits that [01-between-machines](../network/01-between-machines.md#left-open) leaves to v1's recordings, while the frames themselves aren't recorded.
+
+## Settings
+
+| Setting | Unit | Default |
+| --- | --- | --- |
+| Traffic's radius, up to the SDK's 200km cap ([SimConnect_RequestDataOnSimObjectType](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_RequestDataOnSimObjectType.htm)) | `traffic` | 200km |
+| The ATC app | `atc-audio` | Automatic |
+| The ATC volume | `atc-audio` | 100% |
+
+Where each shows is [6.16](../architecture/plan.md#616-the-apps)'s.
+
+## v1-scope's open questions
+
+| Open question | This design |
+| --- | --- |
+| Whether Crosscheck can tell that a pushback started in a following machine's sim ([traffic sync](../product/03-v1-scope.md#traffic-sync)) | It doesn't try in v1: the rule has that pilot take control first, and a PM who forgets sees nothing move (user, 2026-10-17) |
+| Whether traffic sync carries the sim's own pushback tug | Partly: the sim's tugs pushing AI aircraft are `ASO_Pushback_` objects the poll finds ([log](log.md)), which the allowlist carries; whether the tug of a pilot's own pushback is one is a [check in the sim](#cases-for-the-bench) |
+| Whether the traffic host is chosen by hand | Settled before this design, by hand ([roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)) |
+| How Crosscheck detects traffic packs, injectors, and multiplayer | Traffic packs by a list of known folders, on demand ([traffic packs](#traffic-packs)); injectors and the sim's own AI traffic by the count of aircraft that aren't the traffic host's ([notices](#notices)); multiplayer only if its pilots show in that count, unverified |
+| Whether Crosscheck can hide another source's traffic | It doesn't: the notice asks the pilot to turn that source off |
+| How our copies compare with BeyondATC's updated traffic | The build's stage for traffic, by FS Copilot's jitter measure |
+| Which ATC apps besides BeyondATC capture cleanly ([hearing ATC](../product/03-v1-scope.md#hearing-atc)) | SayIntentions, by the user's reports; others as they're tried |
+
+[Hearing ATC](../product/03-v1-scope.md#hearing-atc)'s other open questions stay as they were: whether capture works on Windows 10, which 6.5 left open; two hosts, which v1 leaves out; and Windows' default device, which 6.5 settled.
+
+## What this changes elsewhere
+
+The notes at the top of [03-v1-scope](../product/03-v1-scope.md), [the code map](../architecture/02-code-map.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [04-core-helper](../core/04-core-helper.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [the session's units](../session/02-units.md), and [01-roles-and-members](../session/01-roles-and-members.md) list what this design changes there, and [tentative decisions](../architecture/decisions.md#traffic-polls-twice-a-second-and-a-receiving-machine-draws-each-frozen-copy-every-frame-from-a-routine-of-traffics-1s-behind) give the reasons.
+
+## Budgets
+
+Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s bench measures, beside the code map's [budgets](../architecture/02-code-map.md#budgets) and [budgets for work in the sim](../architecture/02-code-map.md#budgets-for-work-in-the-sim).
+
+| What | Budget |
+| --- | --- |
+| A poll's answers on the loop | Each within a handler's 1ms, at the 291 aircraft records a second p10 read at EGLL ([architecture log](../architecture/log.md)) and its ground objects within 1km |
+| `Traffic` | Under 0.1ms a frame at p99 with 25 moving copies, beside the module's 0.1ms for its other routines, which this raises; FS Copilot's captures had up to 22 moving at once ([traffic report](results/2026-10-17-fsc-traffic-code.txt), point 9) |
+| The sim's frame on a receiving machine | What the same objects cost the traffic host: in FS Copilot's measure, 44.7 fps with none, 38.0 with BeyondATC's 73, and 32.5 with 132 copies (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Baseline: BeyondATC's own traffic scores 0.56") |
+| Traffic between machines | About 2.5KB/s for 120 aircraft ([the gate](#the-gate)) |
+| ATC audio between machines | About 3KB/s while ATC talks ([04-core-helper](../core/04-core-helper.md#what-runs-where)) |
+| ATC from the app to the crew | About 130ms, FS Copilot's measure with its 60ms buffer, plus the network and any depth past 60ms (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "Stage 3: the audio path works on one machine") |
+| Creating 150 copies at a join | Under 1s, at p08's 5.5ms from a create to its object ID ([SDK and probes report](results/2026-10-17-sdk-and-probes.txt), section B) |
+
+## Cases for the bench
+
+[Node 7](../architecture/plan.md#7-testing) turns each into a test, with two cores, the stand-in sim, a stand-in core helper, and the routine host built natively:
+
+- The traffic host's poll answers 130 aircraft and, within 1km, 700 GSX signs and 20 `ASO_Pushback_White` tugs: identities go out for the aircraft and the tugs alone.
+- A parked aircraft's state goes out every 5s; an aircraft that starts to move sends its held sample first, then each poll's; its stop goes out on three polls, and the receiving machine draws it stopped once.
+- A poll whose answers aren't whole after 2s: dropped, and nothing goes as gone.
+- A title starting `CROSSCHECK_`: never carried.
+- A receiving pilot who takes the role: their copies are removed, and their poll carries none of them meanwhile.
+- `LinkUp`: that member gets every identity, and every copy appears within 500ms.
+- A state before its identity: kept up to 10s, and the copy created when the identity comes.
+- A create that throws `CREATE_OBJECT_FAILED`: the stand-in; the stand-in throwing too: missing, the notice counts it, and the create runs again 30s later.
+- A copy with no state for 15s: removed, its identity forgotten, and back only on its identity again.
+- The key moving to another member: every copy of the old traffic host's removed on every machine.
+- The receiving pilot leaving the flight, and a flight load on their machine: every copy removed, and created again once they're back in the flight.
+- Two feeds within one module frame: `Traffic` takes both.
+- `Traffic` drawing samples 500ms apart: no hold at a sample's end; a copy past its newest sample carried 600ms, then held; a parked copy not written.
+- 40 aircraft in the receiving machine's sim that aren't copies, over two sweeps: the notice; the copies alone: none.
+- `LIST_PACKS` with `fsltl-traffic-base` in Community: the list names it with its manifest's version.
+- A capture listing `BeyondATC` then `SayIntentionsAI` with only SayIntentions running: it captures `SayIntentionsAI`.
+- Frames with 80ms ± 30ms of jitter: the depth settles at their 98th percentile; a frame later than its turn is dropped and concealed; a missing number whose stamp gap matches is concealed; a stamp gap with consecutive numbers starts a new transmission.
+- ATC audio's key moving: the old stream closed, a new one open, and the old ATC host's frames dropped.
+
+In the sim:
+
+- `Traffic`'s copies move as smoothly as FS Copilot's, 0.17 on its jitter measure, taxiing, pushing back, and in flight, which ends the build's stage for traffic.
+- `fsVarsAVarSet` holds a frozen AI aircraft's pose, which p12 measured only for `Marshaller_Stick`, a marshaller's wand (read in `experiments/areas/avatars/p12-wasm.mjs`, `STAND_IN`).
+- The copies show on TCAS ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+- Whether a client's AI objects survive a flight load.
+- Whether the tug of a pilot's own pushback, through `K:TOGGLE_PUSHBACK`, is an object the `GROUND` poll finds, titled `ASO_Pushback_`.
+- Whether multiplayer's other pilots show in the count of aircraft that aren't the traffic host's.
+- Whether "Asobo PassiveAircraft Bell 407" creates as the helicopter stand-in.
+- Whether the helper captures `SayIntentionsAI.exe`'s speech.
+
+## Known limits
+
+- Copies are frozen, so the sim doesn't hold them to the ground, and a receiving pilot with other scenery sees them float or sink ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+- A receiving pilot who runs an ATC app of their own hears two ATCs, since nothing finds one on a receiving machine.
+- GSX's vehicles and people, and any ground object off the allowlist, show only on the machine that runs them, until ground operations sync.
+- An AI aircraft's copy pushes back with no tug wherever its tug's title isn't on the allowlist.
+
+## Left open
+
+- The traffic packs beyond `fsltl-traffic-base`, the ground objects beyond `ASO_Pushback_`, and the ATC apps beyond `BeyondATC` and `SayIntentionsAI`: the build, as each is confirmed.
+- How a page shows the traffic packs, and whether it shows the crew's: the user's, with [6.16](../architecture/plan.md#616-the-apps) (user, 2026-10-17).

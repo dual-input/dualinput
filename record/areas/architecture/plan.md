@@ -723,6 +723,7 @@ It reads 03-v1-scope's [pointer sync](../product/03-v1-scope.md#pointer-sync), 6
 It settles the spine's open item on which clock the panel bridge measures a span on ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/pointer-sync/01-pointer-sync.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-17.
 Raised elsewhere: by 6.9, state sync has a panel module too, `h-events`, so pointer sync isn't v1's one feature with a panel module; pointer sync's press kind answers `Unfinished(handle)` until its panel has played the press through to its release, then calls `cx.cockpit().applied(handle)`, and `Skipped` while the cockpit stream's catch-up runs or for a display whose panel hasn't announced itself, reading the stream's state ([the sync units](../sync/05-units.md#kinds)).
 Raised elsewhere: by 6.10, no v1 unit waits on how far the core's arrival stamp trails a page's read, since a page that times something sends a span, as pointer sync's presses do, so pointer sync times nothing by a press's arrival ([flight-model sync](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)).
 

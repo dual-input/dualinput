@@ -17,7 +17,7 @@ Here a pose is the aircraft's position and attitude.
 
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
-| `flight-model` | Feature | On the flying machine, each report turned into a sample, and the last one, for a pause; on a following machine, the newest stamp it took, the clock offset it applies, and `Follow`'s feeds | Its crate in the core, and the routines `Lead` and `Follow` in our WASM module |
+| `flight-model` | Feature | On the flying machine, the last sample it sent, which it sends again through a pause; on a following machine, the newest stamp it took, the clock offset it applies, and `Follow`'s feeds | Its crate in the core, and the routines `Lead` and `Follow` in our WASM module |
 
 It depends on the network for its channel and each sender's offset, on the session for control and who is in the flight, and on the sim service for its routines and the flying sim's pause.
 It registers as partly recorded, with `Lead`'s reports and its samples' channel unrecorded ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
@@ -61,7 +61,8 @@ pub struct Snapshot {
   With the surfaces, brakes, stamp, and generation, a sample comes to under 90 bytes (arithmetic).
 - The surfaces and brakes are the yoke, rudder, and toe brakes that [channels](../network/01-between-machines.md#channels) puts in the sample.
   The SDK calls `A:AILERON POSITION` the "aileron input" ([control variables](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Aircraft_SimVars/Aircraft_Control_Variables.htm)), and on the 58P each surface variable read its axis event's value negated, through the six phases of our masking probe's first run (measured on MSFS 2024, 2026-10-01, [p01's result](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-28-54.txt)).
-  So a surface sent back negated repeats the PF's input, and the following aircraft moves its own yoke from it, where `A:YOKE X POSITION`, the aileron yoke's own variable, read 6/25 of the aileron's value at small deflections in the same run.
+  So a surface sent back negated repeats the PF's input, and the following aircraft moves its own yoke from it.
+  The yoke's own variables are the aircraft's response, not its input: `A:YOKE X POSITION` read 6/25 of `A:AILERON POSITION` at small deflections in the same run.
 - A sample carries its control value's generation and not its PF, since only the flying machine sends samples and the network hands each message to its handler with its sender's pilot ID ([channels and sends](../network/02-units.md#channels-and-sends)), which saves the 16 bytes of a pilot ID in every sample.
 
 ## The flying machine
@@ -90,7 +91,8 @@ impl Routine for Lead {
   Read through SimConnect instead and stamped as it arrived, an `L:` variable our module set in the frame of a slot's write trailed that slot by 1.14ms at least, 2.90ms at the 99th percentile, and once by 193ms (measured on MSFS 2024, 2026-10-09, [architecture log][flight]), which at 150 kt would put that sample 15m off its path (arithmetic).
   The core would also take a read each sim frame, about 89 a second if the frames came as the module's updates did in that run (inference), rather than 20.
 - On each report, flight-model sync builds a sample with the session's control generation and sends it `To::Crew`.
-- While the flying sim is paused, `Pause_EX1` not 0 ([what the platform's connection holds](../core/03-sim-seam-and-wasm-module.md#what-the-platforms-connection-holds)), and no report has gone for 100ms, flight-model sync sends the last sample again every 50ms, each stamped 50ms after the one before, so a following machine draws the aircraft standing still rather than carrying it on.
+- While the flying sim is paused, `Pause_EX1` not 0 ([what the platform's connection holds](../core/03-sim-seam-and-wasm-module.md#what-the-platforms-connection-holds)), flight-model sync sends the last sample again every 50ms once no report has gone for 100ms.
+  Each repeat is stamped 50ms after the one before, so a following machine draws the aircraft standing still rather than carrying it on.
   That works whether or not the module's update runs in a pause, which is unmeasured ([when the module stops](../architecture/02-code-map.md#when-the-module-stops)).
 - A load needs nothing of its own: a PF who loads a flight leaves the flight, and control passes ([control](../session/02-units.md#control)).
 
@@ -102,11 +104,11 @@ Our WASM module keeps an estimate of the core's counter, and `Frame::now` is tha
 - The module reads WASI's monotonic clock as `SimConnect_CallDispatch` returns in each update, and the routine host takes, for each header that update delivered, the core's counter less that clock.
   The largest since the module started is its offset, and `Frame::now` is its clock plus that offset.
 - Every write reached the module after it was made, so the offset grows toward the true one and never passes it, short by the shortest delay from a write to the module's read; that shortfall moves every stamp alike, which neither `Lead`'s stamps nor `Follow`'s drawing can see.
-- WASI's monotonic clock counts `QueryPerformanceCounter`'s ticks: one constant offset fit all 1,476 of a flight's echoes over 299s, any drift within ±33 ppm (measured on MSFS 2024, 2026-10-09, [architecture log][flight]), so the offset holds through a run of the module, through a flight load with no header among it.
+- WASI's monotonic clock counts `QueryPerformanceCounter`'s ticks: one constant offset fit all 1,476 of a flight's echoes over 299s, any drift within ±33 ppm (measured on MSFS 2024, 2026-10-09, [architecture log][flight]), so the offset holds for the whole run of the module, through a flight load in which no header arrives.
 - Which event sets that clock's 0 changes nothing: a module that starts again, as `module_init` may after sign-in ([left open](../core/03-sim-seam-and-wasm-module.md#left-open)), starts its offset again from the next header, and a routine runs only from its first feed, whose header brings one.
 
 This settles the spine's item on the module's clock ([left open](../architecture/01-spine.md#left-open)).
-Its other item, how far the core's arrival stamp trails a page's read, is one no v1 unit waits on: a page that times something sends the span ([times](../architecture/01-spine.md#times)), as pointer sync's presses do, and `h-events` matches an `H:` event against a token that lasts 1s ([its own echo](../sync/05-units.md#its-own-echo)).
+The spine's other item, how far the core's arrival stamp trails a page's read, is one no v1 unit waits on: a page that times something sends the span ([times](../architecture/01-spine.md#times)), as pointer sync's presses do, and `h-events` matches an `H:` event against a token that lasts 1s ([its own echo](../sync/05-units.md#its-own-echo)).
 
 ## The following machine
 
@@ -165,11 +167,12 @@ impl Routine for Follow {
 - In a standard-rate turn at 150 kt, 2s of carrying strays about 8m from the path (arithmetic).
   Carrying along the line through two samples keeps a raised simulation rate, where carrying on the velocities would leave the aircraft behind.
 - When a sample is old enough to draw from again, `Follow` takes the difference between what it last wrote and the drawn pose as a correction, adds it to each pose it writes, and shrinks it to nothing over 3s, so the aircraft eases back rather than jumping.
-- A correction of more than 1km, after a long gap or at `Follow`'s start, is none: `Follow` writes the drawn pose at once, since easing 1km in 3s would slide the aircraft far faster than it flies.
+- When a correction would be more than 1km, after a long gap or at `Follow`'s start, `Follow` writes the drawn pose at once instead, since easing 1km in 3s would slide the aircraft far faster than it flies.
 
 ### Its first frames
 
-- In its first frame, `Follow` reads its aircraft's own pose, `A:VELOCITY WORLD X`, `Y`, and `Z`, as FS Copilot reads the first two (read in the FS Copilot fork, `FsCopilot/Simulation/Physics.cs`), and `E:SIMULATION RATE`, and carries that motion, at that velocity times the rate, until a sample is old enough to draw from, then eases in over 3s, as after a gap.
+- In its first frame, `Follow` reads its aircraft's own pose, `A:VELOCITY WORLD X`, `Y`, and `Z`, and `E:SIMULATION RATE`; FS Copilot reads the first two velocities (read in the FS Copilot fork, `FsCopilot/Simulation/Physics.cs`).
+  It carries that motion, at the velocity times the rate, until a sample is old enough to draw from, then eases in over 3s, as after a gap.
   The rate is there because a raised rate moves the aircraft that many times faster than its velocity (unverified).
 - So a joiner on a runway whose PF is airborne is written at the PF's pose at once, and one whose aircraft loaded at the PF's stand eases to the PF's spot.
 - At a handover, the ex-PF's aircraft, which has been flying itself, flies on for 0.4s, then eases about 62m back over 3s, slowing to about three-quarters of its speed at 150 kt, since the new PF's aircraft was drawn 0.4s behind (arithmetic).

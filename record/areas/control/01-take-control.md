@@ -37,13 +37,13 @@ pub fn register(r: &mut Registry) {
     me.sound(sound::CONTROL_PASSED, include_bytes!("sounds/control-passed.opus"));
     me.sound(sound::REFUSED, include_bytes!("sounds/refused.opus"));
     me.on::<ControlPassed>(TakeControl::passed);
-    me.on::<SessionStarted>(TakeControl::watch_binding);
-    me.on::<SessionEnded>(TakeControl::unwatch_binding);
+    me.on::<SessionStarted>(TakeControl::start);                  // its sounds and its binding on
+    me.on::<SessionEnded>(TakeControl::stop);                     // both off
 }
 ```
 
-It watches its binding from `SessionStarted` to `SessionEnded`, with or without an input set.
-A watched binding is a want that's on, so the core helper runs through the session, and the cues play for a pilot who takes control from the buttons alone ([the helper's life](../core/04-core-helper.md#the-helpers-life)).
+From `SessionStarted` to `SessionEnded`, take-control turns on its sounds, a want of their own, so the core helper runs through the session and the cues play for a pilot who takes control from the buttons alone ([the helper's life](../core/04-core-helper.md#the-helpers-life)).
+It turns on its binding over the same span, while an input is set.
 
 ## The binding
 

@@ -735,6 +735,7 @@ It reads 03-v1-scope's [take-control key](../product/03-v1-scope.md#take-control
 The voice phrases left v1 for Soon on 2026-10-17 (user), so the spine's open item on telling speech from noise goes to that pick, and the [control log](../control/log.md) holds the research it starts from.
 Its answer goes in `record/areas/control/01-take-control.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-17.
 Raised elsewhere: by 6.5, take-control registers its binding by its setting's key and gets each press and release with the helper's stamp, so it times a long press itself; the next press crosses while the desktop app binds the key, named for showing; voice registers its phrases and gets each heard phrase's index with when it began and ended; the detector and the recognizer fill one trait inside `apps/core-helper`, so the microphone's audio never leaves the helper, and they hear nothing while a sound of ours plays; and the cues and recorded lines are Ogg Opus files in each feature's crate ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
 Raised elsewhere: by 6.7, the take-control key and button and the voice handover's answer each ask the session crate's `TakeControl`, built as this pilot taking control now, whose verdict the apps show, and the cues play on `ControlPassed` ([the session's units](../session/02-units.md#control)).
 

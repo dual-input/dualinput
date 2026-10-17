@@ -20,6 +20,13 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > - `key` sends with SimConnect's legacy call when the event carries one value or none, and with `_EX1` only when it carries more, where [what a feature calls](#what-a-feature-calls) always sends `_EX1`.
 > - The sim service gains `listen(event)`, which maps the event, adds it to a group that never masks, and gives the group the highest priority.
 > - State sync fires `H:` events from a routine of its own, `HEvents`, and the routine host carries that want with `fsEventsRegisterHEvent` and `fsEventsHEventCall`, a row [wants and the sim's APIs](#wants-and-the-sims-apis) lacks, which settles what a feature calls' line on `H:` events ([`H:` events](../sync/05-units.md#h-events)).
+>
+> Since 2026-10-17, [flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module) changes this document in four places:
+>
+> - A routine slot's header also carries the core's counter at the write, in µs, after the slots hash in [its slots](#its-slots), and the routine host's `Frame::now` is WASI's monotonic clock plus the largest gap between that counter and the clock over the last 60s, where the module reads that clock only to count its status slot's seconds.
+> - The module also creates a report slot, `CROSSCHECK_REPORT_` and the routine's ID, read-only, for each routine that reports, and a feature requests it through `cx.module().reports(routine)`, beside the calls in [what a feature calls](#what-a-feature-calls), which a partly recorded unit may declare `.unrecorded()`.
+> - [Wants and the sim's APIs](#wants-and-the-sims-apis) gains a report, through `SimConnect_SetClientData` on the module's own connection, and events with values, through `fsEventsTriggerKeyEvent` with its values.
+> - The sketch in [what a feature calls](#what-a-feature-calls) has flight-model sync watch the pose each sim frame once a profile loads; it feeds its routine `Lead` instead, which reads the pose in the module, and loads no profile.
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

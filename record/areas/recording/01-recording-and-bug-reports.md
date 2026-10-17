@@ -8,6 +8,8 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 
 > **Note**
 > Since 2026-10-16, a bug report also carries the text of a local bundle its run loaded, since a published one stays on Pages under its hash, and the profile loader tells the recording crate each loaded bundle's hash and whether it's local; the recording holds the loaded profile as the decoded result of the job that read it ([in the recording](../profiles/02-units.md#in-the-recording)).
+>
+> Since 2026-10-17, flight-model sync's unrecorded sim call is its request for `Lead`'s reports, which come about 20 times a second on the flying machine, where [unrecorded inputs](#unrecorded-inputs) has it read the pose every sim frame ([flight-model sync](../flight-model/01-flight-model-sync.md#the-flying-machine)).
 
 A recording is a replay log of the core's inputs, less the high-rate samples a feature marks as unrecorded, such as traffic's positions and the flight model's, so their bytes never reach the disk while the events around them do.
 A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform's, and the features state sync, pointer sync, take-control, voice, rate and pause, and Go to.

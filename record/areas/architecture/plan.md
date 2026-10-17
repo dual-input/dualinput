@@ -723,6 +723,7 @@ It settles the spine's open item on which clock the panel bridge measures a span
 Its answer goes in `record/areas/pointer-sync/01-pointer-sync.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.9, state sync has a panel module too, `h-events`, so pointer sync isn't v1's one feature with a panel module; pointer sync's press kind answers `Pending` until its panel has played the press through to its release, then calls `cx.cockpit().applied`, and `Skipped` while the cockpit stream's catch-up runs or for a display whose panel hasn't announced itself, reading the stream's state ([the sync units](../sync/05-units.md#kinds)).
+Raised elsewhere: by 6.10, no v1 unit waits on how far the core's arrival stamp trails a page's read, since a page that times something sends a span, as pointer sync's presses do, so pointer sync times nothing by a press's arrival ([flight-model sync](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)).
 
 ## 6.12 Control
 
@@ -745,6 +746,7 @@ Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.3, the figure's SimObject title, `CROSSCHECK_Figure`, takes a kind, as [names the sim shares](02-code-map.md#names-the-sim-shares) requires.
 Raised elsewhere: by 6.5, avatars turns the mouse on with the sim's process ID, read from sim awareness, and gets the left and right buttons' presses and releases and at most one move every 16ms while the left is held, each with the cursor's place in the sim's main window and the window's size, only while that window itself is in front, so a click in a popped-out display crosses nothing ([04-core-helper](../core/04-core-helper.md#raw-input)).
 Raised elsewhere: by 6.6, avatars registers as partly recorded and declares its camera read every frame, its `Frame` events, its poses' channel, and its job that reads an aircraft's models unrecorded, while the figure's create answer and the core helper's clicks stay recorded; it may register no guard, catch-up step, or cockpit kind, and turns the mouse want on or off only on a recorded input ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+Raised elsewhere: by 6.10, a routine's `Frame::now` is the routine host's estimate of the core's counter, so `Figure` can draw another pilot's poses, stamped on that pilot's counter and moved onto this core's by the network's offset, without the core estimating the module's clock; and a routine can report a struct to its feature through a report slot ([flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module)).
 
 ## 6.14 Traffic and ATC
 
@@ -818,6 +820,7 @@ Raised elsewhere: by 6.2, how the build gets the sim's stock `VCockpit.js` after
 Raised elsewhere: by 6.4, the network crate compiles each release's default relay list from `relays/relays.toml`, and CI runs the backend's tests against a local D1 ([02-units](../network/02-units.md#the-relays)).
 Raised elsewhere: by 6.8, the profile builder program's name and how authors get it; its `typescript.js`, TypeScript 6.0.3, pinned in the builder; CI's profiles job, which runs on each merge that changes `profiles/` or either profile engine and on each release, reads which levels are released from the release tags, and commits to a `pages` branch holding `.nojekyll` that never loses a file; and that the core builds no bundle, so CI's reason for Windows runners of building bundles as the core does falls away ([the profiles' units](../profiles/02-units.md#publishing)).
 Raised elsewhere: by 6.9, state sync's routine crate, `HEvents`, goes in the module's list, and its panel module, `h-events`, builds into `/Crosscheck/modules/`; the module's bindgen reads `MSFS_Events.h` for `fsEventsRegisterHEvent` and `fsEventsHEventCall` ([the sync units](../sync/05-units.md#h-events)).
+Raised elsewhere: by 6.10, flight-model sync's routine crate `Lead` joins the module's list beside `Follow`, and the module creates its report slot, `CROSSCHECK_REPORT_LEAD` ([flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module)).
 
 ## 7 Testing
 

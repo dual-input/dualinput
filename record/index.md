@@ -9,6 +9,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/flight-controls/log.md](areas/flight-controls/log.md): what our experiments found about keeping a pilot's own flight controls out of the sim by masking key events.
 - [areas/environment/log.md](areas/environment/log.md): what our experiments found about the sim's pause, simulation rate, and time of day, and setting them from SimConnect.
 - [areas/flight-model/log.md](areas/flight-model/log.md): what our experiments found about a following machine setting a frozen aircraft from the flying machine's values, on the Black Square Baron 58P.
+- [areas/flight-model/01-flight-model-sync.md](areas/flight-model/01-flight-model-sync.md): how the flying machine's pose, velocities, and flight controls reach each following machine's aircraft, on which clock each sample is stamped, and how a following machine draws the aircraft through a gap, a pause, and a handover.
 - [areas/interface/log.md](areas/interface/log.md): what our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner, and reaching the sim's menu to set the world map.
 - [areas/network/log.md](areas/network/log.md): what we found about connecting the crew's machines, directly or through our relay.
 - [areas/network/01-between-machines.md](areas/network/01-between-machines.md): how a session's cores reach each other through iroh, our relays, and the backend, and how each channel travels between them.

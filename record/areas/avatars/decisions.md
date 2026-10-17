@@ -5,7 +5,7 @@ Avatar sync's design, [01-avatars](01-avatars.md), confirms each one or changes 
 p25 drove our figure, `CROSSCHECK_Figure`, in the Baron's right seat by the decisions below, parked and in flight, while our test pilot clicked from the left seat ([log](log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
 It cast from `SimConnect_CameraGet`'s `SIMOBJECT` referential and never left the cockpit, so the `WORLD` ray, the fresh cast for drags outside, and the reach of up to 3m on foot haven't run on the figure.
 The findings are in [the avatars log](log.md), and the questions still open are in the idea [Avatar sync](../product/ideas.md#avatar-sync).
-Every decision here was reached on 2026-10-03 with our test pilot, from probes on MSFS 2024 in the A2A Comanche and the Black Square Baron 58P, except where it names the user and a later date.
+Every decision here was reached on 2026-10-03 with our test pilot, from probes on MSFS 2024 in the A2A Comanche and the Black Square Baron 58P, except where it names p27 in the iniBuilds A350 on 2026-10-04, or the user and a later date.
 
 ## The hand goes where the pilot clicks, found from the aircraft's geometry
 
@@ -78,7 +78,7 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
   - A hand leaving the yoke to click goes at once, since the sim acts on the click at once.
   - A run of clicks with one hand keeps the hands as they are; after each release, the clicking hand stays 150ms on its spot, then hovers 1.5cm off it.
   - 500ms after that, with no new press, the hands go back to rest, the left hand taking the yoke, and the right letting go 0.3s after the left arrives.
-  - These times are p27's, the starting values that the build's stage for avatars tunes in the 58P ([the values](01-avatars.md#the-values)).
+  - These times are p27's, the starting values that the build's stage for avatars tunes in the 58P ([which hand, and its target](01-avatars.md#which-hand-and-its-target)).
   - A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
 
   In the right seat, the PF's figure's right hand holds the copilot's yoke at rest, and when the hands go back to rest it takes the yoke 0.3s before the left lets go.

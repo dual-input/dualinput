@@ -147,7 +147,8 @@ parry3d     1.06 s (binned)       115 ms      "~64 bytes per pair of children"
   candidate instance's frame without renormalizing it, so t stays in model
   meters. About 0.6 s to build and 70 to 105 MB at 2.6M triangles: positions
   about 23 MB at the files' 0.64 to 0.80 vertices a triangle [read], u16
-  indices about 16 MB, nodes about 33 to 67 MB [arithmetic, unverified].
+  indices about 16 MB, nodes about 67 MB at about 2.5 triangles a leaf, or
+  about 33 MB at about 5 [arithmetic, unverified].
 - The Comanche's skinned parts need skinning on the CPU and a refit, or stay at
   the bind pose; the Baron's models have none.
 
@@ -175,3 +176,16 @@ parry3d     1.06 s (binned)       115 ms      "~64 bytes per pair of children"
 - The rest of these files' code, mouse and update code that posing doesn't need,
   also uses scmp, quit, case, g1, ?, exp, ln, sign, scat, chr, ++, --, and string
   literals.
+
+Corrections, from the fact-check of 2026-10-17
+----------------------------------------------
+
+- Issue #478 reports unreachable!() for COLOR_0 (BYTE VEC3) and for indices
+  (FLOAT); for TEXCOORD_0 it reports a debug assertion and wrong values in a
+  release build, not a panic. The code claim in section 2 holds: read_tex_coords
+  and read_colors end in `_ => unreachable!()` [read, gltf 1.4.1,
+  src/mesh/mod.rs].
+- At up to 4 triangles a leaf, 2.6M triangles need at least 1.3M leaves, about
+  42 MB of 32-byte nodes for the leaves alone, so the 33 MB figure in section 4
+  holds only at about 5 a leaf; scaled to the 58P's 907,362 triangles, the
+  total comes to about 28 MB to 37 MB [arithmetic].

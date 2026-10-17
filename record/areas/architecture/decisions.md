@@ -1488,10 +1488,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## A pilot's own core works out their figure, and Figure draws every figure on arrival, each frame
 
 - **Decided:** a pilot's own core takes their seat from the camera, casts each click's ray, and decides each hand's target and when it changes, the overlap of two hands on a yoke included, and sends the whole figure as a pose on avatars' channel at each change, at most every 33ms and at least every 1s; the pose carries the seat held, which no session key does.
-  On every machine, `Figure` eases each part toward its newest target as it arrives, with no delay and no clock offset, places a hand on a yoke from that machine's own yoke, works out all 28 joints, and places each figure inside the frame, every frame.
+  On every machine, `Figure` eases each part toward its newest target as it arrives, with no delay and no clock offset, places a hand on a yoke from that machine's own yoke, works out the 27 joints, and places each figure inside the frame, every frame.
   In the aircraft, the ray comes from `SimConnect_CameraGet`'s `SIMOBJECT` referential, and on foot from its `WORLD` referential.
-  This changes [avatars' tentative decision on the ray](../avatars/decisions.md#the-ray-needs-no-calibration), which takes `WORLD` inside and out, and the seat claims [01-between-machines](../network/01-between-machines.md#channels) puts on the session channel.
-  Settled in node 6.13 by the user, 2026-10-17 ([what runs where](../avatars/01-avatars.md#what-runs-where); [the pose](../avatars/01-avatars.md#the-pose)).
+  This changes [avatars' tentative decision on the ray](../avatars/decisions.md#the-ray-needs-no-calibration), which took `WORLD` inside and out until this design edited it in place, and the seat claims [01-between-machines](../network/01-between-machines.md#channels) puts on the session channel.
+  Settled in node 6.13 by the user, 2026-10-17 ([the pose](../avatars/01-avatars.md#the-pose); [`Figure`, each frame](../avatars/01-avatars.md#figure-each-frame)).
 - **Because:**
   - Avatars is partly recorded, so it makes no request the platform decides, and every write of a session key is one ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs); [session keys](../session/02-units.md#session-keys)); no other unit reads a seat.
   - A following machine draws the yoke 0.4s behind a hand's point, so only that machine's own yoke keeps the hand on its horn ([avatars' tentative decisions](../avatars/decisions.md#the-clicking-pilots-machine-finds-the-point-and-the-other-machine-only-draws-it)), and every core loads the models anyway for its own pilot's clicks.
@@ -1505,7 +1505,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** a camera takes a free seat when it's inside that seat's take radius, 0.4m unless the profile gives one, and that seat's eye is the nearest of every seat's; no check limits a radius, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID.
   This changes [avatar sync](../product/03-v1-scope.md#avatar-sync)'s note of 2026-10-17, under which the take radius stays under half the distance between two seats' eyes.
   Settled in node 6.13 by the user, 2026-10-17 ([a seat](../avatars/01-avatars.md#a-seat)).
-- **Because:** the 58P's eyes sit 0.49m apart, so a radius under half that leaves a small seat, while the nearest eye draws a flat border halfway between two eyes whatever their radii, so an author can cover the whole left side of the 58P, and no author meets an error they wouldn't understand (user, 2026-10-17).
+- **Because:** the 58P's eyes sit 0.49m apart, so a radius under half that leaves a small seat, while the nearest eye draws a flat border halfway between two eyes wherever their radii overlap, so an author can cover the whole left side of the 58P, and no author meets an error they wouldn't understand (user, 2026-10-17).
 - **Leaves out:** nothing.
 
 ## The aircraft model is four engines of our own, on serde_json and quick-xml
@@ -1519,7 +1519,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A located change brings the hand after 100ms, past its deadband, and never while a hand is out from a press
 
-- **Decided:** on `CockpitSent` for an entry with a location, avatars reaches for it after 100ms unless another located change comes within that time, a hand is out from a press, or a number entry has moved less than its `deadband` since the hand last reached for it; `deadband` is a new optional field beside `location`, and a cockpit kind that changes an entry declares how to read the entry's number, which `CockpitSent` carries.
+- **Decided:** on `CockpitSent` for an entry with a location, avatars reaches for it after 100ms unless another located entry changes within that time, a hand is out from a press, or a number entry has moved less than its `deadband` since the hand last reached for it; one entry's run of changes is one reach; `deadband` is a new optional field beside `location`, and a cockpit kind that changes an entry declares how to read the entry's number, which `CockpitSent` carries.
   This settles what [avatars' tentative decision](../avatars/decisions.md#a-click-or-a-change-at-a-controls-spot-brings-the-hand-and-on-foot-the-hand-touches-up-to-3m) leaves to 6.13 on one instant and on noise, and adds to [the sync units](../sync/05-units.md#sending)' `CockpitSent`.
   Settled in node 6.13 by the user, 2026-10-17 ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
 - **Because:** only the author knows an axis's units and travel, and a feature can't read another feature's types, so the kind gives the number.

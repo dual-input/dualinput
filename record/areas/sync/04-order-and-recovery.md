@@ -17,7 +17,11 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 > - Of the machines that applied a message a change of control drops, the new PF never catches up from itself, where [a change of control](#a-change-of-control) has every one catch up ([a change of control](05-units.md#a-change-of-control)).
 > - A machine holds what arrives while it's out of the flight and while its catch-up waits for its answer, and in the flight with no profile loaded applies it, state sync skipping its own kinds, where [the cockpit stream](#the-cockpit-stream) holds it until its catch-up ([applying](05-units.md#applying)).
 >
-> Since 2026-10-17, pointer sync sends each gesture as it happens, as a down, moves, and an up, so a gesture's message counts as applied once handed to its panels, and its up once they've played it, where [the cockpit stream](#the-cockpit-stream) counts a press applied once its panel has played it through to the release; and a synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the replay that [the replay](#the-replay) keeps it locked through ([pointer sync](../pointer-sync/01-pointer-sync.md)).
+> Since 2026-10-17, [pointer sync](../pointer-sync/01-pointer-sync.md) changes this document in three places:
+>
+> - Pointer sync sends each gesture as it happens, as a down, moves, and an up, so a gesture's message counts as applied once handed to its panels, and its up once they're done with it, where [the cockpit stream](#the-cockpit-stream) counts a press applied once its panel has played it through to the release.
+> - The catch-up that preflight's end starts skips no press, which queues behind its writes and applies once they're made, since neither cockpit's displays were touched in preflight, where [the cockpit stream](#the-cockpit-stream) skips every press during a receiver's catch-up.
+> - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the replay that [the replay](#the-replay) keeps it locked through.
 
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.

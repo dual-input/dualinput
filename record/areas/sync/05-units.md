@@ -6,6 +6,9 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, 04-order-an
 Decides:     What each of sync's three units holds and offers; a cockpit message's fields; how the cockpit stream holds, paces, keeps, replays, and drops messages; who asks for a catch-up, when, and where its order comes from; how the sync engine tells its own echo, checks a write, steps a knob that's still moving, and runs write functions; how state sync fires and hears `H:` events and hears `K:` events; which call sends an event; what 02-live-sync's and 03-catch-up's open questions still hold; the budgets; and the cases for the bench (node 6.9).
 ```
 
+> **Note**
+> Since 2026-10-17, the cockpit stream's state also says whether preflight's end started the catch-up that runs, which pointer sync reads to play rather than skip the gestures queued behind that one; and a pointer sync up, the one gesture message that answers `Unfinished`, is done once its panels are done with it, where [kinds](#kinds) has pointer sync's press finish at its release ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.
 State sync is the feature that joins the engine to the sim, the stream, and the session.

@@ -1447,26 +1447,29 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Pointer sync sends each gesture as it happens, and the panel bridge sends no span
 
-- **Decided:** a gesture on a synced display goes to the crew as a down, its moves at most every 33ms once the pointer has traveled 2px, a held message each second nothing else goes, and an up, each a cockpit message keyed by the display; each other machine's panel plays each as it arrives, and a long press plays for as long as it's held; the cockpit stream's gaps, on the core's counter, time a gesture in a replay.
+- **Decided:** a gesture on a synced display goes to the crew as a down, its moves at most every 33ms once the pointer has moved 2px, a held message each second nothing else goes, and an up, each a cockpit message keyed by the display; each other machine's panel plays each as it arrives, and a long press plays for as long as it's held; the cockpit stream's gaps, on the core's counter, time a gesture in a replay.
+  A gesture's down, moves, and held messages count as applied once handed to the display's panels, and its up once they're done with it, or after 1s; the catch-up that preflight's end starts plays the gestures queued behind its writes, and any other catch-up skips them.
   This settles the spine's item on which clock the panel bridge measures a span on: it sends none ([left open](01-spine.md#left-open)).
-  It changes [03-v1-scope](../product/03-v1-scope.md#pointer-sync)'s pointer sync, which carries over FS Copilot's gesture sent whole at its release, with a hold capped at 1.5s, and leaves long presses out of v1 (user, 2026-10-17).
-  Settled in node 6.11 by the user, 2026-10-17 ([a gesture](../pointer-sync/01-pointer-sync.md#a-gesture)).
+  It changes [03-v1-scope](../product/03-v1-scope.md#pointer-sync)'s pointer sync, which carries over FS Copilot's gesture sent whole at its release, with a hold capped at 1.5s, and leaves long presses out of v1 (user, 2026-10-17); and it changes [decision 042](../../decisions/042-vector-clock-records-what-applied.md), under which a press counts as applied once played through to its release and a receiver skips every press during its own catch-up, once step 8's decisions are numbered.
+  Settled in node 6.11 by the user, 2026-10-17 ([a gesture](../pointer-sync/01-pointer-sync.md#a-gesture); [playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
 - **Because:**
-  - FS Copilot rejected streaming for its reordering risk, its press and drag riding two packet streams (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, 4.5 and 4.7), and the cockpit stream carries every message in one causal order.
-  - Sent whole, a gesture reaches the other display only after its release, a map pan its whole length late, while avatars' hand follows the drag from a mouse move every 16ms ([raw input](../core/04-core-helper.md#raw-input)).
+  - FS Copilot's record rejects live streaming for "More packets, more reordering risk, and no proven benefit", naming no mechanism (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, 4.7), and the cockpit stream carries every message in one causal order.
+  - Sent whole, a gesture reaches the other display only after its release, a map pan its whole length late, while avatars' hand follows the drag from at most one mouse move every 16ms ([raw input](../core/04-core-helper.md#raw-input)).
   - Streamed, a switch flipped on hardware during a held press lands between the down and the up, as it happened.
+  - Neither cockpit's displays were touched in preflight ([preflight](../product/03-v1-scope.md#preflight)), so the PF's first presses after it play on the same pages, where a late joiner's displays may show others.
 - **Leaves out:** how a display takes the `mouseup` on the document that ends a gesture whose rest never came, which a case in the sim settles.
 
-## A display takes no press while another pilot's gesture plays on it, and a machine other than the PF's locks its displays while it has lost its link to the PF or is catching up
+## A display takes no press while another pilot's gesture plays on it, and a machine other than the PF's locks its displays while it has no link up to the PF or is catching up
 
-- **Decided:** from another pilot's down to their up, the bridge holds an unseen lock over the display, renewed by each message and lapsing 2s after the last, and a press that lands on it is dropped and paints it in one solid color, with no words, until that press's up; on a machine other than the PF's, every synced display locks, visibly, while its link to the PF is lost and while its replay or its catch-up runs, and nothing locks in preflight; pointer sync asks for a lock only once its own pilot's gesture on that display has ended.
+- **Decided:** from another pilot's down to their up, the bridge holds an unseen lock over the display, which the panel module renews at each of the gesture's messages and no message from the core renews, lapsing 2s after the last; a press that lands on it is dropped and paints it in one solid color, with no words, until that press's up, and a lock a blocked press is held on stays until that up; on a machine other than the PF's, every synced display locks, visibly, while this core has no link up to the PF and while its replay or its catch-up runs, and nothing locks in preflight; pointer sync asks for a lock only once its own pilot's gesture on that display has ended.
   This adds catch-up to the times [decision 037](../../decisions/037-while-a-link-is-lost.md) and [the replay](../sync/04-order-and-recovery.md#the-replay) lock a PM's displays.
   Settled in node 6.11 by the user, 2026-10-17 ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 - **Because:**
-  - FS Copilot's veil over every replayed gesture covered the display just as its pilot watched it change, so it went silent (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "The replay interlock blocks silently; twelve seconds is where it speaks"), and a press that does nothing with no sign looks like a display ignoring its pilot.
-  - Gone at the up, the flash reads as the press's own doing, and the other pilot's figure at the display says who's pressing, so it needs no words (user, 2026-10-17).
-  - A machine skips the crew's gestures while it catches up, so its pilot's presses would reach the crew's displays while theirs don't reach it.
-  - The lapse keeps a lock from outliving a module that failed partway, since the core's messages renew every lock whatever the module does.
+  - FS Copilot's veil over every held press and every drag it replayed covered the display just as its pilot watched it change, so it went silent (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "The replay interlock blocks silently; twelve seconds is where it speaks"), and a press that does nothing with no sign looks like a display ignoring its pilot.
+  - Ending at the up, the flash reads as the press's own doing, and the other pilot's figure at the display says who's pressing, so it needs no words (user, 2026-10-17).
+  - A catch-up other than preflight's skips the crew's gestures, so its pilot's presses would reach the crew's displays while theirs don't reach it.
+  - The core sends a message to every panel at least every 2s, so a lock it renewed would outlive a module that failed partway.
+  - A lock lifting under a held press would let its release act on a control behind it and go unsent.
 - **Leaves out:** the look and words of the visible lock and the flash's color, for [6.16](plan.md#616-the-apps) and the build.
 
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start

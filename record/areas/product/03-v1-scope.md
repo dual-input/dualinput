@@ -73,7 +73,7 @@ Decides:     The scope of every v1 feature.
 > - A gesture goes to the crew as it happens, its down, its moves, and its up, where the FS Copilot logic carried over as it is sends it whole at its release, so the other display moves with the pilot's hand ([a gesture](../pointer-sync/01-pointer-sync.md#a-gesture)).
 > - Long presses come into v1, each played for as long as it's held, which takes them out of the section's Not in v1 (user, 2026-10-17).
 > - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the long outage the section's rules name ([locks](../pointer-sync/01-pointer-sync.md#locks)).
-> - While another pilot's gesture plays on a display, that display takes no press from its own pilot, and a press there flashes the display in one color, with no words, until its up (user, 2026-10-17).
+> - A press on a display while another pilot's gesture plays there flashes the display in one color, with no words, until its up, where the overlay carried over stays unseen until it has blocked for 12s (user, 2026-10-17).
 > - Two pilots pressing one display within one trip of each other can leave it different on the two machines, which is rare because each sees the other's figure reach for it, and which settles the section's open question on both pilots typing on one display ([known limits](../pointer-sync/01-pointer-sync.md#known-limits)).
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.

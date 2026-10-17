@@ -710,6 +710,7 @@ It reads 03-v1-scope's [flight-model sync](../product/03-v1-scope.md#flight-mode
 It settles the spine's open items under flight-model sync, on the module's clock and on how far the core's arrival stamp trails the sim's read ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/flight-model/01-flight-model-sync.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-17.
 Raised elsewhere: by 6.4, each sender's clock offset sits in the network's state by pilot ID and restart count, and the flight model's channel handler, not the network, drops a sample made under an older control value ([02-units](../network/02-units.md#channels-and-sends)).
 Raised elsewhere: by 6.6, flight-model sync registers as partly recorded and declares its pose read every frame and its samples' channel unrecorded: it runs in a replay on what was recorded, unchecked, and may register no guard, catch-up step, or cockpit kind, or make a request the platform decides ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
 Raised elsewhere: by 6.7, a following machine follows only while its pilot is in the flight, as `FlightChanged` tells, and in preflight its aircraft is frozen by both `Follow` and the session crate's `Hold`; a joiner of a PF whose engines run loads on a runway, so flight-model sync moves it from that runway to the PF, airborne or not ([the session's units](../session/02-units.md#go-to)).

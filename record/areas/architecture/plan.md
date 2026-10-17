@@ -590,7 +590,7 @@ No system is designed yet down to its units' interfaces, budgets, and cases for 
 A child whose system 02-code-map designs in part, as it does 6.1 to 6.3 and 6.18, links to those sections, and its design doc holds only what they leave out.
 Each child's answer goes in a design doc in its system's area, which gives its units and their interfaces, its budgets, its cases for the bench, and what it leaves open, as 02-code-map's sections do.
 Each child also settles the open items its section names, from the spine's [left open](01-spine.md#left-open), 02-code-map's [left open](02-code-map.md#left-open), and the design docs above.
-Exit: every child is done.
+Exit: every child is done, and every design doc reads as one current text, as [step 8's exit checks](../product/plan.md#8-v1-build-plan) describe, so node 7 reads the designs without their notes (user, 2026-10-17).
 Waits on 5, and 6.1 to 6.18.
 
 ## 6.1 The core's loop and edge

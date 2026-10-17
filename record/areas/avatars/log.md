@@ -61,6 +61,148 @@ Those wait for the passenger feature.
 
 **Evidence:** `experiments/areas/avatars/results/p28-many-figures-2026-10-05-18-18-00` (capped at 30 fps, the PA-24 at KSEA), `-18-32-07`, `-18-35-24`, `-18-46-28`, and `-18-49-45` (the PA-24 on EGLL 27R), and `-18-57-34`, `-19-04-40`, and `-19-13-17` (the A380), each `.txt` and `.ndjson`; each report states its setup and grid.
 
+## 2026-10-04: In the A350, the pilot cut the hand's time on the spot to 150ms and its hover to 500ms at 1.5cm, and sent it back in 0.3s on a curve that eases out
+
+**Asked:** with p26's sidestick rules in the iniBuilds A350's right seat, what timing makes the hands look right, after the pilot found p26's far too long and far ([entry below](#2026-10-04-in-the-a220s-right-seat-the-figures-right-hand-held-the-first-officers-sidestick-and-nothing-moved-that-stick))?
+p27 was also written to run in the iniBuilds A380 with the A350's cockpit standing in, since the A380's models can't be read ([entry below](#2026-10-04-of-the-three-sidestick-airliners-we-could-read-only-the-fenix-marks-a-grip-and-each-sticks-grip-moves-with-its-own-two-animations)).
+
+**Expected:** we had no values to predict.
+The pilot tuned them by eye, in a file the probe read again whenever it changed.
+
+**Found:**
+
+- In the iniBuilds A350-900, parked at latitude −0.90°, heading 169.6° true, p27 ran 7 times, from 2 to 17 minutes each, 49 minutes in all.
+  None of the runs loaded the A380, so the stand-in hasn't run.
+  From the second run on, the probe corrected the module's placement for WGS 84 ([entry below](#2026-10-04-the-modules-sphere-earth-put-a-point-26m-forward-of-the-a350s-reference-point-14cm-off-and-wgs-84s-radii-account-for-all-of-it)).
+- p27 hung the cockpit's three models at the interior's `AP_A359_Cockpit`, 1.418m up and 25.026m forward of the reference point, and took the pilot's eye from the variant's `cameras.cfg` (read in inibuilds-aircraft-a350 1.2.6).
+  The first run started from the Pilot view, with the camera 2.2cm from that eye, so the files' frame is SimConnect's `SIMOBJECT` frame within about 2cm.
+  The other six started from other views, 22.8cm to 173.3cm from the eye, so they don't check it.
+- The A350's CoPilot camera isn't the pilot's mirrored, so the figure's eye was the pilot's mirrored across the centerline, with the seat point 0.678m below it and 0.062m forward, as in p26.
+- p27 kept p26's hand rules, with the first officer's stick as the 4 nodes under the parent of its grip, `FO_JOY_HANDLE`, among them the takeover button `SIDE_STICK_DISCO_FO`.
+  It doesn't pose the cockpit, whose animation code sits in the compiled `<Strings>` table, so the grip stays where the file stores it.
+- The hand settings each run printed, from the tuning file:
+
+  | Run | On the spot, then hovering | Reach out | Way back | Sag | Stick hand's center |
+  | --- | --- | --- | --- | --- | --- |
+  | 4 | 150ms, then 500ms at 1.5cm | not printed | not printed | not printed | one hand's radius out of the grip's surface |
+  | 5 | 150ms, then 500ms at 1.5cm | not printed | not printed | not printed | on the grip's surface |
+  | 6 | 150ms, then 500ms at 1.5cm | 0.15s | 0.8s | 12cm | on the grip's surface, printed as 0.0cm out |
+  | 7 | 150ms, then 500ms at 1.5cm | 0.15s | 0.3s, easing out at power 3 | 6cm | on the grip's surface, printed as 0.0cm out |
+
+  The first three runs printed no hand settings, and the probe's file keeps only its last version, so what they ran is unknown.
+  The fourth and fifth runs' stick hand comes from the grip point each printed, which moved 3.8cm, the hand's radius, between them.
+  In the sixth run, the tuning file changed to 0.3s and 6cm only 0.8s before the run ended, so the run went with 0.8s and 12cm.
+- What the settings do, in the probe's last version:
+  - After a release, the hand stays on the spot, then hovers off it, and with no new press the hands go home when the hover ends, 650ms after the release, where p26 sent them home 2.25s after it.
+  - Going out, a hand follows its target on a spring damped just enough not to overshoot, and from still it gets 95% of the way in the reach time.
+  - Going back, to rest or to the stick, a hand follows a curve that sags down and in toward its shoulder, by the sag at its middle and at most 30% of the way's length, and eases out by 1 − (1 − t)³, leaving at full speed and slowing into place.
+    A way back of 60cm or more takes the back time, and a shorter one less, by the square root of its length, down to a third of it.
+  - With its center on the grip's surface, the stick hand sinks half its ball, 3.8cm in radius, into the grip.
+- The pilot's verdicts are in p27's comments, not in its runs, all from 2026-10-04:
+  - p26's 0.25s on the spot, 2s, and 5cm were far too long and far.
+  - The spring's straight way back was too linear, which brought the sag.
+  - The minimum-jerk profile of human reaching (Flash and Hogan, 1985), slow to start and slow to stop, looked uncanny on a figure of balls and sticks, where a snap looks right, which brought the ease-out.
+    Which run showed it isn't recorded; the sixth printed no easing (unverified).
+  - The pilot asked for the stick hand half inside the grip, so it looks like it holds the grip.
+
+  Nothing records a verdict on the seventh run's values, which are the probe's defaults.
+- The runs' results:
+
+  | Run | Minutes | Left taps | Right taps | Right thumb | Drags | Hands home |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | 1 | 16.9 | 54 | 0 | 0 | 16 | 6 |
+  | 2 | 3.0 | 99 | 6 | 0 | 21 | 9 |
+  | 3 | 2.1 | 7 | 14 | 0 | 5 | 17 |
+  | 4 | 7.1 | 68 | 28 | 0 | 34 | 38 |
+  | 5 | 4.9 | 94 | 0 | 0 | 30 | 27 |
+  | 6 | 4.9 | 18 | 0 | 0 | 1 | 11 |
+  | 7 | 10.5 | 72 | 70 | 7 | 26 | 58 |
+
+  With 500ms of hover, the hands went home after 38 of the fourth run's 96 taps and 58 of the seventh's 142, where with p26's 2s they went home 18 times in 175 taps.
+  In the seventh run, the right thumb pressed `SIDE_STICK_DISCO_FO` 6 times and the grip once.
+- Every press and every look met the cockpit model, so its three files, 2,563,959 triangles, left no gap a ray found.
+- The module wrote the figure with 0 errors in every run, at 27.8 to 28.6 frames a second.
+  Its frame count carries on from run to run while the flight stays loaded, since the probe never resets it, so each run's own count is the difference from the run before: 28,130 frames in the first run, and 83,000 in all by the end of the seventh.
+
+**Changed:** p27's values are settings the pilot chose by eye in the A350, and they disagree with the ones the yoke probes left in the tentative decisions:
+
+- A released hand stays 150ms on the spot, where p20 settled on 0.25s ([entry below](#2026-10-03-during-a-drag-the-cursor-keeps-moving-and-gliding-on-the-touched-surfaces-plane-keeps-the-hand-on-a-lever-where-a-fresh-cast-falls-through)).
+- It hovers 1.5cm off the spot for 500ms before the hands go home, where p21 hovered 5cm off it for 2s, and the pilot found that the hands felt right in the Baron ([entry below](#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+- The stick hand's center sits on the grip's surface, where the yoke hand's sits one hand's radius out of the horn's ([tentative decisions](decisions.md#the-yoke-hand-holds-the-grips-the-aircraft-marks-or-their-copy-on-the-copilots-yoke)).
+
+p21's 2s kept the hands as they were through a run of clicks, 115 taps in 9 sessions, and p27's 500ms sent them home after 58 of 142 taps; no run records whether the pilot saw that as a fault.
+Neither set of values ran in the other's aircraft, so whether the difference comes from the controls, the cockpits, or the pilot's eye after more hours with the figure is unknown.
+[6.13](../architecture/plan.md#613-avatars) picks the values.
+
+**Affects:** [the avatars' tentative decisions](decisions.md), whose hand timing and yoke hand come from the yoke probes and whose hand rules leave sidesticks out, [6.13](../architecture/plan.md#613-avatars), and the idea [Avatar sync](../product/ideas.md#avatar-sync).
+
+**Evidence:** p27's seven runs in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results), `p27-a350-figure-2026-10-04-16-05-53`, `-16-22-59`, `-16-26-14`, `-16-28-31`, `-16-35-41`, `-16-40-42`, and `-16-45-44`, each `.txt` and `.ndjson`, whose `tune` lines hold the settings; the pilot's verdicts in the comments of [p27-a350-figure.mjs](../../../experiments/areas/avatars/p27-a350-figure.mjs).
+
+## 2026-10-04: The module's sphere earth put a point 26m forward of the A350's reference point 14cm off, and WGS 84's radii account for all of it
+
+**Asked:** does `crosscheck-p12-follow` place the figure where we mean it to go in the A350, whose seats sit about 26m forward of the aircraft's reference point?
+
+**Expected:** yes, since the module had held GSX's passenger in the C152 and our figure in the Baron ([entry below](#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
+
+**Found:**
+
+- The module turns the seat's offset into latitude and longitude on a sphere of 6,371km (read in [wasm/src/follow.cpp](../../../experiments/areas/avatars/wasm/src/follow.cpp), `place()`).
+  `lib/frames.mjs` and `lib/pose.mjs`, which turn the `WORLD` camera into the aircraft's frame for the probes, use the same sphere.
+- In the A350-900, parked at latitude −0.90°, heading 169.6° true, [tools/frames.mjs](../../../experiments/areas/avatars/tools/frames.mjs) compared the camera in `SimConnect_CameraGet`'s `SIMOBJECT` referential with the camera in its `WORLD` referential turned into the aircraft's frame on that sphere, with the camera about 26m forward of the reference point.
+  On the sphere, a point 26m forward lands 14.0cm aft and 3.2cm left of where it's meant to go.
+  With WGS 84's radii of curvature at that latitude in place of the sphere's radius, the two cameras agreed within 0.1cm, so the sim's latitudes and longitudes are WGS 84's.
+  The tool's output wasn't saved, and these numbers are in p27's header.
+- The error is the offset times how far WGS 84's radius in that direction strays from 6,371km: at −0.90°, the north radius is 0.56% shorter and the east one 0.11% longer, and at LQSA's 43.8°N, 0.08% shorter and 0.27% longer (arithmetic).
+  Anywhere on the earth it's at most 0.56%, so a seat within 2m of its reference point lands within 1.1cm (arithmetic).
+- From p27's second run on, the probe sent the module the offset that lands right on the sphere: the seat's offset turned to north, east, and down, north and east scaled by the sphere's radius over WGS 84's at the aircraft's latitude, and turned back, every 33ms tick.
+  At the seat, 25.8m forward and 0.52m right of the reference point, that came to 14.0cm forward and 3.0cm right of the true offset in each run.
+  p27's first run placed the figure without the correction, and no run measured where the corrected figure landed.
+
+**Changed:** a figure placed on a sphere earth moves by up to 0.56% of its distance from the reference point, 14cm at an A350's seat, so whatever places the figure in the product uses WGS 84's radii at the aircraft's latitude.
+The same holds for turning the `WORLD` camera into the aircraft's frame, which the probes do on the same sphere.
+
+**Affects:** [the avatars' tentative decisions](decisions.md), whose module places the figure and whose ray turns the `WORLD` camera into the aircraft's frame, and [6.13](../architecture/plan.md#613-avatars).
+
+**Evidence:** [tools/frames.mjs](../../../experiments/areas/avatars/tools/frames.mjs), and `moduleOffset()` and the header in [p27-a350-figure.mjs](../../../experiments/areas/avatars/p27-a350-figure.mjs); the correction each run sent is in its `figure` line, such as [p27's second run](../../../experiments/areas/avatars/results/p27-a350-figure-2026-10-04-16-22-59.txt).
+
+## 2026-10-04: In the A220's right seat, the figure's right hand held the first officer's sidestick, and nothing moved that stick
+
+**Asked:** can the figure hold a sidestick at rest, as p25's held the Baron's yoke, with first-try rules for a sidestick in the right seat, while the pilot clicks from the left seat?
+
+**Expected:** the right-seat yoke rules would carry over with the stick in the yoke's place, the grip taken from the mesh, since nothing in the A220 marks one ([entry below](#2026-10-04-of-the-three-sidestick-airliners-we-could-read-only-the-fenix-marks-a-grip-and-each-sticks-grip-moves-with-its-own-two-animations)).
+
+**Found:**
+
+- In the Synaptic A220-300, parked, p26 placed `CROSSCHECK_Figure` on a seat point through `crosscheck-p12-follow` 0.6.0, every frame, led by 1 frame.
+  The A220 has no `PILOT_` node, so the seat point sat 0.678m below the copilot's eye from `cameras.cfg` and 0.062m forward, as the Baron's `PILOT_1` sits under its copilot's eye (read in synaptic-aircraft-a220 1.0.10, and in bksq-aircraft-baronpro 0.1.1, `BaronProfessional_Base_INT.gltf` and `cameras.cfg`).
+- The camera started 0.8cm from `cameras.cfg`'s Pilot eye, so the cockpit model's space is `SIMOBJECT`'s within about 1cm, as in the Baron ([entry below](#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)).
+- The hand rules, all settings:
+  - At rest, the right hand holds the first officer's stick, and the left rests.
+  - A press more than 5cm right of the seat's centerline is the right hand's, which lets go of the stick to tap, and any other press is the left hand's.
+  - A press on the first officer's stick, any of the 8 nodes under `FO_YOKE_PITCH`, is the right thumb, and the hand keeps hold.
+  - A drag glides on the surface it touched ([entry below](#2026-10-03-during-a-drag-the-cursor-keeps-moving-and-gliding-on-the-touched-surfaces-plane-keeps-the-hand-on-a-lever-where-a-fresh-cast-falls-through)).
+  - After a release, the hand stays 0.25s on the spot, then hovers 5cm off it, and 2s later both hands go home, as p21 ran the yoke ([entry below](#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+  - Each hand eases along a straight line toward where it goes, out and back alike: each 33ms tick closes 1 − e^(−dt/0.06s) of what's left, 95% of the way in 0.18s.
+- The stick hand's center sat one hand's radius, 3.8cm, out from where the line from the copilot's eye to the middle of the grip's mesh meets `FO_STICK_HANDLE`'s surface, 3.8cm short of that middle, held in the grip's own frame.
+- p26 posed the two sticks every tick from `Sidestick.xml`'s code on `L:A22X L Sidestick X` and `Y` and their `R` forms, and nothing else, since the A220's other animations sit in templates whose parameters `lib/cockpit-files.mjs` doesn't fill in.
+- Over the run, `L:A22X R Sidestick X` and `Y` read 0 throughout, while the captain's pair, read as `number`, ranged from −0.27 to 0.16 and from −0.25 to 0.69.
+  So nothing wrote the first officer's pair, and that stick stayed centered.
+- Of the run's 179 presses, all but one came in the A220: the left hand tapped 142 times and the right hand 32, and the right thumb pressed the first officer's stick 4 times, 3 on its grip and once on its takeover button, `SIDE_STICK_DISCO_FO`.
+  Over the run, 46 presses were drags, and the hands went home 18 times.
+- The run went on past the A220.
+  The sim paused 21.6 minutes in, for 29 minutes; the pilot clicked for 20s more, then ended the flight and loaded the iniBuilds A380, with no press, and then the A350, and the 60-minute cap ended the run.
+  So the module's count at the end, 0 frames, came after two flights had loaded and says nothing about the A220 ([entry above](#2026-10-04-in-the-a350-the-pilot-cut-the-hands-time-on-the-spot-to-150ms-and-its-hover-to-500ms-at-15cm-and-sent-it-back-in-03s-on-a-curve-that-eases-out)).
+  Nor do the head's 6,443 looks that met the cockpit and 11,166 that met nothing, which count the pause and the other two aircraft too.
+- The pilot found the 0.25s on the spot, the 2s, and the 5cm far too long and far (the pilot, 2026-10-04, in the header of [p27-a350-figure.mjs](../../../experiments/areas/avatars/p27-a350-figure.mjs)).
+  The record names no fault with the rules themselves.
+
+**Changed:** p27 kept these rules in the A350 and tuned the timing ([entry above](#2026-10-04-in-the-a350-the-pilot-cut-the-hands-time-on-the-spot-to-150ms-and-its-hover-to-500ms-at-15cm-and-sent-it-back-in-03s-on-a-curve-that-eases-out)).
+In the A220, a hand on the first officer's stick stays still whatever is flown, since nothing moves that stick.
+
+**Affects:** [the avatars' tentative decisions](decisions.md), whose hand rules leave sidesticks out, and [the A220 study](../aircraft/synaptic-a220/study.md), whose claim that nothing writes the `R` pair this run measured.
+
+**Evidence:** [p26's run](../../../experiments/areas/avatars/results/p26-a220-figure-2026-10-04-15-02-35.txt), and its record, `p26-a220-figure-2026-10-04-15-02-35.ndjson`, whose system events show the pause and the flights that followed.
+
 ## 2026-10-04: Of the three sidestick airliners we could read, only the Fenix marks a grip, and each stick's grip moves with its own two animations
 
 **Asked:** does the Synaptic A220's sidestick carry what our yoke hand holds, a `[VR]` section and `HANDLING_` hand nodes, and can the figure hold a sidestick as it holds a yoke?

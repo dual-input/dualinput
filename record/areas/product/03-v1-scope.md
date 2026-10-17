@@ -78,11 +78,12 @@ Decides:     The scope of every v1 feature.
 >
 > Since 2026-10-17, the [voice phrases](#voice-phrases) are a Soon pick, out of v1, because a voice handover is a nice-to-have that v1 can ship without (user, 2026-10-17; [the plan](plan.md)).
 > So in v1 control passes only when a pilot takes it, by the take-control key or buttons, and the PF has no way to give it, where the [take-control key](#take-control-key)'s Not in v1 has the PF give it by voice; and Crosscheck captures no microphone, so the microphone setting the note of 2026-10-16 above puts beside the output device comes with that pick.
-> [Take-control](../control/01-take-control.md) changes the [take-control key](#take-control-key) in three places:
+> [Take-control](../control/01-take-control.md) changes the [take-control key](#take-control-key) in four places:
 >
 > - No recorded line plays when control passes: every pilot in the flight hears the control-passed cue, and the banner shows "You have control" to the new PF and who has control to the others (user, 2026-10-17).
 > - A long press takes control once held 1s, before its release, and a single press on its down.
 > - A press the guards refuse plays a refusal cue and shows the reason on the banner, and a press while the link to the PF is lost takes control at once, with no confirming step, and shows the warning after.
+> - A bound key takes control only while a window of the sim is in front, and Crosscheck's settings ask the pilot to keep the key or button unbound in the sim (user, 2026-10-17).
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

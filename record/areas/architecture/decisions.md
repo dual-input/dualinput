@@ -1474,12 +1474,13 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The take-control input takes control on its down or held 1s, and a pass plays a cue and a notice with no recorded line
 
-- **Decided:** a bound key or button takes control on its down, or, set as a long press, once held 1s, before its release, and has no default binding; outside the flight or before preflight's end it does nothing; a press the guards refuse plays a refusal cue and shows each denial's reason; a press while the link to the PF is lost takes control at once and shows the warning after, the apps' buttons showing it before; and a pass plays the control-passed cue on every machine in the flight, with a notice naming the new PF and no recorded line.
+- **Decided:** a bound key or button takes control on its down, or, set as a long press, once held 1s, before its release, and has no default binding; a bound key counts only while a window of the sim is in front, and the desktop app asks the pilot to keep the input unbound in the sim; outside the flight or before preflight's end it does nothing; a press the guards refuse plays a refusal cue and shows each denial's reason; a press while the link to the PF is lost takes control at once and shows the warning after, the apps' buttons showing it before; and a pass plays the control-passed cue on every machine in the flight, with a notice naming the new PF and no recorded line.
   This changes [03-v1-scope](../product/03-v1-scope.md#take-control-key)'s take-control key, under which the new PF hears "you have control" and the old one "they have control" (user, 2026-10-17).
   Settled in node 6.12 by the user, 2026-10-17 ([take-control](../control/01-take-control.md)).
 - **Because:**
-  - The helper's Raw Input in sink mode receives a press while the sim is in front, and only another flag withholds the legacy messages (documented, [RAWINPUTDEVICE](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevice)), so a long press lets take-control share a button the sim uses, such as one bound to the autopilot disconnect, which a tap still disconnects alone; that the sim still acts on it is unverified until a case in the sim runs.
-  - A long press also keeps a key typed in another program from taking control, since the helper reads a bound key whichever program is in front.
+  - The helper reads Raw Input whichever program is in front ([raw input](../core/04-core-helper.md#raw-input)), so without the rule on keys, a bound key typed in a chat would take control (user, 2026-10-17); nobody types on a yoke, so buttons need no such rule.
+  - Crosscheck can't read the sim's own bindings, so it asks the pilot instead, and a Soon pick reads them if they can be read (user, 2026-10-17).
+  - A long press keeps a brushed button from taking control.
   - A pilot pressing hardware in VR gets no other sign of a refusal before looking at the banner.
   - Good neutral voice lines are hard to come by, and the cue and the banner already mark the pass (user, 2026-10-17).
 - **Leaves out:** the cues' sounds, which the build makes; and the notices' words, for [6.16](plan.md#616-the-apps).

@@ -54,12 +54,11 @@ A watched binding is a want that's on, so the core helper runs through the sessi
   Take-control puts it in its slice, and the desktop app writes it into the input setting with `clients`' settings command, as for any setting.
   That raises a setting changed, so the service sends the helper the new binding ([the moments clients raises](../core/02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes)).
   Cancel turns the next press off, and Clear writes none into the input setting the same way, so a pilot can rebind or unbind mid-session.
+- The section asks the pilot to make sure the key or button isn't bound in the sim, since Crosscheck can't read the sim's own bindings (user, 2026-10-17).
+- A bound key counts only while a window of the sim is in front, its main window or a popped-out display, so a key typed in another program takes nothing (user, 2026-10-17); a bound button counts whatever is in front, since nobody types on a yoke ([raw input](../core/04-core-helper.md#raw-input)).
 - **A single press** asks for control on the binding's down.
 - **A long press** starts a 1s timer on the down, through the loop's timers, and asks for control when it fires, while the button is still held; an up before then cancels it, so a tap asks for nothing.
-  A long press lets a pilot share a button with the sim, such as a hardware yoke button the sim binds to the autopilot disconnect, where a tap disconnects the autopilot alone and a hold disconnects it and takes control.
-  That rests on the sim still getting the press: the helper registers its Raw Input in sink mode, which receives input while the helper isn't in front and withholds no legacy message, as only another flag does (documented, [RAWINPUTDEVICE](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevice); [raw input](../core/04-core-helper.md#raw-input)).
-  That the sim still acts on the press is unverified, and a case in the sim settles it.
-  A long press also keeps a brushed button, or a key typed in another program, from taking control.
+  It keeps a brushed button from taking control.
 
 ## Taking control
 
@@ -87,8 +86,8 @@ On each `ControlPassed` that moves control from one pilot to another, every mach
 
 ## Known limits
 
-- A bound key takes control from whatever has the keyboard, the sim's own text boxes and a chat program's included, since the helper reads it whichever program is in front ([raw input](../core/04-core-helper.md#raw-input)), so the desktop app's section suggests a long press for a key.
-- A binding on a button the sim also uses does the sim's action on every press, a long press's included.
+- A bound key typed into one of the sim's own text boxes, such as a search field in the EFB, takes control, since the sim's window is in front.
+- An input the sim also binds does the sim's action on every press too; reading the sim's bindings to show a conflict is a Soon pick if they can be read (user, 2026-10-17; [ideas](../product/ideas.md#binding-conflicts-with-the-sim)).
 - Two devices of one model share their IDs, so a button bound on one takes control from the other too ([raw input](../core/04-core-helper.md#raw-input)).
 - In v1, control passes only when a pilot takes it: the PF gives it by saying so to the crew, and the other pilot presses.
 
@@ -122,10 +121,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - Rebinding mid-session: the new key takes control, and the old one does nothing.
 - The core helper killed mid-session and started again: the binding takes control as before ([cases for the bench](../core/04-core-helper.md#cases-for-the-bench)).
 - The EFB app's button, while a guard denies: the refusal cue and notice, as for the key.
-
-In the sim:
-
-- In the 58P, a long press bound to a flight-hardware button that the pilot's sim bindings send to the autopilot disconnect, with its KFC 150 engaged: a tap disconnects the autopilot alone, and a hold disconnects it and takes control.
+- A bound key typed into another program: nothing crosses; with a popped-out display in front: control passes; a bound button pressed with another program in front: control passes.
 
 ## Left open
 

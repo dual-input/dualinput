@@ -204,6 +204,13 @@ When control passes, [soft takeover](#soft-takeover-on-handover) starts.
 - **Open questions:** accuracy with non-native English accents, which is the first thing to test.
   [03-v1-scope](03-v1-scope.md#voice-phrases) settles which phrases v1 accepts, from the conventions regulators, militaries, and airlines document.
 
+### Binding conflicts with the sim
+
+Crosscheck reads the sim's own key and button bindings, and warns when the take-control input is also bound in the sim, where v1 only asks the pilot to check ([take-control](../control/01-take-control.md#the-binding)).
+
+- **Tech:** whether a program outside the sim can read the sim's bindings, and from where, is unknown.
+- **Product:** a pilot who binds a key the sim uses learns of it before a press does both.
+
 ### Soft takeover on handover
 
 When control passes, the new PF's hardware throttle can sit far from the aircraft's throttle, and the aircraft's throttle jumps to match it.

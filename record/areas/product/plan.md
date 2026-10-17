@@ -73,6 +73,7 @@ The picks, picked on 2026-10-02:
   - The rest of the profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
   - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
   - The voice phrases, from [Voice handover](ideas.md#voice-handover), moved from v1 on 2026-10-17, because a voice handover is a nice-to-have that v1 can ship without (user)
+  - [Binding conflicts with the sim](ideas.md#binding-conflicts-with-the-sim), if the sim's bindings can be read, picked on 2026-10-17 (user)
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
   - [EventBus bridge](ideas.md#eventbus-bridge)

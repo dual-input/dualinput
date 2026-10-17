@@ -104,9 +104,9 @@ Decides:     The scope of every v1 feature.
 >
 > Since 2026-10-17, v1 has no plugins, the 58P's included, which replaces [plugins](#plugins)' In v1 ([plugins and the sandbox](../plugins/01-plugins.md)):
 >
-> - The 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, and writes them through the gauges' own `H:` events, so it syncs the ADF's modes, the KAS 297B's arming and armed vertical speed, and the radar's range, alert, profile, hold, and track with no plugin; and plugins come with the first pick that needs code, designed afresh then (user, 2026-10-17).
+> - The 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, and writes them through the gauges' own `H:` events, and plugins come with the first pick that needs code, designed afresh then (user, 2026-10-17).
 > - The KX 155B's knob-pulled states need no write method: a `toggle` on the knob's `H:` event sets them, and the other radios' knob-pulled states are variables their code reads back, which settles the unverified line on them.
-> - The ADF's elapsed timer runs on each machine from the presses it replays, so a late joiner's starts at 0, and the tablet's failures stay each machine's own unless the crew sets the failure rate to 0, which the profile syncs.
+> - A late joiner's ADF elapsed timer starts at 0, and the tablet rolls each machine's own failures unless the crew sets its failure rate to 0, which the profile syncs ([no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
 > - `radioConfigLoad` is the KNS-81's waypoint load, and it also tunes NAV 3 to waypoint 1 and writes that frequency into the waypoint on display, which answers the trace [plugins](#plugins)' Not in v1 left open (read in bksq-aircraft-baronpro 0.1.1, `KNS81.js`, `radioConfigLoad` and `setStandbyFrequency`; [the Baron's gauge state](../plugins/results/2026-10-17-baron-gauge-state.txt)).
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.

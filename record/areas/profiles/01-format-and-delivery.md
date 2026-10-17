@@ -25,12 +25,11 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 > - An entry with a `location` may also take `deadband`, the smallest change of the entry's number, in its own units, that brings the hand, which the author sets on an axis ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
 > - The seat tool and the click tool are the two commands of `tools/profile-author`, and the click tool marks each control with a key rather than a click, so walking the entries changes nothing in the cockpit ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)).
 >
-> Since 2026-10-17, [plugins and the sandbox](../plugins/01-plugins.md) changes this document in four places:
+> Since 2026-10-17, [plugins and the sandbox](../plugins/01-plugins.md) changes this document in three places:
 >
-> - [Names](#names) gains `instrument(key, path)`, a value in a gauge's JavaScript, which a state entry may watch and nothing may write; a boolean reads as 1 or 0, and any value that's neither a number, text, nor a boolean is an error for its entry ([the instrument name](../plugins/01-plugins.md#the-instrument-name)).
+> - [Names](#names) gains `instrument(key, path)`, a value in a gauge's JavaScript, which a state entry may watch and nothing may write ([the instrument name](../plugins/01-plugins.md#the-instrument-name)).
 > - v1's level has no plugins, so no `plugin:` key, `plugin.state`, or `plugin.write`: [plugins](#plugins), the plugin's write method in [writing](#writing), and the plugin's runtime in [the sandbox](#the-sandbox) wait for plugins' design, and a setting in a gauge's JavaScript is written through the gauge's `H:` events, where [plugins](#plugins) has our panel bridge's operations write it.
 > - [What fails a load](#what-fails-a-load) adds `instrument()` in a `write`, an event entry's `watch`, or an `ignore`, and a path other than names and whole numbers separated by dots, with `()` only at its end.
-> - The 58P's radios need none of [deferred](#deferred)'s items, and its tablet's failures, which would need settings on following machines, stay out of v1.
 
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.

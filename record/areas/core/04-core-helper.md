@@ -14,8 +14,8 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > Since 2026-10-17, the mouse also reports each wheel notch, with the cursor's place, and the right button's release carries the raw counts the mouse moved while the button was held, summed as `mouse.mjs` sums them, where [raw input](#raw-input) leaves out the wheel and `FromHelper::Mouse` carries no counts; avatars brings a hand for a notch, and judges a right press a click by its time, its cursor, and its counts ([avatars](../avatars/01-avatars.md#the-mouse)).
 > Since 2026-10-17, [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md#atc-audio) changes this document in four places, and settles [left open](#left-open)'s item on the bitrate, the gate, the buffer's rule, and how the ATC app is picked:
 >
-> - A capture names a list of programs, and the helper captures the first that's running, where [capturing a program](#capturing-a-program) names one; `Capturing` also names the program captured, and whether the Windows mixer mutes it.
-> - `ToHelper::Frame` also carries the frame's stamp from the ATC host, by which the helper tells one transmission from the next, beside its number.
+> - A capture names a list of programs, and the helper captures the first that's running, where [capturing a program](#capturing-a-program) names one; `Capturing` also names the program captured.
+> - `ToHelper::Frame` also carries the frame's stamp from the ATC host, beside its number: a stamp more than 30ms past what the numbers account for from the frame before starts a new transmission.
 > - A stream's `Buffer` holds the depth's rule, the smallest depth that would have played 98% of the last 10s of frames on time, set at each transmission's first frame between 60ms and 300ms, and the stream's gain, from the ATC volume setting.
 > - `FromHelper` gains a report at each transmission's end, its frames played, concealed, and dropped late, and its depth, which the recording keeps.
 

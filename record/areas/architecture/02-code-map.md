@@ -88,7 +88,7 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > - Traffic has a routine, `Traffic`, in `traffic-routines`, which writes every copy's pose each frame, so traffic reads no `Frame` event; the module's list in [routines in our WASM module](#routines-in-our-wasm-module) gains `traffic::Traffic`, and its slot, `CROSSCHECK_ROUTINE_TRAFFIC`, joins [names the sim shares](#names-the-sim-shares).
 >   So the case in the sim seam's [cases for the bench](#cases-for-the-bench) that writes traffic's copies each `Frame` event through the loop becomes `Traffic`'s, and [left open](#left-open)'s item on moving those writes into the edge falls away.
-> - The engines' bottom line gains `object-mirror`, the gate and the playout, generic over the sample, which traffic and `Traffic` use.
+> - The engines' bottom line gains `object-mirror`, the gate and the playout, generic over the sample, which traffic and `Traffic` use; so [tiers](#tiers)' rule that a feature's routines depend on the message crate and the routine host alone also admits an engine that keeps the loop's rules and builds for wasm32.
 > - Traffic's row in [features](#features) gains the routine, and uses `clients` and `object-mirror` beside its three; ATC audio's uses `clients` too.
 > - The module's 0.1ms a frame in [budgets for work in the sim](#budgets-for-work-in-the-sim) grows by `Traffic`'s, under 0.1ms with 25 moving copies.
 

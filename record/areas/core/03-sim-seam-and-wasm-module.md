@@ -23,7 +23,7 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 >
 > Since 2026-10-17, [flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module) changes this document in four places:
 >
-> - A routine slot's header also carries the core's counter at the write, in µs, after the slots hash in [its slots](#its-slots), and the routine host's `Frame::now` is WASI's monotonic clock plus the largest gap between that counter and the clock over the last 60s, where the module reads that clock only to count its status slot's seconds.
+> - A routine slot's header also carries the core's counter at the write, in µs, after the slots hash in [its slots](#its-slots), and the routine host's `Frame::now` is its estimate of the core's counter ([the core's counter in our module](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)), where the module reads WASI's monotonic clock only to count its status slot's seconds.
 > - The module also creates a report slot, `CROSSCHECK_REPORT_` and the routine's ID, read-only, for each routine that reports, and a feature requests it through `cx.module().reports(routine)`, beside the calls in [what a feature calls](#what-a-feature-calls), which a partly recorded unit may declare `.unrecorded()`.
 > - [Wants and the sim's APIs](#wants-and-the-sims-apis) gains a report, through `SimConnect_SetClientData` on the module's own connection, and events with values, through `fsEventsTriggerKeyEvent` with its values.
 > - The sketch in [what a feature calls](#what-a-feature-calls) has flight-model sync watch the pose each sim frame once a profile loads; it feeds its routine `Lead` instead, which reads the pose in the module, and loads no profile.

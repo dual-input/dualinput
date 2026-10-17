@@ -42,6 +42,8 @@ Decides:     The scope of every v1 feature.
 > - The [preflight match check](#preflight-match-check) compares a copy's package, where it's installed, and its manifest's version, and a streamed copy, which keeps no version on disk, shows against an installed one as a warning that asks both pilots to compare versions themselves, which settles its open question on what identifies a copy ([the match check](../session/02-units.md#the-match-check)).
 > - A session in an aircraft with no published profile flies with state sync, pointer sync, and avatars idle, and the match check shows the missing profile as an error ([the match check](../session/02-units.md#the-match-check)).
 >
+> Since 2026-10-17, the PM sees the aircraft about 0.4s behind the PF, where [flight-model sync](#flight-model-sync) has 0.4s plus the network delay, because a following machine places each sample through the clock offset rather than by when it arrived, so the trip uses up part of the 0.4s; and through a short gap it carries the aircraft along the line through its last two samples, where the note of 2026-10-11 above carries it on its last velocities ([flight-model sync's design](../flight-model/01-flight-model-sync.md#drawing)).
+>
 > Since 2026-10-17, [avatar sync](#avatar-sync) changes in 15 places (user, 2026-10-17), and [the avatars' tentative decisions](../avatars/decisions.md) give the reasons for the hands:
 >
 > - A hand holding the yoke stays on its horn on every machine, the receiving machine placing the grip from its own yoke, since a following machine draws the aircraft and its yoke 0.4s behind ([the other machine](../avatars/decisions.md#the-clicking-pilots-machine-finds-the-point-and-the-other-machine-only-draws-it)).

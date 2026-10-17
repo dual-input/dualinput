@@ -1415,8 +1415,8 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Our WASM module keeps the core's counter, and a routine of ours reads and stamps the flying aircraft
 
-- **Decided:** on the flying machine, flight-model sync's routine `Lead` reads the aircraft's pose, velocities, surfaces, and toe brakes at each 50ms mark and reports each read, stamped with its frame's `Frame::now`; the routine host's `Frame::now` is WASI's monotonic clock plus the largest gap, over the last 60s, between the core's counter in a slot's header and that clock as the module read the header.
-  This settles the spine's two items under flight-model sync: the module stamps on its own clock, carried onto the core's timeline by the module, and no v1 unit waits on how far a page's arrival stamp trails the sim's read ([left open](01-spine.md#left-open)).
+- **Decided:** on the flying machine, flight-model sync's routine `Lead` reads the aircraft's pose, velocities, surfaces, and toe brakes at each 50ms mark and reports each read, stamped with its frame's `Frame::now`; the routine host's `Frame::now` is WASI's monotonic clock plus the largest gap, since the module started, between the core's counter in a slot's header and that clock as the module read the header.
+  This settles the spine's item on the module's clock: the module stamps on its own clock, carried onto the core's timeline by the module ([left open](01-spine.md#left-open)).
   Settled in node 6.10 by the user, 2026-10-17 ([flight-model sync](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)).
 - **Because:**
   - A variable read through SimConnect and stamped as it arrived trailed its frame's slot by up to 2.90ms at the 99th percentile and once by 193ms ([architecture log][a1009]), 15m off the path at 150 kt.
@@ -1434,15 +1434,15 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Flight-model sync can't change control, which the session crate holds, and the next sample after the key replaces each one dropped.
 - **Leaves out:** nothing.
 
-## A following machine draws 400ms behind, carries through a gap for up to 2s, holds through the flying machine's pause, and eases back over 3s
+## A following machine draws 400ms behind, carries through a gap for up to 2s, and eases back over 3s, and a paused flying machine repeats its last sample
 
-- **Decided:** `Follow` draws the aircraft 400ms behind its samples, along straight lines between them; past the newest, it carries the position along the last two samples' line for up to 2s, then holds, and past a sample marked paused it holds at once; it eases from what it last wrote to the drawn pose over 3s, and writes a drawn pose more than 1km away at once; it starts by carrying its aircraft's own motion; and the following core moves the clock offset it applies by at most 5ms a second.
-  This settles what [softening a short gap](../network/01-between-machines.md#softening-a-short-gap) and [clock offsets](../network/01-between-machines.md#clock-offsets) leave to flight-model sync: how far it carries, how it eases, how the flying machine marks a pause, and easing the offset, which [decision 038](../../decisions/038-clock-offset-from-timed-exchange.md) leaves to it too.
+- **Decided:** `Follow` draws the aircraft 400ms behind its samples, along straight lines between them; past the newest, it carries the position along the last two samples' line for up to 2s, then holds; it eases from what it last wrote to the drawn pose over 3s, and writes at once a correction of more than 1km; it starts by carrying its aircraft's own motion; a paused flying machine sends its last sample again every 50ms; and the following core moves the clock offset it applies by at most 5ms a second.
+  This settles what [softening a short gap](../network/01-between-machines.md#softening-a-short-gap) and [clock offsets](../network/01-between-machines.md#clock-offsets) leave to flight-model sync: how far it carries, how it eases, how a pause reaches the following machine, and easing the offset, which [decision 038](../../decisions/038-clock-offset-from-timed-exchange.md) leaves to it too.
   Settled in node 6.10 by the user, 2026-10-17 ([the following machine](../flight-model/01-flight-model-sync.md#the-following-machine)).
 - **Because:**
-  - Samples later than 400ms came to 0.4% or less in every one of 2.3's runs but one, at 1.6% ([softening a short gap](../network/01-between-machines.md#softening-a-short-gap)).
+  - In the friends' runs of 2.3, samples later than 400ms came to 0.4% or less in all but one, at 1.6% ([softening a short gap](../network/01-between-machines.md#softening-a-short-gap)).
   - A dead direct path gives way to the relay 2s after it dies ([paths](../network/01-between-machines.md#paths)), and 2s of carrying strays about 8m in a standard-rate turn at 150 kt (arithmetic).
-  - At a handover, the ex-PF's aircraft must fall 0.4s plus the trip behind; carried and eased, it slows for a few seconds, where held and written it would stop in the air for 0.4s and then jump back.
+  - At a handover, the ex-PF's aircraft must fall 0.4s behind; carried and eased, it slows to about three-quarters of its speed for 3s, where held and written it would stop in the air for 0.4s and then jump back about 31m at 150 kt (arithmetic).
 - **Leaves out:** the starting values, which the bench and friends' sessions tune, and a delay that follows the path.
 
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start

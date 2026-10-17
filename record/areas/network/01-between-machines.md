@@ -24,10 +24,10 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > - The backend is a Cloudflare Worker on D1, which [who does what](#who-does-what) calls a candidate.
 > - In the CI tests that [two cores on one PC](#two-cores-on-one-pc) describes, a proxy that holds bytes back stands in for a relay's loss, and [left open](#left-open)'s check of v1's full mix on a direct path under loss runs by hand on our droplets.
 >
-> Since 2026-10-17, [flight-model sync](../flight-model/01-flight-model-sync.md) changes this document in two places, and settles what [softening a short gap](#softening-a-short-gap) and [clock offsets](#clock-offsets) leave to it:
+> Since 2026-10-17, [flight-model sync](../flight-model/01-flight-model-sync.md) changes this document in two places:
 >
 > - A flight-model sample carries its control value's generation alone, its PF being its sender, where [channels](#channels) and [control](#control) have it carry the whole value; and a following machine drops a sample under a newer value until the control key arrives, where control has a receiver adopt a newer value met on a sample.
-> - The flying machine sends about 20 samples a second, at its frames' 50ms marks, and repeats its last sample every 50ms while its sim is paused, marked paused; a following machine carries the aircraft on for up to 2s past its newest sample, holds after that or at once past a sample marked paused, eases back over 3s, and moves the offset it applies by at most 5ms a second.
+> - [The following machine](../flight-model/01-flight-model-sync.md#the-following-machine) settles what [softening a short gap](#softening-a-short-gap) and [clock offsets](#clock-offsets) leave to flight-model sync, and carries the aircraft along the line through its last two samples, where softening a short gap carries it on its last velocities.
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

@@ -68,8 +68,9 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - Each slot's header also carries the core's counter at the write, and `Frame::now` is the routine host's estimate of that counter, so `Follow`'s `f.now - DELAY` and the samples it reads are on the core's timeline.
 > - Past its newest sample, and before its first, `Follow` moves the frozen aircraft on, carrying it and then easing it in, where [routines in our WASM module](#routines-in-our-wasm-module)'s "through a gap" leaves what it writes open and the second case in [cases for the bench, for work in the sim](#cases-for-the-bench-for-work-in-the-sim) writes nothing for 400ms; the aircraft stays frozen throughout, and a gap longer than 2s is held, as the 20s case has it.
 >
-> Since 2026-10-17, [pointer sync](../pointer-sync/01-pointer-sync.md) changes this document in two places:
+> Since 2026-10-17, [pointer sync](../pointer-sync/01-pointer-sync.md) changes this document in three places:
 >
+> - Pointer sync sends each gesture as a down, moves, and an up, so its kind is a gesture's, whose up counts as applied once the display's panels are done with it, where [what a feature registers](#what-a-feature-registers) has a press kind count as applied at its release and its sketch registers `kind::PRESS` and an unlock command.
 > - Pointer sync has parts only in the core and the panels, where [features](#features) gives it parts in the EFB app and the desktop app too, and it depends on the session, for the PF.
 > - The unseen lock lapses 2s after the panel module last renews it, and no message from the core renews it, where [what the bridge owns](#what-the-bridge-owns) has every lock hold while the core renews it; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 

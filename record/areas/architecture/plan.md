@@ -776,6 +776,7 @@ It reads 03-v1-scope's [plugins](../product/03-v1-scope.md#plugins), 04-room-for
 It settles the spine's open item on which APIs the panel bridge and our WASM module offer plugins ([01-spine](01-spine.md#left-open)), whether the 58P's plugin needs any of 01-format-and-delivery's deferred APIs, and whether QuickJS-ng's hash seed changes anything a script sees ([02-code-map](02-code-map.md#left-open)).
 Its answer goes in `record/areas/plugins/01-plugins.md`.
 Exit: the user agrees to that design doc.
+Done on 2026-10-17.
 Raised elsewhere: by 5.1, which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which 5.1 gives no feature, once the features they may plug into are designed (user, 2026-10-14).
 Raised elsewhere: by 5.3, which operations the panel bridge's `ops` module offers plugins, and how a plugin's API names the panels those operations reach, since the core loads `ops` only into panels named when the profile loads ([02-code-map](02-code-map.md#modules-in-the-panel-bridge)).
 Raised elsewhere: by 6.4, how a plugin's channel instance gets its number and announces it on the session channel, since every other channel is a constant in the message crate, and a receiver drops a channel no unit registered ([02-units](../network/02-units.md#channels-and-sends)).

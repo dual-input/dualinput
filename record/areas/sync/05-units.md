@@ -8,6 +8,7 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 
 > **Note**
 > Since 2026-10-17, the cockpit stream's state also says whether preflight's end started the catch-up that runs, which pointer sync reads to play rather than skip the gestures queued behind that one; and a pointer sync up, the one gesture message that answers `Unfinished`, is done once its panels are done with it, where [kinds](#kinds) has pointer sync's press finish at its release ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+> The stream's guard on `TakeControl`, in [catch-up](#catch-up), denies control only while this pilot's catch-up or replay runs over a link that's up, "over a link that's up" holding for both, as [04-order-and-recovery](04-order-and-recovery.md#catch-up) has it, so a pilot whose link to the PF is lost can take control during a catch-up ([take-control](../control/01-take-control.md#taking-control)).
 
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.

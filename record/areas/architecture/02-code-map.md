@@ -74,7 +74,7 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - Pointer sync has parts only in the core and the panels, where [features](#features) gives it parts in the EFB app and the desktop app too, and it depends on the session, for the PF.
 > - The unseen lock lapses 2s after the panel module last renews it, and no message from the core renews it, where [what the bridge owns](#what-the-bridge-owns) has every lock hold while the core renews it; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 >
-> Since 2026-10-17, the voice phrases are a Soon pick (user, 2026-10-17), so `voice` leaves v1's units in [features](#features), and comes back with that pick, as its row there has it; and take-control reads this core's link to the PF from the session's `status` keys, beside what its row in [features](#features) has it use ([take-control](../control/01-take-control.md)).
+> Since 2026-10-17, the voice phrases are a Soon pick (user, 2026-10-17), so `voice` is out of v1's units, and its rows in [features](#features) and [systems](#systems) describe it for that pick ([take-control](../control/01-take-control.md)).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

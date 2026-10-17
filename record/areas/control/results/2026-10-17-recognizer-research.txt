@@ -252,3 +252,9 @@ route.
 
 Unverified: the unpacked size of the Parakeet 110M model; the CPU cost of the keyword spotter and of Parakeet 110M on a desktop
 CPU; most candidates' memory; accent-specific results for any keyword spotter or grammar recognizer.
+
+CORRECTION, from the fact-check of 2026-10-17
+In 1b, the keyword spotter's "fine-tuned, 98.7% and 0.6 an hour" belongs to the 20-command set; the 200-command set's
+fine-tuned figures are 97.9% and 1.3 an hour (https://github.com/k2-fsa/icefall/blob/master/egs/gigaspeech/KWS/RESULTS.md).
+The list of endpointing values runs from 0.1s to 5.0s, so section 2's line that every endpointer uses 0.5s to 1.2s doesn't
+hold. Moonshine's benchmark page gives Whisper Tiny's 1,141ms without naming the implementation.

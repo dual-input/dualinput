@@ -1478,10 +1478,11 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   This changes [03-v1-scope](../product/03-v1-scope.md#take-control-key)'s take-control key, under which the new PF hears "you have control" and the old one "they have control" (user, 2026-10-17).
   Settled in node 6.12 by the user, 2026-10-17 ([take-control](../control/01-take-control.md)).
 - **Because:**
-  - The helper reads a press without taking it from the sim ([raw input](../core/04-core-helper.md#raw-input)), so a long press lets take-control share a button the sim uses, such as the yoke's autopilot disconnect, which a tap still disconnects alone.
+  - The helper's Raw Input in sink mode receives a press while the sim is in front, and only another flag withholds the legacy messages (documented, [RAWINPUTDEVICE](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevice)), so a long press lets take-control share a button the sim uses, such as one bound to the autopilot disconnect, which a tap still disconnects alone; that the sim still acts on it is unverified until a case in the sim runs.
+  - A long press also keeps a key typed in another program from taking control, since the helper reads a bound key whichever program is in front.
   - A pilot pressing hardware in VR gets no other sign of a refusal before looking at the banner.
   - Good neutral voice lines are hard to come by, and the cue and the banner already mark the pass (user, 2026-10-17).
-- **Leaves out:** the cues' sounds, made in the build, and the notices' words, for [6.16](plan.md#616-the-apps).
+- **Leaves out:** the cues' sounds, which the build makes; and the notices' words, for [6.16](plan.md#616-the-apps).
 
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it

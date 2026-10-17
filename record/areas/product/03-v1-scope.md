@@ -76,7 +76,8 @@ Decides:     The scope of every v1 feature.
 > - A press on a display while another pilot's gesture plays there flashes the display in one color, with no words, until its up, where the overlay carried over stays unseen until it has blocked for 12s (user, 2026-10-17).
 > - Two pilots pressing one display within one trip of each other can leave it different on the two machines, which is rare because each sees the other's figure reach for it, and which settles the section's open question on both pilots typing on one display ([known limits](../pointer-sync/01-pointer-sync.md#known-limits)).
 >
-> Since 2026-10-17, the [voice phrases](#voice-phrases) are a Soon pick, out of v1, because a voice handover is a nice-to-have that v1 can ship without (user, 2026-10-17; [the plan](plan.md)), so in v1 control passes by the take-control key and buttons alone, and Crosscheck captures no microphone.
+> Since 2026-10-17, the [voice phrases](#voice-phrases) are a Soon pick, out of v1, because a voice handover is a nice-to-have that v1 can ship without (user, 2026-10-17; [the plan](plan.md)).
+> So in v1 control passes only when a pilot takes it, by the take-control key or buttons, and the PF has no way to give it, where the [take-control key](#take-control-key)'s Not in v1 has the PF give it by voice; and Crosscheck captures no microphone, so the microphone setting the note of 2026-10-16 above puts beside the output device comes with that pick.
 > [Take-control](../control/01-take-control.md) changes the [take-control key](#take-control-key) in three places:
 >
 > - No recorded line plays when control passes: every pilot in the flight hears the control-passed cue, and the banner shows "You have control" to the new PF and who has control to the others (user, 2026-10-17).

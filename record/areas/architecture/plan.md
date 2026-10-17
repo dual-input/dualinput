@@ -792,6 +792,7 @@ It reads 03-v1-scope's [EFB app](../product/03-v1-scope.md#efb-app) and [notific
 It settles the spine's open items under the apps ([01-spine](01-spine.md#left-open)), and how the status list looks ([01-between-machines](../network/01-between-machines.md#left-open)).
 Its answer goes in `record/areas/interface/01-apps.md`.
 Exit: the user agrees to that design doc.
+The user narrowed it on 2026-10-17 to how the apps connect to the rest of Crosscheck: the apps' looks and words, which slices each shows, and their own code wait for the apps' stage, which [left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage) lists.
 Raised elsewhere: by 6.1, whether the desktop app offers a way to quit Crosscheck, which the core runs as a Leave before it exits ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
 Raised elsewhere: by 6.2, where each notice shows, by its level; which slices each app's frame shows; what the apps tell the pilot after a `bye` and after a socket that closed without one; whether a component whose version differs counts as trouble; and the WebSocket client in the desktop app's Rust side, which sends no `Origin` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
 Raised elsewhere: by 6.3, how the pilot sees a WASM module that's missing, differs, or stopped, and which of sim awareness's state the apps show ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
@@ -821,6 +822,7 @@ Raised elsewhere: by 6.4, the installer's Windows Firewall rule for the core's p
 Raised elsewhere: by 6.5, the core starts `crosscheck-core-helper.exe` from its own folder, so the installer puts the two side by side ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 Raised elsewhere: by 6.7, the session file is JSON in the core's data folder, and the watcher holds updates back while it exists ([the session's units](../session/02-units.md#the-session-file)).
 Raised elsewhere: by 6.13, our Community package carries the figure's SimObject, `CROSSCHECK_FIGURE_PILOT`, and Crosscheck's empty avatar, whose build avatars' stage of the build settles in the sim ([avatars](../avatars/01-avatars.md#left-open)).
+Raised elsewhere: by 6.16, the desktop app offers no quit, so the watcher's tray is where a pilot quits Crosscheck; the core starts the desktop app's program from its own folder when the EFB app's button asks and no desktop app is connected, so the installer puts the two side by side; and the check that names another package's `VCockpit.js` override, with its notice, its match check item, and the desktop app's offer to disable that package, is this node's ([the apps](../interface/01-apps.md#trouble)).
 
 ## 6.18 The build
 
@@ -840,6 +842,7 @@ Raised elsewhere: by 6.10, flight-model sync's routine crate `Lead` joins the mo
 Raised elsewhere: by 6.13, the figure's SimObject in `features/avatars/figure/` compiles with the SDK's `fspackagetool`, which our probes ran only with the sim closed, and which failed while a crashed sim's process lingered ([avatars log](../avatars/log.md#2026-10-03-a-skinned-stick-took-the-sim-down-in-an-in-sim-build-and-a-crashed-sim-held-fspackagetool-until-it-was-closed)), so whether CI's Windows runners can build it with no sim installed, or a developer builds it and the repository keeps the result, is the build's; and `tools/profile-author` builds with the other tools ([avatars](../avatars/01-avatars.md#the-units)).
 Raised elsewhere: by 6.14, traffic's routine `Traffic`, in `traffic-routines`, joins the module's list, and `object-mirror` builds for wasm32 and x86_64 ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#the-units)).
 Raised elsewhere: by 6.15, state sync's second panel module, `instrument-reads`, builds into `/Crosscheck/modules/` beside `h-events`, and the module's list has no `Mechanisms`, since v1 has no plugins ([plugins and the sandbox](../plugins/01-plugins.md#reading-it-in-the-panel)).
+Raised elsewhere: by 6.16, the map check also fails a platform unit, in Rust or TypeScript, whose source names a feature's module of the message crate; and each app keeps a list of its parts, the desktop app's in `apps/desktop` and the EFB app's in `sim-package/pages`, which deleting a feature edits by one line ([the apps](../interface/01-apps.md#a-features-parts)).
 
 ## 7 Testing
 
@@ -873,6 +876,7 @@ It reads 6's and 7's answers.
 Its answer goes in the plan or plans it chooses, which hold v1's build stages.
 Exit: the user agrees to those plans.
 Waits on 6 and 7.
+Raised elsewhere: by 6.16, the apps' stage designs the apps' looks and words, which slices each shows, and the rest of [left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage) before it builds them, and settles there the apps' own code, among it which copy of the MSFS Avionics Framework the EFB app draws with (user, 2026-10-17).
 
 [5.1.1]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start

@@ -108,6 +108,12 @@ Decides:     The scope of every v1 feature.
 > - The KX 155B's knob-pulled states need no write method: a `toggle` on the knob's `H:` event sets them, and the other radios' knob-pulled states are variables their code reads back, which settles the unverified line on them.
 > - A late joiner's ADF elapsed timer starts at 0, and the tablet rolls each machine's own failures unless the crew sets its failure rate to 0, which the profile syncs ([no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
 > - `radioConfigLoad` is the KNS-81's waypoint load, and it also tunes NAV 3 to waypoint 1 and writes that frequency into the waypoint on display, which answers the trace [plugins](#plugins)' Not in v1 left open (read in bksq-aircraft-baronpro 0.1.1, `KNS81.js`, `radioConfigLoad` and `setStandbyFrequency`; [the Baron's gauge state](../plugins/results/2026-10-17-baron-gauge-state.txt)).
+>
+> Since 2026-10-17, [the apps' design](../interface/01-apps.md) changes this document in three places:
+>
+> - Any client changes any setting and can watch the notices, so whether the [EFB app](#efb-app) offers settings and shows notices, which its Not in v1 keeps out, is the apps' design (user, 2026-10-17).
+> - The [notification banner](#notification-banner)'s open question on the panel opening at every flight load passes to the EFB app's code, which calls every 2s until the panel opens, and a check in the sim times it.
+> - The EFB app's button that brings the desktop app to the front may only flash its taskbar button while the sim holds the foreground, since Windows lets a program take the foreground only on conditions the sim then meets (documented, [SetForegroundWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setforegroundwindow)), which a check in the sim settles.
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

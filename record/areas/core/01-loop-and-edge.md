@@ -19,6 +19,7 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 > - The edge puts a same-length placeholder in place of the home folder's path in every input, and the real path back in each output that names a file, and hands up the clipboard only when it holds an invite code.
 >
 > Since 2026-10-16, a job may also run an engine's work on what it read, as the profile loader's job reads, parses, and checks a bundle and hands up the checked profile encoded with postcard, beside the jobs [timers, jobs, and IDs](#timers-jobs-and-ids) lists; and the edge fetches over HTTPS through reqwest 0.13 with rustls, which iroh already brings into the core ([the profiles' units](../profiles/02-units.md#fetching)).
+> Since 2026-10-17, the desktop app offers no quit, so a quit comes from the watcher's tray or from Windows, where [quitting](#quitting) also has it come from the desktop app; and the edge also starts the desktop app's program when the EFB app's button asks for it and no desktop app is connected ([the apps](../interface/01-apps.md#quit)).
 
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.

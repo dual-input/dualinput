@@ -98,6 +98,13 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - State sync has a second panel module, `instrument-reads`, which reads the values in a gauge's JavaScript that a profile's `instrument()` names.
 > - The sandbox's contexts hold, of rquickjs's intrinsics, `Eval` and `RegExp` alone, delete `Math.random` and `queueMicrotask`, and pin the stack's top at each call into JS, beside [one loop](#one-loop)'s missing clock.
 > - That settles three items in [left open](#left-open): QuickJS-ng's hash seed changes nothing a script sees, and the hooks plugins reach, and `ops`' operations and how a plugin names their panels, wait for plugins' design after v1.
+>
+> Since 2026-10-17, [the apps' design](../interface/01-apps.md) changes this document in four places:
+>
+> - A feature's section in an app is one part, with a `start`, a `stop`, and views keyed by the places its app names, which the app's list names in one line; `efb-shell` also holds the banner's page, and the shells reach a feature only through the notices, the settings, and the match check's items ([a feature's parts](../interface/01-apps.md#a-features-parts)).
+> - [The map check](#the-map-check) also fails a platform unit, in Rust or TypeScript, whose source names a feature's module of the message crate, which [tiers](#tiers)' rules allow, since the message crate is an engine.
+> - In [features](#features), traffic, ATC audio, and state sync have parts in the apps wherever the apps' design shows their slices, where the table gives traffic and ATC audio a desktop part and state sync none, and voice is out of v1.
+> - `clients` also holds a command for a notice clicked outside its action and one that brings the desktop app forward, and raises a trouble notice when no cockpit panel connects within 10s of the profile loading; the sim service raises one for a module that's missing, from another build, or stopped while a feature feeds a routine ([trouble](../interface/01-apps.md#trouble)).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

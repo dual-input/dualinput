@@ -27,6 +27,8 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > - The module also creates a report slot, `CROSSCHECK_REPORT_` and the routine's ID, read-only, for each routine that reports, and a feature requests it through `cx.module().reports(routine)`, beside the calls in [what a feature calls](#what-a-feature-calls), which a partly recorded unit may declare `.unrecorded()`.
 > - [Wants and the sim's APIs](#wants-and-the-sims-apis) gains a report, through `SimConnect_SetClientData` on the module's own connection, and events with values, through `fsEventsTriggerKeyEvent` with its values.
 > - The sketch in [what a feature calls](#what-a-feature-calls) has flight-model sync watch the pose each sim frame once a profile loads; it feeds its routine `Lead` instead, which reads the pose in the module, and loads no profile.
+>
+> Since 2026-10-17, a `watch` and a `key` in [what a feature calls](#what-a-feature-calls) can name an object by its ID rather than the pilot's aircraft, as avatars watches `SIMCONNECT_OBJECT_ID_USER_AVATAR` on foot and freezes each figure it creates; and the figure's SimObject title is `CROSSCHECK_FIGURE_PILOT`, of the kind `FIGURE` ([avatars](../avatars/01-avatars.md#names)).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

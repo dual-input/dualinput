@@ -18,6 +18,12 @@ Decides:     A profile's syntax, fields, and file layout; how its script names a
 >
 > Since 2026-10-17, a seat has no `leave_radius`, because a pilot leaves a seat only by taking another, going on foot, or moving their camera more than 0.8m behind its hip, so `take_radius` is the one radius [seats](#seats) has, and whether a seat may change the 0.8m is [6.13](../architecture/plan.md#613-avatars)'s to settle ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
 > Only an entry whose control a pilot moves with hardware or a key, and the aircraft never moves itself, gets a `location`, and the author leaves the rest out as the click tool walks the entries, since Crosscheck can't tell a pilot's change from the aircraft's ([avatars' tentative decisions](../avatars/decisions.md#a-click-or-a-change-at-a-controls-spot-brings-the-hand-and-on-foot-the-hand-touches-up-to-3m)).
+>
+> Since 2026-10-17, [avatars' design](../avatars/01-avatars.md) changes this document in three places:
+>
+> - A seat's `take_radius` is 0.4m unless the profile gives one, and of the seats whose radius holds the camera, the one with the nearest eye takes it, so no check limits a radius, where [seats](#seats) leaves the default open ([a seat](../avatars/01-avatars.md#a-seat)).
+> - An entry with a `location` may also take `deadband`, the smallest change of the entry's number, in its own units, that brings the hand, which the author sets on an axis ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
+> - The seat tool and the click tool are the two commands of `tools/profile-author`, and the click tool marks each control with a key rather than a click, so walking the entries changes nothing in the cockpit ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)).
 
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.

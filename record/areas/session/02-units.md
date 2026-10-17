@@ -15,6 +15,8 @@ Decides:     The session crate's members, session keys, control, session file, j
 > - The match check's profile item takes a fourth value, "Couldn't get the session's profile", for a pinned bundle a core couldn't fetch, find, or read, and it and "No profile for this aircraft" are errors even when every member shows them ([the match check's item](../profiles/02-units.md#the-match-checks-item)).
 >
 > Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) starts a following machine's catch-up when its profile loads after preflight has ended, where [preflight](#preflight) starts a late joiner's on `FlightChanged`, since a joiner's profile loads only once it's in the flight; a member the crew went without still starts its catch-up at `PreflightEnded`.
+>
+> Since 2026-10-17, the session crate keeps in its state the folder of the package its match check's job found, which avatars reads to find the aircraft's models; and seat claims ride avatars' poses, so the session crate holds none ([avatars](../avatars/01-avatars.md#finding-the-files)).
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

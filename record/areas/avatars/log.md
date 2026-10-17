@@ -9,8 +9,31 @@ In a moving cockpit, a WASM module that writes the figure inside the sim's frame
 The figure's hand goes where the pilot clicks: the ray from the eye through the cursor, cast into the aircraft's interior model, lands within 2mm with no calibration and no control names, and a held press glides along the surface it touched.
 A sidestick's grip moves with its own animations as a yoke does, though of the three sidestick airliners we could read, only the Fenix marks where the hand goes.
 Many figures, each posed from its own object's variables, cost about 18µs a frame each in view and almost nothing out of view.
+The 58P's and the Comanche's models are glTF with no compression, in vertex layouts of MSFS's own that the Rust glTF crate's readers don't take.
 The probes are p01 to p28 in [experiments/areas/avatars](../../../experiments/areas/avatars), and their raw output is in [experiments/areas/avatars/results](../../../experiments/areas/avatars/results).
 Every entry that ran in the sim was measured on MSFS 2024 SunRise 12.2.282174.999 between 2026-10-02 and 2026-10-05, at a gate at LQSA with the Cessna C152 Aerial Advertising unless the entry names another aircraft, on our development machine with GSX Pro 4.0.19 and ChasePlane 26.39.1 installed.
+
+## 2026-10-17: The 58P's models need no glTF compression but carry MSFS's own vertex layouts, and no Rust crate reads them, their behavior files, and their code as the core needs
+
+**Asked:** for node 6.13's [aircraft-model engine](01-avatars.md#the-aircraft-model), what the 58P's and the Comanche's model files hold, and which Rust crates read glTF, behavior XML, and calculator code, and cast a ray, within the loop's rules ([one loop](../architecture/02-code-map.md#one-loop)).
+
+**Expected:** plain glTF, as the probes' own reader took it ([entry below](#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)), and a crate for each job.
+
+**Found:** a research agent read the installed packages and the crates' sources; no sim ran.
+
+- The 58P's interior and exterior models draw 467,188 and 440,174 triangles as their scenes instance them, and none is skinned (read in bksq-aircraft-baronpro 0.1.1, `BaronProfessional_Pressurized_INT.gltf` and `_EXT.gltf`).
+- In both aircraft's four LOD0 files, `extensionsRequired` is only `MSFT_texture_dds`, nothing is compressed or quantized, positions are float, indices unsigned short, and animations float and linear (read in the same package and a2a-aircraft-pa24 2.1.3).
+  Normals, texture coordinates, and colors are signed bytes and shorts that core glTF doesn't allow without `normalized` or `KHR_mesh_quantization`.
+- `gltf` 1.4.1 refuses `MSFT_texture_dds` unless its `allow_empty_texture` feature is on, and its typed readers end in `unreachable!()` on those texture coordinates and colors (read in gltf 1.4.1, `src/mesh/mod.rs`; documented, its open issue #478).
+- `roxmltree` refuses `A2A_Templates.xml`, which the Comanche's cockpit includes, for a `#` in its element names, and `quick-xml` 0.42 reads it (read in both crates' tokenizers).
+- Of the BVH crates, `bvh` 0.13 turns on rayon by default and comes to about 415 MB at 2.6 million triangles, `obvhs` 0.4 calls `Instant::now()` in one of its builders, and `parry3d` 0.31 brings about 10 crates, while Clippy's rules see only our own crates.
+- No Rust crate runs MSFS's calculator code; the probes' own operator set ran 310 of the 58P's 406 animation and visibility codes, and most of the rest failed on template parameters and `@` macros left unexpanded.
+
+**Changed:** the aircraft model is four engines of our own, three of them small, on `serde_json` and `quick-xml`, as [the aircraft model](01-avatars.md#the-aircraft-model) designs them.
+
+**Affects:** [01-avatars](01-avatars.md).
+
+**Evidence:** [the research's report](results/2026-10-17-aircraft-model-research.txt).
 
 ## 2026-10-05: Each figure poses from its own object's variables, and costs frame time in view and almost none out of view
 

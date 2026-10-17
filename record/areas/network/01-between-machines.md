@@ -28,6 +28,8 @@ Decides:     The topology, the transport, the way through home routers, the rela
 >
 > - A flight-model sample carries its control value's generation alone, its PF being its sender, where [channels](#channels) and [control](#control) have it carry the whole value; and a following machine drops a sample under a newer value until the control key arrives, where control has a receiver adopt a newer value met on a sample.
 > - [The following machine](../flight-model/01-flight-model-sync.md#the-following-machine) settles what [softening a short gap](#softening-a-short-gap) and [clock offsets](#clock-offsets) leave to flight-model sync, and carries the aircraft along the line through its last two samples, where softening a short gap carries it on its last velocities.
+>
+> Since 2026-10-17, the seat claims that [channels](#channels) lists among the session channel's keys ride avatars' poses on the avatars channel, each pose carrying the whole figure, since avatars, partly recorded, writes no session key ([the pose](../avatars/01-avatars.md#the-pose)).
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

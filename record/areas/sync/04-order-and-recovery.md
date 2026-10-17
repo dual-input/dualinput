@@ -22,6 +22,8 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 > - Pointer sync sends each gesture as it happens, as a down, moves, and an up, so a gesture's message counts as applied once handed to its panels, and its up once they're done with it, where [the cockpit stream](#the-cockpit-stream) counts a press applied once its panel has played it through to the release.
 > - The catch-up that preflight's end starts skips no press, which queues behind its writes and applies once they're made, since neither cockpit's displays were touched in preflight, where [the cockpit stream](#the-cockpit-stream) skips every press during a receiver's catch-up.
 > - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the replay that [the replay](#the-replay) keeps it locked through.
+>
+> Since 2026-10-17, seat claims ride avatars' poses rather than the session channel, since avatars, partly recorded, writes no session key, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID, where [keys several members write](#keys-several-members-write) has the session channel's stamp settle them ([a seat](../avatars/01-avatars.md#a-seat)).
 
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.

@@ -1,0 +1,177 @@
+Research for the aircraft-model engine, 2026-10-17
+==================================================
+
+A research agent read the installed packages on our development machine, and
+Rust crates' sources and documentation, for node 6.13 of the architecture plan.
+Marks: [read] read in files on disk or in a crate's source; [doc] documented by
+the vendor or project; [unverified] an estimate, or not run. Paths are given
+with placeholders.
+
+1. MSFS 2024 glTF in two aircraft
+---------------------------------
+
+Found as experiments/areas/avatars/lib/cockpit-files.mjs finds them: the
+InstalledPackagesPath in %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt,
+then Community, then model.cfg, then the behavior XML, then the <LOD> with the
+largest minSize [read, bksq-aircraft-baronpro 0.1.1, a2a-aircraft-pa24 2.1.3].
+
+LOD0 file                              .gltf bytes   .bin bytes   Triangles,   As the scene   Skinned
+                                                                  distinct     instances them
+BaronProfessional_Pressurized_EXT.gltf     751,828   13,865,584     394,380       440,174           0
+BaronProfessional_Pressurized_INT.gltf   2,616,642   14,511,974     408,861       467,188           0
+PA24_250_LOD00.gltf                        892,355   25,022,660     772,459       772,459      76,066
+PA24_250_INTERIOR_LOD00.gltf             1,694,231   19,012,460     630,960       630,960      32,786
+
+Counting every primitive, as the probes did, gives 479,609, 490,963, 837,287,
+and 683,446 triangles. The avatars log's 650,660 for the Comanche's cockpit is
+683,446 less the 32,786 skinned triangles, which the probe skipped.
+
+In all four files [read]:
+- extensionsRequired is only MSFT_texture_dds; extensionsUsed adds 10 to 19
+  ASOBO_* names, and the Comanche's interior adds ASOBO_property_animation and
+  ASOBO_unique_id.
+- No Draco, no EXT_meshopt_compression, no KHR_mesh_quantization, no sparse
+  accessor; one .bin per file, its size equal to its byteLength.
+- POSITION is always VEC3 float with min and max; indices are always unsigned
+  short; animation data is all float, and every sampler is LINEAR.
+- The other vertex attributes aren't legal core glTF, and none declares
+  KHR_mesh_quantization: NORMAL and TANGENT are VEC4 signed byte without
+  normalized; TEXCOORD is VEC2 signed short without normalized (its bytes decode
+  to plausible half floats [unverified]); COLOR_0 is VEC4 unsigned short (VEC4
+  signed byte on the Comanche's skinned primitives); JOINTS is VEC4 unsigned
+  short; WEIGHTS is VEC4 normalized unsigned short, except 3 Comanche exterior
+  accessors that are SCALAR float.
+- Vertices are interleaved in 1 to 3 bufferViews with strides of 36, 44, or 48
+  bytes, and each primitive's accessors carry their own byteOffset; index values
+  stay inside the primitive's own POSITION accessor (checked on 401 primitives a
+  file); extras.ASOBO_primitive holds PrimitiveCount, VertexCount, VertexType
+  "VTX", and VertexVersion 2, with no base-vertex offset.
+- Textures have no core source: each texture's image index is only in
+  extensions.MSFT_texture_dds.source, and the images are .ktx2 URIs.
+- Some meshes list the same POSITION and indices pair twice (31 times in the
+  Baron's exterior), and the Baron reuses meshes across nodes (28 in the
+  exterior, 132 in the interior).
+- The Baron's base interior XML is 547,571 bytes, the largest of the 204 model
+  XMLs in Community; the Comanche's interior XML is 179,644 bytes.
+- No source primitive has more than 25,308 vertices; each file has 444 to 1,953
+  nodes with a mesh.
+
+2. glTF parsing in Rust
+-----------------------
+
+- gltf 1.4.1, released 2024-05-10, is the latest release; its main branch has
+  unreleased commits up to 2026-05-11 [doc, crates.io and GitHub].
+- Validation reports Error::Unsupported for an extensionsRequired entry missing
+  from ENABLED_EXTENSIONS [read, gltf-json 1.4.1, src/root.rs,
+  root_validate_hook]. MSFT_texture_dds is in that list only with the
+  allow_empty_texture feature [read, src/extensions/mod.rs], which also skips the
+  Missing error for a texture with no source [read, src/texture.rs]. With that
+  feature on the files should validate [unverified, not run].
+  Gltf::from_slice_without_validation skips validation [read, src/lib.rs].
+- KHR_mesh_quantization isn't supported: read_positions reads any accessor as
+  [f32;3], guarded only by a debug_assert_eq! on element size [read,
+  src/accessor/util.rs]; issue #400, open since 2023-12, with PRs #428 and #463
+  unmerged [doc].
+- read_tex_coords, read_colors, read_indices, read_joints, and read_weights end
+  in unreachable!() for component types they don't list [read,
+  src/mesh/mod.rs], which MSFS's signed-short TEXCOORD and signed-byte COLOR
+  reach; open issue #478 (2026-09-25) reports the panic in release builds [doc].
+- Default features include import, which brings image 0.25 (jpeg, png), base64,
+  and urlencoding [doc]. With default features off it needs byteorder,
+  lazy_static, serde_json, and gltf-json, which brings gltf-derive with syn,
+  quote, and inflections. Node names need the names feature; the ASOBO material
+  extensions are kept only with the extensions feature [read,
+  src/extensions/material.rs].
+- easy-gltf 1.1.5 offers only load(path), which calls gltf::import, reading
+  files and decoding images, and depends on image and cgmath [read].
+- serde_json's Map is a BTreeMap unless preserve_order is on [doc].
+
+3. XML for the behavior files
+-----------------------------
+
+- Read with .NET's strict XML 1.0 reader, 4 of the 204 model XMLs in Community
+  aren't well-formed [read]: two template files put template parameters inside
+  element names, such as <BINDING_INC_#FIRST_AVAILABLE_INC_BINDING#>, one of
+  them the Comanche's Templates\A2A_Templates.xml, which PA24_250_INTERIOR.xml
+  includes, the other the Aerostar's; two Bonanza Pro template files have
+  several root elements. All 204 are UTF-8, 24 start with a BOM, none has a
+  DOCTYPE.
+- roxmltree rejects both cases: its name scanner stops at # and fails with
+  InvalidChar2, and anything after the root fails with UnknownToken [read,
+  roxmltree master, src/tokenizer.rs].
+- quick-xml reads both: an element's name runs to the next whitespace
+  (name_len), and its reader doesn't check for one root [read, quick-xml
+  0.42.0, src/utils.rs and src/reader/].
+- roxmltree's own benchmark puts it at 1 to 2 times quick-xml's time, 421,137
+  against 206,232 ns/iter on its medium file [doc, roxmltree README].
+- Both need only memchr; quick-xml's default features are empty, and tokio
+  comes only with async-tokio [doc]. quick-xml released 2026-08-22 and
+  roxmltree 2025-10-12, and neither repository is archived [doc].
+
+4. Ray casting
+--------------
+
+From DGriffin91/tray_racing on an AMD 7950X, averaged over 8 scenes of 57k to
+19.3M triangles, 4.46M on average; the cast column is total CPU time for primary
+plus ambient-occlusion rays at 1920x1080 [doc, the repository's result charts]:
+
+            Single-thread build   Cast        Memory at 2.6M triangles, BVH only
+bvh 0.13.0  1.29 s                500.89 ms   about 415 MB: a shape per leaf, an
+                                              80-byte BvhNode of usize fields
+                                              [read, bvh_node.rs; arithmetic]
+obvhs 0.4.0 0.23 to 1.72 s (PLOC) 63-125 ms   48-byte Bvh2Node [doc], about
+                                              250 MB at one primitive a leaf
+                                              [unverified]
+parry3d     1.06 s (binned)       115 ms      "~64 bytes per pair of children"
+0.31.1                                        [doc], about 166 MB
+
+- bvh: rayon on by default; shapes must store a mutable node index; depends on
+  nalgebra with serde-serialize forced on. Its README gives 844.8 ns as the
+  median Sponza intersect [doc].
+- obvhs: build_cwbvh* calls Instant::now() unconditionally [read,
+  src/cwbvh/builder.rs]; PlocBuilder::build reads no clock, and rayon comes only
+  with parallel [read, src/ploc/mod.rs]; depends on glam, bytemuck, half, log,
+  rdst.
+- parry3d: rayon only with parallel; whether its build or cast iterates a
+  HashMap is unchecked; depends on simba/wide, glamx, spade by default, and about
+  10 more.
+- bevy's mesh picking needs its ECS, and rapier queries through parry
+  [unverified].
+- Our Clippy disallowed_methods lint covers only our own crates
+  (record/areas/architecture/02-code-map.md, one loop), so a dependency's
+  Instant::now, rayon, or HashMap iteration would pass CI unseen.
+- Our own two-level structure: one binned-SAH BVH per distinct POSITION and
+  indices pair, in its node's space, built once (8 to 16 bins, up to 4 triangles
+  a leaf, 32-byte nodes, u16 indices); one instance per node with a mesh, with
+  its matrix, inverse, box, and visibility; a cast turns the ray into each
+  candidate instance's frame without renormalizing it, so t stays in model
+  meters. About 0.6 s to build and 70 to 105 MB at 2.6M triangles: positions
+  about 23 MB at the files' 0.64 to 0.80 vertices a triangle [read], u16
+  indices about 16 MB, nodes about 33 to 67 MB [arithmetic, unverified].
+- The Comanche's skinned parts need skinning on the CPU and a refit, or stay at
+  the bind pose; the Baron's models have none.
+
+5. The behavior XML's calculator code
+-------------------------------------
+
+- No Rust crate evaluates MSFS RPN; crates.io searches for "msfs rpn", "rpn",
+  and "reverse polish notation" find general calculators and infinity-rs, which
+  binds the MSFS 2024 WASM SDK [doc]. The nearest evaluator is fsrpn, a Python
+  lexer and parser on PyPI [doc].
+- The probes' evaluator (experiments/areas/avatars/lib/rpn.mjs) reads numbers
+  and (X:NAME, unit), and has + - * / %, max min pow atg2 div, == != < > <= >=,
+  eq ne lt gt le ge, && || and or ! not, /-/ neg abs sqrt sin cos flr ceil near
+  int, d r p, and if{ } els{ }; in lenient mode, O: and E: reads and writes into
+  a scratch map, the registers s0-49, sp0-49, and l0-49, pi, rand fixed at 0.5,
+  and d360 and dnor [read].
+- The SDK documents about 90 words plus the three register families, adding
+  pmod ++ --, bitwise & | ^ ~ >> <<, ?, rng lg ctg ln sqr acos asin atg tg eps
+  exp sign dec rddg dgrd rnor, quit, case, g0 to gn, 13 string words, and b c
+  [doc, MSFS 2024 SDK, Reverse Polish Notation].
+- With the probes' own compile, the probe set ran 310 of the Baron's 406
+  animation and visibility codes and 480 of the Comanche's 498 [read]. The
+  failures: template parameters left unexpanded, such as #POWER_CODE# (86
+  times); @ macros, such as @IsGpsDrivingHsi; and rng (9 times).
+- The rest of these files' code, mouse and update code that posing doesn't need,
+  also uses scmp, quit, case, g1, ?, exp, ln, sign, scat, chr, ++, --, and string
+  literals.

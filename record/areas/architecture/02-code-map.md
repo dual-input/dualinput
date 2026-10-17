@@ -75,6 +75,14 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The unseen lock lapses 2s after the panel module last renews it, and no message from the core renews it, where [what the bridge owns](#what-the-bridge-owns) has every lock hold while the core renews it; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 >
 > Since 2026-10-17, the voice phrases are a Soon pick (user, 2026-10-17), so `voice` is out of v1's units, and its rows in [features](#features) and [systems](#systems) describe it for that pick ([take-control](../control/01-take-control.md)).
+>
+> Since 2026-10-17, [avatars' design](../avatars/01-avatars.md) changes this document in five places:
+>
+> - The engines' bottom line gains `msfs-gltf`, `msfs-rpn`, and `ray-cast`, which `aircraft-model` uses, with `quick-xml`, where its row in [engines](#engines) uses nothing; and the avatars system's units in [systems](#systems) gain the three.
+> - Avatars' parts are its crate in the core, `Figure`, and the figure's SimObject in `features/avatars/figure/`, with no section in the EFB app, where [features](#features) gives it an EFB part; it also uses the session and `clients`.
+> - `tools/` gains `profile-author`, the seat tool and the click tool, on `sim-client`, `sim-edge`, `aircraft-model`, and the message crate.
+> - [Names the sim shares](#names-the-sim-shares) gains the kind `FIGURE`, which avatars owns: the figure's title `CROSSCHECK_FIGURE_PILOT`, where that section names `CROSSCHECK_Figure`, and `Z:CROSSCHECK_FIGURE_` and each joint's channel.
+> - A cockpit stream kind whose key names an entry also declares how to read the entry's number from its body, and "cockpit sent" carries the entry and its number, which [what a handler sees and does](#what-a-handler-sees-and-does) needs for a change's `location`.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

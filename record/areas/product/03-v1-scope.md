@@ -84,6 +84,14 @@ Decides:     The scope of every v1 feature.
 > - A long press takes control once held 1s, before its release, and a single press on its down.
 > - A press the guards refuse plays a refusal cue and shows the reason on the banner, and a press while the link to the PF is lost takes control at once, with no confirming step, and shows the warning after.
 > - A bound key takes control only while a window of the sim is in front, and Crosscheck's settings ask the pilot to keep the key or button unbound in the sim (user, 2026-10-17).
+>
+> Since 2026-10-17, [avatars' design](../avatars/01-avatars.md) changes [avatar sync](#avatar-sync) in five places:
+>
+> - A seat's take radius is 0.4m unless the profile gives one, and of the seats whose radius holds the camera, the one with the nearest eye takes it, which replaces the note above's rule that the take radius stays under half the distance between two seats' eyes (user, 2026-10-17; [a seat](../avatars/01-avatars.md#a-seat)).
+> - Two pilots who picked the same color both show it, and sort it out between themselves; only a pilot who never picked one gets one nobody shows (user, 2026-10-17).
+> - A wheel turn brings the hand as a tap does, and a change made without a click brings it only after 100ms with no other such change, and only past the entry's deadband ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
+> - On foot, past 3m, the arm points at the spot at 0.6m long.
+> - On a machine that can't read the aircraft's models, its pilot's clicks bring no hand and no figure holds a yoke, while seats, heads, and changes made without a click still show, which replaces the [preflight match check](#preflight-match-check)'s example of avatar sync staying off ([a machine that can't read the models](../avatars/01-avatars.md#a-machine-that-cant-read-the-models)).
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

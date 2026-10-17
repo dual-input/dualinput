@@ -8,6 +8,7 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 
 > **Note**
 > Since 2026-10-16, the helper sends `Alive` every 2s whatever else it sends, where [the pipe](#the-pipe) has it send `Alive` only after 2s of nothing, so its silence counts only recorded messages; and a capture can be registered unrecorded, as ATC audio's is ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+> Since 2026-10-17, the voice phrases are a Soon pick (user, 2026-10-17), so v1 builds no want of phrases, no speech thread, no microphone capture, and no microphone setting, which come with that pick as [speech](#speech) and [the devices](#the-devices) design them; [left open](#left-open)'s detector, recognizer, and microphone rate go to that pick, whose research is in the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon); and take-control registers two sounds, the control-passed cue and a refusal cue, and no recorded line ([take-control](../control/01-take-control.md)).
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

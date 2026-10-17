@@ -1,0 +1,254 @@
+Local phrase recognition and voice activity detection for Crosscheck's core helper
+Research by an agent of node 6.12, 2026-10-17, from web sources; the brief follows, then the report as it came back.
+
+BRIEF, IN SHORT
+The core helper, a Rust program on Windows x64 built with Visual Studio's Build Tools (CMake avoided where we can), captures the
+pilot's own microphone through WASAPI, tells speech from noise, and recognizes about 14 closed English phrases locally:
+offers "you have control", "you have controls", "you have the controls", "you have the flight controls", "you have the aircraft",
+"you have the airplane", "your controls"; answers "I have control", "I have controls", "I have the controls",
+"I have the flight controls", "I have the aircraft", "I have the airplane", "my controls". A phrase counts only when it ends
+the utterance. False accepts are worse than misses. Windows' own recognizers are ruled out. The license must allow shipping in
+an open-source app's installer.
+
+"(measured locally)" means read from a file on the researcher's machine; "(read)" means read in source code; "inference" marks
+the researcher's own reasoning.
+
+1. RECOGNIZERS
+
+1a. Packaging and license
+
+sherpa-onnx keyword spotter (KWS)
+  Version: v1.13.8, 2026-09-10, bundles ONNX Runtime 1.28.2 (https://github.com/k2-fsa/sherpa-onnx/releases/tag/v1.13.8)
+  License: code Apache-2.0; model Apache-2.0 per https://github.com/pkufool/keyword-spotting-models, trained on GigaSpeech, whose
+    data terms say "non-commercial research and educational purposes" (https://huggingface.co/datasets/speechcolab/gigaspeech)
+  Rust: official sherpa-onnx crate 1.13.8, 2026-09-11, monthly releases (https://crates.io/crates/sherpa-onnx); community
+    sherpa-rs 0.6.8, 2025-10-05 (https://crates.io/crates/sherpa-rs)
+  Build: no CMake; build.rs downloads a prebuilt /MT archive; static by default, DLLs with the `shared` feature
+    (https://github.com/k2-fsa/sherpa-onnx/blob/master/sherpa-onnx/rust/sherpa-onnx-sys/build.rs,
+    https://github.com/k2-fsa/sherpa-onnx/blob/master/rust-api-examples/for-advanced-users.md)
+  DLLs: sherpa-onnx-c-api.dll 4.39 MB, onnxruntime.dll 16.97 MB (NuGet org.k2fsa.sherpa.onnx.runtime.win-x64 1.13.8 listing),
+    onnxruntime_providers_shared.dll (0.02 MB for ORT 1.23, measured locally)
+  English model: gigaspeech-3.3M, int8 encoder 4.6 MB, decoder 0.27 MB (1.1 MB fp32), joiner 0.16 MB
+    (https://k2-fsa.github.io/sherpa/onnx/kws/pretrained_models/index.html)
+
+sherpa-onnx streaming transducer with hotwords
+  Version, Rust, build, DLLs: as above
+  License: zipformer-en-20M Apache-2.0, LibriSpeech only; NeMo 80ms model under the "NGC TERMS OF USE"
+    (https://catalog.ngc.nvidia.com/orgs/nvidia/teams/nemo/models/stt_en_fastconformer_hybrid_large_streaming_80ms), its
+    multi-latency sibling CC-BY-4.0 (https://huggingface.co/nvidia/stt_en_fastconformer_hybrid_large_streaming_multi); Kroko
+    English CC-BY-SA (https://huggingface.co/Banafo/Kroko-ASR)
+  Model sizes: zipformer-en-20M int8 encoder 41 MB
+    (https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-transducer/zipformer-transducer-models.html); NeMo 80ms int8
+    130.5 MB (https://huggingface.co/csukuangfj/sherpa-onnx-nemo-streaming-fast-conformer-transducer-en-80ms-int8); Kroko
+    English 67.8 MB
+
+sherpa-onnx offline recognizer on VAD segments
+  License: Parakeet TDT-CTC 110M CC-BY-4.0 (https://huggingface.co/nvidia/parakeet-tdt_ctc-110m); Moonshine English MIT
+  Model sizes: Parakeet 110M int8 archive 103 MB, unpacked size not found; Moonshine tiny-en archive 28.5 MB
+    (https://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models)
+
+Vosk grammar mode
+  Version: vosk-api 0.3.50, 2024-04-22, with no Windows assets; last Windows binaries 0.3.45, 2022-12-14
+    (https://github.com/alphacep/vosk-api/releases); commits continue (2026-10-15)
+  License: Apache-2.0; small-en-us-0.15 Apache-2.0 (https://alphacephei.com/vosk/models)
+  Rust: vosk crate 0.3.1, 2024-10-27 (https://crates.io/crates/vosk)
+  Build: prebuilt DLLs from the release zip, 14.19 MB
+  DLLs: libvosk.dll 24.79 MB, libstdc++-6.dll 18.54 MB, libgcc_s_seh-1.dll 1.21 MB, libwinpthread-1.dll 0.56 MB
+    (https://www.nuget.org/packages/Vosk, 0.3.38)
+  English model: 40 MB
+
+utter (pure-Rust decoder for Vosk models)
+  Version: 0.0.6, 2026-09-30; repository created 2026-09-11, 2 stars (https://github.com/pyscape/utter)
+  License: MIT AND Apache-2.0; Vosk's models
+  Rust: utter crate (https://crates.io/crates/utter), pure Rust, no DLLs; model 40 MB
+
+whisper.cpp
+  Version: v1.9.5, 2026-10-06 (https://github.com/ggml-org/whisper.cpp/releases/tag/v1.9.5)
+  License: MIT; models MIT (https://huggingface.co/ggerganov/whisper.cpp)
+  Rust: whisper-rs 0.16.0, 2026-03-12 (https://codeberg.org/tazz4843/whisper-rs)
+  Build: CMake plus bindgen, needing libclang (read in sys/build.rs)
+  DLLs: about 1.9 MB across whisper.dll and three ggml DLLs (Whisper.net 1.9.2 package listing)
+  English models: tiny.en 74.1 MB (q5_1 30.7 MB); base.en 141.1 MB (q5_1 57 MB)
+
+Moonshine's own library
+  Version: v0.1.5, 2026-08-24 (https://github.com/moonshine-ai/moonshine/releases/tag/v0.1.5)
+  License: MIT; models MIT (https://github.com/moonshine-ai/moonshine/blob/main/docs/models/available-models.md)
+  Rust: moonshine-rs 0.2.6, a community crate with 372 downloads (https://github.com/ghchinoy/moonshine-rs)
+  Build: CMake from source; a prebuilt Windows archive (24.9 MB) exists
+  Models: Tiny Streaming 34M parameters, Small 123M
+
+Picovoice Rhino and Porcupine
+  pv_rhino updated 2024-08-15; SDK Apache-2.0; the FAQ says the "models and inference engines are proprietary"
+    (https://picovoice.ai/docs/faq/general/)
+
+1b. Recognition behavior (all take 16 kHz audio)
+
+KWS
+  CPU: not found; inference, below the 20M model's 0.038 real-time factor (RTF)
+  Latency: about 320ms of model latency for a chunk-16 model (https://k2-fsa.github.io/sherpa/onnx/kws/index.html, stated for
+    the zh-en model; the same for gigaspeech is an inference)
+  Restriction: constrained search; the result "should be either `HELLO WORLD` or empty"; each phrase gets its own boost (:) and
+    trigger threshold (#); defaults threshold 0.25, score 1.0, num_trailing_blanks 1
+    (https://github.com/k2-fsa/sherpa-onnx/blob/master/sherpa-onnx/csrc/keyword-spotter.h, read)
+  End of utterance: fires right after the keyword, so mid-utterance; per-token timestamps; the end must come from the VAD
+  Accuracy: 20 commands, recall 86%, 0.025 false alarms an hour over 40h of GigaSpeech; over 200 commands, recall 83.6%, 0.45 an
+    hour; fine-tuned, 98.7% and 0.6 an hour (https://github.com/k2-fsa/icefall/blob/master/egs/gigaspeech/KWS/RESULTS.md); no
+    accent figures found
+
+Streaming transducer with hotwords
+  CPU: zipformer-en-20M int8 RTF 0.038 on 1 thread; the 2023-06-26 int8 model 0.062 on 2 threads; NeMo not found
+  Latency: endpoint rules default to 2.4s, 1.2s, and 20s, configurable
+    (https://github.com/k2-fsa/sherpa-onnx/blob/master/sherpa-onnx/csrc/endpoint.h)
+  Restriction: hotwords only bias (https://k2-fsa.github.io/sherpa/onnx/hotwords/index.html); streaming NeMo supports them with
+    modified_beam_search (read); rejection means the transcript doesn't match
+  Timings: result JSON carries timestamps, ys_probs, context_scores, and num_trailing_blanks
+    (https://github.com/k2-fsa/sherpa-onnx/blob/master/sherpa-onnx/csrc/online-recognizer.cc, read)
+  Accuracy: NeMo 80ms word error rate (WER) 6.9 on NSC Part 1 (Singapore English), 11.5 on Mozilla Common Voice 7 (NGC page above)
+
+Offline recognizer on VAD segments
+  CPU: Parakeet 110M on CPU not found; Parakeet 0.6B int8 at RTF about 0.054 on an i7-12700KF
+    (https://github.com/groxaxo/parakeet-tdt-0.6b-v3-fastapi-openai, a third party)
+  Latency: the VAD's trailing silence plus decoding the whole segment
+  Restriction: hotwords work on the offline NeMo transducer (read); rejection means the transcript doesn't match
+  Timings: the segment from the VAD, token timestamps
+  Accuracy: Parakeet 110M WER VoxPopuli 6.91, AMI 15.88; Moonshine Tiny 12.66% average
+
+Vosk grammar
+  CPU: not found; utter reports a partial result a median 40ms after a word ends, under a grammar
+  Latency: Kaldi endpointing; vosk_recognizer_set_endpointer_delays takes t_end "usually around 0.5 - 1.0"
+  Restriction: JSON phrase list plus [unk], which "might return [unk] if user said something different"
+    (https://github.com/alphacep/vosk-api/blob/master/src/vosk_api.h); stock Vosk can't tune how strongly [unk] competes, and
+    utter exposes it as unknown_cost
+  Timings: word times and confidence with set_words
+  Accuracy: small model 9.85 on LibriSpeech, 10.38 on TED-LIUM; no false-accept numbers found for grammar mode
+
+whisper.cpp
+  CPU: Whisper Tiny 1,141ms a phrase on Linux x86, through faster-whisper in Moonshine's benchmark
+    (https://github.com/moonshine-ai/moonshine/blob/main/docs/moonshine-vs-whisper.md); memory tiny about 273 MB, base about 388 MB
+  Latency: about 1.1s
+  Restriction: GBNF grammar, initial prompt, no_speech_thold (read in whisper.h); "guided mode" forces a choice from the list
+  Timings: segment timestamps, no streaming endpoint
+  Accuracy: hallucinates on non-speech (https://arxiv.org/abs/2501.11378, https://arxiv.org/abs/2505.12969)
+
+Moonshine's own library
+  Latency: Tiny Streaming 69ms and Small Streaming 165ms on Linux x86, the vendor's own measurement
+  Restriction: keyterms biasing on streaming models, keyterm_boost default 2.0
+    (https://github.com/moonshine-ai/moonshine/blob/main/docs/api/options.md)
+  Timings: built-in VAD averaged over a 0.5s window, optional word timestamps
+  Accuracy: Tiny Streaming 12.00% average WER
+
+Picovoice
+  Ruled out: the AccessKey says "Do not share it with third parties", billing counts monthly active users, and "no dedicated
+    free or paid plans for personal or non-commercial use" (https://picovoice.ai/docs/faq/general/)
+
+A lead outside sherpa-onnx's model list: NVIDIA's parakeet_realtime_eou_120m
+(https://huggingface.co/nvidia/parakeet_realtime_eou_120m-v1) emits a learned <EOU> token, measured at 160ms median and 280ms at
+the 90th percentile on synthesized speech; it's under the NVIDIA Open Model License.
+
+2. TELLING SPEECH FROM NOISE
+
+Silero VAD v6
+  Version v6.2.3, 2026-09-23; MIT; silero_vad.onnx 2.33 MB; sherpa-onnx's own 16 kHz export is 629 KB, dated 2025-07-11, before
+    v6.0 on 2025-08-26 (so v5-era, an inference)
+  Frame: 512 samples, 32ms; CPU under 1ms a chunk of 30ms or more on one thread (https://github.com/snakers4/silero-vad)
+  Noise: share of noise-only files correctly called non-speech, ESC-50 0.87, private noise 0.71 (v5 scored 0.61 and 0.44)
+    (https://github.com/snakers4/silero-vad/wiki/Quality-Metrics, the vendor's own test)
+  Rust: sherpa-onnx's VoiceActivityDetector, which "support[s] both silero-vad v4 and v5"; v6 unverified
+    (https://k2-fsa.github.io/sherpa/onnx/vad/silero-vad.html); or ort 2.0.0-rc.14
+
+TEN VAD
+  v1.0, 2025-07-11; Apache-2.0 plus conditions: "You may not Deploy the ten-vad in a way that competes with Agora's offerings"
+    (https://github.com/TEN-framework/ten-vad/blob/main/LICENSE); 324 KB; 10 or 16ms frames; RTF 0.015 on an i7-10710U
+  Noise: Silero's test ESC-50 0.42, private noise 0.47; TEN's own curves claim it beats Silero
+  Rust: sherpa-onnx, ten-vad-rs
+
+Earshot
+  1.2.2, 2026-08-19; MIT OR Apache-2.0; about 95 KiB, 8 KiB an instance, no ONNX Runtime; 256 samples, 16ms; RTF 0.0003, the
+    vendor's claim
+  Noise: the vendor's chart claims it beats Silero v6; "resilient to most kinds of environmental noise with an SNR >= 3dB"
+    (https://github.com/pykeio/earshot); nothing independent found
+  Rust: earshot, pure Rust
+
+WebRTC VAD (libfvad)
+  webrtc-vad 0.4.0, 2019-10-01; MIT; C code built with cc; 10, 20, or 30ms frames
+    (https://github.com/dpirch/libfvad/blob/master/include/fvad.h); CPU not found
+  Noise: Silero's test ESC-50 0.00, private noise 0.15
+
+Level gate
+  Negligible CPU; inference, keyboard clicks and leaking engine sound pass it; FS Copilot's ATC tool used -50 dBFS RMS with a
+    300ms hangover (FS Copilot fork, record/traffic-atc/tools/README.md)
+
+Endpointing values in use:
+  Kaldi defaults, which Vosk uses (https://github.com/kaldi-asr/kaldi/blob/master/src/online2/online-endpoint.h,
+    https://github.com/alphacep/vosk-api/blob/master/src/model.cc): 5.0s of silence when nothing was decoded, 0.5s after a
+    confident result, 1.0s and 2.0s after less confident results, 20s maximum utterance
+  sherpa-onnx streaming ASR: 2.4s, 1.2s, and 20s
+  sherpa-onnx VAD: min_silence_duration 0.5s
+  Silero's own segmenter: min_silence_duration_ms 100 (https://github.com/snakers4/silero-vad/blob/master/src/silero_vad/utils_vad.py)
+  LiveKit: 0.55s (https://github.com/livekit/agents/blob/main/livekit-plugins/livekit-plugins-silero/livekit/plugins/silero/vad.py)
+  Pipecat: VAD_STOP_SECS = 0.2, paired with a separate turn-detection model
+    (https://github.com/pipecat-ai/pipecat/blob/main/src/pipecat/audio/vad/vad_analyzer.py)
+
+The brief's 300ms target conflicts with the end-of-utterance rule (inference): 300ms leaves at most about 200 to 250ms of trailing
+silence, every endpointer above uses 0.5s to 1.2s, and a pause longer than that after "you have control" ends the utterance
+before "of the radios".
+
+3. RECOMMENDATIONS
+
+Recognizer: sherpa-onnx, running Parakeet TDT-CTC 110M int8 on segments the VAD closes, accepting a phrase only when the
+normalized transcript ends with one of the 14 phrases, which passes "follow me through, you have control" and rejects "you have
+control of the radios".
+  - License: Parakeet 110M is CC-BY-4.0; its training data includes Common Voice, the National Speech Corpus (Singapore
+    English), VoxPopuli, and Europarl, evidence of accent coverage, not a measurement.
+  - Rejection: it transcribes everything, so speech outside the list fails the match instead of being bent toward a keyword.
+  - Confidence: ys_probs and context_scores give per-token confidence and show how much of a match came from hotword boosting.
+  - Packaging: the official crate downloads prebuilt libraries, with no CMake.
+  Moonshine tiny or base (MIT) is a configuration swap in the same API, so the probe should try it too.
+
+Runner-up: the sherpa-onnx keyword spotter, gigaspeech-3.3M: about 6 MB, built for the job, and the only published false-alarm
+rate found, 0.025 an hour. It needs our own check that the VAD reports the speech ending soon after the keyword's last token. It
+wins if Parakeet's decode time plus trailing silence misses the latency budget or costs too much CPU while MSFS runs, mishears
+our accented phrases, or false-accepts more on chatter. Before shipping it, confirm with k2-fsa that its Apache-2.0 license
+holds despite GigaSpeech's data terms.
+
+Out: Vosk (45 MB of MinGW DLLs from 2022, no published false-accept figure for grammar mode); utter (five weeks old); Whisper
+(about 1.1s of latency, hallucinations on non-speech, a CMake build); streaming NeMo (NGC terms, unless we convert the
+CC-BY-4.0 multi-latency model ourselves); Picovoice (license and AccessKey terms).
+
+Speech from noise: Silero VAD v6 through sherpa-onnx's detector, if it loads the v6 file, otherwise sherpa-onnx's own export;
+the best noise numbers in its vendor's test, sharing the ONNX Runtime shipped anyway. Runner-up: Earshot, which wins if it
+false-triggers less on our fans, keyboards, and engine leakage, or if the recognizer ends up not needing ONNX Runtime. TEN VAD
+is out on its non-compete clause, and WebRTC VAD on its noise score. A level gate stays as a pre-filter and a meter, not as the
+speech detector.
+
+Questions only our own voices can settle:
+  1. Recall and false accepts: for each of us, all 14 phrases, and 30 minutes or more of cockpit chatter recorded with the sim,
+     fans, and Discord running; Parakeet, Moonshine, and the keyword spotter, each with and without hotwords.
+  2. Pauses: how long our pauses run inside phrases and before continuations such as "of the radios", which sets the trailing
+     silence and so the latency.
+  3. End-to-end latency from a phrase's end to the report, and CPU a core, while MSFS runs.
+  4. VAD false triggers an hour on our noise, Silero v6, sherpa-onnx's export, and Earshot, with their onset and offset lag.
+  5. Leaking speakers: whether the other pilot through Discord, or ATC, reaches a desk mic and triggers a phrase.
+  6. Build: whether sherpa-onnx loads Silero v6's file, and whether the crate links against the no-TTS DLL.
+
+4. WHAT A RUST BUILD PULLS IN FOR THE RECOMMENDED PAIR
+
+Crates: sherpa-onnx 1.13.8 and sherpa-onnx-sys 1.13.8, both Apache-2.0, plus serde and serde_json; build-time only bzip2 0.4,
+tar 0.4, ureq 2.12, and zip 9 (https://github.com/k2-fsa/sherpa-onnx/blob/master/sherpa-onnx/rust/sherpa-onnx-sys/Cargo.toml);
+the crate's resampler can take 48 kHz down to 16 kHz.
+Native libraries: the `shared` feature with SHERPA_ONNX_LIB_DIR pointing at a pinned
+sherpa-onnx-v1.13.8-win-x64-shared-MT-Release-no-tts-lib.tar.bz2 (7.19 MB), which ships sherpa-onnx-c-api.dll (at most 4.39 MB,
+likely smaller without TTS, an inference), onnxruntime.dll (16.97 MB), and onnxruntime_providers_shared.dll; the static C runtime
+(/MT); the MSVC linker, since sherpa-onnx's Windows guide warns that Cargo may find Git's link.exe first.
+Model files: Parakeet 110M int8 about 130 MB (inference, by analogy with the NeMo 80ms model, whose 98 MB archive unpacks to
+130.5 MB); Silero v6 2.33 MB.
+Total installed: about 154 MB (inference); about 52 MB with Moonshine tiny instead, about 28 MB with the keyword spotter.
+
+License warning: the crate's default archives include text-to-speech, and with it espeak-ng, which is GPL-3.0; sherpa-onnx's
+CMake builds espeak-ng whenever text-to-speech is on (read in https://github.com/k2-fsa/sherpa-onnx/blob/master/CMakeLists.txt),
+and static mode emits a link directive for espeak-ng unconditionally (read in build.rs), so a default build would ship GPL code,
+hence the no-TTS shared archive above. Inference: a no-TTS static archive would fail to link, so shared linking is the practical
+route.
+
+Unverified: the unpacked size of the Parakeet 110M model; the CPU cost of the keyword spotter and of Parakeet 110M on a desktop
+CPU; most candidates' memory; accent-specific results for any keyword spotter or grammar recognizer.

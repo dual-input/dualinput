@@ -59,7 +59,7 @@ The picks, picked on 2026-10-02:
   - The PF's checklist of the profile's starting values, from [Pre-sync checklist](ideas.md#pre-sync-checklist), moved from Soon on 2026-10-04, because [catch-up](../sync/03-catch-up.md#when-preflight-ends) is right only if the PF's aircraft starts at them
   - [The PF's spot on the world map](ideas.md#the-pfs-spot-on-the-world-map), picked on 2026-10-05, when step 6's probe set the world map from code in the menu's document; it replaces flight setup by the host, which went to Ideas left out on 2026-10-03
   - The invite code, from [One-click invite](ideas.md#one-click-invite)
-  - The take-control key, and voice phrases, both from [Voice handover](ideas.md#voice-handover)
+  - The take-control key, from [Voice handover](ideas.md#voice-handover)
   - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
   - The [notification banner](ideas.md#notification-banner), split from Crosscheck objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
@@ -72,6 +72,7 @@ The picks, picked on 2026-10-02:
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - The rest of the profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
   - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
+  - The voice phrases, from [Voice handover](ideas.md#voice-handover), moved from v1 on 2026-10-17, because a voice handover is a nice-to-have that v1 can ship without (user)
 - **Later:**
   - [Bus bridge](ideas.md#bus-bridge)
   - [EventBus bridge](ideas.md#eventbus-bridge)
@@ -146,6 +147,7 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
   Answered on 2026-10-06 from research, not measurement: [network log](../network/log.md#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month).
 - Whether a fast local recognizer hears the [voice phrases](03-v1-scope.md#voice-phrases) accurately with our accents, stays quiet inside longer sentences such as "you have control of the radios", and works while Discord uses the same microphone; an audio probe in `experiments/` answers it, with no sim.
   Deferred to the build: speech recognition is proven, so we research it, build our best version of what v1 needs, then test it with our voices and calibrate (user, 2026-10-06).
+  Moved to Soon with the voice phrases on 2026-10-17, and the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon) holds the research that probe starts from.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
   Answered on 2026-10-06: masking holds back a lever bound in MSFS and not one SPAD.neXt drives, so soft takeover needs another way for those pilots ([flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
 - Whether a click on a [notification banner](03-v1-scope.md#notification-banner) notice opens Crosscheck's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.

@@ -1472,6 +1472,17 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A lock lifting under a held press would let its release act on a control behind it and go unsent.
 - **Leaves out:** the look and words of the visible lock and the flash's color, for [6.16](plan.md#616-the-apps) and the build.
 
+## The take-control input takes control on its down or held 1s, and a pass plays a cue and a notice with no recorded line
+
+- **Decided:** a bound key or button takes control on its down, or, set as a long press, once held 1s, before its release, and has no default binding; outside the flight or before preflight's end it does nothing; a press the guards refuse plays a refusal cue and shows each denial's reason; a press while the link to the PF is lost takes control at once and shows the warning after, the apps' buttons showing it before; and a pass plays the control-passed cue on every machine in the flight, with a notice naming the new PF and no recorded line.
+  This changes [03-v1-scope](../product/03-v1-scope.md#take-control-key)'s take-control key, under which the new PF hears "you have control" and the old one "they have control" (user, 2026-10-17).
+  Settled in node 6.12 by the user, 2026-10-17 ([take-control](../control/01-take-control.md)).
+- **Because:**
+  - The helper reads a press without taking it from the sim ([raw input](../core/04-core-helper.md#raw-input)), so a long press lets take-control share a button the sim uses, such as the yoke's autopilot disconnect, which a tap still disconnects alone.
+  - A pilot pressing hardware in VR gets no other sign of a refusal before looking at the banner.
+  - Good neutral voice lines are hard to come by, and the cue and the banner already mark the pass (user, 2026-10-17).
+- **Leaves out:** the cues' sounds, made in the build, and the notices' words, for [6.16](plan.md#616-the-apps).
+
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

@@ -75,6 +75,13 @@ Decides:     The scope of every v1 feature.
 > - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the long outage the section's rules name ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 > - A press on a display while another pilot's gesture plays there flashes the display in one color, with no words, until its up, where the overlay carried over stays unseen until it has blocked for 12s (user, 2026-10-17).
 > - Two pilots pressing one display within one trip of each other can leave it different on the two machines, which is rare because each sees the other's figure reach for it, and which settles the section's open question on both pilots typing on one display ([known limits](../pointer-sync/01-pointer-sync.md#known-limits)).
+>
+> Since 2026-10-17, the [voice phrases](#voice-phrases) are a Soon pick, out of v1, because a voice handover is a nice-to-have that v1 can ship without (user, 2026-10-17; [the plan](plan.md)), so in v1 control passes by the take-control key and buttons alone, and Crosscheck captures no microphone.
+> [Take-control](../control/01-take-control.md) changes the [take-control key](#take-control-key) in three places:
+>
+> - No recorded line plays when control passes: every pilot in the flight hears the control-passed cue, and the banner shows "You have control" to the new PF and who has control to the others (user, 2026-10-17).
+> - A long press takes control once held 1s, before its release, and a single press on its down.
+> - A press the guards refuse plays a refusal cue and shows the reason on the banner, and a press while the link to the PF is lost takes control at once, with no confirming step, and shows the warning after.
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

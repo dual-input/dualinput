@@ -729,11 +729,11 @@ Raised elsewhere: by 6.10, no v1 unit waits on how far the core's arrival stamp 
 
 ## 6.12 Control
 
-Question: how do the take-control key and buttons, and voice phrases, reach the session's control, from the core helper's captures and speech to the request the session guards; and how does voice tell speech from noise, with which recognizer?
+Question: how do the take-control key and buttons reach the session's control, from the core helper's captures to the request the session guards, and what marks a pass?
 The PF is the session's first role, and the take-control key is how it moves ([01-roles-and-members](../session/01-roles-and-members.md#the-pf)).
-It reads 03-v1-scope's [take-control key](../product/03-v1-scope.md#take-control-key) and [voice phrases](../product/03-v1-scope.md#voice-phrases), 6.5's and 6.7's answers, and decisions [006](../../decisions/006-core-catches-take-control-input.md) and [036](../../decisions/036-control-is-one-value.md).
-It settles the spine's open item on telling speech from noise ([01-spine](01-spine.md#left-open)).
-Its answer goes in `record/areas/control/01-take-control-and-voice.md`.
+It reads 03-v1-scope's [take-control key](../product/03-v1-scope.md#take-control-key), 6.5's and 6.7's answers, and decisions [006](../../decisions/006-core-catches-take-control-input.md) and [036](../../decisions/036-control-is-one-value.md).
+The voice phrases left v1 for Soon on 2026-10-17 (user), so the spine's open item on telling speech from noise goes to that pick, and the [control log](../control/log.md) holds the research it starts from.
+Its answer goes in `record/areas/control/01-take-control.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 6.5, take-control registers its binding by its setting's key and gets each press and release with the helper's stamp, so it times a long press itself; the next press crosses while the desktop app binds the key, named for showing; voice registers its phrases and gets each heard phrase's index with when it began and ended; the detector and the recognizer fill one trait inside `apps/core-helper`, so the microphone's audio never leaves the helper, and they hear nothing while a sound of ours plays; and the cues and recorded lines are Ogg Opus files in each feature's crate ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
 Raised elsewhere: by 6.7, the take-control key and button and the voice handover's answer each ask the session crate's `TakeControl`, built as this pilot taking control now, whose verdict the apps show, and the cues play on `ControlPassed` ([the session's units](../session/02-units.md#control)).
@@ -797,6 +797,7 @@ Raised elsewhere: by 6.7, where and how Crosscheck asks for the display name bef
 Raised elsewhere: by 6.8, the profile loader's local folder setting, and the match check's profile item, whose values are a published hash, a local one shown as "unpublished", "No profile for this aircraft", and "Couldn't get the session's profile"; the apps show no profile's build report, since the core builds nothing ([the profiles' units](../profiles/02-units.md#the-match-checks-item)).
 Raised elsewhere: by 6.9, the cockpit stream's slice of whether a catch-up or a replay runs, for the banner; the wording of state sync's reason on its guard of Ready; state sync's notice, once per entry for each load, for a write that never landed, an entry the driven-entry test stopped, and an entry a write function's limit stopped; and the PF's checklist, each counting entry's `name` and `default`, a slice of state sync's while preflight runs ([the sync units](../sync/05-units.md#ready-notices-marks-and-the-checklist)).
 Raised elsewhere: by 6.11, the look and words of pointer sync's visible lock, which says whether the machine has no link up to the PF, naming taking control as the way out, or is catching up; the flash of a press blocked while another pilot's gesture plays, one solid color with no words, red-orange at about 60% opacity as a start, which the build settles (user, 2026-10-17); and pointer sync has no section in the EFB app or the desktop app ([locks](../pointer-sync/01-pointer-sync.md#locks)).
+Raised elsewhere: by 6.12, take-control's slice of the verdict with each denial's reason, the warning while the link to the PF is lost, and the binding's name and whether it takes a long press; its button in the EFB app and the desktop app, which show that warning before a press; the desktop app's section with Bind, Cancel, Clear, and the long-press setting; and the words of the refusal notice, the warning, "You have control", and "Adam has control" ([take-control](../control/01-take-control.md)).
 
 ## 6.17 Installing and updating
 

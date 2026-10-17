@@ -67,6 +67,11 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - [What a routine can ask for](#what-a-routine-can-ask-for) gains a report, which the routine host writes into the routine's report slot, and events with values, which `Follow` sends for the yoke, rudder, and toe brakes.
 > - Each slot's header also carries the core's counter at the write, and `Frame::now` is the routine host's estimate of that counter, so `Follow`'s `f.now - DELAY` and the samples it reads are on the core's timeline.
 > - Past its newest sample, and before its first, `Follow` moves the frozen aircraft on, carrying it and then easing it in, where [routines in our WASM module](#routines-in-our-wasm-module)'s "through a gap" leaves what it writes open and the second case in [cases for the bench, for work in the sim](#cases-for-the-bench-for-work-in-the-sim) writes nothing for 400ms; the aircraft stays frozen throughout, and a gap longer than 2s is held, as the 20s case has it.
+>
+> Since 2026-10-17, [pointer sync](../pointer-sync/01-pointer-sync.md) changes this document in two places:
+>
+> - Pointer sync has parts in the core and in the panel alone, and uses the session too, for the PF, where [features](#features) gives it parts in the EFB app and the desktop app.
+> - The unseen lock lapses 2s after the panel module last renews it, where [what the bridge owns](#what-the-bridge-owns) has it hold while the core renews it, and a press that lands on it paints it until that press's up ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

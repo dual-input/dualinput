@@ -67,6 +67,14 @@ Decides:     The scope of every v1 feature.
 > - Each pilot picks their figure's color in Crosscheck's settings, a new pilot gets one nobody in the session has, and gray stays the color of a dropped pilot; a "Show the crew's figures" setting, on by default, hides every figure but the pilot's own when the pilot turns it off.
 > - The build's stage for avatars ends only when no part of the figure visibly skips a frame in flight, which carries the open question on the missed frame.
 > - Feet on the pedals stay out of v1, though the 58P poses its pedals from its own code (read in bksq-aircraft-baronpro 0.1.1, `BaronProfessional_Base_INT.xml`, `RUDDERPEDALS`), because telescoping legs reaching a pedal look uncanny where telescoping arms look playful, and an author can tune a seat's knees and feet but not a foot's arc onto a pedal.
+>
+> Since 2026-10-17, [pointer sync's design](../pointer-sync/01-pointer-sync.md) changes [pointer sync](#pointer-sync) in five places:
+>
+> - A gesture goes to the crew as it happens, its down, its moves, and its up, where the FS Copilot logic carried over as it is sends it whole at its release, so the other display moves with the pilot's hand ([a gesture](../pointer-sync/01-pointer-sync.md#a-gesture)).
+> - Long presses come into v1, each played for as long as it's held, which takes them out of the section's Not in v1 (user, 2026-10-17).
+> - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the long outage the section's rules name ([locks](../pointer-sync/01-pointer-sync.md#locks)).
+> - While another pilot's gesture plays on a display, that display takes no press from its own pilot, and a press there flashes the display in one color, with no words, until its up (user, 2026-10-17).
+> - Two pilots pressing one display within one trip of each other can leave it different on the two machines, which is rare because each sees the other's figure reach for it, and which settles the section's open question on both pilots typing on one display ([known limits](../pointer-sync/01-pointer-sync.md#known-limits)).
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

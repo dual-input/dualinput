@@ -6,6 +6,9 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     Who reads the flying aircraft, and how often; what a sample carries; the clock our WASM module stamps on, and how it learns the core's; whether a page's arrival stamp matters; how a following machine takes a sample, draws the aircraft, carries it through a gap, eases it back, and starts; how it eases the clock offset; when each routine runs; what this adds to our module; the budgets; and the cases for the bench (node 6.10).
 ```
 
+> **Note**
+> Since 2026-10-17, pointer sync's presses send no span, where [the core's counter in our module](#the-cores-counter-in-our-module) has them send one: each gesture goes as it happens, and the cockpit stream's gaps time it in a replay, each the difference between two arrival stamps, in which the trail's constant part cancels, so no v1 unit still waits on how far a page's arrival stamp trails its read ([pointer sync](../pointer-sync/01-pointer-sync.md#timing)).
+
 On the flying machine, the PF's, a routine in our WASM module, `Lead`, reads the aircraft's pose, velocities, control surfaces, and toe brakes about 20 times a second, each read stamped with its frame's time, and the core sends each read to the crew as a sample.
 On each following machine, any other pilot's, `Follow` draws the aircraft 400ms behind those samples, along straight lines between them, carries it on through a gap of up to 2s, and eases it back over 3s.
 Our module keeps an estimate of the core's counter, from a stamp the core puts in every slot it writes, so every routine runs on the core's timeline and the core never estimates the module's clock.

@@ -330,12 +330,9 @@ How the hands work, and where they stop, is in [the avatars' tentative decisions
     The ray has been measured against known spots only in the Comanche, and the yoke hand has run only in the Baron 58P.
     The Comanche plays its yoke from A2A's `L:YokeBank_Anim` and `L:YokePitch_Anim`, where the Baron plays its yoke from `A:YOKE X POSITION WITH AP LINEAR` and `A:YOKE Y POSITION WITH AP` (read in a2a-aircraft-pa24 2.1.3 and bksq-aircraft-baronpro 0.1.1, [avatars log](../avatars/log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel)).
     The yoke hand runs whichever code the aircraft has, so it would pose the Comanche's yoke the same way (unverified).
-  - What the figure does for a click beyond its 2m to 3m reach: on foot, the pilot stood a median 1.8m to 2.6m from the spot, and up to 5.8m (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
   - How the hands work with a sidestick or a center stick, since the rules are for a yoke, in either seat ([the avatars' tentative decisions](../avatars/decisions.md#the-hands-follow-a-pilots-habits-with-the-right-hand-on-the-yoke-in-the-right-seat)).
   - Whether avatar sync works for a pilot in VR: whether Crosscheck can read a VR pilot's head and hands, and how the figure looks in a headset, to explore later.
     A sidestick pilot never swaps hands, and a center stick probably stays in the right hand (unverified).
-  - Whether, on the other pilot's machine, Crosscheck should hold each change that swaps hands for 0.3s before applying it, so the hands can pass the yoke as a person would.
-    There Crosscheck applies the change itself, so it could let the free hand take the yoke, then send the tapping hand and move the switch, at the cost of 0.3s more delay on every change that swaps hands.
 
 ## Interface
 

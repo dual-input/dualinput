@@ -3,9 +3,9 @@
 What the avatar experiments have settled for now about the figure's hands, each with the findings behind it and what it leaves out.
 They hold until we design avatar sync for the product, and that design confirms each one as a decision in `record/decisions/`, changes it, or drops it.
 p25 drove our figure, `CROSSCHECK_Figure`, in the Baron's right seat by the decisions below, parked and in flight, while our test pilot clicked from the left seat ([log](log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
-It cast from `SimConnect_CameraGet`'s `SIMOBJECT` referential and never left the cockpit, so the `WORLD` ray, the fresh cast for drags outside, and the 2m to 3m reach on foot haven't run on the figure.
+It cast from `SimConnect_CameraGet`'s `SIMOBJECT` referential and never left the cockpit, so the `WORLD` ray, the fresh cast for drags outside, and the reach of up to 3m on foot haven't run on the figure.
 The findings are in [the avatars log](log.md), and the questions still open are in the idea [Avatar sync](../product/ideas.md#avatar-sync).
-Every decision here was reached on 2026-10-03 with our test pilot, from probes on MSFS 2024 in the A2A Comanche and the Black Square Baron 58P.
+Every decision here was reached on 2026-10-03 with our test pilot, from probes on MSFS 2024 in the A2A Comanche and the Black Square Baron 58P, except where it names the user and a later date.
 
 ## The hand goes where the pilot clicks, found from the aircraft's geometry
 
@@ -17,7 +17,13 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 
 - **Decided:** on the clicking pilot's machine, Crosscheck's core reads the models, the camera, and the cursor, and finds each hand's point ([architecture's tentative decisions](../architecture/decisions.md#the-core-works-out-where-the-figures-hand-goes), 2026-10-07).
   The other machine receives the points, relative to the aircraft, and its WASM module places the figure there every frame.
-- **Because:** both pilots fly the same aircraft package, so a point relative to the aircraft means the same on both machines, and the other machine then needs no model files and no posing.
+  A hand holding the yoke is the exception: the clicking pilot's machine sends which hand holds which grip, and the other machine places that grip from its own yoke, so the hand stays on its horn on every machine (user, 2026-10-17).
+- **Because:** both pilots fly the same aircraft package, so a point relative to the aircraft means the same on both machines, and the other machine casts no ray.
+  A yoke is the one part a received point can't follow, because a following machine draws the aircraft 0.4s behind, with the yoke positions its samples carry ([flight-model sync](../product/03-v1-scope.md#flight-model-sync); [channels](../network/01-between-machines.md#channels)), while the hand's point arrives after the network's delay alone.
+  So on the PM's screen, the PF's hand would move about 0.4s ahead of the yoke it holds, and a 30° roll moves the Baron's grip about 7cm, the grips sitting 25.6cm apart ([log](log.md#2026-10-03-aircraft-mark-their-yoke-grips-with-the-same-node-names-and-the-yokes-own-animations-put-them-on-a-level-wheel); arithmetic).
+  Every hand probe ran on one machine, so none could show it.
+- **Leaves out:** whether the other machine finds the grip's spot on its own yoke from its own copy of the models or from an offset the sender gives it, which [6.13](../architecture/plan.md#613-avatars) designs.
+
 ## The ray needs no calibration
 
 - **Decided:** the ray comes from `SimConnect_CameraGet`'s `WORLD` referential and the cursor's place in the sim window, inside and out, by measured rules:
@@ -64,7 +70,8 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 
 ## The hands follow a pilot's habits, with the right hand on the yoke in the right seat
 
-- **Decided:** in the left seat:
+- **Decided:** only the PF's figure holds a yoke at rest, the one in front of its seat, and when control passes, the new PF's figure takes its yoke and the old PF's lets go (user, 2026-10-17).
+  The PF's figure, in the left seat:
   - At rest, the left hand holds the yoke, and the right hand rests.
   - A click more than 5cm left of the wheel's center is the left hand's, and the right hand takes the yoke; more than 5cm right of it is the right hand's, and the left keeps the yoke; between the two, the hand that's free clicks.
   - A hand leaving the yoke to click goes at once, since the sim acts on the click at once.
@@ -72,18 +79,27 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
   - 2s after the last click or drag is released, the hands go back to rest, the left hand taking the yoke 0.3s before the right lets go.
   - A button on the pilot's own yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
 
-  In the right seat, the right hand holds the copilot's yoke at rest, and when the hands go back to rest it takes the yoke 0.3s before the left lets go.
+  In the right seat, the PF's figure's right hand holds the copilot's yoke at rest, and when the hands go back to rest it takes the yoke 0.3s before the left lets go.
   A click more than 5cm left of that yoke's wheel center is the left hand's, and the right keeps the yoke; one more than 5cm right of it is the right hand's, and the left takes the yoke.
   A button on the copilot's yoke is pressed by the thumb on its side, and the hand holding the yoke keeps hold.
   The other rules are the left seat's.
-- **Because:** with the left-seat rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
+
+  Any other figure rests both hands on its thighs, a click left of its seat's wheel center is the left hand's and one right of it the right hand's, and its runs of clicks, hovering, and going back to rest follow the PF's rules.
+  In either seat, a press on a yoke's wheel rather than a button is a grab, and the hand on that side takes the grip on that side (user, 2026-10-17).
+- **Because:** the probes had no PF, so they chose the yoke hand by seat, and a PM's figure holding its yoke all flight, moving with the PF's inputs, would read as flying, where the PF's figure taking its yoke shows the handover (user, 2026-10-17).
+  With the left-seat rules, 75 clicks and 40 drags took 9 swaps instead of one each, and our test pilot found that the hands felt right ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
   With the right-seat rules, 138 clicks and 26 drags, made by our test pilot from the left seat for the figure in the right seat, took 14 swaps ([log](log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
   Our test pilot found that the figure looked good, parked and in flight, except that some part of it missed a frame now and then; which part is unknown (same entry).
   Handing the yoke over with an overlap when a hand leaves to click put the hand on its switch after the switch had moved ([log](log.md#2026-10-03-with-a-run-of-clicks-treated-as-one-session-115-taps-took-9-swaps-instead-of-one-swap-a-click)).
   A thumb that took the yoke made the holding hand let go and take it back ([log](log.md#2026-10-03-on-the-horns-surface-the-yoke-hand-looks-right-and-a-thumb-on-the-far-horn-must-not-take-the-yoke-from-the-holding-hand)).
-- **Leaves out:**
-  - sidesticks and center sticks, whose habits differ
-  - a click on a yoke's wheel rather than a button on it: p21 and p25 took a press anywhere on the seat's own yoke for a button, so all 3 thumb presses in p25 pressed the wheel, `Yoke_R`, not a button ([log](log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs))
+  p21 and p25 took a press anywhere on the seat's own yoke for a button, so all 3 thumb presses in p25 pressed the wheel, `Yoke_R`, not a button ([log](log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
+- **Leaves out:** sidesticks and center sticks, whose habits differ.
+
+## A change applies without waiting for the hand
+
+- **Decided:** the other machine applies a cockpit change when it arrives, and doesn't hold it until the hand reaches the control, so a switch moves before the hand lands, by the hand's reach time, 0.15s in p27 (user, 2026-10-17).
+- **Because:** holding a change for the hand would make state sync wait on the avatars' channel, and deleting a feature must leave every other feature whole ([02-code-map](../architecture/02-code-map.md#tiers)).
+  p27 set its hand to reach out in 0.15s ([p27's run](../../../experiments/areas/avatars/results/p27-a350-figure-2026-10-04-16-45-44.txt), its settings line).
 
 ## A drag glides inside and follows a fresh cast outside
 
@@ -98,11 +114,16 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
   A wheel turn brings it too, as p21 and p22 ran it, though no log entry has measured it (unverified).
 - **Because:** the right button both clicks controls and, held, turns the view ([log](log.md#2026-10-03-a-quick-still-right-press-is-a-click-and-a-held-or-moved-one-turns-the-view)).
 
-## Only a click brings the hand, and on foot it reaches 2m to 3m
+## A click, or a change at a control's spot, brings the hand, and on foot the hand touches up to 3m
 
-- **Decided:** hardware switches and key bindings, which make no click, bring no hand, and neither does VR.
-  On foot, the hand reaches 2m to 3m.
-- **Because:** our test pilot chose both.
+- **Decided:** a click brings the hand, and so does a change made without one, such as from a home cockpit's switch or a key binding, which brings it to the spot the entry's `location` gives ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
+  Only a control a pilot moves with hardware or a key, and that the aircraft never moves itself, gets a `location`, and neither several entries changing in the same instant nor noise on an axis brings a hand (user, 2026-10-17).
+  VR brings no hand.
+  On foot, the arm touches a spot up to 3m away and points at one farther (user, 2026-10-17).
+- **Because:** our test pilot chose that only a click brings the hand, and the v1 scope reversed it on 2026-10-04, so the crew also sees what a pilot changes from a home cockpit or a key binding.
+  Crosscheck can't tell a pilot's hardware from the aircraft: the platform raises "cockpit sent" for each change a machine sends on the cockpit stream ([02-code-map](../architecture/02-code-map.md#what-a-handler-sees-and-does)), and a change the aircraft makes itself syncs like a pilot's ([state sync](../product/03-v1-scope.md#state-sync)).
+  The Baron takes its chocks away once it moves (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-the-barons-ground-contact-follows-the-written-altitude-and-its-own-physics-writes-dont-hold-against-ours)), and the KFC 150's disengage clears the flight director and six modes together (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so a `location` on any of them would send the PF's hand there unasked.
+  Whether the sim's autopilot moves the 58P's elevator trim is unverified, and a recording of a 58P flight, such as [p10](../../../experiments/areas/architecture/p10-recording.mjs)'s, would show what the aircraft moves itself.
   No probe has run in VR, so whether a VR click gives a cursor place the ray can use is unknown (unverified).
   On foot, our test pilot stood a median 1.8m and 2.6m from the spot clicked in two runs, and up to 5.8m ([log](log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
-- **Leaves out:** what the figure does for a click beyond its reach, which the idea [Avatar sync](../product/ideas.md#avatar-sync) leaves open.
+- **Leaves out:** how long the pointing arm is, how close together entries' changes must be to count as one instant, and how small an axis's change counts as noise, which [6.13](../architecture/plan.md#613-avatars) picks.

@@ -91,6 +91,13 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The engines' bottom line gains `object-mirror`, the gate and the playout, generic over the sample, which traffic and `Traffic` use; so [tiers](#tiers)' rule that a feature's routines depend on the message crate and the routine host alone also admits an engine that keeps the loop's rules and builds for wasm32.
 > - Traffic's row in [features](#features) gains the routine, and uses `clients` and `object-mirror` beside its three; ATC audio's uses `clients` too.
 > - The module's 0.1ms a frame in [budgets for work in the sim](#budgets-for-work-in-the-sim) grows by `Traffic`'s, under 0.1ms with 25 moving copies.
+>
+> Since 2026-10-17, [plugins and the sandbox](../plugins/01-plugins.md) changes this document in four places:
+>
+> - v1 builds no plugins, so [the units](#the-units)' platform has no `plugins` crate, `panel-bridge` holds no `ops`, `routine-host` runs no `Mechanisms`, state sync uses no plugins crate, and the plugins system in [systems](#systems) is the sandbox alone; [what a routine can ask for](#what-a-routine-can-ask-for) loses running calculator code, and [names the sim shares](#names-the-sim-shares) loses `CROSSCHECK_ROUTINE_MECHANISMS`.
+> - State sync has a second panel module, `instrument-reads`, which reads the values in a gauge's JavaScript that a profile's `instrument()` names.
+> - The sandbox's contexts hold, of rquickjs's intrinsics, `Eval` and `RegExp` alone, delete `Math.random` and `queueMicrotask`, and pin the stack's top at each call into JS, beside [one loop](#one-loop)'s missing clock.
+> - That settles three items in [left open](#left-open): QuickJS-ng's hash seed changes nothing a script sees, and the hooks plugins reach, and `ops`' operations and how a plugin names their panels, wait for plugins' design after v1.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

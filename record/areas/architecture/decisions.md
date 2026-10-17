@@ -1574,6 +1574,35 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The helper mixes ATC and the sounds into one output stream, so the Windows mixer can't turn ATC down alone.
 - **Leaves out:** the buffer's limits, which friends' sessions tune from the helper's report on each transmission.
 
+## v1 builds no plugins, and a profile reads a gauge's JavaScript through `instrument()` and writes it only through the gauge's H: events
+
+- **Decided:** v1 builds no plugins crate, plugin API, `plugin:` key, `plugin.state` or `plugin.write` form, `ops` module, or `Mechanisms` routine.
+  A state entry may watch `instrument(key, path)`, a value in a gauge's JavaScript, which state sync's panel module `instrument-reads` reads every 250ms in the gauge's panel: a path of own properties from the instrument, ending in a number, text, or boolean, or in a no-argument method the panel's own scripts wrote, never a built-in; a boolean reads as 1 or 0, and any other value is an error for the entry, with state sync's notice.
+  A profile writes a gauge's state only through the gauge's H: events, in write functions that check the mode another entry syncs, and the Baron 58P's tablet failures and its ADF's elapsed seconds stay out of v1.
+  This changes [decision 020](../../decisions/020-plugin-code-runs-only-in-core.md), whose 58P plugin reads its gauges through our panel bridge, and [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), whose aircraft gets a second runtime for its plugin, once step 8's decisions are numbered; and [03-v1-scope](../product/03-v1-scope.md#plugins), [04-room-for-later](../product/04-room-for-later.md#plugins), [01-format-and-delivery](../profiles/01-format-and-delivery.md#plugins), and [the code map](02-code-map.md#the-units), which build the 58P's plugin, its hooks, `ops`, and `Mechanisms` in v1.
+  Settled in node 6.15 by the user, 2026-10-17 ([plugins and the sandbox](../plugins/01-plugins.md)).
+- **Because:**
+  - Each setting of the 58P's that no variable shows is a field its gauge's constructor sets and only its H: events change, which state sync already fires, so the plugin's one job a profile couldn't do was reading (read in bksq-aircraft-baronpro 0.1.1, `KR87A.js`, `KAS297B.js`, and `bksq_wradar1.js`; [plugins log](../plugins/log.md)).
+  - The radar's events refill the oxygen, repair an engine, or reset every failure on its other pages (same files), so a write checks the mode rather than fire blind, where FS Copilot's radar module replays every event and notes "If ever desynched, won't self-resync" (FS Copilot fork, `Definitions/modules/bksq_bendix_rdr1150xl.yaml`).
+  - MSFS owns the single-letter namespaces, so a word of ours can't collide with one it adds (user, 2026-10-17).
+  - A path that climbed into the DOM or called a built-in could reach past the gauge, where own properties and the scripts' own methods keep a profile from files and the network, as [decision 020](../../decisions/020-plugin-code-runs-only-in-core.md) requires.
+  - The plugin design so far isn't the one the user had in mind, so plugins are designed afresh when a pick needs them (user, 2026-10-17).
+- **Leaves out:** plugins, and what node 6.15's raised lines left to them: their hooks, `ops`, channels, plugin tests, object mirroring, and claims on objects; a value carried as JSON text; and setting a gauge's field directly.
+
+## The sandbox deletes `Math.random`, pins the stack's top at each call into JS, and builds its contexts from `Eval` and `RegExp` alone
+
+- **Decided:** the sandbox gives each loaded profile one QuickJS-ng runtime, whose context holds QuickJS-ng's base objects and, of rquickjs's intrinsics, `Eval` and `RegExp`; after making it, the sandbox deletes `Math.random` and `queueMicrotask`; it calls `JS_UpdateStackTop` at its one entry into JS and sets a 1 MB stack with `JS_SetMaxStackSize`; and the sync engine hands values into JS from a `Vec` or a `BTreeMap`, never a `HashMap`.
+  A script may catch "out of memory".
+  This settles the code map's item in [left open](02-code-map.md#left-open) on QuickJS-ng's hash seed: a script sees nothing of it.
+  Settled in node 6.15 by the user, 2026-10-17 ([the sandbox](../plugins/01-plugins.md#the-sandbox)).
+- **Because:**
+  - QuickJS-ng seeds `Math.random` from the wall clock when it makes a context, and reads its hash seed only to pick a Map's or a Set's bucket, while their iteration walks insertion order (read in rquickjs-sys 0.14.0, `quickjs/quickjs.c`, `JS_NewContextRaw`, `map_hash_key`, `js_map_forEach`).
+  - It sets its stack limit from the stack pointer when the runtime is made, so a recursion's depth at its error turns on the Rust stack at the call unless the top is pinned (read in `quickjs.c`, `update_stack_limit`; rquickjs-core 0.14.0, `src/runtime/raw.rs`).
+  - `WeakRef`'s and `FinalizationRegistry`'s callbacks follow the garbage collector, and rquickjs builds an object from a `HashMap` in its randomly seeded order (read in `quickjs.c`, `reset_weak_ref`; rquickjs-core 0.14.0, `src/value/convert/into.rs`).
+  - A level's declarations name `RegExp` and no Map, Set, or Promise ([the profiles' units](../profiles/02-units.md)), and compiling the write functions needs `Eval`.
+  - The limits are for bugs ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)), and a function that catches "out of memory" and keeps allocating meets the 100ms limit.
+- **Leaves out:** whether the interrupt count and a recursion's depth repeat in a replay, which the bench measures.
+
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

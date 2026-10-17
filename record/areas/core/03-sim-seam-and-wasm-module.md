@@ -36,6 +36,8 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > - It also gains `release(object)`, for `SimConnect_AIReleaseControl` on an object the feature created.
 > - A `watch` takes a period of once, which reads an object's variables one time, as traffic reads each new object's identity; such a watch reuses one definition for its names, and the sim client doesn't make it again on a new connection, where [the sim client](#the-sim-client) makes every setup call again.
 > - Traffic's copies are written each frame by its routine `Traffic`, so traffic's connection makes a few calls a second, and the 4,096 packet IDs [its thread](#its-thread) keeps for each connection hold far more than the 1s it gives them.
+>
+> Since 2026-10-17, v1 has no plugins, so the routine host runs no `Mechanisms` routine and carries no want for calculator code, and [wants and the sim's APIs](#wants-and-the-sims-apis) loses `execute_calculator_code`'s row ([plugins and the sandbox](../plugins/01-plugins.md#no-plugins-in-v1)).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

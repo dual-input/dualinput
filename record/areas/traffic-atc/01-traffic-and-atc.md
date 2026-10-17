@@ -6,6 +6,9 @@ Depends on:  ../product/03-v1-scope.md, ../session/01-roles-and-members.md, ../s
 Decides:     What the traffic host polls, how often, and which objects it carries; what an identity and a state carry, and when a state goes out; how a receiving machine creates, freezes, dresses, and removes each copy, and how traffic's routine draws them; the object-mirror engine; traffic's notices and its list of traffic packs; how ATC audio picks the ATC app, sends its frames, and plays them; the settings; the budgets; and the cases for the bench (node 6.14).
 ```
 
+> **Note**
+> Since 2026-10-17, v1 has no plugins, so how a plugin mirrors objects and claims them, which [the object-mirror engine](#the-object-mirror-engine) gives to 6.15, waits for plugins' design after v1 ([plugins and the sandbox](../plugins/01-plugins.md#what-this-answers)).
+
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.
 Every other machine creates a frozen copy of each object, and traffic's routine `Traffic` in our WASM module draws each copy every frame, 1s behind the traffic host's reads.

@@ -1,0 +1,261 @@
+Baron 58P: the radio and failure state that lives only in gauge JavaScript, and what a plugin needs to sync it
+Read 2026-10-17 for node 6.15 (plugins). Nothing was run and the sim wasn't touched.
+Package: bksq-aircraft-baronpro 0.1.1, installed at <Community>\bksq-aircraft-baronpro (InstalledPackagesPath in %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt).
+
+SOURCE TAGS (each is "read in bksq-aircraft-baronpro 0.1.1, <file>")
+  [KX]   html_ui\Pages\VCockpit\Instruments\Generic\Radios\bksq-aircraft-baronpro\KX155B\KX155B.js
+  [KR]   ...\Generic\Radios\bksq-aircraft-baronpro\KR87A\KR87A.js
+  [KAS]  ...\Generic\Radios\bksq-aircraft-baronpro\KAS297B\KAS297B.js
+  [WX]   ...\NavSystems\bksq-aircraft-baronpro\bksq_wradar1\bksq_wradar1.js (and bksq_wradar1.html)
+  [KNS]  ...\Generic\Radios\bksq-aircraft-baronpro\KNS81\KNS81.js
+  [TAB]  ...\Generic\Misc\bksq-aircraft-baronpro\BlackSquareTablet\BlackSquareTablet.js
+  [INT]  SimObjects\Airplanes\bksq-aircraft-baronpro\model.base\BaronProfessional_Base_INT.xml (line numbers given)
+  [TPL]  ...\model.base\BaronProfessional_Templates.xml, template BKSQ_FAILURE_DATABUS
+  [PCFG] SimObjects\Airplanes\bksq-aircraft-baronpro\panel.N972HJ\PANEL.CFG and Panel.xml
+  [BI]   MSFS 2024's BaseInstrument.js, as captured from the running sim on 2026-08-30 in FS Copilot profiles, sim-sources/vcockpit12-efba220-1/html_UI_Pages_VCockpit_Instruments_Shared_BaseInstrument.js
+  [VC]   MSFS 2024's stock VCockpit.js, FS Copilot fork, record/pointer-forwarding/module/vendor/VCockpit.stock.js (sim version not named there)
+  "read" = the code says so; nothing below was measured unless it says measured.
+
+======================================================================
+0. VERDICTS
+======================================================================
+field                                  profile alone?             plugin reads, profile writes H:?        needs field set / method?
+KX155B comKnobPulled, navKnobPulled    YES (L: mirror + toggle)   not needed                              no
+KR87 antMode, bfoMode                  no (no mirror)             YES, toggle map on the H: event         no
+KR87 multiMode (FRQ/FLT/ET)            no                         no: not a toggle or a step; FRQ button  YES (set field), or a plugin write
+                                                                  swaps frequencies when already in FRQ   method that reads the local mode
+KR87 timerRunning, elapsedTimeSeconds  no                         start/stop/reset only, and only in ET   YES for catch-up (absolute seconds)
+KAS optionalArmingMode                 no                         mostly: toggle on ArmButton, but arming  set field for exactness
+                                                                  needs |ALT SEL - IND ALT| >= 100 ft
+KAS armedVerticalSpeed                 no                         unsafe: the same H: events move the      YES (set field)
+                                                                  altitude preselect or the AP VS target
+                                                                  unless VS-adjust is pulled and VS off
+RDR range                              no                         YES, inc/dec on an index (no-op in       no (read needs a getter call)
+                                                                  modes 4-5)
+RDR alertMode                          no                         YES, toggle (no-op in modes 4-5)         no
+RDR verticalMode                       no                         YES, toggle on radarProfile only         no
+RDR radarHold                          no                         unsafe: in mode 4 the event refills O2   YES (set field) or guarded write
+RDR radarTrack                         no                         unsafe: in mode 4 the events repair      YES (set field) or guarded write
+                                                                  engine 2 / set battery volts; mode 5
+                                                                  resets all failures
+Tablet failures (failureMatrix)        no (count only in L:)      111 of 112 rows by H: toggle; DEICE      set row + force assessment is exact
+                                                                  BOOTS row unreachable (name collision)
+KNS-81 waypoints (out of v1)           no                         no                                       YES: set arrays, or DataStorage +
+                                                                                                           radioConfigLoad (with a side effect)
+
+Every field resets to its constructor default whenever its panel document is created (every aircraft load), and none is saved [KX][KR][KAS][WX constructors].
+So two machines that load together start equal, and replaying each H: event keeps them equal while no event is lost and the modes agree; the plugin's read is what catch-up and a rejoin need.
+
+======================================================================
+1. WHERE EACH GAUGE LIVES, AND HOW A SCRIPT IN ITS DOCUMENT FINDS IT
+======================================================================
+Each VCockpitNN holds exactly one htmlgauge00, so each gauge is alone in its panel document [PCFG].
+The instrument identifier is templateID + "_" + the URL's index when there is one [BI parseURLAttributes]; Panel.xml names the same strings (KX155B_1, KAS297B_1, KNS81_1) for each gauge's <Electric> circuit [PCFG].
+Our panel bridge's instrument key is identifier + "|" + URL query (core/02-clients-and-panel-bridge.md, "Cockpit panels and their modules"; FS Copilot fork, FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js, Channel.keyFor); the keys below are derived from code, not seen at run time.
+
+gauge        panel doc     templateID         identifier         tag (registerInstrument)       key (derived)          power (Panel.xml)
+KX 155B #1   VCockpit08    KX155B             KX155B_1           kx155b-element                 KX155B_1|Index=1       CIRCUIT ON:63
+KX 155B #2   VCockpit09    KX155B             KX155B_2           kx155b-element                 KX155B_2|Index=2       CIRCUIT ON:64
+KR 87        VCockpit10    KR87A              KR87A              kr87a-element                  KR87A                  CIRCUIT ON:74
+KNS-81       VCockpit13    KNS81              KNS81_1            kns81-element                  KNS81_1|Index=1        CIRCUIT ON:69
+RDR 1150XL   VCockpit14    bksq_wradar1       bksq_wradar1       bksq_wradar1-element           bksq_wradar1           CIRCUIT ON:75
+KAS 297B     VCockpit15    KAS297B            KAS297B_1          kas297b-element                KAS297B_1|Index=1      CIRCUIT ON:72
+Tablet       Vcockpit19    BlackSquareTablet  BlackSquareTablet  blacksquaretablet-element      BlackSquareTablet      none (stops while L:bksq_TabletDisabled)
+
+Finding the instance (read):
+- Stock VCockpit.js defines the tag with customElements.define, creates the element with document.createElement(tag), and appends it to the <vcockpit-panel id="panel"> element [VC registerInstrument, createInstrument, setupInstrument].
+  The custom element IS the gauge's instance, so in that document document.querySelector("kr87a-element") or document.getElementById("panel").children[0] returns the object whose fields are below.
+- The gauge classes are top-level class declarations, so they are global lexical bindings, not window properties: typeof KR87A works there and window.KR87A is undefined (measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/09-environment.md, "MSFS globals").
+- Our VCockpit.js block hands each instrument to the bridge as CROSSCHECK_BRIDGE.add(template) (core/02-clients-and-panel-bridge.md, "Our VCockpit.js"), so ops can look an instance up by key with no DOM query (designed, not built).
+- The radar's state is not on the instance itself: instance.weatherRadarMainMap is a bksq_wradar1_MainMap page, and .map on it is the bksq_wradar1_MapElement holding the fields; map.instrument is the <map-instrument id="MapInstrument"> element (Asobo's MapInstrument) that holds the range [WX constructor, bksq_wradar1_MainMap constructor, bksq_wradar1.html line 120].
+  The page is also reachable as instance.pageGroups[0], built in connectedCallback [WX connectedCallback].
+- What else holds the instances: nothing in the package; a grep of all its .js finds no querySelector of another gauge's tag and no cross-gauge reference [all files].
+  The sim's #panel element holds each as a DOM child and the main loop holds bound callbacks [VC][BI createMainLoop].
+  FS Copilot's patched VCockpit.js holds each one in its Hook and replaces onInteractionEvent with a wrapper (FS Copilot fork, FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/hook.js, Hook constructor); both files override VCockpit.js, so only one is live.
+- A gauge's fields are plain own properties set in its constructor: no closure-held state, no #private fields, nothing frozen [KX][KR][KAS][WX][TAB][KNS constructors].
+- H: delivery: stock VCockpit.js hands every OnInteractionEvent to every instrument in the document unless a Guid target is named [VC "OnInteractionEvent"]; each gauge then filters by its own prefix (RADIO1_, RADIO2_, adf_, kas297b_, BKSQ_FAILURE_), and the radar through Asobo's NavSystem, whose source isn't on this machine (it strips "bksq_wradar1_" by templateID per [BI DecomposeEventFromPrefix]; whether NavSystem gates on power is unverified).
+- Panel titles follow "VCockpitNN - <identifier>" (measured, same 09-environment.md); this panel.cfg spells three sections "Vcockpit03", "Vcockpit07", "Vcockpit19", so the tablet's title may read "Vcockpit19 - BlackSquareTablet" (unverified).
+
+======================================================================
+2. PER FIELD
+======================================================================
+Columns of each card: type | changes (H: event and effect) | other writers | L: mirror | profile | H: replay | rate.
+
+--- F1. KX155B.comKnobPulled, KX155B.navKnobPulled (each radio) ---
+type     bool; false in the constructor [KX constructor].
+changes  H:RADIO<n>_COM_Knob_Small_PUSH toggles comKnobPulled; H:RADIO<n>_NAV_Knob_Small_PUSH toggles navKnobPulled; both only while isElectricityAvailable() [KX onInteractionEvent].
+effect   COM small knob steps 25 kHz pulled / 50 kHz in at 25 kHz spacing, 5 / 25 kHz at 8.33 kHz spacing; NAV pulled makes the NAV knobs tune the active frequency and blanks the standby display to "- - -" [KX onInteractionEvent, Update].
+others   none in JavaScript; the XML's UPDATE_ONCE writes 0 to L:COM_1/2 and L:NAV_1/2_KNOB_PULLED [INT 352-355].
+mirror   L:COM_<n>_KNOB_PULLED and L:NAV_<n>_KNOB_PULLED (bool), written on each toggle [KX onInteractionEvent].
+         The gauge never reads them; the XML reads them only for the knob's pull animation, (L:COM_1_KNOB_PULLED, bool) 100 * [INT 8353, 8407, 8563, 8617].
+quirk    The constructor writes L:COM_ + radioIndex while radioIndex is still 1 (Index is parsed later, in connectedCallback), so both radios zero L:COM_1_ and L:NAV_1_KNOB_PULLED [KX constructor, connectedCallback; VC createInstrument order].
+         Harmless at load (all false); a reload of one radio's panel would leave radio 1's mirror false and its own mirror stale (unverified: read, not reloaded).
+profile  YES alone. watch L('COM_1_KNOB_PULLED'), write {toggle: H('RADIO1_COM_Knob_Small_PUSH')}; four entries (COM/NAV x 2). The profile must never write the L: name itself, or the mirror stops matching the field.
+replay   Deterministic toggle from equal starts; lands only while that radio has power on the receiving machine.
+rate     On a click only.
+
+--- F2. KR87A.antMode, KR87A.bfoMode ---
+type     bool each; false in the constructor [KR constructor].
+changes  H:adf_AntAdf toggles antMode; H:adf_bfo toggles bfoMode; only while isElectricityAvailable() (CIRCUIT ON:74) [KR onInteractionEvent; PCFG].
+effect   Annunciators only (ANT/ADF, BFO) [KR Update]; nothing else can see them, so the ADF needle and sound don't change (read: no L: mirror exists for the XML or sound.xml to read).
+others   none.
+mirror   none.
+profile  Not alone (only blind H: replay, which can't catch up). With the plugin exporting the field: watch plugin.state.adf_ant, write {toggle: H('adf_AntAdf')}; same for BFO.
+replay   Deterministic toggle; needs power on the receiving machine.
+rate     On a click only.
+
+--- F3. KR87A.multiMode ---
+type     number 0 = FRQ (standby frequency), 1 = FLT (flight time), 2 = ET (elapsed timer); 0 in the constructor [KR constructor, Update].
+changes  H:adf_FltEt: 0 -> 1, 1 -> 2, 2 -> 1 (never back to 0) [KR onInteractionEvent].
+         H:adf_frqTransfert: if multiMode != 0 sets 0; if already 0 sends K:ADF1_RADIO_SWAP instead [KR onInteractionEvent].
+         Both only while powered.
+others   none.
+mirror   none.
+profile  Not alone. Not a toggle or inc/dec map: reaching 0 takes frqTransfert, which swaps the ADF frequencies on a machine already at 0, and the frequencies are A: variables the profile syncs too.
+         Needs the field set directly (0..2), or a plugin write method that reads the local multiMode and sends FltEt/frqTransfert accordingly.
+replay   Deterministic only from the same starting mode; an event entry replaying frqTransfert into a machine at a different mode swaps that machine's frequencies.
+note     FLT shows the sim's FLIGHT DURATION game variable, per machine, passed in minutes to a formatter that takes seconds [KR Update, getTimeString]; nothing to sync there.
+
+--- F4. KR87A.timerRunning, KR87A.elapsedTimeSeconds ---
+type     bool; number, seconds; false and 0 in the constructor [KR constructor].
+changes  H:adf_SetRst, only when multiMode == 2 and powered: stopped at 0 -> running; running and > 0 -> stopped; stopped and > 0 -> reset to 0 [KR onInteractionEvent].
+others   Update adds deltaTime / 1000 every frame while timerRunning, only in its powered branch [KR Update].
+         deltaTime is wall-clock milliseconds between frames, Date.now() differences [BI doUpdate], so the timer ignores sim rate, halts while unpowered with no jump on power return, and whether it counts during pause is unverified.
+mirror   none.
+nature   Each machine counts its own copy from its own SetRst; replayed starts differ by network latency (sub-second), and the display shows whole seconds (mmss, or hmm past an hour) [KR getTimeString].
+profile  Not alone. Live syncing elapsedTimeSeconds makes no sense: it changes every frame, so an entry would send every frame and the driven-entry test would stop it.
+         Sync timerRunning and multiMode as values, replay or converge SetRst only for start/stop/reset, and set elapsedTimeSeconds (and timerRunning) directly in catch-up for a machine that joined late.
+replay   Start/stop/reset replay deterministically when multiMode and the running/zero state agree.
+
+--- F5. KAS297B.optionalArmingMode ---
+type     bool; false in the constructor [KAS constructor].
+changes  H:kas297b_ArmButton: true -> false; false -> true only if |A:AUTOPILOT ALTITUDE LOCK VAR - A:INDICATED ALTITUDE| >= 100 ft on that machine [KAS onInteractionEvent].
+         The XML sends the event only with CIRCUIT ON:72 and L:var_AutopilotTest 0 [INT 10439-10441]; the gauge also needs power.
+others   Update clears it on each rising edge of VS hold (A:AUTOPILOT VERTICAL HOLD, or PMS50's L:PMS50_APGA_ACTIVE_VERTICAL_MODE > 0 while L:PMS50_APGA_RUNNING) [KAS Update].
+effect   ARM annunciator; and VsButton uses the armed VS instead of the current VS when (L:var_VsAdjustMode or optionalArmingMode) [KAS onInteractionEvent "VsButton", Update].
+mirror   none.
+profile  Not alone. With the plugin's read: {toggle: H('kas297b_ArmButton')} works except within 100 ft of the selected altitude, where arming is refused and the write never lands; set the field for exactness.
+         FS Copilot's 58P profile leaves the ARM button out as "cannot be synced deterministically" (FS Copilot profiles, definitions/bksq-aircraft-baronpropress.yaml, "Autopilot ALT Arm").
+replay   Disarm always; arm depends on each machine's altitude readings at that instant.
+
+--- F6. KAS297B.armedVerticalSpeed ---
+type     number, ft/min, clamped [-3000, 3000]; 0 in the constructor [KAS constructor].
+changes  H:kas297b_100_INC/_DEC step +-100 and H:kas297b_1000_INC/_DEC step +-1000, no wrap, only while L:var_VsAdjustMode is 1 AND VS hold is off [KAS onInteractionEvent].
+         With VS-adjust pulled and VS hold on, the same events step A:AUTOPILOT VERTICAL HOLD VAR:1 instead (K:AP_VS_VAR_SET_ENGLISH, +-3000 limit).
+         With VS-adjust in, they step the altitude preselect (K:AP_ALT_VAR_SET_ENGLISH, 0 to 35000 ft).
+others   Update sets it to A:AUTOPILOT VERTICAL HOLD VAR (FT/MIN) whenever that variable changes, including the first powered frame after load, when lastVs is undefined [KAS Update].
+         So it differs from the stock AP VS target only between the pilot's knob turns and the VS button press; the press sends K:AP_PANEL_VS_HOLD and, 200ms later, K:AP_VS_VAR_SET_ENGLISH with the armed value rounded to 100 [KAS onInteractionEvent "VsButton"].
+mirror   none (L:var_VsAdjustMode is the XML's knob-pull input, toggled by the knob's LEFT_SINGLE_CODE [INT 10494]).
+profile  Not alone. An inc/dec map on the H: events can't guard on VS-adjust or VS hold, and on a machine whose mode differs it moves the altitude preselect or the AP VS target. Needs the field set directly.
+         Writing K:AP_VS_VAR_SET_ENGLISH on the other machine would copy the value in as a side effect of the stock variable, which the PF holds at a different value meanwhile; not usable.
+replay   Deterministic only while both machines agree on VS-adjust, VS hold, and the current value.
+
+--- F7. RDR 1150XL: bksq_wradar1_MapElement fields (instance.weatherRadarMainMap.map) ---
+Mode guard: the map copies L:var_radarMode into map.mapMode on each of its updates and handles events only while mapMode <= 3 (0 Off, 1 Standby, 2 Test, 3 On) [WX bksq_wradar1_MapElement.onEvent, onUpdate].
+In mode 4 (systems page) and 5 (failures page) the outer bksq_wradar1.onEvent acts instead, reading L:var_radarMode live [WX bksq_wradar1.onEvent]:
+  mode 4: radarMap repairs engine 1 (zeroes L:var_engineDamage_L, _engineFouling_L, _fuelInCylinders_L, _vaporInCylinders_L); radarTrackLeft repairs engine 2; radarTrackRight writes ELECTRICAL BATTERY VOLTAGE:1 and :2 to 25.8 V; radarHold sets L:var_oxygenPressure to 2150.
+  mode 5: radarTrackRight sends H:BKSQ_FAILURE_RESET_ALL_FAILURES.
+  Range, alert, and profile events do nothing in modes 4 and 5.
+While HOLD is on, the map's onUpdate runs once more and then stops, so mapMode, tilt, gain, and the annunciators freeze until HOLD is off [WX onUpdate]; a mode-4 press while held then reaches both handlers (inferred from the code).
+No power check in the map's onEvent [WX]; whether NavSystem drops H: events while CIRCUIT ON:75 is off is unverified.
+No L: mirror for any of these; L:var_radarMode, L:var_RadarTilt, L:var_RadarGain, L:var_RadarBrightness are XML-owned L: inputs the profile syncs directly [INT 9780-9849].
+
+field          type / values                   change                                                     profile write
+alertMode      bool, false (WX / WXA)          radarAlertToggle toggles                                   {toggle: H('bksq_wradar1_radarAlertToggle')}: safe, no-op in 4-5
+verticalMode   bool, false (PROFILE)           radarProfile toggles only when mapMode == 3; radarMap      {toggle: H('bksq_wradar1_radarProfile')}: safe, lands only in mode 3;
+                                               clears it (and in mode 4 repairs engine 1)                 never converge with radarMap
+radarHold      bool, false (HOLD)              radarHold toggles                                          toggle unsafe in mode 4 (O2 refill): set the field (radarHold, and
+                                                                                                          lastUpdateBeforeHold = false), or a write that checks L:var_radarMode
+radarTrack     number, degrees, 0, [-35, 35]   radarTrackLeft -2.5, radarTrackRight +2.5, clamped          inc/dec step 2.5 unsafe in modes 4-5: set the field, or a guarded write
+range          index into map.instrument._ranges = [4, 8, 12, 20, 40, 60, 80, 100, 120, 160] NM, which the map assigns every update;
+               radarRangeInc calls map.instrument.zoomOut(), radarRangeDec zoomIn(); read with map.instrument.getWeatherRange() [WX onEvent, onUpdate].
+               The index's field name, its default, its bounds, and whether MapInstrument saves it are in Asobo's MapInstrument.js, not readable on this machine (unverified).
+               Profile: export the index (position of getWeatherRange() in the list), write {inc: H('bksq_wradar1_radarRangeInc'), dec: H('bksq_wradar1_radarRangeDec'), wrap: false}; no-op in 4-5.
+replay   Deterministic while both machines are in the same mode <= 3; FS Copilot's module replays every radar H: event blind and notes "If ever desynched, won't self-resync" (FS Copilot fork, Definitions/modules/bksq_bendix_rdr1150xl.yaml).
+rate     On a click only; scanningRevealTimer and the sweep are animation, not state.
+
+======================================================================
+3. READING RATE
+======================================================================
+- Every field above changes only inside onInteractionEvent/onEvent, synchronously, except armedVerticalSpeed (follows the AP VS target on change) and elapsedTimeSeconds (every frame while running) [KX][KR][KAS][WX].
+- So a read every 250ms to 1s, or a read right after the core hears one of the gauge's H: events (state sync's h-events module hears them, sync/05-units.md, "Hearing them"), is enough; per-frame reads aren't needed.
+- One ops request per document can return all of that gauge's fields at once; the ET should go out only on start/stop/reset and in catch-up.
+
+======================================================================
+4. FAILURES (tablet, Vcockpit19)
+======================================================================
+Structure: BlackSquareTablet.failureMatrix, one row per failure, [0 name, 1 type, 2 active, 3 default MTBF h, 4 MTBF h, 5 armed, 6 after min, 7 before min, 8 circuits/engine, 9 bus, 10 simvar or K: event, 11 unit, 12 normal value or leak rate, 13 failed value, 14 seconds to failure] [TAB populateFailureMatrix].
+Rows: 102 base, 104 58TC, 112 58P (counted from the variant branches in [TAB populateFailureMatrix]; matches the study).
+Types: 0 circuits through L:FailureDataBus_*, 1 bus, 2 simvar (L:var_*Failure* etc.), 3 engine failure (K:TOGGLE_ENGINEn_FAILURE while A:ENG FAILED differs and damage < 100), 4 engine fire (A:ENG ON FIRE, on change), 5 K: toggle (INSTRUMENT AIR, PITOT BLOCKAGE, STATIC BLOCKAGE, L/R BRAKE, on change), 6 leak (fuel or O2 drained each assessment) [TAB failureAssessment].
+
+How a row changes:
+- H:BKSQ_FAILURE_<suffix>: toggles row[2] of the FIRST row whose name, spaces as underscores, CONTAINS the suffix; clears row[5]; sets forceFailureAssessment; RESET_ALL_FAILURES clears all [TAB onInteractionEvent, resetAllFailures].
+  No power or readiness check; before startup's populateFailureMatrix the loop finds nothing, and loadFailureStates 2s later overwrites row[2] [TAB startup, loadFailureStates].
+- Collision: "DEICE_BOOTS" first matches "DEICE BOOTS INTEG" (earlier in the list), so the circuit row "DEICE BOOTS" can't be toggled by H:; every other full name hits its own row (checked by hand against the list order in [TAB populateFailureMatrix]).
+- updateFailureTimes, every 10s (failureAssessmentInterval 10000ms) from failureAssessment, draws row[14] = MTBF x 2 x Math.random() x 3600 s for inactive rows, counts down at the global rate, and sets row[2] true at 0; the whole function does nothing while globalFailureRate is 0 [TAB updateFailureTimes, calculateNewFailureTime, Update].
+- Each assessment re-asserts active rows: type 2 rows write their simvar every 10s whatever changed, so a profile entry syncing L:var_magnetoFailure_1_L or the like is put back by the follower's own tablet within 10s [TAB failureAssessment case 2].
+  Type 0 rows feed the XML's databus, which toggles a circuit only when its connection differs from what the row wants, so a synced breaker and a mirrored circuit failure agree [TPL BKSQ_FAILURE_DATABUS].
+- Saved per row to DataStorage <prefix><name>_Active whenever row[2] changes, on whichever machine it changes [TAB failureAssessment, saveFailureState].
+- Restored 2s after the tablet starts for every type but 4 (fire) and 5 (K: toggles) [TAB loadFailureStates].
+  This corrects the study and inventory/datastorage-keys.txt, which say engine failures and fires aren't restored: the code restores type 3 (L/R ENGINE FAILURE) and skips the five type-5 rows, whatever its comment says.
+
+Rate: L:var_globalFailureRate mirrors globalFailureRate and is read back every 2.5s in updateSimVars, which adopts any value written from outside [TAB updateSimVars, setGlobalFailureRate]; the slider offers 0, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000 [TAB constructor].
+L:bksq_ActiveFailures is the count only, written each assessment [TAB failureAssessment]; no per-row mirror exists.
+
+Could a plugin sync them: yes, by reading the PF's rows and making each follower's rows match, if:
+- Only the PF's tablet rolls: each follower writes L:var_globalFailureRate 0, which freezes its countdowns and draws none (read; the study's sim questions 3 and 7 measure it).
+  This is format doc's deferred "settings on following machines", and needs the plugin or profile to know which machine flies, and a rule when control passes (the new PF's rate back up, the old PF's to 0; frozen countdowns resume later).
+- Write shape A, read-only plugin: export one boolean per row; the profile writes {toggle: H('BKSQ_FAILURE_<NAME>')} per row, comparing with the follower's own row read; 111 of 112 rows reachable (DEICE BOOTS not).
+  Write shape B: a plugin write method sets row[2] for every differing row and forceFailureAssessment = true through one ops set; exact, no collision.
+  Either way the follower's own tablet applies the effects, including the type-5 K: failures no aircraft variable shows, which FS Copilot's watch-the-effect mirror can't do (FS Copilot profiles, definitions/bksq-aircraft-baronpropress.yaml, "FAILURES" section comment).
+- Readiness: write only after the follower's tablet has failureStatesLoaded and mtbfSettingsLoaded true, both readable on the instance; by the code's timers that's about 4s + 2.5s + 2s after load [TAB Update, startup; INT startup counter per the study].
+- Leave leak rows (type 6) off on followers if the profile syncs fuel and oxygen from the PF, or both machines drain.
+- Side effects on the follower's own sim profile: its tablet saves the mirrored rows to its DataStorage, so its next solo flight starts with the PF's failures (types 0-3 and 6), and the 0 rate is a persisted LocalVar saved to its state.CFG at quit (study, "Persistence and initial state"); restoring both at session end needs a DataStorage set op and the follower's own rate kept aside.
+
+======================================================================
+5. KNS-81 WAYPOINTS (out of v1)
+======================================================================
+- Fields: KNS81.memoryFrequencies[0..9] (Hz), memoryRadials[0..9] (degrees), memoryOffsets[0..9] (NM, 0 to 499.9), plus displayChannel and useChannel (1..10), navigationMode (0..3), dataEntryMode (0..2) [KNS constructor, onInteractionEvent].
+- DataStorage: BKSQ_BARON_KNS81_1_memoryFrequencies_0..9, _memoryRadials_0..9, _memoryOffsets_0..9, values as number.toString(), read back with JSON.parse and a typeof check against a number default [KNS radioConfigSave, radioConfigLoad, getConfigValue].
+  Saved every 60s (radioConfigInterval) only while the gauge has power and CIRCUIT AVIONICS ON [KNS Update, radioConfigSave]; the document loads /JS/dataStorage.js itself [KNS line 1], whose GetStoredData/SetStoredData go to window.top.datastorage (FS Copilot profiles, sim-sources/vcockpit12-efba220-1/html_UI_JS_dataStorage.js).
+- radioConfigLoad IS the waypoint load: connectedCallback calls it once; it reads all 30 keys, then sends K:NAV3_RADIO_SET_HZ and K:NAV3_STBY_SET_HZ with waypoint 1's frequency, and setStandbyFrequency also writes memoryFrequencies[displayChannel-1] = that frequency [KNS connectedCallback, radioConfigLoad, setStandbyFrequency].
+  So calling it mid-flight with displayChannel != 1 overwrites that channel's frequency with waypoint 1's and retunes NAV 3; this answers 03-v1-scope's "haven't traced to the waypoint load".
+- Reading: the live arrays through ops (current, includes unsaved edits), or GetStoredData (up to 60s stale, and never saved while unpowered).
+  Writing: set the three arrays through ops (no reload, no retune), or SetStoredData all 30 keys and then radioConfigLoad with displayChannel = 1, or reload the document; the value is 30 numbers, a few hundred bytes.
+
+======================================================================
+6. PRIOR WORK ON ONE SCRIPT REACHING ANOTHER GAUGE'S INSTANCE
+======================================================================
+Measured:
+- A probe evaluated through the inspector in a panel document found the instrument as document.getElementById("panel").children[i] and read instance properties: constructor WasmInstrument, instrumentIdentifier, isInteractive, urlConfig.noEvent (measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/results/p01-wasm-shell-vcockpit17-wasminstrument-2026-08-30-10-30-41.txt).
+- Class declarations are global lexical bindings, not window properties, in a panel document (measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/09-environment.md, "MSFS globals").
+- A peer's press, dispatched as DOM events into the A220's DisplayUnits instrument by FS Copilot's panel code, switched the ND to plan mode; Page.reload through the inspector reloaded a panel document with changed code and no sim restart (measured on MSFS 2024, 2026-09-17, FS Copilot fork, record/pointer-forwarding/docs/build/log.md, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone").
+- A script put into a panel through the inspector read the sim's page-wide objects, ViewListener.g_ViewListenersMgr, and listed every CommBus name the aircraft's code registered (measured on MSFS 2024, 2026-09-28, record/areas/commbus/log.md, "2026-09-28: A script that arrives after a panel loaded can list every CommBus name the panel registered").
+- A wrapper probe left installed swallowed the MFD's clicks and needed location.reload() on the document to undo (measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/build/log.md, the p06 entry); that is why our ops should read and set fields, and wrap nothing.
+Read only, never run:
+- That the element in #panel is the gauge's instance with these fields, and that setting comKnobPulled, multiMode, armedVerticalSpeed, map.radarHold, or failureMatrix[i][2] from another script in the document changes what the gauge draws and does next frame [VC][BI][KX][KR][KAS][WX][TAB].
+- FS Copilot's Hook takes each instance in its patched createInstrument and wraps its onInteractionEvent to relay H: names (FS Copilot fork, FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/hook.js); our records never measured that relay on the Baron.
+- Nothing in coherent-gt.md bears on it: it lists syntax and built-ins only.
+Nobody has set a gauge's JavaScript field from outside the gauge, or called radioConfigLoad, in our records.
+03-v1-scope's open question (can plugin panel code read and set these settings) stays unverified; one inspector probe in VCockpit10, 14, 15, and 19 that reads and sets one field each and screenshots the display would settle it.
+
+FS Copilot's handling of these settings, for comparison:
+- 58P profile: syncs L:var_VsAdjustMode and A:AUTOPILOT VERTICAL HOLD VAR:1, leaves the ARM button out, has "#### ADF AND STUFF TODO HERE" for the KR 87, and no KX 155B knob entries (FS Copilot profiles, definitions/bksq-aircraft-baronpropress.yaml, updated 2026-08-15).
+- Radar module: syncs the four radar L: knobs and replays all eight radar H: events blind (FS Copilot fork, Definitions/modules/bksq_bendix_rdr1150xl.yaml).
+- Community base profile: watches H:adf_AntAdf, _bfo, _frqTransfert, _FltEt, _SetRst, all six H:kas297b_* events, seven radar events (no radarRangeDec), and L:var_adfKnobPulled (FS Copilot profiles, definitions/bksq-aircraft-baronpro.yaml); profiles are leads, not evidence.
+
+======================================================================
+7. WHAT THIS CHANGES FOR PLUGINS AND OPS
+======================================================================
+- The KX 155B needs no plugin: its knob-pulled state syncs with an L: watch and a toggle map on the H: event (F1), which changes 03-v1-scope's "setting it takes a write method".
+  The other radios' knob-pulled states are XML L: variables read back by their code (L:var_adfKnobPulled read by the XML's ADF knob [INT 8912-8927]; L:var_VsAdjustMode read by KAS297B.js; L:var_rnavKnobPulled read by KNS81.js), so they are ordinary entries; that answers 03-v1-scope's "unverified" line.
+- The plugin's v1 job is the KR 87 (4 fields), the KAS 297B (2), the radar (5), and the failure matrix.
+- v1 ops the plugin needs, all in the gauge's own document, routed by instrument key:
+  1. read: key + property paths -> JSON values, several per request (e.g. KR87A antMode, bfoMode, multiMode, timerRunning, elapsedTimeSeconds; weatherRadarMainMap.map.alertMode; failureMatrix rows' [2]).
+  2. set: key + path + value, several per request, atomically in one frame (multiMode; elapsedTimeSeconds with timerRunning; armedVerticalSpeed; map.radarHold with map.lastUpdateBeforeHold; map.radarTrack; failureMatrix[i][2] with forceFailureAssessment = true).
+  3. call: key + method path + arguments, for a getter the plugin can't replace (map.instrument.getWeatherRange()) and, later, KNS81.radioConfigLoad; or a read op that can call a no-argument getter.
+  4. DataStorage get/set, later: the KNS-81, and restoring a follower's failure keys at session end.
+  A push-on-change watch in the panel would replace polling; without it, a read every 250ms to 1s per gauge suffices (section 3).
+- Plain H: writes (toggle and inc/dec maps over a plugin's value) cover ant, BFO, arming, range, alert, and profile; the rest need set, because the same H: events do other things in other modes (engine repair, O2 refill, battery volts, failure reset, altitude preselect, frequency swap).
+- Failures also need "settings on following machines" (a 0 rate on followers), knowledge of the PF, the tablet's readiness flags, and a restore at session end; each is outside what a profile can say today.
+- Fail-open: these ops only read and assign plain properties and never wrap a method, so nothing sits in the pilot's input path; an op on a missing key or path answers an error.

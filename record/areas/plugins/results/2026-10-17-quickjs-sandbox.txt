@@ -1,0 +1,426 @@
+QuickJS-ng sandbox for plugins: determinism, limits, and calls
+Research read for node 6.15 (plugins), 2026-10-17.
+
+Sources read
+- <cargo registry>\rquickjs-0.14.0, rquickjs-core-0.14.0, rquickjs-sys-0.14.0.
+  rquickjs-sys 0.14.0 vendors QuickJS-ng 0.16.2 (quickjs.h, QJS_VERSION_MAJOR/MINOR/PATCH).
+  rquickjs-macro 0.14.0 is not in the registry, so the macros below come from
+  rquickjs's re-exports only (rquickjs-0.14.0\src\lib.rs), not their source.
+- Our records: architecture log 2026-10-08 (p04), 2026-10-09 (p07), 2026-10-14 (5.1.1);
+  architecture decisions.md "The core runs as one loop..."; 02-code-map "One loop" and
+  "Left open"; decision 046; core log 2026-10-15 (FMA3); core 01-loop-and-edge.md.
+- Probe code: experiments/areas/architecture/engine/quickjs (p04),
+  types/quickjs (p07), recording/loop (p10), core/edge/src/bin/fma3.rs.
+- Results: experiments/areas/architecture/results/p04-embedded-engine-2026-10-08-20-0*.txt,
+  p10-loop-2026-10-16-13-52-24/p10-loop-run.txt.
+Citation style: "read in rquickjs-sys 0.14.0, quickjs/quickjs.c, <function>".
+Markers: read (source, this session), measured (our probe output), inference, unverified.
+Nothing here was run for this read; every "measured" line is from an earlier probe.
+
+=====================================================================
+VERDICTS
+=====================================================================
+1. Hash seed: no script-visible effect. It only picks the bucket of a Map, Set, WeakMap,
+   or WeakSet key; every iteration walks an insertion-ordered list. No API sets it.
+2. Other sources, with Date and Performance left out:
+   Math.random (wall-clock seed) -> remove or replace it after making the context.
+   Stack-overflow depth (stack pointer at runtime creation) -> pin the stack top per call.
+   Rust HashMap/HashSet passed through rquickjs IntoJs -> random key order; never pass one.
+   C-runtime math -> already closed by the core's static CRT and FMA3 off.
+   GC-timed WeakRef/FinalizationRegistry -> deterministic if host code is the same in
+   live and replay; or leave the WeakRef intrinsic out.
+   Atomics.wait, std/os, structuredClone, environment -> not reachable.
+3. Interrupt count: deterministic from source reading, with conditions (section 3);
+   never measured. The counter persists across calls, so the count depends on every JS
+   entry since the context was made.
+4. Memory limit: holds, but a script can catch "out of memory"; GC and OOM points repeat
+   when the host's allocations in the runtime repeat.
+5. Pattern: synchronous callbacks into the plugin's exported handlers for each input;
+   host-made promises only for answers to the plugin's own requests, resolved when the
+   answer arrives as an input, with the job queue drained to empty right after that
+   input's handler. Job order is FIFO.
+
+=====================================================================
+1. THE HASH SEED
+=====================================================================
+Where it's taken
+- read in rquickjs-sys 0.14.0, quickjs/quickjs.c, JS_NewContextRaw:
+    ctx->random_state = js__gettimeofday_us();   (0 becomes 1)
+    ctx->hash_seed = xorshift64star(&ctx->random_state);
+  with the comment "TODO(bnoordhuis) use getrandom() etc."
+- Fields: JSContext.random_state (uint64_t), JSContext.hash_seed (uint32_t).
+- The runtime takes no seed (read in quickjs.c, JS_NewRuntime2).
+- Every rquickjs context reaches JS_NewContextRaw: Context::custom calls it, then
+  JS_AddIntrinsicBaseObjects; Context::full calls JS_NewContext, which calls it
+  (read in rquickjs-core 0.14.0, src/context/base.rs, Context::custom, Context::full).
+- On Windows the wall clock has 1ms resolution here: gettimeofday_msvc sets
+  tv_usec = wMilliseconds * 1000 (read in quickjs/cutils.h, gettimeofday_msvc).
+  Two contexts made in the same ms get the same seed and the same Math.random sequence.
+
+What reads it (grep of hash_seed and random_state in quickjs.c: 1 reader each)
+| Reader                                  | Takes the seed?                  | Decides            | Script sees it? |
+|-----------------------------------------|----------------------------------|--------------------|-----------------|
+| map_hash_key (Map, Set, WeakMap, WeakSet)| yes: h ^ hash_seed ^ hash32(tag) | bucket index       | no              |
+| js_math_random                          | random_state, after the seed draw| Math.random()      | yes (section 2) |
+| atoms: __JS_NewAtom, __JS_FindAtom      | no: hash_string(str, atom_type)  | atom bucket        | no              |
+| shapes: shape_initial_hash, shape_hash  | no: proto pointer, atom          | shape-table bucket | no              |
+| own properties: hash_atom               | no: atom index                   | property bucket    | no              |
+| JSON.parse records, JS_WriteObject list | no: atom; pointer * 3163         | bucket             | no              |
+| string hashing (hash_string8/16)        | caller's h: 0, atom_type         | -                  | -               |
+
+Why Map and Set order doesn't depend on it (read in quickjs.c)
+- map_add_record links each record twice: hash_link into s->hash_table[h], and link
+  into s->records, at the tail, so s->records is insertion order.
+- js_map_forEach, js_map_iterator_next, and js_map_clear walk s->records;
+  map_hash_resize rebuilds buckets from s->records.
+- hash_table is read only in map_find_record, map_add_record, and map_hash_resize
+  (grep), so no function produces values in bucket order.
+- Object and symbol keys hash by address, (uintptr_t)ptr * 3163 (map_hash_key), which
+  ASLR and allocation order change per run: bucket only, same conclusion.
+- Map lookups don't poll the interrupt counter, so bucket chains change time, not the
+  interrupt count (section 3).
+
+Other behaviors checked
+| Behavior                                   | What decides it (read in quickjs.c)                                   | Varies run to run? |
+|--------------------------------------------|-----------------------------------------------------------------------|--------------------|
+| Object.keys, entries, Reflect.ownKeys,     | JS_GetOwnPropertyNamesInternal: array-index keys sorted (num_keys_cmp),| no                 |
+|   JSON.stringify                           |   then strings, then symbols, each in shape (insertion) order          |                    |
+| for-in                                     | build_for_in_iterator, same function per prototype                     | no                 |
+| enumeration after delete                   | delete_property sets the slot's atom to JS_ATOM_NULL; compact_properties| no                 |
+|                                            |   (8+ deletes, half the slots) copies live slots in order              |                    |
+| Array.prototype.sort                       | fixed algorithm over the comparator's answers                          | no                 |
+| Symbol, Symbol.for                         | identity; Symbol.for through the atom table                            | no                 |
+| WeakRef.deref, FinalizationRegistry        | when the target is freed (section 2)                                   | no, with conditions|
+| error messages, stack traces               | atom names, the file name we pass, line:column                         | no                 |
+| speed of Map ops                           | bucket chains                                                          | yes, not observable|
+|                                            |   without a clock                                                      |                    |
+
+Verdict: given the same build, inputs, and host calls, a script sees nothing that
+differs because of the seed (read).
+Measured support is weak: p10's live run and its 2 replays each made a new context at a
+different time and matched (hash 3089de01201511e6, 1,929,091 outputs; measured
+2026-10-16, p10-loop-run.txt), but writers.js uses no Map, Set, Math.random, or Date
+(grep of engine/), so it never touched the seed.
+Settles it: a replay, run twice, of a plugin that fills, deletes from, and iterates a Map,
+a Set, and an object (02-code-map's left-open item).
+API to fix the seed: none. random_state is set only in JS_NewContextRaw, JSContext is
+opaque in quickjs.h, and neither quickjs.h nor rquickjs-core has "seed" or "random"
+(grep). None is needed.
+
+=====================================================================
+2. OTHER NONDETERMINISM, WITH DATE AND PERFORMANCE LEFT OUT
+=====================================================================
+What a context holds
+- Context::custom::<I> always adds JS_AddIntrinsicBaseObjects: Object, Function, the
+  Error types, Iterator, Array, Number, Boolean, String, Math, Reflect, Symbol,
+  parseInt and the other globals, and queueMicrotask (read in quickjs.c,
+  JS_AddIntrinsicBaseObjects, js_global_funcs), then the markers in I.
+- rquickjs's markers: Date, Eval, RegExp and a marker for the regex compiler alone,
+  Json, Proxy, MapSet, TypedArrays, Promise, Performance, WeakRef, DOMException (read
+  in rquickjs-core, src/context/builder.rs, intrinsic). The RegExp marker installs the
+  compiler too (read in quickjs.c, JS_AddIntrinsicRegExp).
+- Context::full = JS_NewContext: base + Date, Eval, RegExp, JSON, Proxy, MapSet,
+  TypedArrays (with Atomics), Promise, WeakRef (with FinalizationRegistry), AToB, and
+  Performance. p04, p07, and p10 all used Context::full.
+
+| Source                    | Where (read in quickjs.c unless named)                          | Reaches a script?       | How to close it |
+|---------------------------|-----------------------------------------------------------------|-------------------------|-----------------|
+| Math.random               | js_math_random, xorshift64* over ctx->random_state, seeded by    | yes                     | After making the context: Math.remove("random"), or set a host function on a seed that arrives with an input. Math.random is JS_CFUNC_DEF, so writable and configurable (quickjs.h). QuickJS's own generator can't be seeded (section 1). |
+|                           |   JS_NewContextRaw from the wall clock                           |                         |                 |
+| Stack-overflow depth      | rt->stack_limit = stack_top - stack_size (update_stack_limit);   | yes: a recursion that   | Before each entry into JS from the loop, call qjs::JS_UpdateStackTop(JS_GetRuntime(ctx)) in the sandbox's one entry function, not on re-entry from a host function; and call set_max_stack_size explicitly. |
+|                           |   stack_top is the stack pointer when JS_UpdateStackTop ran;     |   catches RangeError     |                 |
+|                           |   JS_NewRuntime2 runs it once; rquickjs runs it again only with  |   returns its depth     |                 |
+|                           |   `parallel` (rquickjs-core: RawRuntime::update_stack_top,       |                         |                 |
+|                           |   Args::apply, Ctx::eval_raw, Module::eval)                      |                         |                 |
+| WeakRef.deref,            | a target freed at refcount 0 is cleared at once (reset_weak_ref);| yes, if GC timing       | Leave the WeakRef intrinsic out (no core plugin needs it), or keep host code that touches the runtime identical in live and replay. |
+|   FinalizationRegistry    |   a cycle is freed by JS_RunGC, which js_trigger_gc starts in    |   differs               |                 |
+|                           |   JS_NewObjectFromShape when malloc_size + sizeof(JSObject) >    |                         |                 |
+|                           |   malloc_gc_threshold; callbacks are queued as jobs              |                         |                 |
+|                           |   (reset_weak_ref -> JS_EnqueueJob) and run only when we drain   |                         |                 |
+| Atomics.wait              | js_atomics_wait throws TypeError "cannot block in this thread"   | no                      | Nothing: JSRuntime is calloc'd (can_block false) and rquickjs never calls JS_SetCanBlock (grep). No second thread writes a SharedArrayBuffer. |
+| std and os modules        | rquickjs-sys build.rs compiles libregexp.c, libunicode.c,        | no                      | Nothing. No std, os, console, print, setTimeout, or gc(). |
+|                           |   quickjs.c, dtoa.c; quickjs-libc.c is not built                 |                         |                 |
+| eval, new Function        | JS_AddIntrinsicEval sets ctx->eval_internal; without it JS_Eval  | deterministic           | Keep Eval: the host's ctx.eval and Module::declare need it too. Function stays reachable through (function(){}).constructor anyway. The parser never polls the interrupt counter, so a large eval'd string compiles between interrupt checks, bounded by memory. |
+|                           |   throws "eval is not supported" (JS_EvalInternal path)          |                         |                 |
+| structuredClone           | not in QuickJS-ng 0.16.2 (no match in quickjs.c)                 | no                      | Nothing. |
+| environment               | no getenv; the OS reads are the wall clock (JS_NewContextRaw;    | only the stack pointer, | Rows above. |
+|                           |   date_now), QueryPerformanceCounter (js_perf_now,               |   once Date and         |                 |
+|                           |   JS_AddPerformance), the time zone (getTimezoneOffset, from     |   Performance are out   |                 |
+|                           |   get_date_fields and set_date_fields only), the stack pointer,  |                         |                 |
+|                           |   and the allocator's usable size                                |                         |                 |
+| queueMicrotask            | in js_global_funcs, always present; JS_EnqueueJob appends        | deterministic           | Drain the queue at a fixed point (section 5). |
+| Math.sin, cos, exp, ...   | js_math_sin and others call the C runtime                        | across PCs and CRTs     | Closed: static CRT and _set_FMA3_enable(0) (core log 2026-10-15). |
+| Rust HashMap into JS      | rquickjs IntoJs for std HashMap/HashSet and hashbrown's builds    | yes: key order          | Pass Vec, BTreeMap, or IndexMap only. Clippy's iter_over_hash_type doesn't see rquickjs's own loop (inference). |
+|                           |   the object or array in the map's iteration order (rquickjs-core,|                         |                 |
+|                           |   src/value/convert/into.rs, `map:` and `list:` impls)           |                         |                 |
+
+Stack depth, more
+- QuickJS-ng 0.16.2's default stack size is 1 MB (quickjs.h, JS_DEFAULT_STACK_SIZE);
+  rquickjs's doc comment on set_max_stack_size says 256 KB, which is stale.
+- rquickjs turns a size over 16 MiB into 0, which disables the check
+  (rquickjs-core, src/runtime/raw.rs, RawRuntime::set_max_stack_size). The loop
+  thread has 16 MB (core 01-loop-and-edge.md), so the limit must sit well under it.
+- Without a pinned stack top, a replay that reaches the call through other Rust frames,
+  or makes the runtime at another depth, stops a recursion at another depth (inference;
+  unverified). Settles it: a probe that returns the deepest recursion from two call depths.
+- `parallel` pins the stack top on every call as a side effect, including re-entry from
+  a host function, which moves the limit deeper each time; an explicit call at the one
+  entry is the cleaner mechanism.
+
+=====================================================================
+3. THE INTERRUPT HANDLER
+=====================================================================
+API (read in rquickjs-core 0.14.0)
+- Runtime::set_interrupt_handler(Option<InterruptHandler>), src/runtime/base.rs.
+- type InterruptHandler = Box<dyn FnMut() -> bool + 'static> (+ Send with `parallel`),
+  src/runtime.rs.
+- RawRuntime::set_interrupt_handler installs interrupt_handler_trampoline through
+  JS_SetInterruptHandler; a panic in the closure is caught, stored, and the trampoline
+  returns true (src/runtime/raw.rs).
+- Runtime methods borrow a RefCell without `parallel` (src/safe_ref.rs, Mut::lock), and
+  Context::with holds that borrow, so calling rt.* inside ctx.with, or from the handler,
+  panics. The handler may only read our own state.
+
+How often QuickJS-ng calls it (read in quickjs.c)
+- One counter per context: JSContext.interrupt_counter, JS_INTERRUPT_COUNTER_INIT 10000.
+- js_poll_interrupts: --counter <= 0 -> __js_poll_interrupts resets it to 10000, then
+  calls the handler.
+- The counter starts at 0 (js_mallocz_rt in JS_NewContextRaw), so the first poll in a
+  new context calls the handler at once.
+- It counts down by 1 at:
+  - every JS_CallInternal entry: any function call, bytecode or C, host closures,
+    getters and setters; and JS_CallConstructorInternal
+  - OP_goto, OP_goto16, OP_goto8
+  - OP_if_true, OP_if_false, OP_if_true8, OP_if_false8, taken or not
+  - each prototype step in build_for_in_iterator, in JS_OrdinaryIsInstanceOf through a
+    Proxy, js_object_isPrototypeOf, js_object___lookupGetter__
+  - each element in js_array_every (every, some, forEach, map, filter), js_array_reduce,
+    js_array_includes, js_array_indexOf, js_array_lastIndexOf, js_array_find
+- Regexes: libregexp.c's lre_poll_timeout keeps its own counter, INTERRUPT_COUNTER_INIT
+  10000, reset at each exec, and calls the same handler through lre_check_timeout.
+- Not counted: parsing and compiling, GC, JSON.parse and stringify internals, sort
+  without a comparator, string and typed-array builtins. One long C loop runs between
+  polls, so the 100ms limit can overshoot (p10's stalls took 100,026µs on average).
+
+Same count in two runs of the same script on the same inputs?
+- The counter carries over between calls, so where a call's first handler call lands
+  depends on every JS entry since the context was made. A replay that makes the context
+  and repeats every entry repeats it.
+- GC never polls and runs no JS inline: FinalizationRegistry callbacks are jobs, and a
+  Rust class's finalizer runs Rust code.
+- Memory changes the count only through control flow: an "out of memory" throw, which
+  repeats (section 4), and a stack overflow, which repeats once the stack top is pinned.
+- So the count repeats given: the same build, the same host calls into the runtime, the
+  same inputs, Math.random and the clocks gone, and the stack top pinned (read;
+  inference). Unmeasured: p10 matched outputs but didn't record counts.
+  Settles it: count handler calls per script call in a live run and two replays.
+- The recording's "script call" (core 01-loop-and-edge.md, the sandbox's stops) needs to
+  number module evaluation and each drained job too, in loop order.
+
+What the script sees when the handler returns true (read in quickjs.c)
+- JS_ThrowInterrupted: InternalError "interrupted", then JS_SetUncatchableError.
+- JS_CallInternal's exception path searches no catch offsets when
+  JS_IsUncatchableError, so neither catch nor finally runs; it unwinds to the host.
+- In promise_reaction_job the exception returns without rejecting the next promise; in
+  js_async_function_resume is_success becomes false, so the async function's promise
+  stays pending.
+- Host: Function::call returns Err(Error::Exception); ctx.catch() returns the error
+  object; qjs::JS_IsUncatchableError(value) tells it from a script's throw.
+- Measured p04 (2026-10-08): "InternalError: interrupted" after 100.4ms; the 10 frames
+  after it ran and matched.
+
+Usable afterwards
+- Runtime and context: yes. Measured p04 above, and p10's 9 stalls, each followed by
+  more inputs, with both replays matching (2026-10-16).
+- JS state the stopped call half-changed stays changed. A profile's runtime keeps
+  running after a write function hits the limit (decision 046), so its globals hold
+  whatever the call left, the same in a replay.
+
+=====================================================================
+4. THE MEMORY LIMIT
+=====================================================================
+API: Runtime::set_memory_limit(bytes) -> JS_SetMemoryLimit -> malloc_state.malloc_limit
+(read in rquickjs-core, src/runtime/raw.rs; quickjs.c, JS_SetMemoryLimit).
+- Checked in js_malloc_rt, js_calloc_rt, and js_realloc_rt before the arena or the
+  backing allocator is asked, so it holds whatever the allocator (read).
+  rquickjs's doc comment calls it "a Noop when a custom allocator is being used", which
+  0.16.2's code doesn't bear out (read; unverified by a run with rust-alloc).
+- What counts: the size class for blocks up to 512 bytes (31 classes, 16 to 512), the
+  backing allocator's usable size above that (_msize with the default allocator on
+  Windows; the header's size with RustAllocator), plus MALLOC_OVERHEAD
+  (js_arena_usable_size, js_malloc_usable_size in cutils.h). The 4 KB arena pages
+  themselves aren't counted.
+
+What a script sees at the limit (read in quickjs.c)
+- JS_ThrowOutOfMemory: InternalError "out of memory", with no backtrace
+  (rt->in_out_of_memory).
+- Catchable: try/catch and finally run. If making the error object fails too,
+  JS_ThrowError2 throws null.
+- So a plugin that catches it carries on, and the host never learns the limit was hit.
+  A fix to weigh: enforce the limit in our own Allocator (Runtime::new_with_alloc, with
+  QuickJS's limit at 0) and set a flag when it refuses; it sees 4 KB arena refills and
+  blocks over 512 bytes (inference; unverified).
+- Measured p04: endless allocation stopped in 87.9ms, ArrayBuffers in 14.3ms, both
+  "InternalError: out of memory"; the 10 frames after each ran and matched.
+
+Usable afterwards: yes (p04). Memory returns when the runaway's values drop by refcount,
+and cycles at the next GC.
+
+Same outcome run to run?
+- malloc_size is a sum of sizes that repeat for the same allocation sequence, so GC
+  triggers (js_trigger_gc: first threshold 256 KB from JS_NewRuntime2, then 1.5x
+  malloc_size after each GC) and the OOM point repeat (read; inference).
+- They shift if the host allocates differently in the runtime between live and replay:
+  formatting an error with ctx.catch() and to_string in one mode only, debug strings,
+  or run_gc at other points. Host code that touches a runtime must be the same in both.
+- A real allocation failure from Windows is the one path that can't repeat.
+- Knobs: set_gc_threshold (JS_SetGCThreshold), run_gc (JS_RunGC), memory_usage
+  (JS_ComputeMemoryUsage).
+
+=====================================================================
+5. CALLING BETWEEN RUST AND JS ON ONE SYNCHRONOUS LOOP
+=====================================================================
+Host functions and objects (read in rquickjs-core)
+- Function::new(ctx, closure) (src/value/function.rs). Parameters convert by FromJs;
+  helpers This<T>, Opt<T>, Rest<T>, FuncArg<T>, Flat, Exhaustive; MutFn and OnceFn wrap
+  FnMut and FnOnce (src/value/function/types.rs). A returned Err throws.
+  Each one is a Class instance of RustFunction (Function::new).
+- p04 and p10: Object::new, Function::new closures capturing Rc<RefCell<..>> of Rust
+  state, set on an object, set as a global.
+- Classes: impl JsClass (NAME, Mutable, prototype, constructor) + Trace + JsLifetime;
+  Class::instance(ctx, value); borrow and borrow_mut (src/class.rs).
+- Macros with feature `macro`: class, methods, function, module, embed, exotic, and
+  derives FromJs, IntoJs, JsLifetime, Trace (rquickjs src/lib.rs re-exports; unread).
+- Keep JS values out of host closures. Persistent's doc: "ensure that no persistent
+  links outlives the runtime, otherwise Runtime will abort the process when dropped"
+  (src/persistent.rs). JS_FreeRuntime asserts gc_obj_list is empty, and rquickjs-sys's
+  build.rs defines NDEBUG only with `disable-assertions`, so the assert is compiled in
+  unless cc adds NDEBUG (unverified). A closure holding a JS value isn't traced, so the
+  cycle it makes would never be freed (inference).
+  Turning a plugin off: drop every Persistent, then the context, then the runtime; or
+  keep the runtime unused until the aircraft unloads.
+
+Calling what the plugin exported
+- An ES module: Module::declare(ctx, "plugin", src) (JS_EVAL_TYPE_MODULE |
+  JS_EVAL_FLAG_STRICT | JS_EVAL_FLAG_COMPILE_ONLY) -> .eval() -> (Module<Evaluated>,
+  Promise); promise.finish::<()>() drains jobs until it settles, Err(WouldBlock) if it
+  waits on something still pending; then module.namespace() or
+  module.get::<_, Object>("default") (src/value/module.rs).
+- A script: ctx.eval of an IIFE bundle, then ctx.globals().get(...), as p04 and p07 did
+  with esbuild's output.
+- A method: f.call::<_, R>((This(obj.clone()), a, b)) (p04, `plugin`).
+- Across ctx.with calls: Persistent::save(&ctx, f) and .restore(&ctx), which checks the
+  runtime (Error::UnrelatedRuntime).
+- Imports: with feature `loader` off, js_host_resolve_imported_module looks in the
+  context's loaded modules, then throws ReferenceError "could not load module '<name>'",
+  so a plugin that imports anything fails at load, and import() rejects the same way.
+  Declare no other module in a plugin's context.
+- Bytecode: Module::write and unsafe Module::load (JS_ReadObject) skip compiling, but
+  nothing checks the bytes; load source.
+
+How values cross
+- rquickjs conversions: numbers, bool, String (UTF-8 copy), Vec, BTreeMap, IndexMap,
+  Option, tuples; each object field read or write goes through an atom for its name.
+- JSON text: ctx.json_parse (JS_ParseJSON) and ctx.json_stringify (JS_JSONStringify)
+  then to_string. p07 did this with serde_json on the Rust side; 4 of 5 replies matched
+  and the fifth lost 2µs to a u64 past 2^53 (measured 2026-10-09).
+- Neither path's cost was measured on its own; section 6 has call costs.
+
+Promises the host resolves
+- Make one: Promise::new(&ctx) or ctx.promise() -> (promise, resolve, reject)
+  (src/value/promise.rs); return the promise from the host function; keep resolve and
+  reject as Persistent in a BTreeMap by request ID; emit the request as an output.
+- When the answer arrives as an input: restore, resolve.call::<_, ()>((value,)), drain.
+- Drain: Runtime::execute_pending_job() gives Ok(true) per job, Ok(false) when empty,
+  and Err(JobException(ctx)) with the exception still pending on ctx; it borrows the
+  RefCell, so call it outside ctx.with. Ctx::execute_pending_job, inside with, returns
+  a bool and discards a failed job's exception with catch() (src/context/ctx.rs).
+- Ctx::spawn needs feature `futures` and an AsyncRuntime; not needed.
+- Order: JS_EnqueueJob appends to rt->job_list (list_add_tail) and JS_ExecutePendingJob
+  takes the head, so jobs run first in, first out; promise reactions enqueue in the
+  order handlers registered; Function::defer enqueues a call the same way
+  (src/value/function/args.rs, Args::defer). Deterministic for the same calls (read).
+- Unhandled rejections reach Runtime::set_host_promise_rejection_tracker.
+
+Which pattern
+- Both are deterministic on one loop.
+- Inputs: callbacks. The core calls an exported handler synchronously per input, armed
+  with the limit; the call returns with its work done, or with a promise when the
+  handler is async.
+- Waits: host promises, resolved by a later input. A panel's answer comes back as an
+  input, the host resolves the promise, and the queue drains to empty before the next
+  input. An async handler's continuation drains the same way. No JavaScript runs while
+  the plugin waits, as 01-format-and-delivery's sandbox section has it.
+- Each drain runs under the same limit, numbered as a script call (section 3), with a
+  cap on the whole drain, since a plugin can queue microtasks forever.
+- Costs of promises: Persistent bookkeeping that must be dropped before the runtime, and
+  a promise left pending when the plugin turns off.
+- Don't use promise.finish for a flow that awaits the host: it returns WouldBlock.
+
+=====================================================================
+6. COSTS
+=====================================================================
+| What                                              | Value                         | Source |
+|---------------------------------------------------|-------------------------------|--------|
+| Runtime::new + Context::full                      | 0.58ms, 0.31ms (two runs)     | measured p04 2026-10-08, runtime_and_context_ms |
+| In-process startup with 3 bundles evaluated       | 2.57ms, 1.74ms                | same, startup_ms |
+| Evaluate plugin.js (1,965 bytes)                  | 0.41ms, 0.31ms                | same, eval_plugin_ms |
+| Evaluate writers.js (13,469 bytes)                | 1.30ms, 0.91ms                | same, eval_writers_ms |
+| One call into JS returning an object (exports)    | 1.11µs, 1.38µs mean of 1,000  | same, exports_us |
+| One call into JS that calls the host once (write) | 1.21µs, 1.29µs mean of 1,000  | same, write_us |
+| 100 write functions, each crossing into the host  | 75.1µs mean, 155.3µs p99      | measured p04, FRAMES |
+|   once, per frame                                 |   (0.75µs a call)             |        |
+| p10 flight-model input: 100 writer calls + output | 98.7µs mean                   | measured p10 2026-10-16 |
+| Idle runtime, QuickJS's own heap                  | 0.25 MB malloc, 0.20 MB used  | measured p04, READY heap |
+| Idle host process (1 runtime)                     | 0.9 MB private working set,   | measured p04 |
+|                                                   |   5.2 MB working set          |        |
+| A stalled call stopped at 100ms                   | 100,026µs mean, 9 calls       | measured p10 |
+- Context::custom without Date and Performance does less setup than Context::full;
+  unmeasured.
+- JSON parse and stringify per message: unmeasured.
+
+=====================================================================
+7. WHAT ELSE A SANDBOX SHOULD TURN OFF OR WATCH IN RQUICKJS 0.14.0
+=====================================================================
+| Feature or setting        | What it does (read)                                              | For plugins |
+|---------------------------|------------------------------------------------------------------|-------------|
+| default = ["std"]         | std paths, eval_file (host side only)                            | keep |
+| loader                    | Resolver and Loader traits, Runtime::set_loader, FileResolver and| off: no loader means every import fails |
+|                           |   ScriptLoader, which read the disk                              |             |
+| dyn-load                  | loads native modules (dlopen2); implies loader                   | off |
+| parallel                  | Runtime and Context Send + Sync behind a Mutex, JS_UpdateStackTop| off: one loop thread; pin the stack top ourselves |
+|                           |   on each call; "Experimental" in rquickjs's docs                |             |
+| futures                   | AsyncRuntime, AsyncContext, Ctx::spawn, Promise::into_future     | off |
+| rust-alloc                | Runtime::new uses RustAllocator (Rust's global allocator) in     | either; accounting repeats both ways |
+|                           |   place of malloc                                                |             |
+| allocator                 | deprecated: Allocator and Runtime::new_with_alloc are always on  | use new_with_alloc only for the OOM flag |
+| macro                     | proc macros (rquickjs-macro)                                     | fine, build time |
+| chrono, either, indexmap, | conversions; chrono and SystemTime IntoJs build a Date, which    | indexmap fine; chrono off |
+|   phf, half               |   fails with Date left out                                       |             |
+| disable-assertions        | defines NDEBUG for QuickJS                                       | decide: asserts catch bugs, and one aborts the core |
+| dump-*                    | JS_SetDumpFlags at runtime creation, printing to stdout          | off |
+| Context::full             | adds Date, Performance, AToB                                     | use Context::custom |
+| Context::custom intrinsics| suggested: Eval, RegExp, Json, MapSet, Promise; TypedArrays and  | WeakRef out unless a plugin needs it |
+|                           |   Proxy if a plugin needs them                                   |             |
+| Math.random               | base object, always added                                        | remove or replace after creation |
+| set_max_stack_size        | default 1 MB; over 16 MiB becomes unlimited                      | set explicitly; pin the stack top per entry |
+| set_memory_limit          | 64 MB (decision 046)                                             | set before evaluating the plugin |
+| set_interrupt_handler     | set before evaluating, so top-level module code is limited too   | the edge's check |
+| set_host_promise_         | sees rejections nothing handled                                  | report as plugin errors |
+|   rejection_tracker       |                                                                  |             |
+| Persistent                | outliving the runtime aborts the process                         | drop before the runtime |
+| IntoJs for HashMap/HashSet| random key order into JS                                         | never pass one |
+
+=====================================================================
+UNVERIFIED, AND WHAT SETTLES EACH
+=====================================================================
+- The seed changes nothing a script sees: replay, twice, a plugin that fills, deletes
+  from, and iterates a Map, a Set, and an object.
+- The interrupt count repeats: record handler calls per script call in a live run and
+  two replays.
+- The stack depth moves with the Rust stack: return the deepest recursion from two call
+  depths, with and without JS_UpdateStackTop at the entry.
+- The memory limit holds with rust-alloc: run p04's alloc runaway with that feature.
+- QuickJS's asserts are compiled into release builds: check whether cc passes NDEBUG
+  (cargo build -vv shows the compiler's flags).
+- A closure holding a JS value aborts at runtime drop: drop a runtime after making one.

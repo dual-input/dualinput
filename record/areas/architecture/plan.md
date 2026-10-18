@@ -873,6 +873,7 @@ Raised elsewhere: by 6.15, v1 runs no plugin, so the load in the line above hold
 Raised elsewhere: by 6.4, the bench's local `iroh-relay` binds `127.0.0.1`, since in dev mode it answered on IPv6 loopback only, and whether it answers there is untried; a TCP proxy in front of it stands in for a relay's loss and cuts; the bench's cores reach a local backend through a development setting; and v1's full mix on a direct path under loss runs by hand on our droplets, in a program built on the network crate and the transport ([02-units](../network/02-units.md#cases-for-the-bench)).
 Raised elsewhere: by 6.5, a development setting naming the program the core starts as its helper, so the bench can run a stand-in that scripts presses and frames, and whether that keeps to the rule that no development mode skips the real path; and a check of opus-rs on recorded ATC speech at 5% loss ([04-core-helper](../core/04-core-helper.md#cases-for-the-bench)).
 Raised elsewhere: by 6.6, a replay checks only whole units, so the bench's replays of a session check the platform, state sync, pointer sync, take-control, voice, rate and pause, and Go to, and its runs with the setting that records everything check every unit; and v1's friend sessions measure a following machine's recording ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
+Done on 2026-10-18.
 
 ## 8 The build order
 

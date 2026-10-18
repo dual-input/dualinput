@@ -7,12 +7,14 @@ Decides:     The four levels of testing, and where and when each runs; which tes
 ```
 
 Crosscheck is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
-CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green; the sim and friends come at a stage's end and before a release.
+CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.
+[The four levels](#the-four-levels) gives when the sim and friends come in.
 The bench reaches a core only where a pilot's surroundings do: the stand-in sim below the sim seam, fake pages over the real WebSocket, a stand-in core helper over the real pipe, local stand-ins for the network and the profiles' site, and the processes and files on the PC.
 The stand-in sim takes the sim edge's place in a bench build of the core, and runs our WASM module's routines natively.
 
-This answers node 7 of the [architecture plan](../architecture/plan.md#7-testing), narrowed to the setup every stage's tests run on: each system's cases for the bench and how each of its budgets is measured become tests in the stage of [node 8](../architecture/plan.md#8-the-build-order) that builds the system ([left to each stage](#left-to-each-stage); user, 2026-10-18).
-Two rules from our earlier benches hold throughout, as node 7 gives them: no development mode skips the real path, and a bench drives the product only through the sim seam and builds it made itself.
+This answers node 7 of the [architecture plan](../architecture/plan.md#7-testing), narrowed to the setup every stage's tests run on.
+Each system's cases for the bench, and the measurement of each of its budgets, become tests in the stage of [node 8](../architecture/plan.md#8-the-build-order) that builds the system ([left to each stage](#left-to-each-stage); user, 2026-10-18).
+Two rules from our earlier benches hold throughout, as node 7 gives them: no development mode skips the real path, and a bench drives the product only from outside it, never through its internals, and only through builds it made itself.
 
 ## The four levels
 
@@ -28,7 +30,7 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 - A pull request that changes code runs the bench beside the checks the code map's [CI](../architecture/02-code-map.md#ci) lists, the unit tests among them, and a merge needs every one green.
 - Each merge to `main` runs the bench again with the setting that records every input, so every unit is whole and its replay checked ([recording everything](../recording/01-recording-and-bug-reports.md#recording-everything)).
   The merge has already happened, so a red run blocks nothing, and it's fixed before the next release.
-- The release workflow's build job runs both passes of the bench beside every check a pull request runs ([a release](01-the-build.md#a-release)), so no release ships past a red one.
+- The release workflow's build job runs the bench twice, once as a pull request does and once with the setting that records every input, beside every check a pull request runs ([a release](01-the-build.md#a-release)), so no release ships past a red run.
 - CI's bench checks behavior, and no timing budget fails a pull request, since a shared runner's other load would move a timing from run to run (inference).
 
 ## What runs outside CI
@@ -48,7 +50,9 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 ### What it runs
 
 - Two or three bench builds of the core, three where a case names a third, each with a data folder of its own, so its port file, session file, settings, and recordings are its own, as a development core's are ([finding the core](../architecture/01-spine.md#finding-the-core)).
-- The desktop app, for its own cases and for those where it starts a core again: the bench lays out a folder with the desktop app and a bench build of the core as `crosscheck-core.exe`, given that core's data folder, so the core it starts again is a bench core, since the app starts `crosscheck-core.exe` from its own folder ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)).
+- The desktop app, for its own cases and for those where it starts a core again.
+  The app starts `crosscheck-core.exe` from its own folder ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), so the bench lays out a folder holding the desktop app and a bench build of the core named `crosscheck-core.exe`, set to that core's data folder.
+  The core the app starts again is then a bench core.
 
 The desktop app walks the processes for `FlightSimulator2024.exe` (same section), so its cases run with no sim and no other scenario on the PC.
 Those that run Setup.exe, Update.exe, or an uninstall run only on CI's runner, since Velopack installs into the per-user folder a developer's own Crosscheck uses.
@@ -60,7 +64,9 @@ The bench reaches each core only where a pilot's surroundings reach it, so every
 - the stand-in sim, below the sim seam ([the stand-in sim](#the-stand-in-sim))
 - fake pages, which connect over the core's real WebSocket and speak the client protocol from the messages' TypeScript types ([the sim's pages](#the-sims-pages))
 - the stand-in core helper, over the core helper's real pipe ([the stand-in core helper](#the-stand-in-core-helper))
-- the network, as [the network's units](../network/02-units.md#cases-for-the-bench) set it up, with each core's IP transports cleared, a local backend on a local D1, and two local `iroh-relay`s, each behind a TCP proxy that holds back and cuts each core's connection on its own, which the network's cases on two relays and a moved home relay need, and which lets a case route one pair of cores through each relay and delay one pair alone ([network log][p05])
+- the network, as [the network's units](../network/02-units.md#cases-for-the-bench) set it up: each core's IP transports cleared, a local backend on a local D1, and two local `iroh-relay`s ([network log][p05])
+  Each relay sits behind a TCP proxy that can hold back or cut one core's connection without touching the others.
+  The network's cases on two relays and on a moved home relay need both relays, and a case can route one pair of cores through each and delay one pair alone.
 - the profiles, from a local site that serves `index.json` and `bundles/<hash>.yaml` as the Pages site does ([where the core fetches from](../profiles/02-units.md#where-the-core-fetches-from)), from bundles the profile builder built from the tree, which a scenario can hold back, cut, or add a bundle to
 - the packages folders, from a folder the bench lays out with a `UserCfg.opt` and the packages a scenario names, so no run reads or writes the sim's own ([the packages folders](../install/01-installing-and-updating.md#the-packages-folders))
 - processes, which it starts, kills, and suspends, since a killed process closes its sockets and a suspended one holds them open and stops answering (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process")
@@ -103,7 +109,7 @@ The bench build listens on a local socket the bench drives the stand-in and the 
 
 The stand-in runs where the edge runs: off the loop, on a thread of its own, with a clock of its own.
 It hands up stamped inputs, and the recording keeps them as it keeps the edge's, so a bench run's recording replays on the core's replay with no stand-in, as a release's recording replays with no sim ([a replay](../recording/01-recording-and-bug-reports.md#a-replay)).
-So it keeps the edge's rules rather than the loop's, as the note at the top of the code map has it, exempting it from the loop's rules as [tiers](../architecture/02-code-map.md#tiers) exempts the sim edge.
+So it keeps the edge's rules rather than the loop's, and the note at the top of the code map exempts it as [tiers](../architecture/02-code-map.md#tiers) exempts the sim edge.
 
 ### What it models
 
@@ -122,7 +128,8 @@ The systems' cases set 4, 30, and 89 a second ([the sync units' cases](../sync/0
 ### Our WASM module
 
 - The routine host and the routines run natively in the stand-in's frame: each frame, the stand-in hands the routine host its slots' newest writes and the frame, and carries out its wants on the aircraft's table, as [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for) lists them: reads, writes, the freeze, events, `H:` events, and reports into the report slots.
-- The module's list of routines moves out of `sim-package/wasm-module/` into a library crate of its own, `sim-package/routines/`, which the module and the bench build both link, since the bench can't link the module, a cdylib alone ([02-code-map](../architecture/02-code-map.md#left-open)); that link is the one dependency the code map's note allows on `sim-package/`.
+- The module's list of routines lives in a library crate of its own, `sim-package/routines/`, which the module and the bench build both link, the one dependency on `sim-package/` the code map's note allows.
+  The bench can't link the module itself, because the module builds only as a cdylib ([02-code-map](../architecture/02-code-map.md#left-open)).
 - The stand-in takes the module through a trait, which the bench build fills with the routine host and that list, so the stand-in, an engine, depends on no platform or feature code, as node 5 requires of it ([the architecture plan](../architecture/plan.md#7-testing)).
 
 ### The sim's pages
@@ -135,19 +142,21 @@ This settles the code map's [left open](../architecture/02-code-map.md#left-open
 
 A stub program, which the bench starts and kills, stands for the sim's process.
 The stand-in reports it found, with its ID and creation time, and exited, with its exit code, as the edge reports the sim's ([the sim's process](../core/03-sim-seam-and-wasm-module.md#the-sims-process)), and killing it is how a bench sim crashes.
-Each stand-in watches the stub the bench started for it, by its process ID, so a stub's name matters only to the desktop app: it's named `FlightSimulator2024.exe` for the desktop app's cases alone, and anything else elsewhere, so neither the real edge nor the desktop app takes a bench stub for the sim.
+Each stand-in watches the stub the bench started for it, by its process ID, so a stub's name matters only to the desktop app.
+The stub is named `FlightSimulator2024.exe` in the desktop app's cases alone, and has another name in every other case, so neither the real edge nor the desktop app takes it for the sim.
 
 ## The stand-in core helper
 
 - A development setting names the program the core starts as its core helper, and the bench names its own, which speaks the real pipe's messages ([the pipe](../core/04-core-helper.md#the-pipe)) and takes a script from the bench: presses, the mouse, captured audio frames, and what to report it played.
 - The core still starts the program, sends it every want, reads its `Hello`, and starts it again when it exits, so the core's real path runs, and the rule that no development mode skips it holds.
   Only the Windows calls behind the pipe differ, and the core helper's own tests on a desk and its cases in the sim run those ([cases for the bench](../core/04-core-helper.md#cases-for-the-bench)).
-- This settles 6.5's question for node 7 on that setting.
+- This settles the question [6.5](../architecture/plan.md#65-the-core-helper) raised for node 7 on that setting.
 
 ## Replays
 
 - Every bench scenario ends by replaying each core's recording, and fails on any checkpoint that doesn't match, so a change that makes a replay drift fails its own pull request.
-- A replay checks only whole units, so the default pass checks every unit but those [what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading) names as partly recorded, and the pass that records everything checks those too ([cases for the bench](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
+- A replay checks only whole units.
+  The default run checks every unit except those the recording's [what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading) names as partly recorded, and the run that records everything checks those too ([cases for the bench](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
 
 ## The loop under load
 
@@ -174,16 +183,20 @@ The sandbox's recursion and interrupt-check cases are its own unit tests, with n
 The release workflow takes the commit this check ran on, and its build job stops when `main`'s head isn't that commit, so a merge after the check releases nothing unchecked.
 
 1. If the commit's runs on `main` aren't green, stop: the release workflow would stop at them.
-2. Install a build of the commit with `node tools/build.ts install`, and start the sim: our BlurPage copy's script, the EFB app, and the banner's panel load, as the build's [cases in the sim](01-the-build.md#cases-for-the-bench) list.
-3. Start a session from the EFB app, and have a bench core on a stand-in join it as the second pilot: both show as members.
-4. Load a flight at a stand: the figure spawns, and preflight ends once both pilots are ready.
-5. Flip a synced switch on each side: each lands on the other machine.
-6. Press a synced display: the press plays on the bench core's fake panel.
-7. Take control from the bench core, then give it back: control passes each way.
+2. Install a build of the commit with `node tools/build.ts install`: our package's folder, `crosscheck`, is in the Community folder.
+3. Start the sim: our BlurPage copy's script, the EFB app, and the banner's panel load, as the build's [cases in the sim](01-the-build.md#cases-for-the-bench) list.
+4. Start a session from the EFB app: the EFB app shows its code.
+5. Have the bench join a bench core on a stand-in to the session with that code, as the second pilot: both show as members.
+6. Load a flight at a stand: the figure spawns, and preflight ends once both pilots are ready.
+7. Flip a synced switch in the sim: the bench core's stand-in aircraft follows.
+8. Have the bench core flip a synced switch: the sim's cockpit follows.
+9. Press a synced display: the press plays on the bench core's fake panel.
+10. Take control from the bench core: control passes to you.
+11. Give control back: control passes to the bench core.
 
 ## With friends
 
-- A session with friends comes at a stage whose cases need two PCs, and before v1 ships, and its checklist gathers the cases with friends of every stage built by then, so one session checks many things, as node 7 asks (user, 2026-10-14).
+- A session's checklist gathers the cases with friends of every stage built by then, so one session checks many things, as node 7 asks (user, 2026-10-14).
 - Each pilot's recording comes back through Crosscheck's own bug report ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report)), so the session needs no video call, and a following machine's recording measures its own [budget](../recording/01-recording-and-bug-reports.md#budgets).
 
 ## Budgets

@@ -1666,7 +1666,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Tauri's own installer and updater would sign each update with our key and need no .NET in CI, but download the whole installer for every update and write it in place (read in tauri-bundler 2.10.3, `installer.nsi`, and tauri-plugin-updater 2.14.0, `plugins/updater/src/updater.rs`), and deltas decide it (user, 2026-10-18).
   - `VelopackApp::build().run()` applies a downloaded update at its caller's start unless auto-apply is off (read in `src/lib-rust/src/app.rs`), which would apply one with the sim running.
   - Code signing stays out of v1 (user, 2026-10-18), though an enforcing Smart App Control blocks an unsigned release until it has a positive reputation, with "no way to bypass" it for one app (documented, [SmartScreen reputation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation) and [its FAQ](https://support.microsoft.com/en-us/windows/security/threat-malware-protection/smart-app-control-frequently-asked-questions)).
-- **Leaves out:** our package's folder name and whether our WASM module needs a package of its own, for [6.18](plan.md#618-the-build).
+- **Leaves out:** our package's folder name and whether our WASM module needs a package of its own, which [6.18](../build/01-the-build.md#our-package) settles.
 
 ## An update applies only with the sim closed, no session held, and no core running, and Install now quits the core to get there
 
@@ -1682,7 +1682,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The desktop app writes our finished package wherever it's missing or of another version, and the BlurPage copy ships in it
 
-- **Decided:** while the sim is closed, at its start and each time the sim closes, the desktop app copies our package, as the build finished it, into each packages folder's `Community` where it's missing or its `manifest.json`'s `package_version` isn't the app's version, copying it into `Crosscheck\` beside `Community` first and swapping it in by rename, and nothing watches `Community` between those moments (user, 2026-10-18).
+- **Decided:** while the sim is closed, at its start and each time the sim closes, the desktop app copies our package, as the build finished it, into each packages folder's `Community` where it's missing or its `manifest.json`'s `package_version` isn't the app's version, or, since node 6.18, its `build.json` names another build ([our package](../build/01-the-build.md#our-package)), copying it into `Crosscheck\` beside `Community` first and swapping it in by rename, and nothing watches `Community` between those moments (user, 2026-10-18).
   The BlurPage copy ships in the package, built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either (user, 2026-10-18).
   This changes [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), whose watcher makes the copy on each pilot's PC, once step 8's decisions are numbered.
   Nothing asks the pilot for a packages folder.
@@ -1692,7 +1692,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A shipped copy reaches every pilot the same, the Microsoft Store edition's too, whose install folder a program may not be able to read (unverified), and no PC reads or watches the sim's files; on our Steam install BlurPage's files were last written on 2025-11-04 (read on our development machine, 2026-10-18, [install log](../install/log.md#2026-10-18-the-sims-blurpage-files-havent-changed-since-2025-11-04)), so the copy should rarely fall behind.
   - The sim's `Content.xml` names every folder in `Community` by its name, suffixes included (read on our development machine, 2026-10-18), so a copy built there would most likely mount as a second package, and our FS Copilot exerciser's in-process sync of a build into its own folder "deleted 349 of 355 files" before its fix staged and swapped (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
   - The sim "will only look at this file to determine where the Official and Community folders are" (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), so a folder a pilot names before the sim has written one may not be the sim's.
-- **Leaves out:** whether the sim's first run writes `UserCfg.opt`, which a fresh install settles; and how the build notices a sim update that changes BlurPage, and where it keeps the stock files, for [6.18](plan.md#618-the-build).
+- **Leaves out:** whether the sim's first run writes `UserCfg.opt`, which a fresh install settles; and how the build notices a sim update that changes BlurPage, and where it keeps the stock files, which [6.18](../build/01-the-build.md#the-sims-stock-files) settles.
 
 ## The desktop app adds the firewall rule on its first run, and offers the fix while it's missing or blocked
 
@@ -1723,23 +1723,23 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.18 by the user, 2026-10-18 ([the C runtime](../build/01-the-build.md#the-c-runtime)).
 - **Because:**
   - With the entry, p11's core imported no C runtime DLL, the module's build ignored it, and alternating the two builds compiled no crate after the first, while a `RUSTFLAGS` of any value, an empty one included, replaced it, which the guard caught (measured on our development machine, 2026-10-18, [build log](../build/log.md#2026-10-18-one-line-of-cargo-config-links-every-x86_64-programs-c-runtime-statically-and-alternating-with-cargo-msfss-build-rebuilds-nothing)).
-  - A build script's link arguments, as Tauri's and the `static_vcruntime` crate's are, keep the UCRT dynamic, so the core's math would follow each pilot's Windows (read in static_vcruntime 3.0.0 and tauri-build, same entry).
-  - Microsoft's redistributable asks for an administrator as it installs (documented, [results](../build/results/2026-10-18-static-c-runtime.txt)), which our per-user install never does.
+  - A build script's link arguments, as Tauri's and the `static_vcruntime` crate's are, keep the UCRT dynamic, so the core's math would follow each pilot's Windows (read in static_vcruntime 3.0.0 and tauri-build 2.7.1, [build results](../build/results/2026-10-18-static-c-runtime.txt)).
+  - Microsoft's redistributable asks for an administrator as it installs (documented, [Redistributing Visual C++ files](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files)), which our per-user install never does.
 - **Leaves out:** whether bindgen's build script builds with the flag, which the first build of the sim's edge settles.
 
 ## The build installs the SDK version the repository names
 
-- **Decided:** `msfs-sdk.txt` at the root names one SDK version, and `tools/msfs-sdk`, a Rust program adapted from cargo-msfs's install under its MIT license, downloads that version's core installer and unpacks it into cargo-msfs's folder, which `tools/setup.ts` runs when the installed version differs; cargo-msfs builds the module and installs nothing, and a new SDK reaches the build only by a commit.
+- **Decided:** `msfs-sdk.txt` at the root names one SDK version, and `tools/msfs-sdk`, a Rust program adapted from cargo-msfs's install under its MIT license, downloads that version's core installer and unpacks it into cargo-msfs's folder, which `tools/setup.ts` runs when the installed version differs; the bindings' build scripts and `tools/build.ts` fail when the installed SDK isn't that version; cargo-msfs builds the module and installs nothing, and a new SDK reaches the build only by a commit.
   This settles 02-code-map's item in [left open](02-code-map.md#left-open) on an SDK newer than a release's.
   Settled in node 6.18 by the user, 2026-10-18 ([the SDK](../build/01-the-build.md#the-sdk)).
 - **Because:**
-  - cargo-msfs installs only the newest SDK (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`), while each of the 10 older installers we asked for was still served (measured, 2026-10-18, [build log](../build/log.md#2026-10-18-the-sdks-listing-links-only-its-newest-two-versions-and-every-older-installer-we-tried-is-still-served)).
+  - cargo-msfs installs only the newest SDK (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`), while each of the 8 older installers its listing doesn't link was still served when we asked (measured, 2026-10-18, [build log](../build/log.md#2026-10-18-the-sdks-listing-links-only-its-newest-two-versions-and-every-older-installer-we-tried-is-still-served)).
   - A replay runs the build its recording's header names, the SimConnect SDK's version among it ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), which the newest SDK alone couldn't give back.
 - **Leaves out:** whether Microsoft keeps serving older installers.
 
 ## The sim's stock files live in the tree, and a build on a PC with the sim compares the sim's own with them
 
-- **Decided:** `sim-package/stock/` holds the sim's `VCockpit.js` and BlurPage's two files byte for byte, with `stock.json` naming their sim release and hashes; the build makes our copies from them, refusing a missing anchor; on a PC with the sim's Steam edition, `tools/build.ts` stops when one of the sim's three files differs from `stock.json`, and `tools/stock.ts` brings the new ones in; CI checks the files against `stock.json`.
+- **Decided:** `sim-package/stock/` holds the sim's `VCockpit.js` and BlurPage's two files byte for byte, with `stock.json` naming their sim release and hashes; the build makes our copies from them, refusing a missing anchor; on a PC with the sim's Steam edition, `tools/build.ts` stops when one of the sim's three files differs from `stock.json`, and `tools/stock.ts` brings the new ones in, only from Steam's public branch, while on a beta branch the build warns; CI checks the files against `stock.json`.
   This settles what installing and updating's decision on our package and 02-clients-and-panel-bridge leave to 6.18: where the stock files live, and how the build notices a sim update that changes them.
   Settled in node 6.18 by the user, 2026-10-18 ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 - **Because:**
@@ -1749,14 +1749,15 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Our package is one folder, crosscheck, with the order hint PANEL_PATCH, and the files only the sim compiles are compiled with the sim and committed
 
-- **Decided:** one package, in a folder named `crosscheck` with the order hint `PANEL_PATCH`, holds our code in the sim and its pages, our `VCockpit.js` and BlurPage copies, our WASM module, the figure's SimObject, and the banner's in-game panel; when the figure's model or the banner's panel definition changes, someone compiles it with `fspackagetool` on a PC with the sim and commits the output beside its source, with its sources' hashes, which CI checks; no tool of ours writes either format.
-  This settles installing and updating's item on our package's folder name and whether our WASM module needs a package of its own, and avatars' question on how the figure gets built.
+- **Decided:** one package, in a folder named `crosscheck` with the order hint `PANEL_PATCH`, holds our code in the sim and its pages, our `VCockpit.js` and BlurPage copies, our WASM module, the figure's SimObject, and the banner's in-game panel; `build.json` in it names the build, by its commit and a hash of its diff when uncommitted, and the desktop app writes our package where its version or build isn't the app's own, which the sim service's check of our package compares too, so a development build at the same version reaches the sim; when the figure's model or the banner's panel definition changes, someone compiles it with `fspackagetool` on a PC with the sim and commits the output beside its source, with its sources' hashes, which CI checks; no tool of ours writes either format.
+  This settles installing and updating's item on our package's folder name and whether our WASM module needs a package of its own, and avatars' question on how the figure gets built; and it changes the decision above that the desktop app writes our package where it's missing or of another version, which compares the build too.
   Settled in node 6.18 by the user, 2026-10-18 ([our package](../build/01-the-build.md#our-package), [files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
 - **Because:**
-  - FS Copilot's one package, `fscopilot-bridge`, with `PANEL_PATCH`, holds its WASM module and its `html_ui`, and its `VCockpit.js` loaded over the sim's in every panel (read and measured, FS Copilot fork; [build results](../build/results/2026-10-18-msfs-packages-and-sdk.txt)); FS Copilot's then wins over ours, and the warning names it, where ours winning would break FS Copilot with no word from it.
-  - `fspackagetool` starts the sim to build, so no CI runner can run it, and what it writes for both files is undocumented: an optimized glTF with re-encoded vertices, and a binary `.spb` with its strings encoded (read on our development machine, 2026-10-18, [build log](../build/log.md#2026-10-18-fspackagetool-starts-the-sim-to-build-and-the-sim-re-encodes-the-figures-vertices-and-compiles-an-in-game-panels-definition-to-binary)).
+  - FS Copilot's one package, `fscopilot-bridge`, with `PANEL_PATCH`, holds its WASM module and its `html_ui` (read in the FS Copilot fork, [build results](../build/results/2026-10-18-msfs-packages-and-sdk.txt)), and ran its `VCockpit.js` in the A220's panels (measured on MSFS 2024, 2026-09-01, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-01 - Single-machine cockpit validation: the production pipeline works"), though whether `PANEL_PATCH` is what makes an override work is unverified; FS Copilot's most likely then wins over ours, and the warning names it (inference, not run), where ours winning would break FS Copilot with no word from it.
+  - `fspackagetool` starts the sim to build, so no CI runner can run it, and what it writes for both files is a format we found no description of: an optimized glTF with re-encoded vertices, and a binary `.spb` with its strings encoded (read on our development machine and searched, 2026-10-18, [build log](../build/log.md#2026-10-18-fspackagetool-starts-the-sim-to-build-and-the-sim-re-encodes-the-figures-vertices-and-compiles-an-in-game-panels-definition-to-binary)).
+  - The desktop app was our package's one writer already, and comparing its version alone left a rebuild at the same version out of the sim.
   - Both files rarely change, and owning their formats against each sim update would cost more than a recompile (user, 2026-10-18).
-- **Leaves out:** whether a SimObject in a `PANEL_PATCH` package spawns, and whether our BlurPage copy loads from one, which cases in the sim settle; and the procedure and script for the recompile, which node 8's stage that first ships either file writes.
+- **Leaves out:** whether a SimObject in a `PANEL_PATCH` package spawns, and whether our BlurPage copy, an in-game panel, and the EFB app load from one, which one boot in the sim settles; and the procedure and script for the recompile, which node 8's stage that first ships either file writes.
 
 ## The Coherent GT check is a standalone Node tool on acorn, run after each edit and in CI, and no for-of rewrite runs
 
@@ -1766,13 +1767,13 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.18 by the user, 2026-10-18 ([the Coherent GT check](../build/01-the-build.md#the-coherent-gt-check)).
 - **Because:**
   - acorn at 2017 rejected all 20 of p09's samples the engine fails and accepted all 22 from ES2015 to ES2017, the framework's whole bundle gave 2 false hits by name, both cleared by resolving the receiver, and the check took 458ms on a 2.5 MB bundle against 1,358ms for ESLint with eslint-plugin-es-x, which has no rule for any web API (measured on our development machine, 2026-10-18, [build log](../build/log.md#2026-10-18-acorn-at-es2017-fails-every-p09-sample-the-engine-fails-and-the-frameworks-whole-bundle-gives-two-false-hits-by-name)).
-  - typescript-eslint refuses TypeScript 7, and the hook already maps each finding to our TypeScript's line (same entry).
+  - typescript-eslint refuses TypeScript 7, and a prototype of the check mapped each finding to our TypeScript's line through esbuild's map (same entry).
   - The framework's transformer needs TypeScript 5's type checker, which neither esbuild nor TypeScript 7 runs, and the framework's own bundle already runs 140 `for`-`of` loops (same entry).
 - **Leaves out:** the check's name and where our `package.json` takes it from, for its repository; and an ESLint config generated from the same data file, for later.
 
 ## The message crate's hash is SHA-256 over its own source and the locked versions of what it depends on, and a committed stamp carries it and the version to TypeScript
 
-- **Decided:** the message crate's build script hashes its `Cargo.toml`, its build script, and every file under `src/`, with CRLF taken as LF, then the name and version of every package `Cargo.lock` reaches from it, into `messages::HASH`; the `cargo test` that writes ts-rs's types also writes `engines/messages/ts/stamp.ts` with the version and the hash, which is committed and which CI's check for a difference covers.
+- **Decided:** the message crate's build script hashes its `Cargo.toml`, its build script, and every file under `src/`, with CRLF taken as LF, then the name and version of every package `Cargo.lock` reaches from it, into `messages::HASH`, and runs again only when one of those files changes; the `cargo test` that writes ts-rs's types also writes `engines/messages/ts/stamp.ts` with the version and the hash, which is committed and which CI's check for a difference covers.
   This settles the spine's item in [left open](01-spine.md#left-open) on how the build hashes the message crate, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) leaves it.
   Settled in node 6.18 by the user, 2026-10-18 ([the message crate's hash](../build/01-the-build.md#the-message-crates-hash)).
 - **Because:**
@@ -1782,14 +1783,15 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A release is built by a job that can't write, uploaded as a draft, checked, and only then published, with the backend deployed just before
 
-- **Decided:** a person runs the release workflow on `main`; its build job, with a read-only token, refuses an existing version, runs every check, builds, fetches the newest release's full package and fails when a published release gave none, and packs; its publish job deletes a draft a failed run left, uploads a draft, checks the draft's assets and its `releases.win.json`, deploys the backend's migrations and Worker, publishes the draft, and runs the profiles' job; every step is one command; a second workflow deploys the backend alone.
+- **Decided:** a person runs the release workflow on `main`; its build job, with a read-only token, stops at a published release of that version, runs every check, builds, fetches the newest release's full package and fails unless it's the one `releases/latest` holds, or none came and none is published, and packs with `--packId Crosscheck` and `--noPortable`; its publish job deletes a draft a failed run left, uploads a draft, checks that the draft holds every file `assets.win.json` lists and that its `releases.win.json` lists this version, deploys the backend's migrations and Worker, and publishes the draft; a third job runs the profiles' workflow; each step of the first two is one command; a second workflow runs the backend's tests and deploys it alone.
   This settles the line 6.17 raised on a release job that fails when it attaches nothing.
   Settled in node 6.18 by the user, 2026-10-18 ([a release](../build/01-the-build.md#a-release), [the backend](../build/01-the-build.md#the-backend)).
 - **Because:**
   - `vpk upload github` leaves a draft unless told to publish, `vpk download github` exits 0 when it finds no full package, and only a PowerShell step's last command sets its result (read and documented, [build log](../build/log.md#2026-10-18-vpk-uploads-a-draft-unless-told-to-publish-and-two-of-its-paths-exit-0-having-shipped-less)), so a release job could otherwise pass with nothing published, as fsc-editor's v0.1.0 did (fsc-editor, commit 7b2348e).
-  - GitHub lists drafts only to a caller with push access (documented, same entry), so the build job's read-only token can't take a leftover draft as the delta's base.
+  - `vpk download github` takes in any draft its token can list (read, same entry), so checking the fetched package against `releases/latest` keeps a leftover draft from becoming the delta's base, whatever the token lists.
+  - `vpk pack` writes a portable copy unless told not to, which no design covers (read, same entry).
   - A backend deployed just before its release publishes runs only code that passed that release's checks.
-- **Leaves out:** what each release's notes say.
+- **Leaves out:** what each release's notes say; and how CI holds a backend path's bodies to the release that first served them, for the backend's stage.
 
 ## v1 ships no authoring tool
 

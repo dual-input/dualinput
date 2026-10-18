@@ -11,13 +11,13 @@ BlurPage on disk, where [decision 003](../../decisions/003-watcher-keeps-blurpag
 **Found,** by reading our Steam install of MSFS 2024 1.9.18.0 with the sim closed (read on our development machine, 2026-10-18, [results](results/2026-10-18-msfs-packages-and-sdk.txt)):
 
 - `steamapps\common\Limitless\Packages\asobo-vcockpits-core\html_ui\Pages\VCockpit\Core\VCockpit.js` is on disk: 23,520 bytes with CRLF line ends, last written 2024-12-15, SHA-256 `F8797FA188EBE73D09861F8C74E8BF7E1D8B7F9B3C692CF062C3A131ED74F45E`.
-- `BaseInstrument.js` is on disk too, in `asobo-vcockpits-instruments\html_ui\Pages\VCockpit\Instruments\Shared\`, 33,744 bytes, last written 2025-04-07.
+- `BaseInstrument.js` is on disk too, in `asobo-vcockpits-instruments\html_ui\Pages\VCockpit\Instruments\Shared\`, 33,744 bytes, last written 2025-04-07 (read on our development machine, 2026-10-18, apart from the results file).
 - The file's code matches the stock copy the FS Copilot fork made on 2026-09-06 by stripping FS Copilot's blocks from its own copy (FS Copilot fork, `record/pointer-forwarding/module/vendor/VCockpit.stock.js`), apart from FS Copilot's header comment and blank lines.
 - The claim that the sim streams these files comes from the FS Copilot fork's `record/pointer-forwarding/docs/09-environment.md`, which states it without a measurement.
 - BlurPage's `{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html` and `.json`, in `fs-base-ui\cookedcomps\`, have SHA-256 `4712CCF9DDA2EEAB24C96F98EBD71C2D075C4AB3418CDE2896510FD8D113A101` and `419BD3C40DD94B1C0885F3895992F699F7027C1AD8AEF3370F49D4359C42B0D8`.
 - Neither SDK, 1.7.3 or 1.8.1, holds any `html_ui` file.
 - Only a file's own hash tells whether an update changed it:
-  - Steam's update of 2026-10-14 rewrote both packages' `manifest.json` and `layout.json` and left the files' write times.
+  - Steam's update of 2026-10-14 rewrote `asobo-vcockpits-core`'s `manifest.json` and `layout.json` and left its files' write times.
   - The dates in `layout.json` are the package build's, 2026-10-07, not the files'.
   - SimConnect's open message read version 12.2, build 282174.999, on sims 1.8.14, 1.8.16, and 1.9.18 (measured, same results, which cite each run).
   - `FlightSimulator2024.exe`'s file version, 1,9,18,0, names the sim's release.
@@ -52,6 +52,7 @@ A tool that runs without the sim, as cargo-msfs unpacks the SDK without running 
   - `_PackageInt\_RPTInputs.xml`, which it leaves beside the package, holds each source file's absolute path, the home folder included.
   - Two builds of the same figure, on 2026-10-03 and 2026-10-05, gave the same `.bin` (same results).
 - What it did to p05's in-game panel: its 525-byte XML definition became a 674-byte `.spb`, whose properties are keyed by GUIDs, whose numbers are raw floats, 48 and 100 among them, and whose strings are encoded, so "Crosscheck" isn't in it as text (read on our development machine, 2026-10-18, in `experiments/areas/interface/ingame/package/`).
+- We found no description of either format: `ASOBO_asset_optimized` is in neither the SDK's glTF schema index nor its page on the format, and no page we found describes `.spb` (searched 2026-10-18).
 
 **What changed.**
 A developer compiles both with the sim and commits what comes out, and no tool of ours writes either format (user, 2026-10-18; [files compiled with the sim](01-the-build.md#files-compiled-with-the-sim)).
@@ -71,7 +72,7 @@ Only the newest SDK downloadable.
 
 - cargo-msfs v1.1.0 fetches `https://sdk.flightsimulator.com/msfs2024/files/sdk.json`, takes the first entry's core installer, and has no version argument (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`, `get_latest_sdk_release` and `install_latest_sdk`).
 - On 2026-10-18 the listing named 33 SDK versions and linked two, 1.8.1 and 1.7.3 (measured).
-- Each of 10 older versions we asked for, from 0.9.3 to 1.8.1, answered with 200 at `installers/<version>/MSFS2024_SDK_Core_Installer_<version>.zip` (measured, 2026-10-18, a HEAD request each).
+- Each of the 10 versions we asked for, from 0.9.3 to 1.8.1, answered with 200 at `installers/<version>/MSFS2024_SDK_Core_Installer_<version>.zip`, the 8 the listing doesn't link among them (measured, 2026-10-18, a HEAD request each).
   Nothing from Microsoft promises they stay (unverified).
 - The `version.txt` cargo-msfs writes reads "1.8.1" and "2603316" on two lines on our machine, since the SDK's own `version.txt` overwrites it as the files unpack (read on our development machine, 2026-10-18; the cause is an inference).
 - From 1.7.3 to 1.8.1, 8 of the 153 WebAssembly headers, one field's type in `SimConnect.h`, `SimConnect.dll`, and two constants in `MSFS_WasmVersions.a` changed (read, comparing the two SDKs file by file).
@@ -144,10 +145,10 @@ A command that reports a failed upload.
 
 **Found** (read in velopack 1.2.161 and GitHub's docs, [results](results/2026-10-18-velopack-in-ci.txt)):
 
-- Every failure of `vpk` exits -1, a tag or name that already exists among them.
+- Every exception inside a `vpk` command exits -1, a tag or name that already exists among them.
 - `vpk upload github` creates a draft, uploads the build's files, `releases.win.json`, and `RELEASES`, and publishes only with `--publish`; it requires a token, though Velopack's example passes none.
 - `vpk download github` that finds no full package logs a warning and exits 0, so the next `vpk pack` makes no delta.
-- In a PowerShell step, only the last command's exit code sets the step's result (documented, [GitHub's workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)).
+- In a PowerShell step, only the last native command's exit code sets the step's result (documented, [GitHub's workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)).
 - GitHub lists draft releases only to a caller with push access (documented, [GitHub's releases API](https://docs.github.com/en/rest/releases/releases)), and `vpk download github` doesn't filter them out.
 - `GithubSource` reads `releases.win.json` and the packages it names, and nothing else on a release.
 

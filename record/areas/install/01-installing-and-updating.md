@@ -7,9 +7,10 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 ```
 
 > **Note**
-> Since 2026-10-18, [the build](../build/01-the-build.md) settles what [left open](#left-open) and [our package](#our-package) leave to 6.18:
+> Since 2026-10-18, [the build](../build/01-the-build.md) settles what [left open](#left-open) and [our package](#our-package) leave to 6.18, and changes our package's rule:
 >
-> - Our package is one folder named `crosscheck`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, wins over ours, and the warning names it ([our package](../build/01-the-build.md#our-package)).
+> - Our package is one folder named `crosscheck`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, most likely wins over ours (inference, not run), and the warning names it ([our package](../build/01-the-build.md#our-package)).
+> - The package also holds `build.json`, naming the build, and the app writes our package where its version or its build isn't the app's own, where [our package](#our-package) compares the version alone, and the sim service's check of our own package compares both, so a development build at the same version reaches the sim.
 > - The build keeps the sim's stock files in `sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 > - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
 

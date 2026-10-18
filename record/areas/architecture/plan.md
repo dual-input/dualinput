@@ -807,6 +807,7 @@ Raised elsewhere: by 6.12, take-control's slice of the verdict with each denial'
 Raised elsewhere: by 6.13, avatars has no section in the EFB app or the desktop app; its settings are the figure's color, a palette index, "Show my figure", and "Show the crew's figures", both on at first; and its notices name the free seats while this pilot's camera is in another figure's seat, and tell a pilot whose machine can't read the aircraft's models that their clicks bring no hand ([avatars](../avatars/01-avatars.md#the-figures-this-machine-draws)).
 Raised elsewhere: by 6.14, traffic's slice of this machine's traffic packs, which a page asks for with `LIST_PACKS`, and whose look, and whether it shows the crew's lists beside this machine's, are the user's (user, 2026-10-17); the words of traffic's two notices, on aircraft that aren't the traffic host's and on copies missing or shown as stand-ins; ATC audio's slice of the program it captures, or that it's waiting for one; and the settings for traffic's radius, the ATC app, Automatic or a program from the core helper's list, and the ATC volume ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#settings)).
 Raised elsewhere: by 6.15, the words of state sync's notice for an `instrument()` that reads no number, text, or boolean, such as a path an aircraft update renamed, beside its notice for a write that never lands ([plugins and the sandbox](../plugins/01-plugins.md#its-values)).
+Done on 2026-10-18.
 
 ## 6.17 Installing and updating
 

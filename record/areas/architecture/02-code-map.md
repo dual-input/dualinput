@@ -104,6 +104,12 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - A feature's section in an app is one part, which the app's list names in one line; `efb-shell` also holds the banner's page; and the shells reach a feature only through the notices, the settings, the match check's differences, and the role keys' labels ([a feature's parts](../interface/01-apps.md#a-features-parts)).
 > - [The map check](#the-map-check) also fails a platform unit, in Rust or TypeScript, whose source names a feature's module of the message crate, which [tiers](#tiers)' rules allow, since the message crate is an engine.
 > - In [features](#features), traffic, ATC audio, and state sync have parts in the apps wherever the apps' design shows their slices, where the table gives traffic and ATC audio a desktop part and state sync none.
+>
+> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
+>
+> - The installer is Velopack's Setup.exe, not a program of ours, which settles [left open](#left-open)'s item on where it lives; `apps/watcher` links the `velopack` crate, and only the watcher does, since a program that runs Velopack's startup applies a downloaded update.
+> - The session crate also holds the watcher's update state and the Install now and Check now commands, and the sim service the packages folders, the check for packages that override ours, the check of our own package, and the settings that turn a package off, beside their rows in [the platform](#the-platform).
+> - The desktop app builds with `tauri build --no-bundle`, beside its row in [building every target](#building-every-target), and packing a release takes `vpk`, which needs the .NET 8 SDK on the build machine.
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

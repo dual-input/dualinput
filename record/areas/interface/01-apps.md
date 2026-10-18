@@ -6,6 +6,13 @@ Depends on:  ../core/02-clients-and-panel-bridge.md, ../architecture/02-code-map
 Decides:     How a feature's part plugs into each app and comes out; what a part may use; the slices and commands the apps need that no unit had; how any client changes a setting and quits; how the banner is opened; how a click on a notice reaches the EFB app; what trouble in each component raises; what the apps learn when the core goes; and how the EFB app brings the desktop app forward (node 6.16).
 ```
 
+> **Note**
+> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
+>
+> - The watcher's tray quits the core through a message posted to the core's window, which settles what [quit](#quit) leaves to 6.17.
+> - [Slices and commands](#slices-and-commands) gains the session crate's slice of the watcher's update state and its Install now and Check now, and the sim service's slice shows where each package it can turn off sits; the desktop app closes itself on the `bye` that follows its own Install now.
+> - [Trouble](#trouble) gains our own package, which the sim service checks at the core's start and at each sim start, raising a trouble notice when it's missing, at another version, or off in the sim; and the check that names another package overriding our files is the sim service's, with a warning notice for each package and one match item.
+
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.
 The core says whether the banner should be open, and the EFB app's code calls the toolbar until each change in that takes.

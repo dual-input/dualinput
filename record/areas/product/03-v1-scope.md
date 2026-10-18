@@ -862,6 +862,15 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 > **Note**
 > The helper the sim launches, below, is the watcher's job in [the architecture's spine](../architecture/01-spine.md#components) (user, 2026-10-06), and the spine's helper is the core's process for Windows input and audio.
+>
+> Since 2026-10-18, [installing and updating's design](../install/01-installing-and-updating.md) changes this section in five places:
+>
+> - No warning that a waiting update needs a sim restart shows early in the sim's load, since Windows' Do Not Disturb hides other apps' banners while a game runs (user, 2026-10-18), so the open questions on how recent a last session must be, and on where the Store install keeps `exe.xml`, fall away.
+> - The watcher checks for an update at its start, each time the sim closes, every 3 hours, and when the pilot asks; the apps show whether it's checking, downloading, up to date, ready and what holds it back, or failed; and Install now quits Crosscheck so the update applies, refusing while the sim runs or a session is held (user, 2026-10-18).
+> - Nothing asks the pilot for a Community folder: the sim finds its folders only through `UserCfg.opt`, so a pilot who installs before the sim's first run gets our package when that run closes.
+> - Disabling a package moves its folder out of the Community folder to one beside it while the sim is closed, and back, which settles how; since no file of it changes, [decision 001](../../decisions/001-changing-other-developers-packages.md) stands.
+>   Our own package can be turned off the same way.
+> - v1 stays unsigned, at the cost that a pilot whose PC runs Smart App Control has to turn it off to run Crosscheck (user, 2026-10-18).
 
 One installer puts Crosscheck's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
 

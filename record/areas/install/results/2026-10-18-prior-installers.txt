@@ -1,0 +1,707 @@
+Prior installers and updaters: what fsc-editor, the FS Copilot fork, and fsc-exerciser did
+==========================================================================================
+
+Read on 2026-10-18, for node 6.17 ("installing and updating").
+Read only: nothing in the sibling checkouts was edited, built, or run.
+
+Sources, relative to the development folder:
+  fsc-editor/                  cited as "fsc-editor"
+  fsc/src/                     cited as "FS Copilot fork"
+  fsc/profiles/docs/           cited as "FS Copilot profiles"
+  fsc-exerciser/               cited as "fsc-exerciser"
+
+Evidence markers, as writing.md defines them:
+  MEASURED    the record says someone ran it and saw the result
+  READ        we read it in code or config; nothing says that path ran
+  WRITTEN     a design doc says so, with no measurement behind it
+  UNVERIFIED  an inference of ours, or a claim with no source
+
+Redactions: GitHub owner handles, a personal relay domain, and author names in
+these repositories are written as <owner>, <relay-host>, and "upstream's author".
+Paths under a home folder are written with <user>.
+
+
+THE FINDINGS THAT MATTER MOST
+-----------------------------
+
+1. Replacing files a process has loaded fails partway, and a delete-first copy leaves
+   nothing behind. An in-process sync in the exerciser "deleted 349 of 355 files,
+   reached the mapped FsCopilot.dll, threw out of an async void handler and killed
+   the window". The fix was a helper that waits for the process to exit, then stages
+   into "<dir>.new" and swaps by rename.
+   MEASURED (FS Copilot fork, record/pointer-forwarding/docs/build/log.md,
+   "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings
+   with it"; READ in fsc-exerciser, sync-and-rebuild.ps1, function Mirror).
+
+2. A stale or wrong package presents as a defect in the mechanism. Twice in FS Copilot
+   work, a Community package on disk was not the one the session believed: agent v5
+   was never built, so the panel ran v4, and a drag "does NOT work" finding was
+   withdrawn. A VCockpit.js with a missing paren sat installed in Community and would
+   have killed every panel.
+   MEASURED (FS Copilot fork, record/pointer-forwarding/docs/build/log.md,
+   "2026-08-30 - The drag negative result was void: v5 was never installed" and
+   "2026-09-02 - The branch's VCockpit.js was unparseable; caught before any panel
+   loaded it").
+
+3. Both prior apps find the Community folder by reading InstalledPackagesPath from
+   UserCfg.opt, at fixed per-edition locations. Only the Steam-style location,
+   %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt, is on record as seen on a
+   real machine. The Microsoft Store location,
+   %LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt,
+   appears in both codebases and in neither record as tested.
+
+4. Neither app checks the sim's process before replacing its own Community package.
+   fsc-editor replaces a stale package at its own startup whether the sim runs or not,
+   and tells the user to restart MSFS. FS Copilot routes every install and reinstall
+   through its launch-time setup window, whose button stays disabled while a SimConnect
+   connection is up ("Setup required. Close Microsoft Flight Simulator to continue"):
+   a connection check, not a process check. Only fsc-editor's maintainer build script
+   checks the process list, and it does so because fspackagetool hangs with the sim
+   open, not because of the copy. Nobody measured what happens when a WASM file the sim
+   has loaded is overwritten.
+
+5. fsc-editor decides staleness by SHA-256 of the installed .wasm against the shipped
+   one, never by version string, because its two version numbers had drifted
+   (manifest 0.0.1, wire 0.1.0). It never installs where nothing is installed, and
+   never acts when it cannot compare ("unknown" is not "different").
+   MEASURED for the drift, READ for the rest (fsc-editor, docs/sim-vars/build/v1-log.md,
+   "2026-08-23 — Two version numbers for one package, and neither is trustworthy";
+   src/main/sim/install.ts, updateStaleLinks and staleFolders).
+
+6. Community holds junctions, and a recursive delete through one deletes someone
+   else's package. The dev machine's Community had 60-odd packages, two of them
+   junctions into Program Files (x86). fsc-editor's removeEntry lstat's first and
+   rmdir's a link; install replaces a junction with a real folder rather than writing
+   through it. MEASURED (fsc-editor, docs/sim-vars/build/v1-log.md, "2026-08-23 —
+   Uninstall would have deleted somebody else's scenery. Community is full of
+   junctions."), with tests that create real junctions.
+
+7. The only real release pipeline, fsc-editor's, shipped its first release empty with
+   a green job: electron-builder's GitHub publisher defaults to a draft release type,
+   declines a published release with the warning "GitHub release not created", and
+   exits 0. MEASURED (fsc-editor, commit 7b2348e, 2026-09-20; electron-builder.yml
+   comment above releaseType). Two more feed breakers were caught by reading before
+   they shipped: a component-prefixed tag that electron-updater cannot parse, and a
+   relay release becoming GitHub's "latest".
+
+8. Nobody signed anything. fsc-editor accepted SmartScreen's first-run warning for an
+   audience it judged technical, and parked signing with three options. FS Copilot
+   shipped an unsigned archive. Neither record holds a SmartScreen, Defender, or
+   Windows Firewall observation from a real user's machine.
+
+9. FS Copilot's app "update" was a notice, not an updater: a GitHub latest-release
+   check that opens the release page in a browser. Its profile update path downloads
+   aircraft profiles, which carry JavaScript setters the app runs, over plain HTTP
+   with no integrity check. READ (FS Copilot fork, FsCopilot/Updater.cs).
+
+10. fsc-editor gated its restart-to-update on a live Remote Connect session, because a
+    restart ends the session for the other pilot and "updating mid-session can leave
+    the two sides on different builds". WRITTEN and the gate's rendering MEASURED in a
+    development build (fsc-editor, docs/pipeline/06-updater.md, "The gates").
+
+
+1. FSC-EDITOR
+-------------
+
+1.1 Packaging and release
+
+What it does:
+- Electron app built by electron-builder, two Windows targets: nsis and portable, x64
+  (electron-builder.yml, "win.target").
+- NSIS settings: oneClick false, perMachine false, allowToChangeInstallationDirectory
+  true, desktop and Start Menu shortcuts (electron-builder.yml, "nsis").
+  Per-user install under %LOCALAPPDATA%\Programs, chosen because "it is what lets an
+  update replace the installation without a UAC prompt" (docs/pipeline/05-release.md,
+  "The install"; docs/pipeline/02-deployables.md, "The editor"). WRITTEN.
+- Artifact names: FSC-Editor-${version}-setup.${ext} and FSC-Editor-${version}-portable.${ext}.
+- A release contains the setup .exe, its .blockmap, latest.yml, and the portable .exe
+  (docs/pipeline/05-release.md, "What a release contains").
+- The WASM Community package rides inside the installer: extraResources copies
+  link/Packages/fsc-editor-link to resources/link/fsc-editor-link, a real folder
+  outside app.asar, "because installing means copying it into somebody's Community
+  folder, and MSFS reads the result" (electron-builder.yml comment; 08-module.md,
+  "Over the air").
+- The WASM package is committed, because no hosted runner can build it: "fspackagetool
+  drives the game executable and the MSFS SDK has no unattended install"
+  (docs/pipeline/08-module.md, "Why it is committed"). CI checks the committed binary
+  against its source with three guards: protocol (LINK_PROTOCOL = k_protocol, 6),
+  version (package_version = k_version, 0.7.0), and a source hash in
+  link/Packages/source.sha256 written by link/build.sh (08-module.md, "The three guards").
+- publish: provider github, owner <owner>, repo fsc-editor, releaseType: release.
+  The publish block also bakes app-update.yml into resources/ so the installed app
+  knows its feed (electron-builder.yml comment; 05-release.md, "Publishing").
+- Release flow: release-please in manifest mode on push to main; merging a release PR
+  creates the GitHub Release; the "editor" job on windows-latest runs npm ci,
+  npm run check:module, then npm run release:win, which is
+  "npm run build && electron-builder --win --publish always"
+  (.github/workflows/release.yml; package.json "scripts").
+- Tags: the editor is tagged bare vX.Y.Z because "electron-updater reads the version
+  out of the tag of the latest release, and a component prefix would make that
+  unparseable"; the relay is relay-vX.Y.Z (release.yml header; 04-versioning.md).
+- A step "Keep \"latest\" pointing at the editor" marks a relay release --latest=false
+  and re-marks the newest vX.Y.Z as latest, because both electron-updater and the
+  README's download link read GitHub's "latest" (release.yml).
+- The release-please token is a fine-grained PAT, RELEASE_PLEASE_TOKEN, because
+  "GitHub does not start a workflow run for events raised by GITHUB_TOKEN", so the
+  release PR would show no checks at all (release.yml comment; v1-log "2026-09-20 —
+  release-please runs on a PAT, so that its own pull request gets checked").
+
+What went wrong, from the record:
+- v0.1.0 shipped with no installer in it. "electron-builder's GitHub publisher defaults
+  to `releaseType: draft`, and a draft publisher declines a release that is already
+  published — it matches the tag, logs "GitHub release not created" as a *warning*,
+  and returns null. Not an error, so `npm run release:win` exits 0 and the job goes
+  green with nothing attached. v0.1.0 shipped exactly that way: built,
+  module-checked, published, empty." MEASURED (fsc-editor commit 7b2348e, 2026-09-20).
+  The yml also notes a second guard in the same publisher that declines a release
+  published more than two hours ago unless EP_GH_IGNORE_TIME is set, which "will bite
+  a re-run of a publish that failed overnight". READ, not hit.
+- Component-prefixed tags would have broken the feed silently: "every editor in the
+  wild would have been unable to find an update — and the symptom would have been
+  silence, which is also what "no update available" looks like". Caught by reading
+  (docs/pipeline/build/v1-log.md, "2026-09-20 — Component-prefixed tags would have
+  broken the update feed").
+- A relay release would have become "latest", sending electron-updater to a release
+  with no latest.yml. Found while writing the README link; the fix step was "Not yet
+  run" (v1-log, "2026-09-20 — A relay release would have become "latest"").
+- An empty release-please output skips a job rather than failing it: the root
+  component's outputs are unprefixed, so ".--release_created" "is never set at all",
+  and the editor job would have been skipped with a tag and release created anyway
+  (v1-log, "2026-09-20 — The editor's release-please outputs are not path-prefixed").
+- A dependency left out of the packaged files list crashes before a window opens and
+  is invisible in development: node-simconnect resolved MODULE_NOT_FOUND only in the
+  packaged build, and regedit's .vbs scripts failed inside app.asar with
+  "Can not find script file ...app.asar/.../regList.wsf". MEASURED by running the
+  packaged build (docs/sim-vars/build/v1-log.md, "2026-08-23 — Adopting node-simconnect
+  quietly made the packaged app unshippable").
+
+Status of what was proven:
+- Tags v0.1.0 (2026-09-20), v0.1.1, v0.1.2 (2026-09-21), and v0.2.0 (2026-09-22) exist.
+- docs/pipeline/build/v1-plan.md still lists stage 1 (build on a runner), 2 (publish),
+  3 (updater headless) as "written, never run", and stage 4 (differential download
+  proven) and 6 (module over the air proven) as "not started". The record does not
+  say whether an installed copy ever updated itself across those four releases.
+  Treat the updater flow below as WRITTEN.
+
+1.2 The app updater (src/main/updates.ts; docs/pipeline/06-updater.md)
+
+What it does, READ:
+- electron-updater 6.8.9, bundled into main rather than externalized, because an
+  external module must be named in electron-builder's files allowlist or "it is
+  simply absent from a packaged build — silently" (06-updater.md, "It is bundled, not
+  externalized"; v1-log "2026-09-20 — electron-updater is bundled, and the ring's
+  timer belongs in main").
+- watchUpdates(): autoDownload = true, autoInstallOnAppQuit = true, logger = null so
+  failures go to the app's own log. First check 10,000ms after launch
+  (FIRST_CHECK_MS), then every 4 hours (EVERY_MS). check() skips while an update is
+  "ready" or downloading.
+- updatesUnavailable() returns "portable" when process.env.PORTABLE_EXECUTABLE_DIR is
+  set and "development" when !app.isPackaged; watchUpdates then logs
+  "update-skip" `Updates are off in a ${unavailable} build.` and returns.
+- Events: "update-available" logs `Version ${info.version} is downloading.`; the
+  progress ring appears only after RING_AFTER_MS = 400; "update-downloaded" publishes
+  { kind: "ready" }; "error" logs "update-failed" "Checking for an update did not
+  finish." and returns to idle. Every failure is silent to the user and retried next
+  cycle (06-updater.md, "Failure handling").
+- checkForUpdatesNow(): the manual check from the app menu returns "unavailable",
+  "ready", "downloading", "up-to-date", or "failed" to its caller instead of
+  publishing state.
+- installUpdate(): writes { restarting: <version> } to version.json in userData
+  "synchronously, because nothing after quitAndInstall is guaranteed to run", then
+  calls autoUpdater.quitAndInstall().
+- appUpdated() and markUpdateSeen(): version.json's "seen" field drives a What's new
+  dialog; a restart from the menu opens it, an install-on-quit only marks the menu.
+- 06-updater.md says quitAndInstall "spawns the staged installer with --updated /S"
+  and the staging folder is %LOCALAPPDATA%\fsc-editor-updater\pending. WRITTEN.
+- Differential download by blockmap, falling back silently to a full download.
+  WRITTEN; v1-plan stage 4 says "A silent fallback that nobody measures is
+  indistinguishable from a feature that does not exist."
+- Rollback: none. "A bad release is fixed by publishing a higher version, because
+  electron-updater will not offer an older one" (09-open-questions.md, "Rollback").
+
+The gates (06-updater.md, "The gates"), WRITTEN, rendering MEASURED:
+- The restart row is disabled while a Remote Connect session is live: "a restart ends
+  the session for the other pilot permanently. Worse, updating mid-session can leave
+  the two sides on different builds, and the other pilot cannot see that a download
+  is what happened."
+- Unsaved work is not a gate, because drafts are restored after restart.
+- The states were driven through a running development build by publishing state
+  into the store; a stale-armed confirmation bug was found that way: "Returning null
+  from a React component does not unmount it" (v1-log, "2026-09-20 — The confirmation
+  survived the control being hidden"). MEASURED in a dev build only; "What has not
+  been seen is the control appearing on its own, which needs a packaged build"
+  (docs/help/copy-review.md, "Update control — 2026-09-20").
+
+1.3 Code signing and SmartScreen
+
+- Unsigned by decision: "A certificate costs money the project does not have, and
+  SmartScreen warns on an unsigned installer the first time it is run. The audience
+  above can be told that in a sentence in the README." (docs/pipeline/01-goals.md,
+  "Non-goals").
+- README.md:60: "The builds are unsigned, so Windows SmartScreen will warn on first
+  run. Choose "More info", then "Run anyway"."
+- With no publisherName, electron-updater skips Authenticode verification and still
+  verifies the SHA-512 in latest.yml over HTTPS (05-release.md, "Unsigned"). WRITTEN.
+- Options parked in docs/pipeline/09-open-questions.md, "Code signing", verbatim in
+  substance: Azure Trusted Signing "around ten dollars a month, no hardware token,
+  works from a hosted runner, inherits Microsoft's reputation immediately"; an OV
+  certificate "a few hundred a year, still warns until it accrues reputation"; EV
+  "more again, no warning, but awkward to use from CI". "Nothing in the pipeline
+  needs to change to accommodate it later: signing adds a publisherName, at which
+  point electron-updater starts verifying Authenticode as well". WRITTEN, no source
+  cited for the prices or the reputation claims.
+- UNVERIFIED, outside these records and worth checking before a design leans on it:
+  Microsoft changed SmartScreen in 2024 so that an EV certificate no longer grants
+  reputation on its own, which would make the "EV, no warning" line out of date; and
+  Azure Trusted Signing's eligibility for individuals has been limited by country.
+  Microsoft's SmartScreen and Trusted Signing documentation would settle both.
+- No SmartScreen, Defender, or Windows Firewall observation appears anywhere in
+  fsc-editor's docs/. The only antivirus mention is a design note rejecting a global
+  keyboard hook because it "looks exactly like a keylogger to antivirus software"
+  (docs/sim-vars/08-marks.md). WRITTEN.
+
+1.4 Finding the Community folder
+
+What it does, READ (src/main/sim/install.ts, packageRoots and CONFIG_LOCATIONS;
+src/shared/link-install.ts, parseInstalledPackagesPath and COMMUNITY_DIRS):
+- Reads UserCfg.opt from four locations, newest first:
+    %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt
+    %LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt
+    %APPDATA%\Microsoft Flight Simulator\UserCfg.opt
+    %LOCALAPPDATA%\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache\UserCfg.opt
+  The comment says Store installs are included "because a Store user has no %APPDATA%
+  copy at all".
+- parseInstalledPackagesPath matches /^\s*InstalledPackagesPath\s+(.*)$/i per line and
+  accepts a quoted or unquoted value; "Quoted is the only form seen in the wild".
+  Returns null rather than throwing.
+- Roots are deduplicated by path.resolve(root).toLowerCase(), so 2020 and 2024 pointed
+  at one root give one folder.
+- Under each root it offers both "Community" and "Community2024" if they exist, sorted
+  with the folder already holding the package first, then Community before
+  Community2024: "MSFS 2024 scans both, and Community is the one this module has
+  actually been observed working from". The "scans both" half is WRITTEN with no
+  measurement cited.
+- isDirectory uses stat, not lstat, so a Community folder reached through a junction
+  counts.
+- %APPDATA% can be missing: "running through npm run from PowerShell drops it", so
+  roaming() falls back to USERPROFILE\AppData\Roaming and \Local.
+  MEASURED (docs/sim-vars/build/v1-log.md, "2026-08-23 — `$APPDATA` does not survive
+  npm-from-PowerShell": "link/build.sh: line 26: APPDATA: unbound variable").
+- Nothing found is a real answer: the UI says "No simulator found. FSC Editor reads
+  UserCfg.opt rather than guessing where MSFS is installed — choose your Community
+  folder to carry on." and offers a folder picker (link:choose-folder in
+  src/main/ipc.ts, registerIpc; describeCommunity in install.ts accepts any folder).
+
+Measured or written:
+- MEASURED on the development machine: docs/sim-vars/04-connection.md, "Finding the
+  Community folder", shows
+    C:\Users\<user>\AppData\Roaming\Microsoft Flight Simulator 2024\UserCfg.opt
+    InstalledPackagesPath "…\Microsoft Flight Simulator 2024\Packages"
+  with Community, Community2024, Official2020, Official2024, and StreamedPackages
+  beneath it. The record does not name the edition.
+- WRITTEN only: the two Store locations. No record in fsc-editor says a Store install
+  was tested.
+- The maintainer script link/build.sh, find_community, reads only the 2024 %APPDATA%
+  location, with FSCE_COMMUNITY as an override and a hardcoded fallback.
+
+1.5 Installing, updating, and uninstalling its Community package
+
+What it does, READ (src/main/sim/install.ts):
+- installLink(community): removeEntry(target), then fs.cp(shipped, target,
+  { recursive: true }). Replace, not merge: "MSFS reads layout.json — which lists every
+  file with its size — so a stale entry is not inert, it is a package the simulator
+  considers corrupt." Never throws; returns { ok: false, reason } and names "the sim
+  holding the file open, a read-only folder, a OneDrive-synced profile mid-upload" as
+  plausible causes. None of those causes is measured. The copy is not staged: if
+  fs.cp fails partway, the old package is already gone. UNVERIFIED consequence.
+- removeEntry(target): lstat first; a symbolic link or junction is removed with rmdir
+  (falling back to unlink) so the target survives; only a real directory is removed
+  recursively. MEASURED with real junctions in install.test.ts (v1-log entry on
+  junctions, cited above).
+- inspect(): reports version (manifest package_version, or null), current
+  ("same" | "different" | "unknown" by SHA-256 of modules/fsc-editor-link.wasm), and
+  linked (the entry is a junction).
+- updateStaleLinks(): for every folder staleFolders() returns (installed.current ===
+  "different"), calls installLink. "It never installs where nothing is installed" and
+  "It never acts on unknown". Pure staleFolders exists so a test does not rewrite the
+  user's real Community folder.
+- Called from registerIpc in src/main/ipc.ts at startup, fire and forget, before
+  watchUpdates(). Logs "link-update" with
+  `updated the Link package in ${result.path} — restart MSFS to load it` or
+  `could not update the Link package — ${result.reason}`.
+  It does not check whether the sim is running.
+- uninstallLink(community): the same junction-safe removeEntry; "Nothing installed at
+  <target>." when absent.
+- The UI (src/renderer/src/components/settings/groups/sim-module.tsx, SimModuleGroup)
+  proposes one folder with "Change", shows "Install" or "Repair", hides the button once
+  the installed hash matches, and says "Updates are applied automatically when FSC
+  Editor starts." After a write it says, when the sim is live,
+  "MSFS scans packages when it starts, so the simulator you have open will not see
+  this one until it restarts." and otherwise "It will load the next time you start
+  MSFS." For a junction: "This entry is a junction to another folder. Repairing it
+  would replace the link with a real folder."
+- The NSIS uninstaller is electron-builder's default. Nothing in the repository
+  removes the Community package when the app is uninstalled. READ (no nsis include
+  or uninstaller hook in electron-builder.yml).
+
+Findings from the record:
+- "The update prompt should not exist": a prompt asking whether to update the module
+  "is a question the user has no way to answer"; and an early boolean "current" put a
+  "needs updating" badge on a good install when there was nothing to compare against.
+  MEASURED from the built dialog (docs/sim-vars/build/v1-log.md, "2026-08-23 — The
+  update prompt should not exist. And "I cannot tell" is not "stale".").
+- "The folder picker was asking a question we already knew the answer to": a list of
+  two near-identical 90-character paths was the first decision in the flow; replaced
+  by one proposed folder. MEASURED from the built dialog (same log, same date).
+- Two version numbers drifted for one package: manifest 0.0.1 from AssetPackage
+  Version, wire 0.1.0 from k_version. Hashing the bytes "paid for itself immediately"
+  by confirming the installed package was byte-identical to the committed one. MEASURED.
+- 08-module.md, "Three things about step 3": "MSFS only scans packages at its own
+  startup. The module is replaced when the editor restarts, but a simulator already
+  running will not see it." WRITTEN as known behavior.
+
+1.6 The sim running, and waiting for it to close
+
+- The app never waits for the sim. Connection is a node-simconnect retry loop every
+  SIM_RETRY_MS = 5,000ms (src/shared/sim.ts), with handle "quit" and "close" events
+  dropping the session (src/main/sim/session.ts). "The app also cannot distinguish
+  "MSFS is closed" from "MSFS is open and SimConnect refused"; both are ECONNREFUSED."
+  (docs/sim-vars/build/v1-log.md, entry on "Connecting… was permanent").
+- A module silent after connect gets LINK_GRACE_MS = 3,000ms before the chip says the
+  sim needs a restart, "because "sim running, module silent" is also true for the
+  first moment of every connection" (v1-log, "2026-08-23 — The install flow. Four chip
+  states are two independent facts, not four phases."). MEASURED as a design fix.
+- Only link/build.sh checks the process list:
+    tasklist | grep -qi "FlightSimulator2024.exe"
+  printing "MSFS is running. fspackagetool drives the sim executable and will hang" /
+  "waiting for it — close the simulator and run this again." The reason is the
+  packaging tool, not the copy: "fspackagetool drives FlightSimulator2024.exe to do the
+  packaging, so it cannot run while the sim is open. It does not fail — it hangs"
+  (v1-log, "2026-08-23 — The module becomes a sub-project, and fspackagetool cannot
+  run with the sim open"). MEASURED, hit twice. The full build is about 17s with the
+  sim closed (v1-log, "2026-08-23 — fspackagetool runs in seconds, and does not write
+  layout.json"). MEASURED.
+- fspackagetool writes manifest.json but not layout.json, with no error; link/tools/
+  layout.mjs fills it, writing the FILETIME date as a bare number assembled from a
+  BigInt. MEASURED (same entry).
+- A module missing the SDK allocator exports registered in the Wasm Debug panel and
+  then showed "Status: FAILED", "The module is not scheduled" (v1-log, "2026-08-23 —
+  The module must export MSFS's allocator."). MEASURED. Relevant to any CI check on a
+  shipped .wasm.
+
+
+2. FS COPILOT FORK
+------------------
+
+2.1 How it is built and shipped
+
+READ (FsCopilot/FsCopilot.csproj):
+- .NET 9 Avalonia WinExe, Version 1.3, RuntimeIdentifiers win-x64, PublishSingleFile,
+  SelfContained, PublishTrimmed, EnableCompressionInSingleFile,
+  IncludeNativeLibrariesForSelfExtract.
+- Kept outside the single file (ExcludeFromSingleFile): SimConnect.dll,
+  Microsoft.FlightSimulator.SimConnect.dll, and the Community package, copied to
+  Community\ beside the exe from ..\FsCopilot.Bridge\Packages\**. Definitions\ (the
+  profiles) is copied beside the exe too.
+- No installer of any kind: no .iss, .nsi, .wxs, Velopack, or Squirrel files, and no
+  .github workflows in fsc/src/. The fork's git tags are v1.0 through v1.2.1 plus
+  archive/* tags. The release is a folder shipped as an archive: fsc-editor describes
+  FS Copilot as "an application that ships as an archive with no installer"
+  (fsc-editor, docs/pipeline/01-goals.md), and fsc-editor's detection code says
+  installed-program registry keys are "for installed programs, which FS Copilot
+  currently is not" (fsc-editor, src/main/detect.ts, REGISTRY_QUERIES comment).
+- app.manifest declares no requestedExecutionLevel, so it runs as the invoking user.
+- The Community package is built by the MSFS Project Editor ("Build and Mount" on
+  fs-copilot.xml), with Developer Mode on (FsCopilot.Bridge/readme.md). Its manifest:
+  package_version "1.2.0", minimum_game_version "1.6.34", builder "Microsoft Flight
+  Simulator 2024", package_order_hint "PANEL_PATCH", and it contains modules/
+  FsCopilot.wasm (1,187,142 bytes), html_ui/FsCopilot/*.js, and an override of
+  html_ui/Pages/VCockpit/Core/VCockpit.js.
+
+Measured findings about the build:
+- The trimmed single-file exe "binds 9020 non-elevated and accepts a WebSocket upgrade
+  (HTTP 101) - the trimming and URL-ACL risks are retired" (FS Copilot fork,
+  record/pointer-forwarding/docs/build/log.md, "2026-09-01 - The FS Copilot
+  implementation is built and verified offline"). MEASURED.
+- "the trimmed publish crashed at capture start because the linker removed the
+  process-loopback COM interop"; fixed with ILLink.Descriptors.xml (FS Copilot fork,
+  record/traffic-atc/docs/build/log.md, "2026-09-06 · Stage 4, audio and the card").
+  MEASURED. A trimmed publish needs its own smoke test.
+- The Community package works with MSFS Developer Mode off: "For a remote tester this
+  is the difference between "install a package and run a program" and "enable
+  developer mode first"" (log.md, "2026-08-30 - The module works with DevMode off").
+  MEASURED.
+
+2.2 Setup flow
+
+READ (FsCopilot/App.axaml.cs, App.OnFrameworkInitializationCompleted;
+FsCopilot/ViewModels/SetupViewModel.cs; FsCopilot/Installer.cs):
+- At launch, unless --skip-install is passed, Installer.RequiresInstallation decides
+  whether a SetupWindow opens before the main window. RequiresInstallation is
+  RequiresBridgeInstallation || RequiresProfilesSetup || RequiresUninstallYC.
+- SetupViewModel steps (enum InstallerStep): Initial, DownloadingProfiles,
+  NeedRemoveYourControls, InstallingBridge, Completed, Failed.
+- RunInstallationFlowAsync: if no YAML in Definitions\, download the profile pack
+  (Updater.Download, GET /api/profiles/download, retried with backoff from 2s to 10s);
+  then if a YourControls folder exists, stop at NeedRemoveYourControls; then
+  Installer.DeployBridge(); then Completed.
+- The primary button is disabled while IsMsfsRunning, which is bound to
+  sim.Connected, the SimConnect connection. Subtitle strings, verbatim:
+    "Setup required. Close Microsoft Flight Simulator to continue"
+    "Setup required"
+    "Downloading profile pack..."
+    "YourControls module detected. Close Microsoft Flight Simulator to continue"
+    "YourControls module detected in Community folder. Remove it to continue"
+    "Installing FS Copilot components..."
+    "Setup complete. Downloaded {N} profiles" / "Setup complete"
+    "Setup failed" (or the exception message)
+  Buttons: "Install", "Remove YourControls", "Continue", "Retry", "Working...".
+- DeployBridge catches every exception and only logs Log.Debug(e.Message), so a
+  failed copy still reaches "Setup complete". UNVERIFIED consequence, READ in code.
+  The next launch's RequiresBridgeInstallation would see the difference and open
+  setup again.
+
+2.3 Community folder discovery
+
+READ (Installer.cs, PackagesPaths and ReadInstalledPackagesPath):
+- Four fixed UserCfg.opt locations, each kept only if File.Exists:
+    %LOCALAPPDATA%\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache\UserCfg.opt  ("MS Store location")
+    %LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt        ("MS Store 2024 location")
+    %APPDATA%\Microsoft Flight Simulator\UserCfg.opt                                         ("Steam location")
+    %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt                                    ("Steam 2024 location")
+- ReadInstalledPackagesPath takes the first line starting with InstalledPackagesPath
+  and requires a quoted value (Regex "\"([^\"]+)\""), then
+  Path.GetFullPath(Environment.ExpandEnvironmentVariables(...)).
+- Only <InstalledPackagesPath>\Community is used, never Community2024.
+- PackagesPaths is a static field, computed once at type initialization.
+- No fallback to guessed paths, despite FS Copilot profiles' docs saying "Fallback to
+  common installation paths" (see section 3).
+- Measured: nothing in the fork's record tests a Store edition.
+
+2.4 Installing and updating the bridge package
+
+READ (Installer.cs):
+- Source: AppContext.BaseDirectory\Community\fscopilot-bridge.
+- RequiresBridgeInstallation: the source exists and, for any Community folder found,
+  the target is missing or DirectoriesDiffer(source, target).
+- DirectoriesDiffer: compares file count, relative paths (case-insensitive), lengths,
+  and SHA-256 of each file. Any difference means reinstall.
+- DeployBridge: for every Community folder, Directory.CreateDirectory(community) if
+  missing, Directory.Delete(target, recursive: true), then CopyDirectory. It writes
+  into every edition's Community folder it found, 2020's included. Not staged; not
+  junction-aware. What Directory.Delete does with a junction at the target is
+  UNVERIFIED here.
+- Log lines: "[Application] Missing FS Copilot module. Skipped",
+  "[Application] Found community folder: {0}",
+  "[Application] FS Copilot module has been deployed to community".
+- There is no uninstall path for the bridge.
+
+Measured findings:
+- "The app's installer re-prompted whenever its bundled package copy drifted from the
+  sim's - three copies must stay in sync (worktree Packages/, bin output Community/,
+  sim Community/); the package build script now mirrors to all three." (log.md,
+  "2026-09-01 - Single-machine cockpit validation: the production pipeline works").
+  MEASURED. A whole-folder hash comparison treats any developer-side difference as
+  "needs install".
+- A package with a syntax error in VCockpit.js "had been sitting in Community since
+  22:50 without the sim having been started" and would have "killed every instrument
+  on any machine it was installed on". Readiness gained `node --check` over every file
+  under PackageSources/HTML_UI before packaging (log.md, "2026-09-02"). MEASURED.
+- "MSFS needs a restart before it is picked up, because layout.json is read at
+  startup." (log.md, "2026-08-30 - The drag negative result was void"). Stated as
+  known behavior; no probe isolates it.
+- The bridge overrides VCockpit.js with PackageOrderHint PANEL_PATCH; "a second package
+  patching the same path is a conflict", and which wins "depends on load order we do
+  not control — so the result is silently one or the other" (FS Copilot fork,
+  record/pointer-forwarding/docs/05-integration.md, "Where experimental code lives";
+  docs/10-module.md, "The conflict, and why the build refuses"). WRITTEN; the
+  prototype's build.mjs refused to install while fscopilot-bridge was present.
+
+2.5 The YourControls conflict
+
+READ:
+- Install time: RequiresUninstallYC is true when any Community folder holds a folder
+  named exactly "YourControls" (Installer.cs). The setup stops with
+  "YourControls module detected in Community folder. Remove it to continue" and the
+  "Remove YourControls" button runs Installer.DeleteYC(), a recursive
+  Directory.Delete of that folder in every Community folder, then DeployBridge.
+  It deletes another product's package with one click, with no backup.
+- Run time: SimClient streams L:YourControlsPanelId as "number"; a value > 0 sets
+  ViewErrors.Conflict and the message "Conflict detected with YourControls package."
+  (FsCopilot/Connection/SimClient.cs, constructor, _conflict;
+  ViewModels/MainViewModel.cs, ErrorMessage).
+- Neither check is measured in the fork's record.
+
+2.6 Bridge version check
+
+READ:
+- The WASM module sends k_version = "1.2" (FsCopilot.Bridge.Wasm/wasm_module.cpp) in
+  the client data area FSC_READY, requested once per second; SimClient compares it
+  with WasmVersion = "1.2" by string equality (SimClient.cs).
+- Messages: "Bridge package is not loaded. Check your Community folder." when no
+  version arrives; "Bridge version mismatch. Update Community package." on mismatch;
+  "Both sides must use the same FS Copilot version." when the peer's schema hash
+  differs (MainViewModel.cs, ErrorMessage).
+- The app cannot update the package mid-session: install only happens through the
+  setup window at launch.
+
+2.7 Updating the app and its profiles
+
+App update, READ (FsCopilot/Updater.cs, CheckForUpdateAsync; App.axaml.cs,
+CheckForUpdatesAsync; ViewModels/UpdateAvailableViewModel.cs):
+- Only on a launch that skips the setup window, and only when no --bench harness is
+  attached, after the main window opens:
+  GET https://api.github.com/repos/<owner>/FsCopilot/releases/latest with
+  User-Agent "FS-Copilot-Updater"; compares tag_name with the running version via
+  System.Version after stripping a leading "v" and anything after "-".
+- If newer, a modal "FS Copilot Update" says "A newer version of FS Copilot is ready
+  to download." with "Later" and "Open GitHub"; Open GitHub launches the release page
+  in the browser. No download, no install, no restart.
+- Any failure returns null silently.
+- Versions: "Versions are the fork's own, starting at 1.3. The update check reads this
+  fork's releases and compares numbers only: it drops everything after a dash, so
+  `1.3-test.2` reads as `1.3`." (FS Copilot fork, record/conventions.md).
+- Found and fixed: "The update check points at upstream." Updater.cs hardcoded
+  upstream's releases/latest, "so any build from this fork tells its users to go
+  install upstream's release the moment upstream publishes a higher version" (log.md,
+  "2026-09-06 - The fork gets a trunk"). READ, repointed on the ahead-updater branch.
+
+Profile update, READ (Updater.cs, Check and Download; MainViewModel.cs constructor and
+DownloadProfileCommand):
+- Server: new Updater("http://p2p.fscopilot.com:2320") in Program.BuildAvaloniaApp.
+  Plain HTTP.
+- On each aircraft load, GET /api/profiles/{name} returns { exists, published_at };
+  newer than the local profile's UpdatedAt sets NewProfileAvailable. The user's
+  download button fetches /api/profiles/{name}/download and Definitions.Save writes
+  it to Definitions\{name}.yaml beside the exe.
+- Profiles carry JavaScript setters the app evaluates with Jint (Jint 4.4.1 in the
+  csproj), so code arrives over unauthenticated HTTP with no signature or hash.
+  UNVERIFIED as an exploitable risk; READ as a fact of the code.
+
+2.8 Where it keeps data and settings
+
+READ:
+- settings.json beside the exe: Settings.Path = AppContext.BaseDirectory\settings.json,
+  written via a .tmp file and File.Move overwrite (FsCopilot/Settings.cs).
+- Profiles in AppContext.BaseDirectory\Definitions\ (Installer.ProfilesPath,
+  Definitions.Save).
+- The log file is "log", a path relative to the working directory, not the exe
+  (Program.Main, Serilog WriteTo.File(path: "log", ...)).
+- Everything is written beside the exe, so the app only works from a user-writable
+  folder. UNVERIFIED consequence: unpacked under Program Files it would fail to save.
+- A settings.json beside an older build kept keys the code dropped; "a stale file is
+  not evidence that they are" persisted (FS Copilot fork,
+  record/traffic-atc/docs/build/log.md). MEASURED.
+
+2.9 Detecting the sim running or closing
+
+READ (FsCopilot/Connection/SimConnectConsumer.cs, AutoReconnect and Connect):
+- No process check anywhere in the app's sim code. "Running" is a live SimConnect
+  connection: AutoReconnect waits 2s (_reconnectDelay) and calls Connect in a loop;
+  Connect opens SimConnect, sets Connected true, and pumps messages.
+- Closing is detected by a COMException from ReceiveMessage or a queued job, which
+  returns from Connect and sets Connected false. There is no OnRecvQuit handler.
+- MainViewModel shows "Microsoft Flight Simulator is not running!" from the same
+  signal, sampled every 250ms.
+- The setup gate (2.2) therefore cannot see a sim that is starting but has not yet
+  accepted SimConnect clients. UNVERIFIED.
+
+2.10 exe.xml, startup, firewall, SmartScreen
+
+- No exe.xml use, no Run-key or login entry, no single-instance mutex in the app.
+  READ (grep over FsCopilot/ for exe.xml, CurrentVersion\Run, Mutex).
+- No Windows Firewall rule is added. The P2P network binds UDP with LiteNetLib and asks
+  the router for a UPnP mapping named "FS Copilot" (FsCopilot/Network/P2PNetwork.cs,
+  Start, CreatePortMapAsync). READ. A listening UDP socket on a LAN address is the
+  usual trigger for Windows Defender Firewall's first-run prompt; the record never
+  mentions that prompt on a client. UNVERIFIED.
+- Every firewall mention in the fork's record is about the relay VPS (ufw, the cloud
+  firewall), not a pilot's PC (record/self-hosted-relay/docs/03-runbook.md, "5. Firewall").
+- No SmartScreen or Defender mention anywhere in fsc/src.
+
+
+3. FS COPILOT PROFILES DOCS (fsc/profiles/docs/)
+-----------------------------------------------
+
+- desktop-app.md, "SetupViewModel" and "Installer", describes detection as "1. Check
+  LocalState AppData folder for MSFS 2. Parse UserCfg.opt for InstalledPackagesPath
+  3. Fallback to common installation paths" and installation as copying the package,
+  "Validates package structure", and "Checks for conflicts". The fork's code has no
+  fallback path and no structure validation (section 2.3, 2.4). Prefer the code.
+- desktop-app.md, "Updater": "Update server: http://p2p.fscopilot.com:2320", checking
+  "App version (shows dialog if newer available)" and "Definition timestamps".
+  Matches the code, except the app check goes to the GitHub API, not that server.
+- architecture-overview.md, "Error Handling", lists "WASM bridge not installed or
+  version mismatch" and "YourControls conflict (competing shared cockpit addon)".
+- No architecture note on installers, packaging, signing, firewall, or release
+  process. These docs are community-written; treat them as leads.
+
+
+4. FSC-EXERCISER
+----------------
+
+It has no installer and no updater for end users. It does have a self-replacement
+pattern for its own copy of FS Copilot, which is the closest thing in our prior work to
+an updater helper.
+
+READ (fsc-exerciser/src/Sync.cs, Sync.Start and Sync.Stale; sync-and-rebuild.ps1):
+- Sync.Start launches "powershell -NoProfile -ExecutionPolicy Bypass -File
+  sync-and-rebuild.ps1 -Fsc <checkout> -AfterPid <own pid> -Relaunch <own exe>" with
+  UseShellExecute so it outlives the caller, then the window closes.
+- The script: Wait-Process -Id $AfterPid -Timeout 30; finds every process whose Path
+  starts with the exerciser's folder; CloseMainWindow() first, because "FS Copilot
+  says goodbye to its panels and its peer before it goes, and a killed one leaves the
+  other pilot waiting out a five-minute outage"; WaitForExit(5000); then
+  Stop-Process -Force; throws "is still running from here - close it, then sync
+  again." if it survives.
+- Mirror($from, $to, $drop): copies into "$to.new", renames "$to" to "$to.old",
+  renames "$to.new" into place, deletes "$to.old". "A direct delete-then-copy that
+  fails partway leaves nothing: RemoveDirectoryRecursive deletes what it can reach
+  before it throws, so one locked assembly costs the whole copy. Here a failure leaves
+  the old one untouched."
+- Staleness by hash: fsc-exerciser.json records FscPath, Commit, Hash (16 hex chars of
+  SHA-256 of FsCopilot.dll), and When; Sync.Stale compares; Sync.Mismatch compares a
+  hash stamped into the exerciser at build time.
+- It deliberately does not copy Community\: "FS Copilot deploys whatever is in it to
+  the simulator on startup, so syncing it would put this tool in charge of what the sim
+  runs".
+- Relaunch with Start-Process $Relaunch after the swap.
+
+What went wrong:
+- The in-process version: "An in-process sync deleted 349 of 355 files, reached the
+  mapped FsCopilot.dll, threw out of an async void handler and killed the window. The
+  copy belongs in a script that runs after the process exits, and it stages then swaps
+  rather than deleting first." MEASURED (FS Copilot fork,
+  record/pointer-forwarding/docs/build/log.md, "2026-09-19 — The exerciser leaves the
+  tree, and takes four compile-time couplings with it").
+- "a stale build is a working build, and it cost two sessions today before it was
+  named" (same entry). MEASURED.
+- The kill step once killed nothing: "Not Kill($true): Windows PowerShell has no such
+  overload, and the catch that used to sit here hid that, so nothing was killed and
+  the swap below failed on a locked relay/." (sync-and-rebuild.ps1 comment). READ;
+  the comment records that it happened.
+
+
+5. GAPS: WHAT NONE OF THE PRIOR WORK MEASURED
+--------------------------------------------
+
+- A Microsoft Store edition's UserCfg.opt location. Both apps name
+  Microsoft.Limitless_8wekyb3d8bbwe\LocalCache for 2024; neither record tests it.
+  Settled by reading the file on a Store install.
+- Whether MSFS 2024 holds a lock on a loaded .wasm or html_ui file, so that a
+  replacement while the sim runs fails, half-succeeds, or succeeds unseen. fsc-editor
+  replaces at startup regardless; FS Copilot blocks only first-run setup. Settled by
+  one probe: replace the package while the sim is in a flight, and record the error
+  and the sim's behavior on its next start.
+- Whether a stale layout.json entry makes MSFS reject a package. fsc-editor states it
+  as the reason to replace rather than merge; no entry measures it.
+- Whether MSFS 2024 loads packages from Community2024 as well as Community.
+  fsc-editor states it; no measurement is cited.
+- Any SmartScreen, Mark-of-the-Web, Defender, or Windows Firewall prompt on a
+  tester's machine. Both apps shipped unsigned; neither recorded what a first-time
+  user saw.
+- An end-to-end self-update of an installed app. fsc-editor's plan still marks the
+  headless update, differential download, and module-over-the-air stages as not run,
+  though four releases exist.
+- Uninstall: neither app removes its Community package when the app itself is
+  removed. fsc-editor offers an in-app Uninstall; FS Copilot has none.

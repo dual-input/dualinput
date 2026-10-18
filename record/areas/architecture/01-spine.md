@@ -38,6 +38,12 @@ Decides:     Which components Crosscheck runs, where each runs, and what each ow
 > Since 2026-10-17, [the apps' design](../interface/01-apps.md) settles two of [left open](#left-open)'s items under the apps: what trouble in each component raises ([trouble](../interface/01-apps.md#trouble)); and opening the banner during a load, before Ready to fly, and after a second load, as calls from the EFB app's code that go on until each change takes ([the banner](../interface/01-apps.md#the-banner)).
 > It closes for v1 the item under pointer sync on the clock another page measures a span on, since no v1 page sends one.
 > Any client changes any setting, where [components](#components) has the EFB app offer none in v1, and which app offers which is the apps' design ([settings](../interface/01-apps.md#settings)).
+> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in four places:
+>
+> - Velopack's Setup.exe installs Crosscheck per-user and Update.exe updates it, with the watcher as Velopack's main program, where [components](#components) has an installer of our own run once.
+> - The watcher tells the core its update's state through a file the core reads, with its process ID, so the core can tell whether the watcher runs, and reads the core's requests and the pilot's settings for packages turned off, where [the watcher and the desktop app](#the-watcher-and-the-desktop-app), the link table in [communication](#communication), and [how the core knows a component is alive](#how-the-core-knows-a-component-is-alive) have the watcher send the core nothing.
+> - No Windows notification warns of a waiting update as the sim loads (user, 2026-10-18), so the core writes no date of the pilot's last session, which [times](#times) calls the one wall-clock date a component compares with today.
+> - The watcher adds the firewall rule on its first run, and the sim service runs the check for another package's `VCockpit.js` override, which [components](#components) counts among the core's checks.
 
 Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The watcher and the core are Crosscheck's two long-running processes (user, 2026-10-06), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).

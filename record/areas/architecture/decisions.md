@@ -1642,6 +1642,78 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A banner the pilot closed from its toolbar button stays closed, where calling while the states differ would reopen it within one wait.
 - **Leaves out:** when the banner should be open, whether a pilot may close it, where it sits, whether clicks reach the cockpit through its empty part, how it shows in VR, and where a click on a notice lands in the EFB app, which the apps' design settles.
 
+## Velopack installs and updates Crosscheck per-user, with the watcher as its main program
+
+- **Decided:** Velopack's Setup.exe installs Crosscheck to `%LOCALAPPDATA%\Crosscheck\`, with the watcher, the core, the core helper, the desktop app, and our Community package in `current\`, and a shortcut to the watcher in the pilot's own Startup folder; the watcher links the `velopack` crate and alone applies updates, which it reads from the newest GitHub release's assets; the core's data folder is `%APPDATA%\Crosscheck\`, with the watcher's own files in its `watcher\` subfolder; our package goes in each packages folder's `Community`; and v1 ships unsigned.
+  This settles 02-code-map's item in [left open](02-code-map.md#left-open) on where the installer lives: it's Velopack's, not a program of ours.
+  Settled in node 6.17 by the user, 2026-10-18 ([the installer and the updater](../install/01-installing-and-updating.md#the-installer-and-the-updater)).
+- **Because:**
+  - Setup.exe and Update.exe ask for no administrator, and an update replaces `current\` by two renames, so the core's path, which the firewall rule names, and the watcher's, which its tray icon's registration names, stay the same (read in velopack 1.2.161, `src/bins/src/commands/apply_windows_impl.rs`; documented, [NOTIFYICONDATA](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-notifyicondataw)).
+  - Tauri's updater needs a Tauri app's handle, so the watcher would carry an update client of our own beside Tauri's NSIS installer, and an MSI installed per machine prompts at every update (read in tauri-plugin-updater 2.14.0, `plugins/updater/src/updater.rs`; [installer frameworks](../install/results/2026-10-18-installer-frameworks.txt)).
+  - The data folder sits outside Velopack's folder, whose contents an uninstall deletes (read in `src/bins/src/commands/uninstall.rs`).
+  - Code signing stays out of v1 (user, 2026-10-18), though Smart App Control blocks an unsigned program with "no way to bypass" it for one app (documented, [its FAQ](https://support.microsoft.com/en-us/windows/security/threat-malware-protection/smart-app-control-frequently-asked-questions)).
+- **Leaves out:** our package's folder name and whether our WASM module needs a package of its own, for [6.18](plan.md#618-the-build); whether Velopack's `HttpSource` follows GitHub's redirect to the newest release's assets, which a desk run settles.
+
+## An update applies only with the sim closed, no session held, and none of our programs running but the watcher, and the watcher writes our package once a version
+
+- **Decided:** the watcher checks for an update at its start, each time the sim closes, every 3 hours, and on Check now, and downloads one at once; it applies one only while the sim is closed, no session file exists, and no program from `current\` runs but itself, then hands Update.exe the swap and exits.
+  The new watcher writes our package into `Community` once for each version, building it in `Crosscheck\` beside `Community` and swapping it in by rename, and never watches `Community` or puts our package back between versions (user, 2026-10-18).
+  Settled in node 6.17 by the user, 2026-10-18 ([updates](../install/01-installing-and-updating.md#updates), [our package](../install/01-installing-and-updating.md#our-package)).
+- **Because:**
+  - Update.exe force-kills every process running from its folder but itself (read in velopack 1.2.161, `src/bins/src/shared/util_windows.rs`, `force_stop_package`), and the sim loads a package only at boot ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
+  - The sim's `Content.xml` names every folder in `Community` by its name, suffixes included (read on our development machine, 2026-10-18), so a copy built there would most likely mount as a second package, and FS Copilot's in-process copy of its own build "deleted 349 of 355 files" before its fix staged and swapped (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
+  - The join check tells the pilot who is behind to close the sim, so the check as the sim closes is the one a refused join leans on.
+  - A package a mod or the pilot breaks is theirs to mend, and the sim service's check tells them (user, 2026-10-18).
+- **Leaves out:** a sim started in the seconds Update.exe takes to swap, which boots with the old package beside a new core.
+
+## The watcher tells the core its update's state through a file, and the core passes on Install now and Check now through another
+
+- **Decided:** the watcher writes `watcher\update.json`, with its process ID and creation time and one state: checking, downloading with its progress, up to date with when it last checked, ready with what holds it back, or failed with the error; the core's edge pushes the file's bytes as an input on each change, and the session crate shows it in a slice, as "not running" when the watcher has gone.
+  The session crate's Install now refuses unless an update is ready, and while the sim runs or a session is held, and otherwise asks the watcher to open the desktop app again after the update and quits; its Check now asks for a check; each request is numbered, in `watcher-requests.json` beside the port file.
+  No Windows notification warns of a waiting update as the sim loads, and the core writes no date of the pilot's last session.
+  This changes [decision 015](../../decisions/015-watcher-reads-files-core-writes.md), whose watcher sends the core nothing and reads the last session's date for that warning, once step 8's decisions are numbered.
+  Settled in node 6.17 by the user, 2026-10-18 ([the watcher's update file](../install/01-installing-and-updating.md#the-watchers-update-file), [Install now and Check now](../install/01-installing-and-updating.md#install-now-and-check-now)).
+- **Because:**
+  - A pilot who opens the desktop app while a check runs has to see it, or may end our programs to start one (user, 2026-10-18).
+  - Windows' Do Not Disturb sends other apps' banners to the notification center by default while a game runs, and a Windows 11 tray balloon that times out isn't kept there (documented, [Focus](https://support.microsoft.com/en-us/windows/turn-off-notifications-in-windows-during-certain-times-81ed1b25-809b-741d-549c-7696474d15d3) and [Shell_NotifyIconW](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw)), so the warning would rarely be seen (user, 2026-10-18).
+  - The session crate owns quitting and when the core exits, and only the pilot can close the sim or leave a session (user, 2026-10-18).
+- **Leaves out:** how the apps show the states, Install now, and Check now.
+
+## The watcher adds the firewall rule on its first run, and offers the fix while it's missing or blocked
+
+- **Decided:** on its first run after an install, before it starts any core, the watcher runs itself with the `runas` verb, and that copy adds an inbound rule allowing UDP to `current\crosscheck-core.exe` on every profile and deletes every block rule naming that path, comparing paths without regard to letter case; at each start the watcher reads the rules and offers the same fix from its tray while the rule is missing or blocked; an uninstall leaves the rule.
+  This changes [01-between-machines](../network/01-between-machines.md#the-way-through-home-routers), whose installer adds the rule and whose core looks for it.
+  Settled in node 6.17 by the user, 2026-10-18 ([the firewall rule](../install/01-installing-and-updating.md#the-firewall-rule)).
+- **Because:**
+  - Adding a rule takes an administrator, and a pilot who isn't one gets block rules when prompted, whatever they click, which win over allow rules (documented, [Windows Firewall rules](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules)); our machine holds that pair for FS Copilot's `fscopilot.exe` (read on our development machine, 2026-10-18).
+  - Velopack's hooks may show no UI (documented, [Velopack's hooks](https://docs.velopack.io/integrating/hooks)), so the prompt can't come from its install or uninstall hook.
+  - A program with no administrator read all 896 of our machine's rules (measured on our development machine, 2026-10-18).
+- **Leaves out:** whether the core's UDP socket raises Windows' prompt at all, which a case in the sim settles.
+
+## The watcher notices the sim from the process list, starts the core again after a crash, and quits it through the core's window
+
+- **Decided:** every 2s while it holds no sim process, the watcher walks the process list for `FlightSimulator2024.exe` and then waits on the process; on finding it, or starting with it running, it starts a core unless the port file names one that runs; it waits on whichever core the port file names, and starts one again 2s after an exit other than 0 while the sim runs; its tray's Quit ends the watcher and posts a registered message to the core's top-level window, which pushes the same quit as Windows' end of session.
+  This settles how the watcher's tray asks the core to quit, which [quitting](../core/01-loop-and-edge.md#quitting) leaves to this node.
+  Settled in node 6.17 by the user, 2026-10-18 ([the watcher between runs of the sim](../install/01-installing-and-updating.md#the-watcher-between-runs-of-the-sim)).
+- **Because:**
+  - A walk took 2.8ms from PowerShell, and WMI's process-start trace refused a program with no administrator (measured on our development machine, 2026-10-18, [Windows and MSFS facts](../install/results/2026-10-18-windows-and-msfs-facts.txt)).
+  - Windows may start a login program late (documented, [Run and RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)), so the sim may already run.
+  - The core's window already takes Windows' end of the pilot's session ([quitting](../core/01-loop-and-edge.md#quitting)), and the watcher opens no socket to the core.
+- **Leaves out:** nothing.
+
+## The sim service warns of packages that override our files and checks our own, and a package turns off by moving beside Community
+
+- **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, raising a warning notice for each package found, which the match check shows as one item, and checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notice otherwise.
+  Two settings it registers turn other packages, and our own, off and on, and the watcher moves each such folder between `Community` and `Crosscheck\disabled\` beside it while the sim is closed, and back at an uninstall.
+  Moving a folder changes none of the package's files, so [decision 001](../../decisions/001-changing-other-developers-packages.md) stands, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) asked of it.
+  Settled in node 6.17 by the user, 2026-10-18 ([the checks in the core](../install/01-installing-and-updating.md#the-checks-in-the-core), [turning a package off](../install/01-installing-and-updating.md#turning-a-package-off)).
+- **Because:**
+  - Of two packages with the same order hint that override one file, the one mounted later wins (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), and our BlurPage copy loses to another package's ([decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md)).
+  - The EFB app and the banner never connecting goes only to the log ([trouble](../interface/01-apps.md#trouble)), so a missing package showed nowhere outside a session.
+  - The sim's `Content.xml` marks a package the pilot disabled in the sim `UserDisabled` (read on our development machine, 2026-10-18).
+  - With our own package's switch, a pilot can fly an evening with another `VCockpit.js` override without the next update putting ours back in its way.
+- **Leaves out:** whether the sim mounts a folder beside `Community`, which a sim run settles.
+
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

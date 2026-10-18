@@ -25,6 +25,12 @@ Decides:     The session crate's members, session keys, control, session file, j
 > - A role key registers a label in its feature's words, and the "Share my traffic and ATC" switch is the session crate's command.
 > - Any client may send Quit, where [joining and leaving](#joining-and-leaving)'s table names where it comes from.
 > - Any app writes the display name, with `clients`' settings command, and where Crosscheck asks for it is the apps' design, which settles what [members](#members) leaves to 6.16.
+>
+> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
+>
+> - The session crate registers a slice of the watcher's update state, from the file the watcher writes, and two commands, Install now and Check now, beside those [joining and leaving](#joining-and-leaving) lists; Install now refuses unless an update is ready, and while the sim runs or a session is held, and otherwise asks the watcher to open the desktop app again after the update and quits ([Install now and Check now](../install/01-installing-and-updating.md#install-now-and-check-now)).
+> - The search for an aircraft's package in [the match check](#the-match-check) takes the packages folders from the sim service, which reads `UserCfg.opt`.
+> - The match check gains an item, from the sim service's state, listing the other packages that override our files, as a warning.
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

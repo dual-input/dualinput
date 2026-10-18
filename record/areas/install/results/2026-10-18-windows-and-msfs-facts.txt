@@ -1,0 +1,313 @@
+Windows and MSFS 2024 facts for node 6.17, installing and updating
+Researched 2026-10-18 for the architecture plan's node 6.17.
+Sources are Microsoft Learn, Microsoft Support, the MSFS 2024 SDK, MSFS forum posts, and reads and probes on our development machine.
+Development machine: Windows 11 Pro 25H2, build 26200, Steam edition of MSFS 2024 at 1.9.18.0, and every probe below ran from a non-elevated, medium-integrity session.
+No probe changed a firewall rule, a startup entry, a scheduled task, or a security setting.
+
+Evidence markers follow writing.md: measured (we ran it here), read (we read it on our disk), documented (a vendor page says so), unverified (inference, forum, or guess).
+
+======================================================================
+FINDINGS THAT CHANGE A DESIGN
+The design under test: a per-user install, an unsigned v1, a login Run entry, and a Windows notification early in the sim's load.
+======================================================================
+
+F1. Smart App Control blocks an unsigned v1 outright, on every launch, with no per-program override.
+    Microsoft's developer page says Smart App Control's signature checks "apply to all executable files, not just those downloaded from the Internet" (documented, SmartScreen reputation page, Q4).
+    The support FAQ says "There is currently no way to bypass Smart App Control protection for individual apps" (documented, Q3).
+    So a pilot whose PC has it on must turn it off for the whole PC, and every unsigned release starts again at zero reputation.
+    How many pilots have it on is unknown; our development machine has it off, and MSFS forum threads show it blocking the sim's own CoherentGTCore.dll on some pilots' PCs in 2026 (Q3).
+
+F2. A per-user, no-admin install can't add the firewall rule, and a non-admin pilot's prompt always makes block rules.
+    Microsoft says a non-admin user who is prompted gets block rules "It doesn't matter what option is selected", and an admin who cancels or says No gets them too, "one each for TCP and UDP" (documented, Q1).
+    Explicit block rules win over allow rules (documented, Q1).
+    Our machine holds exactly that pattern for FS Copilot: two inbound block rules for fscopilot.exe, TCP and UDP, Private profile, and no allow rule (read, Q1).
+    A non-admin program can read every rule, so Crosscheck can tell the pilot their rule is blocking it, but removing it needs an admin (measured and documented, Q1).
+
+F3. A tray balloon is the wrong channel for a notice early in the sim's load.
+    Windows' own Focus page says do not disturb turns on by default "when you're duplicating your display, playing a game, or using an app in full screen mode" (documented, Q5).
+    While it's on, banners from other apps go "directly to the notification center" (documented, Q5).
+    On Windows 11 a Shell_NotifyIcon balloon is transient: "When a bannner notification times out or is otherwise dismissed, it will not be displayed in the Notification Center" (documented, Q5).
+    Whether a balloon suppressed by do not disturb reaches the notification center at all is unverified, so a balloon sent while the sim is in front may never be seen.
+    A real toast lands in the notification center, and only a toast with scenario "urgent" that the pilot allows, or an app the pilot adds as a priority app, breaks through (documented, Q5).
+    An unpackaged app needs an AppUserModelID, through a Start menu shortcut or the Windows App SDK's registration, before it can raise a toast (documented, Q5).
+
+F4. The tray icon's GUID is tied to the executable's path.
+    NOTIFYICONDATA says "The path of the binary file is included in the registration of the icon's GUID and cannot be changed", and the one exception is two binaries Authenticode-signed by the same company (documented, Q5).
+    An unsigned updater that installs each version into a new folder breaks its tray icon's registration on each update, unless it keeps one path or registers a new GUID per path.
+    The same path dependence holds for firewall rules, which name the full program path, so a path that changes per version also meets a fresh firewall prompt (documented, Q1).
+
+F5. Renaming or staging a package folder inside Community is not a safe way to hold an update.
+    The sim's per-profile Content.xml keys every Community folder by its lowercased folder name, with a communityfs20- or communityfs24- prefix, including folders whose names carry suffixes such as _CVT_, spaces, or underscores, and marks them Activated (read, Q10).
+    So a folder named crosscheck-module-new beside crosscheck-module would most likely be a second package, though no run has tried it (unverified).
+    The sim also writes into Community itself: <package>_CVT_ folders of converted textures, with no manifest (read, Q10).
+    The sim records a pilot's disabling of a package in the same Content.xml as UserDisabled, which a watcher can read to tell "installed but turned off" from "installed" (read, Q10).
+
+F6. The Store edition's install folder carries its version in its name.
+    Windows' crash events from Store pilots name C:\Program Files\WindowsApps\Microsoft.Limitless_<version>_x64__8wekyb3d8bbwe\FlightSimulator2024.exe, with the version changing from 1.0.77.0 to 1.7.22.0 between 2024-11 and 2026-04 (documented in forum posts of Windows event text, Q8, Q9).
+    A watcher that needs the Store install folder must take it from the running process or the package API, not keep a path.
+
+F7. Windows may start a Run entry late.
+    The Run key page says "The system does not provide guarantees about how promptly the programs in the Run key are run" and may delay them (documented, Q2).
+    A watcher that must see the sim's start can't assume it's running before the pilot launches the sim right after signing in, so it has to handle finding the sim already running.
+
+Not design-changing but worth carrying:
+- SmartScreen shows "Windows protected your PC" for an unsigned download, and a per-user, no-admin install doesn't change that, because SmartScreen checks the downloaded file when it runs, before and apart from any elevation (Q4).
+- Polling the process list costs about 3ms a walk, and needs no admin; a WMI start trace needs admin (Q6).
+- On our Steam machine, fs-base-ui changed only with Steam's update of 2026-10-14, and the sim's boots on 2026-10-16 rewrote nothing in the install's Packages (Q11).
+
+======================================================================
+Q1. WINDOWS FIREWALL RULES
+======================================================================
+
+Adding a rule needs admin.
+- netsh: "If User Account Control is enabled on your computer and you want to run any netsh firewall command that changes the firewall configuration, you must run the command from a command prompt that was started with the Run as administrator option", and without that it fails with "The requested operation requires elevation." (documented, Netsh Commands for Windows Firewall, Windows 7 and Server 2008 R2 era: https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc771046(v=ws.10))
+  That page covers the deprecated netsh firewall context; for netsh advfirewall, Microsoft's answer-file page says "The Netsh advfirewall command requires administrator permissions to run." (documented, Windows 8 and 8.1 era, https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/hh825692(v=win.10)).
+- INetFwPolicy2 / INetFwRules::Add: the reference lists E_ACCESSDENIED, "The operation was aborted due to permissions issues", and says a rule with the same identifier overwrites the existing one (documented, https://learn.microsoft.com/en-us/windows/win32/api/netfw/nf-netfw-inetfwrules-add).
+  No Microsoft page we found says in words that a standard user gets E_ACCESSDENIED; the firewall rules page says runtime rule creation requires "administrative privilege" (documented, rules page below).
+  We didn't try an add as a non-admin, because an attempt that succeeded would change the firewall policy.
+
+A non-admin process can read the rules (measured on our machine, 2026-10-18, non-elevated session):
+- HNetCfg.FwPolicy2 (INetFwPolicy2) Rules.Count returned 896, and each rule's Name, ApplicationName, Direction, Action, Protocol, and Profiles were readable.
+- FirewallEnabled(private) and NotificationsDisabled(private) were readable: True and False.
+- Get-NetFirewallRule returned the same 896 rules, and netsh advfirewall firewall show rule name=all dir=in listed 606 inbound rules.
+
+When a program first listens and no allow rule exists (documented, Windows Firewall rules, https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules):
+- "If the user has admin permissions, they're prompted. If they respond No or cancel the prompt, block rules are created. Two rules are typically created, one each for TCP and UDP traffic."
+- "If the user isn't a local admin and they are prompted, block rules are created. It doesn't matter what option is selected."
+- "once the rules are added, they must be deleted to generate the prompt again. If not, the traffic continues to be blocked."
+- The same page lists the causes of a blocked app, among them "the user cancels or dismisses the prompt. Block rules are created."
+- Wildcards aren't supported in application rules: "You can only create rules using the full path to the application(s)."
+
+What a dismissed prompt left on our machine (read, 2026-10-18): six inbound rules with Action Block that name a program, in TCP/UDP pairs, each on the Private profile only (Profiles=2), with the exe's name as both the rule's name and its description, no grouping, and no allow rule for the same program:
+  fscopilot.exe (TCP, UDP), neofly.exe (TCP, UDP), littlenavconnect.exe (TCP, UDP).
+  This matches the documented pair, and shows FS Copilot hit it on our own machine.
+
+Block against allow (documented, rules page): "Explicitly defined allow rules take precedence over the default block setting." and "Explicit block rules take precedence over any conflicting allow rules."
+  The one exception is authenticated bypass, an IPsec rule with OverrideBlockRules, which no home PC uses (documented, https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/configure-with-command-line).
+
+Traffic Windows allows without a rule (documented, command-line page): "Windows Firewall drops traffic that doesn't correspond to allowed unsolicited traffic, or traffic that is sent in response to a request by the device."
+
+Unverified:
+- Whether a UDP socket bound to 0.0.0.0 that only receives replies to its own sends raises the prompt, or only a TCP listen and unsolicited UDP do. A probe from a fresh exe path would settle it, but a dismissed prompt there leaves block rules only an admin can delete.
+- Whether an explicit inbound block rule for a program also drops replies to that program's own outbound UDP. A probe with a block rule in place, run by an admin, would settle it.
+
+======================================================================
+Q2. STARTING AT LOGIN FOR ONE ACCOUNT
+======================================================================
+
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run (documented, https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys):
+- "The Run key makes the program run every time the user logs on"; HKCU needs no admin.
+- "The data value for a key is a command line no longer than 260 characters."
+- With more than one entry, "the order in which those programs run is indeterminate."
+- "these keys are ignored when the computer is started in Safe Mode."
+- "A program that is run from any of these keys should not write to the key during its execution".
+- "The system does not provide guarantees about how promptly the programs in the Run key are run. To improve the user experience, the system may choose to delay the execution of programs in the Run key and in the Startup group".
+
+Startup folder: FOLDERID_Startup, %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup, opened with shell:startup (documented, Configure Startup applications in Windows, https://support.microsoft.com/en-us/windows/experience/startup-boot/configure-startup-applications-in-windows).
+
+Task Scheduler logon task:
+- A logon trigger takes a UserId so it fires for one user; Microsoft's sample registers the task with "the Administrators group as a security context" (documented, https://learn.microsoft.com/en-us/windows/win32/taskschd/logon-trigger-example--scripting-).
+- Whether a standard user can register a logon-triggered task for themselves is unverified: forum reports say schtasks /sc ONLOGON returns Access denied for a non-admin, while the Task Scheduler UI and an XML import worked. We didn't try, because a test would create a standing task.
+- Whether Settings > Apps > Startup or Task Manager lists scheduled tasks is unverified; Microsoft's page describes the list as apps "registered in Windows with a startup task" and names only the Run keys and the Startup folder.
+
+How Settings and Task Manager turn an entry off (documented in part):
+- "The Task Manager provides the same list of startup applications offered by Settings." (documented, support page above)
+- Neither page names where the state is stored.
+- Read on our machine, 2026-10-18: the state lives in HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run, \Run32, and \StartupFolder, and the HKLM equivalents, one 12-byte REG_BINARY per entry, named like the Run value or the shortcut's file name.
+  Enabled entries held 02 00 00 00 00 00 00 00 00 00 00 00.
+  The one disabled entry held 03 00 00 00 followed by a FILETIME, which decodes to 2026-01-24 08:11 UTC, the time it was turned off.
+  SecurityHealth in HKLM held 06 00 ..., meaning unknown.
+  Two Run values had no StartupApproved entry at all, and two StartupApproved entries had no Run value left.
+- The format is undocumented. Community sources agree that 02 means enabled and 03 disabled (unverified); treating a missing entry as enabled and an odd first byte as disabled matches every entry on our machine.
+- A program reads whether the pilot turned it off by reading its value under StartupApproved\Run; Windows leaves the Run value itself in place when the pilot turns it off (read: the disabled SimAppPro entry under StartupApproved\Run32 still has its value under HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run).
+- A program that writes 02 back over the pilot's 03 overrides the pilot's choice.
+
+Packaged apps get a documented state instead: StartupTaskState has Disabled, DisabledByUser ("It can only be re-enabled by the user."), Enabled, DisabledByPolicy, and EnabledByPolicy (documented, https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.startuptaskstate).
+  That API needs an MSIX package, so it doesn't apply to a per-user unpackaged install.
+
+======================================================================
+Q3. SMART APP CONTROL
+======================================================================
+
+What it blocks (documented):
+- "If the app intelligence service is unable to make a prediction, then Smart App Control will still allow an app to run if it is signed with a certificate issued by a certificate authority (CA) within the Trusted Root Program." and "Malware, Potentially Unwanted Apps (PUA), and unknown, unsigned code are blocked by default." (https://learn.microsoft.com/en-us/windows/apps/develop/smart-app-control/overview)
+- "When code is unsigned and the service is unable to predict with confidence that it's safe to run, then we block it." Application control also covers scripts and MSI installers. (https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/appcontrol)
+- "Smart App Control signature checks apply to all executable files, not just those downloaded from the Internet." (https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+- So unsigned code with no cloud reputation is blocked outright; there's no "Run anyway".
+
+Per-program override (documented, https://support.microsoft.com/en-us/windows/security/threat-malware-protection/smart-app-control-frequently-asked-questions):
+- "There is currently no way to bypass Smart App Control protection for individual apps."
+- The FAQ's alternatives are turning it off or asking the developer to sign the app.
+
+Which PCs (documented):
+- It ships from Windows 11 22H2 (app control page).
+- It starts in evaluation mode; "If we detect that you're one of those users, we'll automatically turn Smart App Control off" (developer overview).
+- It "starts in evaluation mode and switches off within 48 hours for enterprise managed devices unless the user turns it on first." (app control page)
+- It's off on managed devices, in developer mode, in S mode, or when optional diagnostic data is off; with diagnostic data off, turning it on needs a reset or reinstall (FAQ).
+- "Recent Windows updates allow Smart App Control to be re-enabled without requiring a clean installation." (FAQ). News coverage ties this to the 2026-04-14 cumulative update KB5083769 for 24H2 and 25H2 (unverified, https://blog-en.topedia.com/2026/04/smart-app-control-in-windows-11-can-now-be-re-enabled-without-reinstalling/).
+  Before that update, turning it off was one-way without a reinstall, so older PCs that turned it off stay off.
+- Its state is HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy\VerifiedAndReputablePolicyState: 0 Off, 1 Enforce, 2 Evaluation (documented, app control page). A non-admin can read it: our machine reads 0, Off (measured, 2026-10-18).
+
+How common on gamers' PCs: no source gives a number (unverified).
+- MSFS forum, "CoherentGTCore.dll blocked by smart app control", 2026-01-21 (Store) and 2026-10-03 (Steam, SU7 beta 1.9.16): pilots with it on had the sim itself blocked (https://forums.flightsimulator.com/t/coherentgtcore-dll-blocked-by-smart-app-control/755051).
+  So some MSFS pilots run with it on, and they may already have turned it off to fly at all.
+
+======================================================================
+Q4. SMARTSCREEN FOR AN UNSIGNED DOWNLOADED INSTALLER
+======================================================================
+
+What the pilot sees (documented, https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation):
+- No signature: "Windows protected your PC"; "User must choose "Run anyway" before the app can run. Enterprise policy can prevent continuation entirely."
+- "Run anyway" sits behind a "More info" link on the dialog, and an unsigned file shows "Unknown publisher" (documented, archived Microsoft blog, https://learn.microsoft.com/en-us/archive/blogs/vsnetsetup/windows-smartscreen-prevented-an-unrecognized-app-from-running-running-this-app-might-put-your-pc-at-risk).
+- "When a file is not signed, SmartScreen reputation must build for each new version of your files, starting with zero reputation."
+- Reputation "can take several weeks and hundreds of clean installs from a wide audience."
+- "EV certificates no longer bypass SmartScreen."
+- Signing options: Azure Artifact Signing about $9.99/month, for organizations in the USA, Canada, EU, and UK, and individuals in the USA and Canada only; OV certificates $150 to $300/year worldwide (documented, https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options).
+
+Per-user install with no admin prompt:
+- SmartScreen checks "downloaded files" and "protects against malicious files from the internet" (documented, https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/).
+  Nothing in it depends on elevation, so a per-user installer gets the same "Windows protected your PC" when it runs (inference from the documented trigger; unverified by a run).
+- Windows knows a file came from the internet by its Zone.Identifier stream, the mark of the web, which Unblock-File removes (documented, https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/unblock-file).
+- Explorer copies the mark to every file it extracts from a marked zip (documented, archived IEInternals blog, https://learn.microsoft.com/en-us/archive/blogs/ieinternals/understanding-local-machine-zone-lockdown), so a zip of unsigned exes warns on each exe's first run.
+- Files an installer writes, and files an updater fetches with its own HTTP client, carry no mark unless the program adds one, so SmartScreen likely never checks them (unverified); Smart App Control still checks them (Q3).
+
+======================================================================
+Q5. DO NOT DISTURB, TOASTS, AND TRAY BALLOONS
+======================================================================
+
+Automatic rules (documented, https://support.microsoft.com/en-us/windows/experience/notifications-and-do-not-disturb-in-windows):
+- Settings > System > Notifications > Turn on do not disturb automatically: "During certain time of the day", "When duplicating the display", "When playing a game", "When using an app in full-screen mode", "For the first hour after a Windows feature update".
+- While it's on, you "will only receive banners for alarms, reminders, and apps of your choice", and other alerts "are sent directly to the notification center until you turn it off."
+- Priority notifications: calls, reminders, and apps the pilot adds with "Add apps" still show.
+
+Defaults:
+- Microsoft's Focus page: "It's set by default to activate automatically when you're duplicating your display, playing a game, or using an app in full screen mode." (documented, https://support.microsoft.com/en-us/windows/turn-off-notifications-in-windows-during-certain-times-81ed1b25-809b-741d-549c-7696474d15d3). The page's wording comes from focus assist; that the same defaults hold on 25H2 is unverified.
+- How Windows decides MSFS 2024 is "a game", and whether a borderless window counts as full screen, is unverified.
+
+Toasts:
+- The toast schema's scenario "urgent" is "An important notification. This allows users to have more control over what apps can send them high-priority toast notifications that can break through Focus Assist (Do not Disturb)." (documented, https://learn.microsoft.com/en-us/uwp/schemas/tiles/toastschema/element-toast)
+  The Windows App SDK gates it behind AppNotificationBuilder.IsUrgentScenarioSupported() (documented, https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/app-notifications-content).
+- A classic desktop app can't raise a toast "Without a valid shortcut installed in the Start screen or in All Programs" carrying its AppUserModelID (documented, https://learn.microsoft.com/en-us/windows/win32/shell/enable-desktop-toast-with-appusermodelid); the Windows App SDK's Register() sets up an unpackaged app's registration itself (documented, https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/app-notifications-dotnet).
+
+Tray balloons, Shell_NotifyIcon with NIF_INFO (documented, https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw and https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-notifyicondataw):
+- "On Windows 10, the balloon messages are shown as banner notifications, which then stay in the Notification Center until dismissed. On Windows 11, the behavior of banner notifications more closely follows the legacy behavior in making them transient. When a bannner notification times out or is otherwise dismissed, it will not be displayed in the Notification Center."
+  Microsoft staff on Q&A reproduced balloons vanishing from Windows 11's notification center after the timeout (documented, https://learn.microsoft.com/en-us/answers/questions/1362368/how-to-show-balloon-tip-message-in-windows-notific).
+- NIF_REALTIME: "If the balloon notification cannot be displayed immediately, discard it."
+- NIIF_RESPECT_QUIET_TIME: a balloon sent during quiet time, the first hour after a new user's first sign-in or after an OS upgrade or clean install, "is not queued; it is simply dismissed unshown."
+- uTimeout is "deprecated as of Windows Vista", and display time follows accessibility settings.
+- The guidItem registration includes the binary's path: "The path of the binary file is included in the registration of the icon's GUID and cannot be changed." The exception: "when both the original and moved binary files are Authenticode-signed by the same company". A side-by-side install "should update the GUID of the binary file."
+- Whether do not disturb holds back a balloon and later shows it, drops it, or puts it in the notification center is unverified. Sending one balloon with the sim's window in front and the game rule on would settle it.
+
+Reading the state before sending (documented):
+- SHQueryUserNotificationState returns QUNS_BUSY ("A full-screen application is running or Presentation Settings are applied"), QUNS_RUNNING_D3D_FULL_SCREEN, QUNS_PRESENTATION_MODE, QUNS_QUIET_TIME, QUNS_ACCEPTS_NOTIFICATIONS, and others, and "there are no notifications sent when the user starts or stops a full-screen application" (https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shqueryusernotificationstate, https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ne-shellapi-query_user_notification_state).
+- Whether it reports do not disturb itself is unverified.
+
+======================================================================
+Q6. NOTICING ANOTHER PROCESS START WITHOUT ADMIN
+======================================================================
+
+Measured on our machine, 2026-10-18, non-elevated, 291 processes running, through .NET P/Invoke from PowerShell (a native Rust caller would be faster):
+- CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS) plus a Process32FirstW/NextW walk comparing each name to FlightSimulator2024.exe: 2.8ms a walk, averaged over 200 walks. At one walk every 2s that is about 0.14% of one core.
+- EnumProcesses: 0.02ms a call, but it returns only IDs, so finding a name needs an OpenProcess and a name query per ID.
+- WMI "SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.Name = 'notepad.exe'": subscribed without admin.
+- WMI Win32_ProcessStartTrace: refused without admin, "Access denied", HRESULT 0x80041003, through both Register-CimIndicationEvent and System.Management.
+- OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION) on explorer.exe, a process of the same user: opened. GetExitCodeProcess returned 259 (STILL_ACTIVE) and WaitForSingleObject(handle, 0) returned 0x102 (WAIT_TIMEOUT).
+- On a child that ran "cmd /c exit 7": WaitForSingleObject returned 0 (signaled) when it ended, and GetExitCodeProcess returned 7.
+- On lsass.exe and services.exe, which run as SYSTEM: OpenProcess failed with error 5, access denied.
+
+Documented:
+- WITHIN is "the interval that Windows Management Instrumentation (WMI) uses to poll the data provider", used "when the consumer requires notification of changes to a class, and an event provider is unavailable"; too small a value can be rejected "due to the resource-intensive nature of polling", and Microsoft recommends "an interval that is greater than 5 minutes." "Permanent event consumers can be created with polling queries only if you have administrator privileges." (https://learn.microsoft.com/en-us/windows/win32/wmisdk/within-clause)
+  So WITHIN is WMI walking the process list for us, in WmiPrvSE, with no gain over our own walk.
+- Win32_ProcessStartTrace's SECURITY_DESCRIPTOR is what "the event provider" uses "to determine which users can receive the event" (https://learn.microsoft.com/en-us/previous-versions/windows/desktop/krnlprov/win32-processstarttrace). The page doesn't say admin; our measurement does.
+
+Unverified: that OpenProcess with the same rights opens the Microsoft Store edition's process. It runs as the pilot's user, as a packaged full-trust app, so we expect it to open; a run on a Store machine would settle it.
+
+======================================================================
+Q7. USERCFG.OPT, INSTALLEDPACKAGESPATH, AND THE PACKAGE FOLDERS
+======================================================================
+
+Steam (read on our machine, 2026-10-18):
+- %APPDATA%\Microsoft Flight Simulator 2024\UserCfg.opt
+- Its line: InstalledPackagesPath "%APPDATA%\Microsoft Flight Simulator 2024\Packages", written with the full home path.
+- Under it: Community (141 folders), Community2024 (5), Official2020 (with a Steam subfolder), Official2024 (with a Steam subfolder holding 3 Marketplace packages), and StreamedPackages (1,221).
+
+Microsoft Store:
+- %LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\UserCfg.opt (unverified: FS Copilot's and fsc-editor's installers read it there, and third-party guides agree, but no run of ours has seen a Store machine).
+- The MSFS Team's forum post of 2024-11-19 gives the Store's default Community folder as C:\Users\[Your Username]\AppData\Local\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\Community and Steam's as C:\Users\[Your Username]\AppData\Roaming\Microsoft Flight Simulator 2024\Packages\Community (documented, https://forums.flightsimulator.com/t/where-is-the-msfs-2024-community-folder/664987, post 14).
+- Whether the Store's Official folders use a OneStore subfolder, as MSFS 2020's did, is unverified.
+
+The SDK (documented, Virtual File System Information, https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm):
+- The sim "will only look at this file to determine where the Official and Community folders are", and the page shows an InstalledPackagesPath example under Roaming and advises against editing it.
+- Folders: Community, "used by both MSFS 2020 and MSFS 2024"; Community2024, "only used by MSFS 2024"; Official2020; Official2024, both for "official" downloaded packages that nobody else should touch; and StreamedPackages, "a few files required for streaming the rest of the package."
+
+======================================================================
+Q8. WHERE EACH EDITION INSTALLS, AND FS-BASE-UI
+======================================================================
+
+Steam (read on our machine, 2026-10-18):
+- <SteamLibrary>\steamapps\common\Limitless, from appmanifest_2537590.acf's installdir "Limitless", with FlightSimulator2024.exe, file version 1.9.18.0.
+- fs-base-ui is <SteamLibrary>\steamapps\common\Limitless\Packages\fs-base-ui, package_version 0.1.10, minimum_game_version 1.9.18, among 289 install packages, 37 of them named fs-base*.
+- The install folder's ACL grants BUILTIN\Users FullControl, so a normal program can read it, and write it.
+
+Microsoft Store:
+- Windows' Application Error events that Store pilots posted name the image as C:\Program Files\WindowsApps\Microsoft.Limitless_1.0.77.0_x64__8wekyb3d8bbwe\FlightSimulator2024.exe on 2024-11-05, the same with 1.0.84.0 on 2024-11-07 (https://devsupport.flightsimulator.com/t/ctd-always-on-startup/10774), and ..._1.7.22.0_... and ..._1.6.34.0_... on 2026-04-26 (https://forums.flightsimulator.com/t/constant-ctd-cant-enter-flight/763986).
+- Forum users say the Xbox app installs it in the XboxGames folder by default (unverified, https://forums.flightsimulator.com/t/microsoft-flight-simulator-2024-pre-install-instructions/664402).
+- The GDK's Flat File Install, shipped in the March 2022 GDK, puts games in C:\XboxGames, where "the C:\XboxGames folder does not require elevated permissions to access game folders and files within it", with "executables designated in the MicrosoftGame.config" left encrypted, and it repoints paths that pointed into WindowsApps (documented, https://devdocs.xbox.com/build/core-features/common/packaging/packaging-flatfileinstall).
+  The 2026 crash paths still name WindowsApps, so whether MSFS 2024 uses Flat File Install is unverified.
+- Whether a normal user's program can read the Store install folder, and fs-base-ui inside it at <install>\Packages\fs-base-ui, is unverified. Listing the folder from a non-elevated prompt on a Store machine and reading fs-base-ui\layout.json would settle it.
+
+======================================================================
+Q9. THE STORE EDITION'S PROCESS NAME
+======================================================================
+
+FlightSimulator2024.exe, the same as Steam's.
+Evidence: Windows' own Application Error event text, "Faulting application path: C:\Program Files\WindowsApps\Microsoft.Limitless_<version>_x64__8wekyb3d8bbwe\FlightSimulator2024.exe", posted by Store pilots from 2024-11 to 2026-04 (documented in forum posts, Q8). The 2024-11 poster launched it through the Microsoft Store's Play button.
+No run of ours has seen it.
+
+======================================================================
+Q10. WHICH FOLDERS MOUNT, RENAMED FOLDERS, AND MOUNT ORDER
+======================================================================
+
+Sources (documented, VFS page, Q7): the sim reads UserCfg.opt for the package folders, and lists Community, Community2024, Official2020, Official2024, and StreamedPackages, plus base content in the install.
+- "The simulation starts by reading the Content.xml of each package source to figure out which packages are enabled or not."
+- A folder beside Community under the same Packages path isn't among them; whether the sim mounts one is unverified, and the page's wording that it uses UserCfg.opt to find "the Official and Community folders" suggests it doesn't.
+
+Same package in two places (documented, VFS page): "if two packages share the same name, only one of them will be activated", and "the version of the package that belongs in the source with the highest score is selected":
+  Package edited in DevMode: infinite; packages required for the sim to boot: 100; Community2024: 4; Community: 3; Marketplace installed: 2; Marketplace streamed: 1; Streamed: 0; Base content: -1.
+  "When the same package is in both an Official folder (streamed or not) and a Community folder, the latter is used."
+
+Different packages with the same file (documented, VFS page):
+- "Packages are mounted in the order given by their Package Order Hint."
+- Within one hint, "Packages are mounted in the alphabetical order."
+- "A newly mounted package has priority over previously mounted ones." "This means that - by default - a package starting with Z has priority over a package starting with A."
+- Overriding files under html_ui or ModelBehaviorDefs requires listing them as Globally Overridden Files, and our records show VCockpit.js overridden without one (see record/learn/foundations/02-01-installs-and-packages.md).
+- The Using The SDK page: "the version of the file in the package mounted last will take precedence" (https://docs.flightsimulator.com/msfs2024/html/1_Introduction/Using_The_SDK.htm).
+
+How the sim names a Community package (read on our machine, 2026-10-18):
+- %APPDATA%\Microsoft Flight Simulator 2024\<profile folder>\Content.xml holds 1,771 <Package name="..." active="..."/> entries, with active values Activated, UserDisabled, and SystemDisabled.
+- All 141 Community folders appear as communityfs20-<folder name lowercased> (69) or communityfs24-<folder name lowercased> (72), spaces and underscores kept: "communityfs24-biis airport msfs2024", "communityfs24-inibuilds-aircraft-a220_croatia_9a-cas", "communityfs20-fnx-aircraft-320_cvt_".
+- Community2024's 5 folders appear the same way, under communityfs20- or communityfs24-, so the prefix follows the package, not the folder it sits in.
+- Content.xml keeps entries for folders deleted long ago: crosscheck-p02-panel, p03-rust, and other probe packages that are no longer in Community.
+- The sim created <package>_CVT_ folders inside Community, holding converted textures named like EFFECTS\TEXTURE\BEACON_WING.DDS.8.E31.015.CVT.NNZ, with no manifest.json: fnx-aircraft-320_CVT_ (97 files, created 2024-11-25), fsltl-traffic-base_CVT_ (8), and pmdg-aircraft-77w_CVT_ (1).
+- The root %APPDATA%\Microsoft Flight Simulator 2024\Content.xml holds 1,284 entries and was last written 2025-06-26; the per-profile one was last written 2026-10-16, so the per-profile file is the live one.
+
+A package folder renamed with a suffix inside Community:
+- The sim keys packages by folder name (read, above), so a renamed folder is a new package name, which the sim lists as Activated on first sight.
+- Whether it mounts depends on it holding a valid manifest.json and layout.json at its top (documented, Using The SDK). Two copies of one package under two folder names are two packages, both mounted, in alphabetical order within their hint (inference; unverified by a run).
+- Settle: copy a probe package to <name>-staged inside Community, boot the sim, and check the VFS window and Content.xml.
+
+======================================================================
+Q11. WHETHER MSFS 2024 UPDATES ITS OWN PACKAGES AT BOOT
+======================================================================
+
+Read and measured on our Steam machine, 2026-10-18:
+- Steam's appmanifest_2537590.acf has LastUpdated 1791993246, which is 2026-10-14 15:54 UTC, and buildid 25798292.
+- FlightSimulator2024.exe was written 2026-10-14 17:52 local time; fs-base-ui's layout.json 17:52; and its 7,591 files' newest write is 17:53. So Steam's update wrote fs-base-ui.
+- 122 of the install's 289 package folders were written that day.
+- The sim ran on 2026-10-16: it wrote UserCfg.opt at 19:04 and the per-profile Content.xml at 18:17, wrote 59 StreamedPackages folders after the update, and Windows logged a FlightSimulator2024.exe crash at 14:20.
+- No file in the install's Packages folder was written after 2026-10-14 18:30, so those boots changed nothing there.
+- The sim's own Marketplace downloads land in Official2024\Steam, apart from Steam: fsreborn-aircraft-phenom300e's folder was last written 2026-10-12, and inibuilds-aircraft-a380's 2026-10-08 (read; which program wrote them is inferred from where they sit).
+
+So, on Steam, fs-base-ui changes with Steam's update of the executable, and the sim's boots in the four days since didn't touch it.
+Unverified: whether any sim update changes base packages at boot, outside Steam; whether the Store edition behaves the same; and whether a boot-time "mandatory update" screen, which MSFS 2020 had, exists in MSFS 2024.
+A watcher that checks fs-base-ui once Steam or the Xbox app has finished updating, and again when it sees the sim start, covers every update path we know.

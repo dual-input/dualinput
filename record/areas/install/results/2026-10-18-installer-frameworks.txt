@@ -1,0 +1,421 @@
+Installer and updater frameworks for Crosscheck on Windows
+==========================================================
+
+Purpose:   Raw research for architecture node 6.17, "installing and updating".
+Date:      2026-10-18. Every web page and source file below was read on this date.
+Method:    Vendor docs and source files on GitHub at a named tag. Nothing here was run.
+Markers:   "read" = we read it in docs or source at the named version.
+           "unverified" = inference, or a claim no primary source confirmed.
+           Nothing in this file is measured.
+
+What Crosscheck needs from the installer (the brief, restated)
+--------------------------------------------------------------
+- Ship four Rust programs as one version: the watcher (starts at login, tray icon, about 1 MB, updates while the sim is closed),
+  crosscheck-core.exe, crosscheck-core-helper.exe (started by the core from its own folder), and the Tauri 2 desktop app.
+- Ship the Community package, a folder the watcher copies into the sim's Community folder.
+- Host releases on GitHub Releases. v1 ships unsigned.
+- Add one Windows Firewall rule for the core's exact path, so the core's path must not change across updates.
+- Start the watcher at login, for the pilot's own account only.
+- Get WebView2 onto a Windows 10 PC that lacks it.
+
+
+PART A. FINDINGS THAT HOLD FOR EVERY OPTION
+===========================================
+
+A1. The firewall rule needs administrator rights, whatever installs the files
+-----------------------------------------------------------------------------
+- Microsoft says automatic rule creation at runtime "require[s] user interaction and administrative privilege",
+  and that a user who isn't a local admin gets block rules "No matter what he clicks".
+  https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules
+  (sections "Applications rules" and "Known issues with automatic rule creation").
+- The same page: application rules take only a full path; wildcards such as C:\*\teams.exe aren't supported.
+  So the rule is a path string, and it keeps working only while the core's path string stays the same.
+- INetFwRules::Add documents E_ACCESSDENIED, "The operation was aborted due to permissions issues."
+  https://learn.microsoft.com/en-us/windows/win32/api/netfw/nf-netfw-inetfwrules-add
+  The page doesn't say in so many words that the caller must be elevated (unverified from this page alone; the firewall page above is the stronger source).
+- Consequence: a per-user installer (Velopack, Tauri NSIS currentUser, Inno lowest, per-user MSI, hand-written) needs one
+  separate elevated step to add the rule, which is one UAC prompt at install.
+  If the core's path is stable, updates need no prompt, because the rule already matches.
+  A per-machine installer runs elevated anyway, so it adds the rule without an extra prompt, but every update of a per-machine install prompts again.
+- Unverified: whether a rule whose path contains a per-user folder (%LocalAppData%) must be written with the expanded path.
+  Writing the expanded full path avoids the question.
+
+A2. WebView2 on a Windows 10 PC that lacks it
+---------------------------------------------
+Source: Microsoft Learn, "Distribute your app and the WebView2 Runtime",
+https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution (ms.date 2024-06-27, updated 2026-10-02).
+- Windows 11 includes the Evergreen Runtime. "The vast majority of Windows 10 devices have the WebView2 Runtime installed already",
+  and "A small number of Windows 10 devices don't", so Microsoft recommends checking and installing.
+  (Tauri's page says Windows 10 from April 2018 ships the runtime with the OS; Microsoft's own page is more careful, and we go by Microsoft.)
+- Two Evergreen installers:
+  - Evergreen Bootstrapper: "a tiny (approximately 2 MB) installer" that downloads the runtime matching the device's architecture. Needs internet.
+    The link Velopack and Tauri both use is https://go.microsoft.com/fwlink/p/?LinkId=2124703 (read in both codebases, see B and C).
+  - Evergreen Standalone Installer: a full offline installer, one per architecture (x86, x64, ARM64).
+    Microsoft's pages give no size. Tauri's docs put its cost at about 127 MB (Tauri's figure, not Microsoft's).
+- Per-user without admin: yes, for both.
+  Microsoft: "If you don't run the installer from an elevated process or command prompt, the Runtime will be installed as per-user."
+  Caveat from the same page: a per-user install "is automatically replaced by a per-machine install, if a per-machine Microsoft Edge Updater is in place",
+  and Microsoft Edge (except Canary) includes that updater.
+- Silent install command, both installers: MicrosoftEdgeWebview2Setup.exe /silent /install, and
+  MicrosoftEdgeWebView2RuntimeInstaller{X64/X86/ARM64}.exe /silent /install.
+- Detection: read pv (REG_SZ) under
+  HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5} (per-machine, 64-bit Windows) and
+  HKCU\Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5} (per-user);
+  a version above 0.0.0.0 in either means installed. Or call GetAvailableCoreWebView2BrowserVersionString and check for nullptr.
+- Fixed Version: binaries "over 250 MB" (Microsoft), not auto-updated, and on Windows 10 from Fixed Version 120 an unpackaged app must run two icacls grants.
+  This doesn't suit us.
+- What each option offers is in its own section, and the table in Part C compares them.
+
+A3. Running executables on Windows
+----------------------------------
+- A running exe's file can't be overwritten or deleted, but it can be renamed (moved aside).
+  The self-replace crate's docs describe exactly this: "we first move our executable aside so the name on the file system is made available for the new executable."
+  https://docs.rs/self-replace/latest/self_replace/ (1.5.0).
+- Velopack's Windows docs list what else locks an install folder: a process running inside it, another process holding a file open,
+  antivirus or Defender, and a process whose working directory is inside it.
+  https://docs.velopack.io/packaging/operating-systems/windows
+- So every option must stop the watcher, core, helper, and desktop app before it replaces their files, or rename them aside.
+
+
+PART B. THE OPTIONS
+===================
+
+B1. Velopack
+------------
+Versions read: velopack crate 1.2.161 (docs.rs), source tag 1.2.161 at github.com/velopack/velopack, docs.velopack.io.
+
+What it is.
+A per-user installer (Setup.exe), an updater process (Update.exe), a Rust crate the app links, and a .NET packaging CLI (vpk).
+Successor to Squirrel.Windows (its docs have a "From Squirrel" migration guide; who wrote it is unverified here).
+
+Rust API (read, https://docs.rs/velopack/latest/velopack/ and src/lib-rust/src/app.rs, manager.rs, sources/github.rs):
+- VelopackApp::build().run() must be the first thing in main(), because it "may terminate/restart the process to perform tasks".
+  Builder methods: on_first_run(FnOnce(Version)), on_restarted(FnOnce(Version)),
+  on_after_install_fast_callback, on_after_update_fast_callback, on_before_update_fast_callback, on_before_uninstall_fast_callback (Windows only),
+  set_auto_apply_on_startup(bool) ("ON by default"), set_args, set_locator, set_app_user_model_id.
+  When the first argument is a hook flag, run() calls the matching callback and then exit(0).
+- Auto-apply on startup: run() looks for a downloaded full package newer than the running version and, unless disabled or just restarted,
+  calls apply_updates_and_restart_with_args. Errors are logged and startup continues.
+  Consequence for us: an exe that calls VelopackApp with the default would apply a pending update the moment it starts.
+  Only the watcher should call it, or every other caller must pass set_auto_apply_on_startup(false).
+- UpdateManager::new<T: UpdateSource>(source, Option<UpdateOptions>, Option<VelopackLocatorConfig>) -> Result<UpdateManager, Error>.
+  It returns an error when the app isn't installed (so a dev build from target\ can't construct one).
+- check_for_updates() -> Result<UpdateCheck, Error>; UpdateCheck::UpdateAvailable(UpdateInfo) when there is one.
+- download_updates(&UpdateInfo, Option<Sender<i16>>) downloads into the packages folder, reports progress, takes a global update lock,
+  uses deltas when it can and falls back to the full package.
+- apply_updates_and_restart(asset): "This will exit your app immediately, apply updates, and then relaunch the app."
+  apply_updates_and_exit(asset): same without the relaunch.
+  apply_updates_and_restart_with_args(asset, args).
+- wait_exit_then_apply_updates(asset, silent: bool, restart: bool, restart_args):
+  "This will launch the Velopack updater and tell it to wait for this program to exit gracefully."
+  "The updater will only wait for 60 seconds before giving up."
+  In source it runs Update.exe with "apply --waitPid <our pid>" (manager.rs, unsafe_apply_updates with ApplyWaitMode::WaitCurrentProcess).
+- get_update_pending_restart() -> Option<VelopackAsset>: a downloaded update not yet applied.
+- UpdateOptions: AllowVersionDowngrade, ExplicitChannel, MaximumDeltasBeforeFallback (default 10, negative disables deltas).
+- Integrity: verify_package_checksum checks the size, then SHA256 from the feed (SHA1 as fallback). There is no publisher signature check.
+  Trust rests on HTTPS and on the GitHub account that publishes the feed.
+
+Sources (read, src/lib-rust/src/sources/):
+- GithubSource::new(repo_url: &str, access_token: Option<String>, prerelease: bool).
+  It calls https://api.github.com/repos/<owner>/<repo>/releases?per_page=10&page=1, so it sees only the newest 10 releases.
+  Without a token it is limited to "60 req/hr per IP" (doc comment) and downloads assets through browser_download_url.
+- HttpSource::new(url): a static host serving releases.<channel>.json and the packages. A GitHub "releases/latest/download/" URL would be one way to use it (unverified).
+- Also FileSource, AutoSource (picks one from a string), GitlabSource, GiteaSource, VelopackFlowSource (hosted service, beta, optional), NoneSource.
+
+Where it installs, and whether the path stays put (read):
+- Setup.exe "is per-user and installs to %LocalAppData%\{packId}, so it does not require elevation or use privileged directories."
+  Override: Setup.exe --installto <dir>. (docs: packaging/operating-systems/windows; source: commands/install.rs.)
+- Layout: %LocalAppData%\{packId}\Update.exe, a stub exe for the main exe, a packages folder, and current\ holding the app's files.
+- Updates replace current\ by two renames in src/bins/src/commands/apply_windows_impl.rs:
+  fs::rename(&current_dir, &temp_path_old), then fs::rename(&temp_path_new, &current_dir).
+  So %LocalAppData%\{packId}\current\crosscheck-core.exe is the same path string after every update.
+  That should keep a path-based firewall rule valid (inference from A1, unmeasured).
+- If the second rename fails, the code returns an error saying the app "was left in a broken state"; the rollback code is commented out (read).
+- Optional MSI: vpk pack --msi --instLocation PerUser|PerMachine|Either. PerUser uses %LocalAppData%\{packId} and HKCU with no elevation;
+  PerMachine uses Program Files\{publisher}\{packTitle} and HKLM and needs elevation. (docs: packaging/installer.)
+
+Admin prompts:
+- Install: none (Setup.exe). Setup.exe has no elevation check at all (read, src/bins/src/setup.rs).
+- Update: none for a per-user root. apply_windows_impl.rs elevates only when is_directory_writable(root) is false,
+  through process::run_process_as_admin, and %LocalAppData% is writable by its owner.
+- Prerequisites: the WebView2 bootstrapper runs unelevated (see WebView2 below).
+  Velopack also offers vcredist, .NET, and .NET Framework prerequisites; whether those prompt is unverified, and we need none of them.
+
+Does Update.exe kill other processes from the install folder? Yes, all of them, including ones not in current\ (read).
+- apply_windows_impl.rs calls shared::force_stop_package(&root_path), where root_path = old_locator.get_root_dir(),
+  after the "obsolete" hook and before the folder swap.
+- force_stop_package (src/bins/src/shared/util_windows.rs) enumerates every process with EnumProcesses, reads each image path with
+  QueryFullProcessImageNameW, and calls kill_process on each one whose path is under the root folder, skipping only its own PID.
+  It runs inside a retry loop.
+- It also runs after every hook ("in case the hook left running processes", windows/util.rs run_hook), when Setup.exe overwrites an install, and at uninstall.
+- The docs say that if the folder is still locked it looks for other lockers and offers a dialog to kill them or abort,
+  and if it can't identify the locker (for example one running as Administrator) it shows an error and launches the old version.
+- Consequence for us: the watcher, core, helper, and desktop app all die by forced termination if they're still running when Update.exe applies.
+  The watcher should shut the others down cleanly first, then call wait_exit_then_apply_updates and exit.
+  A Crosscheck program the pilot started from elsewhere (outside the root) is untouched.
+
+Hooks and their time limits:
+- Docs (https://docs.velopack.io/integrating/hooks): --veloapp-install {version} must exit within 30s; --veloapp-obsolete (old version, before update) 15s;
+  --veloapp-updated (new version, after update) 15s; --veloapp-uninstall 30s.
+  "you may not show any UI to the user", there is "no way to provide feedback ... that you would like to cancel", and a hook that overruns "will be killed".
+- Source passes 30 for install (commands/install.rs), 15 and 15 for obsolete and updated (apply_windows_impl.rs), and 60 for uninstall (commands/uninstall.rs).
+  The uninstall figure disagrees with the docs' 30s; we'd plan on 30s.
+- run_hook runs only the main exe (locator.get_main_exe_path()), never the other exes.
+- A failed install hook shows a warning and the install continues (install.rs).
+- Because force_stop_package runs after each hook, a hook can't leave the watcher running; Setup.exe starts the main exe itself after install
+  (start_package, unless --silent), with VELOPACK_FIRSTRUN set. VELOPACK_RESTART is set when Velopack restarts the app after an update.
+- Consequence for the firewall rule: the install hook can't show a UAC prompt (no UI allowed), so the elevated step belongs in the watcher's first run.
+  The uninstall hook can't prompt either, so uninstall would leave the rule behind, pointing at a deleted path (inference; whether a UAC prompt
+  from inside a hook works anyway is unverified).
+
+Deltas (https://docs.velopack.io/packaging/deltas):
+- vpk pack makes a delta when the previous release is in the output folder; in CI, vpk download github fetches it first.
+- Zstandard per-file binary patches, one file at most 2 GB. --delta None | BestSpeed (default) | BestSize.
+- The client chains several deltas, and a heuristic falls back to the full package when the deltas aren't worth it.
+- On GitHub Releases each release holds one full package and one delta.
+
+Several exes in one package (read):
+- vpk pack -e <main exe> names one main exe. The other exes are ordinary files in current\ and update with it.
+- Only the main exe gets a stub (WindowsPackCommandRunner.cs, PreprocessPackDir, CreateExecutableStubForExe(mainPath, ...)),
+  only the main exe gets shortcuts and hooks, and vpk checks only the main exe for a VelopackApp call (CompatUtil.Verify; can be skipped).
+- Any exe whose path contains \current\ with Update.exe above it can find the install (locator.rs, auto_locate_app_manifest),
+  so the core or desktop app could also construct an UpdateManager, for example to show "update ready".
+- Fit for us: the watcher is the main exe. The core, helper, desktop app, and the Community package folder ride in current\.
+  The helper sits in the core's folder, as the brief needs.
+
+Shortcuts and start at login (https://docs.velopack.io/integrating/shortcuts, src/bins/src/windows/shortcuts.rs, known_path.rs):
+- --shortcuts takes Desktop, StartMenuRoot, StartMenu (needs --packAuthors), Startup, None. Docs say the default is Desktop and StartMenuRoot.
+- Startup resolves to FOLDERID_Startup, the per-user Startup folder (not FOLDERID_CommonStartup).
+  So --shortcuts StartMenuRoot,Startup starts the watcher at login for the pilot's own account only, with no Run key.
+- Shortcuts target current\<main exe> with current\ as the working folder.
+- On update, a shortcut location present in both versions isn't recreated if the user deleted it (comment in shortcuts.rs).
+
+Uninstall (read, src/bins/src/windows/registry.rs, commands/uninstall.rs):
+- Writes HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\<packId> with UninstallString "Update.exe --uninstall" and a quiet variant.
+- Uninstall runs the hook, force-stops everything under the root, removes the root folder's contents, the shortcuts, and the registry entry.
+  Settings must live outside the root, for example in %AppData%\Crosscheck, or they go with it.
+
+WebView2 (read, src/bins/src/windows/runtimes.rs, prerequisite.rs, webview2.rs):
+- vpk pack --framework webview2 declares it. Setup.exe checks GetAvailableCoreWebView2BrowserVersionString.
+- If it's missing, Setup.exe shows a dialog asking the user (show_setup_missing_dependencies_dialog), downloads the Evergreen Bootstrapper from
+  https://go.microsoft.com/fwlink/p/?LinkId=2124703, and runs it with "/silent /install" in silent mode or "/install" otherwise.
+- It starts the bootstrapper with a plain Process::new(...).spawn(), not elevated, so per Microsoft (A2) the runtime installs per-user, with no UAC prompt.
+- Update.exe repeats the check before applying each update, so a later version can add the requirement.
+- No embedded or offline WebView2 mode was found: install on a PC that lacks WebView2 needs internet.
+
+Build time:
+- vpk is a .NET global tool: dotnet tool update -g vpk. Its csproj targets net8.0;net9.0;net10.0 (src/vpk/Velopack.Vpk/Velopack.Vpk.csproj),
+  and the Rust getting-started page says it needs the .NET SDK 8. So the build machine and CI runner need a .NET 8 or later SDK.
+- The GitHub Actions example uses windows-latest, actions/setup-dotnet with 8.0.x, then
+  vpk download github --repoUrl ..., vpk pack -u <id> -v <version> -p <dir>, and vpk upload github --repoUrl ... --publish --releaseName ... --tag ...
+  (https://docs.velopack.io/distributing/github-actions).
+- Unsigned is allowed: signing is skipped when not configured. The FAQ warns "Unsigned applications are more likely to be flagged by antivirus software and Windows SmartScreen."
+- The Rust app is built with cargo as usual; for the desktop app, tauri build --no-bundle skips Tauri's own installer
+  (https://v2.tauri.app/reference/cli/).
+- The velopack crate pulls in ureq, zip, regex, xml, serde_json, sha1, sha2, uuid, and windows (src/lib-rust/Cargo.toml).
+  What that adds to the roughly 1 MB watcher is unmeasured.
+
+License and maturity:
+- MIT (repository and crate).
+- Repository created 2023-12-31; 2,393 stars, 162 forks, 33 open issues; last push 2026-10-17 (GitHub API, 2026-10-18).
+- 0.0.x releases until 1.0.1 on 2026-05-26; 1.1.1 on 2026-05-30; 1.2.0 on 2026-06-03; 1.2.158 on 2026-09-21; 1.2.161, the latest stable, on 2026-09-29;
+  pre-release 1.3.39-g8d2844f on 2026-10-17.
+- Crate: 130,239 downloads, 50,238 recent, 74 versions, first published 2024-02-04 (crates.io API).
+- The README names no users. There is no Tauri sample among its samples (RustIced is the Rust one).
+
+What it costs us:
+- A .NET SDK on the build machine and CI runner, for vpk only. Nothing .NET ships to the pilot.
+- The watcher must be the main exe, call VelopackApp first in main(), and do the orchestration: stop the core, helper, and desktop app cleanly,
+  then wait_exit_then_apply_updates and exit, because Update.exe hard-kills anything left under the root.
+- The other exes must not apply updates on their own start (see "Auto-apply on startup" above).
+- One elevated step on the watcher's first run for the firewall rule; uninstall probably leaves the rule behind.
+- Velopack's 1.x line is five months old, on a codebase that has shipped 0.0.x releases since 2024.
+
+
+B2. Tauri 2's bundler (NSIS and MSI) with tauri-plugin-updater
+--------------------------------------------------------------
+Versions read: tauri-bundler 2.10.3 (tag tauri-bundler-v2.10.3), tauri-plugin-updater 2.14.0 (tag updater-v2.14.0), v2.tauri.app docs.
+
+NSIS installer (https://v2.tauri.app/distribute/windows-installer/, crates/tauri-bundler/src/bundle/windows/nsis/installer.nsi, mod.rs, utils.nsh):
+- installMode:
+  - currentUser (the default when unset, mod.rs): RequestExecutionLevel user, installs to $LOCALAPPDATA\${PRODUCTNAME}. No admin.
+  - perMachine: RequestExecutionLevel admin, installs to $PROGRAMFILES64\${PRODUCTNAME}.
+  - both: MULTIUSER_EXECUTIONLEVEL Highest; the docs say it "will require Administrator privileges to execute".
+- Extra programs: yes. bundle.externalBin ("sidecars") copies each binary into the install folder with the -<target triple> suffix stripped
+  (generate_binaries_data: file_name().replace("-<target>", "")), and bundle.resources copies other files.
+  So the watcher, core, and helper can ride along beside the desktop app, and the Community package as a resource.
+- Hooks: bundle.windows.nsis.installerHooks names an .nsh file defining NSIS_HOOK_PREINSTALL, NSIS_HOOK_POSTINSTALL, NSIS_HOOK_PREUNINSTALL, NSIS_HOOK_POSTUNINSTALL.
+  These are full NSIS, so they can write HKCU\...\Run for the watcher or run netsh. No time limits are documented.
+  In currentUser mode the hook runs unelevated, so the firewall rule still needs its own elevation (A1).
+- Running processes: CheckIfAppIsRunning is called only with "$INSTDIR\${MAINBINARYNAME}.exe".
+  It uses the Restart Manager (RmGetList, RmShutdown with RmForceShutdown); in silent or passive mode it kills without asking.
+  The sidecars aren't checked: a running watcher or core would lock its exe when NSIS writes it.
+  What NSIS does then in passive mode is unverified; a PREINSTALL hook would have to stop them.
+- Update mode: the installer parses /P (passive) and /UPDATE in .onInit. /UPDATE keeps the existing install without uninstalling,
+  skips the WebView2 section, and skips shortcut changes. The install folder stays the same, so the core's path is stable.
+- Shortcuts: Start menu and desktop, targeting the main binary. No Startup entry; we'd add a Run key in a hook.
+- Uninstall key: Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCTNAME} under SHCTX (HKCU for currentUser).
+- WebView2 (bundle.windows.webviewInstallMode): downloadBootstrapper (default, needs internet, 0 MB), embedBootstrapper (~1.8 MB),
+  offlineInstaller (~127 MB), fixedRuntime (~180 MB), skip. The section checks the EdgeUpdate keys in HKLM and HKCU, then runs
+  the installer with "${WEBVIEW2INSTALLERARGS} /install"; it doesn't request elevation, so in currentUser mode WebView2 lands per-user (A2).
+  The downloadBootstrapper URL is https://go.microsoft.com/fwlink/p/?LinkId=2124703.
+- Build: NSIS 3.13 is downloaded by the bundler on a Windows host (mod.rs, NSIS_URL). Cross-building NSIS from Linux or macOS is possible
+  but "should only be used as a last resort".
+
+MSI installer (crates/tauri-bundler/src/bundle/windows/msi/main.wxs):
+- WiX v3, InstallScope="perMachine", installs under ProgramFiles64Folder. Admin at install and at every update.
+- "can only be created on Windows" (docs).
+
+tauri-plugin-updater (https://v2.tauri.app/plugin/updater/, plugins/updater/src/updater.rs, config.rs):
+- Can it be driven from a program that isn't the Tauri app? No, not without linking Tauri.
+  UpdaterBuilder::new is pub(crate) fn new<R: Runtime>(app: &AppHandle<R>, config: crate::Config), reached through app.updater() / app.updater_builder().
+  The watcher isn't a Tauri app, so it can't use this crate as is.
+- Signature verification: mandatory. "This cannot be disabled." The public key goes in tauri.conf.json; the code decodes it with PublicKey::decode
+  and calls public_key.verify(data, &signature, true). Keys come from the Tauri CLI signer; createUpdaterArtifacts makes the .sig files.
+- Endpoints: a static latest.json with version, platforms.<target>.url, and platforms.<target>.signature, which works on GitHub Releases at
+  https://github.com/<owner>/<repo>/releases/latest/download/latest.json. TLS is enforced in production.
+- Windows install: on_before_exit runs, the installer launches through ShellExecuteW, then std::process::exit(0).
+  NSIS gets the install mode's args then /UPDATE (passive = /P, quiet = /S, basicUi = none); MSI gets msiexec /i <file> /passive|/quiet|/qb+ /promptrestart.
+  Quiet mode "Requires admin privileges if the installer does."
+- A workaround for our design: the watcher could fetch latest.json, verify the minisign signature itself, stop the other programs,
+  run <app>-setup.exe /P /UPDATE, and exit. That reimplements the plugin's download and verify steps in the watcher
+  (feasible from the read source; unverified in practice, and the minisign-verify crate as the library is our guess).
+
+Admin prompts: currentUser NSIS: none at install or update (firewall aside). perMachine NSIS and MSI: UAC at install and at every update.
+Install path stable: yes for NSIS update mode; yes for MSI major upgrades into the same folder (unverified for the MSI).
+License: Tauri is MIT or Apache-2.0.
+What it costs us: no .NET, and we already build with Tauri, but the updater lives in the desktop app while our design puts updating in the watcher,
+so either the watcher grows its own updater client or the desktop app must run to update. The NSIS template stops only the desktop app.
+
+
+B3. WiX via cargo-wix, and Inno Setup (brief)
+---------------------------------------------
+cargo-wix 0.3.9 (2025-03-13; https://github.com/volks73/cargo-wix, src/templates/main.wxs.mustache at tag 0.3.9):
+- Template: WiX v3 schema, InstallScope='perMachine', ProgramFiles64Folder, no per-user option.
+- README: needs WiX Toolset v3.14.1 or newer; the "Legacy" v3 variant "is no longer supported by the WiX Toolset developers"; v4+ ("Modern") is also supported;
+  the tool is "only useful when installed on a Windows machine".
+- A per-user MSI is possible by editing the template: Windows Installer 5.0 with ALLUSERS=2 and MSIINSTALLPERUSER=1 installs to %LocalAppData%\Programs
+  with no UAC prompt, and "uses the same installation context for all subsequent updates, repairs, or removal".
+  https://learn.microsoft.com/en-us/windows/win32/msi/single-package-authoring
+- WiX v6 introduced the Open Source Maintenance Fee: organizations with "more than $10,000 in annual revenue" must sponsor the wixtoolset org;
+  WiX v7 enforces EULA acceptance. https://docs.firegiant.com/wix/osmf/
+- No updater. We'd write one that downloads and runs the new MSI as a major upgrade.
+- Admin: per-machine (the template as shipped) prompts at install and at every update; a per-user MSI prompts at neither.
+
+Inno Setup 7.1.0 (2026-08-12, github.com/jrsoftware/issrc):
+- PrivilegesRequired=lowest: Setup "doesn't request administrative privileges, even when a member of the Administrators group starts it".
+  The default, admin, prompts. https://jrsoftware.org/ishelp/topic_setup_privilegesrequired.htm
+- Non-administrative mode maps the "auto" folder constants to their "user" forms and writes the uninstall info to HKCU.
+  https://jrsoftware.org/ishelp/topic_admininstallmode.htm
+- License: license.txt permits use "for any purpose, including commercial applications"; the product page "requests" commercial users buy a license.
+- No updater and no WebView2 support built in; an update means running the next Setup.exe. The compiler is a Windows program (unverified for other hosts).
+- Admin: lowest prompts at neither install nor update; admin prompts at both.
+
+
+B4. cargo-dist and axoupdater (brief)
+-------------------------------------
+dist 0.33.0 (2026-09-11), axoupdater 0.10.2 (2026-08-12).
+- Installers: shell, PowerShell, npm, Homebrew (all fetch archives at install time), and MSI (bundles the binaries).
+  https://axodotdev.github.io/cargo-dist/book/installers/index.html
+- MSI: built with cargo-wix and WiX v3 ("WiX v4 isn't yet supported"), default location %ProgramFiles%\{app_name}\, Windows-only build.
+  https://axodotdev.github.io/cargo-dist/book/installers/msi.html
+- PowerShell installer: copies binaries into an install-path such as CARGO_HOME\bin and edits the user's PATH under HKCU:\Environment.
+  No shortcuts, Startup entry, uninstall entry, or WebView2 are described. https://axodotdev.github.io/cargo-dist/book/installers/powershell.html
+- Updater: install-updater = true ships <app>-update with the shell and PowerShell installers only, not the MSI.
+  https://axodotdev.github.io/cargo-dist/book/installers/updater.html
+  axoupdater reads an install receipt from %LOCALAPPDATA%\<app>, downloads <app>-installer.ps1 from the GitHub release, renames the running exe to
+  <name>.previous.exe, and runs "powershell -ExecutionPolicy ByPass <script>" (axoupdater/src/lib.rs on main, not at a tag).
+- Admin: PowerShell route none; MSI route per-machine, so UAC at install and update.
+- Fit: built for command-line tools. It knows nothing of a Tauri app, a tray app at login, or WebView2.
+
+
+B5. A hand-written installer and updater in Rust (brief)
+--------------------------------------------------------
+What it would need, each a piece Velopack or NSIS already has:
+- A setup exe that copies the payload to a per-user folder we choose, for example %LocalAppData%\Programs\Crosscheck, writes the HKCU Uninstall key,
+  creates Start menu and Startup shortcuts (IShellLinkW through the windows crate) or an HKCU Run value, and launches the watcher.
+- An update client: query the GitHub Releases API, download, verify (a SHA-256 manifest, or minisign as Tauri does), stage beside the install.
+- A swap: stop the four programs, rename the live folder aside and the staged one into place (Velopack's current\ pattern), roll back on failure.
+  Swapping a folder keeps the core's path stable; versioned folders (app-1.2.3\) would break the firewall rule.
+- Self-replacement for the watcher if it lives in the swapped folder: self-replace 1.5.0 (Apache-2.0) moves the running exe aside and spawns a copy
+  opened with FILE_FLAG_DELETE_ON_CLOSE that deletes it after exit. Caveats from its docs: a badly timed power cut leaves temp files,
+  self-deletion needs space in the exe's folder (use self_delete_outside_path to remove the folder), and self_delete can't chain with self_replace on Windows.
+  https://docs.rs/self-replace/latest/self_replace/
+- The WebView2 check and bootstrapper run (A2), the elevated firewall helper (A1), an uninstaller that deletes itself.
+- Admin: only the firewall step. Path: ours, stable by design. Build: cargo only.
+- Cost: all of it is our code, and so are its failure cases (antivirus locks, a half-done swap, a dead GitHub API), which Velopack's code already handles in part.
+
+
+B6. Prior art: YourControls and the FlyByWire installer
+-------------------------------------------------------
+YourControls (github.com/Sequal32/yourcontrols, release 2.8.15 on 2026-04-12):
+- The app's updater (src/yourcontrols/src/update.rs at tag 2.8.15) reads tag_name from https://api.github.com/repos/sequal32/yourcontrols/releases/latest,
+  then downloads https://github.com/sequal32/yourcontrolsinstaller/releases/latest/download/installer.zip, unzips it to a temp folder,
+  and spawns installer.exe. It doesn't replace itself.
+- The installer is a separate repository, github.com/Sequal32/yourcontrolsinstaller: Rust with tauri 0.11 (a pre-1.0 Tauri), GPL-3.0, last pushed 2022-07-27.
+  It is a GUI program that writes files itself, not a bundler-made installer.
+- Install location: a previous path from HKCU\Software\YourControls, else %APPDATA%\YourControls (src-tauri/src/main.rs).
+  The registry variable is named hklm but opens HKEY_CURRENT_USER (installer.rs).
+- Sim check: before downloading, the Install command calls error_for_sim_running, which tries a SimConnect connection named "YourControlsInstaller"
+  and refuses with Error::SimRunning if it connects. It doesn't check whether YourControls itself is running.
+- Community folder (src-tauri/src/finder.rs): reads UserCfg.opt from %APPDATA%\Microsoft Flight Simulator\UserCfg.opt, else
+  %LOCALAPPDATA%\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache\UserCfg.opt (MSFS 2020 paths only),
+  takes the quoted value of the line starting with InstalledPackagesPath, and appends Community. It doesn't check that the folder exists.
+- Package write: deletes Community\YourControls, then writes the new files; backs up and restores config.json around the program reinstall.
+
+FlyByWire installer (github.com/flybywiresim/installer, tag v3.7.2, 2026-05-21; Electron, electron-builder NSIS target, electron-updater ^4.6.5):
+- Community folder (src/renderer/actions/install-path.utils.tsx):
+  - MSFS 2024 base candidates: %LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\ (Microsoft Store) and
+    %APPDATA%\Microsoft Flight Simulator 2024\ (Steam). MSFS 2020: Microsoft.FlightSimulator_8wekyb3d8bbwe and %APPDATA%\Microsoft Flight Simulator\.
+  - It looks for UserCfg.opt in both. If both exist it returns null and the user picks; if one exists it uses that one.
+  - It finds the line containing "InstalledPackagesPath " (trailing space, so InstalledPackagesPathNextBoot doesn't match), takes everything after the first space,
+    strips quotes, appends \Community, and returns it only if that folder exists.
+  - On Linux it maps C:/ to the Steam compatdata drive_c for app IDs 1250410 (2020) and 2537590 (2024).
+  - The user can override the base and Community paths in settings.
+- Sim-running check: yes, before install or update.
+  Each add-on lists blocking apps in disallowedRunningExternalApps; A32NX and A380X for MSFS 2024 list "@/msfs".
+  The remote config https://flybywirecdn.com/installer/config/production.json (fetched 2026-10-18, not pinned to a version)
+  defines msfs as detectionType "tcp" on port 500: a successful TCP connect to localhost port 500, SimConnect's port, means the sim is running.
+  CannotInstallDialog says you "cannot install or update" while those apps run, and its Continue button stays disabled until they close.
+- Writes: downloads into a temp folder (Directories.temp), refuses if that equals the install location, then the Fragmenter library moves it into place.
+
+
+PART C. COMPARISON
+==================
+
+Option                     | Admin at install       | Admin at update | Core path stable          | WebView2 offered                        | Build-time needs                    | Our cost
+-------------------------- | ---------------------- | --------------- | ------------------------- | --------------------------------------- | ----------------------------------- | -----------------------------------------------
+Velopack (Setup.exe)       | none (+1 for firewall) | none            | yes (current\ renamed)    | --framework webview2: bootstrapper, per-user, online only | .NET 8+ SDK for vpk; Windows runner | watcher orchestrates shutdown; Update.exe hard-kills the rest
+Tauri NSIS currentUser     | none (+1 for firewall) | none            | yes (/UPDATE keeps folder) | 4 modes incl. embed ~1.8 MB, offline ~127 MB | Windows host (NSIS fetched); minisign key | watcher needs its own updater client; sidecars not stopped by template
+Tauri NSIS perMachine/MSI  | UAC                    | UAC every time  | yes                       | same (NSIS); MSI per Tauri docs         | as above; WiX v3 for MSI            | UAC per update
+cargo-wix MSI              | UAC (template)         | UAC every time  | yes                       | none; we add it                         | WiX v3 (deprecated) or v4+ (OSMF)   | no updater; template edit for per-user
+Inno Setup (lowest)        | none (+1 for firewall) | none            | yes (our choice)          | none; we add it                         | Inno compiler on Windows            | no updater
+cargo-dist                 | none (PS) / UAC (MSI)  | none / UAC      | yes                       | none                                    | dist; WiX v3 for MSI                | CLI-shaped; no shortcuts, startup, or WebView2
+Hand-written Rust          | none (+1 for firewall) | none            | yes (by design)           | we write it                             | cargo only                          | all code and failure cases ours
+
+
+PART D. WHICH FITS BEST
+=======================
+Velopack fits best.
+- Its per-user Setup.exe and Update.exe never prompt for the install or for updates, and the only UAC prompt left is the firewall rule, which every per-user option shares.
+- It replaces current\ by rename, so the core keeps one path for the firewall rule across updates.
+- Its Rust API matches the watcher's job: the watcher is the main exe, it checks GithubSource while the sim is closed, stops the others, calls
+  wait_exit_then_apply_updates, and exits; Update.exe applies, runs the hooks on the watcher, and restarts it.
+- It ships the other three programs and the Community package in current\ with no extra mechanism, starts the watcher at login through a per-user
+  Startup shortcut, installs WebView2 per-user from the bootstrapper, and makes deltas. MIT.
+Costs to accept: the .NET SDK on the build machine; Update.exe force-kills every process under the root, so the watcher must shut the rest down first;
+only the watcher may call VelopackApp with auto-apply on; the firewall step needs an elevated helper on first run, and uninstall can't remove the rule
+without UI; and the 1.x line dates from 2026-05.
+Runner-up: Tauri's NSIS bundle in currentUser mode, with the watcher running setup.exe /P /UPDATE after its own minisign check.
+It avoids .NET and offers an offline WebView2 mode, but the watcher has to reimplement the updater client and stop the sidecars the template ignores.
+
+
+PART E. WHAT WOULD SETTLE THE OPEN POINTS
+=========================================
+Each is a desk probe on a Windows 10 or 11 machine or VM, with no sim needed.
+1. Velopack: pack four dummy exes with the watcher as main exe, install, add a firewall rule for current\crosscheck-core.exe, apply an update, and confirm the rule
+   still matches and which processes Update.exe killed.
+2. Velopack: confirm --shortcuts Startup starts the main exe at login, and whether a UAC prompt from the uninstall hook appears at all.
+3. Velopack: on a Windows 10 VM without WebView2, confirm --framework webview2 installs it per-user with no UAC prompt, and what happens offline.
+4. Measure the watcher's size with the velopack crate linked.
+5. Tauri NSIS: with a sidecar running, see what a passive /UPDATE does when it reaches the locked file.

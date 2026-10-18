@@ -6,6 +6,10 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../arc
 Decides:     What a release holds; how every x86_64 program links the C runtime statically; which SDK the build uses; where the sim's stock files live and how a sim update that changes them shows; our package's folder name, order hint, and contents, and how a development build reaches the sim; how the files only the sim compiles get built; how the Coherent GT check is built and when it runs, and that no for-of rewrite runs; how the message crate is hashed, and how the version and the hash reach each component; how a release is built, checked, and published, and when the backend deploys; and that v1 ships no authoring tools (node 6.18).
 ```
 
+> **Note**
+> Since 2026-10-18, the relays' tokens live in a private repository of ours rather than in `relays/relays.toml` ([the network's units](../network/02-units.md)), so the build job in [a release](#a-release) also checks that repository out, with a read-only key from this repository's secrets, and the network crate's build compiles each release's default relay list from both; a release build stops when a relay in `relays/relays.toml` has no token.
+> A pull request's build carries no tokens, and the network's tests run through a local relay with a test token (user, 2026-10-18).
+
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `crosscheck`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.

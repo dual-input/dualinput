@@ -1174,12 +1174,12 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## Our relays run on two servers of ours, configured from relays/
 
 - **Decided:** two DigitalOcean droplets, in New York and Frankfurt, run `iroh-relay` 1.3, at $4 to $6 a month each (documented, [research report 06](../network/results/2026-10-10-transport-research-reports/06-relay-hosting-and-cost.txt), prices fetched 2026-10-09).
-  `relays/relays.toml` lists each relay's region, URL, tokens, and cap once; each release's default relay list compiles in from it, and `relays/deploy.ts` renders each relay's configuration from it; a relay of our own, if we ever write one, lives there too.
+  `relays/relays.toml` lists each relay's region, URL, and cap once, and a private repository of ours lists each relay's tokens, newest first, which developers trusted with them are given access to (user, 2026-10-18); each release's default relay list compiles in from both, and `relays/deploy.ts` renders each relay's configuration from both; a relay of our own, if we ever write one, lives in `relays/` too.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-relays)).
 - **Because:**
   - n0's shared relays admit an endpoint through a token n0's own preset mints from a project API key, state a 5 MB/s limit without saying what it applies to, and lock no version, which only Dedicated relays do, at $199 a month for each region (documented, [shared relays](https://docs.iroh.computer/iroh-services/relays/shared), [dedicated relays](https://docs.iroh.computer/iroh-services/relays/managed), [pricing](https://www.iroh.computer/pricing), undated, read 2026-10-16), where [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) has tokens of our own, a cap for each client, and pinned versions.
   - p03, p05, p06, and p07 measured iroh through droplets in those two cities, of 2 vCPUs and 2 GiB ([network log, 2.3][n23]; [network log, p07][p07]).
-  - The tokens are public either way, since each release carries them.
+  - A token read out of a release's program takes reverse engineering, where a public repository would hand it to anyone, so the tokens stay private, and a token added or retired is a commit to their repository (user, 2026-10-18).
 - **Leaves out:** whether a droplet with 1 vCPU and 512 MiB carries `iroh-relay`, which the first deployment shows, and whether pilots in Asia and Oceania need a third region, which v1's recordings show.
 
 ## The backend is a Worker on D1, which counts only wrong codes against an address

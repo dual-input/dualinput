@@ -2,47 +2,13 @@
 
 ```text
 Purpose:     The session crate's interfaces, and how rate and pause, Go to, and the menu script work as the session's features.
-Depends on:  01-roles-and-members.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/02-clients-and-panel-bridge.md, ../core/03-sim-seam-and-wasm-module.md, ../network/02-units.md, ../recording/01-recording-and-bug-reports.md, ../profiles/01-format-and-delivery.md, ../sync/04-order-and-recovery.md, ../product/03-v1-scope.md, ../environment/log.md, ../interface/log.md, ../aircraft/log.md
+Depends on:  01-roles-and-members.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/02-clients-and-panel-bridge.md, ../core/03-sim-seam-and-wasm-module.md, ../network/02-units.md, ../recording/01-recording-and-bug-reports.md, ../profiles/01-format-and-delivery.md, ../profiles/02-units.md, ../sync/04-order-and-recovery.md, ../sync/05-units.md, ../avatars/01-avatars.md, ../traffic-atc/01-traffic-and-atc.md, ../interface/01-apps.md, ../install/01-installing-and-updating.md, ../product/03-v1-scope.md, ../environment/log.md, ../interface/log.md, ../aircraft/log.md
 Decides:     The session crate's members, session keys, control, session file, joining and leaving, preflight, match check, and what it raises; who is in the flight; which pilot's bundle a session pins; where the match check reads an aircraft's version; how rate and pause sets active pause and the simulation rate; how Go to picks a stand or a runway; what the menu script reports and runs; when the core exits; the budgets; and the cases for the bench (node 6.7).
 ```
 
-> **Note**
-> Since 2026-10-16, [the profiles' units](../profiles/02-units.md#the-pin) changes this document in three places:
->
-> - The PF's loader also writes the pin when the key holds none and its choice becomes one, after preflight ends too, where [which bundle a session pins](#which-bundle-a-session-pins) writes it only when the aircraft changes, and keeps it once preflight ends.
->   Its choice is a local bundle that covers the aircraft, which the pin marks so no core fetches it from Pages, or else the bundle its cached index gives its level, where that section takes the newest its cache holds.
-> - The session crate writes this member's `match` key again whenever one of its values changes, where [members](#members)' table rewrites it only when a member enters the flight, so a profile that loads after its member entered the flight shows as loaded.
-> - The match check's profile item takes a fourth value, "Couldn't get the session's profile", for a pinned bundle a core couldn't fetch, find, or read, and it and "No profile for this aircraft" are errors even when every member shows them ([the match check's item](../profiles/02-units.md#the-match-checks-item)).
->
-> Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) starts a following machine's catch-up when its profile loads after preflight has ended, where [preflight](#preflight) starts a late joiner's on `FlightChanged`, since a joiner's profile loads only once it's in the flight; a member the crew went without still starts its catch-up at `PreflightEnded`.
->
-> Since 2026-10-17, the session crate keeps in its state the folder of the package its match check's job found, which avatars reads to find the aircraft's models; and seat claims ride avatars' poses, so the session crate holds none ([avatars](../avatars/01-avatars.md#finding-the-files)).
->
-> Since 2026-10-17, the match check has no item of traffic's, where [the match check](#the-match-check)'s table gives traffic one for traffic packs, injectors, and multiplayer: traffic is partly recorded, so an item it fed would part the recorded `match` key from its replay, and a receiving machine raises notices for other traffic and for missing copies instead, while a page lists the machine's traffic packs when asked ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#notices)).
-> Since 2026-10-17, [the apps' design](../interface/01-apps.md#slices-and-commands) changes this document in four places:
->
-> - The session crate and Go to each register a slice of client state, which [slices and commands](../interface/01-apps.md#slices-and-commands) lists; the session's carries the match check's differences, each with its level and its item's words, so an item gives words as well as a level, where [the match check](#the-match-check)'s items name a level alone.
-> - A role key registers a label in its feature's words, and the "Share my traffic and ATC" switch is the session crate's command.
-> - Any client may send Quit, where [joining and leaving](#joining-and-leaving)'s table names where it comes from.
-> - Any app writes the display name, with `clients`' settings command, and where Crosscheck asks for it is the apps' design, which settles what [members](#members) leaves to 6.16.
->
-> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
->
-> - Crosscheck has no watcher, so a quit in [joining and leaving](#joining-and-leaving)'s table comes from any client, the desktop app's tray among them, or from Windows ending the pilot's session.
-> - The search for an aircraft's package in [the match check](#the-match-check) takes the packages folders from the sim service, which reads `UserCfg.opt`.
-> - The match check gains an item, from the sim service's state, listing the other packages that override our files, as a warning.
->
-> Since 2026-10-18, the sim service holds the loaded aircraft's package, folder, install location, version, and livery, aircraft awareness, and finds the package itself while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md)), so [the match check](#the-match-check)'s aircraft items read them there, where the session crate's own job finds the package and reads `A:LIVERY NAME`, and the session crate keeps no package folder for avatars, where the note of 2026-10-17 has it keep one (user, 2026-10-18).
->
-> Since 2026-10-18, the design review after node 6 changes this document in three places (user, 2026-10-18):
->
-> - In [the match check](#the-match-check), each item's owner hands the session crate its value whenever the value changes, and the session crate writes the `match` key on each, where it reads every item when a member enters the flight; rate and pause hands it the sim's time when a member enters the flight.
-> - The profile's item reports whether the pinned bundle loaded, couldn't be fetched, or there's no profile for the aircraft, and the pinned hash shows once, where the match check's table compares each core's hash, since every core loads only the pinned bundle ([the profiles' units](../profiles/02-units.md)).
-> - No voice answer asks for control in v1, since the voice phrases are a Soon pick, where [control](#control) has the voice handover's answer ask `TakeControl`.
-
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.
-The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins the newest bundle its cache holds for that aircraft.
+The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins a local bundle that covers that aircraft, or else the one its cached index gives its level.
 Rate and pause sets active pause through the EFB app, the one way we found, and Go to puts a joiner on a runway, engines running, whenever the PF's engines run.
 
 This answers node 6.7 of the [architecture plan](../architecture/plan.md#67-the-session).
@@ -60,6 +26,7 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 
 The session crate depends on the kernel, `clients`, `sim-service`, `network`, and `recording`, as the code map's [platform](../architecture/02-code-map.md#the-platform) row has it.
 The crates above it reach it through its moments, its requests, and the keys they declare: the profile loader writes the pinned bundle, state sync guards Ready, and the cockpit stream guards control.
+The session crate and Go to each register a slice of client state, which [slices and commands](../interface/01-apps.md#slices-and-commands) lists.
 
 ## Members
 
@@ -72,11 +39,12 @@ The crates above it reach it through its moments, its requests, and the keys the
 | `member` | Pilot ID, display name, kind, and endpoint ID ([01-roles-and-members](01-roles-and-members.md#the-member-list)) | Never, after the first message |
 | `status` | Its sim awareness's stage, aircraft, and pause flags, how its last sim run ended, and its link to each other member: up, lost, or left | On each `SimChanged` and each link change |
 | `ready` | Its Ready during preflight, and the members it goes without | On Ready, un-ready, and Go without |
-| `match` | Its value for each item of the match check | When a member enters the flight |
+| `match` | Its value for each item of the match check | When one of its values changes ([the match check](#the-match-check)) |
 
 - The `status` key's links let every pilot's banner show the whole crew, as [the connection](../product/03-v1-scope.md#the-connection) asks, and tell a member that can't reach a leaver that they left, as [leaving](../network/01-between-machines.md#leaving) asks of the session channel.
 - A member that leaves takes its own keys with it, and the session crate clears every session-wide key whose value names it.
-- The display name is a setting the session crate registers, empty at first; Host and Join answer that a name is needed while it's empty, and Crosscheck asks the pilot for one, where and how being [6.16](../architecture/plan.md#616-the-apps)'s.
+- The display name is a setting the session crate registers, empty at first, which any app writes with `clients`' settings command ([settings](../interface/01-apps.md#settings)).
+  Host and Join answer that a name is needed while it's empty, and Crosscheck asks the pilot for one, in a place the apps' design picks.
   Nothing fills it from the Windows account, whose name would reach crewmates, their recordings, and our R2 (user, 2026-10-16).
 - Each member joining, and each one gone, raises `MemberJoined` or `MemberGone`, and the session crate tells the recording crate the joiner's display name ([the index](../recording/01-recording-and-bug-reports.md#the-index)).
 
@@ -125,15 +93,17 @@ fn read(me: &mut RateAndPause, _: &SimChanged, cx: &mut Cx) {
   - `Pf`: only the PF writes it, and the session crate drops a value from anyone else, such as the simulation rate or `preflight`.
 - Every write is a request, `WriteKeys`, so a feature never changes a key itself, and any guard on one key refuses the whole request, as [the traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch) needs.
   The apps show its verdict on the "Share my traffic and ATC" switch, which the kernel builds as this pilot claiming every role key a feature declared.
+  The switch is the session crate's command, and each role key registers a label in its feature's words ([slices and commands](../interface/01-apps.md#slices-and-commands)).
 - A key's stamp is [channels](../network/01-between-machines.md#channels)'s, and each change, local or arriving, raises `KeyChanged { key }`.
 - The session crate fills each connection's first message with every key it holds, through the opener hook, as [the first message](../network/02-units.md#the-first-message) has it.
 - A handler reads a key with `cx.read::<Session>().key(KEY)`, which gives the value, and for a `Member` key, each member's.
 
 Beside each member's four, the session crate has two session-wide keys: `control`, the generation and the PF's pilot ID, which [control](../network/01-between-machines.md#control) orders; and `preflight`, a `Pf` key holding the session's aircraft, folder and preset, or none, and preflight's phase ([preflight](#preflight)).
+Seat claims ride avatars' poses, so the session crate holds none ([the pose](../avatars/01-avatars.md#the-pose)).
 
 ## Control
 
-- The session crate declares `TakeControl`, built as this pilot taking control now; the take-control key and button, and the voice handover's answer, each ask it ([6.12](../architecture/plan.md#612-control)).
+- The session crate declares `TakeControl`, built as this pilot taking control now; the take-control key and button each ask it ([6.12](../architecture/plan.md#612-control)), and no voice answer asks for control in v1, since the voice phrases are a Soon pick (user, 2026-10-18).
 - Two guards ride it: the session crate's own, live only while this pilot is in the flight and preflight has ended, and the cockpit stream's, which holds control back from a pilot whose catch-up or replay runs over a link that's up ([guards](../architecture/02-code-map.md#guards)).
 - When a session starts, the host's core writes `control` naming its pilot, since the host is the PF when a session starts ([take-control key](../product/03-v1-scope.md#take-control-key)).
 - A pass the platform makes itself isn't a request.
@@ -159,7 +129,7 @@ Beside each member's four, the session crate has two session-wide keys: `control
 | Join, with a code | Draws this pilot's ID and asks `Join`; on the backend's answer, writes the file and asks `Open` with the crew; on a refusal, shows it as a notice, naming whose version is older ([its requests](../network/02-units.md#its-requests)) |
 | The code box selected, in the EFB app | Reads the clipboard as a job, which hands up only an invite code ([what stays out](../recording/01-recording-and-bug-reports.md#what-stays-out)), and joins with it at once |
 | Leave | Un-readies during preflight, passes control if this pilot holds it, and asks `Leave` as [leaving](../network/01-between-machines.md#leaving) orders it |
-| Quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session | Leaves as above with the quit code, asks `clients` for `bye`, and puts out the exit, as [quitting](../core/01-loop-and-edge.md#quitting) requires |
+| Quit, from any client, the desktop app's tray among them ([quit](../interface/01-apps.md#quit)), or from Windows ending the pilot's session | Leaves as above with the quit code, asks `clients` for `bye`, and puts out the exit, as [quitting](../core/01-loop-and-edge.md#quitting) requires |
 
 - A session starts for this core at its `BackendAnswered`, or when it starts and finds a session file: the session crate raises `SessionStarted`, tells the recording crate the session's ID and the endpoint key, and calls `sim_service::announce(cx, true)` ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement)).
 - Host and Join are refused while a session is held.
@@ -186,42 +156,49 @@ The PF's core runs preflight, since the flying machine is the session's authorit
 - **The countdown:** the PF's core starts a 3s timer when every counted member is ready, and goes back to running, the timer canceled, when one isn't; an un-ready that reaches it after the timer fired is too late, and the flight starts.
 - **Go without:** a ready pilot names a counted member who has dropped out, and the session crate adds it to that pilot's own `ready` key.
   The PF can't be named, since control stays with a PF whose link is lost, so preflight waits for a PF who dropped out until they come back, leave the flight, which passes control, or are counted out at 30 minutes.
-- **A late joiner** enters the flight after preflight ended and skips Ready; the cockpit stream starts their catch-up on `FlightChanged` ([while catch-up runs](../sync/03-catch-up.md#while-catch-up-runs)).
+- **A late joiner** enters the flight after preflight ended and skips Ready; the cockpit stream starts their catch-up when their profile loads, since a joiner's profile loads only once it's in the flight ([while catch-up runs](../sync/03-catch-up.md#while-catch-up-runs), [catch-up](../sync/05-units.md#catch-up)).
   A member the crew went without whose sim kept running never changes its answer, and raises `PreflightEnded` when it comes back and first sees the phase, so its catch-up starts there, and what its replay brings that the catch-up covers drops as a copy ([catch-up](../sync/04-order-and-recovery.md#catch-up)).
-- The departure airport is the `[Departure]` section's `ICAO` in this pilot's flight file, which the sim service keeps in sim awareness ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md)'s note).
+- The departure airport is the `[Departure]` section's `ICAO` in this pilot's flight file, which the sim service keeps in sim awareness ([sim awareness](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
 - The PF's checklist of counted controls is state sync's, beside the preflight summary ([preflight](../product/03-v1-scope.md#preflight)).
 
 ## The match check
 
 ```rust
-// a sketch: rate and pause's item
-me.match_item(rate_and_pause::TIME_OF_DAY, RateAndPause::time_of_day);   // a value of the item's type, which compares itself
+// a sketch: rate and pause's item; `set_match` is a hypothetical name
+me.match_item(rate_and_pause::TIME_OF_DAY);   // a value of the item's type, which compares itself
+me.on::<FlightChanged>(|me, _, cx| cx.set_match(rate_and_pause::TIME_OF_DAY, me.time_of_day(cx)));   // handed over when a member enters the flight
 ```
 
-- The session crate keeps the items, its own and the features', and writes this member's value for each into its `match` key whenever a member enters the flight, so a late join compares fresh values ([preflight match check](../product/03-v1-scope.md#preflight-match-check)).
-- Each core compares every member's values item by item, with the item's own comparison, which names an error or a warning, and shows the differences beside each Ready and as counts on the banner's summary.
+- The session crate keeps the items, its own and the features'.
+  Each item's owner hands it the item's value whenever the value changes, and the session crate writes this member's `match` key on each, so a profile that loads after its member entered the flight shows as loaded (user, 2026-10-18).
+  Rate and pause hands it the sim's time when a member enters the flight, so a late join compares fresh values ([preflight match check](../product/03-v1-scope.md#preflight-match-check); user, 2026-10-18).
+- Each core compares every member's values item by item, with the item's own comparison, which names an error or a warning and gives the difference's words, and shows the differences beside each Ready and as counts on the banner's summary.
+  The session crate's slice carries them, each with its level and its item's words ([slices and commands](../interface/01-apps.md#slices-and-commands)).
 - A feature that a difference breaks reads the result and turns itself off for the session.
 - The aircraft's folder and preset aren't an item: another aircraft puts a pilot out of the flight ([in the flight](#in-the-flight)).
+- Traffic feeds no item, since traffic is partly recorded and an item it fed would part the recorded `match` key from its replay; a receiving machine raises notices for other traffic and for missing copies, and a page lists the machine's traffic packs when asked ([notices](../traffic-atc/01-traffic-and-atc.md#notices)).
 
 | Item | Owner | Compared | Level |
 | --- | --- | --- | --- |
 | The aircraft's package and where it's installed, Community, Official, or streamed | The session crate | Equal | A warning |
 | The aircraft's version | The session crate | Equal, where both copies have one | An error; a warning when one copy is streamed |
 | The livery, `A:LIVERY NAME` | The session crate | Equal | A warning |
-| The profile's bundle | The profile loader | The hash each core loaded, "unpublished" for a local one, and "no profile" when none is published | An error |
+| The profile's bundle | The profile loader | Whether the pinned bundle loaded, with "Couldn't get the session's profile" when it couldn't be fetched, found, or read, and "No profile for this aircraft" when there's none; the pinned hash shows once, "unpublished" for a local one, since every core loads only the pinned bundle ([the match check's item](../profiles/02-units.md#the-match-checks-item); user, 2026-10-18) | An error for either quoted value, even when every member shows it |
 | The sim's date and time of day, `E:ZULU TIME` and the zulu date | Rate and pause | Within 10 minutes, a starting value, on the same date | A warning |
-| Traffic packs, injectors, and multiplayer | Traffic | [6.14](../architecture/plan.md#614-traffic-and-atc)'s | A warning |
+| Other packages that override our files | The session crate, from the sim service's state | Listed, from the sim service's search ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)) | A warning |
 
-- The session crate finds the package that holds the aircraft's folder with a job that looks in each package folder under `UserCfg.opt`'s `InstalledPackagesPath` ([02-01](../../learn/foundations/02-01-installs-and-packages.md)): `Community`, `Community2024`, `Official2020`, `Official2024`'s store folder, and `StreamedPackages`; it reads `package_version` from the package's `manifest.json`.
+- The aircraft's items read the loaded aircraft's facts, aircraft awareness, which the sim service holds ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts); user, 2026-10-18).
+- While a session is held, the sim service finds the package that holds the aircraft's folder with a job that looks in each package folder under the `InstalledPackagesPath` it reads from `UserCfg.opt` ([02-01](../../learn/foundations/02-01-installs-and-packages.md), [the packages folders](../install/01-installing-and-updating.md#the-packages-folders)): `Community`, `Community2024`, `Official2020`, `Official2024`'s store folder, and `StreamedPackages`; it reads `package_version` from the package's `manifest.json`.
 - A streamed copy has no version on disk: none of the 1,221 streamed packages on our development machine had a `manifest.json`, the sim's `Content.xml` gives each package only its name and whether it's active, and the world map's aircraft list carries no version (read on 2026-10-16, [aircraft log][p16]).
   So two streamed copies show no version difference, and a streamed copy against an installed one shows a warning that says the streamed copy's version can't be read and asks both pilots to compare their versions in the sim themselves (user, 2026-10-16).
 - A session in an aircraft with no published profile flies: state sync, pointer sync, and avatars find nothing to load, while flight-model sync, control, rate and pause, traffic, and ATC run, and the profile loader's item shows "No profile for this aircraft" as an error (user, 2026-10-16).
 
 ## Which bundle a session pins
 
-- The profile loader, on the PF's core, writes the pinned bundle's hash into a `Pf` key of its own whenever the session's aircraft changes, taking the newest bundle its cache holds for that aircraft ([delivery](../profiles/01-format-and-delivery.md#delivery)); every other core's loader loads that hash, and fetches it by hash when its cache lacks it.
+- The profile loader, on the PF's core, writes the pinned bundle's hash into a `Pf` key of its own whenever the session's aircraft changes, and when the key holds none and its choice becomes one, after preflight ends too ([the pin](../profiles/02-units.md#the-pin)).
+  Its choice is a local bundle that covers the aircraft, which the pin marks so no core fetches it from Pages, or else the bundle its cached index gives its level ([delivery](../profiles/01-format-and-delivery.md#delivery)); every other core's loader loads that hash, and fetches a published one by hash when its cache lacks it.
 - Every pilot in a session runs one release, by the version check at join, so two caches differ only when one core started before a merge and the other after, and the PF's choice settles it without the cores comparing their caches.
-- After preflight ends the aircraft stays, so the pin does too, as [delivery](../profiles/01-format-and-delivery.md#delivery) requires outside a test session; how the loader writes, fetches, and loads is [6.8](../architecture/plan.md#68-profiles)'s.
+- After preflight ends the aircraft stays, so a pinned bundle does too, as [delivery](../profiles/01-format-and-delivery.md#delivery) requires outside a test session, and the pin changes only from none; how the loader writes, fetches, and loads is [6.8](../architecture/plan.md#68-profiles)'s.
 
 ## Rate and pause
 

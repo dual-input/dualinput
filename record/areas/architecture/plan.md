@@ -592,6 +592,7 @@ Each child's answer goes in a design doc in its system's area, which gives its u
 Each child also settles the open items its section names, from the spine's [left open](01-spine.md#left-open), 02-code-map's [left open](02-code-map.md#left-open), and the design docs above.
 Exit: every child is done, and nodes 7 and 8 read each design doc's notes with its text, as [step 8](../product/plan.md#8-v1-build-plan) says (user, 2026-10-18).
 Waits on 5, and 6.1 to 6.18.
+Done on 2026-10-18.
 
 ## 6.1 The core's loop and edge
 

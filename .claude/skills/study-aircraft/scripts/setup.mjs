@@ -1,12 +1,13 @@
 /*
- * Fetches the tools a study needs into the skill's bin/ folder, if they're missing.
+ * Fetches the tools decode.mjs needs, WABT and prettier, into the skill's bin/ folder,
+ * if they're missing.
  *
  *   node .claude/skills/study-aircraft/scripts/setup.mjs
  *
- * Each tool is pinned in tools.json. A download whose SHA-256 doesn't match is
- * refused, so bumping a version means bumping its hash in the same edit.
- * bin/ is gitignored: a Windows binary committed here would stay in the
- * history of a repository that goes public.
+ * Each tool is pinned in tools.json, with its download's SHA-256, so a changed or
+ * tampered download is refused. When you bump a version there, bump its hash in the same
+ * edit. bin/ is gitignored, so the downloaded binaries never enter the repository, which
+ * goes public.
  */
 
 import { createHash } from "node:crypto"
@@ -47,6 +48,8 @@ function setUpPrettier({ version }) {
   const manifest = join(binDir, "node_modules", "prettier", "package.json")
   const installed = existsSync(manifest) ? JSON.parse(readFileSync(manifest, "utf8")).version : null
   if (installed !== version) {
+    // On Windows, npm is npm.cmd, and Node runs a .cmd file only through a shell
+    // (CVE-2024-27980, fixed in Node's April 2024 security releases).
     execFileSync("npm", ["install", "--prefix", binDir, "--no-save", "--no-package-lock", "--no-audit", "--no-fund", `prettier@${version}`], {
       stdio: "inherit",
       shell: true,
@@ -55,8 +58,8 @@ function setUpPrettier({ version }) {
   console.log(`prettier ${version}: ready`)
 }
 
-// A ustar reader, enough for a release archive: regular files, with GNU and
-// PAX long names. Node has gzip built in but not tar.
+// WABT ships as a .tar.gz, and Node has gzip built in but not tar, so this reads the
+// tar itself: regular files, with GNU and PAX long names, which is enough for a release.
 function readTar(buffer) {
   const entries = new Map()
   let offset = 0

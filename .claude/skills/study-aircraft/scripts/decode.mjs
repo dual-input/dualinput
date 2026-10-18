@@ -1,8 +1,8 @@
 /*
- * Turns an aircraft's files into text a reader can search, and decides nothing
- * about what matters in them.
- *
- *   node .claude/skills/study-aircraft/scripts/decode.mjs <out> <source> [<source> ...]
+ * The study-aircraft skill reads every file of an aircraft to learn how it's built, and
+ * much of an aircraft ships as WASM, minified JavaScript, and Windows binaries, which
+ * nobody can search. This turns those files into searchable text, and leaves deciding
+ * what matters in them to the study.
  *
  * Each source is a folder: a package, a WASM work folder, or a vendor install.
  * It lands in <out>/<source folder name>/, with each file at its path relative
@@ -17,7 +17,10 @@
  *
  * <out>/decode-report.tsv lists every file with what was done to it.
  * An output that already exists is kept, so a rerun only does what's missing.
- * Run scripts/setup.mjs first.
+ *
+ *   node .claude/skills/study-aircraft/scripts/decode.mjs <out> <source> [<source> ...]
+ *
+ * Before the first run, run scripts/setup.mjs, which fetches the tools this uses.
  */
 
 import { spawnSync } from "node:child_process"
@@ -104,14 +107,16 @@ async function decode(file, target) {
   return "untouched"
 }
 
-// Minified code packs a whole module onto a few lines.
+// Minified code packs a whole module onto a few lines, so a line over 1,000 characters
+// marks a file as minified.
 function isMinified(source) {
   return source.split("\n").some((line) => line.length > 1000)
 }
 
-// The tools write to stdout and Node writes the file, because WABT can't open
-// a path past Windows' 260-character limit, and wasm-decompile -o then exits 0
-// with no output. Paths under an aircraft's SimObjects folder get that long.
+// Paths under an aircraft's SimObjects folder can pass Windows' 260-character limit,
+// and WABT's tools can't open a path that long. We saw `wasm-decompile -o` exit 0 on one
+// and write nothing. So the tools write to stdout and Node writes the file, and an empty
+// output counts as a failure.
 function run(tool, args, outputPath) {
   if (existsSync(outputPath) && statSync(outputPath).size > 0) return
   const fd = openSync(outputPath, "w")
@@ -121,8 +126,8 @@ function run(tool, args, outputPath) {
   if (statSync(outputPath).size === 0) throw new Error(`${tool} wrote nothing`)
 }
 
-// Printable runs of 6 or more characters, in ASCII and in UTF-16LE, which is
-// how Windows binaries usually store their strings.
+// Like Unix's `strings`: printable runs of 6 or more characters, in ASCII and in
+// UTF-16LE, which is how Windows binaries usually store their strings.
 function writeStrings(file, target) {
   if (existsSync(target)) return
   const buffer = readFileSync(file)

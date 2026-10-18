@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Mechanical prose checks from .claude/rules/writing.md, on Markdown and on the comments in code.
+// Flags the breaks of .claude/rules/writing.md that a program can catch, such as a banned word
+// or a link to a heading that doesn't exist, in Markdown and in the comments in code.
 //
 //   node scripts/prose-lint.mjs <file>...      Lint whole files. Exits 1 if anything is found.
 //   node scripts/prose-lint.mjs --hook         Lint only what a Write or Edit just wrote, reading the
@@ -24,10 +25,11 @@ const INFLECTIONS = '(?:s|es|d|ed|ing|ly|ness|al|ful)?'
 const CODE_FILE = /\.(?:[cm]?[jt]sx?|cpp|cc|h|hpp|rs|json)$/i
 const HASH_FILE = /\.toml$/i
 const SKIPPED = /(?:^|\/)node_modules\/|^\.claude\/worktrees\//
-// writing.md's Code comments rules out history, since git keeps it. The pattern comes from
-// Afterfund's prose-lint (AfterfundTech/afterfund, .claude/hooks/prose-lint.mjs), without its bare
-// "now" and "used to": the five such hits we checked in our probes' comments meant the moment the
-// code runs, a purpose ("used to tell"), or a variable named NOW.
+// A comment that tells the code's history goes stale, and git keeps the history anyway, so
+// writing.md's Code comments rules it out. The pattern comes from Afterfund's prose-lint
+// (AfterfundTech/afterfund, .claude/hooks/prose-lint.mjs), without its bare "now" and "used to".
+// In our probes' comments, the five such hits we checked meant the moment the code runs, a purpose
+// ("used to tell"), or a variable named NOW.
 const HISTORY = /(?<![.\w])(?:previously|no longer|used to be|for now|we changed|was changed)(?![\w(])/gi
 
 function loadTerms() {
@@ -145,10 +147,10 @@ function scan(text) {
 }
 
 // Returns each line of comment text in a C-like file: JavaScript, TypeScript, C++, Rust, or JSON
-// with comments, such as a tsconfig. Strings are skipped so a `//` inside one isn't read as a
-// comment, and regex literals aren't recognized. A Rust lifetime such as `'a` reads as an unclosed
-// quote, which hides a comment later on its line, and a Rust string that spans lines is read as
-// code after its first line. Taken from Afterfund's prose-lint.
+// with comments, such as a tsconfig. It skips strings, so a `//` inside one isn't read as a
+// comment. Three things fool it: a regex literal, whose `//` can read as a comment; a Rust
+// lifetime such as `'a`, which reads as an unclosed quote and hides the rest of its line; and a
+// Rust string that spans lines, whose later lines read as code. Taken from Afterfund's prose-lint.
 function scanComments(text) {
   const out = []
   let state = 'code'
@@ -305,8 +307,8 @@ function lintMarkdown(file, text, ranges) {
 }
 
 // A document with a "## Sources" section cites it with numbered references like [3]. A source
-// added by hand once reused a number already taken, and the citation it was meant for pointed
-// at a different source without anything failing.
+// added by hand can reuse a number already taken, and the citation meant for it then points at
+// another source, with nothing failing.
 function checkReferences(lines, add, inRange) {
   const start = lines.findIndex((l) => l.heading && /^#{1,6}\s+Sources\s*$/.test(l.code.trim()))
   if (start < 0) return
@@ -362,7 +364,7 @@ function checkLink(file, dest, cache) {
 }
 
 // GitHub's anchor for a heading: lower case, punctuation other than - and _ dropped, each space a
-// hyphen, and -1, -2 appended to repeats.
+// hyphen, and -1, -2 appended to repeats, so "## The C runtime" becomes #the-c-runtime.
 function headingSlugs(text) {
   const seen = new Map()
   const slugs = new Set()

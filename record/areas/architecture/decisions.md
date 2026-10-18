@@ -1791,7 +1791,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - `vpk download github` takes in any draft its token can list (read, same entry), so checking the fetched package against `releases/latest` keeps a leftover draft from becoming the delta's base, whatever the token lists.
   - `vpk pack` writes a portable copy unless told not to, which no design covers (read, same entry).
   - A backend deployed just before its release publishes runs only code that passed that release's checks.
-- **Leaves out:** what each release's notes say; and how CI holds a backend path's bodies to the release that first served them, for the backend's stage.
+- **Leaves out:** what each release's notes say; and how CI holds a backend path's bodies to the release that first served them, for [the network's stage](../build/plan.md#7-the-network).
 
 ## v1 ships no authoring tool
 

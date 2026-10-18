@@ -223,7 +223,7 @@ A third job, which needs the publish job, calls the profiles' workflow, which pu
 
 - The publish job runs D1's migrations and then `wrangler deploy`, with a Cloudflare token from the repository's secrets, just before it publishes, so the backend running is never older than the newest release, and a release's backend deploys only once that release has passed every check.
 - A second workflow, run by hand on `main`, runs the backend's tests, its migrations, and `wrangler deploy`, for a fix between releases.
-- The backend answers older releases' cores too, so a change to a request's body in [its requests](../network/02-units.md#its-requests) takes a new path beside the old one; how CI holds a released path's bodies to its release tag is the backend's stage's ([left open](#left-open)).
+- The backend answers older releases' cores too, so a change to a request's body in [its requests](../network/02-units.md#its-requests) takes a new path beside the old one; how CI holds a released path's bodies to its release tag is the network's stage's ([left open](#left-open)).
 
 ## Authoring tools
 
@@ -268,7 +268,7 @@ On a desk:
 
 - The check's name, and whether our `package.json` takes it from npm or from its repository: its repository's, when it's made.
 - What each release's notes say, and who writes them.
-- How CI holds a backend path's request and answer bodies to the release that first served them, as it holds a released profile level ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)): the backend's stage of [node 8](../architecture/plan.md#8-the-build-order).
+- How CI holds a backend path's request and answer bodies to the release that first served them, as it holds a released profile level ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)): [the network's stage](plan.md#7-the-network), which builds the backend.
 - Whether Microsoft keeps serving older SDK installers: a build of a commit whose SDK it stopped serving can't run, and replaying its recordings would then need that SDK kept elsewhere.
 - Whether bindgen's build script, for the Windows side's bindings, builds with the static runtime, which the first build of the sim's edge settles ([results][crtresults]).
 - Whether the runner's Windows SDK holds the static UCRT, `libucrt.lib`, which the first build on the runner settles ([results][velopack]).

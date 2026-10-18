@@ -203,7 +203,7 @@ Exit: the four are agreed, and these checks pass:
 
 - A walk through [a session from start to finish](03-v1-scope.md#a-session-from-start-to-finish), across the code map and the build's stages, as step 7's walk went across its nodes.
 - On paper, deleting any feature leaves everything else whole, and every engine works outside the core ([the code map](../architecture/plan.md#5-the-code-map)).
-- Each Soon and Later pick lands in the code map as new features, plugins, or channels, without changing an interface the host offers.
+- Each Soon and Later pick lands in the code map as new features, plugins, or channels, without changing an interface the platform offers.
 - Every v1 pick, the three things [step 3](#3-v1-or-later) gives v1 whatever is picked (flight-model sync, the connection, and profiles), and every item the record leaves to step 8 are each in a stage with its own exit criterion.
 
 Design docs keep the notes later designs added at their top, and a builder reads each doc's notes with the text below them, as [writing.md](../../../.claude/rules/writing.md#design-plan-and-log) has a design doc's amendments work.

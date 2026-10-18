@@ -31,6 +31,8 @@ Decides:     The session crate's members, session keys, control, session file, j
 > - Crosscheck has no watcher, so a quit in [joining and leaving](#joining-and-leaving)'s table comes from any client, the desktop app's tray among them, or from Windows ending the pilot's session.
 > - The search for an aircraft's package in [the match check](#the-match-check) takes the packages folders from the sim service, which reads `UserCfg.opt`.
 > - The match check gains an item, from the sim service's state, listing the other packages that override our files, as a warning.
+>
+> Since 2026-10-18, the sim service holds the loaded aircraft's package, folder, install location, version, and livery, aircraft awareness, and finds the package itself while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md)), so [the match check](#the-match-check)'s aircraft items read them there, where the session crate's own job finds the package and reads `A:LIVERY NAME`, and the session crate keeps no package folder for avatars, where the note of 2026-10-17 has it keep one (user, 2026-10-18).
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

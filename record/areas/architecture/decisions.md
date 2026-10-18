@@ -1802,6 +1802,17 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Both are Rust on the workspace's engines and platform crates, so running either from a clone takes the workspace's whole setup, and a pilot who writes YAML needs the guidance the IDE brings anyway (user, 2026-10-18).
 - **Leaves out:** testing a bundle in a contributor's own core, which waits for the IDE.
 
+## The sim service holds the loaded aircraft's facts, which the match check and avatars read
+
+- **Decided:** aircraft awareness, in the sim service's state: the package that holds the loaded aircraft's folder, its folder on disk, where it's installed, its `package_version` where it has one, and the livery, beside sim awareness's aircraft path; a job of the sim service finds the package while a session is held, at each aircraft load and when a session starts with an aircraft loaded, and the sim service raises `AircraftChanged`; the session crate's match items and avatars' model job read it there.
+  This changes the session's units, whose match check finds the package in a job of the session crate's, and avatars, which takes the package folder from this member's `match` key.
+  Settled in the design review after node 6 by the user, 2026-10-18 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md)).
+- **Because:**
+  - Avatars waited for the match check's key to learn the folder, one need riding on another mechanism's side effect, while what aircraft is loaded and where it comes from had no one owner (session/02-units, The match check; avatars/01-avatars, Finding the files).
+  - The search is file I/O, which the sim service already does for the packages folders, while sim awareness stays a model of the sim's stage with no I/O.
+  - Every v1 reader is in a session, so the search runs only while one is held.
+- **Leaves out:** a reader outside a session, which a later feature can add by running the search then.
+
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

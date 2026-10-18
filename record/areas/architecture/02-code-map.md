@@ -120,6 +120,8 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The message crate's build script writes its hash, running again only when what it hashes changes, and the `cargo test` that writes ts-rs's types also writes `ts/stamp.ts`, with the version and the hash, which the check on ts-rs's files covers; and `node tools/build.ts install` copies a development build's package into `Community`, since only an installed desktop app writes it.
 > - A pull request in [CI](#ci) also checks the files compiled with the sim against their sources' hashes, and the stock files against `stock.json`; CI installs Rust with rustup and sets `LIBCLANG_PATH`, each step runs one command, and the profiles' job is a reusable workflow the release workflow calls too.
 > - [Left open](#left-open)'s item on how long CI takes on Windows runners goes to the first stage of node 8 that builds real code, against [budgets for the workspace](#budgets-for-the-workspace).
+>
+> Since 2026-10-18, the sim service also holds aircraft awareness, the loaded aircraft's package, folder, install location, version, and livery, which a job of its own finds while a session is held, and raises `AircraftChanged`, beside its row in [the platform](#the-platform); the session crate's match check and avatars read it there ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md); user, 2026-10-18).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

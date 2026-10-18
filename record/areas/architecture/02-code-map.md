@@ -107,8 +107,8 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
 >
-> - The installer is Velopack's Setup.exe, not a program of ours, which settles [left open](#left-open)'s item on where it lives; `apps/watcher` links the `velopack` crate, and only the watcher does, since a program that runs Velopack's startup applies a downloaded update.
-> - The session crate also holds the watcher's update state and the Install now and Check now commands, and the sim service the packages folders, the check for packages that override ours, the check of our own package, and the settings that turn a package off, beside their rows in [the platform](#the-platform).
+> - There's no `apps/watcher`: `apps/desktop` holds the watcher's jobs, in the desktop app's Rust side, which runs from login as a tray icon, so `apps/` in [the units](#the-units) and [the workspace](#the-workspace) holds `core`, `core-helper`, and `desktop`.
+> - The installer is Velopack's Setup.exe, not a program of ours, which settles [left open](#left-open)'s item on where it lives; `apps/desktop` links the `velopack` crate, and only it does, since a program that runs Velopack's startup applies a downloaded update; and the sim service also holds the packages folders, the check for packages that override ours, and the check of our own package, beside its row in [the platform](#the-platform).
 > - The desktop app builds with `tauri build --no-bundle`, beside its row in [building every target](#building-every-target), and packing a release takes `vpk`, which needs the .NET 8 SDK on the build machine.
 
 Crosscheck's code is a platform, engines, and features.

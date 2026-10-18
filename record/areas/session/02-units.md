@@ -28,7 +28,7 @@ Decides:     The session crate's members, session keys, control, session file, j
 >
 > Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
 >
-> - The session crate registers a slice of the watcher's update state, from the file the watcher writes, and two commands, Install now and Check now, beside those [joining and leaving](#joining-and-leaving) lists; Install now refuses unless an update is ready, and while the sim runs or a session is held, and otherwise asks the watcher to open the desktop app again after the update and quits ([Install now and Check now](../install/01-installing-and-updating.md#install-now-and-check-now)).
+> - Crosscheck has no watcher, so a quit in [joining and leaving](#joining-and-leaving)'s table comes from any client, the desktop app's tray among them, or from Windows ending the pilot's session.
 > - The search for an aircraft's package in [the match check](#the-match-check) takes the packages folders from the sim service, which reads `UserCfg.opt`.
 > - The match check gains an item, from the sim service's state, listing the other packages that override our files, as a warning.
 

@@ -89,6 +89,7 @@ The picks, picked on 2026-10-02:
   - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
   - [Telemetry](ideas.md#telemetry), picked on 2026-10-04
   - [Aircraft adapters](ideas.md#aircraft-adapters), picked on 2026-10-04, each built as a plugin
+  - Turning off another package that overrides our files, from Crosscheck's settings, out of [installing and updating](03-v1-scope.md#installing-and-updating) on 2026-10-18, because the warning that names the package lets the pilot remove it themselves (user)
 
 [Seat awareness](ideas.md#seat-awareness) left Soon on 2026-10-04: avatar sync took telling a pilot's seat into v1, the IDE pick places the seats, and moving a pilot's camera to a seat went to [Ideas left out](ideas.md#ideas-left-out), as did permanent codes.
 

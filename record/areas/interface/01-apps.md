@@ -7,10 +7,11 @@ Decides:     How a feature's part plugs into each app and comes out; what a part
 ```
 
 > **Note**
-> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in three places:
+> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in four places:
 >
-> - The watcher's tray quits the core through a message posted to the core's window, which settles what [quit](#quit) leaves to 6.17.
-> - [Slices and commands](#slices-and-commands) gains the session crate's slice of the watcher's update state and its Install now and Check now, and the sim service's slice shows where each package it can turn off sits; the desktop app closes itself on the `bye` that follows its own Install now.
+> - Crosscheck has no watcher: the desktop app runs from login as a tray icon and does the watcher's jobs, and its tray's Quit sends the session crate's Quit, which settles what [quit](#quit) leaves to 6.17.
+> - The desktop app's socket to the core is open while its window is open, and closing the window destroys it; the app wants a core while the sim runs or its window is open, starts one when none runs, starts one again 2s after an exit other than 0, and after an exit with 0 starts none until the sim next starts or the window next opens, which replaces [when the core goes](#when-the-core-goes)'s rules on the port file and the `bye`.
+> - One copy of the desktop app runs at a time, so the core's start of its program in [bringing the desktop app forward](#bringing-the-desktop-app-forward) opens the running app's window; the update's state, Install now, and Check now are the desktop app's own, in its window.
 > - [Trouble](#trouble) gains our own package, which the sim service checks at the core's start and at each sim start, raising a trouble notice when it's missing, at another version, or off in the sim; and the check that names another package overriding our files is the sim service's, with a warning notice for each package and one match item.
 
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.

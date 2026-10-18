@@ -1644,9 +1644,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Crosscheck has no watcher, and the desktop app runs from login as a tray icon doing its jobs
 
-- **Decided:** the desktop app starts at login as a tray icon alone, from a Run value with `--tray` that Velopack's install hook writes, and its Rust side does every job the spine and decisions 002 and 003 give the watcher; one copy runs for each data folder, so a second start opens the running one's window; closing the window destroys it; its socket to the core is open while its window is open; and the tray's Quit sends the session crate's Quit and ends the app.
+- **Decided:** the desktop app starts at login as a tray icon alone, from a Run value with `--tray` that Velopack's install hook writes, and its Rust side does every job the spine and decision 002 give the watcher; one copy runs for each data folder, so a second start opens the running one's window; closing the window destroys it; its socket to the core is open while its window is open; and the tray's Quit sends the session crate's Quit and ends the app.
   It wants a core while the sim runs, its window is open, or a session file exists, starts one from its own folder when the port file names none that runs, starts one again 2s after an exit other than 0, and after an exit with 0 starts none until the sim next starts or its window next opens.
-  This changes [decision 002](../../decisions/002-core-starts-with-every-sim-run.md) and [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), whose watcher the desktop app replaces, and drops [decision 015](../../decisions/015-watcher-reads-files-core-writes.md), once step 8's decisions are numbered.
+  This changes [decision 002](../../decisions/002-core-starts-with-every-sim-run.md), whose watcher the desktop app replaces, and drops [decision 015](../../decisions/015-watcher-reads-files-core-writes.md), once step 8's decisions are numbered.
   Settled in node 6.17 by the user, 2026-10-18 ([one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
 - **Because:**
   - A Tauri 2 app with a tray icon and no window took 2.2 MB of Task Manager's memory, and 3.7 MB once a window it had opened was destroyed, while a hidden window kept WebView2's 72.3 MB (measured on our development machine, 2026-10-18, [install log](../install/log.md#2026-10-18-a-tauri-2-app-idles-as-a-tray-icon-in-22-mb-and-gives-back-webview2s-69-mb-once-its-window-is-destroyed-but-not-while-its-hidden)).
@@ -1680,16 +1680,19 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Only the pilot can close the sim or leave a session (user, 2026-10-18).
 - **Leaves out:** a sim started in the seconds Update.exe takes to swap, which boots with the old package beside a new core.
 
-## The desktop app writes our package wherever it's missing or of another version, at its start and at each sim close
+## The desktop app writes our finished package wherever it's missing or of another version, and the BlurPage copy ships in it
 
-- **Decided:** while the sim is closed, at its start and each time the sim closes, the desktop app writes our package into each packages folder's `Community` where it's missing or its `manifest.json`'s `package_version` isn't the app's version, building the copy in `Crosscheck\` beside `Community`, with the BlurPage copy and a `layout.json` the app writes, and swapping it in by rename, and nothing watches `Community` between those moments (user, 2026-10-18); a change to the sim's BlurPage file, found at the app's start or while the sim is closed, builds and swaps the package the same way.
+- **Decided:** while the sim is closed, at its start and each time the sim closes, the desktop app copies our package, as the build finished it, into each packages folder's `Community` where it's missing or its `manifest.json`'s `package_version` isn't the app's version, copying it into `Crosscheck\` beside `Community` first and swapping it in by rename, and nothing watches `Community` between those moments (user, 2026-10-18).
+  The BlurPage copy ships in the package, built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either (user, 2026-10-18).
+  This changes [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), whose watcher makes the copy on each pilot's PC, once step 8's decisions are numbered.
   Nothing asks the pilot for a packages folder.
   Settled in node 6.17 by the user, 2026-10-18 ([our package](../install/01-installing-and-updating.md#our-package), [the packages folders](../install/01-installing-and-updating.md#the-packages-folders)).
 - **Because:**
   - One rule covers an install, an update, a reinstall, and a package deleted between them, with no record of what was written.
+  - A shipped copy reaches every pilot the same, the Microsoft Store edition's too, whose install folder a program may not be able to read (unverified), and no PC reads or watches the sim's files; on our Steam install BlurPage's files were last written on 2025-11-04 (read on our development machine, 2026-10-18, [install log](../install/log.md#2026-10-18-the-sims-blurpage-files-havent-changed-since-2025-11-04)), so the copy should rarely fall behind.
   - The sim's `Content.xml` names every folder in `Community` by its name, suffixes included (read on our development machine, 2026-10-18), so a copy built there would most likely mount as a second package, and our FS Copilot exerciser's in-process sync of a build into its own folder "deleted 349 of 355 files" before its fix staged and swapped (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
   - The sim "will only look at this file to determine where the Official and Community folders are" (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), so a folder a pilot names before the sim has written one may not be the sim's.
-- **Leaves out:** whether the sim's first run writes `UserCfg.opt`, which a fresh install settles.
+- **Leaves out:** whether the sim's first run writes `UserCfg.opt`, which a fresh install settles; and how the build notices a sim update that changes BlurPage, and where it keeps the stock files, for [6.18](plan.md#618-the-build).
 
 ## The desktop app adds the firewall rule on its first run, and offers the fix while it's missing or blocked
 

@@ -20,7 +20,7 @@ The research behind it is in this area's [log](log.md).
 
 - A Tauri 2 app with a tray icon and no window took 2.2 MB of Task Manager's memory in one process, and no CPU over 60s; with a window open, 72.7 MB in seven; with the window hidden, 72.3 MB in seven; and with the window destroyed, 3.7 MB in one, every WebView2 process gone within 15s (measured on our development machine, 2026-10-18, [log](log.md#2026-10-18-a-tauri-2-app-idles-as-a-tray-icon-in-22-mb-and-gives-back-webview2s-69-mb-once-its-window-is-destroyed-but-not-while-its-hidden)).
   So closing the desktop app's window destroys it, and never hides it; that a window opened again after one was destroyed gives its memory back the same way is unmeasured ([cases on a desk](#cases-on-a-desk)).
-- The desktop app's Rust side does every job the spine and decisions 002 and 003 give the watcher, so no program of ours runs beside the core without talking to it, and the files [decision 015](../../decisions/015-watcher-reads-files-core-writes.md) has the watcher read fall away with it.
+- The desktop app's Rust side does every job the spine and decision 002 give the watcher, so no program of ours runs beside the core without talking to it, and the files [decision 015](../../decisions/015-watcher-reads-files-core-writes.md) has the watcher read fall away with it; the BlurPage copy that decision 003 gives the watcher ships in our package instead ([our package](#our-package)).
 - **At login** it starts as a tray icon alone, from a value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` that runs it with `--tray`.
   Velopack's install hook writes that value, since starting with Windows is on at first ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and the app's setting to start with Windows writes or deletes it after.
   Started with no argument, as from the Start menu, it opens its window.
@@ -34,7 +34,7 @@ The research behind it is in this area's [log](log.md).
 | Unit | Holds |
 | --- | --- |
 | Velopack's Setup.exe and Update.exe | Not ours: the installer, and the swap of one release's programs for the next ([the installer and the updater](#the-installer-and-the-updater)) |
-| `apps/desktop` | The tray icon and the window, and in its Rust side the watcher's jobs: noticing the sim, starting the core and starting it again, checking for, downloading, and applying updates, writing our Community package and its BlurPage copy, the firewall rule, and the 24 hours of figures |
+| `apps/desktop` | The tray icon and the window, and in its Rust side the watcher's jobs: noticing the sim, starting the core and starting it again, checking for, downloading, and applying updates, writing our Community package, the firewall rule, and the 24 hours of figures |
 | `sim-service` | The packages folders, the search for packages that override our files, and the check of our own package |
 
 ## The installer and the updater
@@ -77,9 +77,9 @@ An MSI installed per machine prompts for an administrator at every update (read 
 | Velopack's downloads | `%LOCALAPPDATA%\Crosscheck\packages\` |
 | WebView2's data for the desktop app's window | `%LOCALAPPDATA%\Crosscheck\webview\`, so an uninstall deletes it with Velopack's folder |
 | The core's data folder | `%APPDATA%\Crosscheck\` |
-| The desktop app's own files: the hash its BlurPage copy came from, the last Store install folder it saw, and its figures | `%APPDATA%\Crosscheck\app\` |
+| The desktop app's own files, its figures among them | `%APPDATA%\Crosscheck\app\` |
 | Our package | `Community` in each packages folder ([the packages folders](#the-packages-folders)) |
-| Our package while the app builds it | `Crosscheck\` in each packages folder, beside `Community`, for the seconds the build takes while the sim is closed |
+| Our package while the app copies it | `Crosscheck\` in each packages folder, beside `Community`, for the seconds the copy takes while the sim is closed |
 
 - The data folder sits outside Velopack's folder, whose contents an uninstall deletes (read in `src/bins/src/commands/uninstall.rs`), and in `%APPDATA%`, the folder the sim's Steam edition keeps its own packages in (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - Our package goes in `Community`, where FS Copilot's, YourControls', and FlyByWire's installers put theirs ([prior installers](results/2026-10-18-prior-installers.txt); [installer frameworks](results/2026-10-18-installer-frameworks.txt)), though the SDK names `Community2024` for packages only MSFS 2024 runs (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)).
@@ -145,14 +145,14 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 - At its start and each time the sim closes, while the sim is closed, the desktop app writes our package from `current\` into each packages folder's `Community` where the package is missing or its `manifest.json`'s `package_version` isn't the app's version.
   That one rule writes it at an install, after an update, after a reinstall, and after a pilot or a mod deletes it, and nothing watches `Community` between those moments (user, 2026-10-18).
-- It builds the new copy in `Crosscheck\` beside `Community`, makes its BlurPage copy there ([decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md)), writes the copy's `layout.json`, renames the old copy out of `Community` and the new one in, and deletes the old one.
-  - The app writes `layout.json`, with each file's size and date, because the BlurPage copy's come from the pilot's own sim, and a broken `layout.json` fails silently ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
-  - A copy built inside `Community` would most likely mount as a second package, since the sim's `Content.xml` names each folder there by its name, suffixes included (read on our development machine, 2026-10-18; unverified by a run).
+- The build finishes the package in `current\`, its `layout.json` included, so the app only copies it: first into `Crosscheck\` beside `Community`, then it renames the old copy out of `Community` and the new one in, and deletes the old one.
+  - A copy made inside `Community` would most likely mount as a second package, since the sim's `Content.xml` names each folder there by its name, suffixes included (read on our development machine, 2026-10-18; unverified by a run).
   - Our FS Copilot exerciser's sync of a new build into its own folder, while it ran, "deleted 349 of 355 files" before it reached one in use, and its fix "stages then swaps rather than deleting first" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
   - Before it deletes a folder, the app checks whether it's a junction and removes only the link, since fsc-editor found two packages in our Community folder that were junctions to folders under `Program Files` (read in fsc-editor, `src/main/sim/install.ts`, `removeEntry`).
-- **The BlurPage copy** follows [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md): at its start, and while the sim is closed, the app compares the sim's file in `fs-base-ui\cookedcomps\` with the hash the copy came from, watching the folder between, and when they differ it builds our package again and swaps it in, as above.
-  - On Steam it finds `fs-base-ui` under the library that `appmanifest_2537590.acf` names, in `steamapps\common\Limitless\Packages`, which only Steam's update of 2026-10-14 had rewritten, while the sim's boots on 2026-10-16 wrote nothing there (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
-  - The Store edition's folder carries the sim's version in its name, `WindowsApps\Microsoft.Limitless_<version>_x64__8wekyb3d8bbwe` (documented in pilots' posts of Windows' crash events, same file), so the app takes it from the running sim's path and keeps the last one it saw; whether a program can read it is unverified, and without the copy Go to is unavailable and says why, as decision 003 accepts.
+- **The BlurPage copy ships in our package,** built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either, where [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md) has the watcher make the copy on each pilot's PC (user, 2026-10-18).
+  - Every pilot then gets the same copy, the Microsoft Store edition's pilots too, whose install folder a program may not be able to read (unverified, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)), and no PC reads, hashes, or watches the sim's files.
+  - The copy should rarely fall behind: on our Steam install, BlurPage's two files were last written on 2025-11-04, though Steam's update of 2026-10-14 rewrote other files in `fs-base-ui`, and the `.json` matches the copy we took on 2026-10-06 (read on our development machine, 2026-10-18, [log](log.md#2026-10-18-the-sims-blurpage-files-havent-changed-since-2025-11-04)).
+  - When a sim update does change BlurPage, our older copy hides the sim's new one until our next release, and what that does to the menu is unknown until it happens; how the build notices such an update, and gets the stock files, is [6.18](../architecture/plan.md#618-the-build)'s.
 
 ## The checks in the core
 
@@ -186,6 +186,8 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 - The desktop app's uninstall hook runs with no UI, and Velopack kills it after 30s, by its docs, where its source passes 60s (documented, [Velopack's hooks](https://docs.velopack.io/integrating/hooks); read in velopack 1.2.161, `src/bins/src/commands/uninstall.rs`).
 - Velopack force-stops every process running from its folder before it runs the hook (read in velopack 1.2.161, `src/bins/src/commands/uninstall.rs`, `uninstall`), so a core that runs at an uninstall dies with no quit, and a crew in a session with it sees its link lost; uninstalling in a session isn't a path a crew takes.
+- Only the pilot starts an uninstall, from Windows' list of installed programs, and an update never does, since it applies only with no core running.
+  The nearest thing to an accident is running Setup.exe again over the install, which asks the pilot to confirm, then force-stops our programs and runs the install hook, not the uninstall hook (read in velopack 1.2.161, `src/bins/src/commands/install.rs`), so the data folder stays: the new app, finding the session file, starts a core, and the pilot comes back as a late joiner, as after a crash ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)).
 - The hook deletes our package from each `Community`, the `Crosscheck\` folder beside each, the Run value, and the data folder.
 - Velopack then deletes its own folder, the programs and WebView2's data among it, ignoring any file it can't delete, the Start-menu shortcut, and its entry in the pilot's list of installed programs (same file); WebView2's processes run from the runtime's own folder, so whether one outlives the app it served and holds a file there is unverified ([cases on a desk](#cases-on-a-desk)).
 - The firewall rule stays, as [the firewall rule](#the-firewall-rule) says.
@@ -224,7 +226,8 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - The window opens with the stand-in ended: the core started for it waits for the app's socket, rather than exiting at once.
 - An update is downloaded and the app starts with the stand-in running: the update stays pending.
 - An update downloads while the stand-in runs: the window says the sim holds it; the stand-in ends, the core exits, the update applies, and the new app starts as a tray icon and writes our package.
-- The stand-in starts while the app builds our package: the app swaps nothing, and writes the package at the stand-in's next end.
+- The stand-in starts while the app copies our package: the app swaps nothing, and writes the package at the stand-in's next end.
+- Setup.exe run over the install during a session: the core dies, the new app starts a core because the session file exists, and the pilot comes back as a late joiner.
 - A session file, or an open window, holds a downloaded update, and the window says which.
 - A host who is behind, alone in a session with the stand-in ended: the window says the session holds the update, and it applies once they leave.
 - Install now waits while the stand-in runs or a session is held; otherwise the core quits, the update applies, and the new app opens its window.

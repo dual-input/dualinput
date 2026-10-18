@@ -863,9 +863,10 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 > **Note**
 > The helper the sim launches, below, is the watcher's job in [the architecture's spine](../architecture/01-spine.md#components) (user, 2026-10-06), and the spine's helper is the core's process for Windows input and audio.
 >
-> Since 2026-10-18, [installing and updating's design](../install/01-installing-and-updating.md) changes this section in six places:
+> Since 2026-10-18, [installing and updating's design](../install/01-installing-and-updating.md) changes this section in seven places:
 >
 > - Crosscheck has no watcher: the desktop app runs from login as a tray icon and does the jobs this section gives the watcher and the helper the sim launches, so the figures it shows are its own and the core's.
+> - Our copy of BlurPage ships in our package, built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either (user, 2026-10-18), so what quitting costs no longer includes Go to staying off after a sim update, which [preflight](#preflight)'s copy made on each PC had.
 > - No warning that a waiting update needs a sim restart shows early in the sim's load, since Windows' Focus assist turns on by default while a game runs and hides other apps' banners (user, 2026-10-18), so the open questions on how recent a last session must be, and on where the Store install keeps `exe.xml`, fall away.
 > - The desktop app also checks for an update on a timer and when the pilot asks ([when the app checks](../install/01-installing-and-updating.md#when-the-app-checks)); its window shows whether it's checking, downloading, up to date, ready and what holds it back, or failed; and Install now quits the core so the update applies, waiting while the sim runs or a session is held (user, 2026-10-18).
 > - Nothing asks the pilot for a Community folder: the sim finds its folders only through `UserCfg.opt`, so a pilot who installs before the sim's first run gets our package when that run closes, provided the run writes `UserCfg.opt` (unverified).

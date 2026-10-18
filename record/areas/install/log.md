@@ -1,5 +1,25 @@
 # Installing and updating: log
 
+## 2026-10-18: The sim's BlurPage files haven't changed since 2025-11-04
+
+**Asked.**
+How often a copy of BlurPage that we ship would fall behind the sim's own, once shipping it replaced making it on each pilot's PC (user, 2026-10-18).
+
+**Expected.**
+A change with some sim updates, since Steam's update of 2026-10-14 rewrote files in `fs-base-ui`.
+
+**Found,** by reading our Steam install's `steamapps\common\Limitless\Packages\fs-base-ui\cookedcomps\` (read on our development machine, 2026-10-18, MSFS 2024 1.9.18.0):
+
+- `{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html`, 973 bytes, and its `.json`, 142 bytes, were both last written on 2025-11-04.
+- The `.json`'s SHA-256 matches the copy interface's p10 took on 2026-10-06 (`experiments/areas/interface/menu/package/PackageSources/cookedcomps/`), and the `.html` is still the 973 bytes the [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly) gives it.
+- Whether Steam keeps a file's old write time when an update leaves it unchanged, rather than the sim having left it alone, is unverified; the hash match covers 2026-10-06 to today.
+
+**What changed.**
+The BlurPage copy ships in our package, built like our `VCockpit.js`, where [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md) has it made on each PC ([our package](01-installing-and-updating.md#our-package)).
+
+**Docs affected.**
+[Installing and updating](01-installing-and-updating.md).
+
 ## 2026-10-18: A Tauri 2 app idles as a tray icon in 2.2 MB, and gives back WebView2's 69 MB once its window is destroyed, but not while it's hidden
 
 **Asked.**

@@ -3,56 +3,13 @@
 ```text
 Purpose:     How the core reaches the sim and knows what it's doing, and how our WASM module runs the routines features feed it.
 Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loop-and-edge.md, 02-clients-and-panel-bridge.md, ../architecture/decisions.md, log.md
-Decides:     The sim edge's thread and its inputs, the sim's process among them; the sim client's and the sim service's interfaces; sim awareness's stages and its one moment, and that it's an engine; how the core tells a crash from a close, and which aircraft and preset loaded; our WASM module's slots, its status, and what happens to a module from another build; which of the sim's APIs carries each want; the module through a flight load; the core's announcement; and the budgets (node 6.3).
+Decides:     The sim edge's thread and its inputs, the sim's process among them; the sim client's and the sim service's interfaces; sim awareness's stages and its one moment, and that it's an engine; how the core tells a crash from a close, which aircraft and preset loaded, and the loaded aircraft's facts; our WASM module's slots, its status, and what happens to a module from another build; which of the sim's APIs carries each want; the module through a flight load; the core's announcement; and the budgets (node 6.3).
 ```
-
-> **Note**
-> Since 2026-10-16, a watch, a camera read, or `frames` in [what a feature calls](#what-a-feature-calls) can be declared `.unrecorded()` by a unit registered as partly recorded, and the sim service hands the edge each such request's connection, kind, and ID before the call goes out, so the recording leaves out its answers; the sim service decides nothing on such an answer beyond routing it to its feature. Each unit numbers its own connections, by its place in the registry and its own count of opens, and the sim service drops an input for a connection it hasn't opened, as it does one for a connection it closed ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
->
-> Since 2026-10-16, [the session's units](../session/02-units.md) changes this document in three places:
->
-> - The sim service reads, as a job, the flight file each `FlightLoaded` names, and gives sim awareness its `[Departure]` section's airport, stand name, and stand number as a signal of its own, beside the signals in [sim awareness](#sim-awareness), since the session crate and Go to both read it ([preflight](../session/02-units.md#preflight)).
-> - The `world_map` requests in [what a feature calls](#what-a-feature-calls) are `free_flight`, `departure_airport`, `departure_stand`, and `departure_runway` ([the menu script](../session/02-units.md#the-menu-script)).
-> - In a session, the menu script reads the page every 500ms and reports a change, beside its report when its socket joins in [leaving Starting](#leaving-starting).
->
-> Since 2026-10-16, [the sync units](../sync/05-units.md#reaching-the-sim) changes this document in three places:
->
-> - `key` sends with SimConnect's legacy call when the event carries one value or none, and with `_EX1` only when it carries more, where [what a feature calls](#what-a-feature-calls) always sends `_EX1`.
-> - The sim service gains `listen(event)`, which maps the event, adds it to a group that never masks, and gives the group the highest priority.
-> - State sync fires `H:` events from a routine of its own, `HEvents`, and the routine host carries that want with `fsEventsRegisterHEvent` and `fsEventsHEventCall`, a row [wants and the sim's APIs](#wants-and-the-sims-apis) lacks, which settles what a feature calls' line on `H:` events ([`H:` events](../sync/05-units.md#h-events)).
->
-> Since 2026-10-17, [flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module) changes this document in four places:
->
-> - A routine slot's header also carries the core's counter at the write, in µs, after the slots hash in [its slots](#its-slots), and the routine host's `Frame::now` is its estimate of the core's counter ([the core's counter in our module](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)), where the module reads WASI's monotonic clock only to count its status slot's seconds.
-> - The module also creates a report slot, `CROSSCHECK_REPORT_` and the routine's ID, read-only, for each routine that reports, and a feature requests it through `cx.module().reports(routine)`, beside the calls in [what a feature calls](#what-a-feature-calls), which a partly recorded unit may declare `.unrecorded()`.
-> - [Wants and the sim's APIs](#wants-and-the-sims-apis) gains a report, through `SimConnect_SetClientData` on the module's own connection, and events with values, through `fsEventsTriggerKeyEvent` with its values.
-> - The sketch in [what a feature calls](#what-a-feature-calls) has flight-model sync watch the pose each sim frame once a profile loads; it feeds its routine `Lead` instead, which reads the pose in the module, and loads no profile.
->
-> Since 2026-10-17, a `watch` and a `key` in [what a feature calls](#what-a-feature-calls) can name an object by its ID rather than the pilot's aircraft, as avatars watches `SIMCONNECT_OBJECT_ID_USER_AVATAR` on foot and freezes each figure it creates; and the figure's SimObject title is `CROSSCHECK_FIGURE_PILOT`, of the kind `FIGURE` ([avatars](../avatars/01-avatars.md#names)).
->
-> Since 2026-10-17, [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md) changes this document in four places:
->
-> - [What a feature calls](#what-a-feature-calls) gains `poll(type, radius)`, one `SimConnect_RequestDataOnSimObjectType` for each call under a request ID of its own, which a partly recorded unit may declare `.unrecorded()`, as 6.6 asked ([polling](../traffic-atc/01-traffic-and-atc.md#polling)).
-> - It also gains `release(object)`, for `SimConnect_AIReleaseControl` on an object the feature created.
-> - A `watch` takes a period of once, which reads an object's variables one time, as traffic reads each new object's identity; such a watch reuses one definition for its names, and the sim client doesn't make it again on a new connection, where [the sim client](#the-sim-client) makes every setup call again.
-> - Traffic's copies are written each frame by its routine `Traffic`, so traffic's connection makes a few calls a second, and the 4,096 packet IDs [its thread](#its-thread) keeps for each connection hold far more than the 1s it gives them.
->
-> Since 2026-10-17, v1 has no plugins, so the routine host runs no `Mechanisms` routine and carries no want for calculator code, and [wants and the sim's APIs](#wants-and-the-sims-apis) loses `execute_calculator_code`'s row ([plugins and the sandbox](../plugins/01-plugins.md#no-plugins-in-v1)).
-> Since 2026-10-17, the sim service registers a slice of client state holding sim awareness's stage, page, aircraft, pause, and how the last run ended, and the module's status, and raises a trouble notice while any routine is fed and the module is Missing, Differs, or Stopped, cleared when it runs or no routine is fed; which of the slice the apps show is the apps' design, which settles what [sim awareness](#sim-awareness) and [the module's status](#the-modules-status) leave to 6.16 ([the apps](../interface/01-apps.md#trouble)).
-> Since 2026-10-18, the sim service also reads the sim's packages folders from `UserCfg.opt`, for the session crate's search too; at the core's start and each time it finds the sim's process, it searches other packages' `layout.json` for the paths ours lists outside our own folders and raises a warning notice for each package found, and checks our own package, raising a trouble notice when it's missing, at another version, or off in the sim ([installing and updating](../install/01-installing-and-updating.md#the-checks-in-the-core)).
->
-> Since 2026-10-18, the sim service also holds the loaded aircraft's facts, aircraft awareness, beside sim awareness's aircraft path in [the aircraft](#the-aircraft) (user, 2026-10-18):
->
-> - The package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, and the livery, `A:LIVERY NAME`.
-> - A job finds the package in the packages folders the sim service reads from `UserCfg.opt`, as [the session's match check](../session/02-units.md#the-match-check) had the session crate's job find it, while a session is held: at each aircraft load, and when a session starts with an aircraft already loaded, since every v1 reader is in a session.
-> - The sim service raises `AircraftChanged` when those facts change, the search's result included, and the match check's items and avatars' model job read them there, so no feature takes the aircraft's package from another's key.
->
-> Since 2026-10-18, the module's status of Missing or Differs and the sim service's check of our package on disk raise one trouble notice for our package, where [the module's status](#the-modules-status) and the note of 2026-10-17 raise one for the module apart from the package's; Stopped keeps its own (user, 2026-10-18).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.
-Our WASM module runs a routine only on feeds from its own build, which it tells by the slots hash, and carries each want through the sim's `fsVars` and `fsEvents` APIs, with calculator code only for a plugin's calculator code.
+Our WASM module runs a routine only on feeds from its own build, which it tells by the slots hash, and carries each want through the sim's `fsVars` and `fsEvents` APIs, and each report through `SimConnect_SetClientData`.
 
 This answers node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module).
 The code map's [sim seam](../architecture/02-code-map.md#the-sim-seam), [work in the sim](../architecture/02-code-map.md#work-in-the-sim), and [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares), the spine's [sim awareness](../architecture/01-spine.md#sim-awareness), [01-loop-and-edge](01-loop-and-edge.md), and [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
@@ -64,7 +21,7 @@ The code map's [sim seam](../architecture/02-code-map.md#the-sim-seam), [work in
 | `sim-edge` | Engine | One thread holding every SimConnect connection and the sim's process: it makes each call, tags each exception, and hands up each message, open, loss, and change of the process as an input | Off the loop, in the core and the IDE |
 | `sim-client` | Engine | For each connection: its IDs, the calls that set it up, which it makes again on a new connection, and a feature's call turned into SimConnect's calls | On the loop, and in the IDE |
 | `sim-awareness` | Engine | One step function from a sim signal to the sim's state, with no clock and no I/O | On the loop, on the bench, and in the IDE |
-| `sim-service` | Platform | The connections, the calls features make, routines' feeds, the module's status and the unfreeze, the masking group, the announcement, and the world map's requests; it raises `SimChanged` | On the loop |
+| `sim-service` | Platform | The connections, the calls features make, routines' feeds, the module's status and the unfreeze, the masking group, the announcement, the world map's requests, aircraft awareness, and the checks of packages on disk; it raises `SimChanged` and `AircraftChanged` | On the loop |
 | `routine-host` | Platform, outside the core | Routines, their slots and wants, the freeze, and the module's status slot | In our WASM module, and natively on the bench |
 | `sim-package/wasm-module` | Sim package | The module's edge on the sim's APIs, and the list of routines | In the sim |
 
@@ -79,7 +36,8 @@ Sim awareness is an engine so that the IDE can link it, as it links the sim clie
   It waits at most 2ms, so the edge still reads a connection whose event never fires, because the SDK says only that a client "can be written to respond to Windows Events" ([SimConnect_Open](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_Open.htm)), not when the sim signals one.
   p08's client waited the same way through a flight (read in `experiments/areas/architecture/flight/client/src/main.rs`; [architecture log][flight]).
 - On each wake it makes the queued calls in their order, then takes each connection's messages through `SimConnect_GetNextDispatch` until none is left.
-- After each call it reads `SimConnect_GetLastSentPacketID`, and keeps each packet ID with its call's handle for the last 4,096 calls on each connection, about 1s of writes while traffic writes 132 injected objects every frame at 32.5 fps, 4,290 a second (arithmetic, from [04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+- After each call it reads `SimConnect_GetLastSentPacketID`, and keeps each packet ID with its call's handle for the last 4,096 calls on each connection.
+  Traffic's routine `Traffic` writes its copies each frame, so traffic's connection makes a few calls a second, and 4,096 packet IDs hold far more than 1s of its calls ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#traffic-each-frame)).
   An exception whose packet ID it holds goes up tagged with that handle.
 
 ### Its inputs
@@ -111,8 +69,9 @@ Four kinds of input come up through the seam, each stamped and recorded ([inputs
 
 - **Calls:** `SimCall`, the output type the edge carries out, has a variant for each SimConnect function our code calls, with its arguments owned, so the edge maps each variant to one call, and the stand-in sim answers each ([node 7](../architecture/plan.md#7-testing)).
 - **IDs:** each connection counts its definitions, requests, client events, groups, and client data from 1, on the loop, so a replay hands out the same.
-- **Setup:** it keeps, in order, each call that set something up on a connection, and makes them all again on that connection's next open, as FS Copilot keeps a list of setup actions for each connection ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+- **Setup:** it keeps, in order, each call that set something up on a connection, other than a watch with a period of once, and makes them all again on that connection's next open, as FS Copilot keeps a list of setup actions for each connection ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
 - **Watches:** a watch's datum IDs are its names' places in it, so each tagged value names its variable; a number is `FLOAT64`, and a string `STRING256`.
+  A watch with a period of once reuses one definition for its names ([polling](../traffic-atc/01-traffic-and-atc.md#polling)).
 - **`B:` names:** at a connection's first `B:` name, it enumerates the input events, holds the connection's `B:` calls until the list is whole, then makes each by its hash, as fsc-editor's cycle does ([04-02](../../learn/foundations/04-02-events.md#the-input-events-api)); a name not on the list answers its call with an error.
 
 ## The sim service
@@ -122,13 +81,14 @@ Four kinds of input come up through the seam, each stamped and recorded ([inputs
 ```rust
 // a sketch: flight-model sync on the flying machine
 pub fn register(r: &mut Registry) {
-    let me = r.unit::<FlightModel>("flight-model");
+    let me = r.unit::<FlightModel>("flight-model").partly_recorded();
     me.on_sim(FlightModel::on_sim);                 // a value, an object's ID, an exception, a lost connection
-    me.on::<ProfileLoaded>(FlightModel::start);     // a hypothetical name for the profile loader's moment
+    me.on::<FlightChanged>(FlightModel::flight);    // this pilot entered or left the flight, a load included
 }
 
-fn start(me: &mut FlightModel, _: &ProfileLoaded, cx: &mut Cx) {
-    me.pose = Some(cx.sim().watch::<Pose>(Period::SimFrame));   // a handle now; the first call opens the feature's connection
+fn flight(me: &mut FlightModel, _: &FlightChanged, cx: &mut Cx) {   // in the flight, holding control
+    me.reports = Some(cx.module().reports(routine::LEAD).unrecorded());   // a handle now; the first call opens the feature's connection
+    cx.module().feed(routine::LEAD, LeadSlot {});                         // Lead reads the pose in the module
 }
 ```
 
@@ -136,18 +96,26 @@ fn start(me: &mut FlightModel, _: &ProfileLoaded, cx: &mut Cx) {
 | --- | --- |
 | `watch(names or a struct, period)` | One definition, requested `TAGGED`, with `CHANGED` when the period is "on change" |
 | `write(watch, values)` | `SetDataOnSimObject` on that definition |
-| `key(event, values)` | `MapClientEventToSimEvent` once, then `TransmitClientEvent_EX1` |
+| `poll(type, radius)` | One `RequestDataOnSimObjectType` for each call, under a request ID of its own ([polling](../traffic-atc/01-traffic-and-atc.md#polling)) |
+| `key(event, values)` | `MapClientEventToSimEvent` once, then `TransmitClientEvent` when the event carries one value or none, and `TransmitClientEvent_EX1` only when it carries more ([reaching the sim](../sync/05-units.md#reaching-the-sim)) |
+| `listen(event)` | Maps the event, adds it to a group that never masks, and gives the group the highest priority ([reaching the sim](../sync/05-units.md#reaching-the-sim)) |
 | `input`, `set_input` | `GetInputEvent`, `SubscribeInputEvent`, and `SetInputEvent`, by hash |
 | `create_ai`, `remove` | `AICreateNonATCAircraft_EX1` or `AICreateSimulatedObject_EX1`, and `AIRemoveObject` |
+| `release(object)` | `AIReleaseControl` on an object the feature created |
 | `camera` | `CameraGet` |
 | `commbus_call`, `commbus_listen` | `CallCommBusEvent`, and `SubscribeToCommBusEvent` |
 | `frames` | `SubscribeToSystemEvent` for `Frame` |
 | `cx.module().feed(routine, slot)`, `.end(routine)` | `SetClientData` on the routine's slot, [below](#its-slots) |
-| `world_map(request)` | A `unit` message to the menu script ([the protocol](02-clients-and-panel-bridge.md#the-protocol)), answered with the call's handle; the requests are [6.7](../architecture/plan.md#67-the-session)'s |
+| `cx.module().reports(routine)` | Requests the routine's report slot `ON_SET` on the feature's connection, so each report reaches the feature as a value ([what this adds to our WASM module](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module)), [below](#its-slots) |
+| `world_map(request)` | A `unit` message to the menu script ([the protocol](02-clients-and-panel-bridge.md#the-protocol)), answered with the call's handle; the requests are `free_flight`, `departure_airport`, `departure_stand`, and `departure_runway` ([the menu script](../session/02-units.md#the-menu-script)) |
 
 - A feature's call is a call to the sim service, which the kernel runs once the feature's handler has returned ([hooks](01-loop-and-edge.md#hooks)), and its handle comes from the kernel's counter at once ([timers, jobs, and IDs](01-loop-and-edge.md#timers-jobs-and-ids)).
 - A call made while the sim is closed is answered at once with an error.
-- `H:` events aren't on the list: whether the profile engine fires them through SimConnect's client events or through our module is [6.9](../architecture/plan.md#69-sync)'s ([left open](../architecture/01-spine.md#left-open)).
+- A `watch` and a `key` name the pilot's aircraft or an object by its ID, as avatars watches `SIMCONNECT_OBJECT_ID_USER_AVATAR` on foot and freezes each figure it creates, whose SimObject title is `CROSSCHECK_FIGURE_PILOT`, of the kind `FIGURE` ([avatars](../avatars/01-avatars.md#names)).
+- A `watch` takes a period of once, which reads an object's variables one time, as traffic reads each new object's identity ([polling](../traffic-atc/01-traffic-and-atc.md#polling)).
+- A unit registered as partly recorded may declare any of its `watch`, `poll`, `camera`, `frames`, and `reports` calls `.unrecorded()`, and the sim service hands the edge each such request's connection, kind, and ID before the call goes out, so the recording leaves out its answers.
+  The sim service decides nothing on such an answer beyond routing it to its feature ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+- `H:` events aren't on the list: state sync fires them from a routine of its own, `HEvents`, in our WASM module ([`H:` events](../sync/05-units.md#h-events)).
 
 ### Connections
 
@@ -155,6 +123,7 @@ fn start(me: &mut FlightModel, _: &ProfileLoaded, cx: &mut Cx) {
 - So after the quit message, it opens nothing until that process has exited and another is found.
   A sim that is shutting down may still return `S_OK` (unverified), and `S_OK` came 46s before the open reply as the sim booted ([architecture log][flight]), so the core couldn't tell that connection from one to a sim starting up.
 - A connection lost while its run hasn't ended, the platform's or a feature's, opens again at once, as [a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load) has it.
+- Each unit numbers its own connections, by its place in the registry and its own count of opens, and the sim service drops an input for a connection it hasn't opened, as it does one for a connection it closed ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
 
 ### What the platform's connection holds
 
@@ -165,6 +134,13 @@ The platform's connection makes these calls at `S_OK`, without waiting for the s
 - maps `CROSSCHECK_MODULE_STATUS`, and requests it `ON_SET`;
 - starts the [announcement](#the-announcement).
 
+### Packages on disk
+
+- The sim service reads the sim's packages folders from `UserCfg.opt`, for [the aircraft's facts](#the-aircrafts-facts) too ([the packages folders](../install/01-installing-and-updating.md#the-packages-folders)).
+- At the core's start and each time it finds the sim's process, it searches other packages' `layout.json` for the paths ours lists outside our own folders, and raises a warning notice for each package found ([the checks in the core](../install/01-installing-and-updating.md#the-checks-in-the-core)).
+- It also checks our own package, and raises a trouble notice when it's missing, at another version, or off in the sim.
+  That's the one trouble notice for our package, which the module's status of Missing or Differs also raises ([the module's status](#the-modules-status); user, 2026-10-18).
+
 ## Sim awareness
 
 ```rust
@@ -172,13 +148,14 @@ The platform's connection makes these calls at `S_OK`, without waiting for the s
 pub enum Signal<'a> {
     Process(Process), Quit,
     AircraftLoaded(&'a str), AircraftState(&'a str), FlightLoaded,
-    Flow(Flow), Pause(u32), Page(MenuPage),
+    Flow(Flow), Pause(u32), Page(MenuPage), Departure(Departure),
 }
 
 pub struct SimAwareness {
     pub stage: Stage,                 // Closed, Starting, Menu, Loading, ReadyToFly, Flying
     pub page: MenuPage,               // the menu script's last report, or Unknown
     pub aircraft: Option<Aircraft>,   // its folder and preset
+    pub departure: Option<Departure>, // the flight file's [Departure] airport, stand name, and stand number
     pub pause: Pause,                 // Pause_EX1's flags
     pub run: Option<SimRun>,          // the sim process's ID and creation time
     pub ended: Option<Ending>,        // Close or Crash, for the run that ended last
@@ -189,7 +166,11 @@ impl SimAwareness {
 }
 ```
 
-The stage, the page, and the aircraft are types of the message crate, since the clients show them; which the apps show is [6.16](../architecture/plan.md#616-the-apps)'s.
+The sim service reads, as a job, the flight file each `FlightLoaded` names, and gives sim awareness its `[Departure]` section's airport, stand name, and stand number as a signal of its own, since the session crate and Go to both read it ([preflight](../session/02-units.md#preflight)).
+
+The stage, the page, and the aircraft are types of the message crate, since the clients show them.
+The sim service registers a slice of client state holding sim awareness's stage, page, aircraft, pause, and how the last run ended, and the module's status.
+Which of the slice the apps show is the apps' design ([slices and commands](../interface/01-apps.md#slices-and-commands)).
 
 ### Stages
 
@@ -220,6 +201,14 @@ The stage, the page, and the aircraft are types of the message crate, since the 
   The sim service reads `A:TITLE` once each load reaches Flying, and logs it beside the path.
 - A path with no `simobjects/airplanes/` in it gives no aircraft, and the sim service logs it.
 
+### The aircraft's facts
+
+The sim service holds the loaded aircraft's facts, aircraft awareness, beside sim awareness's aircraft path: the package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, and the livery, `A:LIVERY NAME` (user, 2026-10-18).
+
+- A job finds the package in the packages folders the sim service reads from `UserCfg.opt` ([packages on disk](#packages-on-disk)), searching them as [the session's match check](../session/02-units.md#the-match-check) describes.
+  It runs while a session is held: at each aircraft load, and when a session starts with an aircraft already loaded, since every v1 reader is in a session.
+- The sim service raises `AircraftChanged` when those facts change, the search's result included, and the match check's items and avatars' model job read them there, so no feature takes the aircraft's package from another's key.
+
 ### The moment
 
 - The sim service raises `SimChanged`, which carries the state before, once for each step that changes the state, so a load is one entry into Loading, however many signals it brings.
@@ -234,6 +223,7 @@ A core stays Starting until the menu script reports its master page, or until `F
 
 The menu script reports its master page when the sim service asks, as its socket joins: `MasterPage` in the main menu and `MasterPage_InGame` in a flight (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
 The `Sim` state can't tell them apart: it read 1 in the main menu, and again 1s into a load's screen ([core log][sim-state]).
+In a session, the menu script also reads the page every 500ms and reports a change ([the menu script](../session/02-units.md#the-menu-script)).
 Without our copy of BlurPage, which brings the menu script ([preflight](../product/03-v1-scope.md#preflight)), the core stays Starting until the next load.
 
 ### A crash and a close
@@ -252,11 +242,13 @@ Without our copy of BlurPage, which brings the menu script ([preflight](../produ
 | Slot | Created by | Written by | Holds |
 | --- | --- | --- | --- |
 | `CROSSCHECK_MODULE_STATUS` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY` | The module | The module's version, the slots hash, and the counter, in a layout that never changes, so any build reads any other's |
-| `CROSSCHECK_ROUTINE_<ID>` | The module | The sim service | A header of the feed count (`u32`), the end mark (`u32`), and the slots hash (`u64`), then the routine's struct |
+| `CROSSCHECK_ROUTINE_<ID>` | The module | The sim service | A header of the feed count (`u32`), the end mark (`u32`), the slots hash (`u64`), and the core's counter at the write, in µs, then the routine's struct |
+| `CROSSCHECK_REPORT_<ID>` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY`, for each routine that reports | The module | The routine's report |
 
 - The module creates every slot in `module_init`, as fsc-editor's and p08's modules create theirs (read in fsc-editor, `link/src/module.cpp`, `module_init`, and `experiments/areas/architecture/flight/module/src/lib.rs`), and subscribes to each routine's slot `ON_SET`.
-- The read-only flag lets "only ClientData creator" write the status slot (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`).
+- The read-only flag lets "only ClientData creator" write the status slot and each report slot (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`).
 - The module counts seconds on WASI's monotonic clock, which counted `QueryPerformanceCounter`'s ticks in a flight ([architecture log][flight]), and raises its counter once a second.
+- The routine host's `Frame::now` is its estimate of the core's counter, kept from each header's counter and the same clock ([the core's counter in our module](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)).
 
 ### A module from another build
 
@@ -272,14 +264,16 @@ Without our copy of BlurPage, which brings the menu script ([preflight](../produ
 | Write an `A:` variable | `fsVarsAVarSet` | p12 wrote another object's pose each frame (same file, `write_pose`); on the pilot's own aircraft, unrun |
 | Read or write an `L:` or `Z:` variable | `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarGet`, and `fsVarsZVarSet` | p08 and p12 ran them in the sim (same file; `experiments/areas/architecture/flight/module/src/lib.rs`) |
 | Freeze the pilot's aircraft | The three `A:IS ... FREEZE ON` flags through `fsVarsAVarGet`, and `fsEventsTriggerKeyEvent` with `KEY_FREEZE_LATITUDE_LONGITUDE_SET`, `KEY_FREEZE_ALTITUDE_SET`, and `KEY_FREEZE_ATTITUDE_SET` | Unrun; FS Copilot's module sends the same events as calculator code (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_control`) |
-| Run calculator code, for a plugin | `execute_calculator_code` | Ran on MSFS 2024 on 2026-08-25 ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)) |
+| Send an event with values | `fsEventsTriggerKeyEvent` with its values | Unrun; it takes an event and its values (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h`) |
+| Fire an `H:` event, for state sync's `HEvents` | `fsEventsRegisterHEvent`, which takes the event's name, and `fsEventsHEventCall` | Unrun; read in `MSFS_Events.h` ([`H:` events](../sync/05-units.md#h-events)) |
+| Write a routine's report | `SimConnect_SetClientData` on the module's own connection, into the routine's report slot | p08's module wrote its echo through it in a flight (read in `experiments/areas/architecture/flight/module/src/lib.rs`, `write_out`; [architecture log][flight]) |
 
 - The routine host looks each ID up once and keeps it: an `A:` variable's through `fsVarsGetAVarId`, an `L:` variable's through `fsVarsRegisterLVar`, since `fsVarsGetLVarId` returns -1 for one that doesn't exist yet and doesn't create it, a `Z:` variable's through `fsVarsRegisterZVar`, and a unit's through `fsVarsGetUnitId`.
   It forgets them all when the handler it registers with `fsVarsRegisterVarsStatusUpdateHandler` reports a `REMOVE` or a `RESET`, which fsc-editor's module heard on an aircraft change (measured on MSFS 2024, 2026-08-27, fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-27 — The typed variable API works, and the sim announces invalidation", for both).
 - `fsEventsTriggerKeyEvent` takes an event's number, and `MSFS_EventsEnum.h` defines the freeze events' numbers (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h` and `Types/MSFS_EventsEnum.h`), so the module needs no table of names for the freeze.
   p08's build generated bindings only from `SimConnect.h` and `MSFS_Vars.h` (read in `experiments/areas/architecture/flight/module/build.rs`), so whether bindgen brings in these numbers is unverified until the module's build adds `MSFS_Events.h`.
-- SDK 1.7.3 marks `execute_calculator_code` deprecated, "Panels API is now deprecated" (read in `WASM/include/MSFS/Legacy/gauges.h`), and nothing else runs calculator code ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)), so it carries only a plugin's.
-- A later want that fires an `H:` event has `fsEventsRegisterHEvent`, which takes the event's name, and `fsEventsHEventCall` (read in `MSFS_Events.h`).
+- SDK 1.7.3 marks `execute_calculator_code` deprecated, "Panels API is now deprecated" (read in `WASM/include/MSFS/Legacy/gauges.h`), though it ran on MSFS 2024 on 2026-08-25, and nothing else runs calculator code ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#the-gauge-api-and-its-replacements)).
+  v1 has no plugins, so the routine host runs no `Mechanisms` routine and carries no want to run calculator code ([plugins and the sandbox](../plugins/01-plugins.md#no-plugins-in-v1)).
 - If node 7's tests in the sim find that `fsVarsAVarSet` doesn't hold the pilot's own aircraft's pose, or that `fsEventsTriggerKeyEvent` doesn't freeze it, calculator code carries that want, as FS Copilot's module writes its pose and its freeze (read in `wasm_module.cpp`, `apply_physics` and `apply_control`), and no routine changes.
 
 ### Each frame
@@ -306,7 +300,8 @@ The routine host then runs its frame, as the code map's [routines in our WASM mo
 - The 3s count only while all three hold, so an aircraft unpaused after a long pause isn't unfrozen before the module's next write.
 - "Unpaused" means `Pause_EX1` reads 0: the pause menu raised 8, active pause and the pilot's pause key 4, and `K:PAUSE_SET` 1 (measured on MSFS 2024, 2026-10-03, [environment log](../environment/log.md#2026-10-03-the-pause-menu-is-the-sim-pause-and-lets-the-clock-run-active-pause-stops-it-and-only-simconnect-raised-a-full-pause)), and whether the module's update runs in each pause is unmeasured ([when the module stops](../architecture/02-code-map.md#when-the-module-stops)).
 - "A routine live" takes the place of the code map's "in a session", since the session sits above the sim service, which can't read it, and a module with no routine live froze nothing.
-- When the pilot sees a module that's missing, differs, or stopped, and how, is [6.16](../architecture/plan.md#616-the-apps)'s.
+- While any routine is fed, the module's status of Missing or Differs raises the one trouble notice for our package, which the check of our package on disk also raises ([packages on disk](#packages-on-disk)), and Stopped raises a trouble notice of its own (user, 2026-10-18).
+  The module's status stops raising either once the module runs or no routine is fed ([the apps](../interface/01-apps.md#trouble)).
 
 ## The announcement
 

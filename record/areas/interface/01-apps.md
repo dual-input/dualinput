@@ -13,6 +13,12 @@ Decides:     How a feature's part plugs into each app and comes out; what a part
 > - The desktop app's socket to the core is open while its window is open, and closing the window destroys it; the app wants a core while the sim runs, its window is open, or a session file exists, starts one when none runs, starts one again 2s after an exit other than 0, and after an exit with 0 starts none until the sim next starts or the window next opens, which replaces [when the core goes](#when-the-core-goes)'s rules on the port file and the `bye`.
 > - One copy of the desktop app runs at a time, so the core's start of its program in [bringing the desktop app forward](#bringing-the-desktop-app-forward) opens the running app's window; the update's state, Install now, and Check now are the desktop app's own, in its window.
 > - [Trouble](#trouble) gains our own package, which the sim service checks at the core's start and at each sim start, raising a trouble notice when it's missing, at another version, or off in the sim; and the check that names another package overriding our files is the sim service's, with a warning notice for each package and one match item.
+>
+> Since 2026-10-18, the banner panel stays open through each flight of a session, and its page shows and hides its notices and the preflight summary itself, from the slices it watches, as the interface log's 2026-10-04 run did with CSS, so the session's slice carries no wanted state, where the opening lines, [slices and commands](#slices-and-commands), and [the banner](#the-banner) have the core say whether it should be open (user, 2026-10-18):
+>
+> - In each flight of a session, the EFB app's code opens the panel, calling `TOOLBAR_BUTTON_TOGGLE` again after a wait until a banner page's socket opens; a pilot who closes it from its toolbar button keeps it closed until the next flight.
+> - The EFB app's code closes it once, when the session ends or the core says `bye`, with no retry.
+> - A case in the sim checks whether clicks reach the cockpit through the panel's see-through part; if they don't, the banner's shape comes back to design.
 
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.

@@ -47,6 +47,8 @@ Decides:     Which components Crosscheck runs, where each runs, and what each ow
 >
 > Since 2026-10-18, [the build](../build/01-the-build.md) settles three of [left open](#left-open)'s items under the build: [the check](#the-check)'s tool is a Node program on acorn, which a hook runs after each edit and CI runs on every file we ship into the sim, with no ESLint config in v1; no step of the build runs the framework's `for`-`of` rewrite, without the frame-time probe, since the rewrite needs TypeScript 5's type checker; and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.
 > The build installs the SDK version the repository names with a program of ours, where [code in the sim](#code-in-the-sim) has cargo-msfs fetch the newest.
+>
+> Since 2026-10-18, the banner panel stays open through each flight of a session and shows and hides its own content, so the EFB app's code opens it in each flight, where [components](#components) and [the sim's pages](#the-sims-pages) have it open the panel when the session has something to show ([the apps](../interface/01-apps.md); user, 2026-10-18).
 
 Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The watcher and the core are Crosscheck's two long-running processes (user, 2026-10-06), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).

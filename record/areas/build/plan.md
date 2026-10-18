@@ -31,6 +31,8 @@ The stages follow these rules (user, 2026-10-18):
 - The first session in the sim, with a bench core as the second pilot, comes once the platform and state sync are built, and the first flight with friends once flight-model sync is built too.
   Friends fly their installed Crosscheck ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
+- Nothing on GitHub comes before [stage 22](#22-github): no pull requests, no workflows, no releases, no Pages site, and no repository of ours beside this one, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
+  Until then each commit goes straight to `main`, and is pushed once its checks pass on our development machine, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.
 
 ## Working a stage
 
@@ -38,8 +40,8 @@ The stages follow these rules (user, 2026-10-18):
    You'll know what the stage builds and what proves it.
 2. If the stage has a `Designs first:` line, propose that design to the user, and once they agree, write it in the design doc it belongs to.
    You'll see the design in its doc before any of the stage's code.
-3. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says.
-   You'll see CI run its unit tests and bench tests green on its pull request.
+3. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, pushing each commit once `node tools/check.ts` passes, and from stage 3 running the whole bench before the stage's exit.
+   You'll see every check pass before each push, and the bench pass before the exit.
 4. Ask the user whether to run the `code-reviewer` agent, as [CLAUDE.md](../../../CLAUDE.md#working-rules) says.
    You'll have their answer, and if they want a review, its findings fixed or answered.
 5. If the stage's system has cases in the sim, run them, and measure the stage's budgets in the sim, in one session in the sim ([in the sim](02-testing.md#in-the-sim)).
@@ -57,10 +59,27 @@ The stages follow these rules (user, 2026-10-18):
 3. Add a note at the top of the design doc that names the log entry, as [writing.md](../../../.claude/rules/writing.md#design-plan-and-log) has a design doc amended.
 4. If the change reverses a numbered decision, write the decision that reverses it, as [writing.md](../../../.claude/rules/writing.md#decisions) says.
 
-## 1 The workspace and CI
+## 1 The workspace and its checks
 
-Builds: the Cargo workspace and its folders, `tools/setup.ts` and `tools/build.ts`, the C runtime's static link, the message crate, which each later stage adds its messages to, and its hash, the map check, the Coherent GT check, and the checks CI runs on a pull request ([the workspace](../architecture/02-code-map.md#the-workspace), [01-the-build](01-the-build.md)).
+Builds:
+
+- the root's files: `Cargo.toml`, whose members are globs, `rust-toolchain.toml`, `package.json` and its lockfile, the one entry in `.cargo/config.toml` that links the C runtime statically, and `msfs-sdk.txt` ([the workspace](../architecture/02-code-map.md#the-workspace), [the C runtime](01-the-build.md#the-c-runtime))
+- `tools/msfs-sdk` and `tools/setup.ts`, which install cargo-msfs and the SDK that `msfs-sdk.txt` names ([the SDK](01-the-build.md#the-sdk))
+- `tools/build.ts`, which builds what the tree holds and stops when the installed SDK isn't the one `msfs-sdk.txt` names ([building every target](../architecture/02-code-map.md#building-every-target))
+- the message crate, which each later stage adds its messages to, with its hash, its TypeScript types from ts-rs, and `ts/stamp.ts` ([the message crate's hash](01-the-build.md#the-message-crates-hash))
+- [the map check](../architecture/02-code-map.md#the-map-check)
+- `tools/check.ts`, which runs each check a pull request runs in [CI](../architecture/02-code-map.md#ci) that the tree has something for: Rustfmt, Clippy, the default members' tests, each tsconfig's type check, the messages' types generated again and compared, and the map check
+
+Each later stage adds its own checks to `tools/check.ts`, such as the Coherent GT check in stage 5, so stage 22's workflows run what every push already ran.
+
 Needs: nothing.
+
+Tests:
+
+- The map check's own tests: fixture crates and TypeScript files that break each rule [tiers](../architecture/02-code-map.md#tiers) lists, each failing by the rule it breaks.
+- From [the build's cases on a desk](01-the-build.md#cases-for-the-bench): a change to the message crate committed without the stamp generated again fails `tools/check.ts`; a checkout with CRLF line ends gives the same hash; a `tools/build.ts` run followed by `cargo build` compiles no crate; and a build whose installed SDK isn't `msfs-sdk.txt`'s stops and names `node tools/setup.ts`.
+
+Exit: on our development machine, `node tools/check.ts` passes on the tree, and the map check fails each of its fixtures by the rule it breaks.
 
 ## 2 The core's loop and edge
 
@@ -80,7 +99,7 @@ Needs: 3.
 
 ## 5 Clients and the panel bridge
 
-Builds: the clients crate, `page-client`, the panel bridge, and our `VCockpit.js` override, with the bench's fake pages ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)).
+Builds: the clients crate, `page-client`, the panel bridge, and our `VCockpit.js` override, with the sim's stock files it starts from, the Coherent GT check, and the bench's fake pages ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the sim's stock files](01-the-build.md#the-sims-stock-files), [the Coherent GT check](01-the-build.md#the-coherent-gt-check)).
 Needs: 4.
 
 ## 6 The core helper
@@ -107,7 +126,8 @@ Needs: 4, 7, and 8.
 
 ## 10 Profiles
 
-Builds: the profile engine, `profile-build`, the profile loader, `tools/profile-builder`, and CI's publishing to the profiles' site, with the bench's local profiles' site ([01-format-and-delivery](../profiles/01-format-and-delivery.md), [the profiles' units](../profiles/02-units.md)).
+Builds: the profile engine, `profile-build`, the profile loader, and `tools/profile-builder`, with the bench's local profiles' site ([01-format-and-delivery](../profiles/01-format-and-delivery.md), [the profiles' units](../profiles/02-units.md)).
+Publishing the profiles to their Pages site comes in [stage 22](#22-github).
 Needs: 9.
 
 ## 11 The apps
@@ -136,7 +156,8 @@ Needs: 11 and 13.
 
 ## 15 Installing and updating
 
-Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, the firewall rule, writing our package, the core's checks of the packages that override ours, and the release workflow with the check before a release ([installing and updating](../install/01-installing-and-updating.md), [a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)).
+Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, writing our package, and the core's checks of the packages that override ours ([installing and updating](../install/01-installing-and-updating.md)).
+The release workflow comes in [stage 22](#22-github).
 Needs: 3 and 11.
 
 ## 16 Flight-model sync
@@ -170,7 +191,13 @@ Needs: 6 and 11.
 Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the desktop app ([the session's units](../session/02-units.md)).
 Needs: 9 and 11.
 
-## 22 v1's release
+## 22 GitHub
+
+Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).
+Needs: every stage before it.
+Tests, from stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
+
+## 23 v1's release
 
 Builds: v1's release, through the release workflow, after the last sessions with friends.
 Needs: every stage before it.

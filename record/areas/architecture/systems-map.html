@@ -1,0 +1,438 @@
+<title>Crosscheck Systems Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=B612:wght@400;700&family=B612+Mono&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: an aeronautical-chart sheet; tabs across the top, the drawing left, a detail card right that stacks below on a phone. */
+:root {
+  --paper: #f3f5f1;
+  --sheet: #fbfcfa;
+  --ink: #1b2430;
+  --muted: #5d6874;
+  --rule: #cdd4d8;
+  --chart-blue: #2b5c9c;
+  --chart-magenta: #a3266f;
+  --chart-teal: #1f7a72;
+  --amber: #a86a12;
+  --zone-sim: #e6eef8;
+  --zone-pc: #eef0ee;
+  --zone-net: #f6e9f0;
+  --dim: 0.18;
+  --display: "B612", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "B612 Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10161b; --sheet: #151d23; --ink: #e2e8ec; --muted: #94a1ab; --rule: #2c3841;
+    --chart-blue: #79a9e6; --chart-magenta: #e277b5; --chart-teal: #5fc0b5; --amber: #e0a24a;
+    --zone-sim: #172433; --zone-pc: #1a2026; --zone-net: #2a1a24; --dim: 0.22;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10161b; --sheet: #151d23; --ink: #e2e8ec; --muted: #94a1ab; --rule: #2c3841;
+  --chart-blue: #79a9e6; --chart-magenta: #e277b5; --chart-teal: #5fc0b5; --amber: #e0a24a;
+  --zone-sim: #172433; --zone-pc: #1a2026; --zone-net: #2a1a24; --dim: 0.22;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+header h1 { font-family: var(--display); font-size: 1.5rem; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
+header .gist { margin: 6px 0 0; max-width: 72ch; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 18px 0 14px; border-bottom: 1px solid var(--rule); }
+.tabs button { font: 600 0.8rem var(--display); letter-spacing: 0.08em; text-transform: uppercase; background: none; border: 0; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid transparent; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--chart-magenta); }
+.tabs button:focus-visible, .chip:focus-visible, .box:focus-visible, .fchip:focus-visible { outline: 2px solid var(--chart-blue); outline-offset: 2px; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); min-width: 0; }
+@media (max-width: 1100px) { .panel { position: static; } }
+.panel h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 2px; }
+.panel .kind { font: 0.7rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--chart-magenta); }
+.panel p { margin: 6px 0; }
+.panel ul { margin: 6px 0; padding-left: 18px; }
+.panel li { margin: 2px 0; }
+.panel h3 { font: 600 0.72rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
+.doc { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); word-break: break-all; }
+.empty { color: var(--muted); }
+.scroll { overflow-x: auto; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; min-width: 0; }
+svg.rt { display: block; width: 100%; min-width: 680px; height: auto; }
+.zone { stroke: var(--rule); }
+.zone.sim { fill: var(--zone-sim); } .zone.pc { fill: var(--zone-pc); } .zone.net { fill: var(--zone-net); }
+.zlabel { font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; fill: var(--muted); }
+.box rect { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.2; }
+.box text { font: 700 13px var(--display); fill: var(--ink); }
+.box text.sub { font: 400 10px var(--body); fill: var(--muted); }
+.box { cursor: pointer; }
+.box.sel rect { stroke: var(--chart-magenta); stroke-width: 2.5; }
+.edge path.line { fill: none; stroke: var(--chart-blue); stroke-width: 1.4; opacity: 0.55; }
+.edge path.hit { fill: none; stroke: transparent; stroke-width: 12; cursor: pointer; }
+.edge text { font: 10px var(--body); fill: var(--ink); paint-order: stroke; stroke: var(--sheet); stroke-width: 3px; display: none; }
+.focus .edge path.line { opacity: var(--dim); }
+.focus .box:not(.on) { opacity: 0.35; }
+.focus .edge.on path.line { opacity: 1; stroke: var(--chart-magenta); stroke-width: 2.2; }
+.focus .edge.pick text { display: block; }
+.tier { margin: 0 0 16px; }
+.tier h3 { font: 700 0.8rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; margin: 0; }
+.tier .rule { color: var(--muted); font-size: 0.85rem; margin: 2px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 0.8rem var(--mono); background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+.chip.t-platform { border-left: 3px solid var(--chart-blue); }
+.chip.t-engines, .chip.t-engine { border-left: 3px solid var(--chart-teal); }
+.chip.t-features, .chip.t-feature { border-left: 3px solid var(--chart-magenta); }
+.chip.t-other { border-left: 3px solid var(--amber); }
+.chip.sel { background: var(--chart-magenta); color: var(--sheet); border-color: var(--chart-magenta); }
+.chip.dep { outline: 2px solid var(--chart-teal); }
+.chip.rdep { outline: 2px dashed var(--amber); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--muted); margin: 0 0 12px; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 2px; }
+.legend .l-dep::before { outline: 2px solid var(--chart-teal); }
+.legend .l-rdep::before { outline: 2px dashed var(--amber); }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 700 0.7rem var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+td.f { font-weight: 600; cursor: pointer; }
+td .none { color: var(--rule); }
+h2.sec { font: 700 0.85rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; margin: 22px 0 8px; }
+.fpick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.fchip { font: 600 0.8rem var(--display); background: var(--sheet); border: 1px solid var(--rule); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.fchip[aria-pressed="true"] { background: var(--chart-blue); color: var(--sheet); border-color: var(--chart-blue); }
+.fgist { margin: 0 0 10px; max-width: 75ch; }
+.lanes { display: grid; gap: 4px 8px; padding: 12px; min-width: 640px; }
+.lanehead { font: 700 0.72rem var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--rule); padding-bottom: 4px; }
+.step { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 8px; font-size: 0.82rem; position: relative; }
+.step .n { font: 700 0.7rem var(--mono); color: var(--chart-magenta); margin-right: 4px; }
+.step .to { display: inline-block; font: 600 0.68rem var(--display); color: var(--chart-blue); margin-left: 4px; white-space: nowrap; }
+.lanecell { border-left: 1px dotted var(--rule); }
+.stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.stage { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; min-width: 0; }
+.stage h3 { font: 700 0.9rem var(--display); margin: 0; }
+.stage .note { font-size: 0.75rem; color: var(--amber); }
+.stage ul { margin: 6px 0 0; padding-left: 16px; font-size: 0.84rem; }
+.stage .n { font: 700 0.75rem var(--mono); color: var(--chart-magenta); margin-right: 6px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.cols ul { margin: 0; padding-left: 18px; font-size: 0.86rem; }
+.mono { font-family: var(--mono); font-size: 0.8rem; }
+@media (prefers-reduced-motion: no-preference) { .edge path.line, .box, .chip { transition: opacity 0.15s, stroke 0.15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Crosscheck Systems Map</h1>
+    <p class="gist" id="gist"></p>
+  </header>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="view"></main>
+</div>
+
+<script type="application/json" id="data">{"gist":"Each pilot's PC runs the sim, a core, a core helper, and a tray app. The core owns the session on one loop, and the rest talks to it: our code in the sim over SimConnect and WebSockets, other pilots' cores over QUIC through iroh. CI builds it all from one repository into one Velopack release.","runtime":{"components":[{"id":"sim","name":"MSFS 2024","where":"pilot's PC","is":"The simulator: SimConnect, the CommBus, and the loaded aircraft","runs":"whenever the pilot starts it; the desktop app watches its process","does":["loads our module and pages from our package","serves the core's SimConnect connections","carries the core's CommBus announcement to our pages","flies the aircraft only on the pilot flying's PC"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md","short":"the simulator"},{"id":"wasm","name":"WASM module","where":"inside the sim","is":"Rust standalone module running routines the core feeds","runs":"from sim boot to sim exit, through menu and flights","does":["holds the aircraft frozen during preflight","reads the flying aircraft about 20 times a second","draws the following aircraft 400ms behind the samples","places pilot figures and traffic copies every frame","fires H: events for state sync","stops each routine 1s after the core's last write"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md","short":"Rust, in the sim's frame"},{"id":"panels","name":"Cockpit panels","where":"inside the sim","is":"Aircraft panels, with our panel bridge via our VCockpit.js","runs":"in every cockpit panel; connects only once a session starts","does":["hands each instrument to the bridge without delaying it","says hello naming its instruments; loads modules the core names","sends and replays pointer gestures on synced displays","locks a display while another pilot's gesture plays","hears H: events and reads gauge values for state sync","fails open: locks lapse when renewals stop"],"doc":"record/areas/core/02-clients-and-panel-bridge.md","short":"VCockpit.js + panel bridge"},{"id":"efb","name":"EFB app","where":"inside the sim","is":"Our app in the sim's EFB, on MSFS Avionics Framework","runs":"from sim start, even with the EFB closed","does":["starts a session or joins with a code","shows session controls, preflight summary, and take-control button","opens and closes the banner through the toolbar","sets active pause for rate and pause","opens the EFB onto itself when a notice is clicked","brings the desktop app forward on request"],"doc":"record/areas/interface/01-apps.md","short":"our app in the EFB"},{"id":"banner","name":"Banner","where":"inside the sim","is":"Our in-game panel; its page exists only while open","runs":"while open; the EFB app opens it when the core asks","does":["shows the session's notices","shows the crew's status and preflight summary","shows why a take-control press was refused","sends a notice click to the core"],"doc":"record/areas/interface/01-apps.md","short":"our in-game panel"},{"id":"menu","name":"Menu script","where":"inside the sim","is":"Script in mainUi, loaded by our BlurPage copy","runs":"from the sim's first screen, in the menu and in flights","does":["reports which menu page is up","runs Go to through the world map's requests","selects free flight, departure airport, stand, or runway","decides nothing beyond which list entry matches"],"doc":"record/areas/session/02-units.md","short":"via our BlurPage copy"},{"id":"core","name":"Core","where":"pilot's PC","is":"Rust program, one loop owning all session state","runs":"while the sim runs, the window's open, or a session file exists","does":["holds SimConnect connections and follows the sim's state","runs the session, control, and preflight","links to other pilots' cores through iroh","syncs cockpit state, flight model, figures, traffic, and ATC","loads profiles and records every run for bug reports","serves our pages and the desktop app over WebSocket"],"doc":"record/areas/core/01-loop-and-edge.md","short":"one loop, all session state"},{"id":"helper","name":"Core helper","where":"pilot's PC","is":"Rust program for the core's Windows input and audio","runs":"in a session, or while the desktop app binds or lists devices","does":["reads the bound key or button through Raw Input","reads the mouse for the pilot's figure","captures the ATC app and encodes Opus","plays ATC frames behind an adaptive buffer","plays the control-passed and refusal cues","lists output devices and programs for the desktop app"],"doc":"record/areas/core/04-core-helper.md","short":"input and audio"},{"id":"desktop","name":"Desktop app","where":"pilot's PC","is":"Tauri app: tray icon, window, and Velopack updater","runs":"from login as a tray icon; window when opened","does":["watches for the sim and starts the core","restarts the core 2s after a crash","checks, downloads, and applies updates while the sim's closed","writes our Community package and adds the firewall rule","shows the session, settings, Go to, and the report page"],"doc":"record/areas/install/01-installing-and-updating.md","short":"tray, window, updates"},{"id":"peer","name":"Other pilot's core","where":"internet","is":"The same core program on a crewmate's PC","runs":"on its own pilot's PC, by the same rules","does":["holds one QUIC connection to this core","sends its session keys, cockpit messages, and heartbeat","as pilot flying: sends flight-model samples and late-joiner catch-up","as traffic or ATC host: sends traffic and ATC audio"],"doc":"record/areas/network/01-between-machines.md","short":"same program, other PC"},{"id":"relay","name":"Relays","where":"internet","is":"n0's iroh-relay, unmodified, on our New York and Frankfurt servers","runs":"always; a session uses its host's relay list","does":["carries a pair's packets when no direct path works","tells each core its public address","admits only clients holding a Crosscheck token","caps how fast one client sends"],"doc":"record/areas/network/01-between-machines.md","short":"iroh-relay, NY + Frankfurt"},{"id":"backend","name":"Backend","where":"internet","is":"Cloudflare Worker in TypeScript, with D1 and R2","runs":"always; no running session waits on it","does":["draws invite codes and maps them to crew endpoints","refuses a join whose version differs, naming who's behind","limits wrong-code guesses per address","takes each pilot's part of a bug report into R2","drops lapsed members and old rows hourly"],"doc":"record/areas/network/02-units.md","short":"Worker, D1, R2"},{"id":"pages","name":"Profile site","where":"internet","is":"GitHub Pages site serving published profile bundles","runs":"always; CI adds bundles on merges and releases","does":["serves index.json, the bundle each level takes","serves each bundle by its hash","keeps every bundle ever published"],"doc":"record/areas/profiles/02-units.md","short":"profile bundles"},{"id":"releases","name":"GitHub Releases","where":"internet","is":"Velopack's update feed on GitHub Releases","runs":"always; each release publishes here","does":["holds each release's Setup.exe and full package","holds deltas between releases","feeds the newest 10 releases to the desktop app"],"doc":"record/areas/install/01-installing-and-updating.md","short":"Velopack's update feed"}],"links":[{"from":"desktop","to":"core","via":"process start, port file","carries":"starts the core when wanted; restarts it 2s after a crash","doc":"record/areas/install/01-installing-and-updating.md"},{"from":"desktop","to":"core","via":"WebSocket, JSON","carries":"the core's state one way; commands, settings, and quit back","doc":"record/areas/interface/01-apps.md"},{"from":"core","to":"desktop","via":"starts its program","carries":"opens the desktop app's window when the EFB button asks","doc":"record/areas/interface/01-apps.md"},{"from":"desktop","to":"sim","via":"process watch, Community folder","carries":"notices sim start and exit; writes our package while sim closed","doc":"record/areas/install/01-installing-and-updating.md"},{"from":"desktop","to":"releases","via":"HTTPS, Velopack's GitHub source","carries":"checks for updates; downloads full or delta packages","doc":"record/areas/install/01-installing-and-updating.md"},{"from":"core","to":"helper","via":"stdin and stdout, postcard","carries":"starts it; sends wants, sounds, and ATC frames to play","doc":"record/areas/core/04-core-helper.md"},{"from":"helper","to":"core","via":"stdout, postcard","carries":"bound presses, the next press, mouse clicks, captured ATC frames","doc":"record/areas/core/04-core-helper.md"},{"from":"core","to":"sim","via":"SimConnect","carries":"watches and writes variables, sends K: events, creates AI objects and figures","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"sim","to":"core","via":"SimConnect","carries":"aircraft and flight loads, flow and pause events, variable values, camera","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"core","to":"sim","via":"process handle, files","carries":"watches its process; reads flight file, packages, aircraft models","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"core","to":"wasm","via":"SimConnect data slots","carries":"routine feeds: preflight hold, follow samples, figures, traffic copies, H: events","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"wasm","to":"core","via":"SimConnect data slots","carries":"version, slots hash, and counter each second; flying aircraft's reads","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"wasm","to":"sim","via":"fsVars and fsEvents","carries":"reads and writes variables and poses, freezes aircraft, fires H: events","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"core","to":"panels","via":"CommBus, then WebSocket","carries":"port announcement; modules to load or stop; gestures to replay","doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"from":"panels","to":"core","via":"WebSocket, JSON","carries":"hello naming instruments; pointer gestures; heard H: events; gauge readings","doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"from":"core","to":"efb","via":"CommBus, then WebSocket","carries":"session state, banner wanted, pause wanted, order to open the EFB","doc":"record/areas/interface/01-apps.md"},{"from":"efb","to":"core","via":"WebSocket, JSON","carries":"commands: host, join, take control, settings, bring desktop forward","doc":"record/areas/interface/01-apps.md"},{"from":"efb","to":"banner","via":"toolbar's toggle call","carries":"opens and closes the banner panel until each change takes","doc":"record/areas/interface/01-apps.md"},{"from":"efb","to":"sim","via":"Coherent calls","carries":"sets active pause; opens the EFB onto our app","doc":"record/areas/interface/01-apps.md"},{"from":"core","to":"banner","via":"CommBus, then WebSocket","carries":"notices and session state out; notice clicks back; only while open","doc":"record/areas/interface/01-apps.md"},{"from":"core","to":"menu","via":"CommBus, then WebSocket","carries":"Go to's world-map requests; asks which menu page is up","doc":"record/areas/session/02-units.md"},{"from":"menu","to":"core","via":"WebSocket, JSON","carries":"which menu page is up; answers to world-map requests","doc":"record/areas/session/02-units.md"},{"from":"menu","to":"sim","via":"world map's own requests","carries":"presses free flight; sets departure airport, stand, or runway; reads page","doc":"record/areas/session/02-units.md"},{"from":"core","to":"peer","via":"QUIC through iroh","carries":"eight channels: session, cockpit, catch-up, flight model, avatars, traffic, ATC, heartbeat","doc":"record/areas/network/01-between-machines.md"},{"from":"core","to":"relay","via":"iroh relay, TCP 443","carries":"relayed packets when no direct path; the core's public address","doc":"record/areas/network/01-between-machines.md"},{"from":"peer","to":"relay","via":"iroh relay, TCP 443","carries":"the other side of relayed packets; its public address","doc":"record/areas/network/01-between-machines.md"},{"from":"core","to":"backend","via":"HTTPS, JSON, signed","carries":"invite codes for crew endpoint IDs, version check, renewals, bug report uploads","doc":"record/areas/network/02-units.md"},{"from":"peer","to":"backend","via":"HTTPS, JSON, signed","carries":"the same requests from the other pilot's core","doc":"record/areas/network/02-units.md"},{"from":"core","to":"pages","via":"HTTPS, ETag-cached","carries":"profile index at each start; pinned bundles by hash","doc":"record/areas/profiles/02-units.md"}]},"code":{"tiers":[{"id":"platform","name":"Platform","rule":"Engines and lower platform lines; in-core and in-sim halves never depend across."},{"id":"engines","name":"Engines","rule":"Only engines on lower lines; no platform, feature, app, or tool code."},{"id":"features","name":"Features","rule":"Platform and engines; never another feature's code or modules."},{"id":"apps","name":"Apps and sim package","rule":"Anything below; nothing depends on apps/ or sim-package/."},{"id":"tools","name":"Tools","rule":"Anything below; nothing depends on tools/."},{"id":"backend","name":"Backend and config","rule":"Worker in its own npm workspace; relays run iroh-relay, no code of ours."}],"units":[{"id":"messages","name":"messages","tier":"engines","folder":"engines/messages/","lang":"Rust","runsIn":["core","helper","desktop","wasm","panels","efb","banner","menu","ci"],"does":"Every message, data slot, and ID; ts-rs writes its TypeScript types.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"simconnect-types","name":"simconnect-types","tier":"engines","folder":"engines/simconnect-types/","lang":"Rust","runsIn":["core","ci"],"does":"SimConnect's types and constants, generated by bindgen from the SDK.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"sandbox","name":"sandbox","tier":"engines","folder":"engines/sandbox/","lang":"Rust","runsIn":["core"],"does":"QuickJS-ng runtimes for profile scripts: limits, no clock, no randomness.","uses":[],"doc":"record/areas/plugins/01-plugins.md"},{"id":"msfs-gltf","name":"msfs-gltf","tier":"engines","folder":"engines/msfs-gltf/","lang":"Rust","runsIn":["core","ci"],"does":"Reads an MSFS glTF model and its buffer.","uses":[],"doc":"record/areas/avatars/01-avatars.md"},{"id":"msfs-rpn","name":"msfs-rpn","tier":"engines","folder":"engines/msfs-rpn/","lang":"Rust","runsIn":["core","ci"],"does":"Expands, compiles, and runs the sim's calculator (RPN) code.","uses":[],"doc":"record/areas/avatars/01-avatars.md"},{"id":"ray-cast","name":"ray-cast","tier":"engines","folder":"engines/ray-cast/","lang":"Rust","runsIn":["core","ci"],"does":"A BVH per mesh, and a ray cast through node transforms.","uses":[],"doc":"record/areas/avatars/01-avatars.md"},{"id":"object-mirror","name":"object-mirror","tier":"engines","folder":"engines/object-mirror/","lang":"Rust","runsIn":["core","wasm"],"does":"Send gate and playout for mirrored objects, generic over the sample.","uses":[],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"sim-awareness","name":"sim-awareness","tier":"engines","folder":"engines/sim-awareness/","lang":"Rust","runsIn":["core"],"does":"One step function from sim signals to the sim's stage; no I/O.","uses":[],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"profile-engine","name":"profile-engine","tier":"engines","folder":"engines/profile-engine/","lang":"Rust","runsIn":["core","ci"],"does":"Profile format, checks, levels, bundle reading and writing, feature blocks.","uses":["messages"],"doc":"record/areas/profiles/02-units.md"},{"id":"recording-format","name":"recording-format","tier":"engines","folder":"engines/recording-format/","lang":"Rust","runsIn":["core"],"does":"Encodes a run's file and its index.","uses":["messages"],"doc":"record/areas/recording/01-recording-and-bug-reports.md"},{"id":"aircraft-model","name":"aircraft-model","tier":"engines","folder":"engines/aircraft-model/","lang":"Rust","runsIn":["core","ci"],"does":"Finds an aircraft's models, poses them, casts click rays into them.","uses":["msfs-gltf","msfs-rpn","ray-cast"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"sim-client","name":"sim-client","tier":"engines","folder":"engines/sim-client/","lang":"Rust","runsIn":["core","ci"],"does":"Per connection: IDs, setup redone on reconnect, calls into SimConnect calls.","uses":["simconnect-types","messages"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"transport","name":"transport","tier":"engines","folder":"engines/transport/","lang":"Rust","runsIn":["core"],"does":"iroh connections: newest-only slots, relay pacing, heartbeat send stamp.","uses":["messages"],"doc":"record/areas/network/02-units.md"},{"id":"page-client","name":"page-client","tier":"engines","folder":"engines/page-client/","lang":"TypeScript","runsIn":["panels","efb","banner","menu"],"does":"How a sim page finds, joins, and rejoins the core.","uses":["messages"],"doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"id":"sync-engine","name":"sync-engine","tier":"engines","folder":"engines/sync-engine/","lang":"Rust","runsIn":["core"],"does":"Per profile: watches, writes, echoes, conflicts, settling, catch-up order.","uses":["profile-engine","sandbox","messages"],"doc":"record/areas/sync/05-units.md"},{"id":"profile-build","name":"profile-build","tier":"engines","folder":"engines/profile-build/","lang":"Rust","runsIn":["ci"],"does":"Builds bundles: merges modules, type-checks and compiles TypeScript in QuickJS-ng.","uses":["profile-engine"],"doc":"record/areas/profiles/02-units.md"},{"id":"sim-edge","name":"sim-edge","tier":"engines","folder":"engines/sim-edge/","lang":"Rust","runsIn":["core","ci"],"does":"One thread holding every SimConnect connection and the sim's process.","uses":["simconnect-types","sim-client"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"stand-in-sim","name":"stand-in-sim","tier":"engines","folder":"engines/stand-in-sim/","lang":"Rust","runsIn":["ci"],"does":"Plays the sim's SimConnect side on the bench; node 7 designs it.","uses":["simconnect-types","sim-client"],"doc":"record/areas/architecture/02-code-map.md"},{"id":"kernel","name":"kernel","tier":"platform","folder":"platform/kernel/","lang":"Rust","runsIn":["core"],"does":"The loop: registry, state store, moments, guards, outbox, timers, jobs.","uses":["messages"],"doc":"record/areas/core/01-loop-and-edge.md"},{"id":"clients","name":"clients","tier":"platform","folder":"platform/clients/","lang":"Rust","runsIn":["core"],"does":"Client protocol: state slices, commands, settings, notices, which panel modules load.","uses":["kernel","messages"],"doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"id":"sim-service","name":"sim-service","tier":"platform","folder":"platform/sim-service/","lang":"Rust","runsIn":["core"],"does":"SimConnect connections, routine feeds, masking, core's announcement, package checks.","uses":["kernel","clients","sim-client","sim-awareness"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"network","name":"network","tier":"platform","folder":"platform/network/","lang":"Rust","runsIn":["core"],"does":"Links, channels, heartbeat, clock offsets, endpoint key, backend requests.","uses":["kernel","clients","messages"],"doc":"record/areas/network/02-units.md"},{"id":"core-helper-service","name":"core-helper-service","tier":"platform","folder":"platform/core-helper-service/","lang":"Rust","runsIn":["core"],"does":"Runs the core helper while wanted; sends it each feature's wants.","uses":["kernel","clients","messages"],"doc":"record/areas/core/04-core-helper.md"},{"id":"recording","name":"recording","tier":"platform","folder":"platform/recording/","lang":"Rust","runsIn":["core"],"does":"Each run's index and marks, which runs to keep, report uploads.","uses":["kernel","clients","recording-format"],"doc":"record/areas/recording/01-recording-and-bug-reports.md"},{"id":"session","name":"session","tier":"platform","folder":"platform/session/","lang":"Rust","runsIn":["core"],"does":"Members, session keys, control, preflight, match check, joining and leaving.","uses":["kernel","clients","sim-service","network","recording"],"doc":"record/areas/session/02-units.md"},{"id":"profile-loader","name":"profile-loader","tier":"platform","folder":"platform/profile-loader/","lang":"Rust","runsIn":["core"],"does":"Fetches, caches, pins, and loads the aircraft's profile bundle.","uses":["kernel","clients","sim-service","recording","session","profile-engine"],"doc":"record/areas/profiles/02-units.md"},{"id":"cockpit-stream","name":"cockpit-stream","tier":"platform","folder":"platform/cockpit-stream/","lang":"Rust","runsIn":["core"],"does":"Cockpit messages in causal order, held values, catch-up, guard on control.","uses":["kernel","network","recording","session"],"doc":"record/areas/sync/05-units.md"},{"id":"routine-host","name":"routine-host","tier":"platform","folder":"platform/routine-host/","lang":"Rust","runsIn":["wasm"],"does":"Runs features' routines in our WASM module: slots, wants, the freeze.","uses":["messages"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"panel-bridge","name":"panel-bridge","tier":"platform","folder":"platform/panel-bridge/","lang":"TypeScript","runsIn":["panels"],"does":"In each cockpit panel: loads panel modules, owns locks, unlock global.","uses":["page-client","messages"],"doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"id":"efb-shell","name":"efb-shell","tier":"platform","folder":"platform/efb-shell/","lang":"TypeScript","runsIn":["efb","banner"],"does":"EFB app frame, banner page, part API, on MSFS Avionics Framework.","uses":["page-client","messages"],"doc":"record/areas/interface/01-apps.md"},{"id":"desktop-shell","name":"desktop-shell","tier":"platform","folder":"platform/desktop-shell/","lang":"TypeScript","runsIn":["desktop"],"does":"Desktop app frame, settings, part API, shared React and Tailwind components.","uses":["messages"],"doc":"record/areas/interface/01-apps.md"},{"id":"menu-script","name":"menu script","tier":"platform","folder":"sim-package/pages/","lang":"TypeScript","runsIn":["menu"],"does":"In the sim's main menu: reports its page, runs world-map requests.","uses":["page-client"],"doc":"record/areas/session/02-units.md"},{"id":"state-sync","name":"state-sync","tier":"features","folder":"features/state-sync/","lang":"Rust","runsIn":["core","wasm","panels"],"does":"Syncs the switches, knobs, and gauge settings a profile names.","uses":["kernel","messages","cockpit-stream","session","sim-service","profile-loader","clients","sync-engine","routine-host","panel-bridge"],"doc":"record/areas/sync/05-units.md"},{"id":"pointer-sync","name":"pointer-sync","tier":"features","folder":"features/pointer-sync/","lang":"Rust","runsIn":["core","panels"],"does":"Plays each press or drag on a synced display everywhere.","uses":["kernel","messages","cockpit-stream","clients","network","session","panel-bridge"],"doc":"record/areas/pointer-sync/01-pointer-sync.md"},{"id":"flight-model","name":"flight-model","tier":"features","folder":"features/flight-model/","lang":"Rust","runsIn":["core","wasm"],"does":"Flies following aircraft along the PF's sampled pose and controls.","uses":["kernel","messages","network","session","sim-service","routine-host"],"doc":"record/areas/flight-model/01-flight-model-sync.md"},{"id":"avatars","name":"avatars","tier":"features","folder":"features/avatars/","lang":"Rust","runsIn":["core","wasm","sim"],"does":"Seats each pilot's figure, moves its hands; figure is a SimObject.","uses":["kernel","messages","session","network","sim-service","core-helper-service","cockpit-stream","profile-loader","clients","aircraft-model","routine-host"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"traffic","name":"traffic","tier":"features","folder":"features/traffic/","lang":"Rust","runsIn":["core","wasm"],"does":"Mirrors the traffic host's AI traffic as frozen copies elsewhere.","uses":["kernel","messages","session","sim-service","network","clients","object-mirror","routine-host"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"atc-audio","name":"atc-audio","tier":"features","folder":"features/atc-audio/","lang":"Rust","runsIn":["core"],"does":"Streams the ATC host's ATC app audio to the other pilots.","uses":["kernel","messages","session","core-helper-service","network","clients"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"take-control","name":"take-control","tier":"features","folder":"features/take-control/","lang":"Rust","runsIn":["core","efb","desktop"],"does":"Asks for control from a bound key, button, or app button.","uses":["kernel","messages","session","core-helper-service","clients","efb-shell","desktop-shell"],"doc":"record/areas/control/01-take-control.md"},{"id":"rate-and-pause","name":"rate-and-pause","tier":"features","folder":"features/rate-and-pause/","lang":"Rust","runsIn":["core","efb"],"does":"Shares active pause and the simulation rate across the crew.","uses":["kernel","messages","session","sim-service","clients","efb-shell"],"doc":"record/areas/session/02-units.md"},{"id":"go-to","name":"go-to","tier":"features","folder":"features/go-to/","lang":"Rust","runsIn":["core","desktop"],"does":"Points a joiner's world map at the PF's stand or runway.","uses":["kernel","messages","session","sim-service","clients","desktop-shell"],"doc":"record/areas/session/02-units.md"},{"id":"app-core","name":"apps/core","tier":"apps","folder":"apps/core/","lang":"Rust","runsIn":["core"],"does":"The core program: unit list, queue, edge threads, recording, replay.","uses":["kernel","clients","sim-service","network","core-helper-service","recording","session","profile-loader","cockpit-stream","state-sync","pointer-sync","flight-model","avatars","traffic","atc-audio","take-control","rate-and-pause","go-to","transport","sim-edge","recording-format","messages"],"doc":"record/areas/core/01-loop-and-edge.md"},{"id":"app-core-helper","name":"apps/core-helper","tier":"apps","folder":"apps/core-helper/","lang":"Rust","runsIn":["helper"],"does":"Separate process: Raw Input, audio capture, Opus, playback, sounds.","uses":["messages"],"doc":"record/areas/core/04-core-helper.md"},{"id":"app-desktop","name":"apps/desktop","tier":"apps","folder":"apps/desktop/","lang":"Rust","runsIn":["desktop"],"does":"Tauri tray app: starts the core, updates, writes our package, lists parts.","uses":["desktop-shell","take-control","go-to","messages"],"doc":"record/areas/install/01-installing-and-updating.md"},{"id":"wasm-module","name":"sim-package/wasm-module","tier":"apps","folder":"sim-package/wasm-module/","lang":"Rust","runsIn":["wasm"],"does":"The cdylib: edge on the sim's APIs, and the routines list.","uses":["routine-host","state-sync","flight-model","avatars","traffic"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"pages","name":"sim-package/pages","tier":"apps","folder":"sim-package/pages/","lang":"TypeScript","runsIn":["panels","efb","banner","menu"],"does":"VCockpit.js override, EFB app and banner entries, menu script.","uses":["panel-bridge","efb-shell","page-client","take-control","rate-and-pause"],"doc":"record/areas/interface/01-apps.md"},{"id":"profile-builder","name":"tools/profile-builder","tier":"tools","folder":"tools/profile-builder/","lang":"Rust","runsIn":["ci"],"does":"Checks and builds profile bundles, for CI and the core team.","uses":["profile-build","profile-engine"],"doc":"record/areas/profiles/02-units.md"},{"id":"profile-author","name":"tools/profile-author","tier":"tools","folder":"tools/profile-author/","lang":"Rust","runsIn":["ci"],"does":"Seat and click tools for profiles, run with the sim open.","uses":["sim-client","sim-edge","aircraft-model","messages"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"msfs-sdk","name":"tools/msfs-sdk","tier":"tools","folder":"tools/msfs-sdk/","lang":"Rust","runsIn":["ci"],"does":"Installs the SDK version msfs-sdk.txt names.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"build-ts","name":"tools/build.ts","tier":"tools","folder":"tools/build.ts","lang":"TypeScript","runsIn":["ci"],"does":"Builds every target but backend and profiles; lays out the release.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"setup-ts","name":"tools/setup.ts","tier":"tools","folder":"tools/setup.ts","lang":"TypeScript","runsIn":["ci"],"does":"Installs cargo-msfs and the pinned SDK on a new PC.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"stock-ts","name":"tools/stock.ts","tier":"tools","folder":"tools/stock.ts","lang":"TypeScript","runsIn":["ci"],"does":"Copies the sim's stock files into sim-package/stock/ after a sim update.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"release-ts","name":"tools/release.ts","tier":"tools","folder":"tools/release.ts","lang":"TypeScript","runsIn":["ci"],"does":"Runs each release workflow step: build, pack, upload, check, publish.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"reports-ts","name":"tools/reports.ts","tier":"tools","folder":"tools/reports.ts","lang":"TypeScript","runsIn":["ci"],"does":"Lists and fetches bug reports on our PCs.","uses":[],"doc":"record/areas/recording/01-recording-and-bug-reports.md"},{"id":"map-check","name":"the map check","tier":"tools","folder":"tools/","runsIn":["ci"],"does":"Fails crates and TypeScript imports that break the code map's rules.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"coherent-gt-check","name":"the Coherent GT check","tier":"tools","folder":"its own repository, pinned in package.json","runsIn":["ci"],"does":"Fails in-sim JavaScript that Coherent GT can't run.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"bench","name":"the bench","tier":"tools","folder":"tools/","runsIn":["ci"],"does":"Two cores on one PC, stand-in sim; node 7 designs it.","uses":["stand-in-sim","routine-host"],"doc":"record/areas/architecture/02-code-map.md"},{"id":"backend","name":"backend","tier":"backend","folder":"backend/","lang":"TypeScript","runsIn":["backend"],"does":"Cloudflare Worker on D1: invite codes, sessions, members; reports in R2.","uses":[],"doc":"record/areas/network/02-units.md"},{"id":"relays","name":"relays","tier":"backend","folder":"relays/","lang":"TypeScript","runsIn":["relay"],"does":"relays.toml lists our relays; deploy.ts configures their iroh-relay.","uses":[],"doc":"record/areas/network/02-units.md"}],"features":[{"id":"state-sync","name":"State sync","does":"Keeps the cockpit's switches, knobs, and gauge settings the same on every machine.","parts":{"core":"state-sync","routines":["HEvents"],"panel":["h-events","instrument-reads"],"efb":"Checklist (app TBD)","desktop":"Checklist (app TBD)"},"uses":["kernel","messages","cockpit-stream","session","sim-service","profile-loader","clients","sync-engine","routine-host","panel-bridge"],"doc":"record/areas/sync/05-units.md"},{"id":"pointer-sync","name":"Pointer sync","does":"A press or drag on a synced display plays on every other machine's display.","parts":{"core":"pointer-sync","routines":[],"panel":["pointer-sync"],"efb":null,"desktop":null},"uses":["kernel","messages","cockpit-stream","clients","network","session","panel-bridge"],"doc":"record/areas/pointer-sync/01-pointer-sync.md"},{"id":"flight-model","name":"Flight-model sync","does":"Following aircraft fly 400ms behind the PF's sampled pose, velocities, and controls.","parts":{"core":"flight-model","routines":["Lead","Follow"],"panel":[],"efb":null,"desktop":null},"uses":["kernel","messages","network","session","sim-service","routine-host"],"doc":"record/areas/flight-model/01-flight-model-sync.md"},{"id":"avatars","name":"Avatars","does":"Each pilot's figure takes a seat, looks where they look, reaches for clicks.","parts":{"core":"avatars","routines":["Figure"],"panel":[],"efb":null,"desktop":null},"uses":["kernel","messages","session","network","sim-service","core-helper-service","cockpit-stream","profile-loader","clients","aircraft-model","routine-host"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"traffic","name":"Traffic","does":"The traffic host's AI traffic appears as frozen copies in every other sim.","parts":{"core":"traffic","routines":["Traffic"],"panel":[],"efb":"Packs list (app TBD)","desktop":"Packs list (app TBD)"},"uses":["kernel","messages","session","sim-service","network","clients","object-mirror","routine-host"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"atc-audio","name":"ATC audio","does":"The ATC host's ATC app plays in every other pilot's headset.","parts":{"core":"atc-audio","routines":[],"panel":[],"efb":"Capture status (app TBD)","desktop":"Capture status (app TBD)"},"uses":["kernel","messages","session","core-helper-service","network","clients"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"take-control","name":"Take-control","does":"A bound key, hardware button, or app button asks to take control.","parts":{"core":"take-control","routines":[],"panel":[],"efb":"Take-control button","desktop":"Section that binds the input"},"uses":["kernel","messages","session","core-helper-service","clients","efb-shell","desktop-shell"],"doc":"record/areas/control/01-take-control.md"},{"id":"rate-and-pause","name":"Rate and pause","does":"Active pause and the simulation rate stay the same across the crew.","parts":{"core":"rate-and-pause","routines":[],"panel":[],"efb":"No screen; sets active pause","desktop":null},"uses":["kernel","messages","session","sim-service","clients","efb-shell"],"doc":"record/areas/session/02-units.md"},{"id":"go-to","name":"Go to","does":"Points a joiner's world map at the PF's stand, or a runway while engines run.","parts":{"core":"go-to","routines":[],"panel":[],"efb":null,"desktop":"Section with the Go to button"},"uses":["kernel","messages","session","sim-service","clients","desktop-shell"],"doc":"record/areas/session/02-units.md"}],"systems":[{"id":"loop-and-edge","name":"The core's loop and edge","node":"6.1","doc":"record/areas/core/01-loop-and-edge.md","units":["kernel","app-core"],"line":"One thread runs every unit from one stamped queue; the edge records and replays it."},{"id":"clients","name":"Clients and the panel bridge","node":"6.2","doc":"record/areas/core/02-clients-and-panel-bridge.md","units":["clients","page-client","panel-bridge"],"line":"How the apps and sim pages talk to the core over WebSockets."},{"id":"sim-seam","name":"The sim seam and our WASM module","node":"6.3","doc":"record/areas/core/03-sim-seam-and-wasm-module.md","units":["sim-service","sim-client","sim-edge","sim-awareness","simconnect-types","routine-host","wasm-module"],"line":"How the core reaches SimConnect, tracks the sim, and runs routines inside it."},{"id":"network","name":"The network","node":"6.4","doc":"record/areas/network/02-units.md","units":["network","transport","backend","relays"],"line":"Links between cores over iroh, invite codes from the backend, and our relays."},{"id":"core-helper","name":"The core helper","node":"6.5","doc":"record/areas/core/04-core-helper.md","units":["core-helper-service","app-core-helper"],"line":"A helper process for keys, buttons, mouse, and audio, run only while wanted."},{"id":"recording","name":"Recording and bug reports","node":"6.6","doc":"record/areas/recording/01-recording-and-bug-reports.md","units":["recording","recording-format","backend","reports-ts"],"line":"Each core's replayable input log, and bug reports uploaded to us."},{"id":"session","name":"The session","node":"6.7","doc":"record/areas/session/02-units.md","units":["session","rate-and-pause","go-to","menu-script"],"line":"Members, keys, control, and preflight, with pause, rate, and Go to."},{"id":"profiles","name":"Profiles","node":"6.8","doc":"record/areas/profiles/02-units.md","units":["profile-engine","profile-build","profile-loader","profile-builder"],"line":"The aircraft profile format, building bundles, and loading one in the core."},{"id":"sync","name":"Sync","node":"6.9","doc":"record/areas/sync/05-units.md","units":["cockpit-stream","sync-engine","state-sync"],"line":"Keeps both cockpits' state alike, in causal order, with catch-up."},{"id":"flight-model","name":"Flight-model sync","node":"6.10","doc":"record/areas/flight-model/01-flight-model-sync.md","units":["flight-model"],"line":"The PF's aircraft motion, read in-sim and replayed on each follower."},{"id":"pointer-sync","name":"Pointer sync","node":"6.11","doc":"record/areas/pointer-sync/01-pointer-sync.md","units":["pointer-sync"],"line":"Presses and drags on synced displays, played in every other cockpit."},{"id":"control","name":"Control","node":"6.12","doc":"record/areas/control/01-take-control.md","units":["take-control"],"line":"Taking control by key, button, or app button; voice phrases wait for Soon."},{"id":"avatars","name":"Avatars","node":"6.13","doc":"record/areas/avatars/01-avatars.md","units":["avatars","aircraft-model","msfs-gltf","msfs-rpn","ray-cast","profile-author"],"line":"Pilot figures, and reading an aircraft's own models to place their hands."},{"id":"traffic-atc","name":"Traffic and ATC","node":"6.14","doc":"record/areas/traffic-atc/01-traffic-and-atc.md","units":["traffic","atc-audio","object-mirror"],"line":"One pilot's AI traffic and ATC audio shared with the crew."},{"id":"plugins","name":"Plugins and the sandbox","node":"6.15","doc":"record/areas/plugins/01-plugins.md","units":["sandbox"],"line":"No plugins in v1; the sandbox runs profiles' write functions replayably."},{"id":"apps","name":"The apps","node":"6.16","doc":"record/areas/interface/01-apps.md","units":["efb-shell","desktop-shell","app-desktop","pages"],"line":"EFB app, banner, and desktop app shells, and how features plug in."},{"id":"install","name":"Installing and updating","node":"6.17","doc":"record/areas/install/01-installing-and-updating.md","units":["app-desktop","sim-service"],"line":"Velopack installs and updates; the desktop tray app does the watcher's jobs."},{"id":"build","name":"The build","node":"6.18","doc":"record/areas/build/01-the-build.md","units":["build-ts","setup-ts","msfs-sdk","stock-ts","release-ts","map-check","coherent-gt-check"],"line":"How the repository becomes a checked, published release through CI."}]},"flows":{"flows":[{"id":"install","title":"Installing Crosscheck","gist":"Setup.exe installs per-user; the tray app adds the firewall rule, writes our package, and starts the core with the sim.","lanes":["sim","menu","core","desktop","pages","releases"],"steps":[{"lane":"releases","to":"desktop","text":"Pilot downloads Setup.exe from a release; unsigned, so SmartScreen asks 'Run anyway'"},{"lane":"desktop","text":"Velopack installs to %LOCALAPPDATA%\\Crosscheck, no admin prompt, and sets it to start at login"},{"lane":"desktop","text":"First run: one UAC prompt adds a firewall rule letting the core receive UDP"},{"lane":"desktop","to":"sim","text":"While the sim is closed, copies our package into each Community folder UserCfg.opt names"},{"lane":"sim","text":"Pilot starts the sim, which mounts our package: WASM module, pages, VCockpit.js"},{"lane":"desktop","to":"core","text":"Tray app finds FlightSimulator2024.exe, polling every 2s, and starts crosscheck-core.exe"},{"lane":"core","to":"sim","text":"Opens SimConnect and broadcasts its port on the sim's CommBus every 2s"},{"lane":"core","text":"Checks our package's version, and warns of other packages overriding our files"},{"lane":"core","to":"pages","text":"Fetches the profiles' index.json from Pages, then any bundle its cache lacks"},{"lane":"menu","to":"core","text":"Menu script, from our BlurPage copy, hears the port and connects by WebSocket"}],"doc":"record/areas/install/01-installing-and-updating.md"},{"id":"join","title":"Hosting and joining","gist":"Host gets a backend code; the joiner looks it up, dials the host, uses Go to, and enters the flight.","lanes":["sim","wasm","menu","core","desktop","peer","relay","backend"],"steps":[{"lane":"peer","to":"backend","text":"Host's core posts session, relays, version, and hash; backend returns a code"},{"lane":"desktop","to":"core","text":"Joiner enters the six-character invite code; the Join command reaches their core"},{"lane":"core","to":"backend","text":"Looks the code up; backend checks version and hash, returns relays and crew"},{"lane":"core","to":"relay","text":"Writes the session file, then dials the host by public key via the relays"},{"lane":"relay","to":"peer","text":"Carries the QUIC connection; it moves to direct UDP when hole punching works"},{"lane":"peer","to":"core","text":"Host's first message carries every session key: control, aircraft, the PF's stand"},{"lane":"core","to":"menu","text":"On Go to, sends the menu script world_map requests: PF's airport, then stand"},{"lane":"menu","to":"sim","text":"Selects them on the world map; the joiner starts the flight from there"},{"lane":"sim","to":"core","text":"SimConnect reports Ready to fly in the session's aircraft: in the flight"},{"lane":"core","to":"wasm","text":"Feeds Follow the PF's samples and Hold: aircraft moves to the PF, frozen"}],"doc":"record/areas/session/02-units.md"},{"id":"switch","title":"Syncing a switch","gist":"SimConnect reports the change, the core sends the value on the cockpit stream, and the other core writes it.","lanes":["sim","core","peer"],"steps":[{"lane":"sim","text":"PF flips a switch; the variable its profile entry reads changes"},{"lane":"sim","to":"core","text":"SimConnect reports the new value from a per-frame, on-change data request"},{"lane":"core","text":"Sync engine matches it to no pending write, so it's the pilot's own change"},{"lane":"core","text":"Cockpit stream stamps it with a vector clock and the control value"},{"lane":"core","to":"peer","text":"Sends a postcard (compact binary) message on the cockpit stream, over QUIC"},{"lane":"peer","text":"Waits for what it depends on and its sender's gap; drops copies"},{"lane":"peer","text":"Applies if its stamp wins; when neither saw the other, the flying machine wins"},{"lane":"peer","text":"Sync engine turns the entry's write into actions: a variable, event, or toggle"},{"lane":"peer","text":"Sim service makes them through SimConnect; the switch moves in that cockpit"},{"lane":"peer","text":"The write stays pending until a reading matches; after 1.5s, a notice flags it"}],"doc":"record/areas/sync/02-live-sync.md"},{"id":"press","title":"Pressing a glass display","gist":"The panel module captures down, moves, and up; each crosses the cockpit stream and plays on the other display.","lanes":["panels","core","peer"],"steps":[{"lane":"panels","text":"Pilot presses a synced display; our panel module catches mousedown before the display does"},{"lane":"panels","to":"core","text":"Sends Down at once to the core over the panel's WebSocket"},{"lane":"panels","to":"core","text":"Then Moves at most every 33ms, Held each still second, Up at release"},{"lane":"core","to":"peer","text":"Sends each on the cockpit stream, keyed by display, in one agreed order"},{"lane":"peer","text":"Hands each, as it arrives, to every panel module that announced the display"},{"lane":"peer","text":"Hit-tests the point at the same fractions of the display, past our overlays"},{"lane":"peer","text":"Dispatches mousedown, mousemove, mouseup, and click there as synthetic MouseEvents"},{"lane":"peer","text":"An unseen lock blocks that pilot's own presses; a blocked press flashes"},{"lane":"peer","text":"The Up holds back later cockpit messages until its click plays, at most 1s"}],"doc":"record/areas/pointer-sync/01-pointer-sync.md"},{"id":"flight-model","title":"One flight-model sample","gist":"Lead reads the pose 20 times a second; the core sends it as a datagram; Follow draws it 400ms behind.","lanes":["wasm","core","peer"],"steps":[{"lane":"wasm","text":"Lead routine reads pose, velocities, control surfaces, and toe brakes every 50ms"},{"lane":"wasm","text":"Stamps the read with the frame's time on its estimate of the core's clock"},{"lane":"wasm","to":"core","text":"Writes it to its report slot, which SimConnect delivers to the core"},{"lane":"core","to":"peer","text":"Sends a sample with the control generation as a QUIC datagram, never resent"},{"lane":"peer","text":"Drops it unless from the PF, current generation, newer stamp, and offset known"},{"lane":"peer","text":"Shifts its stamp onto this PC's clock by the heartbeat's offset estimate"},{"lane":"peer","text":"Feeds it into Follow's slot in our WASM module through SimConnect client data"},{"lane":"peer","text":"Follow draws the aircraft 400ms behind, on straight lines between samples"},{"lane":"peer","text":"Each frame it freezes the aircraft, writes pose and velocities, sends axis events"}],"doc":"record/areas/flight-model/01-flight-model-sync.md"},{"id":"control","title":"Taking control","gist":"A bound key or app button asks for control; guards decide; the new control value reaches every machine.","lanes":["wasm","efb","banner","core","helper","peer"],"steps":[{"lane":"helper","to":"core","text":"Raw Input catches the bound key or button and pipes the press up"},{"lane":"efb","to":"core","text":"Or the EFB app's take-control button sends the take-control.request command"},{"lane":"core","text":"Checks: in the flight, preflight over, guards allow; refused plays a refusal cue"},{"lane":"core","text":"Session crate writes control: generation one higher, this pilot's ID"},{"lane":"core","to":"peer","text":"Sends the new control key, and a CONTROL message carrying its vector clock"},{"lane":"peer","text":"Adopts the new control value: a higher generation wins, then the lower pilot ID"},{"lane":"core","to":"wasm","text":"Flight-model sync ends Follow and starts Lead; this machine now sends samples"},{"lane":"peer","text":"Old PF's machine ends Lead, starts Follow; its aircraft eases back over 3s"},{"lane":"helper","text":"Plays the control-passed cue; the other machine's helper plays it too"},{"lane":"banner","text":"Shows \"You have control\"; the other machine shows \"Adam has control\""}],"doc":"record/areas/control/01-take-control.md"},{"id":"update","title":"Updating Crosscheck","gist":"The tray app downloads a new release, holds it until sim, session, and core are gone, then swaps folders.","lanes":["sim","core","desktop","releases"],"steps":[{"lane":"desktop","to":"releases","text":"Checks at start, each sim close, every 3 hours, and on Check now"},{"lane":"releases","to":"desktop","text":"The newest 10 releases' feeds list the new version, full package, and deltas"},{"lane":"desktop","text":"Downloads deltas, else the full package, at once; checks size and SHA-256"},{"lane":"desktop","text":"Holds it while the sim runs, a session file exists, or a core runs"},{"lane":"core","text":"Exits once sim closed, no session, no window; Install now sends Quit instead"},{"lane":"desktop","text":"Calls wait_exit_then_apply_updates, restart with --tray, and exits"},{"lane":"desktop","text":"Update.exe swaps current\\ by two renames and starts the new tray app"},{"lane":"desktop","to":"sim","text":"New app writes our package where Community's copy is another version"}],"doc":"record/areas/install/01-installing-and-updating.md"},{"id":"release","title":"Shipping a release","gist":"A developer runs the release workflow; CI builds, checks, and packs, uploads a draft, deploys the backend, then publishes.","lanes":["dev","ci","releases","backend","pages"],"steps":[{"lane":"dev","to":"ci","text":"Runs the release workflow by hand on main"},{"lane":"ci","text":"Read-only build job: stops if the version's published, then runs every PR check"},{"lane":"ci","text":"node tools/build.ts release lays out the app, core, helper, SimConnect.dll, package"},{"lane":"releases","to":"ci","text":"Serves the newest release's full package to vpk download github, as delta base"},{"lane":"ci","text":"vpk pack packs the folder, with a delta from that base"},{"lane":"ci","to":"releases","text":"Publish job uploads a draft with vpk upload github, then checks its files"},{"lane":"ci","to":"backend","text":"Runs the backend's D1 migrations, then wrangler deploy of the Worker"},{"lane":"ci","to":"releases","text":"Publishes the draft as latest with gh release edit"},{"lane":"ci","to":"pages","text":"Profiles job commits new bundles and index.json to the pages branch"}],"doc":"record/areas/build/01-the-build.md"}]},"build":{"stages":[{"id":"source","name":"The repository","does":["One Cargo workspace, one npm lockfile, profiles, backend, relays","Sim's stock VCockpit.js and BlurPage in sim-package/stock/","Figure model and banner .spb compiled with the sim, committed","msfs-sdk.txt pins the SDK; .cargo/config.toml makes the C runtime static"]},{"id":"setup","name":"tools/setup.ts","does":["Installs cargo-msfs at its tag","Installs the pinned SDK through tools/msfs-sdk","Build fails if the installed SDK isn't the pinned one"]},{"id":"build","name":"tools/build.ts","does":["cargo build: core, core helper, tools, all with a static C runtime","cargo-msfs: the WASM module, for wasm32","esbuild at es2017, then the Coherent GT check: everything in the sim","tauri build --no-bundle: the desktop app","cargo test: ts-rs types and stamp.ts (version + message hash)","Lays out the release folder with our package, crosscheck"]},{"id":"pr","name":"Every pull request","does":["Rustfmt, Clippy, tests; module exports; type-check","Coherent GT check on every file shipped into the sim","Generated types and stamp unchanged; map check","Profiles checked and built","Compiled sim files match source.json; stock files match stock.json"]},{"id":"buildjob","name":"Release: build job","note":"read-only token","does":["Stops if this version is already published","Runs every PR check, then tools/build.ts release","vpk download github: the newest release, for the delta","Fails unless that's releases/latest (or there's no release yet)","vpk pack: Setup.exe, full + delta packages, no portable zip"]},{"id":"publishjob","name":"Release: publish job","note":"write token","does":["Deletes a draft a failed run left","vpk upload github as a draft no pilot sees","Checks the draft holds every file and releases.win.json lists it","Deploys the backend: D1 migrations, then wrangler deploy","Publishes; it becomes releases/latest"]},{"id":"profilesjob","name":"Release: profiles job","does":["Publishes bundles at any level this release brings","Commits to the pages branch, never deleting a file"]}],"release":[["crosscheck-desktop.exe","Tray app, window, updater; Velopack's main program"],["crosscheck-core.exe","The session: sim, network, sync"],["crosscheck-core-helper.exe","Raw Input, audio, Opus"],["SimConnect.dll","From the pinned SDK, for the core"],["crosscheck\\","Our one Community package, PANEL_PATCH"]],"package":["VCockpit.js copy: loads the panel bridge in every cockpit panel","BlurPage copy: loads the menu script in the main menu","Panel bridge, page client, panel modules","EFB app, banner in-game panel","WASM module: routine host and routines","Figure SimObject (avatars)"],"dev":["node tools/build.ts builds everything locally","node tools/build.ts install copies the package into Community, sim closed","The installed app writes Community only from its install folder","Quit the installed app while developing","After a sim update: the build stops if stock files changed; node tools/stock.ts takes them"]}}</script>
+<script>
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("data").textContent);
+  var GIST = D.gist;
+  document.getElementById("gist").textContent = GIST;
+
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "class") e.className = attrs[k];
+      else if (k === "text") e.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), attrs[k]);
+      else e.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function sv(tag, attrs, kids) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (kids || []).forEach(function (c) { e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function list(items) { return el("ul", null, items.map(function (t) { return el("li", { text: t }); })); }
+
+  var comps = {}; D.runtime.components.forEach(function (c) { comps[c.id] = c; });
+  function cname(id) { return comps[id] ? comps[id].name : ({ ci: "CI", dev: "Developer", relay: "Relays" })[id] || id; }
+
+  var TABS = [
+    { id: "runtime", name: "Runtime", render: renderRuntime },
+    { id: "code", name: "Code", render: renderCode },
+    { id: "flows", name: "Flows", render: renderFlows },
+    { id: "build", name: "Build", render: renderBuild }
+  ];
+  var tabsEl = document.getElementById("tabs"), view = document.getElementById("view");
+  function show(id) {
+    TABS.forEach(function (t) { t.btn.setAttribute("aria-selected", String(t.id === id)); });
+    view.innerHTML = "";
+    var t = TABS.filter(function (x) { return x.id === id; })[0] || TABS[0];
+    t.render(view);
+    try { localStorage.setItem("ccmap-tab", t.id); } catch (e) {}
+    if (location.hash.slice(1) !== t.id) { try { history.replaceState(null, "", "#" + t.id); } catch (e) {} }
+  }
+  TABS.forEach(function (t) {
+    t.btn = el("button", { role: "tab", text: t.name, onclick: function () { show(t.id); } });
+    tabsEl.appendChild(t.btn);
+  });
+
+  function panelEmpty(text) {
+    var p = el("aside", { class: "panel" }, [el("p", { class: "empty", text: text })]);
+    return p;
+  }
+  function fill(panel, kids) { panel.innerHTML = ""; kids.forEach(function (k) { if (k) panel.appendChild(k); }); }
+
+  // ---------- Runtime ----------
+  var POS = {
+    sim: [105, 62], panels: [25, 162], efb: [185, 162], banner: [25, 262], menu: [185, 262], wasm: [105, 362],
+    desktop: [420, 112], core: [420, 262], helper: [420, 432],
+    peer: [725, 82], relay: [725, 192], backend: [725, 302], pages: [725, 412], releases: [725, 512]
+  };
+  var BW = 140, BH = 50;
+  function center(id) { var p = POS[id]; return [p[0] + BW / 2, p[1] + BH / 2]; }
+  function clip(id, dx, dy) {
+    var c = center(id), hw = BW / 2 + 3, hh = BH / 2 + 3;
+    var s = Math.min(dx === 0 ? Infinity : hw / Math.abs(dx), dy === 0 ? Infinity : hh / Math.abs(dy));
+    return [c[0] + dx * s, c[1] + dy * s];
+  }
+  function renderRuntime(root) {
+    root.appendChild(el("p", { class: "hint", text: "Click a box for what it does and what it talks to; click a line for what crosses it." }));
+    var grid = el("div", { class: "grid" });
+    var sc = el("div", { class: "scroll" });
+    var panel = panelEmpty("Nothing selected. Start with the Core: everything else talks to it.");
+    var svg = sv("svg", { class: "rt", viewBox: "0 0 960 590", role: "img", "aria-label": "Runtime components and their links" });
+    [["sim", 10, 30, 330, 410, "Inside MSFS 2024"], ["pc", 370, 30, 240, 530, "Each pilot's PC"], ["net", 640, 30, 310, 550, "Across the internet"]].forEach(function (z) {
+      svg.appendChild(sv("rect", { class: "zone " + z[0], x: z[1], y: z[2], width: z[3], height: z[4], rx: 8 }));
+      svg.appendChild(sv("text", { class: "zlabel", x: z[1] + 12, y: z[2] + 20 }, [z[5]]));
+    });
+    var pairCount = {};
+    var edges = [];
+    D.runtime.links.forEach(function (l, i) {
+      if (!POS[l.from] || !POS[l.to]) return;
+      var key = [l.from, l.to].sort().join("|");
+      var nth = pairCount[key] = (pairCount[key] || 0) + 1;
+      var a = center(l.from), b = center(l.to);
+      var dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
+      var p1 = clip(l.from, dx, dy), p2 = clip(l.to, -dx, -dy);
+      var off = nth === 1 ? 0 : (nth % 2 ? 1 : -1) * 22 * Math.ceil((nth - 1) / 2);
+      var mx = (p1[0] + p2[0]) / 2 - dy / len * off, my = (p1[1] + p2[1]) / 2 + dx / len * off;
+      var d = "M" + p1[0] + "," + p1[1] + " Q" + mx + "," + my + " " + p2[0] + "," + p2[1];
+      var g = sv("g", { class: "edge", "data-i": i });
+      g.appendChild(sv("path", { class: "line", d: d, "marker-end": "url(#arr)" }));
+      g.appendChild(sv("path", { class: "hit", d: d }));
+      var lx = (p1[0] + 2 * mx + p2[0]) / 4, ly = (p1[1] + 2 * my + p2[1]) / 4;
+      g.appendChild(sv("text", { x: lx, y: ly, "text-anchor": "middle" }, [l.via]));
+      g.addEventListener("click", function (ev) { ev.stopPropagation(); selectLink(i); });
+      edges.push({ g: g, l: l });
+    });
+    var defs = sv("defs", {}, [sv("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, [sv("path", { d: "M0,0 L10,5 L0,10 z", fill: "currentColor" })])]);
+    svg.appendChild(defs);
+    edges.forEach(function (e) { svg.appendChild(e.g); });
+    var boxes = {};
+    Object.keys(POS).forEach(function (id) {
+      var c = comps[id]; if (!c) return;
+      var p = POS[id];
+      var g = sv("g", { class: "box", tabindex: 0, role: "button", "aria-label": c.name });
+      g.appendChild(sv("rect", { x: p[0], y: p[1], width: BW, height: BH, rx: 5 }));
+      g.appendChild(sv("text", { x: p[0] + 10, y: p[1] + 21 }, [c.name]));
+      g.appendChild(sv("text", { class: "sub", x: p[0] + 10, y: p[1] + 38 }, [(c.short || "").slice(0, 26)]));
+      g.addEventListener("click", function (ev) { ev.stopPropagation(); selectComp(id); });
+      g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectComp(id); } });
+      boxes[id] = g; svg.appendChild(g);
+    });
+    svg.addEventListener("click", function () { clear(); });
+    function clear() {
+      svg.classList.remove("focus");
+      Object.keys(boxes).forEach(function (k) { boxes[k].classList.remove("on", "sel"); });
+      edges.forEach(function (e) { e.g.classList.remove("on", "pick"); });
+    }
+    function selectComp(id) {
+      clear(); svg.classList.add("focus");
+      boxes[id].classList.add("on", "sel");
+      var mine = [];
+      edges.forEach(function (e) {
+        if (e.l.from === id || e.l.to === id) {
+          e.g.classList.add("on"); mine.push(e.l);
+          var other = e.l.from === id ? e.l.to : e.l.from;
+          if (boxes[other]) boxes[other].classList.add("on");
+        }
+      });
+      var c = comps[id];
+      fill(panel, [
+        el("div", { class: "kind", text: c.where }),
+        el("h2", { text: c.name }),
+        el("p", { text: c.is }),
+        el("h3", { text: "Runs" }), el("p", { text: c.runs }),
+        el("h3", { text: "Does" }), list(c.does || []),
+        mine.length ? el("h3", { text: "Talks to" }) : null,
+        mine.length ? el("ul", null, mine.map(function (l) {
+          var other = l.from === id ? l.to : l.from;
+          return el("li", null, [el("strong", { text: cname(other) }), " · " + l.via + ": " + l.carries]);
+        })) : null,
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: c.doc })
+      ]);
+    }
+    function selectLink(i) {
+      clear(); svg.classList.add("focus");
+      var e = edges.filter(function (x) { return x.g.getAttribute("data-i") === String(i); })[0];
+      e.g.classList.add("on", "pick");
+      if (boxes[e.l.from]) boxes[e.l.from].classList.add("on");
+      if (boxes[e.l.to]) boxes[e.l.to].classList.add("on");
+      fill(panel, [
+        el("div", { class: "kind", text: "Link" }),
+        el("h2", { text: cname(e.l.from) + " → " + cname(e.l.to) }),
+        el("p", null, [el("strong", { text: e.l.via })]),
+        el("p", { text: e.l.carries }),
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: e.l.doc })
+      ]);
+    }
+    sc.appendChild(svg);
+    grid.appendChild(sc); grid.appendChild(panel);
+    root.appendChild(grid);
+    selectComp("core");
+  }
+
+  // ---------- Code ----------
+  function renderCode(root) {
+    var C = D.code;
+    var units = {}; C.units.forEach(function (u) { units[u.id] = u; });
+    var usedBy = {}; C.units.forEach(function (u) { (u.uses || []).forEach(function (d) { (usedBy[d] = usedBy[d] || []).push(u.id); }); });
+    root.appendChild(el("p", { class: "hint", text: "Every unit by tier. Click one: what it uses is outlined, what uses it is dashed. Features below show where each one's parts run." }));
+    root.appendChild(el("div", { class: "legend" }, [el("span", { class: "l-dep", text: "uses" }), el("span", { class: "l-rdep", text: "used by" })]));
+    var grid = el("div", { class: "grid" });
+    var left = el("div", { style: "min-width:0" });
+    var panel = panelEmpty("Pick a unit or a feature.");
+    var chips = {};
+    function tclass(t) { return /platform/.test(t) ? "t-platform" : /engine/.test(t) ? "t-engines" : /feature/.test(t) ? "t-features" : "t-other"; }
+    C.tiers.forEach(function (t) {
+      var us = C.units.filter(function (u) { return u.tier === t.id; });
+      if (!us.length) return;
+      var box = el("section", { class: "tier" }, [el("h3", { text: t.name + " · " + us.length }), el("p", { class: "rule", text: t.rule })]);
+      var cs = el("div", { class: "chips" });
+      us.forEach(function (u) {
+        var b = el("button", { class: "chip " + tclass(u.tier), text: u.name, onclick: function () { pick(u.id); } });
+        chips[u.id] = b; cs.appendChild(b);
+      });
+      box.appendChild(cs); left.appendChild(box);
+    });
+    function chipList(ids) {
+      if (!ids || !ids.length) return el("p", { class: "empty", text: "None." });
+      return el("div", { class: "chips" }, ids.filter(function (i) { return units[i]; }).map(function (i) {
+        return el("button", { class: "chip " + tclass(units[i].tier), text: units[i].name, onclick: function () { pick(i); } });
+      }));
+    }
+    function pick(id) {
+      Object.keys(chips).forEach(function (k) { chips[k].classList.remove("sel", "dep", "rdep"); });
+      var u = units[id]; if (!u) return;
+      chips[id].classList.add("sel");
+      (u.uses || []).forEach(function (d) { if (chips[d]) chips[d].classList.add("dep"); });
+      (usedBy[id] || []).forEach(function (d) { if (chips[d]) chips[d].classList.add("rdep"); });
+      fill(panel, [
+        el("div", { class: "kind", text: u.tier + (u.lang ? " · " + u.lang : "") }),
+        el("h2", { text: u.name }),
+        el("p", { text: u.does }),
+        el("div", { class: "doc", text: u.folder }),
+        el("h3", { text: "Runs in" }), el("p", { text: (u.runsIn || []).map(cname).join(", ") || "—" }),
+        el("h3", { text: "Uses" }), chipList(u.uses),
+        el("h3", { text: "Used by" }), chipList(usedBy[id]),
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: u.doc })
+      ]);
+    }
+    left.appendChild(el("h2", { class: "sec", text: "Features and where their parts run" }));
+    var tw = el("div", { class: "scroll" });
+    var tb = el("table", null, [el("thead", null, [el("tr", null, ["Feature", "Core", "WASM routines", "Panel modules", "EFB app", "Desktop app"].map(function (h) { return el("th", { text: h }); }))])]);
+    var body = el("tbody");
+    function cell(v) { if (v == null || (Array.isArray(v) && !v.length)) return el("td", null, [el("span", { class: "none", text: "—" })]); return el("td", { class: "mono", text: Array.isArray(v) ? v.join(", ") : v }); }
+    C.features.forEach(function (f) {
+      var p = f.parts || {};
+      var tr = el("tr", null, [el("td", { class: "f", text: f.name, onclick: function () { pickFeature(f); } }), cell(p.core), cell(p.routines), cell(p.panel), cell(p.efb), cell(p.desktop)]);
+      body.appendChild(tr);
+    });
+    tb.appendChild(body); tw.appendChild(tb); left.appendChild(tw);
+    function pickFeature(f) {
+      Object.keys(chips).forEach(function (k) { chips[k].classList.remove("sel", "dep", "rdep"); });
+      (f.uses || []).forEach(function (d) { if (chips[d]) chips[d].classList.add("dep"); });
+      fill(panel, [
+        el("div", { class: "kind", text: "Feature" }),
+        el("h2", { text: f.name }), el("p", { text: f.does }),
+        el("h3", { text: "Uses" }), chipList(f.uses),
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: f.doc })
+      ]);
+    }
+    if (C.systems && C.systems.length) {
+      left.appendChild(el("h2", { class: "sec", text: "Systems, as node 6 designed them" }));
+      var sw = el("div", { class: "scroll" });
+      var st = el("table", null, [el("thead", null, [el("tr", null, ["Node", "System", "What it is", "Doc"].map(function (h) { return el("th", { text: h }); }))])]);
+      var sb = el("tbody");
+      C.systems.forEach(function (s) { sb.appendChild(el("tr", null, [el("td", { class: "mono", text: s.node }), el("td", { class: "f", text: s.name }), el("td", { text: s.line }), el("td", { class: "doc", text: s.doc })])); });
+      st.appendChild(sb); sw.appendChild(st); left.appendChild(sw);
+    }
+    grid.appendChild(left); grid.appendChild(panel); root.appendChild(grid);
+  }
+
+  // ---------- Flows ----------
+  function renderFlows(root) {
+    var F = D.flows.flows;
+    root.appendChild(el("p", { class: "hint", text: "Each path through the system, one step per row, in the lane where it happens." }));
+    var pickRow = el("div", { class: "fpick", role: "group", "aria-label": "Flows" });
+    var body = el("div");
+    var buttons = [];
+    F.forEach(function (f, i) {
+      var b = el("button", { class: "fchip", "aria-pressed": "false", text: f.title, onclick: function () { draw(i); } });
+      buttons.push(b); pickRow.appendChild(b);
+    });
+    function draw(i) {
+      var f = F[i];
+      buttons.forEach(function (b, j) { b.setAttribute("aria-pressed", String(i === j)); });
+      try { localStorage.setItem("ccmap-flow", String(i)); } catch (e) {}
+      body.innerHTML = "";
+      body.appendChild(el("p", { class: "fgist", text: f.gist }));
+      var sc = el("div", { class: "scroll" });
+      var n = f.lanes.length;
+      var g = el("div", { class: "lanes", style: "grid-template-columns: repeat(" + n + ", minmax(120px, 1fr))" });
+      f.lanes.forEach(function (l) { g.appendChild(el("div", { class: "lanehead", text: cname(l) })); });
+      f.steps.forEach(function (s, k) {
+        var col = f.lanes.indexOf(s.lane);
+        for (var c = 0; c < n; c++) {
+          if (c === col) {
+            g.appendChild(el("div", { class: "step" }, [el("span", { class: "n", text: String(k + 1) }), s.text, s.to ? el("span", { class: "to", text: "→ " + cname(s.to) }) : null]));
+          } else g.appendChild(el("div", { class: "lanecell" }));
+        }
+      });
+      sc.appendChild(g); body.appendChild(sc);
+      body.appendChild(el("p", { class: "doc", text: "Designed in " + f.doc }));
+    }
+    root.appendChild(pickRow); root.appendChild(body);
+    var start = 0; try { start = Math.min(F.length - 1, parseInt(localStorage.getItem("ccmap-flow") || "0", 10) || 0); } catch (e) {}
+    draw(start);
+  }
+
+  // ---------- Build ----------
+  function renderBuild(root) {
+    var B = D.build;
+    root.appendChild(el("p", { class: "hint", text: "From the repository to a release on a pilot's PC. Designed in record/areas/build/01-the-build.md." }));
+    var st = el("div", { class: "stages" });
+    B.stages.forEach(function (s, i) {
+      st.appendChild(el("section", { class: "stage" }, [
+        el("h3", null, [el("span", { class: "n", text: String(i + 1) }), s.name]),
+        s.note ? el("div", { class: "note", text: s.note }) : null,
+        list(s.does)
+      ]));
+    });
+    root.appendChild(st);
+    var cols = el("div", { class: "cols", style: "margin-top:18px" });
+    cols.appendChild(el("section", null, [el("h2", { class: "sec", text: "A release installs" }), el("ul", null, B.release.map(function (r) { return el("li", null, [el("span", { class: "mono", text: r[0] }), ": " + r[1]]); }))]));
+    cols.appendChild(el("section", null, [el("h2", { class: "sec", text: "Our package holds" }), list(B.package)]));
+    cols.appendChild(el("section", null, [el("h2", { class: "sec", text: "Developing" }), list(B.dev)]));
+    root.appendChild(cols);
+  }
+
+  var first = location.hash.slice(1);
+  if (!TABS.some(function (t) { return t.id === first; })) { try { first = localStorage.getItem("ccmap-tab") || "runtime"; } catch (e) { first = "runtime"; } }
+  show(first);
+})();
+</script>

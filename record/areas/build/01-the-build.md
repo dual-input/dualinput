@@ -93,10 +93,10 @@ rustflags = ["-C", "target-feature=+crt-static"]
   - YourControls' package carries no hint (read, [results][msfs]), so it most likely mounts before ours and loses (inference from the report's order).
   - Either way the sim service's warning names the other package, while a name or group that mounted after FS Copilot's would make ours win and break FS Copilot with no word from it.
 - Our probes ran an in-game panel, the EFB app, and BlurPage's copy only from packages with other hints, and a SimObject in a `PANEL_PATCH` package is untried, so one boot of our package in the sim settles all four ([cases for the bench](#cases-for-the-bench)).
-- **A development build** reaches the sim the way a release does: `build.json` in the package names the build, by its commit and a hash of its diff when uncommitted, as a recording's header names it ([what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)).
-  - The desktop app writes our package where it's missing or its version or build isn't the app's own, and the sim service's check of our own package compares both, so a rebuild at the same version reaches `Community` at the next start or sim close, and shows as trouble until it does.
-  - A developer runs the desktop app from the folder `tools/build.ts` laid out, which writes that folder's package, and quits the installed app first, so one app writes the package.
-  - A release's version and build name one commit, so pilots see nothing new.
+- **A development build** reaches the sim only when the developer asks: `node tools/build.ts install` copies the package it built into each packages folder's `Community`, beside and then by rename as the desktop app copies ours, and refuses while the sim runs (user, 2026-10-18).
+  - The desktop app writes our package only when it runs from Velopack's `current\` folder, as an installed release does, so a development build of it never touches `Community`.
+  - A rebuild keeps the version, which changes only for a release, so the installed app's rule, which compares versions, would never copy a rebuild in.
+  - On a PC with a release installed too, the installed app rewrites `Community` whenever the development package's version differs from its own, so the developer quits it first.
 
 ## Files compiled with the sim
 
@@ -165,7 +165,7 @@ No step of the build rewrites `for`-`of` loops, which settles the spine's [left 
 | The core, the core helper, the desktop app's Rust side, and the WASM module | `CARGO_PKG_VERSION`, which each crate inherits from `[workspace.package]` | `messages::HASH` |
 | The desktop app's program, in its Windows version resource | `tauri build --config` | None |
 | Our code in the sim | `stamp.ts` | `stamp.ts` |
-| Our package's `manifest.json`, and its `build.json` | `tools/build.ts` | None |
+| Our package's `manifest.json` | `tools/build.ts` | None |
 | The backend | None: it compares the version and hash the host posted with each joiner's | None |
 
 `tauri build` gets the version through `--config` because Tauri's CLI and the running app read a version the crate inherits, while tauri-build sets the program's Windows version resource only from `tauri.conf.json`'s own (read in tauri-apps/tauri at tag tauri-cli-v2.12.3, [results][velopack]; unverified by a build), which settles the code map's [left open](../architecture/02-code-map.md#left-open) item on it.
@@ -250,7 +250,7 @@ On a desk:
 - A build with `RUSTFLAGS` set, even empty, stops at `apps/core`'s guard, and one whose installed SDK isn't `msfs-sdk.txt`'s stops and names `node tools/setup.ts`.
 - No shipped program imports `VCRUNTIME140.dll`, and the core imports no `api-ms-win-crt-*` DLL, by `dumpbin /imports`.
 - A change to the message crate committed without the stamp generated again fails CI; one commit built on two PCs, one checked out with CRLF line ends, gives one hash; and a `tools/build.ts` run followed by `cargo build` compiles no crate.
-- A rebuild at the same version reaches `Community` at the development desktop app's next start.
+- A development build of the desktop app writes nothing to `Community`, and `tools/build.ts install` writes the package and refuses while the sim runs.
 - A figure source changed without a recompile fails CI.
 - A stock file the sim changed stops a developer's build on the public branch, warns on a beta branch, and `tools/stock.ts` brings it in only from the public one.
 - A release with none before it publishes with no delta, the next publishes with one, and one whose upload fails leaves a draft that the next run deletes before it publishes.

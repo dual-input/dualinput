@@ -3,32 +3,12 @@
 ```text
 Purpose:     How the EFB app, the banner, and the desktop app connect to the core and to each feature, and what trouble in each component raises.
 Depends on:  ../core/02-clients-and-panel-bridge.md, ../architecture/02-code-map.md, ../architecture/01-spine.md, ../session/02-units.md, log.md
-Decides:     How a feature's part plugs into each app and comes out; what a part may use; the slices and commands the apps need that no unit had; how any client changes a setting and quits; how the banner is opened; how a click on a notice reaches the EFB app; what trouble in each component raises; what the apps learn when the core goes; and how the EFB app brings the desktop app forward (node 6.16).
+Decides:     How a feature's part plugs into each app and comes out; what a part may use; the slices and commands the apps need that no unit had; how any client changes a setting and quits; when and how the banner is opened and closed; how a click on a notice reaches the EFB app; what trouble in each component raises; what the apps learn when the core goes; and how the EFB app brings the desktop app forward (node 6.16).
 ```
-
-> **Note**
-> Since 2026-10-18, [installing and updating](../install/01-installing-and-updating.md) changes this document in four places:
->
-> - Crosscheck has no watcher: the desktop app runs from login as a tray icon and does the watcher's jobs, and its tray's Quit sends the session crate's Quit, which settles what [quit](#quit) leaves to 6.17.
-> - The desktop app's socket to the core is open while its window is open, and closing the window destroys it; the app wants a core while the sim runs, its window is open, or a session file exists, starts one when none runs, starts one again 2s after an exit other than 0, and after an exit with 0 starts none until the sim next starts or the window next opens, which replaces [when the core goes](#when-the-core-goes)'s rules on the port file and the `bye`.
-> - One copy of the desktop app runs at a time, so the core's start of its program in [bringing the desktop app forward](#bringing-the-desktop-app-forward) opens the running app's window; the update's state, Install now, and Check now are the desktop app's own, in its window.
-> - [Trouble](#trouble) gains our own package, which the sim service checks at the core's start and at each sim start, raising a trouble notice when it's missing, at another version, or off in the sim; and the check that names another package overriding our files is the sim service's, with a warning notice for each package and one match item.
->
-> Since 2026-10-18, the banner panel stays open through each flight of a session, and its page shows and hides its notices and the preflight summary itself, from the slices it watches, as the interface log's 2026-10-04 run did with CSS, so the session's slice carries no wanted state, where the opening lines, [slices and commands](#slices-and-commands), and [the banner](#the-banner) have the core say whether it should be open (user, 2026-10-18):
->
-> - In each flight of a session, the EFB app's code opens the panel, calling `TOOLBAR_BUTTON_TOGGLE` again after a wait until a banner page's socket opens; a pilot who closes it from its toolbar button keeps it closed until the next flight.
-> - The EFB app's code closes it once, when the session ends or the core says `bye`, with no retry.
-> - A case in the sim checks whether clicks reach the cockpit through the panel's see-through part; if they don't, the banner's shape comes back to design.
->
-> Since 2026-10-18, the design review after node 6 changes this document in three places (user, 2026-10-18):
->
-> - Of the settings in [settings](#settings), recording everything is an ordinary one, and the profile loader's local folder a development one, since v1 ships no authoring tool ([recording](../recording/01-recording-and-bug-reports.md); [the profiles' units](../profiles/02-units.md)).
-> - [Bringing the desktop app forward](#bringing-the-desktop-app-forward) always starts the desktop app's program, whose one running copy opens its window, so `clients` sends the desktop app no message for it, and the case for the bench on a second press goes.
-> - [Trouble](#trouble) has one trouble notice for our package, raised from either the sim service's check on disk or the module's status of Missing or Differs, where it lists them as two; Stopped keeps its own.
 
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.
-The core says whether the banner should be open, and the EFB app's code calls the toolbar until each change in that takes.
+In each flight of a session, the EFB app's code opens the banner, calling the toolbar again until the banner's page connects, and the page shows and hides its own content while the panel stays open.
 Trouble that costs the pilot a feature raises a notice from the unit that sees it, and the rest goes to the log and the recording.
 
 This answers node 6.16 of the [architecture plan](../architecture/plan.md#616-the-apps), narrowed by the user on 2026-10-17 to how the apps connect to the rest of Crosscheck: the apps' looks and words, which slices each shows, and their own code wait for the apps' stage, which [left to the apps' stage](#left-to-the-apps-stage) lists.
@@ -101,7 +81,7 @@ These are the ones the apps need that no unit had:
 | Unit | Its slice adds | Its commands add |
 | --- | --- | --- |
 | `clients` | Whether a banner page's socket is open | A notice clicked outside its action; bring the desktop app forward |
-| `session` | The members, with each one's name, `status`, and `ready`; control; preflight and its countdown; the invite code; the match check's differences, each with its level and its owner's words; the verdicts on Ready and on the "Share my traffic and ATC" switch; the role keys this pilot can claim, each with its label; and whether the banner should be open | The switch, which asks the kernel's request for every role key ([session keys](../session/02-units.md#session-keys)) |
+| `session` | The members, with each one's name, `status`, and `ready`; control; preflight and its countdown; the invite code; the match check's differences, each with its level and its owner's words; the verdicts on Ready and on the "Share my traffic and ATC" switch; and the role keys this pilot can claim, each with its label | The switch, which asks the kernel's request for every role key ([session keys](../session/02-units.md#session-keys)) |
 | `sim-service` | Sim awareness's stage, page, aircraft, pause, and how the last run ended, and the module's status ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)) | None |
 | `recording` | The recorded runs from each run's index, with each one's size, whether it's uploaded, and which is in progress | Mark the moment; upload a session; delete a run, which refuses the run in progress |
 | `go-to` | The PF's spot, whether Go to is available, and the step that failed | None beyond Go to |
@@ -110,6 +90,7 @@ These are the ones the apps need that no unit had:
 
 - A match item names its words as it names its level ([the match check](../session/02-units.md#the-match-check)), and a role key registers a label in its feature's words, so the shells show both without naming a feature.
 - The network's, the core helper service's, the cockpit stream's, state sync's, and take-control's slices are their own designs' ([02-units](../network/02-units.md#what-the-pilot-sees-and-settings), [the devices](../core/04-core-helper.md#the-devices), [the sync units](../sync/05-units.md#catch-up), [taking control](../control/01-take-control.md#taking-control)).
+- The update's state, Install now, and Check now are the desktop app's own, in its window, so they're no unit's slice or command ([updates](../install/01-installing-and-updating.md#updates)).
 
 ## Settings
 
@@ -118,12 +99,13 @@ These are the ones the apps need that no unit had:
 - A setting registers, beside its key, type, and default ([what a unit registers and calls](../core/02-clients-and-panel-bridge.md#what-a-unit-registers-and-calls)), a label in its feature's words, as a notice's text is, and what an app needs that the type doesn't say: a number's range, a list's choices or the slice that lists them, such as the output devices, and whether only its feature's part shows it, as take-control's input, which its section writes after Bind.
   So avatars' settings, and traffic's and ATC audio's, need no part.
 - A development setting says so when it registers, and shows in no app: a developer edits `settings.json` while the core is stopped.
+- Recording everything is an ordinary setting, and the profile loader's local folder a development one, since v1 ships no authoring tool ([recording everything](../recording/01-recording-and-bug-reports.md#recording-everything); [the local folder](../profiles/02-units.md#the-local-folder); user, 2026-10-18).
 - The display name is a setting like any other, which Host and Join need ([members](../session/02-units.md#members)).
 
 ## Quit
 
 Quit is the session crate's command ([joining and leaving](../session/02-units.md#joining-and-leaving)), so any client may send it, and which app offers it is the apps' design.
-The watcher opens no socket to the core, so how its tray asks the core to quit is [6.17](../architecture/plan.md#617-installing-and-updating)'s.
+The desktop app runs from login as a tray icon, and its tray's Quit sends it too ([one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
 
 ## Notices
 
@@ -132,41 +114,45 @@ What the order carries for where in the EFB app it lands waits with that choice,
 
 ## The banner
 
-- The session's slice says whether the banner should be open, and `clients`' says whether a banner page's socket is open, which `clients` closes 8s after the page's last message ([the protocol](../core/02-clients-and-panel-bridge.md#the-protocol)).
-  The rule for when it should be open is the apps' design.
-- On each change of the wanted state, the EFB app's code calls `TOOLBAR_BUTTON_TOGGLE` with it, and calls again while that change hasn't taken: no banner page's socket for an open, and the socket still open for a close.
-  It calls nothing while the wanted state holds, so a pilot who closes the banner from its toolbar button keeps it closed until the wanted state next changes.
-- On a `bye`, the EFB app's code closes the banner, since the core will say nothing more.
+- The banner's panel stays open through each flight of a session, and its page shows and hides its notices and the preflight summary itself, from the slices it watches, as our panel's page did with CSS (measured on MSFS 2024, 2026-10-04, [log](log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), so no slice says whether it should be open (user, 2026-10-18).
+- `clients`' slice says whether a banner page's socket is open, which `clients` closes 8s after the page's last message ([the protocol](../core/02-clients-and-panel-bridge.md#the-protocol)).
+- In each flight of a session, the EFB app's code opens the panel, calling `TOOLBAR_BUTTON_TOGGLE` again after a wait until a banner page's socket opens.
+  A pilot who closes it from its toolbar button keeps it closed until the next flight.
+- The EFB app's code closes the panel once, with no retry, when the session ends or the core says `bye`, since the core says nothing more after either.
 - The call opened and closed our panel from the EFB's document (measured on MSFS 2024, 2026-10-04 and 2026-10-09, [log](log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)), and each measured call asked for the opposite of the panel's state, so whether it sets the state it's given or toggles is unverified, and [the cases in the sim](#cases-for-the-bench) set how long the code waits before calling again.
 - A closed panel's page is destroyed ([log](log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)), and its socket stayed open for the 35s the 2026-10-08 run watched ([log][coverage]), so the socket `clients` closes, not the page's own, says the page is gone.
 - No run has had our code open the panel during a flight load, before Ready to fly, or after a second flight load in one run ([decision 012](../../decisions/012-efb-app-opens-banner-panel.md)).
-  Calling again until the change takes covers them, provided the sim takes a call there at all, which is unverified, since a call our toolbar script made once left the panel closed with no error ([log](log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)); the cases in the sim time each.
+  Calling again until a banner page's socket opens covers them, provided the sim takes a call there at all, which is unverified, since a call our toolbar script made once left the panel closed with no error ([log](log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)); the cases in the sim time each.
 
 ## Trouble
 
 | Component | Trouble | Who sees it | It raises |
 | --- | --- | --- | --- |
 | The core | No core heard, a `bye`, 8s silent, or its socket closed | Each app, through [the connection's state](#when-the-core-goes), and the panel bridge, whose visible locks turn into warnings ([what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns)) | Nothing the core can send |
-| Our WASM module | Missing, from another build, or stopped while any routine is fed | The sim service | A trouble notice, cleared when the module runs or no routine is fed |
+| Our package | Missing, at another version, or off in the sim; or our WASM module missing or from another build while any routine is fed | The sim service | One trouble notice |
+| Our WASM module | Stopped while any routine is fed | The sim service | A trouble notice of its own, cleared when the module runs or no routine is fed |
 | The panel bridge | No cockpit panel's `hello` within 10s of the profile loading | `clients` | A trouble notice, cleared when a panel connects or the profile unloads |
 | The EFB app, the banner, and a page from another version | Not connected, or its version or hash differs | `clients` | The log alone, since the EFB app and the banner are where a notice would show, and every component updates together ([a client whose version differs](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs)) |
 
 - The core helper's, the network's, and Go to's trouble are their own designs' notices and slices ([the helper's life](../core/04-core-helper.md#the-helpers-life), [02-units](../network/02-units.md), [go to](../session/02-units.md#go-to)).
+- The sim service checks our package on disk at the core's start and at each sim start ([our own package](../install/01-installing-and-updating.md#our-own-package)), and the module's status stops raising the package's notice once the module runs or no routine is fed ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status); user, 2026-10-18).
 - The sim service watches the module while any routine is fed, preflight's `Hold` among them, rather than in a session, because it sits below the session crate and can't read it; in v1 a routine is fed only in a session.
 - Every cockpit panel's bridge sends a `hello` when a session starts, whether or not a module is named for it ([the sim's pages](../architecture/01-spine.md#the-sims-pages)), so 10s with none means the bridge didn't load, which stops pointer sync and every other panel module, whatever this profile names.
-- Another package's `VCockpit.js` override, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) shows as a conflict, is the likeliest cause, and the check that names it is [6.17](../architecture/plan.md#617-installing-and-updating)'s.
+- Another package's `VCockpit.js` override, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) shows as a conflict, is the likeliest cause, and the check that names it is the sim service's, which raises a warning notice for each package it finds and one item in the match check ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)).
 
 ## When the core goes
 
 - `page-client` gives its page, and the desktop app's Rust side gives its pages, the connection's state: no core heard, connected, quit after a `bye`, silent for 8s with the socket kept, or closed without a `bye`.
   What each app shows for each is the apps' design.
-- The desktop app reads the port file every 2s while it has no socket, and connects to the core the file names.
-  After a close without a `bye`, it starts a core when the file names none running ([decision 014](../../decisions/014-apps-find-core-through-port-file.md)), and after a `bye` it starts none, since the pilot quit, so it waits for the core the next sim run brings.
-- The watcher also starts a core that exits with a code other than 0 while the sim runs ([exiting](../core/01-loop-and-edge.md#exiting)), and of two started at once, the second finds the first running and exits ([finding the core](../architecture/01-spine.md#finding-the-core)).
+- While its window is open, the desktop app holds a socket to the core the port file names, and closing the window destroys the window rather than hiding it ([one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
+- The desktop app wants a core while the sim runs, its window is open, or a session file exists, and starts one when the port file names none running ([decision 014](../../decisions/014-apps-find-core-through-port-file.md)).
+  It starts one again 2s after an exit with a code other than 0 ([exiting](../core/01-loop-and-edge.md#exiting)), and after an exit with 0 it starts none until the sim next starts or its window next opens ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)).
+  Of two cores started at once, the second finds the first running and exits ([finding the core](../architecture/01-spine.md#finding-the-core)).
 
 ## Bringing the desktop app forward
 
-The EFB app's button sends `clients`' command; with a desktop app connected, `clients` sends it a `unit` message, and with none, the core starts the desktop app's program, as [the watcher and the desktop app](../architecture/01-spine.md#the-watcher-and-the-desktop-app) has it.
+The EFB app's button sends `clients`' command, and the core starts the desktop app's program whether or not a desktop app is connected.
+The program's one running copy opens its window, so `clients` sends the desktop app no message for it ([one program from login](../install/01-installing-and-updating.md#one-program-from-login); user, 2026-10-18).
 
 ## Budgets
 
@@ -174,7 +160,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 | What | Budget |
 | --- | --- |
-| The banner's panel opening, outside a load | Within 2s of the wanted state changing |
+| The banner's panel opening, outside a load | Within 2s of the EFB app's code first calling the toolbar for it |
 | The desktop app after a core restart | Connected again within 2s of the new port file |
 
 ## Cases for the bench
@@ -185,19 +171,20 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - Deleting a feature's folder and its line in each list leaves both apps building, and the map check fails a shell that names a feature's module of the message crate.
 - A setting changed, and a quit sent, from the EFB app's socket each take effect.
 - A notice clicked outside its action reaches the EFB app as the order that opens the EFB.
-- The session's slice wants the banner open, and the stand-in's toolbar call fails twice: the EFB app's code calls again until the banner's page connects; once it's open, a banner closed by its toolbar button stays closed until the wanted state changes.
-- On a `bye`, the EFB app's code closes the banner.
-- The core killed while the desktop app is open: the desktop app starts it and connects within 2s of the new port file; after a `bye`, it starts none, and connects to the core the next sim run brings.
+- In a flight of a session, the stand-in's toolbar call fails twice: the EFB app's code calls again until the banner's page connects; once it's open, a banner closed by its toolbar button stays closed until the next flight.
+- When the session ends, and on a `bye`, the EFB app's code closes the banner with one call.
+- The core killed while the desktop app's window is open: the desktop app starts it again and connects within 2s of the new port file; after an exit with 0, it starts none until the sim next starts or its window next opens.
 - No cockpit panel connects within 10s of the profile loading: `clients`' trouble notice, cleared when a panel connects.
-- A module from another build while `Hold` is fed: the sim service's trouble notice.
-- A restarted core with `Follow` fed: whether the module's trouble notice shows before the module's first status write.
-- With a desktop app connected, the EFB app's button sends it the `unit` message; with none, the core starts its program; and a second press before that program's `hello`: whether a second desktop app starts.
+- A module from another build while `Hold` is fed: the sim service's trouble notice for our package.
+- A restarted core with `Follow` fed: whether the trouble notice for our package shows before the module's first status write.
+- The EFB app's button, whether or not a desktop app is connected: the core starts the desktop app's program.
 - Rate and pause's `unit` message sent while the EFB app reconnects: whether active pause catches up.
 
 In the sim:
 
 - The EFB app's code opens the banner during a flight load, before Ready to fly, and after a second flight load in one run, and how long each takes.
 - `TOOLBAR_BUTTON_TOGGLE` with the panel already in the state it's given: whether it sets the state, toggles, reloads, or moves the panel, which sets how long the EFB app's code waits before calling again.
+- Whether clicks reach the cockpit through the banner panel's see-through part; if they don't, the banner's shape comes back to design.
 
 ## Left to the apps' stage
 
@@ -208,7 +195,7 @@ The apps' design:
 - Where each notice shows, by its level, how long it stays, and how notices come and go.
 - Which slices each app's frame shows, which app takes traffic's, ATC audio's, and state sync's parts, and how the status list looks ([01-between-machines](../network/01-between-machines.md#left-open)).
 - The places each app and the banner name for parts' views, and where each sits.
-- When the banner should be open, whether a pilot may close it and when it opens again, where it sits on screen, whether clicks through its empty part reach the cockpit, and how it shows in VR ([notification banner](../product/03-v1-scope.md#notification-banner)).
+- Where the banner sits on screen, and how it shows in VR ([notification banner](../product/03-v1-scope.md#notification-banner)).
 - What each app shows for each state of the connection, and after a `bye` against a close without one.
 - Where in the EFB app a click on a notice lands, and what the order carries for it.
 - Which app offers which setting and Quit, and where Crosscheck asks for the display name.
@@ -230,6 +217,6 @@ No v1 page sends a span, so the spine's item on the clock a page measures one on
 
 ## What this changes elsewhere
 
-The notes at the top of [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), [the sync units](../sync/05-units.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [traffic and ATC](../traffic-atc/01-traffic-and-atc.md), [01-between-machines](../network/01-between-machines.md), and [03-v1-scope](../product/03-v1-scope.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#a-feature-shows-itself-in-each-app-through-one-part-the-app-lists-and-no-shell-names-a-feature) give the reasons.
+[The code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), [the sync units](../sync/05-units.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [traffic and ATC](../traffic-atc/01-traffic-and-atc.md), [01-between-machines](../network/01-between-machines.md), and [03-v1-scope](../product/03-v1-scope.md) hold what this design changes there, and the [tentative decisions](../architecture/decisions.md#a-feature-shows-itself-in-each-app-through-one-part-the-app-lists-and-no-shell-names-a-feature) give the reasons.
 
 [coverage]: log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel

@@ -11,6 +11,8 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > A pull request's build carries no tokens, and the network's tests run through a local relay with a test token (user, 2026-10-18).
 >
 > Since 2026-10-18, `tools/` also holds `replay.ts`, which fetches the release a recording names from GitHub, takes `crosscheck-core.exe` from its full package, and replays with it, so a release's recording needs no rebuild and no older SDK; [left open](#left-open)'s item on older SDK installers then bears only on a rebuild for added logging ([01-loop-and-edge](../core/01-loop-and-edge.md); user, 2026-10-18).
+>
+> Since 2026-10-18, [testing](02-testing.md) adds to [CI](#ci) and [a release](#a-release): a pull request that changes code also runs the unit tests and the bench; each merge to `main` runs the bench again, recording every input; the build job's third step runs both passes of the bench; and a short session in the sim, on a build of the commit, comes before a person runs the release workflow ([what keeps CI green](02-testing.md#what-keeps-ci-green), [before a release](02-testing.md#before-a-release)).
 
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `crosscheck`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.

@@ -24,6 +24,8 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > - The helper sends no `Alive`, and the core counts it down only when its process exits or its `Hello` differs, where [the pipe](#the-pipe) and [the helper's life](#the-helpers-life) have the core kill a helper silent for 8s; the writer thread that sent `Alive` kept sending while any other thread hung, so the kill caught only a deadlock of our own writer.
 > - The mouse want is on or off: the helper finds the sim's main window by its class, `AceApp`, and the start of its title, as a bound key finds the sim's windows, where [what a feature registers and calls](#what-a-feature-registers-and-calls) passes the sim's process ID.
 > - The ATC buffer's depth comes from the last 500 frames received, where the note of 2026-10-17 above says the last 10s of frames, so a transmission after a pause starts from history rather than the 60ms floor ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#the-buffer)).
+>
+> Since 2026-10-18, [testing](../build/02-testing.md#the-stand-in-core-helper) settles [left open](#left-open)'s item on the development setting that names the helper's program: the bench's stand-in helper speaks the real pipe's messages, and the core starts it, sends it every want, reads its `Hello`, and starts it again as it does this helper.
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

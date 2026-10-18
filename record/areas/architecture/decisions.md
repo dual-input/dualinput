@@ -1829,6 +1829,49 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A toggle can't compare against a reading that hasn't come, so the 58P's battery and beacon, toggles on input events, could flip the wrong way in catch-up ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
 - **Leaves out:** nothing.
 
+## Crosscheck is tested at four levels, and CI keeps the unit tests and the bench green on every pull request
+
+- **Decided:** Crosscheck is tested by each crate's and each TypeScript part's own tests; on the bench, two or three bench builds of the core on one PC, each on a stand-in sim; in the sim, with a bench core on a stand-in as the second pilot where a case needs a crew; and with friends on two PCs.
+  A pull request that changes code runs the unit tests and the bench, and a merge needs them green; each merge to `main` runs the bench again recording every input; the release workflow's build job runs both passes; and no timing budget fails CI.
+  Each stage of node 8 turns its system's cases into tests, measures its budgets on our development machine, and runs its cases in the sim in one session at its end; a short session in the sim comes before each release; friends come at a stage whose cases need two PCs and before v1 ships; and no second MSFS runs in a virtual machine.
+  Settled in node 7 by the user, 2026-10-18 ([testing](../build/02-testing.md)).
+- **Because:**
+  - Node 8 can't lay out stages without knowing what proves each one done ([the architecture plan](plan.md#7-testing)), and the setup every stage's tests run on is what it needs, while each system's cases already sit in its design doc (user, 2026-10-18).
+  - A shared runner's other load would move a timing from run to run (inference), and CI's runners have no MSFS.
+  - A bench core on a stand-in already plays the second pilot on one PC, and friends bring two real sims.
+- **Leaves out:** which test runner the TypeScript parts use, and whether a GitHub-hosted runner holds three cores within the bench's budget ([left open](../build/02-testing.md#left-open)).
+
+## The bench reaches a core only where a pilot's surroundings do, and runs only what it built from the tree under test
+
+- **Decided:** the bench reaches each core through the stand-in sim below the sim seam, fake pages over the core's real WebSocket, a stand-in core helper over the real pipe, a local `iroh-relay` behind a proxy, a local backend, the processes it starts, kills, and suspends, and each core's data folder; it asserts on what the fake pages are told, what the stand-in's aircraft holds and was asked, each core's recording and its replay, and exit codes and logs; every scenario ends by replaying each core's recording and fails on a checkpoint that doesn't match; and each run builds the programs it runs from the tree under test and starts each by the path that build wrote.
+  Settled in node 7 by the user, 2026-10-18 ([the bench](../build/02-testing.md#the-bench)).
+- **Because:**
+  - No development mode skips the real path: FS Copilot's `--dev` "builds no Coordinator and no network", so "The wire, the acks, the resend history and the session state machine never run" in it (FS Copilot fork, `record/exerciser/docs/01-design.md`, "Session: the exerciser is a peer").
+  - FS Copilot's fake panel let its bench assert on what a pilot's panel would have been told, with no second channel for test state (FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "The panel is faked, not driven").
+  - FS Copilot's bench drove whatever its checkout had compiled last, and "a stale build is a working build, and it cost two sessions" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
+- **Leaves out:** nothing.
+
+## The stand-in sim takes the edge's place in a bench build of the core, under the edge's rules, and runs the routines natively from a list both builds link
+
+- **Decided:** `apps/core`'s Cargo feature `stand-in`, which no release build turns on, links `stand-in-sim` and the routines, built natively, where the edge goes; the stand-in runs off the loop on a thread and clock of its own, and its stamped inputs are recorded like the edge's, so it keeps the edge's rules and the code map's tiers exempt it as they exempt the sim edge.
+  It answers every kind of call v1's units make with SimConnect's own messages and tagged exceptions; models an aircraft as a table of named variables seeded from a recording of it in the real sim, with behavior and faults a scenario scripts; sends `Frame` events from its own timer, 89 a second unless a scenario sets another rate; runs the routine host and the routines in its frame through a trait the bench build fills, from the module's list of routines, which moves into a library crate, `sim-package/routines/`, that the module and the bench build both link; hands the core's CommBus calls for JavaScript to the bench's fake pages; and reports a stub `FlightSimulator2024.exe` the bench starts for it as the sim's process.
+  This settles [02-code-map](02-code-map.md#left-open)'s items on the stand-in's model, its frames, how it plays our WASM module, how a core on it reaches the sim's pages, whether it keeps the loop's rules, and where the list of routines lives.
+  Settled in node 7 by the user, 2026-10-18 ([the stand-in sim](../build/02-testing.md#the-stand-in-sim)).
+- **Because:**
+  - The seam sits at SimConnect's own calls so a stand-in can sit below it with nothing above it changing ([why the seam sits at SimConnect's calls](02-code-map.md#why-the-seam-sits-at-simconnects-calls)).
+  - A recording that replays with no stand-in checks the bench's runs as a release's recordings are checked, with nothing of the bench in the replay.
+  - The bench can't link the module, a cdylib alone ([02-code-map](02-code-map.md#left-open)), and the stand-in, an engine, depends on no platform or feature code.
+  - Our module's update ran 89.2 times a second through a flight (measured on MSFS 2024, 2026-10-09, [architecture log][a1009]).
+- **Leaves out:** that no page of the real sim connects to a bench core running beside it, which a case in the sim settles ([cases for the bench](../build/02-testing.md#cases-for-the-bench)).
+
+## The bench's core helper is a stand-in program the core starts through a development setting
+
+- **Decided:** a development setting names the program the core starts as its core helper; the bench's speaks the real pipe's messages and plays a script of presses, the mouse, captured audio frames, and what it played; and the core starts it, sends it every want, reads its `Hello`, and starts it again as it does the real helper.
+  This settles [04-core-helper](../core/04-core-helper.md#left-open)'s item on that setting.
+  Settled in node 7 by the user, 2026-10-18 ([the stand-in core helper](../build/02-testing.md#the-stand-in-core-helper)).
+- **Because:** the core's real path to its helper, its start, the pipe, `Hello`, and restarts, runs on the bench as shipped, so the setting keeps the rule that no development mode skips the real path, and only the Windows calls behind the pipe go to the helper's own tests on a desk and its cases in the sim.
+- **Leaves out:** nothing.
+
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it
 [c05]: ../core/log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu

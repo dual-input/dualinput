@@ -6,6 +6,13 @@ Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.m
 Decides:     The tiers, the tests that keep each unit apart, every unit with its folder and what it may depend on, and the systems node 6 designs (node 5); how the platform runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3); where each unit lives, how one repository builds every target, and how CI checks the map (node 5.4).
 ```
 
+> **Note**
+> Since 2026-10-18, [testing](../build/02-testing.md) settles [left open](#left-open)'s items on the stand-in sim and on whether one loop meets its budgets, and changes three things here:
+>
+> - The stand-in sim keeps the sim edge's rules, not the loop's, since it runs where the edge runs, off the loop with a clock of its own, and its inputs are stamped and recorded like the edge's, so [tiers](#tiers) exempts it as it exempts the sim edge ([its rules](../build/02-testing.md#its-rules)).
+> - The module's list of routines is a library crate of its own, `sim-package/routines/`, which `sim-package/wasm-module/` and the bench build of the core both link, where [the workspace](#the-workspace) keeps it in the module ([our WASM module](../build/02-testing.md#our-wasm-module)).
+> - `apps/core` has a Cargo feature, `stand-in`, that puts the stand-in where the edge goes and that no release build turns on, and `tools/bench/` holds the bench's scenarios, its fake pages, and the stand-in core helper ([its place](../build/02-testing.md#its-place), [where it lives](../build/02-testing.md#where-it-lives)).
+
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.

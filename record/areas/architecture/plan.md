@@ -822,7 +822,7 @@ Raised elsewhere: by 6.4, the installer's Windows Firewall rule for the core's p
 Raised elsewhere: by 6.5, the core starts `crosscheck-core-helper.exe` from its own folder, so the installer puts the two side by side ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 Raised elsewhere: by 6.7, the session file is JSON in the core's data folder, and the watcher holds updates back while it exists ([the session's units](../session/02-units.md#the-session-file)).
 Raised elsewhere: by 6.13, our Community package carries the figure's SimObject, `CROSSCHECK_FIGURE_PILOT`, and Crosscheck's empty avatar, whose build avatars' stage of the build settles in the sim ([avatars](../avatars/01-avatars.md#left-open)).
-Raised elsewhere: by 6.16, the desktop app offers no quit, so the watcher's tray is where a pilot quits Crosscheck; the core starts the desktop app's program from its own folder when the EFB app's button asks and no desktop app is connected, so the installer puts the two side by side; and the check that names another package's `VCockpit.js` override, with its notice, its match check item, and the desktop app's offer to disable that package, is this node's ([the apps](../interface/01-apps.md#trouble)).
+Raised elsewhere: by 6.16, the core starts the desktop app's program from its own folder when the EFB app's button asks and no desktop app is connected, so the installer puts the two side by side; and the check that names another package's `VCockpit.js` override, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) scopes it, is this node's ([the apps](../interface/01-apps.md#trouble)).
 
 ## 6.18 The build
 

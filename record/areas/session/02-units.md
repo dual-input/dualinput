@@ -21,10 +21,10 @@ Decides:     The session crate's members, session keys, control, session file, j
 > Since 2026-10-17, the match check has no item of traffic's, where [the match check](#the-match-check)'s table gives traffic one for traffic packs, injectors, and multiplayer: traffic is partly recorded, so an item it fed would part the recorded `match` key from its replay, and a receiving machine raises notices for other traffic and for missing copies instead, while a page lists the machine's traffic packs when asked ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#notices)).
 > Since 2026-10-17, [the apps' design](../interface/01-apps.md#slices-and-commands) changes this document in four places:
 >
-> - The session crate registers a slice of client state: the members, with each one's name, `status`, `ready`, and `match`; control; preflight and its countdown; the invite code; the verdicts on Ready and on the "Share my traffic and ATC" switch; and whether the banner should be open and whether the banner's page is talking to the core.
-> - The switch is a command of the session crate's, which asks the kernel's request for every role key, and Go to registers a slice of the PF's spot, whether Go to is available, and the step that failed, beside its Go to command.
+> - The session crate and Go to each register a slice of client state, which [slices and commands](../interface/01-apps.md#slices-and-commands) lists; the session's carries the match check's differences, each with its level and its item's words, so an item gives words as well as a level, where [the match check](#the-match-check)'s items name a level alone.
+> - A role key registers a label in its feature's words, and the "Share my traffic and ATC" switch is the session crate's command.
+> - Any client may send Quit, where [joining and leaving](#joining-and-leaving)'s table names where it comes from.
 > - Any app writes the display name, with `clients`' settings command, and where Crosscheck asks for it is the apps' design, which settles what [members](#members) leaves to 6.16.
-> - The desktop app sends no Quit, where [joining and leaving](#joining-and-leaving)'s table has it send one: a quit comes from the watcher's tray or from Windows.
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

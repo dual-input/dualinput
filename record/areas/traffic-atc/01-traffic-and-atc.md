@@ -8,7 +8,7 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 
 > **Note**
 > Since 2026-10-17, v1 has no plugins, so how a plugin mirrors objects and claims them, which [the object-mirror engine](#the-object-mirror-engine) gives to 6.15, waits for plugins' design after v1 ([plugins and the sandbox](../plugins/01-plugins.md#what-this-answers)).
-> Since 2026-10-17, traffic registers a slice of client state holding this machine's traffic packs after `LIST_PACKS`, and ATC audio one holding the program the core helper captures, or that it's waiting for one, which [what they register](#what-they-register) leaves out; each has a part in an app wherever the apps' design shows its slice, and where its notices and settings show is that design's, which settles what [notices](#notices) and [settings](#settings) leave to 6.16 ([the apps](../interface/01-apps.md#slices-and-commands)).
+> Since 2026-10-17, traffic and ATC audio each register a slice of client state, which [what they register](#what-they-register) leaves out ([slices and commands](../interface/01-apps.md#slices-and-commands)), and each has a part in an app wherever the apps' design shows its slice; where their notices and settings show is that design's, which settles what [notices](#notices) and [settings](#settings) leave to 6.16.
 
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.

@@ -1608,38 +1608,39 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** a feature's `efb/` and `desktop/` folders each export one part, named for its unit in the core, with a `start` and a `stop` for code with no screen and views keyed by the places its app names, and each app lists its parts, one line each.
   A part reaches the core only through `watch`, `command`, and the `unit` messages it trades with its own unit, and imports only its app's shell and the message crate's types.
-  The shells reach a feature's state only through the notices, the settings, and the match check's items, and the map check fails a platform unit whose source names a feature's module of the message crate.
-  Each unit registers its own slices and commands, the session's, the sim service's, the recording crate's, Go to's, traffic's, and ATC audio's among them, and a request's verdict rides in the slice of the unit that declares it.
+  The banner's page shows the EFB app's parts' views for places of its own.
+  The shells reach a feature's state only through the notices, the settings, the match check's differences, each with its level and its item's words, and the role keys' labels, and the map check fails a platform unit whose source names a feature's module of the message crate.
   Settled in node 6.16 by the user, 2026-10-17 ([the apps](../interface/01-apps.md#a-features-parts)).
 - **Because:**
-  - Deleting a feature leaves everything else building, its section in each app included ([tiers](02-code-map.md#tiers)), and one line per part is how the core's `main` lists features and the panel bridge loads modules.
+  - Deleting a feature leaves everything else building, its section in each app included ([tiers](02-code-map.md#tiers)), and one line per part is how the core's `main` lists features.
   - The message crate is an engine every unit may import, so the crate graph alone can't see a shell that names a feature's slice.
   - The [EventBus bridge](../product/ideas.md#eventbus-bridge)'s listener has to run in the EFB's document ([code inside the sim](../product/04-room-for-later.md#code-inside-the-sim)), and a part with no view gives it a host there.
 - **Leaves out:** which places each app names and where each sits, which the apps' design settles; and screens that import a feature's widgets directly, which the user would accept for the apps if places get in the design's way (user, 2026-10-17).
 
-## Any client changes any setting, and a setting's registration carries its label and its kind
+## Any client changes any setting and quits, and a setting registers its label and what its type doesn't say
 
-- **Decided:** any client changes any setting with `clients`' one command, and which app offers which setting is the apps' design.
-  A setting registers, beside its key, type, and default, a label in its feature's words and a kind: on or off, a number in a range, one of a list, one of a slice's list, text, or its feature's own, which only its part shows; a development setting shows in no app.
-  The display name is a setting like any other.
+- **Decided:** any client changes any setting with `clients`' one command, and sends the session crate's Quit, and which app offers which setting, and Quit, is the apps' design.
+  A setting registers, beside its key, type, and default, a label in its feature's words and what an app needs that the type doesn't say: a number's range, a list's choices or the slice that lists them, and whether only its feature's part shows it; a development setting says so, and shows in no app.
   This changes [decision 016](../../decisions/016-core-keeps-pilots-settings.md), whose EFB app offers no setting in v1, once step 8's decisions are numbered.
   Settled in node 6.16 by the user, 2026-10-17 ([settings](../interface/01-apps.md#settings)).
 - **Because:**
   - The core keeps the settings and decides what each does ([decision 016](../../decisions/016-core-keeps-pilots-settings.md)), so a rule on which client may change one guards nothing, and every client of v1 is ours on 127.0.0.1 (user, 2026-10-17).
   - Avatars has three settings and no part in either app ([avatars](../avatars/01-avatars.md)), so an app shows its settings from their registrations.
-- **Leaves out:** which app offers which setting, and every setting's words.
+  - A deliberate quit exits with 0, which tells the watcher not to start the core again ([exiting](../core/01-loop-and-edge.md#exiting)), so a quit from any app holds.
+- **Leaves out:** which app offers which setting and Quit, and every setting's words.
 
-## The core says whether the banner should be open, and the EFB app's code sets the panel to that state until the banner's page answers
+## The core says whether the banner should be open, and the EFB app's code calls the toolbar until each change of that takes
 
-- **Decided:** the session's slice says whether the banner should be open and whether its page is talking to the core, and the EFB app's code calls `TOOLBAR_BUTTON_TOGGLE` with the wanted state when it changes and every 2s while the two differ.
-  A feature reaches the banner only through a notice, and a click on a notice outside its action sends `clients`' command, which sends the EFB app the order that opens the EFB onto our app, naming the notice's unit.
+- **Decided:** the session's slice says whether the banner should be open, and `clients`' whether a banner page's socket is open.
+  On each change of the wanted state, the EFB app's code calls `TOOLBAR_BUTTON_TOGGLE` with it, and calls again while the change hasn't taken, after a wait the cases in the sim set; it calls nothing while the wanted state holds, and closes the banner on a `bye`.
+  A click on a notice outside its action sends `clients`' command, which sends the EFB app the order that opens the EFB onto our app.
   This settles what [decision 012](../../decisions/012-efb-app-opens-banner-panel.md) leaves to the apps' stage, opening the panel during a load, before Ready to fly, and after a second load, as calls that go on until one takes, with cases in the sim that time them.
   Settled in node 6.16 by the user, 2026-10-17 ([the banner](../interface/01-apps.md#the-banner)).
 - **Because:**
-  - The call takes the state to set, and opened and closed our panel from the EFB's document (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
-  - A closed panel's socket stays open ([interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)), so the page's messages, not its socket, say whether it's up.
-  - Every link between our components ends at the core ([decision 008](../../decisions/008-every-link-ends-at-core.md)).
-- **Leaves out:** when the banner should be open, where it sits, whether clicks reach the cockpit through its empty part, and how it shows in VR, which the apps' design settles.
+  - The call opened and closed our panel from the EFB's document (measured on MSFS 2024, 2026-10-04 and 2026-10-09, [interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)), each time asked for the opposite of the panel's state, so whether a repeat call sets or toggles is unverified, and calling only to make a change take works either way.
+  - A closed panel's socket stayed open for the 35s a run watched ([interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)), so the socket `clients` closes 8s after the page's last message says whether it's up.
+  - A banner the pilot closed from its toolbar button stays closed, where calling while the states differ would reopen it within one wait.
+- **Leaves out:** when the banner should be open, whether a pilot may close it, where it sits, whether clicks reach the cockpit through its empty part, how it shows in VR, and where a click on a notice lands in the EFB app, which the apps' design settles.
 
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it

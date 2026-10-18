@@ -30,7 +30,7 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > - [The following machine](../flight-model/01-flight-model-sync.md#the-following-machine) settles what [softening a short gap](#softening-a-short-gap) and [clock offsets](#clock-offsets) leave to flight-model sync, and carries the aircraft along the line through its last two samples, where softening a short gap carries it on its last velocities.
 >
 > Since 2026-10-17, the seat claims that [channels](#channels) lists among the session channel's keys ride avatars' poses on the avatars channel, each pose carrying the whole figure, since avatars, partly recorded, writes no session key ([the pose](../avatars/01-avatars.md#the-pose)).
-> Since 2026-10-17, how the status list looks, which [left open](#left-open) gives to the banner's design, is the apps' design, after node 6.16, which settles only how the apps reach the network's slice and the session's ([the apps](../interface/01-apps.md#left-to-the-apps-stage)).
+> Since 2026-10-17, how the status list looks, which [left open](#left-open) gives to the banner's design, waits for the apps' stage, and node 6.16 settles only how the apps reach the network's and the session's slices ([the apps](../interface/01-apps.md#left-to-the-apps-stage)).
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

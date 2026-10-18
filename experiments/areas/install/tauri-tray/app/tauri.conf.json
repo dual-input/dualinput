@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "p01-tauri-tray",
+  "version": "0.1.0",
+  "identifier": "crosscheck.experiments.p01-tauri-tray",
+  "build": {
+    "frontendDist": "../page"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": false,
+    "icon": ["icons/icon.ico"]
+  }
+}

@@ -1,5 +1,32 @@
 # Installing and updating: log
 
+## 2026-10-18: A Tauri 2 app idles as a tray icon in 2.2 MB, and gives back WebView2's 69 MB once its window is destroyed, but not while it's hidden
+
+**Asked.**
+Whether the desktop app can be the program that runs all day from login, doing the watcher's jobs as a tray icon, at a cost near the 1.0 MB a Rust tray icon took ([architecture log](../architecture/log.md#2026-10-08-a-tray-icon-alone-costs-10-mb-of-memory-in-rust-16-mb-in-net-native-aot-51-mb-in-winforms-and-397-mb-over-three-processes-in-electron)), since we'd measured Tauri only with its window open.
+
+**Expected.**
+A few MB with no window, and WebView2's processes lingering after the window closes.
+
+**Found,** with [p01](../../../experiments/areas/install/p01-tauri-tray.mjs), a Tauri 2.12.1 app with its tray icon on and its Rust side holding a WebSocket, each state measured after 15s to settle and again after 60s idle (measured on our development machine, 2026-10-18, WebView2 Runtime 155.0.4283.62, [results](../../../experiments/areas/install/results/p01-tauri-tray-2026-10-18-08-36-33.txt)):
+
+| State | Processes | Task Manager's memory | CPU over 60s |
+| --- | --- | --- | --- |
+| The tray icon alone, no window ever opened | 1 | 2.2 MB | 0ms |
+| A window open, showing a static page | 7 | 72.7 MB | 125ms |
+| The window hidden | 7 | 72.3 MB | 63ms |
+| The window destroyed, the tray icon left | 1 | 3.7 MB | 0ms |
+
+- All six WebView2 processes had exited within 15s of the window's `destroy()`, and the app's own process kept 1.5 MB more than before the window opened.
+- Hiding the window kept every WebView2 process and its memory.
+- The program is 8.2 MB on disk.
+
+**What changed.**
+The desktop app can run all day as a tray icon at 2.2 MB to 3.7 MB, if closing its window destroys the window rather than hiding it; whether it takes the watcher's jobs is 6.17's redraft (user's call).
+
+**Docs affected.**
+[Installing and updating](01-installing-and-updating.md), once redrafted.
+
 ## 2026-10-18: Velopack installs and updates per-user on one path, an unsigned program meets Smart App Control with no override, and Windows hides a notification sent while a game runs
 
 **Asked.**

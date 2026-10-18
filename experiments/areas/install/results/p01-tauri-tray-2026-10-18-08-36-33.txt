@@ -1,0 +1,32 @@
+p01-tauri-tray, 2026-10-18T08:36:33.131Z
+Windows 10.0.26200, 16 logical processors; Node v22.23.1; rustc 1.95.0 (59807616e 2026-04-14)
+Crates, from tauri-tray/app/Cargo.lock: tauri 2.12.1, tauri-runtime-wry 2.12.1, wry 0.57.0, tao 0.37.1, tray-icon 0.25.1, webview2-com 0.39.1, tokio-tungstenite 0.30.0; built with plain `cargo build --release`, the tauri features custom-protocol and tray-icon, no tauri-cli; the program is 8.2 MB
+WebView2 Runtime 155.0.4283.62 by its EdgeUpdate registry entry
+Each state: 15s to settle, sampled, 60s idle, sampled. CPU is the processor time the app's processes used during the idle 60s.
+Processes: the app's and every process under it by ParentProcessId, and any msedgewebview2.exe whose command line holds --webview-exe-name=p01-tauri-tray.exe or the identifier crosscheck.experiments.p01-tauri-tray.
+
+- The app's Rust side connected 0.1s after start.
+- The tray icon alone, no window ever opened: 1 process; after 15s settling: Task Manager's memory 2.3 MB, working set 20.3 MB, private bytes 3.2 MB; after 60s idle: Task Manager's memory 2.2 MB, working set 20.2 MB, private bytes 3.1 MB; CPU over the 60s 0.00% of one processor (0ms)
+  - p01-tauri-tray.exe (14000), app: Task Manager's memory 2.2 MB, working set 20.2 MB, private bytes 3.1 MB, CPU 0ms
+- open: ok
+- A window open, showing a static page: 7 processes; after 15s settling: Task Manager's memory 74.4 MB, working set 335.9 MB, private bytes 152.2 MB; after 60s idle: Task Manager's memory 72.7 MB, working set 341.4 MB, private bytes 150.4 MB; CPU over the 60s 0.21% of one processor (125ms)
+  - p01-tauri-tray.exe (14000), app: Task Manager's memory 3.7 MB, working set 31.0 MB, private bytes 5.0 MB, CPU 0ms
+  - msedgewebview2.exe (16860), browser: Task Manager's memory 27.4 MB, working set 119.5 MB, private bytes 35.5 MB, CPU 31ms
+  - msedgewebview2.exe (13900), crashpad-handler: Task Manager's memory 1.9 MB, working set 13.3 MB, private bytes 3.2 MB, CPU 16ms
+  - msedgewebview2.exe (30164), gpu-process: Task Manager's memory 18.2 MB, working set 65.2 MB, private bytes 67.6 MB, CPU 0ms
+  - msedgewebview2.exe (28968), utility (network.mojom.NetworkService): Task Manager's memory 6.3 MB, working set 39.0 MB, private bytes 11.3 MB, CPU 16ms
+  - msedgewebview2.exe (28320), utility (storage.mojom.StorageService): Task Manager's memory 2.7 MB, working set 19.2 MB, private bytes 7.2 MB, CPU 0ms
+  - msedgewebview2.exe (27116), renderer: Task Manager's memory 12.5 MB, working set 54.3 MB, private bytes 20.6 MB, CPU 63ms
+- hide: ok
+- The window hidden: 7 processes; after 15s settling: Task Manager's memory 72.4 MB, working set 341.1 MB, private bytes 150.0 MB; after 60s idle: Task Manager's memory 72.3 MB, working set 341.9 MB, private bytes 149.7 MB; CPU over the 60s 0.10% of one processor (63ms)
+  - p01-tauri-tray.exe (14000), app: Task Manager's memory 3.7 MB, working set 31.0 MB, private bytes 5.1 MB, CPU 0ms
+  - msedgewebview2.exe (16860), browser: Task Manager's memory 27.3 MB, working set 120.0 MB, private bytes 35.4 MB, CPU 63ms
+  - msedgewebview2.exe (13900), crashpad-handler: Task Manager's memory 1.8 MB, working set 13.2 MB, private bytes 3.0 MB, CPU 0ms
+  - msedgewebview2.exe (30164), gpu-process: Task Manager's memory 18.1 MB, working set 65.4 MB, private bytes 67.5 MB, CPU 0ms
+  - msedgewebview2.exe (28968), utility (network.mojom.NetworkService): Task Manager's memory 6.4 MB, working set 39.1 MB, private bytes 11.4 MB, CPU 0ms
+  - msedgewebview2.exe (28320), utility (storage.mojom.StorageService): Task Manager's memory 2.7 MB, working set 19.2 MB, private bytes 7.2 MB, CPU 0ms
+  - msedgewebview2.exe (27116), renderer: Task Manager's memory 12.2 MB, working set 54.0 MB, private bytes 20.2 MB, CPU 0ms
+- show: ok; close (destroy): ok
+- The window destroyed, the tray icon left: 1 process; after 15s settling: Task Manager's memory 3.7 MB, working set 31.2 MB, private bytes 5.0 MB; after 60s idle: Task Manager's memory 3.7 MB, working set 31.3 MB, private bytes 5.1 MB; CPU over the 60s 0.00% of one processor (0ms)
+  - p01-tauri-tray.exe (14000), app: Task Manager's memory 3.7 MB, working set 31.3 MB, private bytes 5.1 MB, CPU 0ms
+- Still running at the end: the app yes.

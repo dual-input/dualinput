@@ -865,12 +865,12 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 >
 > Since 2026-10-18, [installing and updating's design](../install/01-installing-and-updating.md) changes this section in five places:
 >
-> - No warning that a waiting update needs a sim restart shows early in the sim's load, since Windows' Do Not Disturb hides other apps' banners while a game runs (user, 2026-10-18), so the open questions on how recent a last session must be, and on where the Store install keeps `exe.xml`, fall away.
-> - The watcher checks for an update at its start, each time the sim closes, every 3 hours, and when the pilot asks; the apps show whether it's checking, downloading, up to date, ready and what holds it back, or failed; and Install now quits Crosscheck so the update applies, refusing while the sim runs or a session is held (user, 2026-10-18).
-> - Nothing asks the pilot for a Community folder: the sim finds its folders only through `UserCfg.opt`, so a pilot who installs before the sim's first run gets our package when that run closes.
+> - No warning that a waiting update needs a sim restart shows early in the sim's load, since Windows' Focus assist turns on by default while a game runs and hides other apps' banners (user, 2026-10-18), so the open questions on how recent a last session must be, and on where the Store install keeps `exe.xml`, fall away.
+> - The watcher also checks for an update on a timer and when the pilot asks ([when the watcher checks](../install/01-installing-and-updating.md#when-the-watcher-checks)); the apps show whether it's checking, downloading, up to date, ready and what holds it back, or failed; and Install now quits Crosscheck so the update applies, refusing while the sim runs or a session is held (user, 2026-10-18).
+> - Nothing asks the pilot for a Community folder: the sim finds its folders only through `UserCfg.opt`, so a pilot who installs before the sim's first run gets our package when that run closes, provided the run writes `UserCfg.opt` (unverified).
 > - Disabling a package moves its folder out of the Community folder to one beside it while the sim is closed, and back, which settles how; since no file of it changes, [decision 001](../../decisions/001-changing-other-developers-packages.md) stands.
 >   Our own package can be turned off the same way.
-> - v1 stays unsigned, at the cost that a pilot whose PC runs Smart App Control has to turn it off to run Crosscheck (user, 2026-10-18).
+> - v1 stays unsigned, at the cost that a pilot whose Smart App Control enforces has to turn it off to run a release of ours that has no positive reputation yet (user, 2026-10-18).
 
 One installer puts Crosscheck's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
 

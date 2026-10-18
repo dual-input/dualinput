@@ -194,13 +194,14 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 ## An unsigned v1
 
-v1 ships unsigned, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) leaves code signing out (user, 2026-10-18), at two costs:
+v1 ships unsigned, as [installing and updating](../product/03-v1-scope.md#installing-and-updating) leaves code signing out (user, 2026-10-18), at three costs:
 
 - On a PC whose Smart App Control enforces, a release of ours runs only once it has a positive reputation, since Smart App Control "will block execution of unsigned files unless the file has a positive reputation" and its checks "apply to all executable files, not just those downloaded from the Internet" (documented, [SmartScreen reputation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)), and "There is currently no way to bypass Smart App Control protection for individual apps" (documented, [its FAQ](https://support.microsoft.com/en-us/windows/security/threat-malware-protection/smart-app-control-frequently-asked-questions)).
   Each unsigned release starts "with zero reputation" (same page), so until a release has one, the pilot turns Smart App Control off for the whole PC; in its evaluation mode it blocks nothing.
   How many pilots run it is unknown, and some MSFS pilots found it blocking the sim's own `CoherentGTCore.dll` (an MSFS forum thread, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - SmartScreen shows "Windows protected your PC" at the first install, and the pilot chooses "Run anyway" (documented, [SmartScreen reputation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)).
   The app's downloads carry no mark of the web, so SmartScreen likely never checks an update (unverified), while Smart App Control checks every program it runs.
+- "Unsigned applications are more likely to be flagged by antivirus software" (documented, [Velopack's FAQ](https://docs.velopack.io/troubleshooting/faq)), so a release that Microsoft Defender or another antivirus takes for malware would have a program of ours quarantined, which the pilot sees as Crosscheck not starting or not updating; how often that happens to a release of ours is unknown until releases reach pilots, and their bug reports can't say, since a quarantined core sends none.
 
 Velopack trusts the feed through HTTPS and the GitHub account that publishes it, since it checks a download's hash against the feed and no publisher's signature (read in velopack 1.2.161, `src/lib-rust/src/manager.rs`, `verify_package_checksum`).
 

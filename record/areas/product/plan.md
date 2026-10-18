@@ -197,7 +197,7 @@ Done on 2026-10-13: the architecture plan's four top-level nodes passed the walk
 
 ## 8. v1 build plan
 
-Produces: the code map, a design for each system, the test design, and the plan that builds v1, through nodes 5 to 8 of [the architecture plan](../architecture/plan.md#5-the-code-map), which says where each stands.
+Produces: the code map, a design for each system, the test design, and [the plan that builds v1](../build/plan.md), through nodes 5 to 8 of [the architecture plan](../architecture/plan.md#5-the-code-map), which says where each stands.
 Every system is designed, and the whole checked, before any product code (user, 2026-10-14).
 Exit: the four are agreed, and these checks pass:
 
@@ -211,6 +211,7 @@ Node 6's exit worked the notes of ten docs into their text and stopped there, si
 
 ## 9. Build, test, and release v1
 
+Produces: v1, in the stages of [the build plan](../build/plan.md), which says where the build stands.
 Exit: both of these happen.
 
 - We fly a full flight with a friend, gate to gate, in an aircraft we list, and neither pilot notices the cockpits disagree.

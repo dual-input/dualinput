@@ -880,7 +880,7 @@ Done on 2026-10-18.
 Question: which stages build v1, in what order, each with what it builds, what it needs first, its tests, and an exit you can watch happen?
 It's step 8's last output, and where the stages and their status live is this node's to decide, since a plan is the one place status lives ([writing.md](../../../.claude/rules/writing.md#design-plan-and-log)).
 It reads 6's and 7's answers.
-Its answer goes in the plan or plans it chooses, which hold v1's build stages.
+Its answer goes in [the build plan](../build/plan.md), which holds v1's build stages and their status.
 Exit: the user agrees to those plans.
 Waits on 6 and 7.
 Raised elsewhere: by 6.16, the apps' stage designs the apps' looks and words, which slices each shows, and the rest of [left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage) before it builds them, and settles there the apps' own code, among it which copy of the MSFS Avionics Framework the EFB app draws with (user, 2026-10-17).

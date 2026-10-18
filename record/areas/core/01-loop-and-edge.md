@@ -6,30 +6,10 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../arc
 Decides:     The core's threads; how the queue stamps and orders inputs, and what an input is; the kernel's interface for units, their state, hooks, moments, requests, outputs, timers, jobs, and IDs; what a recording holds for a replay, and how a replay finds where it diverged; the core's math; what a panic does; how the core starts, stops, quits, and logs; and the budgets of the loop and the edge (node 6.1).
 ```
 
-> **Note**
-> Since 2026-10-16, the kernel also hands out random bytes, through `cx.random_bytes()` from the same ChaCha20 generator as `cx.new_id()`, for the network's endpoint key, where [timers, jobs, and IDs](#timers-jobs-and-ids) has the generator draw only UUIDs ([02-units](../network/02-units.md#the-endpoint-key)).
->
-> Since 2026-10-16, [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) changes this document in five places:
->
-> - The writer leaves out the inputs a feature declares unrecorded, so [what a recording holds](#what-a-recording-holds) is every input but those; a unit with one runs in a replay on what was recorded, and its outputs aren't checked.
-> - Each unit counts its own timers, jobs, and calls, and draws its IDs and random bytes from a generator of its own, seeded from the one seed and its place in the registry, where [timers, jobs, and IDs](#timers-jobs-and-ids) has one counter and one generator; and each output names its unit, so the checkpoints' hash folds only whole units' outputs.
-> - A replay on the same commit with uncommitted changes warns and runs, where [running a replay](#running-a-replay) has any other build refuse.
-> - A recording also holds marks, and writes each input's numbers as varints, in a folder for each run in `recordings\` with the run's log file.
-> - The panic hook has the writer record the input being handled, even an unrecorded one, and a replay reproduces a panic only in a whole unit, where [a panic](#a-panic) promises it for any.
-> - The edge puts a same-length placeholder in place of the home folder's path in every input, and the real path back in each output that names a file, and hands up the clipboard only when it holds an invite code.
->
-> Since 2026-10-16, a job may also run an engine's work on what it read, as the profile loader's job reads, parses, and checks a bundle and hands up the checked profile encoded with postcard, beside the jobs [timers, jobs, and IDs](#timers-jobs-and-ids) lists; and the edge fetches over HTTPS through reqwest 0.13 with rustls, which iroh already brings into the core ([the profiles' units](../profiles/02-units.md#fetching)).
-> Since 2026-10-17, any client may send the session crate's quit, which [quitting](#quitting) has come from the desktop app, and the edge also starts the desktop app's program when the EFB app's button asks for it and no desktop app is connected ([the apps](../interface/01-apps.md#quit)).
-> Since 2026-10-18, Crosscheck has no watcher: the desktop app runs from login as a tray icon, starts the core with the sim, and starts it again after an exit other than 0, and its tray's Quit sends the session crate's Quit like any client's, which settles what [quitting](#quitting) leaves to 6.17; the watcher in [exiting](#exiting) and [a panic](#a-panic) is the desktop app ([installing and updating](../install/01-installing-and-updating.md#the-sim-and-the-core)).
-> Since 2026-10-18, the core links the C runtime statically through one entry in the workspace's `.cargo/config.toml`, which every x86_64 program of ours shares, and a `compile_error!` in `apps/core` stops a build whose `RUSTFLAGS` replaced the entry, which settles how [the core's math](#the-cores-math) gets its static runtime ([the C runtime](../build/01-the-build.md#the-c-runtime)).
->
-> Since 2026-10-18, a pilot's recording replays on the `crosscheck-core.exe` its release shipped, which `node tools/replay.ts <file>` fetches from that release on GitHub, since the core's math follows the C runtime of the Windows SDK it was built with, which CI's image doesn't pin ([the core's math](#the-cores-math)).
-> A build of the header's commit still replays, for added logging, and warns when its rustc, MSVC, or Windows SDK version differs from the header's, where [running a replay](#running-a-replay) rebuilds the commit and refuses only another one (user, 2026-10-18).
-
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.
 The kernel calls each handler with its unit's own state, a read-only view of every other unit's, and an outbox, and runs every call one unit asks of another after the asking handler returns.
-The core's edge, in `apps/core`, runs the threads that wait, carries out the outbox, and records every input from the core's first, with a hash of everything the core put out once a second, so a replay on the same build finds the second where it diverged.
+The core's edge, in `apps/core`, runs the threads that wait, carries out the outbox, and records every input from the core's first but those a feature declares unrecorded, with a hash once a second of the outputs of every unit that has no unrecorded input, so a replay on the same build finds the second where it diverged.
 A panic crashes the core, which comes back as a late joiner, and a quit, from the pilot or from Windows ending their session, leaves the session before the core exits.
 
 This answers node 6.1 of the [architecture plan](../architecture/plan.md#61-the-cores-loop-and-edge).
@@ -76,9 +56,10 @@ The code map's [one loop](../architecture/02-code-map.md#one-loop), [what a feat
 An input is its sequence number, its stamp, its source, and its bytes.
 
 - A unit that takes inputs from outside the core registers a source: the sim service for SimConnect's messages, opens, and losses ([the sim seam](../architecture/02-code-map.md#the-sim-seam)), the clients crate for the WebSockets, the network crate for the links and the messages iroh delivers, the core-helper-service crate for the core helper, the session crate for Windows ending the session, and the kernel for its timers, its jobs, and the core's first input.
-- Sources are numbered in the order they register, which the same build always repeats, and only the build that wrote a recording replays it ([one loop](../architecture/02-code-map.md#one-loop)), so the number needs no name beside it.
+- Sources are numbered in the order they register, which the same build always repeats, and a recording replays only on its release's own program or a build of its commit ([running a replay](#running-a-replay)), so the number needs no name beside it.
 - The bytes are what came in, unparsed: a SimConnect message copied whole, a message as iroh delivered it, a WebSocket's text, a frame from the core helper, a timer's handle, or a job's result.
   The owning unit parses them on the loop, within its handler's 1ms ([budgets](../architecture/02-code-map.md#budgets)), so the only code that runs live and never in a replay is the edge's copying, as [why the seam sits at SimConnect's calls](../architecture/02-code-map.md#why-the-seam-sits-at-simconnects-calls) has it for the sim.
+- The edge puts a placeholder of the same length in place of the home folder's path in every input, and the real path back in each output that names a file ([the home folder's path](../recording/01-recording-and-bug-reports.md#the-home-folders-path)).
 
 ## The kernel's interface
 
@@ -131,15 +112,20 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
   An edge carries out its outputs in that order, and nothing is promised between two edges.
 - A unit that needs one thing done before another waits for the input that says it's done.
   The session crate writes the session file with its raised restart count as a job, and opens links only once the job's result says it's written, as [the session file](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts) requires.
-- The kernel folds each output's postcard encoding into a running 64-bit hash, for the recording's checkpoints.
+- Each output names its unit, and the kernel folds only whole units' outputs, each by its postcard encoding, into a running 64-bit hash, for the recording's checkpoints ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+  A whole unit is one with no unrecorded input: an input a feature declares unrecorded, which the writer leaves out ([what a recording holds](#what-a-recording-holds)).
 
 ### Timers, jobs, and IDs
 
 - `cx.timer(after)` sets a timer due at the input's stamp plus `after`, and returns its handle, and the timer thread pushes its firing as an input.
 - `cx.job(j)` starts a job at the edge: reading or writing a file, fetching over HTTPS, or reading the clipboard, whose result, or its error, is an input like any other.
+  A job may also run an engine's work on what it read, as the profile loader's job reads, parses, and checks a bundle and hands up the checked profile encoded with postcard ([loading](../profiles/02-units.md#loading)).
+  The edge fetches over HTTPS through reqwest 0.13 with rustls, which iroh already brings into the core ([fetching](../profiles/02-units.md#fetching)), and hands up the clipboard only when it holds an invite code ([the clipboard](../recording/01-recording-and-bug-reports.md#the-clipboard)).
 - A timer or a job canceled after its input was queued still comes up, and the kernel drops it.
-- Timers, jobs, and calls that wait for an answer, such as the sim's, take their handles from counters on the loop, so a replay hands out the same ones.
-- `cx.new_id()` draws a version 4 UUID from a ChaCha20 generator in the kernel, seeded once by 256 random bits the edge draws from the operating system and puts in the core's first input.
+- Each unit counts its own timers, jobs, and calls that wait for an answer, such as the sim's, and takes their handles from its own counters on the loop, so a replay hands out the same ones.
+  A unit with an unrecorded input that takes fewer in a replay then shifts no other unit's ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+- `cx.new_id()` draws a version 4 UUID, and `cx.random_bytes()` draws random bytes, such as the network's endpoint key ([the endpoint key](../network/02-units.md#the-endpoint-key)), each from the unit's own ChaCha20 generator in the kernel.
+  Each unit's generator is seeded from the core's one seed, 256 random bits the edge draws from the operating system and puts in the core's first input, and from the unit's place in the registry ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
   `uuid`'s `Builder::from_random_bytes` sets the version and variant on bytes it's given (read in uuid 1.28.0, `src/builder.rs`), so the message crate keeps `v4` off.
   A replay draws the same IDs, and nobody without the recording can predict them.
 
@@ -147,15 +133,18 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
 
 ### What a recording holds
 
-The writer records every input from the core's first, in every run of the core, with or without a session, because a replay has to start where the run did: the seed, the handles, sim awareness, and the clients all build up from the first input.
+The writer records every input from the core's first but those a feature declares unrecorded ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)), in every run of the core, with or without a session, because a replay has to start where the run did: the seed, the handles, sim awareness, and the clients all build up from the first input.
+A unit with an unrecorded input runs in a replay on what was recorded, and its outputs aren't checked ([what it runs](../recording/01-recording-and-bug-reports.md#what-it-runs)).
 What a run's recording is kept for, and for how long, is [6.6](../architecture/plan.md#66-recording-and-bug-reports)'s, which keeps or deletes a recording whole.
+Each run's recording sits in a folder of its own in the data folder's `recordings\`, with the run's log file ([the files](../recording/01-recording-and-bug-reports.md#the-files)).
 
-A recording starts with a header, then holds three kinds of record, in the order they happened:
+A recording starts with a header, then holds four kinds of record, in the order they happened:
 
-- **Inputs,** each before the loop handles it.
+- **Inputs,** each before the loop handles it, with each of its numbers written as a varint ([the inputs](../recording/01-recording-and-bug-reports.md#the-inputs)).
 - **The sandbox's stops,** each a script call's number and the count of interrupt calls at which [one loop](../architecture/02-code-map.md#one-loop)'s check stopped it.
-- **Checkpoints:** when an input's stamp starts a new second since the core's first input, the edge records the running hash of the outputs and the input's sequence number, 8 bytes each, before the loop handles it, about 58 KB an hour before framing (arithmetic).
+- **Checkpoints:** when an input's stamp starts a new second since the core's first input, the edge records the running hash of the whole units' outputs and the input's sequence number, 8 bytes each, before the loop handles it, about 58 KB an hour before framing (arithmetic).
   A recording can instead hold a checkpoint before every input, which its header says, for the bench.
+- **Marks,** each written by a unit through `cx.recording().mark(...)` ([marks](../recording/01-recording-and-bug-reports.md#marks)).
 
 The header names the build: its commit, a hash of its diff when it's uncommitted, its profile, the versions of `rustc`, of the MSVC compiler `cc` builds QuickJS-ng with, and of the Windows SDK, whose C runtime the core links ([the core's math](#the-cores-math)), and the SimConnect SDK the build printed ([building every target](../architecture/02-code-map.md#building-every-target)).
 It doesn't name the program's bytes, since a build of one commit on two PCs needn't match byte for byte (unverified for ours).
@@ -164,8 +153,10 @@ How the records are encoded is the recording-format engine's.
 
 ### Running a replay
 
-1. Run `crosscheck-core replay <file>`, the same program, built at the commit the header names.
-   A program of another build refuses, naming the commit to check out, and one on a PC whose CPU differs from the header's says so before it runs.
+1. For a pilot's recording, run `node tools/replay.ts <file>`, which fetches from GitHub the `crosscheck-core.exe` that the recording's release shipped, and replays on it, since the core's math follows the C runtime of the Windows SDK the core was built with, which CI's image doesn't pin ([the core's math](#the-cores-math)).
+   A build of the header's commit also replays it, through `crosscheck-core replay <file>`, for added logging, and warns when its rustc, MSVC, or Windows SDK version differs from the header's (user, 2026-10-18).
+   One with uncommitted changes warns and runs ([a replay on the same commit with local changes](../recording/01-recording-and-bug-reports.md#a-replay-on-the-same-commit-with-local-changes)).
+   A program of another commit refuses, naming the commit to check out, and one on a PC whose CPU differs from the header's says so before it runs.
 2. The replay starts none of the edge's threads, so it binds no server and writes no port file, and takes a folder beside the recording as its data folder, for its named mutex and its log file, so it can run while Crosscheck does; it takes the seed, the settings, and the session file from the recorded first input.
 3. Its queue fills from the file as fast as the loop takes inputs, each output's sink drops it, no timer or job runs, since their results come from the file, and the sandbox's check reads its stops from the file.
 4. At each checkpoint the replay compares its hash with the recorded one; at the first that differs, it names that checkpoint and the inputs since the one before it.
@@ -179,6 +170,7 @@ Rust's `f64` math and QuickJS-ng's `Math` both call the C runtime's functions, a
 
 Windows always loads its own `ucrtbase.dll`, whose version follows each pilot's Windows, even when a program ships its own copy beside it (documented, [Universal CRT deployment](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment)).
 So the core links the C runtime statically, which puts the math in our program, and `main` calls `_set_FMA3_enable(0)` before it starts any thread, in a live run and a replay.
+It links the runtime through one entry in the workspace's `.cargo/config.toml`, which every x86_64 program of ours shares, and a `compile_error!` in `apps/core` stops a build whose `RUSTFLAGS` replaced the entry ([the C runtime](../build/01-the-build.md#the-c-runtime)).
 That two CPUs give the same bits from one build with FMA3 off is unverified, and replaying a recording made on a friend's PC on ours settles it, which then answers 02-code-map's item in [left open](../architecture/02-code-map.md#left-open) on a PC with another CPU.
 
 `_set_FMA3_enable` is in neither windows-sys 0.61.2 nor libc 0.2.190 (read in each crate's source), so `apps/core` declares that one foreign function itself, the third crate the code map's [tiers](../architecture/02-code-map.md#tiers) let declare one, for that function alone; the timer thread takes its functions from windows-sys.
@@ -186,17 +178,20 @@ That two CPUs give the same bits from one build with FMA3 off is unverified, and
 ## A panic
 
 A release build sets `panic = "abort"`, so a panic on any thread ends the core (documented, [Cargo's profiles](https://doc.rust-lang.org/cargo/reference/profiles.html#panic)), and the process exits with a code other than 0 (unverified; a bench case checks it).
-The panic hook in `apps/core` runs first, as std runs it "with both the aborting and unwinding runtimes" (documented, [`std::panic::set_hook`](https://doc.rust-lang.org/std/panic/fn.set_hook.html)): it logs the panic, the input's sequence number, and the unit that was running, and has the writer end its zstd frame, waiting at most 500ms.
-The crash then takes [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)'s path: the watcher starts the core again, and the pilot comes back as a late joiner, while a replay of the recording reproduces the panic at the same input.
+The panic hook in `apps/core` runs first, as std runs it "with both the aborting and unwinding runtimes" (documented, [`std::panic::set_hook`](https://doc.rust-lang.org/std/panic/fn.set_hook.html)): it logs the panic, the input's sequence number, and the unit that was running, and has the writer record the input being handled, even an unrecorded one, and end its zstd frame, waiting at most 500ms.
+The crash then takes [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)'s path: the desktop app starts the core again ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), and the pilot comes back as a late joiner, while a replay of the recording reproduces a panic in a whole unit at the same input ([a panic](../recording/01-recording-and-bug-reports.md#a-panic)).
 
 Catching a feature's panic and turning that feature off for the session would be a mechanism for recovering from our own bugs, and would leave a session half working: a following machine whose flight-model feature was off would fly on its own, where a restart and a late join bring every feature back (user, 2026-10-15).
 
 ## Starting and stopping
 
+The desktop app runs from login as a tray icon, starts the core with the sim, and starts it again after an exit other than 0 ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)).
+The core's edge starts the desktop app's program whenever the EFB app's button asks for it, and the one running copy opens its window ([bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)).
+
 The core starts in this order:
 
 1. `main` turns FMA3 off, takes a named mutex for its data folder, and exits if another core holds it, so two cores started at once for one data folder can't both run; the port file still tells the apps outside the sim where the core is ([finding the core](../architecture/01-spine.md#finding-the-core)).
-2. It draws the generator's 256-bit seed, and registers the units ([the registry and moments](../architecture/02-code-map.md#the-registry-and-moments)).
+2. It draws the core's 256-bit seed, and registers the units ([the registry and moments](../architecture/02-code-map.md#the-registry-and-moments)).
 3. It starts the writer, which writes the header, and pushes the core's first input: the seed, and the bytes of the settings file and of the session file, if there is one.
 4. It starts the timer thread, the window thread, tokio's runtime, and the sim thread, and wires each source and each sink.
    The WebSocket server's port, once bound, comes in as an input, and the edge writes the port file.
@@ -210,11 +205,11 @@ It puts out an exit, and then:
 1. The loop takes no more inputs.
 2. The edges carry out the outputs already put out, within 750ms in all, as FS Copilot's goodbye on the way out had (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, `ShutdownGrace`).
    FS Copilot's quit queued its goodbye, and "the process exits before LiteNetLib's update thread sends it" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-12 — A deliberate quit reaches the peer as an outage").
-3. The writer ends its last frame, the edge deletes the port file, and the process exits with 0, which tells the watcher it meant to.
+3. The writer ends its last frame, the edge deletes the port file, and the process exits with 0, which tells the desktop app it meant to.
 
 ### Quitting
 
-A quit comes from the pilot, from the desktop app or the watcher's tray, which [6.16](../architecture/plan.md#616-the-apps) and [6.17](../architecture/plan.md#617-installing-and-updating) design, or from Windows ending the pilot's session.
+A quit comes from the pilot, through the session crate's Quit, which any client may send ([quit](../interface/01-apps.md#quit)), the desktop app's tray among them ([one program from login](../install/01-installing-and-updating.md#one-program-from-login)), or from Windows ending the pilot's session.
 The session crate runs a quit as a Leave, so the crew sees the pilot leave rather than lose the link ([leaving](../network/01-between-machines.md#leaving)), and then exits.
 
 - Windows sends `WM_QUERYENDSESSION` to the core's window, which returns `TRUE` at once and pushes the quit, since "Each application should return TRUE or FALSE immediately upon receiving this message, and defer any cleanup operations until it receives the WM_ENDSESSION message" (documented, [WM_QUERYENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-queryendsession)).
@@ -224,7 +219,7 @@ The session crate runs a quit as a Leave, so the crew sees the pilot leave rathe
 
 ## Logging
 
-- The loop's crates log through `tracing`'s macros, and `apps/core`'s subscriber writes each line to a file in the data folder, stamped with the stamp and sequence number of the input being handled, which the kernel exposes.
+- The loop's crates log through `tracing`'s macros, and `apps/core`'s subscriber writes each line to the run's log file, beside its recording in `recordings\` ([what a recording holds](#what-a-recording-holds)), stamped with the stamp and sequence number of the input being handled, which the kernel exposes.
 - The level is a setting, and a replay may raise it, since a log line is neither an output nor in the hash, and changes nothing a handler reads.
 
 ## Budgets
@@ -250,10 +245,10 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A pilot quits Crosscheck in a session, and the other core sees a leave, not an outage.
 - Windows signs the pilot out with a session held, and the other core sees a leave.
 - The core is killed, and its recording reads up to its last full frame.
-- A handler panics: the process exits with a code other than 0, the watcher starts it again, the pilot comes back as a late joiner, and the replay panics at the same input.
-- The core exits on its own, with 0, and the watcher doesn't start it again.
+- A whole unit's handler panics: the process exits with a code other than 0, the desktop app starts it again, the pilot comes back as a late joiner, and the replay panics at the same input.
+- The core exits on its own, with 0, and the desktop app doesn't start it again.
 - A test unit raises moments in a cycle, and the kernel panics after 1,000.
-- A replay on another build refuses, naming the commit.
+- A replay on another commit refuses, naming the commit.
 - A test unit that reads the clock in one handler is caught at the next checkpoint of its replay.
 - The timers fire within their budget with the sim running and the PC busy.
 

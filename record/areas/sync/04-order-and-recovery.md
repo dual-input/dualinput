@@ -6,30 +6,6 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, ../network/
 Decides:     What comes back after a link, a core, a sim, or a PC goes down; how a machine records what it applied, drops copies, and skips messages; catch-up's order and pipeline, when it ends, and when control can't pass; how every cockpit message is paced, and how often a state entry is sent; which messages a change of control drops, and who catches up after one; how a core that restarted recovers; how an entry the aircraft drives itself is caught; how a machine puts back a change it may not send; and when an aircraft that loaded before its session counts as settled.
 ```
 
-> **Note**
-> Since 2026-10-16, a receiver's vector clock goes out once a second on a one-off channel of the cockpit-stream crate's own, where [the cockpit stream](#the-cockpit-stream) has the heartbeat carry it, so the heartbeat knows nothing of the cockpit stream ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
->
-> Since 2026-10-16, [the sync units](05-units.md) changes this document in five places:
->
-> - Catch-up's order comes from each machine's sync engine, which keeps when its cockpit first took each of an entry's last 16 distinct values, where [catch-up](#catch-up) reads it from the flying machine's recording ([catch-up's order](05-units.md#catch-ups-order)); so the reason [a core that restarts](#a-core-that-restarts) gives for keeping the cockpit stream in the recording's minimal mode goes, as the minimal mode it names already has ([what each PC keeps](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
-> - The catching-up machine asks the flying machine for its catch-up ([catch-up](05-units.md#catch-up)).
-> - A replay opens with its sender's clock, and runs on the receiving machine until its clock covers that one, which is when [the replay](#the-replay) ends and the guard on control lifts ([kept messages and a replay](05-units.md#kept-messages-and-a-replay)).
-> - Of the machines that applied a message a change of control drops, the new PF never catches up from itself, where [a change of control](#a-change-of-control) has every one catch up ([a change of control](05-units.md#a-change-of-control)).
-> - A machine holds what arrives while it's out of the flight and while its catch-up waits for its answer, and in the flight with no profile loaded applies it, state sync skipping its own kinds, where [the cockpit stream](#the-cockpit-stream) holds it until its catch-up ([applying](05-units.md#applying)).
->
-> Since 2026-10-17, [pointer sync](../pointer-sync/01-pointer-sync.md) changes this document in three places:
->
-> - Pointer sync sends each gesture as it happens, as a down, moves, and an up, so a gesture's message counts as applied once handed to its panels, and its up once they're done with it, where [the cockpit stream](#the-cockpit-stream) counts a press applied once its panel has played it through to the release.
-> - The catch-up that preflight's end starts skips no press, which queues behind its writes and applies once they're made, since neither cockpit's displays were touched in preflight, where [the cockpit stream](#the-cockpit-stream) skips every press during a receiver's catch-up.
-> - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the replay that [the replay](#the-replay) keeps it locked through.
->
-> Since 2026-10-17, seat claims ride avatars' poses rather than the session channel, since avatars, partly recorded, writes no session key, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID, where [keys several members write](#keys-several-members-write) has the session channel's stamp settle them ([a seat](../avatars/01-avatars.md#a-seat)).
->
-> Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
->
-> - In [catch-up](#catch-up), an entry with no reading yet holds its write until its first reading arrives, as an `instrument()` entry's does, where catch-up writes it rather than skipping it, so a toggle never flips blind; a counted or event entry, which never gets a reading, is exempt, and a read the sim refuses drops the held write ([the sync units](05-units.md)).
-> - No answer to a voice offer comes in v1, since the voice phrases are a Soon pick, where [catch-up](#catch-up) names one.
-
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
 A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).
@@ -74,16 +50,19 @@ A receiver's own vector clock is its one record of what it has applied, and serv
 
 - A message reaches a receiver in its sender's order, on that sender's stream or in a replay from whoever kept it ([01-between-machines](../network/01-between-machines.md#coming-back)), and waits until the receiver's clock covers every message it depends on ([02-live-sync](02-live-sync.md#one-stream-in-causal-order)).
   A message the receiver's clock already covers is a copy, and the receiver drops it.
-- A message counts as applied, and moves the receiver's clock on, once Crosscheck has made its write, fired its event, or had the display's panel play its press through to the release, and the heartbeat acknowledges by carrying the receiver's clock ([01-between-machines](../network/01-between-machines.md#channels)).
-  A panel plays a press for as long as the pilot held it, up to 1.5s in FS Copilot's (read in the FS Copilot fork, `pointer.js`, `hold`), so a message counted at the hand-over could let the next event land before the press's click.
+- Pointer sync sends each gesture, a press or drag on a display, as it happens: its down, its moves, and its up ([pointer sync](../pointer-sync/01-pointer-sync.md#a-gesture)).
+  A message counts as applied, and moves the receiver's clock on, once Crosscheck has made its write, fired its event, or handed a gesture's message to the display's panels, and a gesture's up once they're done with it ([playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+  The receiver acknowledges by sending its clock once a second on a one-off channel of the cockpit-stream crate's own, so the heartbeat knows nothing of the cockpit stream ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
+  A panel plays a gesture's click at its up, so an up counted at the hand-over could let the next event land before the click.
   FS Copilot's acknowledgment meant "received by the app", not "applied by the panel" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, the constructor's comment), and its app, restarted, dropped a press it had no panel for yet, logging "No panel for DisplayUnits|config=N324DU; event dropped" (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone").
 - A receiver skips a message in five cases, and a skipped message counts as applied, so nothing waits on it and its sender stops keeping it:
   - [a change of control](#a-change-of-control) drops it;
-  - it's a press that arrives while the receiver's cockpit catches up ([03-catch-up](03-catch-up.md#while-catch-up-runs));
+  - it's a press that arrives while the receiver's cockpit catches up ([03-catch-up](03-catch-up.md#while-catch-up-runs)), other than in the catch-up that preflight's end starts, where a press queues behind that catch-up's writes and applies once they're made, since neither cockpit's displays were touched in preflight ([playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture));
   - it's a press for a display whose panel hasn't announced itself to the core, as for a display the receiver's aircraft lacks, which FS Copilot's pointer sync drops too (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`);
   - its entry is one the aircraft drives itself ([below](#entries-the-aircraft-drives-itself));
   - it's a change to a PF-owned entry in a replay that a later change to the same entry follows, with only PF-owned changes between them ([the replay](#the-replay)).
-- A machine with no aircraft in a flight, such as a joiner still in the sim's menu, or with an aircraft other than the flying machine's, which keeps its pilot out of the flight ([03-v1-scope](../product/03-v1-scope.md)), applies nothing from the cockpit stream, sends nothing on it, and holds what arrives until its catch-up ([catch-up](#catch-up)).
+- A machine with no aircraft in a flight, such as a joiner still in the sim's menu, or with an aircraft other than the flying machine's, which keeps its pilot out of the flight ([03-v1-scope](../product/03-v1-scope.md)), applies nothing from the cockpit stream and sends nothing on it.
+  A machine holds what arrives while it's out of the flight and while its [catch-up](#catch-up) waits for its answer, and in the flight with no profile loaded applies it, state sync skipping its own kinds ([applying](05-units.md#applying)).
 - A machine sends each state entry's newest value at most 20 times a second, a starting value v1's recordings tune; any value it's holding goes out before its next event or press, and events and presses go out as they happen (user, 2026-10-12).
   A hardware axis that jitters with no dead zone changes its lever every frame, so without the cap the 58P's six engine levers could send up to 360 messages a second at 60 fps, against node 2's assumed 5 to 20 (arithmetic); FS Copilot sampled every entry that wasn't shared every 30ms (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `AddLink`).
   A change undone within 50ms never goes out, which no pilot's hand does; a button that pulses an `L:` variable is an event entry, which the cap never holds ([01-format-and-delivery](../profiles/01-format-and-delivery.md#event-entries)).
@@ -97,18 +76,22 @@ That happens only after a crash of the core or the PC ([a core that restarts](#a
 
 ## Catch-up
 
-Catch-up writes each entry at the flying machine's value in the order the flying machine's cockpit first took each of those values, which its recording holds, since the recording keeps every change of the session ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
+Catch-up writes each entry at the flying machine's value in the order the flying machine's cockpit first took each of those values.
+Each machine's sync engine keeps that order, from when its cockpit first took each of an entry's last 16 distinct values ([catch-up's order](05-units.md#catch-ups-order)).
 That settles [03-catch-up](03-catch-up.md#choosing-the-order)'s choice of order: where an interlock makes order matter, as with the hypothetical APU master that tries once to start the APU, it writes the battery first, and where order doesn't matter, it costs nothing, so no probe can change the choice.
 Entries whose value the flying machine took before the session began, or never changed, go first.
 
+- The catching-up machine asks the flying machine for its catch-up ([catch-up](05-units.md#catch-up)).
 - The catch-up carries the flying machine's vector clock as of the state it sends, and the catching-up machine takes it for every counter but its own, which keeps the larger of the two, since a machine's own counter never goes back and a number used twice would drop the second message as a copy ([01-spine](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts)).
   So every message the state already holds, queued while the machine waited or arriving late on the stream, drops as a copy, and the rest apply on top in stream order, paced as [the replay](#the-replay) says ([03-catch-up](03-catch-up.md#while-catch-up-runs)).
 - A catch-up ends once it has made its last write and its aircraft has settled, whichever comes later, where made means the engine has carried out every entry's write, a stepping write's last step included; whether each write landed is the bench's ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
   An aircraft that settled long ago, at the end of preflight, for an ex-PF, or after a core restart, would otherwise end its catch-up the moment it began, while its writes were still landing.
+- A synced display on a machine other than the PF's locks while that machine's catch-up runs, as it does through a [replay](#the-replay) ([pointer sync](../pointer-sync/01-pointer-sync.md#on-a-machine-other-than-the-pfs)).
 - When the core starts watching an input event, it reads its value once with `SimConnect_GetInputEvent`, since subscribing reports nothing until the value changes (fsc-editor, `docs/sim-vars/build/v1-log.md`), and our Rust client read one in a flight (measured on MSFS 2024, 2026-10-09, [architecture log](../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
-  Until that read returns, the entry's value is unknown, and catch-up writes it rather than skipping it.
+  Until that read returns, the entry's value is unknown, and catch-up holds its write until the first reading arrives, as it does for every entry with no reading yet, an `instrument()` entry included, so a toggle never flips blind (user, 2026-10-18).
+  A counted or event entry, which never gets a reading, is exempt, and a read the sim refuses drops the held write ([writing](05-units.md#writing)).
 - When control passes between two other pilots while catch-up runs, it starts again from the new flying machine and skips every entry that already matches.
-- Control can't pass to a pilot while their own catch-up or [replay](#the-replay) runs over a link that's up, by the take-control key or button or by their answer to a voice offer, and the button says why; if the link is lost again first, the lost-link rules apply instead, and any pilot may take control ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
+- Control can't pass to a pilot while their own catch-up or [replay](#the-replay) runs over a link that's up, by the take-control key or button, and the button says why; if the link is lost again first, the lost-link rules apply instead, and any pilot may take control ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
   During catch-up their own changes aren't sent ([03-catch-up](03-catch-up.md#while-catch-up-runs)), and during a replay their cockpit is behind by what's left of it, so a pilot who took over partway would fly a cockpit that differs from the others' or dates from before the cut.
   When the PF leaves the flight, the pass happens anyway, to a pilot still in the flight, an up-to-date one where there is one, and a pilot whose catch-up is running when control reaches them stops catching up, since they're now the source ([roles and members](../session/01-roles-and-members.md#the-pf)).
 
@@ -122,7 +105,7 @@ The simulation rate and the pause aren't steps, because they're session keys, wh
 [03-catch-up](03-catch-up.md#replaying-a-short-outage)'s rule holds for a cut of up to 30 minutes: every missed change, in causal order, each after the gap the PF left before it, capped at 2s.
 
 That rule paces every cockpit message, live or replayed: each waits the gap its sender left before it, capped at 2s, counted from when the one before it applied, so it waits only what's left of that gap (user, 2026-10-12).
-A live message, already spaced by the network, waits nothing; messages queued behind a replay or a catch-up keep their spacing; and the replay, or the catch-up's queue, ends when nothing is waiting.
+A live message, already spaced by the network, waits nothing; messages queued behind a replay or a catch-up keep their spacing; and the catch-up's queue ends when nothing is waiting.
 FS Copilot's panels paced presses the same way: "Each waits its *remaining* gap, not the full one, so live gestures add no latency" (FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, 0.4).
 The core alone paces, and our panel bridge plays each press when the core hands it over, so FS Copilot's panel carries over without its own pacing, which would wait each gap a second time ([03-v1-scope](../product/03-v1-scope.md)).
 
@@ -131,6 +114,7 @@ The core alone paces, and our panel bridge plays each press when the core hands 
   Each lever still holds the value it had before every event or press that followed it, so a starter press replays against the mixture the PF had then.
 - So a replay lasts at most 2s for each change it carries, and changes made close together, such as a knob turned through 20 degrees, replay at their own spacing.
   How long that is turns on how often the PF changed shared entries during the cut, which v1's recordings will show; an entry the aircraft drives itself, which would change at every tick, stops syncing within 30s ([its test](#entries-the-aircraft-drives-itself)).
+- A replay opens with its sender's clock, and runs on the receiving machine until that machine's clock covers the sender's, which is when the replay ends and control can pass to its pilot again ([kept messages and a replay](05-units.md#kept-messages-and-a-replay)).
 - While the replay runs, the returning PM's synced displays stay locked, as they were while the link was lost ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)), the banner says they're catching up, and control can't pass to them while the link stays up ([catch-up](#catch-up)).
 
 ## A change of control
@@ -143,14 +127,14 @@ This replaces [01-between-machines](../network/01-between-machines.md#control)'s
 - A PF who leaves the flight during the PM's replay drops nothing, since the handover it makes includes every message it made.
 - A switch the PF flipped in the moment another pilot pressed take-control, before it learned of the press, is dropped, and the ex-PF's catch-up below undoes it in its own cockpit.
 
-Every machine that applied a message the change drops catches up state from the new PF once its replay ends, skipping what already matches: the ex-PF always, and with more crew, a pilot who got the message live.
+Every machine other than the new PF's that applied a message the change drops catches up state from the new PF once its replay ends, skipping what already matches: the ex-PF always, and with more crew, a pilot who got the message live.
 
 - The ex-PF's aircraft follows the new PF's from the moment control settles, as the warning the new PF saw said it would ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
 - The notice tells the ex-PF that what they changed alone is undone, and that pages and FMS entries they made alone may differ from the new PF's.
 
 ## A core that restarts
 
-A core that crashes while its sim keeps running comes back as a [sim that closed](#a-sim-that-closed) does: the watcher restarts it, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, whose catch-up starts at once, since the sim is still in the flight.
+A core that crashes while its sim keeps running comes back as a [sim that closed](#a-sim-that-closed) does: the desktop app starts it again ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, whose catch-up starts at once, since the sim is still in the flight.
 Crosscheck aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and the crew's notice asks for a bug report (user, 2026-10-12).
 
 Two things differ from a late join after a load, because the aircraft didn't reload:
@@ -159,7 +143,6 @@ Two things differ from a late join after a load, because the aircraft didn't rel
 - The aircraft counts as settled at once, since the core missed Ready to fly, and nothing restores itself in an aircraft that didn't load.
 
 A PF whose core crashes loses control, and their aircraft then follows the new PF's, so it jumps back by the seconds the core was down; presses either pilot made in that window are lost (user, 2026-10-12).
-The recording's minimal mode still records the cockpit stream, because catch-up takes its order from the flying machine's recording ([catch-up](#catch-up); [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
 
 ## Entries the aircraft drives itself
 
@@ -195,8 +178,9 @@ If Ready to fly came 1.5 minutes ago or more, the aircraft counts as settled at 
 
 ## Keys several members write
 
-The session channel's stamp is all that active pause, the countdown, Go without, and seat claims need: of two changes made at once, every machine keeps the same one, and a new PF's win ([01-between-machines](../network/01-between-machines.md#channels)).
+The session channel's stamp is all that active pause, the countdown, and Go without need: of two changes made at once, every machine keeps the same one, and a new PF's win ([01-between-machines](../network/01-between-machines.md#channels)).
 None needs the cockpit's causal order, since none acts on a page another change opened.
+Seat claims ride avatars' poses rather than the session channel, since avatars, partly recorded, writes no session key, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID ([a seat](../avatars/01-avatars.md#a-seat)).
 
 ## Known limits
 

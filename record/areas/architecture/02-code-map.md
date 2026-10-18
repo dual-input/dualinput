@@ -109,7 +109,7 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > - There's no `apps/watcher`: `apps/desktop` holds the watcher's jobs, in the desktop app's Rust side, which runs from login as a tray icon, so `apps/` in [the units](#the-units) and [the workspace](#the-workspace) holds `core`, `core-helper`, and `desktop`.
 > - The installer is Velopack's Setup.exe, not a program of ours, which settles [left open](#left-open)'s item on where it lives; `apps/desktop` links the `velopack` crate, and only it does, since a program that runs Velopack's startup applies a downloaded update; and the sim service also holds the packages folders, the check for packages that override ours, and the check of our own package, beside its row in [the platform](#the-platform).
-> - The desktop app builds with `tauri build --no-bundle`, beside its row in [building every target](#building-every-target), and packing a release takes `vpk`, which needs the .NET 8 SDK on the build machine.
+> - The desktop app builds with `tauri build --no-bundle`, beside its row in [building every target](#building-every-target), and packing a release takes `vpk`, which needs the .NET 8 SDK on the build machine (documented, [Velopack's Rust guide](https://docs.velopack.io/getting-started/rust)).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

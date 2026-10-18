@@ -6,7 +6,7 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Crosscheck; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how the core finds packages that override our files and checks our own; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
 ```
 
-Crosscheck has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB, and does the watcher's jobs, and it shows its window when the pilot opens it.
+Crosscheck has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.
 At its start and at each sim close, it writes our Community package wherever it's missing or of another version, and on its first run it adds the firewall rule.
@@ -19,12 +19,13 @@ The research behind it is in this area's [log](log.md).
 ## One program from login
 
 - A Tauri 2 app with a tray icon and no window took 2.2 MB of Task Manager's memory in one process, and no CPU over 60s; with a window open, 72.7 MB in seven; with the window hidden, 72.3 MB in seven; and with the window destroyed, 3.7 MB in one, every WebView2 process gone within 15s (measured on our development machine, 2026-10-18, [log](log.md#2026-10-18-a-tauri-2-app-idles-as-a-tray-icon-in-22-mb-and-gives-back-webview2s-69-mb-once-its-window-is-destroyed-but-not-while-its-hidden)).
-  So closing the desktop app's window destroys it, and never hides it.
-- The desktop app's Rust side does every job the spine and decisions 002 and 003 give the watcher, so the watcher and the core never need to talk, and the files [decision 015](../../decisions/015-watcher-reads-files-core-writes.md) has them trade fall away with the watcher.
-- **At login** it starts as a tray icon alone, from a value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` that runs it with `--tray`, which its setting to start with Windows writes or deletes.
-  From the Start menu it opens its window.
-- **One runs at a time:** a second start, from the Start menu or from the core, hands its request to the running one, which opens its window, and exits.
-  So the core's start of the desktop app's program, when the EFB app's button asks and no desktop app is connected ([bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)), opens the running app's window.
+  So closing the desktop app's window destroys it, and never hides it; that a window opened again after one was destroyed gives its memory back the same way is unmeasured ([cases on a desk](#cases-on-a-desk)).
+- The desktop app's Rust side does every job the spine and decisions 002 and 003 give the watcher, so no program of ours runs beside the core without talking to it, and the files [decision 015](../../decisions/015-watcher-reads-files-core-writes.md) has the watcher read fall away with it.
+- **At login** it starts as a tray icon alone, from a value under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` that runs it with `--tray`.
+  Velopack's install hook writes that value, since starting with Windows is on at first ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), and the app's setting to start with Windows writes or deletes it after.
+  Started with no argument, as from the Start menu, it opens its window.
+- **One runs for each data folder,** as one core does: a second start, from the Start menu or from the core, hands its request to the running one, which opens its window, and exits.
+  So the core's start of the desktop app's program, when the EFB app's button asks and no desktop app is connected ([bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)), opens the running app's window, and a developer's desktop app with a data folder of its own runs beside the installed one.
 - **Its socket** to the core is open while its window is open, so the core still exits once the sim has closed, no session is held, and no window is open ([joining and leaving](../session/02-units.md#joining-and-leaving)).
 - **The tray's Quit** sends the session crate's Quit, as any client may ([quit](../interface/01-apps.md#quit)), and ends the app, which stays ended until the next login or the next start from the Start menu.
 
@@ -53,17 +54,20 @@ It's MIT-licensed, and its 1.x line began on 2026-05-26.
   Packed with `--framework webview2`, Setup.exe looks for the runtime, and where it's missing asks the pilot in a dialog of its own, then runs Microsoft's bootstrapper without elevation (read in `src/bins/src/windows/prerequisite.rs`, `prompt_and_install_all_missing`, and `runtimes.rs`), which installs the runtime for the pilot alone unless a per-machine Edge updater replaces it (documented, [WebView2 distribution](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution)); such a PC needs the internet at install.
 - **Downloads.**
   The `velopack` crate in the desktop app downloads each release and checks its size and SHA-256 against the release's feed (read in `src/lib-rust/src/manager.rs`, `verify_package_checksum`).
-  It downloads deltas whenever it holds the package of the release it's updating from, falls back to the whole release when a delta fails, and has Update.exe apply the deltas (same file, `download_updates`).
-  The app reads the feed through Velopack's `HttpSource` at `https://github.com/<org>/crosscheck/releases/latest/download/`, which takes no call to GitHub's API; whether `HttpSource` follows GitHub's redirect there is unverified, and a desk case settles it.
-  If it doesn't, the app uses `GithubSource`, which GitHub's API limits to 60 calls an hour from one address and which sees only the newest 10 releases (read in `src/lib-rust/src/sources/github.rs`).
+  It downloads deltas when it holds the whole package of the release it's updating from and the feed lists a delta for each release since; otherwise, or when a delta fails, it downloads the whole release (same file, `download_updates` and `create_delta_update_strategy`), and Update.exe applies the deltas.
+  CI fetches the previous release with `vpk download github` before `vpk pack`, which makes a delta "as long as there is a previous release in your `--outputDir`" (documented, [Velopack's deltas](https://docs.velopack.io/packaging/deltas)).
+- **The feed.**
+  The app reads it through Velopack's `GithubSource`, which builds the feed from the newest 10 releases and downloads each file from the release that holds it (read in `src/lib-rust/src/sources/github.rs`), so a pilot up to 10 releases behind gets deltas (inference from that file and `manager.rs`; unverified by a run).
+  A plain URL at `releases/latest/download/`, through `HttpSource`, would reach only the newest release's files (read in `src/lib-rust/src/sources/http.rs`), so a pilot two releases behind would get no delta.
+  `GithubSource` makes a call to GitHub's API for each check and each download, which GitHub limits to 60 an hour from one address, and a pilot's checks, every 3 hours and at each start and sim close, make a few an hour at most.
 - **The app applies only by its own checks.**
   `VelopackApp::build().run()` applies a downloaded update as the program that calls it starts, unless auto-apply is turned off (read in `src/lib-rust/src/app.rs`, `set_auto_apply_on_startup`, "ON by default"), so the desktop app calls it with auto-apply off, and the core and the core helper link no Velopack.
   Update.exe force-kills every process running from its folder but itself before it swaps (read in `src/bins/src/shared/util_windows.rs`, `force_stop_package`), so the app applies only when [what holds an update back](#what-holds-an-update-back) clears.
 - **Its costs.**
-  CI needs the .NET 8 SDK to run `vpk`, and nothing of .NET reaches the pilot.
+  CI needs the .NET 8 SDK to run `vpk` (documented, [Velopack's Rust guide](https://docs.velopack.io/getting-started/rust)), while Setup.exe and Update.exe are Rust (read in `src/bins`), so nothing of .NET reaches the pilot.
 
-Tauri's own NSIS installer and updater plugin, which the desktop app could drive, would also install per-user with no prompt, keep their folder, and sign each update with a key of ours, but they download the whole installer for every update and write its files in place (read in tauri-bundler 2.10.3, `installer.nsi`, and tauri-plugin-updater 2.14.0, `plugins/updater/src/updater.rs`), where Velopack sends deltas and swaps a folder by rename, and deltas decide it (user, 2026-10-18).
-An MSI installed per machine prompts for an administrator at every update, and an installer and updater of our own would be all ours to write, the swap's failures among them.
+Tauri's own NSIS installer and updater plugin, which the desktop app could drive, would also install per-user with no prompt, keep their folder, and sign each update with a key of ours, but they download the whole installer for every update and write its files in place (read in tauri-bundler 2.10.3, `installer.nsi`, and tauri-plugin-updater 2.14.0, `plugins/updater/src/updater.rs`, where no code fetches a delta), while Velopack sends deltas and swaps a folder by rename, and deltas decide it (user, 2026-10-18).
+An MSI installed per machine prompts for an administrator at every update (read in tauri-bundler 2.10.3, `msi/main.wxs`, `InstallScope="perMachine"`), and an installer and updater of our own would be all ours to write, the swap's failures among them.
 
 ## On disk
 
@@ -95,10 +99,11 @@ An MSI installed per machine prompts for an administrator at every update, and a
 - Every 2s, while it holds no sim process, the desktop app walks a `CreateToolhelp32Snapshot` for `FlightSimulator2024.exe`, ignoring case, as the core's edge does ([the sim's process](../core/03-sim-seam-and-wasm-module.md#the-sims-process)), then opens the process with `SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION` and waits on it for its exit.
   - A walk took 2.8ms from PowerShell, with 291 processes running, about 0.14% of one core at one walk every 2s; a program with no administrator opened another of the pilot's processes that way, and a wait on a process it started returned when that process exited, with its exit code; and WMI's `Win32_ProcessStartTrace` refused it (measured on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
   - That the Store edition's process has the same name, and opens the same way, is unverified ([cases in the sim](#cases-in-the-sim)).
-- The app wants a core while the sim runs or its window is open, and while it wants one and the port file names none that runs, matched by its process ID and creation time ([finding the core](../architecture/01-spine.md#finding-the-core)), it starts `current\crosscheck-core.exe`.
+- The app wants a core while the sim runs, its window is open, or a session file exists, so a pilot whose sim closed while the crew flies on keeps a core that comes back after a crash ([in the flight](../session/02-units.md#in-the-flight)).
+  While it wants one and the port file names none that runs, matched by its process ID and creation time ([finding the core](../architecture/01-spine.md#finding-the-core)), it starts `crosscheck-core.exe` from its own folder.
   The app can start after the sim, since Windows "does not provide guarantees about how promptly the programs in the Run key are run" (documented, [Run and RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)), so it looks for the sim as it starts.
-- It waits on whichever core the port file names, whoever started it.
-  When that core exits with a code other than 0, the app starts one again 2s later while it still wants one; after an exit with 0, which means the core chose to stop, a quit among the reasons ([exiting](../core/01-loop-and-edge.md#exiting)), it starts none until the sim next starts or its window next opens.
+- It waits on whichever core the port file names, whoever started it, and reads its exit code (documented, [GetExitCodeProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getexitcodeprocess); measured only on a process the probe started).
+  When that core exits with a code other than 0, the app starts one again 2s later while it still wants one; after an exit with 0, which means the core chose to stop, by a quit or by the spine's rule ([exiting](../core/01-loop-and-edge.md#exiting)), it starts none until the sim next starts or its window next opens.
   This replaces the rule in [when the core goes](../interface/01-apps.md#when-the-core-goes), which starts a core after a close without a `bye`, since the exit code is the same fact read where the core's process is.
 
 ## Updates
@@ -119,13 +124,13 @@ A downloaded update applies once all of these hold:
 3. No core runs, since Update.exe kills any program running from its folder.
 
 - The core exits on its own once the sim has closed, no session is held, and no window of the app is open, so an open window holds the core, and the core holds the update; closing the window lets both go.
-- The app then calls `wait_exit_then_apply_updates` with `restart` set, and exits, and Update.exe swaps `current\` and starts the new app (read in velopack 1.2.161, `src/lib-rust/src/manager.rs` and `src/bins/src/commands/apply.rs`), which writes our package ([our package](#our-package)).
+- The app then calls `wait_exit_then_apply_updates` with `restart` set and `--tray` as the restart argument, and exits, and Update.exe swaps `current\` and starts the new app as a tray icon (read in velopack 1.2.161, `src/lib-rust/src/manager.rs` and `src/bins/src/commands/apply.rs`), which writes our package ([our package](#our-package)).
 - A host alone in a session before preflight ends keeps it through the sim's close ([in the flight](../session/02-units.md#in-the-flight)), so a host who is behind has their update held by the session, which the window says, and leaves the session first.
 
 ### Install now
 
 - Install now is a button in the window while an update is ready, and it waits, saying why, while the sim runs or a session is held, which the pilot ends first (user, 2026-10-18).
-- Otherwise the app sends the session crate's Quit, so the core sends `bye` and exits with 0, then applies the update with `--window` among Velopack's restart arguments, and the new app opens its window.
+- Otherwise the app sends the session crate's Quit, so the core sends `bye` and exits with 0, then applies the update with no restart argument, so the new app opens its window.
 
 ### No warning early in the sim's load
 
@@ -140,11 +145,12 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 - At its start and each time the sim closes, while the sim is closed, the desktop app writes our package from `current\` into each packages folder's `Community` where the package is missing or its `manifest.json`'s `package_version` isn't the app's version.
   That one rule writes it at an install, after an update, after a reinstall, and after a pilot or a mod deletes it, and nothing watches `Community` between those moments (user, 2026-10-18).
-- It builds the new copy in `Crosscheck\` beside `Community`, makes its BlurPage copy there ([decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md)), renames the old copy out of `Community` and the new one in, and deletes the old one.
+- It builds the new copy in `Crosscheck\` beside `Community`, makes its BlurPage copy there ([decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md)), writes the copy's `layout.json`, renames the old copy out of `Community` and the new one in, and deletes the old one.
+  - The app writes `layout.json`, with each file's size and date, because the BlurPage copy's come from the pilot's own sim, and a broken `layout.json` fails silently ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
   - A copy built inside `Community` would most likely mount as a second package, since the sim's `Content.xml` names each folder there by its name, suffixes included (read on our development machine, 2026-10-18; unverified by a run).
   - Our FS Copilot exerciser's sync of a new build into its own folder, while it ran, "deleted 349 of 355 files" before it reached one in use, and its fix "stages then swaps rather than deleting first" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
   - Before it deletes a folder, the app checks whether it's a junction and removes only the link, since fsc-editor found two packages in our Community folder that were junctions to folders under `Program Files` (read in fsc-editor, `src/main/sim/install.ts`, `removeEntry`).
-- **The BlurPage copy** follows [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md): while the sim is closed, the app watches the sim's `fs-base-ui\cookedcomps\` and makes the copy again in our package when the file's hash differs from the one the copy came from.
+- **The BlurPage copy** follows [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md): at its start, and while the sim is closed, the app compares the sim's file in `fs-base-ui\cookedcomps\` with the hash the copy came from, watching the folder between, and when they differ it builds our package again and swaps it in, as above.
   - On Steam it finds `fs-base-ui` under the library that `appmanifest_2537590.acf` names, in `steamapps\common\Limitless\Packages`, which only Steam's update of 2026-10-14 had rewritten, while the sim's boots on 2026-10-16 wrote nothing there (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
   - The Store edition's folder carries the sim's version in its name, `WindowsApps\Microsoft.Limitless_<version>_x64__8wekyb3d8bbwe` (documented in pilots' posts of Windows' crash events, same file), so the app takes it from the running sim's path and keeps the last one it saw; whether a program can read it is unverified, and without the copy Go to is unavailable and says why, as decision 003 accepts.
 
@@ -152,8 +158,9 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 ### Packages that override our files
 
-- At the core's start, and each time sim awareness finds the sim's process, the sim service searches, in a job, each other package's `layout.json` in each `Community` folder for the paths our package lists outside our own folders: `html_ui/Pages/VCockpit/Core/VCockpit.js`, and BlurPage's `cookedcomps/{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html` and its `.json`.
-- It skips a package that the profile's `Content.xml`, under `%APPDATA%\Microsoft Flight Simulator 2024\`, marks `UserDisabled`, since the sim doesn't mount it; that file names each package `communityfs24-` or `communityfs20-` and its folder's name, lowercased (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
+- At the core's start, and each time sim awareness finds the sim's process, the sim service searches, in a job, each other package's `layout.json` in each packages folder's `Community` and `Community2024` for the paths our package lists outside our own folders, comparing them without regard to letter case: `html_ui/Pages/VCockpit/Core/VCockpit.js`, and BlurPage's `cookedcomps/{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html` and its `.json`.
+  FS Copilot's package lists `html_ui/pages/vcockpit/core/vcockpit.js`, all in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`).
+- It skips a package that the profile's `Content.xml`, under `%APPDATA%\Microsoft Flight Simulator 2024\`, marks `UserDisabled`, which the sim most likely doesn't mount (unverified); that file names each package `communityfs24-` or `communityfs20-` and its folder's name, lowercased (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - Each package it finds raises a warning notice naming it, and the session crate's match check shows the list as one item, from the sim service's state.
 - Crosscheck turns no package off: removing or turning off a package the warning names is the pilot's, however they keep their mods, and the offer [installing and updating](../product/03-v1-scope.md#installing-and-updating) makes to disable it moves to Later (user, 2026-10-18).
 - Of two packages with the same order hint that override one file, the one mounted later wins, in alphabetical order (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), and which copy won shows when the pages that need it say hello or don't: the panel bridge within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)), and the menu script, without which Go to is unavailable ([go to](../session/02-units.md#go-to)).
@@ -167,8 +174,10 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 - The desktop app owns the rule, because "The Netsh advfirewall command requires administrator permissions to run" (documented, [the Windows 8.1 answer-file page](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/hh825692(v=win.10)); no add was tried without one), and a pilot who isn't an administrator, prompted when a program first listens, gets block rules "It doesn't matter what option is selected", which win over allow rules (documented, [Windows Firewall rules](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules)).
   Our machine holds that pair of block rules, TCP and UDP, for FS Copilot's `fscopilot.exe`, with no allow rule (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
-- On its first run after the install, before it starts any core, the app runs itself with the `runas` verb, which shows one UAC prompt, and that copy adds an inbound rule allowing UDP to `current\crosscheck-core.exe`, written as its full path, on every network profile, and deletes every block rule naming that path, comparing paths without regard to letter case, as [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) requires.
-- At each of its starts the app reads the rules, which a program with no administrator did (measured on our development machine, 2026-10-18, same file), and while the rule is missing or a block rule names the core, it offers the same fix.
+- On its first run after the install, before it starts any core, the app reads the rules, which a program with no administrator did (measured on our development machine, 2026-10-18, same file), and if no rule allows the core or a block rule names it, runs itself with the `runas` verb and a flag of its own, which shows one UAC prompt.
+  That copy acts on the flag before the check that hands a second start to the running app, adds an inbound rule allowing UDP to `current\crosscheck-core.exe`, written as its full path, on every network profile, deletes every block rule naming that path, comparing paths without regard to letter case, as [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) requires, and exits.
+  So a reinstall asks nothing, since the rule a past uninstall left behind names the same path.
+- At each of its starts the app reads the rules again, and while the rule is missing or a block rule names the core, it offers the same fix.
 - An update keeps the core's path, so the rule should keep matching it, which a desk case checks.
 - Velopack's hooks "may not show any UI" (documented, [Velopack's hooks](https://docs.velopack.io/integrating/hooks)), so the uninstall hook tries no prompt, whether or not one would work there (unverified), and the rule stays behind, naming a path that no longer exists, which a reinstall's core has again.
 - Whether the core's UDP socket raises Windows' prompt at all, when no rule names it, is unverified (same file).
@@ -176,9 +185,9 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 ## Uninstalling
 
 - The desktop app's uninstall hook runs with no UI, and Velopack kills it after 30s, by its docs, where its source passes 60s (documented, [Velopack's hooks](https://docs.velopack.io/integrating/hooks); read in velopack 1.2.161, `src/bins/src/commands/uninstall.rs`).
-- Velopack runs the hook before it stops our programs, so the hook first sends the session crate's Quit to a core that runs and waits for it to exit, and ends the running desktop app.
-- It then deletes our package from each `Community`, the `Crosscheck\` folder beside each, the Run value, and the data folder.
-- Velopack then deletes its own folder, the programs and WebView2's data among it, the Start-menu shortcut, and its entry in the pilot's list of installed programs (same file).
+- Velopack force-stops every process running from its folder before it runs the hook (read in velopack 1.2.161, `src/bins/src/commands/uninstall.rs`, `uninstall`), so a core that runs at an uninstall dies with no quit, and a crew in a session with it sees its link lost; uninstalling in a session isn't a path a crew takes.
+- The hook deletes our package from each `Community`, the `Crosscheck\` folder beside each, the Run value, and the data folder.
+- Velopack then deletes its own folder, the programs and WebView2's data among it, ignoring any file it can't delete, the Start-menu shortcut, and its entry in the pilot's list of installed programs (same file); WebView2's processes run from the runtime's own folder, so whether one outlives the app it served and holds a file there is unverified ([cases on a desk](#cases-on-a-desk)).
 - The firewall rule stays, as [the firewall rule](#the-firewall-rule) says.
 
 ## An unsigned v1
@@ -210,8 +219,12 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 - The stand-in starts, and the app starts a core; the app starts with the stand-in already running, and starts one too.
 - The core exits with 1 while the stand-in runs, and the app starts it again; it exits with 0, and the app starts none until the stand-in starts again; it crashes before it writes the port file, and the app starts it again.
+- The stand-in ends while a session is held, and the core then crashes: the app starts it again.
+- The stand-in starts again while the core is still exiting from the last end: the app starts a core for the new run.
+- The window opens with the stand-in ended: the core started for it waits for the app's socket, rather than exiting at once.
 - An update is downloaded and the app starts with the stand-in running: the update stays pending.
-- An update downloads while the stand-in runs: the window says the sim holds it; the stand-in ends, the core exits, the update applies, and the new app writes our package.
+- An update downloads while the stand-in runs: the window says the sim holds it; the stand-in ends, the core exits, the update applies, and the new app starts as a tray icon and writes our package.
+- The stand-in starts while the app builds our package: the app swaps nothing, and writes the package at the stand-in's next end.
 - A session file, or an open window, holds a downloaded update, and the window says which.
 - A host who is behind, alone in a session with the stand-in ended: the window says the session holds the update, and it applies once they leave.
 - Install now waits while the stand-in runs or a session is held; otherwise the core quits, the update applies, and the new app opens its window.
@@ -221,8 +234,9 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - Closing the window, with the stand-in ended and no session: the app's socket closes and the core exits.
 - Our package removed, or at another version: the sim service's trouble notice, and the app writes it at its next start or the stand-in's next end.
 - An install with the stand-in running, then a restart before it ends: our package is written once it ends.
-- A package whose `layout.json` lists `html_ui/Pages/VCockpit/Core/VCockpit.js`: a warning naming it, and the match check's item; the same package marked `UserDisabled`: neither.
-- Uninstalling with the core running: the core quits first, and the data folder goes.
+- A package in `Community` or `Community2024` whose `layout.json` lists `html_ui/pages/vcockpit/core/vcockpit.js`, as FS Copilot's does: a warning naming it, and the match check's item; the same package marked `UserDisabled`: neither.
+- Uninstalling with the core running: Velopack kills it, a crew's core sees its link lost, and the data folder goes.
+- A first install, then a restart of the PC: the Run value starts the app as a tray icon, and a reinstall over a firewall rule left behind shows no UAC prompt.
 
 ### Cases on a desk
 
@@ -231,7 +245,8 @@ These need no sim:
 - After a Velopack update, the firewall rule still matches `current\crosscheck-core.exe`, and Update.exe killed only what ran from its folder.
 - On a Windows 10 PC without WebView2, Setup.exe's dialog leads to a per-user install with no UAC prompt.
 - The Run value starts the app at login as a tray icon alone.
-- Velopack's `HttpSource` reads the feed through `releases/latest/download/`.
+- A window opened again after one was destroyed gives its memory back the same way, and WebView2's processes exit when the app is killed, leaving nothing in `%LOCALAPPDATA%\Crosscheck\webview\` held open.
+- A pilot two releases behind gets deltas through `GithubSource`.
 
 ### Cases in the sim
 

@@ -1,0 +1,16 @@
+[package]
+name = "crosscheck-msfs-sdk"
+version.workspace = true
+edition.workspace = true
+publish = false
+description = "Installs the MSFS 2024 SDK version msfs-sdk.txt names, where cargo-msfs reads it"
+
+# This program is adapted from cargo-msfs v1.1.0's SDK installer, so it unpacks the SDK
+# with the same crates. reqwest's default features are off, and native-tls uses Windows'
+# own TLS, so this program builds from Rust alone, with no C code to compile.
+[dependencies]
+anyhow = "1.0.104"
+cab = "0.6.0"
+msi = "0.9.0"
+reqwest = { version = "0.13.5", default-features = false, features = ["blocking", "native-tls"] }
+zip = { version = "2.2.0", default-features = false, features = ["deflate"] }

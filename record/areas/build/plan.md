@@ -32,25 +32,27 @@ The stages follow these rules (user, 2026-10-18):
   Friends fly their installed Crosscheck ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
 - Nothing on GitHub comes before [stage 22](#22-github): no pull requests, no workflows, no releases, no Pages site, and no repository of ours beside this one, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
-  Until then each commit goes straight to `main`, and is pushed once its checks pass on our development machine, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.
+  Until then a stage's commits go straight to `main`, and are pushed once the user has reviewed the stage, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.
 
 ## Working a stage
 
 1. Before writing anything for the stage, read each section its `Builds:` and `Tests:` lines link, with the notes at the top of each design doc they're in, since a doc's notes change the text below them ([step 8](../product/plan.md#8-v1-build-plan)).
    You'll know what the stage builds and what proves it.
-2. If the stage has a `Designs first:` line, propose that design to the user, and once they agree, write it in the design doc it belongs to.
+2. If the stage has only its headline, write its lines in this plan, as [how a stage reads](#how-a-stage-reads) gives them, from what step 1 read.
+   You'll see its `Builds:`, `Needs:`, `Tests:`, and `Exit:` lines.
+3. If the stage has a `Designs first:` line, propose that design to the user, and once they agree, write it in the design doc it belongs to.
    You'll see the design in its doc before any of the stage's code.
-3. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, pushing each commit once `node tools/check.ts` passes, and from stage 3 running the whole bench before the stage's exit.
-   You'll see every check pass before each push, and the bench pass before the exit.
-4. Ask the user whether to run the `code-reviewer` agent, as [CLAUDE.md](../../../CLAUDE.md#working-rules) says.
-   You'll have their answer, and if they want a review, its findings fixed or answered.
+4. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, until `node tools/check.ts` passes, and from stage 3 the whole bench too.
+   You'll see every check pass on our development machine.
 5. If the stage's system has cases in the sim, run them, and measure the stage's budgets in the sim, in one session in the sim ([in the sim](02-testing.md#in-the-sim)).
    You'll have each case's report and each measurement.
 6. Measure the stage's budgets on the bench, on our development machine, and write each result, from the bench and from the sim, with how it was taken, in the log of the area it belongs to.
    A result that misses its budget goes back to the design that set it, as [left to each stage](02-testing.md#left-to-each-stage) says.
    You'll see a log entry for each budget.
-7. Once the stage's exit has happened, add `Done on <YYYY-MM-DD>.` under its `Exit:` line.
-   You'll see the `Done on` line, and the next open stage is where the build stands.
+7. Once the stage's exit has happened, show the user the stage's lines and its code together, as one uncommitted diff, and ask whether to run the `code-reviewer` agent, as [CLAUDE.md](../../../CLAUDE.md#working-rules) says (user, 2026-10-18).
+   You'll have the user's answer, and if they want changes or a review, its findings fixed or answered.
+8. Once the user has looked, add `Done on <YYYY-MM-DD>.` under the stage's `Exit:` line, commit the stage, and push it.
+   You'll see the stage's commit on `origin/main`, and the next open stage is where the build stands.
 
 ## When building shows a design is wrong
 
@@ -63,23 +65,27 @@ The stages follow these rules (user, 2026-10-18):
 
 Builds:
 
-- the root's files: `Cargo.toml`, whose members are globs, `rust-toolchain.toml`, `package.json` and its lockfile, the one entry in `.cargo/config.toml` that links the C runtime statically, and `msfs-sdk.txt` ([the workspace](../architecture/02-code-map.md#the-workspace), [the C runtime](01-the-build.md#the-c-runtime))
+- the root's files: `Cargo.toml`, whose members are globs, `rust-toolchain.toml`, `package.json` and its lockfile, `.cargo/config.toml`, which links the C runtime statically and sets ts-rs's two variables, and `msfs-sdk.txt` ([the workspace](../architecture/02-code-map.md#the-workspace), [the C runtime](01-the-build.md#the-c-runtime))
 - `tools/msfs-sdk` and `tools/setup.ts`, which install cargo-msfs and the SDK that `msfs-sdk.txt` names ([the SDK](01-the-build.md#the-sdk))
 - `tools/build.ts`, which builds what the tree holds and stops when the installed SDK isn't the one `msfs-sdk.txt` names ([building every target](../architecture/02-code-map.md#building-every-target))
-- the message crate, which each later stage adds its messages to, with its hash, its TypeScript types from ts-rs, and `ts/stamp.ts` ([the message crate's hash](01-the-build.md#the-message-crates-hash))
+- the message crate, which each later stage adds its messages to, with its hash and `ts/stamp.ts`, its first TypeScript types coming with its first messages in stage 2 ([the message crate's hash](01-the-build.md#the-message-crates-hash))
 - [the map check](../architecture/02-code-map.md#the-map-check)
-- `tools/check.ts`, which runs each check a pull request runs in [CI](../architecture/02-code-map.md#ci) that the tree has something for: Rustfmt, Clippy, the default members' tests, each tsconfig's type check, the messages' types generated again and compared, and the map check
+- `tools/check.ts`, which runs each check a pull request runs in [CI](../architecture/02-code-map.md#ci) that the tree has something for: Rustfmt, Clippy, the default members' tests, each tsconfig's type check, the messages' types generated again and compared, the map check, and the tools' own tests, on Node's test runner
 
 Each later stage adds its own checks to `tools/check.ts`, such as the Coherent GT check in stage 5, so stage 22's workflows run what every push already ran.
+The root `Cargo.toml` takes each tier's glob with the tier's first crate, since Cargo refuses a glob that matches no folder ([build log](log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import)).
 
 Needs: nothing.
 
 Tests:
 
-- The map check's own tests: fixture crates and TypeScript files that break each rule [tiers](../architecture/02-code-map.md#tiers) lists, each failing by the rule it breaks.
-- From [the build's cases on a desk](01-the-build.md#cases-for-the-bench): a change to the message crate committed without the stamp generated again fails `tools/check.ts`; a checkout with CRLF line ends gives the same hash; a `tools/build.ts` run followed by `cargo build` compiles no crate; and a build whose installed SDK isn't `msfs-sdk.txt`'s stops and names `node tools/setup.ts`.
+- The map check's own tests, in `tools/map-check.test.ts`: a tree that keeps every rule [tiers](../architecture/02-code-map.md#tiers) lists, and a tree for each rule broken, each failing by the rules it breaks and no others.
+- The message crate's tests of its hash: a change to a message, or to a package it reaches, changes it, and an unrelated package doesn't.
+- From [the build's cases on a desk](01-the-build.md#cases-for-the-bench): a change to the message crate committed without the stamp generated again fails `tools/check.ts`; a checkout with CRLF line ends gives the same hash; a `tools/build.ts` run followed by `cargo build` compiles no crate; and a build whose installed SDK isn't `msfs-sdk.txt`'s stops and names `node tools/setup.ts`, in `tools/build.test.ts`.
+  The [build log](log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import) has the run of each by hand.
 
 Exit: on our development machine, `node tools/check.ts` passes on the tree, and the map check fails each of its fixtures by the rule it breaks.
+Done on 2026-10-18.
 
 ## 2 The core's loop and edge
 

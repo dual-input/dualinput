@@ -1,5 +1,35 @@
 # The build: log
 
+## 2026-10-18: Cargo refuses a member glob that matches no folder, or a folder without a Cargo.toml, and TypeScript 7.0.2's --explainFiles lists a type-only import
+
+**Asked.**
+What stage 1 of [the build plan](plan.md#1-the-workspace-and-its-checks) needs before its code: whether the root `Cargo.toml` can name members by globs over folders that also hold TypeScript, as [the workspace](../architecture/02-code-map.md#the-workspace) has it, and whether TypeScript 7.0.2 reports a file's imports, type-only ones included, for the map check.
+Then whether stage 1's cases on a desk pass.
+
+**Expected.**
+Cargo passing over a folder without a `Cargo.toml`, as p12 saw its globs work over folders that all held one ([architecture log](../architecture/log.md#2026-10-15-cargo-takes-globs-in-default-members-too-and-esbuilds-metafile-leaves-out-a-type-only-import)).
+
+**Found,** with Cargo 1.95.0, TypeScript 7.0.2, and Node 22.23.1 (measured on our development machine, 2026-10-18):
+
+- A glob that matches no folder fails the whole workspace: `members = ["platform/*"]` with no `platform\` folder, and with an empty one, gave "failed to load manifest for workspace member `...\platform/*`", since Cargo takes it as a path.
+- A glob that matches a folder without a `Cargo.toml` fails it too: `sim-package/*` over `sim-package\pages\` gave "failed to load manifest for workspace member `...\sim-package\pages`".
+- `exclude` takes such a folder out of a glob's matches, and naming a folder that doesn't exist there is no error.
+- `tsc -p <tsconfig> --explainFiles` lists each file of the program, and under the file an import brought in, "Imported via '../../b/panel/press.ts' from file 'features/a/panel/types-only.ts'", for a file whose one import was `import type`.
+- cargo-msfs v1.1.0's `version.txt` held `1.8.1`, CRLF, and `2603316`, its SDK listing's entry, where `tools/msfs-sdk` writes the version alone, so the version is its first line either way.
+- The cases on a desk that stage 1 takes:
+  - `node tools/build.ts` with no SDK installed, or SDK 1.7.3 installed, stopped before running Cargo, naming `node tools/setup.ts` (`tools/build.test.ts`).
+  - `node tools/build.ts` followed by `cargo build` compiled no crate.
+  - After `cargo fmt` rewrote the message crate's source, `node tools/check.ts` failed at the messages' types, naming `stamp.ts`, and wrote it again, so a change to the crate that leaves the stamp stale fails the check.
+  - Files with CRLF line ends hash as their LF copies do, in the message crate's own tests.
+
+**What changed.**
+The root `Cargo.toml` names each tier's folder by a glob once the tier's first crate exists, and `exclude` names each TypeScript folder the globs match, such as `engines/page-client`.
+`.cargo/config.toml` also sets ts-rs's two variables, so a plain `cargo test` writes the messages' types where the code map has them, typed as decision 025 asks.
+The map check reads TypeScript's imports from `--explainFiles`.
+
+**Docs affected.**
+[The code map](../architecture/02-code-map.md) and [the build](01-the-build.md), in notes at their tops.
+
 ## 2026-10-18: The sim's stock VCockpit.js is on disk in our Steam install, in asobo-vcockpits-core, not streamed
 
 **Asked.**

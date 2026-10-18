@@ -21,7 +21,8 @@ const HOOK_MAX = 25
 const BANNED_HEADINGS = new Set(['overview', 'introduction', 'intro', 'summary', 'conclusion', 'conclusions'])
 // Plain entries in the table also catch these endings: `robust` → `robustness`, `leverage` → `leveraged`.
 const INFLECTIONS = '(?:s|es|d|ed|ing|ly|ness|al|ful)?'
-const CODE_FILE = /\.(?:[cm]?[jt]sx?|cpp|cc|h|hpp)$/i
+const CODE_FILE = /\.(?:[cm]?[jt]sx?|cpp|cc|h|hpp|rs|json)$/i
+const HASH_FILE = /\.toml$/i
 const SKIPPED = /(?:^|\/)node_modules\/|^\.claude\/worktrees\//
 // writing.md's Code comments rules out history, since git keeps it. The pattern comes from
 // Afterfund's prose-lint (AfterfundTech/afterfund, .claude/hooks/prose-lint.mjs), without its bare
@@ -143,8 +144,11 @@ function scan(text) {
   return out
 }
 
-// Returns each line of comment text in a C-like file. Strings are skipped so a `//` inside one
-// isn't read as a comment, and regex literals aren't recognized. Taken from Afterfund's prose-lint.
+// Returns each line of comment text in a C-like file: JavaScript, TypeScript, C++, Rust, or JSON
+// with comments, such as a tsconfig. Strings are skipped so a `//` inside one isn't read as a
+// comment, and regex literals aren't recognized. A Rust lifetime such as `'a` reads as an unclosed
+// quote, which hides a comment later on its line, and a Rust string that spans lines is read as
+// code after its first line. Taken from Afterfund's prose-lint.
 function scanComments(text) {
   const out = []
   let state = 'code'
@@ -193,6 +197,30 @@ function scanComments(text) {
   return out.map(({ n, raw }) => ({ n, ...maskLine(raw.replace(/^\s*\*+/, '').replace(/^\s*[/!]\s?/, '').replace(/@\w+/g, '')) }))
 }
 
+// Returns each line of comment text in a TOML file, where a comment runs from a `#` outside a
+// string to the line's end. A string that spans lines isn't recognized, so a `#` inside one reads
+// as a comment.
+function scanHashComments(text) {
+  const out = []
+  text.split('\n').forEach((line, i) => {
+    let quote = ''
+    for (let j = 0; j < line.length; j++) {
+      const c = line[j]
+      if (quote) {
+        if (c === '\\' && quote === '"') j++
+        else if (c === quote) quote = ''
+      } else if (c === '"' || c === "'") {
+        quote = c
+      } else if (c === '#') {
+        const raw = line.slice(j + 1)
+        if (raw.trim()) out.push({ n: i + 1, ...maskLine(raw) })
+        return
+      }
+    }
+  })
+  return out
+}
+
 function loadTermsInto(add) {
   try {
     return loadTerms()
@@ -212,15 +240,17 @@ function lintTerms(l, terms, add) {
 }
 
 function lint(file, text, ranges) {
-  return CODE_FILE.test(file) ? lintCode(text, ranges) : lintMarkdown(file, text, ranges)
+  if (CODE_FILE.test(file)) return lintCode(scanComments(text), ranges)
+  if (HASH_FILE.test(file)) return lintCode(scanHashComments(text), ranges)
+  return lintMarkdown(file, text, ranges)
 }
 
-function lintCode(text, ranges) {
+function lintCode(comments, ranges) {
   const findings = []
   const add = (line, message) => findings.push({ line, message })
   const inRange = (n) => !ranges || ranges.some(([s, e]) => n >= s && n <= e)
   const terms = loadTermsInto(add)
-  for (const l of scanComments(text)) {
+  for (const l of comments) {
     if (!inRange(l.n)) continue
     lintTerms(l, terms, add)
     for (const m of l.prose.matchAll(HISTORY)) {
@@ -381,7 +411,7 @@ async function hook() {
   const payload = JSON.parse(await readStdin())
   const input = payload.tool_input || {}
   const file = input.file_path && resolve(input.file_path)
-  if (!file || !(/\.md$/i.test(file) || CODE_FILE.test(file)) || !existsSync(file)) return null
+  if (!file || !(/\.md$/i.test(file) || CODE_FILE.test(file) || HASH_FILE.test(file)) || !existsSync(file)) return null
   const rel = relative(ROOT, file).replace(/\\/g, '/')
   if (rel.startsWith('..') || isAbsolute(rel) || SKIPPED.test(rel)) return null
   const text = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')

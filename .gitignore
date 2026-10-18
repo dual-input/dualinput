@@ -1,5 +1,8 @@
 node_modules/
 
+# Cargo's build output, for the whole workspace
+/target/
+
 # Scripts read out of the sim and aircraft by probes: Asobo's and aircraft developers' code
 experiments/sim-sources/
 

@@ -1,0 +1,16 @@
+[package]
+name = "messages"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# build.rs hashes the crate with these two crates, and tests/hash.rs compiles build.rs into
+# the tests, so the tests need them too. When you change a version in one list, change it
+# in the other.
+[build-dependencies]
+sha2 = "0.10.9"
+toml = "1.1.8"
+
+[dev-dependencies]
+sha2 = "0.10.9"
+toml = "1.1.8"

@@ -1,0 +1,26 @@
+# The core, Crosscheck's main program, can record a run and replay it later, and a replay
+# has to compute exactly what the run did. Rust's math functions, such as `f64::sin`, call
+# the C runtime. Windows' own copy of it, ucrtbase.dll, changes with Windows updates, and
+# its math can give different results from the static library in the Windows SDK. So every
+# x86_64 program links the C runtime statically and carries its own copy of the math,
+# which also spares pilots the Visual C++ redistributable installer
+# (record/areas/core/01-loop-and-edge.md, "The core's math").
+#
+# Any RUSTFLAGS, even an empty string, replaces this line without a warning. So when you
+# write a tool or a CI step, never set RUSTFLAGS.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+# Our TypeScript code trades the same messages as our Rust code. So the two can't disagree
+# on a message's shape, ts-rs generates the TypeScript types from the message crate when
+# its tests run, into the folder named here. `relative` resolves the folder from the
+# repository's root, so the types land in the same place whichever folder `cargo test`
+# runs from.
+#
+# Messages reach TypeScript as JSON, which `JSON.parse` reads as plain numbers, so 64-bit
+# integers are typed as `number` rather than ts-rs's default, `bigint`. A number holds an
+# integer exactly only up to 2^53. So when you add an integer field that can pass that,
+# such as an ID, send it as text (decision 025).
+[env]
+TS_RS_EXPORT_DIR = { value = "engines/messages/ts", relative = true }
+TS_RS_LARGE_INT = "number"

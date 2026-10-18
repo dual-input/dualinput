@@ -1,0 +1,14 @@
+# The core, Crosscheck's main program, can record a run and replay it later to reproduce a
+# bug, and a replay has to compute exactly what the run did. Another compiler version can
+# compile the same code to different results, so a recording names the rustc that built
+# it, and a replay built with another one warns. Pinning the version here builds every
+# copy of a commit with the same compiler.
+#
+# Builds of our WASM module and of everything else share one target/ folder. cargo-msfs
+# builds the module with RUSTFLAGS of its own, and Cargo before 1.85 keeps one set of
+# compiled crates for builds with different flags, so the two builds would recompile each
+# other's crates every time. So when you change the version, keep it at 1.85 or later.
+[toolchain]
+channel = "1.95.0"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-wasip1"]

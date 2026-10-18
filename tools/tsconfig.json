@@ -1,0 +1,20 @@
+// Node runs our tools' TypeScript directly by stripping out the types, and stops with an
+// error on TypeScript it can't strip, such as an enum or a parameter property.
+// `erasableSyntaxOnly` makes tsc flag those first. Node also needs every import to name its
+// .ts file, as in `./lib/run.ts` (https://nodejs.org/api/typescript.html).
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

@@ -1,0 +1,32 @@
+# Every Rust crate of Crosscheck is in this one workspace, so every program builds with the
+# same version of each dependency, from one Cargo.lock, and shares the settings below.
+[workspace]
+# Members are named by folder globs: `engines/*` makes every folder under engines/ a
+# member, so adding or deleting a crate's folder needs no edit here. Cargo stops with an
+# error when a glob matches no folder at all, or matches a folder without a Cargo.toml.
+# Some engines are TypeScript rather than Rust, such as engines/page-client, and have no
+# Cargo.toml.
+#
+# - When you add the first crate under a top folder that has no glob yet, such as
+#   platform/, add that folder's glob along with it.
+# - When you add a TypeScript folder that a glob matches, list it in an `exclude` list
+#   beside `members`.
+members = ["engines/*", "tools/msfs-sdk"]
+# A plain `cargo build` builds these. When you add sim-package/'s glob, leave it out of
+# this list: our WASM module's build script needs settings only cargo-msfs gives it.
+default-members = ["engines/*", "tools/msfs-sdk"]
+resolver = "3"
+
+# Two builds with different versions refuse to connect, rather than misread each other's
+# messages. Every crate inherits this one version, so all of a build's programs agree on it.
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+# Our WASM module, the code we load into the sim, is built by cargo-msfs, whose README
+# asks for both: `lto` optimizes across crates, and `strip` leaves debug symbols out of the
+# output. Cargo reads profiles only from the workspace's root, so they live here and apply
+# to every program's release build, the module's among them.
+[profile.release]
+lto = true
+strip = true

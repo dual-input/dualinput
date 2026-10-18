@@ -266,7 +266,7 @@ The product is Crosscheck, capitalized.
 
 Each of these usually marks a sentence written on autopilot.
 [prose-lint](../../scripts/prose-lint.mjs) reads this table and flags every hit outside code, quotation marks, and URLs, including inflected forms (`robustness`, `leveraged`).
-It checks Markdown, and the comments in JavaScript, TypeScript, and C++ files, where it also flags history such as "previously" or "no longer", which [Code comments](#code-comments) rules out.
+It checks Markdown, and the comments in JavaScript, TypeScript, Rust, C++, JSON, and TOML files, where it also flags history such as "previously" or "no longer", which [Code comments](#code-comments) rules out.
 The fix is almost always to delete the word or say the concrete thing it stood in for.
 A flagged word doing real work can stay: "actually" correcting a belief the text just stated is fine.
 
@@ -334,21 +334,36 @@ These patterns are beyond the lint, so the `doc-reviewer` agent looks for them:
 
 ## Code comments
 
-The code already states what it does.
-A comment earns its place by saying what the code can't: why it's this way, the input that breaks it, the ordering that matters, or the thing that was tried and didn't work.
+A comment's reader is working on the code and hasn't read `record/`.
+The code already states what it does, so a comment earns its place by saying what the code can't: why it's this way, the input that breaks it, the ordering that matters, or the thing that was tried and didn't work.
+
+1. **When a comment explains why the code is this way, open with the stakes:** what the code makes possible or prevents, then the fact that shapes it, then the choice the code makes because of it.
+   A fact that doesn't lead to the code below gets cut, because a reader forgets facts that connect to nothing.
+2. **Define a project term in a clause before using it**, as in "the core, Crosscheck's main program", and explain an oddity before the rule that handles it.
+3. **Cite only what a reader would doubt and couldn't check quickly**, with at most one pointer, at the end.
+   A workaround for sim behavior always cites how we know, as a document does: a log entry, a document in `record/`, or an SDK page.
+   Skip the citation for anything a compiler or tool reports the moment it breaks.
+4. **Where a value lives in two places, say so in both:** "`sdkFolder` in tools/lib/sdk.ts names the same folder, so change both together."
+5. **Show a format by example, and make the example explain itself:** "`engines/*` makes every folder under engines/ a workspace member", not "a glob such as `engines/*`".
+6. **Make each sentence follow from the one before.**
+7. **Start a sentence that tells the reader what to do on a later change with its trigger:** "When you add a TypeScript folder that a workspace glob matches, such as engines/page-client, list it in an `exclude` list beside `members`."
+8. **Use the present tense for what holds:** "SimConnect rejects the entry", not "rejected".
+   If the reader needs the measurement behind it, give it a past-tense sentence of its own with its citation, and otherwise leave it in the record.
 
 ```text
 ✗  // Use tagged data.
-✓  // SimConnect rejects a data-definition entry for a variable the simulator doesn't have,
-   // but only later, so nothing fails where the entry was added. A positional read then
-   // shifts every later value onto the wrong variable, and tagged data says which
-   // variable each value is. (fsc-editor, docs/sim-vars/build/v1-log.md, "2026-08-23 —
-   // The `A:` read crashed the app. Positional reads were the wrong shape.")
+✓  // A positional read can put every value after one bad entry onto the wrong variable.
+   // SimConnect rejects a data-definition entry for a variable the sim doesn't have, but
+   // only later, so nothing fails where the entry was added. Tagged data says which
+   // variable each value is. (measured, fsc-editor, docs/sim-vars/build/v1-log.md,
+   // "2026-08-23 — The `A:` read crashed the app. Positional reads were the wrong shape.")
 ```
 
-A workaround for sim behavior cites how we know, the same as a document does: a log entry, another document in `record/`, or an SDK page.
+A Rust `expect` message says what should have held, as in "OUT_DIR should be writable", since the panic prints it before the error.
 A TODO names the condition that ends it.
-No history ("added for the relay change"), since git keeps history, and no commented-out code.
+Leave out the code's own history, such as "added for the relay change", because git keeps it.
+Leave out plan and status, such as a stage number, because they go stale.
+Leave out commented-out code.
 
 ## Commit messages
 

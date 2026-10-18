@@ -198,7 +198,8 @@ Done on 2026-10-13: the architecture plan's four top-level nodes passed the walk
 ## 8. v1 build plan
 
 Produces: the code map, a design for each system, the test design, and [the plan that builds v1](../build/plan.md), through nodes 5 to 8 of [the architecture plan](../architecture/plan.md#5-the-code-map), which says where each stands.
-Every system is designed, and the whole checked, before any product code (user, 2026-10-14).
+Every system is designed before any product code (user, 2026-10-14).
+The build plan lays out every stage, then details each one as it's built, and the user reviews each stage's detail and code together (user, 2026-10-18).
 Exit: the four are agreed, and these checks pass:
 
 - A walk through [a session from start to finish](03-v1-scope.md#a-session-from-start-to-finish), across the code map and the build's stages, as step 7's walk went across its nodes.

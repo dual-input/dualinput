@@ -1,41 +1,16 @@
 # Profiles: format and delivery
 
 ```text
-Purpose:     How a profile and its plugin are written, checked, limited, and delivered to pilots.
-Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-order-and-recovery.md, ../architecture/01-spine.md, ../architecture/decisions.md, ../product/03-v1-scope.md, ../product/04-room-for-later.md
-Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what a plugin can reach; what fails a load; the sandbox's limits; and how profiles and plugins reach pilots, with the level of the format each needs.
+Purpose:     How a profile is written, checked, limited, and delivered to pilots.
+Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-order-and-recovery.md, ../sync/05-units.md, ../architecture/01-spine.md, ../architecture/02-code-map.md, ../architecture/decisions.md, ../product/03-v1-scope.md, ../product/04-room-for-later.md, ../plugins/01-plugins.md, ../avatars/01-avatars.md, ../session/02-units.md, ../core/03-sim-seam-and-wasm-module.md, 02-units.md
+Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what fails a load; the sandbox's limits; and how profiles reach pilots, with the level of the format each needs.
 ```
-
-> **Note**
-> Since 2026-10-14, a write function that hits a limit in [the sandbox](#the-sandbox) also stops its entry syncing on every machine for the rest of the load, as a plugin at its limit is turned off, because the core runs its features on one loop, where a stuck call holds up every input behind it; and a profile's script and a plugin get no clock, their runtimes leaving out `Date`, `performance`, and `Math.random`, so one that has to wait asks the host for a timer ([02-code-map](../architecture/02-code-map.md#budgets)).
-> Since 2026-10-15, the profiles, plugins, and modules live in Crosscheck's own repository, in `profiles/`, with `aircraft/` where [the repository](#the-repository) below has `profiles/`, and an import names a module's path from `profiles/`, so `modules/gns-430` still names the GNS 430's module; CI checks and builds them against the profile engine at the same commit, failing when a released level's schema or declarations differ from its release tag, and publishes them on that repository's GitHub Pages site, apart from Crosscheck's releases; and nobody outside the core team gets write access, so no `CODEOWNERS` file names a profile's maintainers, and the core team reviews and merges each pull request, which the profile's authors can review too ([02-code-map](../architecture/02-code-map.md#profiles-in-this-repository)).
-> Since 2026-10-15, the core reads which preset loaded from the path `AircraftLoaded` reports, lowercased and cut below `simobjects/airplanes/`, and logs `A:TITLE` beside it, which settles [left open](#left-open)'s item on the two ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-aircraft)).
-> Since 2026-10-16, a session pins the newest bundle the PF's cache holds for the session's aircraft, which the PF's profile loader writes as a session key whenever that aircraft changes, until preflight ends; and the match check reads an aircraft's version from its package's `manifest.json`, and shows a streamed copy, which keeps none on disk, as a warning when compared with an installed one; which settles [left open](#left-open)'s items on both ([the session's units](../session/02-units.md#which-bundle-a-session-pins)).
-> Since 2026-10-16, [the profiles' units](02-units.md) changes this document in four places: the core builds no bundle, and the local folder holds bundles that the profile builder or the IDE wrote, where [testing an edit](#testing-an-edit) has the core build a local profile itself; the index lists only the bundles some level takes, where [delivery](#delivery) lists every published bundle; CI publishes from a branch it only adds files to, and only bundles at levels a release supports; and a bundle's level lives in the index, not in its bytes.
-> The builder type-checks and compiles with TypeScript 6.0.3 inside QuickJS-ng, which settles [left open](#left-open)'s item on the compiler, and Pages answers a repeat fetch of an unchanged index with a 304 and no body, which settles [delivery](#delivery)'s unverified line ([profiles log](log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked)).
->
-> Since 2026-10-16, [the sync units](../sync/05-units.md) settles two of [left open](#left-open)'s items: whether the legacy transmit call reaches every aircraft's handlers is a case in the sim for each v1 profile's events, and an aircraft that drops them gets a field naming the call for the whole aircraft at a later level ([reaching the sim](../sync/05-units.md#reaching-the-sim)); and [the sync engine](../sync/05-units.md#the-sync-engine) gives [checking a write](#checking-a-write)'s bench its starting rules.
->
-> Since 2026-10-17, a seat has no `leave_radius`, because a pilot leaves a seat only by taking another, going on foot, or moving their camera more than 0.8m behind its hip, so `take_radius` is the one radius [seats](#seats) has, and whether a seat may change the 0.8m is [6.13](../architecture/plan.md#613-avatars)'s to settle ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
-> Only an entry whose control a pilot moves with hardware or a key, and the aircraft never moves itself, gets a `location`, and the author leaves the rest out as the click tool walks the entries, since Crosscheck can't tell a pilot's change from the aircraft's ([avatars' tentative decisions](../avatars/decisions.md#a-click-or-a-change-at-a-controls-spot-brings-the-hand-and-on-foot-the-hand-touches-up-to-3m)).
->
-> Since 2026-10-17, [avatars' design](../avatars/01-avatars.md) changes this document in three places:
->
-> - A seat's `take_radius` is 0.4m unless the profile gives one, and of the seats whose radius holds the camera, the one with the nearest eye takes it, so no check limits a radius, where [seats](#seats) leaves the default open ([a seat](../avatars/01-avatars.md#a-seat)).
-> - An entry with a `location` may also take `deadband`, the smallest change of the entry's number, in its own units, that brings the hand, which the author sets on an axis ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
-> - The seat tool and the click tool are the two commands of `tools/profile-author`, and the click tool marks each control with a key rather than a click, so walking the entries changes nothing in the cockpit ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)).
->
-> Since 2026-10-17, [plugins and the sandbox](../plugins/01-plugins.md) changes this document in three places:
->
-> - [Names](#names) gains `instrument(key, path)`, a value in a gauge's JavaScript, which a state entry may watch and nothing may write ([the instrument name](../plugins/01-plugins.md#the-instrument-name)).
-> - v1's level has no plugins, so no `plugin:` key, `plugin.state`, or `plugin.write`: [plugins](#plugins), the plugin's write method in [writing](#writing), and the plugin's runtime in [the sandbox](#the-sandbox) wait for plugins' design, and a setting in a gauge's JavaScript is written through the gauge's `H:` events, where [plugins](#plugins) has our panel bridge's operations write it.
-> - [What fails a load](#what-fails-a-load) adds `instrument()` in a `write`, an event entry's `watch`, or an `ignore`, and a path other than names and whole numbers separated by dots, with `()` only at its end.
 
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
-Profiles live as flat files in a public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules and its compiled plugin in it, under its hash.
-Each time the core starts, it brings its cache up to date from the published index, it loads every profile from that cache, and a session, which flies one aircraft, pins its profile by its hash.
-An aircraft's plugin is a TypeScript file beside its profile, and every write it makes goes through `write()` too.
+Profiles live as flat files in `profiles/` in Crosscheck's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.
+Each time the core starts, it brings its cache up to date from the published index, it loads every profile from that cache, and a session, which flies one aircraft, pins by its hash the PF's choice for it: a local bundle that covers the aircraft, or else the bundle the PF's cached index gives its level.
+v1 has no plugins: a profile watches a setting in a gauge's JavaScript through `instrument()`, and writes it through the gauge's `H:` events.
 
 This answers node 4 of the [architecture plan](../architecture/plan.md#4-profiles-and-plugin-delivery).
 A profile's shape, a block of state entries, a block of event entries, and a writer, is [01-profile-entries](../sync/01-profile-entries.md)'s, and this document gives it a syntax; a note at the top of 01-profile-entries says where this document changes it.
@@ -103,6 +78,7 @@ A name says what something in the sim is, and never acts.
 | `B(name)` | An input event: watched, its value; written, the preset its name gives, such as `B('ELECTRICAL_Battery_1_Toggle')` | None |
 | `K(name, ...values)` | A `K:` event | The event's other values |
 | `H(name)` | An `H:` event | None |
+| `instrument(key, path)` | A value in a gauge's JavaScript, which a state entry may watch and nothing may write ([the instrument name](../plugins/01-plugins.md#the-instrument-name)) | A dotted path from the instrument's object, after the instrument's key |
 
 - `A()` takes a unit every time, because the unit sets the scale and more than one resolves.
   Of the 2,464 `A:` lines in FS Copilot's profiles that carry both a written unit and a documented one, 549 disagree, such as `Position 16k` for a percentage, and they work, since both machines run the same profile (counted by fsc-editor, `docs/sim-vars/18-language-core.md`, the struck row on unit categories).
@@ -115,20 +91,19 @@ A name says what something in the sim is, and never acts.
   For an event that takes the written value later in its list, `value` marks the place: `K('SOME_EVENT', 3, value)`, for a hypothetical event, sends 3, then the value.
   Where each event takes its value is documented for only 662 of the SDK's 1,524 `K:` events (counted by fsc-editor, same document, "Confidence tiers").
 - `none` names nothing, and `write: none` marks a watch-only entry ([state entries](#state-entries)).
-- An aircraft's client data, such as the PMDG 777's `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), has no name call: what its bytes mean comes from a layout only that aircraft has, so the aircraft's plugin reads it and exports what the profile needs ([plugins](#plugins)).
+- An aircraft's client data, such as the PMDG 777's `ELEC_Battery_Sw_ON` (read in pmdg-aircraft-77w 2.4.143, [777 study](../aircraft/pmdg-777-300er/study.md)), has no name call: what its bytes mean comes from a layout only that aircraft has, so a plugin would read it and export what the profile needs, and plugins wait for plugins' design ([plugins](#plugins)).
 
 Names are quoted because they're JavaScript strings, and the same JavaScript runs everywhere a profile has script.
 
 ## Writing
 
-`write:` is required on every entry, and takes a name, a map, a plugin's write method, a function, or `none`:
+`write:` is required on every entry, and takes a name, a map, a function, or `none`:
 
 | Form | Example | What the engine does |
 | --- | --- | --- |
 | A name | `write: L('BKSQ_MixtureLeverPosition_1')` | Writes the value into it: sets the variable, or sends the event once |
 | A map with `toggle` | `write: {toggle: K('TOGGLE_BEACON_LIGHTS')}` | Compares the wanted value with the local one, and flips only if they differ |
 | A map with `inc` and `dec` | Below | Turns the difference into steps |
-| A plugin's write method | `write: plugin.write.radar_range` | Calls it with the value ([plugins](#plugins)) |
 | A function | Below | Runs it |
 | `none` | `write: none` | Nothing: the entry is watch-only, and every machine watches it and compares the values |
 
@@ -185,22 +160,24 @@ The A350 takes at most one command every 2 frames (measured on MSFS 2024, 2026-1
 
 ### Which call sends an event
 
-The engine sends an event that carries at most one value through SimConnect's legacy transmit call, and one that carries more through `_EX1`, which takes up to five where the legacy call "only permits one" (documented, [SimConnect_TransmitClientEvent_EX1](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_TransmitClientEvent_EX1.htm)), so a profile never says which.
+The engine sends an event that carries at most one value through SimConnect's legacy transmit call, and one that carries more through `_EX1`, which takes up to five where the legacy call "only permits one" (documented, [SimConnect_TransmitClientEvent_EX1](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Events_And_Data/SimConnect_TransmitClientEvent_EX1.htm)), so a profile doesn't say which.
 The PMDG 777's module dropped a yoke axis event sent with `_EX1` and acted on the same event sent with the legacy call (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)).
-That every aircraft acts on an event sent with the legacy call is unverified: FS Copilot sends every `K:` event with `_EX1` (fsc-editor, `docs/fscopilot-behavior.md`, "How writes reach the sim"), and the 58P's profile is the first test.
+That every aircraft acts on an event sent with the legacy call is unverified: FS Copilot sends every `K:` event with `_EX1` (fsc-editor, `docs/fscopilot-behavior.md`, "How writes reach the sim"), and a case in the sim runs each v1 profile's events by the legacy call.
+An aircraft that drops them gets a field naming the call for the whole aircraft at a later level ([reaching the sim](../sync/05-units.md#reaching-the-sim)).
 
 ## State entries
 
 | Field | Required | What it says |
 | --- | --- | --- |
 | `name` | Yes | The control's name for people, used in the IDE, notices, the PF's checklist, and the recording |
-| `watch` | Yes | A variable or a plugin's value, which every machine reads, or a map that counts events into a [shadow value](#counting-into-a-shadow-value) |
+| `watch` | Yes | A variable or an `instrument()` value, which every machine reads, or a map that counts events into a [shadow value](#counting-into-a-shadow-value) |
 | `write` | Yes | How to change the control ([writing](#writing)) |
 | `default` | With a counting `watch` | The shadow value's starting value |
 | `owner` | No | `pilot_flying`, or `shared`, the default |
 | `only` | No | The variant IDs the entry applies to |
 | `ignore` | No | The names this entry's action also fires |
 | `location` | No | Where the control is, for the figure's hand |
+| `deadband` | No | With a `location`, the smallest change that brings the hand |
 
 - With `owner: pilot_flying`, only the flying machine sends the entry, and a following machine puts back its own pilot's change ([04-order-and-recovery](../sync/04-order-and-recovery.md#putting-back)).
   A profile's PF-owned entries are the engine levers and trim, and the yoke, rudder, and toe brakes travel in the flight model's samples instead ([01-between-machines](../network/01-between-machines.md#channels)).
@@ -214,7 +191,9 @@ That every aircraft acts on an event sent with the legacy call is unverified: FS
 - `location` is `[x, y, z]` in meters from the aircraft's reference point, in the frame SimConnect's camera reports, with x to the left, y up, and z forward (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
   Where a variant's cockpit puts a control elsewhere, `location` is a map from variant ID to a point, and a variant missing from the map gets no location.
   When a change arrives that no click made, such as one from a home cockpit's switch or a key binding, the figure's hand reaches for the location, and a click always wins, since it's where the pilot's hand went ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
-  The click tool writes it, one click per control with each variant loaded.
+  Only an entry whose control a pilot moves with hardware or a key, and the aircraft never moves itself, gets a `location`, and the author leaves the rest out as the click tool walks the entries, since Crosscheck can't tell a pilot's change from the aircraft's ([avatars' tentative decisions](../avatars/decisions.md#a-click-or-a-change-at-a-controls-spot-brings-the-hand-and-on-foot-the-hand-touches-up-to-3m)).
+  The click tool, a command of `tools/profile-author`, writes it with each variant loaded, marking each control with a key rather than a click, so walking the entries changes nothing in the cockpit ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)).
+- `deadband` is a change of the entry's number, in its own units, and the author sets it on an axis ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
 
 ### Counting into a shadow value
 
@@ -266,10 +245,9 @@ The IDE fills `write` with the watched name.
 ## Checking a write
 
 How the engine checks that a write landed, how it tells the echo of its own write from a pilot's change, whether it retries, how a stepped write follows a knob that's still moving, and when it runs a write function all belong to the sync engine inside the core, and none of them changes the format.
-They stay open for sync's stage of step 8, to be settled on a two-instance bench in the sim rather than on paper, because each turns on timing: a write shows in a reading within 2 frames, and a readout the aircraft computes can follow 1.2s later, as the Fenix's battery bus and lamp did after a write to its battery switch (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames), and [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
-[02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)'s rules hold until then.
+They're settled on a two-instance bench in the sim rather than on paper, because each turns on timing: a write shows in a reading within 2 frames, and a readout the aircraft computes can follow 1.2s later, as the Fenix's battery bus and lamp did after a write to its battery switch (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames), and [sync log](../sync/log.md#2026-10-05-the-a220s-fcp-ignores-stock-autopilot-events-the-a350-takes-a-command-at-most-every-2-frames-and-the-fenix-reads-a-counters-jump-as-that-many-detents)).
 
-The bench starts from two simplifications (user, 2026-10-12):
+The bench starts from [the sync engine](../sync/05-units.md#the-sync-engine)'s rules, among them two simplifications (user, 2026-10-12):
 
 - A write gets one attempt, with no retry, since every write that landed in our tests landed on the first try, and the one that didn't, the A220's heading, didn't land after 3 retries either (measured on MSFS 2024, 2026-10-05, [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
 - A write function runs once for each value it's given.
@@ -310,11 +288,13 @@ aircraft:
 - The iniBuilds A350's -900 and -1000 are presets of the folder `A350`, and the Fenix's A319, A320, and A321 are presets of `FNX_32X`, whose study says both pilots must fly the same preset (read in inibuilds-aircraft-a350 1.2.6 and fnx-aircraft-320 2.4.0.4720, [A350 study](../aircraft/inibuilds-a350/study.md#identity), [Fenix study](../aircraft/fenix-a320-family/study.md#identity)).
 - The core matches a loaded aircraft by its folder and its preset, from the path the sim reports when it loads, and compares them ignoring case, since one load reported a relative, mixed-case path and then an absolute, lowercase one ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
   FS Copilot keeps only the folder, the path's segment after `SimObjects\Airplanes\` (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`), though the PA-24's path named its preset too: `pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` (measured on MSFS 2024, 2026-08-18, fsc-editor, [A2A PA-24 study](../aircraft/a2a-pa24-comanche/study.md)).
-  The PA-24 has one preset, so whether the path names the loaded preset on an aircraft with several, and whether `A:TITLE` gives the preset's own title, is the [L-1011 study](../aircraft/inibuilds-l1011/study.md)'s sim question 13; the profile names the preset either way, so which of the two the core reads is for the core's stage of step 8.
+  The PA-24 has one preset, so whether the path names the loaded preset on an aircraft with several, and whether `A:TITLE` gives the preset's own title, is the [L-1011 study](../aircraft/inibuilds-l1011/study.md)'s sim question 13; the profile names the preset either way.
+  The core reads which preset loaded from the path `AircraftLoaded` reports, lowercased and cut below `simobjects/airplanes/`, and logs `A:TITLE` beside it ([the aircraft](../core/03-sim-seam-and-wasm-module.md#the-aircraft)).
 - Two pilots fly together only in the same folder and preset: another aircraft, a different variant included, keeps a pilot out of the flight, while different versions and liveries stop nothing ([03-v1-scope](../product/03-v1-scope.md); user, 2026-10-12).
 - The core finds the package that holds the folder from the same path, for the aircraft's version and the [preflight match check](../product/03-v1-scope.md#preflight-match-check), so a profile names no package.
   One package can hold several aircraft: `bksq-aircraft-baronpro` 0.1.1 holds all three Barons ([Baron study](../aircraft/black-square-baron-pro/study.md#identity)).
 - A profile lists no aircraft versions, because authors would leave the list empty or wrong too often for its warning to mean anything, and the match check still compares the two pilots' aircraft versions with each other.
+  The sim service reads an aircraft's version from its package's `manifest.json` ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)), and the match check shows a streamed copy, which keeps none on disk, as a warning when compared with an installed one ([the match check](../session/02-units.md#the-match-check)).
 - `pace` sets the pace for the whole aircraft ([pace](#pace)).
 
 ## Displays
@@ -354,28 +334,18 @@ seats:
   Legs and eyes don't go sideways from the hip, and measured from it they hold for a seat that faces sideways too, and move with the hip while it's tuned.
 - The thigh and shin stretch to fit between the hip, the knees, and the feet, as the figure's neck stretches to reach the camera, so a deep cushion moves the knees forward; that stretched limbs look right is unverified, and the first cockpits we try settle it.
 - `facing` is optional, in degrees from the nose, positive to the right, and defaults to 0.
-- `take_radius` and `leave_radius`, in meters, are optional, for a seat where the defaults misjudge it ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
+- `take_radius`, in meters, is optional, for a seat where the default misjudges it: it's 0.4m unless the profile gives one, and of the seats whose radius holds the camera, the one with the nearest eye takes it, so no check limits a radius ([a seat](../avatars/01-avatars.md#a-seat)).
+  It's the one radius a seat has: a seat has no `leave_radius`, because a pilot leaves a seat only by taking another, going on foot, or moving their camera, inside, more than 0.8m behind its hip along its facing, a constant ([a seat](../avatars/01-avatars.md#a-seat); [avatar sync](../product/03-v1-scope.md#avatar-sync)).
 - Which hand rules a seat uses, the left seat's or the right's ([avatars' tentative decisions](../avatars/decisions.md#the-hands-follow-a-pilots-habits-with-the-right-hand-on-the-yoke-in-the-right-seat)), this document takes from the side of the centerline its hip is on, so a seat needs no field for it.
 - A variant with a different cabin gets seats of its own, under keys of their own, with `only`.
-- The seat tool seeds the numbers, from the seat objects SimConnect lists, then the cockpit model's `PILOT_` nodes, then a click on the cushion, and the author tunes them in the sim; the tool writes them into the profile itself.
+- The seat tool, `tools/profile-author`'s other command, seeds the numbers, from the seat objects SimConnect lists, then the cockpit model's `PILOT_` nodes, then a click on the cushion, and the author tunes them in the sim; the tool writes them into the profile itself.
 
 ## Plugins
 
-- An aircraft's plugin is `profiles/<name>.plugin.ts`, beside `profiles/<name>.yaml`.
-  A profile has at most one plugin, names nothing to find it, and shares it with no other profile.
-- The plugin is published inside its profile's file, with one hash and one level ([delivery](#delivery)), so a pinned profile pins its plugin too.
-- The plugin runs while its profile is loaded, on every variant the profile covers, and reads the global `aircraft`, whose `variant` holds the profile's variant ID, such as `'press'`, to tell them apart.
-- A profile watches a plugin's value as `plugin.state.<name>`, and writes through one of its write methods as `plugin.write.<name>(…)`, which is the whole write: a profile chains nothing onto it, and any spacing is the plugin's.
-  Calling it hands the engine one action, as `write()` does, so a function's writes keep their call order.
-- Every write a plugin makes ends in `write()`, so the engine orders, marks, and checks those too.
-  A setting that lives only in a gauge's JavaScript, or in the sim's DataStorage, is written through an operation of our panel bridge, and those operations are `write()` targets like any name.
-  Which operations the panel bridge offers is for plugins' stage of step 8, from what the 58P's plugin needs ([01-spine](../architecture/01-spine.md#left-open)).
-- A plugin reaches the sim and the aircraft through our APIs and nothing more: no files and no network.
-  So the worst a plugin can do is spoil a flight, as a profile can, and neither needs a signature ([delivery](#delivery)).
-  The 58P's plugin is expected to read and write its gauges' JavaScript and DataStorage through our panel bridge and need no files; whether panel code can reach those settings is still [plugins](../product/03-v1-scope.md#plugins)' open question.
-- When a plugin is turned off on any machine, every machine stops syncing that plugin's entries for the rest of the session, and the banner says so, so the machines never disagree over values one of them has frozen.
-- Plugins share no code yet, and a library they import comes when two plugins need the same code.
-- How a plugin changes an aircraft's files waits until a plugin needs it, and [decision 001](../../decisions/001-changing-other-developers-packages.md) holds meanwhile.
+v1's level has no plugins, so it has no `plugin:` key, `plugin.state`, or `plugin.write` ([no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
+Plugins, a plugin's write method, and a plugin's runtime in [the sandbox](#the-sandbox) wait for plugins' design.
+A setting that lives only in a gauge's JavaScript is watched through `instrument()` ([names](#names)) and written through the gauge's `H:` events.
+How a plugin changes an aircraft's files waits until a plugin needs it, and [decision 001](../../decisions/001-changing-other-developers-packages.md) holds meanwhile.
 
 ## Modules
 
@@ -387,7 +357,7 @@ import:
 
 - A module is a profile without `aircraft:`: it holds `authors`, `state`, `events`, and `displays`.
   FS Copilot's 11 modules include the GNS 430, PMS50's and TDS's GTNs, the KFC 150 autopilot, and fuel and payload (read in the FS Copilot fork, `Definitions/modules/`).
-- An import is the module's path from the repository's root, without `.yaml`.
+- An import is the module's path from `profiles/`, without `.yaml`, so `modules/gns-430` names `profiles/modules/gns-430.yaml`.
 - A module can't use `only` or `location`: variant IDs belong to each profile, and a GNS 430 sits somewhere different in every cockpit.
   So an imported entry's control gets no reach from a hardware change, and a click on it still brings the hand; a profile could give its imported entries locations by key later, as an added field.
 - A missing module, an import cycle, or a key defined in two files fails the load.
@@ -403,16 +373,17 @@ An error stops a profile loading and stops CI publishing it, and a warning is th
 Errors:
 
 - YAML that doesn't parse, such as a key repeated in one map; some of FS Copilot's CRJ profiles are invalid YAML for that reason (fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-25 — A setter is a script, and most entries do not have one").
-- An unknown block or field, or one above the core's [level](#levels), and a `plugin:` key in a source file, which only the [bundle](#delivery) has.
+- An unknown block or field, or one above the core's [level](#levels).
 - An entry with no `write`, an entry key that isn't lowercase snake_case starting with a letter, or a key defined twice across a profile and its modules.
 - Two entries watching the same name on one variant.
   FS Copilot runs a repeated name as two subscriptions, and 197 of its entries are exact copies, which press twice for a button (fsc-editor, same log, "2026-08-29 — Level 3 opens, and a duplicate get: turns out to be two subscriptions"); one entry whose function writes several targets covers the deliberate cases.
 - A name of the wrong kind for its field, such as a state entry watching a `K:` or `H:` event, an event entry watching an `A:` variable, or `toggle` given an `L:` or `A:` variable.
+- `instrument()` in a `write`, an event entry's `watch`, or an `ignore`, and an `instrument()` path other than names and whole numbers separated by dots, such as one ending in a method call.
 - A unit where a name takes none, or no unit on `A()`.
 - A function that fails to type-check on any one variant, such as one that reads a key that variant doesn't have.
 - In a map that steps or counts: no `wrap`, except in a counted entry's stepping write; `wrap: true` without `range`; a counting `watch` without `range` or without `default`; or a stepping write on a counted entry that gives its own `wrap` or `range`.
   Outside such a map, any `wrap` or `range`.
-- `only`, or a `location` map, naming an unknown variant; `only` or `location` in a module; `only` on a display; a missing module or an import cycle; `value` twice in one name, or in a name that `write()` also gives a value; a pace in any other form than [pace](#pace) gives; a `WasmInstrument|` display in v1; and a `plugin.state` or `plugin.write` name the plugin doesn't register.
+- `only`, or a `location` map, naming an unknown variant; `only` or `location` in a module; `only` on a display; a missing module or an import cycle; `value` twice in one name, or in a name that `write()` also gives a value; a pace in any other form than [pace](#pace) gives; and a `WasmInstrument|` display in v1.
 
 Warnings:
 
@@ -423,95 +394,95 @@ Warnings:
 
 ## The sandbox
 
-Each loaded aircraft gets two QuickJS-ng runtimes in the core, one for its profile's script and one for its plugin, each with its own limits, so a plugin that fails can't stop the profile's writes.
-The limits are for bugs, such as a loop that never ends or an array that never stops growing, not for bad actors, whom what a profile and a plugin can reach already stops ([plugins](#plugins)).
+Each loaded aircraft gets one QuickJS-ng runtime in the core, for its profile's script, with the limits below, and a plugin's runtime waits for plugins' design ([plugins](#plugins)).
+The limits are for bugs, such as a loop that never ends or an array that never stops growing, not for bad actors, whom what a profile can reach already stops ([delivery](#delivery)).
 Without them, an endless loop would stop every write from that profile, and a runaway allocation could run the PC short of memory, with the sim the likeliest thing to crash.
+
+A profile's script gets no clock: its runtime leaves out `Date`, `performance`, and `Math.random`, so a script that has to wait asks the host for a timer ([one loop](../architecture/02-code-map.md#one-loop)).
 
 | Limit | Value | Why that value |
 | --- | --- | --- |
 | Memory | 64 MB per runtime | QuickJS stopped a runaway allocation at this limit in 88ms, and the host ran on; an idle runtime held 0.9 MB, and a profile's state object should take a few MB at most (an estimate the 58P's profile measures) |
-| Time | 100ms per call, by the clock | QuickJS stopped an endless loop at this limit, and the host ran on; a call that does little can still wait behind other work on a PC MSFS keeps busy, so the limit sits far above what a healthy call takes, 100 write functions in 75µs, and a stuck call, a bug, holds up the writes behind it for no longer |
+| Time | 100ms per call, by the clock | QuickJS stopped an endless loop at this limit, and the host ran on; a call that does little can still wait behind other work on a PC MSFS keeps busy, so the limit sits far above what a healthy call takes, 100 write functions in 75µs, and a stuck call, a bug, holds up every input behind it for no longer |
 | One entry's value | 4 KB, as sent | Numbers and switches never come near it; the KNS-81's 10 waypoints, the largest value we know of, would be a few hundred bytes (an estimate), and a cockpit change naming its entry and two pilots in full took 84 bytes ([network log](../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does)) |
 
 The memory and time figures were measured on our development machine, 2026-10-08, in a host doing nothing else, not inside a core at work ([architecture log](../architecture/log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).
-Time a plugin spends waiting on a panel's answer through our API doesn't count, since no JavaScript runs while it waits.
 The state object needs no cap of its own, because a profile fixes its entries when it loads, and 4 KB bounds each.
-All three values are starting values, and the 58P's profile and plugin show what real use needs.
+All three values are starting values, and the 58P's profile shows what real use needs.
 
 At a limit:
 
 - A write function fails that write, and its entry is flagged as for a write that never landed.
-- A plugin is turned off for the rest of the session, every machine stops syncing its entries, and the banner says so ([plugins](#plugins)).
+  The entry also stops syncing on its own machine for the rest of the load, skipping arriving changes to it and sending none, because the core runs its features on one loop, where a stuck call holds up every input behind it ([budgets](../architecture/02-code-map.md#budgets)).
+  The function runs only on a receiving machine, and the entry is still read from the sim ([a write function that hits its limit](../architecture/decisions.md#a-write-function-that-hits-its-limit-stops-its-entry-syncing-for-the-rest-of-the-load)).
 - A value over 4 KB isn't sent, and its entry is flagged.
 
 ## The repository
 
-Profiles, plugins, and modules live in one public repository of flat files:
+Profiles and modules live as flat files in `profiles/` in Crosscheck's own public repository, with each aircraft's profile in `aircraft/` ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)):
 
 ```text
-crosscheck-profiles/
-  profiles/
+profiles/
+  aircraft/
     baron-pro.yaml
-    baron-pro.plugin.ts
     pa24.yaml
   modules/
     gns-430.yaml
     gtn-650-750.yaml
-  .github/
-    CODEOWNERS
-  README.md
 ```
 
 - Each profile's latest version is always at its one path, and git keeps the rest.
-- `CODEOWNERS` names each profile's maintainers by path, and "Code owners are automatically requested for review when someone opens a pull request that modifies code that they own" (documented, [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)).
-- An author finds a profile by browsing `profiles/`, or by searching the repository for the aircraft's SimObjects folder, which the profile lists under `variants`, and the desktop app can link to the file of the profile it loaded.
-- A pull request goes through CI's checks, and once merged, CI publishes it.
+- Nobody outside the core team gets write access, so no `CODEOWNERS` file names a profile's maintainers: the core team reviews and merges each pull request, and the profile's authors can review it too.
+- An author finds a profile by browsing `profiles/aircraft/`, or by searching the repository for the aircraft's SimObjects folder, which the profile lists under `variants`, and the desktop app can link to the file of the profile it loaded.
+- A pull request goes through CI's checks, which check and build the profiles against the profile engine at the same commit and fail when a released level's schema or declarations differ from its release tag, and once merged, CI publishes it.
 
 ### Testing an edit
 
-- The author works in a local profiles folder, laid out as the repository is, which the core reads before the published profiles: a profile there overrides the published one for its variants, and its imports resolve there first.
-- When it loads a profile from there, the core builds the same [bundle](#delivery) CI would, with the same builder code, and the match check shows it as "unpublished".
+- The author's local folder holds bundles that the profile builder or the IDE wrote, and the core reads it before the published profiles: a bundle there overrides the published one for its variants ([the local folder](02-units.md#the-local-folder)).
+- The builder is the same code CI runs, and type-checks and compiles with TypeScript 6.0.3 inside QuickJS-ng (measured on our development machine, 2026-10-16, [profiles log](log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack)), so a local bundle is the one CI would build from the same files.
+  The core builds no bundle, and the match check shows a local one as "unpublished".
   A crewmate testing with the author puts the same files in their own local folder, and equal hashes prove they run the same copy.
 
-Rapid testing, where the core rebuilds on every save and the author's core sends each new bundle to the crew over the session, which reloads the session's profile on every machine, is a test session (user, 2026-10-12).
+Rapid testing, where the profile builder or the IDE rebuilds on every save and the author's core sends each new bundle to the crew over the session, which reloads the session's profile on every machine, is a test session (user, 2026-10-12).
 The one-file bundle makes each reload one message, and a crewmate's core runs the author's exact bytes with no folder or compiler of its own.
 Test sessions are for step 8, with the Crosscheck IDE's dev loop, a Soon pick ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client) lists reloading a profile mid-session among the IDE's commands), and node 4's review found three things they need: a reload starts a plugin that was turned off afresh, a reload skips [catch-up's settling window](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session), since the aircraft didn't load again, and the author's core sends the current bundle to a pilot who joins or rejoins, since a test bundle isn't on Pages.
 
 ## Delivery
 
-On each merge, CI builds every profile into a bundle and publishes static files on GitHub Pages, from the repository and its history:
+On each merge, CI builds every profile into a bundle and publishes static files on the repository's GitHub Pages site, apart from Crosscheck's releases, from a branch it only adds files to ([publishing](02-units.md#publishing)):
 
-- **A bundle** is a profile in this same YAML format, with its modules merged in, so it has no `import`, and with its plugin compiled to JavaScript under a `plugin:` key, which only the builder writes.
-  It gets one hash, over its bytes, and one [level](#levels), the higher of the profile's and the plugin's.
-  A bug report can carry the exact profile and plugin a session ran as one text file.
-- **`index.json`** lists every published bundle with its profile's path, the variants it covers, its hash, the date CI published it, and its level.
-- **Every bundle** is published under its hash and kept for good.
+- **A bundle** is a profile in this same YAML format, with its modules merged in, so it has no `import`.
+  It gets one hash, over its bytes, and one [level](#levels), which the index carries rather than its bytes.
+  A bug report can carry the exact profile a session ran as one text file.
+- **`index.json`** lists only the bundles some level takes, each with its profile's path, the variants it covers, its hash, the date CI published it, and its level.
+- **Every bundle** at a level a release supports is published under its hash and kept for good.
 
 The core uses them:
 
-1. Each time it starts, the core fetches `index.json` and downloads, for each profile, the newest bundle at or below its own level that its cache lacks, and checks that the bytes match the hash; it never rebuilds a published bundle.
+1. Each time it starts, the core fetches `index.json` and downloads, for each profile, the newest bundle at or below its own level that its cache lacks, and checks that the bytes match the hash; it builds no bundle.
    The core starts with every sim run ([tentative decisions](../architecture/decisions.md#the-core-starts-with-every-sim-run)), so a bundle CI publishes reaches a pilot at their next sim start.
 2. It loads a profile from its cache whenever the spine's [what moves them](../architecture/01-spine.md#what-moves-them) says to, such as when a session starts with the aircraft already loaded, so a load never waits on the network.
-3. A session flies one aircraft, its PF's ([roles and members](../session/01-roles-and-members.md#the-pf)), and pins that aircraft's bundle by its hash, which doesn't change for the rest of the session outside a test session; a pilot whose cache lacks it fetches it by its hash ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
+3. A session flies one aircraft, its PF's ([roles and members](../session/01-roles-and-members.md#the-pf)), and the PF's profile loader pins by its hash a local bundle that covers that aircraft, or else the bundle its cached index gives its level ([the pin](02-units.md#the-pin)).
+   It writes the pin as a session key whenever the aircraft changes before preflight ends, and whenever the key holds none and its choice becomes one ([which bundle a session pins](../session/02-units.md#which-bundle-a-session-pins)).
+   After preflight ends, the pin changes only from none, and outside a test session a pinned bundle stays for the rest of the session; a pilot whose cache lacks a published pin fetches it by its hash, and no core fetches a local one ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
 4. Offline, the core uses what it has cached.
 
 - **Why Pages:** GitHub Pages "sites have a soft bandwidth limit of 100 GB per month", and a published site "may be no larger than 1 GB" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).
   FS Copilot's 58P profile, merged but for its five modules, is 59 KB (read on disk, FS Copilot profiles, `profiles/bksq-aircraft-baronpropress.yaml`), and a pilot downloads each bundle once, so 1,000 pilots taking 50 bundles that size, a hypothetical count, take about 3 GB once, and after that only what CI publishes, plus the index at each start (arithmetic).
-  Whether Pages answers a repeat fetch of an unchanged `index.json` with "not modified", sending almost nothing, is unverified.
-- **Nothing is signed.** A profile's script can't touch files or the network, and neither can a plugin ([plugins](#plugins)), so a bundle published from a hijacked repository could spoil flights and do nothing more.
+  Pages answers a repeat fetch of an unchanged file with a 304 and no body, so a start with nothing new published costs one answer of headers (measured on 2026-10-16, [profiles log](log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked)).
+- **Nothing is signed.** A profile's script can't touch files or the network, so a bundle published from a hijacked repository could spoil flights and do nothing more.
   The hash check guarantees that pilots pinned to one bundle run identical bytes.
   If a later plugin needs the pilot's files, signing comes back with it, with a key kept off GitHub, since a key CI holds would sign whatever a hijacked repository asks.
-- The core checks for new versions each time it starts, which answers the [spine](../architecture/01-spine.md#left-open)'s question of how often.
 
 A profile carries no version or date of its own: the core computes the hash, and the date is when CI published it, so neither can be forgotten or wrong, and a copy passed around for testing shows as "unpublished".
 
 ## Levels
 
-The format and the plugin API share one level, an integer that goes up by 1 whenever a Crosscheck release adds anything to either: a block, a field, a name call, or a method on the chain.
-Levels only add, so a Crosscheck runs every bundle at its own level and below, and each release carries the highest level it supports, which answers the [spine](../architecture/01-spine.md#left-open)'s question of how that version relates to Crosscheck's.
+The format has one level, an integer that goes up by 1 whenever a Crosscheck release adds anything to it: a block, a field, a name call, or a method on the chain.
+Levels only add, so a Crosscheck runs every bundle at its own level and below, and each release carries the highest level it supports.
 
 CI works out each bundle's level, so no author writes one.
-It checks the profile's YAML against each level's schema and type-checks its script and its plugin against each level's declarations, and the lowest level that passes all three is the bundle's.
+It checks the profile's YAML against each level's schema and type-checks its script against each level's declarations, and the lowest level that passes both is the bundle's.
 
 For example, with hypothetical releases and dates:
 
@@ -530,14 +501,9 @@ Each of these waits until a profile or plugin needs it, and adding it takes a ne
 - **A request field** for ground operations.
 - **How a plugin changes an aircraft's files.**
 - **Libraries** that plugins share.
-- **Reading an aircraft's client data,** among the plugin APIs that step 8 designs.
+- **Reading an aircraft's client data,** among the plugin APIs that plugins' design brings.
 - **Locations for a module's entries,** given by the profile that imports it.
 
 ## Left open
 
-- Which pilot's bundle the session pins, when two pilots' cores hold different ones, such as when one pilot's sim started after a merge; that's the session's to decide in step 8.
-- Whether the core tells which preset loaded from the path the sim reports or from `A:TITLE`, for the core's stage of step 8 ([the aircraft and its variants](#the-aircraft-and-its-variants)).
-- Where the core reads the version of a streamed Marketplace aircraft, which keeps no `manifest.json` in its folder, the match check's open question ([preflight match check](../product/03-v1-scope.md#preflight-match-check)).
-- Whether the legacy transmit call reaches every aircraft's handlers ([which call sends an event](#which-call-sends-an-event)).
-- Which compiler the core embeds to build a local bundle's plugin, for step 8.
-- How the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, for sync's stage of step 8 ([checking a write](#checking-a-write)).
+Nothing in this design is left open.

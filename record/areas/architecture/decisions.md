@@ -1761,7 +1761,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The Coherent GT check is a standalone Node tool on acorn, run after each edit and in CI, and no for-of rewrite runs
 
-- **Decided:** decision 031's check parses each file at ES2017 with acorn, checks each `RegExp` call's constant pattern with regexpp, finds banned globals through eslint-scope's unresolved references and banned members by name, passes a package's own fill-in by five rules, and names each failure's line in the bundle and in our source through esbuild's map; a hook runs esbuild and the check after each edit, CI runs it on every file we ship into the sim, and it offers no ESLint config in v1.
+- **Decided:** decision 031's check parses each file at ES2017 with acorn, checks each `RegExp` call's constant pattern with regexpp, finds banned globals through eslint-scope's unresolved references and banned members by name, passes a package's own fill-in by four rules, and names each failure's line in the bundle and in our source through esbuild's map; a hook runs esbuild and the check after each edit, CI runs it on every file we ship into the sim, and it offers no ESLint config in v1.
   No step of the build rewrites `for`-`of` loops.
   This settles the spine's items in [left open](01-spine.md#left-open) on how the check's tool is built and on the framework's `for`-`of` rewrite.
   Settled in node 6.18 by the user, 2026-10-18 ([the Coherent GT check](../build/01-the-build.md#the-coherent-gt-check)).

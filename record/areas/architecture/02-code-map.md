@@ -110,6 +110,16 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - There's no `apps/watcher`: `apps/desktop` holds the watcher's jobs, in the desktop app's Rust side, which runs from login as a tray icon, so `apps/` in [the units](#the-units) and [the workspace](#the-workspace) holds `core`, `core-helper`, and `desktop`.
 > - The installer is Velopack's Setup.exe, not a program of ours, which settles [left open](#left-open)'s item on where it lives; `apps/desktop` links the `velopack` crate, and only it does, since a program that runs Velopack's startup applies a downloaded update; and the sim service also holds the packages folders, the check for packages that override ours, and the check of our own package, beside its row in [the platform](#the-platform).
 > - The desktop app builds with `tauri build --no-bundle`, beside its row in [building every target](#building-every-target), and packing a release takes `vpk`, which needs the .NET 8 SDK on the build machine (documented, [Velopack's Rust guide](https://docs.velopack.io/getting-started/rust)).
+>
+> Since 2026-10-18, [the build](../build/01-the-build.md) changes this document in six places:
+>
+> - The root also holds `.cargo/config.toml`, whose one entry links every x86_64 program's C runtime statically, and `msfs-sdk.txt`, which names the SDK; `sim-package/` also holds `stock/`, the sim's stock files our copies start from; and `tools/` also holds `msfs-sdk`, `stock.ts`, and `release.ts`, beside [the workspace](#the-workspace)'s tree.
+> - [Building every target](#building-every-target)'s one copy of the SDK is the version `msfs-sdk.txt` names, which `tools/msfs-sdk` installs into cargo-msfs's folder, where `tools/setup.ts` runs `cargo-msfs install`; that settles [left open](#left-open)'s item on an SDK newer than a release's.
+>   `RUSTFLAGS` stays unset, and `apps/core` stops a build whose `RUSTFLAGS` replaced the static runtime.
+> - The desktop app's version reaches its program's Windows version resource through `tauri build --config`, since Tauri's CLI reads a version the crate inherits and its build script doesn't, which settles [left open](#left-open)'s item on it.
+> - The message crate's build script writes its hash, and the `cargo test` that writes ts-rs's types also writes `ts/stamp.ts`, with the version and the hash, which the check on ts-rs's files covers.
+> - A pull request in [CI](#ci) also checks the files compiled with the sim against their sources' hashes, and the stock files against `stock.json`; CI installs Rust with rustup and sets `LIBCLANG_PATH`, each step runs one command, and the profiles' job is a reusable workflow the release workflow calls too.
+> - [Left open](#left-open)'s item on how long CI takes on Windows runners goes to the first stage of node 8 that builds real code, against [budgets for the workspace](#budgets-for-the-workspace).
 
 Crosscheck's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

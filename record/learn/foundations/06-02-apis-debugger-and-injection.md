@@ -78,7 +78,8 @@ No list of what this build supports is published, so what works was found by pro
 | `Page.getResourceTree`, `Page.getResourceContent`, and `Page.searchInResources`: every script the document loaded | `Page.snapshotRect` and `Page.snapshotNode`: "Could not capture snapshot" |
 
 The resource calls are how we read the sim's own JavaScript.
-MSFS 2024 streams its core packages, so files such as `VCockpit.js` and `BaseInstrument.js` aren't on disk, and one VCockpit document loads about 19 scripts, 4.5MB, all of which the inspector hands over [7].
+One VCockpit document loads about 19 scripts, 4.5MB, all of which the inspector hands over [7], as the copies that won the mount, another package's among them.
+The sim's own `VCockpit.js` and `BaseInstrument.js` are also on disk in a Steam install, in its `asobo-vcockpits-core` and `asobo-vcockpits-instruments` packages, though the FS Copilot fork's record says the sim streams them [23].
 FS Copilot profiles keep a capture of two A220 documents from 2026-08-30, which [06-01](06-01-the-engine-and-instruments.md) quotes [9].
 The inspector also reloads a document: after an edit to a panel file already in an installed package, `Page.reload` ran the new file with no sim restart [10].
 
@@ -180,6 +181,7 @@ Whatever Crosscheck adds runs in every instrument's load, so a fault there takes
 20. Measured on MSFS 2024, 2026-08-30: FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-08-30 — A probe that wraps a sim API disabled the aircraft, and could not be undone".
 21. Documented in our record: FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`, sections "4.8 Blocking with an overlay div, not by suppressing events" and "7.2 Overlay (panel side)".
 22. Documented, read from source: FS Copilot fork, `ahead` branch at 9d4e864, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, the header comment, the watchdog, and `window.fscUnlock`.
+23. Read on our development machine, 2026-10-18, MSFS 2024 1.9.18.0's Steam install: [the build's log](../../areas/build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed).
 
 ## Unverified claims
 

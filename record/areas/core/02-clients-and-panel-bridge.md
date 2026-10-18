@@ -18,6 +18,8 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 > - A `unit` message also reaches an app's part, by its unit's name; `clients` also holds a command for a notice clicked outside its action and one that brings the desktop app forward, and its slice says whether a banner page's socket is open; and `page-client` gives its page the connection's state ([the apps](../interface/01-apps.md#slices-and-commands)).
 > - `clients` raises a trouble notice when no cockpit panel's `hello` comes within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)).
 > - A client whose version differs is logged and nothing more, which settles what [a client whose version differs](#a-client-whose-version-differs) leaves to 6.16; where a notice shows waits for the apps' stage.
+>
+> Since 2026-10-18, the sim's stock `VCockpit.js` is on disk in our Steam install, in its `asobo-vcockpits-core` package, where [our VCockpit.js](#our-vcockpitjs) has the sim stream it; the build makes our copy from the stock file it keeps in `sim-package/stock/`, and a build on a PC with the sim compares the sim's own file with it ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files); [build log](../build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed)).
 
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends something at least every 2s, while only the core closes a socket that goes quiet.

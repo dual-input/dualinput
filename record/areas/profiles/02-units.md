@@ -9,6 +9,8 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 > **Note**
 > Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) answers [the pin](#the-pin)'s question on a late load: a following machine asks for a catch-up whenever its profile loads after preflight has ended, so a pin that goes from none to a bundle after preflight brings every following cockpit to the flying machine's.
 > Since 2026-10-17, v1 has no plugins, so a bundle has no `plugin` key, `program` writes no TypeScript file for a plugin, and the declarations name `instrument` and not `plugin`, where [the profile engine](#the-profile-engine) has them all; the sandbox's contexts hold, of rquickjs's intrinsics, `Eval` and `RegExp` alone, beside the base objects ([plugins and the sandbox](../plugins/01-plugins.md#the-sandbox)).
+> Since 2026-10-18, v1 ships no authoring tool, so `crosscheck-profile-builder` keeps its name and runs from the repository for the core team, where [the units](#the-units) and [the builder program](#the-builder-program) have authors run it; a contributor without the workspace's setup sends a profile's change as a pull request and reads CI's check; and the release workflow calls the profiles' job, a reusable workflow, which [publishing](#publishing) runs on each release ([authoring tools](../build/01-the-build.md#authoring-tools)).
+> That settles [left open](#left-open)'s item on the builder program's name and how authors get it.
 
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.

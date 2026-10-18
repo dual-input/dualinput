@@ -6,6 +6,11 @@ Depends on:  ../product/03-v1-scope.md, decisions.md, log.md, ../architecture/02
 Decides:     What runs on a pilot's own machine and what on every machine; what a pose carries, and how often it goes; how a seat is taken and held; how a click, a drag, a wheel turn, and a change made without a click become a hand's target; how Figure draws each figure and holds a hand on a yoke; the names the sim shares; the aircraft-model engine and the three engines under it; the authoring tool; which of avatars' tentative decisions this design confirms; the budgets; and the cases for the bench (node 6.13).
 ```
 
+> **Note**
+> Since 2026-10-18, `fspackagetool` compiles the figure's SimObject on a PC with the sim, closed, since it starts the sim to build, and the compiled model files are committed beside their source with the sources' hashes, which CI checks ([files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
+> The figure ships in our one package, `crosscheck`, with the order hint `PANEL_PATCH`, where the probes' figure had a package of its own ([our package](../build/01-the-build.md#our-package)).
+> v1 ships `tools/profile-author` to nobody: it runs from the repository for the core team, where [the units](#the-units) and [the authoring tool](#the-authoring-tool) have it on a profile author's PC ([authoring tools](../build/01-the-build.md#authoring-tools)).
+
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
 It sends the whole figure to the crew as a pose, at most every 33ms.
 On every machine, the `Figure` routine in our WASM module eases each hand toward its target, holds a hand on a yoke by that machine's own yoke, works out each figure's 27 joints, and places each figure in the moving cockpit, every frame.

@@ -1,0 +1,261 @@
+MSFS 2024 packages, stock files, fspackagetool, and SDK versions, for node 6.18
+Researched 2026-10-18 for the architecture plan's node 6.18, the build.
+Sources are our record, our experiments' files, the sibling checkouts, the MSFS 2024 SDK on disk and on docs.flightsimulator.com, navigraph/cargo-msfs v1.1.0, and reads on our development machine.
+Development machine: Steam edition of MSFS 2024 at 1.9.18.0, Steam's public branch (BetaKey "public", buildid 25798292), updated by Steam on 2026-10-14.
+Nothing here started, stopped, or touched the sim or its inspector; every "read" below is a file read with the sim closed.
+Evidence markers follow writing.md: measured (we ran it), read (we read it on disk or in source), documented (a vendor page says so), unverified (inference, forum, or guess).
+Microsoft's pages are paraphrased, with their links.
+
+======================================================================
+ANSWERS
+======================================================================
+
+Q  | Question                                     | Answer
+---+----------------------------------------------+------------------------------------------------------------------------
+1a | Which of two VCockpit.js overrides loads?    | The one in the package mounted last (documented; measured for cameras.cfg, not yet for VCockpit.js).
+1b | What decides the order                       | package_order_hint's group first, then the package's name alphabetically within a group; Content.xml only turns packages on and off; a pilot can reorder in Developer Mode's Package Reorder Tool (documented, read).
+1c | Order of the groups                          | Not documented. The sim's own report on our machine lists unset hints (absent, "", NONE) before UI_PATCH, then PANEL_PATCH, then CUSTOM_INSTRUMENT, then SIMOBJECTS_PATCH and the CUSTOM_SIMOBJECTS groups (read).
+1d | Others' folder names                         | FS Copilot: fscopilot-bridge, PANEL_PATCH. YourControls: YourControls, no hint at all. Working Title's base packages don't override VCockpit.js. FlyByWire: not checked (unverified).
+2a | Where the stock VCockpit.js lives            | On disk in the Steam install: <SteamLibrary>\steamapps\common\Limitless\Packages\asobo-vcockpits-core\html_ui\Pages\VCockpit\Core\VCockpit.js, 23,520 bytes, last written 2024-12-15 (read). Our record's "streamed, not on disk" is wrong for Steam.
+2b | Where BlurPage lives                         | On disk: ...\Packages\fs-base-ui\cookedcomps\{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html and .json, last written 2025-11-04 (read). The inspector can't fetch it (measured 2026-10-06).
+2c | How FS Copilot and our probes got VCockpit.js | FS Copilot's header names the install's package as its source; the FS Copilot fork stripped FS Copilot's blocks from that copy; inspector captures held FS Copilot's copy. No Crosscheck probe has built a VCockpit.js.
+2d | Does the SDK ship VCockpit.js?               | No: neither SDK 1.7.3 nor 1.8.1's core has any html_ui file (read). The Samples installer wasn't checked (unverified).
+2e | Telling that an update changed either file   | Hash the files: the package's manifest and layout.json change with every update, and SimConnect's open message didn't change across 1.8.14 to 1.9.18 (measured).
+3a | Does fspackagetool need the sim?             | Yes: it's a 75 KB launcher that starts FlightSimulator2024.exe through Steam, the Store, or a path file, and waits for it (read in its binary).
+3b | On a runner with no sim                      | It can't run there. Copy-only packages need no fspackagetool (measured); the figure's compiled model does.
+3c | The figure's build output                    | 5 files, 266,890 bytes, plus manifest.json; the model files were byte-identical in two builds two days apart on sim 1.8.16; manifest.json carries the building sim's version (read).
+4a | Where cargo-msfs gets the SDK                | https://sdk.flightsimulator.com/msfs2024/files/sdk.json, entry 0's "SDK Installer (Core)" zip, unpacked without running the MSI (read).
+4b | Older SDKs                                   | The listing names 33 versions but links only 1.8.1 and 1.7.3; every older Core zip we tried is still served at the same URL pattern (measured, 10 of 10, 2026-10-18).
+4c | License and CI                               | The EULA limits use to developing MSFS add-ons and forbids redistributing the SDK; it says nothing about build servers (read). Interpretation is unverified.
+4d | Newer SDK, older sim                         | A Rust module built against SDK 1.8.1, which the listing pairs with sim 1.9, ran on sim 1.8.16 (measured 2026-10-08). Nothing documents the general case.
+4e | cargo-msfs's installed SDK                   | 1.8.1; version.txt reads "1.8.1" and "2603316" on two lines (read).
+
+======================================================================
+FINDINGS THAT CHANGE A DESIGN OR A RECORD
+======================================================================
+
+F1. The stock VCockpit.js is on disk in the Steam install, so the build can read it there.
+    <SteamLibrary>\steamapps\common\Limitless\Packages\asobo-vcockpits-core\html_ui\Pages\VCockpit\Core\VCockpit.js, 23,520 bytes, CRLF line ends, SHA-256 F8797FA188EBE73D09861F8C74E8BF7E1D8B7F9B3C692CF062C3A131ED74F45E, last written 2024-12-15 (read 2026-10-18, MSFS 2024 1.9.18.0).
+    It's code-identical to the FS Copilot fork's derived stock copy of 2026-09-06 (read; Q2).
+    The claim that the sim streams it comes from the FS Copilot fork's record/pointer-forwarding/docs/09-environment.md, which states it without a measurement, and our record repeats it in record/learn/foundations/06-02-apis-debugger-and-injection.md, record/areas/core/02-clients-and-panel-bridge.md ("Our VCockpit.js"), plan.md's 6.18 item raised by 6.2, and experiments/tools/sources.mjs.
+    Whether a Microsoft Store install keeps the same package readable on disk is unverified (Q2).
+
+F2. Within one order-hint group, a Crosscheck package named crosscheck-* mounts before fscopilot-bridge, so with both in PANEL_PATCH, FS Copilot's VCockpit.js would win (inference from the documented rule and the read order; not run).
+    A package in a group that the sim's report lists after PANEL_PATCH, such as CUSTOM_INSTRUMENT, would mount after FS Copilot's, and YourControls' package, with no hint, sits in the unset group, which mounts before UI_PATCH and PANEL_PATCH (read; not run).
+    The pilot's Package Reorder Tool can change any of this (documented).
+
+F3. SimConnect's open message can't tell sim updates apart.
+    It read SunRise 12.2, build 282174.999, SimConnect 12.2.0.0 on sim 1.8.14 (fsc-editor, 2026-08-18), on 1.8.16 (ours, 2026-10-08), and on 1.9.18 (ours, 2026-10-16) (measured; Q2).
+    FlightSimulator2024.exe's file version, 1,9,18,0, and the sim's reports' BuildVersion="1.9.18.0" do carry the release (read).
+
+F4. fspackagetool runs the sim to build, so no GitHub-hosted runner can run it (read in its binary; Q3).
+    Everything we ship that is a Copy-only package (files plus our own manifest.json and layout.json) needs no fspackagetool, and the sim ran such packages (measured 2026-10-08 and 2026-10-09).
+    The figure's SimObject is the exception: fspackagetool rewrites its model (Q3).
+
+F5. Older SDK Core installers stay downloadable at a predictable URL, though the listing links only the newest two (measured; Q4).
+    So a script can pin an SDK version, which cargo-msfs itself can't: it always takes the listing's first entry.
+
+F6. cargo-msfs's "update" likely never sees itself up to date on this machine, because the SDK's own version.txt overwrites cargo-msfs's (read in source; unverified by a run; Q4).
+
+======================================================================
+Q1. MOUNT ORDER FOR TWO PACKAGES THAT BOTH HOLD html_ui/Pages/VCockpit/Core/VCockpit.js
+======================================================================
+
+The documented rules (Virtual File System Information, https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm, read 2026-10-18):
+- Content.xml of each package source decides only which packages are enabled.
+- The same package name in two sources: only the copy from the source with the highest score activates (Developer Mode infinite, boot-required 100, Community2024 4, Community 3, Marketplace installed 2, Marketplace streamed 1, Streamed 0, base -1).
+- Different packages holding the same path: packages mount in the order their Package Order Hint gives; within one hint they mount alphabetically; a package mounted later takes priority over earlier ones, so by default a Z package beats an A package.
+- The same page says files under html_ui and ModelBehaviorDefs override only when the package lists them as globally overridden files.
+
+What contradicts or qualifies them:
+- Developer Mode's Package Reorder Tool page (https://docs.flightsimulator.com/msfs2024/retail/devmode/menus/tools/, read 2026-10-18) says priority comes from a priority and bucket generated from the hint, that the list mounts from lowest to highest priority, that reordering sets the hint of every package it moves to CUSTOM, that some packages are locked, that reordering writes an ordering file which Reset Order deletes, and that packages with the same priority and bucket mount in VFS order, which it calls not guaranteed and subject to change.
+  So "alphabetical within a hint" is documented on one page and called not guaranteed on another; our machine shows alphabetical (below).
+  On NTFS a folder listing is itself alphabetical, so no run on Windows can tell "alphabetical" from "folder listing order" (inference).
+- A Navigraph staff reply (forum.navigraph.com, 2026-06-24) says that since SU3 the sim loads a package with no hint at the end (unverified, forum).
+  Our measurement disagrees: p10's packages with an empty hint mounted long before the Baron's CUSTOM_SIMOBJECTS_PATCH package (measured on MSFS 2024, 2026-10-04, record/areas/aircraft/log.md, "2026-10-04: A Community package of ours adds a seat view anywhere in the aircraft...").
+- html_ui without a global override list: FS Copilot's package lists none and its VCockpit.js loads in every panel (measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/build/log.md, "2026-08-30 - The prototype module works end to end in the simulator"; restated in record/learn/foundations/02-01-installs-and-packages.md).
+  Whether PANEL_PATCH is what makes it work stays unverified, as 02-01 says.
+
+Which wins, measured: of aaa-crosscheck-camera-test and zzz-crosscheck-camera-test, both CUSTOM_SIMOBJECTS_PATCH, around bksq-aircraft-baronpro in the same group, the sim mounted aaa, then bksq, then zzz, and zzz's cameras.cfg replaced the others whole (measured on MSFS 2024, 2026-10-04, aircraft log, same entry).
+So the last mounted wins.
+
+Group order, read on our machine from the sim's report %APPDATA%\Microsoft Flight Simulator 2024\AsoboReport-OldCrashes\AsoboReport-Crash-4286222303.txt (BuildVersion="1.9.18.0", 2026-10-16), section [FlightSimulator_Packages], 235 Community and Marketplace packages, base packages not listed, each Community package's hint read from its manifest.json:
+  GENERIC_AIRPORT_PATCH; CUSTOM_NAVDATA; CUSTOM_NAVDATA_PATCH; MISC; then one group holding absent hints, "" and NONE, in one alphabetical run from 29palms-ktnp-airport-msfs2024 to winwing-wwtwasm (crosscheck-p08-module 59th, fsc-editor-link 69th, navigraph-academy-2024 with NONE 87th); UI_PATCH; PANEL_PATCH (fscopilot-bridge alone, 121st); CUSTOM_INSTRUMENT; SIMOBJECTS_PATCH; CUSTOM_SIMOBJECTS; CUSTOM_SIMOBJECTS_PATCH; CUSTOM_MODELLIB_PATCH; CUSTOM_AIRPORT; CUSTOM_AIRPORT_LIFE; POI_PATCH.
+  Marketplace packages, whose hints we couldn't read, sit between some of these groups.
+  Within the unset group, its 17 Marketplace packages come first, alphabetical, then its 69 Community packages, alphabetical, so the source may order packages within a hint too (unverified).
+  The aircraft log read the same ordering from AsoboReport-RunningSession.txt on 2026-10-04, and its measured winner matched the report's order within one group; that the report's list is the mount order for every group is unverified.
+  Base packages such as asobo-vcockpits-core, hint INSTRUMENT, aren't in the report; FS Copilot's PANEL_PATCH copy beats the base copy (measured, above).
+  Every name in the report is lowercase, so how a capital letter sorts (YourControls) is unverified.
+
+Allowed hint values (documented, Package Tool XML Properties, https://docs.flightsimulator.com/msfs2024/flighting/sdk-tools/package-tool/package-tool-xml-properties/, read 2026-10-18):
+- The table lists 64 hints alphabetically, with no mount order, and says third parties should use only those it flags for them.
+- Flagged for third parties, among others: PANEL_PATCH (overrides PANEL packages), CUSTOM_INSTRUMENT, CUSTOM_INSTRUMENT_PATCH, UI PATCH (spelled with a space in the table; manifests use UI_PATCH), CUSTOM_SIMOBJECTS, CUSTOM_SIMOBJECTS_PATCH, SIMOBJECTS_PATCH, and the airport, scenery, library, navdata, and POI families.
+- Not for third parties: INSTRUMENT, PANEL, UI, MISC, SIMOBJECTS, and INVALID, which the table calls the default for a package with no hint.
+- NONE isn't in the table, though navigraph-academy-2024 uses it, and it mounts with the unset group (read).
+- The table's flags on GENERIC_TEXTURELIB and GENERIC_TEXTURELIB_PATCH, and on INSTRUMENT_PATCH, contradict its own descriptions, so they may be swapped (unverified).
+- The Project Inspector page lists the same hints by display name, such as "Panel patch" (https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Project_Editor/The_Project_Inspector.htm).
+- Hints in use on our machine (read): base install packages use MISC 46, MISSION 34, INSTRUMENT 22, SIMOBJECTS 3, INPUT 2, "" 2, and one each of GENERIC_TEXTURELIB, CUSTOM_INSTRUMENT, GENERIC_AIRPORT, SERVICES, and TRAVEL_BOOK; asobo-vcockpits-core is INSTRUMENT and fs-base-ui is MISC.
+
+Other packages that override VCockpit.js:
+- FS Copilot: folder fscopilot-bridge, PackageOrderHint PANEL_PATCH, one package holding both its WASM module (modules\) and html_ui (read in the FS Copilot fork, FsCopilot.Bridge/PackageDefinitions/fscopilot-bridge.xml, and in our Community folder, 2026-10-18). Its layout.json lists the path in lowercase, html_ui/pages/vcockpit/core/vcockpit.js.
+- YourControls: folder YourControls; its 2024 manifest.json has no package_order_hint field at all, and its layout.json lists html_ui/Pages/VCockpit/Core/VCockpit.js and its modules/YourControlsGauge.wasm (read in YourControls/yourcontrols, main branch, scripts/build-include/2024/YourControls/, fetched 2026-10-18). FS Copilot's installer deletes a folder by that name (read in the FS Copilot fork, FsCopilot/Installer.cs, YcPackage).
+- The FS Copilot fork's prototype: folder fscpp-bridge, PANEL_PATCH (read in its record/pointer-forwarding/module/tools/build.mjs). Its build refused to install beside fscopilot-bridge and printed a rename to fscopilot-bridge.off; a renamed folder inside Community is most likely a second package that still mounts (record/areas/install/results/2026-10-18-windows-and-msfs-facts.txt, F5, unverified), and "fscopilot-bridge.off" sorts before "fscpp-bridge", so the prototype would have won anyway (inference).
+- Working Title: no workingtitle-instruments-* package in our install holds Pages\VCockpit\Core\ (read); only asobo-vcockpits-core does.
+- Community scan on our machine (read 2026-10-18): only fscopilot-bridge lists pages/vcockpit/core/vcockpit.js; fnx-aircraft-320 puts three .glb colliders in that folder but no VCockpit.js. No Community package lists BlurPage's two paths.
+- FlyByWire: not checked; flybywire-externaltools-simbridge in our Community lists no such path (read). Whether FlyByWire's aircraft packages override it is unverified.
+
+What our record says about load-order conflicts:
+- Two VCockpit.js overrides give "silently one or the other" (FS Copilot fork, record/pointer-forwarding/docs/10-module.md, "The conflict, and why the build refuses"); restated in 06-02, which also notes a pilot can likely run only one of Crosscheck, FS Copilot, and YourControls at a time (unverified there).
+- record/learn/foundations/02-01-installs-and-packages.md gives the documented rules and leaves the PANEL_PATCH question open.
+- record/areas/install/01-installing-and-updating.md has the core search other Community packages' layout.json files for our three overridden paths and warn, and leaves our folder name to 6.18 ("Left open").
+- Decision 011 and the spine use "no panel's first message arrives" as the sign another override won.
+
+A probe that would settle the VCockpit.js winner directly, without a sim session of its own: put three Copy-only test packages in Community, each the stock VCockpit.js plus one line setting a global to the package's name (named per CLAUDE.md, such as CROSSCHECK_P<nn>_WINNER), with different names and hints, boot once, and read the global in any cockpit panel through the inspector; the running-session report gives the order alongside.
+
+======================================================================
+Q2. THE STOCK FILES, WHERE THEY LIVE, AND HOW TO NOTICE A CHANGE
+======================================================================
+
+Where they live (read 2026-10-18, Steam, 1.9.18.0):
+- VCockpit.js: Packages\asobo-vcockpits-core, package_version 0.1.12, minimum_game_version 1.9.18, package_order_hint INSTRUMENT, content_type CORE, dependency fs-base-ui 0.1.10; four files: VCockpit.html 1,515 bytes, VCockpit.js 23,520, VCockpitLogic.html 780, VCockpitLogic.js 3,911, all last written 2024-12-15, while its manifest.json and layout.json were rewritten 2026-10-14.
+- BlurPage: Packages\fs-base-ui\cookedcomps\{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html, 973 bytes, SHA-256 4712CCF9DDA2EEAB24C96F98EBD71C2D075C4AB3418CDE2896510FD8D113A101, and .json, 142 bytes, SHA-256 419BD3C40DD94B1C0885F3895992F699F7027C1AD8AEF3370F49D4359C42B0D8, last written 2025-11-04 (matches record/areas/install/log.md, "2026-10-18: The sim's BlurPage files haven't changed since 2025-11-04"); fs-base-ui is package_version 0.1.10, hint MISC.
+- Neither package is in %APPDATA%\Microsoft Flight Simulator 2024\Packages\StreamedPackages, Official2024, or Official2020; StreamedPackages holds fs24-fs-base-ui-widgets only among fs-base-ui names (read).
+- Microsoft Store: the install sits under C:\Program Files\WindowsApps\Microsoft.Limitless_<version>_x64__8wekyb3d8bbwe\ (documented in pilots' crash text; Windows and MSFS facts, Q8); whether it holds Packages\asobo-vcockpits-core and a program can read it is unverified, and listing that folder on a Store machine would settle it.
+- The SDK's page on replacing an instrument tells developers to copy the stock files from the asobo-vcockpits-instruments-* packages, with MSFS 2020-style Official folder paths (documented, https://docs.flightsimulator.com/msfs2024/retail/programming-apis/javascript/js-gauge-tutorial/replacing-an-html-js-css-instrument/), which fits the stock html_ui files being shipped only in the sim (inference).
+
+How each copy was got:
+- FS Copilot: its VCockpit.js header says the file is a direct copy of the sim's file from a package it names asobo-vcockpit-core (one letter off the real asobo-vcockpits-core), overriding it through PANEL_PATCH, and that it must follow sim updates (read in the FS Copilot fork, FsCopilot.Bridge/PackageSources/HTML_UI/Pages/VCockpit/Core/VCockpit.js, 26,060 bytes). So its author copied the install's file (inference).
+- The FS Copilot fork's prototype: module/tools/derive-vcockpit.mjs strips FS Copilot's two marked blocks to get the stock file, record/pointer-forwarding/module/vendor/VCockpit.stock.js (last changed in commit 868eac1, 2026-09-06), and names the inspector as the fallback, which returns whichever copy won the mount (read).
+- Compared with the install's file after normalizing line ends, VCockpit.stock.js differs only by FS Copilot's header comment (its strip looks for "FS Copilot" in the header, which the header doesn't contain), four blank lines, and a final newline (read 2026-10-18). So the stock code hasn't changed from FS Copilot's copy to sim 1.9.18.
+- FS Copilot profiles' captures, fsc/profiles/sim-sources/vcockpit02-displayunits/ and vcockpit12-efba220-1/, came through the inspector with FS Copilot installed, so they hold FS Copilot's copy (record/learn/foundations/06-02, "Traps").
+- Crosscheck's probes: none has built a VCockpit.js yet (read: no VCockpit file under experiments/). experiments/tools/sources.mjs dumps loaded scripts through the inspector into experiments/sim-sources/, which .gitignore keeps out.
+- BlurPage: our p10 build read it from fs-base-ui\cookedcomps on disk, found through Steam's libraryfolders.vdf (read in experiments/areas/interface/menu/build.mjs, stockDir), because an XHR for coui://cookedcomps/ errored and the inspector listed no cookedcomps among mainUi's resources (measured on MSFS 2024, 2026-10-06, record/areas/interface/log.md, "2026-10-06: Our copy of BlurPage brings our script into the menu from the first screen, and from there it runs the whole join to Ready to fly").
+
+Does the SDK ship them:
+- The core SDK has no html_ui folder and no VCockpit.js, common.js, BaseInstrument.js, or cookedcomps file: SDK 1.7.3 in C:\MSFS 2024 SDK, 2,471 files, and SDK 1.8.1 in %APPDATA%\cargo-msfs\data\msfs2024, 2,334 files (read 2026-10-18).
+- The Samples installer (installers/1.8.1/MSFS2024_SDK_Samples_Installer_1.8.1.zip) isn't installed here, so whether its samples carry html_ui base files is unverified; downloading it and listing its MSI's File table, as cargo-msfs's code does for the core, would settle it.
+- The EULA restricts the SDK's sample content to internal use (read; Q4), so a sample copy, if one exists, isn't something a release could ship (inference).
+
+Telling whether a sim update changed either file:
+- The file's own hash is the only signal that tracks content (read): VCockpit.js kept its 2024-12-15 write time and FS Copilot-era code through Steam's update of 2026-10-14, while the update rewrote its package's manifest.json and layout.json.
+  Whether Steam keeps an unchanged file's old write time, rather than the file being untouched, is unverified, as the install log says.
+- layout.json's dates aren't content dates: all four asobo-vcockpits-core entries carry 2026-10-07 15:46:15Z, and BlurPage's entries 2026-10-07 15:48:58Z, though the files on disk are from 2024 and 2025 (read). A layout entry's size changes only when the size does.
+- A package's package_version and minimum_game_version move with sim releases (asobo-vcockpits-core 0.1.12 / 1.9.18), so they say "maybe changed", not "changed" (read).
+- The sim's release: FlightSimulator2024.exe's file version (1,9,18,0), Steam's appmanifest_2537590.acf buildid (25798292), and the reports' BuildVersion ("1.8.16.0" on 2026-10-13, "1.9.18.0" on 2026-10-16) (read).
+- SimConnect's SIMCONNECT_RECV_OPEN has application and SimConnect version and build fields (read in SDK 1.7.3, SimConnect SDK/include/SimConnect.h), but they read 12.2 / 282174.999 / 12.2.0.0 across sim 1.8.14, 1.8.16, and 1.9.18 (measured: fsc-editor, docs/sim-vars/build/v1-log.md, "2026-08-18 — Stage 0 passes against the sim. The module is off the critical path."; record/areas/architecture/log.md, 2026-10-08; experiments/areas/environment/results/p02-active-pause-2026-10-16-16-20-29.txt). So they can't detect an update.
+- Without a sim, CI can poll sdk.json: its game_versions "version" field moved to 1.9.0.0 with SDK 1.8.1 (Q4), which marks a new sim minor version only.
+- A check that needs no sim: on a machine with the sim installed, hash the three files and compare with the hashes the build recorded for the release (the values above are the 1.9.18.0 ones).
+
+======================================================================
+Q3. FSPACKAGETOOL
+======================================================================
+
+What it is (read 2026-10-18 in the strings of <SDK>\Tools\bin\fspackagetool.exe, 75,264 bytes, SHA-256 EDA75A7D187FB45EDE71B59DD3189E614880F44642294600AA1AEBDD781A6F51, identical in SDK 1.7.3 and 1.8.1):
+- Its usage text calls it fspackagetool v1.0 and says "you need to have Microsoft Flight Simulator 2024 installed" to run it.
+- It finds the sim three ways: a path in fspackagetool_overrideExePath.txt beside it (empty in both SDKs here), the Store app Microsoft.Limitless_8wekyb3d8bbwe!App through the Application Activation Manager, or Steam's InstallPath from SOFTWARE\Valve\Steam, running steam.exe with -noverifyfiles -silent -nosplash -applaunch 2537590.
+- It passes the build as the sim's own arguments (BuildAssetPackages, ExportForMarketplace, Mirror, Force, CheckOutputTimestamps, UsePause, LauncherPID, ModelBehaviorDefs), attaches to FlightSimulator2024.exe, and waits for it to finish.
+- Options: -outputdir, -tempdir, -marketplace, -rebuild, -mirroring, -forcesteam, -outputtoseparateconsole, -nopause; the docs list the same and say the Store version builds unless -forcesteam is given (documented, https://docs.flightsimulator.com/msfs2024/html/8_SDK_Tools/Package_Tool/Package_Tool.htm).
+- SDK 1.8.x's release notes list a fix for fspackagetool always running in community mode (documented, flighting SDK release notes, https://docs.flightsimulator.com/msfs2024/flighting/introduction/sdk-release-notes/).
+
+So, on a machine with no sim, such as a GitHub-hosted Windows runner, it can't build anything: it has no FlightSimulator2024.exe to start.
+Putting MSFS 2024 on a hosted runner would need a licensed Steam or Store sign-in and the game's install on each run (unverified; nobody has tried).
+A self-hosted runner on a PC with the sim could run it, only while the sim is closed: with the sim running it hangs rather than failing (measured, fsc-editor, docs/sim-vars/build/v1-log.md, "2026-08-23 — The module becomes a sub-project, and fspackagetool cannot run with the sim open").
+fsc-editor also wrote that the SDK has no unattended install; cargo-msfs unpacked the SDK without running its installer (measured 2026-10-08, record/areas/architecture/log.md, "2026-10-08: A standalone module built from Rust with cargo-msfs..."), which gives a runner fspackagetool.exe but not the sim it needs.
+
+What doesn't need it:
+- A Copy-only package (files, plus a manifest.json and layout.json our script writes) loads: p08's module, banner, and EFB packages (measured 2026-10-08 to 2026-10-09, architecture log), and the FS Copilot fork's prototype (FS Copilot fork, record/pointer-forwarding/docs/10-module.md, "Building").
+- What does: the figure's SimObject model, which fspackagetool compiles (below), and an in-game panel's .spb, which p05 got from the Project Editor (read in experiments/areas/architecture/flight/build.mjs).
+- Whether the sim spawns a SimObject from an uncompiled glTF in a Copy-only package is unverified; packaging the figure's source files with a Copy asset group and spawning it would settle it.
+
+What our avatars log says (record/areas/avatars/log.md, "2026-10-03: A skinned stick took the sim down in an in-sim build, and a crashed sim held fspackagetool until it was closed", measured on MSFS 2024, 2026-10-03):
+- Build and Mount of a skinned model in the Project Editor took the sim down; the build had copied the model's XML and never wrote its glTF or buffer.
+- With the sim closed, fspackagetool failed twice after 121s with an empty _RPTErrors.xml.
+- Something of the crashed sim, which the build's check for FlightSimulator2024.exe in the process list didn't catch, was still running; once the pilot closed it, the telescoping model built in 16s. Which process it was is unknown.
+- The rule taken: after a crash, close the sim in full before fspackagetool runs.
+- Other entries the same day: fspackagetool kept animations and node scales as written but rewrote a mesh shared under different uneven scales ("2026-10-03: fspackagetool rewrote a mesh that nodes shared under different uneven scales"), and Build and Mount reaches a running sim with no restart ("2026-10-03: Build and Mount gives a freshly spawned figure a rebuilt model with no restart").
+
+What the figure's build produces (read 2026-10-18 in experiments/areas/avatars/figure/package/, built 2026-10-03 by experiments/areas/avatars/figure/build.mjs; .gitignore keeps the folder out):
+- Packages\crosscheck-figure\manifest.json, 507 bytes, written by fspackagetool.
+- SimObjects\Misc\CROSSCHECK_Figure\sim.cfg, 111 bytes, copied as written.
+- SimObjects\Misc\CROSSCHECK_Figure\model\CROSSCHECK_Figure.bin, 166,512 bytes, from a 123,396-byte source buffer.
+- ...\model\CROSSCHECK_Figure.gltf, 67,748 bytes, from 70,055; it gains the ASOBO_asset_optimized extension, with a bounding box and MajorVersion 4, MinorVersion 8.
+- ...\model\CROSSCHECK_Figure.xml, 32,481 bytes, from 32,661.
+- ...\model\model.CFG, 38 bytes, its extension upper-cased.
+- manifest.json's total_package_size, 266,890 bytes, is the sum of those five files.
+- layout.json, 716 bytes, written by build.mjs, because fspackagetool writes none (measured, fsc-editor, docs/sim-vars/build/v1-log.md, "2026-08-23 — fspackagetool runs in seconds, and does not write layout.json").
+- Beside the package, fspackagetool leaves _PackageInt\ with _RPTErrors.xml, _RPTInputs.xml, timestamps, and metadata; _RPTInputs.xml holds each source file's absolute path, the home folder included, so it must stay out of the tree.
+
+Whether it's the same on each build:
+- p28's build of the same figure under the name CROSSCHECK_FigureZ, 2026-10-05 (experiments/areas/avatars/many/), and the figure's build, 2026-10-03, produced a byte-identical compiled .bin (SHA-256 923026535AF45BC93C11A8F5E8E9B700F12B1AA46BC404C4E0D82220E8121897) and a compiled .gltf identical once the object's name is swapped, from identical sources (read).
+- Both ran on sim 1.8.16, by the minimum_game_version 1.8.16 and minimum_compatibility_version 8.11.0.236 that fspackagetool wrote into each manifest.json (read).
+- fspackagetool takes those two fields from the sim that runs it, as fsc-editor saw it set 1.8.14 over a hand-written 1.6.34 (same fsc-editor entry), so a rebuild after a sim update changes manifest.json at least.
+- Whether the model files change across sim versions, and whether a package declaring minimum_game_version 1.9.18 is refused by a 1.8.x sim, are unverified; rebuilding the figure on 1.9.18 and comparing hashes would settle the first.
+
+======================================================================
+Q4. SDK VERSIONS, CARGO-MSFS, AND THE LICENSE
+======================================================================
+
+cargo-msfs (read in navigraph/cargo-msfs, tag v1.1.0, commit 5d3718d, %USERPROFILE%\.cargo\git\checkouts\cargo-msfs-<hash>\5d3718d\src\sdk.rs and src\main.rs; installed through cargo install --git, per %USERPROFILE%\.cargo\.crates2.json):
+- get_latest_sdk_release fetches https://sdk.flightsimulator.com/msfs2024/files/sdk.json and takes game_versions.first().
+- install_latest_sdk deletes %APPDATA%\cargo-msfs\data\msfs2024 first, downloads that entry's downloads_menu["SDK Installer (Core)"].value relative to https://sdk.flightsimulator.com/msfs2024/files/, opens the zip, reads its .msi and its external .cab files with the msi and cab crates, and writes every file under ".\MSFS 2024 SDK\" into the folder; it never runs the MSI, and the same code runs on Linux, which its Dockerfile does.
+- It writes version.txt with release_notes.first() before extracting.
+- There's no version argument: install, update, and info all take the first entry.
+- Install refuses when version.txt exists; update reinstalls when version.txt's trimmed text differs from the latest version string.
+- Navigraph ships a GitHub Action, action.yml, that runs cargo-msfs from a container image inside a workflow (read).
+
+sdk.json, as of 2026-10-18 (measured, saved and read):
+- Three game_versions entries: "1.9.0.0" links installers/1.8.1/MSFS2024_SDK_Core_Installer_1.8.1.zip, with online_doc pointing at the docs' flighting tree; "1.8.0.0" and "0.0.0.0" link installers/1.7.3/MSFS2024_SDK_Core_Installer_1.7.3.zip, with online_doc pointing at the retail tree.
+- Each entry also links Documentation, Samples, and Wwise installers of its version, and DA62 and Cabri G2 samples under installers/all_versions/.
+- release_notes names 33 SDK versions, newest first: 1.8.1, 1.8.0, 1.7.3, 1.7.2, 1.6.9, 1.6.7, 1.6.6, 1.6.4, 1.5.7, 1.5.6, 1.5.4, 1.5.3, 1.5.2, 1.4.5, 1.4.4, 1.4.3, 1.4.2, 1.4.1, 1.3.4, 1.3.3, 1.3.1, 1.2.4, 1.2.3, 1.2.2, 1.2.0, 1.1.2, 1.1.1, 1.0.1, 1.0.0, 0.11.0, 0.10.2, 0.10.1, 0.9.3.
+- So the listing maps a sim minor version to its SDK, and links only the newest two SDKs.
+- Our sim, 1.9.18 on Steam's public branch, pairs with SDK 1.8.1 by that map, so the "flighting" doc link doesn't mean a beta-only SDK (inference).
+
+Older installers (measured 2026-10-18, HTTP HEAD on https://sdk.flightsimulator.com/msfs2024/files/installers/<v>/MSFS2024_SDK_Core_Installer_<v>.zip, no download):
+  1.8.1 652,783,454 bytes (2026-09-28); 1.8.0 652,779,342 (2026-09-11); 1.7.3 653,705,056 (2026-08-14); 1.7.2 485,200,921 (2026-07-07); 1.6.9 488,427,623 (2026-04-30); 1.5.7 502,196,485 (2025-12-16); 1.4.5 491,181,650 (2025-08-26); 1.2.4 263,679,376 (2025-03-06); 1.0.1 263,720,215 (2024-12-03); 0.9.3 2,256,430,980 (2024-10-30). Dates are Last-Modified.
+- Every one answered 200; no .msi exists at the same paths (404).
+- Nothing from Microsoft promises they stay (unverified); the SDK overview says only that the latest SDK is downloadable from Developer Mode's Help menu (documented, https://docs.flightsimulator.com/msfs2024/flighting/introduction/sdk-overview/).
+- A script can install a version by name: fetch that URL and unpack it as cargo-msfs does, or point cargo-msfs's code at it; cargo-msfs itself can't.
+
+Installed on this machine (read 2026-10-18):
+- cargo-msfs: SDK 1.8.1, %APPDATA%\cargo-msfs\data\msfs2024\version.txt, 14 bytes, "1.8.1" CRLF "2603316", written 2026-10-08.
+  The second line comes from the SDK's own version.txt, which the extraction writes over cargo-msfs's (inference: the installer-made SDK below has its own two-line version.txt, and SDK 1.8.1's release notes give internal changelists 2581449 to 2602277, so 2603316 is likely a build changelist, unverified).
+  Since cargo-msfs trims only the ends, the text "1.8.1\r\n2603316" never equals "1.8.1", so update would reinstall every time and info would report it out of date (read in main.rs; unverified by a run).
+- An installer-made SDK at C:\MSFS 2024 SDK: version.txt "1.7.3" CRLF "0", written 2026-08-14; the MSFS2024_SDK variable names it, and the avatars and interface probes' fspackagetool and MSBuild toolset come from it, as does p08's client's SimConnect.dll by default (read in experiments/areas/architecture/flight/client/build.rs).
+
+What a newer SDK changes (read 2026-10-18, comparing SDK 1.7.3 with 1.8.1 file by file):
+- WASM\include: 8 of 153 headers changed. New functions fsVfxSpawnInWorld_EX1 and fsVfxSetWorldPosition_EX1, a new enum eFsWorldReference, new key events such as KEY_ADI_SYSTEM_TOGGLE and KEY_ENGINE_SPRAY_BAR_ON, default arguments moved behind a __MSFS_DEFAULT_PARAM__ macro, and six enum entries removed from Legacy\gauges.h.
+  The release notes list the same VFX additions (documented, flighting SDK release notes, 1.8.1).
+- SimConnect SDK\include\SimConnect.h: one line, SIMCONNECT_DATA_WAYPOINT's Flags from unsigned long to unsigned int. Both are 32 bits on Windows and wasm32; unsigned long is 64 bits on 64-bit Linux, so bindgen on a Linux host would have read the old header differently (inference).
+- SimConnect.dll, SimConnect.lib, SimConnect_debug.lib, and the managed DLL changed; none carries a version resource.
+- WASM\wasi-sysroot: 410 files, unchanged.
+- WASM\WasmVersions\MSFS_WasmVersions.a: 3,830 bytes in both, two constants changed (2 to 3, and 1 to 2); it exports GetSimConnectVersion and GetExtensionVersion.
+  The flighting docs say this library tells the sim which API versions a module was built with, so that older modules keep behaving as built, and that a Rust pipeline must link it (documented, https://docs.flightsimulator.com/msfs2024/flighting/programming-apis/wasm/webassembly/, "API Version Control"; the retail tree has no such section).
+  Our Rust module ran both with it and without it, and the sim refused it when Rust's linker brought along the library's StackSizesSection (measured on MSFS 2024, 2026-10-08, architecture log, same entry).
+
+Newer SDK on an older sim:
+- WASM: our module built by cargo-msfs against SDK 1.8.1, which sdk.json pairs with sim 1.9, ran on sim 1.8.16 (measured, 2026-10-08, architecture log; the sim's report reads BuildVersion="1.8.16.0" on 2026-10-13, read). It called no function added in 1.8.1.
+  A module importing a function the running sim doesn't have, such as an _EX1 call on an older sim, is unverified; a module importing one missing function, watched in the WASM Debug window, would settle it.
+  The docs cover older modules on newer sims only.
+- SimConnect: a client built on a newer SimConnect client DLL than the server typically gets SIMCONNECT_EXCEPTION_VERSION_MISMATCH, exception index 4 (documented, https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/General/SimConnect_Open.htm).
+  The server reported SimConnect 12.2.0.0 from sim 1.8.14 to 1.9.18 (measured, Q2), and p08's Rust client on SDK 1.7.3's SimConnect.dll made all 66 calls S_OK on sim 1.8.16 (measured 2026-10-09, record/areas/traffic-atc/results/2026-10-17-sdk-and-probes.txt, part B).
+  Whether SDK 1.8.1's SimConnect.dll meets a mismatch on a 1.8.x sim is unverified; one connect from a client on 1.8.1's DLL to a 1.8.x sim would settle it, which needs a sim on the older release.
+
+The license (read 2026-10-18 in <SDK>\Licenses\MSFS SDK EULA.pdf, footer "MS Flight Simulator SDK EULA (11/2019)", 164,176 bytes, identical in SDK 1.7.3 and 1.8.1):
+- Downloading or using the SDK accepts the terms.
+- 1(a): install and use only to develop MSFS add-ons.
+- 1(b): sample content only internally, never distributed.
+- 2(e): no sharing, publishing, distributing, or lending the SDK, except distributable code, and no offering it as a hosted solution for others.
+- It doesn't mention build servers, CI, or caches. Whether a CI job may download it each run, or keep it in a cache or image, is unverified here; Navigraph's Action runs cargo-msfs, which downloads it, inside a workflow (read, above).
+
+======================================================================
+WHAT WOULD SETTLE EACH OPEN POINT
+======================================================================
+
+- Which VCockpit.js wins across hint groups and names, and whether PANEL_PATCH is needed: the three-package probe in Q1, one boot.
+- Whether a Store install keeps asobo-vcockpits-core and fs-base-ui readable on disk: list the WindowsApps folder and read the two files' hashes on a Store machine.
+- Whether the SDK Samples carry html_ui base files: list the Samples installer's MSI File table.
+- Whether the figure's compiled files change across sim versions: rebuild on 1.9.18 and compare with the hashes above.
+- Whether a Copy-only package can carry the figure's uncompiled glTF: package the source files with a Copy group and spawn the figure.
+- Whether a module or client built on a newer SDK runs on an older sim when it calls something new: one module importing a missing function, and one client on SDK 1.8.1's DLL against a 1.8.x sim.
+- Whether Microsoft keeps old SDK installers: only Microsoft can say; re-running the HEAD check before each release shows it per release.
+- Whether CI may download or cache the SDK: a question for the user, or for Microsoft.

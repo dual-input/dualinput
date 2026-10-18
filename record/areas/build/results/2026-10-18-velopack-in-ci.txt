@@ -1,0 +1,371 @@
+Velopack in CI: vpk, GithubSource, the Windows runner, and Tauri's build
+=======================================================================
+
+Purpose:   Raw research for architecture node 6.18, "the build" (record/areas/architecture/plan.md).
+Date:      2026-10-18. Every page and source file below was read on this date.
+Method:    Vendor docs, and source on GitHub at a named tag: velopack/velopack at tag 1.2.161,
+           tauri-apps/tauri at tag tauri-cli-v2.12.3, actions/runner-images at main. Nothing here was run.
+Markers:   "documented" = a vendor page says so. "read" = we read it in source at the named tag.
+           "unverified" = inference, or a claim no primary source confirmed. Nothing in this file is measured.
+Context:   record/areas/install/01-installing-and-updating.md, "The installer and the updater".
+
+
+ANSWERS
+=======
+
+#   | Answer                                                                                              | Marker
+--- | --------------------------------------------------------------------------------------------------- | ----------
+1a  | vpk 1.2.161 pairs with the velopack crate 1.2.161, both the newest stable, both published            | documented
+    | 2026-09-29. "1.2.161" is confirmed. Both also have 1.3.39-g8d2844f (2026-10-17), a prerelease.       |
+1b  | Install: dotnet tool install -g vpk --version 1.2.161. It needs a .NET SDK (8, 9, or 10: vpk         | documented,
+    | targets net8.0;net9.0;net10.0). windows-latest has SDKs 8.0.131 to 10.0.401, so no setup-dotnet.     | read
+1c  | Velopack's docs say to use the same vpk version as the library. vpk checks nothing for a Rust app.   | documented,
+    | The coupling: vpk packs its own Update.exe and Setup.exe, and our crate drives that Update.exe.      | read
+    | Pin both to 1.2.161.                                                                                 |
+2a  | vpk download github: lists the newest 10 releases, merges their releases.win.json, downloads the      | read
+    | one highest-version -full.nupkg into --outputDir (default "Releases"). Token optional; --pre adds     |
+    | prereleases. No full release found: a warning, exit 0, and so no delta from the next pack.           |
+2b  | vpk pack -u <id> -v <ver> -p <dir> -e crosscheck-desktop.exe -i <ico> -f webview2                    | read
+    | --shortcuts StartMenuRoot [-c win] [--delta BestSpeed|BestSize|None] [-o Releases]. Deltas from the  |
+    | highest lower full release in -o. An equal or higher version in -o fails it in CI (exit -1).         |
+2c  | vpk upload github --repoUrl <url> --token <t> --publish --tag <tag> [--releaseName <n>]             | read
+    | [--targetCommitish <sha>] [--pre] [--merge]: creates a draft, uploads this build's files, then       |
+    | releases.win.json and RELEASES,                                                                      |
+    | and publishes only with --publish. The token is required, though the docs' example omits it.        |
+2d  | Files (channel win): <id>-<ver>-full.nupkg, <id>-<ver>-delta.nupkg, <id>-win-Setup.exe,              | read
+    | <id>-win-Portable.zip, releases.win.json, RELEASES, assets.win.json. Upload sends all but            |
+    | assets.win.json. GithubSource reads releases.win.json and the .nupkg files it names, nothing else.   |
+3a  | Every vpk failure exits -1. Green-but-short paths: upload without --publish (a draft pilots never     | read,
+    | see); download finding no full release (exit 0, no delta); and a pwsh run block, where only the last | documented
+    | command's exit code sets the step's status.                                                          |
+3b  | Check afterwards with gh release view <tag> --json isDraft,isPrerelease,assets, and by fetching the  | documented,
+    | release's releases.win.json and finding this version's Full (and Delta) in it. gh 2.102.0 is on the  | unverified
+    | image; it needs GH_TOKEN.                                                                            |
+3c  | releases/latest: the most recent non-prerelease, non-draft release by created_at (the commit's date), | documented
+    | and a newly published release becomes latest by default. GithubSource never reads it.                |
+4   | GithubSource: 1 API call per check (releases?per_page=10&page=1), then up to 10 releases.win.json    | read,
+    | fetches by browser_download_url; 1 more API call per downloaded file. Drops prereleases unless asked; | documented
+    | drafts are invisible without a token. 60 API calls an hour per IP unauthenticated. Delta chain:      |
+    | every Delta in (local, target], ascending; no gap, count, or size check in 1.2.161.                  |
+5   | windows-latest = windows-2025 = Server 2025 with VS 2026. Preinstalled: .NET 8/9/10 SDKs, Rust       | documented
+    | 1.99.0 with rustup 1.29.1, Node 22.23.3, LLVM 20.1.8, VS Enterprise 2026 with the NativeDesktop      |
+    | workload and VC.Tools.x86.x64, Windows SDK 10.1.26100.8249, gh 2.102.0. libucrt.lib ships in the     |
+    | Windows SDK (Microsoft); its presence on the runner is unverified.                                   |
+6a  | tauri build --no-bundle: beforeBuildCommand, a frontendDist check, then cargo build --release --bins | read
+    | --features tauri/custom-protocol,<yours> <args>; no bundling. The exe lands in cargo metadata's       |
+    | target_directory: <workspace root>\target\release\<bin>.exe. Plain cargo build lacks the feature.   |
+6b  | Yes, tauri-cli resolves version.workspace = true, and the app's runtime version is CARGO_PKG_VERSION. | read
+    | But the exe's Windows version resource comes only from tauri.conf.json's version, so with none the  |
+    | exe carries no FileVersion (unverified by a build); --config '{"version":"..."}' fills it.           |
+
+Image software page (question 5):
+https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-VS2026-Readme.md
+
+
+Q1. vpk version, install, .NET, and matching
+============================================
+
+Versions.
+- crates.io lists velopack "1.2.161", created 2026-09-29T11:40:21Z, license MIT; the next one is "1.3.39-g8d2844f", 2026-10-17,
+  a SemVer prerelease (it carries a suffix). https://crates.io/api/v1/crates/velopack/versions
+- NuGet lists vpk "1.2.161" and then "1.3.39-g8d2844f", the same pair. https://api.nuget.org/v3-flatcontainer/vpk/index.json
+- The NuGet page for vpk 1.2.161 shows "Last updated 9/29/2026", MIT, and the install command
+  dotnet tool install --global vpk --version 1.2.161 (documented, https://www.nuget.org/packages/vpk/1.2.161).
+- So the recorded "1.2.161" holds for both the crate and vpk.
+
+Install on a runner.
+- dotnet tool install -g vpk --version 1.2.161 (NuGet page above).
+  Velopack's GitHub Actions example runs dotnet tool install -g vpk with no version, then the vpk commands in the same step
+  (documented, https://docs.velopack.io/distributing/github-actions). Without --version it takes the newest stable, so pin it.
+- The example also says vpk can run without a global install through dnx (same page). dnx needs a .NET 10 SDK (unverified here).
+- Whether %USERPROFILE%\.dotnet\tools is on PATH on the hosted runner is unverified; the docs' example relies on it.
+
+SDK or runtime.
+- The csproj sets <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks> and <PackAsTool>true</PackAsTool>
+  (read, src/vpk/Velopack.Vpk/Velopack.Vpk.csproj).
+- Velopack's Rust guide says the .NET Core SDK 8 is needed to use and update vpk (documented, https://docs.velopack.io/getting-started/rust).
+- So installing needs an SDK (dotnet tool is an SDK command), and running needs a runtime for one of the three targets;
+  an SDK 9 or 10 serves as well as 8 (inference from the csproj).
+- The example workflow uses actions/setup-dotnet@v4 with dotnet-version: 8.0.x on windows-latest (documented, github-actions page).
+  windows-latest already carries SDKs 8.0.131 through 10.0.401 (Q5), so that step is optional there.
+
+Must vpk and the crate match?
+- Docs: "Make sure to use the same `vpk` version as the Velopack package referenced in your application" (github-actions page).
+- vpk doesn't enforce it for a Rust app (read, src/vpk/Velopack.Packaging.Windows/CompatUtil.cs):
+  - The version check reads the ProductVersion of a Velopack.dll beside the exe or inside a .NET single-file bundle.
+    A mismatch is only logged: "Velopack library version is greater than vpk version" as an error, "... is lower than vpk version" as a warning.
+  - For a native exe, both checks return early (LoadDotnetAssembly fails, FindVelopackDll finds nothing), so no message at all.
+- What couples them: vpk packs the Update.exe and Setup.exe from a "vendor" folder inside its own package
+  (read, src/vpk/Velopack.Packaging/HelperFile.cs: AddSearchPath(AppContext.BaseDirectory, "..", "..", "..", "vendor"),
+  files update.exe / update_x64.exe, setup.exe / setup_x64.exe). The vpk version therefore sets the Update.exe that ships,
+  and the velopack crate in the desktop app starts that Update.exe. What breaks across a mismatch is unverified; pinning both avoids the question.
+- vpk checks NuGet for a newer vpk before and after each command, with a 3s timeout, and only logs
+  "There is a newer version of vpk available"; it installs nothing and swallows errors (read, src/vpk/Velopack.Vpk/Updates/UpdateChecker.cs).
+  --skip-updates turns the check off (read, Program.cs).
+
+
+Q2. The three commands, and the files
+=====================================
+
+Options common to all three (read, src/vpk/Velopack.Vpk/Commands/OutputCommand.cs, GitHubBaseCommand.cs, BaseCommand.cs):
+- -o, --outputDir: default "Releases" (relative to the working directory). -c, --channel: default "win" on Windows.
+- --repoUrl, --token, --timeout (minutes, default 30) for the GitHub commands.
+- Every option can come from an environment variable "VPK_" + the option name in capitals with underscores: VPK_TOKEN, VPK_OUTPUT_DIR, ...
+- Global: --yes / -y answers "yes" to prompts; --verbose; --skip-updates (read, Program.cs).
+
+vpk download github (read, src/vpk/Velopack.Deployment/GitHub.cs, _DownloadCommandRunner.cs; src/lib-csharp/Sources/GithubSource.cs, GitBase.cs):
+- It builds the C# GithubSource(options.RepoUrl, options.Token, options.Prerelease) and asks it for the feed of --channel.
+- The C# GithubSource lists releases?per_page=10&page=1, drops prereleases unless --pre, sorts by PublishedAt newest first,
+  and has no draft filter. GitBase then downloads releases.win.json from each listed release and merges every asset into one feed.
+  A release without that file is skipped with a trace log. A failed download of a feed file is not caught, so it fails the command.
+- From the merged feed it takes the Full asset with the highest version, and downloads only that file, to <outputDir>\<file name>.
+  If the file exists with a matching SHA-256 or SHA-1, it logs "Checksum matches. Finished." and stops.
+  If there is no Full asset, it logs "No full / applicable release was found to download. Aborting." as a warning and returns, exit 0.
+- It does not download releases.win.json, deltas, or Setup.exe into the folder.
+- Token: optional. Without one, the release list is one unauthenticated API call and files come by browser_download_url.
+  With one, it sends "Authorization: Bearer <token>" and downloads through the API asset URL.
+- With a token that has push access, GitHub's list includes drafts ("Only users with push access will receive listings for draft releases",
+  documented, https://docs.github.com/en/rest/releases/releases). The C# source has no draft filter, so a leftover draft that holds a
+  releases.win.json would join the feed, and a draft with a higher version would become the delta base (inference; unverified by a run).
+- Without a token, 60 API calls an hour per IP (Q4). Whether a hosted runner shares its outbound IP with other jobs is unverified,
+  so passing --token ${{ github.token }} (1,000 calls an hour per repository) removes the doubt.
+
+vpk pack, Windows (read, src/vpk/Velopack.Vpk/Commands/Packaging/PackCommand.cs, WindowsPackCommand.cs):
+- -u, --packId <id> (required). -v, --packVersion <ver> (required; must be SemVer 2, PackageBuilder.cs ThrowIfVersionNotSemverCompliant).
+- -p, --packDir <dir> (required): the folder with the app's files.
+- -e, --mainExe <name>: the file name, not a path, of the main program.
+- -i, --icon <path>. --packTitle, --packAuthors, --releaseNotes <markdown file>.
+- -f, --framework <list>, for example webview2. --shortcuts <list>, default "Desktop,StartMenuRoot".
+- --delta <mode>, default BestSpeed; BestSize is smaller and slower; None turns deltas off
+  (documented, https://docs.velopack.io/packaging/deltas; read, PackageBuilder.cs: if (prev != null && options.DeltaMode != DeltaMode.None)).
+- --exclude <regex>, default ".*\.pdb", on top of built-in excludes. Hidden but accepted: --noPortable, --noInst, --skipVeloAppCheck.
+- --msi and --instLocation exist and stay unused for us.
+What pack does with --outputDir (read, src/vpk/Velopack.Packaging/PackageBuilder.cs, ReleaseEntryHelper.cs):
+- It scans <outputDir>\*.nupkg, grouped by channel.
+- If any asset in the channel has a version equal to or greater than --packVersion, it prompts
+  "A release in this channel with the same or greater version already exists." In CI the output is redirected, so vpk uses its
+  basic console, whose prompt returns the default, "no" unless --yes (read, Program.cs, Logging/BasicConsole.cs). Pack then throws
+  "There is a release in channel {channel} which is equal or greater to the current version {version}." and exits -1.
+- The delta base is the highest Full in the channel below --packVersion (GetPreviousFullRelease). None: no delta, and no log line.
+- At the end it moves its files into --outputDir, writes assets.<channel>.json listing this build's files, deletes RELEASES*, and
+  rewrites releases.<channel>.json and RELEASES from every .nupkg in the folder.
+
+vpk upload github (read, src/vpk/Velopack.Vpk/Commands/Deployment/GitHubUploadCommand.cs; src/vpk/Velopack.Deployment/_GitRelease.cs, GitHub.cs):
+- Options: --publish ("Create and publish instead of leaving as draft."), --pre, --merge, --releaseName, --tag, --targetCommitish.
+- Token: the validator rejects an empty token, "{PropertyName} is required when uploading to GitHub." No fallback to a GITHUB_TOKEN
+  variable appears in GitHubBaseCommand.cs, OptionMapper.cs, GitHub.cs, or _GitRelease.cs. Velopack's example upload line has no --token
+  (documented, github-actions page), so by this source it would fail validation; pass --token ${{ github.token }} or set VPK_TOKEN.
+- It reads assets.<channel>.json from --outputDir; missing, it throws "Could not find assets file for channel ..." (read, src/vpk/Velopack.Core/BuildAssets.cs).
+- Tag: --tag, else the version of the highest Full in the folder, bare ("1.2.3", no "v"). Release name: --releaseName, else the tag.
+  Release body: the release notes inside that full .nupkg.
+- Without --merge it throws if any release has that tag ("There is already an existing release tagged ...") or that name.
+- With --merge it uses the existing release, logging "Found existing release (...). Merge flag is enabled.", but throws if that release
+  already holds a releases.<channel>.json ("... merging release files on GitHub is not supported.").
+- Otherwise it creates a draft release with tag, name, body, prerelease = --pre, and target_commitish = --targetCommitish.
+  GitHub uses target_commitish only when the tag doesn't exist yet, and defaults it to the default branch (documented, REST releases page).
+  Community sources say a draft creates no Git tag until it's published (unverified). Our CI should pass --targetCommitish ${{ github.sha }}
+  or push the tag first, so the tag names the commit that was built (inference).
+- Then it uploads each file in assets.<channel>.json, each with up to 2 retries 1s apart (read, _Retry.cs), then a releases.<channel>.json
+  built from this build's Full and Delta only, then, for channel "win", a legacy RELEASES file.
+- --publish then turns the draft into a published release; on a release that's already published it logs "Skipping publish, release is already not a draft."
+
+Files vpk pack writes for channel "win" (read, src/vpk/Velopack.Core/DefaultName.cs, src/lib-csharp/Util/CoreUtil.cs, BuildAssets.cs, ReleaseEntryHelper.cs):
+
+File                          | When                                   | Uploaded | Read by GithubSource
+----------------------------- | -------------------------------------- | -------- | --------------------
+<id>-<ver>-full.nupkg         | always                                 | yes      | yes, when a full download is chosen
+<id>-<ver>-delta.nupkg        | a lower Full is in --outputDir         | yes      | yes, one per release in the chain
+<id>-win-Setup.exe            | unless --noInst                        | yes      | no
+<id>-win-Portable.zip         | unless --noPortable                    | yes      | no
+releases.win.json             | always (rewritten from every .nupkg)   | yes, rebuilt from this build only | yes, one per release
+RELEASES                      | always (legacy Squirrel format)        | yes, rebuilt from this build      | no
+assets.win.json               | always (this build's file list)        | no       | no
+
+- On channel "win" the .nupkg names carry no channel; another channel gives <id>-<ver>-<channel>-full.nupkg and RELEASES-<channel>.
+- Setup.exe and Portable.zip always carry the channel: <id>-win-Setup.exe.
+- Velopack's packaging overview lists the same set (documented, https://docs.velopack.io/packaging/overview).
+
+
+Q3. Exit codes, the green-but-empty paths, and checking a release
+=================================================================
+
+vpk's exit codes (read, src/vpk/Velopack.Vpk/Program.cs).
+- Main returns the command's result: 0 on success, -1 from either catch block
+  (UserInfoException or ProcessFailedException, logged without a stack trace; any other exception, logged with one).
+- So each of these exits -1: an existing release with that tag or name and no --merge; a merged release that already holds
+  releases.win.json; a missing assets.win.json; an empty token; an asset upload that fails 3 times; a pack whose version isn't higher
+  than one in --outputDir; a feed file vpk download can't fetch.
+
+Paths that exit 0 having shipped less than intended.
+1. vpk upload github without --publish: exit 0, and the release stays a draft. A pilot's unauthenticated GithubSource never sees drafts
+   (GitHub, above), so no pilot gets the update. Of the three, this one comes closest to fsc-editor's v0.1.0.
+2. vpk download github finding no Full asset: a warning and exit 0, so the next pack makes no delta and every pilot downloads the full
+   package. It's correct for the first release and silent afterwards, for example when none of the newest 10 releases holds a
+   releases.win.json, or all of them are prereleases and --pre is absent.
+3. A pwsh run block. GitHub's default shell on Windows is pwsh, run as pwsh -command ". '{0}'"; GitHub prepends
+   $ErrorActionPreference = 'stop' and appends if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }
+   "so action statuses reflect the script's last exit code" (documented,
+   https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax, "Exit codes and error action preference").
+   PowerShell's $PSNativeCommandUseErrorActionPreference defaults to $false, and only when it's $true does a native command's
+   non-zero exit raise an error (documented, https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables).
+   So in Velopack's example, which runs install, download, pack, and upload in one run block on windows-latest, a vpk download that
+   exits -1 is followed by a pack with no delta and an upload that succeeds, and the step goes green (inference from the two docs).
+   A failed pack on a fresh runner leaves no assets.win.json, so the upload after it fails and turns the step red (inference).
+   Fixes: one vpk command per step; or shell: bash, which runs with -eo pipefail (same GitHub page); or
+   $PSNativeCommandUseErrorActionPreference = $true at the top of the block.
+- A mid-way upload failure exits -1 but leaves a draft holding some files. A rerun then fails on the existing tag unless the draft is
+  deleted or --merge is passed, and --merge refuses once releases.win.json is in it (read, _GitRelease.cs).
+- For comparison: fsc-editor's electron-builder publisher, given a release that was already published, logged "GitHub release not created"
+  as a warning and the job exited 0 with nothing attached (read, fsc-editor, commit 7b2348e).
+
+What a CI step can check after the upload.
+- gh release view [<tag>] shows the release, or the latest release with no tag; --json takes fields including assets, isDraft, isPrerelease,
+  tagName, publishedAt; --jq filters (documented, https://cli.github.com/manual/gh_release_view).
+- A sketch, untested:
+    gh release view "$TAG" --json isDraft,isPrerelease,assets --jq '[.isDraft, .isPrerelease, [.assets[].name]]'
+  then fail unless isDraft and isPrerelease are false and the names include <id>-<ver>-full.nupkg, releases.win.json, RELEASES,
+  <id>-win-Setup.exe, and, when a previous release exists, <id>-<ver>-delta.nupkg.
+- The asset object in GitHub's REST API has name, size, and state ("uploaded" or "open") (documented, REST releases page);
+  whether gh's assets JSON carries size and state under those names is unverified.
+- A check of what pilots read: download https://github.com/<owner>/<repo>/releases/download/<tag>/releases.win.json and confirm it lists
+  this version's Full asset and, after the first release, its Delta. This is the file GithubSource fetches (Q4).
+- gh in a workflow needs GH_TOKEN set for each step that uses it: "GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+  (documented, https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-github-cli).
+
+What releases/latest names.
+- REST "Get the latest release": "the most recent non-prerelease, non-draft release, sorted by the created_at attribute", where
+  created_at "is the date of the commit used for the release" (documented, https://docs.github.com/en/rest/releases/releases).
+- make_latest on create and update: drafts and prereleases can't be latest, it defaults to true for newly published releases, and
+  "legacy" decides by creation date and higher semantic version (same page). So the release vpk just published becomes latest, unless
+  make_latest is set otherwise. vpk publishes by editing the draft with Draft = false and sets no make_latest (read, GitHub.cs PublishReleaseAsync).
+- https://github.com/<owner>/<repo>/releases/latest and .../releases/latest/download/<asset> link to that release
+  (documented, https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases).
+- Neither GithubSource reads releases/latest; both list releases (Q4).
+
+
+Q4. How the Rust GithubSource finds releases
+============================================
+
+Read in velopack 1.2.161, src/lib-rust/src/sources/github.rs, sources/mod.rs, and manager.rs.
+
+Construction.
+- pub fn new(repo_url: &str, access_token: Option<String>, prerelease: bool) -> GithubSource. The API base is https://api.github.com/
+  for github.com, and <scheme>://<host>[:port]/api/v3/ for GitHub Enterprise.
+
+One update check (check_for_updates, then get_release_feed).
+- 1 API call: GET {base}repos/<owner>/<repo>/releases?per_page=10&page=1 with Accept application/vnd.github.v3+json, and a Bearer
+  token only if one was given.
+- It sorts by published_at, newest first, and if !self.prerelease drops prereleases (releases.retain(|r| !r.prerelease)).
+  The prerelease filter runs after the 10 are fetched, so prereleases among the newest 10 shrink the window (inference).
+- No draft field or filter; unauthenticated callers never receive drafts (GitHub, Q2), so a pilot never sees one.
+- get_git_release_feed then, for each of those releases, looks up releases.<channel>.json and downloads it: by browser_download_url when
+  there's no token, else by the API asset URL. A release without the file, or whose download or JSON fails, is skipped with a trace log.
+  All assets are appended into one feed, with no de-duplication, and the function returns Ok even if every release was skipped.
+- So a check is 1 call to api.github.com plus up to 10 downloads from github.com.
+
+The update's choice (manager.rs, check_for_updates and create_delta_update_strategy).
+- Latest: the Full asset with the highest version in the feed. Higher than the local version: an update. Lower: offered only if downgrades
+  are allowed. No Full at all: RemoteIsEmpty.
+- Deltas are used only if a local full package exists in the packages folder (locator::find_latest_full_package), else
+  "There is no local/base package available for this update, so delta updates will be disabled."
+- And only if the feed holds a Delta at the target version; then it takes every Delta with version > local and <= target, sorted ascending.
+- It never checks that the first delta starts at the local version, or that none is missing between. VelopackAsset has no base-version
+  field. MaximumDeltasBeforeFallback defaults to 10, but create_delta_update_strategy never reads it, and no code compares the deltas'
+  total size with the full package.
+- Velopack's deltas page describes a heuristic that weighs the full size, the deltas' total size, and their count
+  (documented, https://docs.velopack.io/packaging/deltas). The Rust source at 1.2.161 has none.
+- What follows for us (inference, unverified by a run): a pilot up to 10 releases behind gets a contiguous chain from the newest 10.
+  At 11 or more behind, the chain starts one or more releases above the pilot's own, the first patch is applied to the wrong base,
+  and the update falls back to the full package if that patch fails. Whether a patch on the wrong base always fails rather than
+  producing a bad file is unverified.
+
+The download (download_updates).
+- Each file: download_release_entry lists releases again (1 API call), takes the first release, newest first, that holds an asset of
+  that name, and downloads it by browser_download_url when there's no token. It then checks the file's size and SHA-256 against the feed.
+- An update with N deltas: N more API calls. Any error in the delta path logs "Falling back to full update..." and downloads the full
+  package once, 1 more API call.
+
+Rate limits.
+- Unauthenticated: "60 requests per hour", tied to the originating IP address. Authenticated: 5,000 an hour. GITHUB_TOKEN in Actions:
+  1,000 an hour per repository (documented, https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
+- That page doesn't say whether downloads by browser_download_url count; the C# source's comment says the browser URL doesn't count
+  against the API rate limit (read, src/lib-csharp/Sources/GithubSource.cs). Unverified by a GitHub page.
+- A pilot's check costs 1 API call, and an update 1 + N (+1 on fallback). A crew of two on one public IP shares the 60.
+- GitHub's docs don't state the order of the list endpoint's results, and the code sorts only the first page of 10 it received,
+  so "the newest 10" assumes GitHub returns newest first (unverified).
+
+
+Q5. The GitHub-hosted Windows runner
+====================================
+
+Which image.
+- runner-images README, Available Images: the row "Windows Server 2025" carries the labels windows-latest, windows-2025, and
+  windows-2025-vs2026, and links Windows2025-VS2026-Readme.md (documented, https://github.com/actions/runner-images/blob/main/README.md).
+- GitHub's changelog: windows-latest and windows-2025 moved to Visual Studio 2026 between 2026-06-08 and 2026-06-15, and windows-2022
+  is the label for VS 2022 (documented, https://github.blog/changelog/2026-05-14-github-actions-upcoming-image-migrations).
+- The repository also holds Windows2025-Readme.md, a Server 2025 image with VS 2022 (image 20261013.288.2) that the README table doesn't
+  link; which label serves it, if any, is unverified.
+
+Software on windows-2025-vs2026 (documented, https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-VS2026-Readme.md,
+"Image Version: 20261007.264.1", "OS Version: 10.0.26100 Build 33438"):
+
+Need                                   | On the image                                                                | Note
+-------------------------------------- | --------------------------------------------------------------------------- | ----
+.NET 8 SDK                             | yes: 11 SDKs, 8.0.131 through 10.0.401                                      | vpk installs with no setup-dotnet step
+Rust, rustup                           | yes: Rust 1.99.0, Cargo 1.99.0, Rustup 1.29.1, Clippy 0.1.99, Rustfmt 1.10.0 | targets not listed; the default host being x86_64-pc-windows-msvc is unverified
+Node 22                                | yes: Node 22.23.3 (24.21.0 cached too)                                       |
+LLVM / clang, for bindgen              | yes: LLVM 20.1.8; also VS components VC.Llvm.Clang and VC.Llvm.ClangToolset | no LIBCLANG_PATH in the env tables; whether bindgen finds libclang.dll without it is unverified
+VS Build Tools with C++                | Visual Studio Enterprise 2026 18.10.12224.181, workload NativeDesktop, component VC.Tools.x86.x64 | the VCTools workload isn't listed; NativeDesktop with VC.Tools.x86.x64 gives MSVC (inference)
+Windows SDK                            | yes: "Windows Software Development Kit 10.1.26100.8249", components Windows11SDK.26100 and Windows10SDK | see libucrt.lib below
+libucrt.lib (static C runtime)         | not listed by name                                                           | Microsoft: the UCRT's static library is in the Windows SDK (documented, https://learn.microsoft.com/en-us/cpp/c-runtime-library/crt-library-features); on the runner unverified
+GitHub CLI gh                          | yes: GitHub CLI 2.102.0                                                     | needs GH_TOKEN (Q3)
+Also                                   | Git 2.56.0.windows.2, PowerShell 7.6.6, Bash 5.3.15, CMake 4.4.4, Perl 5.42.0, 7zip 26.04, Microsoft Edge 154.0.4258.62 | WebView2 not listed; Edge is
+
+- Microsoft's CRT page also places libvcruntime.lib and libcmt.lib with the compiler toolset rather than the SDK (same page).
+
+
+Q6. tauri build --no-bundle, and the version
+============================================
+
+Read in tauri-apps/tauri at tag tauri-cli-v2.12.3 (tauri-cli 2.12.3 is the newest stable on crates.io, 2026-10-14;
+3.0.0-alpha.5 is newer and a prerelease, https://crates.io/api/v1/crates/tauri-cli).
+
+What it runs (crates/tauri-cli/src/build.rs, interface/rust.rs, interface/rust/desktop.rs).
+1. setup(): runs the beforeBuildCommand hook (helpers::run_hook("beforeBuildCommand", ...)), then fails if frontendDist doesn't exist.
+2. build_options() adds the feature "tauri/custom-protocol" and the arg "--bins" on desktop.
+3. cargo_command(): cargo build, plus --release unless --debug or a --profile is given, plus --features <config features, --features, and
+   tauri/custom-protocol, comma-joined>, plus --target if given, plus every trailing arg. It runs in the Tauri crate's folder.
+4. rename_app(): if mainBinaryName is set, renames the built exe in place to <mainBinaryName>.exe.
+5. Bundling runs only if !options.no_bundle && (config.bundle.active || options.bundles.is_some()), so --no-bundle skips it.
+   Binary patching (--no-binary-patching, "Skip patching the main executable with bundle type information", documented,
+   https://v2.tauri.app/reference/cli/) belongs to the bundle step; that --no-bundle also skips it is inference.
+
+Where the exe lands.
+- get_cargo_target_dir uses --target-dir from the args if present, else target_directory from cargo metadata; the profile folder is
+  "release" for a release build; app_binary_path appends .exe on Windows. In a Cargo workspace, cargo metadata reports the workspace's
+  target folder, so the exe is <workspace root>\target\release\<bin>.exe, or ...\target\<triple>\release\ with --target.
+- The main binary: the [[bin]] whose name equals the package name or default-run, else src/main.rs named after the package, else the
+  only binary; mainBinaryName overrides the file name ("Overrides app's main binary filename", documented, https://v2.tauri.app/reference/config/).
+
+Plain cargo build is a different binary.
+- tauri's build script sets cfg(dev) when the custom-protocol feature is off (read, crates/tauri/build.rs: let dev = !custom_protocol;),
+  and tauri's custom-protocol forwards to tauri-macros/custom-protocol (crates/tauri/Cargo.toml).
+- tauri-codegen embeds no assets when dev is set and devUrl exists (read, crates/tauri-codegen/src/context.rs).
+- So a workspace-wide cargo build --release builds a desktop app that looks for the dev server, unless it passes
+  --features tauri/custom-protocol or goes through tauri build (inference from those three files; unverified by a build).
+
+The version with version.workspace = true and no version in tauri.conf.json.
+- The CLI resolves it. CargoPackageSettings has version: Option<MaybeWorkspace<String>>; MaybeWorkspace::resolve takes
+  workspace.package.version from the root manifest found through cargo metadata's workspace_root, and errors with
+  "error inheriting `version` from workspace root manifest's `workspace.package.version`" if absent. The CLI's app version is
+  config.version, else that resolved value (read, interface/rust.rs, RustAppSettings::new).
+- The app at runtime: generate_context! emits env!("CARGO_PKG_VERSION") when config.version is None (read, tauri-codegen context.rs),
+  and Cargo sets that variable from the inherited version, so the app's PackageInfo.version is right.
+- The exe's Windows version resource: tauri-build sets FILEVERSION, PRODUCTVERSION, "FileVersion", and "ProductVersion" only inside
+  if let Some(version_str) = &config.version, and nothing in tauri-build or tauri-utils' config parser fills config.version from Cargo
+  (read, crates/tauri-build/src/lib.rs, crates/tauri-utils/src/config/parse.rs). So with no version in tauri.conf.json, the exe carries no
+  version resource (unverified by a build). Tauri's config reference says a removed version falls back to Cargo.toml's (documented,
+  https://v2.tauri.app/reference/config/); in this source that holds for the CLI and the runtime, not for the Windows resource.
+- A fix that keeps one source of the version: tauri build --no-bundle --config '{"version":"<ver>"}'. The CLI writes the merged --config
+  JSON to TAURI_CONFIG (read, crates/tauri-cli/src/helpers/config.rs), and tauri-build merges TAURI_CONFIG before reading config.version
+  (read, tauri-build lib.rs). Velopack needs no version resource, since vpk pack takes --packVersion.

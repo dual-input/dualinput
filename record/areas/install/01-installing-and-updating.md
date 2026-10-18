@@ -6,6 +6,13 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Crosscheck; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how the core finds packages that override our files and checks our own; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
 ```
 
+> **Note**
+> Since 2026-10-18, [the build](../build/01-the-build.md) settles what [left open](#left-open) and [our package](#our-package) leave to 6.18:
+>
+> - Our package is one folder named `crosscheck`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, wins over ours, and the warning names it ([our package](../build/01-the-build.md#our-package)).
+> - The build keeps the sim's stock files in `sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
+> - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
+
 Crosscheck has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.

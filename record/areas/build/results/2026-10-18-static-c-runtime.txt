@@ -1,0 +1,369 @@
+Linking the C runtime statically in every x86_64 program, for node 6.18
+Researched 2026-10-18 for the architecture plan's node 6.18, the build, on its raised item from 6.1:
+how the core links the C runtime statically when 5.4 sets no RUSTFLAGS, and whether the other programs do too.
+Sources: Cargo and rustc source at the 1.95.0 tags, Cargo's and Rust's docs, navigraph/cargo-msfs v1.1.0,
+tauri-build 2.7.1 (on disk) and 2.7.3 (GitHub), tauri-utils 2.10.1, static_vcruntime 3.0.0, cc 1.8.0, libc 0.2.190,
+velopack 1.2.161, Microsoft Learn, and builds on our development machine.
+Development machine: Windows 11 Pro 10.0.26200, Rust 1.95.0, cargo 1.95.0, cargo-msfs v1.1.0 (5d3718d), every build offline.
+Nothing here touched the sim.
+Evidence markers follow writing.md: measured (we ran it), read (we read it in source or on disk),
+documented (a vendor page says so), unverified (inference or guess).
+Paths: %USERPROFILE% is the home folder; <scratch> is this session's scratch folder, which holds the probe copies.
+
+======================================================================
+ANSWERS
+======================================================================
+
+Q  | Question                                          | Answer
+---+---------------------------------------------------+------------------------------------------------------------------------
+1  | Ways to give x86_64-pc-windows-msvc +crt-static   | Stable, whole-target: .cargo/config.toml [target.x86_64-pc-windows-msvc] rustflags, or a matching
+   | without RUSTFLAGS                                 | [target.'cfg(...)'] entry (the two join). Also stable but per invocation: CARGO_TARGET_X86_64_PC_
+   |                                                   | WINDOWS_MSVC_RUSTFLAGS, or --config. build.rustflags works but reaches every target. Profile rustflags:
+   |                                                   | nightly only. cargo rustc: one crate only. A build script's /NODEFAULTLIB link args (static_vcruntime,
+   |                                                   | tauri-build): per package, but they keep the UCRT dynamic and leave cc compiling C code /MD, so they
+   |                                                   | don't give the core its own math (read).
+   |                                                   | Every config form loses to RUSTFLAGS, even an empty one, and nothing merges with it (read, measured).
+2a | Is the config entry ignored in cargo-msfs builds? | Yes. cargo-msfs sets RUSTFLAGS, which outranks config for wasm32 units, and the entry names x86_64
+   |                                                   | anyway; adding it changed nothing in the cargo-msfs build: 0 crates compiled (read, measured).
+2b | Does it matter for the wasm32 build?              | No: cargo-msfs passes -Ctarget-feature=-crt-static,+bulk-memory itself (read).
+2c | Host artifacts under --target wasm32-wasip1       | They get no rustflags at all on stable: not RUSTFLAGS, not [target], not [build]; only [host],
+   |                                                   | which needs nightly -Zhost-config (read; measured in their fingerprints).
+2d | Does alternating builds rebuild host crates?      | No, on Cargo 1.85 and later: rustflags go into the hash that names files and folders, not into
+   |                                                   | -C metadata, so the host crates with +crt-static and without sit side by side. Alternating compiled
+   |                                                   | 0 crates in every step after the first (measured). Cargo 1.39 to 1.84 left rustflags out of that
+   |                                                   | hash, so there every switch would rebuild them (read in Cargo's changelog; not run).
+2e | +crt-static on proc macros, MSVC, no --target     | Works: rustc's MSVC target allows dylibs with a static C runtime (read), and serde_derive,
+   |                                                   | ts-rs-macros, and thiserror-impl built with it and expanded their derives (measured).
+3  | Does Tauri 2 link the VC runtime statically?      | Yes, by default, for the app's own package only: tauri-build's build script statically links the
+   |                                                   | VC runtime and C startup and links the UCRT dynamically, Microsoft's "hybrid CRT". Turned off by
+   |                                                   | tauri.conf.json build.windows.staticVCRuntime = false (read). With +crt-static and that off, the app
+   |                                                   | imports no C runtime DLL; with it on, it still imports api-ms-win-crt-* (measured).
+4a | vcruntime140.dll on a clean Windows               | Not part of Windows: Microsoft has apps deploy it through the Visual C++ Redistributable, while the
+   |                                                   | UCRT "is now a system component in Windows 10 and later" (documented). A default Rust MSVC build
+   |                                                   | imports VCRUNTIME140.dll (measured). Whether a fresh image happens to hold a copy: unverified.
+4b | Velopack's Update.exe                             | A Rust program; Velopack's Windows CI builds it with RUSTFLAGS=-C target-feature=+crt-static (read).
+   |                                                   | The shipped Update.exe's imports: unverified.
+4c | Velopack's vcredist143-x64                        | Offered by --framework; Setup.exe runs Microsoft's vc_redist.x64.exe (read), which asks for an
+   |                                                   | administrator through UAC when not elevated (documented). That would add a UAC prompt to a per-user
+   |                                                   | install on any PC without the redistributable.
+5  | A local check for 2d                              | Run, on a copy of p11's workspace: recorded below under Q5.
+
+Recommendation
+--------------
+1. The root .cargo/config.toml holds:
+
+       [target.x86_64-pc-windows-msvc]
+       rustflags = ["-C", "target-feature=+crt-static"]
+
+   Every program `cargo build` builds for x86_64 then links the whole C runtime statically:
+   the core, the core helper, the desktop app's Rust side, the profile builder and the other tools, and the tests.
+   (The plan's item also names the watcher, which 6.17 took out of Crosscheck.)
+   cc sees crt-static and compiles C code, such as QuickJS-ng in rquickjs-sys and zstd in zstd-sys, with -MT, so all of it matches (read in cc 1.8.0).
+   cargo-msfs builds the module as it does now, and neither build rebuilds the other's crates (measured).
+   cargo-msfs runs cargo from sim-package/wasm-module/, and Cargo reads config from the current folder and its parents,
+   so the root's file is in reach of every build in the tree (documented).
+2. Keep rust-toolchain.toml at 1.85 or later (1.95 now), since side-by-side host crates need Cargo 1.85 (read).
+3. Keep RUSTFLAGS unset everywhere, as 02-code-map says, and add a guard in apps/core, after its inner doc comments:
+
+       #[cfg(all(target_env = "msvc", not(target_feature = "crt-static")))]
+       compile_error!("crosscheck-core must link the C runtime statically: RUSTFLAGS replaced the +crt-static of .cargo/config.toml");
+
+   A RUSTFLAGS of any value, an empty one included, silently replaces the config's flag (read, measured),
+   and the guard fails that build instead of shipping a core whose math is Windows' (measured below).
+   One concrete source of such a RUSTFLAGS: actions-rust-lang/setup-rust-toolchain v1.17.0 sets RUSTFLAGS="-D warnings" by default;
+   v2.0.0's default is empty (read in each tag's action.yml).
+4. Set tauri.conf.json build.windows.staticVCRuntime = false, so the config's one rule decides the desktop app's C runtime too.
+   Left at Tauri's default, tauri-build's link arguments put the UCRT back to Windows' copy for that one program (measured).
+   Either way the desktop app needs no redistributable; the choice is one mechanism against two.
+   What it costs: Windows Update no longer services that program's UCRT, which then comes with each release's SDK (inference).
+5. Velopack needs no --framework vcredist*, so the install keeps 6.17's no-administrator path.
+6. A static C runtime made p11-core 98,816 bytes larger: 251,904 bytes against 153,088 bytes (measured), the cost per program.
+
+Optional, if a check beyond the core's guard is wanted: the release job runs dumpbin /imports on each shipped exe and fails on
+VCRUNTIME140.dll, and for the core also on api-ms-win-crt-*.dll; p01 and this probe already read imports that way.
+
+======================================================================
+Q1. WAYS TO GIVE THE TARGET +crt-static WITHOUT RUSTFLAGS
+======================================================================
+
+Precedence (documented, Cargo's configuration reference, build.rustflags, read 2026-10-18,
+https://doc.rust-lang.org/cargo/reference/config.html#buildrustflags):
+"There are four mutually exclusive sources of extra flags", checked in order, the first one used:
+CARGO_ENCODED_RUSTFLAGS, RUSTFLAGS, all matching target.<triple>.rustflags and target.<cfg>.rustflags "joined together", build.rustflags.
+Cargo 1.95's code does the same (read in rust-lang/cargo rust-1.95.0, src/cargo/core/compiler/build_context/target_info.rs, extra_args,
+rustflags_from_env, rustflags_from_target, rustflags_from_build).
+rustflags_from_env returns Some(empty list) for a RUSTFLAGS that is set but empty, so an empty RUSTFLAGS still wins (read; measured below).
+
+Way                                         | Reaches                                   | Stable on 1.95 | Against RUSTFLAGS
+--------------------------------------------+-------------------------------------------+----------------+------------------------------
+.cargo/config.toml                          | every unit built for that target; with no | yes            | loses; not merged
+[target.x86_64-pc-windows-msvc] rustflags   | --target, build scripts and proc macros   |                |
+                                            | too                                       |                |
+[target.'cfg(all(windows, target_env =      | the same, for every matching target;      | yes            | loses; not merged
+"msvc"))'] rustflags                        | joins with the triple's entry             |                |
+build.rustflags                             | every target, wasm32 included when no     | yes            | loses; lowest of the four
+                                            | RUSTFLAGS is set                          |                |
+CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_        | as the config entry, for the shell or     | yes            | loses (it is the config key
+RUSTFLAGS environment variable              | job that sets it                          |                | set from the environment)
+cargo --config 'target.x86_64-pc-windows-   | as the config entry, for one invocation   | yes            | loses (same key)
+msvc.rustflags=[...]'                       |                                           |                |
+[profile.*] rustflags                       | per profile, and per package by override  | no: nightly    | n/a
+                                            |                                           | -Zprofile-     |
+                                            |                                           | rustflags      |
+cargo rustc -- -C target-feature=+crt-static| the one crate named, for one package per  | yes            | adds to whichever wins
+                                            | call; dependencies' C code still -MD      |                |
+build script cargo:rustc-link-arg(-bins)    | that package's bins, tests, examples,     | yes            | independent
+with /NODEFAULTLIB and /DEFAULTLIB          | benches, cdylibs                          |                |
+
+Notes per row:
+- Config file merging: arrays from several config files join, and environment variables outrank config files; --config outranks both
+  (documented, same page, "Hierarchical structure", "Environment variables", "Command-line overrides").
+  A personal %USERPROFILE%\.cargo\config.toml entry for the same target would join ours, not replace it.
+- --target: "If the --target flag (or build.target) is used, then the flags will only be passed to the compiler for the target.
+  Things being built for the host, such as build scripts or proc macros, will not receive the args" (documented, same page).
+- Profile rustflags: needs cargo-features = ["profile-rustflags"] in Cargo.toml, or -Z profile-rustflags / [unstable] in config,
+  nightly only (documented, https://doc.rust-lang.org/cargo/reference/unstable.html#profile-rustflags).
+- target-applies-to-host and [host] rustflags: both nightly, behind -Ztarget-applies-to-host and -Zhost-config (documented, same page).
+- cargo:rustc-link-arg: "only when building supported targets (benchmarks, binaries, cdylib crates, examples, and tests)"
+  (documented, https://doc.rust-lang.org/cargo/reference/build-scripts.html). It reaches no other package.
+- Why the link-arg route doesn't serve the core:
+  - static_vcruntime 3.0.0's metabuild() prints exactly these, after returning early unless CARGO_CFG_TARGET_ENV is msvc
+    (read in ChrisDenton/static_vcruntime master, 93a57e8, src/lib.rs):
+      cargo:rustc-link-arg=/NODEFAULTLIB:libvcruntimed.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:vcruntime.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:vcruntimed.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:libcmtd.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:msvcrt.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:msvcrtd.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:libucrt.lib
+      cargo:rustc-link-arg=/NODEFAULTLIB:libucrtd.lib
+      cargo:rustc-link-arg=/DEFAULTLIB:libcmt.lib
+      cargo:rustc-link-arg=/DEFAULTLIB:libvcruntime.lib
+      cargo:rustc-link-arg=/DEFAULTLIB:ucrt.lib
+    So it links the C startup (libcmt.lib) and the VC runtime (libvcruntime.lib) statically and the UCRT through ucrt.lib,
+    the import library for ucrtbase.dll (documented, Microsoft, https://learn.microsoft.com/en-us/cpp/c-runtime-library/crt-library-features).
+    Its own table: "+crt-static | static | static | static" and "static_vcruntime | static | static | dynamic" (read, same file).
+    The UCRT holds sin, exp, and the rest, so the core's math would still come from each pilot's Windows ([core log], 2026-10-15).
+  - It sets no cfg(target_feature = "crt-static"), and cc picks -MT only when CARGO_CFG_TARGET_FEATURE contains crt-static
+    (read in cc 1.8.0, src/lib.rs, lines 194-197 and 2694-2708), so C code would compile -MD and link against libcmt.lib.
+    Microsoft: "All modules passed to a given invocation of the linker must have been compiled with the same runtime library compiler option"
+    (documented, https://learn.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library).
+    static_vcruntime's README recommends setting +crt-static as well, "For the best compatibility" (read).
+  - Hand-written link args for a fully static runtime in apps/core/build.rs would hit the same -MD C code; not tried (unverified).
+- The standard library's choice of runtime follows the flag at link time: libc's copy for std has
+  #[link(name = "msvcrt", cfg(not(target_feature = "crt-static")))] and #[link(name = "libcmt", cfg(target_feature = "crt-static"))]
+  (read in libc 0.2.190, src/windows/mod.rs, lines 259-262).
+- Rust's own docs give the flag the same way: "RUSTFLAGS='-C target-feature=+crt-static' cargo build --target x86_64-pc-windows-msvc",
+  and crates learn of it through cfg(target_feature = "crt-static") and CARGO_CFG_TARGET_FEATURE
+  (documented, The Rust Reference, Linkage, "Static and dynamic C runtimes", https://doc.rust-lang.org/reference/linkage.html).
+- Precedent for the config form: ripgrep's .cargo/config.toml holds [target.x86_64-pc-windows-msvc] rustflags = ["-C", "target-feature=+crt-static"],
+  "so that the resulting EXE does not depend on the vcruntime DLL" (read in BurntSushi/ripgrep, default branch, 2026-10-18).
+
+======================================================================
+Q2. CARGO-MSFS AND THE CONFIG ENTRY
+======================================================================
+
+What cargo-msfs runs (read in navigraph/cargo-msfs v1.1.0, 5d3718d, src/main.rs, CommandType::Build, lines 207-267;
+installed from git tag v1.1.0, read in %USERPROFILE%\.cargo\.crates.toml):
+- Command: cargo build --release --target wasm32-wasip1 --message-format=json, with current_dir set to the -i folder.
+- Environment, in this order: WASI_SYSROOT, MSFS_SDK, RUSTFLAGS (its flags joined by spaces), CFLAGS (--sysroot=<wasi sysroot>),
+  then .envs(std::env::vars()), so the caller's value of any of those four replaces cargo-msfs's.
+- Its RUSTFLAGS: -Cstrip=symbols -Clto -Ctarget-feature=-crt-static,+bulk-memory -Clink-self-contained=no -Clink-arg=-l -Clink-arg=c
+  -Clink-arg=<sysroot>\lib\wasm32-wasi\libclang_rt.builtins-wasm32.a -Clink-arg=-L -Clink-arg=<sysroot>\lib\wasm32-wasi
+  -Clink-arg=--export-table -Clink-arg=--allow-undefined -Clink-arg=--export-dynamic, and --export= for __wasm_call_ctors, malloc,
+  free, mark_decommit_pages, mallinfo, mchunkit_begin, mchunkit_next, get_pages_state.
+- Cargo checks CARGO_ENCODED_RUSTFLAGS before RUSTFLAGS, so a CARGO_ENCODED_RUSTFLAGS in the caller's environment would beat
+  cargo-msfs's flags too (inference from the precedence above; Cargo sets that variable for build scripts, and nothing of ours
+  runs cargo-msfs from one).
+- Aside, not asked: the flags are joined by spaces and Cargo splits RUSTFLAGS on spaces, so a sysroot path with a space in it,
+  under a home folder with a space, would break the link arguments (inference; not run).
+
+(a) Ignored while cargo-msfs builds: yes.
+    Target units (wasm32): RUSTFLAGS outranks target.*.rustflags, and the entry names another triple anyway.
+    Host units: see (c).
+    Measured: after adding the entry, the cargo-msfs build compiled 0 crates (Q5, step 2).
+(b) No effect on the wasm32 build, which carries -Ctarget-feature=-crt-static from cargo-msfs (read, above).
+(c) Host artifacts under --target get no rustflags on stable.
+    Cargo 1.95, extra_args: for a host unit, unless target-applies-to-host is true and the only requested kind is the host
+    (that is, no --target), "host artifacts just get flags from [host], regardless of --target", and they "don't pick up RUSTFLAGS"
+    (read in target_info.rs, rust-1.95.0).
+    [host] is read only with -Zhost-config (read in src/cargo/util/context/target.rs, load_host_triple), and
+    get_target_applies_to_host returns true on stable (same file).
+    So in a plain `cargo build` (no --target) build scripts and proc macros get the config's +crt-static; in cargo-msfs's they get nothing.
+    Measured in the fingerprints Cargo wrote (target\release\.fingerprint\<unit>\*.json, field "rustflags"):
+      serde_derive-87ed6b8d0cc297e4/lib-serde_derive.json: rustflags=-C target-feature=+crt-static   (plain cargo build)
+      serde_derive-99b90db4d619a6c8/lib-serde_derive.json: rustflags=                              (shared with cargo-msfs's build)
+      proc-macro2-2a8c97230ddb804a/build-script-build-script-build.json: rustflags=[-C target-feature=+crt-static]
+      proc-macro2-32883c8f416ce240/build-script-build-script-build.json: rustflags=[]
+(d) No rebuilding when alternating, on Cargo 1.85 and later.
+    Cargo 1.95 builds three hashes per unit (read in src/cargo/core/compiler/build_runner/compilation_files.rs, compute_metadata):
+    - c_metadata, passed as -C metadata for symbol names, leaves rustflags out: "RUSTFLAGS is not in Metadata::c_metadata,
+      because it often has absolute paths (like --remap-path-prefix ...)".
+    - unit_id hashes unit.rustflags, unless they hold --remap-path-prefix ("Avoid trashing the caches on RUSTFLAGS changing via unit_id").
+    - c_extra_filename and pkg_dir both return unit_id, so it names the files (-C extra-filename) and the fingerprint and build-script
+      folders. A host crate built with +crt-static and the same crate built without it get different files and folders.
+    History (read in Cargo's changelog, src/doc/src/CHANGELOG.md at rust-1.95.0):
+    - Cargo 1.33: "RUSTFLAGS is now included in the metadata hash, meaning that changing the flags will not overwrite previously built files" (#6503).
+    - Cargo 1.39: "RUSTFLAGS are no longer incorporated in the metadata and filename hash, reversing the change from 1.33" (#7459).
+    - Cargo 1.85: "Prevented build caches from being discarded after changes to RUSTFLAGS" (#14830, #14898).
+    So on Cargo 1.39 to 1.84 every switch between the two builds would rebuild the shared host crates (inference; no older Cargo run).
+    Measured on 1.95: Q5, steps 2 to 5, 0 crates each. target\release\deps then holds serde_derive-87ed6b8d0cc297e4.dll and
+    serde_derive-99b90db4d619a6c8.dll, and proc_macro2 and syn twice, so target\ grows by one copy of each shared host crate.
+    The one-time cost: the first plain build after the entry goes in recompiles every crate, 27 here.
+(e) +crt-static on proc macros, MSVC, without --target:
+    rustc 1.95.0 rejects a dylib or proc macro with a static runtime only where the target lacks crt_static_allows_dylibs
+    (read in rust-lang/rust 1.95.0, compiler/rustc_session/src/output.rs, invalid_output_for_target),
+    and the MSVC base sets crt_static_allows_dylibs: true (compiler/rustc_target/src/spec/base/windows_msvc.rs, line 17).
+    With +crt-static given, Session::crt_static returns true for a proc macro too (compiler/rustc_session/src/session.rs, crt_static).
+    Measured: serde_derive, ts-rs-macros, and thiserror-impl built with +crt-static, the derives expanded, and cargo test --release passed (Q5).
+    Microsoft cautions against a static runtime in a DLL because the DLL "has its own CRT state" (documented, crt-library-features);
+    rustc loads each proc macro DLL that way, and it worked here; we didn't look further into rustc's proc-macro bridge.
+    Not tried: bindgen's build script compiled with +crt-static for the Windows side's SimConnect bindings, since p11's module is
+    the only crate that uses bindgen and cargo-msfs builds it without flags (unverified; the first build of the sim's edge settles it).
+
+======================================================================
+Q3. TAURI 2'S OWN STATIC VC RUNTIME
+======================================================================
+
+Read in tauri-build 2.7.1 (the version our p05 probe pins, %USERPROFILE%\.cargo\registry\src\...\tauri-build-2.7.1) and tauri-utils 2.10.1:
+- src/lib.rs, line 687: let static_vc_runtime = should_static_link_vc_runtime(&config, &attributes).
+- src/lib.rs, lines 938-950: the deprecated STATIC_VCRUNTIME environment variable decides if set ("Any value other than false
+  statically links", doc comment at lines 78-80); otherwise WindowsAttributes::static_vc_runtime, otherwise tauri.conf.json's
+  build > windows > staticVCRuntime.
+- tauri-utils 2.10.1, src/config.rs, lines 3909-3926: WindowsBuildConfig.static_vc_runtime, serde default true, Default true.
+- src/lib.rs, lines 794 and 879-918: inside if target_triple.contains("windows"), for CARGO_CFG_TARGET_ENV = "msvc" with the setting on,
+  it calls static_vcruntime::build().
+- src/static_vcruntime.rs ("taken from https://github.com/ChrisDenton/static_vcruntime/", "we want this for debug builds too"):
+  the same eleven link args as static_vcruntime 3.0.0 above, plus an empty msvcrt.lib written to OUT_DIR and put on the link search path,
+  "Override the hard-coded msvcrt.lib".
+- tauri-build 2.7.3, the newest 2.x tauri-build in GitHub's release list on 2026-10-18, depends on static_vcruntime = "3.0" and calls static_vcruntime::metabuild()
+  instead (read in tauri-apps/tauri, tag tauri-build-v2.7.3, crates/tauri-build/Cargo.toml and src/lib.rs).
+  static_vcruntime dropped the msvcrt.lib override on 2025-11-25 because "rustc has long since stopped hard coding the CRT library names"
+  (read in its commit c9fa485).
+- tauri-utils 2.10.1 also has bundle > windows > bundleVCRuntime, default false, which bundles the runtime DLLs beside the app
+  (src/config.rs, lines 1084-1096); 6.17 builds with tauri build --no-bundle, so whether anything reads it on our path is unverified.
+
+So by default: static C startup and VC runtime, dynamic UCRT, for the package whose build.rs calls tauri_build::build(), that is
+the desktop app's crate alone, since link args reach only that package's targets (documented, build scripts page).
+The core and the core helper are other packages and get nothing from it.
+Turned off by: build.windows.staticVCRuntime = false in tauri.conf.json, WindowsAttributes::new().static_vc_runtime(false), or
+STATIC_VCRUNTIME=false (deprecated).
+Microsoft documents the same mix as the "Hybrid CRT", which "combines the UCRT and static CRT", compiles with /MT, ignores
+libucrt[d] and links ucrt[d] (documented, https://github.com/microsoft/WindowsAppSDK/blob/main/docs/Coding-Guidelines/HybridCRT.md).
+With +crt-static from our config, cc compiles C code /MT, which is what that mix expects.
+
+Measured, debug builds of a copy of p05 (tauri 2.12.1, tauri-build 2.7.1), imports by dumpbin /imports:
+  A. no config, staticVCRuntime default:     246 crates, 47.6s; no VCRUNTIME140.dll; api-ms-win-crt-math, -string, -convert,
+                                             -runtime, -stdio, -locale, -heap
+  B. +crt-static config, default:            246 crates, 48.6s; the same imports as A
+  C. +crt-static config, staticVCRuntime false: 1 crate, 3.5s; no VCRUNTIME140.dll and no api-ms-win-crt-*.dll
+  D. no config, staticVCRuntime false:       1 crate, 7.8s; VCRUNTIME140.dll, VCRUNTIME140_1.dll, and the seven api-ms-win-crt-*.dll
+  Every variant also imported Windows' own DLLs: kernel32, user32, ole32, combase, ws2_32, and the like.
+  D compiled 1 crate after B and C had built every dependency with +crt-static, so A's dependencies were still on disk:
+  the same side-by-side caching as Q2 (d).
+  Every variant linked; whether the linker warned is unknown, since rustc doesn't show the linker's warnings on a link that succeeds
+  (unverified; Velopack's build.rs turns them into errors with /WX for that reason, read).
+
+======================================================================
+Q4. WHY THE OTHER PROGRAMS WANT A STATIC RUNTIME
+======================================================================
+
+- The UCRT is part of Windows: "The UCRT is now a system component in Windows 10 and later, managed by Windows Update"
+  (documented, https://learn.microsoft.com/en-us/cpp/windows/determining-which-dlls-to-redistribute).
+- vcruntime140.dll is not: the same page lists vcruntime[version].dll among the Visual C++ DLLs an application deploys, and says
+  "Because most users probably don't have Visual Studio installed, you must provide these DLLs for them."
+  Whether a fresh Windows 10 or 11 image happens to carry a copy for some inbox component is unverified; a clean VM settles it,
+  such as the Windows 10 VM 6.17's installer check already plans.
+- A Rust MSVC binary without crt-static imports VCRUNTIME140.dll: p01's math program (measured 2026-10-15, [core log]),
+  p11-core here, and the Tauri app in variant D, which also imported VCRUNTIME140_1.dll (measured).
+  static_vcruntime's docs say the same: "By default, Rust requires programs to deploy vcruntime140.dll (or equivalent)" (read).
+  Microsoft gives the failure as "This application has failed to start because library.dll was not found"
+  (documented, https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files, "Potential runtime errors").
+- Velopack's Update.exe and Setup.exe are Rust programs in src/bins (read in velopack 1.2.161).
+  Its Windows CI job sets env RUSTFLAGS: -C target-feature=+crt-static and builds with
+  --target x86_64-win7-windows-msvc on nightly with -Z build-std (read in .github/workflows/build-rust.yml, tag 1.2.161, job windows).
+  src/bins/build.rs adds delay-load and /DEPENDENTLOADFLAG link args only when CARGO_CFG_TARGET_FEATURE contains crt-static (read).
+  So Velopack ships its own programs with a static runtime; the imports of the Update.exe that vpk ships are unverified.
+- Velopack's vcredist frameworks (read in src/bins/src/windows/runtimes.rs, tag 1.2.161):
+  - vcredist143-x64 is "Visual C++ 2022 Redist (x64)", minimum 14.30.30704, from https://aka.ms/vs/17/release/vc_redist.x64.exe;
+    the table also has vcredist140 to vcredist145 for x86, x64, and arm64.
+  - Detection reads HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall for a DisplayName matching "Microsoft Visual C++ ... Redistributable".
+  - Install runs the downloaded installer with /norestart and /q, or /passive /showrmui.
+  - Velopack's docs: dependencies "will be downloaded and installed before your application will be installed", and Velopack
+    "will check that all required dependencies are installed before applying new updates"
+    (documented, https://docs.velopack.io/packaging/bootstrapping).
+  - Microsoft, on vc_redist: "If you aren't running from an elevated command prompt, you'll need to respond to a User Account Control
+    prompt to allow the installer to run with administrative privileges" (documented, redistributing-visual-cpp-files).
+  - So --framework vcredist143-x64 would put a UAC prompt into Setup.exe on a PC without the redistributable, and into an update
+    if a pilot later removed it (inference from the two sources; not run).
+    6.17's design installs and updates with no administrator prompt beyond the firewall rule's
+    (read in record/areas/install/01-installing-and-updating.md).
+  - Microsoft recommends central deployment through the redistributable over app-local copies "For servicing reasons" (documented, same page),
+    and an app-local vcruntime140.dll would be a file we update ourselves.
+- What a static runtime costs:
+  - 98,816 bytes per program here (p11-core, measured).
+  - Each program carries its own copy of the runtime's state, which matters only when CRT objects cross a DLL boundary
+    (documented, crt-library-features, "What problems exist if an application uses more than one CRT version?");
+    every program we ship for Windows is an EXE.
+  - Runtime fixes come with our releases rather than Windows Update (inference).
+
+======================================================================
+Q5. THE LOCAL CHECK, RUN
+======================================================================
+
+Setup, on 2026-10-18, all under <scratch>\crt:
+- ws\ is a copy of experiments/areas/architecture/workspace (p11's workspace) without target\ and build\: the message crate, the module's
+  host, Follow, the module as a cdylib, and p11-core, with the module left out of default-members and the root profile lto and strip.
+- scripts\probe.mjs runs each command with RUSTFLAGS and CARGO_ENCODED_RUSTFLAGS removed and CARGO_NET_OFFLINE=true, and counts
+  the "Compiling" lines on stdout and stderr; cargo-msfs pipes cargo's JSON stdout and leaves its stderr, where those lines go, to us (read).
+- The cargo-msfs command: cargo-msfs build msfs2024 -i <scratch>\crt\ws\module -o <scratch>\crt\out\p11.wasm, run from <scratch>\crt.
+- No parent folder of <scratch>\crt holds a .cargo\config.toml, and %USERPROFILE%\.cargo holds none (read).
+
+Phase "base", no .cargo\config.toml (p11's case):
+  cargo build --release: ok, 6.1s, 27 crates compiled
+  cargo-msfs build msfs2024: ok, 8.6s, 30 crates compiled
+    (bindgen and its dependencies, the wasm32 copies of serde, uuid, and our crates, and syn v2.0.119 and ts-rs-macros again,
+    since bindgen turns on more of syn's features in that build)
+  cargo build --release again: ok, 0.1s, 0 crates compiled
+  cargo-msfs build again: ok, 0.2s, 0 crates compiled
+  cargo build --release once more: ok, 0.1s, 0 crates compiled
+  imports of target\release\p11-core.exe: bcryptprimitives.dll, api-ms-win-core-synch-l1-2-0.dll, KERNEL32.dll, ntdll.dll,
+    VCRUNTIME140.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll,
+    api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll
+
+Then ws\.cargo\config.toml was written:
+  [target.x86_64-pc-windows-msvc]
+  rustflags = ["-C", "target-feature=+crt-static"]
+
+Phase "config":
+  1. cargo build --release: ok, 5.9s, 27 crates compiled (every crate, since its flags changed)
+  2. cargo-msfs build msfs2024: ok, 0.2s, 0 crates compiled
+  3. cargo build --release again: ok, 0.1s, 0 crates compiled
+  4. cargo-msfs build again: ok, 0.2s, 0 crates compiled
+  5. cargo build --release once more: ok, 0.1s, 0 crates compiled
+  imports of target\release\p11-core.exe: bcryptprimitives.dll, api-ms-win-core-synch-l1-2-0.dll, KERNEL32.dll, ntdll.dll
+  cargo test --release: ok, 6.3s, 4 crates compiled (the test builds of our crates); 1 and 2 tests passed, p11's 3
+  target\release\deps afterwards: serde_derive-87ed6b8d0cc297e4.dll and serde_derive-99b90db4d619a6c8.dll;
+    ts_rs_macros-686953beac6a0ee4.dll, -df8f4a257e5a3d72.dll, and -f4897e7c195b908f.dll; libproc_macro2 twice; libsyn five times.
+  The fingerprints' rustflags are under Q2 (c).
+  So this answers (d): with the entry in place, neither build rebuilds anything of the other's, on cargo 1.95.0.
+
+Guard, with the compile_error! of the recommendation added to p11-core's main.rs after its inner doc comments,
+building cargo build --release -p p11-core from Node with the environment shown:
+  1. config only: exit 0, Finished
+  2. RUSTFLAGS="-C debuginfo=1": exit 101,
+     error: crosscheck-core must link the C runtime statically: RUSTFLAGS replaced the +crt-static of .cargo/config.toml
+  3. RUSTFLAGS set to an empty string: exit 101, the same error
+  On Windows, cmd's `set RUSTFLAGS=` deletes the variable, and a build run that way stayed static (measured: its exe imported
+  no C runtime DLL); PowerShell 5.1's `$env:RUSTFLAGS = ""` deletes it too (unverified here).
+  Node passed the empty value through, and Cargo treated it as set.
+
+Size, release, the same p11-core source:
+  with the config:                          251,904 bytes; imports no C runtime DLL
+  with RUSTFLAGS="" in its own target dir:  153,088 bytes; imports VCRUNTIME140.dll and five api-ms-win-crt-*.dll
+
+The Tauri variants are under Q3. That copy was <scratch>\crt\tauri\app and page\, from experiments/areas/architecture/tauri.
+Nothing in the repository was built or changed; the scratch copies hold every target folder.
+
+[core log]: record/areas/core/log.md, "2026-10-15: A high-resolution waitable timer wakes within 1.5ms where tokio's wake up to 17ms late,
+and the core's math changes with the C runtime's FMA3 switch and with its version".

@@ -1,10 +1,12 @@
 /*
  * Reads the JavaScript a panel loaded, including the sim's own.
  *
- * MSFS 2024 streams its core packages instead of installing them, so scripts
- * such as VCockpit.js and BaseInstrument.js aren't on disk anywhere, but every
- * panel document has them loaded and the inspector hands them over (FS Copilot
- * fork, record/pointer-forwarding/docs/09-environment.md).
+ * Every panel document has the sim's scripts loaded, as the copies that won
+ * the mount, and the inspector hands them over (FS Copilot fork,
+ * record/pointer-forwarding/docs/09-environment.md). The stock VCockpit.js and
+ * BaseInstrument.js are on disk in a Steam install too, in the
+ * asobo-vcockpits-core and asobo-vcockpits-instruments packages
+ * (record/areas/build/log.md, 2026-10-18).
  *
  *   node experiments/tools/sources.mjs <page> list              what the page loaded
  *   node experiments/tools/sources.mjs <page> grep <text>       search every loaded script

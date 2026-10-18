@@ -1,0 +1,570 @@
+Building blocks for the Coherent GT check, for node 6.18
+Researched 2026-10-18 for the architecture plan's node 6.18, the build, on decision 031's open items:
+the check tool's parser, its list of banned built-ins and web APIs with an exception for a package's own fill-in,
+and whether it also offers an ESLint config; plus the framework's for-of rewrite and naming a source line through a map.
+Inputs read first: decisions 030 and 031, record/areas/architecture/coherent-gt.md, the spine's "Compiling our code in
+the sim" and "The check", the architecture log's p09 entry, experiments/areas/architecture/p09-coherent-syntax.mjs,
+and its results files p09-coherent-syntax-2026-10-09-19-07-30.txt and p09-compilers-2026-10-09-19-30-30.txt.
+Development machine: Windows 11 Pro 10.0.26200, Node v22.23.1, npm 10.9.8. Nothing here touched the sim or its inspector.
+Packages, each the version npm tagged latest on 2026-10-18 unless noted:
+  acorn 8.19.0, acorn-walk 8.3.5, espree 11.2.0, meriyah 7.4.0, @eslint-community/regexpp 4.12.2, eslint-scope 9.1.2,
+  source-map-js 1.2.2, esbuild 0.28.2, @microsoft/msfs-sdk 2.3.3 (published 2025-12-12), @microsoft/msfs-ts-transformer
+  1.0.0, eslint 10.13.0, eslint-plugin-es-x 10.1.0 (with eslint-type-tracer 0.5.2), typescript-eslint 8.71.2,
+  typescript 7.0.2 (latest) and 6.0.3, and typescript 5.8.3 for running the transformer.
+Evidence markers follow writing.md: measured (we ran it), read (we read it in a package's files or source),
+documented (a vendor page says so), unverified (inference, forum post, or guess).
+Paths: <scratch> is this session's scratch folder, outside the repository, which holds the scripts and bundles named below;
+none of them is committed.
+
+======================================================================
+ANSWERS
+======================================================================
+
+Q  | Question                                       | Answer
+---+------------------------------------------------+---------------------------------------------------------------------
+1  | Does acorn at ecmaVersion 2017 reject what     | Yes. Of p09's 45 samples it rejects all 20 the engine fails, and accepts
+   | the engine rejects, and accept ES2015-2017?    | all 22 from ES2015 to ES2017. It also rejects 3 the engine parses:
+   |                                                | object rest, the template literal revision, and import(). It rejects a
+   |                                                | raw U+2028 and U+2029, every ES2018+ regex feature, and the s, d, and v
+   |                                                | flags (measured). espree 11.2.0 gives the same verdict on all 65 samples;
+   |                                                | meriyah 7.4.0 has no version option and accepted every one (measured).
+1b | Validating new RegExp("...", "...") at 2017    | @eslint-community/regexpp's RegExpValidator({ ecmaVersion: 2017 }),
+   |                                                | validateFlags then validatePattern: a public API with a version option.
+   |                                                | acorn's own validator isn't exported, and building a literal from the
+   |                                                | string needs escaping of "/" and line terminators. All three agreed on
+   |                                                | 19 patterns (measured). esbuild 0.28.2 at es2017 emits
+   |                                                | new RegExp("(?<y>\\d{4})"), plain and minified, and regexpp fails it with
+   |                                                | "Invalid group" (measured).
+2  | Finding banned built-ins and web APIs, and     | eslint-scope's unresolved references for globals, a member check on those
+   | their false-positive cost in a framework bundle| for statics, property names for prototype methods. An FSComponent page on
+   |                                                | msfs-sdk 2.3.3, bundled at es2017 (2,535,217 bytes): 0 hits for every
+   |                                                | banned name. The whole framework kept (3,689,065 bytes): 2 hits, both
+   |                                                | false positives, ArrayUtils.flatMap(...), the framework's own static
+   |                                                | helper; 0 real uses, 0 typeof guards, 0 regex problems (measured).
+2b | What "an exception for a package's own         | Five rules: a definition isn't a use; a guard isn't a use; a receiver the
+   | fill-in" needs                                 | file binds to its own class or object declaring that member isn't the
+   |                                                | built-in; a file that installs a fill-in for X passes its uses of X; and
+   |                                                | what's left goes in the data file as allowed receivers or source paths,
+   |                                                | not as comments, which a minified bundle drops. The framework fills in
+   |                                                | nothing: it defines ArrayUtils.at, flat, flatMap, ObjectUtils.fromEntries,
+   |                                                | StringUtils.trimStart, and a Warning.description getter (read).
+3  | eslint-plugin-es-x 10.1.0's coverage           | Every syntax and regex item of the reference, regex rules included in
+   |                                                | RegExp(...) and new RegExp(...) with constant strings, and every ES
+   |                                                | built-in but Intl, which no rule bans, and FinalizationRegistry, which only
+   |                                                | no-weakrefs bans, with WeakRef, which the engine has (read, measured).
+   |                                                | No web APIs: core no-restricted-globals and no-restricted-properties do
+   |                                                | those, with no typeof exemption and no window.X (measured).
+   |                                                | Prototype methods: by default only receivers its in-file tracer types
+   |                                                | (0 of 7 untyped reported); aggressive reports unknown receivers (7 of 7)
+   |                                                | and also a local class's own at() and description; typed linting through
+   |                                                | typescript-eslint uses TypeScript's types (measured).
+3b | An ESLint plugin and config as our tool,       | Feasible, at a cost: about 3x slower (CLI median 1,358ms against 458ms on
+   | against a standalone acorn tool                | the 2.5 MB bundle, 1,945ms against 690ms on 3.7 MB), 80 packages and
+   |                                                | 12.2 MB against 9 and 1.4 MB, the bundle's 263 eslint-disable comments
+   |                                                | to neutralize, and restrict-to-es2017's iterator-helper rules, which in
+   |                                                | aggressive mode put 172 false positives on the 2.5 MB bundle (measured).
+   |                                                | Editor warnings in TypeScript sources need the TypeScript 6 API beside
+   |                                                | TypeScript 7: typescript-eslint 8.71.2 throws "typescript-eslint does not
+   |                                                | support TS 7.0." (measured).
+4  | @microsoft/msfs-ts-transformer 1.0.0           | Rewrites a for-of over any type with a number index and a numeric length
+   |                                                | (arrays, readonly arrays, typed arrays, strings) into an _i_N index loop,
+   |                                                | when the body is a block, an expression statement, or empty; and array
+   |                                                | destructuring without rest or defaults over such types. It leaves Map, Set,
+   |                                                | generators, .values(), any, for await, spread, and an unbraced if as body
+   |                                                | (read, measured with TypeScript 5.8.3). msfssdk.js 2.3.3 already holds 109
+   |                                                | rewritten loops and 140 for-of it couldn't rewrite; the 2.5 MB bundle keeps
+   |                                                | 53 and 94, all from the framework (measured). No measurement of for-of's
+   |                                                | cost in Coherent GT found anywhere (unverified).
+5  | Naming the source line of a failure in a bundle| esbuild's sourcemap (external or linked) and source-map-js 1.2.2's
+   |                                                | originalPositionFor: a named group at bad.js line 54963 maps to
+   |                                                | example/bad.ts:8:13, plain and minified; 58ms for the first lookup on a
+   |                                                | 5.6 MB map, then 2ms per 1,000 (measured). esbuild chains the framework's
+   |                                                | own map, which leads to its compiled build/*.js, not its TypeScript.
+
+Recommended shape:
+- A standalone Node CLI on acorn, acorn-walk, eslint-scope, @eslint-community/regexpp, and source-map-js:
+  9 packages with their dependencies, 1.4 MB, the five named under MIT and BSD licenses, and under 0.5s on the
+  2.5 MB bundle including Node's start.
+- It reads one JSON data file holding the reference's lists, checks each file we ship (esbuild's bundles with their maps,
+  and hand-written panel JavaScript), and prints file:line:column, then the source file:line:column through the map,
+  then the source line from the map's sourcesContent.
+- It applies the five exception rules of 2b, under which the framework bundle's 2 false positives would pass with no
+  allow-list entry (rule 3).
+- It parses at 2017 and lives with the 3 false rejections of section 1 (object rest, template literal revision,
+  import()), since esbuild lowers object rest, and neither of the other two appears in the framework's bundles.
+- The ESLint config is an optional second export of the same repository, generated from the same data file, with eslint
+  and eslint-plugin-es-x as optional peer dependencies the CLI never loads.
+  For TypeScript sources it needs only the regex rules and the web-API, Intl, FinalizationRegistry, and crypto.subtle
+  bans, since tsc with lib ES2017 already fails every later built-in and esbuild lowers the later syntax.
+  It can wait: the after-edit hook that decision 031 asks for gives the same findings, mapped to the TypeScript line,
+  within about 0.7s of a save (esbuild about 0.2s plus the check), without the TypeScript 6 install.
+
+======================================================================
+1. PARSER
+======================================================================
+
+Method (measured): <scratch>/cgt/parse-samples.mjs reads the SYNTAX array straight out of p09-coherent-syntax.mjs and
+the engine's verdicts out of p09's 19-07-30 results file, adds 20 samples p09 didn't have, and parses each with
+acorn.parse(src, { ecmaVersion: 2017, sourceType, allowReturnOutsideFunction: true }), the same at 2018 and "latest",
+espree.parse at 2017 with ecmaFeatures.globalReturn, and meriyah.parse with globalReturn and validateRegex.
+p09's samples are function bodies for new Function, hence allowReturnOutsideFunction.
+Engine column: p09 on MSFS 2024, 2026-10-09, the same verdict in all five documents (+ parses and returns the value,
+x doesn't parse, ! parses and throws when run).
+
+ES   | Sample                               | Engine | acorn 2017 | espree 2017 | acorn 2018 | acorn latest | meriyah
+-----+--------------------------------------+--------+------------+-------------+------------+--------------+--------
+2015 | let and const                        | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | arrow functions                      | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | classes, getters, statics            | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | extends and super                    | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | extending Error                      | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | template literals                    | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | tagged templates                     | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | destructuring with defaults          | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | default parameters                   | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | rest parameters                      | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | spread in calls and arrays           | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | computed keys, shorthand, methods    | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | for-of                               | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | generators                           | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | new.target                           | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | super in object methods              | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | binary and octal literals            | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | regex u and y flags                  | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2016 | exponent operator                    | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2017 | async functions                      | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2017 | async arrows and methods             | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2017 | trailing commas in calls             | +      | accepts    | accepts     | accepts    | accepts      | accepts
+2018 | object rest                          | +      | REJECTS    | rejects     | accepts    | accepts      | accepts
+2018 | object spread                        | x      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | for await                            | x      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | async generators                     | x      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | regex named groups                   | x      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | regex lookbehind                     | x      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | regex s flag                         | !      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | regex unicode properties             | x      | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | template literal revision            | +      | REJECTS    | rejects     | accepts    | accepts      | accepts
+2019 | optional catch binding               | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2019 | U+2028 in a string literal           | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2020 | optional chaining                    | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2020 | nullish coalescing                   | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2020 | BigInt literals                      | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2020 | dynamic import                       | + (not run) | REJECTS | rejects   | rejects    | accepts      | accepts
+2021 | logical assignment                   | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2021 | numeric separators                   | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | class fields                         | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | #private fields                      | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | #private methods                     | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | static blocks                        | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | #x in obj                            | x      | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | regex d flag                         | !      | rejects    | rejects     | rejects    | accepts      | accepts
+Samples p09 didn't have (engine not run):
+2019 | U+2029 in a string literal           |        | rejects    | rejects     | rejects    | accepts      | accepts
+2015 | U+2028 in a template literal         |        | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | U+2028 in a // comment               |        | accepts    | accepts     | accepts    | accepts      | accepts
+2024 | regex v flag                         |        | rejects    | rejects     | rejects    | accepts      | accepts
+2018 | regex \k<y> back-reference           |        | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | regex negative lookbehind            |        | rejects    | rejects     | accepts    | accepts      | accepts
+2015 | regex \k with no groups (Annex B)    |        | accepts    | accepts     | accepts    | accepts      | accepts
+2015 | regex \p{L} without u (Annex B)      |        | accepts    | accepts     | accepts    | accepts      | accepts
+2017 | trailing commas in parameter lists   |        | accepts    | accepts     | accepts    | accepts      | accepts
+2017 | async arrow, destructured parameter  |        | accepts    | accepts     | accepts    | accepts      | accepts
+2018 | object rest in a parameter           |        | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | object rest in an assignment         |        | rejects    | rejects     | accepts    | accepts      | accepts
+2018 | array spread after an object rest    |        | rejects    | rejects     | accepts    | accepts      | accepts
+2016 | **=                                  |        | accepts    | accepts     | accepts    | accepts      | accepts
+2023 | hashbang                             |        | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | #private getter                      |        | rejects    | rejects     | rejects    | accepts      | accepts
+2020 | import.meta (module)                 |        | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | top-level await (module)             |        | rejects    | rejects     | rejects    | accepts      | accepts
+2020 | export * as ns (module)              |        | rejects    | rejects     | rejects    | accepts      | accepts
+2022 | string export names (module)         |        | rejects    | rejects     | rejects    | accepts      | accepts
+
+acorn 2017's messages, verbatim, each with line:column in the sample:
+  object rest / spread, for await, async generators, optional catch binding, ?., ??, logical assignment,
+  class fields, static blocks, dynamic import, import.meta, export * as ns: "Unexpected token (1:N)"
+  named groups, lookbehind: "Invalid regular expression: /(?<y>\d{4})/: Invalid group (1:8)"
+  unicode properties: "Invalid regular expression: /\p{L}/: Invalid escape (1:8)"
+  s, d, and v flags: "Invalid regular expression flag (1:8)"
+  template literal revision: "Bad character escape sequence (1:56)"
+  U+2028 and U+2029 in a string: "Unterminated string constant (1:7)"
+  BigInt literals, numeric separators: "Identifier directly after number (1:16)" and "(1:8)"
+  #private fields and methods, #x in obj, hashbang: "Unexpected character '#' (1:10)"
+  top-level await: "Cannot use keyword 'await' outside an async function (1:0)"
+The error is a SyntaxError with loc.line and loc.column (0-based); acorn stops at the first one, so the check reports
+one syntax failure per file.
+
+What the table settles (measured):
+- acorn 8.19.0 at 2017 agrees with the engine on 42 of p09's 45 samples, and never accepts what the engine rejects.
+- The 3 it gets wrong it gets wrong the safe way: object rest, the template literal revision, and import(), which the
+  engine parses (import() wasn't run).
+  esbuild at es2017 lowers object rest (into its __objRest helper), so a bundle never carries it.
+  It leaves a tagged template with an invalid escape (t`\unicode`) and an external import("./x.js") as written, so a
+  bundle with either would fail the check though the engine parses it; neither appears in the framework's bundles
+  below, which parse at 2017 with no error.
+- The s and d flags, which the engine parses and then throws on when the regex runs, fail the parse, as they should.
+- espree 11.2.0 depends on acorn ^8.16.0 and gave acorn's verdict on all 65 samples, with the position moved out of the
+  message into lineNumber and column; it adds nothing a standalone tool needs.
+- meriyah 7.4.0's Options type has sourceType, next, ranges, webcompat, loc, raw, impliedStrict, preserveParens,
+  lexical, jsx, validateRegex, module, and globalReturn, and no ECMAScript version (read in
+  dist/types/options.d.ts), so it can't refuse later syntax; it accepted all 65.
+
+Validating the string arguments of new RegExp (measured, <scratch>/cgt/regex-ways.mjs, 19 patterns):
+  1. regexpp: new RegExpValidator({ ecmaVersion: 2017 }); validateFlags(flags); then
+     validatePattern(pattern, 0, pattern.length, { unicode: flags.includes("u") }).
+     Its errors read "Invalid regular expression: /(?<y>\d{4})/: Invalid group" and "Invalid flag 's'", and carry
+     the index within the pattern. Its option list names 2018 as adding the s flag, named groups, lookbehind, and
+     unicode property escapes, and 2022 the d flag (read in index.d.ts). ESLint and es-x depend on it.
+  2. Build a regex literal from the string and parse it with acorn at 2017: works, but the string's cooked value must
+     have "/" outside a class and every line terminator escaped first, and the error's position is in the made-up
+     literal.
+  3. acorn's own validator: RegExpValidationState isn't among acorn's exports (read in dist/acorn.mjs); reaching it
+     through a parser's regexpState.constructor works today and could break in any release.
+  All three agreed on all 19 patterns, failing named groups, lookbehind and negative lookbehind, \p{L} with u, the s,
+  d, and v flags, "gg", "(", and "a{2,1}", and passing \p{L} and \k without u (Annex B), "a/b", a pattern holding a
+  newline or U+2028, "[/]", \u{61} with u, and "gimuy".
+  Choose 1.
+  The check applies it to every RegExp(...) or new RegExp(...) whose callee is the unshadowed global RegExp, with a
+  string literal or a template literal without expressions as either argument; a regex literal as the first argument
+  carries its own flags, which acorn already checked.
+  The framework's 8 RegExp calls are all new RegExp(/literal/i) (read in the bundle), which pass.
+
+esbuild 0.28.2 at es2017 (measured, <scratch>/cgt/esbuild-lowering.mjs and bundle-bad.mjs):
+  /(?<y>\d{4})/       -> new RegExp("(?<y>\\d{4})")      regexpp 2017: Invalid group
+  /(?<=x)y/           -> new RegExp("(?<=x)y")           Invalid group
+  /a.b/s              -> new RegExp("a.b", "s")          Invalid flag 's'
+  /a/d                -> new RegExp("a", "d")            Invalid flag 'd'
+  /\p{L}/u            -> new RegExp("\\p{L}", "u")       Invalid escape
+  /[\p{L}--a]/v       -> new RegExp("[\\p{L}--a]", "v")  Invalid flag 'v'
+  10n                 -> /* @__PURE__ */ BigInt("10"), with the warning "Big integer literals are not available in the
+                         configured target environment ("es2017") and may crash at run-time"; the check's global
+                         BigInt rule catches the call.
+  None of the regex rewrites warns, and each output parses at acorn 2017.
+  Minified, the bundle keeps the call: let s=new RegExp("(?<y>\\d{4})-(?<m>\\d{2})").exec(...), which the check
+  failed at 4:659250 and mapped to example/bad.ts:8:13.
+  A raw U+2028 in a string comes out as \u2028 with charset ascii and utf8, minified or not, so in our bundles only
+  hand-written JavaScript or tsc's output can carry one.
+
+======================================================================
+2. BANNED BUILT-INS AND WEB APIS
+======================================================================
+
+How to find uses (measured with the scratch prototype <scratch>/cgt/check.mjs and its banned.json, a copy of the
+reference's lists):
+- Globals (BigInt, globalThis, AggregateError, FinalizationRegistry, Intl, and the 10 missing web API globals):
+  eslint-scope 9.1.2's analyze(ast, { ecmaVersion: 2017, sourceType: "script" }), then globalScope.through, the
+  references no scope resolved, minus names a script declares at its top level (globalScope.set), which eslint-scope
+  leaves in through.
+  This skips a shadowed name: var globalThis = 1 and a parameter named Intl gave no hit.
+  eslint-scope reads node.range, which acorn adds only with ranges: true; without it analyze threw "Cannot read
+  properties of undefined (reading '0')" in FunctionScope.__isValidResolution.
+  Writing our own scope tracking on acorn-walk would redo var hoisting, function and class names, catch parameters,
+  and block scopes, which eslint-scope already does, with 4 dependencies (esrecurse, estraverse, and 2 type packages).
+- Through a global object: window.X, self.X, and globalThis.X, where X is a banned global (window.queueMicrotask hit).
+- Statics: a member whose object is one of those unresolved global identifiers, against the list (Object.fromEntries,
+  Object.hasOwn, Promise.any, Promise.allSettled, crypto.subtle).
+- Prototype methods (flat, flatMap, at, findLast, toSorted, matchAll, replaceAll, trimStart, finally, description):
+  without types, only by property name, on a non-computed member or a computed one with a string literal.
+- Error cause: new Error(...) or new XxxError(...) with an object literal second argument that has a cause key.
+- Guards: an enclosing typeof, or an if, ternary, or && whose test names the same identifier.
+  The prototype misses a few cases the real tool should cover: the test's own read (if (Array.prototype.flat) counted as
+  a use), window.crypto.subtle, an alias (var O = Object; O.fromEntries), and destructuring (var { fromEntries } =
+  Object). es-x catches the alias and the destructuring (section 3).
+  eslint-utils' ReferenceTracker, which es-x uses for that, declares a peer dependency on eslint (read:
+  @eslint-community/eslint-utils 4.10.1, peerDependencies eslint "^6.0.0 || ^7.0.0 || >=8.0.0"), so a standalone tool
+  follows const aliases itself or leaves them out.
+
+The bundles (measured, <scratch>/cgt/bundle.mjs): esbuild 0.28.2, bundle, format iife, target es2017,
+jsxFactory FSComponent.buildComponent, sourcemap external.
+- banner.js: a small FSComponent page (example/banner.tsx) using EventBus, Clock, SimVarPublisher, Subject,
+  MappedSubject, ConsumerSubject, ArraySubject, NumberFormatter, DisplayComponent, and FSComponent.render, from
+  @microsoft/msfs-sdk 2.3.3: 2,535,217 bytes, 55,143 lines (883,159 minified). The framework doesn't tree-shake much.
+- whole.js: import * as sdk from "@microsoft/msfs-sdk" put on window, so every export stays: 3,689,065 bytes,
+  82,243 lines (1,358,698 minified).
+- The published msfssdk-iife.js 2.3.3 itself: 4,795,980 bytes.
+- bad.ts: banner's imports plus a named group, peers.flat().at(-1), and new ResizeObserver, as a positive control.
+All four parse at acorn 2017, and the published msfssdk.js parses at 2017 as a module.
+
+Hits (measured):
+
+File               | Hits | Names                                            | Real uses | False positives
+-------------------+------+--------------------------------------------------+-----------+------------------------------
+banner.js          | 0    | none of the 31 names                             | 0         | 0
+whole.js           | 2    | prototype flatMap 2                              | 0         | 2: ArrayUtils.flatMap([...]),
+                   |      |                                                  |           | in the framework's
+                   |      |                                                  |           | autopilot/vnav/VNavEvents.js:75
+                   |      |                                                  |           | and lnav/LNavObsEvents.js:26
+msfssdk-iife.js    | 2    | prototype flatMap 2                              | 0         | the same 2
+bad.ts bundle      | 3+1  | ResizeObserver, flat, at, and the named group    | 4         | 0
+None of the bundles has a typeof guard or any other guard around a banned name, and none has a regex problem.
+
+Plain text in whole.js, word-bounded, to show what an AST check rightly skips (measured, textcount.mjs, context.mjs):
+  fromEntries 2 (a JSDoc line, "Object.fromEntries is not available in CoherentJS.", and the static method ObjectUtils
+  .fromEntries), flat 3 (the static ArrayUtils.flat and 2 comments about "the flat segment"), flatMap 3 (its definition
+  and the 2 calls above), description 6 (5 comments and Warning's getter), finally 2 (a comment and a try ... finally),
+  trimStart 1 (StringUtils.trimStart), cause 7 (all comments), at 461 (the English word, in comments or strings; none as .at), RegExp 8,
+  and 0 for every other name: globalThis, BigInt, Intl, the web APIs, hasOwn, allSettled, subtle, matchAll, findLast,
+  toSorted, and replaceAll.
+Definitions of a banned name in whole.js (measured, definitions.mjs, sources through the map):
+  static ArrayUtils.at       utils/datastructures/ArrayUtils.js:52   (never called in the framework)
+  static ArrayUtils.flatMap  utils/datastructures/ArrayUtils.js:152
+  static ArrayUtils.flat     utils/datastructures/ArrayUtils.js:176
+  static ObjectUtils.fromEntries  utils/datastructures/ObjectUtils.js:11
+  get Warning.description    components/Warnings/Warning.js:49
+  static StringUtils.trimStart    utils/strings/StringUtils.js:26
+  Paths are the framework's build folder as its own source map names it.
+So the framework 2.3.3 fills in no built-in: it ships its own helpers under its own names, and the only cost of a
+property-name check on it is the 2 ArrayUtils.flatMap calls.
+Our code would add more of the same kind: ArrayUtils.at(arr, -1), StringUtils.trimStart(s), or warning.description
+would each be flagged by name (unverified count; we wrote no such code here).
+
+What "an exception for a package's own fill-in" needs (a design sketch from the cases above, not built):
+  1. A definition isn't a use: class members and object keys (the AST check already skips them), assignment targets
+     such as Array.prototype.flat = function () {...}, Object.defineProperty(Array.prototype, "flat", ...), and a
+     top-level function ResizeObserver() {} in a script, which scope analysis already resolves.
+  2. A guard isn't a use: typeof X, "flat" in Y, or Y.flat read in an if, ternary, or && test; and the guarded branch,
+     as in typeof ResizeObserver !== "undefined" ? new ResizeObserver(cb) : null, passes too.
+  3. A receiver the file binds to its own class or object that declares the member isn't the built-in: ArrayUtils
+     resolves to var ArrayUtils = class _ArrayUtils { ... static flatMap(array, map) { ... } } at whole.js line 8044,
+     in the same bundle. This clears both framework hits.
+  4. A file that installs a fill-in for X, by rule 1's assignments or defineProperty, passes its own uses of X, and
+     the report lists the fill-in by its source path. Whether a use can run before the fill-in, through esbuild's
+     module order, isn't checked (unverified).
+  5. What's left goes in the data file: receiver names (the sim's own copy, msfssdk.ArrayUtils.flatMap, resolves to
+     nothing in the file) and source paths matched through the map (for example @microsoft/msfs-sdk/**), each with
+     a reason. Not as comments in the code: esbuild keeps comments in a plain bundle (263 of the framework's
+     eslint-disable lines reached banner.js) and drops them when it minifies (0 in banner.min.js).
+  The data file also keeps "filled in in some documents" apart from "missing", so the message can say which
+  documents have the fill-in, though both fail.
+
+The reference is a sample: the check passes a later built-in the reference doesn't name, such as findLastIndex,
+trimEnd, toReversed, Object.groupBy, or Promise.withResolvers (unverified whether the engine lacks each).
+In TypeScript sources, tsc with lib ES2017 fails those; in JavaScript files and packages, nothing does.
+TypeScript's lib.es2021.weakref.d.ts declares FinalizationRegistry beside WeakRef (read in typescript 6.0.3), so the
+type check passes FinalizationRegistry, which the engine lacks; the check's list has to hold it, and does.
+
+Timing of the prototype in process (measured): banner.js parse 215ms, eslint-scope 78ms, walk 44ms; whole.js 288ms,
+127ms, 61ms; msfssdk-iife.js 290ms, 119ms, 65ms.
+
+======================================================================
+3. ESLINT-PLUGIN-ES-X
+======================================================================
+
+eslint-plugin-es-x 10.1.0 has 373 rules; its flat/restrict-to-es2017 config turns on 109 (read by loading the plugin,
+<scratch>/cgt/esx-list.mjs). It requires eslint >=10.6.0 and Node ^22.23.0 || ^24.18.0 || >=26.4.0 (read in its
+package.json), and depends on @eslint-community/regexpp, @eslint-community/eslint-utils, and eslint-type-tracer.
+
+The reference's items against its rules (read; each in restrict-to-es2017 unless noted):
+  Object spread                   no-rest-spread-properties, which bans object rest too (the engine parses rest)
+  for await, async generators     no-async-iteration
+  Optional catch binding          no-optional-catch-binding
+  Named groups, lookbehind        no-regexp-named-capture-groups, no-regexp-lookbehind-assertions
+  Unicode property escapes        no-regexp-unicode-property-escapes (and its -2019 to -2023 variants)
+  s, d (and v) flags              no-regexp-s-flag, no-regexp-d-flag, no-regexp-v-flag
+  Raw U+2028, U+2029 in a string  no-json-superset
+  ?., ??, ||= &&= ??=             no-optional-chaining, no-nullish-coalescing-operators, no-logical-assignment-operators
+  BigInt literals and BigInt      no-bigint
+  Numeric separators              no-numeric-separators
+  Class fields                    no-class-instance-fields, no-class-static-fields (no-class-fields exists, not in it)
+  #private fields and methods     no-class-private-fields, no-class-private-methods
+  Static blocks, #x in obj        no-class-static-block, no-private-in
+  (Template literal revision, import(): no-malformed-template-literals, no-dynamic-import, both of which the engine
+   parses)
+  flat, flatMap                   no-array-prototype-flat
+  Object.fromEntries              no-object-fromentries
+  Symbol.prototype.description    no-symbol-prototype-description
+  globalThis                      no-global-this
+  matchAll                        no-string-prototype-matchall
+  Promise.any, AggregateError     no-promise-any
+  FinalizationRegistry            only no-weakrefs, which bans WeakRef too; the engine has WeakRef
+  Array and String at             no-array-prototype-at, no-string-prototype-at
+  Object.hasOwn                   no-object-hasown
+  findLast                        no-array-prototype-findlast-findlastindex
+  toSorted                        no-array-prototype-tosorted
+  Intl                            no rule: its Intl rules ban later Intl APIs only
+  Error cause                     no-error-cause
+  Promise.prototype.finally       no-promise-prototype-finally
+  Promise.allSettled              no-promise-all-settled
+  trimStart                       no-string-prototype-trimstart-trimend
+  replaceAll                      no-string-prototype-replaceall
+  The 11 missing web APIs         no rule; core no-restricted-globals and no-restricted-properties (crypto.subtle)
+
+Regex features inside new RegExp: its regex rules walk ReferenceTracker's RegExp calls and constructions and read each
+argument with getStringIfConstant (read in dist/index.mjs, the generator over RegExp calls in its lib/utils.ts region),
+so they cover RegExp("...") and new RegExp("...", "...") with string literals, and go further than our fixed string by
+resolving constant variables (read, not measured).
+On sample files they failed new RegExp("(?<y>\\d{4})"), new RegExp("a.b", "s"), RegExp("\\p{L}", "u"), and
+new RegExp("(?<=x)y") (measured).
+
+Prototype methods, with and without types (measured on example/unknown.js and tsel/src/page.ts):
+- Default: a rule reports only when eslint-type-tracer, which reads the current file only, proves the receiver's type:
+  [1, [2]].flat(), "abc".at(-1), Symbol("x").description, and Promise.resolve().finally(...) were reported;
+  arr.flat(), arr.at(-1), s.replaceAll(...), s.trimStart(), p.finally(...), sym.description, and utils.flatMap(...) on
+  parameters were not: 0 of 7.
+- aggressive: true (per rule or settings["es-x"].aggressive) reports a receiver it can't type: 7 of 7. It still left
+  ArrayUtils.flatMap alone when ArrayUtils was a local object literal or the framework's class, and reported t.at(0)
+  and t.description on an instance of a local class that declares both.
+- With typescript-eslint and projectService, it reads TypeScript's types: rows.flat(), rows.at(-1),
+  name?.replaceAll(...), p.finally(...), and sym.description were reported without aggressive.
+- allowTestedProperty: true lets a guarded property through: Array.prototype.flat ? arr.flat() : arr and
+  if (typeof Object.fromEntries === "function") passed, while var O = Object; O.fromEntries([]) and
+  var { fromEntries } = Object were still reported. no-global-this has no such option, and core no-restricted-globals
+  reported typeof ResizeObserver as a use.
+
+What it leaves out (read, measured): web APIs entirely; Intl; FinalizationRegistry apart from WeakRef; crypto.subtle;
+window.X through no-restricted-globals (window.queueMicrotask passed); a typeof guard on a global; the difference
+between missing and filled in in some documents; and any exception for a package's own fill-in beyond what its type
+tracer infers.
+
+On the bundles (measured, eslint-run.mjs, ESLint 10.13.0, lintText):
+  Config                                                    | banner.js 2.5 MB        | whole.js 3.7 MB
+  ----------------------------------------------------------+-------------------------+------------------------
+  restrict-to-es2017 minus no-weakrefs, plus core bans,      | 0 messages              | 0 messages
+  110 rules, default                                        |                         |
+  the same, aggressive                                      | 172, all false          | 240, all false
+                                                            | positives               | positives
+  only the reference's 37 es-x rules plus 2 core rules,     | 0                       | 0
+  default or aggressive                                     |                         |
+  The 172 on banner.js: Iterator.prototype.map 60, forEach 37, reduce 21, filter 17, find 11, every 4, some 2,
+  Set.prototype.intersection 15, and Array.prototype.with 5, such as this.subs.filter(...) and this.with(data, next).
+  restrict-to-es2017 bans ES2025's iterator helpers by method name, so with aggressive every .map and .filter on an
+  untyped receiver is flagged; a generated config must list only the reference's rules.
+  The bundle carries the framework's eslint-disable comments for rules nobody loads (177 jsdoc/require-jsdoc,
+  44 jsdoc/require-returns, 38 @typescript-eslint/no-unused-vars, 1 @typescript-eslint/no-non-null-assertion in
+  banner.js), and each became an error, "Definition for rule 'jsdoc/require-jsdoc' was not found.", until the
+  config set linterOptions.noInlineConfig, which then warns on each that it "has no effect".
+  ESLint gave a double message where an es-x rule and a core rule overlap (Promise.allSettled, Object.fromEntries,
+  BigInt), so a generated config picks one of the two.
+
+Speed (measured, time.ps1: wall clock, Node's start included, median of 5 runs; ESLint CLI with the reference-only,
+aggressive config; the acorn check is <scratch>/cgt/check.mjs):
+  File                 | acorn check | ESLint CLI
+  ---------------------+-------------+-----------
+  banner.js 2.5 MB     | 458ms       | 1,358ms
+  whole.js 3.7 MB      | 690ms       | 1,945ms
+  banner.min.js 0.9 MB | 405ms       | 1,250ms
+  In process, after its first run, ESLint's lintText took between 0.96s and 2.1s on banner.js across our runs,
+  against the acorn check's 337ms (parse, scope, and walk).
+Dependencies (measured, fresh installs): acorn, acorn-walk, eslint-scope, @eslint-community/regexpp, and source-map-js
+are 9 packages and 1.4 MB; eslint, eslint-plugin-es-x, and source-map-js are 80 packages and 12.2 MB.
+Licenses (read on npm): acorn, acorn-walk, regexpp, and eslint-plugin-es-x MIT; eslint-scope BSD-2-Clause;
+source-map-js BSD-3-Clause; meriyah ISC.
+
+Editor warnings in TypeScript sources (measured in <scratch>/tsel):
+- typescript-eslint 8.71.2 declares typescript ">=4.8.4 <6.1.0" as its peer, npm refused the install beside
+  typescript 7.0.2 without --legacy-peer-deps, and with it ESLint stopped with "typescript-eslint does not support
+  TS 7.0." from typescript-eslint's dist/index.js.
+- typescript 7.0.2's package exports only ./lib/version.cjs, ./package.json, and ./unstable/* entries, no compiler
+  API (read with npm view).
+  TypeScript's announcement says 7.0 ships without an API, and points tools such as typescript-eslint to a
+  compatibility package installed as typescript, typescript@npm:@typescript/typescript6, with 7.0 beside it under
+  another alias (documented, devblogs.microsoft.com/typescript/announcing-typescript-7-0/, "Running side by side with
+  TypeScript 6.0").
+- With typescript 6.0.3 in its place, a config of the 3 regex rules, no-bigint, 5 prototype-method rules, and
+  no-restricted-globals for ResizeObserver and Intl warned on page.ts as expected, untyped and typed: the named group,
+  lookbehind, s flag, ResizeObserver, Intl, and 10n; plus the 5 prototype methods when aggressive or typed.
+  It didn't warn on ?., ??, a class field, or a #private field, whose rules the config left off because esbuild
+  lowers them.
+- So in TypeScript sources an ESLint config adds only what tsc's own check misses: the lookbehind, which TypeScript
+  7.0.2 didn't flag in p09's compilers run while it flagged named groups and the s flag; the regex features that run
+  didn't try (unicode property escapes, the d and v flags; unverified whether tsc flags them); the web APIs, Intl,
+  FinalizationRegistry, and crypto.subtle. In hand-written JavaScript, it would carry every rule.
+
+An ESLint plugin as the tool itself: feasible, as one generated flat config of es-x rules plus core rules, with a CLI
+wrapper that runs ESLint on our bundles and maps each message through the source map. It would still need rules of
+our own for the typeof exemption on globals, window.X, the some-documents messages, and the fill-in exception, so it
+would be an ESLint plugin of ours on top of es-x, against a standalone tool of about the same logic on acorn.
+
+======================================================================
+4. THE FOR-OF REWRITE
+======================================================================
+
+What @microsoft/msfs-ts-transformer 1.0.0 does (read in its transformer.js and README.md, from npm; measured by
+running it through TypeScript 5.8.3's API with emit's before transformers, <scratch>/tsx5/run.cjs, strict on and off):
+- Its peer dependencies are ts-patch ^3.3.0 and typescript ^5.8.3; it needs TypeScript's type checker
+  (program.getTypeChecker()), so esbuild, which has no types, can't run it, and TypeScript 7.0, which ships no API,
+  can't either (documented above).
+- For-of: a for-of whose initializer is one declaration or an expression, not for await, whose body is a block, an
+  expression statement, or empty, over a type with a number index signature and a length assignable to number,
+  becomes:
+    for (let _i_1 = 0; _i_1 < arr.length; ++_i_1) { const x = arr[_i_1]; ... }
+  An iterated expression that isn't an identifier is first held in const _arr_N, so it runs once.
+  Rewritten in our run: number[], arr.filter(...), Float64Array, string, readonly number[], and [string, number][].
+  A string becomes an index loop, which yields UTF-16 code units where for-of yields code points, so a string holding
+  a character outside the Basic Multilingual Plane iterates differently (measured output).
+  Left as for-of: Map, map.values(), Set, a generator, an any-typed value, and a for-of whose body is an unbraced if.
+  for await is left to TypeScript, which lowers it at es2017 with its __asyncValues helper.
+- Array destructuring without rest and without defaults, over a number-indexed type, becomes indexed reads: variable
+  declarations (const a = arr[0], b = arr[1]), parameters (moved into the body as let, unless a later parameter's
+  default names one), assignments whose right side is an identifier, and the binding of a for-of over an iterable of
+  indexable values: for (const [k, v] of map) became for (const _arr_2 of map) { const k = _arr_2[0], v = _arr_2[1]; },
+  which stays a for-of over the Map. That last case applied only with strict on: with strict off, the iterator's
+  return type is any and the transformer left the destructuring.
+  Left: const [c, ...rest] = arr, const [d = 1, e] = arr, and spread [...arr], for which it has no case.
+
+The published framework and our bundle (measured, <scratch>/cgt/forof.mjs, counting ForOfStatement nodes and
+ForStatement nodes whose index is named _i_N):
+  File                      | for-of | for await | _i_N loops | for-of from
+  --------------------------+--------+-----------+------------+-------------------------------------------
+  msfssdk.js 2.3.3          | 140    | 0         | 109        | 47 of the framework's build files
+  whole.js (every export)   | 140    | 0         | 109        | the framework, all 140
+  banner.js (FSComponent)   | 94     | 0         | 53         | the framework, all 94; 0 from our example
+- So the published msfssdk.js already holds the transformer's output, and bundling it with esbuild keeps it.
+- Its remaining for-of loops iterate what the transformer can't index: Sets (for (const key of this.backingSet)),
+  Maps and their .values() (for (const repo of this.repos.values())), generators (for (const segment of
+  this.segments()), for (const leg of plan.legs(...))), and Maps destructured into _arr_N (for (const _arr_1 of
+  this._eventCache), from EventBus.js).
+- Our own TypeScript compiled by esbuild keeps every for-of we write, over arrays included.
+  esbuild's helpers add for-of of their own when our code uses object spread or rest at es2017: __spreadValues and
+  __objRest each run a for (var prop of __getOwnPropSymbols(...)) loop on every call (measured in esbuild's output).
+  banner.js has neither helper, since the framework's published JS, which parses at 2017, has no object spread or rest
+  left for esbuild to lower.
+
+Measurements of for-of in Coherent GT: none found (searched 2026-10-18).
+- The transformer's README says for-of iteration "is not well-optimized by CoherentGT's Javascript interpreter or
+  compiler" and that classical loops are always faster, and gives no numbers (documented by Working Title, no
+  measurement).
+- Coherent Labs' performance guide for GT calls its JavaScript engine an interpreter and says nothing of loops,
+  iterators, or JIT (documented, coherent-labs.com/Documentation/cpp-gt/d9/df1/performance_guide.html).
+- Searches of devsupport.flightsimulator.com, forums.flightsimulator.com, and the web for for-of, iterators, and
+  Coherent turned up threads on the CoherentGTUI thread's cost per frame and on MSFS 2024 costing more than 2020 for
+  the same gauges, none naming a loop construct (unverified forum reports, not measurements).
+- A web search naming FlyByWire found nothing on it either, and our sibling repositories hold no such measurement
+  (searched the FS Copilot fork's record/ and fsc-editor's docs/ for for-of and the transformer's name).
+Decision 030's frame-time probe of the EFB app and the banner, built with the rewrite and without, still settles it.
+
+======================================================================
+5. SOURCE MAPPING
+======================================================================
+
+Measured with bad.ts (<scratch>/cgt/bundle-bad.mjs, check.mjs):
+- esbuild writes the map with sourcemap: "external" (no //# sourceMappingURL comment in the bundle) or "linked"
+  (with the comment); the check looks for <file>.map beside the bundle, or follows the comment.
+- source-map-js 1.2.2: new SourceMapConsumer(JSON.parse(map)), then originalPositionFor({ line, column }), with
+  column 0-based as acorn's loc.column is, and synchronous.
+- Every failure in bad.js mapped to the TypeScript we wrote:
+    54963:15  new RegExp("(?<y>\\d{4})-(?<m>\\d{2})")  -> ../example/bad.ts:8:13, the regex literal
+    54967:18  .flat                                  -> ../example/bad.ts:13:16
+    54967:25  .at                                     -> ../example/bad.ts:13:23
+    54970:9   ResizeObserver                          -> ../example/bad.ts:17:7
+  The minified bundle, 5 lines, mapped the same 4 to the same places (4:659250 and so on).
+- esbuild read msfssdk.js's own //# sourceMappingURL=msfssdk.js.map and chained it: banner.js's map names 460 sources,
+  459 under ../node_modules/@microsoft/build/ and ../example/banner.tsx, with sourcesContent.
+  The framework's map points at its compiled build/*.js (459 sources such as ../build/data/BasicConsumer.js), not at
+  its TypeScript, so a failure in the framework names its compiled file and line, and the path esbuild resolves,
+  node_modules/@microsoft/build/, isn't a folder on disk; the check should print it relative to the package.
+- sourceContentFor(source) gives the line's text to print beside the position.
+- Cost: 58ms to build the consumer and do the first lookup on bad.js's 5.6 MB map, and 2ms for 1,000 more lookups.
+
+======================================================================
+UNVERIFIED AND OPEN
+======================================================================
+
+- What for-of costs in Coherent GT: no measurement exists that we found; decision 030's frame-time probe settles it.
+- Whether a use can run before a package's own fill-in in an esbuild bundle (exception rule 4).
+- Whether the engine lacks each later built-in the reference doesn't name (findLastIndex, trimEnd, toReversed,
+  Object.groupBy, Promise.withResolvers); adding them to p09 and its next run settles it.
+- Whether the engine parses a raw U+2029 (the reference says likely); acorn at 2017 rejects it either way.
+- How many false positives our own code would add by name (ArrayUtils.at, StringUtils.trimStart,
+  warning.description) before exception rule 3; counting them needs our code.
+- es-x's resolution of constant variables in RegExp arguments was read, not run.

@@ -266,7 +266,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 ## Cases for the bench
 
 [Node 7](../architecture/plan.md#7-testing) turns each into a test.
-In CI and on a developer's PC, on Windows, two cores run through a local `iroh-relay` with the production token and cap, each core's IP transports cleared ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)).
+In CI and on a developer's PC, on Windows, two cores run through a local `iroh-relay` with a test token and the production cap, each core's IP transports cleared ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)).
 The relay binds `127.0.0.1:3340` through `http_bind_addr`, because in `--dev` mode it answered on IPv6 loopback only; no run has tried that binding yet ([network log][win]).
 A TCP proxy sits in front of the relay, and both cores' relay list names the proxy, since a session uses one list ([joining](01-between-machines.md#joining)); the proxy can hold back or cut each core's connection through it on its own.
 The cores' backend is a local one on a local D1.

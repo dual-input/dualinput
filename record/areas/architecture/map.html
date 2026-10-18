@@ -1,1192 +1,438 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crosscheck Architecture Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=B612:wght@400;700&family=B612+Mono&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: an FCOM-style systems schematic up top, reference grids below, one sticky section rail. */
+/* Layout: an aeronautical-chart sheet; tabs across the top, the drawing left, a detail card right that stacks below on a phone. */
 :root {
-  --bg: #edf0f3;
-  --surface: #ffffff;
-  --surface-2: #f4f6f8;
-  --ink: #13202b;
-  --ink-2: #44525f;
-  --ink-3: #74808c;
-  --rule: #d3dae1;
-  --frame: #9eabb7;
-  --accent: #0a6d88;
-  --accent-soft: #dbecf1;
-  --ws: #2a5fc4;
-  --bus: #a3389a;
-  --sim: #0b8282;
-  --proc: #5f6b77;
-  --net: #2a8740;
-  --web: #b0700a;
-  --flag: #a84a06;
-  --flag-soft: #fbeee3;
-  --f-display: "B612", "Segoe UI", system-ui, sans-serif;
-  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "B612 Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --paper: #f3f5f1;
+  --sheet: #fbfcfa;
+  --ink: #1b2430;
+  --muted: #5d6874;
+  --rule: #cdd4d8;
+  --chart-blue: #2b5c9c;
+  --chart-magenta: #a3266f;
+  --chart-teal: #1f7a72;
+  --amber: #a86a12;
+  --zone-sim: #e6eef8;
+  --zone-pc: #eef0ee;
+  --zone-net: #f6e9f0;
+  --dim: 0.18;
+  --display: "B612", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "B612 Mono", ui-monospace, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0c1217; --surface: #131b22; --surface-2: #18222b; --ink: #e2e8ee; --ink-2: #a6b2bd; --ink-3: #7a8793;
-    --rule: #26323c; --frame: #4b5a67; --accent: #45c6dd; --accent-soft: #0f2f38;
-    --ws: #74a3ff; --bus: #e27ad9; --sim: #3cc9c4; --proc: #9ba7b2; --net: #62cf72; --web: #efa733;
-    --flag: #f0a050; --flag-soft: #2f2014;
+    --paper: #10161b; --sheet: #151d23; --ink: #e2e8ec; --muted: #94a1ab; --rule: #2c3841;
+    --chart-blue: #79a9e6; --chart-magenta: #e277b5; --chart-teal: #5fc0b5; --amber: #e0a24a;
+    --zone-sim: #172433; --zone-pc: #1a2026; --zone-net: #2a1a24; --dim: 0.22;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0c1217; --surface: #131b22; --surface-2: #18222b; --ink: #e2e8ee; --ink-2: #a6b2bd; --ink-3: #7a8793;
-  --rule: #26323c; --frame: #4b5a67; --accent: #45c6dd; --accent-soft: #0f2f38;
-  --ws: #74a3ff; --bus: #e27ad9; --sim: #3cc9c4; --proc: #9ba7b2; --net: #62cf72; --web: #efa733;
-  --flag: #f0a050; --flag-soft: #2f2014;
+  --paper: #10161b; --sheet: #151d23; --ink: #e2e8ec; --muted: #94a1ab; --rule: #2c3841;
+  --chart-blue: #79a9e6; --chart-magenta: #e277b5; --chart-teal: #5fc0b5; --amber: #e0a24a;
+  --zone-sim: #172433; --zone-pc: #1a2026; --zone-net: #2a1a24; --dim: 0.22;
   color-scheme: dark;
 }
-
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 14.5px/1.5 var(--f-body); }
-a { color: var(--accent); }
-.wrap { max-width: 1720px; margin: 0 auto; padding-inline: 24px; padding-block: 20px 72px; }
-@media (max-width: 600px) { .wrap { padding-inline: 16px; } }
-
-header h1 { font-family: var(--f-display); font-size: 26px; font-weight: 700; margin: 0 0 4px; letter-spacing: 0.01em; text-wrap: balance; }
-header .meta { color: var(--ink-2); margin: 0; max-width: 92ch; }
-header .meta code { font-family: var(--f-mono); font-size: 12.5px; }
-
-nav.rail {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
-  background: var(--bg); border-bottom: 1px solid var(--rule);
-  display: flex; gap: 22px; overflow-x: auto; padding-block: 10px; margin-top: 14px;
-}
-nav.rail a {
-  font-family: var(--f-display); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--ink-2); text-decoration: none; white-space: nowrap;
-}
-nav.rail a:hover, nav.rail a:focus-visible { color: var(--accent); }
-nav.rail a .n { color: var(--flag); }
-
-section { padding-top: 30px; scroll-margin-top: 48px; }
-h2 { font-family: var(--f-display); font-size: 18px; font-weight: 700; margin: 0 0 4px; letter-spacing: 0.01em; }
-.lede { color: var(--ink-2); margin: 0 0 14px; max-width: 92ch; }
-
-/* Map */
-.mapgrid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
-@media (max-width: 1150px) { .mapgrid { grid-template-columns: minmax(0, 1fr); } }
-.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; }
-.mapbox { padding: 10px; overflow-x: auto; min-width: 0; }
-.mapbox svg { display: block; width: 100%; min-width: 860px; height: auto; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 10px 6px 4px; font-size: 12.5px; color: var(--ink-2); }
-.legend span { display: inline-flex; align-items: center; gap: 7px; }
-.legend i { display: inline-block; width: 26px; height: 0; border-top: 2.5px solid currentColor; }
-.legend i.dash { border-top-style: dashed; }
-.lg-ws i { color: var(--ws); } .lg-bus i { color: var(--bus); } .lg-sim i { color: var(--sim); }
-.lg-proc i { color: var(--proc); } .lg-net i { color: var(--net); } .lg-web i { color: var(--web); }
-
-.panel { position: sticky; top: 52px; padding: 16px 18px 18px; max-height: calc(100vh - 68px); overflow: auto; min-width: 0; }
-@media (max-width: 1150px) { .panel { position: static; max-height: none; } }
-.panel .kind { font-family: var(--f-display); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
-.panel h3 { font-family: var(--f-display); font-size: 20px; margin: 2px 0 10px; }
-.panel dl { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 4px 10px; margin: 0 0 6px; font-size: 13.5px; }
-.panel dt { color: var(--ink-3); }
-.panel dd { margin: 0; }
-.panel h4 { font-family: var(--f-display); font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin: 14px 0 4px; }
-.panel ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
-.panel li { margin: 3px 0; }
-.panel p { margin: 0; font-size: 13.5px; }
-.panel .refs { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-3); }
-.panel .hint { margin-top: 12px; font-size: 12px; color: var(--ink-3); }
-
-.ref {
-  font-family: var(--f-mono); font-size: 11.5px; line-height: 1.6; padding: 0 6px; border-radius: 4px;
-  border: 1px solid var(--rule); background: var(--surface-2); color: var(--accent); text-decoration: none; white-space: nowrap;
-}
-.ref:hover, .ref:focus-visible { border-color: var(--accent); }
-.ref.doc { color: var(--ink-2); }
-
-/* SVG schematic */
-.frame { fill: none; stroke: var(--frame); stroke-width: 1.2; stroke-dasharray: 6 5; }
-.simframe { fill: var(--surface-2); stroke: var(--frame); stroke-width: 1; }
-.flab { font-family: var(--f-display); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; fill: var(--ink-3); }
-.fsub { font-family: var(--f-body); font-size: 11px; fill: var(--ink-3); }
-.node { cursor: pointer; outline: none; }
-.node .box { fill: var(--surface); stroke: var(--frame); stroke-width: 1.2; transition: fill 0.15s, stroke 0.15s; }
-.node.inner .box { fill: var(--surface-2); }
-.node:hover .box, .node:focus-visible .box { stroke: var(--accent); stroke-width: 2; }
-.node.sel .box { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.2; }
-.nm { font-family: var(--f-display); font-weight: 700; font-size: 13.5px; fill: var(--ink); }
-.nm.s { font-size: 12px; }
-.nm.l { font-size: 17px; }
-.sb { font-family: var(--f-body); font-size: 11px; fill: var(--ink-2); }
-.sb.s { font-size: 10.5px; }
-.ln { fill: none; stroke-width: 2; }
-.ln.ws { stroke: var(--ws); } .ln.bus { stroke: var(--bus); stroke-dasharray: 5 3; } .ln.sim { stroke: var(--sim); }
-.ln.proc { stroke: var(--proc); } .ln.net { stroke: var(--net); } .ln.web { stroke: var(--web); }
-.ln.dash { stroke-dasharray: 5 4; } .ln.dot { stroke-dasharray: 2 4; }
-.lb { font-family: var(--f-body); font-size: 10.5px; font-weight: 500; }
-.lb.ws { fill: var(--ws); } .lb.bus { fill: var(--bus); } .lb.sim { fill: var(--sim); }
-.lb.proc { fill: var(--proc); } .lb.net { fill: var(--net); } .lb.web { fill: var(--web); }
-.mk.ws { fill: var(--ws); } .mk.sim { fill: var(--sim); } .mk.proc { fill: var(--proc); } .mk.net { fill: var(--net); } .mk.web { fill: var(--web); }
-.lg { transition: opacity 0.15s; }
-svg.dim .lg:not(.on) { opacity: 0.13; }
-.band { fill: var(--surface-2); stroke: var(--rule); }
-.lane { stroke: var(--frame); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
-.badge circle { fill: var(--ink); }
-.badge text { fill: var(--surface); font-family: var(--f-mono); font-size: 11px; text-anchor: middle; }
-
-/* Tables */
-.tblwrap { overflow-x: auto; }
-table { border-collapse: separate; border-spacing: 0; font-size: 12.8px; line-height: 1.42; }
-th, td { text-align: left; vertical-align: top; padding: 9px 11px; border-bottom: 1px solid var(--rule); }
-thead th { font-family: var(--f-display); font-size: 11.5px; font-weight: 700; background: var(--surface-2); color: var(--ink); }
-thead th .s { display: block; font-family: var(--f-body); font-weight: 400; font-size: 11.5px; color: var(--ink-3); }
-tbody tr:last-child > * { border-bottom: 0; }
-table.life { min-width: 1520px; }
-.life th, .life td { border-right: 1px solid var(--rule); width: 152px; }
-.life th:last-child, .life td:last-child { border-right: 0; }
-.life tbody th { position: sticky; left: 0; z-index: 1; background: var(--surface); font-family: var(--f-display); font-size: 12px; width: 118px; }
-.life thead th:first-child { position: sticky; left: 0; z-index: 2; }
-.life td.same, .life td.none { color: var(--ink-3); }
-.life tr.session > * { background: var(--accent-soft); }
-.life tbody tr:hover > td { background: var(--surface-2); }
-.life tr.session:hover > td { background: var(--accent-soft); }
-.life td .ref { font-size: 10.5px; padding: 0 4px; }
-table.ref-t { width: 100%; min-width: 980px; }
-.ref-t td:first-child, .ref-t th:first-child { font-family: var(--f-display); font-size: 12px; font-weight: 700; white-space: nowrap; }
-.ref-t tr.grp > td { background: var(--surface-2); font-family: var(--f-display); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
-.note { font-size: 13px; color: var(--ink-2); padding: 10px 12px 12px; margin: 0; border-top: 1px solid var(--rule); }
-
-/* Trace */
-.trace { display: grid; grid-template-columns: minmax(0, 660px) minmax(0, 1fr); gap: 16px; align-items: start; }
-@media (max-width: 1050px) { .trace { grid-template-columns: minmax(0, 1fr); } }
-.trace .svgbox { padding: 10px; overflow-x: auto; }
-.trace .svgbox svg { display: block; width: 100%; min-width: 560px; height: auto; }
-.steps { padding: 14px 18px; min-width: 0; }
-.steps ol { list-style: none; counter-reset: st; margin: 0; padding: 0; display: grid; gap: 9px; }
-.steps li { counter-increment: st; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; font-size: 13.5px; }
-.steps li::before {
-  content: counter(st); font-family: var(--f-mono); font-size: 11px; color: var(--surface); background: var(--ink);
-  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px;
-}
-.steps h3, .vari h3 { font-family: var(--f-display); font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 10px; }
-.vari { padding: 14px 18px; margin-top: 16px; }
-.vari ul { margin: 0; padding-left: 18px; font-size: 13.5px; display: grid; gap: 6px; }
-
-/* Decisions */
-.dgroups { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 14px; }
-.dgroup { padding: 14px 16px; }
-.dgroup h3 { font-family: var(--f-display); font-size: 12.5px; font-weight: 700; margin: 0 0 8px; }
-.dgroup h3 .s { color: var(--ink-3); font-weight: 400; }
-.dgroup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.2px; }
-.dgroup li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; align-items: baseline; }
-
-/* Systems */
-.systems { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr)); gap: 14px; }
-.sys { padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.sys header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.sys h3 { font-family: var(--f-display); font-size: 15px; margin: 0; }
-.sys .where { font-size: 11.5px; color: var(--ink-3); text-align: right; }
-.sys .what { margin: 0; color: var(--ink-2); font-size: 13.5px; }
-.sys ul { margin: 0; padding-left: 18px; font-size: 13.2px; display: grid; gap: 3px; }
-.sys .open { font-size: 12.5px; color: var(--ink-2); margin: 0; }
-.sys .open b { font-family: var(--f-display); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-right: 4px; }
-.sys footer { margin-top: auto; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between; border-top: 1px solid var(--rule); }
-.sys .spans { font-size: 12px; color: var(--ink-3); }
-.sys .spans span { color: var(--ink-2); }
-.showbtn {
-  font: 600 12px var(--f-body); color: var(--accent); background: var(--surface-2); border: 1px solid var(--rule);
-  border-radius: 6px; padding: 3px 10px; cursor: pointer;
-}
-.showbtn:hover, .showbtn:focus-visible { border-color: var(--accent); outline: none; }
-
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+header h1 { font-family: var(--display); font-size: 1.5rem; margin: 0; letter-spacing: 0.01em; text-wrap: balance; }
+header .gist { margin: 6px 0 0; max-width: 72ch; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin: 18px 0 14px; border-bottom: 1px solid var(--rule); }
+.tabs button { font: 600 0.8rem var(--display); letter-spacing: 0.08em; text-transform: uppercase; background: none; border: 0; color: var(--muted); padding: 8px 12px; border-bottom: 2px solid transparent; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--chart-magenta); }
+.tabs button:focus-visible, .chip:focus-visible, .box:focus-visible, .fchip:focus-visible { outline: 2px solid var(--chart-blue); outline-offset: 2px; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); min-width: 0; }
+@media (max-width: 1100px) { .panel { position: static; } }
+.panel h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 2px; }
+.panel .kind { font: 0.7rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--chart-magenta); }
+.panel p { margin: 6px 0; }
+.panel ul { margin: 6px 0; padding-left: 18px; }
+.panel li { margin: 2px 0; }
+.panel h3 { font: 600 0.72rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 4px; }
+.doc { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); word-break: break-all; }
+.empty { color: var(--muted); }
+.scroll { overflow-x: auto; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; min-width: 0; }
+svg.rt { display: block; width: 100%; min-width: 680px; height: auto; }
+.zone { stroke: var(--rule); }
+.zone.sim { fill: var(--zone-sim); } .zone.pc { fill: var(--zone-pc); } .zone.net { fill: var(--zone-net); }
+.zlabel { font: 700 11px var(--display); letter-spacing: 0.12em; text-transform: uppercase; fill: var(--muted); }
+.box rect { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.2; }
+.box text { font: 700 13px var(--display); fill: var(--ink); }
+.box text.sub { font: 400 10px var(--body); fill: var(--muted); }
+.box { cursor: pointer; }
+.box.sel rect { stroke: var(--chart-magenta); stroke-width: 2.5; }
+.edge path.line { fill: none; stroke: var(--chart-blue); stroke-width: 1.4; opacity: 0.55; }
+.edge path.hit { fill: none; stroke: transparent; stroke-width: 12; cursor: pointer; }
+.edge text { font: 10px var(--body); fill: var(--ink); paint-order: stroke; stroke: var(--sheet); stroke-width: 3px; display: none; }
+.focus .edge path.line { opacity: var(--dim); }
+.focus .box:not(.on) { opacity: 0.35; }
+.focus .edge.on path.line { opacity: 1; stroke: var(--chart-magenta); stroke-width: 2.2; }
+.focus .edge.pick text { display: block; }
+.tier { margin: 0 0 16px; }
+.tier h3 { font: 700 0.8rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; margin: 0; }
+.tier .rule { color: var(--muted); font-size: 0.85rem; margin: 2px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 0.8rem var(--mono); background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+.chip.t-platform { border-left: 3px solid var(--chart-blue); }
+.chip.t-engines, .chip.t-engine { border-left: 3px solid var(--chart-teal); }
+.chip.t-features, .chip.t-feature { border-left: 3px solid var(--chart-magenta); }
+.chip.t-other { border-left: 3px solid var(--amber); }
+.chip.sel { background: var(--chart-magenta); color: var(--sheet); border-color: var(--chart-magenta); }
+.chip.dep { outline: 2px solid var(--chart-teal); }
+.chip.rdep { outline: 2px dashed var(--amber); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--muted); margin: 0 0 12px; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 2px; }
+.legend .l-dep::before { outline: 2px solid var(--chart-teal); }
+.legend .l-rdep::before { outline: 2px dashed var(--amber); }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 700 0.7rem var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+td.f { font-weight: 600; cursor: pointer; }
+td .none { color: var(--rule); }
+h2.sec { font: 700 0.85rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; margin: 22px 0 8px; }
+.fpick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.fchip { font: 600 0.8rem var(--display); background: var(--sheet); border: 1px solid var(--rule); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.fchip[aria-pressed="true"] { background: var(--chart-blue); color: var(--sheet); border-color: var(--chart-blue); }
+.fgist { margin: 0 0 10px; max-width: 75ch; }
+.lanes { display: grid; gap: 4px 8px; padding: 12px; min-width: 640px; }
+.lanehead { font: 700 0.72rem var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid var(--rule); padding-bottom: 4px; }
+.step { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 8px; font-size: 0.82rem; position: relative; }
+.step .n { font: 700 0.7rem var(--mono); color: var(--chart-magenta); margin-right: 4px; }
+.step .to { display: inline-block; font: 600 0.68rem var(--display); color: var(--chart-blue); margin-left: 4px; white-space: nowrap; }
+.lanecell { border-left: 1px dotted var(--rule); }
+.stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.stage { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; min-width: 0; }
+.stage h3 { font: 700 0.9rem var(--display); margin: 0; }
+.stage .note { font-size: 0.75rem; color: var(--amber); }
+.stage ul { margin: 6px 0 0; padding-left: 16px; font-size: 0.84rem; }
+.stage .n { font: 700 0.75rem var(--mono); color: var(--chart-magenta); margin-right: 6px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.cols ul { margin: 0; padding-left: 18px; font-size: 0.86rem; }
+.mono { font-family: var(--mono); font-size: 0.8rem; }
+@media (prefers-reduced-motion: no-preference) { .edge path.line, .box, .chip { transition: opacity 0.15s, stroke 0.15s; } }
 </style>
-</head>
-<body>
 
 <div class="wrap">
-<header>
-  <h1>Crosscheck Architecture Map</h1>
-  <p class="meta">v1's architecture as decisions 001 to 046 settled it on 2026-10-14, drawn from those decision files. Where this page and a decision differ, the decision wins. Click any part of the map to see what it does, when it runs, and what it talks to, and every number opens its decision.</p>
-</header>
-
-<nav class="rail" aria-label="Sections">
-  <a href="#map">The map</a>
-  <a href="#systems">Systems</a>
-  <a href="#life">Lifecycles</a>
-  <a href="#wires">Links and channels</a>
-  <a href="#trace">One switch, end to end</a>
-  <a href="#decisions">Decisions</a>
-</nav>
-
-<section id="map">
-  <h2>The map</h2>
-  <p class="lede">Each pilot's PC runs the same pieces, and every link between them ends at the core. The one exception is the watcher's link to GitHub Releases.</p>
-  <div class="mapgrid">
-    <div class="card mapbox">
-      <svg id="schematic" viewBox="0 0 1240 800" role="group" aria-label="Crosscheck's components on two pilots' PCs, and the services off them">
-        <defs>
-          <marker id="ar-proc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk proc" d="M0,0L10,5L0,10z"/></marker>
-          <marker id="ar-web" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk web" d="M0,0L10,5L0,10z"/></marker>
-        </defs>
-
-        <rect class="frame" x="8" y="8" width="920" height="644" rx="14"/>
-        <text class="flab" x="28" y="32">PILOT A'S PC</text>
-        <rect class="simframe" x="32" y="44" width="876" height="256" rx="10"/>
-        <text class="flab" x="48" y="68">MSFS 2024</text>
-        <text class="fsub" x="892" y="68" text-anchor="end">our code in its Coherent GT pages and its WebAssembly</text>
-        <text class="flab" x="228" y="744">OFF THE PILOTS' PCS</text>
-
-        <!-- Links, drawn under the boxes -->
-        <g class="lg" id="l-trunk" data-ends="core menu efb banner bridge">
-          <path class="ln bus" d="M142,176H774"/>
-          <path class="ln ws" d="M150,186H782"/>
-          <path class="ln bus" d="M446,176V330"/>
-          <path class="ln ws" d="M458,186V330"/>
-          <text class="lb bus" x="438" y="232" text-anchor="end">CommBus, every 2s</text>
-          <text class="lb ws" x="466" y="232">WebSocket, JSON</text>
-        </g>
-        <g class="lg" id="l-menu" data-ends="core menu"><path class="ln bus" d="M142,162V176"/><path class="ln ws" d="M150,162V186"/></g>
-        <g class="lg" id="l-efb" data-ends="core efb"><path class="ln bus" d="M356,162V176"/><path class="ln ws" d="M364,162V186"/></g>
-        <g class="lg" id="l-banner" data-ends="core banner"><path class="ln bus" d="M557,162V176"/><path class="ln ws" d="M565,162V186"/></g>
-        <g class="lg" id="l-bridge" data-ends="core bridge"><path class="ln bus" d="M774,162V176"/><path class="ln ws" d="M782,162V186"/></g>
-        <g class="lg" id="l-slots" data-ends="core wasm"><path class="ln sim" d="M284,286V330"/><text class="lb sim" x="276" y="318" text-anchor="end">data slots</text></g>
-        <g class="lg" id="l-sc" data-ends="core aircraft"><path class="ln sim" d="M646,286V330"/><text class="lb sim" x="654" y="318">SimConnect</text></g>
-        <g class="lg" id="l-helper" data-ends="core helper"><path class="ln proc" d="M252,390H214" marker-end="url(#ar-proc)"/><text class="lb proc" x="232" y="383" text-anchor="middle">starts</text></g>
-        <g class="lg" id="l-wcore" data-ends="watcher core"><path class="ln proc" d="M212,500H250" marker-end="url(#ar-proc)"/><text class="lb proc" x="232" y="493" text-anchor="middle">starts</text></g>
-        <g class="lg" id="l-wdata" data-ends="watcher data"><path class="ln proc dash" d="M212,552H236V610H250" marker-end="url(#ar-proc)"/></g>
-        <g class="lg" id="l-cdata" data-ends="core data"><path class="ln proc" d="M340,566V582" marker-end="url(#ar-proc)"/></g>
-        <g class="lg" id="l-desk" data-ends="core desktop"><path class="ln ws" d="M652,390H704"/><text class="lb ws" x="678" y="383" text-anchor="middle" style="font-size:10px">WebSocket</text></g>
-        <g class="lg" id="l-blur" data-ends="watcher menu">
-          <path class="ln proc dash" d="M32,525H16V122H46" marker-end="url(#ar-proc)"/>
-          <text class="lb proc" x="29" y="400" text-anchor="middle" transform="rotate(-90 29 400)">BlurPage copy</text>
-        </g>
-        <g class="lg" id="l-eb" data-ends="efb banner"><path class="ln proc" d="M458,122H474" marker-end="url(#ar-proc)"/></g>
-        <g class="lg" id="l-direct" data-ends="core pilotB">
-          <path class="ln net" d="M652,476H956"/>
-          <text class="lb net" x="804" y="466" text-anchor="middle">one QUIC connection through iroh</text>
-          <text class="lb net" x="804" y="492" text-anchor="middle">direct when hole punching works</text>
-        </g>
-        <g class="lg" id="l-relay" data-ends="core relays"><path class="ln net dash" d="M652,540H875V692"/><text class="lb net" x="867" y="624" text-anchor="end">or through a relay</text></g>
-        <g class="lg" id="l-relayb" data-ends="relays pilotB"><path class="ln net dash" d="M960,738H1084V558"/></g>
-        <g class="lg" id="l-pages" data-ends="core pages"><path class="ln web" d="M515,692V568" marker-end="url(#ar-web)"/><text class="lb web" x="507" y="676" text-anchor="end">bundles, at each start</text></g>
-        <g class="lg" id="l-backend" data-ends="core backend"><path class="ln web" d="M630,566V692"/><text class="lb web" x="638" y="676">invite codes, reports</text></g>
-        <g class="lg" id="l-rel" data-ends="watcher releases"><path class="ln web" d="M122,692V568" marker-end="url(#ar-web)"/><text class="lb web" x="130" y="636">updates</text></g>
-
-        <!-- Pages in the sim -->
-        <g class="node" data-id="menu" tabindex="0" role="button" aria-label="Menu script">
-          <rect class="box" x="48" y="82" width="196" height="80" rx="8"/>
-          <text class="nm" x="60" y="106">Menu script</text>
-          <text class="sb" x="60" y="126">mainUi, through our</text>
-          <text class="sb" x="60" y="142">BlurPage copy</text>
-        </g>
-        <g class="node" data-id="efb" tabindex="0" role="button" aria-label="EFB app">
-          <rect class="box" x="262" y="82" width="196" height="80" rx="8"/>
-          <text class="nm" x="274" y="106">EFB app</text>
-          <text class="sb" x="274" y="126">the EFB's document</text>
-          <text class="sb" x="274" y="142">start, join, take control</text>
-        </g>
-        <g class="node" data-id="banner" tabindex="0" role="button" aria-label="Banner panel">
-          <rect class="box" x="476" y="82" width="170" height="80" rx="8"/>
-          <text class="nm" x="488" y="106">Banner panel</text>
-          <text class="sb" x="488" y="126">an in-game panel</text>
-          <text class="sb" x="488" y="142">the session's notices</text>
-        </g>
-        <g class="node" data-id="bridge" tabindex="0" role="button" aria-label="Panel bridge">
-          <rect class="box" x="664" y="82" width="228" height="80" rx="8"/>
-          <text class="nm" x="676" y="106">Panel bridge</text>
-          <text class="sb" x="676" y="126">every cockpit panel, through</text>
-          <text class="sb" x="676" y="142">our VCockpit.js override</text>
-        </g>
-        <g class="node" data-id="wasm" tabindex="0" role="button" aria-label="WASM module">
-          <rect class="box" x="48" y="206" width="252" height="80" rx="8"/>
-          <text class="nm" x="60" y="230">WASM module</text>
-          <text class="sb" x="60" y="250">standalone, loaded at boot</text>
-          <text class="sb" x="60" y="266">holds and writes the aircraft</text>
-        </g>
-        <g class="node" data-id="aircraft" tabindex="0" role="button" aria-label="The aircraft and the sim">
-          <rect class="box" x="640" y="206" width="252" height="80" rx="8"/>
-          <text class="nm" x="652" y="230">The aircraft and the sim</text>
-          <text class="sb" x="652" y="250">not ours: variables, events,</text>
-          <text class="sb" x="652" y="266">input events, AI objects</text>
-        </g>
-
-        <!-- Processes and files on the PC -->
-        <g class="node" data-id="helper" tabindex="0" role="button" aria-label="Helper">
-          <rect class="box" x="32" y="340" width="180" height="100" rx="8"/>
-          <text class="nm" x="44" y="366">Helper</text>
-          <text class="sb" x="44" y="386">started by the core</text>
-          <text class="sb" x="44" y="402">input, audio, voice</text>
-        </g>
-        <g class="node" data-id="watcher" tabindex="0" role="button" aria-label="Watcher">
-          <rect class="box" x="32" y="470" width="180" height="96" rx="8"/>
-          <text class="nm" x="44" y="496">Watcher</text>
-          <text class="sb" x="44" y="516">from Windows login</text>
-          <text class="sb" x="44" y="532">starts the core</text>
-        </g>
-        <g class="node" data-id="data" tabindex="0" role="button" aria-label="Core's data folder">
-          <rect class="box" x="252" y="584" width="180" height="52" rx="8"/>
-          <text class="nm s" x="264" y="606">Core's data folder</text>
-          <text class="sb s" x="264" y="624">port file, session file</text>
-        </g>
-        <g class="node" data-id="desktop" tabindex="0" role="button" aria-label="Desktop app">
-          <rect class="box" x="704" y="340" width="196" height="100" rx="8"/>
-          <text class="nm" x="716" y="366">Desktop app</text>
-          <text class="sb" x="716" y="386">Tauri, optional</text>
-          <text class="sb" x="716" y="402">settings, the session</text>
-        </g>
-
-        <g class="node" data-id="core" tabindex="0" role="button" aria-label="Core">
-          <rect class="box" x="252" y="330" width="400" height="236" rx="10"/>
-          <text class="nm l" x="266" y="356">Core</text>
-          <text class="sb" x="638" y="356" text-anchor="end">Rust on tokio, one per PC</text>
-        </g>
-        <g class="node inner" data-id="session" tabindex="0" role="button" aria-label="Session and roles"><rect class="box" x="264" y="370" width="122" height="56" rx="6"/><text class="nm s" x="274" y="392">Session</text><text class="sb s" x="274" y="410">control, members</text></g>
-        <g class="node inner" data-id="sync" tabindex="0" role="button" aria-label="Sync engine"><rect class="box" x="392" y="370" width="122" height="56" rx="6"/><text class="nm s" x="402" y="392">Sync engine</text><text class="sb s" x="402" y="410">cockpit stream</text></g>
-        <g class="node inner" data-id="network" tabindex="0" role="button" aria-label="Network"><rect class="box" x="520" y="370" width="122" height="56" rx="6"/><text class="nm s" x="530" y="392">Network</text><text class="sb s" x="530" y="410">iroh, 8 channels</text></g>
-        <g class="node inner" data-id="profiles" tabindex="0" role="button" aria-label="Profile engine"><rect class="box" x="264" y="434" width="122" height="56" rx="6"/><text class="nm s" x="274" y="456">Profile engine</text><text class="sb s" x="274" y="474">QuickJS-ng, cache</text></g>
-        <g class="node inner" data-id="sim" tabindex="0" role="button" aria-label="Sim awareness"><rect class="box" x="392" y="434" width="122" height="56" rx="6"/><text class="nm s" x="402" y="456">Sim awareness</text><text class="sb s" x="402" y="474">SimConnect, CommBus</text></g>
-        <g class="node inner" data-id="traffic" tabindex="0" role="button" aria-label="Traffic and ATC"><rect class="box" x="520" y="434" width="122" height="56" rx="6"/><text class="nm s" x="530" y="456">Traffic, ATC</text><text class="sb s" x="530" y="474">AI copies, ATC audio</text></g>
-        <g class="node inner" data-id="recording" tabindex="0" role="button" aria-label="Recording"><rect class="box" x="264" y="498" width="122" height="56" rx="6"/><text class="nm s" x="274" y="520">Recording</text><text class="sb s" x="274" y="538">logs, the stream</text></g>
-        <g class="node inner" data-id="checks" tabindex="0" role="button" aria-label="Checks"><rect class="box" x="392" y="498" width="122" height="56" rx="6"/><text class="nm s" x="402" y="520">Checks</text><text class="sb s" x="402" y="538">version, Origin</text></g>
-        <g class="node inner" data-id="settings" tabindex="0" role="button" aria-label="Settings and clients"><rect class="box" x="520" y="498" width="122" height="56" rx="6"/><text class="nm s" x="530" y="520">Settings</text><text class="sb s" x="530" y="538">settings, clients</text></g>
-
-        <!-- Services off the PCs -->
-        <g class="node" data-id="releases" tabindex="0" role="button" aria-label="GitHub Releases">
-          <rect class="box" x="32" y="692" width="180" height="92" rx="8"/>
-          <text class="nm" x="44" y="718">GitHub Releases</text>
-          <text class="sb" x="44" y="738">installers, updates</text>
-        </g>
-        <g class="node" data-id="pages" tabindex="0" role="button" aria-label="GitHub Pages">
-          <rect class="box" x="440" y="692" width="150" height="92" rx="8"/>
-          <text class="nm" x="452" y="718">GitHub Pages</text>
-          <text class="sb" x="452" y="738">profile bundles</text>
-        </g>
-        <g class="node" data-id="backend" tabindex="0" role="button" aria-label="Backend">
-          <rect class="box" x="606" y="692" width="150" height="92" rx="8"/>
-          <text class="nm" x="618" y="718">Backend</text>
-          <text class="sb" x="618" y="738">invite codes,</text>
-          <text class="sb" x="618" y="754">bug reports</text>
-        </g>
-        <g class="node" data-id="relays" tabindex="0" role="button" aria-label="Relays">
-          <rect class="box" x="790" y="692" width="170" height="92" rx="8"/>
-          <text class="nm" x="802" y="718">Relays</text>
-          <text class="sb" x="802" y="738">iroh-relay, 2+ regions</text>
-        </g>
-
-        <!-- The other pilot -->
-        <g class="node" data-id="pilotB" tabindex="0" role="button" aria-label="Pilot B's PC">
-          <rect class="frame" x="940" y="8" width="292" height="644" rx="14"/>
-          <text class="flab" x="958" y="32">PILOT B'S PC</text>
-          <rect class="box" x="956" y="44" width="260" height="256" rx="10"/>
-          <text class="flab" x="972" y="68">MSFS 2024</text>
-          <text class="sb" x="972" y="98">the same pages and</text>
-          <text class="sb" x="972" y="114">WASM module as Pilot A's</text>
-          <rect class="box" x="956" y="330" width="260" height="64" rx="8"/>
-          <text class="sb" x="972" y="358">watcher, helper,</text>
-          <text class="sb" x="972" y="374">desktop app</text>
-          <rect class="box" x="956" y="426" width="260" height="132" rx="10"/>
-          <text class="nm l" x="972" y="456">Core</text>
-          <text class="sb" x="972" y="478">the flying machine,</text>
-          <text class="sb" x="972" y="494">or a following one</text>
-        </g>
-      </svg>
-      <div class="legend" aria-label="Link colors">
-        <span class="lg-ws"><i></i>WebSocket on 127.0.0.1, JSON</span>
-        <span class="lg-bus"><i class="dash"></i>CommBus announcement</span>
-        <span class="lg-sim"><i></i>SimConnect and data slots</span>
-        <span class="lg-proc"><i></i>Process: starts, stdio, files</span>
-        <span class="lg-net"><i></i>QUIC through iroh, postcard</span>
-        <span class="lg-web"><i></i>HTTPS</span>
-      </div>
-    </div>
-    <aside class="card panel" id="panel" aria-live="polite"></aside>
-  </div>
-</section>
-
-<section id="systems">
-  <h2>Systems</h2>
-  <p class="lede">The same architecture cut the other way: each system we build, how it works, and which components it spans. A system is designed once, in a node of the architecture plan or a stage of step 8, and usually runs across several components. “Show on map” lights up the parts it spans.</p>
-  <div class="systems" id="sysList"></div>
-</section>
-
-<section id="life">
-  <h2>Lifecycles</h2>
-  <p class="lede">Rows are components, columns are moments in a session. Read along a row for one component's life, or down a column for what every piece does at one moment.</p>
-  <div class="card tblwrap"><table class="life" id="lifeTable"></table></div>
-</section>
-
-<section id="wires">
-  <h2>Links and channels</h2>
-  <p class="lede">How each link carries its messages and how the core knows the other end is alive, then the eight channels inside each connection between cores.</p>
-  <div class="card tblwrap"><table class="ref-t" id="linkTable"></table></div>
-  <div style="height:14px"></div>
-  <div class="card tblwrap">
-    <table class="ref-t" id="chanTable"></table>
-    <p class="note">When QUIC's queue is short of room, the core keeps only each channel's newest one-off packet and hands them over in a fixed order: heartbeat, flight model, ATC audio, avatars, then traffic. Through a relay, it paces everything below the cap the relay list gives. <a class="ref" href="../../decisions/035-channels-declare-how-they-travel.md" target="_blank" rel="noopener">035</a></p>
-  </div>
-</section>
-
-<section id="trace">
-  <h2>One switch, end to end</h2>
-  <p class="lede">The PM flips a shared switch, such as the landing lights. Here is everything between their sim reporting it and the PF's core learning it's done.</p>
-  <div class="trace">
-    <div class="card svgbox">
-      <svg viewBox="0 0 660 540" role="img" aria-label="Sequence of a shared switch change from the PM's sim to the PF's sim">
-        <defs>
-          <marker id="t-sim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk sim" d="M0,0L10,5L0,10z"/></marker>
-          <marker id="t-net" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk net" d="M0,0L10,5L0,10z"/></marker>
-          <marker id="t-proc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk proc" d="M0,0L10,5L0,10z"/></marker>
-        </defs>
-        <rect class="band" x="276" y="52" width="108" height="476" rx="6"/>
-        <text class="flab" x="330" y="70" text-anchor="middle">QUIC</text>
-        <text class="nm" x="70" y="24" text-anchor="middle">PM's sim</text>
-        <text class="nm" x="220" y="24" text-anchor="middle">PM's core</text>
-        <text class="nm" x="440" y="24" text-anchor="middle">PF's core</text>
-        <text class="nm" x="590" y="24" text-anchor="middle">PF's sim</text>
-        <text class="fsub" x="145" y="42" text-anchor="middle">following machine</text>
-        <text class="fsub" x="515" y="42" text-anchor="middle">flying machine</text>
-        <path class="lane" d="M70,52V528M220,52V528M440,52V528M590,52V528"/>
-
-        <path class="ln sim" d="M76,96H212" marker-end="url(#t-sim)"/><text class="lb sim" x="145" y="88" text-anchor="middle">switch changed</text>
-        <path class="ln proc" d="M220,136H262V158H228" marker-end="url(#t-proc)"/><text class="lb proc" x="268" y="151">newest value, at most 20/s</text>
-        <path class="ln net" d="M226,204H432" marker-end="url(#t-net)"/><text class="lb net" x="330" y="196" text-anchor="middle">cockpit stream</text>
-        <path class="ln proc" d="M440,248H482V270H448" marker-end="url(#t-proc)"/><text class="lb proc" x="488" y="263">copy? order? pace</text>
-        <path class="ln sim" d="M446,316H582" marker-end="url(#t-sim)"/><text class="lb sim" x="515" y="308" text-anchor="middle">write()</text>
-        <path class="ln sim dash" d="M584,370H448" marker-end="url(#t-sim)"/><text class="lb sim" x="515" y="362" text-anchor="middle">reports it back</text>
-        <path class="ln net dash" d="M434,428H228" marker-end="url(#t-net)"/><text class="lb net" x="330" y="420" text-anchor="middle">heartbeat: PF's clock</text>
-        <path class="ln net dot" d="M434,490H228" marker-end="url(#t-net)"/><text class="lb net" x="330" y="482" text-anchor="middle">flight-model samples</text>
-        <path class="ln sim dot" d="M214,490H78" marker-end="url(#t-sim)"/><text class="lb sim" x="145" y="482" text-anchor="middle">WASM writes</text>
-
-        <g class="badge"><circle cx="20" cy="96" r="10"/><text x="20" y="100">1</text></g>
-        <g class="badge"><circle cx="20" cy="147" r="10"/><text x="20" y="151">2</text></g>
-        <g class="badge"><circle cx="20" cy="204" r="10"/><text x="20" y="208">3</text></g>
-        <g class="badge"><circle cx="20" cy="259" r="10"/><text x="20" y="263">4</text></g>
-        <g class="badge"><circle cx="20" cy="316" r="10"/><text x="20" y="320">5</text></g>
-        <g class="badge"><circle cx="20" cy="370" r="10"/><text x="20" y="374">6</text></g>
-        <g class="badge"><circle cx="20" cy="428" r="10"/><text x="20" y="432">7</text></g>
-        <g class="badge"><circle cx="20" cy="490" r="10"/><text x="20" y="494">8</text></g>
-      </svg>
-    </div>
-    <div>
-      <div class="card steps"><h3>The steps</h3><ol id="steps"></ol></div>
-      <div class="card vari"><h3>Variations</h3><ul id="variations"></ul></div>
-    </div>
-  </div>
-</section>
-
-<section id="decisions">
-  <h2>Decisions</h2>
-  <p class="lede">All 46, grouped by the node of the architecture plan that made them.</p>
-  <div class="dgroups" id="dgroups"></div>
-</section>
+  <header>
+    <h1>Crosscheck Architecture Map</h1>
+    <p class="gist" id="gist"></p>
+  </header>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="view"></main>
 </div>
 
+<script type="application/json" id="data">{"gist":"Each pilot's PC runs the sim, a core, a core helper, and a tray app. The core owns the session on one loop, and the rest talks to it: our code in the sim over SimConnect and WebSockets, other pilots' cores over QUIC through iroh. CI builds it all from one repository into one Velopack release.","runtime":{"components":[{"id":"sim","name":"MSFS 2024","where":"pilot's PC","is":"The simulator: SimConnect, the CommBus, and the loaded aircraft","runs":"whenever the pilot starts it; the desktop app watches its process","does":["loads our module and pages from our package","serves the core's SimConnect connections","carries the core's CommBus announcement to our pages","flies the aircraft only on the pilot flying's PC"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md","short":"the simulator"},{"id":"wasm","name":"WASM module","where":"inside the sim","is":"Rust standalone module running routines the core feeds","runs":"from sim boot to sim exit, through menu and flights","does":["holds the aircraft frozen during preflight","reads the flying aircraft about 20 times a second","draws the following aircraft 400ms behind the samples","places pilot figures and traffic copies every frame","fires H: events for state sync","stops each routine 1s after the core's last write"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md","short":"Rust, in the sim's frame"},{"id":"panels","name":"Cockpit panels","where":"inside the sim","is":"Aircraft panels, with our panel bridge via our VCockpit.js","runs":"in every cockpit panel; connects only once a session starts","does":["hands each instrument to the bridge without delaying it","says hello naming its instruments; loads modules the core names","sends and replays pointer gestures on synced displays","locks a display while another pilot's gesture plays","hears H: events and reads gauge values for state sync","fails open: locks lapse when renewals stop"],"doc":"record/areas/core/02-clients-and-panel-bridge.md","short":"VCockpit.js + panel bridge"},{"id":"efb","name":"EFB app","where":"inside the sim","is":"Our app in the sim's EFB, on MSFS Avionics Framework","runs":"from sim start, even with the EFB closed","does":["starts a session or joins with a code","shows session controls, preflight summary, and take-control button","opens and closes the banner through the toolbar","sets active pause for rate and pause","opens the EFB onto itself when a notice is clicked","brings the desktop app forward on request"],"doc":"record/areas/interface/01-apps.md","short":"our app in the EFB"},{"id":"banner","name":"Banner","where":"inside the sim","is":"Our in-game panel; its page exists only while open","runs":"while open; the EFB app opens it when the core asks","does":["shows the session's notices","shows the crew's status and preflight summary","shows why a take-control press was refused","sends a notice click to the core"],"doc":"record/areas/interface/01-apps.md","short":"our in-game panel"},{"id":"menu","name":"Menu script","where":"inside the sim","is":"Script in mainUi, loaded by our BlurPage copy","runs":"from the sim's first screen, in the menu and in flights","does":["reports which menu page is up","runs Go to through the world map's requests","selects free flight, departure airport, stand, or runway","decides nothing beyond which list entry matches"],"doc":"record/areas/session/02-units.md","short":"via our BlurPage copy"},{"id":"core","name":"Core","where":"pilot's PC","is":"Rust program, one loop owning all session state","runs":"while the sim runs, the window's open, or a session file exists","does":["holds SimConnect connections and follows the sim's state","runs the session, control, and preflight","links to other pilots' cores through iroh","syncs cockpit state, flight model, figures, traffic, and ATC","loads profiles and records every run for bug reports","serves our pages and the desktop app over WebSocket"],"doc":"record/areas/core/01-loop-and-edge.md","short":"one loop, all session state"},{"id":"helper","name":"Core helper","where":"pilot's PC","is":"Rust program for the core's Windows input and audio","runs":"in a session, or while the desktop app binds or lists devices","does":["reads the bound key or button through Raw Input","reads the mouse for the pilot's figure","captures the ATC app and encodes Opus","plays ATC frames behind an adaptive buffer","plays the control-passed and refusal cues","lists output devices and programs for the desktop app"],"doc":"record/areas/core/04-core-helper.md","short":"input and audio"},{"id":"desktop","name":"Desktop app","where":"pilot's PC","is":"Tauri app: tray icon, window, and Velopack updater","runs":"from login as a tray icon; window when opened","does":["watches for the sim and starts the core","restarts the core 2s after a crash","checks, downloads, and applies updates while the sim's closed","writes our Community package and adds the firewall rule","shows the session, settings, Go to, and the report page"],"doc":"record/areas/install/01-installing-and-updating.md","short":"tray, window, updates"},{"id":"peer","name":"Other pilot's core","where":"internet","is":"The same core program on a crewmate's PC","runs":"on its own pilot's PC, by the same rules","does":["holds one QUIC connection to this core","sends its session keys, cockpit messages, and heartbeat","as pilot flying: sends flight-model samples and late-joiner catch-up","as traffic or ATC host: sends traffic and ATC audio"],"doc":"record/areas/network/01-between-machines.md","short":"same program, other PC"},{"id":"relay","name":"Relays","where":"internet","is":"n0's iroh-relay, unmodified, on our New York and Frankfurt servers","runs":"always; a session uses its host's relay list","does":["carries a pair's packets when no direct path works","tells each core its public address","admits only clients holding a Crosscheck token","caps how fast one client sends"],"doc":"record/areas/network/01-between-machines.md","short":"iroh-relay, NY + Frankfurt"},{"id":"backend","name":"Backend","where":"internet","is":"Cloudflare Worker in TypeScript, with D1 and R2","runs":"always; no running session waits on it","does":["draws invite codes and maps them to crew endpoints","refuses a join whose version differs, naming who's behind","limits wrong-code guesses per address","takes each pilot's part of a bug report into R2","drops lapsed members and old rows hourly"],"doc":"record/areas/network/02-units.md","short":"Worker, D1, R2"},{"id":"pages","name":"Profile site","where":"internet","is":"GitHub Pages site serving published profile bundles","runs":"always; CI adds bundles on merges and releases","does":["serves index.json, the bundle each level takes","serves each bundle by its hash","keeps every bundle ever published"],"doc":"record/areas/profiles/02-units.md","short":"profile bundles"},{"id":"releases","name":"GitHub Releases","where":"internet","is":"Velopack's update feed on GitHub Releases","runs":"always; each release publishes here","does":["holds each release's Setup.exe and full package","holds deltas between releases","feeds the newest 10 releases to the desktop app"],"doc":"record/areas/install/01-installing-and-updating.md","short":"Velopack's update feed"}],"links":[{"from":"desktop","to":"core","via":"process start, port file","carries":"starts the core when wanted; restarts it 2s after a crash","doc":"record/areas/install/01-installing-and-updating.md"},{"from":"desktop","to":"core","via":"WebSocket, JSON","carries":"the core's state one way; commands, settings, and quit back","doc":"record/areas/interface/01-apps.md"},{"from":"core","to":"desktop","via":"starts its program","carries":"opens the desktop app's window when the EFB button asks","doc":"record/areas/interface/01-apps.md"},{"from":"desktop","to":"sim","via":"process watch, Community folder","carries":"notices sim start and exit; writes our package while sim closed","doc":"record/areas/install/01-installing-and-updating.md"},{"from":"desktop","to":"releases","via":"HTTPS, Velopack's GitHub source","carries":"checks for updates; downloads full or delta packages","doc":"record/areas/install/01-installing-and-updating.md"},{"from":"core","to":"helper","via":"stdin and stdout, postcard","carries":"starts it; sends wants, sounds, and ATC frames to play","doc":"record/areas/core/04-core-helper.md"},{"from":"helper","to":"core","via":"stdout, postcard","carries":"bound presses, the next press, mouse clicks, captured ATC frames","doc":"record/areas/core/04-core-helper.md"},{"from":"core","to":"sim","via":"SimConnect","carries":"watches and writes variables, sends K: events, creates AI objects and figures","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"sim","to":"core","via":"SimConnect","carries":"aircraft and flight loads, flow and pause events, variable values, camera","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"core","to":"sim","via":"process handle, files","carries":"watches its process; reads flight file, packages, aircraft models","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"core","to":"wasm","via":"SimConnect data slots","carries":"routine feeds: preflight hold, follow samples, figures, traffic copies, H: events","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"wasm","to":"core","via":"SimConnect data slots","carries":"version, slots hash, and counter each second; flying aircraft's reads","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"wasm","to":"sim","via":"fsVars and fsEvents","carries":"reads and writes variables and poses, freezes aircraft, fires H: events","doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"from":"core","to":"panels","via":"CommBus, then WebSocket","carries":"port announcement; modules to load or stop; gestures to replay","doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"from":"panels","to":"core","via":"WebSocket, JSON","carries":"hello naming instruments; pointer gestures; heard H: events; gauge readings","doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"from":"core","to":"efb","via":"CommBus, then WebSocket","carries":"session state, banner wanted, pause wanted, order to open the EFB","doc":"record/areas/interface/01-apps.md"},{"from":"efb","to":"core","via":"WebSocket, JSON","carries":"commands: host, join, take control, settings, bring desktop forward","doc":"record/areas/interface/01-apps.md"},{"from":"efb","to":"banner","via":"toolbar's toggle call","carries":"opens and closes the banner panel until each change takes","doc":"record/areas/interface/01-apps.md"},{"from":"efb","to":"sim","via":"Coherent calls","carries":"sets active pause; opens the EFB onto our app","doc":"record/areas/interface/01-apps.md"},{"from":"core","to":"banner","via":"CommBus, then WebSocket","carries":"notices and session state out; notice clicks back; only while open","doc":"record/areas/interface/01-apps.md"},{"from":"core","to":"menu","via":"CommBus, then WebSocket","carries":"Go to's world-map requests; asks which menu page is up","doc":"record/areas/session/02-units.md"},{"from":"menu","to":"core","via":"WebSocket, JSON","carries":"which menu page is up; answers to world-map requests","doc":"record/areas/session/02-units.md"},{"from":"menu","to":"sim","via":"world map's own requests","carries":"presses free flight; sets departure airport, stand, or runway; reads page","doc":"record/areas/session/02-units.md"},{"from":"core","to":"peer","via":"QUIC through iroh","carries":"eight channels: session, cockpit, catch-up, flight model, avatars, traffic, ATC, heartbeat","doc":"record/areas/network/01-between-machines.md"},{"from":"core","to":"relay","via":"iroh relay, TCP 443","carries":"relayed packets when no direct path; the core's public address","doc":"record/areas/network/01-between-machines.md"},{"from":"peer","to":"relay","via":"iroh relay, TCP 443","carries":"the other side of relayed packets; its public address","doc":"record/areas/network/01-between-machines.md"},{"from":"core","to":"backend","via":"HTTPS, JSON, signed","carries":"invite codes for crew endpoint IDs, version check, renewals, bug report uploads","doc":"record/areas/network/02-units.md"},{"from":"peer","to":"backend","via":"HTTPS, JSON, signed","carries":"the same requests from the other pilot's core","doc":"record/areas/network/02-units.md"},{"from":"core","to":"pages","via":"HTTPS, ETag-cached","carries":"profile index at each start; pinned bundles by hash","doc":"record/areas/profiles/02-units.md"}]},"code":{"tiers":[{"id":"platform","name":"Platform","rule":"Engines and lower platform lines; in-core and in-sim halves never depend across."},{"id":"engines","name":"Engines","rule":"Only engines on lower lines; no platform, feature, app, or tool code."},{"id":"features","name":"Features","rule":"Platform and engines; never another feature's code or modules."},{"id":"apps","name":"Apps and sim package","rule":"Anything below; nothing depends on apps/ or sim-package/."},{"id":"tools","name":"Tools","rule":"Anything below; nothing depends on tools/."},{"id":"backend","name":"Backend and config","rule":"Worker in its own npm workspace; relays run iroh-relay, no code of ours."}],"units":[{"id":"messages","name":"messages","tier":"engines","folder":"engines/messages/","lang":"Rust","runsIn":["core","helper","desktop","wasm","panels","efb","banner","menu","ci"],"does":"Every message, data slot, and ID; ts-rs writes its TypeScript types.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"simconnect-types","name":"simconnect-types","tier":"engines","folder":"engines/simconnect-types/","lang":"Rust","runsIn":["core","ci"],"does":"SimConnect's types and constants, generated by bindgen from the SDK.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"sandbox","name":"sandbox","tier":"engines","folder":"engines/sandbox/","lang":"Rust","runsIn":["core"],"does":"QuickJS-ng runtimes for profile scripts: limits, no clock, no randomness.","uses":[],"doc":"record/areas/plugins/01-plugins.md"},{"id":"msfs-gltf","name":"msfs-gltf","tier":"engines","folder":"engines/msfs-gltf/","lang":"Rust","runsIn":["core","ci"],"does":"Reads an MSFS glTF model and its buffer.","uses":[],"doc":"record/areas/avatars/01-avatars.md"},{"id":"msfs-rpn","name":"msfs-rpn","tier":"engines","folder":"engines/msfs-rpn/","lang":"Rust","runsIn":["core","ci"],"does":"Expands, compiles, and runs the sim's calculator (RPN) code.","uses":[],"doc":"record/areas/avatars/01-avatars.md"},{"id":"ray-cast","name":"ray-cast","tier":"engines","folder":"engines/ray-cast/","lang":"Rust","runsIn":["core","ci"],"does":"A BVH per mesh, and a ray cast through node transforms.","uses":[],"doc":"record/areas/avatars/01-avatars.md"},{"id":"object-mirror","name":"object-mirror","tier":"engines","folder":"engines/object-mirror/","lang":"Rust","runsIn":["core","wasm"],"does":"Send gate and playout for mirrored objects, generic over the sample.","uses":[],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"sim-awareness","name":"sim-awareness","tier":"engines","folder":"engines/sim-awareness/","lang":"Rust","runsIn":["core"],"does":"One step function from sim signals to the sim's stage; no I/O.","uses":[],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"profile-engine","name":"profile-engine","tier":"engines","folder":"engines/profile-engine/","lang":"Rust","runsIn":["core","ci"],"does":"Profile format, checks, levels, bundle reading and writing, feature blocks.","uses":["messages"],"doc":"record/areas/profiles/02-units.md"},{"id":"recording-format","name":"recording-format","tier":"engines","folder":"engines/recording-format/","lang":"Rust","runsIn":["core"],"does":"Encodes a run's file and its index.","uses":["messages"],"doc":"record/areas/recording/01-recording-and-bug-reports.md"},{"id":"aircraft-model","name":"aircraft-model","tier":"engines","folder":"engines/aircraft-model/","lang":"Rust","runsIn":["core","ci"],"does":"Finds an aircraft's models, poses them, casts click rays into them.","uses":["msfs-gltf","msfs-rpn","ray-cast"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"sim-client","name":"sim-client","tier":"engines","folder":"engines/sim-client/","lang":"Rust","runsIn":["core","ci"],"does":"Per connection: IDs, setup redone on reconnect, calls into SimConnect calls.","uses":["simconnect-types","messages"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"transport","name":"transport","tier":"engines","folder":"engines/transport/","lang":"Rust","runsIn":["core"],"does":"iroh connections: newest-only slots, relay pacing, heartbeat send stamp.","uses":["messages"],"doc":"record/areas/network/02-units.md"},{"id":"page-client","name":"page-client","tier":"engines","folder":"engines/page-client/","lang":"TypeScript","runsIn":["panels","efb","banner","menu"],"does":"How a sim page finds, joins, and rejoins the core.","uses":["messages"],"doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"id":"sync-engine","name":"sync-engine","tier":"engines","folder":"engines/sync-engine/","lang":"Rust","runsIn":["core"],"does":"Per profile: watches, writes, echoes, conflicts, settling, catch-up order.","uses":["profile-engine","sandbox","messages"],"doc":"record/areas/sync/05-units.md"},{"id":"profile-build","name":"profile-build","tier":"engines","folder":"engines/profile-build/","lang":"Rust","runsIn":["ci"],"does":"Builds bundles: merges modules, type-checks and compiles TypeScript in QuickJS-ng.","uses":["profile-engine"],"doc":"record/areas/profiles/02-units.md"},{"id":"sim-edge","name":"sim-edge","tier":"engines","folder":"engines/sim-edge/","lang":"Rust","runsIn":["core","ci"],"does":"One thread holding every SimConnect connection and the sim's process.","uses":["simconnect-types","sim-client"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"stand-in-sim","name":"stand-in-sim","tier":"engines","folder":"engines/stand-in-sim/","lang":"Rust","runsIn":["ci"],"does":"Plays the sim's SimConnect side on the bench; node 7 designs it.","uses":["simconnect-types","sim-client"],"doc":"record/areas/architecture/02-code-map.md"},{"id":"kernel","name":"kernel","tier":"platform","folder":"platform/kernel/","lang":"Rust","runsIn":["core"],"does":"The loop: registry, state store, moments, guards, outbox, timers, jobs.","uses":["messages"],"doc":"record/areas/core/01-loop-and-edge.md"},{"id":"clients","name":"clients","tier":"platform","folder":"platform/clients/","lang":"Rust","runsIn":["core"],"does":"Client protocol: state slices, commands, settings, notices, which panel modules load.","uses":["kernel","messages"],"doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"id":"sim-service","name":"sim-service","tier":"platform","folder":"platform/sim-service/","lang":"Rust","runsIn":["core"],"does":"SimConnect connections, routine feeds, masking, core's announcement, package checks.","uses":["kernel","clients","sim-client","sim-awareness"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"network","name":"network","tier":"platform","folder":"platform/network/","lang":"Rust","runsIn":["core"],"does":"Links, channels, heartbeat, clock offsets, endpoint key, backend requests.","uses":["kernel","clients","messages"],"doc":"record/areas/network/02-units.md"},{"id":"core-helper-service","name":"core-helper-service","tier":"platform","folder":"platform/core-helper-service/","lang":"Rust","runsIn":["core"],"does":"Runs the core helper while wanted; sends it each feature's wants.","uses":["kernel","clients","messages"],"doc":"record/areas/core/04-core-helper.md"},{"id":"recording","name":"recording","tier":"platform","folder":"platform/recording/","lang":"Rust","runsIn":["core"],"does":"Each run's index and marks, which runs to keep, report uploads.","uses":["kernel","clients","recording-format"],"doc":"record/areas/recording/01-recording-and-bug-reports.md"},{"id":"session","name":"session","tier":"platform","folder":"platform/session/","lang":"Rust","runsIn":["core"],"does":"Members, session keys, control, preflight, match check, joining and leaving.","uses":["kernel","clients","sim-service","network","recording"],"doc":"record/areas/session/02-units.md"},{"id":"profile-loader","name":"profile-loader","tier":"platform","folder":"platform/profile-loader/","lang":"Rust","runsIn":["core"],"does":"Fetches, caches, pins, and loads the aircraft's profile bundle.","uses":["kernel","clients","sim-service","recording","session","profile-engine"],"doc":"record/areas/profiles/02-units.md"},{"id":"cockpit-stream","name":"cockpit-stream","tier":"platform","folder":"platform/cockpit-stream/","lang":"Rust","runsIn":["core"],"does":"Cockpit messages in causal order, held values, catch-up, guard on control.","uses":["kernel","network","recording","session"],"doc":"record/areas/sync/05-units.md"},{"id":"routine-host","name":"routine-host","tier":"platform","folder":"platform/routine-host/","lang":"Rust","runsIn":["wasm"],"does":"Runs features' routines in our WASM module: slots, wants, the freeze.","uses":["messages"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"panel-bridge","name":"panel-bridge","tier":"platform","folder":"platform/panel-bridge/","lang":"TypeScript","runsIn":["panels"],"does":"In each cockpit panel: loads panel modules, owns locks, unlock global.","uses":["page-client","messages"],"doc":"record/areas/core/02-clients-and-panel-bridge.md"},{"id":"efb-shell","name":"efb-shell","tier":"platform","folder":"platform/efb-shell/","lang":"TypeScript","runsIn":["efb","banner"],"does":"EFB app frame, banner page, part API, on MSFS Avionics Framework.","uses":["page-client","messages"],"doc":"record/areas/interface/01-apps.md"},{"id":"desktop-shell","name":"desktop-shell","tier":"platform","folder":"platform/desktop-shell/","lang":"TypeScript","runsIn":["desktop"],"does":"Desktop app frame, settings, part API, shared React and Tailwind components.","uses":["messages"],"doc":"record/areas/interface/01-apps.md"},{"id":"menu-script","name":"menu script","tier":"platform","folder":"sim-package/pages/","lang":"TypeScript","runsIn":["menu"],"does":"In the sim's main menu: reports its page, runs world-map requests.","uses":["page-client"],"doc":"record/areas/session/02-units.md"},{"id":"state-sync","name":"state-sync","tier":"features","folder":"features/state-sync/","lang":"Rust","runsIn":["core","wasm","panels"],"does":"Syncs the switches, knobs, and gauge settings a profile names.","uses":["kernel","messages","cockpit-stream","session","sim-service","profile-loader","clients","sync-engine","routine-host","panel-bridge"],"doc":"record/areas/sync/05-units.md"},{"id":"pointer-sync","name":"pointer-sync","tier":"features","folder":"features/pointer-sync/","lang":"Rust","runsIn":["core","panels"],"does":"Plays each press or drag on a synced display everywhere.","uses":["kernel","messages","cockpit-stream","clients","network","session","panel-bridge"],"doc":"record/areas/pointer-sync/01-pointer-sync.md"},{"id":"flight-model","name":"flight-model","tier":"features","folder":"features/flight-model/","lang":"Rust","runsIn":["core","wasm"],"does":"Flies following aircraft along the PF's sampled pose and controls.","uses":["kernel","messages","network","session","sim-service","routine-host"],"doc":"record/areas/flight-model/01-flight-model-sync.md"},{"id":"avatars","name":"avatars","tier":"features","folder":"features/avatars/","lang":"Rust","runsIn":["core","wasm","sim"],"does":"Seats each pilot's figure, moves its hands; figure is a SimObject.","uses":["kernel","messages","session","network","sim-service","core-helper-service","cockpit-stream","profile-loader","clients","aircraft-model","routine-host"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"traffic","name":"traffic","tier":"features","folder":"features/traffic/","lang":"Rust","runsIn":["core","wasm"],"does":"Mirrors the traffic host's AI traffic as frozen copies elsewhere.","uses":["kernel","messages","session","sim-service","network","clients","object-mirror","routine-host"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"atc-audio","name":"atc-audio","tier":"features","folder":"features/atc-audio/","lang":"Rust","runsIn":["core"],"does":"Streams the ATC host's ATC app audio to the other pilots.","uses":["kernel","messages","session","core-helper-service","network","clients"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"take-control","name":"take-control","tier":"features","folder":"features/take-control/","lang":"Rust","runsIn":["core","efb","desktop"],"does":"Asks for control from a bound key, button, or app button.","uses":["kernel","messages","session","core-helper-service","clients","efb-shell","desktop-shell"],"doc":"record/areas/control/01-take-control.md"},{"id":"rate-and-pause","name":"rate-and-pause","tier":"features","folder":"features/rate-and-pause/","lang":"Rust","runsIn":["core","efb"],"does":"Shares active pause and the simulation rate across the crew.","uses":["kernel","messages","session","sim-service","clients","efb-shell"],"doc":"record/areas/session/02-units.md"},{"id":"go-to","name":"go-to","tier":"features","folder":"features/go-to/","lang":"Rust","runsIn":["core","desktop"],"does":"Points a joiner's world map at the PF's stand or runway.","uses":["kernel","messages","session","sim-service","clients","desktop-shell"],"doc":"record/areas/session/02-units.md"},{"id":"app-core","name":"apps/core","tier":"apps","folder":"apps/core/","lang":"Rust","runsIn":["core"],"does":"The core program: unit list, queue, edge threads, recording, replay.","uses":["kernel","clients","sim-service","network","core-helper-service","recording","session","profile-loader","cockpit-stream","state-sync","pointer-sync","flight-model","avatars","traffic","atc-audio","take-control","rate-and-pause","go-to","transport","sim-edge","recording-format","messages"],"doc":"record/areas/core/01-loop-and-edge.md"},{"id":"app-core-helper","name":"apps/core-helper","tier":"apps","folder":"apps/core-helper/","lang":"Rust","runsIn":["helper"],"does":"Separate process: Raw Input, audio capture, Opus, playback, sounds.","uses":["messages"],"doc":"record/areas/core/04-core-helper.md"},{"id":"app-desktop","name":"apps/desktop","tier":"apps","folder":"apps/desktop/","lang":"Rust","runsIn":["desktop"],"does":"Tauri tray app: starts the core, updates, writes our package, lists parts.","uses":["desktop-shell","take-control","go-to","messages"],"doc":"record/areas/install/01-installing-and-updating.md"},{"id":"wasm-module","name":"sim-package/wasm-module","tier":"apps","folder":"sim-package/wasm-module/","lang":"Rust","runsIn":["wasm"],"does":"The cdylib: edge on the sim's APIs, and the routines list.","uses":["routine-host","state-sync","flight-model","avatars","traffic"],"doc":"record/areas/core/03-sim-seam-and-wasm-module.md"},{"id":"pages","name":"sim-package/pages","tier":"apps","folder":"sim-package/pages/","lang":"TypeScript","runsIn":["panels","efb","banner","menu"],"does":"VCockpit.js override, EFB app and banner entries, menu script.","uses":["panel-bridge","efb-shell","page-client","take-control","rate-and-pause"],"doc":"record/areas/interface/01-apps.md"},{"id":"profile-builder","name":"tools/profile-builder","tier":"tools","folder":"tools/profile-builder/","lang":"Rust","runsIn":["ci"],"does":"Checks and builds profile bundles, for CI and the core team.","uses":["profile-build","profile-engine"],"doc":"record/areas/profiles/02-units.md"},{"id":"profile-author","name":"tools/profile-author","tier":"tools","folder":"tools/profile-author/","lang":"Rust","runsIn":["ci"],"does":"Seat and click tools for profiles, run with the sim open.","uses":["sim-client","sim-edge","aircraft-model","messages"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"msfs-sdk","name":"tools/msfs-sdk","tier":"tools","folder":"tools/msfs-sdk/","lang":"Rust","runsIn":["ci"],"does":"Installs the SDK version msfs-sdk.txt names.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"build-ts","name":"tools/build.ts","tier":"tools","folder":"tools/build.ts","lang":"TypeScript","runsIn":["ci"],"does":"Builds every target but backend and profiles; lays out the release.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"setup-ts","name":"tools/setup.ts","tier":"tools","folder":"tools/setup.ts","lang":"TypeScript","runsIn":["ci"],"does":"Installs cargo-msfs and the pinned SDK on a new PC.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"stock-ts","name":"tools/stock.ts","tier":"tools","folder":"tools/stock.ts","lang":"TypeScript","runsIn":["ci"],"does":"Copies the sim's stock files into sim-package/stock/ after a sim update.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"release-ts","name":"tools/release.ts","tier":"tools","folder":"tools/release.ts","lang":"TypeScript","runsIn":["ci"],"does":"Runs each release workflow step: build, pack, upload, check, publish.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"reports-ts","name":"tools/reports.ts","tier":"tools","folder":"tools/reports.ts","lang":"TypeScript","runsIn":["ci"],"does":"Lists and fetches bug reports on our PCs.","uses":[],"doc":"record/areas/recording/01-recording-and-bug-reports.md"},{"id":"map-check","name":"the map check","tier":"tools","folder":"tools/","runsIn":["ci"],"does":"Fails crates and TypeScript imports that break the code map's rules.","uses":[],"doc":"record/areas/architecture/02-code-map.md"},{"id":"coherent-gt-check","name":"the Coherent GT check","tier":"tools","folder":"its own repository, pinned in package.json","runsIn":["ci"],"does":"Fails in-sim JavaScript that Coherent GT can't run.","uses":[],"doc":"record/areas/build/01-the-build.md"},{"id":"bench","name":"the bench","tier":"tools","folder":"tools/","runsIn":["ci"],"does":"Two cores on one PC, stand-in sim; node 7 designs it.","uses":["stand-in-sim","routine-host"],"doc":"record/areas/architecture/02-code-map.md"},{"id":"backend","name":"backend","tier":"backend","folder":"backend/","lang":"TypeScript","runsIn":["backend"],"does":"Cloudflare Worker on D1: invite codes, sessions, members; reports in R2.","uses":[],"doc":"record/areas/network/02-units.md"},{"id":"relays","name":"relays","tier":"backend","folder":"relays/","lang":"TypeScript","runsIn":["relay"],"does":"relays.toml lists our relays; deploy.ts configures their iroh-relay.","uses":[],"doc":"record/areas/network/02-units.md"}],"features":[{"id":"state-sync","name":"State sync","does":"Keeps the cockpit's switches, knobs, and gauge settings the same on every machine.","parts":{"core":"state-sync","routines":["HEvents"],"panel":["h-events","instrument-reads"],"efb":"Checklist (app TBD)","desktop":"Checklist (app TBD)"},"uses":["kernel","messages","cockpit-stream","session","sim-service","profile-loader","clients","sync-engine","routine-host","panel-bridge"],"doc":"record/areas/sync/05-units.md"},{"id":"pointer-sync","name":"Pointer sync","does":"A press or drag on a synced display plays on every other machine's display.","parts":{"core":"pointer-sync","routines":[],"panel":["pointer-sync"],"efb":null,"desktop":null},"uses":["kernel","messages","cockpit-stream","clients","network","session","panel-bridge"],"doc":"record/areas/pointer-sync/01-pointer-sync.md"},{"id":"flight-model","name":"Flight-model sync","does":"Following aircraft fly 400ms behind the PF's sampled pose, velocities, and controls.","parts":{"core":"flight-model","routines":["Lead","Follow"],"panel":[],"efb":null,"desktop":null},"uses":["kernel","messages","network","session","sim-service","routine-host"],"doc":"record/areas/flight-model/01-flight-model-sync.md"},{"id":"avatars","name":"Avatars","does":"Each pilot's figure takes a seat, looks where they look, reaches for clicks.","parts":{"core":"avatars","routines":["Figure"],"panel":[],"efb":null,"desktop":null},"uses":["kernel","messages","session","network","sim-service","core-helper-service","cockpit-stream","profile-loader","clients","aircraft-model","routine-host"],"doc":"record/areas/avatars/01-avatars.md"},{"id":"traffic","name":"Traffic","does":"The traffic host's AI traffic appears as frozen copies in every other sim.","parts":{"core":"traffic","routines":["Traffic"],"panel":[],"efb":"Packs list (app TBD)","desktop":"Packs list (app TBD)"},"uses":["kernel","messages","session","sim-service","network","clients","object-mirror","routine-host"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"atc-audio","name":"ATC audio","does":"The ATC host's ATC app plays in every other pilot's headset.","parts":{"core":"atc-audio","routines":[],"panel":[],"efb":"Capture status (app TBD)","desktop":"Capture status (app TBD)"},"uses":["kernel","messages","session","core-helper-service","network","clients"],"doc":"record/areas/traffic-atc/01-traffic-and-atc.md"},{"id":"take-control","name":"Take-control","does":"A bound key, hardware button, or app button asks to take control.","parts":{"core":"take-control","routines":[],"panel":[],"efb":"Take-control button","desktop":"Section that binds the input"},"uses":["kernel","messages","session","core-helper-service","clients","efb-shell","desktop-shell"],"doc":"record/areas/control/01-take-control.md"},{"id":"rate-and-pause","name":"Rate and pause","does":"Active pause and the simulation rate stay the same across the crew.","parts":{"core":"rate-and-pause","routines":[],"panel":[],"efb":"No screen; sets active pause","desktop":null},"uses":["kernel","messages","session","sim-service","clients","efb-shell"],"doc":"record/areas/session/02-units.md"},{"id":"go-to","name":"Go to","does":"Points a joiner's world map at the PF's stand, or a runway while engines run.","parts":{"core":"go-to","routines":[],"panel":[],"efb":null,"desktop":"Section with the Go to button"},"uses":["kernel","messages","session","sim-service","clients","desktop-shell"],"doc":"record/areas/session/02-units.md"}],"systems":[{"id":"loop-and-edge","name":"The core's loop and edge","node":"6.1","doc":"record/areas/core/01-loop-and-edge.md","units":["kernel","app-core"],"line":"One thread runs every unit from one stamped queue; the edge records and replays it."},{"id":"clients","name":"Clients and the panel bridge","node":"6.2","doc":"record/areas/core/02-clients-and-panel-bridge.md","units":["clients","page-client","panel-bridge"],"line":"How the apps and sim pages talk to the core over WebSockets."},{"id":"sim-seam","name":"The sim seam and our WASM module","node":"6.3","doc":"record/areas/core/03-sim-seam-and-wasm-module.md","units":["sim-service","sim-client","sim-edge","sim-awareness","simconnect-types","routine-host","wasm-module"],"line":"How the core reaches SimConnect, tracks the sim, and runs routines inside it."},{"id":"network","name":"The network","node":"6.4","doc":"record/areas/network/02-units.md","units":["network","transport","backend","relays"],"line":"Links between cores over iroh, invite codes from the backend, and our relays."},{"id":"core-helper","name":"The core helper","node":"6.5","doc":"record/areas/core/04-core-helper.md","units":["core-helper-service","app-core-helper"],"line":"A helper process for keys, buttons, mouse, and audio, run only while wanted."},{"id":"recording","name":"Recording and bug reports","node":"6.6","doc":"record/areas/recording/01-recording-and-bug-reports.md","units":["recording","recording-format","backend","reports-ts"],"line":"Each core's replayable input log, and bug reports uploaded to us."},{"id":"session","name":"The session","node":"6.7","doc":"record/areas/session/02-units.md","units":["session","rate-and-pause","go-to","menu-script"],"line":"Members, keys, control, and preflight, with pause, rate, and Go to."},{"id":"profiles","name":"Profiles","node":"6.8","doc":"record/areas/profiles/02-units.md","units":["profile-engine","profile-build","profile-loader","profile-builder"],"line":"The aircraft profile format, building bundles, and loading one in the core."},{"id":"sync","name":"Sync","node":"6.9","doc":"record/areas/sync/05-units.md","units":["cockpit-stream","sync-engine","state-sync"],"line":"Keeps both cockpits' state alike, in causal order, with catch-up."},{"id":"flight-model","name":"Flight-model sync","node":"6.10","doc":"record/areas/flight-model/01-flight-model-sync.md","units":["flight-model"],"line":"The PF's aircraft motion, read in-sim and replayed on each follower."},{"id":"pointer-sync","name":"Pointer sync","node":"6.11","doc":"record/areas/pointer-sync/01-pointer-sync.md","units":["pointer-sync"],"line":"Presses and drags on synced displays, played in every other cockpit."},{"id":"control","name":"Control","node":"6.12","doc":"record/areas/control/01-take-control.md","units":["take-control"],"line":"Taking control by key, button, or app button; voice phrases wait for Soon."},{"id":"avatars","name":"Avatars","node":"6.13","doc":"record/areas/avatars/01-avatars.md","units":["avatars","aircraft-model","msfs-gltf","msfs-rpn","ray-cast","profile-author"],"line":"Pilot figures, and reading an aircraft's own models to place their hands."},{"id":"traffic-atc","name":"Traffic and ATC","node":"6.14","doc":"record/areas/traffic-atc/01-traffic-and-atc.md","units":["traffic","atc-audio","object-mirror"],"line":"One pilot's AI traffic and ATC audio shared with the crew."},{"id":"plugins","name":"Plugins and the sandbox","node":"6.15","doc":"record/areas/plugins/01-plugins.md","units":["sandbox"],"line":"No plugins in v1; the sandbox runs profiles' write functions replayably."},{"id":"apps","name":"The apps","node":"6.16","doc":"record/areas/interface/01-apps.md","units":["efb-shell","desktop-shell","app-desktop","pages"],"line":"EFB app, banner, and desktop app shells, and how features plug in."},{"id":"install","name":"Installing and updating","node":"6.17","doc":"record/areas/install/01-installing-and-updating.md","units":["app-desktop","sim-service"],"line":"Velopack installs and updates; the desktop tray app does the watcher's jobs."},{"id":"build","name":"The build","node":"6.18","doc":"record/areas/build/01-the-build.md","units":["build-ts","setup-ts","msfs-sdk","stock-ts","release-ts","map-check","coherent-gt-check"],"line":"How the repository becomes a checked, published release through CI."}]},"flows":{"flows":[{"id":"install","title":"Installing Crosscheck","gist":"Setup.exe installs per-user; the tray app adds the firewall rule, writes our package, and starts the core with the sim.","lanes":["sim","menu","core","desktop","pages","releases"],"steps":[{"lane":"releases","to":"desktop","text":"Pilot downloads Setup.exe from a release; unsigned, so SmartScreen asks 'Run anyway'"},{"lane":"desktop","text":"Velopack installs to %LOCALAPPDATA%\\Crosscheck, no admin prompt, and sets it to start at login"},{"lane":"desktop","text":"First run: one UAC prompt adds a firewall rule letting the core receive UDP"},{"lane":"desktop","to":"sim","text":"While the sim is closed, copies our package into each Community folder UserCfg.opt names"},{"lane":"sim","text":"Pilot starts the sim, which mounts our package: WASM module, pages, VCockpit.js"},{"lane":"desktop","to":"core","text":"Tray app finds FlightSimulator2024.exe, polling every 2s, and starts crosscheck-core.exe"},{"lane":"core","to":"sim","text":"Opens SimConnect and broadcasts its port on the sim's CommBus every 2s"},{"lane":"core","text":"Checks our package's version, and warns of other packages overriding our files"},{"lane":"core","to":"pages","text":"Fetches the profiles' index.json from Pages, then any bundle its cache lacks"},{"lane":"menu","to":"core","text":"Menu script, from our BlurPage copy, hears the port and connects by WebSocket"}],"doc":"record/areas/install/01-installing-and-updating.md"},{"id":"join","title":"Hosting and joining","gist":"Host gets a backend code; the joiner looks it up, dials the host, uses Go to, and enters the flight.","lanes":["sim","wasm","menu","core","desktop","peer","relay","backend"],"steps":[{"lane":"peer","to":"backend","text":"Host's core posts session, relays, version, and hash; backend returns a code"},{"lane":"desktop","to":"core","text":"Joiner enters the six-character invite code; the Join command reaches their core"},{"lane":"core","to":"backend","text":"Looks the code up; backend checks version and hash, returns relays and crew"},{"lane":"core","to":"relay","text":"Writes the session file, then dials the host by public key via the relays"},{"lane":"relay","to":"peer","text":"Carries the QUIC connection; it moves to direct UDP when hole punching works"},{"lane":"peer","to":"core","text":"Host's first message carries every session key: control, aircraft, the PF's stand"},{"lane":"core","to":"menu","text":"On Go to, sends the menu script world_map requests: PF's airport, then stand"},{"lane":"menu","to":"sim","text":"Selects them on the world map; the joiner starts the flight from there"},{"lane":"sim","to":"core","text":"SimConnect reports Ready to fly in the session's aircraft: in the flight"},{"lane":"core","to":"wasm","text":"Feeds Follow the PF's samples and Hold: aircraft moves to the PF, frozen"}],"doc":"record/areas/session/02-units.md"},{"id":"switch","title":"Syncing a switch","gist":"SimConnect reports the change, the core sends the value on the cockpit stream, and the other core writes it.","lanes":["sim","core","peer"],"steps":[{"lane":"sim","text":"PF flips a switch; the variable its profile entry reads changes"},{"lane":"sim","to":"core","text":"SimConnect reports the new value from a per-frame, on-change data request"},{"lane":"core","text":"Sync engine matches it to no pending write, so it's the pilot's own change"},{"lane":"core","text":"Cockpit stream stamps it with a vector clock and the control value"},{"lane":"core","to":"peer","text":"Sends a postcard (compact binary) message on the cockpit stream, over QUIC"},{"lane":"peer","text":"Waits for what it depends on and its sender's gap; drops copies"},{"lane":"peer","text":"Applies if its stamp wins; when neither saw the other, the flying machine wins"},{"lane":"peer","text":"Sync engine turns the entry's write into actions: a variable, event, or toggle"},{"lane":"peer","text":"Sim service makes them through SimConnect; the switch moves in that cockpit"},{"lane":"peer","text":"The write stays pending until a reading matches; after 1.5s, a notice flags it"}],"doc":"record/areas/sync/02-live-sync.md"},{"id":"press","title":"Pressing a glass display","gist":"The panel module captures down, moves, and up; each crosses the cockpit stream and plays on the other display.","lanes":["panels","core","peer"],"steps":[{"lane":"panels","text":"Pilot presses a synced display; our panel module catches mousedown before the display does"},{"lane":"panels","to":"core","text":"Sends Down at once to the core over the panel's WebSocket"},{"lane":"panels","to":"core","text":"Then Moves at most every 33ms, Held each still second, Up at release"},{"lane":"core","to":"peer","text":"Sends each on the cockpit stream, keyed by display, in one agreed order"},{"lane":"peer","text":"Hands each, as it arrives, to every panel module that announced the display"},{"lane":"peer","text":"Hit-tests the point at the same fractions of the display, past our overlays"},{"lane":"peer","text":"Dispatches mousedown, mousemove, mouseup, and click there as synthetic MouseEvents"},{"lane":"peer","text":"An unseen lock blocks that pilot's own presses; a blocked press flashes"},{"lane":"peer","text":"The Up holds back later cockpit messages until its click plays, at most 1s"}],"doc":"record/areas/pointer-sync/01-pointer-sync.md"},{"id":"flight-model","title":"One flight-model sample","gist":"Lead reads the pose 20 times a second; the core sends it as a datagram; Follow draws it 400ms behind.","lanes":["wasm","core","peer"],"steps":[{"lane":"wasm","text":"Lead routine reads pose, velocities, control surfaces, and toe brakes every 50ms"},{"lane":"wasm","text":"Stamps the read with the frame's time on its estimate of the core's clock"},{"lane":"wasm","to":"core","text":"Writes it to its report slot, which SimConnect delivers to the core"},{"lane":"core","to":"peer","text":"Sends a sample with the control generation as a QUIC datagram, never resent"},{"lane":"peer","text":"Drops it unless from the PF, current generation, newer stamp, and offset known"},{"lane":"peer","text":"Shifts its stamp onto this PC's clock by the heartbeat's offset estimate"},{"lane":"peer","text":"Feeds it into Follow's slot in our WASM module through SimConnect client data"},{"lane":"peer","text":"Follow draws the aircraft 400ms behind, on straight lines between samples"},{"lane":"peer","text":"Each frame it freezes the aircraft, writes pose and velocities, sends axis events"}],"doc":"record/areas/flight-model/01-flight-model-sync.md"},{"id":"control","title":"Taking control","gist":"A bound key or app button asks for control; guards decide; the new control value reaches every machine.","lanes":["wasm","efb","banner","core","helper","peer"],"steps":[{"lane":"helper","to":"core","text":"Raw Input catches the bound key or button and pipes the press up"},{"lane":"efb","to":"core","text":"Or the EFB app's take-control button sends the take-control.request command"},{"lane":"core","text":"Checks: in the flight, preflight over, guards allow; refused plays a refusal cue"},{"lane":"core","text":"Session crate writes control: generation one higher, this pilot's ID"},{"lane":"core","to":"peer","text":"Sends the new control key, and a CONTROL message carrying its vector clock"},{"lane":"peer","text":"Adopts the new control value: a higher generation wins, then the lower pilot ID"},{"lane":"core","to":"wasm","text":"Flight-model sync ends Follow and starts Lead; this machine now sends samples"},{"lane":"peer","text":"Old PF's machine ends Lead, starts Follow; its aircraft eases back over 3s"},{"lane":"helper","text":"Plays the control-passed cue; the other machine's helper plays it too"},{"lane":"banner","text":"Shows \"You have control\"; the other machine shows \"Adam has control\""}],"doc":"record/areas/control/01-take-control.md"},{"id":"update","title":"Updating Crosscheck","gist":"The tray app downloads a new release, holds it until sim, session, and core are gone, then swaps folders.","lanes":["sim","core","desktop","releases"],"steps":[{"lane":"desktop","to":"releases","text":"Checks at start, each sim close, every 3 hours, and on Check now"},{"lane":"releases","to":"desktop","text":"The newest 10 releases' feeds list the new version, full package, and deltas"},{"lane":"desktop","text":"Downloads deltas, else the full package, at once; checks size and SHA-256"},{"lane":"desktop","text":"Holds it while the sim runs, a session file exists, or a core runs"},{"lane":"core","text":"Exits once sim closed, no session, no window; Install now sends Quit instead"},{"lane":"desktop","text":"Calls wait_exit_then_apply_updates, restart with --tray, and exits"},{"lane":"desktop","text":"Update.exe swaps current\\ by two renames and starts the new tray app"},{"lane":"desktop","to":"sim","text":"New app writes our package where Community's copy is another version"}],"doc":"record/areas/install/01-installing-and-updating.md"},{"id":"release","title":"Shipping a release","gist":"A developer runs the release workflow; CI builds, checks, and packs, uploads a draft, deploys the backend, then publishes.","lanes":["dev","ci","releases","backend","pages"],"steps":[{"lane":"dev","to":"ci","text":"Runs the release workflow by hand on main"},{"lane":"ci","text":"Read-only build job: stops if the version's published, then runs every PR check"},{"lane":"ci","text":"node tools/build.ts release lays out the app, core, helper, SimConnect.dll, package"},{"lane":"releases","to":"ci","text":"Serves the newest release's full package to vpk download github, as delta base"},{"lane":"ci","text":"vpk pack packs the folder, with a delta from that base"},{"lane":"ci","to":"releases","text":"Publish job uploads a draft with vpk upload github, then checks its files"},{"lane":"ci","to":"backend","text":"Runs the backend's D1 migrations, then wrangler deploy of the Worker"},{"lane":"ci","to":"releases","text":"Publishes the draft as latest with gh release edit"},{"lane":"ci","to":"pages","text":"Profiles job commits new bundles and index.json to the pages branch"}],"doc":"record/areas/build/01-the-build.md"}]},"build":{"stages":[{"id":"source","name":"The repository","does":["One Cargo workspace, one npm lockfile, profiles, backend, relays","Sim's stock VCockpit.js and BlurPage in sim-package/stock/","Figure model and banner .spb compiled with the sim, committed","msfs-sdk.txt pins the SDK; .cargo/config.toml makes the C runtime static"]},{"id":"setup","name":"tools/setup.ts","does":["Installs cargo-msfs at its tag","Installs the pinned SDK through tools/msfs-sdk","Build fails if the installed SDK isn't the pinned one"]},{"id":"build","name":"tools/build.ts","does":["cargo build: core, core helper, tools, all with a static C runtime","cargo-msfs: the WASM module, for wasm32","esbuild at es2017, then the Coherent GT check: everything in the sim","tauri build --no-bundle: the desktop app","cargo test: ts-rs types and stamp.ts (version + message hash)","Lays out the release folder with our package, crosscheck"]},{"id":"pr","name":"Every pull request","does":["Rustfmt, Clippy, tests; module exports; type-check","Coherent GT check on every file shipped into the sim","Generated types and stamp unchanged; map check","Profiles checked and built","Compiled sim files match source.json; stock files match stock.json"]},{"id":"buildjob","name":"Release: build job","note":"read-only token","does":["Stops if this version is already published","Runs every PR check, then tools/build.ts release","vpk download github: the newest release, for the delta","Fails unless that's releases/latest (or there's no release yet)","vpk pack: Setup.exe, full + delta packages, no portable zip"]},{"id":"publishjob","name":"Release: publish job","note":"write token","does":["Deletes a draft a failed run left","vpk upload github as a draft no pilot sees","Checks the draft holds every file and releases.win.json lists it","Deploys the backend: D1 migrations, then wrangler deploy","Publishes; it becomes releases/latest"]},{"id":"profilesjob","name":"Release: profiles job","does":["Publishes bundles at any level this release brings","Commits to the pages branch, never deleting a file"]}],"release":[["crosscheck-desktop.exe","Tray app, window, updater; Velopack's main program"],["crosscheck-core.exe","The session: sim, network, sync"],["crosscheck-core-helper.exe","Raw Input, audio, Opus"],["SimConnect.dll","From the pinned SDK, for the core"],["crosscheck\\","Our one Community package, PANEL_PATCH"]],"package":["VCockpit.js copy: loads the panel bridge in every cockpit panel","BlurPage copy: loads the menu script in the main menu","Panel bridge, page client, panel modules","EFB app, banner in-game panel","WASM module: routine host and routines","Figure SimObject (avatars)"],"dev":["node tools/build.ts builds everything locally","node tools/build.ts install copies the package into Community, sim closed","The installed app writes Community only from its install folder","Quit the installed app while developing","After a sim update: the build stops if stock files changed; node tools/stock.ts takes them"]}}</script>
 <script>
-// Links are relative to this file's folder, record/areas/architecture/.
-const GH = "../../";
-const DEC = {
-  "001": ["changing-other-developers-packages", "Changing other developers' packages"],
-  "002": ["core-starts-with-every-sim-run", "The core starts with every sim run"],
-  "003": ["watcher-keeps-blurpage-copy-current", "The watcher keeps the BlurPage copy current"],
-  "004": ["core-works-out-figures-hand", "The core works out where the figure's hand goes"],
-  "005": ["wasm-module-writes-following-aircraft", "Our WASM module writes the following aircraft"],
-  "006": ["core-catches-take-control-input", "The core catches the take-control key and buttons"],
-  "007": ["core-runs-audio", "The core runs Crosscheck's audio"],
-  "008": ["every-link-ends-at-core", "Every link between our components ends at the core"],
-  "009": ["sim-pages-find-core-over-commbus", "The sim's pages find the core over the CommBus and talk to it over a WebSocket"],
-  "010": ["clients-message-core-every-2s", "Every client sends the core a message every 2s"],
-  "011": ["cockpit-panels-connect-only-in-session", "Cockpit panels connect only in a session, and only the ones in use stay"],
-  "012": ["efb-app-opens-banner-panel", "The EFB app's code opens the banner panel"],
-  "013": ["core-accepts-sim-origin-or-none", "The core accepts a WebSocket only with the sim's Origin or none"],
-  "014": ["apps-find-core-through-port-file", "Apps outside the sim find the core through a port file"],
-  "015": ["watcher-reads-files-core-writes", "The watcher reads what its jobs need from files the core writes"],
-  "016": ["core-keeps-pilots-settings", "The core keeps the pilot's settings"],
-  "017": ["core-writes-control-slot-every-200ms", "The core writes the WASM module's control slot every 200ms"],
-  "018": ["rust-and-typescript", "Crosscheck is written in Rust, and in TypeScript where an engine runs it"],
-  "019": ["input-and-audio-run-in-helper", "The core's input and audio work runs in a helper it starts"],
-  "020": ["plugin-code-runs-only-in-core", "Plugin code runs only in the core"],
-  "021": ["profiles-and-plugins-apart-from-releases", "Profiles and plugins reach pilots apart from Crosscheck's releases"],
-  "022": ["random-uuids-as-text", "Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them"],
-  "023": ["pilot-id-and-restart-count", "A pilot keeps their ID through a core restart, and the core counts its restarts"],
-  "024": ["times-in-microseconds-on-monotonic-clock", "A time in a message is µs on the sender's PC's monotonic clock"],
-  "025": ["messages-in-one-rust-crate", "Messages are defined in one Rust crate: JSON typed by ts-rs, fixed-width structs in data slots, length-prefixed binary to the helper"],
-  "026": ["first-message-carries-version-and-hash", "Every first message carries one version number and a hash of the message crate"],
-  "027": ["core-runs-on-tokio", "The core runs on tokio"],
-  "028": ["desktop-pages-react-vite-tailwind", "The desktop app's pages are React, built with Vite and styled with Tailwind"],
-  "029": ["in-sim-interface-on-msfs-avionics-framework", "Our interface in the sim is built on the MSFS Avionics Framework"],
-  "030": ["in-sim-code-es2017-esbuild", "Our code in the sim is type-checked against ES2017 and bundled by esbuild at es2017"],
-  "031": ["coherent-gt-check-tool", "A tool of our own checks every file we ship into the sim against Coherent GT's measured limits"],
-  "032": ["one-quic-connection-through-iroh", "Every pair of cores holds one QUIC connection through iroh 1.3, directly or through our relays"],
-  "033": ["relays-run-iroh-relay-unmodified", "Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck"],
-  "034": ["backend-matches-invite-codes", "The backend matches invite codes to the crew's endpoint IDs, and no running session waits on it"],
-  "035": ["channels-declare-how-they-travel", "Each channel declares how it travels, and only the cockpit stream is replayed"],
-  "036": ["control-is-one-value", "Control is one value, a generation and the PF's pilot ID"],
-  "037": ["while-a-link-is-lost", "While a link is lost, the PF flies on, a PM that lost the flying machine locks, and any pilot can take control"],
-  "038": ["clock-offset-from-timed-exchange", "A receiver estimates each sender's clock offset from one timed exchange a second"],
-  "039": ["cut-link-replays-others-late-join", "A cut link comes back by replay, and a sim, core, or PC that went down comes back as a late joiner"],
-  "040": ["catch-up-first-final-value-order", "Catch-up writes in the order the flying machine's cockpit first took each value"],
-  "041": ["core-crash-comes-back-as-late-joiner", "A core that crashes comes back as a late joiner"],
-  "042": ["vector-clock-records-what-applied", "A machine's vector clock is its record of what it applied, and a skipped message counts as applied"],
-  "043": ["driven-entries-and-putting-back", "A shared entry every machine's aircraft keeps changing stops syncing, and a machine puts back what it may not send"],
-  "044": ["table-of-roles", "v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand"],
-  "045": ["profile-format-yaml-and-javascript", "A profile is YAML whose script is JavaScript, where names only name and only write() writes"],
-  "046": ["sandbox-runtimes-and-limits", "Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value"]
-};
-const DOCS = {
-  spine: ["areas/architecture/01-spine.md", "spine"],
-  net: ["areas/network/01-between-machines.md", "network"]
-};
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("data").textContent);
+  var GIST = D.gist;
+  document.getElementById("gist").textContent = GIST;
 
-function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-function ref(r) {
-  if (DOCS[r]) return `<a class="ref doc" href="${GH}${DOCS[r][0]}" target="_blank" rel="noopener">${DOCS[r][1]}</a>`;
-  const d = DEC[r];
-  return `<a class="ref" href="${GH}decisions/${r}-${d[0]}.md" target="_blank" rel="noopener" title="${esc(r + ": " + d[1])}">${r}</a>`;
-}
-function refs(list) { return (list || []).map(ref).join(" "); }
-function ul(list) { return `<ul>${list.map(x => `<li>${x}</li>`).join("")}</ul>`; }
-
-/* ---------- Components ---------- */
-const COMP = {
-  core: {
-    kind: "Process on each pilot's PC", name: "Core",
-    runs: "A process of its own, out of sight. One runs per PC, and a development core with its own data folder runs beside it.",
-    built: "Rust on tokio, the SDK's SimConnect.dll through bindgen-made bindings, QuickJS-ng for profiles and plugins, and iroh for the network.",
-    does: ["Owns everything a session does, and every link between our components ends at it.", "Holds SimConnect: its masking group, the sim's events, input events, AI objects, and the CommBus.", "Runs the session, sync, the network, the profile engine and plugins, traffic, recording, and the checks; the blocks inside it on the map open each one.", "Keeps the pilot's settings, and serves the apps and the sim's pages on 127.0.0.1."],
-    life: ["Starts with every sim run, started by the watcher, or by the desktop app when the pilot opens it.", "Takes its masking group as soon as SimConnect_Open succeeds, ahead of an aircraft like the PA-24.", "Stays up through a sim restart while a session is held.", "Exits once the sim has closed, no session is held, and the desktop app isn't open."],
-    links: [["Watcher", "starts it with the sim and restarts it if it exits, and reads files it writes"], ["Helper", "started by it; binary messages on the helper's standard input and output"], ["Desktop app", "WebSocket on 127.0.0.1"], ["Our pages in the sim", "a CommBus announcement every 2s, then a WebSocket from each page"], ["WASM module", "SimConnect data slots, one per kind of message"], ["Other cores", "one QUIC connection each, through iroh"], ["Backend and GitHub Pages", "HTTPS"]],
-    fails: "The watcher restarts it, and its pilot comes back as a late joiner, passing control on if they were PF. After 1s without it, the WASM module unfreezes the aircraft, and panels stop blocking input.",
-    refs: ["002", "008", "016", "018", "027", "041"]
-  },
-  session: {
-    kind: "Inside the core", name: "Session and roles",
-    does: ["Holds the session channel's keys: the control value, each member's entry, Ready, the countdown, seats, the traffic and ATC host, the sim rate and pause, the match check, and notices such as a sim crash.", "Control is one value, a generation and the PF's pilot ID. Every change of PF raises the generation, and of two at the same generation the lower pilot ID wins.", "Every other key carries a stamp: the control value, then a number, then the pilot ID. A core that takes control writes every session-wide key again.", "Two roles in v1: the PF, which passes only to a pilot in the flight, and the traffic and ATC host, which any pilot can take at any time.", "Keeps the session file: session ID, invite code, pilot ID, restart count, the sim's run, the endpoint key, the crew's endpoint IDs, and the relay list."],
-    life: ["The pilot ID is drawn at start or join, and kept through every rejoin.", "The restart count goes up by 1 each time the core starts while the session file exists, and reaches the disk before any link opens.", "Preflight happens only at a session's start. Once it has ended, a session with nobody in the flight ends."],
-    links: [["Other cores", "the session channel, a stream from each sender"], ["Backend", "the invite code, and a place in the crew renewed every 10 minutes"]],
-    refs: ["022", "023", "035", "036", "044"]
-  },
-  sync: {
-    kind: "Inside the core", name: "Sync engine",
-    does: ["Sends the cockpit stream: state changes, events, and presses in one causal order, each message carrying its vector clock and the control value it was made under.", "Sends a state entry's newest value at most 20 times a second, and any held value goes before the next event or press, which go as they happen.", "A receiver's vector clock is its record of what it applied: a message it already covers is a copy and drops, and a press counts once its panel has played it to the release.", "Paces every cockpit message, live or replayed: each waits what's left of its sender's gap, capped at 2s.", "Catches a cockpit up to the flying machine's values, in the order the flying machine's cockpit first took each value.", "Stops syncing an entry every machine's aircraft keeps changing, and writes back what a machine may not send."],
-    life: ["Live from the end of preflight.", "Keeps each sender's messages until every member acknowledges them on the heartbeat, for up to 30 minutes, to replay after a cut."],
-    links: [["Other cores", "the cockpit stream, the catch-up stream, and the heartbeat"], ["Profile engine", "runs each entry's write()"]],
-    refs: ["039", "040", "041", "042", "043"]
-  },
-  network: {
-    kind: "Inside the core", name: "Network",
-    does: ["Runs one iroh endpoint under a key drawn for each session, and holds one QUIC connection to every other core.", "iroh goes direct when hole punching gets through both routers, through one of our relays when it doesn't, and moves between the two.", "Carries eight channels, each declaring its sender, delivery, and priority. Only the cockpit stream is replayed.", "Sends a heartbeat once a second carrying a clock exchange; a receiver takes each sender's offset from the shortest round trip of the last 8.", "Joins through the backend, which matches the invite code to the crew's endpoint IDs. No running session waits on it."],
-    life: ["A link is lost after 5s with nothing on it, and the core closes the connection and redials.", "iroh's path idle timeout is 2s, so a dead direct path moves to the relay 2s later.", "After 30 minutes with no connection to any member, the core leaves the session."],
-    links: [["Other cores", "QUIC through iroh, every message as postcard"], ["Relays", "iroh-relay over TCP, from the host's relay list"], ["Backend", "HTTPS and JSON, each request signed with the endpoint key"]],
-    refs: ["032", "033", "034", "035", "037", "038"]
-  },
-  profiles: {
-    kind: "Inside the core", name: "Profile engine",
-    does: ["Brings its cache of profile bundles up to date each time the core starts, and loads every profile from that cache.", "Pins one bundle by hash for the session, and a pilot who lacks it fetches it by hash.", "A profile is YAML whose script is JavaScript: L(), A(), B(), K(), and H() only name, and write() is the one call that writes.", "Gives each loaded aircraft two QuickJS-ng runtimes, the profile's and the plugin's, with 64 MB each, 100ms a call, and 4 KB a value.", "Runs plugins, which reach the panels, the WASM module, and the sim only through our APIs, and never the pilot's files or the network."],
-    life: ["Loads the profile and plugin once the pilot is in the flight, and unloads them with the aircraft.", "A plugin at a limit is off for the rest of the session, and every machine stops syncing its entries."],
-    links: [["GitHub Pages", "the index and any new bundles, at each start"], ["Panel bridge and WASM module", "the operations plugins drive"]],
-    refs: ["020", "021", "045", "046"]
-  },
-  sim: {
-    kind: "Inside the core", name: "Sim awareness",
-    does: ["Reports whether the sim is closed, starting, in the menu and on which page, loading, at Ready to fly, or in a flight with which aircraft.", "Takes the masking group as SimConnect opens, held open by an event it only listens to.", "Announces the core's port and whether a session runs on the CommBus every 2s, and at once when a session starts or ends.", "Writes the WASM module's control slot every 200ms in a session.", "Reads each input event once when it starts watching it, since a subscription reports nothing until the value changes.", "Stamps every value it reads in µs on QueryPerformanceCounter, as it arrives."],
-    life: ["Follows the sim's system and flow events from the sim's start, session or not."],
-    links: [["The sim", "SimConnect"], ["WASM module", "data slots"], ["Menu script", "which menu page is up"]],
-    refs: ["002", "009", "017", "024", "040"]
-  },
-  traffic: {
-    kind: "Inside the core", name: "Traffic and ATC",
-    does: ["On the traffic and ATC host's machine, sends each AI object's identity and samples, each object at least every 5s.", "On every other machine, injects each object as an AI copy and writes it each frame from outside the sim.", "Removes a copy with no sample for 15s, and forgets its identity.", "Keeps each sender's identities apart, and shows the objects of whoever the session channel names as host.", "ATC: the host's helper captures the ATC app by process, and every other machine plays it on the device its pilot picks."],
-    life: ["Any pilot takes the host role at any time by turning on “Share my traffic and ATC”, which turns the old host's switch off.", "The role stays with its holder through a lost link, a flight left, or a crash, until they switch it off or leave the session."],
-    links: [["Other cores", "identities on a stream, samples and ATC audio as one-off packets"], ["Helper", "ATC capture and playback"], ["The sim", "AI objects through SimConnect"]],
-    refs: ["007", "035", "044"]
-  },
-  recording: {
-    kind: "Inside the core", name: "Recording",
-    does: ["Logs every connection, first message, and close, so a bug report shows which component stopped and when.", "Keeps each sender's clock offset estimate and restart count once a second, so two pilots' recordings line up.", "Keeps the cockpit stream in every mode, minimal included, because catch-up takes its order from it.", "Marks an entry the driven-entry test catches."],
-    life: ["Each machine keeps its recording after the session, for a bug report the desktop app's report page sends."],
-    links: [["Backend", "bug reports"], ["Data folder", "the recording"]],
-    refs: ["008", "038", "040", "041", "043"]
-  },
-  checks: {
-    kind: "Inside the core", name: "Checks",
-    does: ["Every first message and join carries one version number and a hash of the message crate. A core refuses a join that differs, and logs a component on its own PC that differs.", "Accepts a WebSocket only with the Origin coui://html_ui or none, which keeps web pages out.", "Runs the preflight match check, which compares each pilot's setup, profiles by hash.", "Warns of another package's VCockpit.js override when no cockpit panel's first message arrives."],
-    links: [["Backend", "refuses a joiner whose version or hash differs, before anyone dials"]],
-    refs: ["011", "013", "026", "034"]
-  },
-  settings: {
-    kind: "Inside the core", name: "Settings and clients",
-    does: ["Keeps the pilot's settings in its data folder: the take-control binding, the output device, and the recording mode.", "Listens on 127.0.0.1, on a port Windows picks, and writes it to the port file with its process ID and creation time.", "Closes a socket it hasn't heard from in 8s, since a page's socket outlives the page.", "One core runs per data folder: a core that finds a running one named in the port file exits."],
-    links: [["Desktop app", "edits the settings by command"], ["Data folder", "the port file and the settings"]],
-    refs: ["009", "010", "014", "016"]
-  },
-  helper: {
-    kind: "Process on each pilot's PC", name: "Helper",
-    runs: "A process the core starts and restarts.", built: "Rust, linked with Visual Studio's linker.",
-    does: ["Reads the keyboard, flight hardware, and mouse through Raw Input in sink mode, which sits in nobody's input path.", "Catches the take-control key and buttons, bound in Crosscheck's settings, not the sim's.", "Reads the cursor for the figure's hand; the core finds the point by casting a ray into the aircraft's model.", "Captures the microphone and runs the speech recognizer for the voice phrases.", "Captures the ATC app's audio by process, and plays ATC and Crosscheck's sounds on the device the pilot picks."],
-    life: ["Runs in a session. With no session, it runs only while the desktop app binds a key or lists the output devices.", "Sends the core a message every 2s, and the core restarts it when it exits or goes quiet for 8s."],
-    links: [["Core", "its standard input and output, binary and length-prefixed"]],
-    fails: "A crash costs the take-control input, the figure's hand, and the audio until the core restarts it, and the session goes on.",
-    refs: ["004", "006", "007", "010", "019", "025"]
-  },
-  watcher: {
-    kind: "Process on each pilot's PC", name: "Watcher",
-    runs: "A process of its own, from Windows login, in the tray.", built: "Rust.",
-    does: ["Notices the sim's process starting and stopping, from the operating system.", "Starts the core with every sim run, and again if it exits while the sim runs.", "Makes our copy of the sim's BlurPage component from the sim's own file, and makes it again whenever that file's hash changes, so the menu script loads from the first screen.", "Warns at sim start that a waiting update needs a sim restart, if the pilot flew with Crosscheck lately.", "Shows the core's CPU and memory use beside its own.", "Downloads updates from GitHub Releases."],
-    life: ["Runs all day from login. A pilot who turns it off has no core with the sim until they open the desktop app."],
-    links: [["Core", "starts its process, and reads the port file and the last-session date; it opens no socket"], ["GitHub Releases", "HTTPS, the one link of ours that doesn't end at the core"], ["Our package", "writes the BlurPage copy"]],
-    fails: "The core can't tell whether the watcher runs, because the watcher sends it nothing.",
-    refs: ["002", "003", "008", "014", "015"]
-  },
-  desktop: {
-    kind: "App on each pilot's PC", name: "Desktop app",
-    runs: "A window the pilot opens. Optional.", built: "Tauri, with pages in React, built with Vite and styled with Tailwind.",
-    does: ["Starts or joins a session.", "Shows the session.", "Edits the settings the core keeps, by command, and decides nothing.", "Its report page has the core upload the pilot's part of a bug report."],
-    life: ["Open only while the pilot has it open; a pilot in VR flies with it closed.", "Starts the core when the port file names no running core."],
-    links: [["Core", "a WebSocket from its Rust side, which sends no Origin; its pages trade serde_json text with the Rust side"]],
-    fails: "Closing it changes nothing in a session.",
-    refs: ["013", "014", "016", "018", "025", "028"]
-  },
-  data: {
-    kind: "Files on each pilot's PC", name: "Core's data folder",
-    runs: "On disk. Each core has its own, so a development core runs beside the pilot's.",
-    does: ["The port file: the core's port, process ID, and process creation time.", "The date of the pilot's last session, for the watcher's update warning.", "The pilot's settings.", "The session file, from the first join until Leave session, 30 minutes cut off, or the session's end.", "The cache of profile bundles.", "The recording."],
-    links: [["Core", "writes it"], ["Watcher", "reads the port file and the last-session date"], ["Desktop app", "reads the port file"]],
-    refs: ["014", "015", "016", "021", "023"]
-  },
-  menu: {
-    kind: "In the sim", name: "Menu script",
-    runs: "The main menu's document, mainUi, through our copy of the sim's BlurPage component.", built: "TypeScript, no framework, bundled by esbuild at es2017.",
-    does: ["Reports which menu page is up.", "Runs Go to, which loads the flight at the PF's stand, with nobody at the sim."],
-    life: ["Loads from the sim's first screen and answers the core whenever it's asked."],
-    links: [["Core", "hears the CommBus through ADD_VIEW_LISTENER, since mainUi has no Coherent, then opens a WebSocket"]],
-    fails: "If a sim update removes BlurPage, or another package copies it, Go to is off and says why until a release picks another component.",
-    refs: ["003", "009", "030"]
-  },
-  efb: {
-    kind: "In the sim", name: "EFB app",
-    runs: "The EFB's document, registered through Asobo's EFB API.", built: "The MSFS Avionics Framework's FSComponent, in TypeScript, bundled by esbuild at es2017.",
-    does: ["Offers to start a session or enter a code.", "Shows the controls a pilot needs in flight, the take-control button among them.", "Opens and closes the banner panel when the core says the session has something to show, by calling TOOLBAR_BUTTON_TOGGLE."],
-    life: ["Its code runs from sim start with the EFB closed, and connects whenever it hears the core."],
-    links: [["Core", "a CommBus announcement, then a WebSocket"], ["Banner panel", "opens and closes it"]],
-    refs: ["006", "009", "012", "029", "030"]
-  },
-  banner: {
-    kind: "In the sim", name: "Banner panel",
-    runs: "An in-game panel of ours.", built: "FSComponent, from our own pinned copy of @microsoft/msfs-sdk.",
-    does: ["Shows the session's notices.", "A click on a notice opens the EFB onto our app, by way of the core.", "While a link is lost, lists each crew member's link and whether this PC reaches the internet."],
-    life: ["Closed, with no page, until the EFB app's code opens it, and connected only while open."],
-    links: [["Core", "a WebSocket while it's open"], ["EFB app", "opens and closes it"]],
-    refs: ["008", "012", "029", "037"]
-  },
-  bridge: {
-    kind: "In the sim", name: "Panel bridge",
-    runs: "Every cockpit panel, through our VCockpit.js override.", built: "TypeScript, no framework, bundled by esbuild at es2017.",
-    does: ["Pointer sync: captures presses on displays, and plays a peer's press when the core hands it over.", "Loads the modules that features name, one module per file.", "Carries out plugins' requests through generic operations.", "One panel listens for H: events."],
-    life: ["Runs as each panel loads, session or not, and with no session loads nothing and captures nothing.", "Every panel connects when a session starts and names its instruments; the core keeps only the panels in use.", "When the session ends, each module it loaded tears itself down."],
-    links: [["Core", "a CommBus announcement, then a WebSocket"]],
-    fails: "It fails open: a panel blocks input only while the core keeps telling it to. No panel's first message arriving means our bridge didn't load, as when another package's VCockpit.js wins.",
-    refs: ["011", "020", "030", "042"]
-  },
-  wasm: {
-    kind: "In the sim", name: "WASM module",
-    runs: "The sim, as a standalone module loaded at boot from our package.", built: "Rust, built by cargo-msfs.",
-    does: ["Holds every aircraft still in preflight, the PF's included.", "On a following machine, freezes the aircraft and writes the flying machine's pose and body and rotation velocities every frame.", "Places the figures, the other pilots' avatars, every frame.", "Runs the mechanisms plugins drive: writing given variables every frame, running given calculator code, or placing an object."],
-    life: ["Loaded at boot and kept through the main menu, every flight, and every aircraft change.", "Leaves its version in a slot and writes a counter every second, and with no session does nothing each frame."],
-    links: [["Core", "SimConnect data slots of fixed-width structs, one per kind of message; the core writes the control slot every 200ms"]],
-    fails: "It fails safe: after 1s with no word from the core, it unfreezes the aircraft and clears every variable of ours that holds something back. A flight load's 2.8s round trips trip this too, which costs a v1 session nothing.",
-    refs: ["005", "017", "018", "020", "025"]
-  },
-  aircraft: {
-    kind: "In the sim", name: "The aircraft and the sim",
-    runs: "MSFS 2024. Not ours.",
-    does: ["The core reaches it through SimConnect: variables, events, input events, masks, AI objects for traffic copies and figures, and the camera.", "Our features never change another developer's package. A plugin may change its own aircraft's files, a job that waits until a plugin needs it."],
-    links: [["Core", "SimConnect.dll"], ["WASM module", "writes inside the sim's frame"]],
-    refs: ["001", "002", "005", "018"]
-  },
-  releases: {
-    kind: "Off the pilots' PCs", name: "GitHub Releases",
-    does: ["Holds the installers and updates.", "Every component and our package carry one version number, which the build writes from one place."],
-    links: [["Watcher", "HTTPS, the only link of ours that doesn't end at the core"]],
-    refs: ["008", "026"]
-  },
-  pages: {
-    kind: "Off the pilots' PCs", name: "GitHub Pages",
-    runs: "Published by CI from one public repository of profiles and plugins.",
-    does: ["On each merge, CI builds each profile into one bundle, with its modules merged in and its plugin compiled to JavaScript, checks it, and works out its level.", "Holds an index of every bundle, with its hash, variants, publish date, and level, and every bundle under its hash, kept for good.", "Bundles are unsigned, and the core checks each one's bytes against its hash.", "A release runs every bundle at or below its own level."],
-    links: [["Core", "fetches the index at each start, and any bundle its cache lacks"]],
-    refs: ["021", "045"]
-  },
-  backend: {
-    kind: "Off the pilots' PCs", name: "Backend",
-    runs: "A server of ours; a Cloudflare Worker with D1 and R2 is the candidate.",
-    does: ["Draws each invite code and keeps the session under it: its ID, the host's version and hash, the relay list with tokens, and each member's pilot ID, display name, kind, and endpoint ID.", "Refuses a joiner whose version or hash differs, before anyone dials.", "Lists a joiner only once its first message has passed with a member.", "Each core renews every 10 minutes, a member is dropped after 30 minutes without, and the code is freed once the crew is empty.", "Receives each pilot's part of a bug report."],
-    life: ["No running session waits on it: a returning pilot dials the crew from the session file, and asks the backend only if nobody answers."],
-    links: [["Core", "HTTPS and JSON, each request signed with the core's endpoint key"]],
-    refs: ["034"]
-  },
-  relays: {
-    kind: "Off the pilots' PCs", name: "Relays",
-    runs: "n0's iroh-relay, unmodified, in at least two regions.",
-    does: ["Carry a session's QUIC connection over TCP when two cores can't link directly.", "Admit only clients with a token each release carries, and cap each client's rate.", "A session uses its host's relay list, and each pilot homes at the relay with the lowest latency."],
-    life: ["Restart only at a quiet hour, since a restart drops every relayed connection until a redial lands."],
-    links: [["Cores", "iroh's protocol only"]],
-    refs: ["032", "033"]
-  },
-  pilotB: {
-    kind: "The other pilot", name: "Pilot B's PC",
-    runs: "The same components as Pilot A's.",
-    does: ["The PF's machine is the flying machine, and every other is a following machine.", "Either PC can be the flying machine, and control moves by the take-control key, a button, or voice."],
-    links: [["Pilot A's core", "one QUIC connection, direct or through a relay"]],
-    refs: ["032", "036", "044"]
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "class") e.className = attrs[k];
+      else if (k === "text") e.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), attrs[k]);
+      else e.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
   }
-};
-const SUBLINKS = {
-  session: ["l-direct", "l-relay", "l-relayb", "l-backend", "l-cdata"],
-  sync: ["l-direct", "l-relay", "l-relayb", "l-slots", "l-sc", "l-trunk", "l-bridge"],
-  network: ["l-direct", "l-relay", "l-relayb", "l-backend"],
-  profiles: ["l-pages", "l-cdata", "l-sc", "l-slots", "l-trunk", "l-bridge"],
-  sim: ["l-sc", "l-slots", "l-trunk", "l-menu", "l-efb", "l-banner", "l-bridge"],
-  traffic: ["l-sc", "l-direct", "l-relay", "l-relayb", "l-helper"],
-  recording: ["l-cdata", "l-backend"],
-  checks: ["l-trunk", "l-menu", "l-efb", "l-banner", "l-bridge", "l-desk", "l-direct", "l-backend"],
-  settings: ["l-desk", "l-cdata", "l-trunk", "l-menu", "l-efb", "l-banner", "l-bridge", "l-helper"]
-};
-
-const svg = document.getElementById("schematic");
-const nodes = Array.from(svg.querySelectorAll(".node"));
-const links = Array.from(svg.querySelectorAll(".lg"));
-const panel = document.getElementById("panel");
-
-function renderPanel(id) {
-  const c = COMP[id];
-  let h = `<div class="kind">${esc(c.kind)}</div><h3>${esc(c.name)}</h3>`;
-  if (c.runs || c.built) {
-    h += "<dl>";
-    if (c.runs) h += `<dt>Runs in</dt><dd>${esc(c.runs)}</dd>`;
-    if (c.built) h += `<dt>Built with</dt><dd>${esc(c.built)}</dd>`;
-    h += "</dl>";
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function sv(tag, attrs, kids) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (kids || []).forEach(function (c) { e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
   }
-  if (c.does && c.does.length) h += `<h4>Does</h4>${ul(c.does.map(esc))}`;
-  if (c.life && c.life.length) h += `<h4>When it runs</h4>${ul(c.life.map(esc))}`;
-  if (c.links && c.links.length) h += `<h4>Talks to</h4>${ul(c.links.map(l => `<b>${esc(l[0])}</b>: ${esc(l[1])}`))}`;
-  if (c.fails) h += `<h4>If it fails</h4><p>${esc(c.fails)}</p>`;
-  h += `<div class="refs">Decisions ${refs(c.refs)}</div>`;
-  h += `<p class="hint">The map dims every link that doesn't touch this part.</p>`;
-  panel.innerHTML = h;
-}
+  function list(items) { return el("ul", null, items.map(function (t) { return el("li", { text: t }); })); }
 
-function select(id) {
-  if (!COMP[id]) id = "core";
-  nodes.forEach(n => n.classList.toggle("sel", n.dataset.id === id));
-  svg.classList.add("dim");
-  const sub = SUBLINKS[id];
-  links.forEach(l => {
-    const on = sub ? sub.includes(l.id) : l.dataset.ends.split(" ").includes(id);
-    l.classList.toggle("on", on);
+  var comps = {}; D.runtime.components.forEach(function (c) { comps[c.id] = c; });
+  function cname(id) { return comps[id] ? comps[id].name : ({ ci: "CI", dev: "Developer", relay: "Relays" })[id] || id; }
+
+  var TABS = [
+    { id: "runtime", name: "Runtime", render: renderRuntime },
+    { id: "code", name: "Code", render: renderCode },
+    { id: "flows", name: "Flows", render: renderFlows },
+    { id: "build", name: "Build", render: renderBuild }
+  ];
+  var tabsEl = document.getElementById("tabs"), view = document.getElementById("view");
+  function show(id) {
+    TABS.forEach(function (t) { t.btn.setAttribute("aria-selected", String(t.id === id)); });
+    view.innerHTML = "";
+    var t = TABS.filter(function (x) { return x.id === id; })[0] || TABS[0];
+    t.render(view);
+    try { localStorage.setItem("ccmap-tab", t.id); } catch (e) {}
+    if (location.hash.slice(1) !== t.id) { try { history.replaceState(null, "", "#" + t.id); } catch (e) {} }
+  }
+  TABS.forEach(function (t) {
+    t.btn = el("button", { role: "tab", text: t.name, onclick: function () { show(t.id); } });
+    tabsEl.appendChild(t.btn);
   });
-  renderPanel(id);
-  try { localStorage.setItem("xc-map-sel", id); } catch (e) {}
-}
-nodes.forEach(n => {
-  n.addEventListener("click", () => select(n.dataset.id));
-  n.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(n.dataset.id); }
-  });
-});
-let first = "core";
-try { first = localStorage.getItem("xc-map-sel") || "core"; } catch (e) {}
-select(first);
 
-/* ---------- Systems ---------- */
-const SYSTEMS = [
-  { id: "sys-core", name: "The core", where: "Step 8; the spine fixes its shape",
-    what: "The core's own plumbing: SimConnect and the sim's events, sim awareness, the clients' protocol, the pilot's settings, the checks, and versions.",
-    how: ["A Rust program on tokio, reaching the sim through the SDK's SimConnect.dll with bindings bindgen generates from the SDK's headers.",
-      "Takes its masking group as soon as SimConnect_Open succeeds and follows the sim's system and flow events. Sim awareness reports the sim's state and knows nothing of features.",
-      "Listens on 127.0.0.1 on a port Windows picks, written to a port file with its process ID and creation time, so a second core on one data folder exits.",
-      "Announces its port on the CommBus every 2s, accepts a WebSocket only with the Origin coui://html_ui or none, and closes a client quiet for 8s.",
-      "Starts the helper and talks to it over standard input and output, and keeps the pilot's settings in its data folder.",
-      "Every first message carries one version and a hash of the message crate."],
-    open: ["the WebSocket library", "bindings from msfs-rs or our own bindgen run", "the helper link's binary format", "letting in a client beyond the PC", "telling a sim crash from a closed sim"],
-    comps: ["core", "sim", "settings", "checks", "helper", "menu", "data", "aircraft"],
-    refs: ["002", "009", "010", "013", "014", "016", "018", "019", "026", "027"] },
-  { id: "sys-network", name: "The network", where: "Node 2, done",
-    what: "How the cores reach each other, and how each channel travels.",
-    how: ["One iroh 1.3 endpoint per core, under a key drawn for each session, and one QUIC connection between every pair. TLS stays on, since QUIC has no mode without it.",
-      "Direct when hole punching gets through both routers, otherwise through one of our iroh-relay servers over TCP, from the host's relay list. iroh moves between the two.",
-      "Eight channels: the session, cockpit, catch-up, and traffic identities as streams; the flight model, avatars, traffic samples, ATC audio, and heartbeat as one-off packets. Every message is postcard.",
-      "The heartbeat goes once a second with an NTP-style clock exchange, and each receiver keeps the shortest round trip of the last 8 for each sender's offset.",
-      "A link is lost after 5s with nothing on it, then closed and redialed. The path idle timeout is 2s. After 30 minutes with no member, a core leaves.",
-      "The backend matches an invite code to the crew's endpoint IDs, and no running session waits on it."],
-    open: ["one-off packets on a direct path under loss", "tuning the 5s, 2s, and 30 minutes from v1's recordings"],
-    comps: ["core", "network", "relays", "backend", "pilotB"],
-    refs: ["032", "033", "034", "035", "036", "037", "038"] },
-  { id: "sys-sync", name: "Sync", where: "Node 3, done; a two-instance bench in step 8",
-    what: "Keeping every pilot's cockpit the same: state, events, and presses on displays.",
-    how: ["A profile lists state entries, event entries, and a writer, and the engine sees every write, since write() is the one call that writes.",
-      "One cockpit stream per sender, in causal order. Each message carries a vector clock keyed by pilot ID and restart count, and the control value it was made under.",
-      "A state entry goes at most 20 times a second, at its newest value; events and presses go as they happen.",
-      "PF-owned entries, the engine levers and trim, come only from the flying machine, which a following machine enforces by writing them back. Shared entries go both ways.",
-      "A receiver applies each message after the gap its sender left, capped at 2s, and a press counts once played through.",
-      "Catch-up writes the flying machine's values in the order its cockpit first took them. A cut link gets a replay instead, for up to 30 minutes.",
-      "An entry every machine's aircraft keeps changing stops syncing for the rest of the load."],
-    open: ["checking a write, telling its own echo, retries, and following a moving knob, on the bench", "firing H: events through client events or calculator code", "the cockpit message's exact fields"],
-    comps: ["core", "sync", "profiles", "wasm", "bridge", "aircraft", "pilotB"],
-    refs: ["039", "040", "041", "042", "043", "045"] },
-  { id: "sys-session", name: "The session", where: "Node 3, done; then step 8",
-    what: "Starting and joining, members and roles, preflight, the match check, and the sim rate and pause.",
-    how: ["The host starts a session, the backend draws a six-character code and keeps the crew, and a joiner counts once its first message passes with a member.",
-      "The session channel holds every key the crew shares, and each key keeps the value with the highest stamp.",
-      "Control is one value, a generation and the PF's pilot ID. It passes only to a pilot in the flight, and the take-control input is live only after preflight.",
-      "Preflight happens once, at the start: the WASM module holds every aircraft still while each pilot works the match check, takes a seat, and clicks Ready, and a 3s countdown ends it.",
-      "A session flies one aircraft, the PF's, on one pinned profile bundle. After preflight, a session with nobody in the flight ends.",
-      "The sim rate, the flying machine's, and active pause are synced. Time and date aren't in v1, and the match check warns when they differ.",
-      "The traffic and ATC host is a role any pilot can take at any time."],
-    open: ["which bundle a session pins when two pilots' cores hold different ones", "naming the PF's stand once they've moved"],
-    comps: ["core", "session", "efb", "desktop", "menu", "wasm", "backend", "pilotB"],
-    refs: ["005", "021", "034", "035", "036", "044"] },
-  { id: "sys-control", name: "Control", where: "Step 8",
-    what: "Passing control: the take-control key and buttons, and the voice phrases.",
-    how: ["The helper reads the keyboard and flight hardware through Raw Input in sink mode. The binding, a single or a long press, lives in the core's settings.",
-      "The EFB app and the desktop app have a take-control button too.",
-      "By voice, the PF offers control and the PM answers, heard by a recognizer running locally in the helper.",
-      "Every change of PF raises the control value's generation, and of two at once, the lower pilot ID wins.",
-      "Control can't pass to a pilot whose own catch-up or replay runs. While a link is lost, any pilot may take it, warned of what follows."],
-    open: ["which recognizer", "telling speech from noise before listening for a phrase"],
-    comps: ["core", "session", "helper", "efb", "desktop"],
-    refs: ["006", "019", "036", "037", "039", "044"] },
-  { id: "sys-profiles", name: "Profiles and plugin delivery", where: "Node 4, done",
-    what: "The profile format, and how profiles and plugins reach pilots.",
-    how: ["A profile is one YAML file whose script is JavaScript: L(), A(), B(), K(), and H() name, write() writes, and every entry's write and every stepping map's wrap are required.",
-      "Variants name a SimObjects folder or a preset inside one, and a profile imports modules by path.",
-      "Profiles live in one public repository. On each merge, CI builds each profile into one bundle with its plugin compiled in, checks it, and works out its level.",
-      "GitHub Pages holds an index and every bundle by hash, unsigned. The core refreshes its cache at each start and loads every profile from it.",
-      "A session pins one bundle by hash, and a release runs every bundle at or below its own level.",
-      "The core, CI, and the IDE run one checker, so a load fails on anything that breaks a rule."],
-    open: ["which pilot's bundle a session pins when two differ", "test sessions that send a saved bundle to the crew", "the compiler the core embeds for a local build"],
-    comps: ["core", "profiles", "pages", "data"],
-    refs: ["021", "045", "046"] },
-  { id: "sys-plugins", name: "Plugins and the hosts in the sim", where: "Step 8, from the Baron 58P's plugin",
-    what: "The APIs plugins use, and the panel bridge and WASM module as their hosts.",
-    how: ["A plugin is TypeScript implementing our interface, compiled into its profile's bundle, and it runs only in the core.",
-      "Each aircraft's plugin gets its own QuickJS-ng runtime with 64 MB and 100ms a call. At a limit it's off for the session, and every machine stops syncing its entries.",
-      "It reaches panels through the bridge's generic operations, and the sim's frame through the module's mechanisms: variables written every frame, calculator code, or placing an object.",
-      "It never reaches the pilot's files or the network, so it needs no signing.",
-      "v1's one plugin is the Baron 58P's, which exports radio settings that live only in its gauges' JavaScript."],
-    open: ["which APIs the bridge and module offer", "how each module and hook tears itself down", "how the module takes the session up again after a flight load"],
-    comps: ["core", "profiles", "bridge", "wasm"],
-    refs: ["011", "020", "046"] },
-  { id: "sys-fm", name: "Flight-model sync", where: "Step 8",
-    what: "The flying machine's pose and velocities on every following machine.",
-    how: ["The flying machine sends a sample at a fixed rate as a one-off packet, carrying the control value and the yoke, rudder, and toe-brake positions.",
-      "Each sample is stamped in µs when it's read, and the receiver reads it through its offset estimate for that sender.",
-      "The following machine's WASM module freezes the aircraft and writes the pose and the body and rotation velocities every frame, from inside the sim's frame.",
-      "Through a short gap, it carries the aircraft on its last velocities, and eases it back when samples return.",
-      "A sample made under an older control value drops."],
-    open: ["the sample's fields", "whether the module stamps on its own clock", "easing an offset that steps", "marking a sim stopped on purpose"],
-    comps: ["core", "wasm", "aircraft", "pilotB"],
-    refs: ["005", "024", "035", "036", "037", "038"] },
-  { id: "sys-pointer", name: "Pointer sync", where: "Step 8, from the FS Copilot fork's work",
-    what: "Presses on displays and panels, played into the other pilots' cockpits.",
-    how: ["The panel bridge in each display's panel captures presses and sends them to the core, which puts them on the cockpit stream.",
-      "On the receiving side, the core paces each press by the gap its sender left, capped at 2s, and the bridge plays it.",
-      "A press counts as applied once the panel has played it through to its release.",
-      "A press for a display whose panel hasn't announced itself, or one that arrives during catch-up, is skipped."],
-    open: ["which clock the bridge measures a span on"],
-    comps: ["core", "sync", "bridge", "pilotB"],
-    refs: ["011", "039", "042"] },
-  { id: "sys-avatars", name: "Avatars", where: "Step 8, from the avatars area's tentative decisions",
-    what: "Each pilot sees the others as figures, with a hand where they click.",
-    how: ["The WASM module draws each figure from inside the sim's frame, so it keeps up with a moving cockpit.",
-      "At each click, the core casts a ray from the pilot's eye through the cursor into the aircraft's own model, and the hand goes to the point it meets.",
-      "The point crosses relative to the aircraft, on the avatars channel, newest pose only.",
-      "The helper reads the cursor through Raw Input, only in a session."],
-    open: [],
-    comps: ["core", "wasm", "helper", "pilotB"],
-    refs: ["004", "005", "035"] },
-  { id: "sys-traffic", name: "Traffic and ATC", where: "Step 8, from the FS Copilot fork's work",
-    what: "One pilot's AI traffic and ATC app, shared with the crew.",
-    how: ["The host turns on “Share my traffic and ATC”, and any pilot can take the role at any time.",
-      "The host's core sends each object's identity on a stream and its samples in one-off batches under 1,162 bytes, each object at least every 5s.",
-      "Every other core injects AI copies and writes each one every frame from outside the sim, and removes a copy with no sample for 15s.",
-      "The host's helper captures the ATC app by process. 20ms Opus frames play on the other machines behind an adaptive buffer, on each pilot's chosen device."],
-    open: [],
-    comps: ["core", "traffic", "helper", "aircraft", "pilotB"],
-    refs: ["007", "035", "044", "net"] },
-  { id: "sys-apps", name: "The apps", where: "Step 8",
-    what: "The desktop app, the EFB app, and the banner: views and commands that decide nothing.",
-    how: ["Desktop app: Tauri, with pages in React built by Vite and styled with Tailwind, reaching the core through its Rust side.",
-      "EFB app: FSComponent, registered with Asobo's EFB API. Its code runs from sim start and opens the banner.",
-      "Banner: an in-game panel on FSComponent, with our own pinned copy of @microsoft/msfs-sdk.",
-      "The EFB app and the desktop app share TypeScript logic and ts-rs types, not interface."],
-    open: ["what counts as trouble for each component, and where the pilot sees it", "whether the EFB app bundles our pinned framework", "keeping the banner on the right", "opening the banner during a flight load"],
-    comps: ["desktop", "efb", "banner", "core"],
-    refs: ["012", "013", "028", "029", "030"] },
-  { id: "sys-recording", name: "Recording and bug reports", where: "Step 8",
-    what: "What each machine records, and how a bug report reaches us.",
-    how: ["Every machine records, in a mode a setting picks, and minimal mode still keeps the cockpit stream.",
-      "The recording keeps every connection, first message, and close, and each sender's offset and restart count once a second.",
-      "The session ID labels each pilot's recording and their part of a bug report.",
-      "The desktop app's report page has the core upload it to the backend, for which a Cloudflare Worker with D1 and R2 is the candidate."],
-    open: ["what the backend runs on, and its framework"],
-    comps: ["core", "recording", "desktop", "backend", "data"],
-    refs: ["008", "022", "038", "040", "041"] },
-  { id: "sys-install", name: "Installing and updating", where: "Step 8",
-    what: "The installer, and keeping every pilot on one version.",
-    how: ["The installer puts the app and our Community package in place, once.",
-      "Every program and the package carry one version, written by the build from one place.",
-      "The watcher downloads updates from GitHub Releases and installs them with the sim closed, and warns at sim start when one waits.",
-      "Pilots on different versions or message-crate hashes can't join each other."],
-    open: [],
-    comps: ["watcher", "releases"],
-    refs: ["008", "015", "026"] },
-  { id: "sys-build", name: "The build", where: "Step 8",
-    what: "What keeps the pieces in agreement before they ship.",
-    how: ["One Rust crate defines every message, and ts-rs generates the TypeScript types, with 64-bit integers as numbers.",
-      "Data-slot structs are fixed-width, and asserted to lay out the same on x86_64 and wasm32.",
-      "The build hashes the crate, encodings included, and writes one version into every component.",
-      "Code in the sim is type-checked against ES2017, bundled by esbuild at es2017, and checked by our own Coherent GT tool.",
-      "The WASM module builds with cargo-msfs, and two cores run on one PC for a test bench with a stand-in second sim."],
-    open: ["how the crate hash is computed", "the check tool's parser and banned-API list", "whether the framework's for-of rewrite pays for itself", "the stand-in second sim"],
-    comps: [],
-    refs: ["018", "025", "026", "030", "031"] }
-];
-const SYS = Object.fromEntries(SYSTEMS.map(s => [s.id, s]));
-function compNames(ids) {
-  const seen = new Set();
-  return ids.filter(i => COMP[i] && COMP[i].kind !== "Inside the core").map(i => COMP[i].name).filter(n => !seen.has(n) && seen.add(n));
-}
-function selectSystem(id) {
-  const s = SYS[id];
-  nodes.forEach(n => n.classList.toggle("sel", s.comps.includes(n.dataset.id)));
-  svg.classList.add("dim");
-  links.forEach(l => {
-    const hits = l.dataset.ends.split(" ").filter(e => s.comps.includes(e)).length;
-    l.classList.toggle("on", hits >= 2);
-  });
-  const names = compNames(s.comps);
-  let h = `<div class="kind">System · ${esc(s.where)}</div><h3>${esc(s.name)}</h3><p>${esc(s.what)}</p>`;
-  h += `<h4>How it works</h4>${ul(s.how.map(esc))}`;
-  h += `<h4>Spans</h4><p>${names.length ? esc(names.join(", ")) : "No component: it runs in CI and on developers' machines."}</p>`;
-  if (s.open.length) h += `<h4>Still open</h4>${ul(s.open.map(esc))}`;
-  h += `<div class="refs">Decisions ${refs(s.refs)}</div>`;
-  h += `<p class="hint">Click any part of the map to go back to one component.</p>`;
-  panel.innerHTML = h;
-}
-document.getElementById("sysList").innerHTML = SYSTEMS.map(s => {
-  const names = compNames(s.comps);
-  return `<article class="card sys"><header><h3>${esc(s.name)}</h3><span class="where">${esc(s.where)}</span></header>` +
-    `<p class="what">${esc(s.what)}</p>${ul(s.how.map(esc))}` +
-    (s.open.length ? `<p class="open"><b>Open</b>${esc(s.open.join("; "))}</p>` : "") +
-    `<div>${refs(s.refs)}</div>` +
-    `<footer><span class="spans">Spans <span>${names.length ? esc(names.join(", ")) : "none: CI and developers' machines"}</span></span>` +
-    (s.comps.length ? `<button class="showbtn" type="button" data-sys="${s.id}">Show on map</button>` : "") + `</footer></article>`;
-}).join("");
-document.querySelectorAll(".showbtn").forEach(b => b.addEventListener("click", () => {
-  selectSystem(b.dataset.sys);
-  document.getElementById("map").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-}));
+  function panelEmpty(text) {
+    var p = el("aside", { class: "panel" }, [el("p", { class: "empty", text: text })]);
+    return p;
+  }
+  function fill(panel, kids) { panel.innerHTML = ""; kids.forEach(function (k) { if (k) panel.appendChild(k); }); }
 
-/* ---------- Lifecycles ---------- */
-const COLS = [
-  ["Sim closed", "PC on"], ["Sim running", "no session"], ["In a session", "at the menu, loading"], ["Preflight", "in the flight, held still"],
-  ["Flying", "after the countdown"], ["Take control", "key, button, or voice"], ["A link is cut", "sim and core keep running"],
-  ["A sim or core goes down", "closed, crashed, or the PC"], ["Leave", "or the session ends"]
-];
-const S = "=", N = "-";
-const ROWS = [
-  ["session", "The session", [
-    ["No session. A host can start one from the desktop app before the sim runs.", ["002"]],
-    ["No session, so nothing watches the cockpit and no profile loads.", ["011"]],
-    ["The host starts a session and the backend draws its code. A joiner is listed once its first message passes with a member. Each pilot loads a flight at the PF's stand.", ["034"]],
-    ["Every aircraft is held still. Each pilot works the match check, takes a seat, and clicks Ready. The host is the PF.", ["005", "044"]],
-    ["The countdown ends preflight. Every other cockpit catches up to the PF's values, and the aircraft is free to move.", ["040"]],
-    ["Only a pilot in the flight can take control. The control value's generation goes up by 1, and it rides the session channel.", ["036", "044"]],
-    ["The PF flies on. No core decides who lost the connection.", ["037"]],
-    ["That pilot has left the flight, and control passes on if they were PF. After preflight, a session with nobody in the flight ends.", ["039", "044"]],
-    ["Each pilot leaves with Leave session. The session ends with the last, and the backend frees the code.", ["034"]]
-  ]],
-  ["watcher", "Watcher", [
-    ["Runs from Windows login, and keeps the BlurPage copy current.", ["003"]],
-    ["Sees the sim start and starts the core. Warns of a waiting update if the pilot flew lately.", ["002", "015"]],
-    S, S, S, S, S,
-    ["Restarts the core if it exits while the sim runs.", ["002", "041"]],
-    S
-  ]],
-  ["core", "Core", [
-    ["Not running, unless the desktop app started it.", ["002", "014"]],
-    ["Takes its masking group as SimConnect opens, refreshes the profile cache, writes the port file, and announces its port on the CommBus every 2s.", ["002", "009", "014", "021"]],
-    ["Draws the pilot ID, writes the session file and its restart count, dials every member through iroh, announces the session, and starts the helper.", ["019", "022", "023", "032"]],
-    ["Loads the profile and plugin into two QuickJS-ng runtimes, and pins the bundle by hash. Keeps only the panels in use. Reads each input event once.", ["011", "021", "040", "046"]],
-    ["Following cores catch up in the order the PF's cockpit first took each value. The cockpit stream goes live: state at most 20/s, events and presses as they happen.", ["040", "042"]],
-    ["The new PF's core writes every session-wide key again. Receivers drop the old PF's messages outside the change's clock, and machines that applied them catch up.", ["035", "036", "039"]],
-    ["After 5s quiet, closes the link and redials. Keeps every cockpit message until all members acknowledge it, up to 30 min. On return: session keys first, then the replay, each gap capped at 2s.", ["032", "037", "039"]],
-    ["Sim closed: the core stays up and rejoins its pilot as a late joiner. Core crashed: restarted with its restart count raised, a late joiner whose shadow values come from the flying machine, settled at once.", ["039", "041"]],
-    ["Closes with the Leave code and tells the backend, and the session file ends. Exits once the sim is closed and the desktop app isn't open. After 30 min with no member, it leaves on its own.", ["002", "023", "034", "037"]]
-  ]],
-  ["helper", "Helper", [
-    ["Not running.", []],
-    ["Not running, except while the desktop app binds a key or lists the output devices.", ["019"]],
-    ["Started by the core.", ["019"]],
-    ["Runs the audio and reads the cursor. The take-control input isn't live yet.", ["004", "007", "044"]],
-    ["Catches the take-control key, buttons, and voice phrases, reads the cursor for the hand, and captures ATC on the host's PC to play on the others.", ["004", "006", "007"]],
-    ["Catches the press or the phrase that takes control.", ["006"]],
-    S,
-    ["If it exits or goes 8s quiet, the core restarts it, and the session goes on.", ["010", "019"]],
-    ["Stops, since no session runs.", ["019"]]
-  ]],
-  ["desktop", "Desktop app", [
-    ["Optional. Can start the core, and a session, before the sim.", ["002", "014"]],
-    ["Optional. Offers to start or join a session, and edits the settings the core keeps.", ["016"]],
-    ["Optional, and shows the session. Closing it changes nothing.", ["016"]],
-    S, S, S, S, S,
-    ["Its report page has the core upload a bug report to the backend.", ["spine"]]
-  ]],
-  ["wasm", "WASM module", [
-    ["Not loaded.", []],
-    ["Loaded at boot. Leaves its version in a slot, writes a counter every 1s, and does nothing each frame.", ["017"]],
-    ["Hears the core through the control slot, every 200ms.", ["017"]],
-    ["Holds every aircraft still, the PF's included.", ["005"]],
-    ["On following machines, freezes the aircraft and writes the flying machine's pose and velocities every frame. Places the figures.", ["005"]],
-    ["Roles swap: the new PF's aircraft flies, and the ex-PF's machine starts following.", ["005", "036"]],
-    ["Through a short gap, carries the following aircraft on its last velocities, and eases it back when samples return.", ["037"]],
-    ["After 1s without the core, unfreezes the aircraft and clears every variable of ours that holds something back.", ["005"]],
-    ["Learns from the control slot that the session ended, and undoes our state.", ["017"]]
-  ]],
-  ["bridge", "Panel bridge", [
-    N,
-    ["Runs in every cockpit panel, loading nothing and capturing nothing.", ["011"]],
-    ["Every panel connects and names its instruments.", ["011"]],
-    ["The core keeps the panels in use: pointer-sync displays, one H: listener, and a plugin's instruments.", ["011"]],
-    ["Captures presses, and plays a peer's press when the core hands it over. A press counts once played through to its release.", ["039", "042"]],
-    S, S,
-    ["Blocks input only while the core keeps telling it to, so it fails open.", ["spine"]],
-    ["Each module it loaded tears itself down.", ["011"]]
-  ]],
-  ["efb", "EFB app", [
-    N,
-    ["Runs from sim start with the EFB closed, connects when it hears the core, and offers to start a session or enter a code.", ["009", "012"]],
-    ["Shows the session's controls.", []],
-    S,
-    ["The take-control button goes live. Opens the banner when the core has something to show.", ["012", "044"]],
-    ["Its take-control button is one way in.", ["006"]],
-    S, S,
-    ["Offers to start a session or enter a code again.", []]
-  ]],
-  ["banner", "Banner panel", [
-    N,
-    ["Closed, with no page.", ["012"]],
-    ["Opened by the EFB app's code when there's a notice, and connected while open.", ["012"]],
-    S, S, S,
-    ["Lists each crew member's link and whether this PC reaches the internet.", ["037"]],
-    ["Shows the crew's notice that a pilot's sim crashed, and for a core crash asks for a bug report.", ["041"]],
-    ["Closed.", []]
-  ]],
-  ["menu", "Menu script", [
-    N,
-    ["Loads in the main menu through the BlurPage copy, and answers the core when asked.", ["003", "009"]],
-    ["Reports which menu page is up, and runs Go to, which loads the flight at the PF's stand.", ["003"]],
-    N, N, N, N, N, N
-  ]]
-];
-
-(function renderLife() {
-  let h = "<thead><tr><th scope=\"col\">Component</th>";
-  COLS.forEach(c => { h += `<th scope="col">${esc(c[0])}<span class="s">${esc(c[1])}</span></th>`; });
-  h += "</tr></thead><tbody>";
-  ROWS.forEach(r => {
-    h += `<tr class="${r[0] === "session" ? "session" : ""}"><th scope="row">${esc(r[1])}</th>`;
-    r[2].forEach(cell => {
-      if (cell === S) h += `<td class="same">no change</td>`;
-      else if (cell === N) h += `<td class="none">—</td>`;
-      else h += `<td>${esc(cell[0])} ${refs(cell[1])}</td>`;
+  // ---------- Runtime ----------
+  var POS = {
+    sim: [105, 62], panels: [25, 162], efb: [185, 162], banner: [25, 262], menu: [185, 262], wasm: [105, 362],
+    desktop: [420, 112], core: [420, 262], helper: [420, 432],
+    peer: [725, 82], relay: [725, 192], backend: [725, 302], pages: [725, 412], releases: [725, 512]
+  };
+  var BW = 140, BH = 50;
+  function center(id) { var p = POS[id]; return [p[0] + BW / 2, p[1] + BH / 2]; }
+  function clip(id, dx, dy) {
+    var c = center(id), hw = BW / 2 + 3, hh = BH / 2 + 3;
+    var s = Math.min(dx === 0 ? Infinity : hw / Math.abs(dx), dy === 0 ? Infinity : hh / Math.abs(dy));
+    return [c[0] + dx * s, c[1] + dy * s];
+  }
+  function renderRuntime(root) {
+    root.appendChild(el("p", { class: "hint", text: "Click a box for what it does and what it talks to; click a line for what crosses it." }));
+    var grid = el("div", { class: "grid" });
+    var sc = el("div", { class: "scroll" });
+    var panel = panelEmpty("Nothing selected. Start with the Core: everything else talks to it.");
+    var svg = sv("svg", { class: "rt", viewBox: "0 0 960 590", role: "img", "aria-label": "Runtime components and their links" });
+    [["sim", 10, 30, 330, 410, "Inside MSFS 2024"], ["pc", 370, 30, 240, 530, "Each pilot's PC"], ["net", 640, 30, 310, 550, "Across the internet"]].forEach(function (z) {
+      svg.appendChild(sv("rect", { class: "zone " + z[0], x: z[1], y: z[2], width: z[3], height: z[4], rx: 8 }));
+      svg.appendChild(sv("text", { class: "zlabel", x: z[1] + 12, y: z[2] + 20 }, [z[5]]));
     });
-    h += "</tr>";
-  });
-  document.getElementById("lifeTable").innerHTML = h + "</tbody>";
+    var pairCount = {};
+    var edges = [];
+    D.runtime.links.forEach(function (l, i) {
+      if (!POS[l.from] || !POS[l.to]) return;
+      var key = [l.from, l.to].sort().join("|");
+      var nth = pairCount[key] = (pairCount[key] || 0) + 1;
+      var a = center(l.from), b = center(l.to);
+      var dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1;
+      var p1 = clip(l.from, dx, dy), p2 = clip(l.to, -dx, -dy);
+      var off = nth === 1 ? 0 : (nth % 2 ? 1 : -1) * 22 * Math.ceil((nth - 1) / 2);
+      var mx = (p1[0] + p2[0]) / 2 - dy / len * off, my = (p1[1] + p2[1]) / 2 + dx / len * off;
+      var d = "M" + p1[0] + "," + p1[1] + " Q" + mx + "," + my + " " + p2[0] + "," + p2[1];
+      var g = sv("g", { class: "edge", "data-i": i });
+      g.appendChild(sv("path", { class: "line", d: d, "marker-end": "url(#arr)" }));
+      g.appendChild(sv("path", { class: "hit", d: d }));
+      var lx = (p1[0] + 2 * mx + p2[0]) / 4, ly = (p1[1] + 2 * my + p2[1]) / 4;
+      g.appendChild(sv("text", { x: lx, y: ly, "text-anchor": "middle" }, [l.via]));
+      g.addEventListener("click", function (ev) { ev.stopPropagation(); selectLink(i); });
+      edges.push({ g: g, l: l });
+    });
+    var defs = sv("defs", {}, [sv("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, [sv("path", { d: "M0,0 L10,5 L0,10 z", fill: "currentColor" })])]);
+    svg.appendChild(defs);
+    edges.forEach(function (e) { svg.appendChild(e.g); });
+    var boxes = {};
+    Object.keys(POS).forEach(function (id) {
+      var c = comps[id]; if (!c) return;
+      var p = POS[id];
+      var g = sv("g", { class: "box", tabindex: 0, role: "button", "aria-label": c.name });
+      g.appendChild(sv("rect", { x: p[0], y: p[1], width: BW, height: BH, rx: 5 }));
+      g.appendChild(sv("text", { x: p[0] + 10, y: p[1] + 21 }, [c.name]));
+      g.appendChild(sv("text", { class: "sub", x: p[0] + 10, y: p[1] + 38 }, [(c.short || "").slice(0, 26)]));
+      g.addEventListener("click", function (ev) { ev.stopPropagation(); selectComp(id); });
+      g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selectComp(id); } });
+      boxes[id] = g; svg.appendChild(g);
+    });
+    svg.addEventListener("click", function () { clear(); });
+    function clear() {
+      svg.classList.remove("focus");
+      Object.keys(boxes).forEach(function (k) { boxes[k].classList.remove("on", "sel"); });
+      edges.forEach(function (e) { e.g.classList.remove("on", "pick"); });
+    }
+    function selectComp(id) {
+      clear(); svg.classList.add("focus");
+      boxes[id].classList.add("on", "sel");
+      var mine = [];
+      edges.forEach(function (e) {
+        if (e.l.from === id || e.l.to === id) {
+          e.g.classList.add("on"); mine.push(e.l);
+          var other = e.l.from === id ? e.l.to : e.l.from;
+          if (boxes[other]) boxes[other].classList.add("on");
+        }
+      });
+      var c = comps[id];
+      fill(panel, [
+        el("div", { class: "kind", text: c.where }),
+        el("h2", { text: c.name }),
+        el("p", { text: c.is }),
+        el("h3", { text: "Runs" }), el("p", { text: c.runs }),
+        el("h3", { text: "Does" }), list(c.does || []),
+        mine.length ? el("h3", { text: "Talks to" }) : null,
+        mine.length ? el("ul", null, mine.map(function (l) {
+          var other = l.from === id ? l.to : l.from;
+          return el("li", null, [el("strong", { text: cname(other) }), " · " + l.via + ": " + l.carries]);
+        })) : null,
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: c.doc })
+      ]);
+    }
+    function selectLink(i) {
+      clear(); svg.classList.add("focus");
+      var e = edges.filter(function (x) { return x.g.getAttribute("data-i") === String(i); })[0];
+      e.g.classList.add("on", "pick");
+      if (boxes[e.l.from]) boxes[e.l.from].classList.add("on");
+      if (boxes[e.l.to]) boxes[e.l.to].classList.add("on");
+      fill(panel, [
+        el("div", { class: "kind", text: "Link" }),
+        el("h2", { text: cname(e.l.from) + " → " + cname(e.l.to) }),
+        el("p", null, [el("strong", { text: e.l.via })]),
+        el("p", { text: e.l.carries }),
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: e.l.doc })
+      ]);
+    }
+    sc.appendChild(svg);
+    grid.appendChild(sc); grid.appendChild(panel);
+    root.appendChild(grid);
+    selectComp("core");
+  }
+
+  // ---------- Code ----------
+  function renderCode(root) {
+    var C = D.code;
+    var units = {}; C.units.forEach(function (u) { units[u.id] = u; });
+    var usedBy = {}; C.units.forEach(function (u) { (u.uses || []).forEach(function (d) { (usedBy[d] = usedBy[d] || []).push(u.id); }); });
+    root.appendChild(el("p", { class: "hint", text: "Every unit by tier. Click one: what it uses is outlined, what uses it is dashed. Features below show where each one's parts run." }));
+    root.appendChild(el("div", { class: "legend" }, [el("span", { class: "l-dep", text: "uses" }), el("span", { class: "l-rdep", text: "used by" })]));
+    var grid = el("div", { class: "grid" });
+    var left = el("div", { style: "min-width:0" });
+    var panel = panelEmpty("Pick a unit or a feature.");
+    var chips = {};
+    function tclass(t) { return /platform/.test(t) ? "t-platform" : /engine/.test(t) ? "t-engines" : /feature/.test(t) ? "t-features" : "t-other"; }
+    C.tiers.forEach(function (t) {
+      var us = C.units.filter(function (u) { return u.tier === t.id; });
+      if (!us.length) return;
+      var box = el("section", { class: "tier" }, [el("h3", { text: t.name + " · " + us.length }), el("p", { class: "rule", text: t.rule })]);
+      var cs = el("div", { class: "chips" });
+      us.forEach(function (u) {
+        var b = el("button", { class: "chip " + tclass(u.tier), text: u.name, onclick: function () { pick(u.id); } });
+        chips[u.id] = b; cs.appendChild(b);
+      });
+      box.appendChild(cs); left.appendChild(box);
+    });
+    function chipList(ids) {
+      if (!ids || !ids.length) return el("p", { class: "empty", text: "None." });
+      return el("div", { class: "chips" }, ids.filter(function (i) { return units[i]; }).map(function (i) {
+        return el("button", { class: "chip " + tclass(units[i].tier), text: units[i].name, onclick: function () { pick(i); } });
+      }));
+    }
+    function pick(id) {
+      Object.keys(chips).forEach(function (k) { chips[k].classList.remove("sel", "dep", "rdep"); });
+      var u = units[id]; if (!u) return;
+      chips[id].classList.add("sel");
+      (u.uses || []).forEach(function (d) { if (chips[d]) chips[d].classList.add("dep"); });
+      (usedBy[id] || []).forEach(function (d) { if (chips[d]) chips[d].classList.add("rdep"); });
+      fill(panel, [
+        el("div", { class: "kind", text: u.tier + (u.lang ? " · " + u.lang : "") }),
+        el("h2", { text: u.name }),
+        el("p", { text: u.does }),
+        el("div", { class: "doc", text: u.folder }),
+        el("h3", { text: "Runs in" }), el("p", { text: (u.runsIn || []).map(cname).join(", ") || "—" }),
+        el("h3", { text: "Uses" }), chipList(u.uses),
+        el("h3", { text: "Used by" }), chipList(usedBy[id]),
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: u.doc })
+      ]);
+    }
+    left.appendChild(el("h2", { class: "sec", text: "Features and where their parts run" }));
+    var tw = el("div", { class: "scroll" });
+    var tb = el("table", null, [el("thead", null, [el("tr", null, ["Feature", "Core", "WASM routines", "Panel modules", "EFB app", "Desktop app"].map(function (h) { return el("th", { text: h }); }))])]);
+    var body = el("tbody");
+    function cell(v) { if (v == null || (Array.isArray(v) && !v.length)) return el("td", null, [el("span", { class: "none", text: "—" })]); return el("td", { class: "mono", text: Array.isArray(v) ? v.join(", ") : v }); }
+    C.features.forEach(function (f) {
+      var p = f.parts || {};
+      var tr = el("tr", null, [el("td", { class: "f", text: f.name, onclick: function () { pickFeature(f); } }), cell(p.core), cell(p.routines), cell(p.panel), cell(p.efb), cell(p.desktop)]);
+      body.appendChild(tr);
+    });
+    tb.appendChild(body); tw.appendChild(tb); left.appendChild(tw);
+    function pickFeature(f) {
+      Object.keys(chips).forEach(function (k) { chips[k].classList.remove("sel", "dep", "rdep"); });
+      (f.uses || []).forEach(function (d) { if (chips[d]) chips[d].classList.add("dep"); });
+      fill(panel, [
+        el("div", { class: "kind", text: "Feature" }),
+        el("h2", { text: f.name }), el("p", { text: f.does }),
+        el("h3", { text: "Uses" }), chipList(f.uses),
+        el("h3", { text: "Designed in" }), el("div", { class: "doc", text: f.doc })
+      ]);
+    }
+    if (C.systems && C.systems.length) {
+      left.appendChild(el("h2", { class: "sec", text: "Systems, as node 6 designed them" }));
+      var sw = el("div", { class: "scroll" });
+      var st = el("table", null, [el("thead", null, [el("tr", null, ["Node", "System", "What it is", "Doc"].map(function (h) { return el("th", { text: h }); }))])]);
+      var sb = el("tbody");
+      C.systems.forEach(function (s) { sb.appendChild(el("tr", null, [el("td", { class: "mono", text: s.node }), el("td", { class: "f", text: s.name }), el("td", { text: s.line }), el("td", { class: "doc", text: s.doc })])); });
+      st.appendChild(sb); sw.appendChild(st); left.appendChild(sw);
+    }
+    grid.appendChild(left); grid.appendChild(panel); root.appendChild(grid);
+  }
+
+  // ---------- Flows ----------
+  function renderFlows(root) {
+    var F = D.flows.flows;
+    root.appendChild(el("p", { class: "hint", text: "Each path through the system, one step per row, in the lane where it happens." }));
+    var pickRow = el("div", { class: "fpick", role: "group", "aria-label": "Flows" });
+    var body = el("div");
+    var buttons = [];
+    F.forEach(function (f, i) {
+      var b = el("button", { class: "fchip", "aria-pressed": "false", text: f.title, onclick: function () { draw(i); } });
+      buttons.push(b); pickRow.appendChild(b);
+    });
+    function draw(i) {
+      var f = F[i];
+      buttons.forEach(function (b, j) { b.setAttribute("aria-pressed", String(i === j)); });
+      try { localStorage.setItem("ccmap-flow", String(i)); } catch (e) {}
+      body.innerHTML = "";
+      body.appendChild(el("p", { class: "fgist", text: f.gist }));
+      var sc = el("div", { class: "scroll" });
+      var n = f.lanes.length;
+      var g = el("div", { class: "lanes", style: "grid-template-columns: repeat(" + n + ", minmax(120px, 1fr))" });
+      f.lanes.forEach(function (l) { g.appendChild(el("div", { class: "lanehead", text: cname(l) })); });
+      f.steps.forEach(function (s, k) {
+        var col = f.lanes.indexOf(s.lane);
+        for (var c = 0; c < n; c++) {
+          if (c === col) {
+            g.appendChild(el("div", { class: "step" }, [el("span", { class: "n", text: String(k + 1) }), s.text, s.to ? el("span", { class: "to", text: "→ " + cname(s.to) }) : null]));
+          } else g.appendChild(el("div", { class: "lanecell" }));
+        }
+      });
+      sc.appendChild(g); body.appendChild(sc);
+      body.appendChild(el("p", { class: "doc", text: "Designed in " + f.doc }));
+    }
+    root.appendChild(pickRow); root.appendChild(body);
+    var start = 0; try { start = Math.min(F.length - 1, parseInt(localStorage.getItem("ccmap-flow") || "0", 10) || 0); } catch (e) {}
+    draw(start);
+  }
+
+  // ---------- Build ----------
+  function renderBuild(root) {
+    var B = D.build;
+    root.appendChild(el("p", { class: "hint", text: "From the repository to a release on a pilot's PC. Designed in record/areas/build/01-the-build.md." }));
+    var st = el("div", { class: "stages" });
+    B.stages.forEach(function (s, i) {
+      st.appendChild(el("section", { class: "stage" }, [
+        el("h3", null, [el("span", { class: "n", text: String(i + 1) }), s.name]),
+        s.note ? el("div", { class: "note", text: s.note }) : null,
+        list(s.does)
+      ]));
+    });
+    root.appendChild(st);
+    var cols = el("div", { class: "cols", style: "margin-top:18px" });
+    cols.appendChild(el("section", null, [el("h2", { class: "sec", text: "A release installs" }), el("ul", null, B.release.map(function (r) { return el("li", null, [el("span", { class: "mono", text: r[0] }), ": " + r[1]]); }))]));
+    cols.appendChild(el("section", null, [el("h2", { class: "sec", text: "Our package holds" }), list(B.package)]));
+    cols.appendChild(el("section", null, [el("h2", { class: "sec", text: "Developing" }), list(B.dev)]));
+    root.appendChild(cols);
+  }
+
+  var first = location.hash.slice(1);
+  if (!TABS.some(function (t) { return t.id === first; })) { try { first = localStorage.getItem("ccmap-tab") || "runtime"; } catch (e) { first = "runtime"; } }
+  show(first);
 })();
-
-/* ---------- Links and channels ---------- */
-const LINKS = [
-  ["On one PC"],
-  ["Watcher → core", "Starts the core's process, and reads files the core writes in its data folder", "Files", "It can't tell: the watcher sends it nothing", ["002", "014", "015"]],
-  ["Desktop app ↔ core", "WebSocket on 127.0.0.1 from the app's Rust side, on the port the port file names", "JSON from serde_json, typed by ts-rs", "A message every 2s, and the core closes it after 8s quiet", ["010", "013", "014", "025"]],
-  ["Sim pages ↔ core", "A CommBus announcement every 2s with the port and whether a session runs, then a WebSocket", "JSON, typed by ts-rs", "A message every 2s, and a first message naming the component and its version", ["009", "010", "025", "026"]],
-  ["Core ↔ WASM module", "SimConnect data slots, one for each kind of message", "Fixed-width structs, laid out the same on x86_64 and wasm32", "The control slot every 200ms one way, the module's counter every 1s the other", ["017", "025"]],
-  ["Core ↔ helper", "The core starts the process, then its standard input and output", "Binary, prefixed with its length", "A message every 2s, and a restart after 8s quiet or an exit", ["010", "019", "025"]],
-  ["Core ↔ the sim", "The SDK's SimConnect.dll", "SimConnect's own", "Its connection", ["002", "018"]],
-  ["Off the PC"],
-  ["Core ↔ other cores", "One QUIC connection per pair, through iroh, direct or through a relay", "postcard", "Any packet counts, with a heartbeat once a second; lost after 5s with nothing", ["032", "035", "037"]],
-  ["Core ↔ backend", "HTTPS", "JSON with the crate's types, signed with the endpoint key", "No running session waits on it; each core renews every 10 minutes", ["034"]],
-  ["Core → GitHub Pages", "HTTPS, at each start", "Bundles checked against their hash", "Nothing waits on it: profiles load from the cache", ["021"]],
-  ["Watcher → GitHub Releases", "HTTPS", "Installers and updates", "Not needed", ["008"]]
-];
-(function renderLinks() {
-  let h = "<thead><tr><th scope=\"col\">Link</th><th scope=\"col\">How</th><th scope=\"col\">Messages</th><th scope=\"col\">How the core knows it's alive</th><th scope=\"col\">Decisions</th></tr></thead><tbody>";
-  LINKS.forEach(r => {
-    if (r.length === 1) { h += `<tr class="grp"><td colspan="5">${esc(r[0])}</td></tr>`; return; }
-    h += `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${refs(r[4])}</td></tr>`;
-  });
-  document.getElementById("linkTable").innerHTML = h + "</tbody>";
-})();
-
-const CHANS = [
-  ["Session", "Every machine", "A stream from each sender: the newest value of each key, all of them again in a new connection's first message", "The value with the highest stamp wins: control value, then the number, then the lower pilot ID", "Above every other stream", "Sent whole, first, on the new connection", ["035", "036"]],
-  ["Cockpit", "Every machine", "A stream from each sender: state changes, events, and presses in one causal order", "The receiver's vector clock: a message it already covers is a copy", "Below the session's", "Replayed, each gap capped at 2s", ["039", "042"]],
-  ["Catch-up", "The flying machine", "A stream to the catching-up machine", "In order, carrying the flying machine's vector clock", "Below the cockpit's", "Starts again on the new connection", ["035", "040"]],
-  ["Flight model", "The flying machine", "One-off packets, one sample each at a fixed rate, with the yoke, rudder, and toe brakes", "Drops a sample not later than the newest, or made under an older control value", "Ahead of every stream", "The next sample replaces it, and the follower carries the aircraft through the gap", ["035", "036", "037"]],
-  ["Avatars", "Every machine", "One-off packets, one pose each", "The newest pose of each figure, by stamp", "Ahead of every stream", "The next pose replaces it", ["035"]],
-  ["Traffic", "The traffic and ATC host", "Identities on a stream, the newest of each; samples as one-off packets in batches under 1,162 bytes", "The newest identity and sample of each object; a copy with no sample for 15s goes", "Identities below the cockpit's, samples ahead of every stream", "The whole identity set again, replacing the receiver's", ["035", "044"]],
-  ["ATC audio", "The traffic and ATC host", "One-off packets, one numbered 20ms Opus frame each", "Played in number order behind an adaptive buffer; a frame past its turn drops", "Ahead of every stream", "Frames lost in the cut stay lost", ["035", "net"]],
-  ["Heartbeat", "Every machine", "One-off packets, one a second", "Carries a clock exchange, and the sender's vector clock, which acknowledges the cockpit stream", "Ahead of every other channel", "Its return is part of the link coming back", ["032", "038", "042"]]
-];
-(function renderChans() {
-  let h = "<thead><tr><th scope=\"col\">Channel</th><th scope=\"col\">From</th><th scope=\"col\">Carried as</th><th scope=\"col\">Copies and late values</th><th scope=\"col\">Priority</th><th scope=\"col\">After a cut</th><th scope=\"col\">Decisions</th></tr></thead><tbody>";
-  CHANS.forEach(r => {
-    h += `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td><td>${esc(r[5])}</td><td>${refs(r[6])}</td></tr>`;
-  });
-  document.getElementById("chanTable").innerHTML = h + "</tbody>";
-})();
-
-/* ---------- Trace ---------- */
-const STEPS = [
-  ["The PM's sim reports the switch through SimConnect, and the core stamps the value as it arrives, in µs on QueryPerformanceCounter.", ["024"]],
-  ["The core sees a pilot's change, not its own write, and holds the entry's newest value, sent at most 20 times a second. The message names the entry in full, and carries the PM's vector clock and the control value it was made under.", ["036", "042"]],
-  ["It travels on the PM's cockpit stream, over the pair's one QUIC connection, direct or through a relay, as postcard.", ["032", "035"]],
-  ["The PF's core drops it if its vector clock already covers it, holds it until everything it depends on has applied, and waits what's left of the PM's gap, capped at 2s. Live, that wait is nothing.", ["039", "042"]],
-  ["The entry's write() runs in the profile's QuickJS-ng runtime, and SimConnect, the WASM module, or the panel bridge carries it out.", ["045", "046"]],
-  ["The PF's sim reports the change back. The core tells its own write from a pilot's change and sends nothing; how it tells them apart is for sync's two-instance bench in step 8.", ["045"]],
-  ["Once the write is made, the message counts as applied. The PF's heartbeat carries its vector clock once a second, and the PM's core drops the message from its replay store once every member has it.", ["037", "042"]],
-  ["All the while, the flying machine sends flight-model samples, and the PM's WASM module writes the pose and velocities every frame.", ["005", "035"]]
-];
-document.getElementById("steps").innerHTML = STEPS.map(s => `<li><span>${esc(s[0])} ${refs(s[1])}</span></li>`).join("");
-const VARS = [
-  ["An engine lever or the trim belongs to the PF, and only the flying machine sends it. If the PM's hardware moves one, the PM's machine writes the PF's value back at once and sends nothing.", ["043", "045"]],
-  ["A press on a display: the PM's panel bridge captures it, and the PF's plays it when the core hands it over. It counts as applied once played through to its release.", ["039", "042"]],
-  ["If the PM's change reaches a PF who took control in the meantime, and the change of control's vector clock doesn't include it, every machine drops it.", ["036", "039"]]
-];
-document.getElementById("variations").innerHTML = VARS.map(s => `<li>${esc(s[0])} ${refs(s[1])}</li>`).join("");
-
-/* ---------- Decisions ---------- */
-const GROUPS = [
-  ["Ground rule", "", ["001"]],
-  ["Components and where work runs", "node 1.1", ["002", "003", "004", "005", "006", "007", "016"]],
-  ["How the components talk", "node 1.2", ["008", "009", "010", "011", "012", "013", "014", "015", "017"]],
-  ["Languages, frameworks, and the check", "nodes 1.3 and 1.6", ["018", "019", "020", "027", "028", "029", "030", "031"]],
-  ["Shared conventions", "node 1.4", ["022", "023", "024", "025", "026"]],
-  ["Between machines", "node 2", ["032", "033", "034", "035", "036", "037", "038"]],
-  ["Sync and the session", "node 3", ["039", "040", "041", "042", "043", "044"]],
-  ["Profiles and plugin delivery", "node 4", ["021", "045", "046"]]
-];
-document.getElementById("dgroups").innerHTML = GROUPS.map(g =>
-  `<div class="card dgroup"><h3>${esc(g[0])}${g[1] ? ` <span class="s">· ${esc(g[1])}</span>` : ""}</h3><ul>${g[2].map(n => `<li>${ref(n)}<span>${esc(DEC[n][1])}</span></li>`).join("")}</ul></div>`
-).join("");
 </script>
-</body>
-</html>

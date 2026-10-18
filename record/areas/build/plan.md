@@ -17,6 +17,19 @@ Each stage is a `##` section of this plan, placed in the order the stages are bu
 A stage is done when it has a `Done on` line under its `Exit:` line, and open until then.
 The build stands at the first open stage whose `Needs:` line names only done stages, and any other open stage whose needs are done can be built beside it.
 
+## How the stages are ordered
+
+The stages follow these rules (user, 2026-10-18):
+
+- A stage builds only on stages that are done, so the engines and the platform come before the features that use them ([tiers](../architecture/02-code-map.md#tiers)).
+- Each stage builds one [system](../architecture/02-code-map.md#systems) whole and proves it on the bench, where the bench build's test units stand in for features not yet built ([its place](02-testing.md#its-place)).
+  So where the record leaves an item to a system's stage, such as the network's stage, it names one stage.
+  A system too big for one exit splits along its design docs.
+- Where several stages could go next, the one whose design rests on more claims no run has tried goes first, so a wrong design shows before much is built on it.
+- The first session in the sim, with a bench core as the second pilot, comes once the platform and state sync are built, and the first flight with friends once flight-model sync is built too.
+  Friends fly their installed Crosscheck ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
+- No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
+
 ## Working a stage
 
 1. Before writing anything for the stage, read each section its `Builds:` and `Tests:` lines link, with the notes at the top of each design doc they're in, since a doc's notes change the text below them ([step 8](../product/plan.md#8-v1-build-plan)).

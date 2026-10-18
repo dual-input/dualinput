@@ -96,7 +96,7 @@ On each `ControlPassed` that moves control from one pilot to another, every mach
 
 ## What this changes elsewhere
 
-The notes at the top of [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), [the code map](../architecture/02-code-map.md), [04-core-helper](../core/04-core-helper.md), [05-units](../sync/05-units.md), and [the spine](../architecture/01-spine.md) list what this design and the voice phrases' move to Soon change there, [the product plan](../product/plan.md) moves the pick, and a [tentative decision](../architecture/decisions.md#the-take-control-input-takes-control-on-its-down-or-held-1s-and-a-pass-plays-a-cue-and-a-notice-with-no-recorded-line) gives the reasons.
+The text or the notes at the top of [03-v1-scope](../product/03-v1-scope.md), [04-room-for-later](../product/04-room-for-later.md), [the code map](../architecture/02-code-map.md), [04-core-helper](../core/04-core-helper.md), [05-units](../sync/05-units.md), and [the spine](../architecture/01-spine.md) list what this design and the voice phrases' move to Soon change there, [the product plan](../product/plan.md) moves the pick, and a [tentative decision](../architecture/decisions.md#the-take-control-input-takes-control-on-its-down-or-held-1s-and-a-pass-plays-a-cue-and-a-notice-with-no-recorded-line) gives the reasons.
 
 ## Budgets
 

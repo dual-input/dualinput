@@ -590,7 +590,7 @@ No system is designed yet down to its units' interfaces, budgets, and cases for 
 A child whose system 02-code-map designs in part, as it does 6.1 to 6.3 and 6.18, links to those sections, and its design doc holds only what they leave out.
 Each child's answer goes in a design doc in its system's area, which gives its units and their interfaces, its budgets, its cases for the bench, and what it leaves open, as 02-code-map's sections do.
 Each child also settles the open items its section names, from the spine's [left open](01-spine.md#left-open), 02-code-map's [left open](02-code-map.md#left-open), and the design docs above.
-Exit: every child is done, and every design doc reads as one current text, as [step 8's exit checks](../product/plan.md#8-v1-build-plan) describe, so node 7 reads the designs without their notes (user, 2026-10-17).
+Exit: every child is done, and nodes 7 and 8 read each design doc's notes with its text, as [step 8](../product/plan.md#8-v1-build-plan) says (user, 2026-10-18).
 Waits on 5, and 6.1 to 6.18.
 
 ## 6.1 The core's loop and edge
@@ -642,7 +642,7 @@ Done on 2026-10-16.
 
 Question: how does the core-helper-service crate start the core helper, start it again, and pass it the bindings, captures, and sounds features register; and what does `apps/core-helper` run for Raw Input, audio, and speech, behind which interface?
 Control, avatars, and ATC audio reach the pilot's input and speakers only through it.
-It reads 6.1's and 6.2's answers, the spine's [the helper](01-spine.md#the-helper), decisions [006](../../decisions/006-core-catches-take-control-input.md), [007](../../decisions/007-core-runs-audio.md), and [019](../../decisions/019-input-and-audio-run-in-helper.md), and this area's [2026-10-08 entry on Raw Input and audio](log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker).
+It reads 6.1's and 6.2's answers, the spine's [the helper](01-spine.md#the-core-helper), decisions [006](../../decisions/006-core-catches-take-control-input.md), [007](../../decisions/007-core-runs-audio.md), and [019](../../decisions/019-input-and-audio-run-in-helper.md), and this area's [2026-10-08 entry on Raw Input and audio](log.md#2026-10-08-a-rust-program-captures-one-processs-audio-plays-on-a-device-it-looks-up-by-name-and-receives-keyboard-and-hid-input-through-raw-input-in-sink-mode-and-builds-with-visual-studios-linker).
 It settles the binary format on the core helper's standard input and output ([01-spine](01-spine.md#left-open)).
 Its answer goes in `record/areas/core/04-core-helper.md`.
 Exit: the user agrees to that design doc.
@@ -813,7 +813,7 @@ Done on 2026-10-18.
 
 Question: how does a pilot install Crosscheck and get its updates, what does the watcher do between runs of the sim, and where does the installer live?
 Every program and the sim package reach the pilot's PC through it.
-It reads 03-v1-scope's [installing and updating](../product/03-v1-scope.md#installing-and-updating), the spine's [the watcher](01-spine.md#the-watcher), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md), [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and [015](../../decisions/015-watcher-reads-files-core-writes.md), and 6.16's answer.
+It reads 03-v1-scope's [installing and updating](../product/03-v1-scope.md#installing-and-updating), the spine's [the desktop app and the core](01-spine.md#the-desktop-app-and-the-core), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md), [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and [015](../../decisions/015-watcher-reads-files-core-writes.md), and 6.16's answer.
 Its answer goes in `record/areas/install/01-installing-and-updating.md`.
 Exit: the user agrees to that design doc.
 Raised elsewhere: by 5, where the installer lives, and whether it's a program of ours ([02-code-map](02-code-map.md#left-open)).

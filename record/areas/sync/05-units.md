@@ -346,7 +346,7 @@ State sync hears `H:` events in one cockpit panel, through its panel module `h-e
 
 ## What the code map changes in the sync docs
 
-Nothing beyond the notes they carry: the code map names the units that carry their rules, and each change this design makes to a rule is listed in the note at the top of the doc it changes.
+Nothing beyond the notes they carry: the code map names the units that carry their rules, and each change this design makes to a rule is in the doc it changes, in its text or in a note at its top.
 
 ## What the open questions still hold
 

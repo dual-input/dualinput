@@ -274,7 +274,7 @@ On a desk:
 
 ## What this changes elsewhere
 
-The notes at the top of [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the profiles' units](../profiles/02-units.md), [avatars](../avatars/01-avatars.md), [installing and updating](../install/01-installing-and-updating.md), and [the network's units](../network/02-units.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#every-x86_64-program-links-the-c-runtime-statically-through-one-line-of-the-workspaces-cargo-config) give the reasons.
+The text or the notes at the top of [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the profiles' units](../profiles/02-units.md), [avatars](../avatars/01-avatars.md), [installing and updating](../install/01-installing-and-updating.md), and [the network's units](../network/02-units.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#every-x86_64-program-links-the-c-runtime-statically-through-one-line-of-the-workspaces-cargo-config) give the reasons.
 
 [stock]: log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed
 [compiled]: log.md#2026-10-18-fspackagetool-starts-the-sim-to-build-and-the-sim-re-encodes-the-figures-vertices-and-compiles-an-in-game-panels-definition-to-binary

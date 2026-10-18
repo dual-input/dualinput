@@ -199,7 +199,7 @@ impl Routine for Follow {
 - **`flight_model::Lead`** joins the module's list, with `CROSSCHECK_ROUTINE_LEAD` and `CROSSCHECK_REPORT_LEAD`.
   `REPORT` is a kind of its own in [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares), owned by the routine host, so a report slot never collides with a routine whose ID ends in `_REPORT`.
 
-The notes at the top of [the code map](../architecture/02-code-map.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [01-between-machines](../network/01-between-machines.md), [the spine](../architecture/01-spine.md), and [03-v1-scope](../product/03-v1-scope.md) list what this design changes there, and a [tentative decision](../architecture/decisions.md#a-flight-model-sample-carries-its-controls-generation-alone-and-a-receiver-drops-one-under-any-other-value) changes [decision 036](../../decisions/036-control-is-one-value.md).
+The text or the notes at the top of [the code map](../architecture/02-code-map.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [01-between-machines](../network/01-between-machines.md), [the spine](../architecture/01-spine.md), and [03-v1-scope](../product/03-v1-scope.md) list what this design changes there, and a [tentative decision](../architecture/decisions.md#a-flight-model-sample-carries-its-controls-generation-alone-and-a-receiver-drops-one-under-any-other-value) changes [decision 036](../../decisions/036-control-is-one-value.md).
 
 ## Budgets
 

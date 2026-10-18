@@ -252,7 +252,7 @@ Where each shows is [6.16](../architecture/plan.md#616-the-apps)'s.
 
 ## What this changes elsewhere
 
-The notes at the top of [03-v1-scope](../product/03-v1-scope.md), [the code map](../architecture/02-code-map.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [04-core-helper](../core/04-core-helper.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [the session's units](../session/02-units.md), and [01-roles-and-members](../session/01-roles-and-members.md) list what this design changes there, including the open questions it settles in 03-v1-scope, and [tentative decisions](../architecture/decisions.md#traffic-polls-twice-a-second-and-a-receiving-machine-draws-each-frozen-copy-every-frame-from-a-routine-of-traffics-1s-behind) give the reasons.
+The text or the notes at the top of [03-v1-scope](../product/03-v1-scope.md), [the code map](../architecture/02-code-map.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [04-core-helper](../core/04-core-helper.md), [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md), [the session's units](../session/02-units.md), and [01-roles-and-members](../session/01-roles-and-members.md) list what this design changes there, including the open questions it settles in 03-v1-scope, and [tentative decisions](../architecture/decisions.md#traffic-polls-twice-a-second-and-a-receiving-machine-draws-each-frozen-copy-every-frame-from-a-routine-of-traffics-1s-behind) give the reasons.
 
 ## Budgets
 

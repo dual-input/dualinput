@@ -247,8 +247,8 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 ## What the code map changes in 01-between-machines
 
-Nothing beyond the note of 2026-10-14 at the top of 01-between-machines, because that document names components, never units, and the units above add detail to its components without changing them.
-This design's own changes to it are the five its note of 2026-10-16 lists.
+Nothing beyond what [01-between-machines](01-between-machines.md) holds, because that document names components, never units, and the units above add detail to its components without changing them.
+Its text holds this design's own changes to it.
 
 ## Budgets
 

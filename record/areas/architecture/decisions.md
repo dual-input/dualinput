@@ -125,8 +125,9 @@ Numbered as [decision 009](../../decisions/009-sim-pages-find-core-over-commbus.
 
 Numbered as [decision 010](../../decisions/010-clients-message-core-every-2s.md) on 2026-10-13.
 
-- **Decided:** every page, the desktop app, and the helper send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s, and restarts a helper it hasn't heard from in 8s.
-  Settled in node 1.2 by the user, 2026-10-08, and the helper's messages in node 1.3 by the user, 2026-10-08.
+- **Decided:** every page and the desktop app send the core a message every 2s, and the core closes a socket it hasn't heard from in 8s; the core helper sends no such message ([the core helper](#the-core-helper-runs-while-a-feature-wants-something-of-it-and-the-core-sends-it-every-want-whole)).
+  This changes [decision 010](../../decisions/010-clients-message-core-every-2s.md) for the helper once step 8's decisions are numbered.
+  Settled in node 1.2 by the user, 2026-10-08, and the helper's part by the design review after node 6 (user, 2026-10-18).
 - **Because:**
   - A page's socket doesn't close when the page goes away: a cockpit panel's was still open when the run ended 23s after the panel reloaded, and all 16 cockpit panels' were still open as the inspector stopped listing them after the pilot left the flight (measured on MSFS 2024, 2026-10-08, [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel)).
   - FS Copilot's panels give up on their app 8s to 10s after its last 2s renewal (read in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/pointer.js`, `STATE_DEADMAN_MS` and its 2s watchdog), and a suspended process holds its sockets open and answers nothing (documented in the FS Copilot fork, `record/pointer-forwarding/docs/14-test-bench.md`, "Outages are made by suspending a process").
@@ -247,7 +248,7 @@ Numbered as [decision 018](../../decisions/018-rust-and-typescript.md) on 2026-1
   - The user chose TypeScript for the code a JavaScript engine runs: the sim's pages, the desktop app's pages, plugins and write functions, and the backend (user, 2026-10-06 and 2026-10-08), and Coherent GT, WebView2, QuickJS-ng, and a Cloudflare Worker each run the JavaScript it compiles to.
   - In a flight, a Rust client on the SDK's `SimConnect.dll` masked the elevator ahead of Accu-Sim with a group it took as the sim booted, created AI objects with liveries, read the camera, read, set, and heard an input event, called a cockpit panel over the CommBus, and followed the flight load's flow events, and our Rust module echoed every slot write the client made, both on declarations bindgen generated from the SDK's headers (measured on MSFS 2024, 2026-10-09, [architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
 - **Leaves out:**
-  - a build without Visual Studio's linker, which failed with Rust's own tools ([01-spine](01-spine.md#the-helper))
+  - a build without Visual Studio's linker, which failed with Rust's own tools ([01-spine](01-spine.md#the-core-helper))
   - the relay's language ([01-spine](01-spine.md#language-and-toolchains)), and the choices that stay inside one part ([01-spine](01-spine.md#left-open))
 
 ## The core's input and audio work runs in a helper it starts
@@ -258,7 +259,7 @@ Numbered as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)
   The core starts the helper in a session and while the desktop app binds a key or lists the output devices, starts it again if it exits, and talks to it over its standard input and output.
   Settled in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - A crash in that code, such as in a speech recognizer's C or C++ library, takes the core down if it runs in the core's process, and the pilot out of the session until the watcher restarts the core and they rejoin ([01-spine](01-spine.md#the-helper)), while the core restarts a helper that crashes, and the session goes on.
+  - A crash in that code, such as in a speech recognizer's C or C++ library, takes the core down if it runs in the core's process, and the pilot out of the session until the watcher restarts the core and they rejoin ([01-spine](01-spine.md#the-core-helper)), while the core restarts a helper that crashes, and the session goes on.
   - Our probes read Raw Input from a program they start, line by line over its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
 - **Leaves out:** the fields of the helper's messages, which the crate the Rust components share defines for both ends ([01-spine](01-spine.md#messages-between-components)), and their binary format, a choice inside the core and the helper ([01-spine](01-spine.md#left-open)).
 
@@ -670,7 +671,7 @@ Numbered as [decision 040](../../decisions/040-catch-up-first-final-value-order.
 
 Numbered as [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) on 2026-10-13.
 
-- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the watcher restarts it, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
+- **Decided:** a core that crashes while its sim keeps running comes back as a sim that closed does: the desktop app starts it again, it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, and the crew's notice asks for a bug report.
   Because the aircraft didn't reload, each shadow value starts at the flying machine's, and the aircraft counts as settled at once.
   The recording's minimal mode keeps the cockpit stream, from which catch-up takes its order.
   This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
@@ -1211,7 +1212,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** each feature registers its bindings, captures, playback streams, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on, and its sounds, which the service sends after each `Hello`; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
   A want the helper can't carry out it reports, and runs the rest, and the service shows a warning naming the feature.
   When the helper exits while something is wanted, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
-  The helper sends no `Alive`, and the core kills no silent helper, since the design review after node 6 (user, 2026-10-18).
+  The helper sends no `Alive`, and the core kills no silent helper, since the writer thread that sent `Alive` kept sending while any other thread hung, so the kill caught only a deadlock of our own writer (the design review after node 6, user, 2026-10-18).
   The helper exits when its standard input closes.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 - **Because:**
@@ -1312,9 +1313,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** the simulation rate, the session's aircraft, and preflight's phase come only from the flying machine, the session's authority ([the connection](../product/03-v1-scope.md#the-connection)), and a key a follower could write would need each feature to check its writer; a Go without written in each member's own key loses no write when two pilots go without two members at once.
 - **Leaves out:** nothing.
 
-## The PF's core sets the session's aircraft and runs preflight, and its profile loader pins the newest bundle its cache holds
+## The PF's core sets the session's aircraft and runs preflight, and its profile loader pins the session's bundle
 
-- **Decided:** the host's core writes `control` naming its pilot when the session starts; the PF's core writes the session's aircraft whenever its pilot is in a flight and the key holds none or, before preflight ends, another; runs the countdown, and ends preflight with a key every core follows; ends it at once when its aircraft is first in a flight with `A:SIM ON GROUND` at 0; and its profile loader writes, as a key of its own, the newest bundle its cache holds for that aircraft, which every other core loads by hash.
+- **Decided:** the host's core writes `control` naming its pilot when the session starts; the PF's core writes the session's aircraft whenever its pilot is in a flight and the key holds none or, before preflight ends, another; runs the countdown, and ends preflight with a key every core follows; ends it at once when its aircraft is first in a flight with `A:SIM ON GROUND` at 0; and its profile loader writes, as a key of its own, a local bundle that covers that aircraft, or else the bundle its cached index gives its level, which every other core loads by hash ([the pin](../profiles/02-units.md#the-pin)).
   The crew can't go without a PF who dropped out; before preflight ends with nobody in the flight, a PF who leaves the session passes control to the other member anyway, and one who only leaves the flight keeps it.
   Settled in node 6.7 by the user, 2026-10-16 ([the session's units](../session/02-units.md#preflight); [which bundle a session pins](../session/02-units.md#which-bundle-a-session-pins)).
 - **Because:**
@@ -1819,7 +1820,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - from [decision 036](../../decisions/036-control-is-one-value.md), a receiver adopting a newer control value met on any message or sample, since control changes only through the session's control key; and a leaving PF closing once the PM's messages carry the new value, since it closes 1s after the pass;
   - from [decision 037](../../decisions/037-while-a-link-is-lost.md), a core that starts with a session file asking the crew whether its pilot is still in, since it rejoins as a late joiner whenever a member answers.
   Catch-up holds an entry's write until its first reading, where [decision 040](../../decisions/040-catch-up-first-final-value-order.md)'s commitment has it write an input event whose first read hasn't returned; a counted or event entry is exempt, and a refused read drops the held write.
-  The review's other changes are in the notes at the top of the docs they change, and in the tentative decisions above, edited in place.
+  The review's other changes are in the docs they change, in their text or in the notes at their top, and in the tentative decisions above, edited in place.
   Settled in the design review after node 6 by the user, 2026-10-18.
 - **Because:**
   - The writer thread that sent `Alive` kept sending while any other thread hung, so the 8s kill caught only a deadlock of our own writer, and a crashed helper already shows by exiting ([04-core-helper](../core/04-core-helper.md)).

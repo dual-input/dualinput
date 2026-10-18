@@ -205,9 +205,9 @@ Exit: the four are agreed, and these checks pass:
 - On paper, deleting any feature leaves everything else whole, and every engine works outside the core ([the code map](../architecture/plan.md#5-the-code-map)).
 - Each Soon and Later pick lands in the code map as new features, plugins, or channels, without changing an interface the host offers.
 - Every v1 pick, the three things [step 3](#3-v1-or-later) gives v1 whatever is picked (flight-model sync, the connection, and profiles), and every item the record leaves to step 8 are each in a stage with its own exit criterion.
-- Every design doc reads as one current text: each note a later design added at its top is worked into the text below it and removed, and a check of each doc finds nothing in the new text that the old text and its notes didn't say, and nothing they said missing.
-  It's done first when node 6 of the architecture plan ends, before node 7 starts, and again for any note nodes 7 and 8 add.
-  Nothing has been built from these designs yet, so no reader needs their old wording, and a builder who reads a doc's text without its notes would build what the notes changed (user, 2026-10-17).
+
+Design docs keep the notes later designs added at their top, and a builder reads each doc's notes with the text below them, as [writing.md](../../../.claude/rules/writing.md#design-plan-and-log) has a design doc's amendments work.
+Node 6's exit worked the notes of ten docs into their text and stopped there, since folding and checking all 30 cost more usage than a cleaner read saves (user, 2026-10-18).
 
 ## 9. Build, test, and release v1
 

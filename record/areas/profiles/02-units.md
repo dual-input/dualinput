@@ -269,7 +269,7 @@ Each member's value is one of four:
 
 ## What this changes in 01-format-and-delivery
 
-The notes at the top of [01-format-and-delivery](01-format-and-delivery.md) list what the code map and this design change there.
+[01-format-and-delivery](01-format-and-delivery.md) holds what the code map and this design change there.
 
 ## Budgets
 

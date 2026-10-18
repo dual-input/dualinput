@@ -31,7 +31,7 @@ Across the helper's standard input and output go postcard messages, each after a
 The helper reads Raw Input, captures a program's audio and the microphone, encodes and decodes Opus through opus-rs, plays streams and sounds on the device the pilot picks or on Windows' default, and listens for phrases through a recognizer that [6.12](../architecture/plan.md#612-control) picks, so the microphone's audio never leaves it.
 
 This answers node 6.5 of the [architecture plan](../architecture/plan.md#65-the-core-helper).
-Decisions [004](../../decisions/004-core-works-out-figures-hand.md), [006](../../decisions/006-core-catches-take-control-input.md), [007](../../decisions/007-core-runs-audio.md), [010](../../decisions/010-clients-message-core-every-2s.md), and [019](../../decisions/019-input-and-audio-run-in-helper.md), the spine's [the helper](../architecture/01-spine.md#the-helper), [01-loop-and-edge](01-loop-and-edge.md), and [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
+Decisions [004](../../decisions/004-core-works-out-figures-hand.md), [006](../../decisions/006-core-catches-take-control-input.md), [007](../../decisions/007-core-runs-audio.md), [010](../../decisions/010-clients-message-core-every-2s.md), and [019](../../decisions/019-input-and-audio-run-in-helper.md), the spine's [the helper](../architecture/01-spine.md#the-core-helper), [01-loop-and-edge](01-loop-and-edge.md), and [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
 
 ## The units
 

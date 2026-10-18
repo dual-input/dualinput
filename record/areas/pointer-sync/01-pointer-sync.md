@@ -177,7 +177,7 @@ CROSSCHECK_BRIDGE_API.define("pointer-sync", {
 
 ## What this changes elsewhere
 
-The notes at the top of [03-v1-scope](../product/03-v1-scope.md), [the code map](../architecture/02-code-map.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [03-catch-up](../sync/03-catch-up.md), [04-order-and-recovery](../sync/04-order-and-recovery.md), [05-units](../sync/05-units.md), [the spine](../architecture/01-spine.md), and [flight-model sync](../flight-model/01-flight-model-sync.md) list what this design changes there, and two [tentative decisions](../architecture/decisions.md#pointer-sync-sends-each-gesture-as-it-happens-and-the-panel-bridge-sends-no-span) give the reasons and change [decision 042](../../decisions/042-vector-clock-records-what-applied.md).
+The text or the notes at the top of [03-v1-scope](../product/03-v1-scope.md), [the code map](../architecture/02-code-map.md), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [03-catch-up](../sync/03-catch-up.md), [04-order-and-recovery](../sync/04-order-and-recovery.md), [05-units](../sync/05-units.md), [the spine](../architecture/01-spine.md), and [flight-model sync](../flight-model/01-flight-model-sync.md) list what this design changes there, and two [tentative decisions](../architecture/decisions.md#pointer-sync-sends-each-gesture-as-it-happens-and-the-panel-bridge-sends-no-span) give the reasons and change [decision 042](../../decisions/042-vector-clock-records-what-applied.md).
 
 ## Budgets
 

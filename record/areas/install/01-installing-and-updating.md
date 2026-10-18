@@ -23,7 +23,7 @@ At its start and at each sim close, it writes our Community package wherever it'
 In the core, the sim service warns of packages that override our files and checks our own, and Crosscheck turns no package off.
 
 This answers node 6.17 of the [architecture plan](../architecture/plan.md#617-installing-and-updating).
-[Installing and updating](../product/03-v1-scope.md#installing-and-updating), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) and [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and the spine's [watcher and desktop app](../architecture/01-spine.md#the-watcher-and-the-desktop-app) give the rules this design builds on, with the desktop app doing what they give the watcher, and this document holds only what they leave out.
+[Installing and updating](../product/03-v1-scope.md#installing-and-updating), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) and [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and the spine's [desktop app and the core](../architecture/01-spine.md#the-desktop-app-and-the-core) give the rules this design builds on, with the desktop app doing what they give the watcher, and this document holds only what they leave out.
 The research behind it is in this area's [log](log.md).
 
 ## One program from login
@@ -286,4 +286,4 @@ These wait for the apps' stage of step 8, with [the apps' list](../interface/01-
 
 ## What this changes elsewhere
 
-The notes at the top of [the spine](../architecture/01-spine.md), [the code map](../architecture/02-code-map.md), [03-v1-scope](../product/03-v1-scope.md#installing-and-updating), [01-between-machines](../network/01-between-machines.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), and [the apps](../interface/01-apps.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#crosscheck-has-no-watcher-and-the-desktop-app-runs-from-login-as-a-tray-icon-doing-its-jobs) give the reasons.
+The text or the notes at the top of [the spine](../architecture/01-spine.md), [the code map](../architecture/02-code-map.md), [03-v1-scope](../product/03-v1-scope.md#installing-and-updating), [01-between-machines](../network/01-between-machines.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), and [the apps](../interface/01-apps.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#crosscheck-has-no-watcher-and-the-desktop-app-runs-from-login-as-a-tray-icon-doing-its-jobs) give the reasons.

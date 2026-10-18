@@ -46,6 +46,8 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 > - The package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, and the livery, `A:LIVERY NAME`.
 > - A job finds the package in the packages folders the sim service reads from `UserCfg.opt`, as [the session's match check](../session/02-units.md#the-match-check) had the session crate's job find it, while a session is held: at each aircraft load, and when a session starts with an aircraft already loaded, since every v1 reader is in a session.
 > - The sim service raises `AircraftChanged` when those facts change, the search's result included, and the match check's items and avatars' model job read them there, so no feature takes the aircraft's package from another's key.
+>
+> Since 2026-10-18, the module's status of Missing or Differs and the sim service's check of our package on disk raise one trouble notice for our package, where [the module's status](#the-modules-status) and the note of 2026-10-17 raise one for the module apart from the package's; Stopped keeps its own (user, 2026-10-18).
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

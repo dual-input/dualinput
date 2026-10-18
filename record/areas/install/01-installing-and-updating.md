@@ -13,6 +13,8 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > - The app writes our package only when it runs from Velopack's `current\` folder, as an installed app does, beside what [our package](#our-package) says; a developer installs a development build's package with `node tools/build.ts install`, since a rebuild keeps the version and the app's rule would never copy it in ([our package](../build/01-the-build.md#our-package)).
 > - The build keeps the sim's stock files in `sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 > - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
+>
+> Since 2026-10-18, the sim service raises one trouble notice for our package, from either [our own package](#our-own-package)'s check on disk or the module's status of Missing or Differs, where each raises its own; Stopped keeps its own notice (user, 2026-10-18).
 
 Crosscheck has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.

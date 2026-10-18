@@ -24,6 +24,11 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 > - A synced display on a machine other than the PF's also locks while that machine's catch-up runs, beside the replay that [the replay](#the-replay) keeps it locked through.
 >
 > Since 2026-10-17, seat claims ride avatars' poses rather than the session channel, since avatars, partly recorded, writes no session key, and of two pilots who take one seat within a trip, the PF keeps it, or else the lower pilot ID, where [keys several members write](#keys-several-members-write) has the session channel's stamp settle them ([a seat](../avatars/01-avatars.md#a-seat)).
+>
+> Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
+>
+> - In [catch-up](#catch-up), an entry with no reading yet holds its write until its first reading arrives, as an `instrument()` entry's does, where catch-up writes it rather than skipping it, so a toggle never flips blind; a counted or event entry, which never gets a reading, is exempt, and a read the sim refuses drops the held write ([the sync units](05-units.md)).
+> - No answer to a voice offer comes in v1, since the voice phrases are a Soon pick, where [catch-up](#catch-up) names one.
 
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.

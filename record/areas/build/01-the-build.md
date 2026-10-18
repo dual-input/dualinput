@@ -9,6 +9,8 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > **Note**
 > Since 2026-10-18, the relays' tokens live in a private repository of ours rather than in `relays/relays.toml` ([the network's units](../network/02-units.md)), so the build job in [a release](#a-release) also checks that repository out, with a read-only key from this repository's secrets, and the network crate's build compiles each release's default relay list from both; a release build stops when a relay in `relays/relays.toml` has no token.
 > A pull request's build carries no tokens, and the network's tests run through a local relay with a test token (user, 2026-10-18).
+>
+> Since 2026-10-18, `tools/` also holds `replay.ts`, which fetches the release a recording names from GitHub, takes `crosscheck-core.exe` from its full package, and replays with it, so a release's recording needs no rebuild and no older SDK; [left open](#left-open)'s item on older SDK installers then bears only on a rebuild for added logging ([01-loop-and-edge](../core/01-loop-and-edge.md); user, 2026-10-18).
 
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `crosscheck`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.

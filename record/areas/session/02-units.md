@@ -33,6 +33,12 @@ Decides:     The session crate's members, session keys, control, session file, j
 > - The match check gains an item, from the sim service's state, listing the other packages that override our files, as a warning.
 >
 > Since 2026-10-18, the sim service holds the loaded aircraft's package, folder, install location, version, and livery, aircraft awareness, and finds the package itself while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md)), so [the match check](#the-match-check)'s aircraft items read them there, where the session crate's own job finds the package and reads `A:LIVERY NAME`, and the session crate keeps no package folder for avatars, where the note of 2026-10-17 has it keep one (user, 2026-10-18).
+>
+> Since 2026-10-18, the design review after node 6 changes this document in three places (user, 2026-10-18):
+>
+> - In [the match check](#the-match-check), each item's owner hands the session crate its value whenever the value changes, and the session crate writes the `match` key on each, where it reads every item when a member enters the flight; rate and pause hands it the sim's time when a member enters the flight.
+> - The profile's item reports whether the pinned bundle loaded, couldn't be fetched, or there's no profile for the aircraft, and the pinned hash shows once, where the match check's table compares each core's hash, since every core loads only the pinned bundle ([the profiles' units](../profiles/02-units.md)).
+> - No voice answer asks for control in v1, since the voice phrases are a Soon pick, where [control](#control) has the voice handover's answer ask `TakeControl`.
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

@@ -19,6 +19,12 @@ Decides:     How a feature's part plugs into each app and comes out; what a part
 > - In each flight of a session, the EFB app's code opens the panel, calling `TOOLBAR_BUTTON_TOGGLE` again after a wait until a banner page's socket opens; a pilot who closes it from its toolbar button keeps it closed until the next flight.
 > - The EFB app's code closes it once, when the session ends or the core says `bye`, with no retry.
 > - A case in the sim checks whether clicks reach the cockpit through the panel's see-through part; if they don't, the banner's shape comes back to design.
+>
+> Since 2026-10-18, the design review after node 6 changes this document in three places (user, 2026-10-18):
+>
+> - Of the settings in [settings](#settings), recording everything is an ordinary one, and the profile loader's local folder a development one, since v1 ships no authoring tool ([recording](../recording/01-recording-and-bug-reports.md); [the profiles' units](../profiles/02-units.md)).
+> - [Bringing the desktop app forward](#bringing-the-desktop-app-forward) always starts the desktop app's program, whose one running copy opens its window, so `clients` sends the desktop app no message for it, and the case for the bench on a second press goes.
+> - [Trouble](#trouble) has one trouble notice for our package, raised from either the sim service's check on disk or the module's status of Missing or Differs, where it lists them as two; Stopped keeps its own.
 
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.

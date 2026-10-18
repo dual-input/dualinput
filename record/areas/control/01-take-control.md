@@ -6,6 +6,9 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/02-code-map.md, ../core/
 Decides:     How a pilot binds the key or button, as a single or a long press; how a press, or a button in the apps, asks for control; what a pilot gets when the guards refuse, and when the link to the PF is lost; what marks a pass on each machine; the budgets; and the cases for the bench (node 6.12).
 ```
 
+> **Note**
+> Since 2026-10-18, [budgets](#budgets) has no row for the long press, which repeated the core's own timer budget; the case that a 0.9s hold does nothing and a 1.2s hold passes control at 1s stays, and the hold stays 1s, with no setting for it (user, 2026-10-18).
+
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.

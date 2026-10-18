@@ -18,6 +18,12 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > - `ToHelper::Frame` also carries the frame's stamp from the ATC host, beside its number: a stamp more than 30ms past what the numbers account for from the frame before starts a new transmission.
 > - A stream's `Buffer` holds the depth's rule, the smallest depth that would have played 98% of the last 10s of frames on time, set at each transmission's first frame between 60ms and 300ms, and the stream's gain, from the ATC volume setting.
 > - `FromHelper` gains a report at each transmission's end, its frames played, concealed, and dropped late, and its depth, which the recording keeps.
+>
+> Since 2026-10-18, the design review after node 6 changes this document in three places (user, 2026-10-18):
+>
+> - The helper sends no `Alive`, and the core counts it down only when its process exits or its `Hello` differs, where [the pipe](#the-pipe) and [the helper's life](#the-helpers-life) have the core kill a helper silent for 8s; the writer thread that sent `Alive` kept sending while any other thread hung, so the kill caught only a deadlock of our own writer.
+> - The mouse want is on or off: the helper finds the sim's main window by its class, `AceApp`, and the start of its title, as a bound key finds the sim's windows, where [what a feature registers and calls](#what-a-feature-registers-and-calls) passes the sim's process ID.
+> - The ATC buffer's depth comes from the last 500 frames received, where the note of 2026-10-17 above says the last 10s of frames, so a transmission after a pause starts from history rather than the 60ms floor ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#the-buffer)).
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

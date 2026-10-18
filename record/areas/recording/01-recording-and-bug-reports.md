@@ -17,6 +17,13 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 >
 > Since 2026-10-17, v1 has no plugins, so what plugin tests need from a recording, which [left open](#left-open) gives to 6.15, waits for plugins' design after v1; state sync's readings of a gauge's JavaScript arrive from its panel module and stay recorded ([plugins and the sandbox](../plugins/01-plugins.md#reading-it-in-the-panel)).
 > Since 2026-10-17, the recording crate registers a slice of the recorded runs and commands to mark the moment, upload a session, and delete a run, which refuses the run in progress ([slices and commands](../interface/01-apps.md#slices-and-commands)); how the desktop app lists them is the apps' design, which settles what [a bug report](#a-bug-report) leaves to 6.16.
+>
+> Since 2026-10-18, the design review after node 6 changes this document in four places (user, 2026-10-18):
+>
+> - [Recording everything](#recording-everything)'s setting is an ordinary one, which an app may show, so a pilot asked to turn it on needn't stop Crosscheck to edit `settings.json`; left on, it fills the 1 GB in about 22 hours.
+> - [Asking a missing pilot](#asking-a-missing-pilot) moves after v1: no core asks the Worker at its start, the reporting pilot asks their crew, and each crewmate uploads their part from the report page.
+> - The core helper sends no `Alive`, so [what a platform crate may do with one](#what-a-platform-crate-may-do-with-one) has no rule on counting it ([04-core-helper](../core/04-core-helper.md)).
+> - The voice phrases are a Soon pick (user, 2026-10-17), so voice is among no units a replay checks in v1, where this document's opening names it.
 
 A recording is a replay log of the core's inputs, less the high-rate samples a feature marks as unrecorded, such as traffic's positions and the flight model's, so their bytes never reach the disk while the events around them do.
 A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform's, and the features state sync, pointer sync, take-control, voice, rate and pause, and Go to.

@@ -848,7 +848,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A write function that hits its limit stops its entry syncing for the rest of the load
 
-- **Decided:** a write function that hits its 64 MB or 100ms limit fails that write, and its entry stops syncing on every machine for the rest of the load, flagged as a write that never lands is, as a plugin at its limit is turned off.
+- **Decided:** a write function that hits its 64 MB or 100ms limit fails that write, and its entry stops syncing on its own machine for the rest of the load, which skips arriving changes to the entry and sends none, flagged as a write that never lands is; the design review after node 6 dropped the stop on every machine, since the function runs only on a receiving machine and the entry is still read from the sim (user, 2026-10-18).
   This changes [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), under which a write function at a limit fails only that write, once step 8's decisions are numbered.
   Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#budgets)).
 - **Because:** on one loop, a stuck call holds up every input behind it.
@@ -1210,7 +1210,8 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** each feature registers its bindings, captures, playback streams, phrases, and the mouse with `core-helper-service`, each off until the feature turns it on, and its sounds, which the service sends after each `Hello`; the service runs the helper while anything is on, and sends it every want whole after its `Hello` and at each change.
   A want the helper can't carry out it reports, and runs the rest, and the service shows a warning naming the feature.
-  When the helper exits while something is wanted, or goes 8s without a message, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
+  When the helper exits while something is wanted, the service starts it again 2s later, for as long as something is wanted, and shows a trouble notice naming the features whose wants are on once 5s pass with no matching `Hello`; a helper whose version or hash differs is killed and counts as down.
+  The helper sends no `Alive`, and the core kills no silent helper, since the design review after node 6 (user, 2026-10-18).
   The helper exits when its standard input closes.
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#the-helpers-life)).
 - **Because:**
@@ -1288,7 +1289,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A bug report's parts go to R2 through our Worker, only from the session's members, for 30 days
 
-- **Decided:** each pilot's core uploads each file of their part to `POST /v1/reports`, signed with the endpoint key it held in the session; the Worker checks the signature against the endpoint ID and the members it kept for that session, and stores the file in R2 under the session, the endpoint, and the run, where a lifecycle rule expires it at 30 days; a leave marks a member's row as left, and the hourly Cron Trigger keeps sessions' and members' rows 30 days after the later of their last renewal and their leave; a core offers a missing pilot's part when R2 holds a crewmate's; and `tools/reports.ts`, with a secret the Worker holds, lists and fetches reports from R2's listing.
+- **Decided:** each pilot's core uploads each file of their part to `POST /v1/reports`, signed with the endpoint key it held in the session; the Worker checks the signature against the endpoint ID and the members it kept for that session, and stores the file in R2 under the session, the endpoint, and the run, where a lifecycle rule expires it at 30 days; a leave marks a member's row as left, and the hourly Cron Trigger keeps sessions' and members' rows 30 days after the later of their last renewal and their leave; offering a missing pilot's part moves after v1, so the reporting pilot asks their crew (user, 2026-10-18); and `tools/reports.ts`, with a secret the Worker holds, lists and fetches reports from R2's listing.
   Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
 - **Because:**
   - Blobs split across D1's rows of at most 2 MB (documented, [D1 limits](https://developers.cloudflare.com/d1/platform/limits/)) would be a hack (user, 2026-10-16), while R2 stores 10 GB-month free each month and costs $0.015 a GB-month past it (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)).
@@ -1564,7 +1565,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## ATC audio finds its app by a list of program names, stamps each frame, and plays behind a depth picked at each transmission's start
 
-- **Decided:** the ATC app setting is Automatic, the first running of `BeyondATC` and `SayIntentionsAI`, or one program the pilot picks; each frame carries its number, counting the frames sent, and the stamp of its first sample, with a deadline 300ms after that stamp; a receiving helper starts a transmission at a frame whose stamp is more than 30ms past what its number says from the frame before, holds its first frame for the smallest depth that would have played 98% of the last 10s of frames on time, between 60ms and 300ms, and keeps that depth through the transmission; and an ATC volume setting sets the stream's gain.
+- **Decided:** the ATC app setting is Automatic, the first running of `BeyondATC` and `SayIntentionsAI`, or one program the pilot picks; each frame carries its number, counting the frames sent, and the stamp of its first sample, with a deadline 300ms after that stamp; a receiving helper starts a transmission at a frame whose stamp is more than 30ms past what its number says from the frame before, holds its first frame for the smallest depth that would have played 98% of the last 500 frames received on time (the design review after node 6, user, 2026-10-18), between 60ms and 300ms, and keeps that depth through the transmission; and an ATC volume setting sets the stream's gain.
   This settles what [04-core-helper](../core/04-core-helper.md#left-open) leaves to 6.14: the bitrate, the gate, the buffer's rule, and how the ATC app is picked.
   Settled in node 6.14 by the user, 2026-10-17 ([ATC audio](../traffic-atc/01-traffic-and-atc.md#atc-audio)).
 - **Because:**
@@ -1577,7 +1578,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## v1 builds no plugins, and a profile reads a gauge's JavaScript through `instrument()` and writes it only through the gauge's H: events
 
 - **Decided:** v1 builds no plugins crate, plugin API, `plugin:` key, `plugin.state` or `plugin.write` form, `ops` module, or `Mechanisms` routine.
-  A state entry may watch `instrument(key, path)`, a value in a gauge's JavaScript, which state sync's panel module `instrument-reads` reads every 250ms in the gauge's panel: a path of own properties from the instrument, ending in a number, text, or boolean, or in a no-argument method the panel's own scripts wrote, never a built-in; a boolean reads as 1 or 0, and any other value is an error for the entry, with state sync's notice; and the engine holds a write to such an entry until its first reading.
+  A state entry may watch `instrument(key, path)`, a value in a gauge's JavaScript, which state sync's panel module `instrument-reads` reads every 250ms in the gauge's panel: a path of own data properties from the instrument, ending in a number, text, or boolean, with no method call (the design review after node 6, user, 2026-10-18); a boolean reads as 1 or 0, and any other value is an error for the entry, with state sync's notice; and the engine holds a write to such an entry until its first reading.
   A profile writes a gauge's state only through the gauge's H: events, in write functions that check the mode another entry syncs, and the Baron 58P's tablet failures and its ADF's elapsed seconds stay out of v1.
   This changes [decision 020](../../decisions/020-plugin-code-runs-only-in-core.md), whose 58P plugin reads its gauges through our panel bridge, and [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), whose aircraft gets a second runtime for its plugin, once step 8's decisions are numbered; and [03-v1-scope](../product/03-v1-scope.md#plugins), [04-room-for-later](../product/04-room-for-later.md#plugins), [01-format-and-delivery](../profiles/01-format-and-delivery.md#plugins), and [the code map](02-code-map.md#the-units), which build the 58P's plugin, its hooks, `ops`, and `Mechanisms` in v1.
   Settled in node 6.15 by the user, 2026-10-17 ([plugins and the sandbox](../plugins/01-plugins.md)).
@@ -1705,7 +1706,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The sim service warns of packages that override our files and checks our own, and Crosscheck turns no package off
 
-- **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` in `Community` and `Community2024` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, without regard to letter case, since FS Copilot's lists its `VCockpit.js` in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`), skipping a package the sim's `Content.xml` marks `UserDisabled`, and raises a warning notice for each package found, which the match check shows as one item; and it checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notice otherwise.
+- **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` in `Community` and `Community2024` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, without regard to letter case, since FS Copilot's lists its `VCockpit.js` in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`), skipping a package the sim's `Content.xml` marks `UserDisabled`, and raises a warning notice for each package found, which the match check shows as one item; and it checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notice otherwise, one notice with the module's status of Missing or Differs (the design review after node 6, user, 2026-10-18).
   Removing or turning off a package the warning names is the pilot's, and the offer to disable it, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives the desktop app, moves to Later (user, 2026-10-18).
   Settled in node 6.17 by the user, 2026-10-18 ([the checks in the core](../install/01-installing-and-updating.md#the-checks-in-the-core)).
 - **Because:**
@@ -1810,6 +1811,22 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The search is file I/O, which the sim service already does for the packages folders, while sim awareness stays a model of the sim's stage with no I/O.
   - Every v1 reader is in a session, so the search runs only while one is held.
 - **Leaves out:** a reader outside a session, which a later feature can add by running the search then.
+
+## The design review after node 6 trims parts of decisions 019, 036, and 037, and holds each entry's writes until its first reading
+
+- **Decided:** each of these goes, from the numbered decisions named, once step 8's decisions are numbered (user, 2026-10-18):
+  - from [decision 019](../../decisions/019-input-and-audio-run-in-helper.md), the core restarting a helper it hasn't heard from in 8s: the helper sends no `Alive`, and counts as down only when it exits or its `Hello` differs;
+  - from [decision 036](../../decisions/036-control-is-one-value.md), a receiver adopting a newer control value met on any message or sample, since control changes only through the session's control key; and a leaving PF closing once the PM's messages carry the new value, since it closes 1s after the pass;
+  - from [decision 037](../../decisions/037-while-a-link-is-lost.md), a core that starts with a session file asking the crew whether its pilot is still in, since it rejoins as a late joiner whenever a member answers.
+  Catch-up holds an entry's write until its first reading, where [decision 040](../../decisions/040-catch-up-first-final-value-order.md)'s commitment has it write an input event whose first read hasn't returned; a counted or event entry is exempt, and a refused read drops the held write.
+  The review's other changes are in the notes at the top of the docs they change, and in the tentative decisions above, edited in place.
+  Settled in the design review after node 6 by the user, 2026-10-18.
+- **Because:**
+  - The writer thread that sent `Alive` kept sending while any other thread hung, so the 8s kill caught only a deadlock of our own writer, and a crashed helper already shows by exiting ([04-core-helper](../core/04-core-helper.md)).
+  - No unit adopts control from a message: flight-model sync drops samples until the key arrives, and the cockpit stream waits for the `CONTROL` message ([flight-model sync](../flight-model/01-flight-model-sync.md); [the sync units](../sync/05-units.md)); and the leaving core writes the new value itself, so the PM sends nothing carrying it promptly ([the session's units](../session/02-units.md)).
+  - [Decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md) brings every restarted core back as a late joiner, however long it was gone, and in a crew of two the member who counted it out has left the session.
+  - A toggle can't compare against a reading that hasn't come, so the 58P's battery and beacon, toggles on input events, could flip the wrong way in catch-up ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
+- **Leaves out:** nothing.
 
 [a1009]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [c04]: ../core/log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it

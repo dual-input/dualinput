@@ -6,6 +6,9 @@ Depends on:  ../profiles/01-format-and-delivery.md, ../profiles/02-units.md, ../
 Decides:     That plugins come after v1; the `instrument()` name, what its path may reach, and the values it reads; how state sync reads it and writes a gauge's state through its H: events; the Baron 58P's entries for its gauges' state; and the sandbox's rules against randomness a replay can't repeat (node 6.15).
 ```
 
+> **Note**
+> Since 2026-10-18, an `instrument()` path reads own data properties only and ends in a number, text, or boolean, with no method call, where [what a path reaches](#what-a-path-reaches) lets it end in a no-argument method the panel's scripts wrote; so the `[native code]` check and its case go, and the 58P's radar range syncs in v1 only if a data field of Asobo's map holds it (user, 2026-10-18).
+
 v1 builds no plugins.
 The Baron 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, which a panel module of state sync's reads every 250ms.
 It writes them only through the gauges' own H: events, in write functions that check the mode another entry syncs.

@@ -15,6 +15,11 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 > Since 2026-10-17, v1 has no plugins, so the engine watches no plugin value and makes no `Plugin` action, and [reaching the sim](#reaching-the-sim)'s row for a plugin's value goes, which settles [left open](#left-open)'s item on plugins.
 > State sync instead reads each `instrument()` a state entry watches, a value in a gauge's JavaScript, through a second panel module, `instrument-reads`, and the engine holds a write to such an entry, live and in catch-up, until its first reading arrives, which catch-up's `step_made` waits for ([reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
 > Since 2026-10-17, the PF's checklist shows through state sync's part in the apps, wherever the apps' design puts it, beside the banner's preflight summary included, since the banner shows the EFB app's parts' views; where the cockpit stream's slice shows, and the words of state sync's Ready reason and notices, wait for the apps' stage ([the apps](../interface/01-apps.md#a-features-parts)).
+>
+> Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
+>
+> - In [writing](#writing), every entry holds its writes, live and in catch-up, until its first reading arrives, as the note of 2026-10-17 has an `instrument()` entry do, and `step_made` waits for held writes; a counted or event entry, which gets no reading, is exempt, and a read the sim refuses drops the held writes.
+> - A write function at its limit stops its entry only on its own machine, which skips arriving changes to the entry, sends none, and shows its pilot state sync's notice, so [kinds](#kinds) has no `STOPPED`, where [write functions](#write-functions) stops the entry on every machine; the function runs only on a receiving machine, and the entry is still read from the sim.
 
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.

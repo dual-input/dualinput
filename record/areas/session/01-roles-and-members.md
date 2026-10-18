@@ -16,6 +16,8 @@ Decides:     The member list and its kinds, the table of roles and v1's two, who
 > - A receiving machine shows the traffic host's objects while its pilot is in the flight, where that section has it spawn them whenever its sim is in a flight.
 > - A copy with no sample for 15s is removed and keeps its identity, so its next sample creates it again, where that section forgets the identity, since a copy is created only once a sample arrives, and two 5s samples lost in a row would otherwise take a parked copy away for the rest of the session ([which copies it shows](../traffic-atc/01-traffic-and-atc.md#which-copies-it-shows)).
 > - The traffic host reads its traffic only while its own pilot is in the flight, and sends every object as gone when its pilot leaves the flight, so its copies go at once rather than after 15s ([what goes out](../traffic-atc/01-traffic-and-atc.md#what-goes-out)).
+>
+> Since 2026-10-18, no v1 path passes control by voice, since the voice phrases are a Soon pick (user, 2026-10-17), where [the PF](#the-pf) names a voice handover.
 
 A session's members are listed on the session channel, each by an entry it writes itself.
 Its roles are one table, each row saying who may hold the role, how it moves, and what happens when its holder loses the link, leaves the flight, or leaves the session.

@@ -6,6 +6,9 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     What a gesture sends, and when; how another machine's panel plays it, and when each of its messages counts as applied; how a gesture is timed, and which clock the panel bridge measures a span on; which displays lock, when, and what a pilot's blocked press shows; what pointer sync registers; its known limits; the budgets; and the cases for the bench (node 6.11).
 ```
 
+> **Note**
+> Since 2026-10-18, a mouse-up with no gesture open sends nothing, where [a gesture](#a-gesture) sends it as a down and an up, as FS Copilot's `_onUp` does with no reason given; the receiver already plays nothing for an up with no gesture, and the other display would click where this one didn't, which the case in the sim that [cases for the bench](#cases-for-the-bench) lists checks (user, 2026-10-18).
+
 A gesture is one press or drag on a synced display, an instrument the profile's `displays` names, from a button's down to its up.
 It goes to the crew as it happens: its down, its moves, and its up, each a cockpit message keyed by the display.
 Each other machine's panel plays each message on its own copy of the display, at the same fractions of the display's size, as it arrives.

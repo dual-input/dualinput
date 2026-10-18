@@ -34,6 +34,13 @@ Decides:     The topology, the transport, the way through home routers, the rela
 > Since 2026-10-17, the seat claims that [channels](#channels) lists among the session channel's keys ride avatars' poses on the avatars channel, each pose carrying the whole figure, since avatars, partly recorded, writes no session key ([the pose](../avatars/01-avatars.md#the-pose)).
 > Since 2026-10-17, how the status list looks, which [left open](#left-open) gives to the banner's design, waits for the apps' stage, and node 6.16 settles only how the apps reach the network's and the session's slices ([the apps](../interface/01-apps.md#left-to-the-apps-stage)).
 > Since 2026-10-18, the desktop app adds the firewall rule, with one UAC prompt on its first run after the install, allowing UDP to the core's program and deleting any block rule naming it, and the desktop app reads the rules at each of its starts, where [the way through home routers](#the-way-through-home-routers) has the installer add the rule and the core look for it ([installing and updating](../install/01-installing-and-updating.md#the-firewall-rule)).
+>
+> Since 2026-10-18, the design review after node 6 changes this document in four places (user, 2026-10-18):
+>
+> - [A session file after a long outage](#a-session-file-after-a-long-outage) has no crew-timed check: a restarted core rejoins as a late joiner whenever a member answers, however long it was gone, since a late join gives it what retyping the code would, and in a crew of two the member who counted it out has left the session.
+> - [Control](#control)'s rule that a receiver adopts a newer control value met on any message goes: control changes only through the session's control key, as flight-model sync drops samples until the key arrives and the cockpit stream waits for the `CONTROL` message.
+> - In [leaving](#leaving), a leaving PF closes 1s after passing control, where it waits for a message from the PM carrying the new value, since the leaving core writes that value itself and the PM sends nothing carrying it promptly.
+> - No v1 path passes control by voice, since the voice phrases are a Soon pick (user, 2026-10-17), where [control](#control) names a handover by voice.
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

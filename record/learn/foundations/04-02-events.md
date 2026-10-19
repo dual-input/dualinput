@@ -45,15 +45,15 @@ Our code does both halves:
 | Fire | Our traffic tool, freezing an AI aircraft [7] [8] | Map `FREEZE_LATITUDE_LONGITUDE_SET`, then `TransmitClientEvent(objectId, event, 1, 1, GROUPID_IS_PRIORITY)`, with data 1 and priority 1; `A:IS LATITUDE LONGITUDE FREEZE ON` read back 1 |
 | Hear | FS Copilot, watching a profile's `K:` entries [9] | Map the event, add it to group 0 as not maskable, and set group 0 to `SIMCONNECT_GROUP_PRIORITY_HIGHEST`; each firing arrives with its `dwData` |
 
-**What it changes for Crosscheck.**
-Crosscheck can hear key events on one machine and fire them on the other, but, by the SDK, the machine that fires an event can hear it again, so it needs the guard [part 8](outline.md#8-synchronization-full) covers as echo suppression [2].
-Crosscheck can stop a pilot's input before the sim acts on it by masking, as long as its group sits ahead of any aircraft module that masks the same events, which means registering before the aircraft loads [26].
+**What it changes for Dual Input.**
+Dual Input can hear key events on one machine and fire them on the other, but, by the SDK, the machine that fires an event can hear it again, so it needs the guard [part 8](outline.md#8-synchronization-full) covers as echo suppression [2].
+Dual Input can stop a pilot's input before the sim acts on it by masking, as long as its group sits ahead of any aircraft module that masks the same events, which means registering before the aircraft loads [26].
 
 **Traps.**
 
 - An event a client transmits may skip the aircraft's own interception.
   Answering a report from MSFS 2020 SU15, an Asobo developer wrote on the forum that `SimConnect_TransmitClientEvent`, "just like trigger_key_event and execute_calculator_code in the Gauge API will bypass JS and Input Event interception", and logged a bug [10].
-  If that holds in MSFS 2024, a `<Binding EventID=...>` in the aircraft ([02-02](02-02-aircraft.md#model-behaviors)) never sees an event Crosscheck sends this way (unverified).
+  If that holds in MSFS 2024, a `<Binding EventID=...>` in the aircraft ([02-02](02-02-aircraft.md#model-behaviors)) never sees an event Dual Input sends this way (unverified).
 - Which key events a listener hears at all is unmeasured: FS Copilot's profiles rely on hearing some, and nothing in our records checks events that an aircraft's own XML or WASM code fires.
 - Which message an event arrives in is unsettled.
   The header has both `SIMCONNECT_RECV_ID_EVENT` and `SIMCONNECT_RECV_ID_EVENT_EX1` [6], the SDK's page for `SIMCONNECT_RECV_EVENT_EX1` says it arrives with `SIMCONNECT_RECV_ID_EVENT` [11], and an Asobo developer on the forum said events a module fires with `trigger_key_event_EX1` arrive as `SIMCONNECT_RECV_ID_EVENT_EX1` [12].
@@ -87,8 +87,8 @@ fsc-editor subscribes to `AircraftLoaded` and asks for it at every connection, "
 FS Copilot's consumer connection does the same [9].
 In a 437s session that changed aircraft twice, fsc-editor saw each load reported twice, once through each route [18].
 
-**What it changes for Crosscheck.**
-Either pilot may start Crosscheck mid-flight, so it has to subscribe and ask on every connection, and treat two announcements of one load as one.
+**What it changes for Dual Input.**
+Either pilot may start Dual Input mid-flight, so it has to subscribe and ask on every connection, and treat two announcements of one load as one.
 Which event marks an aircraft as loaded and settled is still open ([02-03](02-03-the-running-sim.md#the-flight-lifecycle)).
 
 **Traps.**
@@ -128,8 +128,8 @@ In a session with the PA-24, the subscription showed two things the cycle has to
 - Ahead of each aircraft change came a burst of every subscribed input event with its current value, 318 events arriving within 2ms to 4ms, 4.1s before the `AircraftLoaded` event the first time and 8.2s the second.
 - Each switch reported twice, 17ms to 21ms apart in 43 of 53 pairs and 37ms to 40ms in 9, which fsc-editor reads as one or two frames.
 
-**What it changes for Crosscheck.**
-The list, the hashes, and the subscriptions belong to one aircraft, so Crosscheck has to rebuild them on every aircraft change.
+**What it changes for Dual Input.**
+The list, the hashes, and the subscriptions belong to one aircraft, so Dual Input has to rebuild them on every aircraft change.
 It also has to tell the burst ahead of a change from a pilot's hands, and the second report of a switch from a second flip.
 
 **Traps.**

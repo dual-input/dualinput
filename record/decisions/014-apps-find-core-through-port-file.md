@@ -7,12 +7,12 @@ Decided by the user on 2026-10-08 and 2026-10-09, in node 1.2 of the [architectu
 ## Context
 
 The core listens on 127.0.0.1, on a port Windows picks, and the sim's pages learn the port from the core's announcements on the CommBus ([decision 009](009-sim-pages-find-core-over-commbus.md)).
-Two of Crosscheck's programs outside the sim need the core too:
+Two of Dual Input's programs outside the sim need the core too:
 
 - The desktop app talks to the core over a WebSocket on 127.0.0.1 ([01-spine](../areas/architecture/01-spine.md#communication)), and starts the core when the pilot opens it and the core isn't running ([decision 002](002-core-starts-with-every-sim-run.md)).
 - The watcher shows the core's CPU and memory use beside its own, because a pilot who rarely flies with a crew will ask why it runs all day ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
 
-A Crosscheck developer runs a whole session on one PC, with two cores, each with its own ports and identity ([the product plan](../areas/product/plan.md#7-tech-stack-and-architecture)).
+A Dual Input developer runs a whole session on one PC, with two cores, each with its own ports and identity ([the product plan](../areas/product/plan.md#7-tech-stack-and-architecture)).
 Node 1's walk through a session reopened node 1.2 on 2026-10-09, because the port file named the core by a process ID Windows may reuse ([architecture plan](../areas/architecture/plan.md#12-communication)).
 
 ## Options

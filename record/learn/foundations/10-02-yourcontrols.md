@@ -5,7 +5,7 @@
   - [One switch flip](#one-switch-flip)
   - [One position update](#one-position-update)
   - [Design choices and what they cost](#design-choices-and-what-they-cost)
-  - [What it changes for Crosscheck](#what-it-changes-for-crosscheck)
+  - [What it changes for Dual Input](#what-it-changes-for-dual-input)
   - [Known failures and open problems](#known-failures-and-open-problems)
 - [The two tools compared](#the-two-tools-compared)
 - [Sources](#sources)
@@ -144,11 +144,11 @@ On a touchscreen instrument, the script gives every element without an `id` one 
 A left-button release sends the `id` of the element released on, or of its nearest ancestor with one, as `H:YCB<instrument>#<id>`, and the matching instrument on the other machine dispatches `mousedown`, `mouseup`, and `click` on the element with that `id`, marked so they aren't sent back [7].
 An element's `id` depends on its attributes when the scan reached it, so the two machines can give one button different `id`s (unverified).
 
-### What it changes for Crosscheck
+### What it changes for Dual Input
 
 Both machines have to run the same aircraft knowledge and agree on who is in control, and nothing in MSFS makes either happen.
 YourControls settles both at the host, which puts one pilot's machine on every path.
-Which machine, if any, should hold that role in Crosscheck is an open question.
+Which machine, if any, should hold that role in Dual Input is an open question.
 
 ### Known failures and open problems
 

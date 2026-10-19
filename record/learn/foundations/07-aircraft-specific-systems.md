@@ -28,8 +28,8 @@ This is where four of its systems keep their state [19] [21]:
 | Transponder | `A:TRANSPONDER CODE` | A change reaches the panels on the CommBus [21]; whether the stock variable follows it is unverified |
 | Autopilot | `K:AP_MASTER` | The button fires it, and lights from `L:A22X AP Master` [19] |
 
-**What it changes for Crosscheck.**
-The SDK's variable list can't say where a study-level aircraft keeps its state, so Crosscheck needs that knowledge per aircraft before the flight, from the aircraft's files, its vendor's documentation, and watching it ([03-03](03-03-reading-and-writing.md#enumerating-vs-observing)).
+**What it changes for Dual Input.**
+The SDK's variable list can't say where a study-level aircraft keeps its state, so Dual Input needs that knowledge per aircraft before the flight, from the aircraft's files, its vendor's documentation, and watching it ([03-03](03-03-reading-and-writing.md#enumerating-vs-observing)).
 State kept only on the CommBus needs code in the sim to read.
 
 **Traps.**
@@ -64,8 +64,8 @@ FS Copilot's PMDG profile replays a left click on switch 1084 as `108401 (>K:ROT
 Displays differ too: of the `htmlgauge` lines in each aircraft's `panel.cfg` files, 28 of the PMDG 777's 30 load `WasmInstrument`, as do 15 of the A350's 19 and 14 of the Fenix's 21, against only the systems gauge among the A220's 14 [9].
 Panel code drives the A380's WASM displays at a position, and no sequence tried so far drives the A350's ([06-03](06-03-display-kinds-input-and-pop-outs.md#display-kinds-html-react-on-dom-react-on-svg-canvas-wasm-gauges)).
 
-**What it changes for Crosscheck.**
-Crosscheck needs a reader and a writer for each kind of channel: the namespaces [part 3](outline.md#3-variables-events-and-units-full) covers, SimConnect client data for PMDG, and the CommBus for the A220.
+**What it changes for Dual Input.**
+Dual Input needs a reader and a writer for each kind of channel: the namespaces [part 3](outline.md#3-variables-events-and-units-full) covers, SimConnect client data for PMDG, and the CommBus for the A220.
 PMDG's data also needs each pilot to edit a file in their own install.
 
 **Traps.**
@@ -96,8 +96,8 @@ The A220 profile writes a toggle only when the two machines disagree [2]:
   set: "value != current ? '(>K:AP_MASTER)' : ''"
 ```
 
-**What it changes for Crosscheck.**
-Crosscheck's knowledge of an aircraft has to record each control's semantics, because the sim doesn't: all 464 of the A220's input events have the same type ([03-02](03-02-events-and-other-namespaces.md#b-input-events)).
+**What it changes for Dual Input.**
+Dual Input's knowledge of an aircraft has to record each control's semantics, because the sim doesn't: all 464 of the A220's input events have the same type ([03-02](03-02-events-and-other-namespaces.md#b-input-events)).
 [Part 8](outline.md#8-synchronization-full) covers relative vs. absolute actions.
 
 **Traps.**
@@ -119,8 +119,8 @@ FS Copilot's A220 profile reads the effect and writes the cause when the two mac
 It leaves out about 45 lamp variables because "writing them fights the local model", and about 120 aural cue variables because syncing them "double-plays callouts and warnings" [2].
 Across FS Copilot's profiles, 9,673 setters write a name other than the one their `get:` reads, and 701 write the same one, so reading a state and writing the event that changes it is the usual shape of an entry [11].
 
-**What it changes for Crosscheck.**
-For each control, Crosscheck's aircraft knowledge needs the cause to write and the effect to compare, and comparing effects across machines is how Crosscheck can notice divergence ([part 8](outline.md#8-synchronization-full)).
+**What it changes for Dual Input.**
+For each control, Dual Input's aircraft knowledge needs the cause to write and the effect to compare, and comparing effects across machines is how Dual Input can notice divergence ([part 8](outline.md#8-synchronization-full)).
 
 **Traps.**
 
@@ -130,7 +130,7 @@ For each control, Crosscheck's aircraft knowledge needs the cause to write and t
 ## Hidden state
 
 FMS entries, flight plans, the page each display shows, failures, and running timers live inside the aircraft's code, often with no variable to read.
-Crosscheck can sync them only through a vendor channel, or by replaying inputs onto an aircraft in the same state.
+Dual Input can sync them only through a vendor channel, or by replaying inputs onto an aircraft in the same state.
 
 **How it works.**
 
@@ -142,8 +142,8 @@ Crosscheck can sync them only through a vendor channel, or by replaying inputs o
 | Failures | The SDK's "Aircraft Failures" events are 8 toggles, such as `K:TOGGLE_ENGINE1_FAILURE` [14] |
 | Timers | The A220's chronograph buttons are momentary `L:A22X L Chrono` presses, and no variable in the A220 notes holds the elapsed time [1] |
 
-**What it changes for Crosscheck.**
-Replaying inputs works only onto an aircraft in the same state, so Crosscheck needs both aircraft in a known state before replay starts, and a way to recover when they aren't.
+**What it changes for Dual Input.**
+Replaying inputs works only onto an aircraft in the same state, so Dual Input needs both aircraft in a known state before replay starts, and a way to recover when they aren't.
 [Part 8](outline.md#8-synchronization-full) covers initial sync and resync.
 
 **Traps.**
@@ -170,8 +170,8 @@ Any continuous quantity can drift unless one machine's value wins.
 - **The aircraft's own outputs.**
   Each machine's systems compute their own callouts and lamps, which is why the A220 profile syncs neither [2].
 
-**What it changes for Crosscheck.**
-For each value, Crosscheck has to decide whether one machine sends it or both compute it and compare, which is [part 8](outline.md#8-synchronization-full)'s question of replication models.
+**What it changes for Dual Input.**
+For each value, Dual Input has to decide whether one machine sends it or both compute it and compare, which is [part 8](outline.md#8-synchronization-full)'s question of replication models.
 
 **Traps.**
 
@@ -198,8 +198,8 @@ The sim reports the folder, title, and livery ([02-02](02-02-aircraft.md#how-an-
   With baro sync on, the standby altimeter kept its own setting, 1013 hPa against the main altimeters' 1019 hPa [21].
   PMDG keeps the 777's in `777_Options.ini`, beside 11 saved panel states such as `COLDDARK.sav` [20].
 
-**What it changes for Crosscheck.**
-On join, Crosscheck has to compare an identity both machines compute the same way: the folder, the title, the livery, the package version, and the options that change behavior.
+**What it changes for Dual Input.**
+On join, Dual Input has to compare an identity both machines compute the same way: the folder, the title, the livery, the package version, and the options that change behavior.
 Reading the version means finding the package on disk, and the path `AircraftLoaded` reports is sometimes relative ([02-02](02-02-aircraft.md#how-an-aircraft-is-identified)).
 
 **Traps.**

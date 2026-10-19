@@ -20,7 +20,7 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 >
 > Since 2026-10-18, the design review after node 6 changes this document in four places (user, 2026-10-18):
 >
-> - [Recording everything](#recording-everything)'s setting is an ordinary one, which an app may show, so a pilot asked to turn it on needn't stop Crosscheck to edit `settings.json`; left on, it fills the 1 GB in about 22 hours.
+> - [Recording everything](#recording-everything)'s setting is an ordinary one, which an app may show, so a pilot asked to turn it on needn't stop Dual Input to edit `settings.json`; left on, it fills the 1 GB in about 22 hours.
 > - [Asking a missing pilot](#asking-a-missing-pilot) moves after v1: no core asks the Worker at its start, the reporting pilot asks their crew, and each crewmate uploads their part from the report page.
 > - The core helper sends no `Alive`, so [what a platform crate may do with one](#what-a-platform-crate-may-do-with-one) has no rule on counting it ([04-core-helper](../core/04-core-helper.md)).
 > - The voice phrases are a Soon pick (user, 2026-10-17), so voice is among no units a replay checks in v1, where this document's opening names it.
@@ -165,7 +165,7 @@ Each run of the core writes a folder of its own in the data folder's `recordings
 
 ### The index
 
-The index is the one record a later Crosscheck reads, so the report page lists a session recorded before an update.
+The index is the one record a later Dual Input reads, so the report page lists a session recorded before an update.
 A hypothetical example:
 
 ```json

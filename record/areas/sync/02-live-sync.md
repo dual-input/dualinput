@@ -3,7 +3,7 @@
 ```text
 Purpose:     How a change made in one cockpit reaches every other cockpit while a session runs.
 Depends on:  01-profile-entries.md, ../product/03-v1-scope.md (state sync, the connection)
-Decides:     What crosses the wire, the order changes apply in, how a conflict resolves, how Crosscheck checks that a write landed, and how it keeps a change from applying twice.
+Decides:     What crosses the wire, the order changes apply in, how a conflict resolves, how Dual Input checks that a write landed, and how it keeps a change from applying twice.
 ```
 
 > **Note**
@@ -119,7 +119,7 @@ The engine filters, in this order:
    Other aircraft are untested.
    So the engine drops a report with the same name and value as one from the last 3 frames, but never one more than 200ms after it, because at a low frame rate 3 frames could reach the 261ms repeat.
 3. **Our own writes.**
-   For a state entry, an incoming read that equals the value Crosscheck just wrote is its own write.
+   For a state entry, an incoming read that equals the value Dual Input just wrote is its own write.
    For an event, the engine keeps one token for each event it fires, and the next matching occurrence on that machine uses the token up instead of being sent.
    A token that no occurrence uses expires, because an aircraft that masks the event never reports it, and the token would otherwise swallow a pilot's next press.
    A `K:` event uses the same tokens.

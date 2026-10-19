@@ -19,7 +19,7 @@ import { wantedSdk } from "./lib/sdk.ts"
  * version.txt reads `version`, or no SDK when `version` is null.
  */
 function build(version: string | null) {
-  const appdata = fs.mkdtempSync(path.join(os.tmpdir(), "crosscheck-sdk-"))
+  const appdata = fs.mkdtempSync(path.join(os.tmpdir(), "dualinput-sdk-"))
   try {
     if (version !== null) {
       const sdk = path.join(appdata, "cargo-msfs", "data", "msfs2024")

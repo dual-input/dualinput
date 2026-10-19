@@ -62,8 +62,8 @@ The sim doesn't interpret a module: the SDK says modules are "converted to nativ
 On our Steam machine each compiled module sits in `%APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\<package>\` as `m<hash>_0.dll`, beside a `.pdb` and the module's `work` folder [9].
 That folder holds 32 packages, and a sibling, `WASM\MSFS2020\`, holds 27 more, which we take to be the modules the sim treats as MSFS 2020 builds (unverified) [9].
 
-**What it changes for Crosscheck.**
-Built with the SDK's toolset and packaged by `fspackagetool`, Crosscheck's module needs Visual Studio, the SDK, and MSFS on one machine, because the tool runs the game and fsc-editor's record says the SDK has no unattended install, so fsc-editor commits the built package, and its CI compares a hash of the module's sources with the hash the build recorded [3] [10].
+**What it changes for Dual Input.**
+Built with the SDK's toolset and packaged by `fspackagetool`, Dual Input's module needs Visual Studio, the SDK, and MSFS on one machine, because the tool runs the game and fsc-editor's record says the SDK has no unattended install, so fsc-editor commits the built package, and its CI compares a hash of the module's sources with the hash the build recorded [3] [10].
 Built from Rust with cargo-msfs and packaged by our own script, the module needed no game and no interactive install [23].
 Nobody has built it on a hosted build server (unverified).
 
@@ -120,8 +120,8 @@ Nothing checks one side against the other, and FS Copilot's `FSC_EXE` area shows
 Its app creates and writes the area as a 512-byte string, and its module creates and defines it at `sizeof(var_set)`, 200 bytes, a size left from when the area was `FSC_SET` and carried a `var_set` [11].
 What size the area ends up with, and what happens to calculator code longer than 199 characters, is unmeasured.
 
-**What it changes for Crosscheck.**
-Crosscheck needs a version handshake in its first release, because the first module installed is the one every later app will meet.
+**What it changes for Dual Input.**
+Dual Input needs a version handshake in its first release, because the first module installed is the one every later app will meet.
 Every struct it passes between languages needs one definition both sides are checked against, by a test or a generated file.
 
 **Traps.**
@@ -175,8 +175,8 @@ fsc-editor's module leaves a hello in its output area in `module_init`, and fsc-
 On crashes, the SDK recommends apps outside the sim over modules partly because an app that crashes "typically will not crash" the sim [20], and a module whose code errors goes `DIRTY` and stops being run [18].
 Our records hold no module crash.
 
-**What it changes for Crosscheck.**
-A pilot won't have Developer Mode, so Crosscheck's app has to tell "no module", "module loaded but silent", and "module working" apart itself, and tell the pilot which.
+**What it changes for Dual Input.**
+A pilot won't have Developer Mode, so Dual Input's app has to tell "no module", "module loaded but silent", and "module working" apart itself, and tell the pilot which.
 Its build has to check the required exports before a package ships, where a mistake costs seconds instead of a sim restart.
 
 **Traps.**

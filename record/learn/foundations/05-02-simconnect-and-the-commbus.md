@@ -47,8 +47,8 @@ A Rust module built without it was compiled into `WASM\MSFS2024` and ran [21], a
 A module has all of SimConnect, alongside the Vars API.
 FS Copilot's module reads four freeze and state variables and `L:FSC_CONTROL` through a data definition at `SIMCONNECT_PERIOD_SIM_FRAME` with the `CHANGED` flag, and writes position through calculator code [2].
 
-**What it changes for Crosscheck.**
-Crosscheck's app and module would share only what the SimConnect server carries, so the limits of client data areas apply: 8,192 bytes an area, one message an area, and the last message kept after its writer leaves ([04-03](04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)).
+**What it changes for Dual Input.**
+Dual Input's app and module would share only what the SimConnect server carries, so the limits of client data areas apply: 8,192 bytes an area, one message an area, and the last message kept after its writer leaves ([04-03](04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)).
 The module is there before the app and stays after it, so the app has to find out, each time it connects, whether a module is there and which version it is.
 
 **Traps.**
@@ -148,9 +148,9 @@ The Synaptic A220's systems module publishes its state as JSON on more than 30 n
 The panels get the selected altimeter setting on the CommBus, as `qnh_hpa` on `A22X.L ADS Data` and `qnh.value` on `A22X.L CTP Data` [17].
 Whether `A:KOHLSMAN SETTING MB` follows it is unverified ([07](07-aircraft-specific-systems.md#why-study-level-aircraft-diverge)).
 
-**What it changes for Crosscheck.**
-Some aircraft keep state only on the CommBus, and a Crosscheck module could register for the same names to read it, but it receives only calls whose sender set the WASM flag.
-The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a module can't read the A220's channels, and Crosscheck has to read them from panel JavaScript (unverified).
+**What it changes for Dual Input.**
+Some aircraft keep state only on the CommBus, and a Dual Input module could register for the same names to read it, but it receives only calls whose sender set the WASM flag.
+The A220's module sets only the JavaScript flag, `FsCommBusBroadcast_JS`, so a module can't read the A220's channels, and Dual Input has to read them from panel JavaScript (unverified).
 A SimConnect client can call into all but one of the pages we use, and a page's call back can be lost before its listener reports ready, as the toolbar's was [19].
 
 **Traps.**

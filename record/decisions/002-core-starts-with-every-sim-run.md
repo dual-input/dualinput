@@ -1,6 +1,6 @@
 # 002: The core starts with every sim run
 
-The watcher starts Crosscheck's core whenever the sim starts, and again if the core exits while the sim runs, and the desktop app starts it when the pilot opens the app and the core isn't running.
+The watcher starts Dual Input's core whenever the sim starts, and again if the core exits while the sim runs, and the desktop app starts it when the pilot opens the app and the core isn't running.
 No code in the sim, such as a panel or the EFB app, starts the core.
 Decided by the user on 2026-10-07 and 2026-10-08, in nodes 1.1 and 1.2 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#the-core-starts-with-every-sim-run).
 

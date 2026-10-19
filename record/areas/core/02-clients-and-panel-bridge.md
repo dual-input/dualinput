@@ -7,7 +7,7 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 ```
 
 > **Note**
-> Since 2026-10-15, every name the sim shares is `CROSSCHECK_<KIND>_<NAME>` ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)), so the core's announcement is `CROSSCHECK_CORE_ANNOUNCE`, where [page-client](#page-client) has `CROSSCHECK_CORE`, and the bridge's globals are `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `window.CROSSCHECK_BRIDGE_UNLOCK()`, where [the units](#the-units) and [our VCockpit.js](#our-vcockpitjs) have `CROSSCHECK_BRIDGE`, `CROSSCHECK_PENDING`, and `window.CROSSCHECK_UNLOCK()` ([03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md)).
+> Since 2026-10-15, every name the sim shares is `DUALINPUT_<KIND>_<NAME>` ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)), so the core's announcement is `DUALINPUT_CORE_ANNOUNCE`, where [page-client](#page-client) has `DUALINPUT_CORE`, and the bridge's globals are `DUALINPUT_BRIDGE_API`, `DUALINPUT_BRIDGE_PENDING`, and `window.DUALINPUT_BRIDGE_UNLOCK()`, where [the units](#the-units) and [our VCockpit.js](#our-vcockpitjs) have `DUALINPUT_BRIDGE`, `DUALINPUT_PENDING`, and `window.DUALINPUT_UNLOCK()` ([03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md)).
 > Since 2026-10-16, the core sends each client `alive` every 2s whatever else it sends, where [the protocol](#the-protocol) has it send `alive` once it has sent nothing for 2s, so a slice of a partly recorded unit, which drifts in a replay, never moves when the core's `alive` goes out; and a partly recorded unit's slice is left out of a replay's check ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
 > Since 2026-10-17, beside what [panel modules](#panel-modules) has a `ctx` do, a panel module's `ctx` watches a slice of client state through `ctx.watch`, as pointer sync's watches its visible lock, and `load` names each module's instruments.
 > An unseen lock lapses 2s after the module last renews it, where [the protocol](#the-protocol) has any message from the core renew a panel's locks; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([pointer sync](../pointer-sync/01-pointer-sync.md#locks)).
@@ -36,7 +36,7 @@ The spine's [communication](../architecture/01-spine.md#communication), decision
 | `apps/core`'s edge | The WebSocket server, its `Origin` check, and a tokio task for each socket; a socket opening, a text message, and a close come in as inputs, and "send this text" and "close this socket" go out as outputs |
 | `clients`, on the loop | The protocol, the table of clients, the keepalive, client state, commands, messages to clients, notices, settings, which panel modules each panel loads, and the transport for `ops`; it raises a client joining or leaving, a panel's socket replaced, and a setting changed |
 | `page-client`, in TypeScript | Hearing the core's announcement, connecting, the `hello`, the keepalive, and handing each message to whoever registered its tag |
-| `panel-bridge`, in TypeScript | Our two blocks in `VCockpit.js`, a record of each instrument, loading panel modules, locks and overlays, the `ops` module, and `window.CROSSCHECK_UNLOCK()` |
+| `panel-bridge`, in TypeScript | Our two blocks in `VCockpit.js`, a record of each instrument, loading panel modules, locks and overlays, the `ops` module, and `window.DUALINPUT_UNLOCK()` |
 
 ## The WebSocket server
 
@@ -70,14 +70,14 @@ Each message is JSON with a `t` tag, defined in the message crate's clients modu
   Any message from the core renews a panel's locks, so when the core hangs, the bridge turns a visible lock into a warning 8s to 10s after the core's last message, as the code map's [how work in the sim ends](../architecture/02-code-map.md#how-work-in-the-sim-ends) has it.
 - **A command's answer says only whether the command was taken.**
   What it led to shows in state: a join, for one, answers at once, and its progress shows in the session's slice.
-- **`bye`** goes to every client when the session crate quits, which asks `clients` for it in the handler that puts out the exit; the apps use it to tell the pilot that Crosscheck quit rather than stopped, as FS Copilot's panels told a deliberate shutdown from a crash by its goodbye (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`).
+- **`bye`** goes to every client when the session crate quits, which asks `clients` for it in the handler that puts out the exit; the apps use it to tell the pilot that Dual Input quit rather than stopped, as FS Copilot's panels told a deliberate shutdown from a crash by its goodbye (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`).
 - **A message that doesn't parse never stops the core.**
   `clients` reads a `hello`'s component, version, and hash before the rest of it, so a client is always named; it logs and drops any other message that doesn't parse, with its client's name, and answers a `command` whose arguments don't parse with an error.
 
 ## A client whose version differs
 
 A `hello` whose version or hash differs from the core's is logged by the client's name, with both versions, and the core goes on talking to it (user, 2026-10-15).
-The watcher updates the Community package with Crosscheck while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
+The watcher updates the Community package with Dual Input while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
 This settles, for the WebSocket clients, the spine's item in [left open](../architecture/01-spine.md#left-open) on what the core does beyond logging; our WASM module, whose data slots are structs the module reads in place ([messages and their types](../architecture/01-spine.md#messages-and-their-types)), is [6.3](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)'s, and whether the pilot sees a mismatch is [6.16](../architecture/plan.md#616-the-apps)'s.
 
 ## What a unit registers and calls
@@ -128,7 +128,7 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
 
 ## page-client
 
-1. It listens for the core's announcement, a CommBus event named `CROSSCHECK_CORE` whose payload holds the core's port and whether a session runs, by each kind of page's route in [finding the core](../architecture/01-spine.md#finding-the-core).
+1. It listens for the core's announcement, a CommBus event named `DUALINPUT_CORE` whose payload holds the core's port and whether a session runs, by each kind of page's route in [finding the core](../architecture/01-spine.md#finding-the-core).
    The event's name is new in this design.
 2. When it hears an announcement with no socket open, or one naming a port other than its socket's, it connects to that port and sends its `hello`; a cockpit panel connects only to an announcement that says a session runs ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)).
 3. When its socket closes, it connects again on the next announcement, so it needs no backoff.
@@ -141,18 +141,18 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
 
 Our `VCockpit.js` is the stock file with two blocks between markers, as FS Copilot's copy has ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)):
 
-- The block at the top sets `CROSSCHECK_PENDING = []` and, in a `try`, adds a script element of its own for `/Crosscheck/bridge.js`, one esbuild bundle of the bridge and page-client, which loads the sim's `CommBus.js` the same way where the panel lacks it.
-- The block in `createInstrument`, after the sim's code has set the instrument up, runs `try { if (window.CROSSCHECK_BRIDGE) CROSSCHECK_BRIDGE.add(template); else CROSSCHECK_PENDING.push(template); } catch (e) {}`, and the bridge takes every instrument waiting in `CROSSCHECK_PENDING` when it loads.
+- The block at the top sets `DUALINPUT_PENDING = []` and, in a `try`, adds a script element of its own for `/DualInput/bridge.js`, one esbuild bundle of the bridge and page-client, which loads the sim's `CommBus.js` the same way where the panel lacks it.
+- The block in `createInstrument`, after the sim's code has set the instrument up, runs `try { if (window.DUALINPUT_BRIDGE) DUALINPUT_BRIDGE.add(template); else DUALINPUT_PENDING.push(template); } catch (e) {}`, and the bridge takes every instrument waiting in `DUALINPUT_PENDING` when it loads.
 
 Our files never go through the sim's `Include.addImports`, which FS Copilot's copy uses.
 Stock `VCockpit.js` sets the sim's loader to one script at a time before it loads each instrument's scripts, and in that mode the loader requests a script only once the one before it fires `onload`, so a file of ours that never loads would keep every instrument script behind it from being requested (read in the sim's `common.js`, `IncludeMgr`, not run; [core log][include]).
-So the sim creates each instrument exactly as it would without us, and if `bridge.js` never loads, the cockpit should run as if Crosscheck weren't installed (unverified; a case for the bench settles it).
+So the sim creates each instrument exactly as it would without us, and if `bridge.js` never loads, the cockpit should run as if Dual Input weren't installed (unverified; a case for the bench settles it).
 The build makes our copy by putting the two blocks into the stock file at named anchors, and refuses when an anchor is missing, as our prototype refused when one of FS Copilot's markers was (same chapter).
 The sim streams its stock file rather than keeping it on disk (same chapter), so how the build gets it after each sim update is [6.18](../architecture/plan.md#618-the-build)'s.
 
 ### Panel modules
 
-- Each panel module is a file in `/Crosscheck/modules/`, built from its feature's `panel/` folder ([the workspace](../architecture/02-code-map.md#the-workspace)), which the bridge loads through a script element of its own when `load` names it.
+- Each panel module is a file in `/DualInput/modules/`, built from its feature's `panel/` folder ([the workspace](../architecture/02-code-map.md#the-workspace)), which the bridge loads through a script element of its own when `load` names it.
 - A module's `ctx` sends and receives its `unit` messages, and asks the bridge for a lock.
 
 ### ops
@@ -192,7 +192,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A command no unit registered answers "unknown".
 - A settings file keeps a key no unit registered.
 - An `ops` request nobody answers gives up after 1s.
-- A cockpit whose `bridge.js` is missing, or throws as it loads, loads every instrument as it would without Crosscheck.
+- A cockpit whose `bridge.js` is missing, or throws as it loads, loads every instrument as it would without Dual Input.
 
 ## Left open
 

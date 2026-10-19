@@ -34,7 +34,7 @@ Two of the 58P's states stay out of v1:
 - **The tablet's failures.** A plugin could mirror the PF's failure rows, but only with the other machines held at a failure rate of 0, which is the format's deferred settings on following machines.
   It would also need to know which machine flies, wait for the tablet's readiness flags, and put each follower's DataStorage back at the session's end, since that tablet saves the mirrored rows as its own (read in `BlackSquareTablet.js`, `failureAssessment`, `saveFailureState`, and `loadFailureStates`).
   The profile syncs `L:var_globalFailureRate` as a shared entry instead, which the tablet reads back every 2.5s (read in `BlackSquareTablet.js`, `updateSimVars`).
-  At 0 the tablet rolls no failures on any machine, though the aircraft's XML still fails an engine whose damage reaches 100 (read in `BaronProfessional_Base_INT.xml`), and at any other rate each machine rolls its own, as without Crosscheck.
+  At 0 the tablet rolls no failures on any machine, though the aircraft's XML still fails an engine whose damage reaches 100 (read in `BaronProfessional_Base_INT.xml`), and at any other rate each machine rolls its own, as without Dual Input.
 - **The ADF's elapsed seconds.** The KR 87 adds each frame's wall-clock time to `elapsedTimeSeconds` while its timer runs (read in `KR87A.js`, `Update`), so an entry for it would change every frame, and [the driven-entry test](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself) would stop it.
 
 ## The 58P's state in its gauges
@@ -197,7 +197,7 @@ The first three turn on the sync engine's starting rules, and each changes the e
 
 ## Known limits
 
-- A gauge's panel that reloads mid-flight sets its fields back to their constructor's values, and `instrument-reads` sends those as this pilot's change; we know of no reload in a flight but through Developer Mode, which Crosscheck doesn't support (unverified).
+- A gauge's panel that reloads mid-flight sets its fields back to their constructor's values, and `instrument-reads` sends those as this pilot's change; we know of no reload in a flight but through Developer Mode, which Dual Input doesn't support (unverified).
 - A late joiner's ADF timer starts stopped at 0, and two machines' timers run apart by the network's delay between their presses.
 
 ## Left open

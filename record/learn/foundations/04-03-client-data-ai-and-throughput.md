@@ -41,8 +41,8 @@ fsc-editor's module sent its table of `L:` names once, when the first client ask
 An area also outlives the client that created it, for the rest of the sim session [1].
 fsc-editor's module leaves a hello message in its output area when it loads, so a client that connects later can read it once and tell a missing module from a silent one [6].
 
-**What it changes for Crosscheck.**
-If Crosscheck has a WASM module, its link to the app through SimConnect is a set of 8KB slots holding one message each.
+**What it changes for Dual Input.**
+If Dual Input has a WASM module, its link to the app through SimConnect is a set of 8KB slots holding one message each.
 A message larger than a slot needs chunking, a writer faster than its reader needs sequence numbers to show what was lost, and a second reader needs areas of its own.
 
 **Traps.**
@@ -58,7 +58,7 @@ A message larger than a slot needs chunking, a writer faster than its reader nee
 
 The AI objects API creates aircraft and other objects, hands them to a client to drive, and removes them [13].
 The Facilities API reads the sim's database of airports, runways, navaids, and procedures [14].
-Crosscheck's shared aircraft is the user aircraft on each machine, so neither API touches the shared cockpit: AI objects matter for syncing traffic, and facilities for what an FMS reads.
+Dual Input's shared aircraft is the user aircraft on each machine, so neither API touches the shared cockpit: AI objects matter for syncing traffic, and facilities for what an FMS reads.
 
 **How it works.**
 Four calls create AI objects, each with an `_EX1` form that also takes a livery, which is new in MSFS 2024 [13] [15]:
@@ -97,8 +97,8 @@ The Facilities API works two ways [14] [21] [22]:
 Nothing in our records calls the Facilities API.
 The A220's systems module has source paths under `simconnect/facilities`, read from panic messages in its `systems.wasm`, which suggests its FMS reads the database this way (unverified) [23].
 
-**What it changes for Crosscheck.**
-If Crosscheck syncs traffic, it inherits FS Copilot's measured method, and every injected object disappears with the connection, so a reconnect has to create them again.
+**What it changes for Dual Input.**
+If Dual Input syncs traffic, it inherits FS Copilot's measured method, and every injected object disappears with the connection, so a reconnect has to create them again.
 Each machine's FMS reads its own sim's database, so two machines with different navigation data might build different flight plans from the same entries, which is a question for [part 7](outline.md#7-aircraft-specific-systems-refresher) (unverified).
 
 **Traps.**
@@ -147,9 +147,9 @@ A client learns the connection is gone in one of these ways:
 
 FS Copilot tries again every 2s, and fsc-editor every 5s [25] [29].
 
-**What it changes for Crosscheck.**
-Crosscheck's SimConnect code needs one owner thread per connection and a record of everything it set up, replayed on each new connection.
-A reconnect also loses whatever changed while it was down, so Crosscheck has to take a fresh snapshot, which [part 8](outline.md#8-synchronization-full) covers as resync after reconnect.
+**What it changes for Dual Input.**
+Dual Input's SimConnect code needs one owner thread per connection and a record of everything it set up, replayed on each new connection.
+A reconnect also loses whatever changed while it was down, so Dual Input has to take a fresh snapshot, which [part 8](outline.md#8-synchronization-full) covers as resync after reconnect.
 
 **Traps.**
 

@@ -52,8 +52,8 @@ What gets worse is the end of each segment, where an aircraft reaches its last k
 
 When there are more objects than the budget carries, Fiedler's priority accumulator sends the most important: each frame it adds each object's priority to a running total, sends the objects with the highest totals that fit, and keeps the others' totals for the next frame [6].
 
-**What it changes for Crosscheck.**
-Crosscheck needs a threshold, a sample rate, and a heartbeat for each class of data, set from what the receiving aircraft can tell apart and what a pilot can see.
+**What it changes for Dual Input.**
+Dual Input needs a threshold, a sample rate, and a heartbeat for each class of data, set from what the receiving aircraft can tell apart and what a pilot can see.
 Its budget has to include what a relay sends on to each other machine, which [part 9](outline.md#9-networking-full-from-the-ground-up) covers.
 How many changes a second a busy airliner cockpit produces is an open question.
 
@@ -86,8 +86,8 @@ The fix in our records is to send the state the action produced and work out the
 The A220 profile's autopilot entry reads `L:A22X AP Master` and fires the toggle only when the received value differs from the local one ([07](07-aircraft-specific-systems.md#control-semantics)), so a repeated message changes nothing, and the next update corrects a lost one.
 A value can then be resent freely, in a snapshot or a heartbeat, and an action only with the numbering and the check for copies that [08-03](08-03-ordering-and-classes-of-data.md#ordering-sequence-numbers-deduplication-idempotency-last-writer-wins) describes.
 
-**What it changes for Crosscheck.**
-For each control synced as an action, Crosscheck needs one of two things: the state the action changes, so it can send the state and work out the action on the receiver, or both aircraft equal to begin with and every action delivered exactly once.
+**What it changes for Dual Input.**
+For each control synced as an action, Dual Input needs one of two things: the state the action changes, so it can send the state and work out the action on the receiver, or both aircraft equal to begin with and every action delivered exactly once.
 Controls with only relative events and no readable state, such as the A220's chronograph ([07](07-aircraft-specific-systems.md#hidden-state)), are the open cases.
 
 **Traps.**
@@ -117,10 +117,10 @@ Two cases follow from the source, and neither is measured:
 - At a handover, the new flying pilot's hardware becomes the source, so if their levers sit somewhere else, the throttles go there on the next axis event their hardware sends (unverified).
 
 A two-pilot Airbus meets the same problem in hardware, and answers it by adding simultaneous sidestick inputs and announcing DUAL INPUT ([01](01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)).
-Keeping the following pilot's hardware out of their sim takes SimConnect's masking, which works on MSFS 2024 when Crosscheck's group sits ahead of the aircraft's own ([04-02](04-02-events.md#client-events)).
+Keeping the following pilot's hardware out of their sim takes SimConnect's masking, which works on MSFS 2024 when Dual Input's group sits ahead of the aircraft's own ([04-02](04-02-events.md#client-events)).
 
-**What it changes for Crosscheck.**
-Crosscheck needs a rule for what the following pilot's hardware does, whether ignored, blocked, or combined, and a handover that copes with two sets of levers in different places.
+**What it changes for Dual Input.**
+Dual Input needs a rule for what the following pilot's hardware does, whether ignored, blocked, or combined, and a handover that copes with two sets of levers in different places.
 Blocking is open to it, as long as it registers its masks before the aircraft's module does ([04-02](04-02-events.md#client-events)).
 
 **Traps.**

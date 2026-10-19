@@ -56,9 +56,9 @@ Our development machine has only a link-local IPv6 address, one starting `fe80::
 Remote SimConnect ([04-01](04-01-connection-and-data.md#connecting)) meets the same wall.
 A client on another PC in the same home reaches the sim's private address and port, and a client across the internet can't address the sim's PC at all without a forwarding rule on its router ([09-03](09-03-nat-and-traversal.md#nat-types-cgnat-port-forwarding-upnp-and-nat-pmp)).
 
-**What it changes for Crosscheck.**
-Crosscheck can't assume either pilot's PC accepts a packet it didn't ask for, so every link has to start with both apps sending outward, either to each other at once or to a server both can reach.
-Whether Crosscheck uses IPv6 where both pilots have it is an open question.
+**What it changes for Dual Input.**
+Dual Input can't assume either pilot's PC accepts a packet it didn't ask for, so every link has to start with both apps sending outward, either to each other at once or to a server both can reach.
+Whether Dual Input uses IPv6 where both pilots have it is an open question.
 
 **Traps.**
 
@@ -110,8 +110,8 @@ On the wire it also carries a 1-byte packet ID, LiteNetLib's 4-byte header, the 
 Our fork's traffic sync sends 1.8 KB/s for 130 aircraft ([08-04](08-04-rates-actions-and-flight-controls.md#change-detection-sample-rates-bandwidth-budgets)), its ATC audio 16 to 27 kbps including headers [6], and its transport notes estimate a four-seat session through a relay at about 42 KB/s out of the relay [9].
 Our machine's wired link runs at 1 Gbps [2].
 
-**What it changes for Crosscheck.**
-Crosscheck has to work from about 1ms of RTT on a LAN to 300ms or more between continents or through a relay, with jitter and loss, and every buffer that absorbs them is lag the other pilot sees.
+**What it changes for Dual Input.**
+Dual Input has to work from about 1ms of RTT on a LAN to 300ms or more between continents or through a relay, with jitter and loss, and every buffer that absorbs them is lag the other pilot sees.
 At FS Copilot's rates, bandwidth isn't the constraint, and a relay's cost grows with its packet count ([09-04](09-04-relays-and-sessions.md#relays-when-theyre-needed-hosting-fan-out-cost)).
 How much delay a pilot accepts on a control both pilots use is an open question.
 

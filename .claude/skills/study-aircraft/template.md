@@ -1,7 +1,7 @@
 # Aircraft study template
 
 A study says how one aircraft is built, where its state lives, and what changes that state.
-Its reader will design a Crosscheck feature later, and wants to know what this aircraft will make that feature do.
+Its reader will design a Dual Input feature later, and wants to know what this aircraft will make that feature do.
 The sections below are the least a study covers.
 Add a section for whatever this aircraft does that none of them fits, and remove a section only when saying it's empty would tell the reader nothing.
 
@@ -15,7 +15,7 @@ Studied:   <YYYY-MM-DD>, from its files
 Readable:  what we could open, and what we couldn't and why
 ```
 
-Then one paragraph that leads with how this aircraft departs from the sim's stock way of building one, with `A:` variables, `K:` events, and Asobo's instruments, and what that means for Crosscheck.
+Then one paragraph that leads with how this aircraft departs from the sim's stock way of building one, with `A:` variables, `K:` events, and Asobo's instruments, and what that means for Dual Input.
 
 ## Sections
 
@@ -36,7 +36,7 @@ A stock variable the aircraft writes follows the cockpit, and one it never write
 
 **Input path.**
 How a click becomes a state change, followed through the files for one control of each kind: latching, momentary, toggle, relative, guarded, multi-position, spring-loaded, and any kind this aircraft adds.
-For each, what Crosscheck would write on the other machine to reproduce it.
+For each, what Dual Input would write on the other machine to reproduce it.
 
 **Displays.**
 One row per display: drawn in JavaScript or WASM, what input it takes (touch, cursor, keypad, knobs), where its page state lives, and whether it pops out.

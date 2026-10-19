@@ -1,14 +1,14 @@
 # Sync: profile entries
 
 ```text
-Purpose:     What a profile says about an aircraft's cockpit, so Crosscheck can sync it.
+Purpose:     What a profile says about an aircraft's cockpit, so Dual Input can sync it.
 Depends on:  ../product/03-v1-scope.md (state sync), 02-live-sync.md, 03-catch-up.md
 Decides:     The profile's two blocks, the fields of an entry, the writer API, and what a profile says once per aircraft.
 ```
 
 > **Note**
 > Since 2026-10-11, [01-format-and-delivery](../profiles/01-format-and-delivery.md) gives this format its syntax, and changes it in these ways.
-> A profile's script is JavaScript calling Crosscheck's globals, with names quoted, as `L('BKSQ_MixtureLeverPosition_1')`, where the sketches below leave names bare.
+> A profile's script is JavaScript calling Dual Input's globals, with names quoted, as `L('BKSQ_MixtureLeverPosition_1')`, where the sketches below leave names bare.
 > The direction field is `owner`, `pilot_flying` or `shared` by default.
 > `write:` is required on every entry, and takes a name, which it sets, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function, or `none`, which marks a watch-only entry in place of a missing `write`; `set:` and `then` are gone.
 > A write function takes only the value to write, reads the global `state`, writes through `write()`, as in `write(K('SET_XPDR_MODE'), value)`, in place of the writer's `k()`, `l()`, `b()`, and `h()`, and returns nothing; when the engine runs it, and whether it runs again when an entry it read changes, as [the writer API](#the-writer-api) below says, stay open for sync's stage of step 8 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
@@ -20,14 +20,14 @@ Decides:     The profile's two blocks, the fields of an entry, the writer API, a
 > Since 2026-10-16, [the sync units](05-units.md) settles two of this document's open lines: state sync fires `H:` events from a routine of its own in our WASM module through `fsEventsHEventCall`, since the SDK documents no SimConnect route to them, which [the writer API](#the-writer-api) leaves unverified ([`H:` events](05-units.md#h-events)); and a write function runs once for each value it's given, and never again when an entry it read changes, where the writer API runs it again ([write functions](05-units.md#write-functions)).
 
 A profile describes an aircraft's cockpit in two blocks.
-`state:` holds the controls whose value Crosscheck can read, or can track by counting the events that change it: it syncs them as values, checks that each write landed, and brings a cockpit that missed changes back to the flying machine's state.
-`events:` holds what Crosscheck can only see happen: it forwards those live, best effort, and never catches them up.
+`state:` holds the controls whose value Dual Input can read, or can track by counting the events that change it: it syncs them as values, checks that each write landed, and brings a cockpit that missed changes back to the flying machine's state.
+`events:` holds what Dual Input can only see happen: it forwards those live, best effort, and never catches them up.
 The flying machine is the PF's, and a following machine is any other pilot's.
 
 An author writes what they can find in the aircraft's files: where a control's value can be read, and what changes it.
 The engine decides how to sync it, so an author never has to know, for example, that an absolute setter beats a toggle.
 Field names that do something are verbs, such as `watch`, `write`, and `ignore`.
-`watch` names what Crosscheck observes in both blocks: a value under `state:`, and an occurrence under `events:`.
+`watch` names what Dual Input observes in both blocks: a value under `state:`, and an occurrence under `events:`.
 
 This document fixes the shape of the profile format.
 Its syntax and file layout are step 7's decision in [the plan](../product/plan.md), so every example below is a sketch.
@@ -38,12 +38,12 @@ The split between reading and writing matches how profiles are already written: 
 
 | Field | What it says |
 | --- | --- |
-| `name` | The control's name for people, used in the Crosscheck IDE, the preflight checklist, and notices |
+| `name` | The control's name for people, used in the Dual Input IDE, the preflight checklist, and notices |
 | `watch` | Where the value comes from: a variable, a plugin's value, or rules that count events into a shadow value |
 | `default` | A shadow value's starting value |
 | `write` | How to change the control: `set`, `toggle`, `inc` and `dec`, `then`, or a write function, and with no `write` the entry is watch-only |
 | direction | Whether only the flying machine sends the entry, or any pilot's machine can |
-| `ignore` | The names this entry's action also fires, which Crosscheck ignores once afterward |
+| `ignore` | The names this entry's action also fires, which Dual Input ignores once afterward |
 
 On each machine, the state object is all of an aircraft's state entries with their current values.
 
@@ -63,7 +63,7 @@ A variable here is an `L:` or `A:` variable, an input event's `B:` value, or an 
 `watch` can also name a value the aircraft's [plugin](../product/03-v1-scope.md#plugins) exports, as `plugin.state.<name>`, which the plugin finds where no variable shows it, such as in a gauge's JavaScript.
 `set:` can name the same value, and calls the write method of that name that the plugin registers ([the writer API](#the-writer-api)).
 
-When no variable shows the value, `watch` counts the events that change it instead, and Crosscheck keeps the result as a shadow value: its own copy of a value the aircraft keeps out of sight.
+When no variable shows the value, `watch` counts the events that change it instead, and Dual Input keeps the result as a shadow value: its own copy of a value the aircraft keeps out of sight.
 
 ```yaml
 speed:
@@ -104,8 +104,8 @@ A shadow value is the last resort, because nothing can check it: a shadow that m
 | `then: <action>` after another form | One action isn't enough | Runs the second action after the first |
 | A write function | Anything less regular | Runs the function and carries out the actions it returns |
 
-An entry with no `write` is watch-only: Crosscheck watches it on every machine and compares the values, and never writes it.
-Crosscheck never falls back to writing an entry's `watch` variable.
+An entry with no `write` is watch-only: Dual Input watches it on every machine and compares the values, and never writes it.
+Dual Input never falls back to writing an entry's `watch` variable.
 The rest of the pre-sync checklist, a Soon pick, uses watch-only entries to tick off a control once both cockpits agree on it ([04-room-for-later](../product/04-room-for-later.md#profiles)).
 
 `toggle` is common enough to be built in.
@@ -142,7 +142,7 @@ A write function that reads a key the profile doesn't have is an error when the 
 
 ### Choosing who sends
 
-An entry either belongs to the PF, so only the flying machine sends it and Crosscheck puts back a following machine's change, or it's shared, so any pilot's change syncs.
+An entry either belongs to the PF, so only the flying machine sends it and Dual Input puts back a following machine's change, or it's shared, so any pilot's change syncs.
 The PF's entries are the categories [the take-control key](../product/03-v1-scope.md#take-control-key) names, and shared is the default.
 The field's name and its values, such as `pilot_flying`, are chosen with the format.
 
@@ -160,7 +160,7 @@ events:
     ignore: [K:TOGGLE_FLIGHT_DIRECTOR]
 ```
 
-After the entry fires, Crosscheck ignores the next occurrence of each name in the list on the machine where the entry fired, if it comes within 1s, so the click's own toggle doesn't travel.
+After the entry fires, Dual Input ignores the next occurrence of each name in the list on the machine where the entry fired, if it comes within 1s, so the click's own toggle doesn't travel.
 A consequence that's a readable state entry needs no `ignore`, because a value written twice stays the same.
 
 ## Event entries
@@ -189,8 +189,8 @@ events:
 Controls whose meaning is their sequence belong here, not under `state:`.
 The A380's refuel selector starts refueling only after AUTO, OFF, AUTO (documented: iniBuilds A380 manual 1.2, p. 28, as the [A380 study](../aircraft/inibuilds-a380/study.md) cites it; not measured), and catch-up, which writes each state entry once at its final value, would write only the final AUTO.
 
-Crosscheck catches a pulse by reading the variable once per frame, so a pulse the aircraft sets and clears within one frame is missed.
-Two kinds of pulse could be caught every time (unverified): one written by panel JavaScript, which code Crosscheck injects into that panel could see, and one set by an input event, whose subscription reports changes.
+Dual Input catches a pulse by reading the variable once per frame, so a pulse the aircraft sets and clears within one frame is missed.
+Two kinds of pulse could be caught every time (unverified): one written by panel JavaScript, which code Dual Input injects into that panel could see, and one set by an input event, whose subscription reports changes.
 A powered A220's subscription reported every transition of 11 latching switches (measured on MSFS 2024, 2026-09-04, fsc-editor, `docs/sim-vars/build/v1-log.md`, "The `B:` subscription is a change feed; the entry below was wrong"), but nobody has tested a pulse shorter than a frame.
 So where a pulse moves something readable, such as a ticker that steps a heading, the entry watches the heading and writes through the pulse, and never depends on catching it.
 
@@ -233,18 +233,18 @@ Some facts belong to the aircraft, not to one control:
   FS Copilot's A220 profile, whose dropped setter sent the same event as calculator code, says a burst collapses into one change (unverified, FS Copilot profiles, `definitions/synaptic_a220.yaml`), so the route an event takes may decide whether the A220 acts on it (unverified).
 - **Transport:** which call an event needs on this aircraft.
   For the yoke's masked axis events, the PMDG 777's module drops one sent with SimConnect's `_EX1` call and acts on the same event sent with the legacy call (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-the-pmdg-777-takes-a-value-sent-back-with-the-legacy-transmit-call)), and its other events are untested.
-- **Following machines' settings:** values Crosscheck sets on every following machine while the session runs, so only one machine runs something each machine would otherwise run for itself.
+- **Following machines' settings:** values Dual Input sets on every following machine while the session runs, so only one machine runs something each machine would otherwise run for itself.
   The Baron's tablet assesses failures every 10s, from failure times each machine draws for itself with `Math.random()` (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so a following machine's failure rate would go to 0, and the PF's failures would reach the others as events.
   That a rate of 0 stops them, and that `H:` events mirror every failure, are unverified (the Baron study's sim questions 3 and 7).
 
-A profile gives no signal for when the aircraft has finished loading, because only an author who understands Crosscheck's catch-up would fill it in ([03-catch-up](03-catch-up.md#settling-after-a-load)).
+A profile gives no signal for when the aircraft has finished loading, because only an author who understands Dual Input's catch-up would fill it in ([03-catch-up](03-catch-up.md#settling-after-a-load)).
 
 ## What the IDE does with a profile
 
 - It shows the state object live, entry by entry, and lists the watch-only entries, because a forgotten `write` makes an entry watch-only without a word.
 - It warns about an entry with both a readable `watch` and a `default`, an `ignore` naming a readable state entry, and, under `state:`, a pulsing `L:` variable or a control with no readable value whose only event is a toggle, which belong under `events:`.
 - It tests an entry's write across two instances, with a stand-in for the second pilot like fsc-exerciser, which as of 2026-10-04 exercises only pointer sync: click the control on one, apply the entry's write on the other, and compare everything that changed on each.
-  A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Crosscheck's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
+  A write that sets only `L:SWITCH_FUEL_PUMP_1_1` passes Dual Input's own read-back, and this comparison would catch that the pump's stock switch, `A:FUELSYSTEM PUMP SWITCH:1`, moved on one side only (unverified in the sim, the L-1011 study's sim question 1).
 
 The IDE doesn't build entries by itself from what a click fires.
 fsc-editor tried that with its Activity view.

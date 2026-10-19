@@ -28,7 +28,7 @@ For which copy of the framework a page draws with ([architecture log][research])
    That copy can change with a sim update.
 2. **Our own copy, pinned to one exact version**, as Working Title's G1000 pins `@microsoft/msfs-sdk` 2.4.3 and copies it into its own folder.
    2.4.3 isn't on npm, whose newest is 2.3.3 as of 2026-10-09, no document states how the framework's versions track sim updates, and no run has registered an EFB app drawn with a second copy of the framework ([01-spine](../areas/architecture/01-spine.md#left-open)).
-   The framework's license is MIT, for use only in Microsoft Flight Simulator ([architecture log][research]), which Crosscheck is built for.
+   The framework's license is MIT, for use only in Microsoft Flight Simulator ([architecture log][research]), which Dual Input is built for.
 
 ## Decision
 

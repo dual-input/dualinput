@@ -44,8 +44,8 @@ fsc-editor designed a check that catches one kind of divergence before anyone fl
 It would write a candidate variable and watch whether the aircraft "stomps it back within a few hundred milliseconds", because "A variable that reverts shortly after being written will desync if bound" [6].
 Nobody has built it ([07](07-aircraft-specific-systems.md#causes-vs-effects)).
 
-**What it changes for Crosscheck.**
-Crosscheck needs values that both machines hold and it can compare cheaply while the pilots fly, and for each one, which machine's copy is right ([08-01](08-01-replication-models-and-authority.md#authority-pilot-in-control-per-system-or-per-control-ownership-handover-contention)).
+**What it changes for Dual Input.**
+Dual Input needs values that both machines hold and it can compare cheaply while the pilots fly, and for each one, which machine's copy is right ([08-01](08-01-replication-models-and-authority.md#authority-pilot-in-control-per-system-or-per-control-ownership-handover-contention)).
 The states a callout names, such as flap position and FMA modes, have to match for the pilot monitoring to cross-check the aircraft the other pilot flies ([01](01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)).
 Which of them each aircraft exposes is an open question.
 
@@ -94,9 +94,9 @@ What the fork does prevent, it prevents with visible overlays that block input o
 The degraded lock enforces one pilot per panel for the length of an outage, so the flying pilot's held inputs, replayed later, reconstruct the display exactly [8].
 The replaying lock keeps the other pilot's backlog in order, so the local pilot can "neither race it nor produce a divergence nobody can see" [10].
 
-**What it changes for Crosscheck.**
-Any display Crosscheck syncs by replaying input can diverge when both pilots use it within one network delay, and without a way to undo a display's own input, only the pilots can bring it back.
-Whether Crosscheck keeps two pilots off one display, and whether some displays have a state it could sync in place of their inputs, are open questions.
+**What it changes for Dual Input.**
+Any display Dual Input syncs by replaying input can diverge when both pilots use it within one network delay, and without a way to undo a display's own input, only the pilots can bring it back.
+Whether Dual Input keeps two pilots off one display, and whether some displays have a state it could sync in place of their inputs, are open questions.
 
 **Traps.**
 

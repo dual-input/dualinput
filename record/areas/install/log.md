@@ -50,7 +50,7 @@ The desktop app can run all day as a tray icon at 2.2 MB to 3.7 MB, if closing i
 ## 2026-10-18: Velopack installs and updates per-user on one path, an unsigned program meets Smart App Control with no override, and Windows hides a notification sent while a game runs
 
 **Asked.**
-How a pilot installs Crosscheck and gets its updates, what our prior apps did for both, and which of Windows' and MSFS 2024's behaviors a design for a per-user, unsigned install, started at login, with a Windows notification early in the sim's load, runs into.
+How a pilot installs Dual Input and gets its updates, what our prior apps did for both, and which of Windows' and MSFS 2024's behaviors a design for a per-user, unsigned install, started at login, with a Windows notification early in the sim's load, runs into.
 
 **Expected.**
 An installer we'd pick on its build cost, a firewall rule the installer adds, and a notification that shows over the sim's loading screen.
@@ -69,7 +69,7 @@ An installer we'd pick on its build cost, a firewall rule the installer adds, an
 - Neither FS Copilot nor fsc-editor looks for the sim's process before it writes its package (read in the FS Copilot fork, `FsCopilot/Installer.cs`, and fsc-editor, `src/main/sim/install.ts`), though FS Copilot's setup button waits while its SimConnect connection is up, "Setup required. Close Microsoft Flight Simulator to continue" (read in the FS Copilot fork, `FsCopilot/ViewModels/SetupViewModel.cs`, `IsMsfsRunning`), and fsc-editor tells a stale package by its module's SHA-256 (same file, `hashFile`), since its package's and its module's version numbers had drifted apart (fsc-editor, `docs/sim-vars/build/v1-log.md`, "2026-08-23 — Two version numbers for one package, and neither is trustworthy").
 
 **What changed.**
-Velopack installs and updates Crosscheck, with the watcher as its main program, which adds the firewall rule on its first run; the warning early in the sim's load leaves v1 (user, 2026-10-18); and v1 stays unsigned, which costs a pilot whose Smart App Control enforces turning it off until a release of ours has a positive reputation (user, 2026-10-18) ([installing and updating](01-installing-and-updating.md)).
+Velopack installs and updates Dual Input, with the watcher as its main program, which adds the firewall rule on its first run; the warning early in the sim's load leaves v1 (user, 2026-10-18); and v1 stays unsigned, which costs a pilot whose Smart App Control enforces turning it off until a release of ours has a positive reputation (user, 2026-10-18) ([installing and updating](01-installing-and-updating.md)).
 
 **Docs affected.**
 [Installing and updating](01-installing-and-updating.md), and those its [what this changes elsewhere](01-installing-and-updating.md#what-this-changes-elsewhere) lists.

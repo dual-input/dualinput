@@ -74,7 +74,7 @@ noq closes a connection with code 0 when every handle to it is dropped (read in 
 - A new connection's first message carries the session's state whole, control among it, and then each side sends the cockpit stream's replay: each core keeps every sender's cockpit messages it applied until every member has acknowledged them on the heartbeat, for up to 30 minutes, and sends the other what it lacks.
 - Within 30 minutes, a returning pilot whose sim and core kept running gets a replay, which its 2s cap on each gap bounds at 2s a change ([04-order-and-recovery](../areas/sync/04-order-and-recovery.md#the-replay)); at 30 minutes without a connection to any member, a core leaves the session, PF or PM.
 - A core that starts with a session file asks the crew whether its pilot is still in, since a crew member timed the silence.
-- Closing Crosscheck any other way than Leave session sends a quit code that the others treat as a Leave.
+- Closing Dual Input any other way than Leave session sends a quit code that the others treat as a Leave.
 - It replaces [the take-control key](../areas/product/03-v1-scope.md#take-control-key)'s rule that control passes to the PM when the PF's connection drops, and [the connection](../areas/product/03-v1-scope.md#the-connection)'s 5-minute cut-off.
 - It answers which ways to soften a short gap v1 builds ([the connection](../areas/product/03-v1-scope.md#the-connection)), and what a core does with a session file found after a long outage ([01-spine](../areas/architecture/01-spine.md#left-open)).
 - It leaves tuning the 5s, the 2s, and the 30 minutes to v1's recordings.

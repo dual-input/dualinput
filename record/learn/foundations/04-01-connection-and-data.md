@@ -45,8 +45,8 @@ FS Copilot's app opens five, named `FS Copilot (Consumer)`, `(Producer)`, `(Cons
 The SDK groups the API as General, Events and Data, Input Events, AI Objects, Facilities, Flights, Camera, Communication, and Debug [12].
 This part covers the first five, and the Communication group, a CommBus API, belongs to [part 5](outline.md#5-wasm-modules-full).
 
-**What it changes for Crosscheck.**
-Whatever language Crosscheck's app is written in brings a binding with it, and the binding decides which calls exist.
+**What it changes for Dual Input.**
+Whatever language Dual Input's app is written in brings a binding with it, and the binding decides which calls exist.
 Every request needs an ID scheme that routes its replies and its exceptions back to the code that made it.
 
 **Traps.**
@@ -93,8 +93,8 @@ The open reply fsc-editor logged from MSFS 2024 on 2026-08-18 [16]:
 FS Copilot's traffic code reads a major version of 12 as MSFS 2024 and 11 as MSFS 2020 [5] [17].
 The SDK says a client built with the MSFS 2020 SDK is detected as one and works "without the new features" [1], and that a client built against a newer SimConnect than the server gets `SIMCONNECT_EXCEPTION_VERSION_MISMATCH` [3].
 
-**What it changes for Crosscheck.**
-Crosscheck targets MSFS 2024 only, and `SIMCONNECT_RECV_OPEN` is where its app can confirm that before calling anything 2024-only, such as the `_EX1` calls that create AI objects with a livery [17].
+**What it changes for Dual Input.**
+Dual Input targets MSFS 2024 only, and `SIMCONNECT_RECV_OPEN` is where its app can confirm that before calling anything 2024-only, such as the `_EX1` calls that create AI objects with a livery [17].
 Remote SimConnect reaches a sim on another PC only where the network lets the client reach that port, which is [part 9](outline.md#9-networking-full-from-the-ground-up)'s subject.
 
 **Traps.**
@@ -141,8 +141,8 @@ The sim had rejected a definition entry for a variable it doesn't have, after th
 A rejected entry in the middle would have shifted every later value onto the wrong variable, without a crash to show it [23].
 Requesting tagged data fixed both, because each value names its datum [23].
 
-**What it changes for Crosscheck.**
-Crosscheck will read variables some loaded aircraft don't have, so its reads must survive a rejected entry.
+**What it changes for Dual Input.**
+Dual Input will read variables some loaded aircraft don't have, so its reads must survive a rejected entry.
 How to group variables into definitions trades message count against resending unchanged values, and [part 8](outline.md#8-synchronization-full) covers change detection and sample rates.
 
 **Traps.**
@@ -186,8 +186,8 @@ The SDK says the same of AI objects: without `AIReleaseControl` "the AI system a
 FS Copilot does this for the user aircraft on the machine of the pilot not in control, from its WASM module rather than through SimConnect.
 It freezes the aircraft, then writes position, attitude, velocities, and G force every frame, and writes each control surface twice, as `A:AILERON POSITION` and as `K:AXIS_AILERONS_SET`, with the comment "correct usage depends on aircraft" [30].
 
-**What it changes for Crosscheck.**
-For each value it syncs, Crosscheck needs to know whether the sim or the aircraft recomputes it.
+**What it changes for Dual Input.**
+For each value it syncs, Dual Input needs to know whether the sim or the aircraft recomputes it.
 A switch position written once stays written, but anything the simulation drives has to be frozen and written every frame, or not written at all.
 
 **Traps.**

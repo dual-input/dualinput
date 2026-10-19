@@ -18,7 +18,7 @@ Node 1's walk through a session found on 2026-10-09 that the core needs the pilo
 ## Options
 
 1. **The desktop app keeps the settings in a file of its own.**
-   The values the core acts on would live with a component that shows Crosscheck's state, sends it commands, and decides nothing ([04-room-for-later](../areas/product/04-room-for-later.md#one-protocol-for-every-client)), and the core would need them while that component is closed.
+   The values the core acts on would live with a component that shows Dual Input's state, sends it commands, and decides nothing ([04-room-for-later](../areas/product/04-room-for-later.md#one-protocol-for-every-client)), and the core would need them while that component is closed.
 2. **The core keeps the settings in its data folder, and the desktop app edits them by command.**
    The desktop app stays where a pilot edits them, and the core holds the values it acts on.
 

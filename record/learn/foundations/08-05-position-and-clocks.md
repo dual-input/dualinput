@@ -70,7 +70,7 @@ That made identical scenery a firm requirement for our traffic copies [10].
 YourControls' source describes sending altitude with the ground's height removed below 1,000 feet and adding each machine's own ground height back, and the calls that would apply it are commented out at 31b1706 [12].
 Whether a frozen user aircraft's own systems see it on the ground, through `A:SIM ON GROUND`, is unmeasured.
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 The following machine needs a writer inside the sim that runs every frame ([05-01](05-01-kinds-lifecycle-and-apis.md#lifecycle-init-per-frame-update-deinit)) and a render delay long enough for the samples it gets, and that delay is lag the following pilot sees.
 A landing on scenery that differs between the two machines is an open question.
 
@@ -121,8 +121,8 @@ A raised rate on the flying machine sends positions at the pace they happen in r
 YourControls syncs the sim's time once, when a pilot joins ([08-02](08-02-echoes-and-initial-sync.md#initial-sync-a-snapshot-on-join-late-join-resync-after-reconnect)).
 The sim has events that set all three, such as `K:PAUSE_SET`, `K:SIM_RATE_SET`, and `K:ZULU_HOURS_SET`, and forum reports say the time events don't hold on MSFS 2024 ([02-03](02-03-the-running-sim.md#the-sim-loop)).
 
-**What it changes for Crosscheck.**
-Crosscheck needs a clock mapping for each peer on any stream it times, and has to decide whether pause, simulation rate, and time of day are shared state with an owner, like any other value.
+**What it changes for Dual Input.**
+Dual Input needs a clock mapping for each peer on any stream it times, and has to decide whether pause, simulation rate, and time of day are shared state with an owner, like any other value.
 Whether the events that set them work on MSFS 2024, and what the following machine's systems should do while the flying machine is paused, are open questions.
 
 **Traps.**

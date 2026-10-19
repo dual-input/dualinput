@@ -11,7 +11,7 @@ The apps reach the core only through slices of state, commands, and a part's `un
 In each flight of a session, the EFB app's code opens the banner, calling the toolbar again until the banner's page connects, and the page shows and hides its own content while the panel stays open.
 Trouble that costs the pilot a feature raises a notice from the unit that sees it, and the rest goes to the log and the recording.
 
-This answers node 6.16 of the [architecture plan](../architecture/plan.md#616-the-apps), narrowed by the user on 2026-10-17 to how the apps connect to the rest of Crosscheck: the apps' looks and words, which slices each shows, and their own code wait for the apps' stage, which [left to the apps' stage](#left-to-the-apps-stage) lists.
+This answers node 6.16 of the [architecture plan](../architecture/plan.md#616-the-apps), narrowed by the user on 2026-10-17 to how the apps connect to the rest of Dual Input: the apps' looks and words, which slices each shows, and their own code wait for the apps' stage, which [left to the apps' stage](#left-to-the-apps-stage) lists.
 [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s protocol, notices, and settings, the code map's [tiers](../architecture/02-code-map.md#tiers) and [workspace](../architecture/02-code-map.md#the-workspace), decisions [012](../../decisions/012-efb-app-opens-banner-panel.md), [014](../../decisions/014-apps-find-core-through-port-file.md), [016](../../decisions/016-core-keeps-pilots-settings.md), and [028](../../decisions/028-desktop-pages-react-vite-tailwind.md) to [030](../../decisions/030-in-sim-code-es2017-esbuild.md), and this area's [log](log.md) give the rules this design builds on, and this document holds only what they leave out.
 
 ## The units
@@ -198,7 +198,7 @@ The apps' design:
 - Where the banner sits on screen, and how it shows in VR ([notification banner](../product/03-v1-scope.md#notification-banner)).
 - What each app shows for each state of the connection, and after a `bye` against a close without one.
 - Where in the EFB app a click on a notice lands, and what the order carries for it.
-- Which app offers which setting and Quit, and where Crosscheck asks for the display name.
+- Which app offers which setting and Quit, and where Dual Input asks for the display name.
 - Whether the desktop app's take-control button hides outside the flight, as the EFB app's does ([taking control](../control/01-take-control.md#taking-control)).
 - The traffic packs page, and whether it shows the crew's lists beside this machine's, which are the user's ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#left-open)).
 - The recordings list, and the report page ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).

@@ -46,9 +46,9 @@ A link forms only when a pilot joins, and `PeerTags`, the packet that makes an a
 On our two-instance bench, a link cut by suspending one instance stayed down through 3 minutes of waiting, twice, and a Join afterwards restored it ([08-02](08-02-echoes-and-initial-sync.md#initial-sync-a-snapshot-on-join-late-join-resync-after-reconnect)) [13].
 fsc-editor's relay holds a session for 30s after its host drops, and the host's app retries after 0.5, 1.5, 4, and 8s with its resume token, then tells the pilot it lost the connection [11] [14].
 
-**What it changes for Crosscheck.**
-Crosscheck needs a heartbeat and a timeout on every link, a goodbye that reaches the peer before the process exits, and a rule for each machine during an outage and after it, which [08-02](08-02-echoes-and-initial-sync.md#initial-sync-a-snapshot-on-join-late-join-resync-after-reconnect) covers from the sync side.
-Whether Crosscheck rebuilds links on its own, and how long an outage it rides out before it ends a session, are open questions.
+**What it changes for Dual Input.**
+Dual Input needs a heartbeat and a timeout on every link, a goodbye that reaches the peer before the process exits, and a rule for each machine during an outage and after it, which [08-02](08-02-echoes-and-initial-sync.md#initial-sync-a-snapshot-on-join-late-join-resync-after-reconnect) covers from the sync side.
+Whether Dual Input rebuilds links on its own, and how long an outage it rides out before it ends a session, are open questions.
 
 **Traps.**
 

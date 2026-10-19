@@ -42,9 +42,9 @@ Under last writer wins, each machine keeps the most recent write, which makes co
 FS Copilot's cockpit updates carry a name and a value, with no sequence number or time [2], and each machine applies whatever arrives, so two writes that cross leave each machine holding the other's ([08-01](08-01-replication-models-and-authority.md#authority-pilot-in-control-per-system-or-per-control-ownership-handover-contention)).
 Our fork's rule for hosting traffic converges because it ignores arrival order: the smallest peer ID wins, on every machine ([08-01](08-01-replication-models-and-authority.md#authority-pilot-in-control-per-system-or-per-control-ownership-handover-contention)).
 
-**What it changes for Crosscheck.**
-Every stream Crosscheck sends needs a stated order and a rule for copies, and each synced value has to travel either as an idempotent value or as a numbered action.
-For a value both pilots can change, Crosscheck needs a winner that every machine picks the same way.
+**What it changes for Dual Input.**
+Every stream Dual Input sends needs a stated order and a rule for copies, and each synced value has to travel either as an idempotent value or as a numbered action.
+For a value both pilots can change, Dual Input needs a winner that every machine picks the same way.
 
 **Traps.**
 
@@ -88,8 +88,8 @@ Between the classes sits targeted redundancy.
 "The one unreliable loss that shows is an object's last sample" [8]: a lost sample of a moving aircraft is replaced by the next, and a lost "stopped here" leaves the receiver carrying the aircraft 600ms past the stop and holding it there until the 5s heartbeat.
 So the traffic sender repeats the stopping sample on its next two polls, and a receiver that already has it drops the copy [8].
 
-**What it changes for Crosscheck.**
-Each Crosscheck stream needs a class, chosen by whether the next message replaces this one, and streams that share an ordered channel have to tolerate waiting behind each other.
+**What it changes for Dual Input.**
+Each Dual Input stream needs a class, chosen by whether the next message replaces this one, and streams that share an ordered channel have to tolerate waiting behind each other.
 An `H:` event must arrive, because a lost one leaves no value to read again ([03-02](03-02-events-and-other-namespaces.md#h-html-events)).
 
 **Traps.**

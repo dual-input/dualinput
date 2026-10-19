@@ -1,26 +1,26 @@
 # Installing and updating
 
 ```text
-Purpose:     How Crosscheck reaches a pilot's PC and stays current, and what runs on it between runs of the sim.
+Purpose:     How Dual Input reaches a pilot's PC and stays current, and what runs on it between runs of the sim.
 Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/03-sim-seam-and-wasm-module.md, ../session/02-units.md, ../interface/01-apps.md, log.md
-Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Crosscheck; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how the core finds packages that override our files and checks our own; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
+Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Dual Input; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how the core finds packages that override our files and checks our own; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
 ```
 
 > **Note**
 > Since 2026-10-18, [the build](../build/01-the-build.md) settles what [left open](#left-open) and [our package](#our-package) leave to 6.18, and changes our package's rule:
 >
-> - Our package is one folder named `crosscheck`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, most likely wins over ours (inference, not run), and the warning names it ([our package](../build/01-the-build.md#our-package)).
+> - Our package is one folder named `dualinput`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, most likely wins over ours (inference, not run), and the warning names it ([our package](../build/01-the-build.md#our-package)).
 > - The app writes our package only when it runs from Velopack's `current\` folder, as an installed app does, beside what [our package](#our-package) says; a developer installs a development build's package with `node tools/build.ts install`, since a rebuild keeps the version and the app's rule would never copy it in ([our package](../build/01-the-build.md#our-package)).
 > - The build keeps the sim's stock files in `sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 > - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
 >
 > Since 2026-10-18, the sim service raises one trouble notice for our package, from either [our own package](#our-own-package)'s check on disk or the module's status of Missing or Differs, where each raises its own; Stopped keeps its own notice (user, 2026-10-18).
 
-Crosscheck has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
+Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.
 At its start and at each sim close, it writes our Community package wherever it's missing or of another version, and on its first run it adds the firewall rule.
-In the core, the sim service warns of packages that override our files and checks our own, and Crosscheck turns no package off.
+In the core, the sim service warns of packages that override our files and checks our own, and Dual Input turns no package off.
 
 This answers node 6.17 of the [architecture plan](../architecture/plan.md#617-installing-and-updating).
 [Installing and updating](../product/03-v1-scope.md#installing-and-updating), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) and [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and the spine's [desktop app and the core](../architecture/01-spine.md#the-desktop-app-and-the-core) give the rules this design builds on, with the desktop app doing what they give the watcher, and this document holds only what they leave out.
@@ -53,7 +53,7 @@ Velopack is a per-user installer, Setup.exe; an updater, Update.exe; a Rust crat
 It's MIT-licensed, and its 1.x line began on 2026-05-26.
 
 - **Per-user, one path.**
-  Setup.exe installs to `%LOCALAPPDATA%\Crosscheck\` with no administrator prompt, and an update replaces the `current\` folder there by two renames, so `current\crosscheck-core.exe` keeps its path from release to release (read in velopack 1.2.161, `src/bins/src/setup.rs` and `src/bins/src/commands/apply_windows_impl.rs`).
+  Setup.exe installs to `%LOCALAPPDATA%\DualInput\` with no administrator prompt, and an update replaces the `current\` folder there by two renames, so `current\dualinput-core.exe` keeps its path from release to release (read in velopack 1.2.161, `src/bins/src/setup.rs` and `src/bins/src/commands/apply_windows_impl.rs`).
   The firewall rule names that path.
 - **One release, three programs.**
   The desktop app is Velopack's main program, and the core, the core helper, and our Community package ride beside it in `current\`, so the core starts the core helper and the desktop app from its own folder, as [the helper's life](../core/04-core-helper.md#the-helpers-life) and [bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward) need.
@@ -83,13 +83,13 @@ An MSI installed per machine prompts for an administrator at every update (read 
 
 | What | Where |
 | --- | --- |
-| The programs, and the copy of our package the app writes from | `%LOCALAPPDATA%\Crosscheck\current\` |
-| Velopack's downloads | `%LOCALAPPDATA%\Crosscheck\packages\` |
-| WebView2's data for the desktop app's window | `%LOCALAPPDATA%\Crosscheck\webview\`, so an uninstall deletes it with Velopack's folder |
-| The core's data folder | `%APPDATA%\Crosscheck\` |
-| The desktop app's own files, its figures among them | `%APPDATA%\Crosscheck\app\` |
+| The programs, and the copy of our package the app writes from | `%LOCALAPPDATA%\DualInput\current\` |
+| Velopack's downloads | `%LOCALAPPDATA%\DualInput\packages\` |
+| WebView2's data for the desktop app's window | `%LOCALAPPDATA%\DualInput\webview\`, so an uninstall deletes it with Velopack's folder |
+| The core's data folder | `%APPDATA%\DualInput\` |
+| The desktop app's own files, its figures among them | `%APPDATA%\DualInput\app\` |
 | Our package | `Community` in each packages folder ([the packages folders](#the-packages-folders)) |
-| Our package while the app copies it | `Crosscheck\` in each packages folder, beside `Community`, for the seconds the copy takes while the sim is closed |
+| Our package while the app copies it | `DualInput\` in each packages folder, beside `Community`, for the seconds the copy takes while the sim is closed |
 
 - The data folder sits outside Velopack's folder, whose contents an uninstall deletes (read in `src/bins/src/commands/uninstall.rs`), and in `%APPDATA%`, the folder the sim's Steam edition keeps its own packages in (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - Our package goes in `Community`, where FS Copilot's, YourControls', and FlyByWire's installers put theirs ([prior installers](results/2026-10-18-prior-installers.txt); [installer frameworks](results/2026-10-18-installer-frameworks.txt)), though the SDK names `Community2024` for packages only MSFS 2024 runs (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)).
@@ -101,7 +101,7 @@ An MSI installed per machine prompts for an administrator at every update (read 
   They match the line by its name and a space, `InstalledPackagesPath `, as FlyByWire's installer does, so a longer name such as `InstalledPackagesPathNextBoot` doesn't match (read in flybywiresim/installer v3.7.2, `src/renderer/actions/install-path.utils.tsx`).
 - Every packages folder found gets our package, so a PC with both editions has it in each.
 - Nothing asks the pilot for a folder: the sim "will only look at this file to determine where the Official and Community folders are" (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), so a folder the pilot names before the sim has written one may not be the sim's.
-  A pilot who installs Crosscheck before the sim's first run gets our package when that run closes, provided the run writes `UserCfg.opt` (unverified; a first run on a fresh install settles it).
+  A pilot who installs Dual Input before the sim's first run gets our package when that run closes, provided the run writes `UserCfg.opt` (unverified; a first run on a fresh install settles it).
 - The sim service gives the session crate the packages folders for its search for an aircraft's package ([the match check](../session/02-units.md#the-match-check)), so one unit reads `UserCfg.opt` in the core.
 
 ## The sim and the core
@@ -110,7 +110,7 @@ An MSI installed per machine prompts for an administrator at every update (read 
   - A walk took 2.8ms from PowerShell, with 291 processes running, about 0.14% of one core at one walk every 2s; a program with no administrator opened another of the pilot's processes that way, and a wait on a process it started returned when that process exited, with its exit code; and WMI's `Win32_ProcessStartTrace` refused it (measured on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
   - That the Store edition's process has the same name, and opens the same way, is unverified ([cases in the sim](#cases-in-the-sim)).
 - The app wants a core while the sim runs, its window is open, or a session file exists, so a pilot whose sim closed while the crew flies on keeps a core that comes back after a crash ([in the flight](../session/02-units.md#in-the-flight)).
-  While it wants one and the port file names none that runs, matched by its process ID and creation time ([finding the core](../architecture/01-spine.md#finding-the-core)), it starts `crosscheck-core.exe` from its own folder.
+  While it wants one and the port file names none that runs, matched by its process ID and creation time ([finding the core](../architecture/01-spine.md#finding-the-core)), it starts `dualinput-core.exe` from its own folder.
   The app can start after the sim, since Windows "does not provide guarantees about how promptly the programs in the Run key are run" (documented, [Run and RunOnce](https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys)), so it looks for the sim as it starts.
 - It waits on whichever core the port file names, whoever started it, and reads its exit code (documented, [GetExitCodeProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getexitcodeprocess); measured only on a process the probe started).
   When that core exits with a code other than 0, the app starts one again 2s later while it still wants one; after an exit with 0, which means the core chose to stop, by a quit or by the spine's rule ([exiting](../core/01-loop-and-edge.md#exiting)), it starts none until the sim next starts or its window next opens.
@@ -155,7 +155,7 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 - At its start and each time the sim closes, while the sim is closed, the desktop app writes our package from `current\` into each packages folder's `Community` where the package is missing or its `manifest.json`'s `package_version` isn't the app's version.
   That one rule writes it at an install, after an update, after a reinstall, and after a pilot or a mod deletes it, and nothing watches `Community` between those moments (user, 2026-10-18).
-- The build finishes the package in `current\`, its `layout.json` included, so the app only copies it: first into `Crosscheck\` beside `Community`, then it renames the old copy out of `Community` and the new one in, and deletes the old one.
+- The build finishes the package in `current\`, its `layout.json` included, so the app only copies it: first into `DualInput\` beside `Community`, then it renames the old copy out of `Community` and the new one in, and deletes the old one.
   - A copy made inside `Community` would most likely mount as a second package, since the sim's `Content.xml` names each folder there by its name, suffixes included (read on our development machine, 2026-10-18; unverified by a run).
   - Our FS Copilot exerciser's sync of a new build into its own folder, while it ran, "deleted 349 of 355 files" before it reached one in use, and its fix "stages then swaps rather than deleting first" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
   - Before it deletes a folder, the app checks whether it's a junction and removes only the link, since fsc-editor found two packages in our Community folder that were junctions to folders under `Program Files` (read in fsc-editor, `src/main/sim/install.ts`, `removeEntry`).
@@ -172,7 +172,7 @@ The warning that a waiting update needs a sim restart, which [installing and upd
   FS Copilot's package lists `html_ui/pages/vcockpit/core/vcockpit.js`, all in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`).
 - It skips a package that the profile's `Content.xml`, under `%APPDATA%\Microsoft Flight Simulator 2024\`, marks `UserDisabled`, which the sim most likely doesn't mount (unverified); that file names each package `communityfs24-` or `communityfs20-` and its folder's name, lowercased (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - Each package it finds raises a warning notice naming it, and the session crate's match check shows the list as one item, from the sim service's state.
-- Crosscheck turns no package off: removing or turning off a package the warning names is the pilot's, however they keep their mods, and the offer [installing and updating](../product/03-v1-scope.md#installing-and-updating) makes to disable it moves to Later (user, 2026-10-18).
+- Dual Input turns no package off: removing or turning off a package the warning names is the pilot's, however they keep their mods, and the offer [installing and updating](../product/03-v1-scope.md#installing-and-updating) makes to disable it moves to Later (user, 2026-10-18).
 - Of two packages with the same order hint that override one file, the one mounted later wins, in alphabetical order (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), and which copy won shows when the pages that need it say hello or don't: the panel bridge within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)), and the menu script, without which Go to is unavailable ([go to](../session/02-units.md#go-to)).
 
 ### Our own package
@@ -185,7 +185,7 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 - The desktop app owns the rule, because "The Netsh advfirewall command requires administrator permissions to run" (documented, [the Windows 8.1 answer-file page](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/hh825692(v=win.10)); no add was tried without one), and a pilot who isn't an administrator, prompted when a program first listens, gets block rules "It doesn't matter what option is selected", which win over allow rules (documented, [Windows Firewall rules](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules)).
   Our machine holds that pair of block rules, TCP and UDP, for FS Copilot's `fscopilot.exe`, with no allow rule (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - On its first run after the install, before it starts any core, the app reads the rules, which a program with no administrator did (measured on our development machine, 2026-10-18, same file), and if no rule allows the core or a block rule names it, runs itself with the `runas` verb and a flag of its own, which shows one UAC prompt.
-  That copy acts on the flag before the check that hands a second start to the running app, adds an inbound rule allowing UDP to `current\crosscheck-core.exe`, written as its full path, on every network profile, deletes every block rule naming that path, comparing paths without regard to letter case, as [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) requires, and exits.
+  That copy acts on the flag before the check that hands a second start to the running app, adds an inbound rule allowing UDP to `current\dualinput-core.exe`, written as its full path, on every network profile, deletes every block rule naming that path, comparing paths without regard to letter case, as [the way through home routers](../network/01-between-machines.md#the-way-through-home-routers) requires, and exits.
   So a reinstall asks nothing, since the rule a past uninstall left behind names the same path.
 - At each of its starts the app reads the rules again, and while the rule is missing or a block rule names the core, it offers the same fix.
 - An update keeps the core's path, so the rule should keep matching it, which a desk case checks.
@@ -198,7 +198,7 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 - Velopack force-stops every process running from its folder before it runs the hook (read in velopack 1.2.161, `src/bins/src/commands/uninstall.rs`, `uninstall`), so a core that runs at an uninstall dies with no quit, and a crew in a session with it sees its link lost; uninstalling in a session isn't a path a crew takes.
 - Only the pilot starts an uninstall, from Windows' list of installed programs, and an update never does, since it applies only with no core running.
   The nearest thing to an accident is running Setup.exe again over the install, which asks the pilot to confirm, then force-stops our programs and runs the install hook, not the uninstall hook (read in velopack 1.2.161, `src/bins/src/commands/install.rs`), so the data folder stays: the new app, finding the session file, starts a core, and the pilot comes back as a late joiner, as after a crash ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)).
-- The hook deletes our package from each `Community`, the `Crosscheck\` folder beside each, the Run value, and the data folder.
+- The hook deletes our package from each `Community`, the `DualInput\` folder beside each, the Run value, and the data folder.
 - Velopack then deletes its own folder, the programs and WebView2's data among it, ignoring any file it can't delete, the Start-menu shortcut, and its entry in the pilot's list of installed programs (same file); WebView2's processes run from the runtime's own folder, so whether one outlives the app it served and holds a file there is unverified ([cases on a desk](#cases-on-a-desk)).
 - The firewall rule stays, as [the firewall rule](#the-firewall-rule) says.
 
@@ -211,7 +211,7 @@ v1 ships unsigned, as [installing and updating](../product/03-v1-scope.md#instal
   How many pilots run it is unknown, and some MSFS pilots found it blocking the sim's own `CoherentGTCore.dll` (an MSFS forum thread, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - SmartScreen shows "Windows protected your PC" at the first install, and the pilot chooses "Run anyway" (documented, [SmartScreen reputation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)).
   The app's downloads carry no mark of the web, so SmartScreen likely never checks an update (unverified), while Smart App Control checks every program it runs.
-- "Unsigned applications are more likely to be flagged by antivirus software" (documented, [Velopack's FAQ](https://docs.velopack.io/troubleshooting/faq)), so a release that Microsoft Defender or another antivirus takes for malware would have a program of ours quarantined, which the pilot sees as Crosscheck not starting or not updating; how often that happens to a release of ours is unknown until releases reach pilots, and their bug reports can't say, since a quarantined core sends none.
+- "Unsigned applications are more likely to be flagged by antivirus software" (documented, [Velopack's FAQ](https://docs.velopack.io/troubleshooting/faq)), so a release that Microsoft Defender or another antivirus takes for malware would have a program of ours quarantined, which the pilot sees as Dual Input not starting or not updating; how often that happens to a release of ours is unknown until releases reach pilots, and their bug reports can't say, since a quarantined core sends none.
 
 Velopack trusts the feed through HTTPS and the GitHub account that publishes it, since it checks a download's hash against the feed and no publisher's signature (read in velopack 1.2.161, `src/lib-rust/src/manager.rs`, `verify_package_checksum`).
 
@@ -256,10 +256,10 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 These need no sim:
 
-- After a Velopack update, the firewall rule still matches `current\crosscheck-core.exe`, and Update.exe killed only what ran from its folder.
+- After a Velopack update, the firewall rule still matches `current\dualinput-core.exe`, and Update.exe killed only what ran from its folder.
 - On a Windows 10 PC without WebView2, Setup.exe's dialog leads to a per-user install with no UAC prompt.
 - The Run value starts the app at login as a tray icon alone.
-- A window opened again after one was destroyed gives its memory back the same way, and WebView2's processes exit when the app is killed, leaving nothing in `%LOCALAPPDATA%\Crosscheck\webview\` held open.
+- A window opened again after one was destroyed gives its memory back the same way, and WebView2's processes exit when the app is killed, leaving nothing in `%LOCALAPPDATA%\DualInput\webview\` held open.
 - A pilot two releases behind gets deltas through `GithubSource`.
 
 ### Cases in the sim
@@ -286,4 +286,4 @@ These wait for the apps' stage of step 8, with [the apps' list](../interface/01-
 
 ## What this changes elsewhere
 
-The text or the notes at the top of [the spine](../architecture/01-spine.md), [the code map](../architecture/02-code-map.md), [03-v1-scope](../product/03-v1-scope.md#installing-and-updating), [01-between-machines](../network/01-between-machines.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), and [the apps](../interface/01-apps.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#crosscheck-has-no-watcher-and-the-desktop-app-runs-from-login-as-a-tray-icon-doing-its-jobs) give the reasons.
+The text or the notes at the top of [the spine](../architecture/01-spine.md), [the code map](../architecture/02-code-map.md), [03-v1-scope](../product/03-v1-scope.md#installing-and-updating), [01-between-machines](../network/01-between-machines.md), [01-loop-and-edge](../core/01-loop-and-edge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [the session's units](../session/02-units.md), and [the apps](../interface/01-apps.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#dual-input-has-no-watcher-and-the-desktop-app-runs-from-login-as-a-tray-icon-doing-its-jobs) give the reasons.

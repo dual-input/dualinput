@@ -1,6 +1,6 @@
 # Product: plan
 
-This is Crosscheck's master plan: the steps from ideas to a released v1, each with what it produces and the criterion that ends it.
+This is Dual Input's master plan: the steps from ideas to a released v1, each with what it produces and the criterion that ends it.
 Each step's content lives in the document it produces, except step 3's picks and step 6's risks, which live here.
 The steps don't run strictly in order: a probe in step 6 can move an idea into or out of v1, and when it does, step 3's picks change.
 
@@ -42,7 +42,7 @@ v1 has these whatever is picked, because they're the product rather than ideas:
 
 - flight-model sync, which keeps the aircraft's position, attitude, and velocity the same on every machine
 - the connection between machines
-- profiles, starting with the 58P's, written without the Crosscheck IDE, which is a Soon pick
+- profiles, starting with the 58P's, written without the Dual Input IDE, which is a Soon pick
 
 v1's aircraft is the pressurized 58P variant of the [Black Square Baron Pro](../aircraft/black-square-baron-pro/study.md).
 
@@ -61,17 +61,17 @@ The picks, picked on 2026-10-02:
   - The invite code, from [One-click invite](ideas.md#one-click-invite)
   - The take-control key, from [Voice handover](ideas.md#voice-handover)
   - Recording and bug reports, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
-  - Crosscheck's controls as an app on the sim's EFB, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Crosscheck without taking the headset off
-  - The [notification banner](ideas.md#notification-banner), split from Crosscheck objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
-  - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Crosscheck IDE
-  - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Crosscheck's own code from the first aircraft on
+  - Dual Input's controls as an app on the sim's EFB, from [Dual Input's interface in the EFB and on a tablet](ideas.md#dual-inputs-interface-in-the-efb-and-on-a-tablet), because [01-aims](01-aims.md) requires that a pilot in VR can use Dual Input without taking the headset off
+  - The [notification banner](ideas.md#notification-banner), split from Dual Input objects in the cockpit and moved to v1 on 2026-10-03, because a notice can't depend on the EFB being open
+  - [Avatar sync](ideas.md#avatar-sync), moved from Soon on 2026-10-03, which in v1 takes the 58P's seats and the spots of its controls from the profile, set without the Dual Input IDE
+  - [Plugins](ideas.md#plugins) for aircraft, with one for the 58P, picked on 2026-10-04, because the code that serves one aircraft needs a home outside Dual Input's own code from the first aircraft on
   - The crew's notice that a pilot's sim crashed, from [Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed), picked on 2026-10-07, and free to move to Soon if telling a crash from a quit proves hard (user)
 - **Soon:**
   - [Ground operations sync](ideas.md#ground-operations-sync)
   - [Soft takeover](ideas.md#soft-takeover-on-handover), moved from v1 on 2026-10-03, because it needs masking, which is too large a job for v1
   - [Mixed flight controls](ideas.md#mixed-flight-controls)
   - The rest of the profile's checklist, and state watching, both from [Pre-sync checklist](ideas.md#pre-sync-checklist)
-  - The [Crosscheck IDE](ideas.md#crosscheck-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
+  - The [Dual Input IDE](ideas.md#dual-input-ide), out of v1's baseline on 2026-10-03, because the 58P's profile can be written without it
   - The voice phrases, from [Voice handover](ideas.md#voice-handover), moved from v1 on 2026-10-17, because a voice handover is a nice-to-have that v1 can ship without (user)
   - [Binding conflicts with the sim](ideas.md#binding-conflicts-with-the-sim), if the sim's bindings can be read, picked on 2026-10-17 (user)
 - **Later:**
@@ -82,14 +82,14 @@ The picks, picked on 2026-10-02:
   - Weather, from [Environment sync](ideas.md#environment-sync)
   - Home-network discovery, from [One-click invite](ideas.md#one-click-invite)
   - Crews beyond two, and passengers, both from [Join modes](ideas.md#join-modes)
-  - The tablet in a browser, from [Crosscheck's interface in the EFB and on a tablet](ideas.md#crosschecks-interface-in-the-efb-and-on-a-tablet)
+  - The tablet in a browser, from [Dual Input's interface in the EFB and on a tablet](ideas.md#dual-inputs-interface-in-the-efb-and-on-a-tablet)
   - The debrief timeline, from [Flight recorder and debrief](ideas.md#flight-recorder-and-debrief)
   - Automatic profile fetch, and the community profile registry, both from [Profile registry](ideas.md#profile-registry)
-  - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Crosscheck can sync
-  - [Crosscheck objects in the cockpit](ideas.md#crosscheck-objects-in-the-cockpit), picked on 2026-10-03
+  - [What doesn't sync](ideas.md#what-doesnt-sync), moved out of the aims on 2026-10-03, because we first learn what Dual Input can sync
+  - [Dual Input objects in the cockpit](ideas.md#dual-input-objects-in-the-cockpit), picked on 2026-10-03
   - [Telemetry](ideas.md#telemetry), picked on 2026-10-04
   - [Aircraft adapters](ideas.md#aircraft-adapters), picked on 2026-10-04, each built as a plugin
-  - Turning off another package that overrides our files, from Crosscheck's settings, out of [installing and updating](03-v1-scope.md#installing-and-updating) on 2026-10-18, because the warning that names the package lets the pilot remove it themselves (user)
+  - Turning off another package that overrides our files, from Dual Input's settings, out of [installing and updating](03-v1-scope.md#installing-and-updating) on 2026-10-18, because the warning that names the package lets the pilot remove it themselves (user)
 
 [Seat awareness](ideas.md#seat-awareness) left Soon on 2026-10-04: avatar sync took telling a pilot's seat into v1, the IDE pick places the seats, and moving a pilot's camera to a seat went to [Ideas left out](ideas.md#ideas-left-out), as did permanent codes.
 
@@ -98,8 +98,8 @@ How the connection shows to pilots, such as "Direct, 38ms" in One-click invite, 
 ## 4. v1 scope
 
 Produces: [03-v1-scope](03-v1-scope.md), written with the users from step 2 in mind.
-Exit: every v1 feature, and installing and updating Crosscheck, is agreed: what it does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
-Then a pass strings the features into one session, from installing Crosscheck to ending a flight, and scopes the gaps between them, such as rejoining after a dropped connection and switching seats before or during a flight.
+Exit: every v1 feature, and installing and updating Dual Input, is agreed: what it does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
+Then a pass strings the features into one session, from installing Dual Input to ending a flight, and scopes the gaps between them, such as rejoining after a dropped connection and switching seats before or during a flight.
 
 We take one feature at a time: we gather what the record establishes and what's open, discuss it, and run a sim probe where a decision needs data the record doesn't have.
 We scope control first, because which pilot is flying decides which machine flies the aircraft, then sync, then the session, then the remaining features, and installing and updating last.
@@ -130,7 +130,7 @@ Done on 2026-10-04.
 ## 5. What later features need from v1
 
 Produces: [04-room-for-later](04-room-for-later.md).
-Exit: each Soon and Later pick says what Crosscheck must allow for it, such as a low-delay stream of the other pilot's axes for mixed flight controls.
+Exit: each Soon and Later pick says what Dual Input must allow for it, such as a low-delay stream of the other pilot's axes for mixed flight controls.
 A pick gets only that much detail, so the architecture knows the future it has to leave room for.
 Done on 2026-10-04, which also added Plugins to v1 and two probes to step 6.
 
@@ -152,7 +152,7 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
   Moved to Soon with the voice phrases on 2026-10-17, and the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon) holds the research that probe starts from.
 - Whether masking holds back the Baron's mixture levers, which the Baron takes through its own input events, such as `BKSQ_TurbochargedMixtureController_1` (read in its [study](../aircraft/black-square-baron-pro/study.md)); soft takeover depends on it.
   Answered on 2026-10-06: masking holds back a lever bound in MSFS and not one SPAD.neXt drives, so soft takeover needs another way for those pilots ([flight-controls log](../flight-controls/log.md#2026-10-06-masking-holds-back-a-mixture-lever-bound-in-msfs-and-not-one-spadnext-drives-because-spadnext-sets-the-input-event-itself)).
-- Whether a click on a [notification banner](03-v1-scope.md#notification-banner) notice opens Crosscheck's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
+- Whether a click on a [notification banner](03-v1-scope.md#notification-banner) notice opens Dual Input's EFB app when the app is on neither the EFB's dock nor the first page of its app list, and whether the app's own code runs while the EFB is closed.
   The probe fills the EFB with far more apps than its dock and the first page of its app list hold.
   The chain ran only from a stand-in we put into the EFB's document through the sim's inspector, pressing GSX's button on the dock ([interface log](../interface/log.md#2026-10-04-a-click-on-a-notice-in-our-panel-opens-the-efb-onto-another-app-whether-the-efb-was-open-or-closed)).
   Answered on 2026-10-06: [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed).
@@ -167,11 +167,11 @@ Exit: each risk below has a log entry that answers it, or is deferred with a rea
   Answered on 2026-10-05, from every change for 2 minutes after Ready to fly: [sync log](../sync/log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads).
 - Whether the input event double-fire stays inside [live sync's duplicate filter](../sync/02-live-sync.md#keeping-a-change-from-applying-twice) at low frame rates (the PA-24 session's wasn't recorded), and whether a held key bound to a momentary input event repeats inside that window.
   Answered on 2026-10-05 for the PA-24: [sync log](../sync/log.md#2026-10-05-the-pa-24s-double-fire-comes-one-frame-apart-at-31-and-21-fps-and-a-held-key-doesnt-repeat).
-- Whether SimConnect applies the writes Crosscheck sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
+- Whether SimConnect applies the writes Dual Input sends in one frame in the order sent, how long an aircraft takes to show a write, and how many retries a write takes to land on each studied aircraft, which decide catch-up's order and live sync's read-back wait and retry count.
   Answered on 2026-10-05: [sync log](../sync/log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames).
 - Whether one sim draws several of our figures, each posed from variables of its own object, and what 2, 20, and 180 figures cost in frame time with every joint moving every frame, which decides how the avatars' module and channel are built ([04-room-for-later](04-room-for-later.md#people-beyond-the-crew)).
   Answered on 2026-10-05, up to 1,000 figures: [avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-and-costs-frame-time-in-view-and-almost-none-out-of-view).
-- Whether an EFB app and the notification banner's in-game panel can each hold a WebSocket to a program on the same PC, as a cockpit panel can, or show a page that program serves, as the Fenix's tablet app does, which decides whether every client of Crosscheck speaks one protocol ([04-room-for-later](04-room-for-later.md#one-protocol-for-every-client)).
+- Whether an EFB app and the notification banner's in-game panel can each hold a WebSocket to a program on the same PC, as a cockpit panel can, or show a page that program serves, as the Fenix's tablet app does, which decides whether every client of Dual Input speaks one protocol ([04-room-for-later](04-room-for-later.md#one-protocol-for-every-client)).
   Answered on 2026-10-05: [interface log](../interface/log.md#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves).
 
 The world map probe and the six after it, on stepped writes, settling, the double-fire, writes landing, figures, and WebSockets, made one batched sim session, on 2026-10-05.
@@ -189,9 +189,9 @@ The decisions also pick whether each machine sends to every other directly or th
 They build in what [04-room-for-later](04-room-for-later.md) says v1 builds now, and pick where each part of a [plugin](03-v1-scope.md#plugins) runs and what language plugins are written in.
 The tooling includes one check that every file that runs in Coherent GT, experiments included, parses within the engine's measured limits, run in CI and after edits; before writing its rules, we look for Coherent GT's own documentation of its JavaScript and for rules others already maintain.
 
-The architecture lets a Crosscheck developer run a whole session on one machine: two cores, each with its own ports and identity, and a stand-in for the second pilot's sim, as fsc-exerciser does and as the FS Copilot fork's two-instance bench did (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
+The architecture lets a Dual Input developer run a whole session on one machine: two cores, each with its own ports and identity, and a stand-in for the second pilot's sim, as fsc-exerciser does and as the FS Copilot fork's two-instance bench did (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
 
-Crosscheck's components, how they talk, the conventions they share, its languages and frameworks, and its parts are in [the architecture's spine](../architecture/01-spine.md), with what it leaves open filed under each part, naming the node or stage of step 8 that settles each item.
+Dual Input's components, how they talk, the conventions they share, its languages and frameworks, and its parts are in [the architecture's spine](../architecture/01-spine.md), with what it leaves open filed under each part, naming the node or stage of step 8 that settles each item.
 
 Done on 2026-10-13: the architecture plan's four top-level nodes passed the walk through a session, and their tentative decisions are numbered as decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) to [046](../../decisions/046-sandbox-runtimes-and-limits.md).
 
@@ -216,7 +216,7 @@ Produces: v1, in the stages of [the build plan](../build/plan.md), which says wh
 Exit: both of these happen.
 
 - We fly a full flight with a friend, gate to gate, in an aircraft we list, and neither pilot notices the cockpits disagree.
-- A friend who has never used Crosscheck installs it and flies with us without our help.
+- A friend who has never used Dual Input installs it and flies with us without our help.
 
 ## 10. After v1
 

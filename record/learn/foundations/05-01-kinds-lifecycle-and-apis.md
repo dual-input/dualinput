@@ -52,17 +52,17 @@ The file API's error for a file outside those places is `FsIOErr_AccessNotAllowe
 The SDK also lists "The Windows API is not supported", along with C++ exceptions and C++ threads [1].
 Both our project files build the C++ library without threads, and the toolset compiles every module without exceptions ([05-03](05-03-toolchain-versioning-and-debugging.md#toolchain-sdk-platform-toolset-fspackagetool-the-project-editor)) [12] [13].
 
-**What it changes for Crosscheck.**
-A Crosscheck module has to be standalone, because it runs with whatever aircraft the pilots fly.
-It can't open a connection to Crosscheck's app, so everything between them passes through the sim ([05-02](05-02-simconnect-and-the-commbus.md)) or through a panel's WebSocket ([part 6](outline.md#6-glass-cockpits-and-coherent-gt-full)).
-It can't read the loaded aircraft's files either, so what Crosscheck knows about an aircraft's controls has to reach the module from the app.
+**What it changes for Dual Input.**
+A Dual Input module has to be standalone, because it runs with whatever aircraft the pilots fly.
+It can't open a connection to Dual Input's app, so everything between them passes through the sim ([05-02](05-02-simconnect-and-the-commbus.md)) or through a panel's WebSocket ([part 6](outline.md#6-glass-cockpits-and-coherent-gt-full)).
+It can't read the loaded aircraft's files either, so what Dual Input knows about an aircraft's controls has to reach the module from the app.
 
 **Traps.**
 
 - In one early run, a package's `modules` folder held two standalone modules, the cargo-msfs build and a build linked with `MSFS_WasmVersions.a`, and only the first ran [26].
   The second is a build the sim refuses even in a package of its own ([05-03](05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), so the run doesn't show whether the sim ignores a second module (unverified).
   Until it is measured, give each standalone module a package of its own.
-- A system module must be in the same package as the `systems.cfg` that names it [6], so Crosscheck can't add one to another vendor's aircraft from a package of its own.
+- A system module must be in the same package as the `systems.cfg` that names it [6], so Dual Input can't add one to another vendor's aircraft from a package of its own.
 - A module that reads a file with the C library's blocking calls, while the sim is still streaming that file, is paused "for few frames" until it arrives; the SDK advises the asynchronous file API instead [1] [11].
 - The SDK says Marketplace packages are encrypted, and tells module authors not to read an aircraft's `*.xml`, `systems.cfg`, or `flight_model.cfg`, even in their own package [1].
   Two Marketplace aircraft we've studied are encrypted only in part: the iniBuilds A380's package and the FSReborn Phenom 300E's each have seven `.fsarchive` files, and two of them have a `notEncrypted` header and hold `panel.cfg`, the `.flt` files, and the panels' JavaScript [24] [25].
@@ -110,8 +110,8 @@ Gauges and systems follow the aircraft instead, and the SDK names their callback
 
 The MSFS 2020 form, which the SDK calls deprecated, is one callback per gauge that receives service codes such as `PANEL_SERVICE_PRE_UPDATE` and `PANEL_SERVICE_PRE_DRAW` [5].
 
-**What it changes for Crosscheck.**
-State in a Crosscheck module outlives each flight, so the module has to notice a flight or aircraft change and reset itself.
+**What it changes for Dual Input.**
+State in a Dual Input module outlives each flight, so the module has to notice a flight or aircraft change and reset itself.
 It outlives the app too, so whatever it does to the pilot's aircraft for the app must undo itself when the app goes quiet.
 FS Copilot's module does this: its app writes `FSC_CONTROL` every 200ms, and when none has arrived for 1s the module unfreezes the aircraft [12] [18].
 
@@ -161,8 +161,8 @@ The Event API takes a numeric event ID, and the SDK defines the IDs as constants
 `MSFS_Events.h` declares no call that turns a name into an ID [21].
 So a module handed an event name at run time keeps its own table, runs `(>K:FLAPS_SET)` as calculator code, or maps the name through SimConnect ([04-02](04-02-events.md#client-events)).
 
-**What it changes for Crosscheck.**
-A Crosscheck module needs calculator code for anything named at run time, such as a `B:` or `H:` write that an aircraft profile names.
+**What it changes for Dual Input.**
+A Dual Input module needs calculator code for anything named at run time, such as a `B:` or `H:` write that an aircraft profile names.
 The one call that runs it is deprecated in SDK 1.7.3 with no replacement, and it still worked on MSFS 2024 on 2026-08-25 [23].
 
 **Traps.**

@@ -1,16 +1,16 @@
 # Product: users
 
 ```text
-Purpose:     The kinds of pilots Crosscheck is designed for, by their situation and the problems they run into.
+Purpose:     The kinds of pilots Dual Input is designed for, by their situation and the problems they run into.
 Depends on:  01-aims.md
 Decides:     Which kinds of pilots designs serve, and which one wins when two pull apart.
 ```
 
-Crosscheck is designed for four ways of flying together: casually, teaching, by the book, and as a group.
+Dual Input is designed for four ways of flying together: casually, teaching, by the book, and as a group.
 When two of them pull in different directions, casual flying wins, because [01-aims](01-aims.md) breaks ties toward what we'd want when flying with our friends.
 Casual pilots reach for any switch, for example, while a by-the-book crew leaves each pilot's side to that pilot.
 Every session also has a host and joiners, and pilots bring flight hardware, VR headsets, and home cockpit panels.
-This document describes each kind by its situation and problems, and leaves what Crosscheck does about them to v1's scope, step 4 in [the plan](plan.md).
+This document describes each kind by its situation and problems, and leaves what Dual Input does about them to v1's scope, step 4 in [the plan](plan.md).
 
 The one problem we've seen ourselves hits every kind: most of what went wrong when we flew with FS Copilot was FS Copilot failing to sync.
 The problems below are ones we expect.
@@ -19,7 +19,7 @@ The problems below are ones we expect.
 
 ### Host
 
-- **Who:** starts the session, and can be the pilot who knows the aircraft and the sim best, or someone using Crosscheck for the first time.
+- **Who:** starts the session, and can be the pilot who knows the aircraft and the sim best, or someone using Dual Input for the first time.
 - **Wants:** their friends in the same flight without walking them through it.
 - **Goes wrong:** an experienced host ends up debugging a friend's setup over voice, and a first-time host doesn't know how to start a session or get their friend into it.
 
@@ -59,7 +59,7 @@ The problems below are ones we expect.
   So a crew has two limits:
   - a design limit of 5, the largest crew we expect in practice, which every design is tuned and tested for
   - a hard limit of 22, the largest real crew we found in which everyone works a station on the aircraft, which a session must still support
-  The E-4B carries up to 108 more people, but they're battle staff at desks, so in Crosscheck's terms they'd be passengers ([E-4](https://en.wikipedia.org/wiki/Boeing_E-4) on Wikipedia).
+  The E-4B carries up to 108 more people, but they're battle staff at desks, so in Dual Input's terms they'd be passengers ([E-4](https://en.wikipedia.org/wiki/Boeing_E-4) on Wikipedia).
   Passengers range from one friend riding along to an event filling an A320 with more than 150 people, and some groups already fly with passengers (unverified: reported to us by an FS Copilot user).
 - **Wants:** the crew want what the other kinds want, and passengers want to be aboard and watch the flight.
 - **Goes wrong:** each extra machine is another setup that can differ from the host's, and another connection that can fail.

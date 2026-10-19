@@ -42,9 +42,9 @@ No SimConnect function runs calculator code: of the 117 in `SimConnect.h`, the n
 So FS Copilot's and fsc-editor's apps each pass calculator code to their own WASM module to run [3] [6].
 When fsc-editor ran `1 (>L:Battery1Switch)` that way, it got back `ok` and 0, because a write leaves nothing on the stack [6].
 
-**What it changes for Crosscheck.**
-An aircraft's behavior is written in calculator code, so its XML is where Crosscheck's authors will learn what a control does.
-Running calculator code needs Crosscheck to have code inside the sim, which [part 5](outline.md#5-wasm-modules-full) covers.
+**What it changes for Dual Input.**
+An aircraft's behavior is written in calculator code, so its XML is where Dual Input's authors will learn what a control does.
+Running calculator code needs Dual Input to have code inside the sim, which [part 5](outline.md#5-wasm-modules-full) covers.
 
 **Traps.**
 
@@ -57,7 +57,7 @@ Running calculator code needs Crosscheck to have code inside the sim, which [par
 
 ## Which namespace can be read, written, or listed from where
 
-Crosscheck's code can run in three places: an app outside the sim using SimConnect, a WASM module inside the sim, and JavaScript in a cockpit panel.
+Dual Input's code can run in three places: an app outside the sim using SimConnect, a WASM module inside the sim, and JavaScript in a cockpit panel.
 No one place reaches everything: only SimConnect lists input events, only a WASM module lists `L:` variables, and only JavaScript receives `H:` events.
 
 **How it works.**
@@ -76,7 +76,7 @@ A WASM module can also run calculator code, which reaches every namespace the ai
 FS Copilot's module writes `B:`, `H:`, and `Z:` that way, and reads `B:` and `Z:` by running `(NAME, units)` every frame [3] [16].
 JavaScript names an `A:` variable without its prefix, as in `SimVar.GetSimVarValue("GROUND VELOCITY", "knots")`, and every other namespace with it, as in `"E:ABSOLUTE TIME"` or `SimVar.SetSimVarValue("K:AP_NAV_SELECT_SET", "number", _index)` [10].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 An app using SimConnect alone reaches `A:`, `L:`, `K:`, and `B:`.
 Seeing `H:` events, listing `L:` variables, and running calculator code each need code inside the sim, in a WASM module ([part 5](outline.md#5-wasm-modules-full)) or a panel ([part 6](outline.md#6-glass-cockpits-and-coherent-gt-full)).
 
@@ -112,8 +112,8 @@ Over 4 minutes of the PA-24 at rest, two counters made up 87% of 5,739 change re
 So fsc-editor ranks each variable by how far its changes depart from its rate while nobody touches anything, and uses closeness in time only to break ties [25].
 One lever can also move several variables together: pulling the PA-24's cabin vent moves five `L:` variables on the same sample every time, `L:CabinVentLeftLever` among them [27].
 
-**What it changes for Crosscheck.**
-The sim won't tell Crosscheck an aircraft's controls when it connects, so that knowledge has to exist before the flight.
+**What it changes for Dual Input.**
+The sim won't tell Dual Input an aircraft's controls when it connects, so that knowledge has to exist before the flight.
 How it's built, from the aircraft's files, from watching the aircraft, or both, is a question for [part 7](outline.md#7-aircraft-specific-systems-refresher).
 
 **Traps.**
@@ -154,8 +154,8 @@ With a threshold of 0, a clock-like variable changes on every tick, which is how
 fsc-editor's module reads at 15Hz with a 1e-6 threshold, and starts each variable's last value at NaN, so its first tick reports every variable [31].
 FS Copilot sends an entry from a profile's `master:` block, which only the pilot in control sends, at most every 30ms and unreliably; it sends a `shared:` entry reliably [29].
 
-**What it changes for Crosscheck.**
-For each variable, Crosscheck needs a wire type that keeps every value the receiving aircraft can tell apart, and a threshold that drops noise without dropping a step a pilot made.
+**What it changes for Dual Input.**
+For each variable, Dual Input needs a wire type that keeps every value the receiving aircraft can tell apart, and a threshold that drops noise without dropping a step a pilot made.
 [Part 8](outline.md#8-synchronization-full) covers change detection, sample rates, and bandwidth.
 
 **Traps.**

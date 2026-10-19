@@ -153,11 +153,11 @@ How the records are encoded is the recording-format engine's.
 
 ### Running a replay
 
-1. For a pilot's recording, run `node tools/replay.ts <file>`, which fetches from GitHub the `crosscheck-core.exe` that the recording's release shipped, and replays on it, since the core's math follows the C runtime of the Windows SDK the core was built with, which CI's image doesn't pin ([the core's math](#the-cores-math)).
-   A build of the header's commit also replays it, through `crosscheck-core replay <file>`, for added logging, and warns when its rustc, MSVC, or Windows SDK version differs from the header's (user, 2026-10-18).
+1. For a pilot's recording, run `node tools/replay.ts <file>`, which fetches from GitHub the `dualinput-core.exe` that the recording's release shipped, and replays on it, since the core's math follows the C runtime of the Windows SDK the core was built with, which CI's image doesn't pin ([the core's math](#the-cores-math)).
+   A build of the header's commit also replays it, through `dualinput-core replay <file>`, for added logging, and warns when its rustc, MSVC, or Windows SDK version differs from the header's (user, 2026-10-18).
    One with uncommitted changes warns and runs ([a replay on the same commit with local changes](../recording/01-recording-and-bug-reports.md#a-replay-on-the-same-commit-with-local-changes)).
    A program of another commit refuses, naming the commit to check out, and one on a PC whose CPU differs from the header's says so before it runs.
-2. The replay starts none of the edge's threads, so it binds no server and writes no port file, and takes a folder beside the recording as its data folder, for its named mutex and its log file, so it can run while Crosscheck does; it takes the seed, the settings, and the session file from the recorded first input.
+2. The replay starts none of the edge's threads, so it binds no server and writes no port file, and takes a folder beside the recording as its data folder, for its named mutex and its log file, so it can run while Dual Input does; it takes the seed, the settings, and the session file from the recorded first input.
 3. Its queue fills from the file as fast as the loop takes inputs, each output's sink drops it, no timer or job runs, since their results come from the file, and the sandbox's check reads its stops from the file.
 4. At each checkpoint the replay compares its hash with the recorded one; at the first that differs, it names that checkpoint and the inputs since the one before it.
 
@@ -242,7 +242,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 - Two edges push at once for minutes, and every stamp rises with its sequence number.
 - A feature's command handler reads the clients crate's settings while the clients crate dispatches it.
-- A pilot quits Crosscheck in a session, and the other core sees a leave, not an outage.
+- A pilot quits Dual Input in a session, and the other core sees a leave, not an outage.
 - Windows signs the pilot out with a session held, and the other core sees a leave.
 - The core is killed, and its recording reads up to its last full frame.
 - A whole unit's handler panics: the process exits with a code other than 0, the desktop app starts it again, the pilot comes back as a late joiner, and the replay panics at the same input.

@@ -10,7 +10,7 @@ Every entry was measured on MSFS 2024 SunRise 12.2.282174.999, on the date in it
 
 ## 2026-10-07: A group that takes its priority as the sim starts, held open by an event it only listens to, masks ahead of Accu-Sim once it adds the axis
 
-**Asked:** can Crosscheck's core take its masking priority as the sim starts, ahead of an aircraft's own module, without holding back the pilot's controls until a session wants to mask ([architecture plan](../architecture/plan.md#111-masking-priority-at-sim-start), node 1.1.1)?
+**Asked:** can Dual Input's core take its masking priority as the sim starts, ahead of an aircraft's own module, without holding back the pilot's controls until a session wants to mask ([architecture plan](../architecture/plan.md#111-masking-priority-at-sim-start), node 1.1.1)?
 
 **Expected:** no prediction for a group that masks nothing at first.
 
@@ -102,7 +102,7 @@ Every earlier window with the yoke moving heard 83 or more in 5s.
 So MSFS applies the dead zone before it fires the event, and a masked event carries the value after it.
 Whether MSFS applies its sensitivity curve at the same stage is unmeasured.
 
-**Changed:** Crosscheck keeps the pilot's own dead zone when it takes their input by masking, so it needn't rebuild that setting.
+**Changed:** Dual Input keeps the pilot's own dead zone when it takes their input by masking, so it needn't rebuild that setting.
 
 **Affects:** the idea [Mixed flight controls](../product/ideas.md#mixed-flight-controls).
 
@@ -130,7 +130,7 @@ A send meant for a module's own handler should use the legacy call, which carrie
 
 ## 2026-10-01: A value sent back at 10,000,001 reached our own masking group, and the 777 ignored re-sent values
 
-**Asked:** can Crosscheck send a masked input back changed, at half, so the aircraft acts on it, and at which priority?
+**Asked:** can Dual Input send a masked input back changed, at half, so the aircraft acts on it, and at which priority?
 
 **Expected:** a send at 10,000,001 reaches only groups behind 10,000,000, since the SDK has delivery start at the priority given ([04-02](../../learn/foundations/04-02-events.md#client-events)).
 
@@ -157,7 +157,7 @@ On the 777 it's unsettled, so mixing two pilots' inputs there isn't shown to wor
 
 ## 2026-10-01: The mask registered first gets ahead of Accu-Sim's
 
-**Asked:** does Crosscheck's mask at 10,000,000 stop the A2A PA-24's input?
+**Asked:** does Dual Input's mask at 10,000,000 stop the A2A PA-24's input?
 
 **Expected:** no prediction.
 We missed that the SDK gives a group asking for a taken priority the next lower free one ([04-02](../../learn/foundations/04-02-events.md#client-events)), which predicts what we found.
@@ -172,7 +172,7 @@ We missed that the SDK gives a group asking for a taken priority the next lower 
 - The masks survived the flight load.
 - Both results follow from the SDK's rule: whichever group asks second for a priority is placed behind the first.
 
-**Changed:** on an aircraft that masks at 10,000,000, Crosscheck's group gets ahead only if it registers before the aircraft's module, so Crosscheck has to connect before the flight starts.
+**Changed:** on an aircraft that masks at 10,000,000, Dual Input's group gets ahead only if it registers before the aircraft's module, so Dual Input has to connect before the flight starts.
 Whether its masks stay first across later aircraft changes was measured for one load only.
 A mask on an event the aircraft also sends, such as the PA-24's own `K:AXIS_ELEVATOR_SET`, catches the aircraft's output too.
 
@@ -196,7 +196,7 @@ A mask on an event the aircraft also sends, such as the PA-24's own `K:AXIS_ELEV
 - In the first run's trim step on the Baron, nobody touched the trim, yet `A:ELEVATOR TRIM PCT` moved from 14.7% to 19.6% and the input event `HANDLING_ELEVATORTRIM_1` changed, with none of the four trim key events we listened for.
   Something in the aircraft or the sim moved it (unverified which), so this shows nothing about hardware input that goes around key events.
 
-**Changed:** masking key events blocks a pilot's hardware input, and the block ends when the masking client dies, so a crashed Crosscheck leaves the pilot with working controls.
+**Changed:** masking key events blocks a pilot's hardware input, and the block ends when the masking client dies, so a crashed Dual Input leaves the pilot with working controls.
 
 **Affects:** the ideas [Soft takeover on handover](../product/ideas.md#soft-takeover-on-handover) and [Mixed flight controls](../product/ideas.md#mixed-flight-controls); [04-02](../../learn/foundations/04-02-events.md#unverified-claims), whose list of unverified claims has "Masking works in MSFS 2024".
 

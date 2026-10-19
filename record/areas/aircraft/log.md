@@ -46,7 +46,7 @@ Where can the core read each kind of copy's version?
 - Posting the same key-down and key-up messages to the sim's window moved the eye by less than 1mm.
 - Shift and A, held 500ms with `SendInput`, moved the eye 330mm back left, to within 1mm of where it started.
 
-**Changed:** Crosscheck can slide a pilot's eye anywhere the sim's own camera keys reach, by pressing the keys the pilot bound, read from their profile, while the sim's window is in front, and the pilot keeps their camera; it can't do it with the window behind another, since the sim ignores posted messages.
+**Changed:** Dual Input can slide a pilot's eye anywhere the sim's own camera keys reach, by pressing the keys the pilot bound, read from their profile, while the sim's window is in front, and the pilot keeps their camera; it can't do it with the window behind another, since the sim ignores posted messages.
 How far the eye can travel, how fast at a higher `COCKPIT CAMERA SPEED`, and how closely a feedback loop on `SimConnect_CameraGet` lands it are next.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
@@ -71,7 +71,7 @@ SimConnect answered each mapping with `NAME_UNRECOGNIZED` (7), and each send wit
 
 ## 2026-10-04: COCKPIT CAMERA HEIGHT raises the cockpit eye and leaves the pilot their camera, and the cockpit save slots didn't seat the eye
 
-**Asked:** can the camera simvars move the pilot's cockpit eye, or save it to a slot and load it back, so Crosscheck can seat a pilot at any point and hand the camera back?
+**Asked:** can the camera simvars move the pilot's cockpit eye, or save it to a slot and load it back, so Dual Input can seat a pilot at any point and hand the camera back?
 The settable ones include `CAMERA ACTION COCKPIT VIEW SAVE:index`, "This can be used to save a cockpit camera when the CAMERA STATE is set to 2 (Cockpit). The index value given is the save 'slot' that will be used, from 0 to 9", `CAMERA VIEW TYPE AND INDEX`, `CAMERA REQUEST ACTION`, whose 2 is "Move Active Camera", `CAMERA ACTION COCKPIT VIEW RESET`, and `COCKPIT CAMERA HEIGHT`, "the cockpit camera height modifier expressed as a percentage. Default is 50%" ([Camera Variables](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Camera_Variables.htm)); the events include `VIEW_CAMERA_SELECT_0` to `_9` (read in MSFS 2024 SDK 1.7.3, `MSFS_EventsEnum.h`).
 
 **Expected:** a slot saved while our client held the camera at the right seat would load back with the camera free.
@@ -121,36 +121,36 @@ And does the sim's root `Cameras.CFG` add views?
 
 **Expected:** a package that mounts after the aircraft's would replace the file, as a z-named texture pack replaces the PMDG 777's textures.
 
-**Found:** p10 built two packages on this machine from the installed Black Square Baron 58P's `cameras.cfg`, bksq-aircraft-baronpro 0.1.1, each the whole file with one test view appended: `aaa-crosscheck-camera-test` with "Crosscheck: AAA" and `zzz-crosscheck-camera-test` with "Crosscheck: ZZZ", 1.2m behind the copilot's view, in the cabin.
-It also appended "Crosscheck: ROOT" to the root `Cameras.CFG` in the sim's AppData folder.
+**Found:** p10 built two packages on this machine from the installed Black Square Baron 58P's `cameras.cfg`, bksq-aircraft-baronpro 0.1.1, each the whole file with one test view appended: `aaa-crosscheck-camera-test` with "Dual Input: AAA" and `zzz-crosscheck-camera-test` with "Dual Input: ZZZ", 1.2m behind the copilot's view, in the cabin.
+It also appended "Dual Input: ROOT" to the root `Cameras.CFG` in the sim's AppData folder.
 
 - The sim mounts packages in groups by the manifest's `package_order_hint`, and alphabetically within a group, as its running-session report lists them (`AsoboReport-RunningSession.txt`, `[FlightSimulator_Packages]`): empty hints, then `UI_PATCH`, `PANEL_PATCH`, `CUSTOM_INSTRUMENT`, `SIMOBJECTS_PATCH`, `CUSTOM_SIMOBJECTS`, `CUSTOM_SIMOBJECTS_PATCH`, `CUSTOM_MODELLIB_PATCH`, `CUSTOM_AIRPORT`, among others.
   The 58P's package has `CUSTOM_SIMOBJECTS_PATCH`, and the HUES texture pack, `zhues_pmdg777_rev`, sits right after `pmdg-aircraft-77w` in `CUSTOM_SIMOBJECTS`.
 - With empty hints, both test packages mounted long before the 58P's, and SimConnect_EnumerateCameraDefinitions listed the 58P's 32 views and neither test view.
-- With both set to `CUSTOM_SIMOBJECTS_PATCH`, the sim mounted `aaa`, then `bksq-aircraft-baronpro`, then `zzz`, and listed 33 views: the 58P's 32 and "Crosscheck: ZZZ", without "Crosscheck: AAA".
+- With both set to `CUSTOM_SIMOBJECTS_PATCH`, the sim mounted `aaa`, then `bksq-aircraft-baronpro`, then `zzz`, and listed 33 views: the 58P's 32 and "Dual Input: ZZZ", without "Dual Input: AAA".
   So the package that mounts last replaces the whole file; the files don't merge, or AAA's view, with its own name and Guid, would show too.
-- "Crosscheck: ROOT" never showed, in either boot.
+- "Dual Input: ROOT" never showed, in either boot.
 - ChasePlane's `get_views` listed neither test view.
   ChasePlane keeps each aircraft's views as JSON files of its own, one per view, in `%APPDATA%\Microsoft Flight Simulator 2024\WASM\MSFS2024\p42-util-chaseplane\work\aircraft\<aircraft>\onboard\`, each position an offset from a cockpit anchor, `anchor_at_save`, which for the 58P is the pilot's eye `CameraGet` reads.
   The 58P's were written the day before, so ChasePlane imported the aircraft's views once and reads its own copies since (read in ChasePlane 2026.39.1.16's work folder; whether it reads our shadowed file when it first imports an aircraft is untested).
-- Holding the camera, `SimConnect_CameraSetUsingCameraDefinition` put the eye on "Crosscheck: ZZZ" to the millimeter, and on the 58P's own `CabinForward` too.
-  Releasing the camera into a view handed it back there only for `Pilot` and `CoPilot`, whose `SubCategoryItem` are `"DefaultPilot"` and `"CoPilot"`; `CabinForward`, `CabinRearward`, and "Crosscheck: ZZZ", each `"None"`, put the eye at `Pilot`'s.
+- Holding the camera, `SimConnect_CameraSetUsingCameraDefinition` put the eye on "Dual Input: ZZZ" to the millimeter, and on the 58P's own `CabinForward` too.
+  Releasing the camera into a view handed it back there only for `Pilot` and `CoPilot`, whose `SubCategoryItem` are `"DefaultPilot"` and `"CoPilot"`; `CabinForward`, `CabinRearward`, and "Dual Input: ZZZ", each `"None"`, put the eye at `Pilot`'s.
 - p10 then moved ZZZ 0.3m up and gave it `SubCategoryItem` `"LandingPilot"`, one of the SDK's pilot items the 58P leaves unused, in the installed package, without restarting the sim; after a new flight, holding the camera put the eye where ZZZ was at boot, so the sim reads the file at its start and not at a flight's.
 - After a sim restart, holding the camera put the eye on the moved ZZZ to the millimeter, and releasing the camera into ZZZ left it there, 1.2m behind the copilot's view, with the status `NOT_ACQUIRED`.
   Over the next 10s the pilot looked around with the mouse, the yaw going from −150° to 59°, and the eye stayed within 1mm of where the release put it.
 
-**Changed:** with the sim's own camera, Crosscheck can seat a pilot at any point in the aircraft, with their look as usual: a package of its own copies the aircraft's camera file and appends a view with a pilot item the aircraft leaves free, it mounts after the aircraft's package by its `package_order_hint` and name, and it's written before the sim starts.
+**Changed:** with the sim's own camera, Dual Input can seat a pilot at any point in the aircraft, with their look as usual: a package of its own copies the aircraft's camera file and appends a view with a pilot item the aircraft leaves free, it mounts after the aircraft's package by its `package_order_hint` and name, and it's written before the sim starts.
 That copies another developer's file onto the pilot's machine and shadows it, which needs a decision.
 How many seats this covers turns on whether several views can share an item, since the SDK lists `ClosePilot`, `LandingPilot`, and `TrueCockpit` besides the 58P's `DefaultPilot`, `CoPilot`, and `PilotVR`.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), the [installing and updating](../product/03-v1-scope.md#installing-and-updating) scope, whose `VCockpit.js` check meets the same mount order, and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
 
 **Evidence:** p10's runs [with empty hints](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-14-39.txt), [with `CUSTOM_SIMOBJECTS_PATCH`](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-20-51.txt), [after the move and a new flight](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-26-13.txt), and [after the restart, with `"LandingPilot"`](../../../experiments/areas/aircraft/results/p10-camera-package-2026-10-04-05-30-05.txt).
-The reads of `CabinForward` and `CabinRearward` came from a one-off script between the second and third runs, which released into `Pilot`, `CoPilot`, `CabinForward`, `CabinRearward`, and "Crosscheck: ZZZ" in turn: the eye landed at x −0.253m, y 0.855m, z −0.144m (x right, from the reference point) for all but `CoPilot`, at 0.236m, 0.811m, −0.116m; holding, `CabinForward` put it at 0.227m, 0.661m, −2.107m and ZZZ at −0.009m, 0.761m, −1.316m.
+The reads of `CabinForward` and `CabinRearward` came from a one-off script between the second and third runs, which released into `Pilot`, `CoPilot`, `CabinForward`, `CabinRearward`, and "Dual Input: ZZZ" in turn: the eye landed at x −0.253m, y 0.855m, z −0.144m (x right, from the reference point) for all but `CoPilot`, at 0.236m, 0.811m, −0.116m; holding, `CabinForward` put it at 0.227m, 0.661m, −2.107m and ZZZ at −0.009m, 0.761m, −1.316m.
 
 ## 2026-10-04: CameraSetRelative6DOF puts the eye at any point but holds the camera, and a camera handed back into a view returns to the view's own eye
 
-**Asked:** can Crosscheck put a pilot's eye at a point no camera view gives and hand the camera back, so the pilot keeps their look?
+**Asked:** can Dual Input put a pilot's eye at a point no camera view gives and hand the camera back, so the pilot keeps their look?
 The Camera API has no call that adds a view at runtime (read in MSFS 2024 SDK 1.7.3, `SimConnect.h` and `WASM/include/MSFS/MSFS_Camera.h`).
 `SimConnect_CameraSetRelative6DOF` moves the user's camera relative to the aircraft's eyepoint, and SDK 1.6.9 fixed it after it "ignored position parameters and put camera at the center of the SimObject, not the eyepoint" ([release notes](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/Release_Notes.htm)).
 
@@ -168,7 +168,7 @@ The Camera API has no call that adds a view at runtime (read in MSFS 2024 SDK 1.
   `CameraSetRelative6DOF` while our client held the camera took it from our client the same way.
 
 **Changed:** with the sim's own camera, a client can put the eye at any point only while it holds the camera, which freezes the pilot's look, and `CameraSetRelative6DOF` holds it in a way our client can't undo.
-Crosscheck must not call it for a pilot without ChasePlane until we know what frees the camera.
+Dual Input must not call it for a pilot without ChasePlane until we know what frees the camera.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
 
@@ -195,7 +195,7 @@ Whether the sim itself reads the file, such as for the pilot's own key that load
 ## 2026-10-03: Camera views added to the per-user camera file don't show up after a flight restart or a new flight
 
 **Asked:** do camera views added to the sim's per-user camera file for an aircraft become views that SimConnect lists and a client can release the camera into, and does ChasePlane pick them up?
-If so, Crosscheck can add a view for each seat the profile defines, so a pilot can be seated where the aircraft has no view of its own.
+If so, Dual Input can add a view for each seat the profile defines, so a pilot can be seated where the aircraft has no view of its own.
 
 **Expected:** yes after the aircraft loads again, since the sim keeps a pilot's saved custom cameras there.
 
@@ -209,7 +209,7 @@ If so, Crosscheck can add a view for each seat the profile defines, so a pilot c
 - Whether a full sim restart loads the file, and whether the pilot's own key for loading custom camera 2 still reads it, is untested.
   The pilot hasn't used the sim's custom cameras since switching to ChasePlane, which fits the file's date.
 
-**Changed:** within one sim run, the per-user camera file gives Crosscheck no way to add a view.
+**Changed:** within one sim run, the per-user camera file gives Dual Input no way to add a view.
 The test views stay in the file until the sim's next start, which is the restart test, and p08's `--restore` then puts the backup back.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), whose open question on seats with no camera view this narrows.
@@ -218,7 +218,7 @@ The test views stay in the file until the sim's next start, which is the restart
 
 ## 2026-10-03: The eyepoint events don't move the cockpit eye, the pilot's own camera keys fire none of the legacy camera events, and a held camera doesn't take the mouse look
 
-**Asked:** with the sim's own camera, can Crosscheck put a pilot's eye at a point no camera view gives, such as a seat the profile defines?
+**Asked:** with the sim's own camera, can Dual Input put a pilot's eye at a point no camera view gives, such as a seat the profile defines?
 Releasing the camera into a view keeps the pilot's look, and releasing it anywhere else snaps it back ([entry below](#2026-10-03-a-simconnect-client-moves-the-pilots-camera-to-the-copilots-seat-by-releasing-the-camera-into-the-aircrafts-copilot-view-unless-chaseplane-runs)), so we tried nudging the eye from a view, and holding the camera with the flag that permits interactions.
 
 **Expected:** the legacy events `K:EYEPOINT_LEFT`, `_RIGHT`, `_FORWARD`, `_BACK`, `_UP`, and `_DOWN` would move the eye, since the pilot moves it with keys.
@@ -236,7 +236,7 @@ Releasing the camera into a view keeps the pilot's look, and releasing it anywhe
 - That run started with the eye at 0.205m left and 0.256m back of the reference point, moved there by the pilot in p07, and releasing the camera into `Pilot` returned it there rather than to the view's own eye, at 0.253m left and 0.144m back.
   So the sim may keep a pilot's move within each view (unverified).
 
-**Changed:** with the sim's own camera, Crosscheck can put a pilot only where a camera view is, unless it drives the look and the clicks itself while it holds the camera, as ChasePlane does.
+**Changed:** with the sim's own camera, Dual Input can put a pilot only where a camera view is, unless it drives the look and the clicks itself while it holds the camera, as ChasePlane does.
 What the interaction flag permits is unknown.
 
 **Affects:** the idea [Seat awareness](../product/ideas.md#seat-awareness), and avatar sync in [03-v1-scope](../product/03-v1-scope.md).
@@ -246,7 +246,7 @@ p06's run at 21-32-42 stopped before sending anything, because ChasePlane held t
 
 ## 2026-10-03: ChasePlane's own API moves the pilot's camera to the copilot's seat by loading its CoPilot view
 
-**Asked:** with ChasePlane running, can Crosscheck move a pilot's camera to another seat through ChasePlane itself, since ChasePlane takes the camera back from a SimConnect client ([entry below](#2026-10-03-a-simconnect-client-moves-the-pilots-camera-to-the-copilots-seat-by-releasing-the-camera-into-the-aircrafts-copilot-view-unless-chaseplane-runs))?
+**Asked:** with ChasePlane running, can Dual Input move a pilot's camera to another seat through ChasePlane itself, since ChasePlane takes the camera back from a SimConnect client ([entry below](#2026-10-03-a-simconnect-client-moves-the-pilots-camera-to-the-copilots-seat-by-releasing-the-camera-into-the-aircrafts-copilot-view-unless-chaseplane-runs))?
 
 **Expected:** yes, since ChasePlane has a remote control of its own.
 
@@ -264,7 +264,7 @@ p06's run at 21-32-42 stopped before sending anything, because ChasePlane held t
   Whether that message moves the camera inside the cockpit, and what it expects, is unknown.
 - `set_view_by_guid` with `Pilot` brought the eye back to the left seat, within 1mm of where it started.
 
-**Changed:** with ChasePlane running, Crosscheck can seat a pilot through ChasePlane's API in any seat ChasePlane has a view for, and the pilot looks around through ChasePlane as usual.
+**Changed:** with ChasePlane running, Dual Input can seat a pilot through ChasePlane's API in any seat ChasePlane has a view for, and the pilot looks around through ChasePlane as usual.
 A seat with no view needs either `cam_set_position` worked out or a view created for it.
 The API is undocumented, so a ChasePlane update can change it.
 
@@ -274,7 +274,7 @@ The API is undocumented, so a ChasePlane update can change it.
 
 ## 2026-10-03: A SimConnect client moves the pilot's camera to the copilot's seat by releasing the camera into the aircraft's copilot view, unless ChasePlane runs
 
-**Asked:** can Crosscheck move a pilot's cockpit camera to another seat, so it can seat the pilot itself rather than tell them to move?
+**Asked:** can Dual Input move a pilot's cockpit camera to another seat, so it can seat the pilot itself rather than tell them to move?
 
 **Expected:** unknown.
 Setting `A:CAMERA STATE` didn't stick ([entry below](#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)), and nothing in our records had called the camera functions that set it.
@@ -293,7 +293,7 @@ Setting `A:CAMERA STATE` didn't stick ([entry below](#2026-10-01-loading-flights
   Releasing with `Pilot` brought it back to the left seat.
 - With ChasePlane on, ChasePlane held the camera again within 1s of the release with `CoPilot`, and the eye stayed in the left seat for the 13s the pilot looked around.
 
-**Changed:** with the sim's own camera, Crosscheck can seat a pilot in any seat the aircraft has a camera definition for, and hand the camera back for the pilot to look around as usual.
+**Changed:** with the sim's own camera, Dual Input can seat a pilot in any seat the aircraft has a camera definition for, and hand the camera back for the pilot to look around as usual.
 With ChasePlane, it can't without holding the camera for as long as the pilot sits there, which takes the camera from ChasePlane.
 A seat with no camera definition needs the same hold, with or without ChasePlane.
 

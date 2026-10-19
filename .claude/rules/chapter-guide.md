@@ -17,11 +17,11 @@ Everything in [writing.md](writing.md) applies too.
    A full section has four parts:
    1. The answer, in one or two sentences, so a reader who already knows it can move on.
    2. The mechanism, shown with one real example, taken from our records where one exists, with the one sentence of context the reader needs to follow it.
-   3. What it changes for Crosscheck, in one to three sentences: a constraint on the design or a question it opens, never a choice between designs.
+   3. What it changes for Dual Input, in one to three sentences: a constraint on the design or a question it opens, never a choice between designs.
    4. Its traps.
 3. Pitch each section at the depth the outline gives it, whether for the whole part or for a group of bullets.
    A part with no depth is full.
-   - Brief: the answer, and what it changes for Crosscheck.
+   - Brief: the answer, and what it changes for Dual Input.
    - Refresher: all four parts, with the mechanism stated as facts rather than built up.
    - Full: all four parts, building the mechanism from what the reader already knows, with the opening answer in terms the reader already has.
 4. When a section needs something another part teaches, give the one sentence it needs, and link to that part's chapter, or name the part if its chapter isn't written yet.

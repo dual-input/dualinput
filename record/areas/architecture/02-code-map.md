@@ -1,7 +1,7 @@
 # Architecture: the code map
 
 ```text
-Purpose:     The units of Crosscheck's code, which tier each is in, what each owns, its interface, and what it may depend on.
+Purpose:     The units of Dual Input's code, which tier each is in, what each owns, its interface, and what it may depend on.
 Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.md, ../sync/04-order-and-recovery.md, ../session/01-roles-and-members.md, ../profiles/01-format-and-delivery.md, ../product/04-room-for-later.md
 Decides:     The tiers, the tests that keep each unit apart, every unit with its folder and what it may depend on, and the systems node 6 designs (node 5); how the platform runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3); where each unit lives, how one repository builds every target, and how CI checks the map (node 5.4).
 ```
@@ -19,20 +19,20 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - `.cargo/config.toml` also sets ts-rs's `TS_RS_EXPORT_DIR` and `TS_RS_LARGE_INT`, so a plain `cargo test` writes the messages' types into the message crate's `ts/`, typed as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) asks.
 > - `node tools/check.ts` runs each check [CI](#ci) lists that the tree has something for, and [the map check](#the-map-check) reads TypeScript's imports from `tsc --explainFiles`, which lists type-only ones.
 
-Crosscheck's code is a platform, engines, and features.
+Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.
 The platform in the core is a kernel and a crate for each of its services, which the kernel never names, and every dependency points down the tiers ([the units](#the-units)).
 
 This answers node 5 of the [architecture plan](plan.md#5-the-code-map), whose children settle its parts; the plan says which are settled.
-The tentative decisions behind it start at [decisions.md](decisions.md#crosschecks-code-is-a-platform-engines-and-features-and-deleting-a-features-crate-leaves-the-rest-whole).
+The tentative decisions behind it start at [decisions.md](decisions.md#dual-inputs-code-is-a-platform-engines-and-features-and-deleting-a-features-crate-leaves-the-rest-whole).
 
 ## Tiers
 
 | Tier | What it is | Examples |
 | --- | --- | --- |
 | Platform | The services every feature uses: in the core, and in the sim through the panel bridge and our WASM module, which load what features and plugins run there by name ([04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim)) | The kernel, the session and its keys, control, channels, the cockpit stream, catch-up, the client protocol, settings, notices, recording, the sim service, the routine host, the panel bridge, the apps' shells |
-| Engines | Libraries that know nothing of the app, so another program can link them, such as the [Crosscheck IDE](../product/ideas.md#crosscheck-ide) | The message crate, the profile engine, the sync engine, the sandbox, the transport, the recording format, the sim client, sim awareness, the sim edge, the stand-in sim |
+| Engines | Libraries that know nothing of the app, so another program can link them, such as the [Dual Input IDE](../product/ideas.md#dual-input-ide) | The message crate, the profile engine, the sync engine, the sandbox, the transport, the recording format, the sim client, sim awareness, the sim edge, the stand-in sim |
 | Features | Each one thing a pilot gets | Pointer sync, avatars, traffic, ATC audio, the take-control key, rate and pause, Go to, which points the world map at the PF's spot |
 
 Three tests stand in for a definition of clean, because a definition in prose invites an agent to enforce it where it doesn't fit (user, 2026-10-14):
@@ -162,7 +162,7 @@ A feature's section in an app is one part, which the app's list names in one lin
 | `tools/profile-builder` | Checks each profile and builds its bundle, for CI and for authors | profile-build |
 | `tools/profile-author` | The seat tool and the click tool ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)) | sim-client, sim-edge, aircraft-model, messages |
 
-Each crate in `apps/` and `sim-package/` is named `crosscheck-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Crosscheck's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
+Each crate in `apps/` and `sim-package/` is named `dualinput-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Dual Input's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
 
 ### The registry and moments
 
@@ -432,7 +432,7 @@ self.copies.insert(key, sim.create_ai(title, livery, at));  // a handle now; the
 ### What the platform keeps
 
 - **Masking:** a group that registers after an aircraft's module sits behind it ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)), so the platform's connection takes its group as the sim starts ([flight-controls log](../flight-controls/log.md#2026-10-07-a-group-that-takes-its-priority-as-the-sim-starts-held-open-by-an-event-it-only-listens-to-masks-ahead-of-accu-sim-once-it-adds-the-axis)), and a later feature that masks asks the platform.
-- **The module's version and counter:** our WASM module is the platform's, and the platform's connection reads `CROSSCHECK_MODULE_STATUS`, the slot where the module leaves its version and its counter; a feature's routines there are fed on the feature's own connection ([work in the sim](#work-in-the-sim)).
+- **The module's version and counter:** our WASM module is the platform's, and the platform's connection reads `DUALINPUT_MODULE_STATUS`, the slot where the module leaves its version and its counter; a feature's routines there are fed on the feature's own connection ([work in the sim](#work-in-the-sim)).
 - **The CommBus event that announces the core's port** ([01-spine](01-spine.md#finding-the-core)).
   Any other CommBus event a feature subscribes to or calls goes through the feature's own connection, as any sim call does.
 - **Sim awareness** ([01-spine](01-spine.md#sim-awareness)): the sim service raises `SimChanged` for each change of the sim's state, so it raises one for each load, however many signals the sim sends.
@@ -509,7 +509,7 @@ out.module().feed(routine::FOLLOW, FollowSlot::from(sample));   // on each pose 
 out.module().end(routine::FOLLOW);                              // when this pilot takes control
 ```
 
-- **Its slot:** the module creates each routine's slot when it loads, named `CROSSCHECK_ROUTINE_` and the routine's ID, such as `CROSSCHECK_ROUTINE_FOLLOW`.
+- **Its slot:** the module creates each routine's slot when it loads, named `DUALINPUT_ROUTINE_` and the routine's ID, such as `DUALINPUT_ROUTINE_FOLLOW`.
   A feed goes out on the feature's own connection, as every sim call of a feature's does ([a connection for each feature](#a-connection-for-each-feature-for-each-load)), and the sim service writes the last feed again every 200ms until the feature feeds another or ends the routine, so no feature keeps its routine alive by hand.
 - **Its header:** each slot opens with a header the sim service writes and the routine host reads, a count of the feature's feeds, an end mark, a hash of the slots' layouts ([a module from another build](../core/03-sim-seam-and-wasm-module.md#a-module-from-another-build)), and the core's counter at the write, so a routine hears `on_slot` only for a new feed, not for the sim service's rewrite, and an ended slot holds its end mark until the next feed.
   `Frame::now` is the routine host's estimate of the core's counter, so `Follow`'s `f.now - DELAY` and the samples it reads are on the core's timeline ([the core's counter in our module](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module)).
@@ -554,7 +554,7 @@ Each routine's crate denies Clippy's `unwrap_used`, `expect_used`, `panic`, and 
 
 ### Modules in the panel bridge
 
-- The sim loads our `VCockpit.js` override into every cockpit panel, and the override is the sim's file plus a few guarded lines, which load the bridge's own file and queue each instrument the sim creates before that file has loaded, in `CROSSCHECK_BRIDGE_PENDING`, as FS Copilot's copy does ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+- The sim loads our `VCockpit.js` override into every cockpit panel, and the override is the sim's file plus a few guarded lines, which load the bridge's own file and queue each instrument the sim creates before that file has loaded, in `DUALINPUT_BRIDGE_PENDING`, as FS Copilot's copy does ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
   Everything of ours beyond those lines is in files of its own, so a mistake in one of them stops no instrument.
 - A feature registers each panel module with a rule for which panels get it, as pointer sync's takes the panels its profile's [`displays`](../profiles/01-format-and-delivery.md#displays) names, and the core answers a panel's first message with the modules to load ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) once the profile has loaded, since a panel can connect before it does ([01-spine](01-spine.md#the-sims-pages)).
 - A first message naming the instruments another socket holds replaces that socket, and the core closes the old one, since a page's socket stays open after a reload ([decision 010](../../decisions/010-clients-message-core-every-2s.md)).
@@ -569,7 +569,7 @@ Each routine's crate denies Clippy's `unwrap_used`, `expect_used`, `panic`, and 
 
 ```ts
 // a sketch: pointer sync's panel module, built by esbuild at es2017 into pointer-sync.js
-CROSSCHECK_BRIDGE_API.define("pointer-sync", {
+DUALINPUT_BRIDGE_API.define("pointer-sync", {
   start(ctx) {
     for (const display of ctx.instruments) capture(display, ctx);   // the instruments `load` named for this module
     ctx.on("gesture", play);                                       // another pilot's Down, Move, Held, or Up
@@ -588,9 +588,9 @@ The bridge owns only what can block the pilot's input:
   The unseen lock lapses 2s after the panel module last renews it, and no message from the core renews it; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([locks](../pointer-sync/01-pointer-sync.md#locks)).
   The panel module that asked for a lock stopping, or the socket closing, drops it at once.
 - **Later wrappers and CommBus handlers:** no v1 panel module wraps one of the sim's APIs or listens on the CommBus.
-  A later one asks the bridge to install a wrapper, and the bridge suppresses the wrapped call only for one dispatch and clears that unconditionally afterward, restores the original through `window.CROSSCHECK_BRIDGE_UNLOCK()`, and uninstalls the wrapper after 120s idle: the rules the FS Copilot fork took from a probe whose wrapper left an A350 display taking no clicks ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+  A later one asks the bridge to install a wrapper, and the bridge suppresses the wrapped call only for one dispatch and clears that unconditionally afterward, restores the original through `window.DUALINPUT_BRIDGE_UNLOCK()`, and uninstalls the wrapper after 120s idle: the rules the FS Copilot fork took from a probe whose wrapper left an A350 display taking no clicks ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
   The bridge also runs each CommBus handler of ours in a `try`, since `Coherent._trigger` calls a name's handlers with no `try`, so one that throws would stop the aircraft's own handlers after it (read in the sim's `Coherent._trigger`, [CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered); not run).
-- **The fixed global:** `window.CROSSCHECK_BRIDGE_UNLOCK()` removes every lock and wrapper in its document and stops every panel module, from the inspector or any other console.
+- **The fixed global:** `window.DUALINPUT_BRIDGE_UNLOCK()` removes every lock and wrapper in its document and stops every panel module, from the inspector or any other console.
 
 Anything else a panel module adds, such as pointer sync's listeners, its own `stop` removes, and one it leaves behind reads clicks and sends to a closed socket, blocking nothing.
 FS Copilot's panel code, by contrast, replaces `EventTarget.prototype.addEventListener` in every document and never puts it back ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
@@ -604,7 +604,7 @@ FS Copilot's panel code, by contrast, replaces `EventTarget.prototype.addEventLi
 | The core hangs | 1s with no write leaves every routine unfed | Each visible lock turns into a warning 8s to 10s after its last renewal |
 | The core exits | The same | Its socket closes, and the bridge stops every panel module and drops every lock |
 | Our own code in the sim stops | The module goes `DIRTY`, and the core unfreezes the aircraft | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
-| A person steps in | Nothing to call | `window.CROSSCHECK_BRIDGE_UNLOCK()` |
+| A person steps in | Nothing to call | `window.DUALINPUT_BRIDGE_UNLOCK()` |
 
 ### Budgets for work in the sim
 
@@ -623,37 +623,37 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 - With the core killed, the following aircraft unfreezes within 1s of the last write, plus a frame.
 - With the module stopped by an error, from a test routine built to panic, the module goes `DIRTY` and the core unfreezes the aircraft within 3s of the counter's last tick, while the counter stalling through a flight load or a pause unfreezes nothing.
 - A panel module that fails to parse, or throws in `start`, leaves the other panel modules in its panel running.
-- With the core suspended, a locked display's overlay turns into a warning within 10s, and `window.CROSSCHECK_BRIDGE_UNLOCK()` removes it at once.
+- With the core suspended, a locked display's overlay turns into a warning within 10s, and `window.DUALINPUT_BRIDGE_UNLOCK()` removes it at once.
 - With the core's socket closed, every lock drops and every panel module stops at once.
 - A panel that reloads mid-session gets its panel modules again on its new socket, and the core closes the old one.
 - A CommBus handler of ours that throws leaves the aircraft's handlers after it running.
 
 ## Names the sim shares
 
-Every name of ours in a namespace the sim shares with other packages, a panel's globals, the CommBus, client data areas, SimObject titles, and `L:` and `Z:` variables, is `CROSSCHECK_`, a kind, `_`, and a name, so a reader can tell what owns it at a glance, and names of two kinds never collide (user, 2026-10-15).
+Every name of ours in a namespace the sim shares with other packages, a panel's globals, the CommBus, client data areas, SimObject titles, and `L:` and `Z:` variables, is `DUALINPUT_`, a kind, `_`, and a name, so a reader can tell what owns it at a glance, and names of two kinds never collide (user, 2026-10-15).
 Without the kind, a routine whose ID was `MODULE` would take the client data area of the module's own status.
-A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO` ([architecture log][flight]).
+A probe's kind is its ID, as in p08's `L:CROSSCHECK_P08_ECHO`, which carries the product's earlier name ([architecture log][flight]).
 
 | Kind | Where the sim shares it | Owner | Names |
 | --- | --- | --- | --- |
-| `ROUTINE` | Client data areas | routine-host | One for each routine, by its ID: `CROSSCHECK_ROUTINE_HOLD`, `CROSSCHECK_ROUTINE_LEAD`, `CROSSCHECK_ROUTINE_FOLLOW`, `CROSSCHECK_ROUTINE_FIGURE`, `CROSSCHECK_ROUTINE_TRAFFIC`, and `CROSSCHECK_ROUTINE_H_EVENTS` |
-| `REPORT` | Client data areas | routine-host | One for each routine that reports, by its ID: `CROSSCHECK_REPORT_LEAD` ([what this adds to our WASM module](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module)) |
-| `MODULE` | Client data areas | routine-host | `CROSSCHECK_MODULE_STATUS` |
-| `CORE` | The CommBus | sim-service | `CROSSCHECK_CORE_ANNOUNCE` |
-| `BRIDGE` | A cockpit panel's `window` | panel-bridge | `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `CROSSCHECK_BRIDGE_UNLOCK` |
-| `FIGURE` | SimObject titles, and `Z:` variables | avatars | The figure's title, `CROSSCHECK_FIGURE_PILOT`, and `Z:CROSSCHECK_FIGURE_` and each joint's channel ([avatars' names](../avatars/01-avatars.md#names)) |
+| `ROUTINE` | Client data areas | routine-host | One for each routine, by its ID: `DUALINPUT_ROUTINE_HOLD`, `DUALINPUT_ROUTINE_LEAD`, `DUALINPUT_ROUTINE_FOLLOW`, `DUALINPUT_ROUTINE_FIGURE`, `DUALINPUT_ROUTINE_TRAFFIC`, and `DUALINPUT_ROUTINE_H_EVENTS` |
+| `REPORT` | Client data areas | routine-host | One for each routine that reports, by its ID: `DUALINPUT_REPORT_LEAD` ([what this adds to our WASM module](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module)) |
+| `MODULE` | Client data areas | routine-host | `DUALINPUT_MODULE_STATUS` |
+| `CORE` | The CommBus | sim-service | `DUALINPUT_CORE_ANNOUNCE` |
+| `BRIDGE` | A cockpit panel's `window` | panel-bridge | `DUALINPUT_BRIDGE_API`, `DUALINPUT_BRIDGE_PENDING`, and `DUALINPUT_BRIDGE_UNLOCK` |
+| `FIGURE` | SimObject titles, and `Z:` variables | avatars | The figure's title, `DUALINPUT_FIGURE_PILOT`, and `Z:DUALINPUT_FIGURE_` and each joint's channel ([avatars' names](../avatars/01-avatars.md#names)) |
 
 A unit that needs a name of a new kind adds the kind to this table.
 
 ## The workspace
 
-One repository holds all of Crosscheck: its programs, our WASM module, our code in the sim, the backend, and the profiles (user, 2026-10-15).
+One repository holds all of Dual Input: its programs, our WASM module, our code in the sim, the backend, and the profiles (user, 2026-10-15).
 Its folders follow the [tiers](#tiers), and each feature keeps every part it has in one folder.
 One Cargo workspace builds every Rust crate, the module's among them, and one npm lockfile covers every TypeScript folder; `tools/build.ts`, run by Node, builds every target but the backend and the profiles, and every build that reads the SDK reads the one copy `tools/setup.ts` installs.
 CI runs on Windows, and one script checks both the crates and the TypeScript imports against this map.
 
 ```text
-crosscheck/
+dualinput/
   Cargo.toml  Cargo.lock  package.json  package-lock.json  rust-toolchain.toml
   .cargo/config.toml     one entry, which links every x86_64 program's C runtime statically
   msfs-sdk.txt           the SDK version every build uses
@@ -667,7 +667,7 @@ crosscheck/
   apps/
     core/  core-helper/  each program's main, and its list of features
     desktop/             Tauri: its Rust side, and its pages built by Vite
-    ide/                 the Crosscheck IDE, once it's built
+    ide/                 the Dual Input IDE, once it's built
   sim-package/
     wasm-module/         the cdylib cargo-msfs builds: the edge, and the routines' list
     pages/               the VCockpit.js override, the EFB app, the banner, the menu script
@@ -746,11 +746,11 @@ The profiles, plugins, and modules that [01-format-and-delivery](../profiles/01-
 - An author can clone the repository without file contents and check out only `profiles/` and the files at its root, which git's sparse checkout keeps in its default cone mode (documented, [git sparse-checkout](https://git-scm.com/docs/git-sparse-checkout)), or edit a profile on GitHub's site, which forks the repository and proposes the change as a pull request (documented, [Editing files](https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files)); the profiles' contributor documentation shows both:
 
   ```bash
-  git clone --filter=blob:none --sparse https://github.com/<org>/crosscheck.git
+  git clone --filter=blob:none --sparse https://github.com/dual-input/dualinput.git
   ```
 
   ```bash
-  cd crosscheck
+  cd dualinput
   ```
 
   ```bash
@@ -759,7 +759,7 @@ The profiles, plugins, and modules that [01-format-and-delivery](../profiles/01-
 
 ### CI
 
-CI runs on Windows runners only (user, 2026-10-15), because Crosscheck runs only on Windows:
+CI runs on Windows runners only (user, 2026-10-15), because Dual Input runs only on Windows:
 
 - Our code runs in CI on the system it runs on for pilots, which matters to its floating-point results, since Rust's `f64` functions reach the C runtime's math, whose results change with its FMA3 switch and with its version ([core log](../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version); [left open](#left-open)).
 - One toolchain setup serves every job.

@@ -1,4 +1,4 @@
-# Every Rust crate of Crosscheck is in this one workspace, so every program builds with the
+# Every Rust crate of Dual Input is in this one workspace, so every program builds with the
 # same version of each dependency, from one Cargo.lock, and shares the settings below.
 [workspace]
 # Members are named by folder globs: `engines/*` makes every folder under engines/ a

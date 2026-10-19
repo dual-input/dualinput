@@ -156,7 +156,7 @@ Reloading DisplayUnits produced the same snapshots 2.3s after the reload, which 
 
 A listener in the Sentry panel listened for the 43 names that only other panels had registered, and received all 39 of them that sent anything during the run.
 A second listener in a CTP panel counted the same messages on the names both listened to, to within one on a channel that sends 30 messages a second.
-So a panel receives any CommBus name a listener in it registers, and Crosscheck needs one listener in one panel.
+So a panel receives any CommBus name a listener in it registers, and Dual Input needs one listener in one panel.
 
 **Changed:** on the A220, a late listener can get the full state within about 100ms, whenever it asks.
 The call that asks is Synaptic's, so each aircraft that works this way needs its own in the profile.

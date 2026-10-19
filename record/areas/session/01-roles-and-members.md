@@ -30,7 +30,7 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 
 Each member writes its own entry on the session channel: its pilot ID, display name, kind, and endpoint ID ([01-between-machines](../network/01-between-machines.md#channels)).
 
-- A joiner becomes a member once its first message has passed ([joining](../network/01-between-machines.md#joining)), and stops being one when it leaves the session, quits Crosscheck, or has been disconnected for 30 minutes ([coming back](../network/01-between-machines.md#coming-back)).
+- A joiner becomes a member once its first message has passed ([joining](../network/01-between-machines.md#joining)), and stops being one when it leaves the session, quits Dual Input, or has been disconnected for 30 minutes ([coming back](../network/01-between-machines.md#coming-back)).
 - A member's kind is crew in v1, and passenger once [join modes](../product/ideas.md#join-modes) comes.
   Crew members send on the cockpit stream, so they hold counters in the vector clocks; a passenger sends no cockpit message, so it never appears in one ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-cockpit-stream)).
 - Every crew member acknowledges on the heartbeat what it applied, because each core keeps the cockpit's messages until every member on its links has acknowledged them ([coming back](../network/01-between-machines.md#coming-back)).
@@ -70,7 +70,7 @@ Each member writes its own entry on the session channel: its pilot ID, display n
   Two pilots who turn it on at once are settled by the session channel's stamp, and the switch of the one who lost goes back off ([channels](../network/01-between-machines.md#channels)).
   FS Copilot's build allowed no taking over: "a toggle is disabled while someone else hosts that feature" (same document, same section, row 2).
   A pilot can take the role by mistake, or two can tussle over it, and the old host's ATC conversation ends, since the new host's ATC app starts its own; turning the switch on is deliberate, and crews settle it on voice.
-  Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which [traffic sync](../product/03-v1-scope.md#traffic-sync)'s open questions leave unknown.
+  Taking the role automatically would need Dual Input to tell which pilot runs a traffic injector, which [traffic sync](../product/03-v1-scope.md#traffic-sync)'s open questions leave unknown.
 - The role stays with its holder through a lost link, a flight left, and a crash of their sim, core, or PC, and only leaving the session releases it.
   A host who comes back while still holding it sends their traffic again, with no switch to touch.
 - A receiver keeps each sender's set of identities apart, and shows the objects of whoever the session channel names as host, spawning each it lacks whenever its sim is in a flight ([channels](../network/01-between-machines.md#channels)).

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crosscheck Architecture Map</title>
+<title>Dual Input Architecture Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=B612:wght@400;700&family=B612+Mono&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -211,7 +211,7 @@ table.ref-t { width: 100%; min-width: 980px; }
 
 <div class="wrap">
 <header>
-  <h1>Crosscheck Architecture Map</h1>
+  <h1>Dual Input Architecture Map</h1>
   <p class="meta">v1's architecture as decisions 001 to 046 settled it on 2026-10-14, drawn from those decision files. Where this page and a decision differ, the decision wins. Click any part of the map to see what it does, when it runs, and what it talks to, and every number opens its decision.</p>
 </header>
 
@@ -229,7 +229,7 @@ table.ref-t { width: 100%; min-width: 980px; }
   <p class="lede">Each pilot's PC runs the same pieces, and every link between them ends at the core. The one exception is the watcher's link to GitHub Releases.</p>
   <div class="mapgrid">
     <div class="card mapbox">
-      <svg id="schematic" viewBox="0 0 1240 800" role="group" aria-label="Crosscheck's components on two pilots' PCs, and the services off them">
+      <svg id="schematic" viewBox="0 0 1240 800" role="group" aria-label="Dual Input's components on two pilots' PCs, and the services off them">
         <defs>
           <marker id="ar-proc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk proc" d="M0,0L10,5L0,10z"/></marker>
           <marker id="ar-web" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk web" d="M0,0L10,5L0,10z"/></marker>
@@ -497,7 +497,7 @@ const DEC = {
   "004": ["core-works-out-figures-hand", "The core works out where the figure's hand goes"],
   "005": ["wasm-module-writes-following-aircraft", "Our WASM module writes the following aircraft"],
   "006": ["core-catches-take-control-input", "The core catches the take-control key and buttons"],
-  "007": ["core-runs-audio", "The core runs Crosscheck's audio"],
+  "007": ["core-runs-audio", "The core runs Dual Input's audio"],
   "008": ["every-link-ends-at-core", "Every link between our components ends at the core"],
   "009": ["sim-pages-find-core-over-commbus", "The sim's pages find the core over the CommBus and talk to it over a WebSocket"],
   "010": ["clients-message-core-every-2s", "Every client sends the core a message every 2s"],
@@ -508,10 +508,10 @@ const DEC = {
   "015": ["watcher-reads-files-core-writes", "The watcher reads what its jobs need from files the core writes"],
   "016": ["core-keeps-pilots-settings", "The core keeps the pilot's settings"],
   "017": ["core-writes-control-slot-every-200ms", "The core writes the WASM module's control slot every 200ms"],
-  "018": ["rust-and-typescript", "Crosscheck is written in Rust, and in TypeScript where an engine runs it"],
+  "018": ["rust-and-typescript", "Dual Input is written in Rust, and in TypeScript where an engine runs it"],
   "019": ["input-and-audio-run-in-helper", "The core's input and audio work runs in a helper it starts"],
   "020": ["plugin-code-runs-only-in-core", "Plugin code runs only in the core"],
-  "021": ["profiles-and-plugins-apart-from-releases", "Profiles and plugins reach pilots apart from Crosscheck's releases"],
+  "021": ["profiles-and-plugins-apart-from-releases", "Profiles and plugins reach pilots apart from Dual Input's releases"],
   "022": ["random-uuids-as-text", "Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them"],
   "023": ["pilot-id-and-restart-count", "A pilot keeps their ID through a core restart, and the core counts its restarts"],
   "024": ["times-in-microseconds-on-monotonic-clock", "A time in a message is µs on the sender's PC's monotonic clock"],
@@ -523,7 +523,7 @@ const DEC = {
   "030": ["in-sim-code-es2017-esbuild", "Our code in the sim is type-checked against ES2017 and bundled by esbuild at es2017"],
   "031": ["coherent-gt-check-tool", "A tool of our own checks every file we ship into the sim against Coherent GT's measured limits"],
   "032": ["one-quic-connection-through-iroh", "Every pair of cores holds one QUIC connection through iroh 1.3, directly or through our relays"],
-  "033": ["relays-run-iroh-relay-unmodified", "Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck"],
+  "033": ["relays-run-iroh-relay-unmodified", "Our relays run iroh-relay unmodified, in at least two regions, and admit only Dual Input"],
   "034": ["backend-matches-invite-codes", "The backend matches invite codes to the crew's endpoint IDs, and no running session waits on it"],
   "035": ["channels-declare-how-they-travel", "Each channel declares how it travels, and only the cockpit stream is replayed"],
   "036": ["control-is-one-value", "Control is one value, a generation and the PF's pilot ID"],
@@ -628,7 +628,7 @@ const COMP = {
   helper: {
     kind: "Process on each pilot's PC", name: "Helper",
     runs: "A process the core starts and restarts.", built: "Rust, linked with Visual Studio's linker.",
-    does: ["Reads the keyboard, flight hardware, and mouse through Raw Input in sink mode, which sits in nobody's input path.", "Catches the take-control key and buttons, bound in Crosscheck's settings, not the sim's.", "Reads the cursor for the figure's hand; the core finds the point by casting a ray into the aircraft's model.", "Captures the microphone and runs the speech recognizer for the voice phrases.", "Captures the ATC app's audio by process, and plays ATC and Crosscheck's sounds on the device the pilot picks."],
+    does: ["Reads the keyboard, flight hardware, and mouse through Raw Input in sink mode, which sits in nobody's input path.", "Catches the take-control key and buttons, bound in Dual Input's settings, not the sim's.", "Reads the cursor for the figure's hand; the core finds the point by casting a ray into the aircraft's model.", "Captures the microphone and runs the speech recognizer for the voice phrases.", "Captures the ATC app's audio by process, and plays ATC and Dual Input's sounds on the device the pilot picks."],
     life: ["Runs in a session. With no session, it runs only while the desktop app binds a key or lists the output devices.", "Sends the core a message every 2s, and the core restarts it when it exits or goes quiet for 8s."],
     links: [["Core", "its standard input and output, binary and length-prefixed"]],
     fails: "A crash costs the take-control input, the figure's hand, and the audio until the core restarts it, and the session goes on.",
@@ -637,7 +637,7 @@ const COMP = {
   watcher: {
     kind: "Process on each pilot's PC", name: "Watcher",
     runs: "A process of its own, from Windows login, in the tray.", built: "Rust.",
-    does: ["Notices the sim's process starting and stopping, from the operating system.", "Starts the core with every sim run, and again if it exits while the sim runs.", "Makes our copy of the sim's BlurPage component from the sim's own file, and makes it again whenever that file's hash changes, so the menu script loads from the first screen.", "Warns at sim start that a waiting update needs a sim restart, if the pilot flew with Crosscheck lately.", "Shows the core's CPU and memory use beside its own.", "Downloads updates from GitHub Releases."],
+    does: ["Notices the sim's process starting and stopping, from the operating system.", "Starts the core with every sim run, and again if it exits while the sim runs.", "Makes our copy of the sim's BlurPage component from the sim's own file, and makes it again whenever that file's hash changes, so the menu script loads from the first screen.", "Warns at sim start that a waiting update needs a sim restart, if the pilot flew with Dual Input lately.", "Shows the core's CPU and memory use beside its own.", "Downloads updates from GitHub Releases."],
     life: ["Runs all day from login. A pilot who turns it off has no core with the sim until they open the desktop app."],
     links: [["Core", "starts its process, and reads the port file and the last-session date; it opens no socket"], ["GitHub Releases", "HTTPS, the one link of ours that doesn't end at the core"], ["Our package", "writes the BlurPage copy"]],
     fails: "The core can't tell whether the watcher runs, because the watcher sends it nothing.",

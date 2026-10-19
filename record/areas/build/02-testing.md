@@ -1,12 +1,12 @@
 # Testing
 
 ```text
-Purpose:     How Crosscheck is tested, from a crate's own tests to friends on two PCs, and which tests keep CI green.
+Purpose:     How Dual Input is tested, from a crate's own tests to friends on two PCs, and which tests keep CI green.
 Depends on:  01-the-build.md, ../architecture/02-code-map.md, ../architecture/01-spine.md, ../core/03-sim-seam-and-wasm-module.md, ../core/04-core-helper.md, ../network/01-between-machines.md, ../network/02-units.md, ../profiles/02-units.md, ../recording/01-recording-and-bug-reports.md, ../plugins/01-plugins.md, ../install/01-installing-and-updating.md
 Decides:     The four levels of testing, and where and when each runs; which tests a merge and a release need green, and which run outside CI; what the bench runs, touches, and checks, and how it runs only what it built; the stand-in sim's place, rules, model, frames, WASM module, pages, and process; the stand-in core helper; the replay check; the loop under load; the check before a release; and that no second MSFS runs in a virtual machine (node 7).
 ```
 
-Crosscheck is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
+Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.
 [The four levels](#the-four-levels) gives when the sim and friends come in.
 The bench reaches a core only where a pilot's surroundings do: the stand-in sim below the sim seam, fake pages over the real WebSocket, a stand-in core helper over the real pipe, local stand-ins for the network and the profiles' site, and the processes and files on the PC.
@@ -23,7 +23,7 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 | Unit tests | Each crate's tests, the engines alone, the routines built natively, and each TypeScript part's tests; seam inputs recorded from the real sim, such as p08's signals, played into the sim client and sim awareness ([cases for the bench](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)) | CI, and a developer's PC | Every pull request that changes code, and while developing |
 | The bench | Two or three bench builds of the core, each on a stand-in sim, with fake pages, a stand-in core helper, and local stand-ins for the relays, the backend, and the profiles' site | CI's Windows runner, and a developer's PC | Every pull request that changes code, every merge to `main`, and while developing |
 | In the sim | A build of the core from the tree, its package installed with `node tools/build.ts install` ([our package](01-the-build.md#our-package)), on our MSFS, with a bench core on a stand-in as the second pilot where a case needs a crew | Our development machine | At the end of each stage whose system has cases in the sim, and before each release |
-| With friends | Each pilot's installed Crosscheck | Two PCs on two home networks | At a stage whose cases need two PCs, and before v1 ships |
+| With friends | Each pilot's installed Dual Input | Two PCs on two home networks | At a stage whose cases need two PCs, and before v1 ships |
 
 ## What keeps CI green
 
@@ -51,11 +51,11 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 
 - Two or three bench builds of the core, three where a case names a third, each with a data folder of its own, so its port file, session file, settings, and recordings are its own, as a development core's are ([finding the core](../architecture/01-spine.md#finding-the-core)).
 - The desktop app, for its own cases and for those where it starts a core again.
-  The app starts `crosscheck-core.exe` from its own folder ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), so the bench lays out a folder holding the desktop app and a bench build of the core named `crosscheck-core.exe`, set to that core's data folder.
+  The app starts `dualinput-core.exe` from its own folder ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), so the bench lays out a folder holding the desktop app and a bench build of the core named `dualinput-core.exe`, set to that core's data folder.
   The core the app starts again is then a bench core.
 
 The desktop app walks the processes for `FlightSimulator2024.exe` (same section), so its cases run with no sim and no other scenario on the PC.
-Those that run Setup.exe, Update.exe, or an uninstall run only on CI's runner, since Velopack installs into the per-user folder a developer's own Crosscheck uses.
+Those that run Setup.exe, Update.exe, or an uninstall run only on CI's runner, since Velopack installs into the per-user folder a developer's own Dual Input uses.
 
 ### What it touches
 
@@ -183,7 +183,7 @@ The sandbox's recursion and interrupt-check cases are its own unit tests, with n
 The release workflow takes the commit this check ran on, and its build job stops when `main`'s head isn't that commit, so a merge after the check releases nothing unchecked.
 
 1. If the commit's runs on `main` aren't green, stop: the release workflow would stop at them.
-2. Install a build of the commit with `node tools/build.ts install`: our package's folder, `crosscheck`, is in the Community folder.
+2. Install a build of the commit with `node tools/build.ts install`: our package's folder, `dualinput`, is in the Community folder.
 3. Start the sim: our BlurPage copy's script, the EFB app, and the banner's panel load, as the build's [cases in the sim](01-the-build.md#cases-for-the-bench) list.
 4. Start a session from the EFB app: the EFB app shows its code.
 5. Have the bench join a bench core on a stand-in to the session with that code, as the second pilot: both show as members.
@@ -197,7 +197,7 @@ The release workflow takes the commit this check ran on, and its build job stops
 ## With friends
 
 - A session's checklist gathers the cases with friends of every stage built by then, so one session checks many things, as node 7 asks (user, 2026-10-14).
-- Each pilot's recording comes back through Crosscheck's own bug report ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report)), so the session needs no video call, and a following machine's recording measures its own [budget](../recording/01-recording-and-bug-reports.md#budgets).
+- Each pilot's recording comes back through Dual Input's own bug report ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report)), so the session needs no video call, and a following machine's recording measures its own [budget](../recording/01-recording-and-bug-reports.md#budgets).
 
 ## Budgets
 
@@ -233,7 +233,7 @@ Each stage of [node 8](../architecture/plan.md#8-the-build-order) that builds a 
 
 ## Dropped
 
-A second MSFS with its own Crosscheck in a virtual machine on the same PC, which the spine's [left open](../architecture/01-spine.md#left-open) asks about for the bench: a bench core on a stand-in plays the second pilot, and friends bring two real sims (user, 2026-10-18).
+A second MSFS with its own Dual Input in a virtual machine on the same PC, which the spine's [left open](../architecture/01-spine.md#left-open) asks about for the bench: a bench core on a stand-in plays the second pilot, and friends bring two real sims (user, 2026-10-18).
 
 ## Left open
 
@@ -242,7 +242,7 @@ A second MSFS with its own Crosscheck in a virtual machine on the same PC, which
 
 ## What this changes elsewhere
 
-The notes at the top of [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [the build](01-the-build.md), and [04-core-helper](../core/04-core-helper.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#crosscheck-is-tested-at-four-levels-and-ci-keeps-the-unit-tests-and-the-bench-green-on-every-pull-request) give the reasons.
+The notes at the top of [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [the build](01-the-build.md), and [04-core-helper](../core/04-core-helper.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#dual-input-is-tested-at-four-levels-and-ci-keeps-the-unit-tests-and-the-bench-green-on-every-pull-request) give the reasons.
 
 [flight]: ../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [p10]: ../architecture/log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly

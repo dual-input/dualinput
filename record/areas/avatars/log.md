@@ -1,7 +1,7 @@
 # Avatars: log
 
 What our experiments found about showing one pilot's avatar on the other pilot's machine with MSFS multiplayer off, newest entry first.
-The avatar shows as a figure: an object Crosscheck spawns and moves.
+The avatar shows as a figure: an object Dual Input spawns and moves.
 SimConnect reads the avatar's position, ground speed, and facing every sim frame through `SIMCONNECT_OBJECT_ID_USER_AVATAR`, and `SimConnect_CameraGet` gives where the pilot looks, whether ChasePlane drives the camera or not.
 The sim's own people stay invisible when a SimConnect client spawns them, GSX's people show, and a model of our own compiles from generated glTF, with its size and color set per object while it runs.
 A figure of our own, balls and sticks whose joints are animations that read variables, poses in the cockpit as our dev page poses it, and one variable changes its color.
@@ -562,7 +562,7 @@ The pilot also found the 0.3s overlap wrong when a hand leaves the yoke to tap: 
 - The pilot found that the hands felt right.
 
 **Changed:** the hands swap once for each run of clicks on one side, and the tapping hand reaches its switch as the sim moves it.
-On the other pilot's machine, where Crosscheck applies the change itself, it could hold the change until the hand arrives, for an overlap, at that much more delay; that's a product decision.
+On the other pilot's machine, where Dual Input applies the change itself, it could hold the change until the hand arrives, for an overlap, at that much more delay; that's a product decision.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 
@@ -617,7 +617,7 @@ Clicks on the yoke itself need a rule of their own.
 
 ## 2026-10-03: Aircraft mark their yoke grips with the same node names, and the yoke's own animations put them on a level wheel
 
-**Asked:** where on the yoke does the figure's free hand go, and can Crosscheck find that point in an aircraft's files instead of a profile author picking it?
+**Asked:** where on the yoke does the figure's free hand go, and can Dual Input find that point in an aircraft's files instead of a profile author picking it?
 
 **Expected:** a profile author would pick a grip point by hand in the profile IDE.
 
@@ -811,7 +811,7 @@ Picking the control by input event name failed on this aircraft's naming alone, 
 - Placed 0.6m along the ray from the camera through the cursor, the sphere moved mirrored left to right and didn't sit on the controls the pilot clicked.
   We set the ray aside, because a hand that follows the cursor all the time isn't what a pilot does.
 
-**Changed:** Crosscheck can build its own figure from generated glTF and drive its parts per object at runtime: position, size, and color, by switching between colored parts.
+**Changed:** Dual Input can build its own figure from generated glTF and drive its parts per object at runtime: position, size, and color, by switching between colored parts.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 
@@ -900,7 +900,7 @@ The pilot's screen recordings of both are kept out of the repository, because th
 - The pilot saw the wand near the tail rather than at the seat, while SimConnect read it 0.37m behind the aircraft's reference point and the avatar's object 2.24m behind.
   Why the two disagree is unknown.
 
-**Changed:** writing from inside the sim's frame keeps a figure up with a flying aircraft, so the WASM route works for aircraft whose files Crosscheck doesn't edit.
+**Changed:** writing from inside the sim's frame keeps a figure up with a flying aircraft, so the WASM route works for aircraft whose files Dual Input doesn't edit.
 Where to write it, and how to follow pitch and roll, are still open.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
@@ -917,7 +917,7 @@ Where to write it, and how to follow pitch and roll, are still open.
 The only objects within 500m were the aircraft, the avatar's object, and `SEAT_DEFAULT_Pilot`, so no separate object carried the passengers for GSX's program to move.
 The process check matched `Couatl64_boot`, which stays after Couatl is quit from its tray, so whether GSX's own program was running is unknown, and with no object to move it couldn't have moved them.
 
-**Changed:** attaching through the aircraft's files is a measured way to keep a figure still in a flying aircraft, on aircraft whose package Crosscheck can edit.
+**Changed:** attaching through the aircraft's files is a measured way to keep a figure still in a flying aircraft, on aircraft whose package Dual Input can edit.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 
@@ -941,7 +941,7 @@ The process check matched `Couatl64_boot`, which stays after Couatl is quit from
 - GSX's in-sim module, `fsdt-msfs-bridge.wasm`, exports only `module_init` and `module_deinit` and imports `set_named_variable_value` and `execute_calculator_code`, so it can set the `L:` variables and can't move an object.
 
 **Changed:** the sim carries a model smoothly only when the aircraft's own files attach it, and GSX gets there by editing those files on the user's machine.
-A Crosscheck figure could be attached the same way, with its parts moved by its own animations reading `CROSSCHECK_` `L:` variables, since an attached model's animations run on the aircraft it's attached to ([Model Attachments](https://docs.flightsimulator.com/msfs2024/html/3_Models_And_Textures/Model_Attachments.htm)).
+A Dual Input figure could be attached the same way, with its parts moved by its own animations reading `CROSSCHECK_` `L:` variables, since an attached model's animations run on the aircraft it's attached to ([Model Attachments](https://docs.flightsimulator.com/msfs2024/html/3_Models_And_Textures/Model_Attachments.htm)).
 Then a frame of lag in our writes moves a hand late, not the whole figure against the cockpit.
 Editing another developer's aircraft package is a product decision, and it has to coexist with GSX's own edit of the same file.
 
@@ -1012,7 +1012,7 @@ The pilot expected no translation from the tracker, which they believe a recent 
   Against those, the `SIMOBJECT` and `EYEPOINT` positions are in meters, with x pointing left, y up, and z forward (correlation 1.000 on each axis, slope 1.00).
 - ChasePlane's `L:p42_cp_r_x`, `_y`, and `_z` are in meters too, with x pointing right, y up, and z forward (slopes 1.00, 0.94, and 0.99).
 
-**Changed:** `SimConnect_CameraGet` is the one source that follows the mouse, ChasePlane, and a head tracker, so it's what Crosscheck reads to turn the other pilot's head.
+**Changed:** `SimConnect_CameraGet` is the one source that follows the mouse, ChasePlane, and a head tracker, so it's what Dual Input reads to turn the other pilot's head.
 With ChasePlane off, the sim's own camera carries the tracker's rotation and none of its translation, so a lean shows only with ChasePlane on.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
@@ -1021,7 +1021,7 @@ With ChasePlane off, the sim's own camera carries the tracker's rotation and non
 
 ## 2026-10-03: SimConnect_CameraGet gives where the pilot looks, with ChasePlane driving the camera or not
 
-**Asked:** what tells Crosscheck where the pilot looks in the cockpit, whether or not ChasePlane drives the camera?
+**Asked:** what tells Dual Input where the pilot looks in the cockpit, whether or not ChasePlane drives the camera?
 
 **Expected:** `A:CAMERA GAMEPLAY PITCH YAW` would read 0 with ChasePlane on and track the look with it off, as in p03 ([entry below](#2026-10-02-seat-objects-place-the-other-pilot-in-the-cockpit-and-the-seated-avatar-doesnt-turn-with-the-look)).
 ChasePlane moves the sim's camera through Asobo's Camera API (read in p42-util-chaseplane 26.39.1, `ChasePlaneModule.wasm`, which imports `fsCameraAcquire`, `fsCameraSet`, and `fsCameraGet`), and Asobo staff wrote that from the sim's Sim Update 6 beta, 1.8.8.0, `SimConnect_CameraGet` returns the active camera even when nobody has acquired it ([thread](https://devsupport.flightsimulator.com/t/cameraapi-cameraget-behavior-requires-clarification/17697)).
@@ -1046,7 +1046,7 @@ So we expected `SimConnect_CameraGet` to report where the pilot looks in both st
   In meters the movement would be 2cm to 4cm, and a read taken after moving the camera a known distance would settle it.
   In `WORLD` it read latitude, longitude, and an altitude of 513.9, which matches the aircraft's 1,684 ft MSL in meters.
 
-**Changed:** `SimConnect_CameraGet` gives where the pilot looks, both from ChasePlane's camera and from the sim's own, so Crosscheck can turn the head of the other pilot's figure without asking anyone to disable ChasePlane.
+**Changed:** `SimConnect_CameraGet` gives where the pilot looks, both from ChasePlane's camera and from the sim's own, so Dual Input can turn the head of the other pilot's figure without asking anyone to disable ChasePlane.
 Whether a head tracker's movement shows in it is unmeasured.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
@@ -1055,7 +1055,7 @@ Whether a head tracker's movement shows in it is unmeasured.
 
 ## 2026-10-02: Writing a GSX person's animation frame makes it walk, and a seated one moves on its own
 
-**Asked:** can Crosscheck make a figure walk rather than slide, and sit in a seat?
+**Asked:** can Dual Input make a figure walk rather than slide, and sit in a seat?
 
 **Expected:** each GSX person's model plays the animation frame whose number one variable of its own object holds.
 The passengers' model XML passes `(A:VELOCITY BODY Y,m/s)` to `ASOBO_GT_Anim_Code`, the cleaner's passes `(A:WAGON FRONT LINK ORIENTATION, number)`, and each `sim.cfg` lists which frames are the idle and walk loops at 30 frames a second (read in fsdreamteam-gsx-pro 4.0.19, `SimObjects/GroundVehicles/FSDT_Passengers` and `FSDT_cleaning_crew`).
@@ -1073,7 +1073,7 @@ GSX's seated people are separate objects, whose model plays its clip with `typeP
 - `FSDT_Passenger_CASUAL_M_0030_SEATED`, of `A:CATEGORY` `StaticObject`, sat on `SEAT_C152_Pax` and moved on its own, breathing and shifting, with nothing written.
   Its feet were at the seat object's position, so it sat a seat's height too high: the model's origin is at its feet, while the seat object marks where a person sits.
 
-**Changed:** a figure Crosscheck ships can walk under our own writes, built as GSX's people are: one clip whose frame is a variable of the figure's own object.
+**Changed:** a figure Dual Input ships can walk under our own writes, built as GSX's people are: one clip whose frame is a variable of the figure's own object.
 A seated figure needs only a position, and with its origin at the hip it would sit on an aircraft's seat objects with no offset.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
@@ -1083,7 +1083,7 @@ The p04 run from 21:50:18 was a false start, and nothing here uses it.
 
 ## 2026-10-02: Seat objects place the other pilot in the cockpit, and the seated avatar doesn't turn with the look
 
-**Asked:** what can Crosscheck read and show of the other pilot in the cockpit?
+**Asked:** what can Dual Input read and show of the other pilot in the cockpit?
 
 **Expected:** no prediction.
 
@@ -1098,7 +1098,7 @@ The p04 run from 21:50:18 was a false start, and nothing here uses it.
   With ChasePlane disabled in its own settings but its bridge, `CP MSFS Bridge.exe`, still running, `A:CAMERA GAMEPLAY PITCH YAW` tracked the look: pitch −77.5° to 74.6°, yaw −156.7° to 119.7°.
 - `L:p42_cp_rendered_camera_sequence` advanced every frame, and `L:p42_cp_rendered_camera_valid` stayed 0.
 
-**Changed:** on an aircraft with seat objects, Crosscheck can read both seats' positions, and the figure goes in the other pilot's seat.
+**Changed:** on an aircraft with seat objects, Dual Input can read both seats' positions, and the figure goes in the other pilot's seat.
 Where the pilot looks has to come from the camera, not the avatar, and the [entry above](#2026-10-03-simconnect_cameraget-gives-where-the-pilot-looks-with-chaseplane-driving-the-camera-or-not) finds a source that works with ChasePlane.
 
 **Affects:** the ideas [Avatar sync](../product/ideas.md#avatar-sync) and [Seat awareness](../product/ideas.md#seat-awareness).
@@ -1107,7 +1107,7 @@ Where the pilot looks has to come from the camera, not the avatar, and the [entr
 
 ## 2026-10-02: A GSX person shows and follows where we write it, and the sim's own people stay invisible
 
-**Asked:** can Crosscheck show the other pilot's avatar by spawning a figure and writing its position every frame?
+**Asked:** can Dual Input show the other pilot's avatar by spawning a figure and writing its position every frame?
 
 **Expected:** the sim's own people, titled `CharacterSim_...`, would stay invisible, as developers on the DevSupport forum reported ([2024 thread](https://devsupport.flightsimulator.com/t/simconnect-injections-in-fs2024/11769), [2026 thread](https://devsupport.flightsimulator.com/t/charactersim/18104)).
 No prediction for anything else.
@@ -1127,7 +1127,7 @@ No prediction for anything else.
   The figure kept up with the pilot, turned with them, and stayed on the ground, but slid: writing `A:VELOCITY BODY Z` from the avatar's ground speed didn't start its walk.
 
 **Changed:** the sim's own people are out as the figure.
-A person shows when a package ships it as a SimObject with a model of its own, as GSX does, so Crosscheck would ship its own figure that way rather than depend on GSX.
+A person shows when a package ships it as a SimObject with a model of its own, as GSX does, so Dual Input would ship its own figure that way rather than depend on GSX.
 Why the sim's own people stay invisible is unverified.
 What starts a figure's walk is unknown, and reading how GSX's people are animated in their SimObject files would settle what a figure of ours needs.
 
@@ -1160,7 +1160,7 @@ On the DevSupport forum, an Asobo developer wrote that "index 2" on `A:PLANE LAT
 - Object ID 2 answered `UNRECOGNIZED_ID`, and on object 0, `A:PLANE LATITUDE:1` and `A:PLANE LATITUDE:2` both returned the aircraft's position, so "index 2" works as neither an object ID nor a variable index.
 - `A:CAMERA GAMEPLAY PITCH YAW` stayed 0 at both indexes throughout, on foot and seated, with ChasePlane running, so the camera's direction is unmeasured.
 
-**Changed:** one SimConnect request at the sim's frame rate gives Crosscheck everything it needs to place the other pilot's figure on foot, and the heading turns the figure the way the pilot faces.
+**Changed:** one SimConnect request at the sim's frame rate gives Dual Input everything it needs to place the other pilot's figure on foot, and the heading turns the figure the way the pilot faces.
 
 **Affects:** the idea [Avatar sync](../product/ideas.md#avatar-sync).
 

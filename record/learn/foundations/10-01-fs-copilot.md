@@ -5,7 +5,7 @@
   - [One switch flip](#one-switch-flip)
   - [One position update](#one-position-update)
   - [Design choices and what they cost](#design-choices-and-what-they-cost)
-  - [What it changes for Crosscheck](#what-it-changes-for-crosscheck)
+  - [What it changes for Dual Input](#what-it-changes-for-dual-input)
   - [Known failures and open problems](#known-failures-and-open-problems)
 - [Sources](#sources)
 - [Unverified claims](#unverified-claims)
@@ -138,10 +138,10 @@ The copy has to be redone after any sim update that changes the stock file.
 The sim runs only one package's copy of a file ([02-01](02-01-installs-and-packages.md#packages-and-the-virtual-file-system)), and FS Copilot's installer deletes YourControls' package.
 Its app also reports "Conflict detected with YourControls package." whenever `L:YourControlsPanelId` is above 0, a sign that YourControls' panel code ran [5].
 
-### What it changes for Crosscheck
+### What it changes for Dual Input
 
 Each hop in the two diagrams is a place where a message can be lost, copied, reordered, echoed, or read by another version, and FS Copilot guards against those at some hops and not at others: a pointer gesture carries a session and a sequence number end to end, and a cockpit update carries only a name and a value.
-So for each hop, Crosscheck needs a stated rule for each of those five, and how long a switch flip takes from one cockpit to the other is an open question no record has measured.
+So for each hop, Dual Input needs a stated rule for each of those five, and how long a switch flip takes from one cockpit to the other is an open question no record has measured.
 
 ### Known failures and open problems
 

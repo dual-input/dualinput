@@ -1,10 +1,10 @@
-//! Every message Crosscheck's programs send each other, on one PC and between the two
+//! Every message Dual Input's programs send each other, on one PC and between the two
 //! pilots' PCs. So no two programs can disagree on a message's shape, the Rust programs
 //! all use this one crate, and ts-rs generates the TypeScript side's types from it. Each
 //! program's first message carries `VERSION` and `HASH`, so two builds that don't match
 //! refuse each other (decisions 025 and 026).
 
-/// Crosscheck's version, which every crate inherits from the root Cargo.toml's
+/// Dual Input's version, which every crate inherits from the root Cargo.toml's
 /// `[workspace.package]`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

@@ -291,7 +291,7 @@ What we haven't run: `import()` and a sort of a long array; the A220's DisplayUn
 
 - `es2017` is the compile target the framework's authors, FlyByWire, and every project we read use, and none goes higher, so it's our starting target, which 1.6.2 checks against what the engine parses.
 - A compiler's target lowers syntax but fills in no built-in, and TypeScript's `lib` setting catches a missing ES built-in such as `Object.fromEntries` at type-check time but not a missing DOM API such as `ResizeObserver`, which the `DOM` lib declares; so our check needs a rule of its own for those, and nobody maintains one to reuse.
-- We can ship our own pinned copy of the framework, as Working Title does, under a license that limits its use to Microsoft Flight Simulator, which Crosscheck is built for.
+- We can ship our own pinned copy of the framework, as Working Title does, under a license that limits its use to Microsoft Flight Simulator, which Dual Input is built for.
 
 What we haven't settled: whether the engine's newer built-ins are its own or the sim's fill-ins, which 1.6.2 measures; and how the framework's versions track sim updates, which no document states.
 
@@ -301,7 +301,7 @@ What we haven't settled: whether the engine's newer built-ins are its own or the
 
 ## 2026-10-09: In a flight, a Rust client on SimConnect.dll masks, creates AI objects with liveries, sets input events, reads the camera, and follows the load; the Rust module echoes; Raw Input gets a person's key and button; and the module's clock counts the counter's ticks from near the sim's start
 
-**Asked:** does what Crosscheck's Rust pieces did at the main menu hold in a flight (node 1.5)?
+**Asked:** does what Dual Input's Rust pieces did at the main menu hold in a flight (node 1.5)?
 Specifically: does the core's client on the SDK's `SimConnect.dll` do what our probes did through node-simconnect, does our Rust module run and trade data slots, and does the helper's Raw Input get a key and a button that a person presses with the sim in front?
 Three measurements rode along: whether a clock the module reads counts the same ticks as `QueryPerformanceCounter`, how long a data-slot write and a variable requested through SimConnect take to reach the client, and how each page's `performance.now()` runs against the counter.
 The banner's half of the run is in the [interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus).
@@ -356,7 +356,7 @@ The banner's half of the run is in the [interface log](../interface/log.md#2026-
 
 What we haven't run: the module's clock over a longer flight, and which event sets its 0; page samples kept and taken over longer; an aircraft other than the PA-24; a second flight load in the same sim run; and the helper's audio in a flight.
 
-**Affects:** node 1.5 of the [architecture plan](plan.md#15-a-flight-with-crosschecks-rust-pieces); the tentative decisions [Crosscheck is written in Rust](decisions.md#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it) and [The core catches the take-control key and buttons](decisions.md#the-core-catches-the-take-control-key-and-buttons); and the spine's [left open](01-spine.md#left-open) items on the core, the clocks, and the arrival delay.
+**Affects:** node 1.5 of the [architecture plan](plan.md#15-a-flight-with-dual-inputs-rust-pieces); the tentative decisions [Dual Input is written in Rust](decisions.md#dual-input-is-written-in-rust-and-in-typescript-where-an-engine-runs-it) and [The core catches the take-control key and buttons](decisions.md#the-core-catches-the-take-control-key-and-buttons); and the spine's [left open](01-spine.md#left-open) items on the core, the clocks, and the arrival delay.
 
 **Evidence:** `results/p08-flight-2026-10-09-17-12-31.txt`, `.ndjson`, and a folder of screenshots.
 
@@ -545,7 +545,7 @@ On Windows, the helper's build takes a C toolchain besides Rust: the MSVC target
 
 What we haven't run: Raw Input with the sim in front, which the take-control input's [tentative decision](decisions.md#the-core-catches-the-take-control-key-and-buttons) leaves open; a key a person pressed rather than one a program sent; which devices the HID reports came from; a microphone; and an output device other than the default.
 
-**Affects:** node 1.3's answer, and the tentative decisions on [the take-control input](decisions.md#the-core-catches-the-take-control-key-and-buttons) and [the audio](decisions.md#the-core-runs-crosschecks-audio).
+**Affects:** node 1.3's answer, and the tentative decisions on [the take-control input](decisions.md#the-core-catches-the-take-control-key-and-buttons) and [the audio](decisions.md#the-core-runs-dual-inputs-audio).
 
 **Evidence:** `results/p02-rust-helper-2026-10-08-17-14-54.txt`.
 

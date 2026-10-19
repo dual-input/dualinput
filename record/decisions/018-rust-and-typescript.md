@@ -1,13 +1,13 @@
-# 018: Crosscheck is written in Rust, and in TypeScript where an engine runs it
+# 018: Dual Input is written in Rust, and in TypeScript where an engine runs it
 
 The core, the helper, the watcher, the desktop app's program, and the WASM module are Rust, and TypeScript is for the code in Coherent GT, the desktop app's pages, plugins, and the backend ([01-spine](../areas/architecture/01-spine.md#language-and-toolchains)), while a profile's script is JavaScript in its YAML, which TypeScript checks against our declarations ([decision 045](045-profile-format-yaml-and-javascript.md)).
 The core reaches the sim through the SDK's own `SimConnect.dll` and runs plugins and write functions in QuickJS-ng, embedded through rquickjs, with memory and time limits; the desktop app is a Tauri app; and the WASM module is built with Navigraph's cargo-msfs and packaged by our own script.
 The Rust code's bindings to the SDK are generated from the SDK's headers, and the Rust components share one crate that defines the messages they trade.
-Decided by the user on 2026-10-08, in node 1.3 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it).
+Decided by the user on 2026-10-08, in node 1.3 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#dual-input-is-written-in-rust-and-in-typescript-where-an-engine-runs-it).
 
 ## Context
 
-Crosscheck's components run in runtimes that differ: Coherent GT, the sim's WebAssembly, whatever the core and the desktop app's window run in, and whatever the speech recognizer and ATC audio capture run in ([architecture plan](../areas/architecture/plan.md#13-language-and-toolchains)).
+Dual Input's components run in runtimes that differ: Coherent GT, the sim's WebAssembly, whatever the core and the desktop app's window run in, and whatever the speech recognizer and ATC audio capture run in ([architecture plan](../areas/architecture/plan.md#13-language-and-toolchains)).
 Four of the choices had something to measure:
 
 - **The watcher** runs from the pilot's login, all day, and shows the pilot its own CPU and memory use, and Node has no tray icon ([architecture plan](../areas/architecture/plan.md#131-the-watchers-runtime)).

@@ -42,7 +42,7 @@ Key events take scaled integers of their own, documented per event: `K:FLAPS_SET
 So one control can be read in one scale and written in another.
 The Synaptic A220's flap lever is read as `A:FLAPS HANDLE INDEX`, from 0 to 5, and written as `K:FLAPS_SET` with the index divided by 5 and multiplied by 16383 [7].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 Both machines must read and write each variable in the same unit, or a value arrives off by a factor such as 100 or 16383.
 A control whose read and write use different scales needs a conversion between them.
 
@@ -83,8 +83,8 @@ So FS Copilot's PA-24 profile reads the fuel pump switch as an `A:` variable and
 
 How a SimConnect client writes a settable variable, and what the sim overwrites on the next frame, is [part 4](outline.md#4-simconnect-full).
 
-**What it changes for Crosscheck.**
-For each control, Crosscheck needs to know whether its `A:` variable can be written, and for a read-only one, which event changes it.
+**What it changes for Dual Input.**
+For each control, Dual Input needs to know whether its `A:` variable can be written, and for a read-only one, which event changes it.
 The SDK answers the first question for the sim's own systems, and [part 7](outline.md#7-aircraft-specific-systems-refresher) covers aircraft that run their own.
 
 **Traps.**
@@ -127,10 +127,10 @@ A `Z:` variable belongs to one object.
 The SDK says SimConnect reads it as 0 while the object loads, and the sim resets it when the object changes or reloads [2].
 The WASM header describes it as "same as L:1 Var" [17].
 
-**What it changes for Crosscheck.**
-The sim can't tell Crosscheck which `L:` variables an aircraft uses, so that list has to come from the aircraft's files or from watching what moves ([Enumerating vs. observing](03-03-reading-and-writing.md#enumerating-vs-observing)).
-Every `L:` Crosscheck writes is visible to every other add-on in the sim.
-A value written before a flight loads doesn't survive the load, so anything Crosscheck relies on in an `L:` has to be written again after each one.
+**What it changes for Dual Input.**
+The sim can't tell Dual Input which `L:` variables an aircraft uses, so that list has to come from the aircraft's files or from watching what moves ([Enumerating vs. observing](03-03-reading-and-writing.md#enumerating-vs-observing)).
+Every `L:` Dual Input writes is visible to every other add-on in the sim.
+A value written before a flight loads doesn't survive the load, so anything Dual Input relies on in an `L:` has to be written again after each one.
 
 **Traps.**
 

@@ -9,7 +9,7 @@ Decided by the user on 2026-10-07, in node 1.1 of the [architecture plan](../are
 v1 flies the traditional way: the following machine freezes its aircraft's position, altitude, and attitude, and takes the flying machine's values ([take-control key](../areas/product/03-v1-scope.md#take-control-key)).
 In preflight, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude ([preflight](../areas/product/03-v1-scope.md#preflight)).
 A frozen aircraft keeps integrating its own velocities, so the following machine writes them along with the pose, every frame: with the pose alone, a replayed Baron's airspeed was 22 kt off within two minutes, where written velocities kept it within 3.2 kt (measured on MSFS 2024, 2026-10-03, [flight-model log](../areas/flight-model/log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)).
-If Crosscheck stops on the following machine, the aircraft unfreezes within about 1s and nothing writes to it afterward ([flight-model sync](../areas/product/03-v1-scope.md#flight-model-sync)).
+If Dual Input stops on the following machine, the aircraft unfreezes within about 1s and nothing writes to it afterward ([flight-model sync](../areas/product/03-v1-scope.md#flight-model-sync)).
 
 Where the writes come from decides whether the aircraft moves smoothly.
 Written from outside the sim each frame, the pose and velocities held on a parked Baron ([flight-model log](../areas/flight-model/log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)).
@@ -28,7 +28,7 @@ But an object written from outside stuttered in a moving cockpit (measured on MS
 
 Option 2.
 Writes from inside the sim's frame keep up with a flying aircraft where writes from outside stuttered, and our WASM module runs inside the sim, so it outlives the core and can still reach the aircraft to unfreeze it.
-Our probe module, `crosscheck-p12-follow`, held a figure in its seat from inside the sim's frame ([avatars log](../areas/avatars/log.md#2026-10-03-nose-up-and-right-wing-down-are-negative-and-turned-by-full-attitude-a-wasm-written-figure-holds-its-seat)), and the product's figures need the same module, since Crosscheck's own features hold avatars through it rather than through the aircraft's files ([decision 001](001-changing-other-developers-packages.md)).
+Our probe module, `crosscheck-p12-follow`, held a figure in its seat from inside the sim's frame ([avatars log](../areas/avatars/log.md#2026-10-03-nose-up-and-right-wing-down-are-negative-and-turned-by-full-attitude-a-wasm-written-figure-holds-its-seat)), and the product's figures need the same module, since Dual Input's own features hold avatars through it rather than through the aircraft's files ([decision 001](001-changing-other-developers-packages.md)).
 
 ## What it commits us to
 

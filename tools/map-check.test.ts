@@ -46,7 +46,7 @@ const TS: Tree = {
 }
 
 function findings(tree: Tree): Rule[] {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "crosscheck-map-check-"))
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dualinput-map-check-"))
   try {
     for (const [file, text] of Object.entries(tree)) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true })
@@ -72,7 +72,7 @@ test("a tree that keeps every rule passes", () => {
       { dir: "sim-package/routines", name: "routines", deps: ["traffic-routines", "routine-host"] },
       {
         dir: "apps/core",
-        name: "crosscheck-core",
+        name: "dualinput-core",
         deps: ["pointer-sync", "kernel", "routines"],
         source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n}\n`,
       },
@@ -199,7 +199,7 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     rules: ["foreign-functions"],
     tree: rust([
       { dir: "engines/messages", name: "messages", source: `unsafe extern "C" {\n    fn puts(s: *const u8) -> i32;\n}\n` },
-      { dir: "apps/core", name: "crosscheck-core", source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n    fn rand() -> i32;\n}\n` },
+      { dir: "apps/core", name: "dualinput-core", source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n    fn rand() -> i32;\n}\n` },
     ]),
   },
   {

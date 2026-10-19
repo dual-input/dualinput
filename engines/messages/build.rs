@@ -1,6 +1,6 @@
 //! Computes `messages::HASH`, a fingerprint of the message crate.
 //!
-//! Crosscheck's programs, on one PC and between the two pilots' PCs, talk in the messages
+//! Dual Input's programs, on one PC and between the two pilots' PCs, talk in the messages
 //! this crate defines. Two builds whose messages differ would misread each other, so each
 //! program sends the hash in its first message, and two builds with different hashes
 //! refuse to talk. A new version of an encoding crate such as serde can change the bytes a

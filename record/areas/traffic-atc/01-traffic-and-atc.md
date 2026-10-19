@@ -42,7 +42,7 @@ FS Copilot built both features, and this design carries over its measured mechan
 
 ## Names
 
-`Traffic`'s slot is `CROSSCHECK_ROUTINE_TRAFFIC`, of the routine host's kind ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)).
+`Traffic`'s slot is `DUALINPUT_ROUTINE_TRAFFIC`, of the routine host's kind ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)).
 
 ## What they register
 
@@ -94,7 +94,7 @@ The traffic host skips, in this order:
 
 1. The pilot's own aircraft, by `IS USER SIM`, and the avatar on foot; whether the parked aircraft still reads `IS USER SIM` as 1 while its pilot walks around is a [check in the sim](#cases-for-the-bench).
 2. Any object traffic itself created, which exists only on a machine whose pilot was receiving before taking the role, and goes once its removal lands ([which copies it shows](#which-copies-it-shows)).
-3. Any title starting `CROSSCHECK_`, so avatars' figures, `CROSSCHECK_FIGURE_PILOT` ([avatars](../avatars/01-avatars.md#names)), and any later object of ours never become copies.
+3. Any title starting `DUALINPUT_`, so avatars' figures, `DUALINPUT_FIGURE_PILOT` ([avatars](../avatars/01-avatars.md#names)), and any later object of ours never become copies.
 4. Any ground object whose title isn't on the allowlist.
 
 The allowlist is a list of title prefixes in traffic's crate, which starts with `ASO_Pushback_` and takes other pushback tugs as the build finds them, GSX's among them, while GSX's other vehicles and its people wait for [ground operations sync](../product/ideas.md#ground-operations-sync), which brings GSX through a plugin (user, 2026-10-17).
@@ -275,7 +275,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - The traffic host's poll answers 130 aircraft and, within 1km, 700 GSX signs and 20 `ASO_Pushback_White` tugs: identities go out for the aircraft and the tugs alone.
 - A parked aircraft's state goes out every 5s; an aircraft that starts to move sends its held sample first, then each poll's; its stop goes out on three polls, and the receiving machine draws it stopped once.
 - A poll whose answers aren't whole after 2s: dropped, and nothing goes as gone.
-- A title starting `CROSSCHECK_`: never carried.
+- A title starting `DUALINPUT_`: never carried.
 - A receiving pilot who takes the role: their copies are removed, and their poll carries none of them meanwhile.
 - A traffic host who loses the role and takes it back: every identity goes out again, and the copies come back.
 - `LinkUp`: that member gets every identity, creates every copy within 500ms, and draws them once the clock offset arrives.
@@ -307,7 +307,7 @@ In the sim:
 ## Known limits
 
 - Copies are frozen, so the sim doesn't hold them to the ground, and a receiving pilot with other scenery sees them float or sink ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
-- Crosscheck hides no other source's traffic: the notice asks the pilot to turn it off.
+- Dual Input hides no other source's traffic: the notice asks the pilot to turn it off.
 - A receiving pilot who runs an ATC app of their own hears two ATCs, since nothing finds one on a receiving machine.
 - GSX's vehicles and people, other than the pushback tugs the allowlist names, show only on the machine that runs them, until ground operations sync, and an AI aircraft's copy pushes back with no tug where its tug's title isn't on the allowlist.
 - On a following machine, copies are drawn 1s behind the traffic host, and the crew's aircraft 0.4s behind the PF, so the copies show 0.6s staler than the aircraft: a tug at 2kt to 3kt would sit 0.6m to 0.9m off the nose gear it pushes (arithmetic), and AI traffic's replies to the crew show that much later.

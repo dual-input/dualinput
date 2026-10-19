@@ -1,5 +1,5 @@
 [package]
-name = "crosscheck-msfs-sdk"
+name = "dualinput-msfs-sdk"
 version.workspace = true
 edition.workspace = true
 publish = false

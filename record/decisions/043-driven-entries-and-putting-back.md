@@ -1,7 +1,7 @@
 # 043: A shared entry every machine's aircraft keeps changing stops syncing, and a machine puts back what it may not send
 
-A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Crosscheck's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load.
-When a machine's sim reports a change Crosscheck didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
+A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load.
+When a machine's sim reports a change Dual Input didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
 Decided by the user on 2026-10-11 and 2026-10-13, in node 3 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#a-shared-entry-every-machines-aircraft-keeps-changing-stops-syncing-and-a-machine-puts-back-what-it-may-not-send).
 
 ## Context
@@ -31,7 +31,7 @@ A change a machine may not send:
 
 4. **Put nothing back, as FS Copilot did.**
    FS Copilot wrote no PF-owned value back, so a PM's throttle could spool up their own engine until the PF next moved theirs ([take-control key](../areas/product/03-v1-scope.md#take-control-key)).
-5. **Write back the value the machine holds, whenever its sim reports a change Crosscheck didn't write that the machine may not send.**
+5. **Write back the value the machine holds, whenever its sim reports a change Dual Input didn't write that the machine may not send.**
 
 ## Decision
 

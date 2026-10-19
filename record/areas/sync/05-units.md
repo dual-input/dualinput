@@ -310,7 +310,7 @@ pub fn register(r: &mut Registry) {
 ### `H:` events
 
 **Firing them.**
-State sync fires an `H:` event through a routine of its own in our WASM module, `HEvents`, whose slot is `CROSSCHECK_ROUTINE_H_EVENTS`.
+State sync fires an `H:` event through a routine of its own in our WASM module, `HEvents`, whose slot is `DUALINPUT_ROUTINE_H_EVENTS`.
 
 ```rust
 // a sketch: state sync's module of the message crate

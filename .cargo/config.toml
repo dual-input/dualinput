@@ -1,4 +1,4 @@
-# The core, Crosscheck's main program, can record a run and replay it later, and a replay
+# The core, Dual Input's main program, can record a run and replay it later, and a replay
 # has to compute exactly what the run did. Rust's math functions, such as `f64::sin`, call
 # the C runtime. Windows' own copy of it, ucrtbase.dll, changes with Windows updates, and
 # its math can give different results from the static library in the Windows SDK. So every

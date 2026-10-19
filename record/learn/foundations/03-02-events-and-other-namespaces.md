@@ -34,9 +34,9 @@ Outside calculator code, `SimConnect_TransmitClientEvent_EX1` carries up to five
 FS Copilot reverses a profile's stack order into those slots, rounds a fraction away from zero, and lets a negative number wrap, so −1 arrives as 4294967295 [5] [6].
 `K:ELEVATOR_SET` takes −16383 to 16384 [7], so its negative values travel that way.
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 A key event is an action, not a state.
-Crosscheck can replay the event a pilot's click caused, but a toggle or a step lands on whatever state the other aircraft is in, which [part 8](outline.md#8-synchronization-full) covers as relative vs. absolute actions.
+Dual Input can replay the event a pilot's click caused, but a toggle or a step lands on whatever state the other aircraft is in, which [part 8](outline.md#8-synchronization-full) covers as relative vs. absolute actions.
 Each parameter must travel as an integer, in its documented slot.
 
 **Traps.**
@@ -76,8 +76,8 @@ fsc-editor measured these on the Synaptic A220 [16] [17]:
 The A220's list holds `<InputEvent ID>` values, such as `AIRLINER_FCU_CHRONO_2`, and none of the preset names, such as `AIRLINER_FCU_CHRONO_2_Push`, that the Behaviors window shows [18].
 The PA-24's subscription reported a preset's name instead ([02-02](02-02-aircraft.md#model-behaviors)), and which rule holds for which aircraft is unverified.
 
-**What it changes for Crosscheck.**
-On an aircraft whose controls are input events, SimConnect alone tells Crosscheck which controls exist and when one moves.
+**What it changes for Dual Input.**
+On an aircraft whose controls are input events, SimConnect alone tells Dual Input which controls exist and when one moves.
 It doesn't say whether a control latches or springs back, and some aircraft declare few input events: a Black Square Bonanza declares 5 of its own ([02-02](02-02-aircraft.md#model-behaviors)).
 
 **Traps.**
@@ -105,7 +105,7 @@ FS Copilot's panel hook wraps that method on each instrument and forwards `_args
 It reports an event only from the one instrument whose random ID is in `L:FSC_HOOK` [21], because MSFS's stock `VCockpit.js` hands each `H:` event to every instrument in a document unless the sim names a target ([06-02](06-02-apis-debugger-and-injection.md#the-js-apis-coherentcall-simvar-commbus-listeners)).
 FS Copilot holds each `H:` event for 500ms before sending it to the other machine, where its WASM module fires the event through calculator code [5] [22].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 Glass cockpits and FMS keypads often talk to their displays through `H:` events, so syncing them needs code in a panel to see each event ([part 6](outline.md#6-glass-cockpits-and-coherent-gt-full)) and code in the sim to fire it.
 An `H:` event has no value to re-read, so one lost on the way leaves the two displays different, with nothing to compare.
 
@@ -131,7 +131,7 @@ Five more namespaces appear in aircraft code: `E:` for sim-wide state such as ti
 SimConnect names an `O:` or `I:` variable by its component's path, as in `O:Path:To:Component@alias:NAME` [25].
 The SDK's list has six more prefixes: `F:` for built-in functions, `G:` for gauge variables, `P:` as another name for `E:`, `R:` for localized strings, `W:` for sound events, and `X:` for mission parameters [14].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 `O:` and `I:` variables hold state inside an aircraft's model behaviors that no list exposes, and reaching one needs its component path from the aircraft's XML.
 `E:` variables hold sim-wide state, such as the simulation rate, that [part 8](outline.md#8-synchronization-full) syncs as clocks rather than as aircraft state.
 

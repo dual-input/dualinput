@@ -140,7 +140,7 @@ pub enum FromHelper {
 
 - Every `at`, `from`, and `to` is µs on `QueryPerformanceCounter`, the one timeline every process on the PC reads ([times](../architecture/01-spine.md#times)), taken in the helper as it reads the value, as the spine's rule that the reader stamps asks.
   The queue's own stamp on the input comes later, after the pipe.
-- The helper's first message is `Hello`, with Crosscheck's version and the message crate's hash as text ([versions](../architecture/01-spine.md#versions)), and `Hello` stays `FromHelper`'s first variant, with those two fields, in every build, so a helper of another build is always read.
+- The helper's first message is `Hello`, with Dual Input's version and the message crate's hash as text ([versions](../architecture/01-spine.md#versions)), and `Hello` stays `FromHelper`'s first variant, with those two fields, in every build, so a helper of another build is always read.
   A helper whose version or hash differs is logged with both and killed, and counts as down; installed together, the two differ only for a developer's stale build.
 - The helper sends `Alive` once it has sent nothing for 2s, and the service has the edge kill a helper it hasn't heard from in 8s, since a hung helper's process doesn't exit ([decision 010](../../decisions/010-clients-message-core-every-2s.md)).
   The core sends the helper no keepalive: its standard input closing tells the helper the core is gone.
@@ -149,7 +149,7 @@ pub enum FromHelper {
 
 - **It runs while anything is wanted.**
   In v1 that's in a session, where take-control watches its binding, and with no session only while the desktop app binds a key or lists devices, as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) has it, without the service knowing what a session is.
-- **Starting:** the service puts out a start, and the edge starts `crosscheck-core-helper.exe` from the core's own folder through tokio's `process::Command`, with its standard input and output piped and its standard error discarded.
+- **Starting:** the service puts out a start, and the edge starts `dualinput-core-helper.exe` from the core's own folder through tokio's `process::Command`, with its standard input and output piped and its standard error discarded.
   Its process ID, or the error that stopped it starting, comes back as an input.
   The helper is a Windows program with no console, as p08's was (read in `experiments/areas/architecture/flight/helper/src/main.rs`, `windows_subsystem`); p08 piped only its standard output (read in `experiments/areas/architecture/p08-flight.mjs`), so that such a program reads a piped standard input is unverified, and the helper's first build settles it.
 - **On `Hello`:** the service sends each sound, then the wants, whole.
@@ -196,7 +196,7 @@ The helper runs on std's threads and channels, with no async runtime, since each
 ### The devices
 
 - The output device and the microphone are each a setting of the service's: Windows' default device for the role `wasapi` documents as the one "used by most applications" (documented, [wasapi 0.25.0](https://docs.rs/wasapi/0.25.0/wasapi/enum.Role.html)), or a device the pilot picked, kept by its endpoint ID, with its name to show it by.
-- On Windows' default changing, each stream on a default device, the output's and the microphone's, opens again on the new default, so a pilot who switches headsets mid-session hears Crosscheck, and is heard by it, in the new one.
+- On Windows' default changing, each stream on a default device, the output's and the microphone's, opens again on the new default, so a pilot who switches headsets mid-session hears Dual Input, and is heard by it, in the new one.
 - When no device has the picked endpoint ID, the helper takes one with the picked name, since Windows may give a USB headset plugged into another port a new endpoint ID (unverified); with neither, it plays or listens on Windows' default instead, and moves back when the device returns.
   The helper reports what it uses in `InUse`, which the core logs, so a bug report shows where sound went, and the service shows a warning naming the missing device while it's gone.
 - While `lists` is on, the helper answers with the output devices, the microphones, and the programs that own an audio session, which FS Copilot's "Choose another…" lists for the ATC app (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Choosing the ATC app"), and the service puts them in a slice for the desktop app.
@@ -237,7 +237,7 @@ The helper runs on std's threads and channels, with no async runtime, since each
 
 The helper encodes and decodes Opus through opus-rs, a pure-Rust port of libopus 1.6, at the version the helper's stage of the build pins (user, 2026-10-16).
 
-- Nothing else in Crosscheck depends on ATC audio or the cues, so we take a young codec there, and the codec sits behind three calls, to encode a frame, decode one, and conceal a lost one, with the same build at both ends.
+- Nothing else in Dual Input depends on ATC audio or the cues, so we take a young codec there, and the codec sits behind three calls, to encode a frame, decode one, and conceal a lost one, with the same build at both ends.
   If the bench finds it falls short, `opus` 0.4.0, bindings to libopus 1.6.1, takes its place, which changes one crate and no message, and puts CMake on every build machine, since `opus` 0.4.0 builds libopus through opusic-sys 0.7, whose bundled build runs CMake (read on crates.io, 2026-10-16; documented, [opusic-sys](https://github.com/DoumanAsh/opusic-sys)).
   Every libopus binding we found builds that way (read 2026-10-16 in the dependencies crates.io lists for opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0, each with `cmake`), and nothing else in our build uses CMake (read in our probes' `Cargo.lock` files, which hold `cc` and `ring` and no `cmake`).
 - opus-rs claims test suites against libopus, 13 fuzz targets, loss concealment "as libopus does", and speed "competitive with C libopus", and has 53 stars and one maintaining organization (documented, [opus-rs](https://github.com/restsend/opus-rs), read 2026-10-16); we've checked none of it.
@@ -284,7 +284,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - Clicks with another program in front, or in a popped-out display, never cross.
 - On a monitor scaled to 150%, a click in the top-left corner of the sim's window's client area crosses as x −1, y 1, and one in the bottom-right as x 1, y −1.
 - Windows' default output device changes while a sound plays, and the sound carries on in the new device; Windows' default microphone changes, and a phrase is still heard.
-- A picked headset is unplugged: Crosscheck plays on Windows' default and warns, and goes back to the headset when it's plugged into another port.
+- A picked headset is unplugged: Dual Input plays on Windows' default and warns, and goes back to the headset when it's plugged into another port.
 - Our recorded "you have control" plays through desk speakers beside the microphone, and opens no offer.
 - The captured program exits and starts again: the capture stops, then attaches again, and with the program at 30% in the Windows mixer, its frames arrive at full level.
 - Audio below the gate never crosses.

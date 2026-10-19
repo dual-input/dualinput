@@ -15,7 +15,7 @@ The EFB app is its own app on the sim's EFB framework, not the desktop app reuse
 1. **The desktop app's interface running in the EFB too.**
    03-v1-scope leaves it out of v1: Coherent GT rejects syntax newer tools emit and lacks APIs a desktop interface uses (measured on MSFS 2024, 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), and fitting the main app to it would hold the main app back ([03-v1-scope](../areas/product/03-v1-scope.md#efb-app)).
 2. **React, built with Vite and styled with Tailwind, for the desktop app's pages alone**, sharing only logic and types with the EFB app.
-   Crosscheck then has two interfaces, one in each app, which the EFB app's rule keeps to one implementation: it shows the core's state and sends it commands, and decides nothing itself ([03-v1-scope](../areas/product/03-v1-scope.md#efb-app)).
+   Dual Input then has two interfaces, one in each app, which the EFB app's rule keeps to one implementation: it shows the core's state and sends it commands, and decides nothing itself ([03-v1-scope](../areas/product/03-v1-scope.md#efb-app)).
 
 The record weighed no other framework for the desktop app's pages.
 

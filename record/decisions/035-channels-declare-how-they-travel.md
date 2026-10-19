@@ -45,7 +45,7 @@ The newest-only slots changed nothing on iroh's relay, and on a direct path, whe
 ## What it commits us to
 
 - v1's channels have fixed numbers in the message crate, each stream opens with a header naming its channel, and a channel in the cockpit's shared order rides the cockpit stream, tagged with its channel.
-- A plugin opens only instances of the kinds of channel Crosscheck provides, object mirroring and audio capture, and announces each on the session channel ([01-between-machines](../areas/network/01-between-machines.md#channels)).
+- A plugin opens only instances of the kinds of channel Dual Input provides, object mirroring and audio capture, and announces each on the session channel ([01-between-machines](../areas/network/01-between-machines.md#channels)).
 - A new connection's first message carries every session key, and a core applies nothing else from the connection until it has passed; catch-up starts again on the new connection.
 - Every session key but control carries a stamp: the control value its writer held, a number one past the highest its writer has seen on that key, and the writer's pilot ID.
   A receiver keeps the value with the highest stamp, comparing control values first, as [decision 036](036-control-is-one-value.md) orders them, then the numbers, with the lower pilot ID winning a tie ([01-between-machines](../areas/network/01-between-machines.md#channels)).

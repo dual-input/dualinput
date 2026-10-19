@@ -31,7 +31,7 @@ The kind decides who reads it and what shape it takes.
 | Chapter            | `record/learn/<course>/NN-<slug>.md`                                     | understand one part of a course well enough to use it                                  |
 | Agent instructions | `CLAUDE.md` and `.claude/`, including rules such as this file            | act correctly without asking                                                           |
 | Study              | `record/areas/aircraft/<aircraft>/study.md`                              | know how one aircraft is built, where its state lives, and what changes it             |
-| Ideas              | `record/areas/product/ideas.md`                                          | know what Crosscheck might do, how promising each idea looked, and what we left out    |
+| Ideas              | `record/areas/product/ideas.md`                                          | know what Dual Input might do, how promising each idea looked, and what we left out    |
 
 A document that's two kinds at once serves neither reader.
 A design doc that also tracks progress goes stale in its progress half and takes the design half down with it.
@@ -215,7 +215,7 @@ So every MSFS-specific claim, and any other claim a reader could ask "says who?"
 
 For a source in another of our repositories, cite the repository, the path, and for a log the entry heading, as text, because a link would break for anyone else: `(measured on MSFS 2024, 2026-08-30, FS Copilot fork, record/pointer-forwarding/docs/09-environment.md)`.
 
-Crosscheck targets MSFS 2024, so a claim is about 2024 unless it says otherwise.
+Dual Input targets MSFS 2024, so a claim is about 2024 unless it says otherwise.
 When a source describes MSFS 2020, say so, because 2024 may behave differently.
 
 A claim with no marker is knowledge a working developer accepts without a source, like "UDP doesn't guarantee delivery".
@@ -260,7 +260,20 @@ Contractions are fine wherever you'd say them aloud.
 
 **American English**, with the Oxford comma.
 Names keep their own spelling.
-The product is Crosscheck, capitalized.
+
+**The product is Dual Input**, two capitalized words, in prose, headings, and anything a pilot reads.
+A name that can't hold a space joins the two words, and shows the break with a capital where its casing allows one:
+
+| Where | Form |
+| --- | --- |
+| Lowercase names: our package's folder, crates, programs, and the link scheme | `dualinput`, as in `dualinput-core.exe` |
+| Names the sim shares, and environment variables | `DUALINPUT`, as in `DUALINPUT_CORE_ANNOUNCE` |
+| Types, Windows folders, Velopack's pack ID, and folders inside our package | `DualInput`, as in `%APPDATA%\DualInput\` |
+| JavaScript and TypeScript variables and functions | `dualInput` |
+
+The one exception is the GitHub organization, `dual-input`, because GitHub wouldn't take `dualinput`.
+Dual Input was called Crosscheck until 2026-10-19.
+`experiments/` and every `results/` folder keep that name, and so does a log where it quotes what a probe ran, because they record what ran.
 
 ## Words and patterns to cut
 
@@ -339,7 +352,7 @@ The code already states what it does, so a comment earns its place by saying wha
 
 1. **When a comment explains why the code is this way, open with the stakes:** what the code makes possible or prevents, then the fact that shapes it, then the choice the code makes because of it.
    A fact that doesn't lead to the code below gets cut, because a reader forgets facts that connect to nothing.
-2. **Define a project term in a clause before using it**, as in "the core, Crosscheck's main program", and explain an oddity before the rule that handles it.
+2. **Define a project term in a clause before using it**, as in "the core, Dual Input's main program", and explain an oddity before the rule that handles it.
 3. **Cite only what a reader would doubt and couldn't check quickly**, with at most one pointer, at the end.
    A workaround for sim behavior always cites how we know, as a document does: a log entry, a document in `record/`, or an SDK page.
    Skip the citation for anything a compiler or tool reports the moment it breaks.

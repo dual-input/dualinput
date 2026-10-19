@@ -44,7 +44,7 @@ The session crate and Go to each register a slice of client state, which [slices
 - The `status` key's links let every pilot's banner show the whole crew, as [the connection](../product/03-v1-scope.md#the-connection) asks, and tell a member that can't reach a leaver that they left, as [leaving](../network/01-between-machines.md#leaving) asks of the session channel.
 - A member that leaves takes its own keys with it, and the session crate clears every session-wide key whose value names it.
 - The display name is a setting the session crate registers, empty at first, which any app writes with `clients`' settings command ([settings](../interface/01-apps.md#settings)).
-  Host and Join answer that a name is needed while it's empty, and Crosscheck asks the pilot for one, in a place the apps' design picks.
+  Host and Join answer that a name is needed while it's empty, and Dual Input asks the pilot for one, in a place the apps' design picks.
   Nothing fills it from the Windows account, whose name would reach crewmates, their recordings, and our R2 (user, 2026-10-16).
 - Each member joining, and each one gone, raises `MemberJoined` or `MemberGone`, and the session crate tells the recording crate the joiner's display name ([the index](../recording/01-recording-and-bug-reports.md#the-index)).
 
@@ -222,7 +222,7 @@ me.on::<FlightChanged>(|me, _, cx| cx.set_match(rate_and_pause::TIME_OF_DAY, me.
 - A pilot out of the flight sees where the PF is, in the desktop app, such as "James is at EGLL, PARKING 140", and Go to:
   - points the world map at the PF's departure airport and selects the PF's stand while the PF's engines are off;
   - selects the first runway the world map lists for that airport while they run, so the joiner's aircraft starts with its engines running, which catch-up can't give it, since it writes each entry once at the PF's value and an engine start takes time (inference); a runway start runs the engines (reported by the user, 2026-10-16).
-  - Crosscheck then moves the joiner's aircraft to the PF, airborne or not, as flight-model sync does for every joiner.
+  - Dual Input then moves the joiner's aircraft to the PF, airborne or not, as flight-model sync does for every joiner.
 - It never names a stand the PF taxied to, since a joiner is moved to the PF anyway; with no `[Departure]` airport, Go to is unavailable and says so.
 - It's available by sim awareness's page, while the menu script is connected, as [preflight](../product/03-v1-scope.md#preflight) limits it.
 - It runs as the sim service's `world_map` requests, each answered before the next goes ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls)), and a failed step shows the pilot which step failed.

@@ -151,7 +151,7 @@ pub fn register(r: &mut Registry) {
 
 ```ts
 // a sketch: pointer sync's panel module, built by esbuild at es2017 into pointer-sync.js
-CROSSCHECK_BRIDGE_API.define("pointer-sync", {
+DUALINPUT_BRIDGE_API.define("pointer-sync", {
   start(ctx) {
     for (const display of ctx.instruments) capture(display, ctx);   // the instruments `load` named for this module
     ctx.on("gesture", play);                                       // another pilot's Down, Move, Held, or Up

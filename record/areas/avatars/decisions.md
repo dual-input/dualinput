@@ -9,13 +9,13 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 
 ## The hand goes where the pilot clicks, found from the aircraft's geometry
 
-- **Decided:** at each click, Crosscheck casts the ray from the pilot's eye through the cursor into the aircraft's own model, and the hand goes to the point the ray meets.
+- **Decided:** at each click, Dual Input casts the ray from the pilot's eye through the cursor into the aircraft's own model, and the hand goes to the point the ray meets.
   Nothing names the control: no input event, variable, or behavior component.
 - **Because:** picking the control by the input event that changed failed in the Comanche, where none of the sim's 318 input events matched the names in the aircraft's behavior XML ([log](log.md#2026-10-03-the-cockpit-models-own-space-lines-up-with-simconnects-within-8mm-but-the-models-input-event-ids-arent-the-names-the-sim-lists)), while the ray landed within 2mm of known spots ([log](log.md#2026-10-03-the-ray-through-the-cursor-needs-no-calibration-cameragets-field-of-view-is-the-views-height-and-clicks-land-within-2mm-at-any-zoom-and-window-shape)).
 
 ## The clicking pilot's machine finds the point, and the other machine only draws it
 
-- **Decided:** on the clicking pilot's machine, Crosscheck's core reads the models, the camera, and the cursor, and finds each hand's point ([architecture's tentative decisions](../architecture/decisions.md#the-core-works-out-where-the-figures-hand-goes), 2026-10-07).
+- **Decided:** on the clicking pilot's machine, Dual Input's core reads the models, the camera, and the cursor, and finds each hand's point ([architecture's tentative decisions](../architecture/decisions.md#the-core-works-out-where-the-figures-hand-goes), 2026-10-07).
   The other machine receives the points, relative to the aircraft, and its WASM module places the figure there every frame.
   A hand holding the yoke is the exception: the clicking pilot's machine sends which hand holds which grip, and the other machine places that grip from its own yoke, so the hand stays on its horn on every machine (user, 2026-10-17).
 - **Because:** both pilots fly the same aircraft package, so a point relative to the aircraft means the same on both machines, and the other machine casts no ray.
@@ -36,7 +36,7 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 
 ## The models come from the aircraft's own package
 
-- **Decided:** from the aircraft's title, Crosscheck finds its `aircraft.cfg` and `model.cfg`, then the interior and exterior models' most detailed glTF, and reads them once per aircraft.
+- **Decided:** from the aircraft's title, Dual Input finds its `aircraft.cfg` and `model.cfg`, then the interior and exterior models' most detailed glTF, and reads them once per aircraft.
 - **Because:** the eight Community aircraft packages we looked in on our development machine ship their models as `.gltf` files (read in a2a-aircraft-aerostar600 1.0.6, a2a-aircraft-pa24 2.1.3, bksq-aircraft-baronpro 0.1.1, fnx-aircraft-320 2.4.0.4720, inibuilds-aircraft-a350 1.2.6, inibuilds-aircraft-l1011 1.0.8, pmdg-aircraft-77w 2.4.143, and synaptic-aircraft-a220 1.0.10, 2026-10-03).
   Our probe loaded the Comanche's cockpit model, 650,660 triangles, in 150ms ([log](log.md#2026-10-03-a-clicks-ray-cast-into-the-cockpit-model-finds-the-control-the-pilot-clicked-with-no-names-but-the-run-couldnt-pin-down-the-field-of-view)).
 - **Leaves out:**
@@ -45,7 +45,7 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
 
 ## The model is posed only from code in the aircraft's own files
 
-- **Decided:** before a cast, Crosscheck moves the parts of its copy of the model, and hides the parts the sim hides, by running the animation and visibility code in the aircraft's behavior XML on the `A:` and `L:` variables that code reads.
+- **Decided:** before a cast, Dual Input moves the parts of its copy of the model, and hides the parts the sim hides, by running the animation and visibility code in the aircraft's behavior XML on the `A:` and `L:` variables that code reads.
   Parts that sim templates drive, and parts whose code keeps its own state from frame to frame, stay as the files store them.
 - **Because:** posing the yoke from its own code kept the hand on it through its whole travel ([log](log.md#2026-10-03-one-hand-holds-the-yoke-through-its-whole-travel-posed-from-the-aircrafts-own-code-while-the-other-taps-and-they-swap-by-side)), and expanding the sim's template library would be a project of its own.
 - **Leaves out:** parts the files don't pose: the Baron's throttle, prop levers, and gear, which sim templates drive, and its wing flex, whose code keeps its own state ([log](log.md#2026-10-03-inside-with-the-cockpit-posed-a-fresh-cast-stays-on-a-posed-lever-but-still-falls-through-one-the-file-holds-still), [log](log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
@@ -124,7 +124,7 @@ Every decision here was reached on 2026-10-03 with our test pilot, from probes o
   VR brings no hand.
   On foot, the arm touches a spot up to 3m away and points at one farther (user, 2026-10-17).
 - **Because:** our test pilot chose that only a click brings the hand, and the v1 scope reversed it on 2026-10-04, so the crew also sees what a pilot changes from a home cockpit or a key binding.
-  Crosscheck can't tell a pilot's hardware from the aircraft: the platform raises "cockpit sent" for each change a machine sends on the cockpit stream ([02-code-map](../architecture/02-code-map.md#what-a-handler-sees-and-does)), and a change the aircraft makes itself syncs like a pilot's ([state sync](../product/03-v1-scope.md#state-sync)).
+  Dual Input can't tell a pilot's hardware from the aircraft: the platform raises "cockpit sent" for each change a machine sends on the cockpit stream ([02-code-map](../architecture/02-code-map.md#what-a-handler-sees-and-does)), and a change the aircraft makes itself syncs like a pilot's ([state sync](../product/03-v1-scope.md#state-sync)).
   The Baron takes its chocks away once it moves (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-the-barons-ground-contact-follows-the-written-altitude-and-its-own-physics-writes-dont-hold-against-ours)), and the KFC 150's disengage clears the flight director and six modes together (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so a `location` on any of them would send the PF's hand there unasked.
   Whether the sim's autopilot moves the 58P's elevator trim is unverified, and a recording of a 58P flight, such as [p10](../../../experiments/areas/architecture/p10-recording.mjs)'s, would show what the aircraft moves itself.
   No probe has run in VR, so whether a VR click gives a cursor place the ray can use is unknown (unverified).

@@ -6,7 +6,7 @@ Decided by the user on 2026-10-08, in node 1.3 of the [architecture plan](../are
 
 ## Context
 
-The core reads the pilot's keyboard and flight hardware for the take-control input ([decision 006](006-core-catches-take-control-input.md)), and runs Crosscheck's audio: the microphone and the speech recognizer, the ATC app's audio captured by process, and playback on the device the pilot picks ([decision 007](007-core-runs-audio.md)).
+The core reads the pilot's keyboard and flight hardware for the take-control input ([decision 006](006-core-catches-take-control-input.md)), and runs Dual Input's audio: the microphone and the speech recognizer, the ATC app's audio captured by process, and playback on the device the pilot picks ([decision 007](007-core-runs-audio.md)).
 Node 1.1 raised whether that native code runs in the core's own process or in a process the core supervises, since a crash in native code inside the core's process takes the core down, and the pilot out of the session until the core restarts ([architecture plan](../areas/architecture/plan.md#13-language-and-toolchains)).
 
 ## Options

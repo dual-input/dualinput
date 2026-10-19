@@ -461,7 +461,7 @@ It leads on two conditions nobody has measured: its relay's TCP stalls mustn't s
 Neither has a pass line yet; we expect stalls across an ocean to break a 60ms audio buffer, so the user sets the audio buffer and the switch time we'd accept from 2.3's counts, before node 2 picks.
 [2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks) measures both, against a UDP relay under the same injected loss.
 If iroh fails either, 2.1 reopens, and ICE through `is` with TURN and quinn, over one QUIC connection, comes next.
-On any QUIC option, Crosscheck drops a waiting flight-model sample as soon as a newer one is ready, because QUIC's one-off queue drops the oldest only when its 1 MiB fills, thousands of stale samples at 150 bytes each (research digest).
+On any QUIC option, Dual Input drops a waiting flight-model sample as soon as a newer one is ready, because QUIC's one-off queue drops the oldest only when its 1 MiB fills, thousands of stale samples at 150 bytes each (research digest).
 It paces bulk transfers so they never crowd the flight model.
 
 **Affects:** [2.3](../architecture/plan.md#23-a-probe-across-friends-home-networks), node 2's design doc, and the spine's [between machines](../architecture/01-spine.md#between-machines), which leaves the relay's language to node 2: iroh's relay is Rust.
@@ -556,8 +556,8 @@ The idle runs `p01-turn-peer-cap-2026-10-10-08-36-28.txt` and `p01-turn-peer-cap
 - A pilot sends about 5 KB/s, by an estimate from packet sizes in an FS Copilot architecture document older than its code, with the rate of variable updates assumed, not measured (FS Copilot profiles, `docs/synchronization.md`).
   At that rate, a relayed two-pilot session sends 36 MB an hour out of the relay, the direction DigitalOcean bills, so 500 GB carries about 13,900 relayed session-hours a month.
 
-**Changed:** one $4 server carries the relayed sessions until crews fly about 46,000 hours a month in all, if 30% of them go through the relay, and more if fewer do, so the aim of about $10 a month holds while Crosscheck stays that small and sends no more than FS Copilot does; how many hours crews will fly is unknown.
-Crosscheck connects directly first, with IPv6, a port opened on the router, and port probing, and falls back to the relay.
+**Changed:** one $4 server carries the relayed sessions until crews fly about 46,000 hours a month in all, if 30% of them go through the relay, and more if fewer do, so the aim of about $10 a month holds while Dual Input stays that small and sends no more than FS Copilot does; how many hours crews will fly is unknown.
+Dual Input connects directly first, with IPv6, a port opened on the router, and port probing, and falls back to the relay.
 The real share for our pilots gets measured later: a script that friends run for a minute, with no sim, can report the kind of NAT each sits behind, and opt-in telemetry after launch can count the sessions that went through the relay.
 
 **Affects:** [01-aims](../product/01-aims.md#relay-and-license), and the plan's step 6.

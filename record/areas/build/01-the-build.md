@@ -10,13 +10,13 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > Since 2026-10-18, the relays' tokens live in a private repository of ours rather than in `relays/relays.toml` ([the network's units](../network/02-units.md)), so the build job in [a release](#a-release) also checks that repository out, with a read-only key from this repository's secrets, and the network crate's build compiles each release's default relay list from both; a release build stops when a relay in `relays/relays.toml` has no token.
 > A pull request's build carries no tokens, and the network's tests run through a local relay with a test token (user, 2026-10-18).
 >
-> Since 2026-10-18, `tools/` also holds `replay.ts`, which fetches the release a recording names from GitHub, takes `crosscheck-core.exe` from its full package, and replays with it, so a release's recording needs no rebuild and no older SDK; [left open](#left-open)'s item on older SDK installers then bears only on a rebuild for added logging ([01-loop-and-edge](../core/01-loop-and-edge.md); user, 2026-10-18).
+> Since 2026-10-18, `tools/` also holds `replay.ts`, which fetches the release a recording names from GitHub, takes `dualinput-core.exe` from its full package, and replays with it, so a release's recording needs no rebuild and no older SDK; [left open](#left-open)'s item on older SDK installers then bears only on a rebuild for added logging ([01-loop-and-edge](../core/01-loop-and-edge.md); user, 2026-10-18).
 >
 > Since 2026-10-18, [testing](02-testing.md) adds to [CI](#ci) and [a release](#a-release): a pull request that changes code also runs the unit tests and the bench; each merge to `main` runs the bench again, recording every input; the build job's third step runs both passes of the bench; a short session in the sim, on a build of the commit, comes before a person runs the release workflow; and the workflow takes that commit, and its build job's first step also stops when `main`'s head isn't it ([what keeps CI green](02-testing.md#what-keeps-ci-green), [before a release](02-testing.md#before-a-release)).
 >
 > Since 2026-10-18, `.cargo/config.toml` holds an `[env]` table beside [the C runtime](#the-c-runtime)'s one entry, setting ts-rs's `TS_RS_EXPORT_DIR` to the message crate's `ts/` and `TS_RS_LARGE_INT` to `number`, so a plain `cargo test` writes the types where [the message crate's hash](#the-message-crates-hash) has them; and the build reads the installed SDK's version from the first line of `version.txt`, since cargo-msfs writes a build number after it ([log](log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import)).
 
-`tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `crosscheck`.
+`tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.
 The Coherent GT check is a Node tool of its own on acorn, run on every bundle after each edit and in CI, and the message crate's hash is SHA-256 over its own source and the locked versions of what it depends on.
 A release runs by hand on `main`: a job that can't write to the repository builds, checks, and packs it, and a job that can uploads it as a draft, checks the draft, deploys the backend, and publishes it.
@@ -31,10 +31,10 @@ The research behind it is in this area's [log](log.md).
 
 | In the folder | Built by |
 | --- | --- |
-| `crosscheck-desktop.exe` | `tauri build --no-bundle`, which builds the desktop app's pages and then its Rust side with Tauri's `custom-protocol` feature, so the program serves its built pages (read in tauri-apps/tauri at tag tauri-cli-v2.12.3, [results][velopack]); a plain `cargo build` of it would most likely look for Vite's server instead (inference, same results) |
-| `crosscheck-core.exe` and `crosscheck-core-helper.exe` | `cargo build --release` |
+| `dualinput-desktop.exe` | `tauri build --no-bundle`, which builds the desktop app's pages and then its Rust side with Tauri's `custom-protocol` feature, so the program serves its built pages (read in tauri-apps/tauri at tag tauri-cli-v2.12.3, [results][velopack]); a plain `cargo build` of it would most likely look for Vite's server instead (inference, same results) |
+| `dualinput-core.exe` and `dualinput-core-helper.exe` | `cargo build --release` |
 | `SimConnect.dll` | Copied from the pinned SDK ([the SDK](#the-sdk)), for the core, which loads it from its own folder |
-| `crosscheck\` | Our Community package ([our package](#our-package)) |
+| `dualinput\` | Our Community package ([our package](#our-package)) |
 
 The module's routines, the panel modules, and the default relay list build as [the sync units](../sync/05-units.md#h-events), [flight-model sync](../flight-model/01-flight-model-sync.md#what-this-adds-to-our-wasm-module), [traffic and ATC](../traffic-atc/01-traffic-and-atc.md#the-units), [plugins and the sandbox](../plugins/01-plugins.md#reading-it-in-the-panel), and [the network's units](../network/02-units.md#their-configuration) give them, and no release carries the tools ([authoring tools](#authoring-tools)).
 
@@ -59,7 +59,7 @@ rustflags = ["-C", "target-feature=+crt-static"]
 
   ```rust
   #[cfg(all(target_env = "msvc", not(target_feature = "crt-static")))]
-  compile_error!("crosscheck-core must link the C runtime statically: RUSTFLAGS replaced the +crt-static of .cargo/config.toml");
+  compile_error!("dualinput-core must link the C runtime statically: RUSTFLAGS replaced the +crt-static of .cargo/config.toml");
   ```
 
   CI installs Rust with rustup from `rust-toolchain.toml`, rather than through `actions-rust-lang/setup-rust-toolchain`, whose v1.17.0 sets `RUSTFLAGS="-D warnings"` by default (read in its `action.yml`, [log][crt]).
@@ -91,7 +91,7 @@ rustflags = ["-C", "target-feature=+crt-static"]
 
 ## Our package
 
-- **One package,** in a folder named `crosscheck` with the order hint `PANEL_PATCH`, holds our code in the sim and its pages, the EFB app among them, our `VCockpit.js` and BlurPage copies, our WASM module, the figure's SimObject, and the banner's in-game panel.
+- **One package,** in a folder named `dualinput` with the order hint `PANEL_PATCH`, holds our code in the sim and its pages, the EFB app among them, our `VCockpit.js` and BlurPage copies, our WASM module, the figure's SimObject, and the banner's in-game panel.
   - FS Copilot's one package holds its WASM module and its `html_ui` both (read in the FS Copilot fork, `FsCopilot.Bridge/PackageDefinitions/fscopilot-bridge.xml`), and the spine's rule of a package for each standalone module keeps two modules apart ([code in the sim](../architecture/01-spine.md#code-in-the-sim)), while we ship one.
   - That settles what [installing and updating](../install/01-installing-and-updating.md#left-open) leaves to this design.
 - **The mount order.** Within one order hint's group, the package later in the alphabet wins a file both hold ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)).
@@ -99,7 +99,7 @@ rustflags = ["-C", "target-feature=+crt-static"]
   The sim's report on our machine lists the group with no hint before `UI_PATCH`, `PANEL_PATCH`, and `CUSTOM_INSTRUMENT` (read on our development machine, 2026-10-18, [results][msfs]), though that this is the mount order across groups is unverified.
   The Package Reorder Tool's page says the order within one priority "is not guaranteed" (documented, [Developer Mode's tools](https://docs.flightsimulator.com/msfs2024/retail/devmode/menus/tools/)).
   - FS Copilot's generated package, `fscopilot-bridge`, with `PANEL_PATCH`, ran its `VCockpit.js` in the A220's panels (measured on MSFS 2024, 2026-09-01, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-01 - Single-machine cockpit validation: the production pipeline works"), so ours takes the same hint; whether `PANEL_PATCH` is what makes an override work is unverified ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
-  - `fscopilot-bridge` sorts after `crosscheck` in the same group, so FS Copilot's most likely wins over ours (inference from the documented rule, not run; [cases for the bench](#cases-for-the-bench)).
+  - `fscopilot-bridge` sorts after `dualinput` in the same group, so FS Copilot's most likely wins over ours (inference from the documented rule, not run; [cases for the bench](#cases-for-the-bench)).
   - YourControls' package carries no hint (read, [results][msfs]), so it most likely mounts before ours and loses (inference from the report's order).
   - Either way the sim service's warning names the other package, while a name or group that mounted after FS Copilot's would make ours win and break FS Copilot with no word from it.
 - Our probes ran an in-game panel, the EFB app, and BlurPage's copy only from packages with other hints, and a SimObject in a `PANEL_PATCH` package is untried, so one boot of our package in the sim settles all four ([cases for the bench](#cases-for-the-bench)).
@@ -204,7 +204,7 @@ The **build job**, whose token reads the repository and can't write to it:
 5. It runs `vpk download github`, which fetches the newest release's full package so `vpk pack` can make a delta, and fails unless that package is the one `releases/latest` holds, or none came and no release is published.
    That one check catches both ways the delta's base goes wrong: `vpk` exits 0 having fetched nothing, and its feed takes in any draft its token can list ([log][vpk]).
 6. It runs `vpk pack` with the desktop app as the main program, `--framework webview2`, and `--shortcuts StartMenuRoot` ([the installer and the updater](../install/01-installing-and-updating.md#the-installer-and-the-updater)), and keeps what it wrote as the job's artifact.
-   It also passes `--packId Crosscheck`, which never changes, since Setup.exe's folder most likely takes that name (inference, [results][velopack]), and `--noPortable`, so no release carries a portable copy that no design covers.
+   It also passes `--packId DualInput`, which never changes, since Setup.exe's folder most likely takes that name (inference, [results][velopack]), and `--noPortable`, so no release carries a portable copy that no design covers.
 
 The **publish job**, whose token can write releases, then:
 
@@ -219,7 +219,7 @@ A third job, which needs the publish job, calls the profiles' workflow, which pu
 - A release with nothing attached stops at the publish job's third step, where fsc-editor's v0.1.0 shipped empty while its publisher logged a warning and exited 0 (fsc-editor, commit 7b2348e).
 - A run that fails after publishing is run again with GitHub's "Re-run failed jobs", since a new run stops at its first step.
 - The tag is the bare version, such as `1.0.0`, as `vpk upload github` writes it (read, [results][velopack]), and the profiles' job reads each release's level from those tags.
-- Every release on the repository is Crosscheck's, so the newest 10 releases `GithubSource` lists are ours; the Coherent GT check's releases are its own repository's.
+- Every release on the repository is Dual Input's, so the newest 10 releases `GithubSource` lists are ours; the Coherent GT check's releases are its own repository's.
 
 ## The backend
 
@@ -231,10 +231,10 @@ A third job, which needs the publish job, calls the profiles' workflow, which pu
 
 v1 ships no authoring tool (user, 2026-10-18):
 
-- `crosscheck-profile-builder` and `tools/profile-author` run from the repository with `cargo run`, for the core team, and CI's profiles' job runs the builder to publish.
+- `dualinput-profile-builder` and `tools/profile-author` run from the repository with `cargo run`, for the core team, and CI's profiles' job runs the builder to publish.
 - Both are Rust on the workspace's engines and platform crates, and the profile author tool needs the SDK too, so running one from a clone takes [the workspace](../architecture/02-code-map.md#the-workspace)'s whole setup on a new PC, which a pilot who writes YAML won't have; the IDE brings authoring to them later (user, 2026-10-18).
 - A contributor without that setup can still send a profile's change as a pull request, and CI's check reports on it, while testing a bundle in their own core waits for the IDE.
-- That settles the profiles' units' [left open](../profiles/02-units.md#left-open) item on the builder program: it keeps the name `crosscheck-profile-builder`, and authors get it with the repository.
+- That settles the profiles' units' [left open](../profiles/02-units.md#left-open) item on the builder program: it keeps the name `dualinput-profile-builder`, and authors get it with the repository.
 
 ## Budgets
 

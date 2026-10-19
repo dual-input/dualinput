@@ -20,8 +20,8 @@ The Steam and Microsoft Store installs keep `UserCfg.opt` in different places [1
 On our Steam development machine the line reads `InstalledPackagesPath "…\Microsoft Flight Simulator 2024\Packages"`, and that folder holds `Community`, `Community2024`, `Official2020`, `Official2024`, and `StreamedPackages` [2].
 A path that doesn't come from this line can be wrong, because a user can move the packages folder [2].
 
-**What it changes for Crosscheck.**
-Crosscheck's installer has to read `InstalledPackagesPath` from both locations rather than guess a folder, as FS Copilot's and fsc-editor's installers do [1] [2].
+**What it changes for Dual Input.**
+Dual Input's installer has to read `InstalledPackagesPath` from both locations rather than guess a folder, as FS Copilot's and fsc-editor's installers do [1] [2].
 
 ## Packages and the virtual file system
 
@@ -68,8 +68,8 @@ A new or reinstalled package needs a sim restart, because the sim reads `layout.
 An edit to a file the package already lists doesn't need one: reloading a panel through the Coherent debugger picked up an edited `hook.js` [10].
 A package built in the Project Editor is mounted into the running sim at once [11].
 
-**What it changes for Crosscheck.**
-If Crosscheck ships a package, each install or update costs the pilot a sim restart, so the app has to tell "installed but not loaded" apart from "not installed", as fsc-editor's does [2].
+**What it changes for Dual Input.**
+If Dual Input ships a package, each install or update costs the pilot a sim restart, so the app has to tell "installed but not loaded" apart from "not installed", as fsc-editor's does [2].
 If it overrides a core file, it competes with FS Copilot and YourControls, which replace `VCockpit.js` too ([chapter 1](01-prior-art-and-crew-practice.md#prior-art)), and the mount order picks the winner [4].
 [Part 6](outline.md#6-glass-cockpits-and-coherent-gt-full) covers panel injection and its load-order conflicts.
 

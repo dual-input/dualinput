@@ -62,8 +62,8 @@ FS Copilot tries both when it starts, through the Open.Nat.V2 library, version 3
 When UPnP finds a router, the app binds its socket to the local address that faces that router and asks for the same port number outside as inside [9].
 On our development machine, neither a UPnP search for an Internet Gateway Device nor a NAT-PMP request to the router got an answer [3].
 
-**What it changes for Crosscheck.**
-Some pilots will be behind NATs that no app can open, behind CGNAT or a NAT that maps per destination, so Crosscheck can't rely on port forwarding or UPnP to make a pilot reachable.
+**What it changes for Dual Input.**
+Some pilots will be behind NATs that no app can open, behind CGNAT or a NAT that maps per destination, so Dual Input can't rely on port forwarding or UPnP to make a pilot reachable.
 How many pilots are in that position is unknown.
 
 **Traps.**
@@ -132,8 +132,8 @@ FS Copilot's procedure next to it:
 | Test | Every pair of host, server-reflexive, and relayed candidates | Punches to the other's private and public endpoints |
 | Relay | Relayed candidates, checked with the rest | A separate relay protocol, after 4s without a direct link [17] |
 
-**What it changes for Crosscheck.**
-A direct link needs a rendezvous server both pilots can reach, and some pairs will never get one, so Crosscheck needs a second path and a way to tell which case a pair is in.
+**What it changes for Dual Input.**
+A direct link needs a rendezvous server both pilots can reach, and some pairs will never get one, so Dual Input needs a second path and a way to tell which case a pair is in.
 How long to try for a direct link before falling back trades the time a join takes against the traffic a relay carries, and it's an open question.
 
 **Traps.**

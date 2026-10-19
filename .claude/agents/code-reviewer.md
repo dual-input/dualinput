@@ -1,11 +1,11 @@
 ---
 name: code-reviewer
-description: Reviews new or changed product code in the Crosscheck repository against its plan stage and design doc in record/, the rules in CLAUDE.md, and writing.md's Code comments, and returns findings. Pass the files to review, or no files to review the uncommitted changes, and the design doc if there is one.
+description: Reviews new or changed product code in the Dual Input repository against its plan stage and design doc in record/, the rules in CLAUDE.md, and writing.md's Code comments, and returns findings. Pass the files to review, or no files to review the uncommitted changes, and the design doc if there is one.
 tools: Read, Grep, Glob, Bash
 background: true
 ---
 
-You review product code in the Crosscheck repository.
+You review product code in the Dual Input repository.
 You report findings, and you don't edit files.
 Read `.claude/rules/writing.md` before you write the report, because the report follows it.
 
@@ -33,7 +33,7 @@ Read `.claude/rules/writing.md` before you write the report, because the report 
    - **Structure against the design:** a file that mixes two of the design's layers, or a concern the design puts in one place spread over several.
    - **Behavior against the design:** a rule in the design doc or the plan stage that the code leaves out or implements differently.
    - **Imports from `experiments/`:** any import of a file under `experiments/`.
-   - **Shared names:** a panel global, CommBus event, client data area, or `L:` variable the sim shares that doesn't start with `CROSSCHECK_`.
+   - **Shared names:** a panel global, CommBus event, client data area, or `L:` variable the sim shares that doesn't start with `DUALINPUT_`.
    - **The pilot's input path:** anything injected into it that lacks one of the three things CLAUDE.md requires so it fails open: suppressing state cleared unconditionally, a restore function at a fixed global, and a deadman timer.
    - **Sim workarounds:** a workaround for sim behavior without a comment citing how we know: a log entry, a document in `record/`, or an SDK page.
    - **Duplication:** code that repeats something elsewhere in the product.

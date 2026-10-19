@@ -1,9 +1,9 @@
 # Record
 
-The documents agents write for Crosscheck live here, in the kinds [writing.md](../.claude/rules/writing.md) describes.
+The documents agents write for Dual Input live here, in the kinds [writing.md](../.claude/rules/writing.md) describes.
 Documentation people write for other people lives in `docs/` instead.
 
-- [learn/foundations/outline.md](learn/foundations/outline.md): the foundations course, the concepts we need to build Crosscheck, in the order we'll learn them, with the depth each one gets.
+- [learn/foundations/outline.md](learn/foundations/outline.md): the foundations course, the concepts we need to build Dual Input, in the order we'll learn them, with the depth each one gets.
 - [areas/commbus/log.md](areas/commbus/log.md): what our experiments found about reading an aircraft's CommBus traffic from panel JavaScript, on the Synaptic A220, the A2A PA-24, and the iniBuilds A350, and listening and publishing on the avionics framework's `wt.eb.evt`.
 - [areas/aircraft/plan.md](areas/aircraft/plan.md): how the aircraft we fly are built, studied from their files, then checked in the sim.
 - [areas/flight-controls/log.md](areas/flight-controls/log.md): what our experiments found about keeping a pilot's own flight controls out of the sim by masking key events.
@@ -13,7 +13,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/control/01-take-control.md](areas/control/01-take-control.md): how a bound key or button, or a button in the apps, takes control, as a single or a long press, what a refused press and a pass show, and how a pilot binds the key.
 - [areas/control/log.md](areas/control/log.md): what we found about passing control between pilots, such as the research on recognizing the voice phrases on the pilot's PC, which left v1 for Soon.
 - [areas/pointer-sync/01-pointer-sync.md](areas/pointer-sync/01-pointer-sync.md): how a press or drag on a synced display reaches the crew's displays as it happens and plays there, and when a display takes no press because it can't sync one.
-- [areas/interface/log.md](areas/interface/log.md): what our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner, and reaching the sim's menu to set the world map.
+- [areas/interface/log.md](areas/interface/log.md): what our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner, and reaching the sim's menu to set the world map.
 - [areas/interface/01-apps.md](areas/interface/01-apps.md): how the EFB app, the banner, and the desktop app connect to the core and to each feature's part, how any client changes a setting, and what trouble in each component raises.
 - [areas/network/log.md](areas/network/log.md): what we found about connecting the crew's machines, directly or through our relay.
 - [areas/network/01-between-machines.md](areas/network/01-between-machines.md): how a session's cores reach each other through iroh, our relays, and the backend, and how each channel travels between them.
@@ -26,7 +26,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/plugins/log.md](areas/plugins/log.md): what we found reading the Baron 58P's gauges for the settings only their JavaScript holds, and QuickJS-ng for what a replay can't repeat.
 - [areas/plugins/01-plugins.md](areas/plugins/01-plugins.md): why v1 has no plugins, how a profile reads a gauge's JavaScript through `instrument()` and writes it through the gauge's `H:` events, and the sandbox's rules for profiles' scripts.
 - [areas/sync/01-profile-entries.md](areas/sync/01-profile-entries.md): what a profile says about an aircraft's cockpit, its state and events blocks, and the writer API.
-- [areas/sync/02-live-sync.md](areas/sync/02-live-sync.md): how a change reaches every cockpit during a session, how conflicts resolve, and how Crosscheck checks a write landed.
+- [areas/sync/02-live-sync.md](areas/sync/02-live-sync.md): how a change reaches every cockpit during a session, how conflicts resolve, and how Dual Input checks a write landed.
 - [areas/sync/03-catch-up.md](areas/sync/03-catch-up.md): how a cockpit that missed changes comes to the flying machine's state, and when a loaded aircraft counts as settled.
 - [areas/sync/04-order-and-recovery.md](areas/sync/04-order-and-recovery.md): what comes back after a link, a core, a sim, or a PC goes down, and how the cockpit stream, its replay, and catch-up keep their order.
 - [areas/sync/05-units.md](areas/sync/05-units.md): the sync engine's, the cockpit stream's, and state sync's interfaces, how `H:` events are fired and heard, and the rules the bench starts from.
@@ -35,18 +35,18 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/profiles/02-units.md](areas/profiles/02-units.md): the profile engine's, the profile builder's, and the profile loader's interfaces, and how a bundle is built, published, fetched, cached, pinned, and loaded.
 - [areas/profiles/log.md](areas/profiles/log.md): what our experiments found about building profiles' bundles with TypeScript inside QuickJS-ng, and fetching them from GitHub Pages.
 - [areas/sync/log.md](areas/sync/log.md): what our experiments found about settling after a load, write order, the double-fire, and how aircraft take stepped writes.
-- [areas/product/plan.md](areas/product/plan.md): Crosscheck's master plan, the steps from ideas to a released v1, and where each one stands.
-- [areas/product/01-aims.md](areas/product/01-aims.md): who Crosscheck is for, what it aims at, what it won't do, and its relay and license commitments.
-- [areas/product/02-users.md](areas/product/02-users.md): the kinds of pilots Crosscheck is designed for, and the problems each runs into.
+- [areas/product/plan.md](areas/product/plan.md): Dual Input's master plan, the steps from ideas to a released v1, and where each one stands.
+- [areas/product/01-aims.md](areas/product/01-aims.md): who Dual Input is for, what it aims at, what it won't do, and its relay and license commitments.
+- [areas/product/02-users.md](areas/product/02-users.md): the kinds of pilots Dual Input is designed for, and the problems each runs into.
 - [areas/product/03-v1-scope.md](areas/product/03-v1-scope.md): what each v1 feature does, where v1 stops, and the rules for its behavior.
 - [areas/product/04-room-for-later.md](areas/product/04-room-for-later.md): what each feature after v1 needs from what v1 builds, and what v1 builds so it slots in without rework.
-- [decisions/001-changing-other-developers-packages.md](decisions/001-changing-other-developers-packages.md): Crosscheck's own features never change another developer's package, and an aircraft's plugin may, on the pilot's machine.
+- [decisions/001-changing-other-developers-packages.md](decisions/001-changing-other-developers-packages.md): Dual Input's own features never change another developer's package, and an aircraft's plugin may, on the pilot's machine.
 - [decisions/002-core-starts-with-every-sim-run.md](decisions/002-core-starts-with-every-sim-run.md): The core starts with every sim run.
 - [decisions/003-watcher-keeps-blurpage-copy-current.md](decisions/003-watcher-keeps-blurpage-copy-current.md): The watcher keeps the BlurPage copy current.
 - [decisions/004-core-works-out-figures-hand.md](decisions/004-core-works-out-figures-hand.md): The core works out where the figure's hand goes.
 - [decisions/005-wasm-module-writes-following-aircraft.md](decisions/005-wasm-module-writes-following-aircraft.md): Our WASM module writes the following aircraft.
 - [decisions/006-core-catches-take-control-input.md](decisions/006-core-catches-take-control-input.md): The core catches the take-control key and buttons.
-- [decisions/007-core-runs-audio.md](decisions/007-core-runs-audio.md): The core runs Crosscheck's audio.
+- [decisions/007-core-runs-audio.md](decisions/007-core-runs-audio.md): The core runs Dual Input's audio.
 - [decisions/008-every-link-ends-at-core.md](decisions/008-every-link-ends-at-core.md): Every link between our components ends at the core.
 - [decisions/009-sim-pages-find-core-over-commbus.md](decisions/009-sim-pages-find-core-over-commbus.md): The sim's pages find the core over the CommBus and talk to it over a WebSocket.
 - [decisions/010-clients-message-core-every-2s.md](decisions/010-clients-message-core-every-2s.md): Every client sends the core a message every 2s.
@@ -57,10 +57,10 @@ Documentation people write for other people lives in `docs/` instead.
 - [decisions/015-watcher-reads-files-core-writes.md](decisions/015-watcher-reads-files-core-writes.md): The watcher reads what its jobs need from files the core writes.
 - [decisions/016-core-keeps-pilots-settings.md](decisions/016-core-keeps-pilots-settings.md): The core keeps the pilot's settings.
 - [decisions/017-core-writes-control-slot-every-200ms.md](decisions/017-core-writes-control-slot-every-200ms.md): The core writes the WASM module's control slot every 200ms.
-- [decisions/018-rust-and-typescript.md](decisions/018-rust-and-typescript.md): Crosscheck is written in Rust, and in TypeScript where an engine runs it.
+- [decisions/018-rust-and-typescript.md](decisions/018-rust-and-typescript.md): Dual Input is written in Rust, and in TypeScript where an engine runs it.
 - [decisions/019-input-and-audio-run-in-helper.md](decisions/019-input-and-audio-run-in-helper.md): The core's input and audio work runs in a helper it starts.
 - [decisions/020-plugin-code-runs-only-in-core.md](decisions/020-plugin-code-runs-only-in-core.md): Plugin code runs only in the core.
-- [decisions/021-profiles-and-plugins-apart-from-releases.md](decisions/021-profiles-and-plugins-apart-from-releases.md): Profiles and plugins reach pilots apart from Crosscheck's releases.
+- [decisions/021-profiles-and-plugins-apart-from-releases.md](decisions/021-profiles-and-plugins-apart-from-releases.md): Profiles and plugins reach pilots apart from Dual Input's releases.
 - [decisions/022-random-uuids-as-text.md](decisions/022-random-uuids-as-text.md): Sessions and pilots are named by random UUIDs, carried as text where JSON or TypeScript reads them.
 - [decisions/023-pilot-id-and-restart-count.md](decisions/023-pilot-id-and-restart-count.md): A pilot keeps their ID through a core restart, and the core counts its restarts.
 - [decisions/024-times-in-microseconds-on-monotonic-clock.md](decisions/024-times-in-microseconds-on-monotonic-clock.md): A time in a message is µs on the sender's PC's monotonic clock.
@@ -72,7 +72,7 @@ Documentation people write for other people lives in `docs/` instead.
 - [decisions/030-in-sim-code-es2017-esbuild.md](decisions/030-in-sim-code-es2017-esbuild.md): Our code in the sim is type-checked against ES2017 and bundled by esbuild at es2017.
 - [decisions/031-coherent-gt-check-tool.md](decisions/031-coherent-gt-check-tool.md): A tool of our own checks every file we ship into the sim against Coherent GT's measured limits.
 - [decisions/032-one-quic-connection-through-iroh.md](decisions/032-one-quic-connection-through-iroh.md): Every pair of cores holds one QUIC connection through iroh 1.3, directly or through our relays.
-- [decisions/033-relays-run-iroh-relay-unmodified.md](decisions/033-relays-run-iroh-relay-unmodified.md): Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck.
+- [decisions/033-relays-run-iroh-relay-unmodified.md](decisions/033-relays-run-iroh-relay-unmodified.md): Our relays run iroh-relay unmodified, in at least two regions, and admit only Dual Input.
 - [decisions/034-backend-matches-invite-codes.md](decisions/034-backend-matches-invite-codes.md): The backend matches invite codes to the crew's endpoint IDs, and no running session waits on it.
 - [decisions/035-channels-declare-how-they-travel.md](decisions/035-channels-declare-how-they-travel.md): Each channel declares how it travels, and only the cockpit stream is replayed.
 - [decisions/036-control-is-one-value.md](decisions/036-control-is-one-value.md): Control is one value, a generation and the PF's pilot ID.
@@ -86,10 +86,10 @@ Documentation people write for other people lives in `docs/` instead.
 - [decisions/044-table-of-roles.md](decisions/044-table-of-roles.md): v1's table of roles holds the PF and the traffic and ATC host, whom a pilot chooses by hand.
 - [decisions/045-profile-format-yaml-and-javascript.md](decisions/045-profile-format-yaml-and-javascript.md): A profile is YAML whose script is JavaScript, where names only name and only `write()` writes.
 - [decisions/046-sandbox-runtimes-and-limits.md](decisions/046-sandbox-runtimes-and-limits.md): Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value.
-- [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Crosscheck might do, how viable each looked, and the ones we left out.
-- [areas/architecture/plan.md](areas/architecture/plan.md): how we design Crosscheck's v1 architecture, step 7, and v1's code map, systems, tests, and build order, step 8, as a tree of questions that goes a level deeper only when the work shows a need, and where each question stands.
-- [areas/architecture/01-spine.md](areas/architecture/01-spine.md): the spine every other part of Crosscheck rests on, one section for each child of the architecture plan's node 1.
-- [areas/architecture/02-code-map.md](areas/architecture/02-code-map.md): the units of Crosscheck's code in three tiers, the platform, engines, and features, every unit with its folder and what it may depend on, how the platform runs its features on one loop, what a feature registers with it, where the core's code meets the sim, how a feature adds work to our WASM module and the panel bridge, and where each unit lives and how one repository builds every target.
+- [areas/product/ideas.md](areas/product/ideas.md): the ideas for what Dual Input might do, how viable each looked, and the ones we left out.
+- [areas/architecture/plan.md](areas/architecture/plan.md): how we design Dual Input's v1 architecture, step 7, and v1's code map, systems, tests, and build order, step 8, as a tree of questions that goes a level deeper only when the work shows a need, and where each question stands.
+- [areas/architecture/01-spine.md](areas/architecture/01-spine.md): the spine every other part of Dual Input rests on, one section for each child of the architecture plan's node 1.
+- [areas/architecture/02-code-map.md](areas/architecture/02-code-map.md): the units of Dual Input's code in three tiers, the platform, engines, and features, every unit with its folder and what it may depend on, how the platform runs its features on one loop, what a feature registers with it, where the core's code meets the sim, how a feature adds work to our WASM module and the panel bridge, and where each unit lives and how one repository builds every target.
 - [areas/architecture/map.html](areas/architecture/map.html): v1's whole architecture on one page to open in a browser, drawn from decisions 001 to 046 on 2026-10-14: a clickable map of the components, the systems, each component's lifecycle, the links and channels, and one change traced end to end.
 - [areas/architecture/v1-design-map.html](areas/architecture/v1-design-map.html): v1's whole design as node 6 left it, on one page to open in a browser, drawn on 2026-10-18: what runs where and how it connects, every code unit by tier, eight end-to-end flows, and the build.
 - [areas/architecture/decisions.md](areas/architecture/decisions.md): what the architecture's nodes settled, and on what findings, each numbered as one of decisions 002 to 046.
@@ -102,9 +102,9 @@ Documentation people write for other people lives in `docs/` instead.
 - [areas/core/log.md](areas/core/log.md): what we found about the core's own process, such as how precisely its timers wake on Windows.
 - [areas/recording/01-recording-and-bug-reports.md](areas/recording/01-recording-and-bug-reports.md): what each machine records for a replay and what it leaves out, how long it keeps it, and how a bug report reaches us through the backend.
 - [areas/session/02-units.md](areas/session/02-units.md): the session crate's members, keys, control, session file, joining and leaving, preflight, and match check, who is in the flight, and how rate and pause, Go to, and the menu script work.
-- [areas/install/01-installing-and-updating.md](areas/install/01-installing-and-updating.md): how the desktop app runs from login as a tray icon in place of a watcher, how Velopack installs and updates Crosscheck for the pilot's own account, when an update applies, how our Community package gets written and the firewall rule added, and how the core checks the packages that override ours.
-- [areas/install/log.md](areas/install/log.md): what we found about installers and updaters for Crosscheck, Windows' firewall, Smart App Control, and notifications, and how MSFS 2024 names and mounts its packages.
+- [areas/install/01-installing-and-updating.md](areas/install/01-installing-and-updating.md): how the desktop app runs from login as a tray icon in place of a watcher, how Velopack installs and updates Dual Input for the pilot's own account, when an update applies, how our Community package gets written and the firewall rule added, and how the core checks the packages that override ours.
+- [areas/install/log.md](areas/install/log.md): what we found about installers and updaters for Dual Input, Windows' firewall, Smart App Control, and notifications, and how MSFS 2024 names and mounts its packages.
 - [areas/build/01-the-build.md](areas/build/01-the-build.md): what a release holds, how every program links its C runtime and which SDK it builds against, where the sim's stock files live, our package's name and order, the Coherent GT check, the message crate's hash, and how CI builds, checks, and publishes each release.
-- [areas/build/02-testing.md](areas/build/02-testing.md): how Crosscheck is tested at four levels, what CI keeps green, the bench and what it touches, the stand-in sim and core helper, replays, the loop under load, and what runs at a stage's end and before a release.
+- [areas/build/02-testing.md](areas/build/02-testing.md): how Dual Input is tested at four levels, what CI keeps green, the bench and what it touches, the stand-in sim and core helper, replays, the loop under load, and what runs at a stage's end and before a release.
 - [areas/build/plan.md](areas/build/plan.md): the stages that build v1, in the order they're built, what each builds, needs, and tests, its exit, and where each stands.
-- [areas/build/log.md](areas/build/log.md): what we found about building Crosscheck: the sim's stock files on disk, what `fspackagetool` compiles, older SDKs, a static C runtime through Cargo's config, the check's building blocks, and how `vpk` publishes.
+- [areas/build/log.md](areas/build/log.md): what we found about building Dual Input: the sim's stock files on disk, what `fspackagetool` compiles, older SDKs, a static C runtime through Cargo's config, the check's building blocks, and how `vpk` publishes.

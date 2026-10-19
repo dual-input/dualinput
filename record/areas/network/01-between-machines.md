@@ -42,7 +42,7 @@ The terms:
 | --- | --- | --- |
 | Every core | On each pilot's PC | Its iroh endpoint, under a key drawn fresh for each session; a connection to every other crew member, and each link's state; the channels and what sends them; the session's state and the replay when a link comes back; clock offsets; recording each connection's path, loss, and relay stalls, and each sender's clock offset |
 | The flying machine's core | The PF's PC | What 03-v1-scope already gives it: the flight model and the aircraft's authority; nothing more for the connection |
-| Relay | n0's `iroh-relay`, unmodified, on two servers of ours off the pilots' machines, in New York and Frankfurt ([the relays](#the-relays)) | Carries a pair's packets when no direct path works, tells each endpoint its public address, and admits only Crosscheck |
+| Relay | n0's `iroh-relay`, unmodified, on two servers of ours off the pilots' machines, in New York and Frankfurt ([the relays](#the-relays)) | Carries a pair's packets when no direct path works, tells each endpoint its public address, and admits only Dual Input |
 | Backend | Off the pilots' machines: a Cloudflare Worker on D1 ([01-spine](../architecture/01-spine.md#components); [02-units](02-units.md#its-framework-and-storage)) | Draws invite codes and maps each to the crew's endpoint IDs, limits code guessing, and holds bug reports; nothing a running session waits on |
 
 ## The link between two cores
@@ -84,14 +84,14 @@ In our FS Copilot work, two connections between one pair carried every packet tw
 
 ## Joining
 
-1. The host's core draws its key and asks the backend for a code, sending the session's ID, the session's relay list with each relay's token, and the host's pilot ID, display name, endpoint ID, Crosscheck version, and message crate hash.
+1. The host's core draws its key and asks the backend for a code, sending the session's ID, the session's relay list with each relay's token, and the host's pilot ID, display name, endpoint ID, Dual Input version, and message crate hash.
    The backend draws a code that no live session holds, as fsc-editor's relay does ([09-04](../../learn/foundations/09-04-relays-and-sessions.md#setting-up-a-session-codes-rendezvous-servers)), and keeps the session under it.
 2. A joining core draws its key and looks up the code.
    If its version or hash differs from the session's, the backend refuses and names who is behind, before anyone dials ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
    Otherwise it answers with the session's ID, its relay list and tokens, and each member's pilot ID, display name, kind, and endpoint ID, and lists nobody new.
 3. The joining core builds its endpoint with exactly the session's relays, so it homes at one of them, and dials each member by endpoint ID with every relay in that list.
    Until a connection has chosen a path, iroh sends its first packets to every address it knows (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `handle_msg_send_datagram`), and an endpoint's address holds several relays at once (read in iroh-base 1.3.0, `src/endpoint_addr.rs`), so the dial reaches the member through whichever relay it homes at, and iroh learns the direct addresses over the connection itself (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `trigger_holepunching`).
-4. Each side's first message on a connection opens the session channel's stream with a header that no release changes, holding Crosscheck's version and the message crate's hash, followed by the session's code, the sender's pilot ID and restart count, and every key of the session channel the sender holds, its own member entry and control among them.
+4. Each side's first message on a connection opens the session channel's stream with a header that no release changes, holding Dual Input's version and the message crate's hash, followed by the session's code, the sender's pilot ID and restart count, and every key of the session channel the sender holds, its own member entry and control among them.
    A core accepts a connection whose first message carries its session's code, version, and hash, and closes any other with an application code that says why.
    Until that first message has passed, it applies nothing else from the connection: neither its other streams, which QUIC keeps no order with, nor its one-off packets, which QUIC can deliver before the first stream data.
    So every receiver knows the session's state, and who flies, before anything that depends on them.
@@ -110,7 +110,7 @@ The backend keeps a session only as long as its crew uses it, and no running ses
 - Leave session tells the backend at once, and the backend frees the code once its last member has left or lapsed.
 - The backend limits how many wrong codes one address can try, as fsc-editor's Worker limits join attempts per IP address ([09-04](../../learn/foundations/09-04-relays-and-sessions.md#setting-up-a-session-codes-rendezvous-servers)), counting only wrong codes, since carrier-grade NAT puts many pilots behind one address ([network log, 2026-10-06](log.md#2026-10-06-research-puts-the-share-of-pilot-pairs-that-need-the-relay-between-5-and-31-and-one-small-servers-transfer-covers-tens-of-thousands-of-session-hours-a-month)).
 - Each request a core makes about itself carries a signature by its endpoint key, and the backend keys members by endpoint ID, so nobody else can register, renew, or leave in a pilot's name.
-- The backend's requests and answers are JSON, with the message crate's types and a version of the backend's own, and the backend serves each version still in pilots' hands, since one backend serves every Crosscheck release in use.
+- The backend's requests and answers are JSON, with the message crate's types and a version of the backend's own, and the backend serves each version still in pilots' hands, since one backend serves every Dual Input release in use.
 
 The session file keeps the crew's endpoint IDs and the session's relay list and tokens, so a returning core dials the crew with no backend, and asks the backend by code only if nobody answers.
 The relays speak iroh's own protocol, and nothing of ours.
@@ -133,15 +133,15 @@ v1 records each connection's path, loss, and relay stalls in the recording that 
 
 A relay runs n0's `iroh-relay`, in Rust, unmodified, which settles the relay's language the [spine](../architecture/01-spine.md#language-and-toolchains) left to this node.
 We run relays in at least two regions (user, 2026-10-11), on two servers of ours, DigitalOcean droplets in New York and Frankfurt ([02-units](02-units.md#who-hosts-them)).
-Each release of Crosscheck carries the default relay list, each entry with its URL, its token, and the rate it caps a client at (user, 2026-10-11).
-A setting overrides the list, so a group can point Crosscheck at relays of its own, as [01-aims](../product/01-aims.md#relay-and-license) asks, and a session uses the list its host started with ([joining](#joining)).
+Each release of Dual Input carries the default relay list, each entry with its URL, its token, and the rate it caps a client at (user, 2026-10-11).
+A setting overrides the list, so a group can point Dual Input at relays of its own, as [01-aims](../product/01-aims.md#relay-and-license) asks, and a session uses the list its host started with ([joining](#joining)).
 
 A core builds its endpoint from iroh's `presets::Minimal`, with `RelayMode::Custom` and the session's relay list, as 2.3's probe did ([2.3]).
 iroh's `presets::N0` would publish each pilot's endpoint ID and home relay to n0's DNS for the whole session (read in iroh 1.3.0, `src/endpoint/presets.rs`), and an endpoint bound with relays turned off never gets a relay at all ([2.3]).
 
-Our relays admit only Crosscheck (user, 2026-10-11).
+Our relays admit only Dual Input (user, 2026-10-11).
 Each relay's configuration lists one or more shared tokens, and admits only a client that presents one (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig::SharedToken`), and a core presents the token its relay list carries.
-That keeps other iroh applications off our relays, though not someone who reads the token out of Crosscheck.
+That keeps other iroh applications off our relays, though not someone who reads the token out of Dual Input.
 A session's members all run one release ([joining](#joining)), so they all hold its tokens, and a token changes only with a release, after which a relay lists the old token and the new one until the old release is out of use.
 `iroh-relay` reads its tokens only when it starts, and reloads only its certificates (read in iroh-relay 1.3.0, `src/main.rs`), so a change of tokens restarts the relay, as an upgrade does, and a restart drops every relayed connection through it until a redial lands, which waits for the dialed core's home relay connection to come back, as long as 23.8s after a link outage in [p07]; we restart relays at a quiet hour.
 Each relay also caps how fast one client can send (read in iroh-relay 1.3.0, `src/main.rs`, `limits.client.rx`), above v1's live traffic, and the core paces everything it sends through a relay below the cap its list gives ([sending](#sending)).
@@ -164,7 +164,7 @@ So a crewmate of a relayed ATC host on a lossy link, far from the relay their pa
 
 ## Encryption
 
-QUIC encrypts every packet with TLS 1.3 and has no mode that doesn't, so Crosscheck builds nothing for encryption, as it needn't (user, 2026-10-09).
+QUIC encrypts every packet with TLS 1.3 and has no mode that doesn't, so Dual Input builds nothing for encryption, as it needn't (user, 2026-10-09).
 QUIC's own header and frames, the encryption's tag among them, take about 30 of the 58 bytes every packet carries before any message ([2.2]).
 iroh's handshake checks the accepting core's key against the endpoint ID the dialer asked for, and has the dialing core sign with its own key, so each side knows the other's endpoint ID (read in iroh 1.3.0, `src/tls/verifier.rs`, `verify_server_cert` and `verify_client_cert`).
 
@@ -174,7 +174,7 @@ A channel declares its delivery, every message in order, the newest value of eac
 
 - v1's channels have fixed numbers in the message crate, whose hash both sides check, and each stream opens with a header naming its channel, so no stream waits on an announcement made on another.
 - A feature whose messages must apply in order with the cockpit's, such as a later bus bridge, registers kinds on the cockpit stream rather than a channel, because QUIC keeps no order across streams, and each cockpit message carries its kind, with no channel's tag, under the stream's one vector clock ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
-- A plugin opens instances of the kinds of channel Crosscheck provides, object mirroring and audio capture, such as a GSX plugin mirroring GSX's vehicles, and defines no kind of its own (user, 2026-10-11; [04-room-for-later](../product/04-room-for-later.md#plugins)).
+- A plugin opens instances of the kinds of channel Dual Input provides, object mirroring and audio capture, such as a GSX plugin mirroring GSX's vehicles, and defines no kind of its own (user, 2026-10-11; [04-room-for-later](../product/04-room-for-later.md#plugins)).
   A plugin's instance announces its number and stable name on the session channel; a receiver drops a one-off packet with a number it doesn't know, since a plugin's channel exists only where that plugin runs, and a channel's priority comes from its kind.
 
 The cockpit stream is the one log a link replays.
@@ -281,7 +281,7 @@ Leave session closes each connection with an application code of ours that only 
 - noq lets a peer drop stream data it hasn't delivered once a close arrives (read in noq 1.3.0, `src/connection.rs`, `Connection::close`), so a goodbye message sent just before the close could be lost.
 - So a PF who leaves first passes control to the PM as an ordinary handover, and closes 1s after passing it, since the leaving core writes the new control value itself and the PM sends nothing carrying it promptly (user, 2026-10-18).
   If the close reaches the PM before the new control value does, the PM's machine locks and holds as when it has lost the flying machine ([while a link is lost](#while-a-link-is-lost)), and the PM can take control with no warning, since the close's Leave code says the PF has gone.
-- Closing Crosscheck any other way, from the tray, by a Windows shutdown or logoff, or for an update, passes control the same way and closes each connection with a quit code of ours before `Endpoint::close`, and the others treat a quit as a Leave (user, 2026-10-11).
+- Closing Dual Input any other way, from the tray, by a Windows shutdown or logoff, or for an update, passes control the same way and closes each connection with a quit code of ours before `Endpoint::close`, and the others treat a quit as a Leave (user, 2026-10-11).
 - A process that dies sends no close, or at most one with code 0, which noq sends when every handle to a connection is dropped (read in noq 1.3.0, `src/connection.rs`, the docs of `Connection`), so code 0 and every error QUIC or iroh closes with count as a lost link, never as a leave.
 - A core that exits awaits iroh's `Endpoint::close`, bounded in time, which resends the closes until each peer acknowledges them (read in iroh 1.3.0, `src/endpoint.rs`, `Endpoint::close`).
 - Leave session also tells the backend, which frees the code once the last member has left, and the session channel tells any member who can't reach the leaver.
@@ -292,7 +292,7 @@ A core that starts and finds a session file can't tell how long it was gone, bec
 So it dials the crew from the file, and whenever a member answers, however long it was gone, it rejoins as a late joiner, with a catch-up and no replay ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)), since a late join gives it what retyping the code would, and in a crew of two the member who counted it out has left the session (user, 2026-10-18).
 If nobody answers, the core asks the backend whether its code still holds the session, deletes the file if it doesn't, and otherwise keeps dialing for 30 minutes from its own start.
 
-Crosscheck installs no update while a session file exists.
+Dual Input installs no update while a session file exists.
 Otherwise it installs a waiting update when the sim closes, and a crash closes the sim too, so a core could restart mid-session on a new version that can't rejoin a crew still on the old one ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
 
 ## Paths
@@ -358,7 +358,7 @@ The local relay takes a test token because the relays' tokens live in a private 
 ## iroh as a dependency
 
 The design leans on behavior iroh keeps private and a minor release may change: the 60s timer for punching again, the 5s ceiling on a path keep-alive, the 15s ceiling on a path idle timeout, the two-thirds rule for moving home relay, sending a dial's first packets to every known address, and the home relay connection's reconnect backoff of up to 16s plus its 10s connect timeout (read in iroh 1.3.0, `src/socket/remote_map/remote_state.rs`, `src/endpoint/quic.rs`, `src/net_report.rs`, and `src/socket/transports/relay/actor.rs`).
-So Crosscheck pins the exact versions of iroh, noq, and `iroh-relay`, and an upgrade is a change of its own:
+So Dual Input pins the exact versions of iroh, noq, and `iroh-relay`, and an upgrade is a change of its own:
 
 1. Read the release notes, and the diff of that behavior.
 2. Change the pins.

@@ -15,7 +15,7 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 >
 > Since 2026-10-18, the release workflow deploys the backend, its D1 migrations and then its Worker, just before it publishes each release, and a second workflow deploys it alone for a fix, so the backend running is the newest release's and answers older releases' cores too, and a change to a request's body in [its requests](#its-requests) takes a new path beside the old one ([the backend](../build/01-the-build.md#the-backend)).
 >
-> Since 2026-10-18, the relays' tokens stay out of this repository, which goes public: a private repository of ours, under Crosscheck's GitHub organization, holds each relay's tokens newest first, where [their configuration](#their-configuration) puts them in `relays/relays.toml`, which keeps each relay's region, URL, and cap (user, 2026-10-18).
+> Since 2026-10-18, the relays' tokens stay out of this repository, which goes public: a private repository of ours, under Dual Input's GitHub organization, holds each relay's tokens newest first, where [their configuration](#their-configuration) puts them in `relays/relays.toml`, which keeps each relay's region, URL, and cap (user, 2026-10-18).
 > Developers trusted with the tokens are given access to it, and adding or retiring a token is a commit there.
 > `relays/deploy.ts` reads the tokens from a clone of it, and the network crate's build compiles them into each release's default list from the copy [the release's build job](../build/01-the-build.md#a-release) checks out, so a token is exposed only as far as a release's program exposes it, where their configuration has the tokens go public with the repository.
 > The local `iroh-relay` that [cases for the bench](#cases-for-the-bench) runs two cores through takes a test token, not the production one, so CI's tests need no access.
@@ -88,7 +88,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 ### The first message
 
 - The session crate registers the session channel with `me.opener(session::CHANNEL, Session::open)`, and only one unit may.
-- When a connection comes up, the network asks the kernel to call `open`, which sends every session key the core holds with `cx.net().first(conn, &keys)`, and the network puts the header in front of it: Crosscheck's version, the message crate's hash, the session's code, and this core's pilot ID and restart count ([joining](01-between-machines.md#joining)).
+- When a connection comes up, the network asks the kernel to call `open`, which sends every session key the core holds with `cx.net().first(conn, &keys)`, and the network puts the header in front of it: Dual Input's version, the message crate's hash, the session's code, and this core's pilot ID and restart count ([joining](01-between-machines.md#joining)).
 - On a connection's first message, the network checks the header itself.
   - A code, version, or hash other than its own closes the connection with an application code naming which.
   - Otherwise it hands the keys to the session channel's handler, and the link takes the connection ([links](#links)).
@@ -204,7 +204,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 | Request | Body | Answer |
 | --- | --- | --- |
-| `POST /v1/sessions` | The session's ID, its relay list with tokens, the host's member entry, and Crosscheck's version and the message crate's hash | The code |
+| `POST /v1/sessions` | The session's ID, its relay list with tokens, the host's member entry, and Dual Input's version and the message crate's hash | The code |
 | `POST /v1/lookup` | The code, the version, and the hash | The session's ID, relays, and crew; or a refusal: no such code, a version or hash that differs, naming whose is older, or too many wrong codes |
 | `POST /v1/members` | The code and the member's entry | Taken, the member listed or renewed |
 | `POST /v1/members/leave` | The code and the endpoint ID | Taken |

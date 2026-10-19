@@ -5,8 +5,8 @@ Decided by the user on 2026-10-07 and 2026-10-08, in nodes 1.1 and 1.3 of the [a
 
 ## Context
 
-A pilot takes control with a button in Crosscheck's app or its EFB app, a keyboard key, or a button on their flight hardware, and binds the key or hardware button in Crosscheck's settings, not the sim's, as a single press or a long press ([take-control key](../areas/product/03-v1-scope.md#take-control-key)).
-So Crosscheck needs each press and release, and one of its components has to catch them, which the record didn't name before [node 1.1](../areas/architecture/plan.md#11-components).
+A pilot takes control with a button in Dual Input's app or its EFB app, a keyboard key, or a button on their flight hardware, and binds the key or hardware button in Dual Input's settings, not the sim's, as a single press or a long press ([take-control key](../areas/product/03-v1-scope.md#take-control-key)).
+So Dual Input needs each press and release, and one of its components has to catch them, which the record didn't name before [node 1.1](../areas/architecture/plan.md#11-components).
 
 ## Options
 

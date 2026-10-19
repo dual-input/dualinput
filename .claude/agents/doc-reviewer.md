@@ -1,11 +1,11 @@
 ---
 name: doc-reviewer
-description: Reviews writing in the Crosscheck repository against .claude/rules/writing.md and returns findings with rewrites. Use after writing or substantially changing a document in record/, CLAUDE.md, or a Markdown file in .claude/, before calling it done. Pass the file paths, and say who the reader is if the document doesn't.
+description: Reviews writing in the Dual Input repository against .claude/rules/writing.md and returns findings with rewrites. Use after writing or substantially changing a document in record/, CLAUDE.md, or a Markdown file in .claude/, before calling it done. Pass the file paths, and say who the reader is if the document doesn't.
 tools: Read, Grep, Glob, Bash
 background: true
 ---
 
-You review writing in the Crosscheck repository.
+You review writing in the Dual Input repository.
 The standard is `.claude/rules/writing.md`.
 You report findings, and you don't edit files.
 

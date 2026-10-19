@@ -9,13 +9,13 @@ Decided by the user on 2026-10-08 and 2026-10-11, in nodes 1.3 and 4 of the [arc
 [03-v1-scope](../areas/product/03-v1-scope.md#plugins) left open where each part of a plugin runs, in the core, in the aircraft's panels, or in a WASM module, and what language plugins are written in.
 v1 has one plugin, the Baron 58P's, whose first candidate job is to find radio settings that live only in its gauges' JavaScript and export them as values its profile syncs (same section).
 [04-room-for-later](../areas/product/04-room-for-later.md#code-inside-the-sim) gives plugins hooks in the panels and in the WASM module, both hosts that load modules by name, and lets a plugin read the sim, the aircraft's panels, and the pilot's files directly where no hook reaches, since we review every plugin ([04-room-for-later](../areas/product/04-room-for-later.md#plugins)).
-Profiles and plugins reach pilots from one public repository, apart from Crosscheck's releases ([decision 021](021-profiles-and-plugins-apart-from-releases.md)).
+Profiles and plugins reach pilots from one public repository, apart from Dual Input's releases ([decision 021](021-profiles-and-plugins-apart-from-releases.md)).
 
 ## Options
 
 1. **Plugin code in the panels and the WASM module too, which load its modules by name,** as [04-room-for-later](../areas/product/04-room-for-later.md#code-inside-the-sim) gives it.
-   Frame logic and panel code for one aircraft would run inside our module and our panel bridge, against the rule that Crosscheck's own code owns each mechanism and a plugin owns the policy ([04-room-for-later](../areas/product/04-room-for-later.md#plugins)).
-   The WASM module and the panel bridge load only when the sim boots or a panel loads, while a plugin that's only JavaScript and data can reach pilots apart from Crosscheck's releases.
+   Frame logic and panel code for one aircraft would run inside our module and our panel bridge, against the rule that Dual Input's own code owns each mechanism and a plugin owns the policy ([04-room-for-later](../areas/product/04-room-for-later.md#plugins)).
+   The WASM module and the panel bridge load only when the sim boots or a panel loads, while a plugin that's only JavaScript and data can reach pilots apart from Dual Input's releases.
 2. **Plugin code only in the core, with the pilot's files and the network open to it.**
    A plugin that read the pilot's files, published from a hijacked repository, could pass them to a crewmate over a channel, so plugins would need signing, and a signature would help only with a key kept off GitHub, a manual step in every publish (user, 2026-10-11).
 3. **Plugin code only in the core, reaching the panels, the module, and the sim through our APIs, and never the pilot's files or the network.**

@@ -50,7 +50,7 @@ FS Copilot is a hybrid, read from its source [5]:
 
 The freeze events stop the sim moving the following aircraft ([04-01](04-01-connection-and-data.md#writing-data)), and its engines and systems keep running on that machine, though whether it keeps burning fuel is unmeasured ([07](07-aircraft-specific-systems.md#unverified-claims)).
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 Each kind of data needs a model, and the model decides where divergence can come from: state fights whatever the receiver's systems recompute, and input drifts wherever the two aircraft already differed.
 Lockstep stays out of reach unless something can make MSFS wait for another machine's input.
 
@@ -98,8 +98,8 @@ Neither sends again, because each machine drops its sim's report of the write as
 Our fork's pointer notes accept the same limit for displays: they don't guarantee "convergence under concurrent conflicting input on the same panel within a latency window" [6].
 A two-pilot Airbus meets it in hardware, where simultaneous sidestick inputs add up and a DUAL INPUT voice warns the crew ([01](01-prior-art-and-crew-practice.md#crm-callouts-and-transfer-of-control)).
 
-**What it changes for Crosscheck.**
-Crosscheck needs an owner for each value that every machine works out the same way, whatever order the messages arrived in, and a rule for two claims or two writes that cross.
+**What it changes for Dual Input.**
+Dual Input needs an owner for each value that every machine works out the same way, whatever order the messages arrived in, and a rule for two claims or two writes that cross.
 Whether control is taken, given, or offered and accepted, what becomes of it when its pilot leaves or drops, and whether some switches belong to one seat are open questions.
 
 **Traps.**

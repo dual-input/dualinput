@@ -32,7 +32,7 @@ This changes the interface log's 2026-10-06 entry, which gives the job to the co
 ## What it commits us to
 
 - There's no fallback.
-  When a sim update removes BlurPage or stops MasterPage placing it, or another package copies it, Crosscheck has no copy installed, and the Go to button is unavailable and says why until a Crosscheck release picks another component (user, 2026-10-06; [preflight](../areas/product/03-v1-scope.md#preflight)).
-- The watcher tells a pilot who chooses to quit it what quitting costs, such as Go to staying off after a sim update until Crosscheck runs again ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
+  When a sim update removes BlurPage or stops MasterPage placing it, or another package copies it, Dual Input has no copy installed, and the Go to button is unavailable and says why until a Dual Input release picks another component (user, 2026-10-06; [preflight](../areas/product/03-v1-scope.md#preflight)).
+- The watcher tells a pilot who chooses to quit it what quitting costs, such as Go to staying off after a sim update until Dual Input runs again ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
 - This decision leaves open whether a sim update can change `fs-base-ui` while the sim boots, after the watcher's last check, which no run has tried ([interface log](../areas/interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
 - No run has tried the Microsoft Store edition either, whose install folder may not be readable (same entry).

@@ -53,7 +53,7 @@ A follow-up further apart than that, such as an APU bleed opened a minute after 
 The 2s is a starting value, to tune once we've watched a real outage replay.
 
 Our FS Copilot fork's pointer sync did the same for presses: it resent what it held in sequence order, kept each press's idle time before it, `GapMs`, capped at 1s, so "a panel that loads a page after a click gets the time the pilot gave it", and dropped what the receiver had already applied (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
-Crosscheck's replay does the same for every kind of change, with the longer cap, because a cockpit's follow-up can come later than a display's.
+Dual Input's replay does the same for every kind of change, with the longer cap, because a cockpit's follow-up can come later than a display's.
 
 ## Catching up state
 
@@ -88,7 +88,7 @@ Both end on, and the battery's last change came after the APU's, so last-change 
 The battery first took "on" before the APU did, so first-final-value order writes the battery first, and the APU starts.
 
 For a write that reads back wrong without power, such as a radio frequency, the two orders end the same way, because a retry lands it once the battery is on.
-If the PF's battery ends off, both orders skip it on a catching-up aircraft that loaded cold and dark, so writes that need power fail on every retry, and Crosscheck flags them.
+If the PF's battery ends off, both orders skip it on a catching-up aircraft that loaded cold and dark, so writes that need power fail on every retry, and Dual Input flags them.
 
 ## When preflight ends
 
@@ -102,7 +102,7 @@ When the countdown ends, every other pilot's cockpit catches up state from the P
 
 A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a flight, and lasts until their aircraft has settled ([below](#settling-after-a-load)).
 
-- The catching-up pilot's own changes aren't sent, and Crosscheck moves them back toward the PF's state, which also undoes the aircraft restoring its saved state.
+- The catching-up pilot's own changes aren't sent, and Dual Input moves them back toward the PF's state, which also undoes the aircraft restoring its saved state.
   The banner says "Catching up...", and tells the pilot that switches they move now will be reset.
 - Changes the other pilots make while catch-up runs, state and events alike, queue, and replay in stream order on top of the catch-up.
   So if a pilot presses a state control, then an event control, then another state control, the event still applies between the two.

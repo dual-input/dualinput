@@ -6,7 +6,7 @@ Decided by the user on 2026-10-09, in node 1.2 of the [architecture plan](../are
 
 ## Context
 
-The watcher warns, in a Windows notification early in the sim's load, that a waiting update will need a sim restart, and it warns only a pilot who has flown with Crosscheck lately, judged by the date of their last session ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
+The watcher warns, in a Windows notification early in the sim's load, that a waiting update will need a sim restart, and it warns only a pilot who has flown with Dual Input lately, judged by the date of their last session ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
 The core knows when the pilot last flew, but it may not be running ([01-spine](../areas/architecture/01-spine.md#components-with-no-session)).
 Node 1's walk through a session reopened node 1.2 on 2026-10-09, because the watcher had no way to learn what its jobs need from the core ([architecture plan](../areas/architecture/plan.md#12-communication)).
 

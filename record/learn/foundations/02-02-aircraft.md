@@ -48,8 +48,8 @@ The PA-24's `N6229P` livery sets `name = "A2A N6229P"` and `atc_id = "N6229P"`, 
 A `[Selection]` section can limit a livery to presets whose attachments define the tags it lists in `required_tags` [6].
 Non-modular aircraft, built the MSFS 2020 way, don't use `livery.cfg`, and each livery is its own `[FLTSIM.N]` section with its own title [6] [7].
 
-**What it changes for Crosscheck.**
-Any check Crosscheck makes by reading an aircraft's files, such as whether both pilots have the same aircraft, has to merge `common`, attachments, and preset the way the sim does, or compare what the sims report instead.
+**What it changes for Dual Input.**
+Any check Dual Input makes by reading an aircraft's files, such as whether both pilots have the same aircraft, has to merge `common`, attachments, and preset the way the sim does, or compare what the sims report instead.
 [Part 7](outline.md#7-aircraft-specific-systems-refresher) covers matching aircraft.
 
 **Traps.**
@@ -85,8 +85,8 @@ fsc-editor found that all 16 FS Copilot profiles whose aircraft was installed we
 In non-modular packages the title carries the livery instead.
 FSLTL's traffic aircraft have titles like `FSLTL_FAIB_B738_UAL-United_NC`, and `A:LIVERY NAME` is empty on all of them [7].
 
-**What it changes for Crosscheck.**
-Crosscheck needs an aircraft identity that both machines compute the same way from what their sims report.
+**What it changes for Dual Input.**
+Dual Input needs an aircraft identity that both machines compute the same way from what their sims report.
 The folder finds the aircraft's profile, and whether the title and livery also have to match on both machines is a question for [part 7](outline.md#7-aircraft-specific-systems-refresher).
 
 **Traps.**
@@ -136,8 +136,8 @@ The first 15 enumerated were all `CLICKSPOT_*` and `WALKAROUND_*`, and A2A decla
 A Black Square Bonanza defines 5 of its own, and some aircraft wire a click straight to calculator code with no input event at all [21].
 An input event can bind a key event with `<Binding EventID=...>`, and the sim then intercepts that key event and runs the input event's `<Set>` code instead of the key event's default [17].
 
-**What it changes for Crosscheck.**
-One click can surface as an input event, an `H:` event, an `L:` write, or nothing Crosscheck can observe, and the aircraft's XML decides which.
+**What it changes for Dual Input.**
+One click can surface as an input event, an `H:` event, an `L:` write, or nothing Dual Input can observe, and the aircraft's XML decides which.
 [Part 3](outline.md#3-variables-events-and-units-full) covers each namespace, and [part 7](outline.md#7-aircraft-specific-systems-refresher) covers how aircraft differ.
 
 **Traps.**

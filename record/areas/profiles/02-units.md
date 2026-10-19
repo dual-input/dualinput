@@ -9,7 +9,7 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 > **Note**
 > Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) answers [the pin](#the-pin)'s question on a late load: a following machine asks for a catch-up whenever its profile loads after preflight has ended, so a pin that goes from none to a bundle after preflight brings every following cockpit to the flying machine's.
 > Since 2026-10-17, v1 has no plugins, so a bundle has no `plugin` key, `program` writes no TypeScript file for a plugin, and the declarations name `instrument` and not `plugin`, where [the profile engine](#the-profile-engine) has them all; the sandbox's contexts hold, of rquickjs's intrinsics, `Eval` and `RegExp` alone, beside the base objects ([plugins and the sandbox](../plugins/01-plugins.md#the-sandbox)).
-> Since 2026-10-18, v1 ships no authoring tool, so `crosscheck-profile-builder` keeps its name and runs from the repository for the core team, where [the units](#the-units) and [the builder program](#the-builder-program) have authors run it; a contributor without the workspace's setup sends a profile's change as a pull request and reads CI's check; and the release workflow calls the profiles' job, a reusable workflow, which [publishing](#publishing) runs on each release ([authoring tools](../build/01-the-build.md#authoring-tools)).
+> Since 2026-10-18, v1 ships no authoring tool, so `dualinput-profile-builder` keeps its name and runs from the repository for the core team, where [the units](#the-units) and [the builder program](#the-builder-program) have authors run it; a contributor without the workspace's setup sends a profile's change as a pull request and reads CI's check; and the release workflow calls the profiles' job, a reusable workflow, which [publishing](#publishing) runs on each release ([authoring tools](../build/01-the-build.md#authoring-tools)).
 > That settles [left open](#left-open)'s item on the builder program's name and how authors get it.
 >
 > Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
@@ -19,7 +19,7 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
-The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `crosscheck-profile-builder` program authors run, and later in the IDE, so `typescript.js` never ships to pilots.
+The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `dualinput-profile-builder` program authors run, and later in the IDE, so `typescript.js` never ships to pilots.
 CI publishes to a branch it only ever adds files to, and only at levels a release supports, and the index lists, for each profile, the bundle a core at each level takes.
 On the core, a job reads, parses, and checks the pinned bundle, and the loop decodes the result and raises `ProfileLoaded`.
 
@@ -33,7 +33,7 @@ This answers node 6.8 of the [architecture plan](../architecture/plan.md#68-prof
 | `profile-engine` | Engine | The format, its blocks and each feature's, every check but the type check, the levels' frozen schemas and declarations, reading a bundle, writing one, and the program TypeScript checks | In the core's jobs, the builder, and CI |
 | `profile-build` | Engine | Building a bundle: modules merged, the type check and compile with TypeScript 6.0.3 inside QuickJS-ng, the level worked out, and the bundle read back | In the builder, CI, and later the IDE, and never in the core |
 | `profile-loader` | Platform | The index, the cache, the local folder, the pin, the loaded profile, and the match check's item | On the loop, with jobs at the edge |
-| `tools/profile-builder` | Tool | The program `crosscheck-profile-builder`: building, watching, and publishing | For authors and CI |
+| `tools/profile-builder` | Tool | The program `dualinput-profile-builder`: building, watching, and publishing | For authors and CI |
 
 - `profile-engine` uses the message crate, as the code map's [engines](../architecture/02-code-map.md#engines) row has it, and reads no file: whoever runs it hands it the files' bytes.
 - `profile-build` uses `profile-engine` and rquickjs, so it sits on the engines' top line, beside the sync engine.
@@ -133,7 +133,7 @@ So moving to TypeScript 7, if the IDE's editor runs it, is a change to the build
 
 ### The builder program
 
-`tools/profile-builder` builds `crosscheck-profile-builder`, whose commands are a sketch until [6.18](../architecture/plan.md#618-the-build) names the program and how authors get it:
+`tools/profile-builder` builds `dualinput-profile-builder`, whose commands are a sketch until [6.18](../architecture/plan.md#618-the-build) names the program and how authors get it:
 
 | Command | Does |
 | --- | --- |
@@ -147,7 +147,7 @@ An author points `--out` at their local folder ([the local folder](#the-local-fo
 
 CI's profiles job runs on each merge to `main` that changes `profiles/` or either profile engine, and on each release:
 
-1. It runs `crosscheck-profile-builder publish` on `main`'s newest commit.
+1. It runs `dualinput-profile-builder publish` on `main`'s newest commit.
 2. It fails on any error, and when two profiles cover one folder or preset.
 3. It leaves out each bundle at a level no release supports yet: a level is released once a release tag's `LEVEL` reaches it, which CI reads from the tags.
 4. It commits each new bundle as `bundles/<hash>.yaml`, and the new `index.json`, to the `pages` branch, which Pages serves, and never deletes a file there.

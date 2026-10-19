@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Writes one chapter of the Crosscheck learning material, and fact-checks its full-depth sections. Use when the user asks for a learning chapter or the next part of a course's outline, for example "/learn foundations 3".
+description: Writes one chapter of the Dual Input learning material, and fact-checks its full-depth sections. Use when the user asks for a learning chapter or the next part of a course's outline, for example "/learn foundations 3".
 argument-hint: <course> [part number]
 ---
 
@@ -16,7 +16,7 @@ Run each step's agent alone, and wait for its report before starting the next.
 1. **Write.** Run the `chapter-writer` agent with the course and the part number.
 2. **Check the facts at full depth.** If any of the part is at full depth, run the `fact-checker` agent on those sections, and fix every failure it reports.
    Mark each claim it couldn't check as unverified, and add it to the chapter's closing list with what would settle it.
-   If a fix turns on a design choice for Crosscheck, ask the user rather than choosing.
+   If a fix turns on a design choice for Dual Input, ask the user rather than choosing.
    Brief and refresher sections skip this step, because a fact check took longer than writing them.
 3. **Link it.** Turn the part's heading in the course's `outline.md` into a link to the chapter, or to the first chapter if the part was split.
 4. **Commit** the chapter and the outline together.

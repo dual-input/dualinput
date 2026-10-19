@@ -1,6 +1,6 @@
 # 034: The backend matches invite codes to the crew's endpoint IDs, and no running session waits on it
 
-The backend draws each invite code and keeps the session under it: its ID, the host's Crosscheck version and message crate hash, its relay list with each relay's token, and each member's pilot ID, display name, kind, crew in v1, and endpoint ID ([01-between-machines](../areas/network/01-between-machines.md#joining)).
+The backend draws each invite code and keeps the session under it: its ID, the host's Dual Input version and message crate hash, its relay list with each relay's token, and each member's pilot ID, display name, kind, crew in v1, and endpoint ID ([01-between-machines](../areas/network/01-between-machines.md#joining)).
 A joining core looks up the code, the backend refuses a joiner whose version or message crate hash differs from the session's and otherwise answers with the session's ID, its relay list, and the crew, and the joining core dials each member by endpoint ID through every relay in that list.
 No running session waits on the backend: a returning pilot dials the crew from the session file and asks the backend only if nobody answers, and the relays speak only iroh's protocol.
 Decided by the user on 2026-10-11, in node 2 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#the-backend-matches-invite-codes-to-the-crews-endpoint-ids-and-no-running-session-waits-on-it).
@@ -24,7 +24,7 @@ Node 2 made the relays n0's `iroh-relay`, unmodified ([decision 033](033-relays-
 4. **Counting every request from an address against it.**
    Carrier-grade NAT puts many pilots behind one address ([01-between-machines](../areas/network/01-between-machines.md#joining)).
 5. **A backend that matches codes to endpoint IDs, which no running session waits on, and lists a joiner only once its first message has passed with a member.**
-   One backend serves every Crosscheck release in use, so it serves each version of its requests still in pilots' hands, and each core renews its place with it while the session lasts ([01-between-machines](../areas/network/01-between-machines.md#joining)).
+   One backend serves every Dual Input release in use, so it serves each version of its requests still in pilots' hands, and each core renews its place with it while the session lasts ([01-between-machines](../areas/network/01-between-machines.md#joining)).
 
 ## Decision
 

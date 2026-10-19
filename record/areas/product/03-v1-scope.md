@@ -8,7 +8,7 @@ Decides:     The scope of every v1 feature.
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
-It says what Crosscheck does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.
+It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.
 
 The pilot flying (PF) is the pilot whose yoke, rudder, toe brakes, engine levers, and trim fly the aircraft, and the pilot monitoring (PM) is the other front-seat pilot.
 The flying machine is the PF's, and a following machine is any other pilot's, in v1 the PM's.
@@ -18,9 +18,9 @@ v1 sessions have two pilots, because crews beyond two are a Later pick, but v1 b
 
 A v1 session runs in this order, and each step's rules are in the section it links to.
 
-1. Each pilot installs Crosscheck once, with its Community package ([installing and updating](#installing-and-updating)).
-2. Crosscheck and the sim start in either order, and the host starts a session and shares its code, which the other pilots enter to join ([invite code](#invite-code)).
-3. Each pilot loads a flight at the PF's stand, or at a runway of the PF's departure airport while the PF's engines run, which Crosscheck shows them, and once they're in it, Crosscheck moves their aircraft to the PF's position and holds every aircraft still for [preflight](#preflight).
+1. Each pilot installs Dual Input once, with its Community package ([installing and updating](#installing-and-updating)).
+2. Dual Input and the sim start in either order, and the host starts a session and shares its code, which the other pilots enter to join ([invite code](#invite-code)).
+3. Each pilot loads a flight at the PF's stand, or at a runway of the PF's departure airport while the PF's engines run, which Dual Input shows them, and once they're in it, Dual Input moves their aircraft to the PF's position and holds every aircraft still for [preflight](#preflight).
 4. In preflight, each pilot works through the [preflight match check](#preflight-match-check)'s list, takes a seat ([avatar sync](#avatar-sync)), and clicks Ready, and the PF also checks the profile's starting values.
 5. When every pilot is ready, a countdown ends [preflight](#preflight): every other pilot's cockpit takes the PF's value for every control the profile can read or track, and the aircraft is free to move.
 6. The crew flies, passing control by the [take-control key](#take-control-key), with [notices](#notification-banner) for what needs their attention.
@@ -36,10 +36,10 @@ A pilot presses take-control and becomes the PF at once, and their machine becom
 **In v1:**
 
 - v1 flies the traditional way, as FS Copilot does: the following machine freezes its aircraft's position, altitude, and attitude, and takes the flying machine's values (read in the FS Copilot fork, `FsCopilot/Simulation/MasterSwitch.cs`, `FsCopilot/Simulation/Coordinator.cs`, and `FsCopilot.Bridge.Wasm/wasm_module.cpp`).
-- Taking control from a button in Crosscheck's app or its EFB app, a keyboard key, or a button on the pilot's flight hardware.
-- The pilot binds the key or hardware button in Crosscheck's settings, not the sim's, and chooses whether it takes a single press or a long press.
+- Taking control from a button in Dual Input's app or its EFB app, a keyboard key, or a button on the pilot's flight hardware.
+- The pilot binds the key or hardware button in Dual Input's settings, not the sim's, and chooses whether it takes a single press or a long press.
   A single press takes control on its down, and a long press once held 1s, before its release ([take-control](../control/01-take-control.md)).
-  A bound key takes control only while a window of the sim is in front, and Crosscheck's settings ask the pilot to keep the key or button unbound in the sim (user, 2026-10-17).
+  A bound key takes control only while a window of the sim is in front, and Dual Input's settings ask the pilot to keep the key or button unbound in the sim (user, 2026-10-17).
 
 **Not in v1:**
 
@@ -91,7 +91,7 @@ The voice phrases are a Soon pick, out of v1, because a voice handover is a nice
   Those are the endings regulators, militaries, and airlines use, with "You have …" and "I have …" the shape in every convention we found (documented: [FAA AC 61-115](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40455386&FileExtension=.PDF&FileName=FAA+AC+61_115_Positive+Exchange+of+Flight+Controls-Master.PDF), [Transport Canada TP 975](https://tc.canada.ca/sites/default/files/migrated/tp975e.pdf), [UK MAA RA 2309](https://assets.publishing.service.gov.uk/media/62454dcdd3bf7f32a7c01197/RA2309_Issue_8.pdf), [USAF AFMAN 11-248](https://data.ntsb.gov/Docket/Document/docBLOB?ID=40445920&FileExtension=.PDF&FileName=Operations+-+Attachment+16+-+Excerpts+%E2%80%93+AFMAN+11-248+T-6+General+Flying-Master.PDF), [US Army TC 3-04.51](https://asktop.net/wp/download/5/tc3_04x51.pdf), and Airbus as quoted in [AAIB Bulletin 1/2013](https://assets.publishing.service.gov.uk/media/5423034de5274a1314000b7f/Airbus_A319-111_G-EZFV_01-13.pdf)).
 - "Your controls" also offers and "my controls" also answers, for pilots who hand over casually, though we found the pair only on a blog (unverified).
 - English, recognized as well as the recognizer manages with each pilot's accent.
-- Crosscheck listens whenever a session is syncing, with no push-to-talk key.
+- Dual Input listens whenever a session is syncing, with no push-to-talk key.
 
 **Not in the pick:**
 
@@ -105,9 +105,9 @@ The voice phrases are a Soon pick, out of v1, because a voice handover is a nice
 
 **Rules:**
 
-- Crosscheck hears each pilot only through their own microphone, so it always knows who spoke.
+- Dual Input hears each pilot only through their own microphone, so it always knows who spoke.
   That's what tells an offer from an answer, since the two differ only in "you" and "I".
-  The microphone is a setting beside the output device, which comes with this pick: Windows' default device, which Crosscheck follows when the pilot switches headsets, or a device the pilot picks ([04-core-helper](../core/04-core-helper.md#the-devices)).
+  The microphone is a setting beside the output device, which comes with this pick: Windows' default device, which Dual Input follows when the pilot switches headsets, or a device the pilot picks ([04-core-helper](../core/04-core-helper.md#the-devices)).
 - Only the PF's offer counts, and it opens a 5s window.
 - The PM's answer inside the window passes control, and the endings needn't match: "You have control" answered with "I have the aircraft" passes it.
   An answer works only while its pilot is in the flight, after [preflight](#preflight), and passes no control while their own catch-up or replay runs over a link that's up, as for the [take-control key](#take-control-key).
@@ -127,7 +127,7 @@ The voice phrases are a Soon pick, out of v1, because a voice handover is a nice
 - Whether a local recognizer is accurate enough with non-native English accents, the first thing to test once it's built, when we calibrate it with our own voices ([the plan](plan.md)'s step 6).
 - Whether a phrase counts inside a longer sentence.
   A UK CAA examiner says "follow me through, you have control" ([CAA Standards Document 01(H)](https://www.caa.co.uk/publication/download/13074)), and the same rule would let "you have control of the radios" open a window.
-- How Crosscheck tells speech from noise before it listens for a phrase.
+- How Dual Input tells speech from noise before it listens for a phrase.
   The intent is to run recognition only while the pilot's microphone is loud enough to be speech, and the architecture designs it.
 
 ## Sync
@@ -156,7 +156,7 @@ The following machine's aircraft goes where the flying machine's goes, with the 
   The 0.4s is FS Copilot's: its following machine draws the aircraft 400ms in the past (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm`).
   That's acceptable, because the PM has nothing to compare it against, and shortening it is welcome but not required.
 - At a handover, the new flying machine carries on from the last state it was written, and a small step there is acceptable (from our experience with FS Copilot).
-- If Crosscheck stops on the following machine, the aircraft unfreezes within about 1s and nothing writes to it afterward.
+- If Dual Input stops on the following machine, the aircraft unfreezes within about 1s and nothing writes to it afterward.
   FS Copilot's module unfreezes after 1s without a write, and may keep writing its last pose into the unfrozen aircraft after that (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`; unverified in the sim).
 
 **Depends on:**
@@ -179,14 +179,14 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 - A cockpit that missed changes, or never had them, catches up ([catch-up](../sync/03-catch-up.md)).
   When [preflight](#preflight) ends, when a pilot joins late, and when one rejoins after a sim restart, it takes the flying machine's value for every control the profile can read, or can track by counting the events that change it.
   After a short outage with the sim still running, it replays the changes it missed, in order.
-- Crosscheck checks that each write it makes lands, and when one never does, it marks the recording and shows a notice on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
+- Dual Input checks that each write it makes lands, and when one never does, it marks the recording and shows a notice on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 
 **Not in v1:**
 
-- Telling pilots what on their aircraft doesn't sync, a Later pick in [the plan](plan.md), because we first learn what Crosscheck can sync.
-- Comparing whole cockpits through a flight to find ones that drifted apart, beyond checking each write, because we don't know how reliably Crosscheck can read an aircraft's state, and a resync prompt interrupts the pilots ([Ideas left out](ideas.md#ideas-left-out)).
+- Telling pilots what on their aircraft doesn't sync, a Later pick in [the plan](plan.md), because we first learn what Dual Input can sync.
+- Comparing whole cockpits through a flight to find ones that drifted apart, beyond checking each write, because we don't know how reliably Dual Input can read an aircraft's state, and a resync prompt interrupts the pilots ([Ideas left out](ideas.md#ideas-left-out)).
 - Catching up what the profile doesn't reach, such as a display's page or an FMS's contents.
-- Catching a restore that lands after Crosscheck judged the aircraft settled, which moves that control in every cockpit, the PF's included ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
+- Catching a restore that lands after Dual Input judged the aircraft settled, which moves that control in every cockpit, the PF's included ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 - The pilot's own MSFS EFB overlay.
 
 **Rules:**
@@ -195,11 +195,11 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
   Those reach the following machine from the flying machine.
   Everything else in the profile is shared: either pilot can change it, and the other cockpit follows.
 - When both pilots change the same shared entry at nearly the same moment, both machines end on the same value: the later change when one pilot saw the other's, and the PF's when neither did ([live sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
-- Crosscheck sends every change a pilot makes, and never a change it applied itself.
-  The PM turns the beacon on, Crosscheck sets it on the PF's machine, and the PF's sim reports that the beacon changed: Crosscheck doesn't send that report back.
+- Dual Input sends every change a pilot makes, and never a change it applied itself.
+  The PM turns the beacon on, Dual Input sets it on the PF's machine, and the PF's sim reports that the beacon changed: Dual Input doesn't send that report back.
   If the PF turns the beacon off half a second later, that change goes through, where a guard that ignores reports for a while after each write would drop it, as one dropped two real pilot inputs in our FS Copilot work ([08-02](../../learn/foundations/08-02-echoes-and-initial-sync.md#echo-loops-and-suppressing-them)).
 - A change the aircraft makes on its own syncs like a pilot's, such as the Baron taking its chocks away once it moves (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-the-barons-ground-contact-follows-the-written-altitude-and-its-own-physics-writes-dont-hold-against-ours)).
-- Until an aircraft has settled after a load, the changes it makes to itself don't sync: in preflight, Ready waits for it, and while a cockpit catches up, Crosscheck moves those changes back to the PF's state ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
+- Until an aircraft has settled after a load, the changes it makes to itself don't sync: in preflight, Ready waits for it, and while a cockpit catches up, Dual Input moves those changes back to the PF's state ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
 
 **Depends on:**
 
@@ -208,7 +208,7 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 
 ### Pointer sync
 
-A press or drag on a panel display travels to the other machine as the position the pointer went to, and the receiving display decides what's there, which reaches displays whose state Crosscheck can't read or write.
+A press or drag on a panel display travels to the other machine as the position the pointer went to, and the receiving display decides what's there, which reaches displays whose state Dual Input can't read or write.
 
 **In v1:**
 
@@ -228,7 +228,7 @@ A press or drag on a panel display travels to the other machine as the position 
 
 - A gesture replays at the same position, as a fraction of the display's size, and the receiving display decides what it hits.
   A peer's press sent that way drove the A220's ND to plan mode, and replayed drags work with a small drift in their timing (measured on MSFS 2024, 2026-09-17 and 2026-08-30, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "A peer's press drove the real A220 ND, opted in by identifier alone" and "The drag drift candidate is real but small, and temporal not spatial").
-- A replayed press does what the pilot meant only when both displays show the same page, and Crosscheck can't check that they do, because a display's page is state no profile entry reads.
+- A replayed press does what the pilot meant only when both displays show the same page, and Dual Input can't check that they do, because a display's page is state no profile entry reads.
 - During a long outage, the following pilot's synced displays lock, and taking control unlocks them (measured on a two-instance bench, 2026-09-12, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "Q12 is survivable and it is not a two-pilot special case").
   A synced display on a machine other than the PF's also locks while that machine's catch-up runs ([locks](../pointer-sync/01-pointer-sync.md#locks)).
 - A press on a display while another pilot's gesture plays there flashes the display in one color, with no words, until its up (user, 2026-10-17).
@@ -242,7 +242,7 @@ A press or drag on a panel display travels to the other machine as the position 
 ### Plugins
 
 A plugin is code we ship for one aircraft or one add-on.
-It finds state a profile can't reach, exports it as values the profile watches, registers the write methods that set them, and reaches the rest through hooks into Crosscheck, so Crosscheck's own code never names a product.
+It finds state a profile can't reach, exports it as values the profile watches, registers the write methods that set them, and reaches the rest through hooks into Dual Input, so Dual Input's own code never names a product.
 
 **In v1:**
 
@@ -267,17 +267,17 @@ It finds state a profile can't reach, exports it as values the profile watches, 
 **Rules:**
 
 - Plugins' design, after v1, starts from these rules and isn't bound by them (user, 2026-10-17; [no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
-- Code that serves one aircraft or add-on lives in a plugin, never in Crosscheck's own code, so dropping support for an aircraft means removing its plugin and its profile.
+- Code that serves one aircraft or add-on lives in a plugin, never in Dual Input's own code, so dropping support for an aircraft means removing its plugin and its profile.
 - Each aircraft has one plugin, which runs alongside any add-on's plugin, and plugins share no library, which comes when two plugins need the same code ([01-format-and-delivery](../profiles/01-format-and-delivery.md#deferred)).
   Black Square's Baron Pro and Bonanza Pro each ship a tablet file named `BlackSquareTablet.js`, of 4,830 and 5,383 lines (read in bksq-aircraft-baronpro 0.1.1 and bksq-aircraft-bonanzapro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md), [Bonanza study](../aircraft/black-square-bonanza-pro/study.md)), and how much code the two share is unverified.
-- A plugin runs while a variant its profile covers is loaded, and is published inside its profile's file, so pilots never install a plugin or pick one to run, and profiles and plugins reach pilots apart from Crosscheck's releases ([architecture's tentative decisions](../architecture/decisions.md#plugin-code-runs-only-in-the-core), [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)).
-- A plugin's code runs only in Crosscheck's core, the program that owns the session ([EFB app](#efb-app)), and reaches the panels and the WASM module through our own code's APIs (same decisions).
-  It reaches only the sim and the aircraft, through Crosscheck's APIs, and never the pilot's files (same decisions).
-  It changes what Crosscheck watches only in the write methods it registers, which run only when Crosscheck calls them, because Crosscheck would see any other change as a pilot's and send it to the crew.
+- A plugin runs while a variant its profile covers is loaded, and is published inside its profile's file, so pilots never install a plugin or pick one to run, and profiles and plugins reach pilots apart from Dual Input's releases ([architecture's tentative decisions](../architecture/decisions.md#plugin-code-runs-only-in-the-core), [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)).
+- A plugin's code runs only in Dual Input's core, the program that owns the session ([EFB app](#efb-app)), and reaches the panels and the WASM module through our own code's APIs (same decisions).
+  It reaches only the sim and the aircraft, through Dual Input's APIs, and never the pilot's files (same decisions).
+  It changes what Dual Input watches only in the write methods it registers, which run only when Dual Input calls them, because Dual Input would see any other change as a pilot's and send it to the crew.
   A write method writes however the aircraft needs, such as into DataStorage or a gauge's JavaScript ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
-- Crosscheck turns off a plugin that fails for the rest of the session, the [notification banner](#notification-banner) says so, and the flight goes on.
+- Dual Input turns off a plugin that fails for the rest of the session, the [notification banner](#notification-banner) says so, and the flight goes on.
   A plugin turned off on any machine stops its entries syncing on every machine.
-- A plugin changes an aircraft's files only on the pilot's machine, the pilot can turn such a plugin off in Crosscheck's settings, and Crosscheck never ships a file of another developer's ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
+- A plugin changes an aircraft's files only on the pilot's machine, the pilot can turn such a plugin off in Dual Input's settings, and Dual Input never ships a file of another developer's ([decision 001](../../decisions/001-changing-other-developers-packages.md)).
 
 **Depends on:**
 
@@ -298,13 +298,13 @@ The host starts a session and gets a code, and the other pilot enters it to join
 **In v1:**
 
 - The code is six characters from the 30-character alphabet fsc-editor uses, which leaves out I, L, O, U, 0, and 1, because codes are read aloud and typed by someone looking at a sim (read in fsc-editor, `src/shared/remote-connect.ts`, `CODE_ALPHABET`, and `docs/remote-connect.md`, "The code").
-- When the pilot selects the box for the code, Crosscheck fills it from the clipboard if the clipboard holds a code, and joins at once.
+- When the pilot selects the box for the code, Dual Input fills it from the clipboard if the clipboard holds a code, and joins at once.
 - The code belongs to the session, not to any pilot's machine, and lasts until the last pilot leaves, so it doesn't change when control passes, and a pilot who dropped out rejoins with the same code.
-- Crosscheck and the sim start in either order: a host can start a session, and a pilot can enter a code, before the sim runs, and Crosscheck attaches to the sim whenever it starts.
+- Dual Input and the sim start in either order: a host can start a session, and a pilot can enter a code, before the sim runs, and Dual Input attaches to the sim whenever it starts.
 
 **Not in v1:**
 
-- Invite links, because Discord shows a `crosscheck://` link as plain text and an https redirect adds two prompts ([One-click invite](ideas.md#one-click-invite)).
+- Invite links, because Discord shows a `dualinput://` link as plain text and an https redirect adds two prompts ([One-click invite](ideas.md#one-click-invite)).
 - Permanent codes, left out on 2026-10-04 ([Ideas left out](ideas.md#ideas-left-out)).
 - Reading the clipboard at any other moment.
 - Host approval of each joiner.
@@ -314,7 +314,7 @@ The host starts a session and gets a code, and the other pilot enters it to join
 - The code admits a pilot with no approval from the host, as it does in fsc-editor, where the relay limits how fast one address can guess codes and the host sees how many peers are connected (read in fsc-editor, `docs/remote-connect.md`, "The code").
   It's a game among friends, and confirming each joiner would get in the way.
 - Every pilot sees who's in the crew.
-- Crosscheck asks each pilot for the name the crew sees before they first start or join a session, and never takes it from the Windows account ([members](../session/02-units.md#members)).
+- Dual Input asks each pilot for the name the crew sees before they first start or join a session, and never takes it from the Windows account ([members](../session/02-units.md#members)).
 
 **Depends on:**
 
@@ -322,8 +322,8 @@ The host starts a session and gets a code, and the other pilot enters it to join
 
 **Open questions:**
 
-- Whether the EFB app can fill its box from the clipboard: the EFB runs inside the sim's panel, so Crosscheck's own app would read the clipboard when the EFB's box is selected (unverified).
-- Whether the Crosscheck IDE joins through the same session and code, making the Crosscheck session the editing session too, or the session points the IDE at a server of its own; either way has consequences for the relay and the protocol, settled later.
+- Whether the EFB app can fill its box from the clipboard: the EFB runs inside the sim's panel, so Dual Input's own app would read the clipboard when the EFB's box is selected (unverified).
+- Whether the Dual Input IDE joins through the same session and code, making the Dual Input session the editing session too, or the session points the IDE at a server of its own; either way has consequences for the relay and the protocol, settled later.
 
 ### The connection
 
@@ -351,18 +351,18 @@ The connection carries everything between the crew's machines, directly when it 
 - When a pilot loses the connection, the others fly on without pausing, and the [take-control key](#take-control-key)'s rules say what locks, what the [notification banner](#notification-banner) shows, and who can take control.
 - After 30 minutes cut off, a pilot leaves the session, PF or PM (user, 2026-10-11; [01-between-machines](../network/01-between-machines.md#coming-back)).
   Our FS Copilot fork waits 5 minutes, which its notes call "long enough for a router reboot or a sim reload" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, `DegradedTimeout`, and `record/pointer-forwarding/docs/13-pr-prep.md`).
-- Recovery is the app's job, and each part of Crosscheck recovers its own state within it.
+- Recovery is the app's job, and each part of Dual Input recovers its own state within it.
   The app tells whether a returning pilot's sim kept running or restarted, from session state it saves on the pilot's machine with an identifier for the sim's run.
-  If the sim kept running, Crosscheck reconnects the pilot with no action from them, from that saved state, and replays what they missed in the order it happened ([catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
-  If the sim restarted, Crosscheck rejoins the pilot once they're in a flight again, with the code it remembers, as a [late joiner](#preflight): flight-model sync puts them back in the aircraft's place, their cockpit catches up on every control the profile can read or track, and Crosscheck tells them that their displays' pages, their FMS, and anything else the profile can't read may differ from the PF's.
-  A pilot whose Crosscheck crashed while their sim kept running comes back as a late joiner too, as one whose sim crashed does; Crosscheck aims for a core that never crashes, and asks for a bug report when one does (user, 2026-10-12; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
+  If the sim kept running, Dual Input reconnects the pilot with no action from them, from that saved state, and replays what they missed in the order it happened ([catch-up](../sync/03-catch-up.md#replaying-a-short-outage)).
+  If the sim restarted, Dual Input rejoins the pilot once they're in a flight again, with the code it remembers, as a [late joiner](#preflight): flight-model sync puts them back in the aircraft's place, their cockpit catches up on every control the profile can read or track, and Dual Input tells them that their displays' pages, their FMS, and anything else the profile can't read may differ from the PF's.
+  A pilot whose Dual Input crashed while their sim kept running comes back as a late joiner too, as one whose sim crashed does; Dual Input aims for a core that never crashes, and asks for a bug report when one does (user, 2026-10-12; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
 - A sim that closes, by a crash or by its pilot, counts as leaving the flight, and its pilot comes back as a late joiner, since a closed sim's pages, FMS, and avionics state can't be restored (user, 2026-10-11; [04-order-and-recovery](../sync/04-order-and-recovery.md#a-sim-that-closed)).
   A PF's crash passes control to the PM at once.
-  When a pilot's sim crashes, their core stays up, and the others' notice says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Crosscheck rejoins him once he's back in a flight." ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
+  When a pilot's sim crashes, their core stays up, and the others' notice says that pilot's sim crashed rather than that their connection dropped, such as "James's sim crashed. Dual Input rejoins him once he's back in a flight." ([Telling the crew a sim crashed](ideas.md#telling-the-crew-a-sim-crashed); user, 2026-10-07).
   How the core tells a crash from a pilot closing the sim is open (same entry).
 - A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying: control passes to the PM if they were the PF, and the others get a notice.
-  Once they're in a flight again, Crosscheck rejoins them as a late joiner.
-- A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app, and closing Crosscheck without Leave session counts as a Leave.
+  Once they're in a flight again, Dual Input rejoins them as a late joiner.
+- A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app, and closing Dual Input without Leave session counts as a Leave.
 
 **Depends on:**
 
@@ -380,7 +380,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 **In v1:**
 
 - Joining and flying are two steps.
-  Joining admits a pilot to the session once Crosscheck's own checks pass, such as compatible Crosscheck versions, which [installing and updating](#installing-and-updating) scopes.
+  Joining admits a pilot to the session once Dual Input's own checks pass, such as compatible Dual Input versions, which [installing and updating](#installing-and-updating) scopes.
 - Once a pilot has joined, and until they're in a flight, they see where the PF is, such as "James is at EGLL stand X12", or "James hasn't loaded a flight yet" before the PF has ([in the flight](../session/02-units.md#in-the-flight)).
   A Go to button points the world map at the PF's departure airport and selects the PF's stand while the PF's engines are off, and a runway at that airport while they run, so the joiner's engines start running ([go to](../session/02-units.md#go-to)).
   It does so with the world map's own requests, made by a script of ours that a copy of the sim's BlurPage component brings into the menu's document.
@@ -388,18 +388,18 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
   The copy ships in our package, built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either (user, 2026-10-18; [our package](../install/01-installing-and-updating.md#our-package)).
   Go to takes the stand from the `[Departure]` section of `CustomFlight.FLT`, the flight file the sim names in `FlightLoaded`, which names the stand a flight loaded at, such as `GateName=PARKING; GateNumber=140` (measured on MSFS 2024, 2026-10-05, [interface log](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), so it never names a stand the PF taxied to.
 - Each pilot loads their flight at the PF's stand, or at a runway of the PF's departure airport while the PF's engines run, because moving an aircraft across the world makes the sim load new scenery there, which can stall it or fill its video memory (unverified; a probe that moves a parked aircraft to an airport on another continent settles it).
-- When a joined pilot is in a flight, Crosscheck puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
+- When a joined pilot is in a flight, Dual Input puts their aircraft at the PF's position, and from then until preflight ends, every aircraft in the crew, the PF's included, holds its position, altitude, and attitude, so the crew is in one aircraft from the start.
 - Each pilot works through the [preflight match check](#preflight-match-check)'s list and clicks Ready.
 - When every pilot counted is ready, a 3s countdown runs, and when it ends, preflight ends: the aircraft is free to move, and the rest of sync starts.
 - When preflight ends, every other pilot's cockpit catches up to the PF's, as [state sync](#state-sync) scopes.
-- The PF works through a checklist of the controls Crosscheck tracks by counting their events, because no variable shows their value, and confirms each is where the aircraft starts it, such as a hypothetical "FCU speed 80" on an Airbus.
-  Crosscheck counts from that value, so a wrong start on the PF's aircraft reaches every other cockpit ([01-profile-entries](../sync/01-profile-entries.md#keeping-a-shadow-value)).
+- The PF works through a checklist of the controls Dual Input tracks by counting their events, because no variable shows their value, and confirms each is where the aircraft starts it, such as a hypothetical "FCU speed 80" on an Airbus.
+  Dual Input counts from that value, so a wrong start on the PF's aircraft reaches every other cockpit ([01-profile-entries](../sync/01-profile-entries.md#keeping-a-shadow-value)).
   Whether the 58P's profile has any such controls, and so whether v1's checklist has anything on it, is unknown until the profile is written.
 
 **Not in v1:**
 
-- Warning a pilot who spawned far from the PF before Crosscheck moves them to the PF's position, which risks the scenery load above.
-- Loading a pilot's flight at the PF's stand for them: the pilot loads it from the world map, and Crosscheck moves their aircraft only once they're in it.
+- Warning a pilot who spawned far from the PF before Dual Input moves them to the PF's position, which risks the scenery load above.
+- Loading a pilot's flight at the PF's stand for them: the pilot loads it from the world map, and Dual Input moves their aircraft only once they're in it.
   The world map's own requests can also choose the aircraft and livery and start the flight (measured on MSFS 2024, 2026-10-05, [interface log, 2026-10-05](../interface/log.md#2026-10-05-code-in-the-menus-document-sets-the-world-maps-departure-stand-aircraft-and-livery-and-starts-the-flight)), and our script went from a closed sim to Ready to fly with nobody at the sim (measured on MSFS 2024, 2026-10-06, [interface log, 2026-10-06](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)), but handling every page a pilot might start from would add days to v1's build, so it stays out (user, 2026-10-05).
 
 **Rules:**
@@ -407,8 +407,8 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 - If the PF's aircraft isn't on the ground when the session starts, there's no preflight: the crew flies at once, and every other pilot joins as a late joiner (user, 2026-10-08).
   Holding the PF still in the air would go wrong, because a frozen aircraft keeps integrating its velocities: a parked Baron, frozen and written 5 ft up, had its `A:VELOCITY BODY Z` climb from 0 to 68 ft/s in 4s (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)), and skipping preflight is simpler than finding out whether writing every velocity each frame would hold them (user, 2026-10-08).
 - A pilot's Ready is unavailable until their aircraft has settled after loading ([catch-up](../sync/03-catch-up.md#settling-after-a-load)).
-- The Go to button is unavailable, and says why, on any page but the main menu's home page and Free flight's world map, or when Crosscheck has no copy of BlurPage installed: a sim update removes BlurPage or stops MasterPage placing it, or another package copies it.
-  Crosscheck tries no other component, so the button stays unavailable until a Crosscheck release picks one (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
+- The Go to button is unavailable, and says why, on any page but the main menu's home page and Free flight's world map, or when Dual Input has no copy of BlurPage installed: a sim update removes BlurPage or stops MasterPage placing it, or another package copies it.
+  Dual Input tries no other component, so the button stays unavailable until a Dual Input release picks one (user, 2026-10-06; [interface log](../interface/log.md#2026-10-06-our-copy-of-blurpage-brings-our-script-into-the-menu-from-the-first-screen-and-from-there-it-runs-the-whole-join-to-ready-to-fly)).
 - Pilots other than the PF touch nothing in the cockpit during preflight, because catch-up sets only what the profile holds: a PM who switches a display to another page during preflight keeps that page after the PF's state arrives.
   The PF touches nothing beyond the checklist.
 - Un-readying during the countdown cancels it, and the flight doesn't start until every pilot counted is ready again.
@@ -416,7 +416,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 - A pilot who drops out during preflight becomes unready and still counts, so by default the crew waits for them.
   Any pilot who's ready can choose Go without, such as "Go without James", which takes James out of the count.
 - A pilot who drops out and comes back before preflight ends is back in preflight, unready, and clicks Ready again.
-- A late joiner, who joins after preflight ended or comes back after the crew went without them, skips Ready: once they're in a flight, Crosscheck puts their aircraft at the flying machine's position, airborne or not, and their catch-up starts ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
+- A late joiner, who joins after preflight ended or comes back after the crew went without them, skips Ready: once they're in a flight, Dual Input puts their aircraft at the flying machine's position, airborne or not, and their catch-up starts ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
 - Preflight comes only at a session's start, because once it has ended, a session with no pilot in the flight ends (user, 2026-10-12; [roles and members](../session/01-roles-and-members.md#the-pf)).
   A session flies one aircraft, its PF's, so a crew that wants another starts a new session.
 
@@ -433,7 +433,7 @@ From the moment a joined pilot is in a flight until the crew starts flying, ever
 
 ### Preflight match check
 
-During [preflight](#preflight), and when a late joiner is in a flight, Crosscheck compares what each pilot has for the shared aircraft and lists what differs.
+During [preflight](#preflight), and when a late joiner is in a flight, Dual Input compares what each pilot has for the shared aircraft and lists what differs.
 
 **In v1:**
 
@@ -454,7 +454,7 @@ During [preflight](#preflight), and when a late joiner is in a flight, Crosschec
   A pilot in a flight with another aircraft, whether they joined in it or loaded it later, stays in the session but out of the flight, as at the main menu, with a notice to load the session's aircraft, and once they load the flying machine's aircraft, they rejoin as a late joiner (user, 2026-10-16; [in the flight](../session/02-units.md#in-the-flight)).
 - No other difference stops the flight: versions, liveries, and add-ons stop nothing.
   An error says something will likely go wrong, and a warning says it might: a different aircraft version can be an error, and a different livery a warning.
-  A developer's update that fixes textures changes the version without touching anything Crosscheck syncs, and making a pilot spend 10 minutes updating for it would only get in the way.
+  A developer's update that fixes textures changes the version without touching anything Dual Input syncs, and making a pilot spend 10 minutes updating for it would only get in the way.
 - A difference that breaks one feature turns that feature off for the session and shows a warning, rather than an error for the whole flight.
   A machine that can't read the aircraft's models turns off only part of avatar sync, as [avatar sync](#avatar-sync) says.
 - A session in an aircraft with no published profile flies with state sync, pointer sync, and avatars idle, and the check shows the missing profile as an error ([the match check](../session/02-units.md#the-match-check)).
@@ -463,7 +463,7 @@ During [preflight](#preflight), and when a late joiner is in a flight, Crosschec
 **Depends on:**
 
 - Profiles, whose hashes the check compares.
-  What a feature needs follows from what the profile references, such as the display identifiers pointer sync replays into, and Crosscheck checks each machine for those itself.
+  What a feature needs follows from what the profile references, such as the display identifiers pointer sync replays into, and Dual Input checks each machine for those itself.
 - [Preflight](#preflight), whose join step admits the pilot and during which the check runs.
 
 **Open questions:**
@@ -489,7 +489,7 @@ The AI traffic in one pilot's sim, usually injected by an ATC add-on such as Bey
 **Not in v1:**
 
 - Removing another source's traffic for the pilot, because SimConnect removes only the AI objects its own client created ([SimConnect_AIRemoveObject](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/AI_Object/SimConnect_AIRemoveObject.htm)).
-- Hiding another source's traffic, which would leave ATC talking to aircraft nobody sees, so Crosscheck hides none.
+- Hiding another source's traffic, which would leave ATC talking to aircraft nobody sees, so Dual Input hides none.
 - GSX's other vehicles and its people, which wait for [ground operations sync](ideas.md#ground-operations-sync).
 - Detecting a pushback started in a following machine's sim (user, 2026-10-17).
 
@@ -526,10 +526,10 @@ The ATC app's audio on the traffic host's machine plays on every other pilot's m
 **In v1:**
 
 - ATC apps that run as their own program, such as BeyondATC, captured by process and found by program name or picked from a list of programs playing audio, as our FS Copilot fork does (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Capturing" and "Choosing the ATC app").
-  Crosscheck finds BeyondATC by itself, and SayIntentions by its program's name, which a check in the sim confirms ([traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md)).
-- Crosscheck plays the audio on the output device, with no window needed, so a pilot in VR hears it too.
-  The output device is a setting: Windows' default device, which Crosscheck follows when the pilot switches headsets, or a device the pilot picks ([04-core-helper](../core/04-core-helper.md#the-devices)).
-  Crosscheck's own sounds, such as the handover cues, play on the same device.
+  Dual Input finds BeyondATC by itself, and SayIntentions by its program's name, which a check in the sim confirms ([traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md)).
+- Dual Input plays the audio on the output device, with no window needed, so a pilot in VR hears it too.
+  The output device is a setting: Windows' default device, which Dual Input follows when the pilot switches headsets, or a device the pilot picks ([04-core-helper](../core/04-core-helper.md#the-devices)).
+  Dual Input's own sounds, such as the handover cues, play on the same device.
 - An ATC volume setting turns ATC down alone ([traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md)).
 
 **Not in v1:**
@@ -546,7 +546,7 @@ The ATC app's audio on the traffic host's machine plays on every other pilot's m
 - ATC reaches the crew about 130ms after the app plays it, plus the network delay, plus whatever depth past 60ms the buffer picks at the start of a transmission, up to 300ms (same entry; [traffic and ATC's design](../traffic-atc/01-traffic-and-atc.md)).
   At times it reaches a crewmate later than 300ms, the delay at which a readback on Discord would overtake the call, when the ATC host is relayed on a lossy link far from the relay their packets cross, which the user accepts for v1 (user, 2026-10-10; [01-between-machines](../network/01-between-machines.md#the-relays)).
   A direct path that dies with no warning loses up to 2s of it, the 2s the connection takes to move to the relay (same section).
-- Crosscheck picks up an ATC app started after it, and attaches again when the app restarts (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Choosing the ATC app").
+- Dual Input picks up an ATC app started after it, and attaches again when the app restarts (FS Copilot fork, `record/traffic-atc/docs/01-design.md`, "Choosing the ATC app").
 
 **Depends on:**
 
@@ -567,7 +567,7 @@ The crew's sims share one simulation rate and an active pause that holds for eve
 
 - When any pilot turns active pause on or off, every machine follows.
 - The flying machine's simulation rate reaches every machine when [preflight](#preflight) ends, when a late joiner is in a flight, and whenever the PF changes it.
-  Crosscheck puts back any change another pilot makes to it.
+  Dual Input puts back any change another pilot makes to it.
 - When the PF opens the sim's pause menu, the [notification banner](#notification-banner) tells the rest of the crew, such as "James is in the pause menu", so a frozen aircraft has a reason.
 
 **Not in v1:**
@@ -599,7 +599,7 @@ The crew's sims share one simulation rate and an active pause that holds for eve
 
 ### Avatar sync
 
-Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, looking where they look, reaching for what they change, and on foot beside them on the walkaround.
+Each pilot sees the other pilot as a figure of Dual Input's own, in their seat, looking where they look, reaching for what they change, and on foot beside them on the walkaround.
 
 **In v1:**
 
@@ -620,8 +620,8 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
   The pilot clicked from a median 1.8m to 2.6m and up to 5.8m away (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-on-foot-outside-the-click-ray-lands-within-1cm-on-the-exterior-and-the-pilot-clicks-from-up-to-6m-away)).
 - A pilot sees their own figure inside the aircraft and in an outside view, on by default with a setting to turn it off, so the pilot sees what they show the crew (user, 2026-10-17).
   While their camera sits at the figure's head, the figure's head and neck hide and its hands fade, and where the sim can't fade a figure's material, the hands hide.
-  To hide the sim's own avatar in an outside view, Crosscheck ships an avatar with nothing to show, which the pilot picks, as the [No Avatar](https://flightsim.to/addon/59715/no-aavatar) add-on does, and v1 tells the pilot how to pick it.
-- Each pilot picks their figure's color in Crosscheck's settings, and two pilots who picked the same color both show it and sort it out between themselves; only a pilot who never picked one gets one nobody shows, and gray stays the color of a dropped pilot (user, 2026-10-17).
+  To hide the sim's own avatar in an outside view, Dual Input ships an avatar with nothing to show, which the pilot picks, as the [No Avatar](https://flightsim.to/addon/59715/no-aavatar) add-on does, and v1 tells the pilot how to pick it.
+- Each pilot picks their figure's color in Dual Input's settings, and two pilots who picked the same color both show it and sort it out between themselves; only a pilot who never picked one gets one nobody shows, and gray stays the color of a dropped pilot (user, 2026-10-17).
   A "Show the crew's figures" setting, on by default, hides every figure but the pilot's own when the pilot turns it off.
 - When a pilot's connection drops, their figure slumps in its seat and turns gray, and when they leave the session, it disappears.
   A figure slumps and turns gray only on a machine that reaches the internet, by the network's check of our relays ([the network's units](../network/02-units.md#what-the-pilot-sees-and-settings)), and no figure slumps before the check answers.
@@ -630,7 +630,7 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
 - When a pilot switches to an outside view, their figure stays seated, facing forward.
 - A pilot whose camera moves around inside the aircraft, in no seat, shows as a head floating at their camera.
 - A WASM module places each figure inside the sim's frame, turned by the aircraft's attitude and led by up to a frame, which held our figure in the 58P's right seat at up to 185 kt GS (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
-  Crosscheck edits no other developer's package to hold it there.
+  Dual Input edits no other developer's package to hold it there.
 
 **Not in v1:**
 
@@ -646,7 +646,7 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
   The authoring tool seeds a seat from the seat objects SimConnect lists, then from the cockpit model's `PILOT_` nodes, then from a click on the cushion, and the author tunes it ([Seat awareness](ideas.md#seat-awareness)).
   The 58P lists a seat object only for the pilot's seat, so its right seat starts from its model's `PILOT_1` node (measured on MSFS 2024, 2026-10-03, [aircraft log](../aircraft/log.md#2026-10-03-the-baron-58p-lists-only-its-pilots-seat-because-the-seat-objects-are-the-seats-in-each-aircrafts-navigation-graph)).
 - Each pilot moves to a seat themselves, with their own camera.
-- Crosscheck tells which seat a pilot is in from their camera's position: a pilot takes a free seat when their camera comes within its take radius of its eye point, 0.4m unless the profile gives one, and of the seats whose radius holds the camera, the one with the nearest eye takes it (user, 2026-10-17; [a seat](../avatars/01-avatars.md#a-seat)).
+- Dual Input tells which seat a pilot is in from their camera's position: a pilot takes a free seat when their camera comes within its take radius of its eye point, 0.4m unless the profile gives one, and of the seats whose radius holds the camera, the one with the nearest eye takes it (user, 2026-10-17; [a seat](../avatars/01-avatars.md#a-seat)).
 - A pilot leaves a seat only by taking another, going on foot, or moving their camera more than 0.8m behind the seat's hip, so a close-up of the panel never takes a pilot out of their seat (user, 2026-10-17).
   A leave radius would have to pass 0.77m to keep a pilot seated in the 58P's eight instrument views, which sit 0.35m to 0.77m from the nearer seat's eye in any direction (read in bksq-aircraft-baronpro 0.1.1, `bksq-aircraft-baronpropress/cameras.cfg`).
   Measured backward alone, the farthest back of those instrument views, `EmergencyGearExtension`, is 0.58m behind the `Pilot` eye, which stays under 0.8m behind the hip while the seat's eye sits less than 0.22m behind its hip (arithmetic), and `CabinForward` is about 2m behind it (same file).
@@ -664,7 +664,7 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
 
 **Open questions:**
 
-- How Crosscheck's empty avatar is built, and whether the pilot picks it in the sim's own avatar screen or Crosscheck can select it (unverified).
+- How Dual Input's empty avatar is built, and whether the pilot picks it in the sim's own avatar screen or Dual Input can select it (unverified).
 - Whether the sim can fade a figure's material, through the material animation that colors it, so a dropped pilot's figure can turn see-through and a pilot's own hands can fade (unverified).
 - Whether a click through the pilot's own figure still reaches the control behind it.
 
@@ -672,7 +672,7 @@ Each pilot sees the other pilot as a figure of Crosscheck's own, in their seat, 
 
 ### EFB app
 
-A small app on the sim's EFB holds what a pilot needs during a flight, so a pilot in VR can use Crosscheck without taking the headset off.
+A small app on the sim's EFB holds what a pilot needs during a flight, so a pilot in VR can use Dual Input without taking the headset off.
 
 **In v1:**
 
@@ -681,7 +681,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 - What a pilot needs during a flight: the take-control button, the crew and the connection's state, the Ready button beside the match check's warnings and errors, Go without for each pilot who drops out during [preflight](#preflight), the box for an invite code, Leave session, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
 - Opening onto what a notice on the [notification banner](#notification-banner) is about when the pilot clicks the notice anywhere but on its action, whether the EFB was open on another app or closed.
   The core passes the click to the app, whose own code runs while the EFB is closed: it opens the EFB if it's closed and fires `OPEN_BY_KEY` with its own name, which opened a crowded EFB onto our app whether the EFB was closed, open on another app, or closed after use, with our app on neither the dock nor the first page of the app list (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
-- A button that brings the desktop app to the front while Crosscheck's core is running.
+- A button that brings the desktop app to the front while Dual Input's core is running.
 - How it looks is for a design later.
 
 **Not in v1:**
@@ -697,7 +697,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 **Depends on:**
 
-- Crosscheck's core, which owns the session; a headless core with the apps as its clients is the architecture's leading candidate in [the plan](plan.md).
+- Dual Input's core, which owns the session; a headless core with the apps as its clients is the architecture's leading candidate in [the plan](plan.md).
 
 **Open questions:**
 
@@ -705,22 +705,22 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 ### Notification banner
 
-Crosscheck's notices slide in at the right of the screen, on a see-through in-game panel, the kind of window the sim's toolbar opens, so the pilot sees them whether or not the EFB is open.
+Dual Input's notices slide in at the right of the screen, on a see-through in-game panel, the kind of window the sim's toolbar opens, so the pilot sees them whether or not the EFB is open.
 A notice can carry one action of its own, such as Ready on the preflight summary, and a click anywhere else on it opens the [EFB app](#efb-app) at what the notice is about.
 
 **In v1:**
 
 - The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", and "You have control".
-- A notice when a synced control never matches after Crosscheck's retries, once per control per flight, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
+- A notice when a synced control never matches after Dual Input's retries, once per control per flight, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - While a pilot's cockpit catches up, a "Catching up..." notice saying that switches they move now will be reset ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
 - During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button, and for pilots other than the PF, a line telling them to touch nothing in the cockpit.
-- Crosscheck opening the banner's panel itself when a flight loads, with no click from the pilot.
+- Dual Input opening the banner's panel itself when a flight loads, with no click from the pilot.
 
 **Not in v1:**
 
-- The rest of Crosscheck's controls, which live in the EFB app.
+- The rest of Dual Input's controls, which live in the EFB app.
 - A banner that floats in front of the pilot's view on an object of ours, like a pair of AR glasses: its text smeared while the view moved, and parts of the cockpit sometimes cut into it (judged by the pilot in MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-a-banner-drawn-on-an-object-of-ours-smears-in-motion-and-is-clipped-behind-the-cockpit-so-we-parked-it-for-an-in-game-panel)).
-- Crosscheck's other objects in the cockpit, such as a take-control button stuck to a window, a Later pick.
+- Dual Input's other objects in the cockpit, such as a take-control button stuck to a window, a Later pick.
 
 **Rules:**
 
@@ -731,7 +731,7 @@ A notice can carry one action of its own, such as Ready on the preflight summary
 **Depends on:**
 
 - The [EFB app](#efb-app)'s code, which opens the banner's panel ([architecture's tentative decisions](../architecture/decisions.md#the-efb-apps-code-opens-the-banner-panel)).
-  It and a script that Crosscheck's toolbar icon puts into the sim's toolbar each opened the panel from our installed package after a flight load and mid-flight ([interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)), and Crosscheck ships no toolbar script, since it rests on Parallel 42's trick, not a sim feature: the toolbar runs markup it finds in an icon, and an update could stop that.
+  It and a script that Dual Input's toolbar icon puts into the sim's toolbar each opened the panel from our installed package after a flight load and mid-flight ([interface log](../interface/log.md#2026-10-09-installed-from-the-community-folder-our-toolbar-script-loads-at-the-flight-load-and-it-and-our-efb-apps-code-each-open-the-banner-when-the-client-asks-over-the-commbus)), and Dual Input ships no toolbar script, since it rests on Parallel 42's trick, not a sim feature: the toolbar runs markup it finds in an icon, and an update could stop that.
 - The [EFB app](#efb-app), which a click on a notice opens.
 
 **Open questions:**
@@ -745,7 +745,7 @@ A notice can carry one action of its own, such as Ready on the preflight summary
   ChasePlane closes its own full-screen overlay when the toolbar's `globalVars.vrMode` is set (read in p42-util-chaseplane 2026.39.1.16, `HTML_UI/icons/toolbar/P42_PANEL_CHASEPLANE_OVERLAY.svg`), which suggests a panel like ours may not work in VR (unverified).
 - Whether clicks on the panel's empty part reach the cockpit beneath it, which nobody has tried.
   If they don't, the full-height column blocks that part of the cockpit for the whole flight, and reporting only the notice's rectangle with `UPDATE_PANEL_RECT` might let them through (unverified, [interface log](../interface/log.md#2026-10-04-an-in-game-panels-size-is-a-percent-of-the-screens-height-capped-at-150-of-it-so-ours-cant-span-a-wide-screen-though-parallel-42s-panels-do)).
-- How to keep the panel on the right when Crosscheck opens it: opened from code, it sat at the left of the screen (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
+- How to keep the panel on the right when Dual Input opens it: opened from code, it sat at the left of the screen (measured on MSFS 2024, 2026-10-04, [interface log](../interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
 
 ## Tools
 
@@ -755,18 +755,18 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 **In v1:**
 
-- Every crew member's machine records every input that passes through Crosscheck, such as each synced change, each handover, and the connection's events, but the high-rate samples a feature leaves out, such as traffic's positions and the flight model's ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+- Every crew member's machine records every input that passes through Dual Input, such as each synced change, each handover, and the connection's events, but the high-rate samples a feature leaves out, such as traffic's positions and the flight model's ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
 - The recording keeps the readings state sync's panel module takes from the gauges' JavaScript, which arrive as inputs, and what plugin tests need from a recording waits for plugins' design, after v1 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#left-open)).
 - The recording keeps each watch-only profile entry whose value differs between machines, with both values ([live sync](../sync/02-live-sync.md#values-not-events)).
-- Crosscheck marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
+- Dual Input marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - Each machine keeps its runs within 1 GB.
-- A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Crosscheck, the sim, and the aircraft, the profile, and the connection's statistics.
+- A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Dual Input, the sim, and the aircraft, the profile, and the connection's statistics.
 - Each pilot uploads their own part to our Worker, labeled with the session's ID, and the parts meet there, so a report works after the crew has gone: if something goes wrong on landing and everyone goes to bed, there's no live session the next morning.
   The Worker keeps each part in R2 for 30 days, and takes it only from a member of that session ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
   The session's ID is a version 4 UUID, drawn by the host's core when it starts the session, and every machine shares it; it can't be the code, since a later session can draw the same six characters ([architecture's spine](../architecture/01-spine.md#ids)).
 - A report page lists the pilot's recorded sessions so each is easy to recognize, by date and time, aircraft, departure airport, and crew, and offers to upload one.
 - On our end, a report shows as one session with who has uploaded and who's missing, such as "uploaded: James, Adam; missing: Greg".
-- A pilot's Crosscheck offers their part when a crewmate has sent one.
+- A pilot's Dual Input offers their part when a crewmate has sent one.
 
 **Not in v1:**
 
@@ -781,31 +781,31 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 - [The connection](#the-connection), for the session's ID that labels every part.
 
-## Getting Crosscheck
+## Getting Dual Input
 
 ### Installing and updating
 
-One installer puts Crosscheck's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
+One installer puts Dual Input's app and its package in the sim's Community folder on a pilot's PC, and updates keep both current without catching the pilot mid-flight.
 
 **In v1:**
 
 - One installer, for the app and the Community package together.
   It finds the Community folder as fsc-editor does, from the `InstalledPackagesPath` line in `UserCfg.opt`, which the Steam and Microsoft Store installs keep in different places ([02-01](../../learn/foundations/02-01-installs-and-packages.md)).
   Nothing asks the pilot for a Community folder: the sim finds its folders only through `UserCfg.opt`, so a pilot who installs before the sim's first run gets our package when that run closes, provided the run writes `UserCfg.opt` (unverified; [the packages folders](../install/01-installing-and-updating.md#the-packages-folders)).
-- Updates download silently, and Crosscheck checks for one each time it starts, before the pilot is likely to have the sim running.
+- Updates download silently, and Dual Input checks for one each time it starts, before the pilot is likely to have the sim running.
   The desktop app also checks on a timer and when the pilot asks ([when the app checks](../install/01-installing-and-updating.md#when-the-app-checks)), and its window shows whether it's checking, downloading, up to date, ready and what holds it back, or failed (user, 2026-10-18).
 - The app and the package update together, as one version, and only while the sim is closed, because the sim loads a package only at boot ([02-01](../../learn/foundations/02-01-installs-and-packages.md)) and an app ahead of its loaded package would have to cope with every pairing.
-- An "install when the sim is closed" option: when the sim exits, the desktop app, which runs from login as a tray icon, updates Crosscheck then.
-  Crosscheck installs no update while a session file exists, since a sim crash closes the sim too, and the option would then leave a core on a new version that its crew refuses ([01-between-machines](../network/01-between-machines.md#a-session-file-after-a-long-outage)).
+- An "install when the sim is closed" option: when the sim exits, the desktop app, which runs from login as a tray icon, updates Dual Input then.
+  Dual Input installs no update while a session file exists, since a sim crash closes the sim too, and the option would then leave a core on a new version that its crew refuses ([01-between-machines](../network/01-between-machines.md#a-session-file-after-a-long-outage)).
   Install now quits the core so the update applies, waiting while the sim runs or a session is held (user, 2026-10-18; [install now](../install/01-installing-and-updating.md#install-now)).
-- Crosscheck has no watcher: the desktop app starts with Windows as a tray icon, for the pilot's own account, as a setting the pilot can turn off (user, 2026-10-06 and 2026-10-18; [one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
+- Dual Input has no watcher: the desktop app starts with Windows as a tray icon, for the pilot's own account, as a setting the pilot can turn off (user, 2026-10-06 and 2026-10-18; [one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
   A pilot who rarely flies with a crew will ask why it runs all day, so it records its own CPU and memory use and the core's, and shows them over its last 24 hours of running, in words a pilot takes in at a glance, when they open it from the tray icon, choose to quit it, or find its setting.
   Beside the numbers it says what it does for them and what quitting costs, in concrete terms.
-- When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app and the EFB app each show a warning, such as "Conflict: another mod (mod-name) overrides a sim file Crosscheck overrides. You may experience issues. [Learn more]", and the [preflight match check](#preflight-match-check)'s list shows it as one, rather than a Windows notification as the sim starts (user, 2026-10-08).
+- When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app and the EFB app each show a warning, such as "Conflict: another mod (mod-name) overrides a sim file Dual Input overrides. You may experience issues. [Learn more]", and the [preflight match check](#preflight-match-check)'s list shows it as one, rather than a Windows notification as the sim starts (user, 2026-10-08).
   The SDK says the package mounted later wins (documented, [02-01](../../learn/foundations/02-01-installs-and-packages.md)), so only one override runs.
   FS Copilot treats YourControls' package as a conflict: its setup won't continue until the pilot removes it, and its app warns "Conflict detected with YourControls package." while YourControls' panel variable is set (read in the FS Copilot fork, `FsCopilot/ViewModels/SetupViewModel.cs` and `FsCopilot/ViewModels/MainViewModel.cs`; user, 2026-10-08).
   Its code doesn't say why they conflict, and both overriding `VCockpit.js` is the likely reason (unverified); the warning holds either way.
-  A losing Crosscheck's panel bridge never loads, so pointer sync and every module a feature names in a panel stop, with no error.
+  A losing Dual Input's panel bridge never loads, so pointer sync and every module a feature names in a panel stop, with no error.
   The warning names the package, and removing it is the pilot's ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)).
 
 **Not in v1:**
@@ -813,13 +813,13 @@ One installer puts Crosscheck's app and its package in the sim's Community folde
 - Code signing, so the installer meets Windows SmartScreen's warning about an unknown publisher; the signing fsc-editor priced was about $10 a month, and flight sim pilots are used to tools that ask more of them (fsc-editor, `docs/pipeline/09-open-questions.md`, "Code signing").
   A pilot whose Smart App Control enforces has to turn it off to run a release of ours that has no positive reputation yet (user, 2026-10-18; [an unsigned v1](../install/01-installing-and-updating.md#an-unsigned-v1)).
 - A beta channel, since all of v1 is a beta.
-- Pilots on different Crosscheck versions flying together.
+- Pilots on different Dual Input versions flying together.
 - A warning, early in the sim's load, that a waiting update will need a sim restart, since Windows' Focus assist turns on by default while a game runs and hides other apps' banners (user, 2026-10-18; [no warning early in the sim's load](../install/01-installing-and-updating.md#no-warning-early-in-the-sims-load)).
 - An offer from the desktop app to disable another package, and a rule that makes disabling reversible, which are Later picks (user, 2026-10-18).
 
 **Rules:**
 
-- Pilots on different versions can't join each other's session, and the join check says who is behind and what to do, such as "Adam has a newer Crosscheck; close the sim to update".
+- Pilots on different versions can't join each other's session, and the join check says who is behind and what to do, such as "Adam has a newer Dual Input; close the sim to update".
 - When the pilot chooses to quit the desktop app, it asks once, giving Quit and Keep running equal weight, and a choice to turn it off stays off (user, 2026-10-06).
 
 **Depends on:**

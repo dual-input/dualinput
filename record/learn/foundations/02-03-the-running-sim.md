@@ -40,8 +40,8 @@ Slew has `K:SLEW_TOGGLE`, `K:SLEW_SET`, and `A:IS SLEW ACTIVE` [4] [8].
 Replay has a flow event at each end, `SIMCONNECT_FLOW_EVENT_REPLAY_START` and `SIMCONNECT_FLOW_EVENT_REPLAY_END`, and a camera state, 15 in `A:CAMERA STATE` [5] [9].
 The time of day is `E:ZULU TIME` and `E:LOCAL TIME`, in seconds since midnight, and key events such as `K:ZULU_HOURS_SET` and `K:CLOCK_HOURS_SET` set it [1] [4].
 
-**What it changes for Crosscheck.**
-Two machines never run the same frames, so Crosscheck can't sync frame by frame: anything it writes every frame follows the receiving machine's frames, not the sender's.
+**What it changes for Dual Input.**
+Two machines never run the same frames, so Dual Input can't sync frame by frame: anything it writes every frame follows the receiving machine's frames, not the sender's.
 Pause, simulation rate, slew, and time of day are per machine, and FS Copilot syncs none of them [10], so a pilot who pauses falls behind the other.
 [Part 8](outline.md#8-synchronization-full) covers syncing clocks, pause, and simulation rate.
 
@@ -75,8 +75,8 @@ Flow events also mark a teleport, a back-on-track or skip in an activity, a repl
 `SimConnect_SubscribeToFlowEvent` takes only the connection handle, and each event arrives as a `SIMCONNECT_RECV_FLOW_EVENT` carrying the event type and the path of any flight file loaded [16].
 The SDK says that after `FLT_LOADED` the aircraft "is now in a new state", and code should re-read its variables from the sim [5].
 
-**What it changes for Crosscheck.**
-Crosscheck can't start syncing until both machines have loaded the same aircraft and its variables exist, and it has to take a fresh snapshot after anything that resets the aircraft's state: a reload, and possibly a teleport or a back-on-track.
+**What it changes for Dual Input.**
+Dual Input can't start syncing until both machines have loaded the same aircraft and its variables exist, and it has to take a fresh snapshot after anything that resets the aircraft's state: a reload, and possibly a teleport or a back-on-track.
 Which event marks "loaded and settled" reliably is a question for a sim session.
 
 **Traps.**
@@ -105,9 +105,9 @@ Most of them need a flight running, and none of them exist on a pilot's machine 
 The Behaviors window's Input Events view answers "what does this switch do": for each input event it shows the current value, the calculator code each `<Inc>`, `<Dec>`, and `<Set>` runs, and the bindings, with bindings to key event IDs in blue [18].
 The SimVar watcher reads and sets simulation variables, and needs a flight running [22].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 These tools are for us, while we work out what an aircraft does.
-They answer questions about the present moment and keep no history [23], and a pilot's sim won't have them, so whatever Crosscheck needs while the pilots fly has to come through SimConnect, a WASM module, or panel code.
+They answer questions about the present moment and keep no history [23], and a pilot's sim won't have them, so whatever Dual Input needs while the pilots fly has to come through SimConnect, a WASM module, or panel code.
 
 **Traps.**
 

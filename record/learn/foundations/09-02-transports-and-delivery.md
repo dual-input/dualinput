@@ -56,10 +56,10 @@ In .NET, `System.Net.Quic` is stable from .NET 9, runs on Windows 11 and Windows
 Where each can run follows from earlier parts.
 A WASM module can't open a socket of any kind ([05-01](05-01-kinds-lifecycle-and-apis.md#gauge-vs-standalone-modules-and-the-sandbox)), a panel can hold a WebSocket to the app on loopback ([06-04](06-04-websockets-to-localhost.md#websockets-from-a-panel-to-localhost)), and the desktop app has the operating system's whole network stack.
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 The classes of data in [08-03](08-03-ordering-and-classes-of-data.md#classes-of-data-what-must-arrive-vs-what-can-be-dropped) need at least a must-arrive, in-order mode and a newest-wins mode on one link, without one stream waiting behind another.
 Any transport over TCP, WebSocket included, puts every stream in one ordered queue.
-The transport also decides which NAT traversal and encryption come built in and which Crosscheck would have to add ([09-03](09-03-nat-and-traversal.md), [09-05](09-05-versions-and-security.md)).
+The transport also decides which NAT traversal and encryption come built in and which Dual Input would have to add ([09-03](09-03-nat-and-traversal.md), [09-05](09-05-versions-and-security.md)).
 
 **Traps.**
 
@@ -118,8 +118,8 @@ FS Copilot doesn't turn it on, and our fork logs `mtu 1024` on every connect [18
 LiteNetLib splits a reliable message larger than the budget into fragments, each with 6 more bytes of header, and throws `TooBigPacketException` for an `Unreliable`, `Sequenced`, or `ReliableSequenced` one [9] [12].
 So our fork sizes each traffic batch to fit: 23 aircraft states of 43 bytes behind a 19-byte header, 1,008 bytes [18].
 
-**What it changes for Crosscheck.**
-Each Crosscheck stream needs a delivery mode and an ordering domain, chosen so that no stream waits behind one it doesn't depend on, and every message sent without reliability has to fit one packet on the smallest MTU of every path it takes, relay legs included.
+**What it changes for Dual Input.**
+Each Dual Input stream needs a delivery mode and an ordering domain, chosen so that no stream waits behind one it doesn't depend on, and every message sent without reliability has to fit one packet on the smallest MTU of every path it takes, relay legs included.
 Which MTU to design for is an open question: LiteNetLib starts at 1,024 bytes, IPv6 guarantees 1,280, and what the VPNs that pilots use leave is unmeasured.
 
 **Traps.**

@@ -73,7 +73,7 @@ So two `AircraftLoaded` came in the main menu, 49s and 16s before the flight's `
 
 ## 2026-10-15: The sim's script loader holds every later script behind one that never loads, while it loads one at a time
 
-**Asked:** if a file of ours that `VCockpit.js` loads through the sim's `Include.addImports`, as FS Copilot's copy loads its own, never loads, does the cockpit still load as if Crosscheck weren't installed, for node 6.2 of the [architecture plan](../architecture/plan.md#62-clients-and-the-panel-bridge)?
+**Asked:** if a file of ours that `VCockpit.js` loads through the sim's `Include.addImports`, as FS Copilot's copy loads its own, never loads, does the cockpit still load as if Dual Input weren't installed, for node 6.2 of the [architecture plan](../architecture/plan.md#62-clients-and-the-panel-bridge)?
 
 **Expected:** yes, since FS Copilot's copy loads seven files of its own that way ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
 

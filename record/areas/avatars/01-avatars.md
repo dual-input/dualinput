@@ -8,7 +8,7 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 
 > **Note**
 > Since 2026-10-18, `fspackagetool` compiles the figure's SimObject on a PC with the sim, closed, since it starts the sim to build, and the compiled model files are committed beside their source with the sources' hashes, which CI checks ([files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
-> The figure ships in our one package, `crosscheck`, with the order hint `PANEL_PATCH`, where the probes' figure had a package of its own ([our package](../build/01-the-build.md#our-package)).
+> The figure ships in our one package, `dualinput`, with the order hint `PANEL_PATCH`, where the probes' figure had a package of its own ([our package](../build/01-the-build.md#our-package)).
 > v1 ships `tools/profile-author` to nobody: it runs from the repository for the core team, where [the units](#the-units) and [the authoring tool](#the-authoring-tool) have it on a profile author's PC ([authoring tools](../build/01-the-build.md#authoring-tools)).
 > Since 2026-10-18, avatars' model job takes the aircraft's package folder from the sim service's aircraft awareness, starting once the profile has loaded and `AircraftChanged` has named the folder, where [finding the files](#finding-the-files), the register sketch in [what it registers](#what-it-registers), and the bench case on a late folder have it wait for this member's `match` key ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md); user, 2026-10-18).
 >
@@ -46,11 +46,11 @@ Here a pose is everything one pilot's figure shows, and a target is where one of
 
 Avatars owns the kind `FIGURE` in [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares):
 
-- The figure's SimObject title is `CROSSCHECK_FIGURE_PILOT`, a `StaticObject`, where the probes' was `CROSSCHECK_Figure` (read in `experiments/areas/avatars/figure/build.mjs`), which settles 6.3's line on it.
-  A lighter figure for passengers, a Later pick, is `CROSSCHECK_FIGURE_PASSENGER`.
-- The figure's 27 joints and its color are 28 `Z:` variables of its own object, `CROSSCHECK_FIGURE_` and the channel, such as `Z:CROSSCHECK_FIGURE_HEAD_YAW`, `Z:CROSSCHECK_FIGURE_ARM_L_LEN`, and `Z:CROSSCHECK_FIGURE_COLOR`; the probes named them `CROSSCHECK_` and the channel (read in `figure/model.mjs`, `CHANNELS` and `variable`).
+- The figure's SimObject title is `DUALINPUT_FIGURE_PILOT`, a `StaticObject`, where the probes' was `CROSSCHECK_Figure` (read in `experiments/areas/avatars/figure/build.mjs`), which settles 6.3's line on it.
+  A lighter figure for passengers, a Later pick, is `DUALINPUT_FIGURE_PASSENGER`.
+- The figure's 27 joints and its color are 28 `Z:` variables of its own object, `DUALINPUT_FIGURE_` and the channel, such as `Z:DUALINPUT_FIGURE_HEAD_YAW`, `Z:DUALINPUT_FIGURE_ARM_L_LEN`, and `Z:DUALINPUT_FIGURE_COLOR`; the probes named them `CROSSCHECK_` and the channel (read in `figure/model.mjs`, `CHANNELS` and `variable`).
   `Z:` variables don't add to the sim's `L:` name table, which held 6,517 names before and after 1,000 figures ([log](log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-and-costs-frame-time-in-view-and-almost-none-out-of-view)).
-- The routine's slot stays `CROSSCHECK_ROUTINE_FIGURE`, of the routine host's kind.
+- The routine's slot stays `DUALINPUT_ROUTINE_FIGURE`, of the routine host's kind.
 
 ## What it registers
 
@@ -190,7 +190,7 @@ On `CockpitSent` for an entry whose `location` covers this pilot's variant, the 
 
 ### The figures this machine draws
 
-- Avatars creates a figure for each member whose pose has arrived, and one for its own pilot, through `create_ai` with `CROSSCHECK_FIGURE_PILOT`, at the aircraft's position, then freezes each one's position, altitude, and attitude with `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET` with 1 on its object ID, as p25 to p27 did (read in `p25-figure-hands.mjs`).
+- Avatars creates a figure for each member whose pose has arrived, and one for its own pilot, through `create_ai` with `DUALINPUT_FIGURE_PILOT`, at the aircraft's position, then freezes each one's position, altitude, and attitude with `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET` with 1 on its object ID, as p25 to p27 did (read in `p25-figure-hands.mjs`).
 - A figure goes when its member is gone from the session, and every figure goes when the profile unloads.
   The SDK documents that closing a connection removes the objects it created, which we've measured only for a killed client, so until [node 7](../architecture/plan.md#7-testing) settles it, avatars removes its figures itself, as [a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load) has the sim service do if closing leaves them.
 - Each frame, avatars works out each figure's state from its newest pose and this machine's view of its member:
@@ -225,7 +225,7 @@ impl Routine for Figure {
             figure.ease(f.now);                                   // the hands on their spring or way back, the head on its ease
             let joints = figure.solve(&yokes);                    // the 27 joints, the color, and what shows
             want.write_on(figure.object, &aircraft.lead(1.0).place(figure.root()));
-            want.write_on(figure.object, &joints);                // Z:CROSSCHECK_FIGURE_*
+            want.write_on(figure.object, &joints);                // Z:DUALINPUT_FIGURE_*
         }
     }
 }
@@ -382,7 +382,7 @@ In the sim:
 
 ## Left open
 
-- How Crosscheck's empty avatar is built, and whether the pilot picks it in the sim's own avatar screen: the build's stage for avatars, in the sim ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
+- How Dual Input's empty avatar is built, and whether the pilot picks it in the sim's own avatar screen: the build's stage for avatars, in the sim ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
 - How avatars tells that a pilot is in VR: a sim check with a headset, at the same stage.
 - How the authoring tool edits the profile's YAML and keeps its comments: inside the tool.
 - How the figure's legs step on foot: the build's stage, by eye.

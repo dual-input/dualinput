@@ -57,7 +57,7 @@ It turns on its binding over the same span, while an input is set.
   Take-control puts it in its slice, and the desktop app writes it into the input setting with `clients`' settings command, as for any setting.
   That raises a setting changed, so the service sends the helper the new binding ([the moments clients raises](../core/02-clients-and-panel-bridge.md#the-moments-clients-raises-and-the-calls-it-takes)).
   Cancel turns the next press off, and Clear writes none into the input setting the same way, so a pilot can rebind or unbind mid-session.
-- The section asks the pilot to make sure the key or button isn't bound in the sim, since Crosscheck can't read the sim's own bindings (user, 2026-10-17).
+- The section asks the pilot to make sure the key or button isn't bound in the sim, since Dual Input can't read the sim's own bindings (user, 2026-10-17).
 - A bound key counts only while a window of the sim is in front, its main window or a popped-out display, so a key typed in another program takes nothing (user, 2026-10-17); a bound button counts whatever is in front, since nobody types on a yoke ([raw input](../core/04-core-helper.md#raw-input)).
 - **A single press** asks for control on the binding's down.
 - **A long press** starts a 1s timer on the down, through the loop's timers, and asks for control when it fires, while the button is still held; an up before then cancels it, so a tap asks for nothing.

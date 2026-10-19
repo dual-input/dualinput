@@ -35,10 +35,10 @@ YourControls syncs keypresses on a flight management computer (FMC), not the FMC
 
 FS Copilot and YourControls each ship their own copy of the sim's `html_ui/Pages/VCockpit/Core/VCockpit.js`, and FS Copilot's installer deletes the YourControls package from the Community folder [6] [7].
 
-**What it changes for Crosscheck.**
-With no shared cockpit in the sim, Crosscheck has to be the authority that FSX's sim was, deciding whose input counts and routing every other change.
+**What it changes for Dual Input.**
+With no shared cockpit in the sim, Dual Input has to be the authority that FSX's sim was, deciding whose input counts and routing every other change.
 Like FS Copilot and YourControls, it needs knowledge of each aircraft's variables and events, which [part 3](outline.md#3-variables-events-and-units-full) and [part 7](outline.md#7-aircraft-specific-systems-refresher) cover.
-If Crosscheck also replaces `VCockpit.js`, a pilot can't run it alongside FS Copilot or YourControls (unverified), and [part 6](outline.md#6-glass-cockpits-and-coherent-gt-full) covers injecting code into panels and its load-order conflicts.
+If Dual Input also replaces `VCockpit.js`, a pilot can't run it alongside FS Copilot or YourControls (unverified), and [part 6](outline.md#6-glass-cockpits-and-coherent-gt-full) covers injecting code into panels and its load-order conflicts.
 
 ## CRM, callouts, and transfer of control
 
@@ -61,11 +61,11 @@ One of AC 120-71B's monitoring strategies is to check the FMA after every change
 On an Airbus, the two sidesticks aren't mechanically linked: simultaneous inputs are added, a "DUAL INPUT" voice warns the crew, and a priority takeover button cancels the other stick [18].
 Two pilots on two machines have two sets of hardware too, which [part 8](outline.md#8-synchronization-full) covers.
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 Both machines must agree at every moment on which pilot is PF, and whether control is handed over, taken, or both is a question for part 8.
 Every state a callout names, from a flap setting to an FMA mode, must match on both machines, or the PM cross-checks a different aircraft from the one the PF flies.
 Callouts are spoken.
-P3D's shared aircraft had a built-in voice intercom [3], and crews using FS Copilot talk over a separate voice call such as Discord [19], so whether Crosscheck carries voice is an open question.
+P3D's shared aircraft had a built-in voice intercom [3], and crews using FS Copilot talk over a separate voice call such as Discord [19], so whether Dual Input carries voice is an open question.
 
 ## Sources
 

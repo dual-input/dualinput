@@ -12,7 +12,7 @@ It has also lost what it had sent that no machine had received, and if it was do
 The spine left node 3 to say how such a core recovers, and what it keeps beyond the session file ([01-spine](../areas/architecture/01-spine.md#left-open)).
 
 The PF is the pilot flying, the flying machine is the PF's, and a following machine is any other pilot's ([03-v1-scope](../areas/product/03-v1-scope.md)).
-A shadow value is Crosscheck's own copy of a value the aircraft keeps out of sight, counted from the events that change it ([01-profile-entries](../areas/sync/01-profile-entries.md#keeping-a-shadow-value)).
+A shadow value is Dual Input's own copy of a value the aircraft keeps out of sight, counted from the events that change it ([01-profile-entries](../areas/sync/01-profile-entries.md#keeping-a-shadow-value)).
 
 ## Options
 
@@ -25,7 +25,7 @@ A shadow value is Crosscheck's own copy of a value the aircraft keeps out of sig
 ## Decision
 
 Option 2.
-Crosscheck aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and a late join reuses the path a sim crash already takes (user, 2026-10-12).
+Dual Input aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and a late join reuses the path a sim crash already takes (user, 2026-10-12).
 A restarted core's aircraft kept the controls it had, which matched the flying machine's, so the flying machine's shadow values are the nearest to its own, and nothing restores itself in an aircraft that didn't load, so it counts as settled at once ([04-order-and-recovery](../areas/sync/04-order-and-recovery.md#a-core-that-restarts)).
 
 ## What it commits us to

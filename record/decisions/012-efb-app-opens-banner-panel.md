@@ -1,15 +1,15 @@
 # 012: The EFB app's code opens the banner panel
 
 In a session, the EFB app's code opens the banner panel when the core says the session has something to show, and closes it, by calling `TOOLBAR_BUTTON_TOGGLE` from the EFB's document.
-Crosscheck ships no script in the toolbar's document.
+Dual Input ships no script in the toolbar's document.
 Decided by the user on 2026-10-09, in node 1.5 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#the-efb-apps-code-opens-the-banner-panel).
 
 ## Context
 
-Crosscheck's notices show on the banner, a see-through in-game panel of ours, and Crosscheck opens the banner's panel itself, with no click from the pilot ([notification banner](../areas/product/03-v1-scope.md#notification-banner)).
+Dual Input's notices show on the banner, a see-through in-game panel of ours, and Dual Input opens the banner's panel itself, with no click from the pilot ([notification banner](../areas/product/03-v1-scope.md#notification-banner)).
 `Coherent.call("TOOLBAR_BUTTON_TOGGLE", "PANEL_CROSSCHECK_P05", open)` opened and closed our panel when run in the toolbar's page and in the EFB's page, and did nothing in the Baron's tablet page or in `VLogic`, and mainUi has no `Coherent` to call it with (measured on MSFS 2024, 2026-10-04, [interface log](../areas/interface/log.md#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page)).
 Closing the panel destroys its page (same entry), so the code that opens it lives in another page.
-[Node 1.5](../areas/architecture/plan.md#15-a-flight-with-crosschecks-rust-pieces) asked which page that is, and with it whether the toolbar script is one of Crosscheck's components at all.
+[Node 1.5](../areas/architecture/plan.md#15-a-flight-with-dual-inputs-rust-pieces) asked which page that is, and with it whether the toolbar script is one of Dual Input's components at all.
 
 ## Options
 
@@ -30,7 +30,7 @@ This changes [notification banner](../areas/product/03-v1-scope.md#notification-
 
 ## What it commits us to
 
-- The toolbar script isn't one of Crosscheck's components ([01-spine](../areas/architecture/01-spine.md#components)).
+- The toolbar script isn't one of Dual Input's components ([01-spine](../areas/architecture/01-spine.md#components)).
 - The EFB app connects to the core whenever it hears the core's announcement, and the banner panel connects while it's open ([01-spine](../areas/architecture/01-spine.md#the-sims-pages)).
 - Opened from code, our panel sat at the left of the screen, not the right, and how to keep it on the right is one of the banner's open questions (measured on MSFS 2024, 2026-10-04, [interface log](../areas/interface/log.md#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click); [notification banner](../areas/product/03-v1-scope.md#notification-banner)).
 - This decision leaves to the apps' stage of step 8 opening the panel during a flight load, before Ready to fly, and after a second flight load in one run of the sim, which no run has tried ([01-spine](../areas/architecture/01-spine.md#left-open)).

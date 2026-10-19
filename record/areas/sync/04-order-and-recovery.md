@@ -28,7 +28,7 @@ A link cut for 30 minutes ends the session for that pilot ([01-between-machines]
 
 ## A sim that closed
 
-A sim that closed has lost every display's page, its FMS, and each avionics suite's own state, such as a GTN 750's flight plan, and no profile entry reads them, so Crosscheck restores none of it (user, 2026-10-11).
+A sim that closed has lost every display's page, its FMS, and each avionics suite's own state, such as a GTN 750's flight plan, and no profile entry reads them, so Dual Input restores none of it (user, 2026-10-11).
 Replaying the presses that built them wouldn't either, because a press does what the pilot meant only on the page they saw.
 
 So a pilot whose sim run has ended has left the flight, and comes back as a late joiner (user, 2026-10-11).
@@ -51,7 +51,7 @@ A receiver's own vector clock is its one record of what it has applied, and serv
 - A message reaches a receiver in its sender's order, on that sender's stream or in a replay from whoever kept it ([01-between-machines](../network/01-between-machines.md#coming-back)), and waits until the receiver's clock covers every message it depends on ([02-live-sync](02-live-sync.md#one-stream-in-causal-order)).
   A message the receiver's clock already covers is a copy, and the receiver drops it.
 - Pointer sync sends each gesture, a press or drag on a display, as it happens: its down, its moves, and its up ([pointer sync](../pointer-sync/01-pointer-sync.md#a-gesture)).
-  A message counts as applied, and moves the receiver's clock on, once Crosscheck has made its write, fired its event, or handed a gesture's message to the display's panels, and a gesture's up once they're done with it ([playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+  A message counts as applied, and moves the receiver's clock on, once Dual Input has made its write, fired its event, or handed a gesture's message to the display's panels, and a gesture's up once they're done with it ([playing a gesture](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
   The receiver acknowledges by sending its clock once a second on a one-off channel of the cockpit-stream crate's own, so the heartbeat knows nothing of the cockpit stream ([02-units](../network/02-units.md#the-heartbeat-and-clock-offsets)).
   A panel plays a gesture's click at its up, so an up counted at the hand-over could let the next event land before the click.
   FS Copilot's acknowledgment meant "received by the app", not "applied by the panel" (read in the FS Copilot fork, `FsCopilot/Simulation/Coordinator.cs`, the constructor's comment), and its app, restarted, dropped a press it had no panel for yet, logging "No panel for DisplayUnits|config=N324DU; event dropped" (measured on MSFS 2024, 2026-09-17, FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-17 — A peer's press drove the real A220 ND, opted in by identifier alone").
@@ -135,7 +135,7 @@ Every machine other than the new PF's that applied a message the change drops ca
 ## A core that restarts
 
 A core that crashes while its sim keeps running comes back as a [sim that closed](#a-sim-that-closed) does: the desktop app starts it again ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), it counts its pilot as having left the flight, passes control on if they held it, and rejoins its pilot as a late joiner, whose catch-up starts at once, since the sim is still in the flight.
-Crosscheck aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and the crew's notice asks for a bug report (user, 2026-10-12).
+Dual Input aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and the crew's notice asks for a bug report (user, 2026-10-12).
 
 Two things differ from a late join after a load, because the aircraft didn't reload:
 
@@ -148,9 +148,9 @@ A PF whose core crashes loses control, and their aircraft then follows the new P
 
 An entry for something the aircraft changes or fires on its own, such as a timer, a blinking light, or an `H:` event a gauge fires on a timer, is a profile's mistake, since an entry carries a cause ([02-live-sync](02-live-sync.md#values-not-events)), and it would send a change or a firing at every tick and fill every replay.
 Input events can report on their own: 21 of the A220's reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, as the [A220 study](../aircraft/synaptic-a220/study.md) cites).
-The IDE shows every entry live while the profile is written, where an author can see one change on its own ([01-profile-entries](01-profile-entries.md#what-the-ide-does-with-a-profile)), and Crosscheck catches a shared entry the author missed by a sign no pilot makes: every machine's own aircraft keeps changing it.
+The IDE shows every entry live while the profile is written, where an author can see one change on its own ([01-profile-entries](01-profile-entries.md#what-the-ide-does-with-a-profile)), and Dual Input catches a shared entry the author missed by a sign no pilot makes: every machine's own aircraft keeps changing it.
 
-- A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Crosscheck's write, and it also received another machine's change to it or firing of it, a replayed one included.
+- A machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and it also received another machine's change to it or firing of it, a replayed one included.
 - It then stops syncing that entry for the rest of the load, sending no change to it and applying none, and each aircraft drives its own copy, as it would anyway.
 - It marks the recording and shows the once-a-flight notice that a write never landed shows ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)), so the profile reaches us in a bug report.
 
@@ -160,7 +160,7 @@ The 3s and the 30s are starting values, which v1's recordings tune.
 
 ## Putting back
 
-When a machine's sim reports a change that Crosscheck didn't write and the machine may not send, the machine writes back at once the value it holds, and sends nothing.
+When a machine's sim reports a change that Dual Input didn't write and the machine may not send, the machine writes back at once the value it holds, and sends nothing.
 A machine may not send:
 
 - a PF-owned entry, unless it's the flying machine, such as when the PM's throttle hardware moves ([01-between-machines](../network/01-between-machines.md#channels));

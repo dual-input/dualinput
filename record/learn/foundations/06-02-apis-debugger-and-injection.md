@@ -43,8 +43,8 @@ A CommBus listener is one more view listener.
 [05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm) covers the CommBus itself.
 Instruments also reach each other on channels of their own: `BaseInstrument`'s `triggerEventToAllInstruments` sends an event to every view through `LaunchFlowEvent("ON_HTMLEVENT_TO_ALL_VIEWS", ...)` [1], and the Avionics Framework syncs its bus through `JS_LISTENER_GENERICDATA` ([06-01](06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
 
-**What it changes for Crosscheck.**
-Everything Crosscheck's panel code does to the sim goes through a call name or a listener channel, and few of those are documented, so each one Crosscheck depends on needs a measurement first.
+**What it changes for Dual Input.**
+Everything Dual Input's panel code does to the sim goes through a call name or a listener channel, and few of those are documented, so each one Dual Input depends on needs a measurement first.
 A write returns before the sim has applied it, so code that writes a value and reads it straight back, to check for its own echo, may read the old value (unverified).
 
 **Traps.**
@@ -83,9 +83,9 @@ The sim's own `VCockpit.js` and `BaseInstrument.js` are also on disk in a Steam 
 FS Copilot profiles keep a capture of two A220 documents from 2026-08-30, which [06-01](06-01-the-engine-and-instruments.md) quotes [9].
 The inspector also reloads a document: after an edit to a panel file already in an installed package, `Page.reload` ran the new file with no sim restart [10].
 
-**What it changes for Crosscheck.**
-The debugger reaches every panel on a sim set up the way a pilot's is, so it's the tool for Crosscheck's panel experiments.
-Whether a shipped Crosscheck could use it too, to reach panels without replacing a core file, is an open question: it worked with Developer Mode off [5], and nothing documents it as an interface for apps.
+**What it changes for Dual Input.**
+The debugger reaches every panel on a sim set up the way a pilot's is, so it's the tool for Dual Input's panel experiments.
+Whether a shipped Dual Input could use it too, to reach panels without replacing a core file, is an open question: it worked with Developer Mode off [5], and nothing documents it as an interface for apps.
 
 **Traps.**
 
@@ -147,9 +147,9 @@ FS Copilot's production pointer code follows those rules [21] [22].
 Its `pointer.js` adds listeners and dispatches events, and wraps nothing.
 When it has to block the pilot's input, during an outage, it covers the instrument with a visible `div` rather than swallowing events, `window.fscUnlock()` removes the `div` from any console, and a block that hears no renewal from the app for 8s turns into a warning that doesn't block.
 
-**What it changes for Crosscheck.**
-If Crosscheck gets code into panels by replacing `VCockpit.js`, a pilot can run only one of Crosscheck, FS Copilot, and YourControls at a time (unverified, [01](01-prior-art-and-crew-practice.md#unverified-claims)), and each MSFS update that changes the stock file needs a new copy.
-Whatever Crosscheck adds runs in every instrument's load, so a fault there takes out the pilot's displays along with Crosscheck's features.
+**What it changes for Dual Input.**
+If Dual Input gets code into panels by replacing `VCockpit.js`, a pilot can run only one of Dual Input, FS Copilot, and YourControls at a time (unverified, [01](01-prior-art-and-crew-practice.md#unverified-claims)), and each MSFS update that changes the stock file needs a new copy.
+Whatever Dual Input adds runs in every instrument's load, so a fault there takes out the pilot's displays along with Dual Input's features.
 
 **Traps.**
 

@@ -20,7 +20,7 @@ It dropped a disconnected host's claim after the 15s its networking took to call
 How the traffic and ATC host is chosen:
 
 1. **Taken automatically, by whoever has traffic.**
-   Crosscheck would need to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../areas/product/03-v1-scope.md#traffic-sync)).
+   Dual Input would need to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../areas/product/03-v1-scope.md#traffic-sync)).
 2. **Chosen by hand and kept until released, as FS Copilot's build kept it.**
    A role nobody can take from its holder needs a rule that frees it from a host who went quiet, and stays with a host who doesn't come back (user, 2026-10-13).
 3. **Chosen by hand, and any pilot can take it at any time.**

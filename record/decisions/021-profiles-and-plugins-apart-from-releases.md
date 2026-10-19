@@ -1,24 +1,24 @@
-# 021: Profiles and plugins reach pilots apart from Crosscheck's releases
+# 021: Profiles and plugins reach pilots apart from Dual Input's releases
 
-Profiles and plugins update apart from Crosscheck's releases: on each merge to one public repository, CI builds each profile into a bundle, with its modules merged in and its plugin compiled to JavaScript, and publishes it on GitHub Pages under its hash.
+Profiles and plugins update apart from Dual Input's releases: on each merge to one public repository, CI builds each profile into a bundle, with its modules merged in and its plugin compiled to JavaScript, and publishes it on GitHub Pages under its hash.
 Each time the core starts, it brings its cache of bundles up to date, and a session flies one aircraft and pins one bundle by its hash.
 Nothing is signed, and the format and the plugin API share one level, so a release runs every bundle at or below its own level.
-Decided by the user on 2026-10-08, 2026-10-11, and 2026-10-12, in nodes 1.3 and 4 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases).
+Decided by the user on 2026-10-08, 2026-10-11, and 2026-10-12, in nodes 1.3 and 4 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases).
 
 ## Context
 
-[03-v1-scope](../areas/product/03-v1-scope.md#plugins) ships plugins with Crosscheck, in its installer and its Community package, and updates them with it, so every pilot in a crew runs the same plugins.
-A pilot installs a new Crosscheck only with the sim closed, and pilots on different versions can't fly together ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
+[03-v1-scope](../areas/product/03-v1-scope.md#plugins) ships plugins with Dual Input, in its installer and its Community package, and updates them with it, so every pilot in a crew runs the same plugins.
+A pilot installs a new Dual Input only with the sim closed, and pilots on different versions can't fly together ([installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
 The [preflight match check](../areas/product/03-v1-scope.md#preflight-match-check) already compares each profile by a hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../areas/product/04-room-for-later.md#profiles)).
-The spine left to node 4 where profiles and plugins are served from, how often the core checks for new versions, and how the plugin API's version relates to Crosscheck's ([01-spine](../areas/architecture/01-spine.md#left-open)).
+The spine left to node 4 where profiles and plugins are served from, how often the core checks for new versions, and how the plugin API's version relates to Dual Input's ([01-spine](../areas/architecture/01-spine.md#left-open)).
 
 ## Options
 
 For when profiles and plugins reach pilots:
 
-1. **With Crosscheck's releases,** as 03-v1-scope ships plugins.
-   Every fix to one would take a new Crosscheck, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
-2. **Apart from Crosscheck's releases.**
+1. **With Dual Input's releases,** as 03-v1-scope ships plugins.
+   Every fix to one would take a new Dual Input, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../areas/product/03-v1-scope.md#installing-and-updating)).
+2. **Apart from Dual Input's releases.**
    Plugin code runs only in the core ([decision 020](020-plugin-code-runs-only-in-core.md)), so the core can load a new version whenever a session isn't using the old one.
 
 For how a plugin travels with its profile:
@@ -59,7 +59,7 @@ For versions:
 ## Decision
 
 The last option in each group.
-Published apart from releases, a fix to a profile or a plugin reaches pilots at their next sim start with no new Crosscheck, and one bundle under one hash keeps the match check, the pin, and the level covering the plugin too.
+Published apart from releases, a fix to a profile or a plugin reaches pilots at their next sim start with no new Dual Input, and one bundle under one hash keeps the match check, the pin, and the level covering the plugin too.
 A cache brought up to date at each start lets the core load a profile at any moment a session needs one, such as a session started with the aircraft already loaded, with no wait on the network, and outside a test session, a session changes no bundle midway anyway (user, 2026-10-12).
 A core has to know which bundles it can run, and a level CI works out tells it while asking nothing of authors (user, 2026-10-11).
 Pages's 100 GB a month covers the load: a pilot downloads each bundle once, so 1,000 pilots taking 50 bundles the size of FS Copilot's merged 58P profile, 59 KB, a hypothetical count, take about 3 GB once, and after that only what CI publishes, plus the index at each start (arithmetic, [01-format-and-delivery](../areas/profiles/01-format-and-delivery.md#delivery)).
@@ -70,10 +70,10 @@ Pages's 100 GB a month covers the load: a pilot downloads each bundle once, so 1
 - GitHub Pages holds an index of every published bundle, with its profile's path, the variants it covers, its hash, the date CI published it, and its level, and every bundle under its hash, kept for good.
 - Each time the core starts, it fetches the index and downloads the newest bundle of each profile at or below its own level that its cache lacks, checking the bytes against the hash; it never rebuilds a published bundle, and it loads every profile from that cache.
 - A session pins its one bundle by hash, which doesn't change mid-session outside a test session, and a pilot whose machine lacks the pinned bundle fetches it by its hash.
-- The level is an integer that each release adding to the format or the plugin API raises by 1, and a pilot who doesn't update Crosscheck keeps the older bundle, bug included ([01-format-and-delivery](../areas/profiles/01-format-and-delivery.md#levels)).
+- The level is an integer that each release adding to the format or the plugin API raises by 1, and a pilot who doesn't update Dual Input keeps the older bundle, bug included ([01-format-and-delivery](../areas/profiles/01-format-and-delivery.md#levels)).
 - A profile carries no version or date of its own.
 - For testing, the core builds the same bundle from a local folder, and shows it in the match check as "unpublished".
-- This changes [03-v1-scope](../areas/product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's questions of whether profiles reach pilots apart from Crosscheck's releases, where they're served from, how often the core checks, and how the plugin API's version relates to Crosscheck's.
+- This changes [03-v1-scope](../areas/product/03-v1-scope.md#plugins), whose plugins ship and update with Dual Input, and settles the spine's questions of whether profiles reach pilots apart from Dual Input's releases, where they're served from, how often the core checks, and how the plugin API's version relates to Dual Input's.
 - This decision leaves to step 8 which pilot's bundle the session pins when two pilots' cores took different ones, and which compiler the core embeds for a local build.
 - It also leaves to step 8 test sessions, in which the author's core sends each saved bundle to the crew and every machine reloads it, with the three needs [01-format-and-delivery](../areas/profiles/01-format-and-delivery.md#testing-an-edit) lists.
 - It leaves out signing, if a later plugin needs the pilot's files.

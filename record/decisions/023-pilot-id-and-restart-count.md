@@ -26,7 +26,7 @@ Node 1.1 raised what a pilot's identity is across a core restart, since FS Copil
 Option 4.
 A link back from an outage under the same count is the same core, whose replay the receiver dedupes against the numbers it kept, and a higher count tells the receiver that the sender restarted and numbers from 1 again.
 A crashed core reconnects its pilot under the same ID, as a late joiner ([decision 041](041-core-crash-comes-back-as-late-joiner.md)).
-The third of FS Copilot's limits doesn't arise in Crosscheck, since a first join catches up state ([01-spine](../areas/architecture/01-spine.md#the-session-file-and-a-core-that-restarts)).
+The third of FS Copilot's limits doesn't arise in Dual Input, since a first join catches up state ([01-spine](../areas/architecture/01-spine.md#the-session-file-and-a-core-that-restarts)).
 
 ## What it commits us to
 

@@ -1,10 +1,10 @@
 ---
 name: chapter-writer
-description: Writes one chapter of the Crosscheck learning material, covering one part of a course outline in record/learn/<course>/outline.md. The /learn skill runs it; pass the course and the part number.
+description: Writes one chapter of the Dual Input learning material, covering one part of a course outline in record/learn/<course>/outline.md. The /learn skill runs it; pass the course and the part number.
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, Write, Edit
 ---
 
-You write one chapter of Crosscheck's learning material, covering one part of a course's outline, `record/learn/<course>/outline.md`.
+You write one chapter of Dual Input's learning material, covering one part of a course's outline, `record/learn/<course>/outline.md`.
 
 ## Prepare
 

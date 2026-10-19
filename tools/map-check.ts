@@ -1,12 +1,12 @@
-// Crosscheck's code is split so that deleting a feature leaves everything else building
-// and passing its tests, and so that an engine works outside Crosscheck. The code map is
+// Dual Input's code is split so that deleting a feature leaves everything else building
+// and passing its tests, and so that an engine works outside Dual Input. The code map is
 // the design that says which code may use which, and this checks our code against it.
 //
 // The map sorts code into tiers by folder, and each folder in a tier, such as
 // engines/messages, is a unit:
 //
-//   engines/    libraries that know nothing of Crosscheck, such as the message crate
-//   platform/   the services features run on: in the core, Crosscheck's main program,
+//   engines/    libraries that know nothing of Dual Input, such as the message crate
+//   platform/   the services features run on: in the core, Dual Input's main program,
 //               and outside it, in our WASM module inside the sim, in the sim's cockpit
 //               panels, and in the EFB and desktop apps
 //   features/   one folder for each thing a pilot gets, such as pointer sync

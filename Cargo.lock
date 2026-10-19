@@ -154,17 +154,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
-name = "crosscheck-msfs-sdk"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cab",
- "msi",
- "reqwest",
- "zip",
-]
-
-[[package]]
 name = "crypto-common"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -210,6 +199,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
+]
+
+[[package]]
+name = "dualinput-msfs-sdk"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cab",
+ "msi",
+ "reqwest",
+ "zip",
 ]
 
 [[package]]

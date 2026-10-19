@@ -46,8 +46,8 @@ FS Copilot also holds every outgoing `H:` event for 500ms [3].
 No record measures why.
 The profiles repo gives a reason, that without the delay intermediate states get synchronized, and it's unverified [6].
 
-**What it changes for Crosscheck.**
-Every path Crosscheck writes through needs its own echo guard.
+**What it changes for Dual Input.**
+Every path Dual Input writes through needs its own echo guard.
 The guard has to hold when a write draws no report, when one write draws two, and when the pilot moves the same control while the guard is waiting.
 
 **Traps.**
@@ -96,8 +96,8 @@ A first contact replays nothing, because a pilot's solo presses would land on a 
 On our two-instance bench, a dropped link never came back on its own.
 A link cut by suspending one instance stayed down through 3 minutes of waiting, twice, and a Join pressed afterwards delivered every held press, in order and without duplicates [15].
 
-**What it changes for Crosscheck.**
-Crosscheck needs a join step that brings the joining aircraft to the other's state before change sync starts, and a resync after every outage, whether of the network or of SimConnect ([04-03](04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
+**What it changes for Dual Input.**
+Dual Input needs a join step that brings the joining aircraft to the other's state before change sync starts, and a resync after every outage, whether of the network or of SimConnect ([04-03](04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)).
 Which machine's state wins at join, and how to tell that the joining aircraft has finished loading ([02-03](02-03-the-running-sim.md#the-flight-lifecycle)), are open questions.
 
 **Traps.**

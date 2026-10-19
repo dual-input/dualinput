@@ -55,8 +55,8 @@ Our fork's relay versions its own protocol rather than the payload [8] [9]:
 fsc-editor keeps one definition for both ends of its relay: `src/shared/remote-connect.ts` "is the whole contract, shared by the app and the relay" [10].
 Its relay reads only each message's envelope, so the messages inside can change without redeploying it [10].
 
-**What it changes for Crosscheck.**
-Crosscheck's app will meet other versions of itself, of its relay, and of its module, and each of those boundaries needs a stated rule: refuse, agree on a version both speak, or skip what it doesn't know.
+**What it changes for Dual Input.**
+Dual Input's app will meet other versions of itself, of its relay, and of its module, and each of those boundaries needs a stated rule: refuse, agree on a version both speak, or skip what it doesn't know.
 Whether two pilots on different releases can fly together is a product question, and the wire format decides the answer.
 
 **Traps.**
@@ -105,8 +105,8 @@ fsc-editor treats everything from the other side as hostile [19]:
 - The relay stamps which guest sent each message, from the socket it arrived on.
 - Nothing is written to disk except through the app's normal save.
 
-**What it changes for Crosscheck.**
-Crosscheck has to decide who may join a session and how the app checks it.
+**What it changes for Dual Input.**
+Dual Input has to decide who may join a session and how the app checks it.
 Its receiver has to bound what any message can do to the sim, in which variables, events, and ranges, whatever the sender claims.
 Whether whoever runs a relay should be able to read or change a session's traffic is an open question.
 

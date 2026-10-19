@@ -63,8 +63,8 @@ How fast panels find a restarted app depends on the backoff: lengthening the wai
 
 FS Copilot moved forwarded clicks onto this channel from its CommBus path because a drag of 240 points is about 2.4KB [5], and the client data areas on the CommBus path hold one 512-byte message each ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)).
 
-**What it changes for Crosscheck.**
-Crosscheck's panel code, and the code of every other page we use, can reach Crosscheck's app directly, without a WASM module in between.
+**What it changes for Dual Input.**
+Dual Input's panel code, and the code of every other page we use, can reach Dual Input's app directly, without a WASM module in between.
 A restart of the app ends every socket, but a reload of a page ends none, so the app can't take a closed socket to mean its page went away, and has to learn that from what the page sends.
 Any process on the machine can connect to the same port, so the app has to decide what a local connection is allowed to do.
 

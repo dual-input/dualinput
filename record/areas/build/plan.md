@@ -1,6 +1,6 @@
 # Build: plan
 
-This plan builds Crosscheck's v1, as [03-v1-scope](../product/03-v1-scope.md) has it, in numbered stages, each ending with an exit you can watch happen.
+This plan builds Dual Input's v1, as [03-v1-scope](../product/03-v1-scope.md) has it, in numbered stages, each ending with an exit you can watch happen.
 It's the one place v1's build status lives, for [step 9](../product/plan.md#9-build-test-and-release-v1) of the product plan, whose exit is its last stage's exit.
 [Node 8](../architecture/plan.md#8-the-build-order) of the architecture plan designs the stages and their order.
 
@@ -29,7 +29,7 @@ The stages follow these rules (user, 2026-10-18):
 - Each case becomes a test in the stage that builds the last thing it needs, so a case of the loop's in which the desktop app starts a crashed core again lands in the install stage.
 - Where several stages could go next, the one whose design rests on more claims no run has tried goes first, so a wrong design shows before much is built on it.
 - The first session in the sim, with a bench core as the second pilot, comes once the platform and state sync are built, and the first flight with friends once flight-model sync is built too.
-  Friends fly their installed Crosscheck ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
+  Friends fly their installed Dual Input ([the four levels](02-testing.md#the-four-levels)), so the install stage comes before that flight.
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
 - Nothing on GitHub comes before [stage 22](#22-github): no pull requests, no workflows, no releases, no Pages site, and no repository of ours beside this one, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
   Until then a stage's commits go straight to `main`, and are pushed once the user has reviewed the stage, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.

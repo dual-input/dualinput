@@ -1,7 +1,7 @@
 # Architecture: tentative decisions
 
 What the architecture's nodes settled, each with the findings behind it and what it leaves out.
-Step 7's are numbered as decisions in `record/decisions/` since 2026-10-13, once its top-level answers passed the walk through a session, as [the plan](plan.md#where-answers-go) says; step 8's, from [Crosscheck's code is a platform, engines, and features](#crosschecks-code-is-a-platform-engines-and-features-and-deleting-a-features-crate-leaves-the-rest-whole) on, are numbered once step 8's top-level answers pass theirs.
+Step 7's are numbered as decisions in `record/decisions/` since 2026-10-13, once its top-level answers passed the walk through a session, as [the plan](plan.md#where-answers-go) says; step 8's, from [Dual Input's code is a platform, engines, and features](#dual-inputs-code-is-a-platform-engines-and-features-and-deleting-a-features-crate-leaves-the-rest-whole) on, are numbered once step 8's top-level answers pass theirs.
 The numbered decision is the one that holds, and a change to it is a new decision that reverses it ([writing.md](../../../.claude/rules/writing.md#decisions)).
 The watcher and the core are the two long-running processes in [the spine](01-spine.md), and the flying and following machines are defined in [03-v1-scope](../product/03-v1-scope.md).
 
@@ -45,7 +45,7 @@ Numbered as [decision 004](../../decisions/004-core-works-out-figures-hand.md) o
   This changes the avatars' tentative decision, which gave the job to the desktop app ([avatars decisions](../avatars/decisions.md#the-clicking-pilots-machine-finds-the-point-and-the-other-machine-only-draws-it)).
   Settled in node 1.1 by the user, 2026-10-07.
 - **Because:**
-  - The desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)), and a hand worked out in the desktop app would stop whenever the app is closed.
+  - The desktop app and the EFB app show Dual Input's state and send it commands, and decide nothing ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)), and a hand worked out in the desktop app would stop whenever the app is closed.
   - Our avatar probes read the pilot's mouse from a program outside the sim through Windows' Raw Input in sink mode, which sits in nobody's input path ([mouse.mjs](../../../experiments/tools/mouse.mjs)).
 
 ## Our WASM module writes the following aircraft
@@ -70,16 +70,16 @@ Numbered as [decision 006](../../decisions/006-core-catches-take-control-input.m
 - **Decided:** the core reads the pilot's keyboard and flight hardware through Windows' input APIs, by way of the helper it starts ([below](#the-cores-input-and-audio-work-runs-in-a-helper-it-starts)), rather than mapping the input through SimConnect.
   Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3 by the user, 2026-10-08.
 - **Because:**
-  - Pilots bind the key or a hardware button in Crosscheck's settings, as a single press or a long press ([take-control key](../product/03-v1-scope.md#take-control-key)), so Crosscheck needs each press and release.
+  - Pilots bind the key or a hardware button in Dual Input's settings, as a single press or a long press ([take-control key](../product/03-v1-scope.md#take-control-key)), so Dual Input needs each press and release.
   - A shortcut API in the desktop app, such as Electron's `globalShortcut`, which reports no release (documented in fsc-editor, `docs/sim-vars/08-marks.md`), would stop whenever the pilot closes the optional desktop app.
   - SimConnect's input mapping takes an event for the press and one for the release (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`, `SimConnect_MapInputEventToClientEvent_EX1`), and the user ruled it out as a hack (user, 2026-10-07).
   - Through Raw Input in sink mode, with the sim in front, a Rust helper got all 3 Page Down presses a person made, and 22 changes of a flight-hardware button's state in 10s, named by its device's vendor and product ID (measured on MSFS 2024, 2026-10-09, [architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
 
-## The core runs Crosscheck's audio
+## The core runs Dual Input's audio
 
 Numbered as [decision 007](../../decisions/007-core-runs-audio.md) on 2026-10-13.
 
-- **Decided:** the core captures the pilot's microphone and runs the speech recognizer, captures the ATC app's audio by process, and plays ATC and Crosscheck's own sounds on the device the pilot picks, in the helper the core starts ([below](#the-cores-input-and-audio-work-runs-in-a-helper-it-starts)), so the desktop app stays optional.
+- **Decided:** the core captures the pilot's microphone and runs the speech recognizer, captures the ATC app's audio by process, and plays ATC and Dual Input's own sounds on the device the pilot picks, in the helper the core starts ([below](#the-cores-input-and-audio-work-runs-in-a-helper-it-starts)), so the desktop app stays optional.
   Settled in node 1.1 by the user, 2026-10-07, and the helper in node 1.3 by the user, 2026-10-08.
 - **Because:**
   - ATC and the handover cues play with no window open, so a pilot in VR hears them ([hearing ATC](../product/03-v1-scope.md#hearing-atc)).
@@ -90,7 +90,7 @@ Numbered as [decision 007](../../decisions/007-core-runs-audio.md) on 2026-10-13
 
 Numbered as [decision 008](../../decisions/008-every-link-ends-at-core.md) on 2026-10-13.
 
-- **Decided:** no two of Crosscheck's components talk to each other directly, apart from the watcher downloading updates from the release host: each talks to the core, and the core passes on what another needs.
+- **Decided:** no two of Dual Input's components talk to each other directly, apart from the watcher downloading updates from the release host: each talks to the core, and the core passes on what another needs.
   Apart from the announcements through which the sim's pages find the core and learn whether a session runs ([below](#the-sims-pages-find-the-core-over-the-commbus-and-talk-to-it-over-a-websocket)), the core uses the CommBus and `L:` variables only to reach the aircraft's state; soft takeover, a Soon pick, would add a hold flag for each lever as an `L:` variable for the pilot's binding tool to read, and whether such a tool can make a binding wait on one is unverified ([ideas](../product/ideas.md#soft-takeover-on-handover)).
   Settled in node 1.2 by the user, 2026-10-08.
 - **Because:**
@@ -150,7 +150,7 @@ Numbered as [decision 011](../../decisions/011-cockpit-panels-connect-only-in-se
 Numbered as [decision 012](../../decisions/012-efb-app-opens-banner-panel.md) on 2026-10-13.
 
 - **Decided:** in a session, the EFB app's code opens the banner panel when the core says the session has something to show, and closes it, by calling `TOOLBAR_BUTTON_TOGGLE` from the EFB's document.
-  Crosscheck ships no script in the toolbar's document.
+  Dual Input ships no script in the toolbar's document.
   This changes [03-v1-scope](../product/03-v1-scope.md#notification-banner), whose banner depends on a script that our toolbar icon puts into the toolbar.
   Settled in node 1.5 by the user, 2026-10-09.
 - **Because:**
@@ -209,7 +209,7 @@ Numbered as [decision 016](../../decisions/016-core-keeps-pilots-settings.md) on
   Settled in node 1.1 by the user, 2026-10-09, after node 1's walk through a session reopened it.
 - **Because:**
   - The desktop app is optional, and a pilot in VR flies with it closed, while the core still needs the bound key ([take-control key](../product/03-v1-scope.md#take-control-key)), plays ATC "on the output device each pilot picks, with no window needed" ([hearing ATC](../product/03-v1-scope.md#hearing-atc)), and records in the mode a setting chooses ([recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)).
-  - The desktop app and the EFB app show Crosscheck's state and send it commands, and decide nothing ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)), so the values the core acts on live with the core rather than in a file of the desktop app's.
+  - The desktop app and the EFB app show Dual Input's state and send it commands, and decide nothing ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client)), so the values the core acts on live with the core rather than in a file of the desktop app's.
 - **Leaves out:**
   - the watcher's own settings, such as whether it starts with Windows, which the watcher keeps ([installing and updating](../product/03-v1-scope.md#installing-and-updating))
   - which plugins may change aircraft files, which waits with how a plugin changes an aircraft's files ([plugin code runs only in the core](#plugin-code-runs-only-in-the-core))
@@ -227,7 +227,7 @@ Numbered as [decision 017](../../decisions/017-core-writes-control-slot-every-20
   - Whether two writes to one slot in one frame both arrive is unmeasured ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#client-data-areas-and-their-size-limits)), so no two kinds of message share a slot.
   - A slot keeps its last value after its writer restarts (documented, same chapter), so a value that stays put can't show that the module still runs, and only a counter that moves tells the core it does.
 
-## Crosscheck is written in Rust, and in TypeScript where an engine runs it
+## Dual Input is written in Rust, and in TypeScript where an engine runs it
 
 Numbered as [decision 018](../../decisions/018-rust-and-typescript.md) on 2026-10-13.
 
@@ -267,38 +267,38 @@ Numbered as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md)
 
 Numbered as [decision 020](../../decisions/020-plugin-code-runs-only-in-core.md) on 2026-10-13.
 
-- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS-ng embedded there under memory and time limits ([above](#crosscheck-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, and the sim only through APIs our own code carries out, and never the pilot's files or the network.
+- **Decided:** a plugin is TypeScript that implements an interface of ours and runs only in the core, in QuickJS-ng embedded there under memory and time limits ([above](#dual-input-is-written-in-rust-and-in-typescript-where-an-engine-runs-it)), and it reaches the cockpit panels, the WASM module, and the sim only through APIs our own code carries out, and never the pilot's files or the network.
   Nothing a plugin ships runs in a panel or in the module: for something inside the sim's frame, our module offers mechanisms the plugin drives, such as writing given variables every frame, running given calculator code, or placing an object, and for something in a panel, our panel bridge offers generic operations.
   A plugin belongs to one profile and sits beside it, runs on every variant the profile covers, and writes only through `write()`, with the panel bridge's operations among its targets ([01-format-and-delivery](../profiles/01-format-and-delivery.md#plugins)).
   This changes [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim), which gives plugins hooks in the panels and in the WASM module that load their modules by name, and answers [03-v1-scope](../product/03-v1-scope.md#plugins)'s question of where each part of a plugin runs.
   Settled in node 1.3 by the user, 2026-10-08, and narrowed to the sim and the aircraft in node 4, 2026-10-11.
 - **Because:**
   - Plugins implement a framework API, the way a class implements an interface, and their code runs only in the core's engine; when a plugin needs something done in panel code, we offer the API, and our own panel code carries it out (user, 2026-10-08).
-  - Crosscheck's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Crosscheck's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic and panel code for one aircraft stay out of our module and our panel bridge.
+  - Dual Input's own code owns each mechanism, and a plugin owns the policy, and code that serves one product lives in a plugin, never in Dual Input's own code ([04-room-for-later](../product/04-room-for-later.md#plugins)), so frame logic and panel code for one aircraft stay out of our module and our panel bridge.
   - Our generic panel code keeps the fail-open rules for anything in the pilot's input path ([CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel)), whatever a plugin asks of it.
-  - A plugin that's only JavaScript and data can reach pilots apart from Crosscheck's releases ([below](#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)), while the WASM module and the panel bridge load only when the sim boots or a panel loads.
+  - A plugin that's only JavaScript and data can reach pilots apart from Dual Input's releases ([below](#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases)), while the WASM module and the panel bridge load only when the sim boots or a panel loads.
   - A plugin that read the pilot's files, published from a hijacked repository, could pass them to a crewmate over a channel; with no files or network, a plugin can do no worse than a profile, which only spoils a flight, so neither needs signing, and the 58P's plugin is expected to read its gauges' JavaScript and DataStorage through our panel bridge and need no files, which is unverified until a panel probe reaches those settings (user, 2026-10-11).
 - **Leaves out:**
   - which APIs our panel bridge and module offer, for the part that designs plugins; the Baron 58P's plugin is the first case, and its profile settles what it needs ([plugins](../product/03-v1-scope.md#plugins))
   - a plugin that needs logic inside the frame beyond what calculator code expresses, which no v1 plugin is known to need
   - how a plugin changes an aircraft's files, which waits until a plugin needs it, with [decision 001](../../decisions/001-changing-other-developers-packages.md) holding meanwhile (user, 2026-10-11)
 
-## Profiles and plugins reach pilots apart from Crosscheck's releases
+## Profiles and plugins reach pilots apart from Dual Input's releases
 
 Numbered as [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md) on 2026-10-13.
 
-- **Decided:** profiles and plugins update apart from Crosscheck's releases.
+- **Decided:** profiles and plugins update apart from Dual Input's releases.
   They live in one public repository of flat files, and on each merge CI builds each profile into a bundle, one YAML file with its modules merged in and its plugin compiled to JavaScript under a `plugin:` key only the builder writes, checks it, works out its level, and publishes it on GitHub Pages: an index of every published bundle, with its profile's path, the variants it covers, its hash, the date CI published it, and its level, and every bundle under its hash, kept for good.
   Each time the core starts, it fetches the index and downloads the newest bundle of each profile at or below its own level that its cache lacks, checking the bytes against the hash; it never rebuilds a published bundle, and it loads every profile from that cache.
   A session flies one aircraft and pins one bundle, by hash, which doesn't change mid-session outside a test session; a pilot whose machine lacks the pinned bundle fetches it by its hash.
   The format and the plugin API share one level, an integer that each release adding to either raises by 1, and a release runs every bundle at or below its own level.
   Nothing is signed, and a profile carries no version or date of its own.
   For testing, the core builds the same bundle from a local folder, and shows it in the match check as "unpublished".
-  This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Crosscheck, and settles the spine's questions of whether profiles reach pilots apart from Crosscheck's releases, where they're served from, how often the core checks, and how the plugin API's version relates to Crosscheck's.
+  This changes [03-v1-scope](../product/03-v1-scope.md#plugins), whose plugins ship and update with Dual Input, and settles the spine's questions of whether profiles reach pilots apart from Dual Input's releases, where they're served from, how often the core checks, and how the plugin API's version relates to Dual Input's.
   Settled in node 1.3 by the user, 2026-10-08, and in node 4, 2026-10-11 and 2026-10-12 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#delivery)).
 - **Because:**
-  - If profiles and plugins shipped in releases, every fix to one would take a new Crosscheck.
-    A pilot installs a new Crosscheck only with the sim closed, and pilots on different versions can't fly together, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+  - If profiles and plugins shipped in releases, every fix to one would take a new Dual Input.
+    A pilot installs a new Dual Input only with the sim closed, and pilots on different versions can't fly together, so after each fix two pilots couldn't fly until both had closed the sim to install it (user, 2026-10-08; [installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - The [preflight match check](../product/03-v1-scope.md#preflight-match-check) already compares each profile by a hash, and the profile registry, a Later pick, would fetch a profile by that hash ([04-room-for-later](../product/04-room-for-later.md#profiles)).
   - A plugin published apart from its profile escaped the profile's hash, pin, and level: a merge that changed only the plugin left the hash the same while two pilots ran different plugins, and a plugin needing a newer level could ride beside an older profile (node 4's review, 2026-10-12).
   - Plugin code runs only in the core ([above](#plugin-code-runs-only-in-the-core)), so the core can load a new version whenever a session isn't using the old one.
@@ -342,7 +342,7 @@ Numbered as [decision 023](../../decisions/023-pilot-id-and-restart-count.md) on
 - **Because:**
   - A receiver drops a message it has already applied ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)), so a receiver that didn't know a core restarted would take its messages, numbered from 1 again, for copies of old ones.
     A link back from an outage under the same count is the same core, whose replay the receiver dedupes against the numbers it kept.
-  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); the third doesn't arise in Crosscheck, since a first join catches up state ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
+  - FS Copilot made a restarted app a new peer, and the fix its pre-PR review settled on lived with three limits: up to one acknowledgment interval of events could apply twice on a restarted peer, a restarted sender's history was gone, and a new third person got a replay they didn't need (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R03); the third doesn't arise in Dual Input, since a first join catches up state ([01-spine](01-spine.md#the-session-file-and-a-core-that-restarts)).
   - [The connection](../product/03-v1-scope.md#the-connection) reconnects a returning pilot from session state saved on their machine; the user first chose that a crashed core replays what its pilot missed (user, 2026-10-09), then that it comes back as a late joiner, the path a sim crash already takes (user, 2026-10-12).
   - A core could instead save the number of each message it sends and go on numbering after a restart, but that puts a disk write ahead of every send, where the restart count costs one write per start.
 - **Leaves out:**
@@ -397,7 +397,7 @@ Numbered as [decision 026](../../decisions/026-first-message-carries-version-and
   A core refuses a join whose version or hash differs from its own, and on one machine the core logs a component whose version or hash differs from its own.
   Settled in node 1.4 by the user, 2026-10-09.
 - **Because:**
-  - Crosscheck's programs and its package update together, as one version, and pilots on different versions can't join each other ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
+  - Dual Input's programs and its package update together, as one version, and pilots on different versions can't join each other ([installing and updating](../product/03-v1-scope.md#installing-and-updating)).
   - A version number nothing reads drifts: fsc-editor's package version sat at 0.0.1 while its module's reached 0.3.0, until its build derived one from the other ([05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#protocol-versioning-between-the-app-and-the-module-packed-structs)).
   - Two development builds can carry one version number with different messages, and the hash tells them apart, as FS Copilot's check of a hash of each packet type refuses a peer whose types differ ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
 - **Leaves out:**
@@ -469,7 +469,7 @@ Numbered as [decision 031](../../decisions/031-coherent-gt-check-tool.md) on 202
 
 - **Decided:** every JavaScript file we ship into the sim, experiments' files included, passes a check run after every edit and in CI.
   The check parses each file at ECMAScript 2017, with the pattern of each regex literal and of each `new RegExp(...)` given a fixed string, and fails any use of a built-in or web API [Coherent GT's JavaScript](coherent-gt.md) lists as missing or filled in only in some documents.
-  It's a tool of its own, holding that list as one data file, built for our needs in a repository of its own under Crosscheck's GitHub organization, and published as it is, for anyone to use, without support.
+  It's a tool of its own, holding that list as one data file, built for our needs in a repository of its own under Dual Input's GitHub organization, and published as it is, for anyone to use, without support.
   Settled in node 1.6 by the user, 2026-10-09.
 - **Because:**
   - Step 7 asks for a check that every file run in Coherent GT, experiments included, parses within the engine's measured limits, run in CI and after edits ([the product plan](../product/plan.md#7-tech-stack-and-architecture)), and nobody maintains a rule set for the engine we could use instead ([architecture log](log.md#2026-10-09-coherent-gts-makers-last-placed-its-engine-near-safari-101-the-msfs-avionics-framework-and-flybywire-compile-to-es2017-nobody-maintains-a-rule-set-for-the-engine-and-working-title-ships-its-own-pinned-copy-of-the-framework)).
@@ -488,7 +488,7 @@ Numbered as [decision 032](../../decisions/032-one-quic-connection-through-iroh.
   Each link is up, lost after 5s with nothing on its connection, when its core closes the connection and redials, or disconnected after 30 minutes without one; any packet counts as hearing from a member, and a heartbeat goes once a second.
   A joining core dials every member, and after a lost link both cores redial; when two connections between a pair pass their first message, a higher restart count closes the older restart's connection, and of two from one restart the one the lower endpoint ID dialed stays, or of two one side dialed, the newer.
   A core keys what it keeps about a sender by the sender's pilot ID and restart count, never by a connection; v1 forwards nothing, and a later feature that forwards carries each message's sender with it.
-  QUIC's TLS 1.3 encryption stays on, and Crosscheck builds nothing for encryption.
+  QUIC's TLS 1.3 encryption stays on, and Dual Input builds nothing for encryption.
   This answers how the cores reach each other, which the spine leaves to node 2 ([01-spine](01-spine.md#between-machines)), and how a core learns another went quiet ([01-spine](01-spine.md#how-the-core-knows-a-component-is-alive)), and picks [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)'s link between every pair.
   Settled in node 2 by the user, 2026-10-11 ([01-between-machines](../network/01-between-machines.md)).
 - **Because:**
@@ -503,7 +503,7 @@ Numbered as [decision 032](../../decisions/032-one-quic-connection-through-iroh.
   - A key that outlives a session would let the backend and the relays link every session one pilot joins (user, 2026-10-11).
 - **Leaves out:** Wi-Fi, carrier-grade NAT, double NAT, mobile links, and two friends' routers paired with each other, which no run has covered and v1's recordings count ([01-between-machines](../network/01-between-machines.md#the-way-through-home-routers)).
 
-## Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck
+## Our relays run iroh-relay unmodified, in at least two regions, and admit only Dual Input
 
 Numbered as [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) on 2026-10-13.
 
@@ -528,7 +528,7 @@ Numbered as [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.
 
 Numbered as [decision 034](../../decisions/034-backend-matches-invite-codes.md) on 2026-10-13.
 
-- **Decided:** the backend draws each invite code and keeps the session under it: its ID, the host's Crosscheck version and message crate hash, its relay list with each relay's token, and each member's pilot ID, display name, kind, crew in v1, and endpoint ID ([01-between-machines](../network/01-between-machines.md#joining)).
+- **Decided:** the backend draws each invite code and keeps the session under it: its ID, the host's Dual Input version and message crate hash, its relay list with each relay's token, and each member's pilot ID, display name, kind, crew in v1, and endpoint ID ([01-between-machines](../network/01-between-machines.md#joining)).
   A joining core looks up the code; the backend refuses a joiner whose version or message crate hash differs from the session's, naming who is behind, and otherwise answers with the session's ID, its relay list, and the crew, and lists the joiner only once the joiner registers itself, after its first message has passed with a member.
   A joining core dials each member by endpoint ID through every relay in the session's list, and iroh finds the direct path, so the backend and the session file keep endpoint IDs and no addresses.
   Each core renews its place every 10 minutes, the backend drops a member after 30 minutes without renewal, Leave session tells it at once, and it frees the code once the crew is empty.
@@ -550,7 +550,7 @@ Numbered as [decision 034](../../decisions/034-backend-matches-invite-codes.md) 
 Numbered as [decision 035](../../decisions/035-channels-declare-how-they-travel.md) on 2026-10-13.
 
 - **Decided:** the core keeps a registry of the session's channels, each declaring who sends and receives it, its delivery, its priority, and whether it joins the cockpit's shared order.
-  v1's channels have fixed numbers in the message crate, each stream opens with a header naming its channel, a channel in the cockpit's shared order rides the cockpit stream tagged with its channel, and a plugin opens only instances of the kinds Crosscheck provides, announcing each on the session channel.
+  v1's channels have fixed numbers in the message crate, each stream opens with a header naming its channel, a channel in the cockpit's shared order rides the cockpit stream tagged with its channel, and a plugin opens only instances of the kinds Dual Input provides, announcing each on the session channel.
   The cockpit stream is the one replayed log; the session channel and traffic's identities carry the newest value of each key, all of them again on a new connection, and catch-up starts again there.
   A new connection's first message carries every session key, and a core applies nothing else from the connection until it has passed; a receiver merges traffic's identity set, and a copy with no sample for 15s is removed and its identity forgotten (changed in node 3, [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host)).
   Every session key but control carries a stamp, the control value its writer held, a number one past the highest its writer has seen on that key, and the writer's pilot ID, and every receiver keeps the value with the highest stamp, comparing control values first, as control orders them, then the numbers, with the lower pilot ID winning a tie; a core that takes control writes every session-wide key again under the new value.
@@ -604,7 +604,7 @@ Numbered as [decision 037](../../decisions/037-while-a-link-is-lost.md) on 2026-
   A new connection's first message carries the session's state whole, control among it, and then each side sends the cockpit stream's replay: each core keeps every sender's cockpit messages it applied until every member has acknowledged them on the heartbeat, for up to 30 minutes, and sends the other what it lacks.
   Within 30 minutes a returning pilot whose sim and core kept running gets a replay, which its 2s cap on each gap bounds at 2s a change ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-replay)); at 30 minutes without a connection to any member, a core leaves the session, PF or PM.
   A core that starts with a session file asks the crew whether its pilot is still in, since a crew member timed the silence.
-  Leave session's goodbye is QUIC's close, with an application code that only Leave sends, and closing Crosscheck any other way sends a quit code that the others treat as a Leave.
+  Leave session's goodbye is QUIC's close, with an application code that only Leave sends, and closing Dual Input any other way sends a quit code that the others treat as a Leave.
   This changes [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that control passes to the PM when the PF's connection drops, and [the connection](../product/03-v1-scope.md#the-connection)'s 5-minute cut-off, and answers which ways to soften a short gap v1 builds ([the connection](../product/03-v1-scope.md#the-connection)) and what a core does with a session file found after a long outage ([01-spine](01-spine.md#left-open)).
   Settled in node 2 by the user, 2026-10-10 and 2026-10-11.
 - **Because:**
@@ -677,7 +677,7 @@ Numbered as [decision 041](../../decisions/041-core-crash-comes-back-as-late-joi
   This answers the spine's question of how a restarted core recovers, and what it keeps beyond the session file ([01-spine](01-spine.md#left-open)).
   Settled in node 3 by the user, 2026-10-11, and changed to a late join by the user, 2026-10-12 ([04-order-and-recovery](../sync/04-order-and-recovery.md#a-core-that-restarts)).
 - **Because:**
-  - Crosscheck aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and a late join reuses the path a sim crash already takes, where recovering in place needed a journal written before every send, a rebuild of four structures, a comparison with the sim, and a wait for the panels (user, 2026-10-12).
+  - Dual Input aims for a core that never crashes, so a crash is a bug to report and fix rather than a state to recover from, and a late join reuses the path a sim crash already takes, where recovering in place needed a journal written before every send, a rebuild of four structures, a comparison with the sim, and a wait for the panels (user, 2026-10-12).
   - A restarted core's aircraft kept the controls it had, which matched the flying machine's, so the flying machine's shadow values are the nearest to its own.
 - **Leaves out:** a shadow value's turns its pilot made while the core was down; and the presses either pilot made in that window, which are lost.
 
@@ -704,8 +704,8 @@ Numbered as [decision 042](../../decisions/042-vector-clock-records-what-applied
 
 Numbered as [decision 043](../../decisions/043-driven-entries-and-putting-back.md) on 2026-10-13.
 
-- **Decided:** a machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Crosscheck's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notice of a write that never lands.
-  When a machine's sim reports a change Crosscheck didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
+- **Decided:** a machine counts a shared state entry, or an event entry, as driven by the aircraft when, in every 3s for 30s, its own aircraft changed or fired it, other than by Dual Input's write, and another machine's change or firing arrived, a replayed one included; it then stops sending and applying that entry for the rest of the load, marks the recording, and shows the once-a-flight notice of a write that never lands.
+  When a machine's sim reports a change Dual Input didn't write that the machine may not send, it writes back the value it holds: a PF-owned entry on a following machine, any entry during its own catch-up, and the simulation rate on any machine but the flying one.
   Settled in node 3 by the user, 2026-10-11, and the test's reach to event entries by the user, 2026-10-13 ([04-order-and-recovery](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
 - **Because:**
   - An entry for something that ticks, which a profile's author added by mistake, would send a change or a firing at every tick and fill every replay, whatever the IDE warned (user, 2026-10-11), and 21 of the A220's input events reported four times a second on an untouched aircraft (measured on MSFS 2024, 2026-09-04, fsc-editor, as the [A220 study](../aircraft/synaptic-a220/study.md) cites).
@@ -728,7 +728,7 @@ Numbered as [decision 044](../../decisions/044-table-of-roles.md) on 2026-10-13.
   Settled in node 3 by the user, 2026-10-11; the take-control input, a session's end, and one aircraft a session by the user, 2026-10-12; and taking the host's role at any time by the user, 2026-10-13 ([roles and members](../session/01-roles-and-members.md)).
 - **Because:**
   - FS Copilot's build had no taking over, "a toggle is disabled while someone else hosts that feature", removed a host's traffic once the host stopped, withdrew hosting while the host's sim was disconnected, and removed a copy after 15s without a sample (FS Copilot fork, `record/traffic-atc/docs/03-implementation-plan.md`, "Decisions locked with the user (2026-09-06)", rows 2 and 4, and "Key invariants"); it dropped a disconnected host's claim after the 15s its networking took to call a peer gone, sent each object at least every 5s, and forgot an identity with its stale copy (read in the FS Copilot fork, `FsCopilot/Simulation/ShareSwitch.cs`, `OnPeers`, `FsCopilot/Network/RelayNetwork.cs`, `DisconnectTimeout`, `FsCopilot/Simulation/TrafficHost.cs`, `Heartbeat`, and `TrafficReceiver.cs`, line 413).
-  - Taking the role automatically would need Crosscheck to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
+  - Taking the role automatically would need Dual Input to tell which pilot runs a traffic injector, which is unknown ([traffic sync](../product/03-v1-scope.md#traffic-sync)).
   - Pilots who all want the best for the session settle a tussle over the switch on voice, so a role anyone can take needs no rule that frees it from a host who went quiet, and covers a host who doesn't come back (user, 2026-10-13).
   - Control that rests only with a pilot in the flight never lands on one with no aircraft, and a session with nobody in the flight has nothing left to sync, so starting a new one is the clean way back (user, 2026-10-12).
   - Keeping the role while its holder is quiet costs up to 15s of copies standing still, which the user accepted for the simpler design (user, 2026-10-11).
@@ -738,7 +738,7 @@ Numbered as [decision 044](../../decisions/044-table-of-roles.md) on 2026-10-13.
 
 Numbered as [decision 045](../../decisions/045-profile-format-yaml-and-javascript.md) on 2026-10-13.
 
-- **Decided:** a profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Crosscheck's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included; a run's plain `write()` calls go out together, in call order, and only a chain spaces them.
+- **Decided:** a profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Dual Input's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included; a run's plain `write()` calls go out together, in call order, and only a chain spaces them.
   Every entry's `write:` is required, and is a name, a map for `toggle` or `inc` and `dec`, a plugin's write method, a function `(value) => …` that reads the global `state` and returns nothing, or, on a state entry, `none` for a watch-only entry.
   A state entry whose value no variable shows counts events into a shadow value starting from `default`, and `wrap` and `range` appear only in a map that steps or counts, `wrap` required in each but a counted entry's stepping write, which takes the count's.
   An entry's direction is `owner`, `pilot_flying` or `shared` by default, and the PF's entries are the engine levers and trim, since the yoke, rudder, and toe brakes travel in the flight model's samples; an `aircraft:` header maps variant IDs to SimObjects folders, or to presets inside one, which entries and seats select with `only`; a profile imports modules by path, and a module carries no `only` or `location`; and profiles and modules live as flat files in one public repository.
@@ -751,7 +751,7 @@ Numbered as [decision 045](../../decisions/045-profile-format-yaml-and-javascrip
   - Names that only name and one call that writes let the engine see every write, which it marks as its own, paces, orders, and checks ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
   - FS Copilot's format guessed a setter's kind from its characters and fell back silently, emptied a whole profile on one unknown key, and ran a repeated name as two subscriptions (fsc-editor, `docs/fscopilot-behavior.md` and `docs/sim-vars/18-language-core.md`).
   - A required `write`, with `none` for watch-only, turns a forgotten `write` into a load error rather than a silent watch-only entry, and a required `wrap` turns a forgotten one into a load error rather than a heading bug that crosses north by 359 steps the long way (user, 2026-10-12).
-  - The first aircraft after the 58P with a control no variable shows would otherwise wait for a Crosscheck release before its profile could be written (user, 2026-10-12).
+  - The first aircraft after the 58P with a control no variable shows would otherwise wait for a Dual Input release before its profile could be written (user, 2026-10-12).
   - The Fenix's A319, A320, and A321 are presets of one folder, `FNX_32X`, and both pilots must fly the same preset (read in fnx-aircraft-320 2.4.0.4720, [Fenix study](../aircraft/fenix-a320-family/study.md#identity)), while FS Copilot keeps only the folder from the path the sim reports (read in the FS Copilot fork, `FsCopilot/Connection/SimConnectConsumer.cs`, `PushAircraft`), so a folder alone can't tell those variants apart (the root's walk, 2026-10-12).
 - **Leaves out:** whether the core tells which preset loaded from the path the sim reports or from `A:TITLE`, for the core's stage of step 8; settings on following machines, a request field, a plugin's changes to aircraft files, libraries that plugins share, reading client data, and locations for a module's entries, each until a profile or plugin needs it; and how the sync engine checks a write, tells its own echo from a pilot's change, retries, follows a moving knob, and runs write functions, which sync's stage of step 8 settles on a two-instance bench, starting from one attempt per write and one run of a function per value, with the cases [01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write) lists (user, 2026-10-12).
 
@@ -772,9 +772,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A profile fixes its entries when it loads, so the cap on each value bounds the state object.
 - **Leaves out:** what real profiles and plugins need, which the 58P's profile and plugin measure.
 
-## Crosscheck's code is a platform, engines, and features, and deleting a feature's crate leaves the rest whole
+## Dual Input's code is a platform, engines, and features, and deleting a feature's crate leaves the rest whole
 
-- **Decided:** Crosscheck's code is in three tiers: the platform, the services every feature uses, in the core and, through the panel bridge and our WASM module, in the sim; engines, libraries that know nothing of the app; and features, each one thing a pilot gets.
+- **Decided:** Dual Input's code is in three tiers: the platform, the services every feature uses, in the core and, through the panel bridge and our WASM module, in the sim; engines, libraries that know nothing of the app; and features, each one thing a pilot gets.
   Three tests stand in for a definition of clean: deleting a feature, its crate, its one registration, its modules in the message crate and the profile engine, its routines in our WASM module and their line in the module's list, its panel modules, and its section in each app, leaves everything else building and passing its tests; an engine builds and runs outside the core; and CI checks each crate's dependencies against the ones the code map allows.
   A feature's messages stay in the one message crate, and its profile block in the profile engine, which is why deleting a feature deletes a module in each.
   Settled in node 5 by the user, 2026-10-14 ([02-code-map](02-code-map.md#tiers)).
@@ -911,7 +911,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** a panel module adds its own listeners, removes them in its own `stop`, and wraps none of the sim's APIs.
   The bridge owns the locks, the overlays it places for pointer sync, a visible one over a display blocked through an outage and an unseen one while another pilot's gesture replays, with a hit test that looks past them; a lock holds only while the core renews it over the panel's socket every 2s, 8s to 10s after the last renewal a visible lock turns into a warning that blocks nothing and an unseen one goes, and a lock drops at once when the panel module that asked for it stops or the socket closes.
-  It also owns any API a later feature has wrapped, suppressed only for one dispatch and cleared unconditionally after it, restored by `window.CROSSCHECK_BRIDGE_UNLOCK()`, and uninstalled after 120s idle; each CommBus handler of ours, run in a `try`; and `window.CROSSCHECK_BRIDGE_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module, its name by [names the sim shares](02-code-map.md#names-the-sim-shares).
+  It also owns any API a later feature has wrapped, suppressed only for one dispatch and cleared unconditionally after it, restored by `window.DUALINPUT_BRIDGE_UNLOCK()`, and uninstalled after 120s idle; each CommBus handler of ours, run in a `try`; and `window.DUALINPUT_BRIDGE_UNLOCK()`, which removes every lock and wrapper in its document and stops every panel module, its name by [names the sim shares](02-code-map.md#names-the-sim-shares).
   A panel's first message naming the instruments another socket holds replaces that socket, which the core closes.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#what-the-bridge-owns)).
 - **Because:**
@@ -919,15 +919,15 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - `Coherent._trigger` calls a name's handlers with no `try`, so a handler of ours that throws would stop the aircraft's own handlers after it (read in the sim's `Coherent._trigger`, [CommBus log](../commbus/log.md#2026-09-28-a-script-that-arrives-after-a-panel-loaded-can-list-every-commbus-name-the-panel-registered); not run).
   - The core's CommBus announcement goes on with no session, so it can't renew a lock; and a page's socket stays open after the page reloads ([decision 010](../../decisions/010-clients-message-core-every-2s.md)), so without the replacement a reloaded panel's presses could go to its old socket (node 5.3's review, 2026-10-15).
 
-## One repository holds all of Crosscheck, its folders by tier, with each feature's parts in one folder
+## One repository holds all of Dual Input, its folders by tier, with each feature's parts in one folder
 
-- **Decided:** one repository holds Crosscheck's programs, our WASM module, our code in the sim, the backend, the Crosscheck IDE once it's built, and the profiles.
+- **Decided:** one repository holds Dual Input's programs, our WASM module, our code in the sim, the backend, the Dual Input IDE once it's built, and the profiles.
   Its top-level folders are `engines/`, `platform/`, `features/`, `apps/`, `sim-package/`, `profiles/`, `backend/`, and `tools/`.
   `features/<name>/` holds every part a feature has: its crate in the core, its routines, its panel modules, and its sections of the desktop app and the EFB app.
   `apps/` holds a folder for each program on the pilot's PC, the core helper's among them as `apps/core-helper/`; `sim-package/` holds what the sim loads from our Community package, `wasm-module/` and `pages/`; and `tools/` holds what builds, checks, and tests them, the profile builder among it (user, 2026-10-15).
-  The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit, fails when a released level's schema or declarations differ from its release tag, and publishes them on this repository's GitHub Pages site, apart from Crosscheck's releases.
+  The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit, fails when a released level's schema or declarations differ from its release tag, and publishes them on this repository's GitHub Pages site, apart from Dual Input's releases.
   Nobody outside the core team gets write access, so the profiles have no `CODEOWNERS` file; the core team reviews and merges every profile's pull request, and a profile's authors review it without their approval counting toward a merge.
-  This changes [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository), which gives the profiles a public repository of their own; [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)'s "one public repository" holds, since Crosscheck's is public from v1.
+  This changes [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository), which gives the profiles a public repository of their own; [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)'s "one public repository" holds, since Dual Input's is public from v1.
   Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-workspace)).
 - **Because:**
   - Deleting a feature is then deleting its folder, its modules in the message crate and the profile engine, and its line in each program's list, the code map's first test.
@@ -958,7 +958,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   The code map's third test is a script in `tools/` that takes each crate's tier from its folder and reads the resolved graph from `cargo metadata`, crates from outside the workspace included, takes each TypeScript file's imports, type-only ones included, from the TypeScript compiler's own resolution, finds a feature naming another feature's module in the message crate or the profile engine by name, and checks all of it against the code map's rules.
   Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#ci)).
 - **Because:**
-  - Crosscheck runs only on Windows, so CI runs our code on the system pilots run it on, and builds bundles on the system the core builds a local one on, whose hash two testers compare ([01-format-and-delivery](../profiles/01-format-and-delivery.md#testing-an-edit)).
+  - Dual Input runs only on Windows, so CI runs our code on the system pilots run it on, and builds bundles on the system the core builds a local one on, whose hash two testers compare ([01-format-and-delivery](../profiles/01-format-and-delivery.md#testing-an-edit)).
   - Standard runners are free for a public repository (documented, [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)), as this one is when CI starts (user, 2026-10-15); Windows runners build slower, a whole build nearly 70% slower in one report (documented, [rust-lang/rust#66192](https://github.com/rust-lang/rust/issues/66192)).
   - esbuild drops a type-only import from its metafile (measured on our development machine, 2026-10-15, esbuild 0.28.2, in node 5.4's review).
   - cargo-deny bans a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), where the script holds each rule once, and one script covers both languages (user, 2026-10-15).
@@ -972,7 +972,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Outside the core, the platform is the routine host, the panel bridge, and the shells of the EFB app and the desktop app.
   The routine host also holds the platform's own routines, `Hold` and `Mechanisms`.
   A feature's section imports its app's shell and never an app, and neither half of the platform depends on the other.
-  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `apps/` and `sim-package/` is named `crosscheck-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
+  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `apps/` and `sim-package/` is named `dualinput-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
   [The units](02-code-map.md#the-units) names every unit, what it uses, and the systems [node 6](plan.md#6-systems) designs.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-units)).
 - **Because:**
@@ -1072,7 +1072,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** a `hello` whose version or message crate hash differs from the core's is logged by the client's name with both versions, and nothing else changes, for the clients on WebSockets.
   Settled in node 6.2 by the user, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#a-client-whose-version-differs)).
-- **Because:** the watcher updates the Community package with Crosscheck while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
+- **Because:** the watcher updates the Community package with Dual Input while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
 - **Leaves out:** what the pilot sees, for node 6's design of the apps.
   Our WASM module, whose data slots are read in place, runs no routine on a feed from another build ([below](#our-wasm-module-runs-no-routine-on-a-feed-from-another-build-and-carries-each-want-through-the-sims-fsvars-and-fsevents-apis)).
 
@@ -1087,7 +1087,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** our `VCockpit.js` is the stock file with two blocks between markers: one adds a script element of its own for the bridge in a `try`, and one, after the sim has set each instrument up, hands it to the bridge, or queues it for the bridge if the bridge hasn't loaded, in a `try`; the bridge loads `CommBus.js` and each panel module through script elements of its own too, never through `Include.addImports`; the build puts the blocks in at named anchors and refuses when one is missing.
   Settled in node 6.2, 2026-10-15 ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#our-vcockpitjs)).
 - **Because:**
-  - Code there runs inside the loading of every instrument, so a bridge that never loads has to leave the cockpit as if Crosscheck weren't installed ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
+  - Code there runs inside the loading of every instrument, so a bridge that never loads has to leave the cockpit as if Dual Input weren't installed ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
   - The sim's loader holds every later script behind one that never loads, while it loads one at a time as it does for each instrument (read in the sim's `common.js`, `IncludeMgr`, not run; [core log][c03]).
 - **Leaves out:** how the build gets the stock file after each sim update, since the sim streams it, for node 6's design of the build; and whether a script element's `onerror` fires in Coherent GT, for [node 7](plan.md#7-testing)'s bench.
 
@@ -1118,7 +1118,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Our WASM module runs no routine on a feed from another build, and carries each want through the sim's fsVars and fsEvents APIs
 
-- **Decided:** the module leaves its version, the slots hash, a hash of the slot structs alone, and its counter in `CROSSCHECK_MODULE_STATUS`, in a layout that never changes, and each routine's slot header carries the slots hash; the routine host ignores a feed whose slots hash isn't its own, and the sim service logs both versions and reports the module as differing.
+- **Decided:** the module leaves its version, the slots hash, a hash of the slot structs alone, and its counter in `DUALINPUT_MODULE_STATUS`, in a layout that never changes, and each routine's slot header carries the slots hash; the routine host ignores a feed whose slots hash isn't its own, and the sim service logs both versions and reports the module as differing.
   The routine host reads and writes `A:`, `L:`, and `Z:` variables through `fsVarsAVarGet`, `fsVarsAVarSet`, `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarGet`, and `fsVarsZVarSet`, freezes through `fsEventsTriggerKeyEvent` with the SDK's `KEY_FREEZE_*_SET` numbers, and runs a plugin's calculator code through `execute_calculator_code`.
   The core unfreezes the aircraft once the counter has been still for 3s spent in Flying, unpaused, with a routine of ours live.
   Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#our-wasm-module)).
@@ -1128,10 +1128,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The session sits above the sim service, which can't read it, and a module with no routine live froze nothing.
 - **Leaves out:** whether `fsVarsAVarSet` holds the pilot's own aircraft's pose and whether `fsEventsTriggerKeyEvent` freezes it, for [node 7](plan.md#7-testing)'s tests in the sim, after which calculator code carries either that fails, as FS Copilot's module writes its pose and freeze; and whether bindgen brings in the freeze events' numbers, since p08's build generated bindings only from `SimConnect.h` and `MSFS_Vars.h`.
 
-## Every name the sim shares is CROSSCHECK_, a kind, and a name
+## Every name the sim shares is DUALINPUT_, a kind, and a name
 
-- **Decided:** every name of ours that the sim shares with other packages, in a panel's globals, the CommBus, client data areas, SimObject titles, and `L:` and `Z:` variables, is `CROSSCHECK_<KIND>_<NAME>`, where the kind is what owns the name, from the list in [names the sim shares](02-code-map.md#names-the-sim-shares), or a probe's ID.
-  So a routine's slot is `CROSSCHECK_ROUTINE_FOLLOW`, the module's own `CROSSCHECK_MODULE_STATUS`, the core's announcement `CROSSCHECK_CORE_ANNOUNCE`, and the bridge's globals `CROSSCHECK_BRIDGE_API`, `CROSSCHECK_BRIDGE_PENDING`, and `CROSSCHECK_BRIDGE_UNLOCK`.
+- **Decided:** every name of ours that the sim shares with other packages, in a panel's globals, the CommBus, client data areas, SimObject titles, and `L:` and `Z:` variables, is `DUALINPUT_<KIND>_<NAME>`, where the kind is what owns the name, from the list in [names the sim shares](02-code-map.md#names-the-sim-shares), or a probe's ID.
+  So a routine's slot is `DUALINPUT_ROUTINE_FOLLOW`, the module's own `DUALINPUT_MODULE_STATUS`, the core's announcement `DUALINPUT_CORE_ANNOUNCE`, and the bridge's globals `DUALINPUT_BRIDGE_API`, `DUALINPUT_BRIDGE_PENDING`, and `DUALINPUT_BRIDGE_UNLOCK`.
   Settled in node 6.3 by the user, 2026-10-15.
 - **Because:** a reader can tell what owns a name at a glance, and names of two kinds in one namespace never collide, where without the kind a routine whose ID was `MODULE` would take the module's own status slot (user, 2026-10-15).
 - **Leaves out:** the figure's SimObject title, `CROSSCHECK_Figure`, for node 6's design of avatars.
@@ -1245,7 +1245,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.5 by the user, 2026-10-16 ([04-core-helper](../core/04-core-helper.md#opus)).
 - **Because:**
   - At 24 kbps a frame averages 60 bytes, about 3 KB/s, where 48 kHz mono 16-bit audio would put 96 KB/s, about 345 MB an hour, in every recording (arithmetic), and the codec's native code stays out of the core, as [decision 019](../../decisions/019-input-and-audio-run-in-helper.md) wants.
-  - Every libopus binding we found builds through CMake, `opus` 0.4.0 among them through opusic-sys (read 2026-10-16 in the dependencies crates.io lists for `opus` 0.4.0, opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0), which nothing else in our build uses, while opus-rs needs no CMake; nothing else in Crosscheck depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
+  - Every libopus binding we found builds through CMake, `opus` 0.4.0 among them through opusic-sys (read 2026-10-16 in the dependencies crates.io lists for `opus` 0.4.0, opusic-sys 0.7.5, libopus_sys 0.3.2, and opus-codec 0.2.0), which nothing else in our build uses, while opus-rs needs no CMake; nothing else in Dual Input depends on ATC audio or the cues, so a young codec costs little, and swapping in `opus` 0.4.0, bindings to libopus 1.6.1, changes one crate and no message (user, 2026-10-16).
 - **Leaves out:** whether opus-rs holds up, which a bench case and a listen at the helper's stage of the build settle.
 
 ## A microphone setting sits beside the output device, and each follows Windows' default unless the pilot picks one
@@ -1282,7 +1282,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Each PC keeps whole runs within 1 GB, with no minimal recording
 
-- **Decided:** the recording crate deletes each run with no session that isn't among the 3 newest runs before the one starting, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, crew, and upload, is the one record a later Crosscheck reads; and no setting chooses full or minimal recording.
+- **Decided:** the recording crate deletes each run with no session that isn't among the 3 newest runs before the one starting, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, crew, and upload, is the one record a later Dual Input reads; and no setting chooses full or minimal recording.
   This changes [decision 016](../../decisions/016-core-keeps-pilots-settings.md)'s recording mode, once step 8's decisions are numbered.
   Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
 - **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), and at a few MB an hour of session, 1 GB holds hundreds of hours, so size no longer calls for a minimal mode (user, 2026-10-16).
@@ -1349,7 +1349,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## The core loads only bundles, which the profile builder builds with TypeScript 6.0.3 inside QuickJS-ng
 
 - **Decided:** the core never builds a bundle: a published one comes from Pages, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
-  An engine of its own, `profile-build`, type-checks and compiles with TypeScript 6.0.3's `typescript.js` inside QuickJS-ng through rquickjs, the same in CI, in the `crosscheck-profile-builder` program with its watch mode, and later in the IDE, which rebuilds on each save; the profile engine parses YAML with saphyr's tree and our own checker, and a bundle's hash is SHA-256.
+  An engine of its own, `profile-build`, type-checks and compiles with TypeScript 6.0.3's `typescript.js` inside QuickJS-ng through rquickjs, the same in CI, in the `dualinput-profile-builder` program with its watch mode, and later in the IDE, which rebuilds on each save; the profile engine parses YAML with saphyr's tree and our own checker, and a bundle's hash is SHA-256.
   This changes [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md), whose core builds a local bundle itself, once step 8's decisions are numbered.
   Settled in node 6.8 by the user, 2026-10-16 ([the profiles' units](../profiles/02-units.md#the-builder)).
 - **Because:**
@@ -1481,7 +1481,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Settled in node 6.12 by the user, 2026-10-17 ([take-control](../control/01-take-control.md)).
 - **Because:**
   - The helper reads Raw Input whichever program is in front ([raw input](../core/04-core-helper.md#raw-input)), so without the rule on keys, a bound key typed in a chat would take control (user, 2026-10-17); nobody types on a yoke, so buttons need no such rule.
-  - Crosscheck can't read the sim's own bindings, so it asks the pilot instead, and a Soon pick reads them if they can be read (user, 2026-10-17).
+  - Dual Input can't read the sim's own bindings, so it asks the pilot instead, and a Soon pick reads them if they can be read (user, 2026-10-17).
   - A long press keeps a brushed button from taking control.
   - A pilot pressing hardware in VR gets no other sign of a refusal before looking at the banner.
   - Good neutral voice lines are hard to come by, and the cue and the banner already mark the pass (user, 2026-10-17).
@@ -1544,7 +1544,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Traffic carries aircraft and helicopters within its radius, and ground objects within 1km only by an allowlist of titles
 
-- **Decided:** the traffic host carries the AI aircraft and helicopters within its radius setting, 200km at most and at first, and the ground objects within 1km whose title starts with a prefix on a list in traffic's crate, which starts with `ASO_Pushback_` and takes other pushback tugs, GSX's among them, as the build finds them; it never carries the pilot's own aircraft or avatar, an object traffic created, or a title starting `CROSSCHECK_`.
+- **Decided:** the traffic host carries the AI aircraft and helicopters within its radius setting, 200km at most and at first, and the ground objects within 1km whose title starts with a prefix on a list in traffic's crate, which starts with `ASO_Pushback_` and takes other pushback tugs, GSX's among them, as the build finds them; it never carries the pilot's own aircraft or avatar, an object traffic created, or a title starting `DUALINPUT_`.
   This changes [traffic sync](../product/03-v1-scope.md#traffic-sync), which carries ground vehicles, GSX's tugs, fuel trucks, and catering among them (user, 2026-10-17).
   Settled in node 6.14 by the user, 2026-10-17 ([which objects the host carries](../traffic-atc/01-traffic-and-atc.md#which-objects-the-host-carries)).
 - **Because:**
@@ -1642,7 +1642,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - When a notice shows is a screen decision, which belongs in the banner's page, not the core's protocol.
 - **Leaves out:** whether clicks reach the cockpit through the panel's see-through part, which a case in the sim checks and which, if they don't, brings the banner's shape back to design; where it sits, how it shows in VR, and where a click on a notice lands in the EFB app, which the apps' stage settles.
 
-## Crosscheck has no watcher, and the desktop app runs from login as a tray icon doing its jobs
+## Dual Input has no watcher, and the desktop app runs from login as a tray icon doing its jobs
 
 - **Decided:** the desktop app starts at login as a tray icon alone, from a Run value with `--tray` that Velopack's install hook writes, and its Rust side does every job the spine and decision 002 give the watcher; one copy runs for each data folder, so a second start opens the running one's window; closing the window destroys it; its socket to the core is open while its window is open; and the tray's Quit sends the session crate's Quit and ends the app.
   It wants a core while the sim runs, its window is open, or a session file exists, starts one from its own folder when the port file names none that runs, starts one again 2s after an exit other than 0, and after an exit with 0 starts none until the sim next starts or its window next opens.
@@ -1655,9 +1655,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The exit code says whether the core meant to stop ([exiting](../core/01-loop-and-edge.md#exiting)), whoever reads it.
 - **Leaves out:** the tray's menu, the window, and the figures' look, for the apps' stage.
 
-## Velopack installs and updates Crosscheck per-user, with the desktop app as Velopack's main program
+## Velopack installs and updates Dual Input per-user, with the desktop app as Velopack's main program
 
-- **Decided:** Velopack's Setup.exe installs Crosscheck to `%LOCALAPPDATA%\Crosscheck\`, with the desktop app, the core, the core helper, and our Community package in `current\`, and a Start-menu shortcut to the desktop app; the desktop app links the `velopack` crate with auto-apply at startup off, and alone applies updates, which it reads through Velopack's `GithubSource` from the newest 10 GitHub releases; the core's data folder is `%APPDATA%\Crosscheck\`, with the app's own files in its `app\` subfolder; our package goes in each packages folder's `Community`; and v1 ships unsigned.
+- **Decided:** Velopack's Setup.exe installs Dual Input to `%LOCALAPPDATA%\DualInput\`, with the desktop app, the core, the core helper, and our Community package in `current\`, and a Start-menu shortcut to the desktop app; the desktop app links the `velopack` crate with auto-apply at startup off, and alone applies updates, which it reads through Velopack's `GithubSource` from the newest 10 GitHub releases; the core's data folder is `%APPDATA%\DualInput\`, with the app's own files in its `app\` subfolder; our package goes in each packages folder's `Community`; and v1 ships unsigned.
   This settles 02-code-map's item in [left open](02-code-map.md#left-open) on where the installer lives: it's Velopack's, not a program of ours.
   Settled in node 6.17 by the user, 2026-10-18 ([the installer and the updater](../install/01-installing-and-updating.md#the-installer-and-the-updater)).
 - **Because:**
@@ -1682,7 +1682,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The desktop app writes our finished package wherever it's missing or of another version, and the BlurPage copy ships in it
 
-- **Decided:** while the sim is closed, at its start and each time the sim closes, the desktop app copies our package, as the build finished it, into each packages folder's `Community` where it's missing or its `manifest.json`'s `package_version` isn't the app's version, and, since node 6.18, only when the app runs from Velopack's `current\` folder, as an installed app does ([our package](../build/01-the-build.md#our-package)), copying it into `Crosscheck\` beside `Community` first and swapping it in by rename, and nothing watches `Community` between those moments (user, 2026-10-18).
+- **Decided:** while the sim is closed, at its start and each time the sim closes, the desktop app copies our package, as the build finished it, into each packages folder's `Community` where it's missing or its `manifest.json`'s `package_version` isn't the app's version, and, since node 6.18, only when the app runs from Velopack's `current\` folder, as an installed app does ([our package](../build/01-the-build.md#our-package)), copying it into `DualInput\` beside `Community` first and swapping it in by rename, and nothing watches `Community` between those moments (user, 2026-10-18).
   The BlurPage copy ships in the package, built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either (user, 2026-10-18).
   This changes [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), whose watcher makes the copy on each pilot's PC, once step 8's decisions are numbered.
   Nothing asks the pilot for a packages folder.
@@ -1696,7 +1696,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The desktop app adds the firewall rule on its first run, and offers the fix while it's missing or blocked
 
-- **Decided:** on its first run after an install, before it starts any core, the desktop app reads the rules and, if none allows the core or one blocks it, runs itself with the `runas` verb and a flag it acts on before handing a second start to the running app, and that copy adds an inbound rule allowing UDP to `current\crosscheck-core.exe` on every profile and deletes every block rule naming that path, comparing paths without regard to letter case; at each start the app reads the rules again and offers the same fix while the rule is missing or blocked; an uninstall leaves the rule, so a reinstall asks nothing.
+- **Decided:** on its first run after an install, before it starts any core, the desktop app reads the rules and, if none allows the core or one blocks it, runs itself with the `runas` verb and a flag it acts on before handing a second start to the running app, and that copy adds an inbound rule allowing UDP to `current\dualinput-core.exe` on every profile and deletes every block rule naming that path, comparing paths without regard to letter case; at each start the app reads the rules again and offers the same fix while the rule is missing or blocked; an uninstall leaves the rule, so a reinstall asks nothing.
   This changes [01-between-machines](../network/01-between-machines.md#the-way-through-home-routers), whose installer adds the rule and whose core looks for it.
   Settled in node 6.17 by the user, 2026-10-18 ([the firewall rule](../install/01-installing-and-updating.md#the-firewall-rule)).
 - **Because:**
@@ -1705,7 +1705,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A program with no administrator read all 896 of our machine's rules (measured on our development machine, 2026-10-18).
 - **Leaves out:** whether the core's UDP socket raises Windows' prompt at all, which a case in the sim settles.
 
-## The sim service warns of packages that override our files and checks our own, and Crosscheck turns no package off
+## The sim service warns of packages that override our files and checks our own, and Dual Input turns no package off
 
 - **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` in `Community` and `Community2024` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, without regard to letter case, since FS Copilot's lists its `VCockpit.js` in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`), skipping a package the sim's `Content.xml` marks `UserDisabled`, and raises a warning notice for each package found, which the match check shows as one item; and it checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notice otherwise, one notice with the module's status of Missing or Differs (the design review after node 6, user, 2026-10-18).
   Removing or turning off a package the warning names is the pilot's, and the offer to disable it, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives the desktop app, moves to Later (user, 2026-10-18).
@@ -1747,9 +1747,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Our package ships changed copies of the three files anyway, as FS Copilot's and YourControls' repositories keep theirs, so they can be public (user, 2026-10-18).
 - **Leaves out:** the Microsoft Store edition's files, which a program may not be able to read.
 
-## Our package is one folder, crosscheck, with the order hint PANEL_PATCH, and the files only the sim compiles are compiled with the sim and committed
+## Our package is one folder, dualinput, with the order hint PANEL_PATCH, and the files only the sim compiles are compiled with the sim and committed
 
-- **Decided:** one package, in a folder named `crosscheck` with the order hint `PANEL_PATCH`, holds our code in the sim and its pages, our `VCockpit.js` and BlurPage copies, our WASM module, the figure's SimObject, and the banner's in-game panel; the desktop app writes our package only when it runs from Velopack's `current\` folder, and `node tools/build.ts install` copies a development build's package into `Community` when the developer asks, refusing while the sim runs; when the figure's model or the banner's panel definition changes, someone compiles it with `fspackagetool` on a PC with the sim and commits the output beside its source, with its sources' hashes, which CI checks; no tool of ours writes either format.
+- **Decided:** one package, in a folder named `dualinput` with the order hint `PANEL_PATCH`, holds our code in the sim and its pages, our `VCockpit.js` and BlurPage copies, our WASM module, the figure's SimObject, and the banner's in-game panel; the desktop app writes our package only when it runs from Velopack's `current\` folder, and `node tools/build.ts install` copies a development build's package into `Community` when the developer asks, refusing while the sim runs; when the figure's model or the banner's panel definition changes, someone compiles it with `fspackagetool` on a PC with the sim and commits the output beside its source, with its sources' hashes, which CI checks; no tool of ours writes either format.
   This settles installing and updating's item on our package's folder name and whether our WASM module needs a package of its own, and avatars' question on how the figure gets built; and it narrows the decision above that the desktop app writes our package where it's missing or of another version to an installed app.
   Settled in node 6.18 by the user, 2026-10-18 ([our package](../build/01-the-build.md#our-package), [files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
 - **Because:**
@@ -1783,7 +1783,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A release is built by a job that can't write, uploaded as a draft, checked, and only then published, with the backend deployed just before
 
-- **Decided:** a person runs the release workflow on `main`; its build job, with a read-only token, stops at a published release of that version, runs every check, builds, fetches the newest release's full package and fails unless it's the one `releases/latest` holds, or none came and none is published, and packs with `--packId Crosscheck` and `--noPortable`; its publish job deletes a draft a failed run left, uploads a draft, checks that the draft holds every file `assets.win.json` lists and that its `releases.win.json` lists this version, deploys the backend's migrations and Worker, and publishes the draft; a third job runs the profiles' workflow; each step of the first two is one command; a second workflow runs the backend's tests and deploys it alone.
+- **Decided:** a person runs the release workflow on `main`; its build job, with a read-only token, stops at a published release of that version, runs every check, builds, fetches the newest release's full package and fails unless it's the one `releases/latest` holds, or none came and none is published, and packs with `--packId DualInput` and `--noPortable`; its publish job deletes a draft a failed run left, uploads a draft, checks that the draft holds every file `assets.win.json` lists and that its `releases.win.json` lists this version, deploys the backend's migrations and Worker, and publishes the draft; a third job runs the profiles' workflow; each step of the first two is one command; a second workflow runs the backend's tests and deploys it alone.
   This settles the line 6.17 raised on a release job that fails when it attaches nothing.
   Settled in node 6.18 by the user, 2026-10-18 ([a release](../build/01-the-build.md#a-release), [the backend](../build/01-the-build.md#the-backend)).
 - **Because:**
@@ -1795,7 +1795,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## v1 ships no authoring tool
 
-- **Decided:** the profile builder and the profile author tool run from the repository for the core team, and no release carries either; the builder keeps the name `crosscheck-profile-builder`; a contributor without the toolchain sends a profile's change as a pull request and reads CI's check.
+- **Decided:** the profile builder and the profile author tool run from the repository for the core team, and no release carries either; the builder keeps the name `dualinput-profile-builder`; a contributor without the toolchain sends a profile's change as a pull request and reads CI's check.
   This settles the profiles' units' item in [left open](../profiles/02-units.md#left-open) on the builder program's name and how authors get it.
   Settled in node 6.18 by the user, 2026-10-18 ([authoring tools](../build/01-the-build.md#authoring-tools)).
 - **Because:**
@@ -1829,9 +1829,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - A toggle can't compare against a reading that hasn't come, so the 58P's battery and beacon, toggles on input events, could flip the wrong way in catch-up ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
 - **Leaves out:** nothing.
 
-## Crosscheck is tested at four levels, and CI keeps the unit tests and the bench green on every pull request
+## Dual Input is tested at four levels, and CI keeps the unit tests and the bench green on every pull request
 
-- **Decided:** Crosscheck is tested by each crate's and each TypeScript part's own tests; on the bench, two or three bench builds of the core on one PC, each on a stand-in sim; in the sim, with a bench core on a stand-in as the second pilot where a case needs a crew; and with friends on two PCs.
+- **Decided:** Dual Input is tested by each crate's and each TypeScript part's own tests; on the bench, two or three bench builds of the core on one PC, each on a stand-in sim; in the sim, with a bench core on a stand-in as the second pilot where a case needs a crew; and with friends on two PCs.
   A pull request that changes code runs the unit tests and the bench, and a merge needs them green; each merge to `main` runs the bench again recording every input; the release workflow's build job runs both passes; and no timing budget fails CI.
   Each stage of node 8 turns its system's cases into tests, measures its budgets on our development machine, runs the cases that need a third-party aircraft's files there too, and runs its cases in the sim in one session at its end; a short session in the sim comes before each release, and the release workflow takes the commit that session checked and stops unless it's `main`'s head; friends come at a stage whose cases need two PCs and before v1 ships; and no second MSFS runs in a virtual machine.
   Settled in node 7 by the user, 2026-10-18 ([testing](../build/02-testing.md)).
@@ -1843,7 +1843,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The bench reaches a core only where a pilot's surroundings do, and runs only what it built from the tree under test
 
-- **Decided:** the bench runs two or three bench builds of the core, and the desktop app from a folder it lays out with a bench core as `crosscheck-core.exe`; it reaches each through the stand-in sim below the sim seam, fake pages over the core's real WebSocket, a stand-in core helper over the real pipe, two local `iroh-relay`s each behind a proxy, a local backend, a local site serving profiles built from the tree, a packages folder it lays out with a `UserCfg.opt`, the processes it starts, kills, and suspends, and each core's data folder, the local stand-ins reached through development settings; it asserts on what the fake pages are told, what the stand-in's aircraft holds and was asked, each core's recording and its replay, and exit codes and logs; every scenario ends by replaying each core's recording and fails on a checkpoint that doesn't match; and each run builds the programs it runs from the tree under test and starts each by the path that build wrote.
+- **Decided:** the bench runs two or three bench builds of the core, and the desktop app from a folder it lays out with a bench core as `dualinput-core.exe`; it reaches each through the stand-in sim below the sim seam, fake pages over the core's real WebSocket, a stand-in core helper over the real pipe, two local `iroh-relay`s each behind a proxy, a local backend, a local site serving profiles built from the tree, a packages folder it lays out with a `UserCfg.opt`, the processes it starts, kills, and suspends, and each core's data folder, the local stand-ins reached through development settings; it asserts on what the fake pages are told, what the stand-in's aircraft holds and was asked, each core's recording and its replay, and exit codes and logs; every scenario ends by replaying each core's recording and fails on a checkpoint that doesn't match; and each run builds the programs it runs from the tree under test and starts each by the path that build wrote.
   Settled in node 7 by the user, 2026-10-18 ([the bench](../build/02-testing.md#the-bench)).
 - **Because:**
   - No development mode skips the real path: FS Copilot's `--dev` "builds no Coordinator and no network", so "The wire, the acks, the resend history and the session state machine never run" in it (FS Copilot fork, `record/exerciser/docs/01-design.md`, "Session: the exerciser is a peer").

@@ -1,6 +1,6 @@
-# Crosscheck
+# Dual Input
 
-Crosscheck is a shared cockpit for Microsoft Flight Simulator: two pilots on two PCs flying one aircraft, each seeing the other's switches, knobs, and displays move.
+Dual Input is a shared cockpit for Microsoft Flight Simulator: two pilots on two PCs flying one aircraft, each seeing the other's switches, knobs, and displays move.
 Don't write product code until a plan in `record/` has a stage for it.
 Until a decision in `record/decisions/` picks them, propose a language, framework, or architecture rather than choosing one.
 
@@ -10,7 +10,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
   Create or edit it only when asked, and keep the author's voice.
 - `record/` holds the documents agents write.
   [record/index.md](record/index.md) is the map.
-  Keep its top level to `index.md`, `decisions/`, `learn/`, and `areas/`, and give each part of Crosscheck a folder under `areas/`, so twenty areas don't bury the rest.
+  Keep its top level to `index.md`, `decisions/`, `learn/`, and `areas/`, and give each part of Dual Input a folder under `areas/`, so twenty areas don't bury the rest.
 - `experiments/` holds probes and prototypes, and their raw results, in `experiments/areas/<area>/`, the same path the area has under `record/`.
   A finding worth keeping goes in the area's log in `record/areas/<area>/`, and the area's README links to that log and says nothing else that can go stale.
   `experiments/tools/` drives the sim's inspector on 127.0.0.1:19999, which runs JavaScript in any panel, so a panel probe needs no one to paste it.
@@ -30,12 +30,12 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 
 ## Targets
 
-Crosscheck supports MSFS 2024 only.
+Dual Input supports MSFS 2024 only.
 Don't spend effort on MSFS 2020 compatibility, and don't assume a 2020 source holds for 2024.
 
 ## Prior work
 
-Before Crosscheck we worked on FS Copilot, another shared-cockpit app, and on tools around it.
+Before Dual Input we worked on FS Copilot, another shared-cockpit app, and on tools around it.
 Before designing a probe or planning a sim session, search their records, because they hold measured answers to many of the questions we'll have.
 They're sibling checkouts on the development machine.
 Read and run them, but don't edit their files, commit, or switch branches there, because each has its own work in progress.
@@ -67,10 +67,11 @@ A prototype that works reaches the product through a plan stage that rebuilds it
 An experiment needs no plan and no decision on language: run it, and write down only what's worth keeping.
 Probes are Node `.mjs` files and panel `.js` files.
 
-**Name everything the sim shares `CROSSCHECK_<KIND>_<NAME>`.**
+**Name everything the sim shares `DUALINPUT_<KIND>_<NAME>`.**
 That covers panel globals, CommBus events, client data areas, and `L:` variables.
 Every package in the Community folder shares these namespaces, and FS Copilot's `FSC_` and fsc-editor's `FSCEDITOR_` are already in use there.
 The kind is what owns the name, from the list in [02-code-map](record/areas/architecture/02-code-map.md#names-the-sim-shares), or a probe's ID such as `P08`, so a reader can tell a routine's slot from the module's own, and names of two kinds never collide.
+Probes from before 2026-10-19 keep `CROSSCHECK_`, the product's earlier name, as [writing.md](.claude/rules/writing.md#voice) says.
 
 **Never delete as a side effect.**
 Deleting a file, or running `git checkout`, `restore`, `stash`, or `reset` on a path, is its own proposal: ask first, and say why.

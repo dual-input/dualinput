@@ -1,6 +1,6 @@
 # Foundations: learning outline
 
-The concepts we need to build Crosscheck, in the order we'll learn them.
+The concepts we need to build Dual Input, in the order we'll learn them.
 The reader is an experienced software developer and simmer, so software and flight-sim basics are left out, and networking and the MSFS SDK get the most depth.
 
 Each part is marked with its depth:

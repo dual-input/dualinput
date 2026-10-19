@@ -67,7 +67,7 @@ fsc-editor's runs as a Cloudflare Worker with one Durable Object per session cod
 It carries TCP, so every message waits behind any lost one ([09-02](09-02-transports-and-delivery.md#delivery-modes-reliable-ordered-sequenced-unreliable-head-of-line-blocking-mtu-and-fragmentation)).
 TURN is the standard protocol for a relay, and WebRTC reaches it through ICE ([09-03](09-03-nat-and-traversal.md#stun-turn-ice-and-hole-punching)).
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 A pair of pilots with no direct link needs a relay, a forwarded port on one pilot's router where there's no CGNAT, or a network the pilots set up themselves, such as a mesh VPN.
 A relay is a server that someone runs, pays for, and keeps compatible with every client version in use.
 Its traffic grows with seats times packet rate, and its location adds to the latency of every pair it carries.
@@ -107,7 +107,7 @@ fsc-editor's Remote Connect lets the relay pick the code [10] [16]:
 - The code stays valid for the whole session, so a pilot can join late, and the Worker allows 20 join attempts a minute from each IP address, counted separately at each Cloudflare location, before any session object runs.
 - The host gets a resume token, so the code is enough to join a session and not enough to take it over.
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 Two apps need a server both reach to find each other, before any link exists and even when the link then goes direct, unless one pilot is reachable and the other types in that pilot's address, as YourControls' direct mode asks ([01](01-prior-art-and-crew-practice.md#prior-art)).
 A code has to survive being read aloud, and whether it lasts for one app run or one session, and how hard it is to guess, are open questions tied to security ([09-05](09-05-versions-and-security.md#security-authentication-encryption-validating-what-a-peer-writes-into-your-sim)).
 

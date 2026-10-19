@@ -11,7 +11,7 @@
 //! holding the version alone.
 //!
 //! ```text
-//! crosscheck-msfs-sdk <version> [--into <folder>]
+//! dualinput-msfs-sdk <version> [--into <folder>]
 //! ```
 //!
 //! `--into` installs into another folder, to try the program without touching the SDK
@@ -65,11 +65,11 @@ fn main() -> Result<()> {
     let mut args = env::args().skip(1);
     let version = args
         .next()
-        .context("usage: crosscheck-msfs-sdk <version> [--into <folder>]")?;
+        .context("usage: dualinput-msfs-sdk <version> [--into <folder>]")?;
     let target = match (args.next().as_deref(), args.next()) {
         (None, _) => sdk_folder()?,
         (Some("--into"), Some(folder)) => PathBuf::from(folder),
-        _ => bail!("usage: crosscheck-msfs-sdk <version> [--into <folder>]"),
+        _ => bail!("usage: dualinput-msfs-sdk <version> [--into <folder>]"),
     };
     if !version
         .split('.')

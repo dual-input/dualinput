@@ -1,4 +1,4 @@
-# The core, Crosscheck's main program, can record a run and replay it later to reproduce a
+# The core, Dual Input's main program, can record a run and replay it later to reproduce a
 # bug, and a replay has to compute exactly what the run did. Another compiler version can
 # compile the same code to different results, so a recording names the rustc that built
 # it, and a replay built with another one warns. Pinning the version here builds every

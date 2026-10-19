@@ -54,7 +54,7 @@ None of the SimConnect events we tried could, nor the one cockpit panel and main
 - Each date held for the 6s we watched, the local date moved with the zulu date, and the time of day ran on untouched.
 - `K:ZULU_YEAR_SET` 2026 and `K:ZULU_DAY_SET` 276 put the date back to 2026-10-03.
 
-**Changed:** Crosscheck can bring every machine to the PF's date as well as the PF's time of day, which matters to weather add-ons that pick the weather by date.
+**Changed:** Dual Input can bring every machine to the PF's date as well as the PF's time of day, which matters to weather add-ons that pick the weather by date.
 
 **Affects:** time, date, sim rate, and pause in [03-v1-scope](../product/03-v1-scope.md).
 
@@ -75,7 +75,7 @@ Forum reports say `K:ZULU_HOURS_SET` and `K:CLOCK_HOURS_SET` get reverted a seco
   `E:LOCAL TIME` moved with it, 6 hours behind, and the date stayed 2026-10-03.
 - `K:ZULU_MINUTES_SET` and `K:CLOCK_HOURS_SET` held the same way, and `K:CLOCK_HOURS_SET` moved zulu time with local time.
 
-**Changed:** Crosscheck can bring every machine to the PF's simulation rate, in steps, and to the PF's time of day, with the time events; on this build they don't revert.
+**Changed:** Dual Input can bring every machine to the PF's simulation rate, in steps, and to the PF's time of day, with the time events; on this build they don't revert.
 Whether calculator code can set `E:SIMULATION RATE` directly, as the SDK says, is untested.
 
 **Affects:** time, date, sim rate, and pause in [03-v1-scope](../product/03-v1-scope.md); [02-03](../../learn/foundations/02-03-the-running-sim.md#unverified-claims), whose unverified claims include the time events reverting.

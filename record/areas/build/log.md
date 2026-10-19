@@ -81,7 +81,7 @@ A tool that runs without the sim, as cargo-msfs unpacks the SDK without running 
   - The model's XML loses its comment, `model.cfg` becomes `model.CFG`, and it writes a `manifest.json` that carries the building sim's version, and no `layout.json`.
   - `_PackageInt\_RPTInputs.xml`, which it leaves beside the package, holds each source file's absolute path, the home folder included.
   - Two builds of the same figure, on 2026-10-03 and 2026-10-05, gave the same `.bin` (same results).
-- What it did to p05's in-game panel: its 525-byte XML definition became a 674-byte `.spb`, whose properties are keyed by GUIDs, whose numbers are raw floats, 48 and 100 among them, and whose strings are encoded, so "Crosscheck" isn't in it as text (read on our development machine, 2026-10-18, in `experiments/areas/interface/ingame/package/`).
+- What it did to p05's in-game panel: its 525-byte XML definition became a 674-byte `.spb`, whose properties are keyed by GUIDs, whose numbers are raw floats, 48 and 100 among them, and whose strings are encoded, so "Dual Input" isn't in it as text (read on our development machine, 2026-10-18, in `experiments/areas/interface/ingame/package/`).
 - We found no description of either format: `ASOBO_asset_optimized` is in neither the SDK's glTF schema index nor its page on the format, and no page we found describes `.spb` (searched 2026-10-18).
 
 **What changed.**

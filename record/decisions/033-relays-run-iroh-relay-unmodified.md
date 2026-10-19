@@ -1,9 +1,9 @@
-# 033: Our relays run iroh-relay unmodified, in at least two regions, and admit only Crosscheck
+# 033: Our relays run iroh-relay unmodified, in at least two regions, and admit only Dual Input
 
 A relay runs n0's `iroh-relay`, in Rust, with nothing of ours on it, in at least two regions, and admits only clients that present one of its shared tokens, capping each client's rate.
 Each release carries the default relay list, each entry with its URL, token, and cap, and a setting overrides the list.
 A session uses its host's relay list, from which a joining core builds its endpoint with iroh's `presets::Minimal` and `RelayMode::Custom`, and each pilot homes at the relay with the lowest latency, as iroh picks it.
-Decided by the user on 2026-10-11, in node 2 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#our-relays-run-iroh-relay-unmodified-in-at-least-two-regions-and-admit-only-crosscheck).
+Decided by the user on 2026-10-11, in node 2 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#our-relays-run-iroh-relay-unmodified-in-at-least-two-regions-and-admit-only-dual-input).
 
 ## Context
 
@@ -46,7 +46,7 @@ For the relays a session's endpoints use:
 iroh's own relay, unmodified, in at least two regions, admitting only clients with a token each release carries, with each session on its host's list and each endpoint built from `presets::Minimal`.
 The user accepted iroh's relay over TCP for v1, with an adaptive buffer for ATC audio, at the cost 2.3 measured (user, 2026-10-10; [network log, 2.3][n23]).
 The user chose at least two regions (user, 2026-10-11), and since a lost packet's hold-up grows with the sender's round trip to the relay ([network log, 2.3][n23]), a second region keeps more pilots nearer a relay (inference).
-Tokens keep other iroh applications off our relays, though not someone who reads the token out of Crosscheck, and a joiner whose endpoint is built from the host's list makes one list per session true by construction ([01-between-machines](../areas/network/01-between-machines.md#joining)).
+Tokens keep other iroh applications off our relays, though not someone who reads the token out of Dual Input, and a joiner whose endpoint is built from the host's list makes one list per session true by construction ([01-between-machines](../areas/network/01-between-machines.md#joining)).
 
 ## What it commits us to
 
@@ -55,7 +55,7 @@ Tokens keep other iroh applications off our relays, though not someone who reads
 - Each relay caps how fast one client can send, above v1's live traffic, and the core paces everything it sends through a relay below the cap its list gives ([decision 035](035-channels-declare-how-they-travel.md)).
 - iroh homes each pilot at the relay with the best latency over the last 5 minutes, and moves only for one under two-thirds of the current one's (read in iroh 1.3.0, `src/net_report.rs`, `add_report_history_and_set_preferred_relay`).
 - Our relays are upgraded before the release that carries a new iroh, at a quiet hour ([01-between-machines](../areas/network/01-between-machines.md#iroh-as-a-dependency)).
-- A group can point Crosscheck at relays of its own through the setting, as 01-aims asks ([01-between-machines](../areas/network/01-between-machines.md#the-relays)).
+- A group can point Dual Input at relays of its own through the setting, as 01-aims asks ([01-between-machines](../areas/network/01-between-machines.md#the-relays)).
 - It settles the relay's language, which the spine left to node 2, and changes 01-aims' one relay.
 - It leaves out who hosts the relays, our own servers or n0's managed relays, which changes nothing else ([01-between-machines](../areas/network/01-between-machines.md#the-relays)).
 

@@ -1,12 +1,12 @@
 # Interface: log
 
-What our experiments found about showing Crosscheck to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
+What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
 ## 2026-10-09: Installed from the Community folder, our toolbar script loads at the flight load, and it and our EFB app's code each open the banner when the client asks over the CommBus
 
-**Asked:** does the toolbar script run outside a Build and Mount, and open the banner's panel after a flight loads and when a session starts mid-flight; and can our EFB app's code open it instead ([architecture plan](../architecture/plan.md#15-a-flight-with-crosschecks-rust-pieces), node 1.5)?
-The answer decides whether the toolbar script is one of Crosscheck's components at all.
+**Asked:** does the toolbar script run outside a Build and Mount, and open the banner's panel after a flight loads and when a session starts mid-flight; and can our EFB app's code open it instead ([architecture plan](../architecture/plan.md#15-a-flight-with-dual-inputs-rust-pieces), node 1.5)?
+The answer decides whether the toolbar script is one of Dual Input's components at all.
 
 **Expected:** no prediction: the toolbar script had run only after a Build and Mount ([entry below](#2026-10-04-our-toolbar-icon-loads-a-script-of-ours-into-the-toolbars-document-and-it-opens-our-panel-with-no-click)).
 
@@ -153,7 +153,7 @@ And from a closed sim, can that code run the whole join: Start, Free flight, the
 
 **Expected:** our toolbar icon's script, since the toolbar's document is one of the world map's documents with the store (same entry); if not, our own copy of one of the sim's UI components, as Flow Pro ships.
 
-**Found:** on MSFS 2024 SunRise 12.2.282174.999, with crosscheck-p10-menu, whose script polls p10 on 127.0.0.1 and runs the steps p10 sends, as Crosscheck's core would:
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, with crosscheck-p10-menu, whose script polls p10 on 127.0.0.1 and runs the steps p10 sends, as Dual Input's core would:
 
 - In the menu, the toolbar's document draws no panel buttons, so on the first visit our icon's script loaded nowhere.
   It loaded during a flight and stayed in the toolbar's document back in the menu, but there the airport search answered nothing, sent as it was or after the script registered the search's listener itself.
@@ -187,7 +187,7 @@ And from a closed sim, can that code run the whole join: Start, Free flight, the
 
 **Changed:**
 
-- Crosscheck's way into the menu is a copy of BlurPage, because it's the smallest component loaded from the first screen and the plainest, with nothing a mod would change (user, 2026-10-06).
+- Dual Input's way into the menu is a copy of BlurPage, because it's the smallest component loaded from the first screen and the plainest, with nothing a mod would change (user, 2026-10-06).
 - The core makes the copy on the pilot's machine from the sim's own file, at install, at each start, and before it launches the sim, whenever the stock file's hash differs from the one the copy was made from, so the copy never falls behind a sim update.
 - There's no fallback: if BlurPage is gone, no longer placed by MasterPage, or copied by another package, the core writes no copy, and a button that needs the menu, such as Go to, is unavailable and says why, until we pick another component deliberately (user, 2026-10-06).
 - A Join starts from wherever the pilot is, so it reads where the sim is, takes the next step from there, confirms each step arrived, and shows the pilot an error when a step fails or the page is one it doesn't know (user, 2026-10-06; [entry above](#2026-10-06-code-in-the-menus-document-tells-which-page-is-up-and-nothing-we-found-takes-the-menu-home-without-the-sim-in-front)).
@@ -216,7 +216,7 @@ Does it work when our app is on neither the dock nor the first page of the app l
 
 **Expected:** the EFB's document opens an app when it hears `OPEN_BY_KEY(app, page, args)` (read in fs-base-efb, `html_ui/efb_ui/efb_os/efb_os.js`), and the sim's `engine.trigger` calls the document's own handlers before it reaches the sim (read in mainUi's `coui://html_UI/JS/AsoboCoherent.js`), so our app's code could fire it.
 
-**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P, with crosscheck-p09-efb: one app of ours, "ZZ Crosscheck P09", and 48 filler apps, each registered with `window.EFB_API.use` in the shape of the EFB API's App and AppView (read in fsdreamteam-gsx-efb, `GSX_EFB.js.map`, efb_api 1.0.3), with p09 playing the core over HTTP on 127.0.0.1:
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in the Baron 58P, with crosscheck-p09-efb: one app of ours, "ZZ Dual Input P09", and 48 filler apps, each registered with `window.EFB_API.use` in the shape of the EFB API's App and AppView (read in fsdreamteam-gsx-efb, `GSX_EFB.js.map`, efb_api 1.0.3), with p09 playing the core over HTTP on 127.0.0.1:
 
 - The EFB installed our 49 among 61 apps in all, and drew our app nowhere in its document, while "Filler 01" was there.
 - Our app's code ran from the sim's start, in the menu and in the flight, and polled every 333ms with the EFB closed and never opened.
@@ -226,7 +226,7 @@ Does it work when our app is on neither the dock nor the first page of the app l
   - closed after use, with our app still the EFB's current one: the view got the page key and showed, with no onResume, since closing the EFB doesn't pause the app on screen.
 - The view drew black, because our app never loaded its stylesheet, as Navigraph's does in `install()`.
 
-**Changed:** a click on a notice opens Crosscheck's EFB app wherever the app sits in the EFB, from the app's own code, with no button to find and no list to page through.
+**Changed:** a click on a notice opens Dual Input's EFB app wherever the app sits in the EFB, from the app's own code, with no button to find and no list to page through.
 The click reaches the app through the core, and an EFB app loaded the sim's way reaches the core on 127.0.0.1 by HTTP, as code in the EFB's document did ([entry below](#2026-10-05-an-efb-app-the-toolbar-and-in-game-panels-each-reach-a-program-on-the-same-pc-by-websocket-and-http-and-can-show-a-page-it-serves)).
 
 **Affects:** the [EFB app](../product/03-v1-scope.md#efb-app) and the [notification banner](../product/03-v1-scope.md#notification-banner) in the v1 scope.
@@ -255,7 +255,7 @@ The world map's own code makes each change as a request to its store: picking a 
 - With no departure set, `launchFlight` brought up the sim's "Unexpected error" dialog, "You cannot launch this flight and enter the sim.", and Start flight stays disabled.
 - The search results reached p07, which listened on both `ResultsUpdated` and `EVENT_FROM_VIEW_LISTENER`, and not p08's first version, which listened on `ResultsUpdated` alone, so they come through `EVENT_FROM_VIEW_LISTENER`, or both.
 
-**Changed:** Crosscheck can put a joining pilot at the PF's airport and stand, in the PF's aircraft and livery, and start the flight, from a script in the menu's document.
+**Changed:** Dual Input can put a joining pilot at the PF's airport and stand, in the PF's aircraft and livery, and start the flight, from a script in the menu's document.
 Flow Pro clicks the menu's Start and Free Flight buttons on this machine, so the path from the sim starting to Ready to fly could run with no clicks, which nobody has run as one chain; it gets probed and scoped when the feature is built (user, 2026-10-05).
 
 **Affects:** [the PF's spot on the world map](../product/ideas.md#the-pfs-spot-on-the-world-map).
@@ -337,7 +337,7 @@ It rests on two things only measured with code installed through the inspector: 
 
 ## 2026-10-04: Our toolbar icon loads a script of ours into the toolbar's document, and it opens our panel with no click
 
-**Asked:** can Crosscheck open its in-game panel by itself, from code we ship and control, with no click and no EFB app ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page))?
+**Asked:** can Dual Input open its in-game panel by itself, from code we ship and control, with no click and no EFB app ([entry below](#2026-10-04-an-in-game-panel-of-ours-takes-clicks-and-opens-from-code-in-the-toolbars-and-the-efbs-pages-but-not-in-a-cockpit-page))?
 The core can't make the call: `Coherent` exists only inside the sim's documents, and the inspector on port 19999, though it works with DevMode off (FS Copilot fork, `record/pointer-forwarding/docs/09-environment.md`), is a debugger we won't ship on.
 
 **Expected:** Parallel 42's add-ons run code in the toolbar's document, and the toolbar's document can open panels, so their way in would be ours too.
@@ -355,7 +355,7 @@ The core can't make the call: `Coherent` exists only inside the sim's documents,
 - A Build and Mount gave the toolbar a fresh document, holding one copy of our script and none of the flags we had set in it, but the script it ran was the copy from the first build, so the toolbar's document keeps its first files as our panel's does.
 - Opened from code, from the toolbar's document or the EFB's, our 48-wide column sat at the left of the screen, not the right.
 
-**Changed:** Crosscheck can open its panel itself, from code in its own package, with no EFB app and no click.
+**Changed:** Dual Input can open its panel itself, from code in its own package, with no EFB app and no click.
 The trick isn't a sim feature: it rests on the toolbar inlining icon markup, which an update could stop.
 Why the first call left the panel closed is unknown; a script that calls until the toolbar lists the panel as open is built but hasn't run, because the sim kept serving the first copy.
 Putting the column back on the right when code opens it is untested.
@@ -366,7 +366,7 @@ Putting the column back on the right when code opens it is untested.
 
 ## 2026-10-04: Code in the EFB's document switches the EFB to another app, but no call we found puts the EFB on screen
 
-**Asked:** can a notice on our panel open the EFB on Crosscheck's own app, so the EFB app holds the controls and the panel only shows notices?
+**Asked:** can a notice on our panel open the EFB on Dual Input's own app, so the EFB app holds the controls and the panel only shows notices?
 
 **Expected:** the EFB is a toolbar panel, so the toolbar call would open it, and the EFB's code would have a way to pick an app.
 
@@ -427,7 +427,7 @@ Whether clicks on the column's clear part reach the cockpit is untested; if they
 
 - p05's package ([ingame/build.mjs](../../../experiments/areas/interface/ingame/build.mjs)) copies the format of a working MSFS 2020 template (bymaximus/msfs2020-toolbar-window-template): a `SimBase.Document Type="InGamePanels"` compiled by an `SPB` asset group, and its page by a `Copy` group.
   The Project Editor asked for an order hint before it built, and we gave it `UI_PATCH`.
-- Build and Mount mounted it with the sim running, and the toolbar listed "Crosscheck", with a blank square where our icon should be.
+- Build and Mount mounted it with the sim running, and the toolbar listed "Dual Input", with a blank square where our icon should be.
 - Opened from the toolbar, it sat on the right, see-through around the card.
   The page's `vh` counts the panel's own height, not the screen's, so the first column, 42% of the screen's height, drew everything 2.4 times too small.
 - The panel counted 4 presses of Start flying into `L:CROSSCHECK_P05_CLICKS` before we drove it from code, which we take to be the pilot's.
@@ -439,7 +439,7 @@ Whether clicks on the column's clear part reach the cockpit is untested; if they
   A pink background on the page's `html` element never showed, and a full-size element of the page did.
 
 **Changed:** the banner can be an in-game panel with its own buttons, left open, that shows and hides its elements by CSS without toggling the panel.
-Crosscheck's EFB app could open it, since the EFB's page can; whether the app's code runs while the EFB is closed is untested.
+Dual Input's EFB app could open it, since the EFB's page can; whether the app's code runs while the EFB is closed is untested.
 The panel must paint nothing outside its elements, or it blurs that part of the cockpit.
 Clicks through its clear part, outside views, VR, and the icon are untested.
 
@@ -484,7 +484,7 @@ The exact time, and whether anything other than time lets a texture go, are unte
 
 ## 2026-10-04: A picture written over a texture file before the sim first loads it shows on the next spawn, and once loaded the sim keeps it
 
-**Asked:** can the floating panel's picture change while the sim runs, by writing over its texture file, so that Crosscheck's app could draw any notice and the banner show it?
+**Asked:** can the floating panel's picture change while the sim runs, by writing over its texture file, so that Dual Input's app could draw any notice and the banner show it?
 
 **Expected:** a fresh spawn would read the file again.
 

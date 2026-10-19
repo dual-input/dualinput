@@ -6,9 +6,9 @@ Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-
 Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what fails a load; the sandbox's limits; and how profiles reach pilots, with the level of the format each needs.
 ```
 
-A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Crosscheck defines.
+A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
-Profiles live as flat files in `profiles/` in Crosscheck's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.
+Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.
 Each time the core starts, it brings its cache up to date from the published index, it loads every profile from that cache, and a session, which flies one aircraft, pins by its hash the PF's choice for it: a local bundle that covers the aircraft, or else the bundle the PF's cached index gives its level.
 v1 has no plugins: a profile watches a setting in a gauge's JavaScript through `instrument()`, and writes it through the gauge's `H:` events.
 
@@ -187,17 +187,17 @@ An aircraft that drops them gets a field naming the call for the whole aircraft 
 - An entry's key is lowercase snake_case starting with a letter, so a function reads it as `state.battery_1`, and it's unique across the profile and its modules, in both blocks.
 - `only` lets one profile cover variants that differ.
   On the base Baron, the mixture lever drags `A:GENERAL ENG MIXTURE LEVER POSITION`, and on the 58TC and 58P it drags `L:BKSQ_MixtureLeverPosition_n` (read in bksq-aircraft-baronpro 0.1.1, [Baron study](../aircraft/black-square-baron-pro/study.md)), so two entries with different keys and `only` lists cover the mixture.
-- After the entry fires, Crosscheck ignores the next occurrence of each name in `ignore` on that machine, if it comes within 1s, as [01-profile-entries](../sync/01-profile-entries.md#ignoring-a-consequence) describes.
+- After the entry fires, Dual Input ignores the next occurrence of each name in `ignore` on that machine, if it comes within 1s, as [01-profile-entries](../sync/01-profile-entries.md#ignoring-a-consequence) describes.
 - `location` is `[x, y, z]` in meters from the aircraft's reference point, in the frame SimConnect's camera reports, with x to the left, y up, and z forward (measured on MSFS 2024, 2026-10-03, [avatars log](../avatars/log.md#2026-10-03-simconnect_cameraget-includes-a-tobii-head-trackers-rotation-and-its-position-is-in-meters)).
   Where a variant's cockpit puts a control elsewhere, `location` is a map from variant ID to a point, and a variant missing from the map gets no location.
   When a change arrives that no click made, such as one from a home cockpit's switch or a key binding, the figure's hand reaches for the location, and a click always wins, since it's where the pilot's hand went ([avatar sync](../product/03-v1-scope.md#avatar-sync)).
-  Only an entry whose control a pilot moves with hardware or a key, and the aircraft never moves itself, gets a `location`, and the author leaves the rest out as the click tool walks the entries, since Crosscheck can't tell a pilot's change from the aircraft's ([avatars' tentative decisions](../avatars/decisions.md#a-click-or-a-change-at-a-controls-spot-brings-the-hand-and-on-foot-the-hand-touches-up-to-3m)).
+  Only an entry whose control a pilot moves with hardware or a key, and the aircraft never moves itself, gets a `location`, and the author leaves the rest out as the click tool walks the entries, since Dual Input can't tell a pilot's change from the aircraft's ([avatars' tentative decisions](../avatars/decisions.md#a-click-or-a-change-at-a-controls-spot-brings-the-hand-and-on-foot-the-hand-touches-up-to-3m)).
   The click tool, a command of `tools/profile-author`, writes it with each variant loaded, marking each control with a key rather than a click, so walking the entries changes nothing in the cockpit ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)).
 - `deadband` is a change of the entry's number, in its own units, and the author sets it on an axis ([a change made without a click](../avatars/01-avatars.md#a-change-made-without-a-click)).
 
 ### Counting into a shadow value
 
-When no variable shows a control's value, `watch` counts the events that change it, and Crosscheck keeps the result as a shadow value, starting from `default`, as [01-profile-entries](../sync/01-profile-entries.md#keeping-a-shadow-value) designed it.
+When no variable shows a control's value, `watch` counts the events that change it, and Dual Input keeps the result as a shadow value, starting from `default`, as [01-profile-entries](../sync/01-profile-entries.md#keeping-a-shadow-value) designed it.
 
 ```yaml
 fcu_heading:
@@ -419,7 +419,7 @@ At a limit:
 
 ## The repository
 
-Profiles and modules live as flat files in `profiles/` in Crosscheck's own public repository, with each aircraft's profile in `aircraft/` ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)):
+Profiles and modules live as flat files in `profiles/` in Dual Input's own public repository, with each aircraft's profile in `aircraft/` ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)):
 
 ```text
 profiles/
@@ -445,11 +445,11 @@ profiles/
 
 Rapid testing, where the profile builder or the IDE rebuilds on every save and the author's core sends each new bundle to the crew over the session, which reloads the session's profile on every machine, is a test session (user, 2026-10-12).
 The one-file bundle makes each reload one message, and a crewmate's core runs the author's exact bytes with no folder or compiler of its own.
-Test sessions are for step 8, with the Crosscheck IDE's dev loop, a Soon pick ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client) lists reloading a profile mid-session among the IDE's commands), and node 4's review found three things they need: a reload starts a plugin that was turned off afresh, a reload skips [catch-up's settling window](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session), since the aircraft didn't load again, and the author's core sends the current bundle to a pilot who joins or rejoins, since a test bundle isn't on Pages.
+Test sessions are for step 8, with the Dual Input IDE's dev loop, a Soon pick ([04-room-for-later](../product/04-room-for-later.md#one-protocol-for-every-client) lists reloading a profile mid-session among the IDE's commands), and node 4's review found three things they need: a reload starts a plugin that was turned off afresh, a reload skips [catch-up's settling window](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session), since the aircraft didn't load again, and the author's core sends the current bundle to a pilot who joins or rejoins, since a test bundle isn't on Pages.
 
 ## Delivery
 
-On each merge, CI builds every profile into a bundle and publishes static files on the repository's GitHub Pages site, apart from Crosscheck's releases, from a branch it only adds files to ([publishing](02-units.md#publishing)):
+On each merge, CI builds every profile into a bundle and publishes static files on the repository's GitHub Pages site, apart from Dual Input's releases, from a branch it only adds files to ([publishing](02-units.md#publishing)):
 
 - **A bundle** is a profile in this same YAML format, with its modules merged in, so it has no `import`.
   It gets one hash, over its bytes, and one [level](#levels), which the index carries rather than its bytes.
@@ -464,7 +464,7 @@ The core uses them:
 2. It loads a profile from its cache whenever the spine's [what moves them](../architecture/01-spine.md#what-moves-them) says to, such as when a session starts with the aircraft already loaded, so a load never waits on the network.
 3. A session flies one aircraft, its PF's ([roles and members](../session/01-roles-and-members.md#the-pf)), and the PF's profile loader pins by its hash a local bundle that covers that aircraft, or else the bundle its cached index gives its level ([the pin](02-units.md#the-pin)).
    It writes the pin as a session key whenever the aircraft changes before preflight ends, and whenever the key holds none and its choice becomes one ([which bundle a session pins](../session/02-units.md#which-bundle-a-session-pins)).
-   After preflight ends, the pin changes only from none, and outside a test session a pinned bundle stays for the rest of the session; a pilot whose cache lacks a published pin fetches it by its hash, and no core fetches a local one ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-crosschecks-releases)).
+   After preflight ends, the pin changes only from none, and outside a test session a pinned bundle stays for the rest of the session; a pilot whose cache lacks a published pin fetches it by its hash, and no core fetches a local one ([tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases)).
 4. Offline, the core uses what it has cached.
 
 - **Why Pages:** GitHub Pages "sites have a soft bandwidth limit of 100 GB per month", and a published site "may be no larger than 1 GB" (documented, [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), while GitHub's REST API allows an unauthenticated address 60 requests an hour (documented, [rate limits for the REST API](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)).
@@ -478,19 +478,19 @@ A profile carries no version or date of its own: the core computes the hash, and
 
 ## Levels
 
-The format has one level, an integer that goes up by 1 whenever a Crosscheck release adds anything to it: a block, a field, a name call, or a method on the chain.
-Levels only add, so a Crosscheck runs every bundle at its own level and below, and each release carries the highest level it supports.
+The format has one level, an integer that goes up by 1 whenever a Dual Input release adds anything to it: a block, a field, a name call, or a method on the chain.
+Levels only add, so a Dual Input runs every bundle at its own level and below, and each release carries the highest level it supports.
 
 CI works out each bundle's level, so no author writes one.
 It checks the profile's YAML against each level's schema and type-checks its script against each level's declarations, and the lowest level that passes both is the bundle's.
 
 For example, with hypothetical releases and dates:
 
-1. Crosscheck 1.0 ships at level 1, and on 2026-10-20 the 58P's profile is published using level 1 alone, so the index lists its bundle, hash `a1b2…`, at level 1.
-2. Crosscheck 1.1 ships at level 2, adding a `checklist:` block, and on 2026-11-05 the profile gains one; level 1's schema refuses the unknown block and level 2's passes, so the index adds hash `c3d4…` at level 2.
+1. Dual Input 1.0 ships at level 1, and on 2026-10-20 the 58P's profile is published using level 1 alone, so the index lists its bundle, hash `a1b2…`, at level 1.
+2. Dual Input 1.1 ships at level 2, adding a `checklist:` block, and on 2026-11-05 the profile gains one; level 1's schema refuses the unknown block and level 2's passes, so the index adds hash `c3d4…` at level 2.
 3. Two pilots on 1.1 both take `c3d4…`, and a pilot still on 1.0 takes `a1b2…`, the bundle from before the checklist, which loads, and flies with pilots on 1.0, who take the same.
 
-A fix published after the checklist reaches only pilots on 1.1 or later, so a pilot who doesn't update Crosscheck keeps the older bundle, bug included.
+A fix published after the checklist reaches only pilots on 1.1 or later, so a pilot who doesn't update Dual Input keeps the older bundle, bug included.
 FS Copilot shows what levels prevent: its fork's new `pointer:` key "bricks profile loading on older releases" (FS Copilot fork, `record/pointer-forwarding/docs/11-fsc-implementation-plan.md`, item 6), because an unknown key emptied the whole profile (fsc-editor, `docs/sim-vars/18-language-core.md`, `key-unknown`).
 
 ## Deferred

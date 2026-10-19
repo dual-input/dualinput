@@ -2,7 +2,7 @@
 
 Every JavaScript file we ship into the sim, experiments' files included, passes a check run after every edit and in CI.
 The check parses each file at ECMAScript 2017, with the pattern of each regex literal and of each `new RegExp(...)` given a fixed string, and fails any use of a built-in or web API [Coherent GT's JavaScript](../areas/architecture/coherent-gt.md) lists as missing or filled in only in some documents.
-It's a tool of its own, holding that list as one data file, built for our needs in a repository of its own under Crosscheck's GitHub organization, and published as it is, for anyone to use, without support.
+It's a tool of its own, holding that list as one data file, built for our needs in a repository of its own under Dual Input's GitHub organization, and published as it is, for anyone to use, without support.
 Decided by the user on 2026-10-09, in node 1.6 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#a-tool-of-our-own-checks-every-file-we-ship-into-the-sim-against-coherent-gts-measured-limits).
 
 ## Context

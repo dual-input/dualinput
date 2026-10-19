@@ -1,12 +1,12 @@
 # 045: A profile is YAML whose script is JavaScript, where names only name and only `write()` writes
 
-A profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Crosscheck's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included.
+A profile is one YAML file, and its values that name or write something in the sim are JavaScript calling Dual Input's globals: `L()`, `A()`, `B()`, `K()`, and `H()` name, with the names quoted, and `write()` is the one call that writes, a plugin's writes included.
 Every entry's `write:` is required, and the core, CI, and the IDE run one checker, so a load fails on anything that breaks a rule.
 Decided by the user on 2026-10-11 and 2026-10-12, in node 4 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#a-profile-is-yaml-whose-script-is-javascript-where-names-only-name-and-only-write-writes).
 
 ## Context
 
-A profile describes an aircraft's cockpit so Crosscheck can sync it, in the shape [01-profile-entries](../areas/sync/01-profile-entries.md) gives it: a block of state entries, a block of event entries, and a writer.
+A profile describes an aircraft's cockpit so Dual Input can sync it, in the shape [01-profile-entries](../areas/sync/01-profile-entries.md) gives it: a block of state entries, a block of event entries, and a writer.
 Step 7's exit asks for its syntax and file layout ([the product plan](../areas/product/plan.md#7-tech-stack-and-architecture)), and profiles will come from the community ([01-profile-entries](../areas/sync/01-profile-entries.md#the-writer-api)).
 
 Our earlier work shows what a format can cost:
@@ -36,7 +36,7 @@ Required fields:
 A control no variable shows:
 
 6. **Leave counting events into a shadow value to a later release.**
-   The first aircraft after the 58P with a control no variable shows would wait for a Crosscheck release before its profile could be written (user, 2026-10-12).
+   The first aircraft after the 58P with a control no variable shows would wait for a Dual Input release before its profile could be written (user, 2026-10-12).
 
 A variant:
 

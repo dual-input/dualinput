@@ -111,7 +111,7 @@ fn flight(me: &mut FlightModel, _: &FlightChanged, cx: &mut Cx) {   // in the fl
 
 - A feature's call is a call to the sim service, which the kernel runs once the feature's handler has returned ([hooks](01-loop-and-edge.md#hooks)), and its handle comes from the kernel's counter at once ([timers, jobs, and IDs](01-loop-and-edge.md#timers-jobs-and-ids)).
 - A call made while the sim is closed is answered at once with an error.
-- A `watch` and a `key` name the pilot's aircraft or an object by its ID, as avatars watches `SIMCONNECT_OBJECT_ID_USER_AVATAR` on foot and freezes each figure it creates, whose SimObject title is `CROSSCHECK_FIGURE_PILOT`, of the kind `FIGURE` ([avatars](../avatars/01-avatars.md#names)).
+- A `watch` and a `key` name the pilot's aircraft or an object by its ID, as avatars watches `SIMCONNECT_OBJECT_ID_USER_AVATAR` on foot and freezes each figure it creates, whose SimObject title is `DUALINPUT_FIGURE_PILOT`, of the kind `FIGURE` ([avatars](../avatars/01-avatars.md#names)).
 - A `watch` takes a period of once, which reads an object's variables one time, as traffic reads each new object's identity ([polling](../traffic-atc/01-traffic-and-atc.md#polling)).
 - A unit registered as partly recorded may declare any of its `watch`, `poll`, `camera`, `frames`, and `reports` calls `.unrecorded()`, and the sim service hands the edge each such request's connection, kind, and ID before the call goes out, so the recording leaves out its answers.
   The sim service decides nothing on such an answer beyond routing it to its feature ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
@@ -131,7 +131,7 @@ The platform's connection makes these calls at `S_OK`, without waiting for the s
 
 - takes masking group A, as [the spine](../architecture/01-spine.md#components-with-no-session) has it;
 - subscribes to `AircraftLoaded`, `FlightLoaded`, `Pause_EX1`, and the flow events, and asks `RequestSystemState` for `AircraftLoaded`;
-- maps `CROSSCHECK_MODULE_STATUS`, and requests it `ON_SET`;
+- maps `DUALINPUT_MODULE_STATUS`, and requests it `ON_SET`;
 - starts the [announcement](#the-announcement).
 
 ### Packages on disk
@@ -192,7 +192,7 @@ Which of the slice the apps show is the apps' design ([slices and commands](../i
 ### The aircraft
 
 - The aircraft is the last `AircraftLoaded` path heard while Loading.
-  One heard in any other stage changes nothing: the main menu's own aircraft, which p08 heard twice ([core log][signals]), or one from Developer Mode's Aircraft Selector, which Crosscheck doesn't support (user, 2026-10-15).
+  One heard in any other stage changes nothing: the main menu's own aircraft, which p08 heard twice ([core log][signals]), or one from Developer Mode's Aircraft Selector, which Dual Input doesn't support (user, 2026-10-15).
 - When Starting gives way to Ready to fly or Flying, the aircraft is the `AircraftLoaded` state's answer, which the platform's connection asked for at `S_OK`.
 - The engine lowercases the path, turns `\` into `/`, keeps what follows `simobjects/airplanes/`, and drops a final `config/aircraft.cfg` or `aircraft.cfg`.
   So the PA-24's `SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` becomes `pa24-250/presets/a2a/pa24-250`, whose first part is the folder ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
@@ -241,9 +241,9 @@ Without our copy of BlurPage, which brings the menu script ([preflight](../produ
 
 | Slot | Created by | Written by | Holds |
 | --- | --- | --- | --- |
-| `CROSSCHECK_MODULE_STATUS` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY` | The module | The module's version, the slots hash, and the counter, in a layout that never changes, so any build reads any other's |
-| `CROSSCHECK_ROUTINE_<ID>` | The module | The sim service | A header of the feed count (`u32`), the end mark (`u32`), the slots hash (`u64`), and the core's counter at the write, in µs, then the routine's struct |
-| `CROSSCHECK_REPORT_<ID>` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY`, for each routine that reports | The module | The routine's report |
+| `DUALINPUT_MODULE_STATUS` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY` | The module | The module's version, the slots hash, and the counter, in a layout that never changes, so any build reads any other's |
+| `DUALINPUT_ROUTINE_<ID>` | The module | The sim service | A header of the feed count (`u32`), the end mark (`u32`), the slots hash (`u64`), and the core's counter at the write, in µs, then the routine's struct |
+| `DUALINPUT_REPORT_<ID>` | The module, with `SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY`, for each routine that reports | The module | The routine's report |
 
 - The module creates every slot in `module_init`, as fsc-editor's and p08's modules create theirs (read in fsc-editor, `link/src/module.cpp`, `module_init`, and `experiments/areas/architecture/flight/module/src/lib.rs`), and subscribes to each routine's slot `ON_SET`.
 - The read-only flag lets "only ClientData creator" write the status slot and each report slot (read in MSFS 2024 SDK 1.7.3, `SimConnect.h`).
@@ -305,7 +305,7 @@ The routine host then runs its frame, as the code map's [routines in our WASM mo
 
 ## The announcement
 
-- The platform's connection calls `SimConnect_CallCommBusEvent` with `CROSSCHECK_CORE_ANNOUNCE`, `SIMCONNECT_COMM_BUS_BROADCAST_TO_JS`, and a JSON body of the core's port and whether a session runs ([page-client](02-clients-and-panel-bridge.md#page-client)), a type of the message crate, such as a hypothetical `{"port":51234,"session":false}`.
+- The platform's connection calls `SimConnect_CallCommBusEvent` with `DUALINPUT_CORE_ANNOUNCE`, `SIMCONNECT_COMM_BUS_BROADCAST_TO_JS`, and a JSON body of the core's port and whether a session runs ([page-client](02-clients-and-panel-bridge.md#page-client)), a type of the message crate, such as a hypothetical `{"port":51234,"session":false}`.
 - It calls it every 2s from `S_OK`, and at once when the session crate calls `sim_service::announce(cx, session)` as a session starts or ends; the port is the clients crate's.
 
 ## Budgets

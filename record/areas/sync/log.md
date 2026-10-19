@@ -87,7 +87,7 @@ Whether a +1 on the Fenix's push-pull counter pulls the knob, or does nothing on
 
 ## 2026-10-05: Two writes in one frame land in the order sent, and a write shows within 2 frames
 
-**Asked:** does SimConnect apply the writes Crosscheck sends in one frame in the order sent, how long does an aircraft take to show a write, and how many retries does a write take to land ([the plan](../product/plan.md)'s step 6)?
+**Asked:** does SimConnect apply the writes Dual Input sends in one frame in the order sent, how long does an aircraft take to show a write, and how many retries does a write take to land ([the plan](../product/plan.md)'s step 6)?
 
 **Expected:** no source either way.
 
@@ -127,7 +127,7 @@ A readout the aircraft computes can take longer, such as the Fenix's battery lam
 - The sim's `L:` name table held 6,792 names when the run started and 15,538 after six aircraft, and loading one again added none; a name stays until the sim restarts.
 - Restart, from the pause menu, loads the aircraft again: `AircraftLoaded` fires, and the Baron registered 6 new names.
 
-**Changed:** nothing: Crosscheck won't try to detect a load with no aircraft, since an empty cockpit says so louder than any message would (user, 2026-10-05).
+**Changed:** nothing: Dual Input won't try to detect a load with no aircraft, since an empty cockpit says so louder than any message would (user, 2026-10-05).
 It explains why some loads in the settle runs ran twice.
 
 **Evidence:** `results/p01-guided-load-2026-10-05-16-54-34` and `-17-29-24`, the `system` and `load` records.

@@ -43,8 +43,8 @@ The Fenix EFB loads `http://localhost:8083/index.html` in an iframe inside its `
 
 The Avionics Framework's FSComponent renders JSX the way React does ([06-01](06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)), so its displays presumably fall in the HTML and SVG kinds, and none has been tested (unverified).
 
-**What it changes for Crosscheck.**
-A Crosscheck aircraft profile needs each display's kind, and for a WASM display its module too, because the module decides where a press lands: panel code drives the A380's displays at a position, and not, so far, the A350's [21].
+**What it changes for Dual Input.**
+A Dual Input aircraft profile needs each display's kind, and for a WASM display its module too, because the module decides where a press lands: panel code drives the A380's displays at a position, and not, so far, the A350's [21].
 The A350's and A380's displays both have the instrument identifier `WasmInstrument`, so a profile names the module, such as `inibuilds-A380.wasm`, or the module and gauge [21].
 A display that panel code can't drive leaves per-aircraft channels, such as an `L:` variable per softkey, to [07-aircraft-specific-systems](07-aircraft-specific-systems.md#how-major-addons-expose-state).
 
@@ -110,10 +110,10 @@ The A350's MFD pressed under the real cursor, whatever the event said, on 2026-0
 
 A rerun on 2026-09-23 reproduced neither the IRS press nor the latch [21], and what differed between the two runs is unknown.
 
-**What it changes for Crosscheck.**
-On the A380's displays, Crosscheck can carry one pilot's press to the other through panel code, as an enter-wrapped press at the same coordinates, wherever the receiving pilot's cursor is, and on the A350's it can't yet [21].
+**What it changes for Dual Input.**
+On the A380's displays, Dual Input can carry one pilot's press to the other through panel code, as an enter-wrapped press at the same coordinates, wherever the receiving pilot's cursor is, and on the A350's it can't yet [21].
 The wrapper's `mouseleave` tells the sim the mouse left a display the receiving pilot may be pointing at, and what that does to their own hover is unmeasured [21].
-On the other kinds, `isTrusted` tells a pilot's press from one Crosscheck dispatched, which is a signal [08-02](08-02-echoes-and-initial-sync.md#echo-loops-and-suppressing-them) needs to keep a replayed press from being sent back.
+On the other kinds, `isTrusted` tells a pilot's press from one Dual Input dispatched, which is a signal [08-02](08-02-echoes-and-initial-sync.md#echo-loops-and-suppressing-them) needs to keep a replayed press from being sent back.
 
 **Traps.**
 
@@ -142,7 +142,7 @@ Measured on MSFS 2024 1.8.16.0 with the A220's DisplayUnits popped out [19]:
 The inspector can't take a screenshot ([06-02](06-02-apis-debugger-and-injection.md#the-coherent-debugger-on-port-19999)), so a picture of a display comes from capturing its window.
 The sim has no command that pops a display out, and nothing reports where a panel is on screen, so the fsc-exerciser pops one out by sending Right-Alt and a click into the sim's window [20].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 A pop-out changes how one pilot views a display, and on the one display we measured it left the document's size alone.
 So a position given as a fraction of the instrument means the same thing whether or not either pilot has popped the display out.
 Whether popping out reloads the document, which would put the display back in its default state ([06-01](06-01-the-engine-and-instruments.md#vcockpit-baseinstrument-and-panelcfg-gauges)), is unverified.

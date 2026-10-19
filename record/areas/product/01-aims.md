@@ -1,30 +1,30 @@
 # Product: aims
 
 ```text
-Purpose:     What Crosscheck is for, who it serves, and what it won't do.
+Purpose:     What Dual Input is for, who it serves, and what it won't do.
 Depends on:  nothing.
-Decides:     Who Crosscheck is for, its aims and non-goals, and the relay and license commitments every design works within.
+Decides:     Who Dual Input is for, its aims and non-goals, and the relay and license commitments every design works within.
 ```
 
 > **Note**
-> Since 2026-10-11, we run relays in at least two regions, not one, because the relay Crosscheck uses carries packets over TCP, and each lost packet holds back the ones behind it longer the farther the sender is from the relay: at 3% loss, 53ms at p99 at 22ms away, and 534ms at 131ms (user, 2026-10-11; [01-between-machines](../network/01-between-machines.md#the-relays)).
+> Since 2026-10-11, we run relays in at least two regions, not one, because the relay Dual Input uses carries packets over TCP, and each lost packet holds back the ones behind it longer the farther the sender is from the relay: at 3% loss, 53ms at p99 at 22ms away, and 534ms at 131ms (user, 2026-10-11; [01-between-machines](../network/01-between-machines.md#the-relays)).
 
-Crosscheck is built for us first, and then for anyone who flies MSFS 2024 with friends.
+Dual Input is built for us first, and then for anyone who flies MSFS 2024 with friends.
 Its pilots are flight sim enthusiasts at every level of technical skill.
-Some would write a profile, the file that tells Crosscheck what to sync on one aircraft, and others don't know what a profile is for.
-When two choices are otherwise even, Crosscheck takes the one we'd want when flying with our friends.
+Some would write a profile, the file that tells Dual Input what to sync on one aircraft, and others don't know what a profile is for.
+When two choices are otherwise even, Dual Input takes the one we'd want when flying with our friends.
 
 ## Aims
 
-- **Pilots never need to understand Crosscheck to use it.**
-  Someone who has never heard of a profile goes from installing Crosscheck to flying with a friend without reading any documentation.
-- **Every aircraft we list has been flown gate to gate with Crosscheck.**
+- **Pilots never need to understand Dual Input to use it.**
+  Someone who has never heard of a profile goes from installing Dual Input to flying with a friend without reading any documentation.
+- **Every aircraft we list has been flown gate to gate with Dual Input.**
   We write and maintain the profiles for a short list of aircraft, and open profile writing to everyone after v1.
 - **A session can hold any number of people.**
 - **Pilots join with a code and never make an account.**
-- **A pilot in VR can use everything Crosscheck offers during a flight without taking the headset off.**
-- **Crosscheck is free, and takes donations.**
-- **Every part of Crosscheck gets the same care from its first version,** the tools only we use included: no cut corners in code, interface, or copy, because an interface allowed to drift keeps drifting.
+- **A pilot in VR can use everything Dual Input offers during a flight without taking the headset off.**
+- **Dual Input is free, and takes donations.**
+- **Every part of Dual Input gets the same care from its first version,** the tools only we use included: no cut corners in code, interface, or copy, because an interface allowed to drift keeps drifting.
 - **v1 gives up features, never design.**
   v1 is the set of features for a first flight, and it builds what later features need from it, so any feature after v1 slots in without rebuilding what v1 built ([04-room-for-later](04-room-for-later.md)).
 

@@ -29,6 +29,6 @@ main(() => {
     console.log(`SDK ${wanted} is installed in ${sdkFolder()}`)
   } else {
     console.log(installed ? `SDK ${installed} is installed; installing ${wanted}` : `installing SDK ${wanted}`)
-    run("cargo", ["run", "--release", "--locked", "-p", "crosscheck-msfs-sdk", "--", wanted])
+    run("cargo", ["run", "--release", "--locked", "-p", "dualinput-msfs-sdk", "--", wanted])
   }
 })

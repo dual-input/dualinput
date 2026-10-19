@@ -57,9 +57,9 @@ Two more limits apply to anything drawn on a display [8].
 The sim renders cockpit screens as emissive surfaces with bloom, so bright strokes glow and fatten, and dark muted shades survive.
 CSS gradients run at reduced precision: a `repeating-linear-gradient` with a period of a few pixels, across the 7410-pixel-wide DisplayUnits document, smeared into wide bands, and a small gradient tile repeated with `background-size` drew correctly.
 
-**What it changes for Crosscheck.**
-Every file Crosscheck puts in a panel must parse in this engine, and a Node syntax check doesn't prove that it does.
-Rejecting the syntax Coherent GT lacks falls to Crosscheck's build, and which ECMAScript version a parser should be set to for that is unverified, because the engine matches no version exactly.
+**What it changes for Dual Input.**
+Every file Dual Input puts in a panel must parse in this engine, and a Node syntax check doesn't prove that it does.
+Rejecting the syntax Coherent GT lacks falls to Dual Input's build, and which ECMAScript version a parser should be set to for that is unverified, because the engine matches no version exactly.
 
 **Traps.**
 
@@ -131,8 +131,8 @@ Documents share no JavaScript: each has its own globals, and the engine has no `
 Two projects elect one document through an `L:` variable instead.
 Each FS Copilot hook writes a random number to `L:FSC_HOOK`, and only the hook whose number is still there when an `H:` event arrives reports the event [16]; YourControls does the same with `L:YourControlsPanelId` [17].
 
-**What it changes for Crosscheck.**
-Code Crosscheck puts in panels runs once per document, 14 times on the A220, starts before its instrument has a size, and dies with its document on a reload.
+**What it changes for Dual Input.**
+Code Dual Input puts in panels runs once per document, 14 times on the A220, starts before its instrument has a size, and dies with its document on a reload.
 Naming one instrument the same way on both machines takes its identifier and its query, and the query can carry the livery.
 
 **Traps.**
@@ -178,7 +178,7 @@ A third-party aircraft can use part of the framework.
 The A220's DisplayUnits bundle carries the framework's EventBus and publishers, and draws with React (`react-dom` and `createRoot`) into SVG [7] [24].
 Its six instrument bundles draw and hold no aircraft state: the aircraft's systems module holds it and publishes it on the CommBus ([05-02](05-02-simconnect-and-the-commbus.md#the-commbus-wasm-to-js-to-wasm)) [25].
 
-**What it changes for Crosscheck.**
+**What it changes for Dual Input.**
 In framework avionics, state such as a display page or a map range can live only in JavaScript objects and bus topics inside the instruments, where SimConnect can't reach it (unverified for any particular aircraft).
 Synced topics cross between documents on a sim channel with a known key, and code of ours can listen on it: a listener in the EFB's document heard all five of a G3000's buses under `wt.eb.evt`, and a package it sent moved the MFD's map (measured on MSFS 2024, 2026-10-06, [CommBus log](../../areas/commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends)).
 

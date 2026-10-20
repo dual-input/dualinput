@@ -1,0 +1,3 @@
+# The programs in apps/ hold the edges, whose job is to read the clock, start threads, and
+# do I/O, so they leave out the list of calls the root's clippy.toml forbids the loop's
+# crates. Clippy reads the clippy.toml nearest a crate's folder, which is this one.

@@ -3,6 +3,27 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-20: Stage 2's timers fire at most 977µs late, its idle core holds 1.0 MB, and it exits in 29ms
+
+**Asked:** does the core [stage 2](../build/plan.md#2-the-cores-loop-and-edge) builds meet three of [01-loop-and-edge's budgets](01-loop-and-edge.md#budgets): a timer within 2ms of its deadline at p99 on an idle PC, under 30 MB of private working set with no session, and an exit done within 1s?
+
+**Expected:** all three, since p01's high-resolution waitable timer woke at most 1.46ms late ([p01's entry](#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version)), and the core runs no units of its own yet.
+
+**Found:** on our development machine, with `apps/core`'s tests:
+
+- **Timers:** 1,000 timers in a release build, each set, as the one before it fired, to fire 10ms later, came in 158µs late at p50, 587µs at p99, and 977µs at most.
+  A timer's lateness is its firing input's stamp less its deadline, so it counts the timer thread's wake and the queue's push.
+  The PC ran its usual programs and wasn't otherwise idled.
+- **Memory:** a release core with no units held 1.0 MB of private working set 10s after it started, by `GetProcessMemoryInfo`'s `PrivateWorkingSetSize`.
+- **Exiting:** a debug core of a test's own units exited 29ms after a unit put out its exit, the time `run` measures from the exit to its end, through tokio's shutdown, the timer thread's stop, and the writer's last frame.
+
+**Changed:** nothing, since each is within its budget.
+The timer budget's other half, with the sim running and the PC busy, waits for [stage 4](../build/plan.md#4-the-sim-seam-our-wasm-module-and-our-package)'s session in the sim, and the memory budget's busy session for [stage 18](../build/plan.md#18-traffic-and-atc-audio)'s, which hosts traffic.
+
+**Affects:** nothing.
+
+**Evidence:** [results/2026-10-20-stage-2-budgets.txt](results/2026-10-20-stage-2-budgets.txt).
+
 ## 2026-10-15: The `Sim` state reads 1 in the main menu and through a load's screen, and a Restart sends `FLIGHT_END` inside its load
 
 **Asked:** can sim awareness tell the main menu from a flight by the `Sim` state when the core connects mid-run, and does `FLIGHT_END` mean the pilot left the flight, for node 6.3 of the [architecture plan](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)?

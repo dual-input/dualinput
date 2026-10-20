@@ -8,13 +8,13 @@
 # Cargo.toml.
 #
 # - When you add the first crate under a top folder that has no glob yet, such as
-#   platform/, add that folder's glob along with it.
+#   features/, add that folder's glob along with it.
 # - When you add a TypeScript folder that a glob matches, list it in an `exclude` list
 #   beside `members`.
-members = ["engines/*", "tools/msfs-sdk"]
+members = ["engines/*", "platform/*", "apps/*", "tools/msfs-sdk"]
 # A plain `cargo build` builds these. When you add sim-package/'s glob, leave it out of
 # this list: our WASM module's build script needs settings only cargo-msfs gives it.
-default-members = ["engines/*", "tools/msfs-sdk"]
+default-members = ["engines/*", "platform/*", "apps/*", "tools/msfs-sdk"]
 resolver = "3"
 
 # Two builds with different versions refuse to connect, rather than misread each other's
@@ -23,10 +23,24 @@ resolver = "3"
 version = "0.1.0"
 edition = "2024"
 
+# A replay of the core has to visit everything in the order the run did, and a HashMap's
+# order is seeded at random each run. So the loop's crates, every crate outside apps/,
+# sim-package/, tools/, the transport, and the sim edge, fail Clippy on a `for` loop over
+# one, and on a call to a function clippy.toml lists, such as `Instant::now`, even without
+# `-D warnings`. Each loop crate opts in with `[lints] workspace = true`.
+[workspace.lints.clippy]
+iter_over_hash_type = "deny"
+disallowed_methods = "deny"
+
 # Our WASM module, the code we load into the sim, is built by cargo-msfs, whose README
-# asks for both: `lto` optimizes across crates, and `strip` leaves debug symbols out of the
-# output. Cargo reads profiles only from the workspace's root, so they live here and apply
-# to every program's release build, the module's among them.
+# asks for `lto` and `strip`: `lto` optimizes across crates, and `strip` leaves debug
+# symbols out of the output. Cargo reads profiles only from the workspace's root, so they
+# live here and apply to every program's release build, the module's among them.
+#
+# `panic = "abort"` ends the core at a panic on any of its threads, so a panic on an edge
+# thread can't leave the loop running without it, and the desktop app starts the core
+# again (record/areas/core/01-loop-and-edge.md, "A panic").
 [profile.release]
 lto = true
 strip = true
+panic = "abort"

@@ -9,6 +9,10 @@
 //!
 //! tests/hash.rs compiles this file into its tests, so the functions they call are `pub`.
 
+// A build script runs as the crate builds, never on the core's loop, so reading files is
+// its job, which the root's clippy.toml forbids only the loop.
+#![allow(clippy::disallowed_methods)]
+
 use std::{
     collections::{BTreeSet, HashMap},
     env, fs,

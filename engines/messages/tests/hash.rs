@@ -1,6 +1,10 @@
 //! Tests of the build script's hash. `cargo test` never runs tests inside a build script,
 //! so this file includes the script as a module.
 
+// Tests run off the core's loop, so they may write files, which the root's clippy.toml
+// forbids only the loop.
+#![allow(clippy::disallowed_methods)]
+
 // The script's `main` and `find_lock` go unused here, which would warn.
 #[allow(dead_code)]
 #[path = "../build.rs"]

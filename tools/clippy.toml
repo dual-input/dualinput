@@ -1,0 +1,3 @@
+# The tools build and check Dual Input and never run on the core's loop, so they leave out
+# the list of calls the root's clippy.toml forbids the loop's crates. Clippy reads the
+# clippy.toml nearest a crate's folder, which is this one.

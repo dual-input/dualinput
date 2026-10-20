@@ -68,7 +68,7 @@ Builds:
 - the root's files: `Cargo.toml`, whose members are globs, `rust-toolchain.toml`, `package.json` and its lockfile, `.cargo/config.toml`, which links the C runtime statically and sets ts-rs's two variables, and `msfs-sdk.txt` ([the workspace](../architecture/02-code-map.md#the-workspace), [the C runtime](01-the-build.md#the-c-runtime))
 - `tools/msfs-sdk` and `tools/setup.ts`, which install cargo-msfs and the SDK that `msfs-sdk.txt` names ([the SDK](01-the-build.md#the-sdk))
 - `tools/build.ts`, which builds what the tree holds and stops when the installed SDK isn't the one `msfs-sdk.txt` names ([building every target](../architecture/02-code-map.md#building-every-target))
-- the message crate, which each later stage adds its messages to, with its hash and `ts/stamp.ts`, its first TypeScript types coming with its first messages in stage 2 ([the message crate's hash](01-the-build.md#the-message-crates-hash))
+- the message crate, which each later stage adds its messages to, with its hash and `ts/stamp.ts`, its first TypeScript types coming with the first stage that adds a message ([the message crate's hash](01-the-build.md#the-message-crates-hash))
 - [the map check](../architecture/02-code-map.md#the-map-check)
 - `tools/check.ts`, which runs each check a pull request runs in [CI](../architecture/02-code-map.md#ci) that the tree has something for: Rustfmt, Clippy, the default members' tests, each tsconfig's type check, the messages' types generated again and compared, the map check, and the tools' own tests, on Node's test runner
 
@@ -89,24 +89,51 @@ Done on 2026-10-18.
 
 ## 2 The core's loop and edge
 
-Builds: the kernel, and `apps/core`'s edge, with the replay log's encoding in `recording-format` ([01-loop-and-edge](../core/01-loop-and-edge.md)).
+Builds:
+
+- the kernel: the registry, the store of each unit's state, hooks, moments, requests and their guards, the outbox and its running hash, timers, jobs, the files each unit is handed with the core's first input, such as the settings, and each unit's handles and IDs ([the kernel's interface](../core/01-loop-and-edge.md#the-kernels-interface), [starting and stopping](../core/01-loop-and-edge.md#starting-and-stopping))
+- `apps/core`'s `main` and its list of units, the queue and its stamps, the home folder's placeholder, the timer thread, tokio's runtime and its blocking pool, a sink for each output type, the panic hook, the log's subscriber, and starting and exiting, with FMA3 off, the data folder's named mutex, and the guard on the static C runtime ([threads](../core/01-loop-and-edge.md#threads), [the queue](../core/01-loop-and-edge.md#the-queue), [inputs](../core/01-loop-and-edge.md#inputs), [the core's math](../core/01-loop-and-edge.md#the-cores-math), [a panic](../core/01-loop-and-edge.md#a-panic), [starting and stopping](../core/01-loop-and-edge.md#starting-and-stopping), [logging](../core/01-loop-and-edge.md#logging))
+- the recording's writer and `dualinput-core replay`, with the replay log's encoding in `recording-format`: its header, inputs, and checkpoints ([replay](../core/01-loop-and-edge.md#replay))
+- the loop's Clippy rules: the root's `clippy.toml` and the workspace's lint on a `HashMap`'s order, which the loop's crates take ([one loop](../architecture/02-code-map.md#one-loop))
+
+The sim thread comes in stage 4, the WebSocket server and the port file in stage 5, the marks' record in stage 8, the window thread in stage 9 with the session crate that handles the quit it pushes, the sandbox's stops' record in stage 12, and `tools/replay.ts` in stage 22.
+The edge's jobs read and write files, and its other jobs, fetching over HTTPS and reading the clipboard, come with the first stage whose units start them.
+The kernel's way for a crate of the platform's to put out an output, or draw a handle, for the unit whose call it carries out comes in stage 4, whose sim service is the first to need it, and a slice credited to its owner in stage 5 ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+01-loop-and-edge's other cases and budgets are in the `Tests` lines of stages 3, 4, 5, 9, 15, and 18, each marked as from stage 2.
+
+Designs first: four things [01-loop-and-edge](../core/01-loop-and-edge.md) left open, which the user agreed on 2026-10-20: the queue's lock ([the queue](../core/01-loop-and-edge.md#the-queue)), the 64-bit hash that folds the outputs ([outputs](../core/01-loop-and-edge.md#outputs)), the crate that gives ChaCha20 ([timers, jobs, and IDs](../core/01-loop-and-edge.md#timers-jobs-and-ids)), and how big the log file grows ([logging](../core/01-loop-and-edge.md#logging)).
+
 Needs: 1.
+
+Tests:
+
+- A test of each rule in [the kernel's interface](../core/01-loop-and-edge.md#the-kernels-interface), among the kernel's own tests, a test unit that raises moments in a cycle among them.
+- From [01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench): two edges push at once, and every stamp rises with its sequence number, over 200,000 pushes each, which the bench runs for minutes; a test unit that reads the clock is caught at the next checkpoint of its replay; and a replay on another commit refuses, naming the commit.
+- From [the build's cases on a desk](01-the-build.md#cases-for-the-bench): a build with `RUSTFLAGS` set, even empty, stops at `apps/core`'s guard, in `tools/core.test.ts`; and the core imports no `api-ms-win-crt-*` DLL, by `dumpbin /imports`.
+- From [01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets): by hand, a timer fires within 2ms of its deadline at p99 on an idle PC, and the core holds under 30 MB of private working set with no session; among the tests, the core exits within 1s of its exit going out.
+
+Exit: on our development machine, `node tools/check.ts` passes with the kernel's and `apps/core`'s tests among it.
+In one of them, a core with units of the test's own records a run and exits within 1s, and the recording replays to every checkpoint, while a copy with one input's bytes changed names the first checkpoint after that input.
+Done on 2026-10-20.
 
 ## 3 The bench
 
 Builds: `tools/bench/`'s scenarios and the processes and folders it runs, the stand-in sim with the sim seam's `sim-client` and `simconnect-types`, and `apps/core`'s `stand-in` feature with its test units ([the bench](02-testing.md#the-bench), [the stand-in sim](02-testing.md#the-stand-in-sim)).
 Each later stage adds the stand-ins its own units need ([left to each stage](02-testing.md#left-to-each-stage)).
 Needs: 2.
+Tests, from stage 2: the core is killed, its recording reads up to its last full frame, and it loses at most the recording's last second; and [the loop under load](02-testing.md#the-loop-under-load), whose replay runs an hour's recording in under 6 minutes ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench) and [budgets](../core/01-loop-and-edge.md#budgets)).
 
 ## 4 The sim seam, our WASM module, and our package
 
-Builds: the sim service, sim awareness, the sim edge, the routine host, `sim-package/routines/`, `sim-package/wasm-module`, and our package with `node tools/build.ts install` ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [our package](01-the-build.md#our-package)).
+Builds: the sim service, sim awareness, the sim edge, the routine host, `sim-package/routines/`, `sim-package/wasm-module`, and our package with `node tools/build.ts install` ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [our package](01-the-build.md#our-package)); and the kernel's way for the sim service to put out a call, and draw its handle, for the unit whose call it carries out ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
 Needs: 3.
+Tests, from stage 2: the timers fire within 2ms of their deadlines at p99 with the sim running and the PC busy, in this stage's session in the sim ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
 
 ## 5 Clients and the panel bridge
 
 Builds: the clients crate, `page-client`, the panel bridge, and our `VCockpit.js` override, with the sim's stock files it starts from, the Coherent GT check, and the bench's fake pages ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the sim's stock files](01-the-build.md#the-sims-stock-files), [the Coherent GT check](01-the-build.md#the-coherent-gt-check)).
 Needs: 4.
+Tests, from stage 2: a feature's command handler reads the clients crate's settings while the clients crate dispatches it ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
 
 ## 6 The core helper
 
@@ -120,15 +147,16 @@ Needs: 5.
 
 ## 8 Recording and bug reports
 
-Builds: the recording crate, the self-describing record in `recording-format`, uploads, and the backend's bug reports ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+Builds: the recording crate, the self-describing record and the replay log's marks in `recording-format`, uploads, and the backend's bug reports ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
 The report page is the desktop shell's, and comes with [the apps](#11-the-apps).
 Needs: 7.
 
 ## 9 The session
 
-Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)).
+Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)); and `apps/core`'s window thread, which pushes a quit when Windows ends the pilot's session ([quitting](../core/01-loop-and-edge.md#quitting)).
 Its features come in [stage 21](#21-rate-and-pause-and-go-to).
 Needs: 4, 7, and 8.
+Tests, from stage 2: a pilot quits Dual Input in a session, and Windows signs a pilot out with a session held, and each time the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
 
 ## 10 Profiles
 
@@ -145,7 +173,7 @@ Needs: 9 and 10.
 
 ## 12 The sandbox
 
-Builds: the sandbox ([plugins and the sandbox](../plugins/01-plugins.md)).
+Builds: the sandbox, with the check `apps/core` hands its interrupt handler and the replay log's record of its stops ([plugins and the sandbox](../plugins/01-plugins.md), [what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)).
 It needs only stage 1, so it can be built any time before stage 13.
 Needs: 1.
 
@@ -165,6 +193,7 @@ Needs: 11 and 13.
 Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, writing our package, and the core's checks of the packages that override ours ([installing and updating](../install/01-installing-and-updating.md)).
 The release workflow comes in [stage 22](#22-github).
 Needs: 3 and 11.
+Tests, from stage 2: a whole unit's handler panics, the process exits with a code other than 0, the desktop app starts it again, the pilot comes back as a late joiner, and the replay panics at the same input; and the core exits on its own, with 0, and the desktop app doesn't start it again ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
 
 ## 16 Flight-model sync
 
@@ -181,6 +210,7 @@ Needs: 6, 10, and 13.
 
 Builds: the traffic feature, its routine `Traffic`, `object-mirror`, and the ATC audio feature, with their parts in the apps ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md)).
 Needs: 6, 9, and 11.
+Tests, from stage 2: the core holds under 100 MB of private working set beside QuickJS-ng's runtimes in a busy session, one that hosts traffic ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
 
 ## 19 Pointer sync
 
@@ -199,7 +229,7 @@ Needs: 9 and 11.
 
 ## 22 GitHub
 
-Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).
+Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).
 Needs: every stage before it.
 Tests, from stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
 

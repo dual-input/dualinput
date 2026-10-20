@@ -1,0 +1,40 @@
+# A recording replays the core's loop only if nothing on it reads a clock, draws an
+# unseeded random number, does I/O, waits, starts a thread, or visits a HashMap in its order,
+# which is seeded at random (record/areas/architecture/02-code-map.md, "One loop"). So
+# Clippy fails a call to any function below in the loop's crates: every crate outside apps/,
+# sim-package/, tools/, the transport, and the sim edge.
+#
+# Clippy reads the clippy.toml nearest a crate's folder, so apps/ and tools/ each have one of
+# their own, which lists nothing. When you add the first crate under sim-package/, or an
+# edge engine, the transport, the sim edge, or the stand-in sim, give its folder one too.
+#
+# Clippy prints each reason as a note under the error, so each says what to do instead.
+disallowed-methods = [
+    { path = "std::time::Instant::now", reason = "take the time from the handler's input, through Cx::now" },
+    { path = "std::time::SystemTime::now", reason = "take the time from the handler's input, through Cx::now" },
+    { path = "std::thread::spawn", reason = "start slow work as a job, through Cx::job, whose result comes back as an input" },
+    { path = "std::thread::Builder::spawn", reason = "start slow work as a job, through Cx::job, whose result comes back as an input" },
+    { path = "std::thread::sleep", reason = "set a timer, through Cx::timer, which fires as an input" },
+    { path = "std::collections::HashMap::iter", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::iter_mut", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::keys", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::values", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::values_mut", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::into_keys", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::into_values", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::drain", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashMap::retain", reason = "use a BTreeMap or a Vec, since a HashMap's order is seeded at random" },
+    { path = "std::collections::HashSet::iter", reason = "use a BTreeSet or a Vec, since a HashSet's order is seeded at random" },
+    { path = "std::collections::HashSet::drain", reason = "use a BTreeSet or a Vec, since a HashSet's order is seeded at random" },
+    { path = "std::collections::HashSet::retain", reason = "use a BTreeSet or a Vec, since a HashSet's order is seeded at random" },
+    { path = "std::fs::read", reason = "read the file with a job, through Cx::job, whose result comes back as an input" },
+    { path = "std::fs::read_to_string", reason = "read the file with a job, through Cx::job, whose result comes back as an input" },
+    { path = "std::fs::write", reason = "write the file with a job, through Cx::job" },
+    { path = "std::fs::File::open", reason = "read the file with a job, through Cx::job, whose result comes back as an input" },
+    { path = "std::fs::File::create", reason = "write the file with a job, through Cx::job" },
+    { path = "std::fs::OpenOptions::open", reason = "read or write the file with a job, through Cx::job" },
+    { path = "std::fs::read_dir", reason = "list the folder with a job, through Cx::job, whose result comes back as an input" },
+    { path = "std::env::var", reason = "read a setting instead, since only the core's edge reads the environment" },
+    { path = "std::env::var_os", reason = "read a setting instead, since only the core's edge reads the environment" },
+    { path = "std::process::Command::new", reason = "put out an output that the core's edge carries out by starting the program" },
+]

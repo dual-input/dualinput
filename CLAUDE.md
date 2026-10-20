@@ -67,6 +67,10 @@ A prototype that works reaches the product through a plan stage that rebuilds it
 An experiment needs no plan and no decision on language: run it, and write down only what's worth keeping.
 Probes are Node `.mjs` files and panel `.js` files.
 
+**Group a folder's files by what they're for once the plan shows it growing past about a dozen.**
+Name each group's folder, and each file, for what it holds, as in `edges/timer.rs` and `data_folder.rs`, and in Rust put `edges.rs` beside `edges/` rather than an `edges/mod.rs`.
+`apps/core/src` reached 17 flat files, among them `data.rs` and `built.rs`, which hid what belonged together, while a folder made for files that won't grow only adds nesting.
+
 **Name everything the sim shares `DUALINPUT_<KIND>_<NAME>`.**
 That covers panel globals, CommBus events, client data areas, and `L:` variables.
 Every package in the Community folder shares these namespaces, and FS Copilot's `FSC_` and fsc-editor's `FSCEDITOR_` are already in use there.

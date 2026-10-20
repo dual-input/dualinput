@@ -373,6 +373,7 @@ The code already states what it does, so a comment earns its place by saying wha
 ```
 
 A Rust `expect` message says what should have held, as in "OUT_DIR should be writable", since the panic prints it before the error.
+A lint's reason, such as a `disallowed-methods` entry's in `clippy.toml`, says what to do instead, as in "take the time from the handler's input, through Cx::now", since the developer reads it under the error, right after breaking the rule.
 A TODO names the condition that ends it.
 Leave out the code's own history, such as "added for the relay change", because git keeps it.
 Leave out plan and status, such as a stage number, because they go stale.

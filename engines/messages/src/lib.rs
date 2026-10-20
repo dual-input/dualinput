@@ -10,7 +10,10 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 
+// Tests run off the core's loop, so they may write files, which the root's clippy.toml
+// forbids only the loop.
 #[cfg(test)]
+#[allow(clippy::disallowed_methods)]
 mod tests {
     use super::{HASH, VERSION};
 

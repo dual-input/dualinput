@@ -3,6 +3,32 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-20: Stage 3's bench carries an hour of a busy flight at 0.5% of a core with a p99 wait of 87µs, replays it in 17s, and a killed core loses its last 0.64s
+
+**Asked:** does the core meet its budgets on [stage 3](../build/plan.md#3-the-bench)'s bench: the queue within one sim frame, 11.2ms, at p99, each handler within 1ms but a write function at its limit, and the loop busy under 20% of a core ([the code map's budgets](../architecture/02-code-map.md#budgets)); a replay of an hour's recording within 6 minutes; and a crash losing at most the recording's last second ([budgets](01-loop-and-edge.md#budgets))?
+
+**Expected:** all of them, since p10's loop carried the same flight at 0.5% of a core with a p99 wait of 92µs, and replayed its 600s in 1.8s ([architecture log](../architecture/log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly)).
+
+**Found:** on our development machine, with the release profile, from the loop's stats in the core's log ([the loop under load](../build/02-testing.md#the-loop-under-load)):
+
+- **An hour under load:** the load unit took p10's capture six times over, made-up inputs at a session's rates with the link's at 140 a second, and a 100ms stop once a minute, 2,636,127 inputs in 3,600s, 732 a second.
+  - Inputs waited in the queue 14µs at p50, 87µs at p99, 69.6ms at p99.9, and 100.1ms at most.
+  - The loop was busy 0.50% of the time, timed around the kernel's handling of each input.
+  - 60 inputs took longer than 1ms, each a 100ms stop.
+  - The replay matched every checkpoint in 17.2s, and held every one of the inputs the loop handled.
+  - The recording came to 126.2 MB with zstd.
+- **The worst minutes:** in two of the 60, a stop landed on a burst of traffic's records, about 300 that come together every 500ms, and held 1% of the minute's inputs back, so that minute's p99 was 90.1ms and 47.1ms; every other minute's p99 was at most 1.1ms.
+- **10 minutes on the final code,** once the review had the busy share cover the whole of each input, its checkpoint, record, and sinks too: 439,359 inputs, 17µs at p50 and 99µs at p99, busy 0.65%, 10 inputs over 1ms, each a stop, and a replay of 2.9s, 17.3s an hour.
+  Every input the loop handled was in the recording, though the playback, the timer thread, and tokio's jobs pushed at once, and the recording's writer stops at a stamp that falls.
+- **A killed core:** of 300 numbered lines the bench sent 10ms apart, the recording held the first 259, losing those of the last 637ms before the kill, and replayed to its last whole frame.
+
+**Changed:** nothing in the design, since each is within its budget.
+The load report shows the worst minute without a budget, since the code map sets the queue's budget over the run, and a write function at its limit holds the loop by design ([budgets](../architecture/02-code-map.md#budgets)).
+
+**Affects:** nothing.
+
+**Evidence:** [results/2026-10-20-stage-3-bench.txt](results/2026-10-20-stage-3-bench.txt).
+
 ## 2026-10-20: Stage 2's timers fire at most 977µs late, its idle core holds 1.0 MB, and it exits in 29ms
 
 **Asked:** does the core [stage 2](../build/plan.md#2-the-cores-loop-and-edge) builds meet three of [01-loop-and-edge's budgets](01-loop-and-edge.md#budgets): a timer within 2ms of its deadline at p99 on an idle PC, under 30 MB of private working set with no session, and an exit done within 1s?

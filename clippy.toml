@@ -2,7 +2,9 @@
 # unseeded random number, does I/O, waits, starts a thread, or visits a HashMap in its order,
 # which is seeded at random (record/areas/architecture/02-code-map.md, "One loop"). So
 # Clippy fails a call to any function below in the loop's crates: every crate outside apps/,
-# sim-package/, tools/, the transport, and the sim edge.
+# sim-package/, tools/, the transport, the sim edge, and the stand-in sim. The root
+# Cargo.toml and EDGE_ENGINES in tools/map-check.ts list the same crates, so change all
+# three together.
 #
 # Clippy reads the clippy.toml nearest a crate's folder, so apps/ and tools/ each have one of
 # their own, which lists nothing. When you add the first crate under sim-package/, or an

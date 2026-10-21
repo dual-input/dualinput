@@ -13,7 +13,7 @@ import { test } from "node:test"
 import { checkMap, type Rule } from "./map-check.ts"
 
 type Tree = Record<string, string>
-type Crate = { dir: string; name: string; deps?: string[]; source?: string }
+type Crate = { dir: string; name: string; deps?: string[]; source?: string; procMacro?: boolean }
 
 /**
  * A Cargo workspace of `members`, each depending on the crates its `deps` name, and of
@@ -30,7 +30,8 @@ function rust(members: Crate[], outside: Crate[] = []): Tree {
       if (!dep) throw new Error(`no crate ${name} in the tree`)
       return `${name} = { path = "${path.posix.relative(c.dir, dep.dir)}" }`
     })
-    tree[`${c.dir}/Cargo.toml`] = `[package]\nname = "${c.name}"\nversion = "0.1.0"\nedition = "2024"\n\n[dependencies]\n${deps.join("\n")}\n`
+    const lib = c.procMacro ? `[lib]\nproc-macro = true\n\n` : ""
+    tree[`${c.dir}/Cargo.toml`] = `[package]\nname = "${c.name}"\nversion = "0.1.0"\nedition = "2024"\n\n${lib}[dependencies]\n${deps.join("\n")}\n`
     tree[`${c.dir}/src/lib.rs`] = c.source ?? ""
   }
   return tree
@@ -60,24 +61,31 @@ function findings(tree: Tree): Rule[] {
 
 test("a tree that keeps every rule passes", () => {
   const tree: Tree = {
-    ...rust([
-      { dir: "engines/messages", name: "messages" },
-      { dir: "engines/sim-client", name: "sim-client", deps: ["messages"] },
-      { dir: "engines/object-mirror", name: "object-mirror" },
-      { dir: "platform/kernel", name: "kernel", deps: ["messages"] },
-      { dir: "platform/clients", name: "clients", deps: ["kernel", "messages"] },
-      { dir: "platform/routine-host", name: "routine-host", deps: ["messages"] },
-      { dir: "features/pointer-sync/core", name: "pointer-sync", deps: ["clients", "messages"], source: "use messages::pointer_sync::Press;\n" },
-      { dir: "features/traffic/routines", name: "traffic-routines", deps: ["messages", "routine-host", "object-mirror"] },
-      { dir: "sim-package/routines", name: "routines", deps: ["traffic-routines", "routine-host"] },
-      {
-        dir: "apps/core",
-        name: "dualinput-core",
-        deps: ["pointer-sync", "kernel", "routines"],
-        source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n}\n`,
-      },
-      { dir: "tools/thing", name: "thing", deps: ["messages"] },
-    ]),
+    ...rust(
+      [
+        // A derive macro runs in the compiler, so what it reaches is no loop crate's I/O.
+        { dir: "engines/messages", name: "messages", deps: ["derive"] },
+        { dir: "engines/sim-client", name: "sim-client", deps: ["messages"] },
+        { dir: "engines/object-mirror", name: "object-mirror" },
+        { dir: "platform/kernel", name: "kernel", deps: ["messages"] },
+        { dir: "platform/clients", name: "clients", deps: ["kernel", "messages"] },
+        { dir: "platform/routine-host", name: "routine-host", deps: ["messages"] },
+        { dir: "features/pointer-sync/core", name: "pointer-sync", deps: ["clients", "messages"], source: "use messages::pointer_sync::Press;\n" },
+        { dir: "features/traffic/routines", name: "traffic-routines", deps: ["messages", "routine-host", "object-mirror"] },
+        { dir: "sim-package/routines", name: "routines", deps: ["traffic-routines", "routine-host"] },
+        {
+          dir: "apps/core",
+          name: "dualinput-core",
+          deps: ["pointer-sync", "kernel", "routines"],
+          source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n}\n`,
+        },
+        { dir: "tools/thing", name: "thing", deps: ["messages"] },
+      ],
+      [
+        { dir: "outside/derive", name: "derive", deps: ["windows-sys"], procMacro: true },
+        { dir: "outside/windows-sys", name: "windows-sys" },
+      ],
+    ),
     ...TS,
     "engines/messages/ts/stamp.ts": `export const HASH = "0";\n`,
     "engines/messages/ts/pointer-sync/press.ts": `export type Press = { x: number };\n`,
@@ -132,6 +140,15 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     tree: rust([
       { dir: "platform/routine-host", name: "routine-host", deps: ["sim-client"] },
       { dir: "engines/sim-client", name: "sim-client" },
+    ]),
+  },
+  {
+    // A proc macro's dependencies leave the loop's I/O alone, but not the tiers.
+    name: "an engine's proc macro on a feature",
+    rules: ["down-the-tiers"],
+    tree: rust([
+      { dir: "engines/messages", name: "messages", deps: ["pointer-sync"], procMacro: true },
+      { dir: "features/pointer-sync/core", name: "pointer-sync" },
     ]),
   },
   {

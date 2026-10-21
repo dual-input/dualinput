@@ -83,7 +83,8 @@ const OUTSIDE_PLATFORM = ["routine-host", "panel-bridge", "efb-shell", "desktop-
 const FEATURE_PARTS = ["core", "routines", "panel", "efb", "desktop"]
 
 // The engines that are edge code, the stand-in sim included, which takes the sim's place
-// in tests. The loop's rules don't hold for them.
+// in tests. The loop's rules don't hold for them. The comments on the loop's lints in the
+// root Cargo.toml and clippy.toml list the same crates, so change all three together.
 const EDGE_ENGINES = ["sim-edge", "transport", "stand-in-sim"]
 
 // The crates that do I/O, which no loop crate may reach. A crate that does I/O but isn't
@@ -217,7 +218,7 @@ function importRule(from: Unit, to: Unit, toRel: string, features: Set<string>):
 type Crate = { id: string; name: string; dir: string; rel: string; unit: Unit | undefined | null }
 
 type Metadata = {
-  packages: { id: string; name: string; manifest_path: string }[]
+  packages: { id: string; name: string; manifest_path: string; targets: { kind: string[] }[] }[]
   workspace_members: string[]
   resolve: { nodes: { id: string; deps: { pkg: string; dep_kinds: { kind: string | null }[] }[] }[] }
 }
@@ -251,6 +252,11 @@ function checkCrates(root: string, features: Set<string>, findings: Finding[]): 
   for (const node of meta.resolve.nodes) {
     deps.set(node.id, node.deps.filter((d) => d.dep_kinds.some((k) => k.kind === null)).map((d) => d.pkg))
   }
+  // A proc macro runs in the compiler too, so what it reaches is no loop crate's I/O: ts-rs's
+  // derive reaches windows-sys through termcolor. Its dependencies still count for the
+  // tiers, so a proc macro of ours keeps every other rule.
+  const procMacros = new Set(meta.packages.filter((p) => p.targets.some((t) => t.kind.includes("proc-macro"))).map((p) => p.id))
+  const runtimeDeps = new Map([...deps].map(([id, list]) => [id, procMacros.has(id) ? [] : list]))
 
   for (const crate of ours.values()) {
     if (!crate.unit) {
@@ -264,7 +270,7 @@ function checkCrates(root: string, features: Set<string>, findings: Finding[]): 
       if (rule) findings.push({ rule, where: crate.rel, detail: `depends on ${to.rel}` })
     }
     if (isLoopCrate(crate.unit)) {
-      for (const io of ioReached(crate.id, deps, names, ours)) {
+      for (const io of ioReached(crate.id, runtimeDeps, names, ours)) {
         findings.push({ rule: "loop-io", where: crate.rel, detail: `reaches ${io}` })
       }
     }

@@ -11,7 +11,8 @@ export function wantedSdk(): string {
 
 /**
  * The folder cargo-msfs reads the 2024 SDK from, `%APPDATA%\cargo-msfs\data\msfs2024`.
- * `sdk_folder` in tools/msfs-sdk/src/main.rs names the same folder, so change both together.
+ * `sdk_folder` in tools/msfs-sdk/src/main.rs and in engines/simconnect-types/build.rs name the
+ * same folder, so change all three together.
  */
 export function sdkFolder(): string {
   const appdata = process.env.APPDATA

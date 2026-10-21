@@ -67,6 +67,7 @@ pub fn replay(
     }
     let warnings = differences(&header);
     cpu::fma3_off();
+    // tools/bench/cores.ts reads the replay's log from this folder, so change both together.
     let folder = file.parent().unwrap_or(Path::new(".")).join("replay");
     std::fs::create_dir_all(&folder)?;
     let Some(_lock) = data_folder::lock(&folder) else {

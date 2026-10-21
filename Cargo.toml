@@ -25,9 +25,11 @@ edition = "2024"
 
 # A replay of the core has to visit everything in the order the run did, and a HashMap's
 # order is seeded at random each run. So the loop's crates, every crate outside apps/,
-# sim-package/, tools/, the transport, and the sim edge, fail Clippy on a `for` loop over
-# one, and on a call to a function clippy.toml lists, such as `Instant::now`, even without
-# `-D warnings`. Each loop crate opts in with `[lints] workspace = true`.
+# sim-package/, tools/, the transport, the sim edge, and the stand-in sim, fail Clippy on a
+# `for` loop over one, and on a call to a function clippy.toml lists, such as
+# `Instant::now`, even without `-D warnings`. Each loop crate opts in with
+# `[lints] workspace = true`. clippy.toml and EDGE_ENGINES in tools/map-check.ts list the
+# same crates, so change all three together.
 [workspace.lints.clippy]
 iter_over_hash_type = "deny"
 disallowed_methods = "deny"

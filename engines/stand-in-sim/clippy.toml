@@ -1,0 +1,5 @@
+# The stand-in sim takes the sim edge's place on the bench, on a thread of its own, so it
+# keeps the edge's rules rather than the loop's: it waits, watches a process, and hands up
+# inputs to be stamped (record/areas/build/02-testing.md, "Its rules"). So it leaves out the
+# list of calls the root's clippy.toml forbids the loop's crates. Clippy reads the
+# clippy.toml nearest a crate's folder, which is this one.

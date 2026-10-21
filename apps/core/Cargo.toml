@@ -4,14 +4,24 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
+# The bench build of the core, which no release turns on: the bench's socket, and the test
+# units its scenarios drive (record/areas/build/02-testing.md, "Its place").
+[features]
+stand-in = ["dep:serde", "dep:serde_json", "dep:zstd"]
+
 [dependencies]
 kernel = { path = "../../platform/kernel" }
+messages = { path = "../../engines/messages" }
 recording-format = { path = "../../engines/recording-format" }
+serde = { version = "1.0.229", features = ["derive"], optional = true }
+serde_json = { version = "1.0.145", optional = true }
 sha2 = "0.10.9"
 # The core runs its sockets on tokio (decision 027), and its jobs on tokio's blocking pool.
 tokio = { version = "1.53.3", features = ["rt-multi-thread"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "std", "registry"] }
+# The loop under load reads its capture of a flight, which p10 compressed with zstd.
+zstd = { version = "0.14.3", default-features = false, optional = true }
 
 [dependencies.windows-sys]
 version = "0.61.2"

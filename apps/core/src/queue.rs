@@ -97,9 +97,9 @@ mod tests {
     use super::*;
 
     /// Two edges push at once, and every stamp rises with its sequence number
-    /// (record/areas/core/01-loop-and-edge.md, "Cases for the bench"). The bench, which runs
-    /// whole cores on one PC, runs it for minutes; this runs 200,000 pushes on each of two
-    /// threads.
+    /// (record/areas/core/01-loop-and-edge.md, "Cases for the bench"). This runs 200,000
+    /// pushes on each of two threads; the bench's loop under load runs the case for an hour
+    /// on three, through the recording's writer, which refuses a stamp that falls.
     #[test]
     fn stamps_rise_with_sequence_numbers_while_two_threads_push() {
         let queue = Queue::new(Arc::new(Home::none()));

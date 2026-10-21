@@ -1,0 +1,15 @@
+[package]
+name = "stand-in-sim"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# Like the sim edge, the stand-in keeps the edge's rules, not the loop's, so it takes none
+# of the workspace's lints for the loop.
+[dependencies]
+sim-client = { path = "../sim-client" }
+simconnect-types = { path = "../simconnect-types" }
+
+[dependencies.windows-sys]
+version = "0.61.2"
+features = ["Win32_Foundation", "Win32_Security", "Win32_System_Threading"]

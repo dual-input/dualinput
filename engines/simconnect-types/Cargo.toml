@@ -1,0 +1,14 @@
+[package]
+name = "simconnect-types"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# bindgen generates the types from the SDK's SimConnect.h each time this crate builds, so no
+# file in the repository holds a copy of the SDK's headers. It reads them through libclang,
+# from the LLVM that LIBCLANG_PATH names.
+[build-dependencies]
+bindgen = "0.72.1"
+
+[lints]
+workspace = true

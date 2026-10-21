@@ -19,6 +19,7 @@ use crate::edges::jobs::Jobs;
 use crate::edges::timer::Timers;
 use crate::home::Home;
 use crate::log;
+use crate::loop_stats::Stats;
 use crate::queue::{Item, Queue};
 use crate::recording::convert::to_record;
 use crate::recording::{build_info, writer};
@@ -72,6 +73,8 @@ pub enum Ran {
 struct Ready {
     partly_recorded: Vec<&'static str>,
     start_files: Vec<&'static str>,
+    #[cfg(feature = "stand-in")]
+    bench: Option<crate::bench::Sources>,
 }
 
 /// What the loop's thread needs from the edge before its first input.
@@ -99,7 +102,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         &home,
         options.abort_on_panic,
     )?;
-    tracing::info!(commit = build_info::COMMIT, uncommitted = ?build_info::UNCOMMITTED, profile = build_info::PROFILE, "the core started");
+    tracing::info!(commit = build_info::COMMIT, uncommitted = ?build_info::UNCOMMITTED, profile = build_info::PROFILE, messages = messages::HASH, "the core started");
     let seed = seed()?;
     let queue = Arc::new(Queue::new(home.clone()));
 
@@ -123,12 +126,16 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
             let _ = ready.send(Ready {
                 partly_recorded: kernel.partly_recorded(),
                 start_files: kernel.start_files(),
+                #[cfg(feature = "stand-in")]
+                bench: crate::bench::Sources::of(&kernel),
             });
             gone.recv().ok().map(|go| live(&mut kernel, go))
         })?;
     let Ok(Ready {
         partly_recorded,
         start_files,
+        #[cfg(feature = "stand-in")]
+        bench,
     }) = units_ready.recv()
     else {
         std::panic::resume_unwind(
@@ -185,6 +192,11 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let cancel = timers.clone();
     sinks.on(move |c: CancelTimer| cancel.cancel(c.id));
     sinks.on(move |s: StartJob| jobs.start(s));
+    #[cfg(feature = "stand-in")]
+    if let Some(sources) = bench {
+        crate::bench::sinks(&mut sinks);
+        crate::bench::start(&options.data, queue.clone(), sources, context.clone())?;
+    }
     let _ = go.send(Go {
         queue,
         sinks,
@@ -245,8 +257,10 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
     let mut first = None;
     let mut checkpointed = 0;
     let mut behind = false;
+    let mut stats = Stats::new();
     loop {
         let Item { input, recorded } = queue.pop();
+        let popped = Instant::now();
         let waited = clock::now().saturating_sub(input.stamp);
         if waited > BEHIND && !behind {
             behind = true;
@@ -278,7 +292,9 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
 
         let input = Rc::new(input);
         run_context::handling(input.clone(), written);
+        let handling = Instant::now();
         let outputs = kernel.handle(&input);
+        let took = handling.elapsed();
         run_context::done();
         let mut exit = None;
         for output in outputs {
@@ -288,6 +304,9 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
                 sinks.carry(output);
             }
         }
+        // The loop is busy from taking an input to asking for the next, its checkpoint,
+        // its record, and its outputs' sinks included.
+        stats.handled(&input, waited, took, popped.elapsed());
         if let Some(exited) = exit {
             // One more checkpoint, as if before an input that never came, so a replay
             // checks the run's last second too.
@@ -296,6 +315,7 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
                 hash: kernel.hash(),
             }));
             tracing::info!(seq = input.seq, "the core is exiting");
+            stats.finish();
             return exited;
         }
     }

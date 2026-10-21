@@ -49,8 +49,9 @@ The stages follow these rules (user, 2026-10-18):
 6. Measure the stage's budgets on the bench, on our development machine, and write each result, from the bench and from the sim, with how it was taken, in the log of the area it belongs to.
    A result that misses its budget goes back to the design that set it, as [left to each stage](02-testing.md#left-to-each-stage) says.
    You'll see a log entry for each budget.
-7. Once the stage's exit has happened, show the user the stage's lines and its code together, as one uncommitted diff, and ask whether to run the `code-reviewer` agent, as [CLAUDE.md](../../../CLAUDE.md#working-rules) says (user, 2026-10-18).
-   You'll have the user's answer, and if they want changes or a review, its findings fixed or answered.
+7. Once the stage's exit has happened, make the stage's map with `/stage-map`: a private page that shows what each of the stage's parts does, why, and how its code works, which the user reads before the diff (user, 2026-10-20).
+   Then show the user the map, and the stage's lines and its code together as one uncommitted diff, and ask whether to run the `code-reviewer` agent, as [CLAUDE.md](../../../CLAUDE.md#working-rules) says (user, 2026-10-18).
+   You'll have the map's link and the user's answer, and if they want changes or a review, its findings fixed or answered, and the map published again if they changed what it shows.
 8. Once the user has looked, add `Done on <YYYY-MM-DD>.` under the stage's `Exit:` line, commit the stage, and push it.
    You'll see the stage's commit on `origin/main`, and the next open stage is where the build stands.
 
@@ -118,22 +119,48 @@ Done on 2026-10-20.
 
 ## 3 The bench
 
-Builds: `tools/bench/`'s scenarios and the processes and folders it runs, the stand-in sim with the sim seam's `sim-client` and `simconnect-types`, and `apps/core`'s `stand-in` feature with its test units ([the bench](02-testing.md#the-bench), [the stand-in sim](02-testing.md#the-stand-in-sim)).
+Builds:
+
+- `tools/bench.ts` and `tools/bench/`: the runner, which builds the bench build into a target folder of its own, runs each scenario in `tools/bench/scenarios/` on Node's test runner with a data folder for each core, starts and kills the cores, and ends each scenario by replaying each core's recording; and the loop under load, which runs by hand on p10's capture of a flight ([the bench](02-testing.md#the-bench), [replays](02-testing.md#replays), [the loop under load](02-testing.md#the-loop-under-load))
+- `apps/core`'s `stand-in` feature: the bench's socket, whose messages are the message crate's first, and the test units the scenarios drive ([its place](02-testing.md#its-place))
+- the loop's stats in the core's log ([logging](../core/01-loop-and-edge.md#logging))
+- `simconnect-types`; the sim seam's four inputs in `sim-client`, with the edge's own calls, which look for the sim's process and open and close a connection; and the stand-in sim's thread, the process it watches, its opens and closes, and the losses and quit messages a scenario asks for ([the stand-in sim](02-testing.md#the-stand-in-sim), [the sim seam](../architecture/02-code-map.md#the-sim-seam), [the edge](../core/03-sim-seam-and-wasm-module.md#the-edge))
+
+The stand-in answers no SimConnect call until [stage 4](#4-the-sim-seam-our-wasm-module-and-our-package), which builds each call in `sim-client`, the sim edge, and the stand-in together, so the stand-in learns each call beside the edge that tries it in the sim (user, 2026-10-20).
 Each later stage adds the stand-ins its own units need ([left to each stage](02-testing.md#left-to-each-stage)).
+The bench's [other cases](02-testing.md#cases-for-the-bench) and its [budgets](02-testing.md#budgets) need parts later stages build, and are in the `Tests` lines of stages 4, 5, 7, 15, and 22, each marked as from stage 3, and the loop under load runs again in stage 14.
+
 Needs: 2.
-Tests, from stage 2: the core is killed, its recording reads up to its last full frame, and it loses at most the recording's last second; and [the loop under load](02-testing.md#the-loop-under-load), whose replay runs an hour's recording in under 6 minutes ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench) and [budgets](../core/01-loop-and-edge.md#budgets)).
+
+Tests:
+
+- From [01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench): the core is killed, its recording reads up to its last full frame, and it loses at most the recording's last second ([budgets](../core/01-loop-and-edge.md#budgets)).
+- From [the bench's own cases](02-testing.md#cases-for-the-bench): a bench build and a release build of one commit carry one message crate's hash, and `cargo tree` of the release build lists no `stand-in-sim`.
+- By hand, [the loop under load](02-testing.md#the-loop-under-load) for an hour: the queue within one sim frame, 11.2ms, at p99, each handler within 1ms but the stand-ins for write functions, and the loop busy under 20% of a CPU core ([the code map's budgets](../architecture/02-code-map.md#budgets)); its replay within 6 minutes ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)); and, from stage 2, edges pushing at once for the hour, every stamp rising with its sequence number, since the recording's writer stops at a stamp that falls and the recording holds every input the loop handled ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+- The stand-in's own tests: it hands up a watched process's finding and its exit code, an open's result and the sim's open message, and the losses and quit messages a scenario asks for.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the killed core's scenario among them, and the [core's log](../core/log.md) has an entry for the loop under load's hour.
+Done on 2026-10-21.
 
 ## 4 The sim seam, our WASM module, and our package
 
-Builds: the sim service, sim awareness, the sim edge, the routine host, `sim-package/routines/`, `sim-package/wasm-module`, and our package with `node tools/build.ts install` ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [our package](01-the-build.md#our-package)); and the kernel's way for the sim service to put out a call, and draw its handle, for the unit whose call it carries out ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+Builds: the sim service, sim awareness, the sim edge, the routine host, `sim-package/routines/`, `sim-package/wasm-module`, and our package with `node tools/build.ts install` ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [our package](01-the-build.md#our-package)); the rest of `sim-client`, with each SimConnect call the sim service makes and the stand-in's answer to it, and the stand-in in the edge's place in the bench build, with its frames, its aircraft, its faults, its routines through the routine host, and the stub the bench starts for each sim ([the stand-in sim](02-testing.md#the-stand-in-sim)); the SimConnect SDK's version, `simconnect_types::SDK_VERSION`, in the recording's header ([what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)); and the kernel's way for the sim service to put out a call, and draw its handle, for the unit whose call it carries out ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
 Needs: 3.
-Tests, from stage 2: the timers fire within 2ms of their deadlines at p99 with the sim running and the PC busy, in this stage's session in the sim ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
+
+Tests:
+
+- From stage 2: the timers fire within 2ms of their deadlines at p99 with the sim running and the PC busy, in this stage's session in the sim ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
+- From stage 3: two bench cores on one PC each see only their own stub, and killing one stub ends that core's sim alone, as a crash ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 
 ## 5 Clients and the panel bridge
 
 Builds: the clients crate, `page-client`, the panel bridge, and our `VCockpit.js` override, with the sim's stock files it starts from, the Coherent GT check, and the bench's fake pages ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the sim's stock files](01-the-build.md#the-sims-stock-files), [the Coherent GT check](01-the-build.md#the-coherent-gt-check)).
 Needs: 4.
-Tests, from stage 2: a feature's command handler reads the clients crate's settings while the clients crate dispatches it ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+
+Tests:
+
+- From stage 2: a feature's command handler reads the clients crate's settings while the clients crate dispatches it ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+- From stage 3: a fake page that heard the stand-in's announcement connects; and in this stage's session in the sim, with a bench core running beside the real sim's core, every page of the real sim connects to the real sim's core, and none to the bench core ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 
 ## 6 The core helper
 
@@ -144,6 +171,7 @@ Needs: 5.
 
 Builds: the network crate, the transport, the backend's invite codes, and our relays, with the bench's local relays, their proxies, and its local backend ([01-between-machines](../network/01-between-machines.md), [the network's units](../network/02-units.md), [the backend](01-the-build.md#the-backend)).
 Needs: 5.
+Tests, from stage 3: a scenario that holds back one pair's relay leaves the other pairs' messages on time ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 
 ## 8 Recording and bug reports
 
@@ -187,13 +215,18 @@ Needs: 10 and 12.
 Builds: the state sync feature, its routine `HEvents`, its panel modules `h-events` and `instrument-reads`, its parts in the apps, and the Baron 58P profile's `state` and `events` blocks ([the sync units](../sync/05-units.md), [reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
 It ends with the first session in the sim, with a bench core as the second pilot ([how the stages are ordered](#how-the-stages-are-ordered)).
 Needs: 11 and 13.
+Tests, from stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them.
 
 ## 15 Installing and updating
 
 Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, writing our package, and the core's checks of the packages that override ours ([installing and updating](../install/01-installing-and-updating.md)).
 The release workflow comes in [stage 22](#22-github).
 Needs: 3 and 11.
-Tests, from stage 2: a whole unit's handler panics, the process exits with a code other than 0, the desktop app starts it again, the pilot comes back as a late joiner, and the replay panics at the same input; and the core exits on its own, with 0, and the desktop app doesn't start it again ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+
+Tests:
+
+- From stage 2: a whole unit's handler panics, the process exits with a code other than 0, the desktop app starts it again, the pilot comes back as a late joiner, and the replay panics at the same input; and the core exits on its own, with 0, and the desktop app doesn't start it again ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+- From stage 3: a bench core killed under the desktop app comes back as a bench core, with its own data folder ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 
 ## 16 Flight-model sync
 
@@ -231,7 +264,11 @@ Needs: 9 and 11.
 
 Builds: what waits for the end because it's on GitHub ([how the stages are ordered](#how-the-stages-are-ordered)): CI's workflows for each pull request and each merge to `main` ([CI](../architecture/02-code-map.md#ci), [what keeps CI green](02-testing.md#what-keeps-ci-green)), the release workflow with the check before a release ([a release](01-the-build.md#a-release), [before a release](02-testing.md#before-a-release)), the profiles' workflow and their Pages site ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)), `tools/replay.ts`, which fetches the core a recording's release shipped ([running a replay](../core/01-loop-and-edge.md#running-a-replay)), and the repositories of ours beside this one, the Coherent GT check's and the one that holds the relays' tokens ([the build](01-the-build.md)).
 Needs: every stage before it.
-Tests, from stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
+
+Tests:
+
+- From stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
+- From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); a pull request's bench within the code map's 20 minutes, as a job beside the others; and the check before a release within 15 minutes of a person's time, from a sim at the main menu ([testing's budgets](02-testing.md#budgets)).
 
 ## 23 v1's release
 

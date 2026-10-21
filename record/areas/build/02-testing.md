@@ -90,11 +90,19 @@ So a scenario checks what a pilot's EFB app or panel would have been told, with 
 Each bench run builds the programs it runs from the tree under test, and starts each by the path that build wrote, so it never runs a program from another commit.
 FS Copilot's exerciser harness ran whatever its checkout had compiled last, and "a stale build is a working build, and it cost two sessions" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
 On a developer's PC the build is incremental, so a run with nothing changed builds nothing.
+The bench builds into `target/bench`, a target folder of its own, because a build with the `stand-in` feature in `target/` would replace the `dualinput-core.exe` a plain `cargo build` writes there, and a developer's next build would replace the bench's (user, 2026-10-20).
 
 ### Where it lives
 
 `tools/bench/` holds the bench, as the code map's [workspace](../architecture/02-code-map.md#the-workspace) has it: its scenarios, fake pages, and local profiles' site in TypeScript on Node, as `tools/build.ts` and the other scripts there are, and the stand-in core helper, a Rust program on the message crate.
 The stand-in sim is an engine, `engines/stand-in-sim`, and the bench build of the core links it.
+
+`node tools/bench.ts` runs the bench (user, 2026-10-20):
+
+- Each scenario is a file in `tools/bench/scenarios/`, run on Node's test runner, as the tools' own tests are.
+- Each scenario's run has a folder of its own in `target/bench/runs/`, with a data folder for each core.
+- `tools/check.ts` leaves the bench out, since the bench takes minutes, so a stage's code passes both.
+- The [loop under load](#the-loop-under-load) runs only when asked for, with `node tools/bench.ts load`, since it measures timing and takes an hour, and on the release profile, as a pilot's core runs.
 
 ## The stand-in sim
 
@@ -104,6 +112,11 @@ The bench build of the core is `apps/core` built with its Cargo feature `stand-i
 The feature also registers the test units the cases name, such as one that panics, one that raises moments in a cycle, and one that reads the clock, and the bench build's list of routines adds a test routine built to panic ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim), [01-loop-and-edge's](../core/01-loop-and-edge.md#cases-for-the-bench)).
 Apart from those, everything above the sim seam is a release's code, `tools/build.ts release` builds without the feature, and the edge's own code runs only in the sim.
 The bench build listens on a local socket the bench drives the stand-in and the test units through, and a release build has no such socket.
+
+- The socket is TCP on 127.0.0.1, at a port Windows picks, which the core writes to `bench-port` in its data folder, so the bench finds a core whichever program started it (user, 2026-10-20).
+- Each message is one line of JSON, whose types are the message crate's `bench` module, as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) has every message between our programs, and the core's first line carries its version and hash, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks.
+- A line for a test unit becomes an input under that unit's source, which the recording keeps, so the replay runs it.
+- A line for the stand-in goes to the stand-in's thread, as the bench acting on the sim, and is no input of the core's.
 
 ### Its rules
 
@@ -165,6 +178,15 @@ It measures the queue against the code map's one sim frame at p99, 11.2ms ([budg
 p10's loop ran a 600s capture of a flying machine that hosted traffic at EGLL, with made-up inputs at a session's rates beside it, and an input waited 92µs in the queue at p99, the loop was busy 0.5% of the time, and two replays matched the live run's outputs (measured on our development machine, 2026-10-16, [architecture log][p10]); the bench case repeats that load with the stand-in's inputs and v1's write functions.
 It runs on our development machine, since it measures timing, at the kernel's stage and again once state sync's write functions run.
 
+At the kernel's stage, before the sim service, the sandbox, and the network exist, a test unit stands in for them, on the same load as p10's (user, 2026-10-20):
+
+- It takes p10's capture, copied into `tools/bench/fixtures/`, at the pace it was captured, and p10's made-up inputs at a session's rates, with the link's raised to about 140 a second.
+- On each flight-model input, it puts out 100 outputs and keeps the loop for 98.7µs, standing in for 100 write functions, which took that long on average in p10.
+- Once a minute, it keeps the loop for 100ms, standing in for a write function stopped at its limit.
+- Each of these waits reads the clock but leaves the outputs alone, so the replay still matches.
+- The run plays the 600s capture six times over, for an hour, then replays the recording.
+- The bench reads the queue's waits, the loop's busy share, and the slowest input from the loop's stats in the core's log ([logging](../core/01-loop-and-edge.md#logging)).
+
 ## The sandbox's cases
 
 The sandbox's recursion and interrupt-check cases are its own unit tests, with no core and no sim ([cases for the bench](../plugins/01-plugins.md#cases-for-the-bench)).
@@ -201,7 +223,7 @@ The release workflow takes the commit this check ran on, and its build job stops
 
 ## Budgets
 
-Each is a starting value, which the first stage of [node 8](../architecture/plan.md#8-the-build-order) that builds the bench measures:
+Each is a starting value, which the first stage of [node 8](../architecture/plan.md#8-the-build-order) that runs the bench in CI measures:
 
 | What | Budget |
 | --- | --- |
@@ -237,8 +259,9 @@ A second MSFS with its own Dual Input in a virtual machine on the same PC, which
 
 ## Left open
 
-- Which test runner the TypeScript parts use: the first stage that writes a TypeScript test.
-- Whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies within the bench's budget: the first stage that builds the bench.
+- Which test runner the product's TypeScript parts use, such as `page-client`: the first stage that writes one's tests.
+  The tools and the bench run on Node's.
+- Whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies within the bench's budget: the first stage that runs the bench in CI.
 
 ## What this changes elsewhere
 

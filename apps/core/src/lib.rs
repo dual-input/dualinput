@@ -20,12 +20,15 @@ compile_error!(
     "dualinput-core must link the C runtime statically: RUSTFLAGS replaced the +crt-static of .cargo/config.toml"
 );
 
+#[cfg(feature = "stand-in")]
+mod bench;
 mod clock;
 mod cpu;
 mod data_folder;
 mod edges;
 mod home;
 mod log;
+mod loop_stats;
 mod panic;
 mod queue;
 mod recording;
@@ -52,6 +55,10 @@ given.";
 
 /// The program: a live run, or with `replay`, a replay of a recording.
 pub fn main(units: &[fn(&mut Registry)]) -> ExitCode {
+    // A bench build registers the test units after the build's own, in its runs and its
+    // replays alike, so a replay has the units its recording ran with.
+    #[cfg(feature = "stand-in")]
+    let units = &[units, bench::UNITS].concat();
     let args: Vec<String> = std::env::args().skip(1).collect();
     let args: Vec<&str> = args.iter().map(String::as_str).collect();
     match args[..] {
@@ -91,6 +98,8 @@ fn live(data: PathBuf, units: &[fn(&mut Registry)]) -> ExitCode {
     }
 }
 
+/// Replays a recording, and prints what came of it. tools/bench/cores.ts reads what this
+/// prints when the replay matched, so change both together.
 fn replay_file(file: &str, level: LevelFilter, units: &[fn(&mut Registry)]) -> ExitCode {
     match replay(PathBuf::from(file).as_path(), units, level, true) {
         Ok(Replay { warnings, outcome }) => {

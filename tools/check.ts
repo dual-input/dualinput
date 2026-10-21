@@ -20,8 +20,9 @@ const checks: [string, () => void][] = [
   // so this runs before the tests, or it would compare fresh files with fresh files.
   ["the messages' TypeScript types", checkMessageTypes],
   // RUSTFLAGS would replace the static C runtime that .cargo/config.toml sets, so
-  // -D warnings goes on Clippy's command line instead.
-  ["Clippy", () => run("cargo", ["clippy", "--all-targets", "--", "-D", "warnings"])],
+  // -D warnings goes on Clippy's command line instead. --all-features lints the bench
+  // build's code too, which only apps/core's `stand-in` feature compiles.
+  ["Clippy", () => run("cargo", ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])],
   ["the default members' tests", () => run("cargo", ["test"])],
   ["each tsconfig's type check", typeCheck],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],

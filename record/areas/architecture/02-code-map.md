@@ -18,6 +18,12 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - Cargo refuses a member glob that matches no folder, or a folder without a `Cargo.toml`, so the root `Cargo.toml` adds each tier's glob with the tier's first crate, and its `exclude` names each folder of TypeScript a glob would match, such as `engines/page-client`.
 > - `.cargo/config.toml` also sets ts-rs's `TS_RS_EXPORT_DIR` and `TS_RS_LARGE_INT`, so a plain `cargo test` writes the messages' types into the message crate's `ts/`, typed as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) asks.
 > - `node tools/check.ts` runs each check [CI](#ci) lists that the tree has something for, and [the map check](#the-map-check) reads TypeScript's imports from `tsc --explainFiles`, which lists type-only ones.
+>
+> Since 2026-10-20, building stage 3 of [the build plan](../build/plan.md#3-the-bench) changes two things ([build log](../build/log.md#2026-10-20-bindgen-builds-the-windows-sides-simconnect-types-with-the-static-c-runtime-and-ts-rss-derive-reaches-windows-sys)):
+>
+> - The SDK in cargo-msfs's folder serves the Windows side's bindings too, which [building every target](#building-every-target) has as unverified.
+> - [The map check](#the-map-check) follows no proc macro's own dependencies when it looks for a loop crate's I/O, as it follows no build dependency's, since a proc macro runs in the compiler too: ts-rs's derive reaches `windows-sys` through `termcolor`.
+>   A proc macro of ours still keeps the tiers' other rules.
 
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

@@ -1,5 +1,28 @@
 # The build: log
 
+## 2026-10-20: bindgen builds the Windows side's SimConnect types with the static C runtime, and ts-rs's derive reaches windows-sys
+
+**Asked.**
+Whether `simconnect-types`, the first crate of stage 3 of [the build plan](plan.md#3-the-bench) that reads the SDK's headers, builds from the SDK in cargo-msfs's folder with the static C runtime, which [the build](01-the-build.md#left-open) and [the code map](../architecture/02-code-map.md#building-every-target) left to the first build of the sim's edge.
+Then whether the message crate's first dependencies, serde and ts-rs, keep it a loop crate.
+
+**Expected.**
+Both, as p08's client generated its bindings with bindgen 0.72.1 ([architecture log](../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)), though from SDK 1.7.3 in the SDK's own install folder.
+
+**Found,** with rustc 1.95.0, bindgen 0.72.1, libclang from LLVM 23.1.3, and SDK 1.8.1 in `%APPDATA%\cargo-msfs\data\msfs2024` (measured on our development machine, 2026-10-20):
+
+- `simconnect-types`' build script, which Cargo compiles with the `+crt-static` that `.cargo/config.toml` sets for every x86_64 program, ran bindgen on the SDK's `SimConnect.h` behind `windows.h`, and the crate built, with bindgen's checks of each packed struct's layout.
+- ts-rs 12.0.1's derive, `ts-rs-macros`, reaches `windows-sys` through `termcolor` and `winapi-util`, and the map check failed the message crate for it as `loop-io`.
+  `termcolor` comes with ts-rs's default `serde-compat` feature, which makes ts-rs read serde's attributes, such as the tag of `messages::bench::ToCore`, so the message crate keeps it.
+- Each of the 312,702 SimConnect messages in p10's capture of a flight carries version 6 in its header, which the stand-in sim puts in its own (read in `experiments/areas/architecture/results/p10-capture-2026-10-16-13-52-24.bin.zst`).
+
+**What changed.**
+The build's item on bindgen and the static C runtime, and the code map's claim that the one SDK serves the Windows side, are settled.
+When the map check looks for a loop crate's I/O, it follows no proc macro's own dependencies, as it follows no build dependency's, since a proc macro runs in the compiler too.
+
+**Docs affected.**
+[The code map](../architecture/02-code-map.md) and [the build](01-the-build.md), in notes at their tops.
+
 ## 2026-10-18: Cargo refuses a member glob that matches no folder, or a folder without a Cargo.toml, and TypeScript 7.0.2's --explainFiles lists a type-only import
 
 **Asked.**

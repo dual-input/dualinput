@@ -4,6 +4,12 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
+# The messages are JSON that serde_json writes, and ts-rs writes their TypeScript types from
+# the derives on each (decision 025).
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+ts-rs = "12.0.1"
+
 # build.rs hashes the crate with these two crates, and tests/hash.rs compiles build.rs into
 # the tests, so the tests need them too. When you change a version in one list, change it
 # in the other.

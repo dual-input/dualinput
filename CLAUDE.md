@@ -24,6 +24,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
   If an agent in `.claude/agents/` isn't available as an agent type, which happens when its definition was added after the session started, run a general-purpose agent told to read that definition and act as that agent, in the background if its front matter says `background: true`.
 - `.claude/skills/resume/` picks up work on one area of `record/areas/` from its plan, its log, or both (`/resume <area>`).
 - `.claude/skills/learn/` writes one chapter of the learning material (`/learn <course> <part>`), running the `chapter-writer` agent, then the `fact-checker` on full-depth sections.
+- `.claude/skills/stage-map/` makes a build stage's map, the page the user reads before the stage's diff (`/stage-map <stage>`).
 - `.claude/skills/study-aircraft/` studies one aircraft from every file of it we can open (`/study-aircraft <aircraft>`).
   Start a background subagent per aircraft and have it invoke the skill, because a study fills a whole context.
   When it reports, commit its folder and mark it in `record/areas/aircraft/plan.md`.

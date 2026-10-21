@@ -1,0 +1,479 @@
+<title>Dual Input stage 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; each part reads top to bottom: what it does, a picture, why, then where it lives in the code. */
+:root{
+  --bg:#f1f3f0; --panel:#ffffff; --ink:#18212b; --muted:#5a6573; --line:#d4d9dc; --line2:#aab3bb; --arrow:#5a6573;
+  --new:#a85f00; --new-bg:#fcf0dc; --rel:#0d6a5f; --rel-bg:#e0f2ee; --later:#5f4bb0; --later-bg:#ece8fa;
+  --ok:#2f7a2f; --ok-bg:#e3f2df; --stop:#b03a2e; --stop-bg:#f9e4e1; --zone:#e7ebe8;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --panel:#192029; --ink:#e6e9ee; --muted:#9aa5b3; --line:#2b3441; --line2:#4a5564; --arrow:#9aa5b3;
+  --new:#f0a63a; --new-bg:#33260f; --rel:#53c4b2; --rel-bg:#112e2a; --later:#a99af2; --later-bg:#241f44;
+  --ok:#7ccf72; --ok-bg:#16301a; --stop:#f08a7e; --stop-bg:#3a1b17; --zone:#161c24; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --panel:#192029; --ink:#e6e9ee; --muted:#9aa5b3; --line:#2b3441; --line2:#4a5564; --arrow:#9aa5b3;
+  --new:#f0a63a; --new-bg:#33260f; --rel:#53c4b2; --rel-bg:#112e2a; --later:#a99af2; --later-bg:#241f44;
+  --ok:#7ccf72; --ok-bg:#16301a; --stop:#f08a7e; --stop-bg:#3a1b17; --zone:#161c24; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+main{max-width:920px;margin:0 auto;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:36px;line-height:1.1}
+h2{font-size:25px;line-height:1.2}
+p{margin:0;max-width:66ch}
+code{font-family:var(--mono);font-size:.86em}
+.eyebrow{font:500 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:12px}
+.lead{font-size:18px;line-height:1.55}
+.cando{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.cando div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:4px}
+.cando code{font-size:13px;color:var(--rel)}
+.cando span{font-size:14.5px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;border:1.5px solid}
+.sw.new{background:var(--new-bg);border-color:var(--new)}
+.sw.rel{background:var(--rel-bg);border-color:var(--rel)}
+.sw.later{background:var(--later-bg);border-color:var(--later);border-style:dashed}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+svg text{font-family:var(--body)}
+svg .t{font:600 15px var(--body);fill:var(--ink)}
+svg .s{font:13px var(--body);fill:var(--muted)}
+svg .b{fill:var(--panel);stroke:var(--line2)}
+svg .b.new{fill:var(--new-bg);stroke:var(--new)}
+svg .b.rel{fill:var(--rel-bg);stroke:var(--rel)}
+svg .b.later{fill:var(--later-bg);stroke:var(--later);stroke-dasharray:5 4}
+svg .z{fill:var(--zone);stroke:var(--line)}
+svg .zl{font:600 12px var(--display);letter-spacing:.1em;fill:var(--muted)}
+svg .a{stroke:var(--arrow);stroke-width:1.5;fill:none}
+svg .a.later{stroke:var(--later);stroke-dasharray:5 4}
+svg .badge{fill:var(--ink)}
+svg .bn{font:600 12px var(--body);fill:var(--bg)}
+.story{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:8px;font-size:15.5px}
+.story li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:baseline}
+.story b{width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);font:600 12px/22px var(--body);text-align:center}
+.part{display:grid;gap:14px;padding-top:24px;border-top:1px solid var(--line)}
+.part-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.tag{font:600 11px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:4px;border:1px solid}
+.tag.new{color:var(--new);background:var(--new-bg);border-color:var(--new)}
+.tag.rel{color:var(--rel);background:var(--rel-bg);border-color:var(--rel)}
+.tag.later{color:var(--later);background:var(--later-bg);border-color:var(--later);border-style:dashed}
+.what{font-size:16.5px}
+.pic{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pic .st{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:9px 13px;font-size:14.5px;line-height:1.35;min-width:0}
+.pic .st small{display:block;color:var(--muted);font-size:13px}
+.pic .st.new{background:var(--new-bg);border-color:var(--new)}
+.pic .st.rel{background:var(--rel-bg);border-color:var(--rel)}
+.pic .st.ok{background:var(--ok-bg);border-color:var(--ok)}
+.pic .st.stop{background:var(--stop-bg);border-color:var(--stop)}
+.pic .ar{color:var(--muted);font-size:20px;line-height:1}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.pair .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:6px;font-size:14.5px}
+.pair .box h4{margin:0;font:600 14.5px var(--body)}
+.pair .box ul{margin:0;padding-left:18px;display:grid;gap:3px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font:600 11px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.order{margin:0;padding-left:22px;display:grid;gap:8px;font-size:15px}
+.order span{color:var(--muted);font-size:13.5px;font-family:var(--mono)}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 8px;font-size:13.5px}
+nav.toc a{padding:3px 9px;border:1px solid var(--line);border-radius:4px;background:var(--panel);text-decoration:none;color:inherit}
+a{color:inherit}
+a:focus-visible{outline:2px solid var(--rel);outline-offset:2px}
+@media (max-width:560px){h1{font-size:30px}.lead{font-size:17px}}
+.walk{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:w}
+.walk li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);counter-increment:w}
+.walk .do{padding:9px 12px 9px 40px;position:relative;font-size:15px;line-height:1.45}
+.walk .do::before{content:counter(w);position:absolute;left:10px;top:10px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--bg);font:600 11px/20px var(--body);text-align:center}
+.walk .at{padding:9px 12px;background:var(--zone);border-left:1px solid var(--line);font:12.5px/1.5 var(--mono);color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.walk .at b{display:block;font-weight:500;color:var(--rel);font-size:12px;letter-spacing:.01em}
+.walk .at code{font-size:12.5px;color:var(--ink);font-family:var(--mono)}
+svg .f{font:12px var(--mono);fill:var(--muted)}
+.story .at{display:block;font:12.5px var(--mono);color:var(--rel);margin-top:2px}
+@media (max-width:620px){.walk li{grid-template-columns:1fr}.walk .at{border-left:0;border-top:1px solid var(--line)}}
+svg .t2{font:600 14px var(--body);fill:var(--ink)}
+svg .tm{font:500 13.5px var(--mono);fill:var(--ink)}
+svg .ts{font:12px var(--body);fill:var(--muted)}
+.states{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.state{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:11px 13px;display:grid;gap:7px;align-content:start}
+.state.ok{border-color:var(--ok);background:var(--ok-bg)}
+.state.stop{border-color:var(--stop);background:var(--stop-bg)}
+.state h4{margin:0;font:600 15px var(--body)}
+.state ul{margin:0;padding:0;list-style:none;font-size:14px;display:grid;gap:4px;color:var(--muted)}
+.state .via{font-size:13px;color:var(--ink);border-top:1px dashed var(--line2);padding-top:7px}
+.state .via::before{content:"→ ";color:var(--muted)}
+.seam{display:grid;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.seam .side{padding:12px 14px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.seam .label{font:600 12px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);width:100%}
+.seam .bar{display:flex;align-items:center;gap:10px;padding:0 14px;font:600 11px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.seam .bar::before,.seam .bar::after{content:"";flex:1;height:0;border-top:2px dashed var(--line2)}
+.chip{font:13px var(--mono);padding:5px 9px;border-radius:5px;border:1px solid var(--line2);background:var(--bg)}
+.chip.up::before{content:"↑ ";color:var(--rel)}
+.chip.down::before{content:"↓ ";color:var(--new)}
+pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font:12.5px/1.55 var(--mono);overflow-x:auto;white-space:pre}
+.part .k{font:600 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--rel)}
+.part p .k{display:block;margin:0 0 6px}
+.part div.k{margin-bottom:-4px}
+
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">Dual Input · build plan · stage 3</div>
+  <h1>The bench</h1>
+  <p class="lead">The bench runs real cores on this PC and drives them from outside, as a sim and a network would. After each scenario it replays every core's recording, and fails if a replay differs from its run. It needs no sim and no second PC.</p>
+  <div class="cando">
+    <div><code>node tools/bench.ts</code><span>Builds the bench build of the core, runs each scenario, and replays every recording.</span></div>
+    <div><code>node tools/bench.ts load</code><span>Runs one core under an hour of a busy flight, then reports the loop against its budgets.</span></div>
+    <div><code>log.txt</code><span>Every core, release builds included, logs its loop's stats once a minute.</span></div>
+  </div>
+  <div class="legend" aria-label="Color key">
+    <span><i class="sw new"></i>bench only, never ships</span>
+    <span><i class="sw rel"></i>ships in every core</span>
+    <span><i class="sw later"></i>built now, wired in stage 4</span>
+  </div>
+  <nav class="toc" aria-label="Parts">
+    <a href="#copy">Bench build</a><a href="#door">Bench's socket</a><a href="#fakes">Test units</a><a href="#tape">Playback</a><a href="#health">Loop's stats</a><a href="#plug">Killed core</a><a href="#fakesim">Stand-in sim</a><a href="#below">Sim seam's types</a><a href="#numbers">Numbers</a><a href="#order">Reading the diff</a>
+  </nav>
+</header>
+
+<section aria-labelledby="h-run" style="display:grid;gap:14px">
+  <h2 id="h-run">How the parts connect</h2>
+  <div class="scroll">
+  <svg viewBox="0 0 1000 510" style="min-width:760px;width:100%;height:auto;display:block" role="img" aria-labelledby="bigt bigd">
+    <title id="bigt">Stage 3's parts and how inputs move between them</title>
+    <desc id="bigd">The bench in Node builds the bench build, starts a core, and sends it lines through the bench's socket. In the core, the socket and the playback push inputs into the queue, the loop hands them to the two test units, and the recording's writer and the loop's stats write files. At the end the bench replays each recording. Below the sim seam, sim-client, simconnect-types, and the stand-in sim are built; the stand-in is wired in stage 4.</desc>
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" style="stroke:var(--arrow)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ahl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" style="stroke:var(--later)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    </defs>
+    <rect class="z" x="16" y="30" width="282" height="460" rx="10"/><text class="zl" x="34" y="56">THE BENCH · NODE</text>
+    <rect class="z" x="330" y="30" width="400" height="460" rx="10"/><text class="zl" x="348" y="56">A CORE · BENCH BUILD</text>
+    <rect class="z" x="762" y="30" width="222" height="460" rx="10"/><text class="zl" x="780" y="56">BELOW THE SIM SEAM · ENGINES</text>
+
+    <a href="#copy"><rect class="b new" x="36" y="76" width="242" height="58" rx="6"/><text class="tm" x="52" y="100">tools/bench.ts</text><text class="ts" x="52" y="120">builds the bench build</text></a>
+    <a href="#door"><rect class="b new" x="36" y="168" width="242" height="70" rx="6"/><text class="tm" x="52" y="192">cores.ts · BenchRun, Core</text><text class="ts" x="52" y="212">starts, drives, and kills cores</text><text class="ts" x="52" y="228">replays every recording</text></a>
+    <a href="#plug"><rect class="b new" x="36" y="278" width="242" height="58" rx="6"/><text class="tm" x="52" y="302">scenarios/</text><text class="ts" x="52" y="322">killed-core · builds</text></a>
+    <a href="#numbers"><rect class="b new" x="36" y="368" width="242" height="58" rx="6"/><text class="tm" x="52" y="392">bench/load.ts</text><text class="ts" x="52" y="412">the hour under load</text></a>
+    <text class="ts" x="36" y="458">The scenarios and load.ts drive</text>
+    <text class="ts" x="36" y="474">their cores through BenchRun.</text>
+
+    <a href="#door"><rect class="b new" x="350" y="76" width="170" height="58" rx="6"/><text class="t2" x="364" y="100">bench's socket</text><text class="ts" x="364" y="120">127.0.0.1 · bench-port</text></a>
+    <a href="#tape"><rect class="b new" x="540" y="76" width="170" height="58" rx="6"/><text class="t2" x="554" y="100">playback</text><text class="ts" x="554" y="120">flight + session</text></a>
+    <rect class="b rel" x="350" y="178" width="360" height="42" rx="6"/><text class="t2" x="364" y="204">queue</text><text class="ts" x="414" y="204">stamped and numbered under one lock</text>
+    <rect class="b rel" x="350" y="248" width="360" height="112" rx="6"/><text class="t2" x="364" y="272">the loop · kernel.handle</text>
+    <a href="#fakes"><rect class="b new" x="364" y="288" width="160" height="56" rx="6"/><text class="t2" x="378" y="311">lines unit</text><text class="ts" x="378" y="330">counts lines, exits</text></a>
+    <a href="#fakes"><rect class="b new" x="538" y="288" width="158" height="56" rx="6"/><text class="t2" x="552" y="311">load unit</text><text class="ts" x="552" y="330">writes, holds, jobs</text></a>
+    <rect class="b rel" x="350" y="390" width="170" height="58" rx="6"/><text class="t2" x="364" y="414">recording's writer</text><text class="ts" x="364" y="434">inputs.zst</text>
+    <a href="#health"><rect class="b rel" x="540" y="390" width="170" height="58" rx="6"/><text class="t2" x="554" y="414">loop's stats</text><text class="ts" x="554" y="434">log.txt, each minute</text></a>
+
+    <a href="#below"><rect class="b rel" x="782" y="76" width="182" height="58" rx="6"/><text class="tm" x="796" y="100">sim-client</text><text class="ts" x="796" y="120">Up ↑ · SimCall ↓</text></a>
+    <a href="#fakesim"><rect class="b later" x="782" y="176" width="182" height="74" rx="6"/><text class="tm" x="796" y="200">stand-in-sim</text><text class="ts" x="796" y="220">its own thread</text><text class="ts" x="796" y="237">wired in stage 4</text></a>
+    <a href="#below"><rect class="b rel" x="782" y="288" width="182" height="58" rx="6"/><text class="tm" x="796" y="312">simconnect-types</text><text class="ts" x="796" y="332">generated from the SDK</text></a>
+    <a href="#door"><rect class="b rel" x="782" y="390" width="182" height="58" rx="6"/><text class="tm" x="796" y="414">messages::bench</text><text class="ts" x="796" y="434">the socket's lines</text></a>
+
+    <line class="a" x1="157" y1="134" x2="157" y2="166" marker-end="url(#ah)"/>
+    <path class="a" d="M278 196 H318 V105 H348" marker-end="url(#ah)"/>
+    <line class="a" x1="435" y1="134" x2="435" y2="176" marker-end="url(#ah)"/>
+    <line class="a" x1="520" y1="105" x2="538" y2="105" marker-end="url(#ah)"/>
+    <line class="a" x1="625" y1="134" x2="625" y2="176" marker-end="url(#ah)"/>
+    <line class="a" x1="530" y1="220" x2="530" y2="246" marker-end="url(#ah)"/>
+    <line class="a" x1="435" y1="360" x2="435" y2="388" marker-end="url(#ah)"/>
+    <line class="a" x1="625" y1="360" x2="625" y2="388" marker-end="url(#ah)"/>
+    <path class="a" d="M348 419 H318 V228 H280" marker-end="url(#ah)"/>
+    <line class="a" x1="873" y1="134" x2="873" y2="174" marker-end="url(#ah)"/>
+    <line class="a" x1="873" y1="288" x2="873" y2="252" marker-end="url(#ah)"/>
+    <path class="a later" d="M782 213 H746 V199 H712" marker-end="url(#ahl)"/>
+
+    <g><circle class="badge" cx="177" cy="150" r="9"/><text class="bn" x="177" y="154" text-anchor="middle">1</text></g>
+    <g><circle class="badge" cx="318" cy="150" r="9"/><text class="bn" x="318" y="154" text-anchor="middle">2</text></g>
+    <g><circle class="badge" cx="529" cy="80" r="9"/><text class="bn" x="529" y="84" text-anchor="middle">3</text></g>
+    <g><circle class="badge" cx="454" cy="156" r="9"/><text class="bn" x="454" y="160" text-anchor="middle">4</text></g>
+    <g><circle class="badge" cx="644" cy="156" r="9"/><text class="bn" x="644" y="160" text-anchor="middle">5</text></g>
+    <g><circle class="badge" cx="551" cy="234" r="9"/><text class="bn" x="551" y="238" text-anchor="middle">6</text></g>
+    <g><circle class="badge" cx="530" cy="375" r="9"/><text class="bn" x="530" y="379" text-anchor="middle">7</text></g>
+    <g><circle class="badge" cx="318" cy="330" r="9"/><text class="bn" x="318" y="334" text-anchor="middle">8</text></g>
+  </svg>
+  </div>
+  <ol class="story">
+    <li><b>1</b><div>tools/bench.ts builds the core with its <code>stand-in</code> feature into target/bench, so the bench never overwrites the core a plain <code>cargo build</code> makes.<span class="at">tools/bench.ts:45 buildBenchCore()</span></div></li>
+    <li><b>2</b><div>cores.ts starts the core on a new data folder, reads the port the core wrote there, connects, and checks that the core was built from this tree.<span class="at">tools/bench/cores.ts:95 Core.start()</span></div></li>
+    <li><b>3</b><div>A load line starts the playback, and puts nothing in the queue itself.<span class="at">apps/core/src/bench/socket.rs:65 playback::play(…)</span></div></li>
+    <li><b>4</b><div>The socket puts each count and exit line in the queue, as an input.<span class="at">socket.rs:72 queue.push(sources.lines, line, true)</span></div></li>
+    <li><b>5</b><div>The playback pushes a flight's inputs and a session's into the queue, each when it falls due.<span class="at">apps/core/src/bench/playback.rs:243 queue.push(…)</span></div></li>
+    <li><b>6</b><div>The loop takes one input at a time and hands it to a test unit.<span class="at">apps/core/src/run.rs:296 kernel.handle(&amp;input)</span></div></li>
+    <li><b>7</b><div>The recording's writer saves every input, and the loop's stats go to the log.<span class="at">run.rs:309 stats.handled(…)</span></div></li>
+    <li><b>8</b><div>When the scenario ends, even by failing, cores.ts kills any core still running and replays each recording. A replay that differs from its run fails the scenario.<span class="at">tools/bench/cores.ts:49 test.after(() =&gt; this.end())</span></div></li>
+  </ol>
+</section>
+
+<section class="part" id="copy" aria-labelledby="h-copy">
+  <div class="part-head"><h2 id="h-copy">The bench build</h2><span class="tag new">bench only</span></div>
+  <p class="what"><span class="k">What</span> The bench build is the core with its <code>stand-in</code> Cargo feature on, which adds the bench's socket and two test units. Release builds leave the feature off.</p>
+  <p class="what"><span class="k">Why</span> The bench has to test the code a pilot runs, and a separate test program would test something else.</p>
+  <div class="k">How</div>
+  <div class="pic">
+    <div class="st rel">the core<small>everything a release has</small></div><span class="ar">+</span>
+    <div class="st new">the bench's socket</div><span class="ar">+</span>
+    <div class="st new">two test units</div><span class="ar">=</span>
+    <div class="st">the bench build<small>in target/bench</small></div>
+  </div>
+  <ol class="walk">
+    <li><span class="do">The core's Cargo.toml declares the feature and the crates it needs.</span><span class="at"><b>apps/core/Cargo.toml</b><code>[features] stand-in = ["dep:serde", …]</code></span></li>
+    <li><span class="do">With the feature on, <code>main</code> registers the test units after the core's own units.</span><span class="at"><b>apps/core/src/lib.rs:61</b><code>let units = &amp;[units, bench::UNITS].concat();</code></span></li>
+    <li><span class="do">As the core starts, it opens the bench's socket only if the test units registered.</span><span class="at"><b>apps/core/src/run.rs:130, 198</b><code>bench::Sources::of(&amp;kernel)</code> then <code>bench::start(…)</code></span></li>
+    <li><span class="do">tools/bench.ts builds the bench build into target/bench, and runs the program Cargo reports it built.</span><span class="at"><b>tools/bench.ts:46, 59</b><code>--features stand-in --target-dir target/bench</code>, <code>message.executable</code></span></li>
+    <li><span class="do">A scenario checks that a release build can't reach the stand-in sim.</span><span class="at"><b>tools/bench/scenarios/builds.ts:24</b><code>!release.some(line =&gt; line.startsWith("stand-in-sim "))</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="door" aria-labelledby="h-door">
+  <div class="part-head"><h2 id="h-door">The bench's socket</h2><span class="tag new">bench only</span></div>
+  <p class="what"><span class="k">What</span> The bench's socket is a TCP port on 127.0.0.1 that only the bench build opens. The bench sends it JSON lines, and the core's first line answers with its version and hash.</p>
+  <p class="what"><span class="k">Why</span> The bench may reach the core only where a pilot's sim and network do, so every scenario runs a pilot's code.</p>
+  <div class="k">How</div>
+  <div class="scroll">
+  <svg viewBox="0 0 1000 290" style="min-width:680px;width:100%;height:auto;display:block" role="img" aria-labelledby="sqt sqd">
+    <title id="sqt">The lines between the bench and the core's socket</title>
+    <desc id="sqd">The bench connects to the port in bench-port; the core sends its version and hash; then each count or exit line from the bench becomes a recorded input in the queue, and a load line starts the playback.</desc>
+    <defs><marker id="sq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" style="stroke:var(--arrow)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+    <rect class="b new" x="70" y="14" width="200" height="48" rx="6"/><text class="t2" x="170" y="35" text-anchor="middle">the bench</text><text class="f" x="170" y="53" text-anchor="middle">tools/bench/cores.ts</text>
+    <rect class="b new" x="420" y="14" width="200" height="48" rx="6"/><text class="t2" x="520" y="35" text-anchor="middle">the core's socket</text><text class="f" x="520" y="53" text-anchor="middle">bench/socket.rs</text>
+    <rect class="b rel" x="750" y="14" width="200" height="48" rx="6"/><text class="t2" x="850" y="35" text-anchor="middle">the queue, or the playback</text><text class="f" x="850" y="53" text-anchor="middle">inside the core</text>
+    <line x1="170" y1="62" x2="170" y2="282" style="stroke:var(--line2)" stroke-dasharray="4 4"/>
+    <line x1="520" y1="62" x2="520" y2="282" style="stroke:var(--line2)" stroke-dasharray="4 4"/>
+    <line x1="850" y1="62" x2="850" y2="282" style="stroke:var(--line2)" stroke-dasharray="4 4"/>
+    <text class="ts" x="345" y="88" text-anchor="middle">connects to the port in bench-port</text><line class="a" x1="172" y1="96" x2="516" y2="96" marker-end="url(#sq)"/>
+    <text class="f" x="345" y="124" text-anchor="middle">{"version":"0.1.0","hash":"…"}</text><line class="a" x1="518" y1="132" x2="174" y2="132" marker-end="url(#sq)"/>
+    <text class="ts" x="160" y="152" text-anchor="end">must match stamp.ts</text>
+    <text class="f" x="345" y="172" text-anchor="middle">{"kind":"count","n":1}</text><line class="a" x1="172" y1="180" x2="516" y2="180" marker-end="url(#sq)"/>
+    <text class="ts" x="685" y="172" text-anchor="middle">a recorded input</text><line class="a" x1="522" y1="180" x2="846" y2="180" marker-end="url(#sq)"/>
+    <text class="f" x="345" y="212" text-anchor="middle">{"kind":"exit"}</text><line class="a" x1="172" y1="220" x2="516" y2="220" marker-end="url(#sq)"/>
+    <text class="ts" x="685" y="212" text-anchor="middle">a recorded input</text><line class="a" x1="522" y1="220" x2="846" y2="220" marker-end="url(#sq)"/>
+    <text class="f" x="345" y="252" text-anchor="middle">{"kind":"load","capture":…,"plays":6}</text><line class="a" x1="172" y1="260" x2="516" y2="260" marker-end="url(#sq)"/>
+    <text class="ts" x="685" y="252" text-anchor="middle">starts the playback</text><line class="a" x1="522" y1="260" x2="846" y2="260" marker-end="url(#sq)"/>
+  </svg>
+  </div>
+  <ol class="walk">
+    <li><span class="do">The core asks Windows for a free port on 127.0.0.1.</span><span class="at"><b>apps/core/src/bench/socket.rs:23</b><code>TcpListener::bind(("127.0.0.1", 0))</code></span></li>
+    <li><span class="do">It writes the port to <code>bench-port.new</code>, then renames that to <code>bench-port</code>, so the bench never reads half a number.</span><span class="at"><b>socket.rs:26–28</b><code>std::fs::write</code> · <code>std::fs::rename</code></span></li>
+    <li><span class="do">The bench waits for <code>bench-port</code>, then connects.</span><span class="at"><b>tools/bench/cores.ts:108–113</b><code>net.connect({ host: "127.0.0.1", port })</code></span></li>
+    <li><span class="do">The core sends its version and hash, and the bench fails unless they match its own.</span><span class="at"><b>socket.rs:46 · cores.ts:117</b><code>Hello { version, hash }</code> · <code>assert.deepEqual(hello, { VERSION, HASH })</code></span></li>
+    <li><span class="do">The socket puts count and exit lines in the queue.</span><span class="at"><b>socket.rs:72</b><code>queue.push(sources.lines, line, true)</code></span></li>
+    <li><span class="do">For a load line, it starts the playback instead.</span><span class="at"><b>socket.rs:65</b><code>ToCore::Load { capture, plays } =&gt; playback::play(…)</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="fakes" aria-labelledby="h-fakes">
+  <div class="part-head"><h2 id="h-fakes">The test units</h2><span class="tag new">bench only</span></div>
+  <p class="what"><span class="k">What</span> The test units are two units only the bench build registers. The lines unit counts the bench's numbered lines and exits on request, and the load unit does a busy session's work.</p>
+  <p class="what"><span class="k">Why</span> The loop and its recording need a workload to measure before the real features exist.</p>
+  <div class="k">How</div>
+  <div class="pair">
+    <div class="box"><h4>The lines unit</h4><ul><li>count n: logs n and puts out <code>Counted(n)</code></li><li>exit: puts out the core's exit</li></ul></div>
+    <div class="box"><h4>The load unit</h4><ul><li>a flight-model input: 100 outputs, then holds the loop 98.7µs, as 100 write functions did in p10</li><li>every 60s: holds the loop 100ms, as a write function at its limit</li><li>a timer 5 times a second, and a file job every 30s</li><li>any other input: passes its bytes on as an output</li></ul></div>
+  </div>
+  <ol class="walk">
+    <li><span class="do">The lines unit parses each line from the socket.</span><span class="at"><b>apps/core/src/bench/lines.rs:26</b><code>fn line</code> · <code>serde_json::from_slice</code></span></li>
+    <li><span class="do">For a count line, it logs n and puts out <code>Counted(n)</code>.</span><span class="at"><b>lines.rs:31–32</b><code>tracing::debug!(n, …)</code> · <code>cx.out(Counted(n))</code></span></li>
+    <li><span class="do">For an exit line, it puts out the core's exit.</span><span class="at"><b>lines.rs:34</b><code>ToCore::Exit =&gt; cx.out(Exit)</code></span></li>
+    <li><span class="do">The load unit reads each input's kind from its first two bytes.</span><span class="at"><b>apps/core/src/bench/load.rs:90</b><code>fn input</code> · <code>match kind</code></span></li>
+    <li><span class="do">The start input sets its timers and its file job going.</span><span class="at"><b>load.rs:98</b><code>START =&gt; cx.timer(TICK, …) · cx.timer(STOP_EVERY, …) · cx.job(…)</code></span></li>
+    <li><span class="do">For a flight-model input, it puts out 100 writes, then holds the loop.</span><span class="at"><b>load.rs:105–114</b><code>cx.out(Wrote::Entry { … })</code> · <code>hold(started, WRITE_FUNCTIONS)</code></span></li>
+    <li><span class="do">Once a minute, its stop timer holds the loop for 100ms.</span><span class="at"><b>load.rs:145–146</b><code>fn stop</code> · <code>hold(Instant::now(), LIMIT)</code></span></li>
+    <li><span class="do">A hold spins until its time is up. Nothing the unit puts out depends on how long it spun, so the replay still matches.</span><span class="at"><b>load.rs:168–170</b><code>while started.elapsed() &lt; long { spin_loop() }</code></span></li>
+    <li><span class="do">The end input puts out the core's exit.</span><span class="at"><b>load.rs:134</b><code>END =&gt; cx.out(Exit)</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="tape" aria-labelledby="h-tape">
+  <div class="part-head"><h2 id="h-tape">The playback</h2><span class="tag new">bench only</span></div>
+  <p class="what"><span class="k">What</span> The playback feeds the core a recorded 10-minute flight at its real pace, plus a session's made-up inputs. You run it by hand with <code>node tools/bench.ts load</code>, and stage 14 runs it again with real write functions.</p>
+  <p class="what"><span class="k">Why</span> Every input goes through one loop, so a loop that falls behind a busy flight makes every pilot's action wait. The playback lets the bench check the loop keeps up before the features that bring that load exist.</p>
+  <div class="k">How</div>
+  <div class="scroll"><svg viewBox="0 0 1000 250" style="min-width:640px;width:100%;height:auto;display:block" role="img" aria-labelledby="pbt pbd">
+<title id="pbt">The playback merges its streams into the queue in time order</title>
+<desc id="pbd">A schematic 100 millisecond slice: sim frames from the capture, a burst of traffic records, the link's inputs, ATC frames and panel messages each arrive on their own schedule, and the playback pushes them into one queue in the order they fall due.</desc>
+<text class="s" x="176" y="38" text-anchor="end">sim frames</text><line x1="190" y1="34" x2="960" y2="34" style="stroke:var(--line)"/><circle cx="247.0" cy="34" r="4.5" style="fill:var(--rel)"/><circle cx="401.0" cy="34" r="4.5" style="fill:var(--rel)"/><circle cx="555.0" cy="34" r="4.5" style="fill:var(--rel)"/><circle cx="709.0" cy="34" r="4.5" style="fill:var(--rel)"/><circle cx="863.0" cy="34" r="4.5" style="fill:var(--rel)"/>
+<text class="s" x="176" y="72" text-anchor="end">link, 140 a second</text><line x1="190" y1="68" x2="960" y2="68" style="stroke:var(--line)"/><circle cx="216.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="271.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="326.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="381.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="436.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="491.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="546.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="601.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="656.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="711.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="766.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="821.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="876.4" cy="68" r="4.5" style="fill:var(--new)"/><circle cx="931.4" cy="68" r="4.5" style="fill:var(--new)"/>
+<text class="s" x="176" y="106" text-anchor="end">ATC frames</text><line x1="190" y1="102" x2="960" y2="102" style="stroke:var(--line)"/><circle cx="280.9" cy="102" r="4.5" style="fill:var(--new)"/><circle cx="434.9" cy="102" r="4.5" style="fill:var(--new)"/><circle cx="588.9" cy="102" r="4.5" style="fill:var(--new)"/><circle cx="742.9" cy="102" r="4.5" style="fill:var(--new)"/><circle cx="896.9" cy="102" r="4.5" style="fill:var(--new)"/>
+<text class="s" x="176" y="140" text-anchor="end">panels</text><line x1="190" y1="136" x2="960" y2="136" style="stroke:var(--line)"/><circle cx="729.0" cy="136" r="4.5" style="fill:var(--new)"/>
+<text class="s" x="176" y="174" text-anchor="end">traffic, every 500ms</text><line x1="190" y1="170" x2="960" y2="170" style="stroke:var(--line)"/><circle cx="667.4" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="669.6" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="671.8" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="674.0" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="676.2" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="678.4" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="680.6" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="682.8" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="685.0" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="687.2" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="689.4" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="691.6" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="693.8" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="696.0" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="698.2" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="700.4" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="702.6" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="704.8" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="707.0" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="709.2" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="711.4" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="713.6" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="715.8" cy="170" r="3.2" style="fill:var(--rel)"/><circle cx="718.0" cy="170" r="3.2" style="fill:var(--rel)"/>
+<text class="t" x="176" y="221" text-anchor="end">the queue</text><rect x="190" y="204" width="770" height="24" rx="12" style="fill:var(--zone);stroke:var(--line2)"/><circle cx="216.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="247.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="271.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="280.9" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="326.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="381.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="401.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="434.9" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="436.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="491.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="546.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="555.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="588.9" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="601.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="656.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="667.4" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="669.6" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="671.8" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="674.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="676.2" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="678.4" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="680.6" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="682.8" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="685.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="687.2" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="689.4" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="691.6" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="693.8" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="696.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="698.2" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="700.4" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="702.6" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="704.8" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="707.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="709.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="709.2" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="711.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="711.4" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="713.6" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="715.8" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="718.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="729.0" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="742.9" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="766.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="821.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="863.0" cy="216" r="3.2" style="fill:var(--rel)"/><circle cx="876.4" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="896.9" cy="216" r="3.2" style="fill:var(--new)"/><circle cx="931.4" cy="216" r="3.2" style="fill:var(--new)"/>
+<text class="s" x="960" y="248" text-anchor="end">one 100ms slice, schematic · each dot an input</text>
+</svg></div>
+  <ol class="walk">
+    <li><span class="do">A load line from the bench starts the playback on a thread of its own.</span><span class="at"><b>apps/core/src/bench/playback.rs:26</b><code>pub fn play(path, plays, queue, source, context)</code></span></li>
+    <li><span class="do">It decompresses the capture into memory and indexes its records.</span><span class="at"><b>playback.rs:59–61</b><code>Capture::read</code> · <code>zstd::stream::read::Decoder</code></span></li>
+    <li><span class="do">It sets up the made-up streams: 109 cockpit changes a second, 30 avatar poses, 1 heartbeat, 10 panel messages, 50 ATC frames, and cursor drags.</span><span class="at"><b>playback.rs:189</b><code>fn session() -&gt; Vec&lt;Box&lt;dyn Stream&gt;&gt;</code></span></li>
+    <li><span class="do">It keeps every stream in a heap, ordered by when its next input is due.</span><span class="at"><b>playback.rs:227</b><code>BinaryHeap&lt;Reverse&lt;(u64, usize)&gt;&gt;</code></span></li>
+    <li><span class="do">It sleeps until the next input is due, then pushes it into the queue. Inputs due together, such as a burst of traffic records, go in back to back.</span><span class="at"><b>playback.rs:240, 243</b><code>thread::sleep(…)</code> · <code>queue.push(source, bytes, true)</code></span></li>
+    <li><span class="do">It pushes a start input first and an end input last, which the load unit starts and exits on.</span><span class="at"><b>playback.rs:233, 249</b><code>input(START, &amp;[])</code> · <code>input(END, &amp;[])</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="health" aria-labelledby="h-health">
+  <div class="part-head"><h2 id="h-health">The loop's stats</h2><span class="tag rel">ships in every core</span></div>
+  <p class="what"><span class="k">What</span> Once a minute, every core logs how its loop is doing: inputs handled, how busy it was, how long inputs waited, and the slowest. At exit it logs the same for the whole run.</p>
+  <p class="what"><span class="k">Why</span> A pilot's bug report then shows whether their loop kept up, and the bench reads its budgets from the same lines.</p>
+  <div class="k">How</div>
+  <div class="scroll">
+  <svg viewBox="0 0 1000 176" style="min-width:680px;width:100%;height:auto;display:block" role="img" aria-labelledby="lt">
+    <title id="lt">One turn of the loop, and the three times the stats take from it</title>
+    <rect x="20" y="62" width="190" height="34" rx="4" style="fill:var(--zone);stroke:var(--line2)"/><text class="ts" x="115" y="84" text-anchor="middle">waiting in the queue</text>
+    <rect x="214" y="62" width="150" height="34" rx="4" style="fill:var(--panel);stroke:var(--line2)"/><text class="ts" x="289" y="84" text-anchor="middle">checkpoint, record</text>
+    <rect x="368" y="62" width="270" height="34" rx="4" style="fill:var(--rel-bg);stroke:var(--rel)"/><text class="t2" x="503" y="84" text-anchor="middle">the handlers run</text>
+    <rect x="642" y="62" width="150" height="34" rx="4" style="fill:var(--panel);stroke:var(--line2)"/><text class="ts" x="717" y="84" text-anchor="middle">outputs to their sinks</text>
+    <text class="ts" x="20" y="50">queued</text>
+    <text class="ts" x="214" y="50" text-anchor="middle">taken</text><line x1="214" y1="54" x2="214" y2="106" style="stroke:var(--ink)" stroke-width="1.5"/>
+    <text class="ts" x="796" y="50" text-anchor="middle">asks for the next</text><line x1="796" y1="54" x2="796" y2="106" style="stroke:var(--ink)" stroke-width="1.5"/>
+    <path d="M20 116 V124 H210 V116" style="fill:none;stroke:var(--muted)"/><text class="tm" x="115" y="144" text-anchor="middle">waited</text><text class="ts" x="115" y="162" text-anchor="middle">p50, p99, p99.9, most</text>
+    <path d="M368 116 V124 H638 V116" style="fill:none;stroke:var(--rel)"/><text class="tm" x="503" y="144" text-anchor="middle">took</text><text class="ts" x="503" y="162" text-anchor="middle">over 1ms counted, slowest kept</text>
+    <path d="M214 30 V22 H796 V30" style="fill:none;stroke:var(--new)"/><text class="tm" x="505" y="16" text-anchor="middle">busy</text>
+  </svg>
+  </div>
+  <pre class="log">the loop's stats window="minute" seconds=60.0 inputs=34768 busy_percent=0.52 wait_p50_us=12
+  wait_p99_us=87 wait_p999_us=223 wait_max_us=98509 over_1ms=1 slowest_us=100004 slowest_seq=625250</pre>
+  <ol class="walk">
+    <li><span class="do">The loop notes the time it takes an input from the queue.</span><span class="at"><b>apps/core/src/run.rs:263</b><code>let popped = Instant::now();</code></span></li>
+    <li><span class="do">It works out how long the input waited since it was queued.</span><span class="at"><b>run.rs:264</b><code>let waited = clock::now() - input.stamp;</code></span></li>
+    <li><span class="do">It times the handlers.</span><span class="at"><b>run.rs:296–297</b><code>kernel.handle(&amp;input)</code> · <code>let took = handling.elapsed();</code></span></li>
+    <li><span class="do">It passes the three times to the stats, counting everything since it took the input as busy.</span><span class="at"><b>run.rs:309</b><code>stats.handled(&amp;input, waited, took, popped.elapsed())</code></span></li>
+    <li><span class="do">The stats add them to the minute's totals and the run's, and log the minute's line once 60s have passed.</span><span class="at"><b>apps/core/src/loop_stats.rs:34–39</b><code>fn handled</code> · <code>self.minute.log("minute")</code></span></li>
+    <li><span class="do">The percentiles come from a fixed table of wait times, and are at most 1/16 above the true ones.</span><span class="at"><b>loop_stats.rs:127, 156</b><code>Histogram::bucket</code> · <code>at_most(0.99)</code></span></li>
+    <li><span class="do">As the core exits, the loop logs the whole run's line.</span><span class="at"><b>run.rs:318</b><code>stats.finish()</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="plug" aria-labelledby="h-plug">
+  <div class="part-head"><h2 id="h-plug">The killed-core scenario</h2><span class="tag new">bench only</span></div>
+  <p class="what"><span class="k">What</span> The killed-core scenario sends a core 300 numbered lines, kills it, and counts the lines its recording kept.</p>
+  <p class="what"><span class="k">Why</span> The core's budget says a crash loses at most the recording's last second, and this scenario checks it.</p>
+  <div class="k">How</div>
+  <div class="scroll"><svg viewBox="0 0 1000 172" style="min-width:640px;width:100%;height:auto;display:block" role="img" aria-labelledby="kt kd">
+<title id="kt">The killed core's 300 lines, one tick each</title>
+<desc id="kd">Lines 1 to 259 were sent before the recording's last finished frame and are in the recording; lines 260 to 300 were sent in the 637ms after it and were lost when the core was killed.</desc>
+<line x1="40" y1="104" x2="960" y2="104" style="stroke:var(--line2)"/>
+<line x1="40.0" y1="104" x2="40.0" y2="109" style="stroke:var(--line2)"/><text class="s" x="40.0" y="122" text-anchor="middle">0s</text>
+<line x1="235.7" y1="104" x2="235.7" y2="109" style="stroke:var(--line2)"/><text class="s" x="235.7" y="122" text-anchor="middle">1s</text>
+<line x1="431.5" y1="104" x2="431.5" y2="109" style="stroke:var(--line2)"/><text class="s" x="431.5" y="122" text-anchor="middle">2s</text>
+<line x1="627.2" y1="104" x2="627.2" y2="109" style="stroke:var(--line2)"/><text class="s" x="627.2" y="122" text-anchor="middle">3s</text>
+<line x1="823.0" y1="104" x2="823.0" y2="109" style="stroke:var(--line2)"/><text class="s" x="823.0" y="122" text-anchor="middle">4s</text>
+<line x1="40.0" y1="58" x2="40.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="43.1" y1="58" x2="43.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="46.1" y1="58" x2="46.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="49.2" y1="58" x2="49.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="52.3" y1="58" x2="52.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="55.3" y1="58" x2="55.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="58.4" y1="58" x2="58.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="61.5" y1="58" x2="61.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="64.5" y1="58" x2="64.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="67.6" y1="58" x2="67.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="70.7" y1="58" x2="70.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="73.7" y1="58" x2="73.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="76.8" y1="58" x2="76.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="79.9" y1="58" x2="79.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="82.9" y1="58" x2="82.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="86.0" y1="58" x2="86.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="89.1" y1="58" x2="89.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="92.1" y1="58" x2="92.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="95.2" y1="58" x2="95.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="98.3" y1="58" x2="98.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="101.3" y1="58" x2="101.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="104.4" y1="58" x2="104.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="107.5" y1="58" x2="107.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="110.5" y1="58" x2="110.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="113.6" y1="58" x2="113.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="116.7" y1="58" x2="116.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="119.7" y1="58" x2="119.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="122.8" y1="58" x2="122.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="125.9" y1="58" x2="125.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="128.9" y1="58" x2="128.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="132.0" y1="58" x2="132.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="135.1" y1="58" x2="135.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="138.1" y1="58" x2="138.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="141.2" y1="58" x2="141.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="144.3" y1="58" x2="144.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="147.3" y1="58" x2="147.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="150.4" y1="58" x2="150.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="153.5" y1="58" x2="153.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="156.5" y1="58" x2="156.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="159.6" y1="58" x2="159.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="162.7" y1="58" x2="162.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="165.7" y1="58" x2="165.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="168.8" y1="58" x2="168.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="171.9" y1="58" x2="171.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="174.9" y1="58" x2="174.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="178.0" y1="58" x2="178.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="181.1" y1="58" x2="181.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="184.1" y1="58" x2="184.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="187.2" y1="58" x2="187.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="190.3" y1="58" x2="190.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="193.3" y1="58" x2="193.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="196.4" y1="58" x2="196.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="199.5" y1="58" x2="199.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="202.5" y1="58" x2="202.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="205.6" y1="58" x2="205.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="208.7" y1="58" x2="208.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="211.7" y1="58" x2="211.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="214.8" y1="58" x2="214.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="217.9" y1="58" x2="217.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="220.9" y1="58" x2="220.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="224.0" y1="58" x2="224.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="227.1" y1="58" x2="227.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="230.1" y1="58" x2="230.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="233.2" y1="58" x2="233.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="236.3" y1="58" x2="236.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="239.3" y1="58" x2="239.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="242.4" y1="58" x2="242.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="245.5" y1="58" x2="245.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="248.5" y1="58" x2="248.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="251.6" y1="58" x2="251.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="254.7" y1="58" x2="254.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="257.7" y1="58" x2="257.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="260.8" y1="58" x2="260.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="263.9" y1="58" x2="263.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="266.9" y1="58" x2="266.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="270.0" y1="58" x2="270.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="273.1" y1="58" x2="273.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="276.1" y1="58" x2="276.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="279.2" y1="58" x2="279.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="282.2" y1="58" x2="282.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="285.3" y1="58" x2="285.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="288.4" y1="58" x2="288.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="291.4" y1="58" x2="291.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="294.5" y1="58" x2="294.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="297.6" y1="58" x2="297.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="300.6" y1="58" x2="300.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="303.7" y1="58" x2="303.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="306.8" y1="58" x2="306.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="309.8" y1="58" x2="309.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="312.9" y1="58" x2="312.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="316.0" y1="58" x2="316.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="319.0" y1="58" x2="319.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="322.1" y1="58" x2="322.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="325.2" y1="58" x2="325.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="328.2" y1="58" x2="328.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="331.3" y1="58" x2="331.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="334.4" y1="58" x2="334.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="337.4" y1="58" x2="337.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="340.5" y1="58" x2="340.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="343.6" y1="58" x2="343.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="346.6" y1="58" x2="346.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="349.7" y1="58" x2="349.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="352.8" y1="58" x2="352.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="355.8" y1="58" x2="355.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="358.9" y1="58" x2="358.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="362.0" y1="58" x2="362.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="365.0" y1="58" x2="365.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="368.1" y1="58" x2="368.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="371.2" y1="58" x2="371.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="374.2" y1="58" x2="374.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="377.3" y1="58" x2="377.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="380.4" y1="58" x2="380.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="383.4" y1="58" x2="383.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="386.5" y1="58" x2="386.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="389.6" y1="58" x2="389.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="392.6" y1="58" x2="392.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="395.7" y1="58" x2="395.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="398.8" y1="58" x2="398.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="401.8" y1="58" x2="401.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="404.9" y1="58" x2="404.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="408.0" y1="58" x2="408.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="411.0" y1="58" x2="411.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="414.1" y1="58" x2="414.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="417.2" y1="58" x2="417.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="420.2" y1="58" x2="420.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="423.3" y1="58" x2="423.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="426.4" y1="58" x2="426.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="429.4" y1="58" x2="429.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="432.5" y1="58" x2="432.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="435.6" y1="58" x2="435.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="438.6" y1="58" x2="438.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="441.7" y1="58" x2="441.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="444.8" y1="58" x2="444.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="447.8" y1="58" x2="447.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="450.9" y1="58" x2="450.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="454.0" y1="58" x2="454.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="457.0" y1="58" x2="457.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="460.1" y1="58" x2="460.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="463.2" y1="58" x2="463.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="466.2" y1="58" x2="466.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="469.3" y1="58" x2="469.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="472.4" y1="58" x2="472.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="475.4" y1="58" x2="475.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="478.5" y1="58" x2="478.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="481.6" y1="58" x2="481.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="484.6" y1="58" x2="484.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="487.7" y1="58" x2="487.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="490.8" y1="58" x2="490.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="493.8" y1="58" x2="493.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="496.9" y1="58" x2="496.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="500.0" y1="58" x2="500.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="503.0" y1="58" x2="503.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="506.1" y1="58" x2="506.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="509.2" y1="58" x2="509.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="512.2" y1="58" x2="512.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="515.3" y1="58" x2="515.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="518.4" y1="58" x2="518.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="521.4" y1="58" x2="521.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="524.5" y1="58" x2="524.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="527.6" y1="58" x2="527.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="530.6" y1="58" x2="530.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="533.7" y1="58" x2="533.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="536.8" y1="58" x2="536.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="539.8" y1="58" x2="539.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="542.9" y1="58" x2="542.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="546.0" y1="58" x2="546.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="549.0" y1="58" x2="549.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="552.1" y1="58" x2="552.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="555.2" y1="58" x2="555.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="558.2" y1="58" x2="558.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="561.3" y1="58" x2="561.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="564.4" y1="58" x2="564.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="567.4" y1="58" x2="567.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="570.5" y1="58" x2="570.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="573.6" y1="58" x2="573.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="576.6" y1="58" x2="576.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="579.7" y1="58" x2="579.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="582.8" y1="58" x2="582.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="585.8" y1="58" x2="585.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="588.9" y1="58" x2="588.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="592.0" y1="58" x2="592.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="595.0" y1="58" x2="595.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="598.1" y1="58" x2="598.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="601.2" y1="58" x2="601.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="604.2" y1="58" x2="604.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="607.3" y1="58" x2="607.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="610.4" y1="58" x2="610.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="613.4" y1="58" x2="613.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="616.5" y1="58" x2="616.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="619.6" y1="58" x2="619.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="622.6" y1="58" x2="622.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="625.7" y1="58" x2="625.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="628.8" y1="58" x2="628.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="631.8" y1="58" x2="631.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="634.9" y1="58" x2="634.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="638.0" y1="58" x2="638.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="641.0" y1="58" x2="641.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="644.1" y1="58" x2="644.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="647.2" y1="58" x2="647.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="650.2" y1="58" x2="650.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="653.3" y1="58" x2="653.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="656.4" y1="58" x2="656.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="659.4" y1="58" x2="659.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="662.5" y1="58" x2="662.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="665.6" y1="58" x2="665.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="668.6" y1="58" x2="668.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="671.7" y1="58" x2="671.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="674.8" y1="58" x2="674.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="677.8" y1="58" x2="677.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="680.9" y1="58" x2="680.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="684.0" y1="58" x2="684.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="687.0" y1="58" x2="687.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="690.1" y1="58" x2="690.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="693.2" y1="58" x2="693.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="696.2" y1="58" x2="696.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="699.3" y1="58" x2="699.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="702.4" y1="58" x2="702.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="705.4" y1="58" x2="705.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="708.5" y1="58" x2="708.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="711.6" y1="58" x2="711.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="714.6" y1="58" x2="714.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="717.7" y1="58" x2="717.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="720.8" y1="58" x2="720.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="723.8" y1="58" x2="723.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="726.9" y1="58" x2="726.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="730.0" y1="58" x2="730.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="733.0" y1="58" x2="733.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="736.1" y1="58" x2="736.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="739.2" y1="58" x2="739.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="742.2" y1="58" x2="742.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="745.3" y1="58" x2="745.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="748.3" y1="58" x2="748.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="751.4" y1="58" x2="751.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="754.5" y1="58" x2="754.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="757.5" y1="58" x2="757.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="760.6" y1="58" x2="760.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="763.7" y1="58" x2="763.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="766.7" y1="58" x2="766.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="769.8" y1="58" x2="769.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="772.9" y1="58" x2="772.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="775.9" y1="58" x2="775.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="779.0" y1="58" x2="779.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="782.1" y1="58" x2="782.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="785.1" y1="58" x2="785.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="788.2" y1="58" x2="788.2" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="791.3" y1="58" x2="791.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="794.3" y1="58" x2="794.3" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="797.4" y1="58" x2="797.4" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="800.5" y1="58" x2="800.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="803.5" y1="58" x2="803.5" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="806.6" y1="58" x2="806.6" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="809.7" y1="58" x2="809.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="812.7" y1="58" x2="812.7" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="815.8" y1="58" x2="815.8" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="818.9" y1="58" x2="818.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="821.9" y1="58" x2="821.9" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="825.0" y1="58" x2="825.0" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="828.1" y1="58" x2="828.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="831.1" y1="58" x2="831.1" y2="96" style="stroke:var(--ok)" stroke-width="1.3"/><line x1="834.2" y1="58" x2="834.2" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="837.3" y1="58" x2="837.3" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="840.3" y1="58" x2="840.3" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="843.4" y1="58" x2="843.4" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="846.5" y1="58" x2="846.5" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="849.5" y1="58" x2="849.5" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="852.6" y1="58" x2="852.6" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="855.7" y1="58" x2="855.7" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="858.7" y1="58" x2="858.7" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="861.8" y1="58" x2="861.8" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="864.9" y1="58" x2="864.9" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="867.9" y1="58" x2="867.9" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="871.0" y1="58" x2="871.0" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="874.1" y1="58" x2="874.1" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="877.1" y1="58" x2="877.1" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="880.2" y1="58" x2="880.2" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="883.3" y1="58" x2="883.3" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="886.3" y1="58" x2="886.3" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="889.4" y1="58" x2="889.4" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="892.5" y1="58" x2="892.5" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="895.5" y1="58" x2="895.5" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="898.6" y1="58" x2="898.6" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="901.7" y1="58" x2="901.7" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="904.7" y1="58" x2="904.7" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="907.8" y1="58" x2="907.8" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="910.9" y1="58" x2="910.9" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="913.9" y1="58" x2="913.9" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="917.0" y1="58" x2="917.0" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="920.1" y1="58" x2="920.1" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="923.1" y1="58" x2="923.1" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="926.2" y1="58" x2="926.2" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="929.3" y1="58" x2="929.3" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="932.3" y1="58" x2="932.3" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="935.4" y1="58" x2="935.4" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="938.5" y1="58" x2="938.5" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="941.5" y1="58" x2="941.5" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="944.6" y1="58" x2="944.6" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="947.7" y1="58" x2="947.7" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="950.7" y1="58" x2="950.7" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="953.8" y1="58" x2="953.8" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/><line x1="956.9" y1="58" x2="956.9" y2="96" style="stroke:var(--stop)" stroke-width="1.3"/>
+<line x1="245.5" y1="46" x2="245.5" y2="102" style="stroke:var(--ink)" stroke-width="1.2" stroke-dasharray="3 3"/>
+<line x1="441.3" y1="46" x2="441.3" y2="102" style="stroke:var(--ink)" stroke-width="1.2" stroke-dasharray="3 3"/>
+<line x1="637.0" y1="46" x2="637.0" y2="102" style="stroke:var(--ink)" stroke-width="1.2" stroke-dasharray="3 3"/>
+<line x1="832.8" y1="46" x2="832.8" y2="102" style="stroke:var(--ink)" stroke-width="1.2" stroke-dasharray="3 3"/>
+<text class="s" x="245.5" y="38" text-anchor="middle">a frame finishes, about once a second</text>
+<text class="s" x="832.8" y="38" text-anchor="end">last frame finished</text>
+<line x1="962" y1="36" x2="962" y2="104" style="stroke:var(--stop)" stroke-width="3"/><text class="t" x="958" y="30" text-anchor="end" style="fill:var(--stop)">kill</text>
+<path d="M40 134 V140 H831.1 V134" style="fill:none;stroke:var(--ok)"/><text class="t" x="435.6" y="160" text-anchor="middle" style="fill:var(--ok)">lines 1–259 are in the recording</text>
+<path d="M834.2 134 V140 H962 V134" style="fill:none;stroke:var(--stop)"/><text class="t" x="898.1" y="160" text-anchor="middle" style="fill:var(--stop)">41 lost · 637ms</text>
+</svg></div>
+  <ol class="walk">
+    <li><span class="do">The scenario starts a core in a run folder of its own.</span><span class="at"><b>tools/bench/scenarios/killed-core.ts:20–21</b><code>new BenchRun("killed-core", t)</code> · <code>run.core("a")</code></span></li>
+    <li><span class="do">It sends 300 numbered lines, one every 15.6ms or so, the step of Windows' timer.</span><span class="at"><b>killed-core.ts:24–27</b><code>core.send({ kind: "count", n })</code> · <code>sleep(10)</code></span></li>
+    <li><span class="do">It kills the core.</span><span class="at"><b>killed-core.ts:30</b><code>core.kill()</code></span></li>
+    <li><span class="do">It replays the recording at debug level, so the lines unit logs each n.</span><span class="at"><b>killed-core.ts:35</b><code>run.replay(recording, "debug")</code></span></li>
+    <li><span class="do">It reads the numbers from the replay's log, and checks they run 1, 2, 3 with no gap.</span><span class="at"><b>killed-core.ts:38–40</b><code>/a line from the bench reached the loop n=(\d+)/</code></span></li>
+    <li><span class="do">It checks the lost lines were all sent in the last second before the kill, with 100ms of slack.</span><span class="at"><b>killed-core.ts:46</b><code>lostMs &lt;= 1_000 + SLACK_MS</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="fakesim" aria-labelledby="h-fakesim">
+  <div class="part-head"><h2 id="h-fakesim">The stand-in sim</h2><span class="tag new">bench only</span><span class="tag later">wired in stage 4</span></div>
+  <p class="what"><span class="k">What</span> The stand-in sim plays MSFS for the bench. It tracks a process the bench names as the sim's, takes connections, and loses one or quits on request.</p>
+  <p class="what"><span class="k">Why</span> Stage 4 builds the core's connection to the sim, and the bench has to test it without MSFS running.</p>
+  <div class="k">How</div>
+  <div class="states">
+    <div class="state"><h4>No sim</h4><ul><li>An open fails with <code>E_FAIL</code>, as during the sim's boot.</li><li>Looking for the sim finds nothing until the bench names a process.</li></ul><div class="via">the bench names a process, the core looks</div></div>
+    <div class="state ok"><h4>Sim running</h4><ul><li>An open succeeds, then MSFS's open message follows.</li><li>The bench can make it lose a connection.</li></ul><div class="via">the bench asks it to quit</div></div>
+    <div class="state"><h4>Sim quit</h4><ul><li>The quit message went to every open connection.</li><li>An open still succeeds, then nothing answers.</li></ul><div class="via">the process ends</div></div>
+    <div class="state stop"><h4>Sim exited</h4><ul><li>It reports the process's exit code.</li><li>It keeps watching a process the bench named next.</li></ul><div class="via">the core looks again</div></div>
+  </div>
+  <ol class="walk">
+    <li><span class="do">The stand-in runs on a thread of its own, and waits until a call comes or the sim's process ends.</span><span class="at"><b>engines/stand-in-sim/src/lib.rs:148, 161</b><code>fn run</code> · <code>WaitForMultipleObjects(…)</code></span></li>
+    <li><span class="do">The bench names the process that plays the sim's.</span><span class="at"><b>lib.rs:212</b><code>Act::Watch { process } =&gt; self.watched = Some(process)</code></span></li>
+    <li><span class="do">When the core asks it to look, the stand-in opens that process and reports its ID and creation time.</span><span class="at"><b>lib.rs:233, 262</b><code>fn find</code> · <code>OpenProcess</code> · <code>Up::Found { … }</code></span></li>
+    <li><span class="do">An open fails while no sim runs, and succeeds while one does, followed by MSFS's open message.</span><span class="at"><b>lib.rs:176, 201</b><code>E_FAIL</code> · <code>S_OK</code> and <code>open_message()</code></span></li>
+    <li><span class="do">After the quit message, an open succeeds but nothing answers, a case the real sim may show.</span><span class="at"><b>lib.rs:187</b><code>if self.quit { … S_OK, and nothing after }</code></span></li>
+    <li><span class="do">The bench can make it lose a connection, or quit.</span><span class="at"><b>lib.rs:213, 218</b><code>Act::Lose</code> · <code>Act::Quit</code></span></li>
+    <li><span class="do">When the process ends, the stand-in reports its exit code, and keeps watching a process the bench named next.</span><span class="at"><b>lib.rs:272–284</b><code>fn exited</code> · <code>GetExitCodeProcess</code> · <code>Up::Exited { code }</code></span></li>
+    <li><span class="do">It builds each message in SimConnect's own layout.</span><span class="at"><b>lib.rs:290, 314</b><code>open_message()</code> · <code>header::&lt;T&gt;()</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="below" aria-labelledby="h-below">
+  <div class="part-head"><h2 id="h-below">The sim seam's types</h2><span class="tag rel">ships</span><span class="tag later">grows in stage 4</span></div>
+  <p class="what"><span class="k">What</span> <code>simconnect-types</code> holds SimConnect's structs, generated from the SDK at each build. <code>sim-client</code> holds what crosses the sim seam: five kinds of input up, three calls down.</p>
+  <p class="what"><span class="k">Why</span> The sim edge, the stand-in sim, and a replay must hand up the same inputs, so the code above the seam can't tell them apart.</p>
+  <div class="k">How</div>
+  <div class="seam">
+    <div class="side"><span class="label">Above the seam: the core's sim code, from stage 4</span><span class="chip down">FindProcess</span><span class="chip down">Open { connection, name }</span><span class="chip down">Close { connection }</span></div>
+    <div class="bar">the sim seam</div>
+    <div class="side"><span class="label">Below the seam: the sim edge, the stand-in sim, or a replay</span><span class="chip up">Message { connection, record }</span><span class="chip up">Opened { connection, result }</span><span class="chip up">Lost { connection }</span><span class="chip up">Found { process, created }</span><span class="chip up">Exited { code }</span></div>
+  </div>
+  <ol class="walk">
+    <li><span class="do">Before it generates anything, the build script checks that the SDK on disk is the version msfs-sdk.txt names, and stops with "run node tools/setup.ts" if not.</span><span class="at"><b>engines/simconnect-types/build.rs:17–48</b><code>std::process::exit(1)</code></span></li>
+    <li><span class="do">bindgen reads SimConnect.h and generates a Rust type for each name that starts SIMCONNECT_.</span><span class="at"><b>build.rs:62</b><code>.allowlist_type("SIMCONNECT_.*")</code></span></li>
+    <li><span class="do">Cargo builds the types again when a header changes, and the crate records the SDK's version.</span><span class="at"><b>build.rs:50, 70</b><code>SIMCONNECT_SDK_VERSION</code> · <code>CargoCallbacks</code></span></li>
+    <li><span class="do">The five kinds of input that come up.</span><span class="at"><b>engines/sim-client/src/lib.rs:28</b><code>enum Up { Message, Opened, Lost, Found, Exited }</code></span></li>
+    <li><span class="do">The three calls that go down.</span><span class="at"><b>sim-client/src/lib.rs:61</b><code>enum SimCall { FindProcess, Open, Close }</code></span></li>
+    <li><span class="do">An input becomes bytes for the queue, and bytes again on the loop.</span><span class="at"><b>sim-client/src/lib.rs:48, 53</b><code>Up::encode</code> · <code>Up::decode</code></span></li>
+  </ol>
+</section>
+
+<section class="part" id="numbers" aria-labelledby="h-numbers">
+  <div class="part-head"><h2 id="h-numbers">The numbers</h2></div>
+  <p class="what">One core ran an hour of the busy flight, about 730 inputs a second, on the release profile. <code>tools/bench/load.ts</code> reads the loop's stats from its log (line 39) and replays the hour (line 47). Each bar is one minute's p99 wait in the queue.</p>
+  <div class="scroll"><svg viewBox="0 0 1000 250" style="min-width:640px;width:100%;height:auto;display:block" role="img" aria-labelledby="mt md">
+<title id="mt">Each minute's p99 wait in the queue over the hour</title>
+<desc id="md">58 of the 60 minutes stayed between 57 microseconds and 1.1 milliseconds at p99; two minutes reached 47 and 90 milliseconds, where a 100ms hold met a burst of traffic records; the budget is 11.2 milliseconds over the run, and the hour's p99 was 87 microseconds.</desc>
+<line x1="64" y1="214.0" x2="864" y2="214.0" style="stroke:var(--line)"/><text class="s" x="56" y="218.0" text-anchor="end">10µs</text>
+<line x1="64" y1="169.0" x2="864" y2="169.0" style="stroke:var(--line)"/><text class="s" x="56" y="173.0" text-anchor="end">100µs</text>
+<line x1="64" y1="124.0" x2="864" y2="124.0" style="stroke:var(--line)"/><text class="s" x="56" y="128.0" text-anchor="end">1ms</text>
+<line x1="64" y1="79.0" x2="864" y2="79.0" style="stroke:var(--line)"/><text class="s" x="56" y="83.0" text-anchor="end">10ms</text>
+<line x1="64" y1="34.0" x2="864" y2="34.0" style="stroke:var(--line)"/><text class="s" x="56" y="38.0" text-anchor="end">100ms</text>
+<rect x="66.0" y="180.0" width="9.3" height="34.0" rx="1.5" style="fill:var(--rel)"/><rect x="79.3" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="92.7" y="165.0" width="9.3" height="49.0" rx="1.5" style="fill:var(--rel)"/><rect x="106.0" y="176.8" width="9.3" height="37.2" rx="1.5" style="fill:var(--rel)"/><rect x="119.3" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="132.7" y="178.0" width="9.3" height="36.0" rx="1.5" style="fill:var(--rel)"/><rect x="146.0" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="159.3" y="175.7" width="9.3" height="38.3" rx="1.5" style="fill:var(--rel)"/><rect x="172.7" y="169.2" width="9.3" height="44.8" rx="1.5" style="fill:var(--rel)"/><rect x="186.0" y="175.7" width="9.3" height="38.3" rx="1.5" style="fill:var(--rel)"/><rect x="199.3" y="130.0" width="9.3" height="84.0" rx="1.5" style="fill:var(--rel)"/><rect x="212.7" y="176.8" width="9.3" height="37.2" rx="1.5" style="fill:var(--rel)"/><rect x="226.0" y="166.3" width="9.3" height="47.7" rx="1.5" style="fill:var(--rel)"/><rect x="239.3" y="178.0" width="9.3" height="36.0" rx="1.5" style="fill:var(--rel)"/><rect x="252.7" y="173.6" width="9.3" height="40.4" rx="1.5" style="fill:var(--rel)"/><rect x="266.0" y="171.7" width="9.3" height="42.3" rx="1.5" style="fill:var(--rel)"/><rect x="279.3" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="292.7" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="306.0" y="175.7" width="9.3" height="38.3" rx="1.5" style="fill:var(--rel)"/><rect x="319.3" y="176.8" width="9.3" height="37.2" rx="1.5" style="fill:var(--rel)"/><rect x="332.7" y="122.4" width="9.3" height="91.6" rx="1.5" style="fill:var(--new)"/><rect x="346.0" y="172.6" width="9.3" height="41.4" rx="1.5" style="fill:var(--rel)"/><rect x="359.3" y="166.3" width="9.3" height="47.7" rx="1.5" style="fill:var(--rel)"/><rect x="372.7" y="172.6" width="9.3" height="41.4" rx="1.5" style="fill:var(--rel)"/><rect x="386.0" y="170.8" width="9.3" height="43.2" rx="1.5" style="fill:var(--rel)"/><rect x="399.3" y="173.6" width="9.3" height="40.4" rx="1.5" style="fill:var(--rel)"/><rect x="412.7" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="426.0" y="173.6" width="9.3" height="40.4" rx="1.5" style="fill:var(--rel)"/><rect x="439.3" y="175.7" width="9.3" height="38.3" rx="1.5" style="fill:var(--rel)"/><rect x="452.7" y="171.7" width="9.3" height="42.3" rx="1.5" style="fill:var(--rel)"/><rect x="466.0" y="132.8" width="9.3" height="81.2" rx="1.5" style="fill:var(--rel)"/><rect x="479.3" y="179.3" width="9.3" height="34.7" rx="1.5" style="fill:var(--rel)"/><rect x="492.7" y="175.7" width="9.3" height="38.3" rx="1.5" style="fill:var(--rel)"/><rect x="506.0" y="176.8" width="9.3" height="37.2" rx="1.5" style="fill:var(--rel)"/><rect x="519.3" y="176.8" width="9.3" height="37.2" rx="1.5" style="fill:var(--rel)"/><rect x="532.7" y="170.8" width="9.3" height="43.2" rx="1.5" style="fill:var(--rel)"/><rect x="546.0" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="559.3" y="168.4" width="9.3" height="45.6" rx="1.5" style="fill:var(--rel)"/><rect x="572.7" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="586.0" y="171.7" width="9.3" height="42.3" rx="1.5" style="fill:var(--rel)"/><rect x="599.3" y="48.7" width="9.3" height="165.3" rx="1.5" style="fill:var(--new)"/><rect x="612.7" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="626.0" y="170.8" width="9.3" height="43.2" rx="1.5" style="fill:var(--rel)"/><rect x="639.3" y="173.6" width="9.3" height="40.4" rx="1.5" style="fill:var(--rel)"/><rect x="652.7" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="666.0" y="171.7" width="9.3" height="42.3" rx="1.5" style="fill:var(--rel)"/><rect x="679.3" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="692.7" y="173.6" width="9.3" height="40.4" rx="1.5" style="fill:var(--rel)"/><rect x="706.0" y="173.6" width="9.3" height="40.4" rx="1.5" style="fill:var(--rel)"/><rect x="719.3" y="172.6" width="9.3" height="41.4" rx="1.5" style="fill:var(--rel)"/><rect x="732.7" y="36.0" width="9.3" height="178.0" rx="1.5" style="fill:var(--new)"/><rect x="746.0" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="759.3" y="167.0" width="9.3" height="47.0" rx="1.5" style="fill:var(--rel)"/><rect x="772.7" y="170.0" width="9.3" height="44.0" rx="1.5" style="fill:var(--rel)"/><rect x="786.0" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="799.3" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="812.7" y="176.8" width="9.3" height="37.2" rx="1.5" style="fill:var(--rel)"/><rect x="826.0" y="174.6" width="9.3" height="39.4" rx="1.5" style="fill:var(--rel)"/><rect x="839.3" y="166.3" width="9.3" height="47.7" rx="1.5" style="fill:var(--rel)"/><rect x="852.7" y="175.7" width="9.3" height="38.3" rx="1.5" style="fill:var(--rel)"/>
+<line x1="64" y1="76.8" x2="864" y2="76.8" style="stroke:var(--stop)" stroke-width="1.5" stroke-dasharray="6 4"/><text class="s" x="874" y="80.8" style="fill:var(--stop)">budget, 11.2ms</text>
+<line x1="64" y1="171.7" x2="864" y2="171.7" style="stroke:var(--ink)" stroke-width="1.2"/><text class="s" x="874" y="175.7">the hour, 87µs</text>
+<text class="s" x="697.3" y="24" text-anchor="middle">a 100ms hold met a burst of traffic</text>
+<text class="s" x="64" y="236">minute 1</text><text class="s" x="864" y="236" text-anchor="end">minute 60</text>
+</svg></div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Question</th><th>Answer</th><th>Budget</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>How long did 99 in 100 inputs wait in the queue?</td><td class="num">87µs or less</td><td class="num">11.2ms</td><td><span class="pill ok">within</span></td></tr>
+      <tr><td>How busy was the loop?</td><td class="num">0.50%, 0.65% on the final code</td><td class="num">20%</td><td><span class="pill ok">within</span></td></tr>
+      <tr><td>Which inputs took longer than 1ms?</td><td class="num">only the load unit's 100ms holds</td><td class="num">those only</td><td><span class="pill ok">within</span></td></tr>
+      <tr><td>How long did the hour take to replay?</td><td class="num">17.2s</td><td class="num">6 minutes</td><td><span class="pill ok">within</span></td></tr>
+      <tr><td>Did the recording hold every input, in order?</td><td class="num">all 2,636,127</td><td></td><td><span class="pill ok">within</span></td></tr>
+      <tr><td>How much does a killed core lose?</td><td class="num">its last 637ms</td><td class="num">1s</td><td><span class="pill ok">within</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="part" id="order" aria-labelledby="h-order">
+  <div class="part-head"><h2 id="h-order">Reading the diff</h2></div>
+  <ol class="order">
+    <li>Stage 3's lines in the plan, and the cases moved to later stages. <span>record/areas/build/plan.md</span></li>
+    <li>The sim seam's types, then the stand-in sim. <span>engines/simconnect-types, sim-client, stand-in-sim</span></li>
+    <li>The bench socket's messages. <span>engines/messages/src/bench.rs</span></li>
+    <li>The core: the loop's stats, then the bench build's socket and test units. <span>apps/core/src/loop_stats.rs, run.rs, bench/</span></li>
+    <li>The bench. <span>tools/bench.ts, tools/bench/</span></li>
+    <li>The map check's change, the logs, and the measured results. <span>tools/map-check.ts, record/areas/*/log.md</span></li>
+  </ol>
+</section>
+</main>

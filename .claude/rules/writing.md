@@ -1,8 +1,10 @@
 # Writing
 
 ```text
-Purpose:  How everything an agent writes for this repository is written.
-Covers:   The record, code comments, commit messages, and instructions for agents.
+Purpose:  How everything an agent writes for people to read is written.
+Covers:   The record, code comments, commit messages, instructions for agents,
+          pages we publish, and replies in chat. A rule made for files, such as one
+          sentence per line, holds only in files.
 Loaded:   Into every session, by Claude Code, from .claude/rules/.
 ```
 

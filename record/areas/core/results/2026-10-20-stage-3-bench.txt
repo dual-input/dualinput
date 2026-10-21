@@ -1,0 +1,117 @@
+Stage 3's bench results, on our development machine, 2026-10-20.
+
+== The killed core: node tools/bench.ts, scenario killed-core ==
+259 of 300 lines reached the recording, which lost the last 637ms before the kill
+
+== The loop under load for an hour, release profile, before the review moved the busy share to cover the whole of each input ==
+the loop under load: flight-58p-egll-600s.bin.zst played 6 times over, a run of 3600s, in target\bench\runs\2026-10-20_18-28-36-load
+inputs	2636127, 732 a second
+queue wait, p50	14µs
+queue wait, p99	87µs	budget 11.2ms	within
+queue wait, p99 of the worst minute	90.1ms	budget 11.2ms	MISSED
+queue wait, p99.9	69.6ms
+queue wait, most	100.1ms
+busy	0.50%	budget 20%	within
+inputs over 1ms	60, of which the load's 100ms stops are 60 or 59	budget 1ms but the stops	within
+slowest input	100.0ms, #990628
+replay	17.2s for 2636127 inputs, 17.2s an hour	budget 360s an hour	within
+recording	126.2 MB
+
+The core's log, its start, the playback, and the loop's stats:
+30827954155µs  INFO dualinput_core::run: the core started commit="2d63ea80bd3fca87db104f5c7e6e039fb028914b" uncommitted=Some("7d85dd92596f0ae301bff18b17ffdda70d4e075c21ece151e72623886659ae91") profile="release" messages="a48d170bd1323f6dc7b0d264100e0072118449aa4abd304f33dc035999ccd606"
+30828018013µs  INFO dualinput_core::bench::load: the playback started records=312702 plays=6
+30887958534µs #36956  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36957 busy_percent=0.34 wait_p50_us=12 wait_p99_us=57 wait_p999_us=115 wait_max_us=2172 over_1ms=0 slowest_us=301 slowest_seq=29874 slowest_stamp=30876413578
+30947958978µs #74026  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37070 busy_percent=0.48 wait_p50_us=12 wait_p99_us=75 wait_p999_us=191 wait_max_us=100082 over_1ms=1 slowest_us=100003 slowest_seq=36972 slowest_stamp=30888018421
+31007966440µs #111912  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37886 busy_percent=0.50 wait_p50_us=11 wait_p99_us=123 wait_p999_us=69631 wait_max_us=100038 over_1ms=1 slowest_us=100004 slowest_seq=74042 slowest_stamp=30948018545
+31067971184µs #149085  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37173 busy_percent=0.46 wait_p50_us=11 wait_p99_us=67 wait_p999_us=175 wait_max_us=100041 over_1ms=1 slowest_us=100003 slowest_seq=111926 slowest_stamp=31008018822
+31127978286µs #185885  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36800 busy_percent=0.48 wait_p50_us=11 wait_p99_us=111 wait_p999_us=20479 wait_max_us=100018 over_1ms=1 slowest_us=100004 slowest_seq=149100 slowest_stamp=31068019350
+31187978439µs #220653  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34768 busy_percent=0.50 wait_p50_us=10 wait_p99_us=63 wait_p999_us=543 wait_max_us=98493 over_1ms=1 slowest_us=100004 slowest_seq=185901 slowest_stamp=31128019515
+31247980991µs #254578  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33925 busy_percent=0.49 wait_p50_us=11 wait_p99_us=111 wait_p999_us=57343 wait_max_us=98494 over_1ms=1 slowest_us=100004 slowest_seq=220667 slowest_stamp=31188019734
+31307983668µs #313891  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=59313 busy_percent=0.51 wait_p50_us=16 wait_p99_us=71 wait_p999_us=175 wait_max_us=98505 over_1ms=1 slowest_us=100002 slowest_seq=254591 slowest_stamp=31248020240
+31367984977µs #376352  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62461 busy_percent=0.52 wait_p50_us=18 wait_p99_us=99 wait_p999_us=895 wait_max_us=100016 over_1ms=1 slowest_us=100002 slowest_seq=313903 slowest_stamp=31308020273
+31427988871µs #439342  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62990 busy_percent=0.51 wait_p50_us=17 wait_p99_us=71 wait_p999_us=143 wait_max_us=98033 over_1ms=1 slowest_us=100005 slowest_seq=376365 slowest_stamp=31368020701
+31487995909µs #476314  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36972 busy_percent=0.51 wait_p50_us=12 wait_p99_us=735 wait_p999_us=86015 wait_max_us=98034 over_1ms=1 slowest_us=100004 slowest_seq=439353 slowest_stamp=31428021049
+31547998260µs #513385  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37071 busy_percent=0.49 wait_p50_us=12 wait_p99_us=67 wait_p999_us=151 wait_max_us=97851 over_1ms=1 slowest_us=100004 slowest_seq=476323 slowest_stamp=31488021419
+31607998571µs #551269  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37884 busy_percent=0.51 wait_p50_us=12 wait_p99_us=115 wait_p999_us=57343 wait_max_us=100021 over_1ms=1 slowest_us=100006 slowest_seq=513393 slowest_stamp=31548021588
+31667999328µs #588441  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37172 busy_percent=0.47 wait_p50_us=12 wait_p99_us=63 wait_p999_us=127 wait_max_us=97508 over_1ms=1 slowest_us=100004 slowest_seq=551278 slowest_stamp=31608022115
+31728006182µs #625242  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36801 busy_percent=0.50 wait_p50_us=12 wait_p99_us=79 wait_p999_us=6911 wait_max_us=97520 over_1ms=1 slowest_us=100004 slowest_seq=588450 slowest_stamp=31668022509
+31788007775µs #660010  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34768 busy_percent=0.52 wait_p50_us=12 wait_p99_us=87 wait_p999_us=223 wait_max_us=98509 over_1ms=1 slowest_us=100004 slowest_seq=625250 slowest_stamp=31728023060
+31848008105µs #693933  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33923 busy_percent=0.50 wait_p50_us=12 wait_p99_us=111 wait_p999_us=45055 wait_max_us=100025 over_1ms=1 slowest_us=100005 slowest_seq=660017 slowest_stamp=31788023460
+31908009045µs #753246  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=59313 busy_percent=0.51 wait_p50_us=16 wait_p99_us=75 wait_p999_us=223 wait_max_us=96515 over_1ms=1 slowest_us=100005 slowest_seq=693940 slowest_stamp=31848023935
+31968016027µs #815709  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62463 busy_percent=0.51 wait_p50_us=17 wait_p99_us=71 wait_p999_us=119 wait_max_us=97026 over_1ms=1 slowest_us=100004 slowest_seq=753253 slowest_stamp=31908024248
+32028018336µs #878699  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62990 busy_percent=0.51 wait_p50_us=17 wait_p99_us=67 wait_p999_us=119 wait_max_us=99508 over_1ms=1 slowest_us=100005 slowest_seq=815714 slowest_stamp=31968024761
+32088021263µs #915672  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36973 busy_percent=0.51 wait_p50_us=12 wait_p99_us=1087 wait_p999_us=73727 wait_max_us=95271 over_1ms=1 slowest_us=100005 slowest_seq=878703 slowest_stamp=32028024827
+32148025583µs #952744  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.1 inputs=37072 busy_percent=0.65 wait_p50_us=12 wait_p99_us=83 wait_p999_us=767 wait_max_us=95012 over_1ms=2 slowest_us=100006 slowest_seq=915674 slowest_stamp=32088025324
+32208025885µs #990628  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37884 busy_percent=0.50 wait_p50_us=12 wait_p99_us=115 wait_p999_us=45055 wait_max_us=97028 over_1ms=1 slowest_us=100013 slowest_seq=990628 slowest_stamp=32208025885
+32268026265µs #1027799  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37171 busy_percent=0.48 wait_p50_us=13 wait_p99_us=83 wait_p999_us=511 wait_max_us=99565 over_1ms=1 slowest_us=100006 slowest_seq=1027799 slowest_stamp=32268026265
+32328026701µs #1064599  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36800 busy_percent=0.50 wait_p50_us=12 wait_p99_us=91 wait_p999_us=335 wait_max_us=98102 over_1ms=1 slowest_us=100005 slowest_seq=1064599 slowest_stamp=32328026701
+32388026750µs #1099366  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34767 busy_percent=0.52 wait_p50_us=12 wait_p99_us=79 wait_p999_us=287 wait_max_us=95045 over_1ms=1 slowest_us=100008 slowest_seq=1099366 slowest_stamp=32388026750
+32448027040µs #1133289  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33923 busy_percent=0.50 wait_p50_us=12 wait_p99_us=111 wait_p999_us=30719 wait_max_us=97059 over_1ms=1 slowest_us=100005 slowest_seq=1133289 slowest_stamp=32448027040
+32508027553µs #1192602  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=59313 busy_percent=0.52 wait_p50_us=18 wait_p99_us=79 wait_p999_us=159 wait_max_us=99549 over_1ms=1 slowest_us=100007 slowest_seq=1192602 slowest_stamp=32508027553
+32568027686µs #1255064  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62462 busy_percent=0.52 wait_p50_us=18 wait_p99_us=71 wait_p999_us=183 wait_max_us=94073 over_1ms=1 slowest_us=100005 slowest_seq=1255064 slowest_stamp=32568027686
+32628028070µs #1318052  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62988 busy_percent=0.51 wait_p50_us=18 wait_p99_us=87 wait_p999_us=167 wait_max_us=95030 over_1ms=1 slowest_us=100005 slowest_seq=1318052 slowest_stamp=32628028070
+32688028590µs #1355022  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36970 busy_percent=0.51 wait_p50_us=12 wait_p99_us=639 wait_p999_us=59391 wait_max_us=99057 over_1ms=1 slowest_us=100005 slowest_seq=1355022 slowest_stamp=32688028590
+32748029012µs #1392094  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37072 busy_percent=0.48 wait_p50_us=12 wait_p99_us=59 wait_p999_us=215 wait_max_us=100058 over_1ms=1 slowest_us=100006 slowest_seq=1392094 slowest_stamp=32748029012
+32808029315µs #1429977  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37883 busy_percent=0.50 wait_p50_us=12 wait_p99_us=71 wait_p999_us=31743 wait_max_us=96558 over_1ms=1 slowest_us=100006 slowest_seq=1429977 slowest_stamp=32808029315
+32868029566µs #1467149  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37172 busy_percent=0.47 wait_p50_us=12 wait_p99_us=67 wait_p999_us=223 wait_max_us=97551 over_1ms=1 slowest_us=100005 slowest_seq=1467149 slowest_stamp=32868029566
+32928029705µs #1503947  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36798 busy_percent=0.49 wait_p50_us=12 wait_p99_us=67 wait_p999_us=191 wait_max_us=98546 over_1ms=1 slowest_us=100005 slowest_seq=1503947 slowest_stamp=32928029705
+32988030219µs #1538716  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34769 busy_percent=0.52 wait_p50_us=12 wait_p99_us=91 wait_p999_us=1151 wait_max_us=100078 over_1ms=1 slowest_us=100003 slowest_seq=1538716 slowest_stamp=32988030219
+33048031100µs #1572640  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33924 busy_percent=0.50 wait_p50_us=12 wait_p99_us=111 wait_p999_us=18431 wait_max_us=100050 over_1ms=1 slowest_us=100005 slowest_seq=1572640 slowest_stamp=33048031100
+33108031511µs #1631952  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=59312 busy_percent=0.51 wait_p50_us=17 wait_p99_us=103 wait_p999_us=207 wait_max_us=99094 over_1ms=1 slowest_us=100004 slowest_seq=1631952 slowest_stamp=33108031511
+33168032046µs #1694414  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62462 busy_percent=0.52 wait_p50_us=18 wait_p99_us=111 wait_p999_us=335 wait_max_us=99051 over_1ms=1 slowest_us=100004 slowest_seq=1694414 slowest_stamp=33168032046
+33228032411µs #1757279  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62865 busy_percent=0.51 wait_p50_us=18 wait_p99_us=87 wait_p999_us=183 wait_max_us=98071 over_1ms=1 slowest_us=100005 slowest_seq=1757279 slowest_stamp=33228032411
+33288032775µs #1794373  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37094 busy_percent=0.51 wait_p50_us=12 wait_p99_us=47103 wait_p999_us=100104 wait_max_us=100104 over_1ms=1 slowest_us=100005 slowest_seq=1794373 slowest_stamp=33288032775
+33348033128µs #1831442  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37069 busy_percent=0.49 wait_p50_us=13 wait_p99_us=75 wait_p999_us=159 wait_max_us=97483 over_1ms=1 slowest_us=100005 slowest_seq=1831442 slowest_stamp=33348033128
+33408033470µs #1869328  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37886 busy_percent=0.51 wait_p50_us=13 wait_p99_us=91 wait_p999_us=19455 wait_max_us=99600 over_1ms=1 slowest_us=100004 slowest_seq=1869328 slowest_stamp=33408033470
+33468033610µs #1906499  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37171 busy_percent=0.48 wait_p50_us=13 wait_p99_us=79 wait_p999_us=215 wait_max_us=95333 over_1ms=1 slowest_us=100005 slowest_seq=1906499 slowest_stamp=33468033610
+33528033786µs #1943299  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36800 busy_percent=0.50 wait_p50_us=12 wait_p99_us=75 wait_p999_us=167 wait_max_us=97521 over_1ms=1 slowest_us=100005 slowest_seq=1943299 slowest_stamp=33528033786
+33588033854µs #1978065  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34766 busy_percent=0.51 wait_p50_us=11 wait_p99_us=87 wait_p999_us=215 wait_max_us=97341 over_1ms=1 slowest_us=100005 slowest_seq=1978065 slowest_stamp=33588033854
+33648033903µs #2011991  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33926 busy_percent=0.50 wait_p50_us=11 wait_p99_us=111 wait_p999_us=5119 wait_max_us=99552 over_1ms=1 slowest_us=100004 slowest_seq=2011991 slowest_stamp=33648033903
+33708034427µs #2071302  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=59311 busy_percent=0.51 wait_p50_us=17 wait_p99_us=79 wait_p999_us=167 wait_max_us=95793 over_1ms=1 slowest_us=100004 slowest_seq=2071302 slowest_stamp=33708034427
+33768034663µs #2133763  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62461 busy_percent=0.51 wait_p50_us=18 wait_p99_us=79 wait_p999_us=143 wait_max_us=95930 over_1ms=1 slowest_us=100004 slowest_seq=2133763 slowest_stamp=33768034663
+33828034943µs #2196361  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62598 busy_percent=0.51 wait_p50_us=18 wait_p99_us=83 wait_p999_us=183 wait_max_us=97035 over_1ms=1 slowest_us=100005 slowest_seq=2196361 slowest_stamp=33828034943
+33888035170µs #2233723  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37362 busy_percent=0.51 wait_p50_us=13 wait_p99_us=90111 wait_p999_us=90111 wait_max_us=99550 over_1ms=1 slowest_us=100005 slowest_seq=2233723 slowest_stamp=33888035170
+33948035536µs #2270793  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37070 busy_percent=0.49 wait_p50_us=13 wait_p99_us=75 wait_p999_us=215 wait_max_us=97100 over_1ms=1 slowest_us=100005 slowest_seq=2270793 slowest_stamp=33948035536
+34008035763µs #2308677  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37884 busy_percent=0.51 wait_p50_us=13 wait_p99_us=111 wait_p999_us=5631 wait_max_us=97056 over_1ms=1 slowest_us=100005 slowest_seq=2308677 slowest_stamp=34008035763
+34068035859µs #2345849  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37172 busy_percent=0.47 wait_p50_us=12 wait_p99_us=95 wait_p999_us=271 wait_max_us=97574 over_1ms=1 slowest_us=100007 slowest_seq=2345849 slowest_stamp=34068035859
+34128036073µs #2382648  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36799 busy_percent=0.50 wait_p50_us=12 wait_p99_us=75 wait_p999_us=271 wait_max_us=99063 over_1ms=1 slowest_us=100004 slowest_seq=2382648 slowest_stamp=34128036073
+34188036516µs #2417416  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34768 busy_percent=0.52 wait_p50_us=12 wait_p99_us=75 wait_p999_us=863 wait_max_us=98034 over_1ms=1 slowest_us=100005 slowest_seq=2417416 slowest_stamp=34188036516
+34248036905µs #2451340  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33924 busy_percent=0.50 wait_p50_us=11 wait_p99_us=67 wait_p999_us=231 wait_max_us=98204 over_1ms=1 slowest_us=100005 slowest_seq=2451340 slowest_stamp=34248036905
+34308037277µs #2510260  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=58920 busy_percent=0.51 wait_p50_us=17 wait_p99_us=75 wait_p999_us=175 wait_max_us=98549 over_1ms=1 slowest_us=100006 slowest_seq=2510260 slowest_stamp=34308037277
+34368037331µs #2573113  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62853 busy_percent=0.50 wait_p50_us=15 wait_p99_us=115 wait_p999_us=98303 wait_max_us=99565 over_1ms=1 slowest_us=100004 slowest_seq=2573113 slowest_stamp=34368037331
+34428117054µs  INFO dualinput_core::bench::load: the playback ended
+34428037518µs #2635711  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62598 busy_percent=0.49 wait_p50_us=15 wait_p99_us=71 wait_p999_us=135 wait_max_us=99058 over_1ms=1 slowest_us=100005 slowest_seq=2635711 slowest_stamp=34428037518
+34428138218µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=0.0 inputs=415 busy_percent=64.53 wait_p50_us=73727 wait_p99_us=86015 wait_p999_us=99029 wait_max_us=99029 over_1ms=0 slowest_us=98 slowest_seq=2636112 slowest_stamp=34428077538
+34428138224µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=3600.2 inputs=2636127 busy_percent=0.50 wait_p50_us=14 wait_p99_us=87 wait_p999_us=69631 wait_max_us=100104 over_1ms=60 slowest_us=100013 slowest_seq=990628 slowest_stamp=32208025885
+
+== The loop under load for 10 minutes, release profile, the final code ==
+the loop under load: flight-58p-egll-600s.bin.zst played once, a run of 600s, in target\bench\runs\2026-10-20_19-30-46-load
+inputs	439359, 732 a second
+queue wait, p50	17µs
+queue wait, p99	99µs	budget 11.2ms	within
+queue wait, p99 of the worst minute	111µs
+queue wait, p99.9	55.3ms
+queue wait, most	100.1ms
+busy	0.65%	budget 20%	within
+inputs over 1ms	10, of which the load's 100ms stops are 10 or 9	budget 1ms but the stops	within
+slowest input	100.0ms, #439353
+replay	2.9s for 439359 inputs, 17.3s an hour	budget 360s an hour	within
+stamps rise	439359 of 439359 inputs recorded in order		within
+recording	21.1 MB
+
+The core's log, its start, the playback, and the loop's stats:
+34557893153µs  INFO dualinput_core::run: the core started commit="2d63ea80bd3fca87db104f5c7e6e039fb028914b" uncommitted=Some("49d87f4dfdaacc44d9b6c6c89970572bdbe41e3a8d3558bdb849f0fca632b7a2") profile="release" messages="d3fd9e37736590ef1e58706190384e8d6539c5ec1360f85e14f3228f5c7215e4"
+34557965789µs  INFO dualinput_core::bench::playback: the playback started records=312702 plays=1
+34617898715µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36955 busy_percent=0.48 wait_p50_us=13 wait_p99_us=103 wait_p999_us=151 wait_max_us=2092 over_1ms=0 slowest_us=237 slowest_seq=12765 slowest_stamp=34578549128
+34677906095µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37071 busy_percent=0.63 wait_p50_us=14 wait_p99_us=99 wait_p999_us=255 wait_max_us=100084 over_1ms=1 slowest_us=100003 slowest_seq=36972 slowest_stamp=34617966325
+34737906200µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37886 busy_percent=0.64 wait_p50_us=13 wait_p99_us=107 wait_p999_us=73727 wait_max_us=100045 over_1ms=1 slowest_us=100003 slowest_seq=74042 slowest_stamp=34677966367
+34797906442µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=37172 busy_percent=0.61 wait_p50_us=14 wait_p99_us=87 wait_p999_us=175 wait_max_us=99500 over_1ms=1 slowest_us=100005 slowest_seq=111929 slowest_stamp=34737966725
+34857909929µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=36799 busy_percent=0.64 wait_p50_us=13 wait_p99_us=111 wait_p999_us=20479 wait_max_us=100018 over_1ms=1 slowest_us=100004 slowest_seq=149100 slowest_stamp=34797966974
+34917917412µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=34769 busy_percent=0.66 wait_p50_us=12 wait_p99_us=79 wait_p999_us=207 wait_max_us=98958 over_1ms=1 slowest_us=100004 slowest_seq=185901 slowest_stamp=34857967246
+34977924116µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=33925 busy_percent=0.64 wait_p50_us=12 wait_p99_us=111 wait_p999_us=57343 wait_max_us=99017 over_1ms=1 slowest_us=100005 slowest_seq=220667 slowest_stamp=34917967740
+35037926045µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=59312 busy_percent=0.66 wait_p50_us=21 wait_p99_us=103 wait_p999_us=223 wait_max_us=98996 over_1ms=1 slowest_us=100004 slowest_seq=254591 slowest_stamp=34977968149
+35097926208µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62461 busy_percent=0.67 wait_p50_us=23 wait_p99_us=95 wait_p999_us=223 wait_max_us=98475 over_1ms=1 slowest_us=100006 slowest_seq=313904 slowest_stamp=35037968464
+35157926639µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=62601 busy_percent=0.66 wait_p50_us=22 wait_p99_us=103 wait_p999_us=191 wait_max_us=98021 over_1ms=1 slowest_us=100004 slowest_seq=376365 slowest_stamp=35097968661
+35157984207µs  INFO dualinput_core::bench::playback: the playback ended
+35158069315µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=0.1 inputs=408 busy_percent=70.65 wait_p50_us=35 wait_p99_us=90111 wait_p999_us=97974 wait_max_us=97974 over_1ms=1 slowest_us=100006 slowest_seq=439353 slowest_stamp=35157969116
+35158069358µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=600.2 inputs=439359 busy_percent=0.65 wait_p50_us=17 wait_p99_us=99 wait_p999_us=55295 wait_max_us=100084 over_1ms=10 slowest_us=100006 slowest_seq=439353 slowest_stamp=35157969116

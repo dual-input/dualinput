@@ -236,6 +236,8 @@ The session crate runs a quit as a Leave, so the crew sees the pilot leave rathe
   At 16 MB, one 150-byte warning every sim frame at 60 fps takes about 30 minutes to fill it, 1 GB still holds about 60 runs, and a bug report uploads it in about a minute at 2 Mbps (arithmetic).
   Keeping the newest lines instead would lose the run's start, with its build and settings, and a storm's first lines, which show what set it off; the recording holds the rest.
   A replay's log has no cap, since a replay is where we raise the level.
+- Once a minute the edge logs the loop's stats for that minute, and as the core exits for the whole run as well: how many inputs it handled, the share of the time it was busy from taking an input to asking for the next, how long they waited in the queue at p50, p99, p99.9, and at most, how many took longer than a handler's 1ms ([budgets](../architecture/02-code-map.md#budgets)), and the input that took longest to handle, with its time and sequence number (user, 2026-10-20).
+  So a bug report's log shows whether the loop kept up, and the bench reads the loop's budgets there ([the loop under load](../build/02-testing.md#the-loop-under-load)).
 
 ## Budgets
 

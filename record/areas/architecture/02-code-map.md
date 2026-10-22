@@ -24,6 +24,11 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - The SDK in cargo-msfs's folder serves the Windows side's bindings too, which [building every target](#building-every-target) has as unverified.
 > - [The map check](#the-map-check) follows no proc macro's own dependencies when it looks for a loop crate's I/O, as it follows no build dependency's, since a proc macro runs in the compiler too: ts-rs's derive reaches `windows-sys` through `termcolor`.
 >   A proc macro of ours still keeps the tiers' other rules.
+>
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - [One loop](#one-loop) leaves out no input, and a replay checks every unit, where it has a unit with an unrecorded input run unchecked and register no guard, catch-up step, or cockpit kind; so no unit draws fewer handles in a replay than live, which each unit's own counters in [the registry and moments](#the-registry-and-moments) guard against.
+> - The recording crate holds no uploads or bug reports in v1, and `backend/` no reports, where [the platform](#the-platform) and [systems](#systems) list them; they come after v1.
 
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

@@ -10,7 +10,10 @@ import net from "node:net"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import type { FromCore } from "../../engines/messages/ts/bench/FromCore.ts"
 import type { Hello } from "../../engines/messages/ts/bench/Hello.ts"
+import type { SimCall } from "../../engines/messages/ts/bench/SimCall.ts"
+import type { StandInAct } from "../../engines/messages/ts/bench/StandInAct.ts"
 import type { ToCore } from "../../engines/messages/ts/bench/ToCore.ts"
 import { HASH, VERSION } from "../../engines/messages/ts/stamp.ts"
 import { ROOT } from "../lib/repo.ts"
@@ -32,6 +35,7 @@ export function benchCore(): string {
 export class BenchRun {
   readonly folder: string
   private readonly cores: Core[] = []
+  private readonly stubs: Stub[] = []
   private readonly replayed = new Set<string>()
 
   /**
@@ -56,6 +60,13 @@ export class BenchRun {
     return core
   }
 
+  /** Starts a stub for a sim's process, which the run kills at its end if a step hasn't. */
+  stub(): Stub {
+    const stub = new Stub()
+    this.stubs.push(stub)
+    return stub
+  }
+
   /**
    * Replays `file` with the bench build, at the log level given, and fails unless the
    * replay matched every checkpoint.
@@ -71,6 +82,7 @@ export class BenchRun {
    */
   async end(): Promise<void> {
     for (const core of this.cores) await core.kill()
+    for (const stub of this.stubs) await stub.kill()
     for (const core of this.cores) {
       for (const file of core.recordings()) if (!this.replayed.has(file)) this.replay(file)
     }
@@ -83,12 +95,14 @@ export class Core {
   /** The core's exit code once it has exited, or null once `kill` ended it, since Node gives no code for a process it ended. */
   readonly exited: Promise<number | null>
   private readonly socket: net.Socket
+  private readonly lines: Lines
 
-  private constructor(data: string, process: ChildProcess, exited: Promise<number | null>, socket: net.Socket) {
+  private constructor(data: string, process: ChildProcess, exited: Promise<number | null>, socket: net.Socket, lines: Lines) {
     this.data = data
     this.process = process
     this.exited = exited
     this.socket = socket
+    this.lines = lines
   }
 
   /** Starts a core on the data folder `data`, and ends it again if it doesn't answer as a bench core of this tree. */
@@ -113,9 +127,10 @@ export class Core {
       socket = net.connect({ host: "127.0.0.1", port: Number(fs.readFileSync(portFile, "utf8")) })
       // A killed core resets the connection, which ends the socket and nothing else.
       socket.on("error", () => {})
-      const hello = JSON.parse(await firstLine(socket)) as Hello
+      const lines = new Lines(socket)
+      const hello = JSON.parse(await lines.next()) as Hello
       assert.deepEqual(hello, { version: VERSION, hash: HASH }, "the core was built from another tree than the bench's types")
-      return new Core(data, child, exited, socket)
+      return new Core(data, child, exited, socket, lines)
     } catch (error) {
       socket?.destroy()
       child.kill()
@@ -126,6 +141,55 @@ export class Core {
 
   send(line: ToCore): void {
     this.socket.write(`${JSON.stringify(line)}\n`)
+  }
+
+  /** Acts on the core's stand-in sim. */
+  act(act: StandInAct): void {
+    this.send({ kind: "stand-in", act })
+  }
+
+  /** Has the sim's test unit, which stands in for a feature, make a call of the sim. */
+  call(call: SimCall): void {
+    this.send({ kind: "sim", call })
+  }
+
+  /** Every line the sim's test unit has told the bench so far, oldest first. */
+  heard(): string[] {
+    return this.lines.read.flatMap((l) => {
+      const line = JSON.parse(l) as FromCore
+      return line.kind === "heard" ? [line.what] : []
+    })
+  }
+
+  /**
+   * Waits until the sim's test unit has told the bench a line that `wanted` matches, among
+   * the lines after the first `after` it told, and returns it.
+   */
+  async hear(wanted: string | RegExp, { after = 0, ms = 10_000 } = {}): Promise<string> {
+    const match = (what: string) => (typeof wanted === "string" ? what === wanted : wanted.test(what))
+    const started = Date.now()
+    while (true) {
+      const found = this.heard().slice(after).find(match)
+      if (found !== undefined) return found
+      const left = ms - (Date.now() - started)
+      if (left <= 0) throw new Error(`the core's test unit never said ${wanted}; it said:\n${this.heard().join("\n")}`)
+      await this.lines.more(left)
+    }
+  }
+
+  /** What the stand-in was called for, and what its aircraft holds. */
+  async report(): Promise<StandInReport> {
+    const before = this.lines.read.length
+    this.act({ act: "report" })
+    const started = Date.now()
+    while (Date.now() - started < 5_000) {
+      for (const l of this.lines.read.slice(before)) {
+        const line = JSON.parse(l) as FromCore
+        if (line.kind === "stand-in") return line
+      }
+      await this.lines.more(5_000)
+    }
+    throw new Error("the stand-in didn't report within 5s")
   }
 
   /** Ends the core at once, as a crash would, if it's still running, and waits until it has. */
@@ -147,19 +211,79 @@ export class Core {
   }
 }
 
-function firstLine(socket: net.Socket): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let text = ""
-    const onData = (chunk: Buffer) => {
-      text += chunk.toString("utf8")
-      const end = text.indexOf("\n")
-      if (end < 0) return
-      socket.off("data", onData)
-      resolve(text.slice(0, end))
+export type StandInReport = Extract<FromCore, { kind: "stand-in" }>
+
+/** The lines a core sends over the bench's socket, as they arrive. */
+class Lines {
+  readonly read: string[] = []
+  private text = ""
+  private closed = false
+  private wake: (() => void)[] = []
+  private taken = 0
+
+  constructor(socket: net.Socket) {
+    socket.on("data", (chunk: Buffer) => {
+      this.text += chunk.toString("utf8")
+      for (let end = this.text.indexOf("\n"); end >= 0; end = this.text.indexOf("\n")) {
+        this.read.push(this.text.slice(0, end))
+        this.text = this.text.slice(end + 1)
+      }
+      this.notify()
+    })
+    socket.once("close", () => {
+      this.closed = true
+      this.notify()
+    })
+  }
+
+  /** The next line no caller of `next` has taken, once it arrives. */
+  async next(): Promise<string> {
+    while (this.taken >= this.read.length) {
+      if (this.closed) throw new Error("the core closed its socket before its next line")
+      await this.more(15_000)
     }
-    socket.on("data", onData)
-    socket.once("close", () => reject(new Error("the core closed its socket before its first line")))
-  })
+    return this.read[this.taken++]!
+  }
+
+  /** Resolves once another line arrives, the socket closes, or `ms` passes. */
+  more(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      const timer = setTimeout(resolve, ms)
+      this.wake.push(() => {
+        clearTimeout(timer)
+        resolve()
+      })
+    })
+  }
+
+  private notify(): void {
+    for (const wake of this.wake.splice(0)) wake()
+  }
+}
+
+/**
+ * The process that stands for the sim's: a ping that runs for 10 minutes, which the bench
+ * kills to crash the sim. Each stand-in watches its own stub by its ID, so the stub's name
+ * matters only to the desktop app (record/areas/build/02-testing.md, "The sim's process").
+ */
+export class Stub {
+  readonly process: ChildProcess
+  private readonly ended: Promise<void>
+
+  constructor() {
+    this.process = spawn("ping", ["-n", "600", "127.0.0.1"], { stdio: "ignore" })
+    this.ended = new Promise((resolve) => this.process.once("exit", () => resolve()))
+  }
+
+  get id(): number {
+    return this.process.pid!
+  }
+
+  /** Ends the stub at once, as a crash ends the sim, and waits until it has. */
+  async kill(): Promise<void> {
+    if (this.process.exitCode === null && this.process.signalCode === null) this.process.kill()
+    await this.ended
+  }
 }
 
 export type Replayed = {

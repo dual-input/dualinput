@@ -30,7 +30,6 @@ impl UnitId {
 
 pub(crate) struct UnitInfo {
     pub(crate) name: &'static str,
-    pub(crate) partly_recorded: bool,
 }
 
 pub(crate) struct Registered<F> {
@@ -106,10 +105,7 @@ impl Registry {
             "unit {name} should register once"
         );
         let id = u32::try_from(self.units.len()).expect("the core should have under 2^32 units");
-        self.units.push(UnitInfo {
-            name,
-            partly_recorded: false,
-        });
+        self.units.push(UnitInfo { name });
         self.states.push(Some(Box::new(S::default())));
         self.by_type.insert(TypeId::of::<S>(), id);
         Unit {
@@ -146,29 +142,6 @@ pub struct Unit<'r, S> {
 }
 
 impl<S: 'static> Unit<'_, S> {
-    /// Says the unit has an unrecorded input, so a replay runs it on what was recorded and
-    /// doesn't check its outputs. Its drift then mustn't reach another unit, so the kernel
-    /// refuses it a guard, a request, and an ask
-    /// (record/areas/recording/01-recording-and-bug-reports.md, "What keeps the drift from
-    /// spreading"). It comes before anything else registered on the unit, and panics after
-    /// a request or a guard, which it would have refused.
-    pub fn partly_recorded(self) -> Self {
-        let unit = self.id;
-        let decides = self.registry.requests.iter().any(|r| r.decider == unit);
-        let guards = self
-            .registry
-            .requests
-            .iter()
-            .any(|r| r.guards.iter().any(|g| g.unit == unit));
-        assert!(
-            !decides && !guards,
-            "unit {} says it's partly recorded after registering a request or a guard",
-            self.registry.units[unit as usize].name
-        );
-        self.registry.units[unit as usize].partly_recorded = true;
-        self
-    }
-
     pub fn id(&self) -> UnitId {
         UnitId(self.id)
     }
@@ -248,7 +221,6 @@ impl<S: 'static> Unit<'_, S> {
         decide: fn(&mut S, R, &mut Cx),
         build: fn(&S, &View) -> Option<R>,
     ) -> &mut Self {
-        self.whole("declares a request");
         let decide: DecideFn = Box::new(move |state, request, cx| {
             let request = *request
                 .downcast::<R>()
@@ -280,7 +252,6 @@ impl<S: 'static> Unit<'_, S> {
     /// crate that decides `R` registers before any unit that guards it, since the platform
     /// registers from the kernel up and the features after it.
     pub fn guard<R: 'static>(&mut self, f: fn(&S, &R, &View) -> Result<(), String>) -> &mut Self {
-        self.whole("registers a guard");
         let index = *self
             .registry
             .request_by_type
@@ -314,15 +285,6 @@ impl<S: 'static> Unit<'_, S> {
             unit: self.id,
             f: Rc::new(move |state, arg, cx| f(downcast_mut(state), arg, cx)),
         }
-    }
-
-    fn whole(&self, what: &str) {
-        let unit = &self.registry.units[self.id as usize];
-        assert!(
-            !unit.partly_recorded,
-            "unit {} is partly recorded, so it {what} that a replay can't check",
-            unit.name
-        );
     }
 }
 

@@ -4,6 +4,19 @@
 //! program's first message carries `VERSION` and `HASH`, so two builds that don't match
 //! refuse each other (decisions 025 and 026).
 
+// Our WASM module builds this crate in, and a panic there stops every routine in the sim,
+// so the commonest panics fail Clippy, which tools/check.ts runs on the module
+// (record/areas/architecture/02-code-map.md, "When the module stops"). Tests may panic.
+#![cfg_attr(
+    not(test),
+    deny(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::indexing_slicing
+    )
+)]
+
 /// Dual Input's version, which every crate inherits from the root Cargo.toml's
 /// `[workspace.package]`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -11,6 +24,8 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 
 pub mod bench;
+pub mod module;
+pub mod sim;
 
 // Tests run off the core's loop, so they may write files, which the root's clippy.toml
 // forbids only the loop.

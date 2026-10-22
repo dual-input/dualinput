@@ -1,0 +1,15 @@
+Stage 4's budgets, on our development machine, 2026-10-21.
+
+The timers, from stage 2: a timer fires within 2ms of its deadline at p99 with the sim
+running and the PC busy. MSFS 2024 was in a flight, the pilot flying it, its process at
+6,147 MB of working set; the test's core runs a unit of its own and never connects to the sim.
+
+> cargo test -p dualinput-core --release --test core -- --ignored --nocapture --test-threads 1 timers_fire_within_2ms_at_p99
+    Finished `release` profile [optimized] target(s) in 0.27s
+     Running tests\core.rs (target\release\deps\core-33668a39e75ec608.exe)
+
+running 1 test
+test timers_fire_within_2ms_at_p99 ... TIMERS	1000 fired	p50 217µs	p99 1068µs	max 3318µs late
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 10.30s

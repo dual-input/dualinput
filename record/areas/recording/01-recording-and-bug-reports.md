@@ -24,6 +24,21 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 > - [Asking a missing pilot](#asking-a-missing-pilot) moves after v1: no core asks the Worker at its start, the reporting pilot asks their crew, and each crewmate uploads their part from the report page.
 > - The core helper sends no `Alive`, so [what a platform crate may do with one](#what-a-platform-crate-may-do-with-one) has no rule on counting it ([04-core-helper](../core/04-core-helper.md)).
 > - The voice phrases are a Soon pick (user, 2026-10-17), so voice is among no units a replay checks in v1, where this document's opening names it.
+>
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in these places (user, 2026-10-21; [recording log](log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - No unit is partly recorded, so [unrecorded inputs](#unrecorded-inputs) goes whole, with `.partly_recorded()`, `.unrecorded()`, and the edge's filter, and so do the notes of 2026-10-17 on flight-model sync's, avatars', and traffic's unrecorded sim calls.
+> - [A replay](#a-replay) checks every unit's outputs, and the header lists no partly recorded units.
+>   The leaf rule in [what keeps the drift from spreading](#what-keeps-the-drift-from-spreading) goes; its other rules served only to keep a partly recorded unit's drift to itself, and whether each stays is open.
+> - [A panic](#a-panic) in any unit replays at the same input, since the writer already holds the input being handled.
+> - [Recording everything](#recording-everything)'s setting goes, with the note of 2026-10-18 that makes it an ordinary one.
+> - [Why it records less than every input](#why-it-records-less-than-every-input): the user's call of 2026-10-16 that 45 MB an hour is too much to upload after a flight, or to keep several flights of, no longer applies, since v1 uploads nothing and we ask for a run's log first.
+> - [What each PC keeps](#what-each-pc-keeps): its rules stay, and 1 GB holds roughly 8 to 22 hours at 45 to 126 MB an hour, where it says over 250 hours.
+> - [A bug report](#a-bug-report): when a pilot reports a problem, we ask for the run's `log.txt` first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand.
+>   Uploading a part, what the backend admits, asking a missing pilot, and on our end come after v1, built on the same files.
+>   So do the units `backend/`'s reports and `tools/reports.ts`, the edge's HTTPS for the upload, the run's `key` file, which only the upload's signature reads, the index's `uploaded` field, the note of 2026-10-17's command that uploads a session, and [left open](#left-open)'s item on R2.
+> - [Budgets](#budgets): the budgets for a session's recording and for a run with no session rest on partial recording's rules, and p10's 45 MB an hour passes the first; what replaces them is open.
+> - [Cases for the bench](#cases-for-the-bench): the session with traffic, avatars, the flight model, and ATC audio running matches every unit's checkpoints, and the cases on unrecorded inputs, the setting, a partly recorded unit's drift and its panic, a signed part, a restarted core's upload, and a missing pilot's part go.
 
 A recording is a replay log of the core's inputs, less the high-rate samples a feature marks as unrecorded, such as traffic's positions and the flight model's, so their bytes never reach the disk while the events around them do.
 A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform's, and the features state sync, pointer sync, take-control, voice, rate and pause, and Go to.

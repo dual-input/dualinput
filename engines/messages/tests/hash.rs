@@ -12,7 +12,7 @@ mod build_script;
 
 use std::{fs, path::PathBuf};
 
-use build_script::{crate_hash, reachable_packages};
+use build_script::{crate_hash, reachable_packages, slots_hash};
 
 fn fake_crate(name: &str, files: &[(&str, &str)]) -> PathBuf {
     let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(name);
@@ -107,6 +107,24 @@ fn the_lock_gives_the_packages_the_crate_reaches() {
     let expected =
         [("serde", "1.0.228"), ("toml", "1.1.8")].map(|(n, v)| (n.to_owned(), v.to_owned()));
     assert_eq!(reached, expected);
+}
+
+#[test]
+fn only_a_change_to_a_slot_changes_the_slots_hash() {
+    let files = [
+        ("Cargo.toml", "[package]\nname = \"messages\"\n"),
+        ("build.rs", "fn main() {}\n"),
+        ("src/lib.rs", "pub mod module;\n"),
+        ("src/module.rs", "pub mod slots;\npub struct Status;\n"),
+        ("src/module/slots.rs", "pub struct HoldSlot {}\n"),
+    ];
+    let base = slots_hash(&fake_crate("slots", &files));
+    let mut message = files;
+    message[3] = ("src/module.rs", "pub mod slots;\npub struct Status(u8);\n");
+    assert_eq!(base, slots_hash(&fake_crate("slots-message", &message)));
+    let mut slot = files;
+    slot[4] = ("src/module/slots.rs", "pub struct HoldSlot { x: u32 }\n");
+    assert_ne!(base, slots_hash(&fake_crate("slots-slot", &slot)));
 }
 
 #[test]

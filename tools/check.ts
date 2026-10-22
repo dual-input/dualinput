@@ -11,8 +11,10 @@ import path from "node:path"
 import { createRequire } from "node:module"
 
 import { readMessageTypes, writeMessageTypes } from "./lib/messages.ts"
+import { buildModule, clippyModule, missingExports } from "./lib/module.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { Failed, main, run } from "./lib/run.ts"
+import { requireSdk } from "./lib/sdk.ts"
 
 const checks: [string, () => void][] = [
   ["Rustfmt", () => run("cargo", ["fmt", "--all", "--", "--check"])],
@@ -24,6 +26,8 @@ const checks: [string, () => void][] = [
   // build's code too, which only apps/core's `stand-in` feature compiles.
   ["Clippy", () => run("cargo", ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])],
   ["the default members' tests", () => run("cargo", ["test"])],
+  ["our WASM module's build and exports", checkModule],
+  ["Clippy on our WASM module", clippyModule],
   ["each tsconfig's type check", typeCheck],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
   ["the tools' tests", () => run(process.execPath, ["--test", ...toolTests()])],
@@ -53,6 +57,17 @@ function checkMessageTypes(): void {
       `the messages' generated files differed from what the message crate generates, and are written again: ${changed.join(", ")}`,
     )
   }
+}
+
+/**
+ * A module that lacks a function the sim calls in a standalone module builds, packages, and
+ * loads without a word, and fails only in the sim. So this builds the module with cargo-msfs,
+ * which the default members' build and tests leave out, and fails unless it exports each.
+ */
+function checkModule(): void {
+  requireSdk()
+  const missing = missingExports(fs.readFileSync(buildModule()))
+  if (missing.length) throw new Failed(`our WASM module lacks exports the sim calls: ${missing.join(", ")}`)
 }
 
 function typeCheck(): void {

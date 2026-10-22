@@ -1,0 +1,48 @@
+p05, on MSFS 2024 with stage 4's release core connected beside it, 2026-10-21. The probe
+connected while the pilot was already loading the L-1011's Standard Cabin & Engine Pod preset.
+At 60.9s the pilot opened the pause menu and chose End flight, then picked the Cabin w/
+Lounge & Engine Pod preset in the main menu and flew.
+
+> node experiments/areas/core/p05-leaving-a-flight.mjs
+    0.0s  connected; end the flight from the pause menu, then load the next
+    0.1s  Pause_EX1 0
+    4.7s  FlightLoaded %APPDATA%\Microsoft Flight Simulator 2024\MISSIONS\Custom\CustomFlight\CustomFlight.FLT
+    4.8s  flow FLT_LOAD apron.flt
+    4.8s  flow FLT_LOADED apron.flt
+    4.8s  flow FLT_LOAD CustomFlight.FLT
+    4.9s  flow FLT_LOADED CustomFlight.FLT
+    4.9s  flow TELEPORT_START
+    4.9s  flow TELEPORT_DONE
+   12.1s  AircraftLoaded %APPDATA%\microsoft flight simulator 2024\packages\community\inibuilds-aircraft-l1011\simobjects\airplanes\inibuilds-l1011\presets\inibuilds\l1011-500-pod\config\aircraft.cfg
+   24.5s  flow FLIGHT_START
+   24.5s  flow FLT_LOAD apron.flt
+   24.5s  flow FLT_LOADED apron.flt
+   24.5s  flow RTC_START
+   25.6s  flow RTC_END
+   60.9s  Pause_EX1 8
+   63.8s  flow FLIGHT_END
+   71.8s  flow TELEPORT_START
+   71.8s  flow TELEPORT_DONE
+   71.8s  flow FLT_LOAD hangar.flt
+   71.8s  flow FLT_LOADED hangar.flt
+   71.8s  flow TELEPORT_START
+   71.8s  flow TELEPORT_DONE
+   71.8s  flow FLT_LOAD hangar.flt
+   71.8s  flow FLT_LOADED hangar.flt
+   79.1s  AircraftLoaded %APPDATA%\microsoft flight simulator 2024\packages\community\inibuilds-aircraft-l1011\simobjects\airplanes\inibuilds-l1011\presets\inibuilds\l1011-500-stair-pod\config\aircraft.cfg
+   79.1s  Pause_EX1 0
+   89.4s  FlightLoaded %APPDATA%\Microsoft Flight Simulator 2024\MISSIONS\Custom\CustomFlight\CustomFlight.FLT
+   89.5s  flow FLT_LOAD apron.flt
+   89.5s  flow FLT_LOADED apron.flt
+   89.5s  flow FLT_LOAD CustomFlight.FLT
+   89.5s  flow FLT_LOADED CustomFlight.FLT
+   89.5s  flow TELEPORT_START
+   89.5s  flow TELEPORT_DONE
+   97.0s  AircraftLoaded %APPDATA%\microsoft flight simulator 2024\packages\community\inibuilds-aircraft-l1011\simobjects\airplanes\inibuilds-l1011\presets\inibuilds\l1011-500-stair-pod\config\aircraft.cfg
+  109.7s  flow FLIGHT_START
+  109.7s  flow FLT_LOAD apron.flt
+  109.7s  flow FLT_LOADED apron.flt
+  109.8s  flow RTC_START
+  110.9s  flow RTC_END
+
+The home folder's path is written as %APPDATA% in place of the real one.

@@ -27,7 +27,6 @@ fn options(data: &Path) -> Options {
     Options {
         data: data.to_path_buf(),
         level: LevelFilter::INFO,
-        everything: false,
         checkpoint_every_input: false,
         abort_on_panic: false,
     }

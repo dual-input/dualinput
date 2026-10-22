@@ -106,6 +106,8 @@ impl Window {
 
 /// Counts waits in µs in buckets 1µs wide below 32µs, and above that 16 to each doubling,
 /// so a percentile it gives is at most 1/16 above the true one, in 8 KB whatever the count.
+/// engines/sim-edge/src/stats.rs keeps a copy for the sim edge's wake-ups, so change both
+/// together.
 struct Histogram {
     counts: Vec<u64>,
     total: u64,

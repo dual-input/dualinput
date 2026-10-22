@@ -19,6 +19,12 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > Developers trusted with the tokens are given access to it, and adding or retiring a token is a commit there.
 > `relays/deploy.ts` reads the tokens from a clone of it, and the network crate's build compiles them into each release's default list from the copy [the release's build job](../build/01-the-build.md#a-release) checks out, so a token is exposed only as far as a release's program exposes it, where their configuration has the tokens go public with the repository.
 > The local `iroh-relay` that [cases for the bench](#cases-for-the-bench) runs two cores through takes a test token, not the production one, so CI's tests need no access.
+>
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes the note of 2026-10-16 in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - No channel is declared `.unrecorded()`.
+> - The lost-link timer's count of a connection's recorded inputs counts every packet, as [links](#links) has it.
+> - The backend takes no bug report's parts and stores nothing in R2 in v1, since the report endpoints come after v1; the 30 days it keeps a session's rows after a leave serve those endpoints' check, and whether v1's backend keeps them is open.
 
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.

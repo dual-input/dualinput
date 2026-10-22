@@ -4,15 +4,33 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
-# The bench build of the core, which no release turns on: the bench's socket, and the test
-# units its scenarios drive (record/areas/build/02-testing.md, "Its place").
+# The bench build of the core, which no release turns on: the bench's socket, the test
+# units its scenarios drive, and the stand-in sim in the sim edge's place, running our WASM
+# module's routines natively (record/areas/build/02-testing.md, "Its place").
 [features]
-stand-in = ["dep:serde", "dep:serde_json", "dep:zstd"]
+stand-in = [
+    "dep:bytemuck",
+    "dep:routine-host",
+    "dep:routines",
+    "dep:serde",
+    "dep:serde_json",
+    "dep:stand-in-sim",
+    "dep:zstd",
+]
 
 [dependencies]
+bytemuck = { version = "1.25.2", optional = true }
 kernel = { path = "../../platform/kernel" }
 messages = { path = "../../engines/messages" }
 recording-format = { path = "../../engines/recording-format" }
+routine-host = { path = "../../platform/routine-host", optional = true }
+routines = { path = "../../sim-package/routines", optional = true }
+sim-awareness = { path = "../../engines/sim-awareness" }
+sim-client = { path = "../../engines/sim-client" }
+sim-edge = { path = "../../engines/sim-edge" }
+sim-service = { path = "../../platform/sim-service" }
+simconnect-types = { path = "../../engines/simconnect-types" }
+stand-in-sim = { path = "../../engines/stand-in-sim", optional = true }
 serde = { version = "1.0.229", features = ["derive"], optional = true }
 serde_json = { version = "1.0.145", optional = true }
 sha2 = "0.10.9"

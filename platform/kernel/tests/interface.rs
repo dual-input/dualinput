@@ -323,129 +323,6 @@ fn a_guard_refuses_a_request_and_its_verdict_stays_current() {
     );
 }
 
-#[test]
-#[should_panic(
-    expected = "unit traffic is partly recorded, so it registers a guard that a replay can't check"
-)]
-fn a_partly_recorded_unit_cant_guard() {
-    use requests::*;
-    #[derive(Default)]
-    struct Traffic;
-    fn allow(_: &Traffic, _: &TakeControl, _: &View) -> Result<(), String> {
-        Ok(())
-    }
-    started(|r| {
-        register(r);
-        r.unit::<Traffic>("traffic").partly_recorded().guard(allow);
-    });
-}
-
-#[test]
-#[should_panic(
-    expected = "unit traffic says it's partly recorded after registering a request or a guard"
-)]
-fn a_unit_cant_say_its_partly_recorded_after_guarding() {
-    use requests::*;
-    #[derive(Default)]
-    struct Traffic;
-    fn allow(_: &Traffic, _: &TakeControl, _: &View) -> Result<(), String> {
-        Ok(())
-    }
-    started(|r| {
-        register(r);
-        let mut traffic = r.unit::<Traffic>("traffic");
-        traffic.guard(allow);
-        traffic.partly_recorded();
-    });
-}
-
-#[test]
-#[should_panic(
-    expected = "unit traffic is partly recorded, so it asks for a request that a replay can't check"
-)]
-fn a_partly_recorded_unit_cant_ask() {
-    use requests::*;
-    #[derive(Default)]
-    struct Traffic;
-    fn ask(_: &mut Traffic, _: &Started, cx: &mut Cx) {
-        cx.ask(TakeControl);
-    }
-    started(|r| {
-        register(r);
-        r.unit::<Traffic>("traffic")
-            .partly_recorded()
-            .on::<Started>(ask);
-    });
-}
-
-/// Only whole units' outputs go into the hash, so a partly recorded unit that drifts in a
-/// replay leaves the checkpoints alone.
-#[test]
-fn the_hash_folds_only_whole_units_outputs() {
-    #[derive(Default)]
-    struct Traffic;
-    struct TrafficKey;
-    fn traffic(_: &mut Traffic, input: &Input, cx: &mut Cx) {
-        cx.out(Said("traffic", format!("{:?}", input.bytes)));
-    }
-    struct Key;
-    let run = |traffic_bytes: &[u8], counter_inputs: u64| {
-        let (mut kernel, _) = started(|r| {
-            r.unit::<Counter>("counter")
-                .source::<Key>(Counter::on_input);
-            r.unit::<Traffic>("traffic")
-                .partly_recorded()
-                .source::<TrafficKey>(traffic);
-        });
-        let (key, traffic_key) = (
-            kernel.source::<Key>().unwrap(),
-            kernel.source::<TrafficKey>().unwrap(),
-        );
-        kernel.handle(&input(1, 2_000, traffic_key, traffic_bytes.to_vec()));
-        for seq in 0..counter_inputs {
-            kernel.handle(&input(seq + 2, 3_000, key, vec![]));
-        }
-        assert_eq!(kernel.partly_recorded(), ["traffic"]);
-        kernel.hash()
-    };
-    assert_eq!(
-        run(b"one", 2),
-        run(b"two", 2),
-        "traffic's outputs stay out of the hash"
-    );
-    assert_ne!(
-        run(b"one", 2),
-        run(b"one", 3),
-        "the counter's outputs go in"
-    );
-}
-
-/// A run that records every input checks every unit, so the hash folds the partly recorded
-/// units' outputs too.
-#[test]
-fn recording_everything_folds_every_units_outputs() {
-    #[derive(Default)]
-    struct Traffic;
-    struct TrafficKey;
-    fn traffic(_: &mut Traffic, input: &Input, cx: &mut Cx) {
-        cx.out(Said("traffic", format!("{:?}", input.bytes)));
-    }
-    let run = |traffic_bytes: &[u8]| {
-        let mut registry = Registry::new();
-        registry
-            .unit::<Traffic>("traffic")
-            .partly_recorded()
-            .source::<TrafficKey>(traffic);
-        let mut kernel = Kernel::new(registry);
-        kernel.record_everything();
-        kernel.handle(&input(0, 1_000, FIRST, first_input(SEED, vec![])));
-        let key = kernel.source::<TrafficKey>().unwrap();
-        kernel.handle(&input(1, 2_000, key, traffic_bytes.to_vec()));
-        kernel.hash()
-    };
-    assert_ne!(run(b"one"), run(b"two"));
-}
-
 #[derive(Default)]
 struct Waiter {
     timer: Option<TimerId>,
@@ -501,7 +378,6 @@ fn timers_and_jobs_come_back_as_inputs() {
             path: "settings.json".into()
         }
     );
-    assert!(job.recorded);
     assert_eq!(job.id.handle().n(), 1);
 
     let said = values::<Said>(kernel.handle(&input(1, 6_100, TIMERS, set.id.fired())));
@@ -539,19 +415,6 @@ fn a_canceled_timer_that_fires_anyway_is_dropped() {
     );
 }
 
-#[test]
-#[should_panic(
-    expected = "unit waiter starts an unrecorded job, so it should say it's partly recorded"
-)]
-fn a_whole_unit_cant_start_an_unrecorded_job() {
-    fn start(_: &mut Waiter, _: &Started, cx: &mut Cx) {
-        cx.unrecorded_job(Job::read("models"), Waiter::read);
-    }
-    started(|r| {
-        r.unit::<Waiter>("waiter").on::<Started>(start);
-    });
-}
-
 #[derive(Default)]
 struct Drawer {
     draws: usize,
@@ -575,8 +438,8 @@ impl Other {
     }
 }
 
-/// Each unit draws from a generator of its own, so a unit that draws fewer IDs in a replay
-/// leaves every other unit's IDs as they were.
+/// Each unit draws from a generator of its own, so how many IDs one unit draws leaves every
+/// other unit's IDs as they were.
 #[test]
 fn ids_follow_the_seed_and_each_units_place() {
     let ids = |draws: usize| {

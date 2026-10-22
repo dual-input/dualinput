@@ -26,6 +26,8 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > - The ATC buffer's depth comes from the last 500 frames received, where the note of 2026-10-17 above says the last 10s of frames, so a transmission after a pause starts from history rather than the 60ms floor ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#the-buffer)).
 >
 > Since 2026-10-18, [testing](../build/02-testing.md#the-stand-in-core-helper) settles [left open](#left-open)'s item on the development setting that names the helper's program: the bench's stand-in helper speaks the real pipe's messages, and the core starts it, sends it every want, reads its `Hello`, and starts it again as it does this helper.
+>
+> Since 2026-10-21, the core records every input, so no capture is registered unrecorded, and ATC audio's captured frames are in the recording, where the note of 2026-10-16 has its capture registered unrecorded (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

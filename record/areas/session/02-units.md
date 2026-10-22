@@ -6,6 +6,13 @@ Depends on:  01-roles-and-members.md, ../architecture/02-code-map.md, ../core/01
 Decides:     The session crate's members, session keys, control, session file, joining and leaving, preflight, match check, and what it raises; who is in the flight; which pilot's bundle a session pins; where the match check reads an aircraft's version; how rate and pause sets active pause and the simulation rate; how Go to picks a stand or a runway; what the menu script reports and runs; when the core exits; the budgets; and the cases for the bench (node 6.7).
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - [The match check](#the-match-check)'s reason that traffic feeds no item, traffic being partly recorded, goes, and whether traffic feeds one is open.
+> - The endpoint key that the session crate tells the recording crate at a session's start, in [joining and leaving](#joining-and-leaving), serves only an upload's signature, which comes after v1.
+> - A display name from the Windows account would reach crewmates and their recordings, and reach R2 only after v1, where [members](#members) names our R2.
+
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.
 The PF's core sets the session's aircraft, runs preflight's countdown, and ends preflight with a key, and its profile loader pins a local bundle that covers that aircraft, or else the one its cached index gives its level.

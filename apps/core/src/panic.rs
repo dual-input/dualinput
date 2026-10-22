@@ -7,10 +7,7 @@ use std::panic::PanicHookInfo;
 use std::sync::Once;
 use std::time::Duration;
 
-use recording_format::Record;
-
 use crate::clock;
-use crate::recording::convert::to_record;
 use crate::run_context;
 
 /// How long the hook waits for the writer to put the recording's last frame on disk.
@@ -33,24 +30,20 @@ pub fn install() {
     });
 }
 
-/// Logs the panic with the input being handled and the unit that was running, has the
-/// writer record that input even if it's unrecorded, so the recording shows what came in,
-/// and waits for the writer to end its frame. Returns whether the process should abort.
+/// Logs the panic with the input being handled and the unit that was running, and waits for
+/// the writer to put everything it was sent on disk, that input included, since the loop
+/// records each input before handling it. Returns whether the process should abort.
 fn record(info: &PanicHookInfo) -> bool {
-    let handling = run_context::current();
     let unit = kernel::running_unit().unwrap_or("none");
-    let at = handling
-        .as_ref()
-        .map_or("no input".to_string(), |h| format!("input {}", h.input.seq));
+    let at = run_context::current().map_or("no input".to_string(), |input| {
+        format!("input {}", input.seq)
+    });
     run_context::with(|c| {
         c.log.always(&format!(
             "{}µs ERROR panic at {at}, in unit {unit}: {info}\n",
             clock::now()
         ));
         if let Some(writer) = c.writer.get() {
-            if let Some(h) = handling.filter(|h| !h.written) {
-                writer.record(Record::Input(to_record(&h.input)));
-            }
             writer.flush(FLUSH);
         }
         c.abort_on_panic

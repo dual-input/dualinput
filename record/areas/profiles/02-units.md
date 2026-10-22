@@ -16,6 +16,8 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 >
 > - [The match check's item](#the-match-checks-item) reports whether the pinned bundle loaded, couldn't be fetched, or there's no profile for the aircraft, and the session shows the pinned hash once, since every core loads only the pinned bundle, so two cores' hashes can't differ.
 > - [The local folder](#the-local-folder)'s setting is a development setting, which no app shows, since v1 ships no authoring tool; the IDE makes it a pilot's setting.
+>
+> Since 2026-10-21, v1 uploads no bug report, so the upload that [a bundle's bytes](#a-bundles-bytes) has use sha2 comes after v1, and how a run's folder, which a pilot sends by hand, carries a local bundle's text, which [in the recording](#in-the-recording) has a bug report carry, is open (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.

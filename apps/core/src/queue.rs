@@ -8,12 +8,6 @@ use kernel::{Input, SourceId};
 use crate::clock;
 use crate::home::Home;
 
-/// An input, and whether it goes in the recording.
-pub struct Item {
-    pub input: Input,
-    pub recorded: bool,
-}
-
 /// A replay compares what a run did input by input, so the inputs' stamps have to rise in
 /// the order the loop takes them, or a handler that compares two stamps would decide one
 /// way live and another in the replay. `push` reads the clock and numbers the input under
@@ -32,7 +26,7 @@ pub struct Queue {
 }
 
 struct State {
-    items: VecDeque<Item>,
+    inputs: VecDeque<Input>,
     next: u64,
 }
 
@@ -40,7 +34,7 @@ impl Queue {
     pub fn new(home: Arc<Home>) -> Queue {
         Queue {
             state: Mutex::new(State {
-                items: VecDeque::new(),
+                inputs: VecDeque::new(),
                 next: 0,
             }),
             ready: Condvar::new(),
@@ -50,31 +44,28 @@ impl Queue {
 
     /// Stamps and numbers an input and appends it, with the home folder's path hidden in its
     /// bytes, so the recording never holds it.
-    pub fn push(&self, source: SourceId, mut bytes: Vec<u8>, recorded: bool) {
+    pub fn push(&self, source: SourceId, mut bytes: Vec<u8>) {
         self.home.hide(&mut bytes);
         let mut state = self.lock();
         let seq = state.next;
         state.next += 1;
         let stamp = clock::now();
-        state.items.push_back(Item {
-            input: Input {
-                seq,
-                stamp,
-                source,
-                bytes,
-            },
-            recorded,
+        state.inputs.push_back(Input {
+            seq,
+            stamp,
+            source,
+            bytes,
         });
         drop(state);
         self.ready.notify_one();
     }
 
     /// The oldest input, once there is one.
-    pub fn pop(&self) -> Item {
+    pub fn pop(&self) -> Input {
         let mut state = self.lock();
         loop {
-            if let Some(item) = state.items.pop_front() {
-                return item;
+            if let Some(input) = state.inputs.pop_front() {
+                return input;
             }
             state = self
                 .ready
@@ -108,14 +99,14 @@ mod tests {
                 let queue = &queue;
                 s.spawn(move || {
                     for _ in 0..200_000 {
-                        queue.push(SourceId(source), vec![], true);
+                        queue.push(SourceId(source), vec![]);
                     }
                 });
             }
         });
         let mut last = (0, 0);
         for expected in 0..400_000 {
-            let input = queue.pop().input;
+            let input = queue.pop();
             assert_eq!(input.seq, expected);
             assert!(
                 input.stamp >= last.1,

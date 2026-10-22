@@ -20,6 +20,8 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 > - A client whose version differs is logged and nothing more, which settles what [a client whose version differs](#a-client-whose-version-differs) leaves to 6.16; where a notice shows waits for the apps' stage.
 >
 > Since 2026-10-18, the sim's stock `VCockpit.js` is on disk in our Steam install, in its `asobo-vcockpits-core` package, where [our VCockpit.js](#our-vcockpitjs) has the sim stream it; the build makes our copy from the stock file it keeps in `sim-package/stock/`, and a build on a PC with the sim compares the sim's own file with it ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files); [build log](../build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed)).
+>
+> Since 2026-10-21, the core records every input, so no unit's slice drifts in a replay, and a replay checks every slice, where the note of 2026-10-16 leaves a partly recorded unit's out; the core's `alive` every 2s whatever else it sends, from that note, then guards against no drift, and [the protocol](#the-protocol)'s `alive` after 2s of nothing would replay exactly too (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
 A client opens with a `hello` that names it and its version, and from then on each side sends something at least every 2s, while only the core closes a socket that goes quiet.

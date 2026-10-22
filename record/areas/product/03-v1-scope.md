@@ -6,6 +6,14 @@ Depends on:  01-aims.md, 02-users.md, and the v1 picks in plan.md
 Decides:     The scope of every v1 feature.
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes [recording and bug reports](#recording-and-bug-reports) in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - Every crew member's machine records every input that passes through Dual Input, the high-rate samples such as traffic's positions and the flight model's included, and keeps its runs within 1 GB, which holds roughly 8 to 22 hours at 45 to 126 MB an hour.
+> - When a pilot reports a problem, we ask for the run's log first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand.
+> - Each pilot's upload to our Worker, the 30 days in R2, the report page's upload, our view of who has uploaded and who's missing, and the offer of a pilot's part come after v1.
+>   So [the EFB app](#efb-app)'s line on a moment marked for a bug report the pilot uploads later, and the notices that ask for a bug report from the desktop app, such as [notification banner](#notification-banner)'s, name an upload v1 doesn't have.
+
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.

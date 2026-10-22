@@ -1,0 +1,5 @@
+# The sim edge holds every SimConnect connection on a thread of its own, off the loop, so it
+# keeps the edge's rules rather than the loop's: it waits, reads the clock, calls
+# SimConnect.dll, and watches the sim's process (record/areas/core/03-sim-seam-and-wasm-module.md,
+# "The edge"). So it leaves out the list of calls the root's clippy.toml forbids the loop's
+# crates. Clippy reads the clippy.toml nearest a crate's folder, which is this one.

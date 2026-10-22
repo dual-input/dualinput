@@ -1,0 +1,160 @@
+Stage 4's session in the sim, on our development machine, 2026-10-21, MSFS 2024 1.9.18.0 (Steam).
+The release core built from the tree ran on a data folder of its own while the pilot booted the
+sim, flew the Black Square Baron 58P, then each of the iniBuilds L-1011's four presets, each
+reached from the last by the pause menu's End flight, closed the sim with its window's close
+button, then booted it twice more: the sim crashed on its own in the first boot, and the second
+was killed with taskkill /F after its open reply. Seconds are from the core's start.
+
+> node tools/sim/sim-seam.ts --core target/release/dualinput-core.exe
+the core started, on the data folder target\sim\runs\2026-10-21_20-57-59\core; start the sim, load flights, then close it
+keys: k kills the sim, q stops the core and replays
+   22.015s  the sim's process was found
+   22.015s  stage Starting
+  134.422s  connection 1.19 opened
+  182.537s  the sim edge's wake-ups: seconds=60.0 messages=0 event_wakes=0 timeout_wakes=20256 timeout_messages=0 event_to_up_p50_us=0 event_to_up_p99_us=0 event_to_up_p999_us=0 event_to_up_max_us=0
+  189.059s  the sim's open reply: SunRise [12, 2, 282174, 999]
+  242.537s  the sim edge's wake-ups: seconds=60.0 messages=11 event_wakes=11 timeout_wakes=25307 timeout_messages=0 event_to_up_p50_us=10 event_to_up_p99_us=70 event_to_up_p999_us=70 event_to_up_max_us=70
+  279.146s  our WASM module is running, version 0.1.0
+  302.538s  the sim edge's wake-ups: seconds=60.0 messages=35 event_wakes=35 timeout_wakes=25495 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=465 event_to_up_p999_us=465 event_to_up_max_us=465
+  362.539s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24632 timeout_messages=0 event_to_up_p50_us=8 event_to_up_p99_us=17 event_to_up_p999_us=17 event_to_up_max_us=17
+  422.541s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24561 timeout_messages=0 event_to_up_p50_us=8 event_to_up_p99_us=13 event_to_up_p999_us=13 event_to_up_max_us=13
+  482.542s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24489 timeout_messages=0 event_to_up_p50_us=8 event_to_up_p99_us=13 event_to_up_p999_us=13 event_to_up_max_us=13
+  542.543s  the sim edge's wake-ups: seconds=60.0 messages=56 event_wakes=56 timeout_wakes=24448 timeout_messages=1 event_to_up_p50_us=9 event_to_up_p99_us=11 event_to_up_p999_us=11 event_to_up_max_us=11
+  602.544s  the sim edge's wake-ups: seconds=60.0 messages=57 event_wakes=57 timeout_wakes=24480 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=13 event_to_up_p999_us=13 event_to_up_max_us=13
+  662.545s  the sim edge's wake-ups: seconds=60.0 messages=58 event_wakes=58 timeout_wakes=24569 timeout_messages=0 event_to_up_p50_us=8 event_to_up_p99_us=36 event_to_up_p999_us=36 event_to_up_max_us=36
+  722.548s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24584 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=15 event_to_up_p999_us=15 event_to_up_max_us=15
+  782.550s  the sim edge's wake-ups: seconds=60.0 messages=58 event_wakes=58 timeout_wakes=24501 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=16 event_to_up_p999_us=16 event_to_up_max_us=16
+  842.551s  the sim edge's wake-ups: seconds=60.0 messages=56 event_wakes=56 timeout_wakes=24621 timeout_messages=0 event_to_up_p50_us=8 event_to_up_p99_us=11 event_to_up_p999_us=11 event_to_up_max_us=11
+  876.773s  stage Loading
+  898.449s  stage ReadyToFly bksq-aircraft-baronpropress
+  899.832s  stage Flying bksq-aircraft-baronpropress
+  899.844s  title: Black Square Baron 58P Professional N513LW
+  902.551s  the sim edge's wake-ups: seconds=60.0 messages=76 event_wakes=73 timeout_wakes=24583 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=23 event_to_up_p999_us=23 event_to_up_max_us=23
+  962.552s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24553 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=21 event_to_up_p999_us=21 event_to_up_max_us=21
+ 1003.283s  stage Loading bksq-aircraft-baronpropress
+ 1018.535s  stage ReadyToFly inibuilds-l1011/presets/inibuilds/l1011-500
+ 1020.114s  stage Flying inibuilds-l1011/presets/inibuilds/l1011-500
+ 1020.134s  title: L1011-500 Standard Cabin
+ 1022.554s  the sim edge's wake-ups: seconds=60.0 messages=73 event_wakes=71 timeout_wakes=24539 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=26 event_to_up_p999_us=26 event_to_up_max_us=26
+ 1082.556s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24553 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=17 event_to_up_p999_us=17 event_to_up_max_us=17
+ 1142.556s  the sim edge's wake-ups: seconds=60.0 messages=59 event_wakes=59 timeout_wakes=24514 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=12 event_to_up_p999_us=12 event_to_up_max_us=12
+ 1184.876s  stage Loading inibuilds-l1011/presets/inibuilds/l1011-500
+ 1202.513s  stage ReadyToFly inibuilds-l1011/presets/inibuilds/l1011-500-stair
+ 1202.558s  the sim edge's wake-ups: seconds=60.0 messages=81 event_wakes=76 timeout_wakes=24454 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=29 event_to_up_p999_us=29 event_to_up_max_us=29
+ 1203.590s  stage Flying inibuilds-l1011/presets/inibuilds/l1011-500-stair
+ 1203.630s  title: L1011-500 Cabin w/ Lounge
+ 1262.558s  the sim edge's wake-ups: seconds=60.0 messages=61 event_wakes=61 timeout_wakes=24610 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=12 event_to_up_p999_us=12 event_to_up_max_us=12
+ 1286.493s  stage Loading inibuilds-l1011/presets/inibuilds/l1011-500-stair
+ 1306.287s  stage ReadyToFly inibuilds-l1011/presets/inibuilds/l1011-500-pod
+ 1307.389s  stage Flying inibuilds-l1011/presets/inibuilds/l1011-500-pod
+ 1307.418s  title: L1011-500 Standard Cabin & Engine Pod
+ 1322.560s  the sim edge's wake-ups: seconds=60.0 messages=81 event_wakes=77 timeout_wakes=24355 timeout_messages=1 event_to_up_p50_us=9 event_to_up_p99_us=160 event_to_up_p999_us=160 event_to_up_max_us=160
+ 1371.121s  stage Loading inibuilds-l1011/presets/inibuilds/l1011-500-pod
+ 1382.562s  the sim edge's wake-ups: seconds=60.0 messages=77 event_wakes=77 timeout_wakes=24404 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=29 event_to_up_p999_us=29 event_to_up_max_us=29
+ 1391.512s  stage ReadyToFly inibuilds-l1011/presets/inibuilds/l1011-500-stair-pod
+ 1392.618s  stage Flying inibuilds-l1011/presets/inibuilds/l1011-500-stair-pod
+ 1392.645s  title: L-1011-500 Cabin w/ Lounge & Engine Pod
+ 1442.563s  the sim edge's wake-ups: seconds=60.0 messages=65 event_wakes=65 timeout_wakes=24337 timeout_messages=1 event_to_up_p50_us=9 event_to_up_p99_us=15 event_to_up_p999_us=15 event_to_up_max_us=15
+ 1486.304s  the quit message
+ 1486.304s  stage Closed inibuilds-l1011/presets/inibuilds/l1011-500-stair-pod
+ 1495.103s  the sim's process exited, with 0x0
+ 1504.234s  the sim edge's wake-ups: seconds=61.7 messages=40 event_wakes=40 timeout_wakes=17829 timeout_messages=0 event_to_up_p50_us=9 event_to_up_p99_us=49 event_to_up_p999_us=49 event_to_up_max_us=49
+ 1538.242s  the sim's process was found
+ 1538.242s  stage Starting
+ 1584.777s  the sim's process exited, with 0xc0000005
+ 1584.777s  stage Closed
+ 1618.255s  the sim's process was found
+ 1618.255s  stage Starting
+ 1838.703s  connection 1.64 opened
+ 1868.820s  the sim edge's wake-ups: seconds=60.0 messages=0 event_wakes=0 timeout_wakes=12819 timeout_messages=0 event_to_up_p50_us=0 event_to_up_p99_us=0 event_to_up_p999_us=0 event_to_up_max_us=0
+ 1893.107s  the sim's open reply: SunRise [12, 2, 282174, 999]
+ 1904.899s  the sim's process exited, with 0x1
+ 1904.899s  stage Closed
+the replay: replayed 11952 inputs, and all 1924 checkpoints matched
+
+The failed opens as the sim booted, from the recording replayed at the debug level; each line's
+stamp is in µs on the PC's performance counter, and result -2147467259 is E_FAIL.
+
+> dualinput-core replay <the run's recording> --log debug
+46020501485µs #121 [sim-service]  INFO sim_service::seam: the sim's process was found process=81000 created=134370899007443950
+46025005224µs #147 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 1 } result=-2147467259
+46030977199µs #181 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 2 } result=-2147467259
+46037018174µs #215 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 3 } result=-2147467259
+46043023878µs #249 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 4 } result=-2147467259
+46049003274µs #283 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 5 } result=-2147467259
+46055019840µs #317 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 6 } result=-2147467259
+46061007466µs #351 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 7 } result=-2147467259
+46066994362µs #384 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 8 } result=-2147467259
+46073052241µs #419 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 9 } result=-2147467259
+46079007074µs #452 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 10 } result=-2147467259
+46085027638µs #486 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 11 } result=-2147467259
+46091038056µs #520 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 12 } result=-2147467259
+46097030558µs #554 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 13 } result=-2147467259
+46103043500µs #588 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 14 } result=-2147467259
+46109031445µs #622 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 15 } result=-2147467259
+46115011867µs #656 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 16 } result=-2147467259
+46121020022µs #690 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 17 } result=-2147467259
+46127024214µs #724 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 18 } result=-2147467259
+46132908476µs #757 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 1, open: 19 }
+47493589297µs #9534 [sim-service]  INFO sim_service::seam: the sim's process exited code="0x0"
+47536727923µs #9772 [sim-service]  INFO sim_service::seam: the sim's process was found process=213560 created=134370914164675082
+47541237620µs #9798 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 20 } result=-2147467259
+47547236282µs #9832 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 21 } result=-2147467259
+47553250364µs #9866 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 22 } result=-2147467259
+47559248519µs #9900 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 23 } result=-2147467259
+47565235681µs #9933 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 24 } result=-2147467259
+47571232520µs #9967 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 25 } result=-2147467259
+47577246928µs #10001 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 26 } result=-2147467259
+47583263017µs #10035 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 27 } result=-2147467259
+47583263030µs #10036 [sim-service]  INFO sim_service::seam: the sim's process exited code="0xc0000005"
+47616741171µs #10222 [sim-service]  INFO sim_service::seam: the sim's process was found process=63584 created=134370914961431219
+47621267614µs #10247 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 28 } result=-2147467259
+47627238416µs #10281 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 29 } result=-2147467259
+47633260344µs #10315 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 30 } result=-2147467259
+47639272004µs #10349 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 31 } result=-2147467259
+47645244448µs #10383 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 32 } result=-2147467259
+47651257565µs #10417 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 33 } result=-2147467259
+47657268332µs #10451 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 34 } result=-2147467259
+47663273002µs #10485 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 35 } result=-2147467259
+47669260578µs #10519 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 36 } result=-2147467259
+47675276613µs #10553 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 37 } result=-2147467259
+47681259063µs #10587 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 38 } result=-2147467259
+47687258075µs #10621 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 39 } result=-2147467259
+47693281010µs #10655 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 40 } result=-2147467259
+47699262124µs #10689 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 41 } result=-2147467259
+47705250286µs #10722 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 42 } result=-2147467259
+47711281839µs #10757 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 43 } result=-2147467259
+47717269840µs #10790 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 44 } result=-2147467259
+47723276047µs #10824 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 45 } result=-2147467259
+47729282508µs #10858 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 46 } result=-2147467259
+47735264017µs #10892 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 47 } result=-2147467259
+47741319102µs #10927 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 48 } result=-2147467259
+47747281959µs #10960 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 49 } result=-2147467259
+47753269868µs #10994 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 50 } result=-2147467259
+47759266369µs #11028 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 51 } result=-2147467259
+47765281179µs #11062 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 52 } result=-2147467259
+47771287821µs #11096 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 53 } result=-2147467259
+47777274554µs #11130 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 54 } result=-2147467259
+47783273847µs #11164 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 55 } result=-2147467259
+47789278645µs #11198 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 56 } result=-2147467259
+47795267403µs #11232 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 57 } result=-2147467259
+47801270984µs #11266 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 58 } result=-2147467259
+47807305000µs #11300 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 59 } result=-2147467259
+47813284980µs #11334 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 60 } result=-2147467259
+47819287582µs #11368 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 61 } result=-2147467259
+47825297675µs #11402 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 62 } result=-2147467259
+47831284017µs #11436 [sim-service] DEBUG sim_service::seam: a connection didn't open connection=Connection { unit: 1, open: 63 } result=-2147467259
+47837188953µs #11469 [sim-service]  INFO sim_service::seam: a connection to the sim opened connection=Connection { unit: 1, open: 64 }
+47903384737µs #11841 [sim-service]  INFO sim_service::seam: the sim's process exited code="0x1"
+
+The Windows Application log's entry for the crash in the second boot:
+
+Faulting application name: FlightSimulator2024.exe, version: 1.9.18.0, time stamp: 0x00000000
+Faulting module name: FlightSimulator2024.exe, version: 1.9.18.0, time stamp: 0x00000000
+Exception code: 0xc0000005
+Fault offset: 0x000000000e1961b9
+Faulting process id: 0x34238
+Faulting application start time: 0x1DD61A26EEE120A
+Faulting application path: C:\Program Files (x86)\Steam\steamapps\common\Limitless\FlightSimulator2024.exe
+Faulting module path: C:\Program Files (x86)\Steam\steamapps\common\Limitless\FlightSimulator2024.exe
+Report Id: baf86f14-3907-4485-89d9-ac5cfc2ec0ab

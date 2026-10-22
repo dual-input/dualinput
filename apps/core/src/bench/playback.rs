@@ -230,7 +230,7 @@ fn playback(capture: Capture, plays: u32, queue: &Queue, source: SourceId) {
         .filter_map(|(i, stream)| stream.due().map(|at| Reverse((at, i))))
         .collect();
     let start = clock::now();
-    queue.push(source, input(START, &[]), true);
+    queue.push(source, input(START, &[]));
     while let Some(Reverse((at, i))) = due.pop() {
         if at >= until {
             break;
@@ -240,11 +240,11 @@ fn playback(capture: Capture, plays: u32, queue: &Queue, source: SourceId) {
             std::thread::sleep(Duration::from_micros(start + at - now));
         }
         if let Some(bytes) = streams[i].take() {
-            queue.push(source, bytes, true);
+            queue.push(source, bytes);
         }
         if let Some(next) = streams[i].due() {
             due.push(Reverse((next, i)));
         }
     }
-    queue.push(source, input(END, &[]), true);
+    queue.push(source, input(END, &[]));
 }

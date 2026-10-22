@@ -48,6 +48,10 @@ fn main() {
         std::process::exit(1);
     }
     println!("cargo::rustc-env=SIMCONNECT_SDK_VERSION={wanted}");
+    // The sim edge's build script reads this as DEP_SIMCONNECT_SDK_FOLDER, through the
+    // `links` key in this crate's Cargo.toml, and links SimConnect.lib from the folder only
+    // once the check above has passed.
+    println!("cargo::metadata=folder={}", sdk.display());
 
     let include = sdk.join("SimConnect SDK").join("include");
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("Cargo should set OUT_DIR"));

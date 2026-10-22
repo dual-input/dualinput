@@ -6,6 +6,33 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loo
 Decides:     The sim edge's thread and its inputs, the sim's process among them; the sim client's and the sim service's interfaces; sim awareness's stages and its one moment, and that it's an engine; how the core tells a crash from a close, which aircraft and preset loaded, and the loaded aircraft's facts; our WASM module's slots, its status, and what happens to a module from another build; which of the sim's APIs carries each want; the module through a flight load; the core's announcement; and the budgets (node 6.3).
 ```
 
+> **Note**
+> Since 2026-10-21, building stage 4 of [the build plan](../build/plan.md#4-the-sim-seam-our-wasm-module-and-our-package) settles one item and adds what the design left to its code:
+>
+> - The edge's wait: its 2ms comes from a high-resolution waitable timer in the wait's list, since `WaitForMultipleObjects`' own timeout can end a clock tick late, 15.6ms at Windows' default, as tokio's sleeps woke up to 16.9ms late ([core log][p01]); the edge arms it only while a connection is open.
+> - Each call's tag: each call the sim service makes carries a number of the service's, which the edge keeps with the call's packet ID and hands back with an exception, where [its thread](#its-thread) has the edge keep the call's handle, since `sim-client`, an engine, can't name the kernel's handles, and the platform's own calls have none; the service keeps each tag's unit and handle for the same last 4,096 calls on each connection.
+> - Calls and connections: a call made while the sim is closed fails at once and sets nothing up, and a call that sets nothing up, made while its connection opens, goes out after the connection's setup once it opens.
+>   At the sim's exit each feature's connection forgets its setup, so the feature's next call opens an empty connection, as after its profile unloads, while the platform's keeps its setup for the sim's next run.
+>   A unit's connections number on from its last, so an input still on its way for an old one is dropped.
+> - Sim awareness's state is a unit of its own, `sim-awareness`, which the sim service registers beside itself and steps through a call, so a feature reads it through `cx.read::<SimAwareness>()`.
+> - [Its slots](#its-slots): the slots' structs live in the message crate's files named `slots.rs`, and the slots hash is the first 8 bytes of a SHA-256 of those files, so a change to another message leaves it alone.
+>   Each struct is `#[repr(C)]` with bytemuck's `Pod` derive, which fails a struct with padding when it compiles.
+>   The header takes 24 bytes; the status slot's layout is the counter (`u64`), the slots hash (`u64`), and the version (16 bytes, padded with zeros), 32 bytes in all; and a routine's slot takes its ID's name, as in `DUALINPUT_ROUTINE_HOLD`.
+> - [The module's status](#the-modules-status): its first write reads Running.
+>   The 3s of Stopped count from the counter's last tick, at each feed, end, status write, `SimChanged`, and the 200ms rewrite, and the unfreeze reads the three flags once on the platform's connection before turning off each that's on.
+> - [Wants and the sim's APIs](#wants-and-the-sims-apis)' item on the freeze's numbers is settled: bindgen brings each from `MSFS_Events.h`, as `KEY_FREEZE_ALTITUDE_SET` 66834 ([build log][numbers]).
+> - A second `module_init` closes the first's connection and creates the slots again; whether they still exist is [left open](#left-open).
+>
+> Since 2026-10-21, stage 4's session in the sim changes two things (user, 2026-10-21; [core log][session]):
+>
+> - [Stages](#stages): `FLIGHT_END` enters Menu from Ready to fly or Flying, since the pause menu's End flight sends it and no `BACK_TO_MAIN_MENU`; a Restart and a reload send `FlightLoaded` first, so their `FLIGHT_END` comes while Loading and still moves no stage.
+> - [Budgets](#budgets): the platform's connection opens within 6.5s of the sim taking connections, where the table has 2s, since each `SimConnect_Open` that fails as the sim boots returns `E_FAIL` only after 4.5s, and the service tries again every 2s.
+>
+> Since 2026-10-21, the core records every input, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - No unit registers as partly recorded or declares a call `.unrecorded()`, and the sim service hands the edge no request to leave out, where [what a feature calls](#what-a-feature-calls) and its sketch of flight-model sync have both.
+> - Every unit's calls and feeds replay, so three things each replay exactly: each call's tag from one counter of the service's, as the first note of 2026-10-21 has it; the 200ms rewrite, whichever unit's feed starts it; and [the module's status](#the-modules-status)'s unfreeze, which turns on whether any feature's routine is live.
+
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.
 A crash is a sim whose process ends with no quit message before it, and the loaded aircraft is the folder and preset in the path `AircraftLoaded` reports.
@@ -345,6 +372,9 @@ In the sim:
 
 - `module_init` also runs "after sign-in", so it may run twice in one run of the sim ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#lifecycle-init-per-frame-update-deinit)); whether a second run finds its slots already created is unverified.
 
+[session]: log.md#2026-10-21-stage-4s-core-follows-the-sim-through-three-boots-and-five-loads-and-replays-all-of-it-but-ending-a-flight-sends-no-back_to_main_menu-and-a-failed-open-blocks-for-45s
+[p01]: log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version
+[numbers]: ../build/log.md#2026-10-21-bindgen-brings-the-freeze-events-numbers-into-our-wasm-module-and-the-module-its-package-and-the-cores-simconnectdll-build-from-the-tree
 [flight]: ../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [signals]: log.md#2026-10-15-two-of-the-three-aircraftloaded-our-client-heard-around-a-flight-load-came-in-the-main-menu
 [crashes]: log.md#2026-10-15-every-sim-crash-our-aircraft-harness-saw-closed-simconnects-connection-with-no-quit-message-before-it

@@ -56,14 +56,13 @@ pub struct Header {
     pub msvc: String,
     /// The version of the Windows SDK whose C runtime the core links, such as `10.0.26100.0`.
     pub windows_sdk: String,
+    /// The version of the MSFS SDK whose SimConnect headers laid out the messages the core
+    /// read, such as `1.8.1`.
+    pub simconnect_sdk: String,
     /// The PC's CPU, by the name it gives itself.
     pub cpu: String,
     /// Whether the CPU has FMA3, which the C runtime's math would use if the core let it.
     pub fma3: bool,
-    /// The units with an unrecorded input, whose outputs a replay doesn't check.
-    pub partly_recorded: Vec<String>,
-    /// Whether every input was recorded, the unrecorded ones too.
-    pub everything: bool,
     /// Whether a checkpoint comes before every input, rather than once a second.
     pub checkpoint_every_input: bool,
 }
@@ -87,7 +86,7 @@ pub struct Input {
     pub bytes: Vec<u8>,
 }
 
-/// The hash of everything the core's whole units had put out before the input `seq`.
+/// The hash of everything the core's units had put out before the input `seq`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Checkpoint {
     pub seq: u64,
@@ -370,10 +369,9 @@ mod tests {
             rustc: "rustc 1.95.0".into(),
             msvc: "14.44.35207".into(),
             windows_sdk: "10.0.26100.0".into(),
+            simconnect_sdk: "1.8.1".into(),
             cpu: "a test CPU".into(),
             fma3: true,
-            partly_recorded: vec!["traffic".into()],
-            everything: false,
             checkpoint_every_input: false,
         }
     }

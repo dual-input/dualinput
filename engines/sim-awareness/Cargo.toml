@@ -1,0 +1,12 @@
+[package]
+name = "sim-awareness"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+messages = { path = "../messages" }
+simconnect-types = { path = "../simconnect-types" }
+
+[lints]
+workspace = true

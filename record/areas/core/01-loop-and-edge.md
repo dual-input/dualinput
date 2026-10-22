@@ -6,6 +6,15 @@ Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, ../arc
 Decides:     The core's threads; how the queue stamps and orders inputs, and what an input is; the kernel's interface for units, their state, hooks, moments, requests, outputs, timers, jobs, and IDs; what a recording holds for a replay, and how a replay finds where it diverged; the core's math; what a panic does; how the core starts, stops, quits, and logs; and the budgets of the loop and the edge (node 6.1).
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - The writer leaves out no input, and a replay checks every unit's outputs, where the opening, [outputs](#outputs), and [what a recording holds](#what-a-recording-holds) leave out the inputs a feature declares unrecorded and check whole units alone.
+>   So the checkpoints' hash folds every unit's outputs, traffic's, avatars', the flight model's, and ATC audio's among them, and no unit takes fewer handles in a replay than live, which the counters of each unit's own in [timers, jobs, and IDs](#timers-jobs-and-ids) guard against.
+> - [A panic](#a-panic)'s hook has no unrecorded input to record, and a panic in any unit replays at the same input.
+> - [Logging](#logging): each unit logs at info each decision a pilot can notice, with its reason, such as control passing, a value applied or refused, a link lost, and catch-up's steps.
+>   When a pilot reports a problem, we ask for the run's `log.txt` first, and for the recording only when the log isn't enough, and the pilot sends either by hand, where the 16 MB cap's arithmetic has a bug report upload the log.
+
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.
 The kernel calls each handler with its unit's own state, a read-only view of every other unit's, and an outbox, and runs every call one unit asks of another after the asking handler returns.
@@ -115,8 +124,7 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
   An edge carries out its outputs in that order, and nothing is promised between two edges.
 - A unit that needs one thing done before another waits for the input that says it's done.
   The session crate writes the session file with its raised restart count as a job, and opens links only once the job's result says it's written, as [the session file](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts) requires.
-- Each output names its unit, and the kernel folds only whole units' outputs, each by its postcard encoding, into a running 64-bit hash, for the recording's checkpoints ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
-  A whole unit is one with no unrecorded input: an input a feature declares unrecorded, which the writer leaves out ([what a recording holds](#what-a-recording-holds)).
+- Each output names its unit, and the kernel folds only whole units' outputs, each by its postcard encoding, into a running 64-bit hash, for the recording's checkpoints ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).  A whole unit is one with no unrecorded input: an input a feature declares unrecorded, which the writer leaves out ([what a recording holds](#what-a-recording-holds)).
 - The hash is the first 8 bytes of a running SHA-256, from the sha2 crate the message crate's hash already uses.
   A build of the header's commit made with another rustc still replays, with a warning ([running a replay](#running-a-replay)), so the hash has to come out the same across Rust releases, and std's `DefaultHasher` "should not be relied upon over releases" (documented, [DefaultHasher](https://doc.rust-lang.org/std/hash/struct.DefaultHasher.html)).
   xxh3 would be many times faster, and FNV-1a needs no crate, but whole units' outputs leave out the heavy ones, traffic's, avatars', the flight model's, and ATC audio's, so SHA-256's hundreds of MB a second leave the hash a small part of the loop's time (unverified; the bench measures the loop's CPU).
@@ -164,7 +172,7 @@ How the records are encoded is the recording-format engine's.
 ### Running a replay
 
 1. For a pilot's recording, run `node tools/replay.ts <file>`, which fetches from GitHub the `dualinput-core.exe` that the recording's release shipped, and replays on it, since the core's math follows the C runtime of the Windows SDK the core was built with, which CI's image doesn't pin ([the core's math](#the-cores-math)).
-   A build of the header's commit also replays it, through `dualinput-core replay <file>`, for added logging, and warns when its rustc, MSVC, or Windows SDK version differs from the header's (user, 2026-10-18).
+   A build of the header's commit also replays it, through `dualinput-core replay <file>`, for added logging, and warns when its rustc, MSVC, Windows SDK, or MSFS SDK version differs from the header's (user, 2026-10-18), the last since the MSFS SDK's headers lay out the sim's messages the core reads.
    One with uncommitted changes warns and runs ([a replay on the same commit with local changes](../recording/01-recording-and-bug-reports.md#a-replay-on-the-same-commit-with-local-changes)).
    A program of another commit refuses, naming the commit to check out, and one on a PC whose CPU differs from the header's says so before it runs.
 2. The replay starts none of the edge's threads, so it binds no server and writes no port file, and takes a folder beside the recording as its data folder, for its named mutex and its log file, so it can run while Dual Input does; it takes the seed, the settings, and the session file from the recorded first input.

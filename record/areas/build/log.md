@@ -1,5 +1,31 @@
 # The build: log
 
+## 2026-10-21: bindgen brings the freeze events' numbers into our WASM module, and the module, its package, and the core's SimConnect.dll build from the tree
+
+**Asked.**
+Whether bindgen brings the numbers of the freeze's events into our WASM module from the SDK's `MSFS_Events.h`, which [wants and the sim's APIs](../core/03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis) left unverified until the module's build added that header.
+Then whether stage 4 of [the build plan](plan.md#4-the-sim-seam-our-wasm-module-and-our-package) builds the module, our package, and the core's link to `SimConnect.dll` from the tree, with no path to the SDK written twice more.
+
+**Expected.**
+The numbers, since `MSFS_EventsEnum.h` defines each as a sum of two constants, which clang can evaluate.
+
+**Found,** with rustc 1.95.0, bindgen 0.72.1, cargo-msfs v1.1.0, and SDK 1.8.1 (measured on our development machine, 2026-10-21):
+
+- bindgen evaluated each `#define` in `MSFS_EventsEnum.h`, such as `KEY_FREEZE_ATTITUDE_SET (KEY_ID_MIN + 1292)` with `KEY_ID_MIN 0x00010000`, into a `u32`: 66828 for `KEY_FREEZE_ATTITUDE_SET`, 66830 for `KEY_FREEZE_LATITUDE_LONGITUDE_SET`, and 66834 for `KEY_FREEZE_ALTITUDE_SET`, each the header's sum.
+- The module built by cargo-msfs exports the 11 functions p03 checked for, and `memory`, `__stack_pointer`, `__indirect_function_table`, `rust_eh_personality`, and one of std's mangled symbols, as p03's build did.
+  Beyond p08's, it imports `fsEventsTriggerKeyEvent`, `fsVarsGetAVarId`, `fsVarsAVarGet`, and the handler of the variables' status, `fsVarsRegisterVarsStatusUpdateHandler` and its unregister.
+- A crate can hand a build script that depends on it a value: `simconnect-types` declares `links = "simconnect-sdk"` and prints `cargo::metadata=folder=` with the SDK's folder after its version check, and the sim edge's build script reads it as `DEP_SIMCONNECT_SDK_FOLDER`, links `SimConnect.lib` from it, and copies `SimConnect.dll` beside the program.
+- ts-rs writes an import of another generated type without an extension, as `import type { Called } from "./Called"`, which `tools/tsconfig.json`'s `nodenext` resolution refuses, since Node runs our tools by stripping their types and resolves an import only by its whole file name.
+  `TS_RS_IMPORT_EXTENSION` set to `ts` writes `"./Called.ts"`.
+
+**What changed.**
+The module's numbers for the freeze come from the SDK's headers, with no table of ours.
+`.cargo/config.toml`'s `[env]` table sets `TS_RS_IMPORT_EXTENSION` beside its two other entries for ts-rs.
+The SDK's folder stays named in three places, the sim edge's build script reading it from `simconnect-types`.
+
+**Docs affected.**
+[03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) and [the build](01-the-build.md), in notes at their tops.
+
 ## 2026-10-20: bindgen builds the Windows side's SimConnect types with the static C runtime, and ts-rs's derive reaches windows-sys
 
 **Asked.**

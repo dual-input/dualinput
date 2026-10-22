@@ -52,7 +52,7 @@ struct Work {
     units: Vec<UnitWork>,
     timers: BTreeMap<Handle, TimerFn>,
     jobs: BTreeMap<Handle, JobFn>,
-    /// The running hash of the whole units' outputs.
+    /// The running hash of every output.
     hash: Sha256,
     verdicts: Vec<Option<Verdict>>,
     started: bool,
@@ -63,8 +63,6 @@ struct UnitWork {
     next: u64,
     /// The unit's generator of random IDs, which the first input seeds.
     rng: Option<ChaCha20Rng>,
-    /// Whether every input the unit takes is recorded, so a replay checks its outputs.
-    whole: bool,
 }
 
 type TimerFn = Box<dyn FnOnce(&mut dyn Any, TimerId, &mut Cx)>;
@@ -83,11 +81,7 @@ impl Kernel {
         let units = registry
             .units
             .iter()
-            .map(|unit| UnitWork {
-                next: 0,
-                rng: None,
-                whole: !unit.partly_recorded,
-            })
+            .map(|_| UnitWork { next: 0, rng: None })
             .collect();
         let verdicts = registry.requests.iter().map(|_| None).collect();
         Kernel {
@@ -108,16 +102,6 @@ impl Kernel {
         }
     }
 
-    /// Folds every unit's outputs into the hash, the partly recorded units' too, for a run
-    /// that records every input, so a replay of it checks every unit
-    /// (record/areas/recording/01-recording-and-bug-reports.md, "Recording everything").
-    /// The edge calls it before the first input, in a run and in its replay alike.
-    pub fn record_everything(&mut self) {
-        for unit in &mut self.work.units {
-            unit.whole = true;
-        }
-    }
-
     /// The number of the source `K` names, for the edge to push its inputs under.
     pub fn source<K: 'static>(&self) -> Option<SourceId> {
         self.table.source_keys.get(&TypeId::of::<K>()).copied()
@@ -135,18 +119,14 @@ impl Kernel {
         names
     }
 
-    /// The units with an unrecorded input, for the recording's header.
-    pub fn partly_recorded(&self) -> Vec<&'static str> {
-        self.table
-            .units
-            .iter()
-            .filter(|u| u.partly_recorded)
-            .map(|u| u.name)
-            .collect()
+    /// Each unit's name, by its place in the registry, so the bench can name a unit whose
+    /// sim connection it acts on.
+    pub fn units(&self) -> Vec<&'static str> {
+        self.table.units.iter().map(|u| u.name).collect()
     }
 
-    /// The first 8 bytes of the SHA-256 of everything the whole units have put out so far,
-    /// which the recording's checkpoints hold.
+    /// The first 8 bytes of the SHA-256 of everything the units have put out so far, which
+    /// the recording's checkpoints hold.
     pub fn hash(&self) -> u64 {
         let digest = self.work.hash.clone().finalize();
         u64::from_be_bytes(digest[..8].try_into().expect("a SHA-256 has 32 bytes"))
@@ -459,19 +439,16 @@ impl Cx<'_> {
     }
 
     /// Puts out `output`, for the edge to carry out once the input and everything it set
-    /// off are handled. A whole unit's output also goes into the running hash, by its
-    /// postcard encoding. A `HashMap` or `HashSet` encodes its entries in an order seeded
-    /// at random each run, so a replay would part from its run with no bug to find, and an
-    /// output type holds a `BTreeMap`, a `BTreeSet`, or a `Vec` instead.
+    /// off are handled. The output also goes into the running hash, by its postcard
+    /// encoding. A `HashMap` or `HashSet` encodes its entries in an order seeded at random
+    /// each run, so a replay would part from its run with no bug to find, and an output type
+    /// holds a `BTreeMap`, a `BTreeSet`, or a `Vec` instead.
     pub fn out<O: Serialize + Send + 'static>(&self, output: O) {
+        let bytes = postcard::to_stdvec(&output).expect("an output should encode with postcard");
         let mut work = self.work.borrow_mut();
-        if work.units[self.unit as usize].whole {
-            let bytes =
-                postcard::to_stdvec(&output).expect("an output should encode with postcard");
-            work.hash.update(self.unit.to_le_bytes());
-            work.hash.update((bytes.len() as u64).to_le_bytes());
-            work.hash.update(&bytes);
-        }
+        work.hash.update(self.unit.to_le_bytes());
+        work.hash.update((bytes.len() as u64).to_le_bytes());
+        work.hash.update(&bytes);
         work.outputs.push(Output {
             unit: UnitId(self.unit),
             unit_name: self.table.units[self.unit as usize].name,
@@ -511,7 +488,6 @@ impl Cx<'_> {
     /// Asks for a request a crate of the platform's decides: once this handler has
     /// returned, the request's guards run, and if none refuses it, its crate decides it.
     pub fn ask<R: 'static>(&self, request: R) {
-        self.whole("asks for a request");
         let index = self.request::<R>();
         self.queue(Pending::Ask(index, Box::new(request)));
     }
@@ -553,22 +529,14 @@ impl Cx<'_> {
         job: Job,
         f: fn(&mut S, JobId, Result<Vec<u8>, String>, &mut Cx),
     ) -> JobId {
-        self.start(job, f, true)
-    }
-
-    /// Starts a job whose result stays out of the recording, for a partly recorded unit.
-    pub fn unrecorded_job<S: 'static>(
-        &self,
-        job: Job,
-        f: fn(&mut S, JobId, Result<Vec<u8>, String>, &mut Cx),
-    ) -> JobId {
-        let unit = &self.table.units[self.unit as usize];
-        assert!(
-            unit.partly_recorded,
-            "unit {} starts an unrecorded job, so it should say it's partly recorded",
-            unit.name
+        self.own::<S>("starts a job");
+        let id = JobId(self.handle());
+        self.work.borrow_mut().jobs.insert(
+            id.0,
+            Box::new(move |state, id, result, cx| f(downcast_mut(state), id, result, cx)),
         );
-        self.start(job, f, false)
+        self.out(StartJob { id, job });
+        id
     }
 
     /// Cancels a job. Its result, when it comes, is dropped.
@@ -602,22 +570,6 @@ impl Cx<'_> {
         bytes
     }
 
-    fn start<S: 'static>(
-        &self,
-        job: Job,
-        f: fn(&mut S, JobId, Result<Vec<u8>, String>, &mut Cx),
-        recorded: bool,
-    ) -> JobId {
-        self.own::<S>("starts a job");
-        let id = JobId(self.handle());
-        self.work.borrow_mut().jobs.insert(
-            id.0,
-            Box::new(move |state, id, result, cx| f(downcast_mut(state), id, result, cx)),
-        );
-        self.out(StartJob { id, job, recorded });
-        id
-    }
-
     fn queue(&self, pending: Pending) {
         let mut work = self.work.borrow_mut();
         work.queued += 1;
@@ -647,15 +599,6 @@ impl Cx<'_> {
         assert!(
             self.table.unit_of::<S>() == self.unit,
             "unit {unit} {what} with another unit's handler"
-        );
-    }
-
-    fn whole(&self, what: &str) {
-        let unit = &self.table.units[self.unit as usize];
-        assert!(
-            !unit.partly_recorded,
-            "unit {} is partly recorded, so it {what} that a replay can't check",
-            unit.name
         );
     }
 }

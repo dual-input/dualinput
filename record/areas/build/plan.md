@@ -99,7 +99,6 @@ Builds:
 
 The sim thread comes in stage 4, the WebSocket server and the port file in stage 5, the marks' record in stage 8, the window thread in stage 9 with the session crate that handles the quit it pushes, the sandbox's stops' record in stage 12, and `tools/replay.ts` in stage 22.
 The edge's jobs read and write files, and its other jobs, fetching over HTTPS and reading the clipboard, come with the first stage whose units start them.
-The kernel's way for a crate of the platform's to put out an output, or draw a handle, for the unit whose call it carries out comes in stage 4, whose sim service is the first to need it, and a slice credited to its owner in stage 5 ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
 01-loop-and-edge's other cases and budgets are in the `Tests` lines of stages 3, 4, 5, 9, 15, and 18, each marked as from stage 2.
 
 Designs first: four things [01-loop-and-edge](../core/01-loop-and-edge.md) left open, which the user agreed on 2026-10-20: the queue's lock ([the queue](../core/01-loop-and-edge.md#the-queue)), the 64-bit hash that folds the outputs ([outputs](../core/01-loop-and-edge.md#outputs)), the crate that gives ChaCha20 ([timers, jobs, and IDs](../core/01-loop-and-edge.md#timers-jobs-and-ids)), and how big the log file grows ([logging](../core/01-loop-and-edge.md#logging)).
@@ -126,7 +125,7 @@ Builds:
 - the loop's stats in the core's log ([logging](../core/01-loop-and-edge.md#logging))
 - `simconnect-types`; the sim seam's four inputs in `sim-client`, with the edge's own calls, which look for the sim's process and open and close a connection; and the stand-in sim's thread, the process it watches, its opens and closes, and the losses and quit messages a scenario asks for ([the stand-in sim](02-testing.md#the-stand-in-sim), [the sim seam](../architecture/02-code-map.md#the-sim-seam), [the edge](../core/03-sim-seam-and-wasm-module.md#the-edge))
 
-The stand-in answers no SimConnect call until [stage 4](#4-the-sim-seam-our-wasm-module-and-our-package), which builds each call in `sim-client`, the sim edge, and the stand-in together, so the stand-in learns each call beside the edge that tries it in the sim (user, 2026-10-20).
+The stand-in answers no SimConnect call until [stage 4](#4-the-sim-seam-our-wasm-module-and-our-package), which builds the platform's calls in `sim-client`, the sim edge, and the stand-in together, as each later stage builds its features' calls, so the stand-in learns each call beside the edge that tries it in the sim (user, 2026-10-20).
 Each later stage adds the stand-ins its own units need ([left to each stage](02-testing.md#left-to-each-stage)).
 The bench's [other cases](02-testing.md#cases-for-the-bench) and its [budgets](02-testing.md#budgets) need parts later stages build, and are in the `Tests` lines of stages 4, 5, 7, 15, and 22, each marked as from stage 3, and the loop under load runs again in stage 14.
 
@@ -144,17 +143,45 @@ Done on 2026-10-21.
 
 ## 4 The sim seam, our WASM module, and our package
 
-Builds: the sim service, sim awareness, the sim edge, the routine host, `sim-package/routines/`, `sim-package/wasm-module`, and our package with `node tools/build.ts install` ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), [our package](01-the-build.md#our-package)); the rest of `sim-client`, with each SimConnect call the sim service makes and the stand-in's answer to it, and the stand-in in the edge's place in the bench build, with its frames, its aircraft, its faults, its routines through the routine host, and the stub the bench starts for each sim ([the stand-in sim](02-testing.md#the-stand-in-sim)); the SimConnect SDK's version, `simconnect_types::SDK_VERSION`, in the recording's header ([what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)); and the kernel's way for the sim service to put out a call, and draw its handle, for the unit whose call it carries out ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+Builds:
+
+- `sim-edge`: the sim thread, which waits on each connection's event and the sim's process for at most 2ms, makes the queued calls through `SimConnect.dll` in order, dispatches each connection's messages, tags each exception by its packet ID, and finds and watches the sim's process ([the edge](../core/03-sim-seam-and-wasm-module.md#the-edge))
+- the rest of `sim-client`: each connection's IDs, the setup it makes again on a new connection, and watches by name ([the sim client](../core/03-sim-seam-and-wasm-module.md#the-sim-client))
+- `sim-awareness`: its stages, the aircraft from `AircraftLoaded`'s path, the pause, and the run of the sim and how it ended ([sim awareness](../core/03-sim-seam-and-wasm-module.md#sim-awareness))
+- `sim-service`: its connections; the platform's connection and what it holds, but the announcement; the calls `watch`, `write`, and `key`, and `cx.module()`'s `feed` and `end`; the module's status and the unfreeze; `SimChanged`; and the flight file's `[Departure]` read, as a job ([the sim service](../core/03-sim-seam-and-wasm-module.md#the-sim-service), [the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status))
+- `routine-host`: routines' slots and their header, a routine's life, `Frame::now`, the freeze, preflight's `Hold`, and the module's status slot ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module), [its slots](../core/03-sim-seam-and-wasm-module.md#its-slots), [the core's counter in our module](../flight-model/01-flight-model-sync.md#the-cores-counter-in-our-module))
+- `sim-package/routines/`, the module's list of routines, and `sim-package/wasm-module/`, the module's edge on the sim's APIs, with Clippy's four panic lints denied in every crate the module builds ([our WASM module](../core/03-sim-seam-and-wasm-module.md#our-wasm-module), [when the module stops](../architecture/02-code-map.md#when-the-module-stops))
+- our package, which `tools/build.ts` lays out with its `layout.json` and `manifest.json`; `node tools/build.ts install`; and the module's build in `tools/check.ts`, which checks its exports against the list p03 checked ([our package](01-the-build.md#our-package), [building every target](../architecture/02-code-map.md#building-every-target), [CI](../architecture/02-code-map.md#ci))
+- the stand-in in the edge's place in the bench build: its answer to each call above, its aircraft's table of variables, its frames, which run the routine host and the routines natively, its faults, a load played from p08's recorded signals, and the stub the bench starts for each sim ([the stand-in sim](02-testing.md#the-stand-in-sim))
+- the SimConnect SDK's version, `simconnect_types::SDK_VERSION`, in the recording's header ([what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds))
+
+The sim service's other calls each come with the first feature that makes them, with the stand-in's answer and the call's trial in the sim (user, 2026-10-21): `listen`, `input`, and `set_input` in stage 14, `reports` in stage 16, `create_ai`, `remove`, `camera`, and `frames` in stage 17, `poll` and `release` in stage 18, `world_map` in stage 21, and `commbus_call` and `commbus_listen` after v1, since no v1 feature makes them.
+p08's client already made AI creates, camera reads, input events, masking, and a CommBus call through `SimConnect.dll` in a flight ([the core](../architecture/01-spine.md#the-core)), so trying them before their features adds little.
+The routine host's other wants come with the routines that ask for them, in stages 14, 16, and 17.
+The sim service's parts that need a later stage come with it: the announcement, the module's notices, and the sim service's slice of client state in stage 5, which builds the clients crate; the menu script with our BlurPage copy, aircraft awareness, and `announce` in stage 9, which builds the session crate; and the checks of packages on disk in stage 15.
+The kernel gets no way to count an output the sim service makes for a feature's call as that feature's, since with every input recorded a replay checks both units' outputs ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+
 Needs: 3.
 
 Tests:
 
-- From stage 2: the timers fire within 2ms of their deadlines at p99 with the sim running and the PC busy, in this stage's session in the sim ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
+- From [03's cases for the bench](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench), as sim awareness's own tests: p08's recorded signals raise one Loading, one Ready to fly, and one Flying, with the PA-24's folder and preset, and the main menu's two `AircraftLoaded` raise nothing; the Restart's recorded signals raise one Loading, and no Menu; and the A350's two paths for one load name one aircraft.
+- From the same, on the bench: the quit message, then the process exiting, ends the run as a close, and nothing opens between the two; the process exiting with no quit message ends it as a crash; a loss with no quit message, then an open that succeeds, changes no stage, and each test unit hears its own connection's loss; a feed whose slots hash differs runs no routine, and the sim service reports the module as differing; and the counter still for 3s in Flying, unpaused, with a routine live, unfreezes the aircraft, while still through Loading, through a pause, with no routine live, or for under 3s since a pause ended, it does nothing.
+- From [the code map's cases](../architecture/02-code-map.md#cases-for-the-bench), on the bench: `AircraftLoaded` three times around one load raises one `SimChanged` into Loading; a message for a closed connection is discarded; a variable the stand-in rejects from a watch after the call returned leaves the watch's other values arriving; the platform's connection takes its masking group at `S_OK`, before the sim's open message; and a connection lost and opened again has its setup made again, as the platform's has when the sim closes and starts again.
+- From [the code map's cases for work in the sim](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim), on the bench: a routine fed again after its end mark starts with nothing from its last feeding; and with the module stopped by a test routine built to panic, the core unfreezes the aircraft within 3s of the counter's last tick, while the counter stalling through a flight load or a pause unfreezes nothing.
 - From stage 3: two bench cores on one PC each see only their own stub, and killing one stub ends that core's sim alone, as a crash ([the bench's own cases](02-testing.md#cases-for-the-bench)).
+- From [the build's cases on a desk](01-the-build.md#cases-for-the-bench): `node tools/build.ts install` writes our package into each packages folder's `Community`, and refuses while the sim runs.
+- In this stage's session in the sim: our module runs from our `PANEL_PATCH` package, and the sim service reads it as Running ([our package](01-the-build.md#our-package)); and from [03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench), closing the sim from its menu sends the quit message before its process exits; killing the sim shows which of a failed call, the quit message, and the process's exit reaches the edge first, and how soon; through a second flight load in one run of the sim, the module's own connection and its slots carry on; a Marketplace aircraft's path names its folder and preset, and each of the L-1011's four presets gives a path of its own; and a connection's event, not the 2ms timeout, wakes the edge.
+- In that session, by hand: from stage 2, the timers fire within 2ms of their deadlines at p99 with the sim running and the PC busy ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)); the edge puts a message on the queue within 1ms of SimConnect signaling it, at p99 ([the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets)); and Closed comes within 100ms of the quit message or the process exiting, and the platform's connection opens within 6.5s of the sim taking connections ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md)'s note of 2026-10-21 on its budgets).
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the module's build and the sim seam's scenarios among them; in this stage's session in the sim, a core built from the tree follows the sim in its log from its boot through two flight loads to its close, naming each load's aircraft, with the module Running; and the [core's log](../core/log.md) has an entry for the session's cases and budgets.
+Done on 2026-10-22.
 
 ## 5 Clients and the panel bridge
 
 Builds: the clients crate, `page-client`, the panel bridge, and our `VCockpit.js` override, with the sim's stock files it starts from, the Coherent GT check, and the bench's fake pages ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the sim's stock files](01-the-build.md#the-sims-stock-files), [the Coherent GT check](01-the-build.md#the-coherent-gt-check)).
+Designs first: whether the core sends each client `alive` every 2s whatever else it sends, or only after 2s of nothing, as [the protocol](../core/02-clients-and-panel-bridge.md#the-protocol) has it, since recording every input took away the drift the first guarded against ([recording log](../recording/log.md)).
+From stage 4, it also builds the sim service's announcement every 2s, whose body holds the clients crate's port, and its parts that slices and notices carry: its slice of client state, and the module's trouble notices ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement), [sim awareness](../core/03-sim-seam-and-wasm-module.md#sim-awareness), [the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
 Needs: 4.
 
 Tests:
@@ -175,16 +202,23 @@ Tests, from stage 3: a scenario that holds back one pair's relay leaves the othe
 
 ## 8 Recording and bug reports
 
-Builds: the recording crate, the self-describing record and the replay log's marks in `recording-format`, uploads, and the backend's bug reports ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+Builds: the recording crate, and the self-describing record and the replay log's marks in `recording-format` ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+The rule that each unit logs at info each decision a pilot can notice, with its reason, is in [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-21 on [logging](../core/01-loop-and-edge.md#logging), and each stage's units keep it.
 The report page is the desktop shell's, and comes with [the apps](#11-the-apps).
+Designs first: the budgets for a session's recording and for a run with no session, which rested on partial recording, and which of [what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)'s rules stay, now that every input is recorded ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-21).
 Needs: 7.
 
 ## 9 The session
 
 Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)); and `apps/core`'s window thread, which pushes a quit when Windows ends the pilot's session ([quitting](../core/01-loop-and-edge.md#quitting)).
+From stage 4, it also builds the menu script and our BlurPage copy in `sim-package/pages`, with the menu script's report of the menu's page, which ends sim awareness's Starting ([the menu script](../session/02-units.md#the-menu-script), [leaving Starting](../core/03-sim-seam-and-wasm-module.md#leaving-starting)); the sim service's aircraft awareness, which runs while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)); the sim service's feed of preflight's `Hold` on the platform's connection ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module)); and `sim_service::announce`, which the session crate calls as a session starts or ends ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement)).
 Its features come in [stage 21](#21-rate-and-pause-and-go-to).
 Needs: 4, 7, and 8.
-Tests, from stage 2: a pilot quits Dual Input in a session, and Windows signs a pilot out with a session held, and each time the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+
+Tests:
+
+- From stage 2: a pilot quits Dual Input in a session, and Windows signs a pilot out with a session held, and each time the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+- From stage 4: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)), raising one `SimChanged` for the load it finds ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); the announcement goes out within one input of the session crate's call ([03's budgets](../core/03-sim-seam-and-wasm-module.md#budgets)); and in this stage's session in the sim, `fsEventsTriggerKeyEvent` freezes and unfreezes the pilot's aircraft through `Hold` (same cases).
 
 ## 10 Profiles
 
@@ -213,13 +247,19 @@ Needs: 10 and 12.
 ## 14 State sync
 
 Builds: the state sync feature, its routine `HEvents`, its panel modules `h-events` and `instrument-reads`, its parts in the apps, and the Baron 58P profile's `state` and `events` blocks ([the sync units](../sync/05-units.md), [reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
+From stage 4, it also builds the sim service's `listen`, `input`, and `set_input`, with `sim-client`'s `B:` names; the routine host's `H:` events; and the stand-in's answers to each, with the rules a scenario scripts for its aircraft's own behavior ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the sim client](../core/03-sim-seam-and-wasm-module.md#the-sim-client), [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for), [what it models](02-testing.md#what-it-models)).
 It ends with the first session in the sim, with a bench core as the second pilot ([how the stages are ordered](#how-the-stages-are-ordered)).
 Needs: 11 and 13.
-Tests, from stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them.
+
+Tests:
+
+- From stage 3: [the loop under load](02-testing.md#the-loop-under-load) again, by hand, with the stand-in's sim inputs and state sync's write functions in place of the test unit's stand-ins for them.
+- From stage 4, in this stage's session in the sim: a group on one connection keeps hearing an event while a group on another is cleared ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
 
 ## 15 Installing and updating
 
 Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, writing our package, and the core's checks of the packages that override ours ([installing and updating](../install/01-installing-and-updating.md)).
+From stage 4, the release's folder also holds the C++ runtime's three DLLs that `SimConnect.dll` imports ([the build](01-the-build.md)), and the desktop app copies our package as [installing and updating](../install/01-installing-and-updating.md)'s note of 2026-10-21 has it.
 The release workflow comes in [stage 22](#22-github).
 Needs: 3 and 11.
 
@@ -231,19 +271,28 @@ Tests:
 ## 16 Flight-model sync
 
 Builds: the flight-model feature, and its routines `Lead` and `Follow` ([01-flight-model-sync](../flight-model/01-flight-model-sync.md)).
+From stage 4, it also builds the sim service's `reports`; the routine host's writes, events with values, and reports ([what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for)); and the stand-in's answers to each, with its aircraft moving by its velocities ([what it models](02-testing.md#what-it-models)).
 It ends with the first flight with friends, which needs state sync and the installer too ([how the stages are ordered](#how-the-stages-are-ordered)).
 Needs: 4, 9, 14, and 15.
+Tests, from stage 4, in this stage's session in the sim: `fsVarsAVarSet` holds the pilot's own aircraft's pose; through a second flight load in one run of the sim, `Follow` starts new at its first feed ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)); and our module's update, every routine's frame and the routine host's work together, takes under 0.1ms a frame at p99 ([budgets for work in the sim](../architecture/02-code-map.md#budgets-for-work-in-the-sim)).
 
 ## 17 Avatars
 
 Builds: the avatars feature, its routine `Figure`, the figure's SimObject, `aircraft-model`, `msfs-gltf`, `msfs-rpn`, `ray-cast`, `tools/profile-author`, and the Baron 58P profile's seats ([01-avatars](../avatars/01-avatars.md)).
+From stage 4, it also builds the sim service's `create_ai`, `remove`, `camera`, and `frames`, the routine host's `Z:` writes, and the stand-in's answers to each, with its faults for a create whose title the sim lacks and for several `Frame` events in one read ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [what it models](02-testing.md#what-it-models)).
 Needs: 6, 10, and 13.
+Tests, from stage 4: after a `RESET`, `Figure`'s `Z:` writes still land ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)); several `Frame` events in one read each reach the loop as an input of its own, and an AI create whose title the sim lacks has its exception reach the call ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); and in this stage's session in the sim, closing a connection removes the AI objects it created, as killing its client did ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load)).
 
 ## 18 Traffic and ATC audio
 
 Builds: the traffic feature, its routine `Traffic`, `object-mirror`, and the ATC audio feature, with their parts in the apps ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md)).
+From stage 4, it also builds the sim service's `poll` and `release`, and the stand-in's answers to them ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls)).
 Needs: 6, 9, and 11.
-Tests, from stage 2: the core holds under 100 MB of private working set beside QuickJS-ng's runtimes in a busy session, one that hosts traffic ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
+
+Tests:
+
+- From stage 2: the core holds under 100 MB of private working set beside QuickJS-ng's runtimes in a busy session, one that hosts traffic ([01-loop-and-edge's budgets](../core/01-loop-and-edge.md#budgets)).
+- From stage 4: v1's connections and their watches add under 0.2ms to the sim's frame ([the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets)), and `Traffic`'s frame takes under 0.1ms with 25 moving copies ([budgets for work in the sim](../architecture/02-code-map.md#budgets-for-work-in-the-sim)).
 
 ## 19 Pointer sync
 
@@ -258,6 +307,7 @@ Needs: 6 and 11.
 ## 21 Rate and pause, and Go to
 
 Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the desktop app ([the session's units](../session/02-units.md)).
+From stage 4, it also builds the sim service's `world_map`, and the menu script's requests that carry it out ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the menu script](../session/02-units.md#the-menu-script)).
 Needs: 9 and 11.
 
 ## 22 GitHub

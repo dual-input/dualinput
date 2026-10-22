@@ -6,6 +6,13 @@ Depends on:  ../core/02-clients-and-panel-bridge.md, ../architecture/02-code-map
 Decides:     How a feature's part plugs into each app and comes out; what a part may use; the slices and commands the apps need that no unit had; how any client changes a setting and quits; when and how the banner is opened and closed; how a click on a notice reaches the EFB app; what trouble in each component raises; what the apps learn when the core goes; and how the EFB app brings the desktop app forward (node 6.16).
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - [Slices and commands](#slices-and-commands): `recording`'s slice doesn't say whether a run is uploaded, and its command to upload a session comes after v1.
+> - [Settings](#settings): no setting records everything.
+> - [Left to the apps' stage](#left-to-the-apps-stage): the report page's upload comes after v1.
+
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.
 In each flight of a session, the EFB app's code opens the banner, calling the toolbar again until the banner's page connects, and the page shows and hides its own content while the panel stays open.

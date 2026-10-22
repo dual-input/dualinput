@@ -14,6 +14,11 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 >
 > - [The buffer](#the-buffer)'s depth comes from the last 500 frames received, where it says the last 10s of frames, so a transmission after a pause starts from history rather than at 60ms.
 > - Avatars removes no figure itself at a profile's unload ([avatars](../avatars/01-avatars.md)), so [which copies it shows](#which-copies-it-shows) can't compare traffic's removal to it; traffic still removes each copy with `AIRemoveObject`, since it removes copies while its connection stays open.
+>
+> Since 2026-10-21, the core records every input, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - Neither traffic nor ATC audio registers as partly recorded: traffic's polls, its reads of each new object's identity, and its states' channel, and ATC audio's captured frames and its frames' channel, are recorded, where [the units](#the-units), [what they register](#what-they-register), [what goes out](#what-goes-out), and [the ATC host](#the-atc-host) declare them unrecorded, and a replay checks both units' outputs.
+> - Neither is a leaf, so the one request that claims both role keys, in [the units](#the-units), rests on [the traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch) alone.
 
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.

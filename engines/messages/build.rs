@@ -1,4 +1,5 @@
-//! Computes `messages::HASH`, a fingerprint of the message crate.
+//! Computes `messages::HASH`, a fingerprint of the message crate, and `messages::SLOTS_HASH`,
+//! a fingerprint of the routines' slots alone.
 //!
 //! Dual Input's programs, on one PC and between the two pilots' PCs, talk in the messages
 //! this crate defines. Two builds whose messages differ would misread each other, so each
@@ -6,6 +7,12 @@
 //! refuse to talk. A new version of an encoding crate such as serde can change the bytes a
 //! message becomes, so the hash covers the version of every crate this one depends on, as
 //! well as its source (decision 026).
+//!
+//! Our WASM module reads a routine's slot in place, so it needs only the slots' layouts to
+//! match the core's, and the slots hash covers only the files named `slots.rs`. A change to
+//! any other message then leaves our module's build as good as it was, and a developer
+//! needn't restart the sim for one (record/areas/core/03-sim-seam-and-wasm-module.md, "A
+//! module from another build").
 //!
 //! tests/hash.rs compiles this file into its tests, so the functions they call are `pub`.
 
@@ -30,12 +37,16 @@ fn main() {
         fs::read_to_string(&lock_path).expect("the workspace's Cargo.lock should be readable");
 
     let hash = crate_hash(&crate_dir, &lock);
+    let slots = slots_hash(&crate_dir);
     let out =
         PathBuf::from(env::var_os("OUT_DIR").expect("Cargo should set OUT_DIR")).join("hash.rs");
     let source = format!(
         "/// A SHA-256 fingerprint of this crate and every crate it depends on, as 64 lowercase\n\
          /// hex digits. Each program sends it in its first message; build.rs says why.\n\
-         pub const HASH: &str = \"{hash}\";\n"
+         pub const HASH: &str = \"{hash}\";\n\
+         /// The first 8 bytes of a SHA-256 of the routines' slots, the files named `slots.rs`.\n\
+         /// Each slot's header carries it; build.rs says why.\n\
+         pub const SLOTS_HASH: u64 = {slots:#018x};\n"
     );
     fs::write(out, source).expect("OUT_DIR should be writable");
 
@@ -51,7 +62,31 @@ fn main() {
 
 pub fn crate_hash(crate_dir: &Path, lock: &str) -> String {
     let mut hasher = Sha256::new();
-    for (name, path) in source_files(crate_dir) {
+    hash_files(&mut hasher, source_files(crate_dir));
+    for (name, version) in reachable_packages(lock, "messages") {
+        hasher.update(format!("{name} {version}\n").as_bytes());
+    }
+    hasher
+        .finalize()
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+
+/// The first 8 bytes of the SHA-256 of every file under `src/` named `slots.rs`, read as a
+/// big-endian number.
+pub fn slots_hash(crate_dir: &Path) -> u64 {
+    let mut hasher = Sha256::new();
+    let slots = source_files(crate_dir)
+        .into_iter()
+        .filter(|(name, _)| name.starts_with("src/") && name.ends_with("/slots.rs"));
+    hash_files(&mut hasher, slots);
+    let digest = hasher.finalize();
+    u64::from_be_bytes(digest[..8].try_into().expect("a SHA-256 has 32 bytes"))
+}
+
+fn hash_files(hasher: &mut Sha256, files: impl IntoIterator<Item = (String, PathBuf)>) {
+    for (name, path) in files {
         let bytes = fs::read(&path).expect("a source file should be readable");
         let text = lf_endings(&bytes);
         // The name and length mark where each file starts and ends. Without them, moving a
@@ -61,14 +96,6 @@ pub fn crate_hash(crate_dir: &Path, lock: &str) -> String {
         hasher.update((text.len() as u64).to_le_bytes());
         hasher.update(&text);
     }
-    for (name, version) in reachable_packages(lock, "messages") {
-        hasher.update(format!("{name} {version}\n").as_bytes());
-    }
-    hasher
-        .finalize()
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect()
 }
 
 /// `Cargo.toml`, `build.rs`, and every file under `src/`, each named by its path from the

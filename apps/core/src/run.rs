@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::sync::{Arc, mpsc};
 use std::time::{Duration, Instant};
 
-use kernel::{CancelTimer, Exit, FIRST, Kernel, Registry, SetTimer, StartJob};
+use kernel::{CancelTimer, Exit, FIRST, Kernel, Registry, SetTimer, SourceId, StartJob};
 use recording_format::{Checkpoint, Header, Record};
 use tracing::level_filters::LevelFilter;
 use windows_sys::Win32::Security::Cryptography::{
@@ -20,7 +20,7 @@ use crate::edges::timer::Timers;
 use crate::home::Home;
 use crate::log;
 use crate::loop_stats::Stats;
-use crate::queue::{Item, Queue};
+use crate::queue::Queue;
 use crate::recording::convert::to_record;
 use crate::recording::{build_info, writer};
 use crate::run_context;
@@ -48,8 +48,6 @@ pub struct Options {
     /// The data folder, which one core holds at a time.
     pub data: PathBuf,
     pub level: LevelFilter,
-    /// Records every input, the unrecorded ones too, so every unit's replay is checked.
-    pub everything: bool,
     /// Puts a checkpoint before every input rather than once a second, for tests that want
     /// a replay to name the very input where it parted.
     pub checkpoint_every_input: bool,
@@ -71,8 +69,10 @@ pub enum Ran {
 
 /// What the loop's thread reports once the units have registered.
 struct Ready {
-    partly_recorded: Vec<&'static str>,
     start_files: Vec<&'static str>,
+    /// The sim service's source, when the core has one, which the sim's side of the seam
+    /// pushes under.
+    seam: Option<SourceId>,
     #[cfg(feature = "stand-in")]
     bench: Option<crate::bench::Sources>,
 }
@@ -82,7 +82,6 @@ struct Go {
     queue: Arc<Queue>,
     sinks: Sinks,
     writer: writer::Handle,
-    everything: bool,
     checkpoint_every_input: bool,
 }
 
@@ -113,27 +112,23 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let (go, gone) = mpsc::channel::<Go>();
     let units = units.to_vec();
     let loop_context = context.clone();
-    let everything = options.everything;
     let looper = std::thread::Builder::new()
         .name("loop".into())
         .stack_size(STACK)
         .spawn(move || {
             run_context::enter(loop_context);
             let mut kernel = build(&units);
-            if everything {
-                kernel.record_everything();
-            }
             let _ = ready.send(Ready {
-                partly_recorded: kernel.partly_recorded(),
                 start_files: kernel.start_files(),
+                seam: kernel.source::<sim_client::Seam>(),
                 #[cfg(feature = "stand-in")]
                 bench: crate::bench::Sources::of(&kernel),
             });
             gone.recv().ok().map(|go| live(&mut kernel, go))
         })?;
     let Ok(Ready {
-        partly_recorded,
         start_files,
+        seam,
         #[cfg(feature = "stand-in")]
         bench,
     }) = units_ready.recv()
@@ -158,10 +153,9 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         rustc: build_info::RUSTC.into(),
         msvc: build_info::MSVC.into(),
         windows_sdk: build_info::WINDOWS_SDK.into(),
+        simconnect_sdk: simconnect_types::SDK_VERSION.into(),
         cpu,
         fma3,
-        partly_recorded: partly_recorded.into_iter().map(Into::into).collect(),
-        everything: options.everything,
         checkpoint_every_input: options.checkpoint_every_input,
     };
     let (writer, writer_thread) = writer::start(
@@ -170,7 +164,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         context.clone(),
     )?;
     let _ = context.writer.set(writer.clone());
-    queue.push(FIRST, kernel::first_input(seed, files), true);
+    queue.push(FIRST, kernel::first_input(seed, files));
 
     let (timers, timer_thread) = Timers::start(queue.clone(), context.clone())?;
     let tokio_context = context.clone();
@@ -192,16 +186,27 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let cancel = timers.clone();
     sinks.on(move |c: CancelTimer| cancel.cancel(c.id));
     sinks.on(move |s: StartJob| jobs.start(s));
+    // The sim's side of the seam: the sim edge on SimConnect.dll, or in a bench build the
+    // stand-in sim, which the bench's edge starts.
+    #[cfg(not(feature = "stand-in"))]
+    let sim = seam
+        .map(|source| crate::edges::sim::start(queue.clone(), source, context.clone(), &mut sinks))
+        .transpose()?;
     #[cfg(feature = "stand-in")]
     if let Some(sources) = bench {
-        crate::bench::sinks(&mut sinks);
-        crate::bench::start(&options.data, queue.clone(), sources, context.clone())?;
+        crate::bench::start(
+            &options.data,
+            queue.clone(),
+            sources,
+            seam,
+            context.clone(),
+            &mut sinks,
+        )?;
     }
     let _ = go.send(Go {
         queue,
         sinks,
         writer: writer.clone(),
-        everything: options.everything,
         checkpoint_every_input: options.checkpoint_every_input,
     });
 
@@ -212,6 +217,11 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     runtime.shutdown_timeout(GRACE.saturating_sub(exited.elapsed()));
     timers.stop();
     let _ = timer_thread.join();
+    #[cfg(not(feature = "stand-in"))]
+    if let Some((edge, thread)) = sim {
+        edge.stop();
+        let _ = thread.join();
+    }
     writer.finish();
     let _ = writer_thread.join();
     let exit_took = exited.elapsed();
@@ -251,7 +261,6 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
         queue,
         mut sinks,
         writer,
-        everything,
         checkpoint_every_input,
     } = go;
     let mut first = None;
@@ -259,7 +268,7 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
     let mut behind = false;
     let mut stats = Stats::new();
     loop {
-        let Item { input, recorded } = queue.pop();
+        let input = queue.pop();
         let popped = Instant::now();
         let waited = clock::now().saturating_sub(input.stamp);
         if waited > BEHIND && !behind {
@@ -285,13 +294,10 @@ fn live(kernel: &mut Kernel, go: Go) -> Instant {
             }));
             checkpointed = second;
         }
-        let written = recorded || everything;
-        if written {
-            writer.record(Record::Input(to_record(&input)));
-        }
+        writer.record(Record::Input(to_record(&input)));
 
         let input = Rc::new(input);
-        run_context::handling(input.clone(), written);
+        run_context::handling(input.clone());
         let handling = Instant::now();
         let outputs = kernel.handle(&input);
         let took = handling.elapsed();

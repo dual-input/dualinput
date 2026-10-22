@@ -8,6 +8,8 @@ Decides:     Who reads the flying aircraft, and how often; what a sample carries
 
 > **Note**
 > Since 2026-10-17, pointer sync's presses send no span, where [the core's counter in our module](#the-cores-counter-in-our-module) has them send one: each gesture goes as it happens, and the cockpit stream's gaps time it in a replay, each the difference between two arrival stamps, so a constant delay before the core's stamp cancels, and no v1 unit still waits on how far a page's arrival stamp trails its read ([pointer sync](../pointer-sync/01-pointer-sync.md#timing)).
+>
+> Since 2026-10-21, the core records every input, so flight-model sync doesn't register as partly recorded, `Lead`'s reports and its samples' channel are recorded, and a replay checks its outputs, where [the units](#the-units), [the sample](#the-sample), and [what this adds to our WASM module](#what-this-adds-to-our-wasm-module) declare them `.unrecorded()` (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 On the flying machine, the PF's, a routine in our WASM module, `Lead`, reads the aircraft's pose, velocities, control surfaces, and toe brakes about 20 times a second, each read stamped with its frame's time, and the core sends each read to the crew as a sample.
 On each following machine, any other pilot's, `Follow` draws the aircraft 400ms behind those samples, along straight lines between them, carries it on through a gap of up to 2s, and eases it back over 3s.

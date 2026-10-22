@@ -1094,11 +1094,11 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## Sim awareness is an engine, whose stages each load enters once
 
 - **Decided:** sim awareness is an engine, `sim-awareness`: one step function, with no clock and no I/O, from the sim's signals to its state, the stage, the aircraft, the pause flags, the run of the sim, and how the last run ended.
-  The stages are Closed, Starting, Menu, Loading, Ready to fly, and Flying; a load starts at `FlightLoaded`, Ready to fly at `RTC_START`, Flying at `RTC_END`, and Menu at `BACK_TO_MAIN_MENU`, and every other signal, `FLIGHT_END` among them, leaves the stage as it is.
+  The stages are Closed, Starting, Menu, Loading, Ready to fly, and Flying; a load starts at `FlightLoaded`, Ready to fly at `RTC_START`, Flying at `RTC_END`, and Menu at `BACK_TO_MAIN_MENU`, or at `FLIGHT_END` from Ready to fly or Flying, since the pause menu's End flight sends `FLIGHT_END` and no `BACK_TO_MAIN_MENU`; a Restart's or a reload's `FLIGHT_END` comes while Loading and moves no stage, and every other signal leaves the stage as it is.
   A core that connects mid-run leaves Starting by the menu script's master page, `MasterPage` for Menu and `MasterPage_InGame` for Flying, or by a load's signal.
   The aircraft is the last `AircraftLoaded` path heard while Loading, lowercased and cut below `simobjects/airplanes/`, which names the folder and the preset, and the core logs `A:TITLE` beside it.
   The sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading.
-  Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)).
+  Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#sim-awareness)), and changed for `FLIGHT_END` by the user, 2026-10-21 ([core log](../core/log.md#2026-10-21-stage-4s-core-follows-the-sim-through-three-boots-and-five-loads-and-replays-all-of-it-but-ending-a-flight-sends-no-back_to_main_menu-and-a-failed-open-blocks-for-45s)).
 - **Because:**
   - The IDE can link it, as it links the sim client, where fsc-editor worked the sim's state out again on every `AircraftLoaded` (read in fsc-editor, `src/main/sim/session.ts`, `aircraftChanged`), and the bench can feed it recorded signals with nothing else running (user, 2026-10-15).
   - p08's client heard two of its three `AircraftLoaded` in the main menu, and `FLT_LOAD` three times in one load ([core log][c05]).
@@ -1256,20 +1256,17 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Because:** on the wrong microphone, a voice handover fails with no sign of why.
 - **Leaves out:** nothing.
 
-## A recording is a replay log less the high-rate samples a feature marks, and a replay checks only the units whose inputs are whole
+## A recording is a replay log of every input the core takes, and a replay checks every unit
 
-- **Decided:** a unit registered as partly recorded can declare a channel, a sim call, a core helper want, or a job unrecorded, and the edge's writer leaves its inputs out of the recording.
-  Such a unit runs in a replay on what was recorded, and its outputs go unchecked; it may register no guard, catch-up step, or cockpit kind, or make a request the platform decides, and turns a core helper want on or off only on a recorded input.
-  Each unit counts its own handles, draws its own IDs, and numbers its own SimConnect connections; each output names its unit; and a platform crate decides nothing on an unrecorded input beyond handing it to its unit, so the network's lost-link timer counts only recorded inputs, and the core helper sends `Alive`, and the core sends each client `alive`, every 2s whatever else it sends.
-  The panic hook records the input being handled, even an unrecorded one; a development setting records everything; and a replay on the same commit with uncommitted changes warns and runs.
-  v1's partly recorded units are traffic, ATC audio, avatars, and flight-model sync.
-  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+- **Decided:** the edge's writer records every input the core takes, from its first, and a replay checks every unit's outputs.
+  No unit is partly recorded, and no channel, sim call, core helper want, or job is declared unrecorded, so the edge drops no input, no unit is held to a leaf rule, no setting records everything, and the header lists no partly recorded units.
+  A replay on the same commit with uncommitted changes warns and runs.
+  Settled in node 6.6 by the user, 2026-10-16, and changed to every input by the user, 2026-10-21 ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 - **Because:**
-  - A flying machine that hosts traffic at EGLL took in 285 MB of inputs an hour, 45 MB with zstd, 87% of the raw bytes traffic's positions ([architecture log][p10]), and without its traffic's positions, flight model, and camera its sim inputs came to 0.9 MB an hour ([architecture log][lean]).
-  - Reading less would have cut it to 13 MB an hour ([architecture log][lean]), but a recording is a debugging tool, and mustn't set traffic's radius or rate, or anything else a pilot feels (user, 2026-10-16).
-  - The line that matters runs between a feature's events and its samples, not between features, so traffic's identities and the figure's creation stay in the recording (user, 2026-10-16).
-  - Splitting a feature into a replayed unit for its events and an unrecorded one for its samples would have let the recorder shape the feature's code, for exact replay of traffic's spawns alone, since flight-model sync and avatars decide sample by sample.
-- **Leaves out:** how big a following machine's recording is, which v1's friend sessions show.
+  - Stage 4's code review found three bugs in the sim service, each from partial recording: call tags drawn from one counter across units, the rewrite timer started by whichever unit fed first, and the module's unfreeze turning on a partly recorded feature's feeds; each platform crate that serves features would bring more ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+  - Recording every input costs only file size: a flying machine that hosts traffic at EGLL took in 45 MB an hour with zstd ([architecture log][p10]), against 0.9 MB for its sim inputs under partial recording's rules ([architecture log][lean]), and stage 3's bench recorded 126 MB in its hour under its busiest load ([core log](../core/log.md#2026-10-20-stage-3s-bench-carries-an-hour-of-a-busy-flight-at-05-of-a-core-with-a-p99-wait-of-87µs-replays-it-in-17s-and-a-killed-core-loses-its-last-064s)).
+  - The user's call of 2026-10-16, that 45 MB an hour is too much to upload after a flight or to keep several flights of, doesn't apply while v1 uploads nothing and we ask for a run's log first (user, 2026-10-21).
+- **Leaves out:** how big a following machine's recording is, which v1's friend sessions show; how much of a recording avatars' model job takes, which is unmeasured; and whether each unit's own handles, IDs, and connection numbers, each output naming its unit, and the core's `alive` to each client every 2s whatever else it sends, which kept a partly recorded unit's drift to itself, stay.
 
 ## The edge keeps the home folder's path, and anything but an invite code on the clipboard, out of every input
 
@@ -1282,21 +1279,20 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Each PC keeps whole runs within 1 GB, with no minimal recording
 
-- **Decided:** the recording crate deletes each run with no session that isn't among the 3 newest runs before the one starting, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, crew, and upload, is the one record a later Dual Input reads; and no setting chooses full or minimal recording.
+- **Decided:** the recording crate deletes each run with no session that isn't among the 3 newest runs before the one starting, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, and crew, is the one record a later Dual Input reads; and no setting chooses full or minimal recording.
   This changes [decision 016](../../decisions/016-core-keeps-pilots-settings.md)'s recording mode, once step 8's decisions are numbered.
-  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
-- **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), and at a few MB an hour of session, 1 GB holds hundreds of hours, so size no longer calls for a minimal mode (user, 2026-10-16).
+  Settled in node 6.6 by the user, 2026-10-16, and kept at 1 GB with every input recorded by the user, 2026-10-21 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps); [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+- **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), so a run is kept or deleted whole, and at 45 to 126 MB an hour, 1 GB holds roughly 8 to 22 hours (arithmetic; user, 2026-10-21).
 - **Leaves out:** the desktop app's list of recordings with their sizes and a way to delete them, for [6.16](plan.md#616-the-apps).
 
-## A bug report's parts go to R2 through our Worker, only from the session's members, for 30 days
+## v1 uploads no bug report: a pilot sends a run's folder by hand when we ask, and its log comes first
 
-- **Decided:** each pilot's core uploads each file of their part to `POST /v1/reports`, signed with the endpoint key it held in the session; the Worker checks the signature against the endpoint ID and the members it kept for that session, and stores the file in R2 under the session, the endpoint, and the run, where a lifecycle rule expires it at 30 days; a leave marks a member's row as left, and the hourly Cron Trigger keeps sessions' and members' rows 30 days after the later of their last renewal and their leave; offering a missing pilot's part moves after v1, so the reporting pilot asks their crew (user, 2026-10-18); and `tools/reports.ts`, with a secret the Worker holds, lists and fetches reports from R2's listing.
-  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#a-bug-report)).
-- **Because:**
-  - Blobs split across D1's rows of at most 2 MB (documented, [D1 limits](https://developers.cloudflare.com/d1/platform/limits/)) would be a hack (user, 2026-10-16), while R2 stores 10 GB-month free each month and costs $0.015 a GB-month past it (documented, [R2 pricing](https://developers.cloudflare.com/r2/pricing/)).
-  - A member's own endpoint key already signs the backend's requests ([02-units](../network/02-units.md#its-requests)), so admitting only members keeps out junk with no accounts.
-  - Every session ends in a leave, so a leave that ended a member's row would refuse their upload the next morning.
-- **Leaves out:** whether the R2 subscription, which an account adds through Cloudflare's checkout ([R2 get started](https://developers.cloudflare.com/r2/get-started/)), needs a card on file, which subscribing shows.
+- **Decided:** when a pilot reports a problem, we ask for the run's `log.txt` first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand.
+  Each unit logs at info each decision a pilot can notice, with its reason, such as control passing, a value applied or refused, a link lost, and catch-up's steps.
+  The report page's upload, the Worker's report endpoints, R2's storage of reports, signing each part with the session's endpoint key, asking a missing pilot, and `tools/reports.ts` come after v1, built on the same files.
+  Settled in node 6.6 by the user, 2026-10-16, and changed to no upload in v1 by the user, 2026-10-21 ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+- **Because:** a recording replays at any log level, even on a build of the same commit with log lines added afterward ([a replay on the same commit with local changes](../recording/01-recording-and-bug-reports.md#a-replay-on-the-same-commit-with-local-changes)), so a run's log can be read first, and its recording replayed with more lines only when the log isn't enough.
+- **Leaves out:** the upload's design for after v1, which [a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report) keeps: each part to R2 through our Worker, signed with the session's endpoint key, only from the session's members, for 30 days; whether v1's backend keeps a left member's row those 30 days, which only the report endpoints' check reads; and whether R2's subscription needs a card on file.
 
 ## Every core works out who is in the flight from each member's own key, and a pilot in another aircraft joins out of the flight
 
@@ -1495,12 +1491,11 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   This changes [avatars' tentative decision on the ray](../avatars/decisions.md#the-ray-needs-no-calibration), which took `WORLD` inside and out until this design edited it in place, and the seat claims [01-between-machines](../network/01-between-machines.md#channels) puts on the session channel.
   Settled in node 6.13 by the user, 2026-10-17 ([the pose](../avatars/01-avatars.md#the-pose); [`Figure`, each frame](../avatars/01-avatars.md#figure-each-frame)).
 - **Because:**
-  - Avatars is partly recorded, so it makes no request the platform decides, and every write of a session key is one ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs); [session keys](../session/02-units.md#session-keys)); no other unit reads a seat.
   - A following machine draws the yoke 0.4s behind a hand's point, so only that machine's own yoke keeps the hand on its horn ([avatars' tentative decisions](../avatars/decisions.md#the-clicking-pilots-machine-finds-the-point-and-the-other-machine-only-draws-it)), and every core loads the models anyway for its own pilot's clicks.
   - The probes wrote every joint from outside the sim every 33ms while the module placed the figure's root inside the frame (read in `experiments/areas/avatars/p25-figure-hands.mjs`, `drive`), which is one candidate for the frame the figure missed now and then (unverified).
   - Drawn on arrival, a hand lands about its reach time after its switch moves, where a delay for smoothing the head would add to every hand.
   - `WORLD` in flight needs the aircraft's pose from the camera's own frame, one frame apart being 2.6m at 150 kt and 30 fps (arithmetic), while p25 cast from `SIMOBJECT` at up to 185 kt GS ([avatars log](../avatars/log.md#2026-10-03-in-the-right-seat-the-figures-hands-followed-the-yoke-rules-with-the-right-hand-on-the-yoke-and-the-module-held-it-in-its-seat-at-up-to-185-kt-gs)).
-- **Leaves out:** the hands' times, which the build's stage for avatars tunes in the 58P.
+- **Leaves out:** the hands' times, which the build's stage for avatars tunes in the 58P; and whether the seat moves to a session key: it rides the pose because a partly recorded avatars could make no request the platform decides, and every write of a session key is one ([session keys](../session/02-units.md#session-keys)), but the core records every input ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 ## Of the seats whose radius holds the camera, the one with the nearest eye takes it
 
@@ -1559,10 +1554,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   This changes [the session's units](../session/02-units.md#the-match-check), whose match check has an item of traffic's for traffic packs, injectors, and multiplayer, and [traffic sync](../product/03-v1-scope.md#traffic-sync), which puts them in the match check's list.
   Settled in node 6.14 by the user, 2026-10-17 ([notices](../traffic-atc/01-traffic-and-atc.md#notices); [traffic packs](../traffic-atc/01-traffic-and-atc.md#traffic-packs)).
 - **Because:**
-  - Traffic leaves its polls out of the recording and its own count of jobs drifts in a replay, so a match item it fed would part the recorded `match` key from its replay ([avatars](../avatars/01-avatars.md#a-machine-that-cant-read-the-models)).
   - The count catches the sim's own AI traffic and any injector by what shows, as FS Copilot's receiver counted aircraft (read in the FS Copilot fork, `FsCopilot/Simulation/TrafficReceiver.cs`, `ForeignPoll`), and the stand-ins catch the packs that differ by what the copies do.
   - Folder names and manifests take no reading of the 2,690 `aircraft.cfg` and `livery.cfg` files that finding each title's package would, and traffic packs rarely rename their folders (user, 2026-10-17).
-- **Leaves out:** how a page shows the list, and whether it shows the crew's, the user's with [6.16](plan.md#616-the-apps); and whether the count sees multiplayer's other pilots, a check in the sim.
+- **Leaves out:** how a page shows the list, and whether it shows the crew's, the user's with [6.16](plan.md#616-the-apps); whether the count sees multiplayer's other pilots, a check in the sim; and whether traffic feeds a match item, since the reason it feeds none, its polls left out of the recording, went with partial recording ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 ## ATC audio finds its app by a list of program names, stamps each frame, and plays behind a depth picked at each transmission's start
 

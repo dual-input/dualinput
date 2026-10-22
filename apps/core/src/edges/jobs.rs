@@ -22,8 +22,7 @@ impl Jobs {
         let jobs = self.clone();
         self.runtime.spawn_blocking(move || {
             let result = run(&jobs, &start);
-            jobs.queue
-                .push(JOBS, start.id.finished(result), start.recorded);
+            jobs.queue.push(JOBS, start.id.finished(result));
         });
     }
 }

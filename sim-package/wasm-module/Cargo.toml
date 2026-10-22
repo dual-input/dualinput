@@ -1,0 +1,23 @@
+[package]
+name = "wasm-module"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# Our WASM module, the one file of ours the sim runs as code, which cargo-msfs builds for
+# wasm32. cargo-msfs refuses a crate whose build outputs more than one file, so this crate is
+# a cdylib alone, and the routine host and the routines are crates of their own, which the
+# bench links natively (record/areas/architecture/02-code-map.md, "Building every target").
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+messages = { path = "../../engines/messages" }
+routine-host = { path = "../../platform/routine-host" }
+routines = { path = "../routines" }
+
+# bindgen generates the declarations of the sim's APIs from the SDK's headers each time the
+# module builds, so no file in the repository holds a copy of them. It reads them through
+# libclang, from the LLVM that LIBCLANG_PATH names.
+[build-dependencies]
+bindgen = "0.72.1"

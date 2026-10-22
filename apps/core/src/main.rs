@@ -8,7 +8,7 @@ use kernel::Registry;
 /// platform's crates from the kernel up, then the features
 /// (record/areas/architecture/02-code-map.md, "The registry and moments"). When you add a
 /// crate of the platform's or a feature, add its `register` here in that order.
-const UNITS: &[fn(&mut Registry)] = &[];
+const UNITS: &[fn(&mut Registry)] = &[sim_service::register];
 
 fn main() -> ExitCode {
     dualinput_core::main(UNITS)

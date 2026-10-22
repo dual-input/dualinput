@@ -1,23 +1,41 @@
 //! The stand-in hands up what the sim edge would, as a scenario acts on the sim: a watched
 //! process found and its exit code, an open's result and the sim's open message, and the
-//! losses and quit messages a scenario asks for, then an open that never answers. A `ping` that runs for a minute stands for
-//! the sim's process, as the bench's stub does.
+//! losses and quit messages a scenario asks for, then an open that never answers. A `ping`
+//! that runs for a minute stands for the sim's process, as the bench's stub does.
 
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc;
 use std::time::Duration;
 
 use sim_client::{Connection, SimCall, Up};
-use stand_in_sim::{Act, StandIn};
+use stand_in_sim::{Act, Aircraft, Module, StandIn};
 
 const S_OK: i32 = 0;
 const E_FAIL: i32 = 0x8000_4005_u32 as i32;
 
+/// A module with no slots, which writes nothing.
+struct NoModule;
+
+impl Module for NoModule {
+    fn slots(&self) -> Vec<String> {
+        Vec::new()
+    }
+
+    fn written(&mut self, _: &str, _: &[u8], _: u64) {}
+
+    fn frame(&mut self, _: u64, _: &mut Aircraft) -> Vec<(String, Vec<u8>)> {
+        Vec::new()
+    }
+}
+
 fn started() -> (StandIn, mpsc::Receiver<Up>) {
     let (to, from) = mpsc::channel();
-    let (stand_in, _) = StandIn::start(move |up| {
-        let _ = to.send(up);
-    })
+    let (stand_in, _) = StandIn::start(
+        move |up| {
+            let _ = to.send(up);
+        },
+        Box::new(NoModule),
+    )
     .unwrap();
     (stand_in, from)
 }
@@ -136,7 +154,10 @@ fn opens_a_connection_only_while_the_sim_runs_and_hands_up_its_open_message() {
             result: S_OK
         }
     );
-    let Up::Message { connection, record } = next(&from) else {
+    let Up::Message {
+        connection, record, ..
+    } = next(&from)
+    else {
         panic!("the sim's open message should follow the open");
     };
     assert_eq!(connection, C1);
@@ -161,10 +182,13 @@ fn loses_a_connection_and_quits_on_the_others_when_asked() {
         assert!(matches!(next(&from), Up::Message { .. }));
     }
 
-    stand_in.act(Act::Lose { connection: C1 });
+    stand_in.act(Act::Lose { unit: C1.unit });
     assert_eq!(next(&from), Up::Lost { connection: C1 });
     stand_in.act(Act::Quit);
-    let Up::Message { connection, record } = next(&from) else {
+    let Up::Message {
+        connection, record, ..
+    } = next(&from)
+    else {
         panic!("the quit message should come up on the connection still open");
     };
     assert_eq!(connection, C2);

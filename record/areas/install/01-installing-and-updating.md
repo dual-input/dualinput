@@ -15,6 +15,8 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
 >
 > Since 2026-10-18, the sim service raises one trouble notice for our package, from either [our own package](#our-own-package)'s check on disk or the module's status of Missing or Differs, where each raises its own; Stopped keeps its own notice (user, 2026-10-18).
+>
+> Since 2026-10-21, the app copies our package through a folder it makes fresh for each copy, beside `Community` or beside the folder a `Community` junction leads to, as `tools/build.ts install` does, where [our package](#our-package) and the uninstall name one `DualInput\` folder, since a junction to `%APPDATA%\Community` would put that folder at `%APPDATA%\DualInput\`, the pilot's data folder (user, 2026-10-21; [log](log.md#2026-10-21-a-fixed-dualinput-staging-folder-beside-a-community-junctions-target-can-be-the-pilots-data-folder)).
 
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.

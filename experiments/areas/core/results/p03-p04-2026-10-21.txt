@@ -1,0 +1,20 @@
+p03 and p04, on MSFS 2024 1.9.18.0 with stage 4's release core and our package installed,
+2026-10-21, each run once from the pilot's terminal while the sim was up.
+
+p03, in the main menu, some minutes after the core first read our module as Running, which
+came 90s after the core's connection got the sim's open reply:
+
+> node experiments/areas/core/p03-module-status.mjs
+connected to SunRise
+once: counter 444, slots hash b0828a8b3c652b62, version 0.1.0
+on set: counter 445, slots hash b0828a8b3c652b62, version 0.1.0
+on set: counter 446, slots hash b0828a8b3c652b62, version 0.1.0
+on set: counter 447, slots hash b0828a8b3c652b62, version 0.1.0
+on set: counter 448, slots hash b0828a8b3c652b62, version 0.1.0
+on set: counter 449, slots hash b0828a8b3c652b62, version 0.1.0
+on set: counter 450, slots hash b0828a8b3c652b62, version 0.1.0
+
+p04, flying the Black Square Baron 58P:
+
+> node experiments/areas/core/p04-aircraft-loaded.mjs
+AircraftLoaded: SimObjects\Airplanes\bksq-aircraft-baronpropress\aircraft.CFG

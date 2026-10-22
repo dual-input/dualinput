@@ -1,0 +1,21 @@
+[package]
+name = "sim-edge"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# The sim edge runs off the loop, on a thread of its own, where it waits, reads the clock,
+# and calls SimConnect.dll, so it takes none of the workspace's lints for the loop.
+[dependencies]
+sim-client = { path = "../sim-client" }
+simconnect-types = { path = "../simconnect-types" }
+tracing = "0.1.44"
+
+[dependencies.windows-sys]
+version = "0.61.2"
+features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Threading",
+]

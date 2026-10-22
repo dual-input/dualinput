@@ -3,6 +3,10 @@ name = "simconnect-types"
 version.workspace = true
 edition.workspace = true
 publish = false
+# `links` lets the build script hand the SDK's folder to the build scripts of the crates
+# that depend on this one, as DEP_SIMCONNECT_SDK_FOLDER, so the sim edge links SimConnect.lib
+# from the SDK these types came from without finding the folder again.
+links = "simconnect-sdk"
 
 # bindgen generates the types from the SDK's SimConnect.h each time this crate builds, so no
 # file in the repository holds a copy of the SDK's headers. It reads them through libclang,

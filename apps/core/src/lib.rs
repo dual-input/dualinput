@@ -77,7 +77,6 @@ fn live(data: PathBuf, units: &[fn(&mut Registry)]) -> ExitCode {
     let options = Options {
         data,
         level: LevelFilter::INFO,
-        everything: false,
         checkpoint_every_input: false,
         abort_on_panic: true,
     };
@@ -138,7 +137,7 @@ fn replay_file(file: &str, level: LevelFilter, units: &[fn(&mut Registry)]) -> E
                         format!("one of inputs {since} to {last}")
                     };
                     println!(
-                        "the replay parted from the run at the checkpoint before input {checkpoint}, in the run's second {second}: {inputs} led a whole unit to put out something else"
+                        "the replay parted from the run at the checkpoint before input {checkpoint}, in the run's second {second}: {inputs} led a unit to put out something else"
                     );
                     ExitCode::from(1)
                 }

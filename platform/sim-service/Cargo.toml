@@ -1,0 +1,17 @@
+[package]
+name = "sim-service"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+bytemuck = "1.25.2"
+kernel = { path = "../kernel" }
+messages = { path = "../../engines/messages" }
+sim-awareness = { path = "../../engines/sim-awareness" }
+sim-client = { path = "../../engines/sim-client" }
+simconnect-types = { path = "../../engines/simconnect-types" }
+tracing = "0.1.44"
+
+[lints]
+workspace = true

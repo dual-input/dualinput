@@ -3,6 +3,41 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-21: Stage 4's core follows the sim through three boots and five loads, and replays all of it, but ending a flight sends no BACK_TO_MAIN_MENU, and a failed open blocks for 4.5s
+
+**Asked:** do the sim seam's cases in the sim and its budgets hold for [stage 4](../build/plan.md#4-the-sim-seam-our-wasm-module-and-our-package)'s release core, with our package installed ([03's cases for the bench](03-sim-seam-and-wasm-module.md#cases-for-the-bench), [03's budgets](03-sim-seam-and-wasm-module.md#budgets), [the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets))?
+And stage 2's other half of the timer budget, with the sim running and the PC busy ([budgets](01-loop-and-edge.md#budgets))?
+
+**Expected:** each case as 03 designs it, since the stand-in plays p08's recorded signals and the bench's scenarios passed.
+
+**Found:** on MSFS 2024 1.9.18.0, Steam's edition, with `node tools/sim/sim-seam.ts` running the release core from the tree:
+
+- **Our module** loaded from our `PANEL_PATCH` package, and the core read it as Running 279s after its start, 90s after the sim's open reply, late in the sim's boot; it stayed Running through five flight loads.
+  p03, a second client, read the status slot's counter climbing each second, with this build's slots hash and version 0.1.0.
+  Developer Mode's WASM Debug window read 0ms for every update, for our module and for p08's alike, so it doesn't time a standalone module's update.
+- **The stages:** each load went Loading, Ready to fly, then Flying, with its aircraft.
+  The Black Square Baron 58P's path is `SimObjects\Airplanes\bksq-aircraft-baronpropress\aircraft.CFG`, which p04 read from the sim too, a folder with no presets, so its aircraft is `bksq-aircraft-baronpropress`.
+  Each of the iniBuilds L-1011's four presets gave a path of its own, such as `inibuilds-l1011/presets/inibuilds/l1011-500-stair`, and `A:TITLE` gave each preset's own title, such as `L1011-500 Cabin w/ Lounge`, which answers the [L-1011 study](../aircraft/inibuilds-l1011/study.md)'s sim question 13.
+- **Leaving a flight:** the pause menu's End flight sent `Pause_EX1` 8, `FLIGHT_END` 2.9s later, then the main menu's `hangar.flt` loading 8s after that, and no `BACK_TO_MAIN_MENU` (p05).
+  So the core read Flying through the main menu until the next `FlightLoaded`, where [stages](03-sim-seam-and-wasm-module.md#stages) enters Menu only on `BACK_TO_MAIN_MENU` or the menu script's page.
+  The [interface log](../interface/log.md#2026-10-08-a-pages-websocket-stays-open-after-the-page-is-gone-and-the-commbus-reaches-every-page-we-use-in-the-menu-and-every-cockpit-panel) saw `BACK_TO_MAIN_MENU` with `FLIGHT_END` after the prompt to leave a flight, which this run didn't use.
+- **A close:** the sim's window's close button sent the quit message, and the process exited 8.8s later with code 0; the core read Closed on the quit message's own input.
+- **A crash:** the sim crashed on its own 46.5s into a boot, before it took connections, exiting with `0xc0000005`; the Windows Application log names `FlightSimulator2024.exe` itself as the faulting module.
+  The core read Closed on the exit's input.
+- **A kill:** with the platform's connection open and its open reply in, `taskkill /F` reached the core as the process's exit, code 1, with no quit message, lost connection, or failed call before it, and the core read Closed on that input.
+- **Failed opens:** as the sim booted, each `SimConnect_Open` returned `E_FAIL` 4.5s after the call went out, so with the 2s retry, opens failed every 6.0s, from 5.95s to 6.06s apart.
+  The edge's thread waits inside each failed call.
+- **The edge:** a connection's event woke the edge for every message but 3, one in each of 3 minutes, which a wake on the 2ms timer found instead; one event's wake could hand up several messages, so a minute held up to 5 more messages than event wakes.
+  The edge handed each message up 8µs to 10µs at p50 and at most 465µs at p99 after its event, the most in the minute our module came up.
+- **The timers,** with the sim in a flight and the PC busy, before the session: 1,000 timers came in 217µs late at p50, 1,068µs at p99, and 3,318µs at most.
+- **The replay** of the whole run, 11,952 inputs through three runs of the sim, matched all 1,924 of its checkpoints.
+
+**Changed:** the user decided on 2026-10-21 that `FLIGHT_END` enters Menu from Ready to fly or Flying, and that the platform's connection opens within 6.5s of the sim taking connections, the 4.5s a failed open takes plus the 2s to the next try.
+
+**Affects:** [03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md#stages)'s stages and its budget for the platform's connection, the [tentative decision](../architecture/decisions.md#sim-awareness-is-an-engine-whose-stages-each-load-enters-once) on sim awareness, and stage 4's tests in [the build plan](../build/plan.md#4-the-sim-seam-our-wasm-module-and-our-package).
+
+**Evidence:** [results/2026-10-21-stage-4-session.txt](results/2026-10-21-stage-4-session.txt) and [results/2026-10-21-stage-4-budgets.txt](results/2026-10-21-stage-4-budgets.txt); p03, p04, and p05's output in `experiments/areas/core/results/`.
+
 ## 2026-10-20: Stage 3's bench carries an hour of a busy flight at 0.5% of a core with a p99 wait of 87µs, replays it in 17s, and a killed core loses its last 0.64s
 
 **Asked:** does the core meet its budgets on [stage 3](../build/plan.md#3-the-bench)'s bench: the queue within one sim frame, 11.2ms, at p99, each handler within 1ms but a write function at its limit, and the loop busy under 20% of a core ([the code map's budgets](../architecture/02-code-map.md#budgets)); a replay of an hour's recording within 6 minutes; and a crash losing at most the recording's last second ([budgets](01-loop-and-edge.md#budgets))?

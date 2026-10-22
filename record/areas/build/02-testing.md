@@ -6,6 +6,12 @@ Depends on:  01-the-build.md, ../architecture/02-code-map.md, ../architecture/01
 Decides:     The four levels of testing, and where and when each runs; which tests a merge and a release need green, and which run outside CI; what the bench runs, touches, and checks, and how it runs only what it built; the stand-in sim's place, rules, model, frames, WASM module, pages, and process; the stand-in core helper; the replay check; the loop under load; the check before a release; and that no second MSFS runs in a virtual machine (node 7).
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - Every replay checks every unit, and no setting records every input, so [replays](#replays) has no default run and no run that records everything, and the bench runs that [what keeps CI green](#what-keeps-ci-green) gives that setting, on each merge to `main` and the release's second, are the same run as a pull request's.
+> - [With friends](#with-friends): each pilot sends their run's folder by hand, where it comes back through Dual Input's own bug report.
+
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.
 [The four levels](#the-four-levels) gives when the sim and friends come in.
@@ -117,6 +123,7 @@ The bench build listens on a local socket the bench drives the stand-in and the 
 - Each message is one line of JSON, whose types are the message crate's `bench` module, as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) has every message between our programs, and the core's first line carries its version and hash, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks.
 - A line for a test unit becomes an input under that unit's source, which the recording keeps, so the replay runs it.
 - A line for the stand-in goes to the stand-in's thread, as the bench acting on the sim, and is no input of the core's.
+- The core sends the bench lines of its own after its first: what the sim's test unit, which stands in for a feature that calls the sim, heard from the sim and from sim awareness, each as a line of text, and the stand-in's report when the bench asks for one, of every connection opened, every call made of it, and its aircraft's variables.
 
 ### Its rules
 
@@ -144,6 +151,8 @@ The systems' cases set 4, 30, and 89 a second ([the sync units' cases](../sync/0
 - The module's list of routines lives in a library crate of its own, `sim-package/routines/`, which the module and the bench build both link, the one dependency on `sim-package/` the code map's note allows.
   The bench can't link the module itself, because the module builds only as a cdylib ([02-code-map](../architecture/02-code-map.md#left-open)).
 - The stand-in takes the module through a trait, which the bench build fills with the routine host and that list, so the stand-in, an engine, depends on no platform or feature code, as node 5 requires of it ([the architecture plan](../architecture/plan.md#7-testing)).
+- A routine's panic stops the stand-in's module as the sim stops a module that went `DIRTY`: the stand-in catches the panic and runs the module no more, and its thread belongs to no run of the core's, so the core's panic hook leaves the core running.
+  The bench build's test routine, `PROBE`, panics on one of its modes, and on the others shows whether it carried anything from one feeding into the next.
 
 ### The sim's pages
 
@@ -194,7 +203,7 @@ The sandbox's recursion and interrupt-check cases are its own unit tests, with n
 ## In the sim
 
 - A stage whose system has cases in the sim ends with one session in the sim, which runs all of them, as [CLAUDE.md](../../../CLAUDE.md#working-rules) asks of everything that needs the sim.
-  Each case is a script that prints a report of its own; the sim's inspector on 127.0.0.1:19999 runs a case's part in a panel with nobody pasting it, and `SimConnect_FlightLoad` switches aircraft, with someone nearby, since MSFS 2024 crashed on 5 of about 30 such loads (measured on MSFS 2024 1.8.16.0, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
+  Each system's cases are a script in `tools/sim/`, such as `node tools/sim/sim-seam.ts`, which runs the release core from the tree on a data folder of its own and reports each case as the core's log shows it; the sim's inspector on 127.0.0.1:19999 runs a case's part in a panel with nobody pasting it, and `SimConnect_FlightLoad` switches aircraft, with someone nearby, since MSFS 2024 crashed on 5 of about 30 such loads (measured on MSFS 2024 1.8.16.0, 2026-10-01, [aircraft log](../aircraft/log.md#2026-10-01-loading-flights-through-simconnect-works-but-the-sim-crashed-on-5-of-about-30-loads-so-we-canceled-the-unattended-session)).
 - Where a case needs a crew, a bench core on a stand-in plays the second pilot on the same PC, as FS Copilot's exerciser joined its app's session as a peer rather than through a development mode (FS Copilot fork, `record/exerciser/docs/01-design.md`, "Session: the exerciser is a peer").
   The real sim's core reaches the bench's local backend, relays, and profiles' site through the same development settings as the bench core, so both meet at the commit's own backend.
 - Only a SimConnect client of the sim can call on its CommBus ([finding the core](../architecture/01-spine.md#finding-the-core)), so the real sim's pages hear only the real core's announcement and connect to it alone, which no run has tried ([cases for the bench](#cases-for-the-bench)).

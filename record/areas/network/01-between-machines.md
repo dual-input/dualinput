@@ -6,6 +6,12 @@ Depends on:  ../architecture/01-spine.md, ../product/01-aims.md, ../product/03-v
 Decides:     The topology, the transport, the way through home routers, the relay and its language, encryption, how a crew finds each other, how each channel travels and tells a copy from a late message, how control travels, what a session does while a link is lost and when it comes back, which ways to soften a short gap v1 builds, two cores on one PC, and how a receiver estimates a sender's clock offset.
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - The backend holds no bug reports in v1, where [who does what](#who-does-what) has it hold them; that comes after v1.
+> - [Channels](#channels)' reason for a seat claim riding the avatar's pose, avatars being partly recorded, goes, and whether the claim moves to a session key is open, as [avatars](../avatars/01-avatars.md)' note of 2026-10-21 says.
+
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:

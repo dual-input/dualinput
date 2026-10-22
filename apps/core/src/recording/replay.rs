@@ -32,7 +32,7 @@ pub enum Outcome {
         truncated: bool,
     },
     /// The checkpoint before input `checkpoint` differed, so one of the inputs from `since`
-    /// to the one before `checkpoint` led a whole unit to put out something else. `second`
+    /// to the one before `checkpoint` led a unit to put out something else. `second`
     /// is the second of the run it came in.
     Parted {
         checkpoint: u64,
@@ -90,19 +90,15 @@ pub fn replay(
 
     let file = file.to_path_buf();
     let units = units.to_vec();
-    let looper = std::thread::Builder::new().name("loop".into()).stack_size(STACK).spawn(move || {
-        run_context::enter(context);
-        let mut kernel = build(&units);
-        if header.everything {
-            kernel.record_everything();
-        }
-        let ours: Vec<&str> = kernel.partly_recorded();
-        if ours != header.partly_recorded {
-            tracing::warn!(?ours, theirs = ?header.partly_recorded, "this build's partly recorded units differ from the recording's");
-        }
-        let (_, mut reader) = Reader::new(File::open(&file)?)?;
-        records(&mut kernel, &mut reader)
-    })?;
+    let looper = std::thread::Builder::new()
+        .name("loop".into())
+        .stack_size(STACK)
+        .spawn(move || {
+            run_context::enter(context);
+            let mut kernel = build(&units);
+            let (_, mut reader) = Reader::new(File::open(&file)?)?;
+            records(&mut kernel, &mut reader)
+        })?;
     let outcome = match looper.join() {
         Ok(outcome) => outcome?,
         Err(panic) => std::panic::resume_unwind(panic),
@@ -150,7 +146,7 @@ fn records(kernel: &mut Kernel, reader: &mut Reader<File>) -> std::io::Result<Ou
                 first.get_or_insert(input.stamp);
                 last = input.stamp;
                 let input = Rc::new(from_record(input));
-                run_context::handling(input.clone(), true);
+                run_context::handling(input.clone());
                 kernel.handle(&input);
                 run_context::done();
                 inputs += 1;
@@ -165,8 +161,8 @@ fn records(kernel: &mut Kernel, reader: &mut Reader<File>) -> std::io::Result<Ou
 }
 
 /// What could make the replay part from the run with no bug to find: other uncommitted
-/// changes, another compiler or C runtime, which can change the core's math, or another
-/// CPU.
+/// changes, another compiler or C runtime, which can change the core's math, another MSFS
+/// SDK, whose SimConnect headers lay out the sim's messages the core reads, or another CPU.
 fn differences(header: &Header) -> Vec<String> {
     let mut warnings = Vec::new();
     if header.uncommitted.as_deref() != build_info::UNCOMMITTED {
@@ -183,6 +179,11 @@ fn differences(header: &Header) -> Vec<String> {
             "the Windows SDK",
             &header.windows_sdk,
             build_info::WINDOWS_SDK,
+        ),
+        (
+            "the MSFS SDK",
+            &header.simconnect_sdk,
+            simconnect_types::SDK_VERSION,
         ),
     ] {
         if theirs != ours {

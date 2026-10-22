@@ -1,0 +1,11 @@
+[package]
+name = "routines"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# The module's list of routines, a library of its own, so our WASM module and the bench
+# build of the core both link it: the module builds only as a cdylib, which nothing else
+# can link (record/areas/build/02-testing.md, "Our WASM module").
+[dependencies]
+routine-host = { path = "../../platform/routine-host" }

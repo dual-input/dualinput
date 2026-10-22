@@ -44,9 +44,7 @@ pub fn first_input(seed: [u8; 32], files: Vec<(String, Option<Vec<u8>>)>) -> Vec
 }
 
 /// A number a unit draws from its own counter, for a timer, a job, or a call that waits for
-/// an answer. Each unit counts its own, so a unit that draws fewer in a replay shifts no
-/// other unit's (record/areas/recording/01-recording-and-bug-reports.md, "What keeps the
-/// drift from spreading").
+/// an answer.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Handle {
     pub(crate) unit: u32,
@@ -114,10 +112,6 @@ pub struct CancelTimer {
 pub struct StartJob {
     pub id: JobId,
     pub job: Job,
-    /// Whether the job's result goes in the recording. Only a partly recorded unit starts
-    /// an unrecorded job (record/areas/recording/01-recording-and-bug-reports.md, "Declaring
-    /// one").
-    pub recorded: bool,
 }
 
 /// Work the edge does for a unit, off the loop: reading or writing a file, then optionally

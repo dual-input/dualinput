@@ -1,5 +1,23 @@
 # Installing and updating: log
 
+## 2026-10-21: A fixed `DualInput\` staging folder beside a Community junction's target can be the pilot's data folder
+
+**Asked.**
+Whether copying our package into `Community` through a `DualInput\` folder beside it, as [our package](01-installing-and-updating.md#our-package) has the app do, can delete something not ours, which stage 4's code review of `node tools/build.ts install` raised.
+
+**Expected.**
+No, since `DualInput\` is ours.
+
+**Found.**
+A rename can't cross drives, so the copy goes beside the folder a `Community` junction leads to, and a pilot can make `Community` a junction to another folder.
+With a junction to `%APPDATA%\Community`, the folder beside its target named `DualInput` is `%APPDATA%\DualInput\`, the pilot's data folder, which the copy deletes before and after it runs (read in `tools/lib/install.ts`, and tested in `tools/install.test.ts`, "install deletes nothing beside the folder a Community junction leads to").
+
+**What changed.**
+The copy goes through a folder made fresh for each copy, `dualinput-install-` and a random suffix, which `tools/build.ts install` does and the desktop app will do in [stage 15](../build/plan.md#15-installing-and-updating) (user, 2026-10-21).
+
+**Docs affected.**
+[01-installing-and-updating](01-installing-and-updating.md), in a note at its top.
+
 ## 2026-10-18: The sim's BlurPage files haven't changed since 2025-11-04
 
 **Asked.**

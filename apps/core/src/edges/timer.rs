@@ -136,7 +136,7 @@ fn run(queue: &Queue, from: &mpsc::Receiver<Message>, wake: &Object) {
             }
             due.pop_first();
             by_id.remove(&id);
-            queue.push(TIMERS, id.fired(), true);
+            queue.push(TIMERS, id.fired());
         }
         let handles = match due.first() {
             Some(&(at, _)) => {

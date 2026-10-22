@@ -1,0 +1,15 @@
+[package]
+name = "routine-host"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# The routine host runs in our WASM module, which cargo-msfs builds for wasm32, and natively
+# beside the bench's stand-in sim. It may use only the message crate of ours, where the
+# slots' structs live (record/areas/architecture/02-code-map.md, "Tiers").
+[dependencies]
+bytemuck = "1.25.2"
+messages = { path = "../../engines/messages" }
+
+[lints]
+workspace = true

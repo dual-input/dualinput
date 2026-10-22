@@ -1,5 +1,12 @@
 # Architecture: plan
 
+> **Note**
+> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes these `Raised elsewhere:` lines (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - Those by 6.6 under 6.10, 6.13, and 6.14: no feature registers as partly recorded, declares an input unrecorded, or is held to the leaf rule.
+> - The one by 6.6 under 7: every replay checks every unit, and no run records everything.
+> - The one by 6.4 under 6.6, on where bug reports' files go, and those by 6.6 under 6.7 and 6.16, on uploads, the 30 days a left member's row is kept for one, and a missing pilot's part: each comes after v1.
+
 This plan designs Dual Input's v1 architecture in nodes 1 to 4, for [step 7](../product/plan.md#7-tech-stack-and-architecture) of the product plan, and v1's code map, systems, tests, and build order in nodes 5 to 8, for [step 8](../product/plan.md#8-v1-build-plan).
 Each goes deeper until every detail rests on a fact, by the rules in [When a node is done](#when-a-node-is-done).
 It grows as a tree of questions.

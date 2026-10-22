@@ -6,6 +6,9 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, 03-catch-up.md, ../network/
 Decides:     What comes back after a link, a core, a sim, or a PC goes down; how a machine records what it applied, drops copies, and skips messages; catch-up's order and pipeline, when it ends, and when control can't pass; how every cockpit message is paced, and how often a state entry is sent; which messages a change of control drops, and who catches up after one; how a core that restarted recovers; how an entry the aircraft drives itself is caught; how a machine puts back a change it may not send; and when an aircraft that loaded before its session counts as settled.
 ```
 
+> **Note**
+> Since 2026-10-21, the core records every input, so [keys several members write](#keys-several-members-write)' reason for seat claims riding avatars' poses rather than the session channel, avatars being partly recorded, goes, and whether they move is open, as [avatars](../avatars/01-avatars.md)' note of 2026-10-21 says (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.
 A pilot whose sim, core, or PC went down comes back as a late joiner, with the profile's entries caught up from the flying machine (user, 2026-10-11 and 2026-10-12).

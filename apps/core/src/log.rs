@@ -187,7 +187,7 @@ struct InputTime;
 impl FormatTime for InputTime {
     fn format_time(&self, w: &mut Writer<'_>) -> fmt::Result {
         match run_context::current() {
-            Some(handling) => write!(w, "{}µs #{}", handling.input.stamp, handling.input.seq)?,
+            Some(input) => write!(w, "{}µs #{}", input.stamp, input.seq)?,
             None => write!(w, "{}µs", clock::now())?,
         }
         match kernel::running_unit() {

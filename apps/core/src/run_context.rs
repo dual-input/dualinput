@@ -27,14 +27,7 @@ pub struct Context {
 
 thread_local! {
     static CONTEXT: RefCell<Option<Arc<Context>>> = const { RefCell::new(None) };
-    static HANDLING: RefCell<Option<Handling>> = const { RefCell::new(None) };
-}
-
-/// The input the loop is handling, and whether it's in the recording.
-#[derive(Clone)]
-pub struct Handling {
-    pub input: Rc<Input>,
-    pub written: bool,
+    static HANDLING: RefCell<Option<Rc<Input>>> = const { RefCell::new(None) };
 }
 
 /// Makes this thread one of the run's. Each thread the core starts calls it first.
@@ -85,8 +78,8 @@ pub fn with<R>(f: impl FnOnce(&Context) -> R) -> Option<R> {
     Some(f(&context))
 }
 
-pub fn handling(input: Rc<Input>, written: bool) {
-    HANDLING.with(|h| *h.borrow_mut() = Some(Handling { input, written }));
+pub fn handling(input: Rc<Input>) {
+    HANDLING.with(|h| *h.borrow_mut() = Some(input));
 }
 
 pub fn done() {
@@ -94,6 +87,6 @@ pub fn done() {
 }
 
 /// The input the loop is handling, when this thread is the loop and it's handling one.
-pub fn current() -> Option<Handling> {
+pub fn current() -> Option<Rc<Input>> {
     HANDLING.try_with(|h| h.borrow().clone()).ok().flatten()
 }

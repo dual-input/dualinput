@@ -13,6 +13,11 @@ Decides:     What runs on a pilot's own machine and what on every machine; what 
 > Since 2026-10-18, avatars' model job takes the aircraft's package folder from the sim service's aircraft awareness, starting once the profile has loaded and `AircraftChanged` has named the folder, where [finding the files](#finding-the-files), the register sketch in [what it registers](#what-it-registers), and the bench case on a late folder have it wait for this member's `match` key ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md); user, 2026-10-18).
 >
 > Since 2026-10-18, avatars turns the core helper's mouse on with no process ID, where [the mouse](#the-mouse) passes the sim's, and removes no figure itself at the profile's unload: the platform's close of avatars' sim connection removes them, and the sim service removes any the close leaves, where [what it registers](#what-it-registers) and [the figures this machine draws](#the-figures-this-machine-draws) have avatars remove each until node 7 settles the close (user, 2026-10-18).
+>
+> Since 2026-10-21, the core records every input, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+>
+> - Avatars doesn't register as partly recorded: its camera read, its `Frame` events, its poses' channel, its model's job, and its watches are recorded, where [the units](#the-units), [what it registers](#what-it-registers), [the pose](#the-pose), and [posing](#posing) leave them out, and a replay checks its outputs, its notices among them.
+> - With no leaf rule, the reason [the pose](#the-pose) gives for carrying the seat rather than a session key goes, and so does the reason [a machine that can't read the models](#a-machine-that-cant-read-the-models) gives for replacing the match check's example; whether the seat moves to a session key, and whether a model its machine can't read becomes a match item, are open.
 
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
 It sends the whole figure to the crew as a pose, at most every 33ms.

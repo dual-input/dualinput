@@ -7,6 +7,10 @@ publish = false
 # The messages are JSON that serde_json writes, and ts-rs writes their TypeScript types from
 # the derives on each (decision 025).
 [dependencies]
+# Our WASM module reads each routine's slot in place, as a `#[repr(C)]` struct, and
+# bytemuck's derives check at compile time that a slot's struct has no padding and no
+# pointer, so its bytes are all its fields.
+bytemuck = { version = "1.25.2", features = ["derive"] }
 serde = { version = "1.0.229", features = ["derive"] }
 ts-rs = "12.0.1"
 

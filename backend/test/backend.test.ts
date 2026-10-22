@@ -130,6 +130,12 @@ test("an address's 21st wrong code in an hour is refused, and a right code from 
   assert.equal((await lookup(code, "198.51.100.6")).body.answer, "found")
 })
 
+test("addresses in one IPv6 /64 share their 20 wrong codes an hour", async () => {
+  for (let i = 0; i < 20; i++) await lookup("ZZZZZZ", `2001:db8:7:7::${i + 1}`)
+  assert.deepEqual((await lookup("ZZZZZZ", "2001:db8:7:7:ffff::1")).body, { answer: "too-many-wrong-codes" })
+  assert.deepEqual((await lookup("ZZZZZZ", "2001:db8:7:8::1")).body, { answer: "no-such-code" })
+})
+
 test("a body that doesn't read is refused", async () => {
   assert.deepEqual(await post("/v1/lookup", `{"code":"ABCDEF"}`), { status: 400, body: { error: "the request didn't read" } })
   assert.deepEqual(await post("/v1/nothing", "{}"), { status: 404, body: { error: "no such request" } })

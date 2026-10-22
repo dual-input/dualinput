@@ -20,6 +20,7 @@ import type { Refused } from "../../engines/messages/ts/backend/Refused.ts"
 import type { Renew } from "../../engines/messages/ts/backend/Renew.ts"
 import type { Taken } from "../../engines/messages/ts/backend/Taken.ts"
 import type { Relay } from "../../engines/messages/ts/net/Relay.ts"
+import { counted } from "./address.ts"
 import { claim, wellFormed } from "./codes.ts"
 
 // engines/messages/src/backend.rs names the same paths and headers, so change both together.
@@ -97,7 +98,7 @@ async function sessions(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1
 async function lookup(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1Database, now: number): Promise<Response> {
   const body = read(bytes)
   if (!isLookup(body)) return refuse(400, "the request didn't read")
-  const address = request.headers.get("CF-Connecting-IP") ?? "unknown"
+  const address = counted(request.headers.get("CF-Connecting-IP") ?? "unknown")
   // Each lookup takes one of the address's 20 guesses this hour in the same statement that
   // checks it, so lookups made at once can't all read a count under 20, and a right code gives
   // its guess back. An address at the limit is refused even with a right code, so the limit

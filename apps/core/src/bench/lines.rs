@@ -32,9 +32,15 @@ impl Lines {
                 cx.out(Counted(n));
             }
             Ok(ToCore::Exit) => cx.out(Exit),
-            // The socket hands a load to the playback, an act to the stand-in, and a call of
-            // the sim to the sim's test unit, not to this unit.
-            Ok(ToCore::Load { .. } | ToCore::StandIn { .. } | ToCore::Sim { .. }) => {}
+            // The socket hands a load to the playback, an act to the stand-in, a call of the
+            // sim to the sim's test unit, and a clients' act to the clients' test unit, not to
+            // this unit.
+            Ok(
+                ToCore::Load { .. }
+                | ToCore::StandIn { .. }
+                | ToCore::Sim { .. }
+                | ToCore::Clients { .. },
+            ) => {}
             Err(error) => tracing::warn!(%error, "a line from the bench isn't one of its messages"),
         }
     }

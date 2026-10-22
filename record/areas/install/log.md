@@ -1,5 +1,26 @@
 # Installing and updating: log
 
+## 2026-10-22: Our VCockpit.js won over FS Copilot's, though fscopilot-bridge sorts after dualinput with the same order hint
+
+**Asked.**
+Which package's `VCockpit.js` the sim loads into a cockpit's panels when ours and FS Copilot's are both in `Community`, each with the order hint `PANEL_PATCH`, which [the build](../build/01-the-build.md#our-package) leaves to a case in the sim; stage 5's session ran it first, at the user's ask (user, 2026-10-22).
+
+**Expected.**
+FS Copilot's, since `fscopilot-bridge` sorts after `dualinput`, and within one order hint's group the package later in the alphabet wins a file both hold, by the rule [packages that override our files](01-installing-and-updating.md#packages-that-override-our-files) gives (inference, not run).
+
+**Found,** on MSFS 2024 1.9.18.0, Steam's edition, in a flight with the Black Square Baron (measured on our development machine, 2026-10-22, [core results](../core/results/2026-10-22-stage-5-session.txt)):
+
+- All 20 cockpit panels ran our bridge, which only our `VCockpit.js` loads.
+- The `VCockpit.js` a panel fetched from `/Pages/VCockpit/Core/VCockpit.js` was 24,735 bytes and held our blocks, where `fscopilot-bridge`'s copy on disk is 26,060 bytes.
+- `fscopilot-bridge` is FS Copilot 1.2.0, its folder made on 2026-10-20, while each `node tools/build.ts install` makes `dualinput`'s folder afresh by renaming its copy in, so ours was the newer folder.
+- Why ours won is unverified: which folder is newer, or the sim's `Content.xml`, could decide it, where the alphabet doesn't.
+
+**What changed.**
+Nothing yet: the check of the packages that override our files, and its case with FS Copilot's package installed, come with [stage 15](../build/plan.md#15-installing-and-updating), which takes this result as its starting point.
+
+**Docs affected.**
+[The build](../build/01-the-build.md) and [01-installing-and-updating](01-installing-and-updating.md), in notes at their tops.
+
 ## 2026-10-21: A fixed `DualInput\` staging folder beside a Community junction's target can be the pilot's data folder
 
 **Asked.**

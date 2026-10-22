@@ -52,7 +52,7 @@ function layout(t: TestContext): Layout {
   const wasm = path.join(temp, "module.wasm")
   fs.writeFileSync(wasm, Buffer.alloc(100, 7))
   const pkg = path.join(temp, "built", PACKAGE_NAME)
-  layOutPackage(wasm, pkg, "1.2.3")
+  layOutPackage(wasm, [], pkg, "1.2.3")
   return { temp, cfgs, folders, pkg }
 }
 

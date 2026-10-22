@@ -3,6 +3,7 @@
 //! edge's place, and the units its scenarios name. Everything else in a bench build is a
 //! release's code (record/areas/build/02-testing.md, "Its place").
 
+mod clients;
 mod lines;
 mod load;
 mod module;
@@ -25,6 +26,7 @@ use crate::sinks::Sinks;
 /// The test units, which `main` registers after the build's own.
 pub const UNITS: &[fn(&mut Registry)] = &[
     lines::Lines::register,
+    clients::BenchClients::register,
     load::Load::register,
     sim::Probe::register,
 ];
@@ -35,6 +37,7 @@ pub struct Sources {
     lines: SourceId,
     load: SourceId,
     sim: SourceId,
+    clients: SourceId,
     units: Vec<&'static str>,
 }
 
@@ -46,6 +49,7 @@ impl Sources {
             lines: kernel.source::<lines::Socket>()?,
             load: kernel.source::<load::Playback>()?,
             sim: kernel.source::<sim::Calls>()?,
+            clients: kernel.source::<clients::Acts>()?,
             units: kernel.units(),
         })
     }
@@ -92,8 +96,10 @@ pub fn start(
     let stand_in = match seam {
         Some(source) => {
             let queue = queue.clone();
+            let pages = to_bench.clone();
             let (stand_in, _) = StandIn::start(
                 move |up| queue.push(source, up.encode()),
+                move |name, data| pages.send(&FromCore::CommBus { name, data }),
                 Box::new(module::BenchModule::new(messages::SLOTS_HASH)),
             )?;
             let calls = stand_in.clone();

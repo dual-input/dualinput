@@ -170,6 +170,13 @@ pub enum Op {
         definition: u32,
         data: Vec<u8>,
     },
+    /// `SimConnect_CallCommBusEvent`: the CommBus event `name`, to the listeners `broadcast`
+    /// names, such as `SIMCONNECT_COMM_BUS_BROADCAST_TO_JS`, with `data` as its text.
+    CallCommBusEvent {
+        name: String,
+        broadcast: u32,
+        data: String,
+    },
 }
 
 #[cfg(test)]

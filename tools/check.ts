@@ -12,9 +12,11 @@ import { createRequire } from "node:module"
 
 import { readMessageTypes, writeMessageTypes } from "./lib/messages.ts"
 import { buildModule, clippyModule, missingExports } from "./lib/module.ts"
+import { buildPages, checkPages } from "./lib/pages.ts"
 import { fromRoot, ROOT } from "./lib/repo.ts"
 import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
+import { stockMismatches } from "./lib/stock.ts"
 
 const checks: [string, () => void][] = [
   ["Rustfmt", () => run("cargo", ["fmt", "--all", "--", "--check"])],
@@ -29,8 +31,11 @@ const checks: [string, () => void][] = [
   ["our WASM module's build and exports", checkModule],
   ["Clippy on our WASM module", clippyModule],
   ["each tsconfig's type check", typeCheck],
+  ["the stock files against stock.json", checkStockFiles],
+  ["the Coherent GT check on our code in the sim", () => checkPages(buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
-  ["the tools' tests", () => run(process.execPath, ["--test", ...toolTests()])],
+  // The tools' tests, and our TypeScript's own, such as page-client's, on Node's test runner.
+  ["the TypeScript tests", () => run(process.execPath, ["--test", ...typeScriptTests()])],
 ]
 
 main(() => {
@@ -76,8 +81,14 @@ function typeCheck(): void {
   for (const config of configs) run(process.execPath, [tsc, "-p", fromRoot(config)])
 }
 
-function toolTests(): string[] {
-  return find(path.join(ROOT, "tools"), ".test.ts").map((f) => fromRoot(f))
+function typeScriptTests(): string[] {
+  return ["engines", "platform", "features", "sim-package", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
+}
+
+/** CI has no sim, so it checks only that each stock file matches stock.json. */
+function checkStockFiles(): void {
+  const mismatched = stockMismatches()
+  if (mismatched.length) throw new Failed(`sim-package/stock/ doesn't match its stock.json: ${mismatched.join(", ")}`)
 }
 
 /** Every file under `dir` whose name ends with `suffix`, outside node_modules and target. */

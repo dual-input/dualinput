@@ -8,15 +8,18 @@
 //! and is parsed here, on the loop, so a replay runs the same path as the sim did.
 //!
 //! The service registers two units: sim awareness, whose state features read through
-//! `cx.read::<SimAwareness>()`, and the service itself. Register it before every feature
-//! that calls the sim, since a feature's `on_sim` registers with the service.
+//! `cx.read::<SimAwareness>()`, and the service itself. Register it after the clients crate,
+//! whose port it announces and to which it adds its slice, and before every feature that
+//! calls the sim, since a feature's `on_sim` registers with the service.
 
+mod announce;
 mod awareness;
 mod calls;
 mod connections;
 mod module;
 mod seam;
 
+pub use announce::announce;
 pub use calls::{ModuleCalls, Sim, SimCx, SimUnit};
 pub use module::Status;
 pub use sim_awareness::SimAwareness;
@@ -25,6 +28,7 @@ pub use sim_client::{Period, Value, Var};
 use std::collections::BTreeMap;
 use std::time::Duration;
 
+use clients::ClientsUnit;
 use kernel::{Cx, Handle, Handler, Moment, Registry, Started, TimerId};
 use sim_client::Seam;
 
@@ -86,6 +90,7 @@ pub struct SimService {
     /// The platform's own uses of its connection.
     platform: connections::Platform,
     module: ModuleWatch,
+    announcing: announce::Announcing,
 }
 
 impl SimService {
@@ -106,7 +111,8 @@ pub fn register(r: &mut Registry) {
     let mut me = r.unit::<SimService>("sim-service");
     let id = me.id();
     me.on::<Started>(SimService::started)
-        .on::<SimChanged>(SimService::sim_changed);
+        .on::<SimChanged>(SimService::sim_changed)
+        .client_state(messages::sim::SLICE, SimService::slice);
     me.source::<Seam>(SimService::seam);
     r.state_mut::<SimService>().me = Some(id);
 }

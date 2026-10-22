@@ -11,6 +11,11 @@
             "type": "command",
             "command": "node",
             "args": ["${CLAUDE_PROJECT_DIR}/scripts/prose-lint.mjs", "--hook"]
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/tools/coherent-check/hook.ts"]
           }
         ]
       }

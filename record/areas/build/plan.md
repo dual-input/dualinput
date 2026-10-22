@@ -158,7 +158,7 @@ Builds:
 The sim service's other calls each come with the first feature that makes them, with the stand-in's answer and the call's trial in the sim (user, 2026-10-21): `listen`, `input`, and `set_input` in stage 14, `reports` in stage 16, `create_ai`, `remove`, `camera`, and `frames` in stage 17, `poll` and `release` in stage 18, `world_map` in stage 21, and `commbus_call` and `commbus_listen` after v1, since no v1 feature makes them.
 p08's client already made AI creates, camera reads, input events, masking, and a CommBus call through `SimConnect.dll` in a flight ([the core](../architecture/01-spine.md#the-core)), so trying them before their features adds little.
 The routine host's other wants come with the routines that ask for them, in stages 14, 16, and 17.
-The sim service's parts that need a later stage come with it: the announcement, the module's notices, and the sim service's slice of client state in stage 5, which builds the clients crate; the menu script with our BlurPage copy, aircraft awareness, and `announce` in stage 9, which builds the session crate; and the checks of packages on disk in stage 15.
+The sim service's parts that need a later stage come with it: the announcement with `announce`, the module's notices, and the sim service's slice of client state in stage 5, which builds the clients crate; the menu script with our BlurPage copy and aircraft awareness in stage 9, which builds the session crate; and the checks of packages on disk in stage 15.
 The kernel gets no way to count an output the sim service makes for a feature's call as that feature's, since with every input recorded a replay checks both units' outputs ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 Needs: 3.
@@ -179,15 +179,40 @@ Done on 2026-10-22.
 
 ## 5 Clients and the panel bridge
 
-Builds: the clients crate, `page-client`, the panel bridge, and our `VCockpit.js` override, with the sim's stock files it starts from, the Coherent GT check, and the bench's fake pages ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [the sim's stock files](01-the-build.md#the-sims-stock-files), [the Coherent GT check](01-the-build.md#the-coherent-gt-check)).
-Designs first: whether the core sends each client `alive` every 2s whatever else it sends, or only after 2s of nothing, as [the protocol](../core/02-clients-and-panel-bridge.md#the-protocol) has it, since recording every input took away the drift the first guarded against ([recording log](../recording/log.md)).
-From stage 4, it also builds the sim service's announcement every 2s, whose body holds the clients crate's port, and its parts that slices and notices carry: its slice of client state, and the module's trouble notices ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement), [sim awareness](../core/03-sim-seam-and-wasm-module.md#sim-awareness), [the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
+Builds:
+
+- `clients`: the protocol's messages, in the message crate's `clients` module; the table of clients, each one's `hello`, and the close of a socket quiet for 8s; client state's slices, its round every 50ms, and `watch`; commands and their answers; `unit` messages to a component or a panel module, and from one; notices, as a slice of its own; settings in `settings.json`, each with its label and whether it's a development setting; the moments a client joined or left, a panel's socket replaced, and a setting changed; the profile's load and unload, at which it answers each cockpit panel with `load` or `none`, and sends `stop`; the trouble notice when no cockpit panel's `hello` comes within 10s of the profile loading; and `bye` ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [settings](../interface/01-apps.md#settings), [trouble](../interface/01-apps.md#trouble))
+- `apps/core`'s WebSocket server, on tokio-websockets 0.13.3: its `Origin` check, its 1 MiB limit, text alone, socket IDs from the edge's counter, and the port file, written once the port is bound and deleted as the core exits ([the WebSocket server](../core/02-clients-and-panel-bridge.md#the-websocket-server), [finding the core](../architecture/01-spine.md#finding-the-core))
+- `page-client`: hearing the core's announcement in a page that has the sim's `common.js`, connecting, the `hello`, `alive`, handing each message to whoever registered its tag, connecting again at the next announcement, and the connection's state ([page-client](../core/02-clients-and-panel-bridge.md#page-client), [when the core goes](../interface/01-apps.md#when-the-core-goes))
+- `panel-bridge`: a record of each instrument with its key, the `hello` naming them once a session runs, loading each panel module from its file and calling its `start` and `stop` each in a `try`, a module's `ctx` with its instruments, its `unit` messages, and `ctx.watch`, and `window.DUALINPUT_BRIDGE_UNLOCK()` ([our VCockpit.js](../core/02-clients-and-panel-bridge.md#our-vcockpitjs), [panel modules](../core/02-clients-and-panel-bridge.md#panel-modules), [modules in the panel bridge](../architecture/02-code-map.md#modules-in-the-panel-bridge))
+- in our package, `sim-package/pages`' `VCockpit.js` override, which `tools/build.ts` makes from the stock file at named anchors, and `bridge.js`, one esbuild bundle of the bridge and page-client ([our VCockpit.js](../core/02-clients-and-panel-bridge.md#our-vcockpitjs))
+- `sim-package/stock/`, with the sim's `VCockpit.js`, BlurPage's two files, and `stock.json`; `tools/stock.ts`; and the build's comparison of the sim's own files with them ([the sim's stock files](01-the-build.md#the-sims-stock-files))
+- the Coherent GT check, in `tools/`, with its data file from [Coherent GT's JavaScript](../architecture/coherent-gt.md) and p09's samples as its first tests, which `tools/check.ts` runs on every file we ship into the sim, and a hook runs after each edit ([the Coherent GT check](01-the-build.md#the-coherent-gt-check))
+- the bench's fake pages, which hear the stand-in's announcement and speak the protocol over the core's WebSocket from the messages' TypeScript types, a fake cockpit panel's bridge among them ([the sim's pages](02-testing.md#the-sims-pages))
+
+Designs first: whether the core sends each client `alive` every 2s whatever else it sends, or only after 2s of nothing, as [the protocol](../core/02-clients-and-panel-bridge.md#the-protocol) has it, since recording every input took away the drift the first guarded against ([recording log](../recording/log.md)); [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22 settles it.
+
+From stage 4, it also builds the sim service's announcement every 2s, whose body holds the clients crate's port, and `sim_service::announce`, which a bench test unit calls in the session crate's place until stage 9; `SimConnect_CallCommBusEvent` in `sim-client`, the edge, and the stand-in, which hands each call to the bench's fake pages; the sim service's slice of client state; and the module's trouble notices ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement), [sim awareness](../core/03-sim-seam-and-wasm-module.md#sim-awareness), [the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
+The bridge's locks come with pointer sync in [stage 19](#19-pointer-sync), the one v1 feature that asks for them, and what `clients` holds for the apps alone comes with the apps in [stage 11](#11-the-apps) (user, 2026-10-22).
+The bench's fake EFB app and banner come in stage 11 too, and its fake menu script in stage 9.
+A bench test unit stands in for the profile loader until stage 10, telling `clients` when the profile loads and unloads, as [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22 has it.
+
 Needs: 4.
 
 Tests:
 
 - From stage 2: a feature's command handler reads the clients crate's settings while the clients crate dispatches it ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
-- From stage 3: a fake page that heard the stand-in's announcement connects; and in this stage's session in the sim, with a bench core running beside the real sim's core, every page of the real sim connects to the real sim's core, and none to the bench core ([the bench's own cases](02-testing.md#cases-for-the-bench)).
+- From stage 3: a fake page that heard the stand-in's announcement connects; and in this stage's session in the sim, with a bench core running beside the real sim's core, every cockpit panel connects to the real sim's core, and none to the bench core, while stage 11's session checks the sim's other pages ([the bench's own cases](02-testing.md#cases-for-the-bench)).
+- From [02's cases](../core/02-clients-and-panel-bridge.md#cases-for-the-bench), on the bench: a socket from a browser page closes with 1008, and nothing it sent reaches the loop; a `hello` from a client of another version is logged with both versions, and the core goes on talking to it; a message that doesn't parse is logged and dropped, and a `command` whose arguments don't parse answers with an error; the core suspended for 12s leaves every fake page its socket, and each fake panel's modules carry on without loading again; the core restarted on another port has every fake page connect again within 2s of its next announcement; a panel told `none` connects no more until the session ends; a slice that changes 100 times a second reaches a fake page at most once a round; a command no unit registered answers "unknown"; and a settings file keeps a key no unit registered.
+- From [the code map's cases for work in the sim](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim): as the bridge's own tests, a panel module that fails to load, or throws in `start`, leaves the other panel modules in its panel running, and with the core's socket closed every panel module stops at once; and on the bench, a panel that reloads mid-session gets its panel modules again on its new socket, and the core closes the old one.
+- From [the apps' cases](../interface/01-apps.md#cases-for-the-bench), on the bench: a setting changed from a fake page's socket takes effect; no cockpit panel connecting within 10s of the profile loading raises `clients`' trouble notice, cleared once one connects; and a module from another build while a test routine is fed raises the sim service's trouble notice for our package.
+- From stage 4: the announcement goes out within one input of the session crate's call, here the test unit's ([03's budgets](../core/03-sim-seam-and-wasm-module.md#budgets)).
+- On the bench, [02's budgets](../core/02-clients-and-panel-bridge.md#budgets): a message under 64 KiB; one round of client state under 1ms on the loop; under 30 messages a second to one panel; each of 20 fake cockpit panels, as many as the Black Square Baron 58P has, answered with `load` or `none` within 1s of the profile loading; and a fake page connected again within 2s of a restarted core's announcement.
+  And [the build's budgets](01-the-build.md#budgets): the Coherent GT check on a 2.5 MB bundle, and the hook's findings after a save, each under 1s.
+- In this stage's session in the sim: our `VCockpit.js` loads the bridge into every cockpit panel of a flight, and every instrument loads as without us; each bridge hears the core's announcement, and once the sim's inspector plays a session's announcement into its panel, connects to the core with its instruments' keys; and with `bridge.js` missing, and with one that throws as it loads, every instrument loads as it would without Dual Input, in a sim started for each ([02's cases](../core/02-clients-and-panel-bridge.md#cases-for-the-bench); user, 2026-10-22).
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the Coherent GT check and the clients' scenarios among them; in this stage's session in the sim, every cockpit panel of a flight loads the bridge, and connects to the real sim's core once the inspector plays a session's announcement into it, and every instrument loads as without us whether `bridge.js` is there, missing, or throws; and the [core's log](../core/log.md) has an entry for the session's cases and budgets.
+Done on 2026-10-22.
 
 ## 6 The core helper
 
@@ -211,14 +236,15 @@ Needs: 7.
 ## 9 The session
 
 Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)); and `apps/core`'s window thread, which pushes a quit when Windows ends the pilot's session ([quitting](../core/01-loop-and-edge.md#quitting)).
-From stage 4, it also builds the menu script and our BlurPage copy in `sim-package/pages`, with the menu script's report of the menu's page, which ends sim awareness's Starting ([the menu script](../session/02-units.md#the-menu-script), [leaving Starting](../core/03-sim-seam-and-wasm-module.md#leaving-starting)); the sim service's aircraft awareness, which runs while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)); the sim service's feed of preflight's `Hold` on the platform's connection ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module)); and `sim_service::announce`, which the session crate calls as a session starts or ends ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement)).
+From stage 4, it also builds the menu script and our BlurPage copy in `sim-package/pages`, with the menu script's report of the menu's page, which ends sim awareness's Starting ([the menu script](../session/02-units.md#the-menu-script), [leaving Starting](../core/03-sim-seam-and-wasm-module.md#leaving-starting)); the sim service's aircraft awareness, which runs while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)); the sim service's feed of preflight's `Hold` on the platform's connection ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module)); and the session crate's calls to `sim_service::announce` as a session starts or ends, which stage 5 builds ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement)).
+From stage 5, it also builds the bench's fake menu script ([the sim's pages](02-testing.md#the-sims-pages)).
 Its features come in [stage 21](#21-rate-and-pause-and-go-to).
 Needs: 4, 7, and 8.
 
 Tests:
 
 - From stage 2: a pilot quits Dual Input in a session, and Windows signs a pilot out with a session held, and each time the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
-- From stage 4: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)), raising one `SimChanged` for the load it finds ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); the announcement goes out within one input of the session crate's call ([03's budgets](../core/03-sim-seam-and-wasm-module.md#budgets)); and in this stage's session in the sim, `fsEventsTriggerKeyEvent` freezes and unfreezes the pilot's aircraft through `Hold` (same cases).
+- From stage 4: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)), raising one `SimChanged` for the load it finds ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); and in this stage's session in the sim, `fsEventsTriggerKeyEvent` freezes and unfreezes the pilot's aircraft through `Hold` (same cases).
 
 ## 10 Profiles
 
@@ -230,8 +256,10 @@ Needs: 9.
 
 Designs first: the apps' looks and words, from [the apps' list](../interface/01-apps.md#left-to-the-apps-stage) and [installing and updating's](../install/01-installing-and-updating.md#left-to-the-apps-stage).
 Builds: the EFB shell, the desktop shell, `apps/desktop`'s window and Rust side, and `sim-package/pages`' EFB app and banner ([01-apps](../interface/01-apps.md)).
+From stage 5, it also builds what `clients` holds for the apps alone: the banner's socket in its slice, the command for a notice clicked outside its action with the order that opens the EFB, and the command that brings the desktop app forward, with the core's start of the desktop app's program ([slices and commands](../interface/01-apps.md#slices-and-commands), [notices](../interface/01-apps.md#notices), [bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)); and the bench's fake EFB app and banner ([the sim's pages](02-testing.md#the-sims-pages)).
 Each feature's part in the apps comes with that feature's stage.
 Needs: 9 and 10.
+Tests, from stage 5: in this stage's session in the sim, with a bench core running beside the real sim's core, the EFB app, the banner, and the menu script connect to the real sim's core, and none to the bench core ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 
 ## 12 The sandbox
 
@@ -297,7 +325,9 @@ Tests:
 ## 19 Pointer sync
 
 Builds: the pointer sync feature, its panel module, and the Baron 58P profile's displays ([pointer sync](../pointer-sync/01-pointer-sync.md)).
+From stage 5, it also builds the panel bridge's locks: the visible lock with its renewal and its warning, the unseen lock, and the hit test that looks past their overlays ([what the bridge owns](../architecture/02-code-map.md#what-the-bridge-owns), [locks](../pointer-sync/01-pointer-sync.md#locks)).
 Needs: 5 and 13.
+Tests, from stage 5: with the core suspended, a locked display's overlay turns into a warning within 10s, and `window.DUALINPUT_BRIDGE_UNLOCK()` removes it at once; and with the core's socket closed, every lock drops at once ([the code map's cases for work in the sim](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim)).
 
 ## 20 Take-control
 

@@ -1,0 +1,552 @@
+//! The clients crate driven through the kernel as the core's edge drives it: sockets' inputs
+//! go in, and what it sends each socket comes out (record/areas/core/
+//! 02-clients-and-panel-bridge.md, "Cases for the bench").
+
+use std::collections::BTreeMap;
+
+use clients::{Clients, ClientsUnit, SettingDef, SocketOut, SocketUp, Sockets};
+use kernel::{
+    CancelTimer, Cx, FIRST, Input, JOBS, Kernel, Output, Registry, SetTimer, SourceId, StartJob,
+    TIMERS, TimerId, View, Work, first_input,
+};
+use messages::clients::{SettingKind, ToClient};
+use serde::Deserialize;
+use serde_json::{Value, json};
+
+/// A test unit standing in for a feature, and for the profile loader.
+#[derive(Default)]
+struct Feature {
+    counter: u32,
+    profile: bool,
+}
+
+#[derive(Deserialize)]
+struct Bump {
+    by: u32,
+}
+
+/// Names the test unit's source, whose input loads its profile, `[1]`, or unloads it, `[0]`.
+struct ProfileKey;
+
+impl Feature {
+    fn register(r: &mut Registry) {
+        let mut me = r.unit::<Feature>("feature");
+        me.source::<ProfileKey>(Feature::profile);
+        me.client_state(
+            "feature",
+            |me: &Feature, _: &View| json!({ "counter": me.counter }),
+        )
+        .command("feature.bump", Feature::bump)
+        .command("feature.read-setting", Feature::read_setting)
+        .panel_module("feature-panel", Feature::rule)
+        .setting(
+            "feature.loud",
+            SettingDef {
+                label: "Loud",
+                kind: SettingKind::Bool,
+                default: json!(false),
+                part_only: false,
+                development: false,
+            },
+        );
+    }
+
+    /// Stands in for the profile loader.
+    fn profile(me: &mut Feature, input: &Input, cx: &mut Cx) {
+        me.profile = input.bytes == [1];
+        if me.profile {
+            clients::profile_loaded(cx);
+        } else {
+            clients::profile_unloaded(cx);
+        }
+    }
+
+    fn bump(me: &mut Feature, args: Bump, _: &mut Cx) -> Result<(), String> {
+        me.counter += args.by;
+        Ok(())
+    }
+
+    /// The case from the loop's design: a command's handler reads the clients crate's
+    /// settings while the clients crate dispatches it.
+    fn read_setting(_: &mut Feature, _: Value, cx: &mut Cx) -> Result<(), String> {
+        match cx.read::<Clients>().setting_as::<bool>("feature.loud") {
+            Some(true) => Ok(()),
+            _ => Err("not loud".into()),
+        }
+    }
+
+    fn rule(view: &View, instruments: &[String]) -> Vec<String> {
+        if !view.read::<Feature>().profile {
+            return Vec::new();
+        }
+        instruments
+            .iter()
+            .filter(|i| i.starts_with("PFD"))
+            .cloned()
+            .collect()
+    }
+}
+
+struct Core {
+    kernel: Kernel,
+    sockets: SourceId,
+    seq: u64,
+    now: u64,
+    timers: BTreeMap<(u64, TimerId), ()>,
+    jobs: Vec<StartJob>,
+}
+
+const SECOND: u64 = 1_000_000;
+
+impl Core {
+    fn new(settings: Option<&str>) -> (Core, Vec<SocketOut>) {
+        let mut registry = Registry::new();
+        clients::register(&mut registry);
+        Feature::register(&mut registry);
+        let kernel = Kernel::new(registry);
+        let sockets = kernel
+            .source::<Sockets>()
+            .expect("the clients crate takes the sockets");
+        let files = vec![(
+            "settings.json".to_string(),
+            settings.map(|s| s.as_bytes().to_vec()),
+        )];
+        let mut core = Core {
+            kernel,
+            sockets,
+            seq: 0,
+            now: SECOND,
+            timers: BTreeMap::new(),
+            jobs: Vec::new(),
+        };
+        let outputs = core.handle(FIRST, first_input([1; 32], files));
+        (core, outputs)
+    }
+
+    fn handle(&mut self, source: SourceId, bytes: Vec<u8>) -> Vec<SocketOut> {
+        self.seq += 1;
+        let outputs = self.kernel.handle(&Input {
+            seq: self.seq,
+            stamp: self.now,
+            source,
+            bytes,
+        });
+        self.carry(outputs)
+    }
+
+    fn carry(&mut self, outputs: Vec<Output>) -> Vec<SocketOut> {
+        let mut out = Vec::new();
+        for output in outputs {
+            let value = output.into_value();
+            let value = match value.downcast::<SetTimer>() {
+                Ok(set) => {
+                    self.timers.insert((set.due, set.id), ());
+                    continue;
+                }
+                Err(value) => value,
+            };
+            let value = match value.downcast::<CancelTimer>() {
+                Ok(cancel) => {
+                    self.timers.retain(|(_, id), _| *id != cancel.id);
+                    continue;
+                }
+                Err(value) => value,
+            };
+            let value = match value.downcast::<StartJob>() {
+                Ok(job) => {
+                    self.jobs.push(*job);
+                    continue;
+                }
+                Err(value) => value,
+            };
+            if let Ok(socket) = value.downcast::<SocketOut>() {
+                out.push(*socket);
+            }
+        }
+        out
+    }
+
+    fn up(&mut self, up: SocketUp) -> Vec<SocketOut> {
+        self.handle(self.sockets, up.encode())
+    }
+
+    fn say(&mut self, socket: u64, message: Value) -> Vec<SocketOut> {
+        self.up(SocketUp::Text {
+            socket,
+            text: message.to_string(),
+        })
+    }
+
+    fn join(&mut self, socket: u64, component: &str, instruments: &[&str]) -> Vec<SocketOut> {
+        self.up(SocketUp::Opened { socket });
+        self.say(
+            socket,
+            json!({ "t": "hello", "component": component, "version": messages::VERSION, "hash": messages::HASH, "instruments": instruments }),
+        )
+    }
+
+    /// A cockpit panel's bridge says hello, naming its panel as the sim names it.
+    fn join_panel(&mut self, socket: u64, panel: &str, instruments: &[&str]) -> Vec<SocketOut> {
+        self.up(SocketUp::Opened { socket });
+        self.say(
+            socket,
+            json!({ "t": "hello", "component": "panel-bridge", "version": messages::VERSION, "hash": messages::HASH, "panel": panel, "instruments": instruments }),
+        )
+    }
+
+    /// Moves the clock to `to`, firing each timer due by then, in order.
+    fn advance(&mut self, to: u64) -> Vec<SocketOut> {
+        let mut out = Vec::new();
+        while let Some((&(due, id), _)) = self.timers.iter().next() {
+            if due > to {
+                break;
+            }
+            self.timers.remove(&(due, id));
+            self.now = due;
+            out.extend(self.handle(TIMERS, id.fired()));
+        }
+        self.now = to;
+        out
+    }
+
+    /// Finishes each job the clients crate started, as the edge would.
+    fn finish_jobs(&mut self) -> Vec<Work> {
+        let jobs = std::mem::take(&mut self.jobs);
+        for job in &jobs {
+            let bytes = job.id.finished(Ok(Vec::new()));
+            self.handle(JOBS, bytes);
+        }
+        jobs.into_iter().map(|j| j.job.work).collect()
+    }
+}
+
+/// Each message sent to `socket`, read.
+fn to(socket: u64, outputs: &[SocketOut]) -> Vec<ToClient> {
+    outputs
+        .iter()
+        .filter_map(|o| match o {
+            SocketOut::Send { socket: s, text } if *s == socket => {
+                Some(serde_json::from_str(text).expect("the core should send a ToClient"))
+            }
+            _ => None,
+        })
+        .collect()
+}
+
+fn answer(id: u32, error: Option<&str>) -> ToClient {
+    ToClient::Answer {
+        id,
+        error: error.map(str::to_string),
+    }
+}
+
+#[test]
+fn a_client_gets_a_slice_at_once_then_at_most_once_a_round() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb", &[]);
+    let out = core.say(1, json!({ "t": "watch", "slices": ["feature"] }));
+    assert_eq!(
+        to(1, &out),
+        [ToClient::State {
+            slice: "feature".into(),
+            value: json!({ "counter": 0 })
+        }]
+    );
+    // Five changes between two rounds, each taken: the client hears of the last alone.
+    for id in 0..5 {
+        let out = core.say(
+            1,
+            json!({ "t": "command", "id": id, "name": "feature.bump", "args": { "by": 1 } }),
+        );
+        assert_eq!(to(1, &out), [answer(id, None)]);
+    }
+    let out = core.advance(core.now + 50_000);
+    assert_eq!(
+        to(1, &out),
+        [ToClient::State {
+            slice: "feature".into(),
+            value: json!({ "counter": 5 })
+        }]
+    );
+    let out = core.advance(core.now + 50_000);
+    assert_eq!(to(1, &out), [], "an unchanged slice isn't sent again");
+}
+
+#[test]
+fn a_command_no_unit_registered_answers_unknown_and_one_whose_arguments_dont_read_an_error() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb", &[]);
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 7, "name": "nobody.knows", "args": {} }),
+    );
+    assert_eq!(to(1, &out), [answer(7, Some("unknown"))]);
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 8, "name": "feature.bump", "args": { "by": "two" } }),
+    );
+    let answers = to(1, &out);
+    let [
+        ToClient::Answer {
+            id: 8,
+            error: Some(error),
+        },
+    ] = answers.as_slice()
+    else {
+        panic!("the command should be answered with an error");
+    };
+    assert!(error.starts_with("its arguments didn't read"), "{error}");
+}
+
+#[test]
+fn a_commands_handler_reads_the_settings_while_the_clients_crate_dispatches_it() {
+    let (mut core, _) = Core::new(Some(r#"{ "feature.loud": true }"#));
+    core.join(1, "efb", &[]);
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 1, "name": "feature.read-setting", "args": null }),
+    );
+    assert_eq!(to(1, &out), [answer(1, None)]);
+}
+
+#[test]
+fn a_settings_file_keeps_a_key_no_unit_registered_and_a_value_that_doesnt_fit_takes_its_default() {
+    let (mut core, _) = Core::new(Some(r#"{ "feature.loud": "very", "gone.feature": 3 }"#));
+    core.join(1, "desktop", &[]);
+    let out = core.say(1, json!({ "t": "watch", "slices": ["settings"] }));
+    let sent = to(1, &out);
+    let [ToClient::State { value, .. }] = sent.as_slice() else {
+        panic!("the settings should be sent at once");
+    };
+    assert_eq!(
+        value[0]["value"],
+        json!(false),
+        "a stored value that doesn't fit takes the default"
+    );
+    let out = core.say(1, json!({ "t": "command", "id": 1, "name": "clients.set-setting", "args": { "key": "feature.loud", "value": true } }));
+    assert_eq!(to(1, &out), [answer(1, None)]);
+    let jobs = core.finish_jobs();
+    let [Work::Write { path, bytes }] = jobs.as_slice() else {
+        panic!("the change should write the file");
+    };
+    assert_eq!(path, "settings.json");
+    let written: Value = serde_json::from_slice(bytes).expect("the file should be JSON");
+    assert_eq!(written, json!({ "feature.loud": true, "gone.feature": 3 }));
+    let out = core.say(1, json!({ "t": "command", "id": 2, "name": "clients.set-setting", "args": { "key": "feature.loud", "value": 1 } }));
+    assert!(matches!(
+        to(1, &out).as_slice(),
+        [ToClient::Answer {
+            id: 2,
+            error: Some(_)
+        }]
+    ));
+}
+
+#[test]
+fn a_message_that_doesnt_read_is_dropped_and_a_client_of_another_version_is_still_served() {
+    let (mut core, _) = Core::new(None);
+    core.up(SocketUp::Opened { socket: 1 });
+    core.say(
+        1,
+        json!({ "t": "hello", "component": "efb", "version": "0.0.0", "hash": "another" }),
+    );
+    assert_eq!(
+        core.up(SocketUp::Text {
+            socket: 1,
+            text: "{ not json".into()
+        }),
+        []
+    );
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 3, "name": "feature.bump", "args": { "by": 1 } }),
+    );
+    assert_eq!(to(1, &out), [answer(3, None)]);
+}
+
+#[test]
+fn the_core_says_alive_every_2s_and_closes_a_socket_quiet_for_8s() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb", &[]);
+    core.join(2, "banner", &[]);
+    let out = core.advance_alive(core.now + 10 * SECOND, &[1]);
+    assert!(
+        out.contains(&SocketOut::Close {
+            socket: 2,
+            code: 1000
+        }),
+        "{out:?}"
+    );
+    assert!(
+        !out.iter()
+            .any(|o| matches!(o, SocketOut::Close { socket: 1, .. }))
+    );
+    assert_eq!(
+        to(1, &out)
+            .iter()
+            .filter(|m| **m == ToClient::Alive)
+            .count(),
+        5
+    );
+}
+
+#[test]
+fn panels_get_their_modules_once_the_profile_loads_and_a_reloaded_panel_replaces_its_old_socket() {
+    let (mut core, _) = Core::new(None);
+    core.join_panel(1, "VCockpit01", &["PFD_1|", "MFD_1|"]);
+    core.join_panel(2, "VCockpit02", &["CLOCK|"]);
+    let out = core.handle_profile(true);
+    assert_eq!(
+        to(1, &out),
+        [ToClient::Load {
+            modules: vec![messages::clients::PanelModule {
+                name: "feature-panel".into(),
+                instruments: vec!["PFD_1|".into()]
+            }]
+        }]
+    );
+    assert_eq!(to(2, &out), [ToClient::None]);
+    // Panel 1 reloads: its new socket names the same panel.
+    let out = core.join_panel(3, "VCockpit01", &["PFD_1|", "MFD_1|"]);
+    assert!(out.contains(&SocketOut::Close {
+        socket: 1,
+        code: 1000
+    }));
+    assert!(matches!(to(3, &out).as_slice(), [ToClient::Load { .. }]));
+    let out = core.handle_profile(false);
+    assert_eq!(
+        to(3, &out),
+        [ToClient::Stop {
+            modules: vec!["feature-panel".into()]
+        }]
+    );
+}
+
+#[test]
+fn a_settings_file_that_doesnt_read_is_never_written_over() {
+    let (mut core, _) = Core::new(Some(r#"{ "feature.loud": true, "gone.feature": 3 "#));
+    core.join(1, "desktop", &[]);
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 1, "name": "clients.set-setting", "args": { "key": "feature.loud", "value": true } }),
+    );
+    assert!(matches!(
+        to(1, &out).as_slice(),
+        [ToClient::Answer {
+            id: 1,
+            error: Some(_)
+        }]
+    ));
+    assert!(
+        core.finish_jobs().is_empty(),
+        "no write of the file went out"
+    );
+}
+
+#[test]
+fn a_hello_whose_other_fields_dont_read_still_joins_on_its_component_version_and_hash() {
+    let (mut core, _) = Core::new(None);
+    core.up(SocketUp::Opened { socket: 1 });
+    core.say(
+        1,
+        json!({ "t": "hello", "component": "efb", "version": "9.9.9", "hash": "another", "instruments": "not a list" }),
+    );
+    let out = core.say(
+        1,
+        json!({ "t": "command", "id": 2, "name": "feature.bump", "args": { "by": 1 } }),
+    );
+    assert_eq!(to(1, &out), [answer(2, None)]);
+}
+
+#[test]
+fn two_panels_that_hold_instruments_of_one_key_both_keep_their_sockets() {
+    let (mut core, _) = Core::new(None);
+    // As the Black Square Baron's VCockpit66 and VCockpit67 each hold one keyed GNS_DISABLED.
+    core.join_panel(1, "VCockpit66", &["GNS_DISABLED"]);
+    let out = core.join_panel(2, "VCockpit67", &["GNS_DISABLED"]);
+    assert!(
+        !out.iter().any(|o| matches!(o, SocketOut::Close { .. })),
+        "{out:?}"
+    );
+}
+
+#[test]
+fn no_cockpit_panel_within_10s_of_the_profile_loading_raises_trouble_until_one_connects() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb", &[]);
+    core.say(1, json!({ "t": "watch", "slices": ["notices"] }));
+    core.handle_profile(true);
+    let out = core.advance_alive(core.now + 10 * SECOND + 50_000, &[1]);
+    let notices: Vec<Value> = to(1, &out)
+        .into_iter()
+        .filter_map(|m| match m {
+            ToClient::State { value, .. } => Some(value),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(
+        notices.last().map(|n| n[0]["id"].clone()),
+        Some(json!("clients.no-panel"))
+    );
+    core.join_panel(2, "VCockpit02", &["CLOCK|"]);
+    let out = core.advance(core.now + 50_000);
+    let notices: Vec<Value> = to(1, &out)
+        .into_iter()
+        .filter_map(|m| match m {
+            ToClient::State { value, .. } => Some(value),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(notices, [json!([])]);
+}
+
+#[test]
+fn a_page_keeps_its_socket_through_12s_in_which_the_core_itself_stopped() {
+    let (mut core, _) = Core::new(None);
+    core.join(1, "efb", &[]);
+    // The core stops for 12s: its timers fire only after, all at once, stamped late.
+    core.now += 12 * SECOND;
+    let mut out = Vec::new();
+    while let Some((&(due, id), _)) = core.timers.iter().next() {
+        if due > core.now {
+            break;
+        }
+        core.timers.remove(&(due, id));
+        out.extend(core.handle(TIMERS, id.fired()));
+    }
+    assert!(
+        !out.iter().any(|o| matches!(o, SocketOut::Close { .. })),
+        "{out:?}"
+    );
+    // The page's messages from those 12s come in now, and it goes on as before.
+    core.say(1, json!({ "t": "alive" }));
+    let out = core.advance_alive(core.now + 10 * SECOND, &[1]);
+    assert!(
+        !out.iter().any(|o| matches!(o, SocketOut::Close { .. })),
+        "{out:?}"
+    );
+}
+
+impl Core {
+    /// Moves the clock to `to` a second at a time, with each of `sockets` saying `alive`
+    /// each second, as a page does every 2s, and returns everything sent on the way.
+    fn advance_alive(&mut self, to: u64, sockets: &[u64]) -> Vec<SocketOut> {
+        let mut out = Vec::new();
+        while self.now < to {
+            out.extend(self.advance((self.now + SECOND).min(to)));
+            for &socket in sockets {
+                out.extend(self.say(socket, json!({ "t": "alive" })));
+            }
+        }
+        out
+    }
+
+    /// Has the test unit load or unload its profile, as the profile loader would.
+    fn handle_profile(&mut self, on: bool) -> Vec<SocketOut> {
+        let source = self
+            .kernel
+            .source::<ProfileKey>()
+            .expect("the test unit takes its profile's input");
+        self.handle(source, vec![u8::from(on)])
+    }
+}

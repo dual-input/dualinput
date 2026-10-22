@@ -1,0 +1,43 @@
+Stage 5's budgets, measured on our development machine on 2026-10-22, for record/areas/core/log.md's entry of
+the same day. The bench ran its debug build of the core, as `node tools/bench.ts` builds it; Node 22.23.1.
+
+The bench (node --test tools/bench/scenarios/clients-protocol.ts clients-panels.ts clients-outages.ts), the lines
+each scenario prints:
+
+  # budget: 20 panels answered 31ms after the profile loaded, against 1,000ms
+  # budget: at most 20.7 messages a second to one panel, against 30
+  # budget: the slowest input of a run with 20 panels in rounds took 296µs, 0 over 1ms, against 1,000µs for a round
+  # budget: a page connected again 2ms after the restarted core's announcement, against 2,000ms
+  # budget: a page connected again 3ms after the restarted core's announcement, against 2,000ms
+
+- 20 panels answered: from the bench sending the test unit's profile load to the last of 20 fake cockpit panels
+  getting `load` or `none`, timed in the bench's process.
+- Messages a second: the most any of 20 fake panels got over 3s, each watching a slice the test unit changed 100
+  times a second.
+- The slowest input: from the loop's stats for the whole run, which the core logs as it exits, in that run of 20
+  panels in rounds. An earlier run of the same scenario gave 582µs.
+- Connected again: from the restarted core's first announcement reaching the bench to each fake page's socket
+  opening, for an efb page and a menu-script page.
+- No message to any fake page in any scenario was over 64 KiB; the fake pages fail a scenario on one.
+
+The Coherent GT check (node tools/coherent-check/main.ts <file>), on a 2,714,019-byte stand-in bundle of 11 copies
+of acorn 8.19.0's dist/acorn.js, each wrapped in a function, since the framework's bundle the build log measured
+isn't installed here; five runs, Node's start included:
+
+  1612ms, 652ms, 656ms, 687ms, 652ms   (median 656ms; the first ran cold)
+
+It reported 22 findings in that bundle, 11 each of:
+  Object.hasOwn is missing in Coherent GT     at `var hasOwn = Object.hasOwn || (function (obj, propName) {...`
+  BigInt is missing in Coherent GT            at `return BigInt(str.replace(/_/g, ""))`, which acorn guards at its caller
+An `X || fallback` fill-in is none of the check's four rules, so it fails, as a guard at a caller does.
+
+Building bridge.js and our VCockpit.js, then node --check and the Coherent GT check on both, in one Node
+process (buildPages and checkPages from tools/lib/pages.ts):
+
+  built and checked in 153ms
+
+The hook (node tools/coherent-check/hook.ts, with a PostToolUse payload on stdin):
+  an edit to platform/panel-bridge/src/bridge.ts, which rebuilds bridge.js and our VCockpit.js and checks both: 293ms
+  an edit to tools/check.ts, which loads nothing more: 86ms
+
+bridge.js as built: 16,076 bytes; our VCockpit.js: 24,735 bytes, against the stock file's 23,520.

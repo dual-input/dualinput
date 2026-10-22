@@ -438,6 +438,15 @@ impl Cx<'_> {
         read(self.states, self.table)
     }
 
+    /// Every other unit's state, read-only, for a function another unit registered, as the
+    /// clients crate builds a feature's slice of client state.
+    pub fn view(&self) -> View<'_> {
+        View {
+            states: self.states,
+            table: self.table,
+        }
+    }
+
     /// Puts out `output`, for the edge to carry out once the input and everything it set
     /// off are handled. The output also goes into the running hash, by its postcard
     /// encoding. A `HashMap` or `HashSet` encodes its entries in an order seeded at random

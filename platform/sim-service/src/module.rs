@@ -35,19 +35,8 @@ const FREEZES: [(&str, &str); 3] = [
     ("A:IS ATTITUDE FREEZE ON", "K:FREEZE_ATTITUDE_SET"),
 ];
 
-/// Our WASM module's status.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum Status {
-    /// No write to the status slot heard yet.
-    #[default]
-    Missing,
-    /// The module's slots hash isn't the core's, so it runs none of this core's feeds.
-    Differs,
-    /// Its counter moves.
-    Running,
-    /// Its counter has been still for 3s spent in Flying, unpaused, with a routine live.
-    Stopped,
-}
+/// Our WASM module's status, which the apps show, so its type is the message crate's.
+pub use messages::sim::ModuleState as Status;
 
 #[derive(Default)]
 pub(crate) struct ModuleWatch {
@@ -226,6 +215,9 @@ impl SimService {
             );
             self.unfreeze(cx);
         }
+        // Every moment that can change the status or whether a routine is live runs this,
+        // so the notices follow both from here.
+        self.module_notices(cx);
     }
 
     /// Reads the three freeze flags through the platform's connection, then turns off each

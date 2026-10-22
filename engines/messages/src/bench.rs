@@ -37,6 +37,25 @@ pub enum ToCore {
     StandIn { act: StandInAct },
     /// Has the sim's test unit, which stands in for a feature, make a call of the sim.
     Sim { call: SimCall },
+    /// Has the clients' test unit, which stands in for the session crate, the profile
+    /// loader, and a feature with a slice and a panel module, act.
+    Clients { act: ClientsAct },
+}
+
+/// What the clients' test unit does.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "act", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum ClientsAct {
+    /// Has the core announce that a session started, or ended, as the session crate does.
+    Session { on: bool },
+    /// Loads a profile whose panel module `bench-panel` takes each instrument whose key
+    /// starts with one of `picks`, or unloads it, as the profile loader does.
+    Profile { loaded: bool, picks: Vec<String> },
+    /// Changes the slice `bench` `per_second` times a second for `for_ms`.
+    Churn { per_second: u32, for_ms: u64 },
+    /// Says `bye` to every client, as the session crate does as the core quits.
+    Bye,
 }
 
 /// What the bench does to the stand-in sim.
@@ -134,6 +153,9 @@ pub enum FromCore {
     /// Something the sim's test unit heard or saw, as one line of text, such as `stage
     /// loading`.
     Heard { what: String },
+    /// A CommBus call the core made for JavaScript, which the stand-in hands to the sim's
+    /// pages, so the bench's fake pages hear the core's announcement.
+    CommBus { name: String, data: String },
     /// What the stand-in was called for, and what its aircraft holds.
     StandIn {
         /// Each connection opened while the sim took connections, as its unit's place and

@@ -1,0 +1,123 @@
+//! The test unit that stands in for what uses the clients crate before it's built: the
+//! session crate's announcement and goodbye, the profile loader's load and unload, and a
+//! feature with a slice, a setting, a command, and a panel module that echoes its panel's
+//! messages (record/areas/build/02-testing.md, "Its place").
+
+use std::time::Duration;
+
+use clients::{Clients, ClientsUnit, Sender, SettingDef, To};
+use kernel::{Cx, Input, Registry, TimerId, View};
+use messages::bench::{ClientsAct, ToCore};
+use messages::clients::SettingKind;
+use serde_json::{Value, json};
+
+/// Names the source the bench's lines for this unit come in under.
+pub struct Acts;
+
+/// The unit's panel module, whose rule takes the instruments the bench's profile picks.
+pub const PANEL_MODULE: &str = "bench-panel";
+
+#[derive(Default)]
+pub struct BenchClients {
+    /// The prefixes of the instruments the loaded profile's panel module takes, while one is
+    /// loaded.
+    picks: Option<Vec<String>>,
+    counter: u64,
+    churn: Option<Churn>,
+}
+
+struct Churn {
+    every: Duration,
+    until: u64,
+}
+
+impl BenchClients {
+    pub fn register(r: &mut Registry) {
+        let mut me = r.unit::<BenchClients>("bench-clients");
+        me.source::<Acts>(BenchClients::act);
+        me.client_state(
+            "bench",
+            |me: &BenchClients, _: &View| json!({ "counter": me.counter }),
+        )
+        .setting(
+            "bench.flag",
+            SettingDef {
+                label: "A flag the bench sets",
+                kind: SettingKind::Bool,
+                default: json!(false),
+                part_only: false,
+                development: false,
+            },
+        )
+        .command("bench.read-setting", BenchClients::read_setting)
+        .panel_module(PANEL_MODULE, BenchClients::rule)
+        .client_messages(PANEL_MODULE, BenchClients::echo);
+    }
+
+    fn act(me: &mut BenchClients, input: &Input, cx: &mut Cx) {
+        let Ok(ToCore::Clients { act }) = serde_json::from_slice(&input.bytes) else {
+            tracing::warn!("a line for the clients' test unit isn't one of its acts");
+            return;
+        };
+        match act {
+            ClientsAct::Session { on } => sim_service::announce(cx, on),
+            ClientsAct::Profile { loaded, picks } => {
+                me.picks = loaded.then_some(picks);
+                if loaded {
+                    clients::profile_loaded(cx);
+                } else {
+                    clients::profile_unloaded(cx);
+                }
+            }
+            ClientsAct::Churn { per_second, for_ms } => {
+                let every = Duration::from_secs(1) / per_second.max(1);
+                me.churn = Some(Churn {
+                    every,
+                    until: cx.now() + for_ms * 1_000,
+                });
+                cx.timer(every, BenchClients::churn);
+            }
+            ClientsAct::Bye => clients::bye(cx),
+        }
+    }
+
+    fn churn(me: &mut BenchClients, _: TimerId, cx: &mut Cx) {
+        let Some(churn) = &me.churn else { return };
+        me.counter += 1;
+        if cx.now() < churn.until {
+            cx.timer(churn.every, BenchClients::churn);
+        } else {
+            me.churn = None;
+        }
+    }
+
+    /// The case from the loop's design: a command's handler reads the clients crate's
+    /// settings while the clients crate dispatches it.
+    fn read_setting(_: &mut BenchClients, _: Value, cx: &mut Cx) -> Result<(), String> {
+        match cx.read::<Clients>().setting_as::<bool>("bench.flag") {
+            Some(true) => Ok(()),
+            _ => Err("bench.flag isn't set".into()),
+        }
+    }
+
+    fn rule(view: &View, instruments: &[String]) -> Vec<String> {
+        let Some(picks) = &view.read::<BenchClients>().picks else {
+            return Vec::new();
+        };
+        instruments
+            .iter()
+            .filter(|i| picks.iter().any(|p| i.starts_with(p.as_str())))
+            .cloned()
+            .collect()
+    }
+
+    /// Sends a panel module's message back to every panel that loaded the module.
+    fn echo(_: &mut BenchClients, _: Sender, body: Value, cx: &mut Cx) {
+        clients::send(
+            cx,
+            To::PanelModule(PANEL_MODULE.into()),
+            PANEL_MODULE,
+            &body,
+        );
+    }
+}

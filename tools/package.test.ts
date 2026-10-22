@@ -19,7 +19,7 @@ function laidOut(t: TestContext, size: number, version: string): string {
   const wasm = path.join(temp, "module.wasm")
   fs.writeFileSync(wasm, Buffer.alloc(size, 7))
   const dir = path.join(temp, PACKAGE_NAME)
-  layOutPackage(wasm, dir, version)
+  layOutPackage(wasm, [], dir, version)
   return dir
 }
 
@@ -59,10 +59,24 @@ test("manifest.json names Dual Input at the version, with the order hint PANEL_P
   assert.equal(manifest.total_package_size, "1234")
 })
 
+test("our code in the sim goes where each file says, and layout.json lists it", (t) => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "dualinput-package-"))
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }))
+  const wasm = path.join(temp, "module.wasm")
+  fs.writeFileSync(wasm, Buffer.alloc(10))
+  const bridge = path.join(temp, "bridge.js")
+  fs.writeFileSync(bridge, "var a = 1;\n")
+  const dir = path.join(temp, PACKAGE_NAME)
+  layOutPackage(wasm, [{ file: bridge, to: "html_ui/DualInput/bridge.js" }], dir, "1.2.3")
+  assert.equal(fs.readFileSync(path.join(dir, "html_ui", "DualInput", "bridge.js"), "utf8"), "var a = 1;\n")
+  const layout = JSON.parse(fs.readFileSync(path.join(dir, "layout.json"), "utf8")) as { content: { path: string }[] }
+  assert.deepEqual(layout.content.map((c) => c.path), ["html_ui/DualInput/bridge.js", "modules/dualinput.wasm"])
+})
+
 test("a second layout replaces the first's files", (t) => {
   const dir = laidOut(t, 1234, "1.2.3")
   fs.writeFileSync(path.join(dir, "left-over.txt"), "from an earlier build")
-  layOutPackage(path.join(path.dirname(dir), "module.wasm"), dir, "1.2.4")
+  layOutPackage(path.join(path.dirname(dir), "module.wasm"), [], dir, "1.2.4")
   assert.equal(fs.existsSync(path.join(dir, "left-over.txt")), false)
   assert.doesNotMatch(fs.readFileSync(path.join(dir, "layout.json"), "utf8"), /left-over/)
 })

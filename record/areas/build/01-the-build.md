@@ -28,6 +28,13 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > - The SDK's `SimConnect.dll` imports `VCRUNTIME140.dll`, `VCRUNTIME140_1.dll`, and `MSVCP140.dll`, by `dumpbin /dependents`, and the SDK's static `SimConnect.lib` names the same runtime, `/DEFAULTLIB:MSVCRT`, so linking it would bring them into the core.
 >   So [what a release holds](#what-a-release-holds) adds the three DLLs, copied from the MSVC tools' redistributable folder beside `SimConnect.dll`, as Microsoft's "local deployment" (documented, [Redistributing Visual C++ files](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files)), so the core starts on a PC whose runtime lives only inside the Microsoft Store edition's own package, which is unverified, and no pilot needs the redistributable's installer (user, 2026-10-21).
 >   The sim's own exe imports the same three, so a PC that runs the Steam edition has them installed.
+>
+> Since 2026-10-22, building stage 5 adds our code in the sim to [our package](#our-package), and runs [the Coherent GT check](#the-coherent-gt-check):
+>
+> - `tools/build.ts` bundles `bridge.js` with esbuild into `html_ui/DualInput/`, makes our `VCockpit.js` into `html_ui/Pages/VCockpit/Core/`, and runs `node --check` and the check on both; `tools/check.ts` runs the check, and the stock files against `stock.json`.
+> - The check lives in `tools/coherent-check/` until its repository is made, and a hook runs it after each edit to our code in the sim, in about 0.3s ([core results](../core/results/2026-10-22-stage-5-budgets.txt)).
+> - In one flight with both packages installed, our `VCockpit.js` won over FS Copilot's, and why is unverified ([installing log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
+>   [Our package](#our-package) infers the opposite, and has this outcome break FS Copilot with no word from it, so [cases for the bench](#cases-for-the-bench)' case with FS Copilot's package installed, which expects its file to win, failed in its one run.
 
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.

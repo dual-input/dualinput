@@ -1,0 +1,195 @@
+Stage 5's session in the sim, 2026-10-22, for record/areas/core/log.md's entry of the same day.
+Sim: MSFS 2024 1.9.18.0 on Steam's public branch, on our development machine, in a flight with the
+Black Square Baron (bksq-aircraft-baronpro), 20 cockpit panels. Each boot ran
+`node tools/sim/clients.ts --core target/release/dualinput-core.exe --bench target/bench/debug/dualinput-core.exe`,
+with `--bridge missing` in boot 3 and `--bridge throws` in boot 4, and a person loading the flight and pressing
+Ready to fly. The script reads each cockpit panel through the sim's inspector on 127.0.0.1:19999, and plays a
+session's announcement into each with Coherent.trigger("DUALINPUT_CORE_ANNOUNCE", ...).
+
+Boot 1: fscopilot-bridge (FS Copilot 1.2.0, package_order_hint PANEL_PATCH) and dualinput both in Community,
+before the fix that names a panel in its hello. Boot 2: fscopilot-bridge moved out of Community, with the fix.
+Boots 3 and 4: as boot 2, with our package's bridge.js missing, then throwing as it loads.
+
+Read through the inspector after boot 1's report, with the sim still running:
+- /Pages/VCockpit/Core/VCockpit.js as VCockpit81 fetched it: 24,735 bytes, holding our "Dual Input: begin" marker
+  and nothing of FS Copilot's; fscopilot-bridge's own copy on disk is 26,060 bytes.
+- The core's log: "a cockpit panel's new socket replaced its old one old=14 new=15".
+- VCockpit67 - GNS_DISABLED: globalPanelData.sName "VCockpit67", status connection "closed", instruments ["GNS_DISABLED"]
+- VCockpit66 - GNS_DISABLED: globalPanelData.sName "VCockpit66", status connection "connected", instruments ["GNS_DISABLED"]
+- The package folders' creation times, read after boot 4 (Get-Item, local time): fscopilot-bridge 2026-10-20 12:45:58;
+  dualinput 2026-10-22 17:27:51, boot 4's install, since each install makes the folder afresh by renaming its copy in;
+  boot 1's install, made the same way, came before that boot on the same day.
+- VCockpit65 and VCockpit64 - WasmInstrument: keys differ by their url's query
+  ("WasmInstrument|wasm_module=Gauge/TDSGTNXiGaugeModule.wasm&wasm_gauge=GTNXI650U2" and "...GTNXI750U1").
+======== Boot 1, report.txt of target/sim/runs/2026-10-22_14-59-43-clients
+the core and a bench core started, in target\sim\runs\2026-10-22_14-59-43-clients; start the sim, load a flight in a cockpit, and press Ready to fly
+keys: q stops both cores, replays their recordings, and ends
+the core's WebSocket server listens on 51685
+the sim is Flying; waiting 15s for the cockpit's panels to settle
+20 cockpit panels:
+  VCockpit81 - WeatherSquare4000_int: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit80 - BlackSquareTablet: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit79 - WTT2: 1/1 instruments created; bridge loaded, heard 7 announcements, the last for port 51685 with session false
+  VCockpit78 - WTT1: 1/1 instruments created; bridge loaded, heard 8 announcements, the last for port 51685 with session false
+  VCockpit77 - EDM760_1: 1/1 instruments created; bridge loaded, heard 18 announcements, the last for port 51685 with session false
+  VCockpit76 - KAS297B_1: 1/1 instruments created; bridge loaded, heard 18 announcements, the last for port 51685 with session false
+  VCockpit75 - bksq_wradar1: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit74 - KNS81_1: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit73 - KDI572R: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit72 - AS330: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit71 - KR87A: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit70 - KX155B_2: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit69 - KX155B_1: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit68 - KLN90B: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 51685 with session false
+  VCockpit67 - GNS_DISABLED: 1/1 instruments created; bridge loaded, heard 8 announcements, the last for port 51685 with session false
+  VCockpit66 - GNS_DISABLED: 1/1 instruments created; bridge loaded, heard 8 announcements, the last for port 51685 with session false
+  VCockpit65 - WasmInstrument: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 51685 with session false
+  VCockpit64 - WasmInstrument: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 51685 with session false
+  VCockpit63 - GTN650_INT_2: 1/1 instruments created; bridge loaded, heard 11 announcements, the last for port 51685 with session false
+  VCockpit62 - GTN750_INT: 1/1 instruments created; bridge loaded, heard 11 announcements, the last for port 51685 with session false
+every panel created every instrument
+every panel's bridge heard the core's announcement
+played a session's announcement into each panel; waiting 5s
+19 of 20 panels joined the core
+  the core: socket=0 component="panel-bridge" instruments=1
+  the core: socket=1 component="panel-bridge" instruments=1
+  the core: socket=2 component="panel-bridge" instruments=1
+  the core: socket=3 component="panel-bridge" instruments=1
+  the core: socket=4 component="panel-bridge" instruments=1
+  the core: socket=5 component="panel-bridge" instruments=1
+  the core: socket=6 component="panel-bridge" instruments=1
+  the core: socket=7 component="panel-bridge" instruments=1
+  the core: socket=8 component="panel-bridge" instruments=1
+  the core: socket=9 component="panel-bridge" instruments=1
+  the core: socket=10 component="panel-bridge" instruments=1
+  the core: socket=11 component="panel-bridge" instruments=1
+  the core: socket=12 component="panel-bridge" instruments=1
+  the core: socket=13 component="panel-bridge" instruments=1
+  the core: socket=14 component="panel-bridge" instruments=1
+  the core: socket=15 component="panel-bridge" instruments=1
+  the core: socket=16 component="panel-bridge" instruments=1
+  the core: socket=17 component="panel-bridge" instruments=1
+  the core: socket=18 component="panel-bridge" instruments=1
+  the core: socket=19 component="panel-bridge" instruments=1
+no page joined the bench core
+FAILED: not every panel joined the core
+the core's replay: replayed 12402 inputs, and all 544 checkpoints matched
+the bench's replay: replayed 8697 inputs, and all 544 checkpoints matched
+
+======== Boot 2, report.txt of target/sim/runs/2026-10-22_15-13-18-clients
+the core and a bench core started, in target\sim\runs\2026-10-22_15-13-18-clients; start the sim, load a flight in a cockpit, and press Ready to fly
+keys: q stops both cores, replays their recordings, and ends
+the core's WebSocket server listens on 62553
+the sim is Flying; waiting 15s for the cockpit's panels to settle
+20 cockpit panels:
+  VCockpit60 - WeatherSquare4000_int: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit59 - BlackSquareTablet: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit58 - WTT2: 1/1 instruments created; bridge loaded, heard 12 announcements, the last for port 62553 with session false
+  VCockpit57 - WTT1: 1/1 instruments created; bridge loaded, heard 12 announcements, the last for port 62553 with session false
+  VCockpit56 - EDM760_1: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit55 - KAS297B_1: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit54 - bksq_wradar1: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 62553 with session false
+  VCockpit53 - KNS81_1: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 62553 with session false
+  VCockpit52 - KDI572R: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 62553 with session false
+  VCockpit51 - AS330: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit50 - KR87A: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit49 - KX155B_2: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit48 - KX155B_1: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit47 - KLN90B: 1/1 instruments created; bridge loaded, heard 17 announcements, the last for port 62553 with session false
+  VCockpit46 - GNS_DISABLED: 1/1 instruments created; bridge loaded, heard 13 announcements, the last for port 62553 with session false
+  VCockpit45 - GNS_DISABLED: 1/1 instruments created; bridge loaded, heard 13 announcements, the last for port 62553 with session false
+  VCockpit44 - WasmInstrument: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 62553 with session false
+  VCockpit43 - WasmInstrument: 1/1 instruments created; bridge loaded, heard 16 announcements, the last for port 62553 with session false
+  VCockpit42 - GTN650_INT_2: 1/1 instruments created; bridge loaded, heard 11 announcements, the last for port 62553 with session false
+  VCockpit41 - GTN750_INT: 1/1 instruments created; bridge loaded, heard 11 announcements, the last for port 62553 with session false
+every panel created every instrument
+every panel's bridge heard the core's announcement
+played a session's announcement into each panel; waiting 5s
+20 of 20 panels joined the core
+  the core: socket=0 component="panel-bridge" panel="VCockpit60" instruments=1
+  the core: socket=1 component="panel-bridge" panel="VCockpit59" instruments=1
+  the core: socket=2 component="panel-bridge" panel="VCockpit58" instruments=1
+  the core: socket=3 component="panel-bridge" panel="VCockpit57" instruments=1
+  the core: socket=4 component="panel-bridge" panel="VCockpit56" instruments=1
+  the core: socket=5 component="panel-bridge" panel="VCockpit55" instruments=1
+  the core: socket=6 component="panel-bridge" panel="VCockpit54" instruments=1
+  the core: socket=7 component="panel-bridge" panel="VCockpit53" instruments=1
+  the core: socket=8 component="panel-bridge" panel="VCockpit52" instruments=1
+  the core: socket=9 component="panel-bridge" panel="VCockpit51" instruments=1
+  the core: socket=10 component="panel-bridge" panel="VCockpit50" instruments=1
+  the core: socket=11 component="panel-bridge" panel="VCockpit49" instruments=1
+  the core: socket=12 component="panel-bridge" panel="VCockpit48" instruments=1
+  the core: socket=13 component="panel-bridge" panel="VCockpit47" instruments=1
+  the core: socket=14 component="panel-bridge" panel="VCockpit46" instruments=1
+  the core: socket=15 component="panel-bridge" panel="VCockpit45" instruments=1
+  the core: socket=16 component="panel-bridge" panel="VCockpit44" instruments=1
+  the core: socket=17 component="panel-bridge" panel="VCockpit43" instruments=1
+  the core: socket=18 component="panel-bridge" panel="VCockpit42" instruments=1
+  the core: socket=19 component="panel-bridge" panel="VCockpit41" instruments=1
+no page joined the bench core
+every cockpit panel joined the real sim's core, with its instruments' keys
+the core's replay: replayed 2398 inputs, and all 240 checkpoints matched
+the bench's replay: replayed 3839 inputs, and all 240 checkpoints matched
+
+======== Boot 3, report.txt of target/sim/runs/2026-10-22_15-21-05-clients-missing
+the core and a bench core started, in target\sim\runs\2026-10-22_15-21-05-clients-missing; start the sim, load a flight in a cockpit, and press Ready to fly
+keys: q stops both cores, replays their recordings, and ends
+the core's WebSocket server listens on 62382
+the sim is Flying; waiting 15s for the cockpit's panels to settle
+20 cockpit panels:
+  VCockpit60 - WeatherSquare4000_int: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit59 - BlackSquareTablet: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit58 - WTT2: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit57 - WTT1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit56 - EDM760_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit55 - KAS297B_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit54 - bksq_wradar1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit53 - KNS81_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit52 - KDI572R: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit51 - AS330: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit50 - KR87A: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit49 - KX155B_2: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit48 - KX155B_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit47 - KLN90B: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit46 - GNS_DISABLED: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit45 - GNS_DISABLED: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit44 - WasmInstrument: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit43 - WasmInstrument: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit42 - GTN650_INT_2: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit41 - GTN750_INT: 1/1 instruments created; bridge absent, 1 instruments queued for it
+every panel created every instrument
+with bridge.js missing, no panel has a bridge, and the cockpit loaded as without Dual Input
+the core's replay: replayed 1867 inputs, and all 269 checkpoints matched
+the bench's replay: replayed 4300 inputs, and all 269 checkpoints matched
+
+======== Boot 4, report.txt of target/sim/runs/2026-10-22_15-27-51-clients-throws
+the core and a bench core started, in target\sim\runs\2026-10-22_15-27-51-clients-throws; start the sim, load a flight in a cockpit, and press Ready to fly
+keys: q stops both cores, replays their recordings, and ends
+the core's WebSocket server listens on 49457
+the sim is Flying; waiting 15s for the cockpit's panels to settle
+20 cockpit panels:
+  VCockpit60 - WeatherSquare4000_int: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit59 - BlackSquareTablet: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit58 - WTT2: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit57 - WTT1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit56 - EDM760_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit55 - KAS297B_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit54 - bksq_wradar1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit53 - KNS81_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit52 - KDI572R: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit51 - AS330: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit50 - KR87A: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit49 - KX155B_2: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit48 - KX155B_1: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit47 - KLN90B: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit46 - GNS_DISABLED: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit45 - GNS_DISABLED: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit44 - WasmInstrument: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit43 - WasmInstrument: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit42 - GTN650_INT_2: 1/1 instruments created; bridge absent, 1 instruments queued for it
+  VCockpit41 - GTN750_INT: 1/1 instruments created; bridge absent, 1 instruments queued for it
+every panel created every instrument
+with bridge.js throws, no panel has a bridge, and the cockpit loaded as without Dual Input
+the core's replay: replayed 2279 inputs, and all 330 checkpoints matched
+the bench's replay: replayed 5276 inputs, and all 330 checkpoints matched
+

@@ -12,6 +12,8 @@
 # - When you add a TypeScript folder that a glob matches, list it in an `exclude` list
 #   beside `members`.
 members = ["engines/*", "platform/*", "apps/*", "sim-package/*", "tools/msfs-sdk"]
+# TypeScript, and the sim's stock files.
+exclude = ["engines/page-client", "platform/panel-bridge", "sim-package/pages", "sim-package/stock"]
 # A plain `cargo build` builds these. sim-package/'s glob stays out of this list, since our
 # WASM module's build script needs settings only cargo-msfs gives it, so the module's list of
 # routines, which builds anywhere, is named on its own.

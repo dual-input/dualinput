@@ -107,14 +107,8 @@ pub struct SimRun {
     pub created: u64,
 }
 
-/// How a run of the sim ended.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Ending {
-    /// The quit message came.
-    Close,
-    /// The process exited with no quit message before it, with this exit code.
-    Crash { code: u32 },
-}
+/// How a run of the sim ended, which the apps show, so its type is the message crate's.
+pub use messages::sim::Ending;
 
 /// What the sim is doing, as its signals so far say.
 #[derive(Clone, Debug, Default, PartialEq)]

@@ -85,6 +85,7 @@ impl SimService {
         self.opened(connection, cx);
         if unit == self.me() {
             self.platform_opened(cx);
+            self.start_announcing(cx);
         }
     }
 

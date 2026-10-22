@@ -6,3 +6,6 @@
 *.cmd text eol=crlf
 *.bat text eol=crlf
 *.[fF][lL][tT] -text
+# The sim's stock files keep its bytes, CRLF included, so the SHA-256 in their stock.json
+# holds on every checkout.
+sim-package/stock/** -text

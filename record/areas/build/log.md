@@ -1,5 +1,26 @@
 # The build: log
 
+## 2026-10-22: The Coherent GT check reads a 2.7 MB bundle in 0.66s and its hook answers in 0.3s, and it fails an `X || fallback` fill-in, which none of its rules passes
+
+**Asked.**
+Whether stage 5 of [the build plan](plan.md#5-clients-and-the-panel-bridge)'s Coherent GT check, built to [the Coherent GT check](01-the-build.md#the-coherent-gt-check)'s design, meets its two budgets: the check on a 2.5 MB bundle, Node's start included, under 1s, and the hook's findings after a save under 1s ([budgets](01-the-build.md#budgets)).
+
+**Expected.**
+Both, since the prototype read the framework's 2.5 MB bundle in 458ms ([log entry of 2026-10-18](#2026-10-18-acorn-at-es2017-fails-every-p09-sample-the-engine-fails-and-the-frameworks-whole-bundle-gives-two-false-hits-by-name)).
+
+**Found** (measured on our development machine, 2026-10-22, Node 22.23.1, [core results](../core/results/2026-10-22-stage-5-budgets.txt)):
+
+- Of the 44 p09 samples the engine ran, the check fails each of the 20 the engine failed, passes each of the 22 from ES2015 to ES2017, and fails object rest and the template literal revision, which the engine parsed (`tools/coherent-check/check.test.ts`).
+- On a 2,714,019-byte bundle of 11 copies of acorn 8.19.0's `dist/acorn.js`, since the framework's bundle isn't installed here, it took a median 656ms over five runs, Node's start included, and 1,612ms on the first, cold run.
+- It failed acorn's `var hasOwn = Object.hasOwn || (function (obj, propName) {...})`, 11 times, since an `X || fallback` fill-in is none of its four rules, and `return BigInt(...)` in a function acorn calls only after `typeof BigInt` at its caller, which it can't see.
+- Building `bridge.js` and our `VCockpit.js` and checking both took 153ms, and the hook took 293ms after an edit to our code in the sim and 86ms after an edit to `tools/check.ts`, which loads nothing more.
+
+**What changed.**
+Nothing: our bundles use neither pattern, and a package's code that does goes in the data file with its reason, as rule 4 has it.
+
+**Docs affected.**
+None.
+
 ## 2026-10-21: bindgen brings the freeze events' numbers into our WASM module, and the module, its package, and the core's SimConnect.dll build from the tree
 
 **Asked.**

@@ -279,8 +279,10 @@ impl<S: 'static> Unit<'_, S> {
 
     /// A handler another unit can have the kernel call, as the clients crate calls the
     /// handler a feature registered for a command. The call runs once the calling handler
-    /// has returned (`Cx::call_handler`).
-    pub fn handler<A: 'static>(&self, f: fn(&mut S, A, &mut Cx)) -> Handler<A> {
+    /// has returned (`Cx::call_handler`). `f` may be a closure, so a crate of the
+    /// platform's can wrap a feature's handler, as the clients crate reads a command's
+    /// arguments before it calls the feature's.
+    pub fn handler<A: 'static>(&self, f: impl Fn(&mut S, A, &mut Cx) + 'static) -> Handler<A> {
         Handler {
             unit: self.id,
             f: Rc::new(move |state, arg, cx| f(downcast_mut(state), arg, cx)),

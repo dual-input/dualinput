@@ -12,7 +12,9 @@ publish = false
 # pointer, so its bytes are all its fields.
 bytemuck = { version = "1.25.2", features = ["derive"] }
 serde = { version = "1.0.229", features = ["derive"] }
-ts-rs = "12.0.1"
+# A command's arguments and a unit's message body are JSON the unit reads into its own types.
+serde_json = "1.0.145"
+ts-rs = { version = "12.0.1", features = ["serde-json-impl"] }
 
 # build.rs hashes the crate with these two crates, and tests/hash.rs compiles build.rs into
 # the tests, so the tests need them too. When you change a version in one list, change it

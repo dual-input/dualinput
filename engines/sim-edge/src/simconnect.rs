@@ -8,10 +8,11 @@ use simconnect_types::{
     BOOL, DWORD, SIMCONNECT_CLIENT_DATA_DEFINITION_ID, SIMCONNECT_CLIENT_DATA_ID,
     SIMCONNECT_CLIENT_DATA_PERIOD, SIMCONNECT_CLIENT_DATA_REQUEST_FLAG,
     SIMCONNECT_CLIENT_DATA_SET_FLAG, SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT,
-    SIMCONNECT_CLIENT_EVENT_ID, SIMCONNECT_DATA_DEFINITION_ID, SIMCONNECT_DATA_REQUEST_FLAG,
-    SIMCONNECT_DATA_REQUEST_ID, SIMCONNECT_DATA_SET_FLAG, SIMCONNECT_DATA_SET_FLAG_DEFAULT,
-    SIMCONNECT_DATATYPE, SIMCONNECT_EVENT_FLAG, SIMCONNECT_NOTIFICATION_GROUP_ID,
-    SIMCONNECT_OBJECT_ID, SIMCONNECT_PERIOD, SIMCONNECT_RECV, SIMCONNECT_UNUSED,
+    SIMCONNECT_CLIENT_EVENT_ID, SIMCONNECT_COMM_BUS_BROADCAST_TO, SIMCONNECT_DATA_DEFINITION_ID,
+    SIMCONNECT_DATA_REQUEST_FLAG, SIMCONNECT_DATA_REQUEST_ID, SIMCONNECT_DATA_SET_FLAG,
+    SIMCONNECT_DATA_SET_FLAG_DEFAULT, SIMCONNECT_DATATYPE, SIMCONNECT_EVENT_FLAG,
+    SIMCONNECT_NOTIFICATION_GROUP_ID, SIMCONNECT_OBJECT_ID, SIMCONNECT_PERIOD, SIMCONNECT_RECV,
+    SIMCONNECT_UNUSED,
 };
 use windows_sys::Win32::Foundation::{HANDLE, HWND};
 use windows_sys::core::HRESULT;
@@ -139,6 +140,13 @@ unsafe extern "system" {
         reserved: DWORD,
         size: DWORD,
         data: *mut c_void,
+    ) -> HRESULT;
+    fn SimConnect_CallCommBusEvent(
+        handle: HANDLE,
+        name: *const c_char,
+        broadcast: SIMCONNECT_COMM_BUS_BROADCAST_TO,
+        size: DWORD,
+        data: *const c_char,
     ) -> HRESULT;
 }
 
@@ -268,6 +276,19 @@ pub(crate) unsafe fn make(handle: HANDLE, op: Op) -> HRESULT {
                 data.len() as DWORD,
                 data.as_mut_ptr().cast(),
             ),
+            Op::CallCommBusEvent {
+                name,
+                broadcast,
+                data,
+            } => {
+                let name = c_string(&name);
+                let data = c_string(&data);
+                // The size counts the closing NUL, as p08's client passed it when a cockpit
+                // panel heard its call (read in experiments/areas/architecture/flight/client/
+                // src/main.rs, "bus").
+                let size = data.as_bytes_with_nul().len() as DWORD;
+                SimConnect_CallCommBusEvent(handle, name.as_ptr(), broadcast, size, data.as_ptr())
+            }
         }
     }
 }

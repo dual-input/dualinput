@@ -123,9 +123,13 @@ pub struct StandIn {
 
 impl StandIn {
     /// Starts the stand-in's thread, running `module` in its frames, which hands each input
-    /// up through `up`, as the edge hands its own to the core's queue.
+    /// up through `up`, as the edge hands its own to the core's queue, and each CommBus call
+    /// the core makes for JavaScript to `pages`, by its event's name and its text, as the sim
+    /// hands it to every page listening, so the bench's fake pages hear the core's
+    /// announcement (record/areas/build/02-testing.md, "The sim's pages").
     pub fn start(
         up: impl FnMut(Up) + Send + 'static,
+        pages: impl FnMut(String, String) + Send + 'static,
         module: Box<dyn Module>,
     ) -> std::io::Result<(StandIn, JoinHandle<()>)> {
         // SAFETY: an auto-reset event with no name and no security attributes.
@@ -136,7 +140,7 @@ impl StandIn {
             return Err(std::io::Error::last_os_error());
         }
         let (to, from) = mpsc::channel();
-        let sim = Sim::new(Box::new(up), module);
+        let sim = Sim::new(Box::new(up), Box::new(pages), module);
         let thread_wake = wake.clone();
         let thread = std::thread::Builder::new()
             .name("stand-in".into())

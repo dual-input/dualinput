@@ -73,6 +73,9 @@ struct Ready {
     /// The sim service's source, when the core has one, which the sim's side of the seam
     /// pushes under.
     seam: Option<SourceId>,
+    /// The clients crate's source, when the core has one, which the WebSocket server pushes
+    /// under.
+    sockets: Option<SourceId>,
     #[cfg(feature = "stand-in")]
     bench: Option<crate::bench::Sources>,
 }
@@ -121,6 +124,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
             let _ = ready.send(Ready {
                 start_files: kernel.start_files(),
                 seam: kernel.source::<sim_client::Seam>(),
+                sockets: kernel.source::<clients::Sockets>(),
                 #[cfg(feature = "stand-in")]
                 bench: crate::bench::Sources::of(&kernel),
             });
@@ -129,6 +133,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let Ok(Ready {
         start_files,
         seam,
+        sockets,
         #[cfg(feature = "stand-in")]
         bench,
     }) = units_ready.recv()
@@ -169,6 +174,8 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let (timers, timer_thread) = Timers::start(queue.clone(), context.clone())?;
     let tokio_context = context.clone();
     let runtime = tokio::runtime::Builder::new_multi_thread()
+        // The clients' WebSocket server's sockets.
+        .enable_io()
         .worker_threads(2)
         .max_blocking_threads(4)
         .thread_name("tokio")
@@ -186,6 +193,17 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let cancel = timers.clone();
     sinks.on(move |c: CancelTimer| cancel.cancel(c.id));
     sinks.on(move |s: StartJob| jobs.start(s));
+    let server = sockets
+        .map(|source| {
+            crate::edges::sockets::start(
+                runtime.handle(),
+                queue.clone(),
+                source,
+                &options.data,
+                &mut sinks,
+            )
+        })
+        .transpose()?;
     // The sim's side of the seam: the sim edge on SimConnect.dll, or in a bench build the
     // stand-in sim, which the bench's edge starts.
     #[cfg(not(feature = "stand-in"))]
@@ -215,6 +233,9 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         Err(panic) => std::panic::resume_unwind(panic),
     };
     runtime.shutdown_timeout(GRACE.saturating_sub(exited.elapsed()));
+    if let Some(server) = server {
+        server.stop();
+    }
     timers.stop();
     let _ = timer_thread.join();
     #[cfg(not(feature = "stand-in"))]

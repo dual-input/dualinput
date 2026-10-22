@@ -3,6 +3,46 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-22: Stage 5's bridge loads in all 20 of the Baron's panels, joins the core on a session's announcement, and leaves the cockpit whole when bridge.js is missing or throws, but two panels shared an instrument key
+
+**Asked:** do [stage 5](../build/plan.md#5-clients-and-the-panel-bridge)'s cases in the sim hold for its release core, with our package's `VCockpit.js` and `bridge.js` installed: the bridge in every cockpit panel, every instrument loading as without us, each bridge hearing the core's announcement and joining it on a session's, none joining a bench core beside it, and the cockpit whole with `bridge.js` missing or throwing ([02's cases](02-clients-and-panel-bridge.md#cases-for-the-bench), [the bench's own](../build/02-testing.md#cases-for-the-bench))?
+And do the clients' budgets hold on the bench ([02's budgets](02-clients-and-panel-bridge.md#budgets))?
+
+**Expected:** each case as 02 designs it, since the bench's 29 scenarios passed, and a bench core's announcement can't reach the sim's CommBus.
+
+**Found:** on MSFS 2024 1.9.18.0, Steam's edition, in four boots with the Black Square Baron's 20 cockpit panels, `node tools/sim/clients.ts` reading each panel through the sim's inspector:
+
+- **Every panel** loaded our bridge and created each of its instruments, 20 of 20, and every bridge heard the core's announcement on its port with no session.
+  So with our `VCockpit.js` the sim created each instrument as the stock file does.
+- **A session's announcement,** played into each panel with `Coherent.trigger`, the way the sim's CommBus listener takes a call (read in fs-base-ui, `html_ui/JS/common.js`, `ViewListener.on`), had all 20 join the core in boot 2, each with its panel's instruments' keys, and none joined the bench core beside it.
+- **Two panels shared an instrument key:** the Baron's `VCockpit66` and `VCockpit67` each hold one instrument keyed `GNS_DISABLED`, so in boot 1 the core took 66's `hello` for 67 reloading and closed 67's socket, as [modules in the panel bridge](../architecture/02-code-map.md#modules-in-the-panel-bridge) has a `hello` naming instruments another socket holds replace it.
+  The Baron's two `WasmInstrument` panels kept keys of their own, by their url's query.
+- **Panel names:** `globalPanelData.sName` named each panel uniquely within a load, `VCockpit62` to `VCockpit81` in boot 1 and `VCockpit41` to `VCockpit60` in boots 2 to 4, which suggests the sim numbers panels as it loads them rather than reading the names from the aircraft's files (unverified).
+  Whether a reloaded panel's page keeps its name is unverified, and the replacement rule this entry's change gives rests on it; reading `sName` before and after reloading one panel through the sim's inspector settles it.
+- **With `bridge.js` missing,** and with one that throws as it loads, every panel created each of its instruments, and none had a bridge; each queued its one instrument in `DUALINPUT_BRIDGE_PENDING` for a bridge that never came.
+  Whether a script element's `onerror` fired went unread, so [left open](02-clients-and-panel-bridge.md#left-open)'s item on it stays.
+- **Each run's replay** matched all its checkpoints, the core's and the bench core's in all four boots.
+
+On the bench, with the debug build ([results](results/2026-10-22-stage-5-budgets.txt)):
+
+- 20 fake cockpit panels were answered 31ms after the profile loaded, against 1s.
+- A slice changing 100 times a second reached each of 20 panels at most 20.7 times a second, against 30.
+- The slowest input of a run with 20 panels in rounds took 296µs, and none took over 1ms, so each round took under 1ms.
+- A page connected to a restarted core 2ms to 3ms after the bench heard its announcement, against 2s.
+- No message to a fake page was over 64 KiB.
+
+And among the bench's cases, with the core suspended for 12s, its first 2s tick fired late and started each client's 8s of quiet again, so the core closed no page's socket, and each fake panel's modules carried on without loading again.
+
+**Changed:**
+
+- A cockpit panel's `hello` names its panel, `globalPanelData.sName`, and the core replaces a socket only when a `hello` names a panel that socket holds, so two panels can hold instruments of one key; the user agreed on 2026-10-22.
+- The clients crate's 2s tick, when it fires more than 2s late, starts each client's 8s of quiet again, since the core itself had stopped and heard nothing, which the case of a core suspended for 12s needs.
+- Our `VCockpit.js` won over FS Copilot's in boot 1, which goes in the [installing log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint).
+
+**Affects:** [02-clients-and-panel-bridge](02-clients-and-panel-bridge.md), in its note of 2026-10-22, and the code map's [modules in the panel bridge](../architecture/02-code-map.md#modules-in-the-panel-bridge), in a note at its top.
+
+**Evidence:** [results/2026-10-22-stage-5-session.txt](results/2026-10-22-stage-5-session.txt) and [results/2026-10-22-stage-5-budgets.txt](results/2026-10-22-stage-5-budgets.txt).
+
 ## 2026-10-21: Stage 4's core follows the sim through three boots and five loads, and replays all of it, but ending a flight sends no BACK_TO_MAIN_MENU, and a failed open blocks for 4.5s
 
 **Asked:** do the sim seam's cases in the sim and its budgets hold for [stage 4](../build/plan.md#4-the-sim-seam-our-wasm-module-and-our-package)'s release core, with our package installed ([03's cases for the bench](03-sim-seam-and-wasm-module.md#cases-for-the-bench), [03's budgets](03-sim-seam-and-wasm-module.md#budgets), [the sim seam's budgets](../architecture/02-code-map.md#the-sim-seams-budgets))?

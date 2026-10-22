@@ -1,0 +1,21 @@
+// Our code in the sim runs in Coherent GT, whose features match no browser, so this checks it
+// against ES2017's built-ins and the DOM, and esbuild compiles it to es2017 (decision 030).
+// The DOM types declare web APIs the engine lacks, which the Coherent GT check catches in the
+// built bundle (record/areas/architecture/coherent-gt.md). Node runs the tests by stripping
+// the types, so `erasableSyntaxOnly` flags what it can't strip, such as an enum.
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["es2017", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -34,6 +34,7 @@ fn started() -> (StandIn, mpsc::Receiver<Up>) {
         move |up| {
             let _ = to.send(up);
         },
+        |_, _| {},
         Box::new(NoModule),
     )
     .unwrap();

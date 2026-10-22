@@ -1,0 +1,18 @@
+{
+  "sim": "1.9.18.0",
+  "branch": "public",
+  "files": {
+    "VCockpit.js": {
+      "from": "asobo-vcockpits-core/html_ui/Pages/VCockpit/Core/VCockpit.js",
+      "sha256": "F8797FA188EBE73D09861F8C74E8BF7E1D8B7F9B3C692CF062C3A131ED74F45E"
+    },
+    "{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html": {
+      "from": "fs-base-ui/cookedcomps/{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html",
+      "sha256": "4712CCF9DDA2EEAB24C96F98EBD71C2D075C4AB3418CDE2896510FD8D113A101"
+    },
+    "{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.json": {
+      "from": "fs-base-ui/cookedcomps/{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.json",
+      "sha256": "419BD3C40DD94B1C0885F3895992F699F7027C1AD8AEF3370F49D4359C42B0D8"
+    }
+  }
+}

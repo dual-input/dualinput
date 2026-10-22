@@ -10,7 +10,9 @@ import net from "node:net"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import type { ClientsAct } from "../../engines/messages/ts/bench/ClientsAct.ts"
 import type { FromCore } from "../../engines/messages/ts/bench/FromCore.ts"
+import type { PortFile } from "../../engines/messages/ts/clients/PortFile.ts"
 import type { Hello } from "../../engines/messages/ts/bench/Hello.ts"
 import type { SimCall } from "../../engines/messages/ts/bench/SimCall.ts"
 import type { StandInAct } from "../../engines/messages/ts/bench/StandInAct.ts"
@@ -153,6 +155,31 @@ export class Core {
     this.send({ kind: "sim", call })
   }
 
+  /** Has the clients' test unit, which stands in for the session crate and the profile loader, act. */
+  clients(act: ClientsAct): void {
+    this.send({ kind: "clients", act })
+  }
+
+  /** Calls `f` with each CommBus call the core makes for JavaScript, as the sim's pages hear it, from now on. */
+  onCommBus(f: (name: string, data: string) => void): () => void {
+    return this.lines.listen((l) => {
+      const line = JSON.parse(l) as FromCore
+      if (line.kind === "comm-bus") f(line.name, line.data)
+    })
+  }
+
+  /** The port the core's WebSocket server listens on, from its port file. */
+  port(): number {
+    return (JSON.parse(fs.readFileSync(path.join(this.data, "port.json"), "utf8")) as PortFile).port
+  }
+
+  /** The core's log of its newest run. */
+  log(): string {
+    const recordings = path.join(this.data, "recordings")
+    const newest = fs.readdirSync(recordings).sort().at(-1)
+    return newest ? fs.readFileSync(path.join(recordings, newest, "log.txt"), "utf8") : ""
+  }
+
   /** Every line the sim's test unit has told the bench so far, oldest first. */
   heard(): string[] {
     return this.lines.read.flatMap((l) => {
@@ -220,13 +247,16 @@ class Lines {
   private closed = false
   private wake: (() => void)[] = []
   private taken = 0
+  private readonly listeners = new Set<(line: string) => void>()
 
   constructor(socket: net.Socket) {
     socket.on("data", (chunk: Buffer) => {
       this.text += chunk.toString("utf8")
       for (let end = this.text.indexOf("\n"); end >= 0; end = this.text.indexOf("\n")) {
-        this.read.push(this.text.slice(0, end))
+        const line = this.text.slice(0, end)
+        this.read.push(line)
         this.text = this.text.slice(end + 1)
+        for (const f of this.listeners) f(line)
       }
       this.notify()
     })
@@ -243,6 +273,12 @@ class Lines {
       await this.more(15_000)
     }
     return this.read[this.taken++]!
+  }
+
+  /** Calls `f` with each line as it arrives from now on, until the returned function is called. */
+  listen(f: (line: string) => void): () => void {
+    this.listeners.add(f)
+    return () => this.listeners.delete(f)
   }
 
   /** Resolves once another line arrives, the socket closes, or `ms` passes. */

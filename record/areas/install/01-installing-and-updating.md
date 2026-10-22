@@ -17,6 +17,9 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 > Since 2026-10-18, the sim service raises one trouble notice for our package, from either [our own package](#our-own-package)'s check on disk or the module's status of Missing or Differs, where each raises its own; Stopped keeps its own notice (user, 2026-10-18).
 >
 > Since 2026-10-21, the app copies our package through a folder it makes fresh for each copy, beside `Community` or beside the folder a `Community` junction leads to, as `tools/build.ts install` does, where [our package](#our-package) and the uninstall name one `DualInput\` folder, since a junction to `%APPDATA%\Community` would put that folder at `%APPDATA%\DualInput\`, the pilot's data folder (user, 2026-10-21; [log](log.md#2026-10-21-a-fixed-dualinput-staging-folder-beside-a-community-junctions-target-can-be-the-pilots-data-folder)).
+>
+> Since 2026-10-22, our `VCockpit.js` won over FS Copilot's in one flight with both packages in `Community`, where the note of 2026-10-18 has FS Copilot's most likely win, by [packages that override our files](#packages-that-override-our-files)' rule that the package later in the alphabet wins ([log](log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
+> Why ours won is unverified, so a pilot with both packages installed may find FS Copilot's panels running our bridge in place of its own.
 
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.

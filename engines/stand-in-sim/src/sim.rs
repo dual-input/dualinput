@@ -10,8 +10,8 @@ use std::time::{Duration, Instant};
 use sim_client::message::{Data, Message};
 use sim_client::{Connection, Op, SimCall, Tag, Up};
 use simconnect_types::{
-    SIMCONNECT_DATA_REQUEST_FLAG_CHANGED, SIMCONNECT_DATATYPE_STRING256,
-    SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE,
+    SIMCONNECT_COMM_BUS_BROADCAST_TO_JS, SIMCONNECT_DATA_REQUEST_FLAG_CHANGED,
+    SIMCONNECT_DATATYPE_STRING256, SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED, SIMCONNECT_PERIOD_ONCE,
 };
 use windows_sys::Win32::Foundation::{E_FAIL, FILETIME, S_OK, WAIT_OBJECT_0, WAIT_TIMEOUT};
 use windows_sys::Win32::System::Threading::{
@@ -44,6 +44,9 @@ const FREEZES: [(&str, &str); 3] = [
 
 pub(crate) struct Sim {
     up: Box<dyn FnMut(Up) + Send>,
+    /// The sim's pages, which hear each CommBus call the core makes for JavaScript, by its
+    /// event's name and its text.
+    pages: Box<dyn FnMut(String, String) + Send>,
     module: Box<dyn Module>,
     module_stopped: bool,
     /// The stand-in's own clock, which the module reads its time from.
@@ -102,10 +105,15 @@ struct Request {
 }
 
 impl Sim {
-    pub(crate) fn new(up: Box<dyn FnMut(Up) + Send>, module: Box<dyn Module>) -> Sim {
+    pub(crate) fn new(
+        up: Box<dyn FnMut(Up) + Send>,
+        pages: Box<dyn FnMut(String, String) + Send>,
+        module: Box<dyn Module>,
+    ) -> Sim {
         let started = Instant::now();
         Sim {
             up,
+            pages,
             module,
             module_stopped: false,
             started,
@@ -408,6 +416,15 @@ impl Sim {
                 {
                     let clock = self.clock();
                     self.module.written(&name, &data, clock);
+                }
+            }
+            Op::CallCommBusEvent {
+                name,
+                broadcast,
+                data,
+            } => {
+                if broadcast & SIMCONNECT_COMM_BUS_BROADCAST_TO_JS != 0 {
+                    (self.pages)(name, data);
                 }
             }
         }

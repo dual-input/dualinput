@@ -94,6 +94,14 @@ impl SimService {
             .is_some_and(|h| h.current.is_some())
     }
 
+    /// Whether `unit`'s connection is open and has had its open's result.
+    pub(crate) fn is_ready(&self, unit: UnitId) -> bool {
+        self.holders
+            .get(&unit.place())
+            .and_then(|h| h.current.as_ref())
+            .is_some_and(|c| c.open)
+    }
+
     /// Whether a run of the sim is live: its process found, and no quit message yet.
     pub(crate) fn running(&self) -> bool {
         self.process.is_some() && !self.quit

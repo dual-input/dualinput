@@ -24,6 +24,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 
 pub mod bench;
+pub mod clients;
 pub mod module;
 pub mod sim;
 

@@ -11,6 +11,8 @@ Decides:     The four levels of testing, and where and when each runs; which tes
 >
 > - Every replay checks every unit, and no setting records every input, so [replays](#replays) has no default run and no run that records everything, and the bench runs that [what keeps CI green](#what-keeps-ci-green) gives that setting, on each merge to `main` and the release's second, are the same run as a pull request's.
 > - [With friends](#with-friends): each pilot sends their run's folder by hand, where it comes back through Dual Input's own bug report.
+>
+> Since 2026-10-22, page-client's and the panel bridge's own tests run on Node's test runner, as the tools' do, which settles [left open](#left-open)'s item on the runner for the product's TypeScript ([build plan](plan.md#5-clients-and-the-panel-bridge)).
 
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.

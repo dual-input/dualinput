@@ -29,6 +29,8 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > - [One loop](#one-loop) leaves out no input, and a replay checks every unit, where it has a unit with an unrecorded input run unchecked and register no guard, catch-up step, or cockpit kind; so no unit draws fewer handles in a replay than live, which each unit's own counters in [the registry and moments](#the-registry-and-moments) guard against.
 > - The recording crate holds no uploads or bug reports in v1, and `backend/` no reports, where [the platform](#the-platform) and [systems](#systems) list them; they come after v1.
+>
+> Since 2026-10-22, a cockpit panel's first message names its panel, such as `VCockpit66`, and the core replaces a socket when a new first message names the same panel, where [modules in the panel bridge](#modules-in-the-panel-bridge) has it replace one when the new message names the same instruments; that closed a live socket, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED` (user, 2026-10-22; [core log](../core/log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
 
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).

@@ -1,0 +1,43 @@
+{
+  "globals": {
+    "BigInt": "missing",
+    "globalThis": "missing",
+    "AggregateError": "missing",
+    "FinalizationRegistry": "missing",
+    "Intl": "missing",
+    "ResizeObserver": "missing",
+    "IntersectionObserver": "missing",
+    "PointerEvent": "missing",
+    "AbortController": "missing",
+    "queueMicrotask": "missing",
+    "structuredClone": "missing",
+    "requestIdleCallback": "missing",
+    "Worker": "missing",
+    "BroadcastChannel": "missing",
+    "indexedDB": "missing"
+  },
+  "statics": {
+    "Object.fromEntries": "missing",
+    "Object.hasOwn": "missing",
+    "Promise.any": "missing",
+    "crypto.subtle": "missing",
+    "Promise.allSettled": "filled in by the sim's scripts only in mainUi and the toolbar"
+  },
+  "methods": {
+    "Array.prototype.flat": "missing",
+    "Array.prototype.flatMap": "missing",
+    "Array.prototype.at": "missing",
+    "String.prototype.at": "missing",
+    "Array.prototype.findLast": "missing",
+    "Array.prototype.toSorted": "missing",
+    "String.prototype.matchAll": "missing",
+    "Symbol.prototype.description": "missing",
+    "Promise.prototype.finally": "filled in by the sim's scripts only in mainUi, the EFB, and the toolbar",
+    "String.prototype.trimStart": "filled in by the sim's scripts only in the toolbar",
+    "String.prototype.replaceAll": "filled in by the sim's scripts only in the toolbar"
+  },
+  "allowed": {
+    "receivers": [],
+    "sources": []
+  }
+}

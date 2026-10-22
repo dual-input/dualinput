@@ -100,6 +100,7 @@ impl Bench {
                 // So is anything done to the sim, which the stand-in's thread carries out.
                 Ok(ToCore::StandIn { act }) => self.stand_in(act),
                 Ok(ToCore::Sim { .. }) => self.queue.push(self.sources.sim, line),
+                Ok(ToCore::Clients { .. }) => self.queue.push(self.sources.clients, line),
                 Ok(_) => self.queue.push(self.sources.lines, line),
                 Err(error) => {
                     tracing::warn!(%error, "a line from the bench isn't one of its messages")

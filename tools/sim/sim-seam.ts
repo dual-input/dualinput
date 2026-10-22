@@ -18,6 +18,7 @@ import { spawn, spawnSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 
+import { buildPrograms } from "../lib/cargo.ts"
 import { ROOT } from "../lib/repo.ts"
 import { Failed, main } from "../lib/run.ts"
 import { requireSdk } from "../lib/sdk.ts"
@@ -129,21 +130,5 @@ function newestLog(data: string): string | undefined {
 
 /** Builds the release core, which a pilot runs, and returns the path Cargo wrote it to. */
 function buildCore(): string {
-  const args = ["build", "--release", "-p", "dualinput-core"]
-  console.log(`> cargo ${args.join(" ")}`)
-  const result = spawnSync("cargo", [...args, "--message-format", "json-render-diagnostics"], {
-    cwd: ROOT,
-    encoding: "utf8",
-    maxBuffer: 1 << 28,
-    stdio: ["ignore", "pipe", "inherit"],
-  })
-  if (result.status !== 0) throw new Failed(`cargo ${args.join(" ")} exited with ${result.status}`)
-  for (const line of result.stdout.split(/\r?\n/)) {
-    if (!line.startsWith("{")) continue
-    const message = JSON.parse(line) as { reason?: string; target?: { name?: string }; executable?: string | null }
-    if (message.reason === "compiler-artifact" && message.target?.name === "dualinput-core" && message.executable) {
-      return message.executable
-    }
-  }
-  throw new Failed("cargo reported no dualinput-core.exe")
+  return buildPrograms(["--release", "-p", "dualinput-core"], ["dualinput-core"])["dualinput-core"]
 }

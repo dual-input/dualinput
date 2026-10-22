@@ -1,0 +1,104 @@
+Stage 6's budgets and cases on the bench and a desk, measured on our development machine on 2026-10-22, for
+record/areas/core/log.md's entry of the same day. The bench ran its debug build of the core with the stand-in core
+helper; the desk runs ran release builds of the bench core and the real helper, through node tools/sim/core-helper.ts.
+
+The bench (node --test tools/bench/scenarios/core-helper.ts), the lines each scenario prints, from the run with the
+2s bench tone:
+
+  # budget: the helper ran again with every want sent 2017ms after it was killed, against 3,000ms
+  # budget: the helper exited 5ms after the core was killed, against 1,000ms
+  # budget: 600 mouse moves reached the core and 600 frames reached the helper in 3s, each way against 200 a second
+  # budget: the slowest input of a run with 200 messages a second each way took 486µs, against 1,000µs
+
+With the 10s bench tone, 48 KB, the same pipe run's slowest input took 1,953µs, input 5, the helper's hello, which
+sends every sound; the tone went back to 2s, 9 KB.
+
+The helper's own test (cargo test -p dualinput-core-helper --test pipe -- --nocapture):
+
+  budget: the helper exited 10ms after its standard input closed, against 1,000ms
+
+opus-rs 0.1.39's encoder, a 440Hz tone at 0.3 amplitude, 500 frames of 20ms at 48 kHz mono, 24 kbps VBR, release
+(cargo test --release -p dualinput-core-helper encode_cost -- --ignored --nocapture):
+
+  complexity 9: 193us a frame, 105 bytes a frame
+  complexity 7: 153us a frame, 105 bytes a frame
+  complexity 5: 119us a frame, 105 bytes a frame
+  complexity 3: 95us a frame, 104 bytes a frame
+  complexity 1: 65us a frame, 102 bytes a frame
+
+The desk run (node tools/sim/core-helper.ts desk), its report, with the helper's CPU still read from
+GetProcessTimes and the level compared with the tone's own -20dBFS, both changed after this run:
+
+  the desk's windows are at 96 DPI, 100% scaling
+  the core started the real helper, process 30288
+  ok: the sim's main window came to the front
+  ok: a bound key held for 2s crosses as one press and one release: press down 117us after its stamp; press up 77us after its stamp
+  ok: the bound key with another program in front, and a key nobody bound with the sim in front, never cross
+  ok: the bound key crosses with a popped-out display in front
+  budget: of 200 presses and releases, the 99th percentile reached the loop 108Âµs after the helper's stamp, against 5,000Âµs
+  ok: a press on the queue within 5ms of the helper's stamp at p99
+  clicks: mouse LeftDown -1.000 1.000; mouse LeftDown 0.998 -0.997
+  ok: only the clicks in the sim's main window cross, not one in a popped-out display or another program
+  ok: at 96 DPI, the top-left pixel of the client area crosses as -1, 1, and the bottom-right as nearly 1, -1
+  ok: the next press crosses whatever is in front, once: next press key 0x6d
+  the helper captures desk-tone, at 30% in the Windows mixer
+  budget: the helper took 1.72% of one CPU core over 10s while it captured and played, against 1%, and held 4 MB of private working set, against 20 MB
+  FAILED: the helper under 1% of one CPU core while it captures and plays
+  ok: the helper under 20 MB of private working set
+  ok: the captured program exited, the capture stopped, and attached again once it started again
+  the capture's frames: frames 249 small 0 level -27.0 decode 26
+  FAILED: frames from a program at 30% in the Windows mixer arrive at its full level, âˆ’20dBFS: -27 dBFS
+  the helper plays on: "Speakers (Focusrite USB Audio)"
+  ok: the bench's tone plays on the output device
+  the core's recordings replayed to every checkpoint; 2 FAILED
+
+GetProcessTimes adds a whole 15.6ms clock tick to whichever thread runs at the tick, so the same audio run read the
+helper capturing at 0.31%, 0.47%, and 1.25% of a core in three runs, each a multiple of 0.156%. The desk tool then
+counted the helper's cycles with QueryProcessCycleTime against the time-stamp counter.
+
+The audio runs (node tools/sim/core-helper.ts audio), counting cycles. Two runs before the capture kept its mixer-level
+handle and encoded only frames that cross the gate read it capturing a tone at 1.5% and 1.46% of a core, and playing
+it back at about 0.30% and 0.25% more. These three ran after both changes, newest last:
+
+  desk-tone at 1 in the mixer, as captured: frames 251 small 0 level -26.2 decode 27
+  desk-tone at 0.3 in the mixer, as captured: frames 250 small 0 level -26.2 decode 26
+  ok: the captured program exited, the capture stopped, and attached again once it started again
+  ok: frames from a program at 30% in the Windows mixer arrive at the level it has at 100%: -26.2 dBFS against -26.2 dBFS
+  the helper took 0.25% of one CPU core over 10s with the output device open and nothing playing
+  budget: the helper took 1.42% of one CPU core over 10s capturing a tone, and 1.64% capturing it and playing it back, so about 0.22% playing, each against 1%
+  budget: the helper held 4.2 MB of private working set, against 20 MB
+  FAILED: the helper under 1% of one CPU core while it captures
+  ok: the helper under 1% of one CPU core while it plays
+  ok: the helper under 20 MB of private working set
+  the helper plays on: "Speakers (Focusrite USB Audio)"
+  ok: the bench's tone plays on the output device
+  the core's recordings replayed to every checkpoint; 1 FAILED
+
+  desk-tone at 1 in the mixer, as captured: frames 251 small 0 level -26.3 decode 26
+  desk-tone at 0.3 in the mixer, as captured: frames 250 small 0 level -26.2 decode 26
+  ok: the captured program exited, the capture stopped, and attached again once it started again
+  ok: frames from a program at 30% in the Windows mixer arrive at the level it has at 100%: -26.2 dBFS against -26.3 dBFS
+  the helper took 0.25% of one CPU core over 10s with the output device open and nothing playing
+  budget: the helper took 1.52% of one CPU core over 10s capturing a tone, and 1.84% capturing it and playing it back, so about 0.32% playing, each against 1%
+  budget: the helper held 4 MB of private working set, against 20 MB
+  FAILED: the helper under 1% of one CPU core while it captures
+  ok: the helper under 1% of one CPU core while it plays
+  ok: the helper under 20 MB of private working set
+  the helper plays on: "Speakers (Focusrite USB Audio)"
+  ok: the bench's tone plays on the output device
+  the core's recordings replayed to every checkpoint; 1 FAILED
+
+  desk-tone at 1 in the mixer, as captured: frames 250 small 0 level -26.3 decode 26
+  desk-tone at 0.3 in the mixer, as captured: frames 250 small 0 level -26.2 decode 26
+  ok: the captured program exited, the capture stopped, and attached again once it started again
+  ok: frames from a program at 30% in the Windows mixer arrive at the level it has at 100%: -26.2 dBFS against -26.3 dBFS
+  the helper took 0.27% of one CPU core over 10s with the output device open and nothing playing
+  the helper took 0.21% of one CPU core over 10s capturing a program that plays silence
+  budget: the helper took 1.36% of one CPU core over 10s capturing a tone, and 1.62% capturing it and playing it back, so about 0.26% playing, each against 1%
+  budget: the helper held 4.2 MB of private working set, against 20 MB
+  FAILED: the helper under 1% of one CPU core while it captures
+  ok: the helper under 1% of one CPU core while it plays
+  ok: the helper under 20 MB of private working set
+  the helper plays on: "Speakers (Focusrite USB Audio)"
+  ok: the bench's tone plays on the output device
+  the core's recordings replayed to every checkpoint; 1 FAILED

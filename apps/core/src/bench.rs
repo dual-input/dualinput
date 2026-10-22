@@ -4,6 +4,7 @@
 //! release's code (record/areas/build/02-testing.md, "Its place").
 
 mod clients;
+mod helper;
 mod lines;
 mod load;
 mod module;
@@ -27,6 +28,7 @@ use crate::sinks::Sinks;
 pub const UNITS: &[fn(&mut Registry)] = &[
     lines::Lines::register,
     clients::BenchClients::register,
+    helper::BenchHelper::register,
     load::Load::register,
     sim::Probe::register,
 ];
@@ -38,6 +40,7 @@ pub struct Sources {
     load: SourceId,
     sim: SourceId,
     clients: SourceId,
+    helper: SourceId,
     units: Vec<&'static str>,
 }
 
@@ -50,6 +53,7 @@ impl Sources {
             load: kernel.source::<load::Playback>()?,
             sim: kernel.source::<sim::Calls>()?,
             clients: kernel.source::<clients::Acts>()?,
+            helper: kernel.source::<helper::Acts>()?,
             units: kernel.units(),
         })
     }

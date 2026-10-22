@@ -1,6 +1,7 @@
 //! The core's edges: the threads that wait, each pushing what it waited for into the queue
 //! as an input. When you add an edge, such as the network's, add its module here.
 
+pub mod core_helper;
 pub mod jobs;
 // A bench build puts the stand-in sim where the sim edge goes, and starts no sim thread.
 #[cfg_attr(feature = "stand-in", allow(dead_code))]

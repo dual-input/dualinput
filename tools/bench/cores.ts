@@ -12,6 +12,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 
 import type { ClientsAct } from "../../engines/messages/ts/bench/ClientsAct.ts"
 import type { FromCore } from "../../engines/messages/ts/bench/FromCore.ts"
+import type { HelperAct } from "../../engines/messages/ts/bench/HelperAct.ts"
 import type { PortFile } from "../../engines/messages/ts/clients/PortFile.ts"
 import type { Hello } from "../../engines/messages/ts/bench/Hello.ts"
 import type { SimCall } from "../../engines/messages/ts/bench/SimCall.ts"
@@ -56,8 +57,8 @@ export class BenchRun {
   }
 
   /** Starts a bench core with a data folder named `name`, and connects to its socket. */
-  async core(name: string): Promise<Core> {
-    const core = await Core.start(path.join(this.folder, name))
+  async core(name: string, options: CoreOptions = {}): Promise<Core> {
+    const core = await Core.start(path.join(this.folder, name), options)
     this.cores.push(core)
     return core
   }
@@ -108,13 +109,15 @@ export class Core {
   }
 
   /** Starts a core on the data folder `data`, and ends it again if it doesn't answer as a bench core of this tree. */
-  static async start(data: string): Promise<Core> {
+  static async start(data: string, options: CoreOptions = {}): Promise<Core> {
     fs.mkdirSync(data, { recursive: true })
+    if (options.settings) fs.writeFileSync(path.join(data, "settings.json"), JSON.stringify(options.settings, null, 2))
     // A core started on this folder before, and killed, left its port behind.
     const portFile = path.join(data, "bench-port")
     fs.rmSync(portFile, { force: true })
     const out = fs.openSync(`${data}-output.txt`, "w")
-    const child = spawn(benchCore(), ["--data", data], { stdio: ["ignore", out, out] })
+    const env = { ...process.env, ...options.env }
+    const child = spawn(benchCore(), ["--data", data], { stdio: ["ignore", out, out], env })
     fs.closeSync(out)
     const exited = new Promise<number | null>((resolve) => child.on("exit", resolve))
     let gone = false
@@ -158,6 +161,11 @@ export class Core {
   /** Has the clients' test unit, which stands in for the session crate and the profile loader, act. */
   clients(act: ClientsAct): void {
     this.send({ kind: "clients", act })
+  }
+
+  /** Has the core helper's test unit, which stands in for the features that want things of the helper, act. */
+  helper(act: HelperAct): void {
+    this.send({ kind: "helper", act })
   }
 
   /** Calls `f` with each CommBus call the core makes for JavaScript, as the sim's pages hear it, from now on. */
@@ -239,6 +247,13 @@ export class Core {
 }
 
 export type StandInReport = Extract<FromCore, { kind: "stand-in" }>
+
+export type CoreOptions = {
+  /** The core's `settings.json`, written into its data folder before it starts. */
+  settings?: Record<string, unknown>
+  /** Environment variables for the core, which the programs it starts inherit. */
+  env?: Record<string, string>
+}
 
 /** The lines a core sends over the bench's socket, as they arrive. */
 class Lines {

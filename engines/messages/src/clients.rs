@@ -189,9 +189,20 @@ pub struct Setting {
 #[ts(export, export_to = "clients/")]
 pub enum SettingKind {
     Bool,
-    Number { min: f64, max: f64 },
+    Number {
+        min: f64,
+        max: f64,
+    },
     Text,
-    Choice { choices: Vec<String> },
+    Choice {
+        choices: Vec<String>,
+    },
+    /// An audio device the pilot picked from the core helper's list, a
+    /// `core_helper::DeviceInfo`, or `null` for Windows' default.
+    Device,
+    /// A key or button the core helper named at the next press, a `core_helper::Bound`, or
+    /// `null` for none.
+    Input,
 }
 
 impl SettingKind {
@@ -206,6 +217,10 @@ impl SettingKind {
             SettingKind::Choice { choices } => value
                 .as_str()
                 .is_some_and(|s| choices.iter().any(|c| c == s)),
+            SettingKind::Device => {
+                Option::<crate::core_helper::DeviceInfo>::deserialize(value).is_ok()
+            }
+            SettingKind::Input => Option::<crate::core_helper::Bound>::deserialize(value).is_ok(),
         }
     }
 }

@@ -3,6 +3,35 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-22: Stage 6's helper passes on nothing it wasn't asked for and comes back 2s after a kill, but capturing a continuous tone takes 1.4% of a core against 1%
+
+**Asked:** do [stage 6](../build/plan.md#6-the-core-helper)'s cases on the bench and on a desk hold for the core helper, and its budgets ([04's cases](04-core-helper.md#cases-for-the-bench), [04's budgets](04-core-helper.md#budgets))?
+Its cases that need a person at the PC, and its cases in the sim, wait for stage 7's session (user, 2026-10-22).
+
+**Expected:** each case as 04 designs it, and each budget met, since the helper's own tests passed.
+
+**Found:** on our development machine, the bench with its debug build and the stand-in core helper, and the desk with release builds of a bench core and the real helper, through `node tools/sim/core-helper.ts` ([results](results/2026-10-22-stage-6-bench-and-desk.txt)):
+
+- **On the bench,** a helper killed while a want was on ran again with every want sent 2,017ms after the kill, against 3s; with the core killed, it exited 5ms later, against 1s; a helper of another build was killed and started again, and the trouble notice showed between 4.5s and 7s after it went down; and 200 messages a second each way left the slowest input at 486µs, against 1ms.
+- **A 10s bench tone,** 48 KB, made the helper's `Hello` the slowest input of that run, 1,953µs, since the core sends every sound at each `Hello` and a debug build hashes it slowly; the tone went back to 2s, 9 KB.
+- **The helper,** a program with no console, read its piped standard input, and exited 10ms after it closed, which settles that item of [left open](04-core-helper.md#left-open).
+- **On the desk,** with windows of the desk tool's own at 96 DPI standing in for the sim's: a bound key held 2s crossed as one press and one release; the bound key with another program in front, and a key nobody bound with the sim in front, crossed nothing; the bound key crossed with a window of the sim's class but another title in front, as a popped-out display; the 99th percentile of 200 presses and releases reached the loop 108µs after the helper's stamp, against 5ms; only clicks in the sim's main window crossed, the client area's top-left pixel as −1, 1 and its bottom-right as 0.998, −0.997; and the next press crossed once.
+- **A captured program** that exited and started again had the capture stop and attach again, and at 30% in the Windows mixer its frames came at its level at 100%, −26.2dBFS.
+  Both sit 6dB below the −20dBFS the program played, a mono program on a stereo device, for a reason we haven't found.
+- **The helper's memory** stayed between 4.0 MB and 4.3 MB of private working set, against 20 MB.
+- **Its CPU,** counted in cycles: with the output device open and nothing playing, 0.25% to 0.27% of a core; capturing a program that plays silence, 0.21%; capturing a continuous tone, 1.36% to 1.52%, against 1%; and playing that tone back added 0.22% to 0.32%.
+  opus-rs 0.1.39's encoder took 193µs a frame at its default complexity 9, about 1% of a core at 50 frames a second, 119µs at complexity 5, and 95µs at 3.
+- **`GetProcessTimes`** adds a whole 15.6ms clock tick to whichever thread runs at the tick, so the same run read the helper capturing at 0.31%, 0.47%, and 1.25% of a core; `QueryProcessCycleTime` against the time-stamp counter gave steady readings.
+
+**Changed:**
+
+- The capture encodes only frames that cross the gate, so silence costs no encoding, and keeps a program's mixer-level handle once found, rather than walking the audio sessions each second; a tone, which never falls below the gate, still costs its encoding.
+- The capture's 1% budget waits for the user's call: a lower encoder complexity, which our listening in stage 7's session would check, or the budget read as an average across a session, between transmissions of which capturing costs 0.21%.
+
+**Affects:** [04-core-helper](04-core-helper.md), whose [budgets](04-core-helper.md#budgets) row for the helper's CPU waits on that call.
+
+**Evidence:** [results/2026-10-22-stage-6-bench-and-desk.txt](results/2026-10-22-stage-6-bench-and-desk.txt).
+
 ## 2026-10-22: Stage 5's bridge loads in all 20 of the Baron's panels, joins the core on a session's announcement, and leaves the cockpit whole when bridge.js is missing or throws, but two panels shared an instrument key
 
 **Asked:** do [stage 5](../build/plan.md#5-clients-and-the-panel-bridge)'s cases in the sim hold for its release core, with our package's `VCockpit.js` and `bridge.js` installed: the bridge in every cockpit panel, every instrument loading as without us, each bridge hearing the core's announcement and joining it on a session's, none joining a bench core beside it, and the cockpit whole with `bridge.js` missing or throwing ([02's cases](02-clients-and-panel-bridge.md#cases-for-the-bench), [the bench's own](../build/02-testing.md#cases-for-the-bench))?

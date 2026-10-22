@@ -3,4 +3,4 @@
 /**
  * A setting's type, with what an app needs to offer it.
  */
-export type SettingKind = { "type": "bool" } | { "type": "number", min: number, max: number, } | { "type": "text" } | { "type": "choice", choices: Array<string>, };
+export type SettingKind = { "type": "bool" } | { "type": "number", min: number, max: number, } | { "type": "text" } | { "type": "choice", choices: Array<string>, } | { "type": "device" } | { "type": "input" };

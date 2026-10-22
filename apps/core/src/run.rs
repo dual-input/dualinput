@@ -76,6 +76,9 @@ struct Ready {
     /// The clients crate's source, when the core has one, which the WebSocket server pushes
     /// under.
     sockets: Option<SourceId>,
+    /// The core helper's service's source, when the core has one, which the helper's edge
+    /// pushes under.
+    helper: Option<SourceId>,
     #[cfg(feature = "stand-in")]
     bench: Option<crate::bench::Sources>,
 }
@@ -125,6 +128,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
                 start_files: kernel.start_files(),
                 seam: kernel.source::<sim_client::Seam>(),
                 sockets: kernel.source::<clients::Sockets>(),
+                helper: kernel.source::<core_helper_service::Pipe>(),
                 #[cfg(feature = "stand-in")]
                 bench: crate::bench::Sources::of(&kernel),
             });
@@ -134,6 +138,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         start_files,
         seam,
         sockets,
+        helper,
         #[cfg(feature = "stand-in")]
         bench,
     }) = units_ready.recv()
@@ -174,8 +179,10 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let (timers, timer_thread) = Timers::start(queue.clone(), context.clone())?;
     let tokio_context = context.clone();
     let runtime = tokio::runtime::Builder::new_multi_thread()
-        // The clients' WebSocket server's sockets.
+        // The clients' WebSocket server's sockets, and the core helper's pipe and its 1s to
+        // exit once stopped.
         .enable_io()
+        .enable_time()
         .worker_threads(2)
         .max_blocking_threads(4)
         .thread_name("tokio")
@@ -185,7 +192,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         runtime: runtime.handle().clone(),
         queue: queue.clone(),
         data: Arc::new(options.data.clone()),
-        home,
+        home: home.clone(),
     };
     let mut sinks = Sinks::default();
     let set = timers.clone();
@@ -204,6 +211,17 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
             )
         })
         .transpose()?;
+    // Closing the runtime at the exit drops the helper's standard input, which tells it to
+    // exit with the core.
+    if let Some(source) = helper {
+        crate::edges::core_helper::start(
+            runtime.handle(),
+            queue.clone(),
+            source,
+            home.clone(),
+            &mut sinks,
+        );
+    }
     // The sim's side of the seam: the sim edge on SimConnect.dll, or in a bench build the
     // stand-in sim, which the bench's edge starts.
     #[cfg(not(feature = "stand-in"))]

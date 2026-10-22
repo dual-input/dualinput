@@ -28,6 +28,13 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > Since 2026-10-18, [testing](../build/02-testing.md#the-stand-in-core-helper) settles [left open](#left-open)'s item on the development setting that names the helper's program: the bench's stand-in helper speaks the real pipe's messages, and the core starts it, sends it every want, reads its `Hello`, and starts it again as it does this helper.
 >
 > Since 2026-10-21, the core records every input, so no capture is registered unrecorded, and ATC audio's captured frames are in the recording, where the note of 2026-10-16 has its capture registered unrecorded (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+>
+> Since 2026-10-22, the helper's stage of the build pins two of [its dependencies](#its-dependencies) ([build plan](../build/plan.md#6-the-core-helper)):
+>
+> - opus-rs at 0.1.39, of 2026-10-20, which closed [issue #54](https://github.com/restsend/opus-rs/issues/54) and fixed about a dozen places where its decoder differed from libopus since 0.1.37 (read in its commits on GitHub, 2026-10-22).
+> - `wasapi` at 0.25.0, the version p02 ran, over 0.26.0, of 2026-10-11, whose changes we haven't found written down, though it takes the same `windows` 0.62 (read on docs.rs, 2026-10-22).
+>
+> The ATC speech for [Opus](#opus)'s check is BeyondATC's, which the helper captures in that stage's session in the sim; it stays out of the repository, since it's another program's speech, and the checks every run makes use a generated signal.
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

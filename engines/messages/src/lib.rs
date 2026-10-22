@@ -25,6 +25,7 @@ include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 
 pub mod bench;
 pub mod clients;
+pub mod core_helper;
 pub mod module;
 pub mod sim;
 

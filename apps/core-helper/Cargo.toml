@@ -1,0 +1,40 @@
+[package]
+name = "dualinput-core-helper"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+messages = { path = "../../engines/messages" }
+# Reads the sounds features register, each an Ogg Opus file: pure Rust, and at 24 kbps an
+# Ogg Opus cue is about 30 times smaller than the same cue as 48 kHz 16-bit WAV
+# (record/areas/core/04-core-helper.md, "Its dependencies").
+ogg = "0.9.2"
+# Opus, pure Rust, so no build machine needs CMake, which every libopus binding's build runs;
+# the bench's check and our listening decide whether libopus takes its place
+# (record/areas/core/04-core-helper.md, "Opus").
+opus-rs = "=0.1.39"
+# The devices, capture, and output, through WASAPI. p02's helper captured a program and
+# played on a device through 0.25 (record/areas/core/04-core-helper.md's note of 2026-10-22).
+wasapi = "=0.25.0"
+
+# One Windows crate in the helper, the version wasapi brings, since Raw Input, DPI awareness,
+# and a program's mixer level need COM interfaces windows-sys lacks.
+[dependencies.windows]
+version = "0.62"
+features = [
+    "Win32_Devices_HumanInterfaceDevice",
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Media_Audio",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Com",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Performance",
+    "Win32_System_Threading",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Input",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+]

@@ -8,7 +8,8 @@ use windows_sys::Win32::System::Performance::{QueryPerformanceCounter, QueryPerf
 /// (record/areas/architecture/01-spine.md, "Times"). The conversion runs in 128 bits,
 /// since at the 10 MHz Windows fixes the counter at under a hypervisor, ticks times
 /// 1,000,000 passes a signed 64-bit integer, which the counter is, after about 10.7 days of
-/// the PC running.
+/// the PC running. The core helper stamps its inputs the same way, in apps/core-helper's
+/// `clock::now` and the bench's stand-in's `now`, so change all three together.
 pub fn now() -> u64 {
     let mut ticks = 0;
     // SAFETY: QueryPerformanceCounter writes one i64 to the pointer it's given.

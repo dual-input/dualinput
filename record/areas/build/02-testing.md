@@ -13,6 +13,9 @@ Decides:     The four levels of testing, and where and when each runs; which tes
 > - [With friends](#with-friends): each pilot sends their run's folder by hand, where it comes back through Dual Input's own bug report.
 >
 > Since 2026-10-22, page-client's and the panel bridge's own tests run on Node's test runner, as the tools' do, which settles [left open](#left-open)'s item on the runner for the product's TypeScript ([build plan](plan.md#5-clients-and-the-panel-bridge)).
+>
+> Since 2026-10-22, the bench scripts [the stand-in core helper](#the-stand-in-core-helper) over a line of its own: the bench starts each core with `DUALINPUT_BENCH_HELPER` naming a local port, the stand-in inherits it from the core that starts it and connects there, and over that line the bench tells it what to send or do, and hears each message the core sent it ([build plan](plan.md#6-the-core-helper)).
+> The core's pipe can't carry the script, since the core owns both its ends, and the core still starts only the program its development setting names.
 
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.

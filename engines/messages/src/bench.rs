@@ -40,6 +40,128 @@ pub enum ToCore {
     /// Has the clients' test unit, which stands in for the session crate, the profile
     /// loader, and a feature with a slice and a panel module, act.
     Clients { act: ClientsAct },
+    /// Has the core helper's test unit, which stands in for the features that want things
+    /// of the core helper, act.
+    Helper { act: HelperAct },
+}
+
+/// What the core helper's test unit does. It registers one of each want: a binding to the
+/// setting `bench.input`, the next press, the mouse, a capture, a playback stream, and a
+/// sound, the bench's tone.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "act", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum HelperAct {
+    Binding {
+        on: bool,
+    },
+    NextPress {
+        on: bool,
+    },
+    Mouse {
+        on: bool,
+    },
+    /// Captures the first running program of `programs`, or stops with `None`.
+    Capture {
+        programs: Option<Vec<String>>,
+    },
+    Stream {
+        on: bool,
+    },
+    Sounds {
+        on: bool,
+    },
+    Play,
+    /// Hands the stream `per_second` frames a second, each of `bytes` bytes, for `for_ms`.
+    Frames {
+        per_second: u32,
+        bytes: u32,
+        for_ms: u64,
+    },
+    /// Hands the stream each frame the capture brings, as ATC audio's path between two
+    /// machines would, on one.
+    Loop {
+        on: bool,
+    },
+}
+
+/// What the bench tells the stand-in core helper over the line the stand-in opens to it
+/// (record/areas/build/02-testing.md's note of 2026-10-22).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "act", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum StandInHelperAct {
+    /// Says hello to the core, as the version and hash given, or as this build.
+    Hello {
+        version: Option<String>,
+        hash: Option<String>,
+    },
+    /// The binding numbered `binding` went down or up.
+    Press { binding: u16, down: bool },
+    NextPress {
+        input: crate::core_helper::Input,
+        name: String,
+    },
+    /// A left click in the sim's main window at `x`, `y`.
+    Click { x: f32, y: f32 },
+    /// Sends `per_second` mouse moves a second for `for_ms`, as a pilot dragging a knob would.
+    Moves { per_second: u32, for_ms: u64 },
+    /// A captured frame of `bytes` bytes for the capture numbered `capture`.
+    Frame { capture: u16, bytes: u32 },
+    /// The program a capture takes, or that it waits for one.
+    Capturing {
+        capture: u16,
+        program: Option<String>,
+    },
+    /// A want the helper can't carry out.
+    Failed {
+        want: crate::core_helper::WantId,
+        error: String,
+    },
+    Lists {
+        outputs: Vec<crate::core_helper::DeviceInfo>,
+        programs: Vec<String>,
+    },
+    /// The output device the helper plays on.
+    InUse {
+        output: Option<crate::core_helper::DeviceInfo>,
+    },
+    /// Exits with `code`, as a crash would.
+    Exit { code: i32 },
+}
+
+/// What the stand-in core helper tells the bench.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "line", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum StandInHelperLine {
+    /// It started, as this process.
+    Started {
+        process: u32,
+    },
+    /// The core sent it every want, whole.
+    Wants {
+        bindings: Vec<(u16, crate::core_helper::Input)>,
+        next_press: bool,
+        mouse: bool,
+        captures: Vec<u16>,
+        streams: Vec<u16>,
+        sounds: bool,
+        lists: bool,
+    },
+    Sound {
+        sound: u16,
+        bytes: u32,
+    },
+    Play {
+        sound: u16,
+    },
+    Frame {
+        stream: u16,
+        number: u32,
+    },
+    /// Its standard input closed, so it exits.
+    Closed,
 }
 
 /// What the clients' test unit does.

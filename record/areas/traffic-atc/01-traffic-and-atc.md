@@ -19,6 +19,11 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 >
 > - Neither traffic nor ATC audio registers as partly recorded: traffic's polls, its reads of each new object's identity, and its states' channel, and ATC audio's captured frames and its frames' channel, are recorded, where [the units](#the-units), [what they register](#what-they-register), [what goes out](#what-goes-out), and [the ATC host](#the-atc-host) declare them unrecorded, and a replay checks both units' outputs.
 > - Neither is a leaf, so the one request that claims both role keys, in [the units](#the-units), rests on [the traffic and ATC switch](../architecture/02-code-map.md#the-traffic-and-atc-switch) alone.
+>
+> Since 2026-10-22, building the core helper's buffer changes this document in two places (user, 2026-10-22; [core log](../core/log.md#2026-10-22-stage-6s-helper-passes-on-nothing-it-wasnt-asked-for-and-comes-back-2s-after-a-kill-but-capturing-a-continuous-tone-takes-14-of-a-core-against-1)):
+>
+> - [The buffer](#the-buffer)'s transmission ends once no frame has come for the buffer's most depth, 300ms, rather than at the first turn with nothing buffered: until then it conceals each turn, a frame that comes within it plays on, and one that comes after it counts as late toward the next depth. Frames late in order once ended a transmission at the first such turn, and dropped the rest of it unheard.
+> - On [every other machine](#every-other-machine), ATC audio closes its playback stream and opens a new one when the ATC host's restart count rises, as when the key moves, since a restarted host numbers its frames from 0 again, and every message carries its sender's restart count ([channels and sends](../network/02-units.md#channels-and-sends)).
 
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.

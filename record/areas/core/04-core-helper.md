@@ -34,7 +34,8 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > - opus-rs at 0.1.39, of 2026-10-20, which closed [issue #54](https://github.com/restsend/opus-rs/issues/54) and fixed about a dozen places where its decoder differed from libopus since 0.1.37 (read in its commits on GitHub, 2026-10-22).
 > - `wasapi` at 0.25.0, the version p02 ran, over 0.26.0, of 2026-10-11, whose changes we haven't found written down, though it takes the same `windows` 0.62 (read on docs.rs, 2026-10-22).
 >
-> The ATC speech for [Opus](#opus)'s check is BeyondATC's, which the helper captures in that stage's session in the sim; it stays out of the repository, since it's another program's speech, and the checks every run makes use a generated signal.
+> The ATC speech for [Opus](#opus)'s check is BeyondATC's, which the helper captures in that stage's session in the sim, and a short stretch of it is committed as the check's fixture (user, 2026-10-22).
+> The helper encodes at Opus's complexity 5, where opus-rs's default, 9, took about 1% of a core for a continuous tone, the capture's whole budget; complexity changes no frame's size (user, 2026-10-22; [core log](log.md#2026-10-22-stage-6s-helper-passes-on-nothing-it-wasnt-asked-for-and-comes-back-2s-after-a-kill-but-capturing-a-continuous-tone-takes-14-of-a-core-against-1)).
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

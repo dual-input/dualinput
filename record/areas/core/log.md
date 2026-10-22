@@ -27,6 +27,8 @@ Its cases that need a person at the PC, and its cases in the sim, wait for stage
 
 - The capture encodes only frames that cross the gate, so silence costs no encoding, and keeps a program's mixer-level handle once found, rather than walking the audio sessions each second; a tone, which never falls below the gate, still costs its encoding.
 - The capture's 1% budget waits for the user's call: a lower encoder complexity, which our listening in stage 7's session would check, or the budget read as an average across a session, between transmissions of which capturing costs 0.21%.
+  Complexity sends no more: 105 bytes a frame at complexity 9 and at 5, though a tone at 24 kbps VBR came at about 42 kbps, which speech in that session will measure again.
+- The code review found that frames late in order ended a playback stream's transmission at the first turn with nothing buffered, and dropped the rest unheard; a transmission now ends once nothing has come for 300ms, as [traffic and ATC](../traffic-atc/01-traffic-and-atc.md)'s note of 2026-10-22 has it (user, 2026-10-22).
 
 **Affects:** [04-core-helper](04-core-helper.md), whose [budgets](04-core-helper.md#budgets) row for the helper's CPU waits on that call.
 

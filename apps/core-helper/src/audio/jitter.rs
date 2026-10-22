@@ -41,6 +41,8 @@ struct Transmission {
     next: u32,
     frames: BTreeMap<u32, Vec<u8>>,
     report: Report,
+    /// The turns concealed in a row with nothing buffered to play after them.
+    dry: u32,
 }
 
 pub struct Jitter {
@@ -55,6 +57,9 @@ pub struct Jitter {
     /// The last number whose turn has passed, so a frame that comes after its turn is
     /// dropped even once its transmission has ended, rather than starting another.
     passed: Option<u32>,
+    /// The last ended transmission's first number and when it arrived, so a frame of it that
+    /// comes after its end still counts toward the next depth.
+    ended: Option<(u32, u64)>,
 }
 
 impl Jitter {
@@ -65,6 +70,7 @@ impl Jitter {
             previous: None,
             transmissions: VecDeque::new(),
             passed: None,
+            ended: None,
         }
     }
 
@@ -114,25 +120,38 @@ impl Jitter {
                     depth_ms: (depth / 1_000) as u16,
                     ..Report::default()
                 },
+                dry: 0,
             });
         }
         if self.previous.is_none_or(|(n, _)| number > n) {
             self.previous = Some((number, stamp));
         }
+        let none_started = self.transmissions.is_empty();
         // The newest transmission that starts at or before the frame's number holds it.
-        let Some(t) = self
+        let holder = self
             .transmissions
             .iter_mut()
             .rev()
-            .find(|t| number >= t.first)
-        else {
-            return;
+            .find(|t| number >= t.first);
+        let (first, first_arrived) = match &holder {
+            Some(t) => (t.first, t.first_arrived),
+            // A frame of a transmission that already ended is late, and counts toward the
+            // next depth, so the depth grows to cover a delay that cut the last one short.
+            // Once a newer transmission has started, a frame no transmission holds is that
+            // one's, come ahead of the frame it started at, and isn't the ended one's.
+            None => match self.ended {
+                Some((first, first_arrived)) if number >= first && none_started => {
+                    (first, first_arrived)
+                }
+                _ => return,
+            },
         };
-        let due = t.first_arrived + u64::from(number - t.first) * FRAME_US;
+        let due = first_arrived + u64::from(number - first) * FRAME_US;
         self.lateness.push_back(arrived.saturating_sub(due));
         while self.lateness.len() > usize::from(self.rule.history).max(1) {
             self.lateness.pop_front();
         }
+        let Some(t) = holder else { return };
         if number < t.next {
             t.report.late += 1;
         } else {
@@ -143,24 +162,39 @@ impl Jitter {
     /// The next frame to play, once the output device needs one, at `now` µs on the
     /// helper's clock, or `None` while no transmission has reached its start.
     pub fn pull(&mut self, now: u64) -> Option<Turn> {
+        let waiting = self.transmissions.len() > 1;
+        let most_turns = u32::from(self.rule.most_ms) / (FRAME_US / 1_000) as u32;
         let t = self.transmissions.front_mut()?;
         if now < t.start {
             return None;
         }
         if let Some(opus) = t.frames.remove(&t.next) {
+            // The turns concealed while it ran dry were frames that came late or never.
+            t.report.concealed += std::mem::take(&mut t.dry);
             self.passed = Some(t.next);
             t.next += 1;
             t.report.played += 1;
             return Some(Turn::Play(opus));
         }
         if t.frames.keys().any(|&n| n > t.next) {
+            t.report.concealed += std::mem::take(&mut t.dry) + 1;
             self.passed = Some(t.next);
             t.next += 1;
-            t.report.concealed += 1;
             return Some(Turn::Conceal);
         }
-        // The transmission ends when its frames run out.
+        // Nothing is buffered: the frames have run out, or the next ones are late. The
+        // transmission stays open, concealing, for up to the most depth, so frames that come
+        // within it play on, and ends once none has come for that long, or once the next
+        // transmission waits behind it (user, 2026-10-22).
+        // A dry turn marks no number passed: if the frames had run out, the next
+        // transmission's first frame takes the next number, since silence takes none.
+        if !waiting && t.dry < most_turns {
+            t.dry += 1;
+            t.next += 1;
+            return Some(Turn::Conceal);
+        }
         let ended = self.transmissions.pop_front()?;
+        self.ended = Some((ended.first, ended.first_arrived));
         if let Some(next) = self.transmissions.front_mut() {
             next.start = next.start.max(now);
         }
@@ -246,10 +280,33 @@ mod tests {
         // Frame 4 arrives 200ms late, long after its turn at 60ms + 80ms.
         arrivals[4].2 += 200_000;
         let turns = play(&mut jitter, &arrivals, 0, 1_000_000);
-        assert_eq!(turns.iter().filter(|t| **t == Turn::Conceal).count(), 1);
         assert_eq!(ends(&turns).len(), 1);
+        assert_eq!(ends(&turns)[0].concealed, 1);
         assert_eq!(ends(&turns)[0].late, 1);
         assert_eq!(ends(&turns)[0].played, 29);
+    }
+
+    #[test]
+    fn a_run_of_frames_that_come_in_order_but_late_leaves_the_transmission_playing_on() {
+        let mut jitter = Jitter::new(rule());
+        let mut arrivals: Vec<_> = (0..30)
+            .map(|n| (n, n as u64 * FRAME_US, n as u64 * FRAME_US))
+            .collect();
+        // Frames 4 to 9 come 200ms late, in order, so at frame 4's turn nothing after it
+        // has come either.
+        for arrival in &mut arrivals[4..10] {
+            arrival.2 += 200_000;
+        }
+        let turns = play(&mut jitter, &arrivals, 0, 2_000_000);
+        assert_eq!(
+            ends(&turns),
+            [&Report {
+                played: 24,
+                concealed: 6,
+                late: 6,
+                depth_ms: 60
+            }]
+        );
     }
 
     #[test]

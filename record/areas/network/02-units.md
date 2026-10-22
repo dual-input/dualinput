@@ -15,9 +15,9 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 >
 > Since 2026-10-18, the release workflow deploys the backend, its D1 migrations and then its Worker, just before it publishes each release, and a second workflow deploys it alone for a fix, so the backend running is the newest release's and answers older releases' cores too, and a change to a request's body in [its requests](#its-requests) takes a new path beside the old one ([the backend](../build/01-the-build.md#the-backend)).
 >
-> Since 2026-10-18, the relays' tokens stay out of this repository, which goes public: a private repository of ours, under Dual Input's GitHub organization, holds each relay's tokens newest first, where [their configuration](#their-configuration) puts them in `relays/relays.toml`, which keeps each relay's region, URL, and cap (user, 2026-10-18).
+> Since 2026-10-18, the relays' tokens stay out of this repository, which goes public: a private repository of ours, under Dual Input's GitHub organization, holds each relay's tokens newest first, where [their configuration](#their-configuration) puts them in `src/relays/relays.toml`, which keeps each relay's region, URL, and cap (user, 2026-10-18).
 > Developers trusted with the tokens are given access to it, and adding or retiring a token is a commit there.
-> `relays/deploy.ts` reads the tokens from a clone of it, and the network crate's build compiles them into each release's default list from the copy [the release's build job](../build/01-the-build.md#a-release) checks out, so a token is exposed only as far as a release's program exposes it, where their configuration has the tokens go public with the repository.
+> `src/relays/deploy.ts` reads the tokens from a clone of it, and the network crate's build compiles them into each release's default list from the copy [the release's build job](../build/01-the-build.md#a-release) checks out, so a token is exposed only as far as a release's program exposes it, where their configuration has the tokens go public with the repository.
 > The local `iroh-relay` that [cases for the bench](#cases-for-the-bench) runs two cores through takes a test token, not the production one, so CI's tests need no access.
 >
 > Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes the note of 2026-10-16 in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
@@ -35,7 +35,7 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > Since 2026-10-22, the network's stage of the build settles what this design left to it, in the sections each item links, and [the network's log](log.md#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay) holds its bench run:
 >
 > - The relays run at `nyc.relay.dualinput.app` and `fra.relay.dualinput.app`, and the backend at `api.dualinput.app`, on Dual Input's domain (user, 2026-10-22; [who hosts them](#who-hosts-them)).
-> - `dual-input/relay-tokens` holds `tokens.toml`, each relay's tokens newest first under its region, which the network crate's build reads from the clone `DUALINPUT_RELAY_TOKENS` names, and `relays/deploy.ts` installs n0's own build of `iroh-relay` 1.3.0, checked against its SHA-256 ([their configuration](#their-configuration)).
+> - `dual-input/relay-tokens` holds `tokens.toml`, each relay's tokens newest first under its region, which the network crate's build reads from the clone `DUALINPUT_RELAY_TOKENS` names, and `src/relays/deploy.ts` installs n0's own build of `iroh-relay` 1.3.0, checked against its SHA-256 ([their configuration](#their-configuration)).
 > - Each one-off channel's message type implements the message crate's `OneOff` trait, whose `wait()` gives its key or its deadline, in the type's own module, because Rust accepts `impl OneOff for T` only in the crate that defines `OneOff` or the one that defines `T` ([channels and sends](#channels-and-sends)).
 > - A one-off message gets `ONE_OFF_ROOM` in the message crate, 1,160 bytes, since the transport puts its channel's number in the first 2 of a packet's 1,162, and a stamped channel's message gets 8 fewer, where [sending](01-between-machines.md#sending) keeps a traffic batch under 1,162 ([channels and sends](#channels-and-sends)).
 > - The network sends heartbeats only while a session is open, so a core outside a session records no heartbeat input each second ([the heartbeat and clock offsets](#the-heartbeat-and-clock-offsets)).
@@ -50,7 +50,7 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.
 The network owns everything between machines, the backend's requests among it, and the session crate fills each connection's first message with the session's keys through one hook.
-The backend is a Cloudflare Worker on D1, and our relays run on two servers of ours, in New York and Frankfurt, configured from `relays/`.
+The backend is a Cloudflare Worker on D1, and our relays run on two servers of ours, in New York and Frankfurt, configured from `src/relays/`.
 
 This answers node 6.4 of the [architecture plan](../architecture/plan.md#64-the-network).
 [01-between-machines](01-between-machines.md), decisions [032](../../decisions/032-one-quic-connection-through-iroh.md) to [039](../../decisions/039-cut-link-replays-others-late-join.md) and [041](../../decisions/041-core-crash-comes-back-as-late-joiner.md), the code map's [units](../architecture/02-code-map.md#the-units), [01-loop-and-edge](../core/01-loop-and-edge.md), and [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
@@ -62,8 +62,8 @@ This answers node 6.4 of the [architecture plan](../architecture/plan.md#64-the-
 | `network` | Platform | Each member's link and its connection, their timers, the channels' handlers, the heartbeat and clock offsets, the endpoint key, the backend's requests, and the network's notices; it raises `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered` | On the loop |
 | `transport` | Engine | iroh's endpoint, its connections and streams, the newest-only slots and ATC audio's queue, pacing through a relay, and the send stamp | On tokio at the core's edge, and in any program that links it |
 | The message crate's `net` module | Engine | The kinds of delivery, the first message's header, and the transport's commands and events, while each channel's constant lives in its owner's module | Wherever the message crate does |
-| `backend/`'s sessions | Backend | Invite codes, sessions, members, and wrong codes, in D1 | On Cloudflare Workers |
-| `relays/` | Configuration | Each relay's region, URL, tokens, and cap, and the script that deploys them | On our relay servers, and compiled into each release's default list |
+| `src/backend/`'s sessions | Backend | Invite codes, sessions, members, and wrong codes, in D1 | On Cloudflare Workers |
+| `src/relays/` | Configuration | Each relay's region, URL, tokens, and cap, and the script that deploys them | On our relay servers, and compiled into each release's default list |
 
 The transport's commands and events live in the message crate because the network crate keeps the loop's rules, and the map check lists the transport among the crates that do I/O, so the network crate can't depend on it ([the map check](../architecture/02-code-map.md#the-map-check)).
 The sim's calls follow the same split: `SimCall` lives in the sim client, not in the sim edge ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-sim-client)).
@@ -186,7 +186,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 - The network keeps a slice of client state: each member with its link's state and its path, direct or the relay's URL, and whether this PC reaches the internet.
   While any link is lost, each time a dial starts, a job asks every relay in the session's list for `/ping`, which answers with no token ([network log][win]), and the PC reaches the internet when any answers before a 2s timer fires.
-- It registers its settings: the relay list, whose default each release compiles in from `relays/`; and, for development, sending through relays only, which clears the endpoint's IP transports ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)), and the backend's URL, which the bench points at a local backend.
+- It registers its settings: the relay list, whose default each release compiles in from `src/relays/`; and, for development, sending through relays only, which clears the endpoint's IP transports ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)), and the backend's URL, which the bench points at a local backend.
 
 ## The transport
 
@@ -265,12 +265,12 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 ### Their configuration
 
-- `relays/relays.toml` lists each relay: its region, its URL, its tokens newest first, and its cap in bytes a second, written once (user, 2026-10-16).
+- `src/relays/relays.toml` lists each relay: its region, its URL, its tokens newest first, and its cap in bytes a second, written once (user, 2026-10-16).
   - The network crate compiles each release's default relay list from it: each relay's URL, its first token, and its cap.
-  - A deploy script beside it, `relays/deploy.ts`, run by Node as `tools/build.ts` is, renders each relay's `iroh-relay` configuration from the same entry, `access.shared_token` with all its tokens and `limits.client.rx.bytes_per_second` with its cap (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig` and `RateLimitConfig`), installs it over SSH, and restarts the relay, at a quiet hour ([the relays](01-between-machines.md#the-relays)).
+  - A deploy script beside it, `src/relays/deploy.ts`, run by Node as `tools/build.ts` is, renders each relay's `iroh-relay` configuration from the same entry, `access.shared_token` with all its tokens and `limits.client.rx.bytes_per_second` with its cap (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig` and `RateLimitConfig`), installs it over SSH, and restarts the relay, at a quiet hour ([the relays](01-between-machines.md#the-relays)).
   - A new token reaches every relay before the release that carries it.
 - The tokens go public with the repository, the same exposure as a token read out of a release ([the relays](01-between-machines.md#the-relays)).
-- A relay of our own, if we ever write one, lives in `relays/` too (user, 2026-10-16).
+- A relay of our own, if we ever write one, lives in `src/relays/` too (user, 2026-10-16).
 
 ## What the code map changes in 01-between-machines
 

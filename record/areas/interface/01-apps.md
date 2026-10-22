@@ -27,15 +27,15 @@ This answers node 6.16 of the [architecture plan](../architecture/plan.md#616-th
 | --- | --- |
 | `efb-shell`, in TypeScript on the MSFS Avionics Framework | The EFB app's frame and the platform's screens in it, the banner's page, the part API in both, and calling the toolbar for the banner's panel |
 | `desktop-shell`, in TypeScript, React, and Tailwind | The desktop app's frame and the platform's screens in it, the part API in its pages, the components and theme parts share, and the settings drawn from their registrations |
-| `apps/desktop` | Tauri's Rust side, which holds the WebSocket to the core, Vite's entry, and the list of the desktop app's parts |
-| `sim-package/pages` | The EFB app's entry and the list of its parts, the banner's entry, the menu script, and the `VCockpit.js` override |
+| `src/apps/desktop` | Tauri's Rust side, which holds the WebSocket to the core, Vite's entry, and the list of the desktop app's parts |
+| `src/sim-package/pages` | The EFB app's entry and the list of its parts, the banner's entry, the menu script, and the `VCockpit.js` override |
 
 The banner's page is `efb-shell`'s, since our two pages in the sim draw on the same framework ([decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md)) and show the same notices.
 
 ## A feature's parts
 
 ```ts
-// a sketch: rate and pause's part in the EFB app, features/rate-and-pause/efb/index.ts
+// a sketch: rate and pause's part in the EFB app, src/features/rate-and-pause/efb/index.ts
 export default definePart("rate-and-pause", {
   start(api) {
     api.on((body: PauseWanted) => Coherent.call("TOOLBAR_SET_ACTIVE_PAUSE", body.on));   // the session's units
@@ -45,13 +45,13 @@ export default definePart("rate-and-pause", {
 // a sketch: take-control's part in the desktop app; the place's name is hypothetical
 export default definePart("take-control", { views: { settings: BindingSection } });
 
-// a sketch: the desktop app's list, in apps/desktop
+// a sketch: the desktop app's list, in src/apps/desktop
 export const parts = [takeControl, goTo, traffic];
 ```
 
 - **A part** is one module in a feature's `efb/` or `desktop/` folder, named for its unit in the core.
   It has a `start` and a `stop` for code with no screen of its own, and views keyed by the places its app names.
-- **Each app lists its parts**, one line each, as the core's `main` lists features ([what a feature registers](../architecture/02-code-map.md#what-a-feature-registers)): the desktop app's list is in `apps/desktop`, and the EFB app's in `sim-package/pages`.
+- **Each app lists its parts**, one line each, as the core's `main` lists features ([what a feature registers](../architecture/02-code-map.md#what-a-feature-registers)): the desktop app's list is in `src/apps/desktop`, and the EFB app's in `src/sim-package/pages`.
   The shell starts each part when its app loads and stops it when the app goes, each call in a `try`, so a part that throws stops only itself, as the panel bridge runs its modules ([modules in the panel bridge](../architecture/02-code-map.md#modules-in-the-panel-bridge)).
 - **Each place** is a region of a screen the shell draws, where it shows every listed part's view for that place, in the list's order.
   Which places each app has, and where each sits, are the apps' design.
@@ -76,8 +76,8 @@ Traffic, ATC audio, and state sync have parts wherever the apps' design shows th
   It gets nothing else of the protocol, and the two apps' APIs use the same names, while each gives a value in its framework's own form.
 - **Shared code:** a part imports only from its app's shell and the message crate's TypeScript types ([tiers](../architecture/02-code-map.md#tiers)), so code that parts share lives in the shell.
 - **npm packages:** a feature's folder has no `package.json` of its own ([building every target](../architecture/02-code-map.md#building-every-target)), so a part's `react` resolves from the root's `node_modules`, where npm's default strategy installs a package that isn't duplicated (documented, [npm's `install-strategy`](https://docs.npmjs.com/cli/v11/using-npm/config)); the app and its parts run one copy unless another workspace pins a second version.
-- **Vite** bundles a part because the app's list imports it, and its development server serves files within the workspace root it finds, a folder whose `package.json` has a `workspaces` field (documented, [Vite's `server.fs.allow`](https://vite.dev/config/server-options#server-fs-allow)), as our root's will, since the code map gives it two npm workspaces; the first build of the desktop app checks that `features/` is in reach.
-- **Tailwind** builds a desktop part's classes from the `@source` that names `features/*/desktop/` ([building every target](../architecture/02-code-map.md#building-every-target)), and the theme's colors and spacing are the shell's.
+- **Vite** bundles a part because the app's list imports it, and its development server serves files within the workspace root it finds, a folder whose `package.json` has a `workspaces` field (documented, [Vite's `server.fs.allow`](https://vite.dev/config/server-options#server-fs-allow)), as our root's will, since the code map gives it two npm workspaces; the first build of the desktop app checks that `src/features/` is in reach.
+- **Tailwind** builds a desktop part's classes from the `@source` that names `src/features/*/desktop/` ([building every target](../architecture/02-code-map.md#building-every-target)), and the theme's colors and spacing are the shell's.
 - **In the EFB app,** a part imports `efb-shell` and the MSFS Avionics Framework, whose copy is the apps' stage's to settle ([decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md)).
 
 ## Slices and commands

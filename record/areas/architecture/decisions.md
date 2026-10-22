@@ -784,7 +784,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
     fsc-editor's module keeps its wire format in TypeScript and in C++, and "nothing but `src/main/sim/link.test.ts` notices when the two" drift (read in fsc-editor, `link/README.md`).
     An engine that the core and the IDE both link leaves nothing to copy.
   - The core, CI, and the IDE already run one checker for profiles ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), and CI and the IDE check a profile without the core.
-  - The tier is the platform, not the host, because "the host" already names the pilot who starts a session ([invite code](../product/03-v1-scope.md#invite-code)), as "the traffic host" and "the ATC host" name pilots ([traffic sync](../product/03-v1-scope.md#traffic-sync), [hearing ATC](../product/03-v1-scope.md#hearing-atc)), and because a newcomer opening the repository reads `platform/` as what the features are built on (user, 2026-10-15).
+  - The tier is the platform, not the host, because "the host" already names the pilot who starts a session ([invite code](../product/03-v1-scope.md#invite-code)), as "the traffic host" and "the ATC host" name pilots ([traffic sync](../product/03-v1-scope.md#traffic-sync), [hearing ATC](../product/03-v1-scope.md#hearing-atc)), and because a newcomer opening the repository reads `src/platform/` as what the features are built on (user, 2026-10-15).
 - **Leaves out:** the units themselves, which [the units](02-code-map.md#the-units) names.
 
 ## The core runs as one loop that takes every input, stamped, from one recorded queue
@@ -922,14 +922,15 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## One repository holds all of Dual Input, its folders by tier, with each feature's parts in one folder
 
 - **Decided:** one repository holds Dual Input's programs, our WASM module, our code in the sim, the backend, the Dual Input IDE once it's built, and the profiles.
-  Its top-level folders are `engines/`, `platform/`, `features/`, `apps/`, `sim-package/`, `profiles/`, `backend/`, and `tools/`.
-  `features/<name>/` holds every part a feature has: its crate in the core, its routines, its panel modules, and its sections of the desktop app and the EFB app.
-  `apps/` holds a folder for each program on the pilot's PC, the core helper's among them as `apps/core-helper/`; `sim-package/` holds what the sim loads from our Community package, `wasm-module/` and `pages/`; and `tools/` holds what builds, checks, and tests them, the profile builder among it (user, 2026-10-15).
+  Its code sits in `src/`, whose folders are `engines/`, `platform/`, `features/`, `apps/`, `sim-package/`, `backend/`, and `relays/`, and beside `src/` at the root sit `profiles/` and `tools/` (user, 2026-10-23).
+  `src/features/<name>/` holds every part a feature has: its crate in the core, its routines, its panel modules, and its sections of the desktop app and the EFB app.
+  `src/apps/` holds a folder for each program on the pilot's PC, the core helper's among them as `src/apps/core-helper/`; `src/sim-package/` holds what the sim loads from our Community package, `wasm-module/` and `pages/`; and `tools/` holds what builds, checks, and tests them, the profile builder among it (user, 2026-10-15).
   The profiles, plugins, and modules live in `profiles/`, with `aircraft/` and `modules/` inside, and an import names a module's path from `profiles/`; CI checks and builds them against the profile engine at the same commit, fails when a released level's schema or declarations differ from its release tag, and publishes them on this repository's GitHub Pages site, apart from Dual Input's releases.
   Nobody outside the core team gets write access, so the profiles have no `CODEOWNERS` file; the core team reviews and merges every profile's pull request, and a profile's authors review it without their approval counting toward a merge.
   This changes [01-format-and-delivery](../profiles/01-format-and-delivery.md#the-repository), which gives the profiles a public repository of their own; [decision 021](../../decisions/021-profiles-and-plugins-apart-from-releases.md)'s "one public repository" holds, since Dual Input's is public from v1.
-  Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-workspace)).
+  Settled in node 5.4 by the user, 2026-10-15, and the code moved into `src/` by the user, 2026-10-23 ([02-code-map](02-code-map.md#the-workspace)).
 - **Because:**
+  - With the code in `src/`, the root shows what each folder is for: the code, what builds and checks it, the profiles, the experiments, and the record, where a folder for each tier, the backend, and the relays sorted in among the rest (user, 2026-10-23).
   - Deleting a feature is then deleting its folder, its modules in the message crate and the profile engine, and its line in each program's list, the code map's first test.
   - One pull request can change the profile engine, a new level's declarations, and the profiles that use it, and no package of our tools has to be published for another repository's CI (user, 2026-10-15).
   - An author can clone the repository without file contents and check out only `profiles/` and the root's files, with git's partial clone and sparse checkout, or edit a profile on GitHub's site, and the repository is public from v1, as GitHub Free for organizations needs for a Pages site (user, 2026-10-15; documented, [Creating a GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)).
@@ -939,9 +940,9 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## One Cargo workspace and one npm lockfile build every target, from the SDK cargo-msfs installs
 
-- **Decided:** every Rust crate is a member of one Cargo workspace, our WASM module's cdylib among them, left out of `default-members` with the rest of `sim-package/` and built by cargo-msfs from its own folder; the routine host and the routines are crates of their own.
+- **Decided:** every Rust crate is a member of one Cargo workspace, our WASM module's cdylib among them, left out of `default-members` with the rest of `src/sim-package/` and built by cargo-msfs from its own folder; the routine host and the routines are crates of their own.
   The bindings' build scripts read the SDK from the copy cargo-msfs installs, and bindgen generates them at each build, telling Cargo every header it read, so nothing derived from the SDK's headers is in the repository; the build prints the SDK version it built against; nothing sets `RUSTFLAGS`.
-  TypeScript has one lockfile, with npm workspaces only in `apps/desktop/` and `backend/`, and a tsconfig for each target's `lib`; the messages' TypeScript types are generated into a folder emptied first, committed, and checked by CI, which fails on a difference when it generates them again.
+  TypeScript has one lockfile, with npm workspaces only in `src/apps/desktop/` and `src/backend/`, and a tsconfig for each target's `lib`; the messages' TypeScript types are generated into a folder emptied first, committed, and checked by CI, which fails on a difference when it generates them again.
   The one version lives in the root `Cargo.toml`'s `[workspace.package]`, and `tools/build.ts`, run by Node, builds every target but the backend and the profiles, and lays out the Community package.
   Settled in node 5.4 by the user, 2026-10-15 ([02-code-map](02-code-map.md#building-every-target)).
 - **Because:**
@@ -972,24 +973,24 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   Outside the core, the platform is the routine host, the panel bridge, and the shells of the EFB app and the desktop app.
   The routine host also holds the platform's own routines, `Hold` and `Mechanisms`.
   A feature's section imports its app's shell and never an app, and neither half of the platform depends on the other.
-  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `apps/` and `sim-package/` is named `dualinput-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
+  New engines hold QuickJS-ng's runtimes, an aircraft's models, and a sim page's socket; each crate in `src/apps/` and `src/sim-package/` is named `dualinput-` and its folder; bug reports stay in the platform's recording crate rather than becoming a feature.
   [The units](02-code-map.md#the-units) names every unit, what it uses, and the systems [node 6](plan.md#6-systems) designs.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-units)).
 - **Because:**
   - Node 6 designs each system as whole units, the map check holds the platform's own layering, and a change to one crate rebuilds only the crates that depend on it (user, 2026-10-15).
   - A moment's type in the crate that raises it puts it in a crate the handling feature already reads, and keeps a list of moments out of the kernel.
-  - A section that imported from its app would tie the app and the feature both ways, while with the shell in the platform, the assemblies in `apps/` and `sim-package/` depend on the features and nothing depends on them.
-  - Bug reports as a feature would need a part in `backend/` for their routes, a folder no feature has (user, 2026-10-15).
+  - A section that imported from its app would tie the app and the feature both ways, while with the shell in the platform, the assemblies in `src/apps/` and `src/sim-package/` depend on the features and nothing depends on them.
+  - Bug reports as a feature would need a part in `src/backend/` for their routes, a folder no feature has (user, 2026-10-15).
   - The module can't link a crate in the core, so the routines the platform feeds from the core live in the routine host (node 5's review, 2026-10-15).
   - Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), and refuses a workspace with two crates of one name (measured on our development machine, 2026-10-15, [architecture log](log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io)).
 - **Leaves out:** where the installer lives, and where the relays' configuration lives, for node 6; and where the list of routines lives if node 7's bench runs them natively.
 
 ## Every crate outside the assemblies, the tools, the transport, and the sim edge keeps the loop's rules, and none draws randomness from the operating system
 
-- **Decided:** the loop's crates are a rule on folders: every crate outside `apps/`, `sim-package/`, `tools/`, the transport, and the sim edge keeps [the loop's rules](02-code-map.md#one-loop), which forbid drawing randomness from the operating system as well as reading a clock, the routine host among them though it never runs on the loop, and the stand-in sim until node 7 decides otherwise.
+- **Decided:** the loop's crates are a rule on folders: every crate outside `src/apps/`, `src/sim-package/`, `tools/`, the transport, and the sim edge keeps [the loop's rules](02-code-map.md#one-loop), which forbid drawing randomness from the operating system as well as reading a clock, the routine host among them though it never runs on the loop, and the stand-in sim until node 7 decides otherwise.
   A random ID the core draws, such as the session's, comes from a ChaCha20 generator in the kernel, which the core's edge seeds once, with 256 bits from the operating system in the core's first input, so a replay draws the same IDs (node 6.1, user, 2026-10-15; [01-loop-and-edge](../core/01-loop-and-edge.md#timers-jobs-and-ids)); and the core's edge hands the sandbox the check behind QuickJS-ng's 100ms limit, so no loop crate reads the clock itself.
   The map check fails a loop crate that reaches, through any crate, one on [its list of crates that do I/O](02-code-map.md#the-map-check), which holds `getrandom` and the Windows crates beside tokio and the networking crates; it reads normal dependencies only, and a listed crate it lets a loop crate reach anyway carries its reason in the script.
-  Only the two edges, the sim edge and our WASM module's, declare foreign functions, and `apps/core` the C runtime's `_set_FMA3_enable` alone, which no binding crate has (node 6.1, 2026-10-15; [01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)), and the map check searches our crates' source for any other; the bindings crate holds SimConnect's types and constants.
+  Only the two edges, the sim edge and our WASM module's, declare foreign functions, and `src/apps/core` the C runtime's `_set_FMA3_enable` alone, which no binding crate has (node 6.1, 2026-10-15; [01-loop-and-edge](../core/01-loop-and-edge.md#the-cores-math)), and the map check searches our crates' source for any other; the bindings crate holds SimConnect's types and constants.
   Settled in node 5 by the user, 2026-10-15 ([02-code-map](02-code-map.md#the-map-check)).
 - **Because:**
   - A replay that drew its own random IDs would name the session differently from the run it replays, and [decision 022](../../decisions/022-random-uuids-as-text.md) has the host's core draw the session's ID (node 5's map, 2026-10-15).
@@ -1009,7 +1010,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - Two threads that stamp and then push can push in the other order: FS Copilot's pre-PR review found, by reading its code, that its resend history could record two events with their times opposite to their sequence numbers, and the receiver would drop one as a copy (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, "R15 · History is ordered by wall clock, not by Seq").
   - With the bytes parsed on the loop, the only code that runs live and never in a replay is the edge's copying, where fsc-editor's replay ran a path of its own and a bug shipped ([02-code-map](02-code-map.md#why-the-seam-sits-at-simconnects-calls)).
   - A replay starts where the run did, since the seed, the handles, sim awareness, and the clients build up from the first input.
-- **Leaves out:** which lock, a choice inside `apps/core`; and what a run's log is kept for, for node 6's design of recording.
+- **Leaves out:** which lock, a choice inside `src/apps/core`; and what a run's log is kept for, for node 6's design of recording.
 
 ## The core's timers wait on a high-resolution waitable timer, and the core links the C runtime statically with its FMA3 math off
 
@@ -1172,10 +1173,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The acknowledgment's own channel costs up to one packet a second, about 58 bytes of headers ([network log, 2.2][n22]), and the heartbeat knows nothing of the cockpit stream.
 - **Leaves out:** nothing.
 
-## Our relays run on two servers of ours, configured from relays/
+## Our relays run on two servers of ours, configured from src/relays/
 
 - **Decided:** two DigitalOcean droplets, in New York and Frankfurt, run `iroh-relay` 1.3, at $4 to $6 a month each (documented, [research report 06](../network/results/2026-10-10-transport-research-reports/06-relay-hosting-and-cost.txt), prices fetched 2026-10-09).
-  `relays/relays.toml` lists each relay's region, URL, and cap once, and a private repository of ours lists each relay's tokens, newest first, which developers trusted with them are given access to (user, 2026-10-18); each release's default relay list compiles in from both, and `relays/deploy.ts` renders each relay's configuration from both; a relay of our own, if we ever write one, lives in `relays/` too.
+  `src/relays/relays.toml` lists each relay's region, URL, and cap once, and a private repository of ours lists each relay's tokens, newest first, which developers trusted with them are given access to (user, 2026-10-18); each release's default relay list compiles in from both, and `src/relays/deploy.ts` renders each relay's configuration from both; a relay of our own, if we ever write one, lives in `src/relays/` too.
   Settled in node 6.4 by the user, 2026-10-16 ([02-units](../network/02-units.md#the-relays)).
 - **Because:**
   - n0's shared relays admit an endpoint through a token n0's own preset mints from a project API key, state a 5 MB/s limit without saying what it applies to, and lock no version, which only Dedicated relays do, at $199 a month for each region (documented, [shared relays](https://docs.iroh.computer/iroh-services/relays/shared), [dedicated relays](https://docs.iroh.computer/iroh-services/relays/managed), [pricing](https://www.iroh.computer/pricing), undated, read 2026-10-16), where [decision 033](../../decisions/033-relays-run-iroh-relay-unmodified.md) has tokens of our own, a cap for each client, and pinned versions.
@@ -1712,7 +1713,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## Every x86_64 program links the C runtime statically through one line of the workspace's Cargo config
 
-- **Decided:** the root's `.cargo/config.toml` gives `x86_64-pc-windows-msvc` the flag `-C target-feature=+crt-static`, so the core, the core helper, the desktop app's Rust side, and the tools link the whole C runtime statically; `tauri.conf.json` turns Tauri's `staticVCRuntime` off, so the one entry decides the desktop app's too; `apps/core` holds a `compile_error!` for a build without the flag; `rust-toolchain.toml` names Cargo 1.85 or later; CI installs Rust with rustup, and no release uses a Visual C++ redistributable.
+- **Decided:** the root's `.cargo/config.toml` gives `x86_64-pc-windows-msvc` the flag `-C target-feature=+crt-static`, so the core, the core helper, the desktop app's Rust side, and the tools link the whole C runtime statically; `tauri.conf.json` turns Tauri's `staticVCRuntime` off, so the one entry decides the desktop app's too; `src/apps/core` holds a `compile_error!` for a build without the flag; `rust-toolchain.toml` names Cargo 1.85 or later; CI installs Rust with rustup, and no release uses a Visual C++ redistributable.
   This settles the line 6.1 raised on how the core links the C runtime statically.
   Settled in node 6.18 by the user, 2026-10-18 ([the C runtime](../build/01-the-build.md#the-c-runtime)).
 - **Because:**
@@ -1733,7 +1734,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The sim's stock files live in the tree, and a build on a PC with the sim compares the sim's own with them
 
-- **Decided:** `sim-package/stock/` holds the sim's `VCockpit.js` and BlurPage's two files byte for byte, with `stock.json` naming their sim release and hashes; the build makes our copies from them, refusing a missing anchor; on a PC with the sim's Steam edition, `tools/build.ts` stops when one of the sim's three files differs from `stock.json`, and `tools/stock.ts` brings the new ones in, only from Steam's public branch, while on a beta branch the build warns; CI checks the files against `stock.json`.
+- **Decided:** `src/sim-package/stock/` holds the sim's `VCockpit.js` and BlurPage's two files byte for byte, with `stock.json` naming their sim release and hashes; the build makes our copies from them, refusing a missing anchor; on a PC with the sim's Steam edition, `tools/build.ts` stops when one of the sim's three files differs from `stock.json`, and `tools/stock.ts` brings the new ones in, only from Steam's public branch, while on a beta branch the build warns; CI checks the files against `stock.json`.
   This settles what installing and updating's decision on our package and 02-clients-and-panel-bridge leave to 6.18: where the stock files live, and how the build notices a sim update that changes them.
   Settled in node 6.18 by the user, 2026-10-18 ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 - **Because:**
@@ -1767,7 +1768,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The message crate's hash is SHA-256 over its own source and the locked versions of what it depends on, and a committed stamp carries it and the version to TypeScript
 
-- **Decided:** the message crate's build script hashes its `Cargo.toml`, its build script, and every file under `src/`, with CRLF taken as LF, then the name and version of every package `Cargo.lock` reaches from it, into `messages::HASH`, and runs again only when one of those files changes; the `cargo test` that writes ts-rs's types also writes `engines/messages/ts/stamp.ts` with the version and the hash, which is committed and which CI's check for a difference covers.
+- **Decided:** the message crate's build script hashes its `Cargo.toml`, its build script, and every file under `src/`, with CRLF taken as LF, then the name and version of every package `Cargo.lock` reaches from it, into `messages::HASH`, and runs again only when one of those files changes; the `cargo test` that writes ts-rs's types also writes `src/engines/messages/ts/stamp.ts` with the version and the hash, which is committed and which CI's check for a difference covers.
   This settles the spine's item in [left open](01-spine.md#left-open) on how the build hashes the message crate, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) leaves it.
   Settled in node 6.18 by the user, 2026-10-18 ([the message crate's hash](../build/01-the-build.md#the-message-crates-hash)).
 - **Because:**
@@ -1847,8 +1848,8 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The stand-in sim takes the edge's place in a bench build of the core, under the edge's rules, and runs the routines natively from a list both builds link
 
-- **Decided:** `apps/core`'s Cargo feature `stand-in`, which no release build turns on, links `stand-in-sim` and the routines, built natively, where the edge goes, and registers the test units and the test routine the cases name; the stand-in runs off the loop on a thread and clock of its own, and its stamped inputs are recorded like the edge's, so it keeps the edge's rules, and the code map exempts it from the loop's as its tiers exempt the sim edge.
-  It answers every kind of call v1's units make with SimConnect's own messages and tagged exceptions; models an aircraft as a table of named variables seeded from a recording of it in the real sim, moving by its velocities unless frozen, with behavior and faults a scenario scripts; sends `Frame` events from its own timer, 89 a second unless a scenario sets another rate; runs the routine host and the routines in its frame through a trait the bench build fills, from the module's list of routines, which moves into a library crate, `sim-package/routines/`, that the module and the bench build both link, the one dependency on `sim-package/` the code map allows; hands the core's CommBus calls for JavaScript to the bench's fake pages; and reports a stub the bench starts for it as the sim's process, watched by its ID, named `FlightSimulator2024.exe` only for the desktop app's cases.
+- **Decided:** `src/apps/core`'s Cargo feature `stand-in`, which no release build turns on, links `stand-in-sim` and the routines, built natively, where the edge goes, and registers the test units and the test routine the cases name; the stand-in runs off the loop on a thread and clock of its own, and its stamped inputs are recorded like the edge's, so it keeps the edge's rules, and the code map exempts it from the loop's as its tiers exempt the sim edge.
+  It answers every kind of call v1's units make with SimConnect's own messages and tagged exceptions; models an aircraft as a table of named variables seeded from a recording of it in the real sim, moving by its velocities unless frozen, with behavior and faults a scenario scripts; sends `Frame` events from its own timer, 89 a second unless a scenario sets another rate; runs the routine host and the routines in its frame through a trait the bench build fills, from the module's list of routines, which moves into a library crate, `src/sim-package/routines/`, that the module and the bench build both link, the one dependency on `src/sim-package/` the code map allows; hands the core's CommBus calls for JavaScript to the bench's fake pages; and reports a stub the bench starts for it as the sim's process, watched by its ID, named `FlightSimulator2024.exe` only for the desktop app's cases.
   This settles [02-code-map](02-code-map.md#left-open)'s items on the stand-in's model, its frames, how it plays our WASM module, how a core on it reaches the sim's pages, whether it keeps the loop's rules, and where the list of routines lives.
   Settled in node 7 by the user, 2026-10-18 ([the stand-in sim](../build/02-testing.md#the-stand-in-sim)).
 - **Because:**

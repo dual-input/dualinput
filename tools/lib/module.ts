@@ -40,7 +40,7 @@ declare const WebAssembly: {
  */
 export function buildModule(): string {
   fs.mkdirSync(path.dirname(MODULE), { recursive: true })
-  run("cargo-msfs", ["build", "msfs2024", "-i", "sim-package/wasm-module", "-o", MODULE])
+  run("cargo-msfs", ["build", "msfs2024", "-i", "src/sim-package/wasm-module", "-o", MODULE])
   return MODULE
 }
 

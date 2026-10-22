@@ -280,7 +280,7 @@ Dual Input was called Crosscheck until 2026-10-19.
 ## Words and patterns to cut
 
 Each of these usually marks a sentence written on autopilot.
-[prose-lint](../../scripts/prose-lint.mjs) reads this table and flags every hit outside code, quotation marks, and URLs, including inflected forms (`robustness`, `leveraged`).
+[prose-lint](../../tools/prose-lint.mjs) reads this table and flags every hit outside code, quotation marks, and URLs, including inflected forms (`robustness`, `leveraged`).
 It checks Markdown, and the comments in JavaScript, TypeScript, Rust, C++, JSON, and TOML files, where it also flags history such as "previously" or "no longer", which [Code comments](#code-comments) rules out.
 The fix is almost always to delete the word or say the concrete thing it stood in for.
 A flagged word doing real work can stay: "actually" correcting a belief the text just stated is fine.
@@ -359,9 +359,9 @@ The code already states what it does, so a comment earns its place by saying wha
    A workaround for sim behavior always cites how we know, as a document does: a log entry, a document in `record/`, or an SDK page.
    Skip the citation for anything a compiler or tool reports the moment it breaks.
 4. **Where a value lives in two places, say so in both:** "`sdkFolder` in tools/lib/sdk.ts names the same folder, so change both together."
-5. **Show a format by example, and make the example explain itself:** "`engines/*` makes every folder under engines/ a workspace member", not "a glob such as `engines/*`".
+5. **Show a format by example, and make the example explain itself:** "`src/engines/*` makes every folder under src/engines/ a workspace member", not "a glob such as `src/engines/*`".
 6. **Make each sentence follow from the one before.**
-7. **Start a sentence that tells the reader what to do on a later change with its trigger:** "When you add a TypeScript folder that a workspace glob matches, such as engines/page-client, list it in an `exclude` list beside `members`."
+7. **Start a sentence that tells the reader what to do on a later change with its trigger:** "When you add a TypeScript folder that a workspace glob matches, such as src/engines/page-client, list it in an `exclude` list beside `members`."
 8. **Use the present tense for what holds:** "SimConnect rejects the entry", not "rejected".
    If the reader needs the measurement behind it, give it a past-tense sentence of its own with its citation, and otherwise leave it in the record.
 

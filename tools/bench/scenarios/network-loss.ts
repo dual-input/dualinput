@@ -99,7 +99,7 @@ test("v1's busiest mix through the relay: its peak rate, the cores' CPU, and the
   // once it exits, which writes its log whole.
   b.send({ kind: "exit" })
   await b.exited
-  // The first whole minute's line, as apps/core/src/loop_stats.rs writes it.
+  // The first whole minute's line, as src/apps/core/src/loop_stats.rs writes it.
   const minute = b
     .log()
     .split(/\r?\n/)

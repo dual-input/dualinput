@@ -10,16 +10,16 @@ import net from "node:net"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import type { ClientsAct } from "../../engines/messages/ts/bench/ClientsAct.ts"
-import type { FromCore } from "../../engines/messages/ts/bench/FromCore.ts"
-import type { HelperAct } from "../../engines/messages/ts/bench/HelperAct.ts"
-import type { NetAct } from "../../engines/messages/ts/bench/NetAct.ts"
-import type { PortFile } from "../../engines/messages/ts/clients/PortFile.ts"
-import type { Hello } from "../../engines/messages/ts/bench/Hello.ts"
-import type { SimCall } from "../../engines/messages/ts/bench/SimCall.ts"
-import type { StandInAct } from "../../engines/messages/ts/bench/StandInAct.ts"
-import type { ToCore } from "../../engines/messages/ts/bench/ToCore.ts"
-import { HASH, VERSION } from "../../engines/messages/ts/stamp.ts"
+import type { ClientsAct } from "../../src/engines/messages/ts/bench/ClientsAct.ts"
+import type { FromCore } from "../../src/engines/messages/ts/bench/FromCore.ts"
+import type { HelperAct } from "../../src/engines/messages/ts/bench/HelperAct.ts"
+import type { NetAct } from "../../src/engines/messages/ts/bench/NetAct.ts"
+import type { PortFile } from "../../src/engines/messages/ts/clients/PortFile.ts"
+import type { Hello } from "../../src/engines/messages/ts/bench/Hello.ts"
+import type { SimCall } from "../../src/engines/messages/ts/bench/SimCall.ts"
+import type { StandInAct } from "../../src/engines/messages/ts/bench/StandInAct.ts"
+import type { ToCore } from "../../src/engines/messages/ts/bench/ToCore.ts"
+import { HASH, VERSION } from "../../src/engines/messages/ts/stamp.ts"
 import { ROOT } from "../lib/repo.ts"
 
 /**
@@ -361,14 +361,14 @@ export function replay(file: string, level = "info"): Replayed {
   const result = spawnSync(benchCore(), ["replay", file, "--log", level], { encoding: "utf8" })
   const ms = performance.now() - started
   assert.equal(result.status, 0, `the replay of ${file} didn't match its run:\n${result.stdout}${result.stderr}`)
-  // As dualinput-core's replay prints it, in apps/core/src/lib.rs, such as "replayed 76
+  // As dualinput-core's replay prints it, in src/apps/core/src/lib.rs, such as "replayed 76
   // inputs, and all 3 checkpoints matched", so change both together.
   const said =
     /^replayed (\d+) inputs?, and (?:it held no checkpoint to compare|its (1) checkpoint matched|all (\d+) checkpoints matched)(, up to the last whole frame of a cut recording)?$/m.exec(
       result.stdout,
     )
   assert.ok(said, `the replay of ${file} said something else:\n${result.stdout}`)
-  // apps/core/src/recording/replay.rs writes the log into a `replay` folder beside the
+  // src/apps/core/src/recording/replay.rs writes the log into a `replay` folder beside the
   // recording, so change both together.
   const log = path.join(path.dirname(file), "replay", "log.txt")
   return { file, inputs: Number(said[1]), checkpoints: Number(said[2] ?? said[3] ?? 0), cut: said[4] !== undefined, ms, log }

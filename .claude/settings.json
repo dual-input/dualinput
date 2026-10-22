@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": ["Bash(node scripts/prose-lint.mjs:*)"]
+    "allow": ["Bash(node tools/prose-lint.mjs:*)"]
   },
   "hooks": {
     "PostToolUse": [
@@ -10,7 +10,7 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/scripts/prose-lint.mjs", "--hook"]
+            "args": ["${CLAUDE_PROJECT_DIR}/tools/prose-lint.mjs", "--hook"]
           },
           {
             "type": "command",

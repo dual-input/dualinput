@@ -50,7 +50,7 @@ The code map's [sim seam](../architecture/02-code-map.md#the-sim-seam), [work in
 | `sim-awareness` | Engine | One step function from a sim signal to the sim's state, with no clock and no I/O | On the loop, on the bench, and in the IDE |
 | `sim-service` | Platform | The connections, the calls features make, routines' feeds, the module's status and the unfreeze, the masking group, the announcement, the world map's requests, aircraft awareness, and the checks of packages on disk; it raises `SimChanged` and `AircraftChanged` | On the loop |
 | `routine-host` | Platform, outside the core | Routines, their slots and wants, the freeze, and the module's status slot | In our WASM module, and natively on the bench |
-| `sim-package/wasm-module` | Sim package | The module's edge on the sim's APIs, and the list of routines | In the sim |
+| `src/sim-package/wasm-module` | Sim package | The module's edge on the sim's APIs, and the list of routines | In the sim |
 
 Sim awareness is an engine so that the IDE can link it, as it links the sim client, rather than work out the sim's state again, as fsc-editor did on every `AircraftLoaded` (read in fsc-editor, `src/main/sim/session.ts`, `aircraftChanged`), and so that the bench can feed it recorded signals with nothing else running (user, 2026-10-15).
 

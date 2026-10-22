@@ -1,13 +1,13 @@
 # A recording replays the core's loop only if nothing on it reads a clock, draws an
 # unseeded random number, does I/O, waits, starts a thread, or visits a HashMap in its order,
 # which is seeded at random (record/areas/architecture/02-code-map.md, "One loop"). So
-# Clippy fails a call to any function below in the loop's crates: every crate outside apps/,
-# sim-package/, tools/, the transport, the sim edge, and the stand-in sim. The root
+# Clippy fails a call to any function below in the loop's crates: every crate outside src/apps/,
+# src/sim-package/, tools/, the transport, the sim edge, and the stand-in sim. The root
 # Cargo.toml and EDGE_ENGINES in tools/map-check.ts list the same crates, so change all
 # three together.
 #
-# Clippy reads the clippy.toml nearest a crate's folder, so apps/ and tools/ each have one of
-# their own, which lists nothing. When you add the first crate under sim-package/, or an
+# Clippy reads the clippy.toml nearest a crate's folder, so src/apps/ and tools/ each have one of
+# their own, which lists nothing. When you add the first crate under src/sim-package/, or an
 # edge engine, the transport, the sim edge, or the stand-in sim, give its folder one too.
 #
 # Clippy prints each reason as a note under the error, so each says what to do instead.

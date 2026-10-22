@@ -8,7 +8,7 @@ import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { HASH, VERSION } from "../../../engines/messages/ts/stamp.ts"
+import { HASH, VERSION } from "../../../src/engines/messages/ts/stamp.ts"
 import { BenchRun, type Core } from "../cores.ts"
 import { FakePage, RawSocket } from "../pages.ts"
 

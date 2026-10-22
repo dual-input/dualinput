@@ -25,7 +25,7 @@ Read `.claude/rules/writing.md` before you write the report, because the report 
 4. Run the checks:
    - `node --check` on every file that runs in a panel.
    - A search of those files for every syntax form and function that "Before writing code that runs in a panel" in CLAUDE.md lists, because `node --check` accepts them.
-   - `node scripts/prose-lint.mjs` on the changed JavaScript, TypeScript, and C++ files, because it reads any other file as Markdown.
+   - `node tools/prose-lint.mjs` on the changed JavaScript, TypeScript, and C++ files, because it reads any other file as Markdown.
    - The tests and builds the plan stage names.
 
    Report failures, but spend your attention on what these can't see.

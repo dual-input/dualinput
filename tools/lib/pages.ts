@@ -18,7 +18,7 @@ import { STOCK } from "./stock.ts"
 export const PAGES = path.join(ROOT, "target", "sim-pages")
 
 /** Each bundle, by its entry, and where our package puts it. */
-const BUNDLES: { entry: string; to: string }[] = [{ entry: "sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" }]
+const BUNDLES: { entry: string; to: string }[] = [{ entry: "src/sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" }]
 
 /** Our VCockpit.js, where our package puts it, so it takes the stock file's place in every cockpit panel. */
 const VCOCKPIT = "html_ui/Pages/VCockpit/Core/VCockpit.js"
@@ -29,8 +29,8 @@ const VCOCKPIT = "html_ui/Pages/VCockpit/Core/VCockpit.js"
  * `createInstrument`, after the sim has set the instrument up.
  */
 const BLOCKS: { file: string; anchor: string; where: "before" | "after" }[] = [
-  { file: "platform/panel-bridge/vcockpit/top.js", anchor: "class VCockpitInstrumentData {", where: "before" },
-  { file: "platform/panel-bridge/vcockpit/create.js", anchor: "this.setupInstrument(template);", where: "after" },
+  { file: "src/platform/panel-bridge/vcockpit/top.js", anchor: "class VCockpitInstrumentData {", where: "before" },
+  { file: "src/platform/panel-bridge/vcockpit/create.js", anchor: "this.setupInstrument(template);", where: "after" },
 ]
 
 /** A file the build made for our package: where it is, and where the package puts it. */

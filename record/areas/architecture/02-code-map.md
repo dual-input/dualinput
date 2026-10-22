@@ -10,12 +10,12 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > Since 2026-10-18, [testing](../build/02-testing.md) settles [left open](#left-open)'s items on the stand-in sim and on whether one loop meets its budgets, and changes three things here:
 >
 > - The stand-in sim keeps the sim edge's rules, not the loop's, since it runs where the edge runs, off the loop with a clock of its own, and its inputs are stamped and recorded like the edge's, so [tiers](#tiers) exempts it as it exempts the sim edge ([its rules](../build/02-testing.md#its-rules)).
-> - The module's list of routines is a library crate of its own, `sim-package/routines/`, which `sim-package/wasm-module/` and the bench build of the core both link, where [the workspace](#the-workspace) keeps it in the module; that link of `apps/core`'s is the one dependency on `sim-package/` that [tiers](#tiers)' rule allows ([our WASM module](../build/02-testing.md#our-wasm-module)).
-> - `apps/core` has a Cargo feature, `stand-in`, that no release build turns on, which puts the stand-in where the edge goes and registers the test units and the test routine the cases name, and `tools/bench/` holds the bench's scenarios, its fake pages, its local profiles' site, and the stand-in core helper ([its place](../build/02-testing.md#its-place), [where it lives](../build/02-testing.md#where-it-lives)).
+> - The module's list of routines is a library crate of its own, `src/sim-package/routines/`, which `src/sim-package/wasm-module/` and the bench build of the core both link, where [the workspace](#the-workspace) keeps it in the module; that link of `src/apps/core`'s is the one dependency on `src/sim-package/` that [tiers](#tiers)' rule allows ([our WASM module](../build/02-testing.md#our-wasm-module)).
+> - `src/apps/core` has a Cargo feature, `stand-in`, that no release build turns on, which puts the stand-in where the edge goes and registers the test units and the test routine the cases name, and `tools/bench/` holds the bench's scenarios, its fake pages, its local profiles' site, and the stand-in core helper ([its place](../build/02-testing.md#its-place), [where it lives](../build/02-testing.md#where-it-lives)).
 >
 > Since 2026-10-18, building stage 1 of [the build plan](../build/plan.md#1-the-workspace-and-its-checks) changes three things in [the workspace](#the-workspace) ([build log](../build/log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import)):
 >
-> - Cargo refuses a member glob that matches no folder, or a folder without a `Cargo.toml`, so the root `Cargo.toml` adds each tier's glob with the tier's first crate, and its `exclude` names each folder of TypeScript a glob would match, such as `engines/page-client`.
+> - Cargo refuses a member glob that matches no folder, or a folder without a `Cargo.toml`, so the root `Cargo.toml` adds each tier's glob with the tier's first crate, and its `exclude` names each folder of TypeScript a glob would match, such as `src/engines/page-client`.
 > - `.cargo/config.toml` also sets ts-rs's `TS_RS_EXPORT_DIR` and `TS_RS_LARGE_INT`, so a plain `cargo test` writes the messages' types into the message crate's `ts/`, typed as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) asks.
 > - `node tools/check.ts` runs each check [CI](#ci) lists that the tree has something for, and [the map check](#the-map-check) reads TypeScript's imports from `tsc --explainFiles`, which lists type-only ones.
 >
@@ -28,9 +28,11 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
 >
 > - [One loop](#one-loop) leaves out no input, and a replay checks every unit, where it has a unit with an unrecorded input run unchecked and register no guard, catch-up step, or cockpit kind; so no unit draws fewer handles in a replay than live, which each unit's own counters in [the registry and moments](#the-registry-and-moments) guard against.
-> - The recording crate holds no uploads or bug reports in v1, and `backend/` no reports, where [the platform](#the-platform) and [systems](#systems) list them; they come after v1.
+> - The recording crate holds no uploads or bug reports in v1, and `src/backend/` no reports, where [the platform](#the-platform) and [systems](#systems) list them; they come after v1.
 >
 > Since 2026-10-22, a cockpit panel's first message names its panel, such as `VCockpit66`, and the core replaces a socket when a new first message names the same panel, where [modules in the panel bridge](#modules-in-the-panel-bridge) has it replace one when the new message names the same instruments; that closed a live socket, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED` (user, 2026-10-22; [core log](../core/log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
+>
+> Since 2026-10-23, the code sits in `src/`, the tiers' folders, `apps/`, `sim-package/`, `backend/`, and `relays/` among it, while `tools/` and `profiles/` stay at the root, and prose-lint moves from `scripts/` into `tools/`; the paths in this document name each folder where it is now (user, 2026-10-23; [decisions](decisions.md#one-repository-holds-all-of-dual-input-its-folders-by-tier-with-each-features-parts-in-one-folder)).
 
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
@@ -61,18 +63,18 @@ The map allows these, and [the map check](#the-map-check) holds each:
 - The platform outside the core depends on no crate of the core's, nor the core's on it, and the routine host depends on the message crate alone.
 - No feature depends on another feature's code, nor names another feature's module in the message crate or the profile engine ([what a handler sees and does](#what-a-handler-sees-and-does)).
 - Of our code, a feature's routines depend only on the message crate, the routine host, and an engine that keeps the loop's rules and builds for wasm32, such as `object-mirror` ([work in the sim](#work-in-the-sim)); its panel modules on the panel bridge and the message crate's types; and its sections on its app's shell and the message crate's types.
-- Nothing depends on `apps/`, `sim-package/`, or `tools/`.
-- The loop's crates, every crate outside `apps/`, `sim-package/`, `tools/`, the transport, and the sim edge, keep [the loop's rules](#one-loop), and depend on neither tokio nor any crate on the map check's list of crates that do I/O; the stand-in sim is held to them until [node 7](plan.md#7-testing) decides otherwise.
-- Only the two edges, the sim edge and our WASM module's in `sim-package/wasm-module/`, and `apps/core` declare foreign functions, so only the edges call `SimConnect.dll` and the sim's APIs ([the sim seam](#the-sim-seam)); `apps/core` declares one, the C runtime's `_set_FMA3_enable` ([the core's math](../core/01-loop-and-edge.md#the-cores-math)).
+- Nothing depends on `src/apps/`, `src/sim-package/`, or `tools/`.
+- The loop's crates, every crate outside `src/apps/`, `src/sim-package/`, `tools/`, the transport, and the sim edge, keep [the loop's rules](#one-loop), and depend on neither tokio nor any crate on the map check's list of crates that do I/O; the stand-in sim is held to them until [node 7](plan.md#7-testing) decides otherwise.
+- Only the two edges, the sim edge and our WASM module's in `src/sim-package/wasm-module/`, and `src/apps/core` declare foreign functions, so only the edges call `SimConnect.dll` and the sim's APIs ([the sim seam](#the-sim-seam)); `src/apps/core` declares one, the C runtime's `_set_FMA3_enable` ([the core's math](../core/01-loop-and-edge.md#the-cores-math)).
 
 A system is the units one design doc designs, in one area, and [node 6](plan.md#6-systems) of the plan designs each of [the systems](#systems).
 Each contract is defined once and linked or generated wherever it's used: a feature's messages stay in the message crate of [decision 025](../../decisions/025-messages-in-one-rust-crate.md), and its profile block, such as pointer sync's `displays`, stays in the profile engine, which the core, CI, and the IDE share ([01-format-and-delivery](../profiles/01-format-and-delivery.md#what-fails-a-load)), so deleting a feature deletes its module in the message crate and its module in the profile engine too (user, 2026-10-14).
 
 ## The units
 
-Each unit is a folder in its tier's folder, named as in the picture below.
+Each unit is a folder in its tier's folder, named as in the picture below; the picture's tier folders sit in `src/`, except `tools/`, which sits at the root.
 The tables say what each owns and what it uses; the map check holds [the rules in tiers](#tiers), not these columns, so CI passes a dependency a table doesn't list when the rules allow it.
-`apps/` holds the programs on the pilot's PC, `sim-package/` what the sim loads from our Community package, and `tools/` what builds, checks, and tests them (user, 2026-10-15).
+`src/apps/` holds the programs on the pilot's PC, `src/sim-package/` what the sim loads from our Community package, and `tools/` what builds, checks, and tests them (user, 2026-10-15).
 
 ```text
 apps/         core  core-helper  desktop  ide (later)
@@ -93,7 +95,7 @@ engines/      sync-engine  profile-build  sim-edge  stand-in-sim
 ```
 
 The platform outside the core runs in our WASM module, in each cockpit panel, and in the two apps that take features' sections.
-The platform is split this way, and named the platform rather than the host, because "the host" already names the pilot who starts a session ([invite code](../product/03-v1-scope.md#invite-code)), as "the traffic host" and "the ATC host" name pilots ([traffic sync](../product/03-v1-scope.md#traffic-sync), [hearing ATC](../product/03-v1-scope.md#hearing-atc)), and because a newcomer reads `platform/` as what the features are built on (user, 2026-10-15).
+The platform is split this way, and named the platform rather than the host, because "the host" already names the pilot who starts a session ([invite code](../product/03-v1-scope.md#invite-code)), as "the traffic host" and "the ATC host" name pilots ([traffic sync](../product/03-v1-scope.md#traffic-sync), [hearing ATC](../product/03-v1-scope.md#hearing-atc)), and because a newcomer reads `src/platform/` as what the features are built on (user, 2026-10-15).
 
 ### Engines
 
@@ -141,7 +143,7 @@ v1 builds no plugins, so the platform has no plugins crate ([plugins and the san
 
 ### Features
 
-Each feature is a folder in `features/`, its crate in the core named for it and its routines' crate named for it with `-routines`.
+Each feature is a folder in `src/features/`, its crate in the core named for it and its routines' crate named for it with `-routines`.
 A feature's section in an app is one part, which the app's list names in one line, and the shells reach a feature only through the notices, the settings, the match check's differences, and the role keys' labels ([a feature's parts](../interface/01-apps.md#a-features-parts)).
 
 | Unit | Parts, as v1's scope suggests and node 6 settles | Uses, beyond the kernel and the message crate |
@@ -167,15 +169,15 @@ A feature's section in an app is one part, which the app's list names in one lin
 
 | Unit | What it is | Uses, of ours |
 | --- | --- | --- |
-| `apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets, the timer thread, which waits on a high-resolution waitable timer, the WebSocket server, the core helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the seed of the kernel's random IDs; it declares one foreign function, the C runtime's `_set_FMA3_enable`, to turn FMA3 off in the C runtime it links statically, and stops a build whose `RUSTFLAGS` replaced that static runtime ([the core's math](../core/01-loop-and-edge.md#the-cores-math), [the C runtime](../build/01-the-build.md#the-c-runtime)) | Every crate on the core's side, the transport, and the sim edge |
-| `apps/core-helper` | The core helper: Raw Input and audio, and speech with the voice phrases, a Soon pick | messages |
-| `apps/desktop` | Tauri's Rust side, which holds the watcher's jobs and runs from login as a tray icon, and links the `velopack` crate, as no other program does, since a program that runs Velopack's startup applies a downloaded update ([installing and updating](../install/01-installing-and-updating.md#the-installer-and-the-updater)); Vite's entry; and the list of the desktop app's sections | desktop-shell, each feature's `desktop/`, messages |
-| `sim-package/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers, and the list of routines | routine-host, each feature's `routines/` |
-| `sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of sections, the banner's entry, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, page-client, each feature's `efb/` |
+| `src/apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets, the timer thread, which waits on a high-resolution waitable timer, the WebSocket server, the core helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the seed of the kernel's random IDs; it declares one foreign function, the C runtime's `_set_FMA3_enable`, to turn FMA3 off in the C runtime it links statically, and stops a build whose `RUSTFLAGS` replaced that static runtime ([the core's math](../core/01-loop-and-edge.md#the-cores-math), [the C runtime](../build/01-the-build.md#the-c-runtime)) | Every crate on the core's side, the transport, and the sim edge |
+| `src/apps/core-helper` | The core helper: Raw Input and audio, and speech with the voice phrases, a Soon pick | messages |
+| `src/apps/desktop` | Tauri's Rust side, which holds the watcher's jobs and runs from login as a tray icon, and links the `velopack` crate, as no other program does, since a program that runs Velopack's startup applies a downloaded update ([installing and updating](../install/01-installing-and-updating.md#the-installer-and-the-updater)); Vite's entry; and the list of the desktop app's sections | desktop-shell, each feature's `desktop/`, messages |
+| `src/sim-package/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers, and the list of routines | routine-host, each feature's `routines/` |
+| `src/sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of sections, the banner's entry, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, page-client, each feature's `efb/` |
 | `tools/profile-builder` | Checks each profile and builds its bundle, for CI and for authors | profile-build |
 | `tools/profile-author` | The seat tool and the click tool ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)) | sim-client, sim-edge, aircraft-model, messages |
 
-Each crate in `apps/` and `sim-package/` is named `dualinput-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Dual Input's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
+Each crate in `src/apps/` and `src/sim-package/` is named `dualinput-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Dual Input's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
 
 ### The registry and moments
 
@@ -193,11 +195,11 @@ Each system is one of [the spine's parts](01-spine.md#parts), with two changes: 
 
 | System | Area | Units | Designed in |
 | --- | --- | --- | --- |
-| The core's loop and edge | `core/` | kernel, `apps/core` | [One loop](#one-loop), [01-loop-and-edge](../core/01-loop-and-edge.md) |
-| The sim seam and our WASM module | `core/` | sim-service, sim-client, sim-awareness, sim-edge, simconnect-types, routine-host, `sim-package/wasm-module` | [The sim seam](#the-sim-seam), [work in the sim](#work-in-the-sim), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) |
+| The core's loop and edge | `core/` | kernel, `src/apps/core` | [One loop](#one-loop), [01-loop-and-edge](../core/01-loop-and-edge.md) |
+| The sim seam and our WASM module | `core/` | sim-service, sim-client, sim-awareness, sim-edge, simconnect-types, routine-host, `src/sim-package/wasm-module` | [The sim seam](#the-sim-seam), [work in the sim](#work-in-the-sim), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) |
 | Clients and the panel bridge | `core/` | clients, page-client, panel-bridge | [What the bridge owns](#what-the-bridge-owns), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md) |
-| The core helper | `core/` | core-helper-service, `apps/core-helper` | [04-core-helper](../core/04-core-helper.md) |
-| The network | `network/` | network, transport, `backend/`'s invite codes | [01-between-machines](../network/01-between-machines.md), [02-units](../network/02-units.md) |
+| The core helper | `core/` | core-helper-service, `src/apps/core-helper` | [04-core-helper](../core/04-core-helper.md) |
+| The network | `network/` | network, transport, `src/backend/`'s invite codes | [01-between-machines](../network/01-between-machines.md), [02-units](../network/02-units.md) |
 | Sync | `sync/` | cockpit-stream, sync-engine, state-sync | [01-profile-entries](../sync/01-profile-entries.md) to [05-units](../sync/05-units.md) |
 | The session | `session/` | session, rate-and-pause, go-to, the menu script | [01-roles-and-members](../session/01-roles-and-members.md), [02-units](../session/02-units.md) |
 | Control | `control/` | take-control, voice | [01-take-control](../control/01-take-control.md) |
@@ -207,9 +209,9 @@ Each system is one of [the spine's parts](01-spine.md#parts), with two changes: 
 | Pointer sync | `pointer-sync/` | pointer-sync | [01-pointer-sync](../pointer-sync/01-pointer-sync.md) |
 | Avatars | `avatars/` | avatars, aircraft-model, msfs-gltf, msfs-rpn, ray-cast | [01-avatars](../avatars/01-avatars.md) |
 | Traffic and ATC | `traffic-atc/` | traffic, atc-audio | [01-traffic-and-atc](../traffic-atc/01-traffic-and-atc.md) |
-| The apps | `interface/` | efb-shell, desktop-shell, `apps/desktop`, `sim-package/pages` | [01-apps](../interface/01-apps.md) |
-| Recording and bug reports | `recording/` | recording, recording-format, `backend/`'s reports | [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) |
-| Installing and updating | `install/` | `apps/desktop`'s watcher jobs, and the installer, Velopack's Setup.exe | [01-installing-and-updating](../install/01-installing-and-updating.md) |
+| The apps | `interface/` | efb-shell, desktop-shell, `src/apps/desktop`, `src/sim-package/pages` | [01-apps](../interface/01-apps.md) |
+| Recording and bug reports | `recording/` | recording, recording-format, `src/backend/`'s reports | [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) |
+| Installing and updating | `install/` | `src/apps/desktop`'s watcher jobs, and the installer, Velopack's Setup.exe | [01-installing-and-updating](../install/01-installing-and-updating.md) |
 | The build | `build/` | `tools/`, CI, the map check | [The workspace](#the-workspace), [01-the-build](../build/01-the-build.md) |
 
 ## The platform's interface
@@ -661,7 +663,7 @@ A unit that needs a name of a new kind adds the kind to this table.
 ## The workspace
 
 One repository holds all of Dual Input: its programs, our WASM module, our code in the sim, the backend, and the profiles (user, 2026-10-15).
-Its folders follow the [tiers](#tiers), and each feature keeps every part it has in one folder.
+Its code sits in `src/`, in folders that follow the [tiers](#tiers), and each feature keeps every part it has in one folder; what builds and checks the code sits beside `src/` in `tools/` (user, 2026-10-23).
 One Cargo workspace builds every Rust crate, the module's among them, and one npm lockfile covers every TypeScript folder; `tools/build.ts`, run by Node, builds every target but the backend and the profiles, and every build that reads the SDK reads the one copy `tools/setup.ts` installs.
 CI runs on Windows, and one script checks both the crates and the TypeScript imports against this map.
 
@@ -670,32 +672,33 @@ dualinput/
   Cargo.toml  Cargo.lock  package.json  package-lock.json  rust-toolchain.toml
   .cargo/config.toml     one entry, which links every x86_64 program's C runtime statically
   msfs-sdk.txt           the SDK version every build uses
-  engines/<name>/        each engine in the units' table, such as messages/ and sync-engine/
-  platform/<name>/       each unit of the platform, such as kernel/ and routine-host/
-  features/<name>/
-    core/                its crate in the core
-    routines/            its routines in our WASM module
-    panel/               its panel modules
-    desktop/  efb/       its sections of the desktop app and the EFB app
-  apps/
-    core/  core-helper/  each program's main, and its list of features
-    desktop/             Tauri: its Rust side, and its pages built by Vite
-    ide/                 the Dual Input IDE, once it's built
-  sim-package/
-    wasm-module/         the cdylib cargo-msfs builds: the edge, and the routines' list
-    pages/               the VCockpit.js override, the EFB app, the banner, the menu script
-    stock/               the sim's stock files our copies start from
+  src/
+    engines/<name>/      each engine in the units' table, such as messages/ and sync-engine/
+    platform/<name>/     each unit of the platform, such as kernel/ and routine-host/
+    features/<name>/
+      core/              its crate in the core
+      routines/          its routines in our WASM module
+      panel/             its panel modules
+      desktop/  efb/     its sections of the desktop app and the EFB app
+    apps/
+      core/  core-helper/  each program's main, and its list of features
+      desktop/           Tauri: its Rust side, and its pages built by Vite
+      ide/               the Dual Input IDE, once it's built
+    sim-package/
+      wasm-module/       the cdylib cargo-msfs builds: the edge, and the routines' list
+      pages/             the VCockpit.js override, the EFB app, the banner, the menu script
+      stock/             the sim's stock files our copies start from
+    backend/             the Cloudflare Worker, on D1, with no framework
+    relays/              each relay's region, URL, and cap, and the script that deploys them
   profiles/              aircraft/ and modules/, as 01-format-and-delivery's repository
-  backend/               the Cloudflare Worker, on D1, with no framework
-  relays/                each relay's region, URL, and cap, and the script that deploys them
-  tools/                 build.ts, setup.ts, stock.ts, release.ts, and the map check;
+  tools/                 build.ts, setup.ts, stock.ts, release.ts, the map check, and prose-lint;
                          profile-builder/, profile-author/, msfs-sdk/, and the bench
 ```
 
 A feature has only the parts it needs: pointer sync has a crate in the core and panel modules, and no routines or sections in the apps.
-Avatars keeps its figure's SimObject in its folder too, in `features/avatars/figure/`.
-Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each assembly in `apps/` and `sim-package/`.
-The root `Cargo.toml` names its members by globs, such as `features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` takes the same globs but leaves out `sim-package/`, whose module's build script needs what cargo-msfs sets; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
+Avatars keeps its figure's SimObject in its folder too, in `src/features/avatars/figure/`.
+Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each assembly in `src/apps/` and `src/sim-package/`.
+The root `Cargo.toml` names its members by globs, such as `src/features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` takes the same globs but leaves out `src/sim-package/`, whose module's build script needs what cargo-msfs sets; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
 A feature's block that a released level of the profile format holds stays in the profile engine after the feature goes, since levels only add ([levels](../profiles/01-format-and-delivery.md#levels)).
 
 ### Building every target
@@ -703,31 +706,31 @@ A feature's block that a released level of the profile format holds stays in the
 | Target | Built by | From |
 | --- | --- | --- |
 | The core, the core helper, the desktop app's Rust side, and the profile builder | `cargo build`, for x86_64 | The workspace's root |
-| Our WASM module | cargo-msfs, for wasm32 | `sim-package/wasm-module/` |
+| Our WASM module | cargo-msfs, for wasm32 | `src/sim-package/wasm-module/` |
 | Our code in the sim: the bridge, panel modules, and the sim's pages | esbuild at `es2017` ([decision 030](../../decisions/030-in-sim-code-es2017-esbuild.md)), then the Coherent GT check ([decision 031](../../decisions/031-coherent-gt-check-tool.md)) | `tools/` |
-| The desktop app's pages and its program | `tauri build --no-bundle`, which runs Vite for the pages and then builds the Rust side ([what a release holds](../build/01-the-build.md#what-a-release-holds)) | `apps/desktop/` |
-| The backend | wrangler | `backend/` |
-| The messages' TypeScript types | ts-rs, which writes them during `cargo test` into the folder `TS_RS_EXPORT_DIR` names (documented, [ts-rs 12.0.1](https://docs.rs/ts-rs/12.0.1/ts_rs/)) | `engines/messages/` |
+| The desktop app's pages and its program | `tauri build --no-bundle`, which runs Vite for the pages and then builds the Rust side ([what a release holds](../build/01-the-build.md#what-a-release-holds)) | `src/apps/desktop/` |
+| The backend | wrangler | `src/backend/` |
+| The messages' TypeScript types | ts-rs, which writes them during `cargo test` into the folder `TS_RS_EXPORT_DIR` names (documented, [ts-rs 12.0.1](https://docs.rs/ts-rs/12.0.1/ts_rs/)) | `src/engines/messages/` |
 | The profiles' bundles | `tools/profile-builder`, on `profile-build` | `profiles/` |
 
-- **Our WASM module is a member of the workspace,** left out of `default-members` with the rest of `sim-package/` because its build script needs what cargo-msfs sets, and cargo-msfs builds it from its own folder.
+- **Our WASM module is a member of the workspace,** left out of `default-members` with the rest of `src/sim-package/` because its build script needs what cargo-msfs sets, and cargo-msfs builds it from its own folder.
   p11 built it that way against the same message crate as the Windows side, in one `target/` folder and one `Cargo.lock`, and building either side after the other compiled no crate ([architecture log][p11]).
-  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `sim-package/wasm-module/` is a cdylib alone, and the routine host and the routines are crates of their own, which node 7's bench can link natively.
+  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `src/sim-package/wasm-module/` is a cdylib alone, and the routine host and the routines are crates of their own, which node 7's bench can link natively.
 - **One copy of the SDK** is the version `msfs-sdk.txt` names, which `tools/setup.ts` installs through `tools/msfs-sdk` into cargo-msfs's data folder, `%APPDATA%\cargo-msfs\data\msfs2024`, which holds SimConnect's header, its import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15; [the SDK](../build/01-the-build.md#the-sdk)).
   The bindings' build scripts read the SDK from `MSFS_SDK`, which cargo-msfs sets for the module, fall back to that folder for the Windows side, and fail with a message naming `node tools/setup.ts` when the installed SDK isn't that version.
   That the one copy serves the Windows side is unverified, since p11 generated no bindings for it, and the first build of the sim's edge settles it.
 - **The bindings follow the SDK:** bindgen generates them at each build, so no file derived from the SDK's headers is in the repository, and tells Cargo every header it read (read in bindgen 0.72.1, `src/lib.rs`, `CargoCallbacks`), so a new SDK in the same folder generates them again.
   cargo-msfs installs only the newest SDK, with no way to name a version (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`, `install_latest_sdk`), so `tools/msfs-sdk` installs the one `msfs-sdk.txt` names, the build prints the version it built against, from the `version.txt` `tools/msfs-sdk` writes beside the SDK, and CI keys its cache on it.
 - **`RUSTFLAGS` is never set,** in CI or in our tools, because cargo-msfs hands the build its caller's environment after setting `RUSTFLAGS` to its own link arguments (same function as above, Build), and ours would replace them; Clippy's `-D warnings` goes on Clippy's own command line.
-  `apps/core` stops a build whose `RUSTFLAGS` replaced the static C runtime that the root's `.cargo/config.toml` sets ([the C runtime](../build/01-the-build.md#the-c-runtime)).
+  `src/apps/core` stops a build whose `RUSTFLAGS` replaced the static C runtime that the root's `.cargo/config.toml` sets ([the C runtime](../build/01-the-build.md#the-c-runtime)).
 - **The release profile is the root's,** with `lto` and `strip` on, as cargo-msfs's README asks, since a workspace reads profiles only from its root.
-- **The messages' TypeScript types** are generated into `engines/messages/ts/`, the folder `TS_RS_EXPORT_DIR` names, which `tools/build.ts` deletes before it runs the message crate's tests, since ts-rs removes no file it wrote before, so a deleted message's type would stay (read in ts-rs 12.0.1's source, which calls no `remove_file`); they're committed and imported from there; CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
+- **The messages' TypeScript types** are generated into `src/engines/messages/ts/`, the folder `TS_RS_EXPORT_DIR` names, which `tools/build.ts` deletes before it runs the message crate's tests, since ts-rs removes no file it wrote before, so a deleted message's type would stay (read in ts-rs 12.0.1's source, which calls no `remove_file`); they're committed and imported from there; CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
   ts-rs's derives built into the module in p11, so the message crate needs no second form for wasm32.
   The message crate's build script writes its hash, running again only when what it hashes changes, and the `cargo test` that writes ts-rs's types also writes `ts/stamp.ts`, with the version and the hash, which that check covers ([the message crate's hash](../build/01-the-build.md#the-message-crates-hash)).
-- **TypeScript** has one lockfile at the root, and two npm workspaces, each with a `package.json` of its own beside the root's: `apps/desktop/`, because the Tauri CLI takes the folder it runs in when that holds a `package.json` (read in tauri-apps/tauri, its default branch on 2026-10-15, `crates/tauri-cli/src/helpers/app_paths.rs`), and `backend/`, since Cloudflare recommends installing wrangler in the project (documented, [Wrangler's commands](https://developers.cloudflare.com/workers/wrangler/commands/)).
+- **TypeScript** has one lockfile at the root, and two npm workspaces, each with a `package.json` of its own beside the root's: `src/apps/desktop/`, because the Tauri CLI takes the folder it runs in when that holds a `package.json` (read in tauri-apps/tauri, its default branch on 2026-10-15, `crates/tauri-cli/src/helpers/app_paths.rs`), and `src/backend/`, since Cloudflare recommends installing wrangler in the project (documented, [Wrangler's commands](https://developers.cloudflare.com/workers/wrangler/commands/)).
   A feature's TypeScript folders have no `package.json` of their own.
   Each target's tsconfig sets its own `lib`: ES2017 for our code in the sim, as decision 030 sets it, the latest with the DOM for the desktop app's pages, and the Workers' types for the backend.
-  The desktop app's stylesheet names `features/*/desktop/` as a source with Tailwind's `@source`, since Tailwind's Vite plugin scans only below Vite's root (read in @tailwindcss/vite 4.3.3, `dist/index.mjs`, in node 5.4's review), and a feature's section would otherwise render unstyled.
+  The desktop app's stylesheet names `src/features/*/desktop/` as a source with Tailwind's `@source`, since Tailwind's Vite plugin scans only below Vite's root (read in @tailwindcss/vite 4.3.3, `dist/index.mjs`, in node 5.4's review), and a feature's section would otherwise render unstyled.
 - **One version** lives in the root `Cargo.toml`'s `[workspace.package]`, which every crate inherits, as [decision 026](../../decisions/026-first-message-carries-version-and-hash.md) asks; Tauri takes the desktop app's from its crate when `tauri.conf.json` names none (documented, [Tauri's configuration](https://v2.tauri.app/reference/config/#version)), and since Tauri's CLI reads a version the crate inherits and its build script doesn't, the version reaches the desktop app's Windows version resource through `tauri build --config` ([each component's version and hash](../build/01-the-build.md#each-components-version-and-hash)); the build writes it into the Community package's `manifest.json`, where p08's build script wrote a fixed one (read in `experiments/areas/architecture/flight/build.mjs`, `finish`).
 - **`tools/build.ts`** builds every row of the table but the backend's and the profiles', then lays out the Community package with its `layout.json` and `manifest.json`, as p08's build script does.
   Node 22.18 or later runs it by stripping its types, so our build scripts use no `enum` and name each import's `.ts` (documented, [Node's TypeScript support](https://nodejs.org/api/typescript.html)).
@@ -790,7 +793,7 @@ The code map's [third test](#tiers) is a script in `tools/` that CI and a develo
 - A crate's tier is its folder, from the `manifest_path` that `cargo metadata` gives each crate, and the script reads the resolved graph, crates from outside the workspace included, so a routine that reaches tokio through any crate fails.
 - A TypeScript file's tier is its folder, and the script takes each file's imports, type-only ones included, from the TypeScript compiler's own resolution, since esbuild's metafile listed no import for a file whose only import was `import type` (measured on our development machine, 2026-10-15, esbuild 0.28.2, [architecture log][p12]).
 - The message crate and the profile engine each hold every feature's module, so the crate graph can't show one feature using another's there; the script searches each feature's source for the names of other features' modules.
-- The script also searches `features/` for `impl Moment`, so no feature raises a moment of its own ([moments](../core/01-loop-and-edge.md#moments)).
+- The script also searches `src/features/` for `impl Moment`, so no feature raises a moment of its own ([moments](../core/01-loop-and-edge.md#moments)).
 - The script also fails a platform unit, in Rust or TypeScript, whose source names a feature's module of the message crate, which [tiers](#tiers)' rules allow, since the message crate is an engine ([a feature's parts](../interface/01-apps.md#a-features-parts)).
 - The script finds the loop's crates by folder, as [tiers](#tiers) defines them, so it checks a new feature's crates with no edit.
 - The crates that do I/O are a list in the script, and a loop crate that reaches one through any other fails:
@@ -806,7 +809,7 @@ The code map's [third test](#tiers) is a script in `tools/` that CI and a develo
   A listed crate the script lets a loop crate reach anyway carries its reason in the script.
 - p10's loop has 11 crates besides itself among its normal dependencies, rquickjs and zstd among them, none on the list (measured on our development machine, 2026-10-15, [architecture log][map]).
   p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off, as p11's did ([architecture log][p11]), and the kernel draws the IDs from the seed the core's edge hands it.
-- The script also searches our crates' source for a foreign function's declaration outside the two edges and `apps/core`'s `_set_FMA3_enable`, which the crate graph can't show.
+- The script also searches our crates' source for a foreign function's declaration outside the two edges and `src/apps/core`'s `_set_FMA3_enable`, which the crate graph can't show.
 - An outside crate that calls std's file, socket, or clock functions itself, rather than through a crate on the list, passes the check, so we review each new dependency of a loop crate before it's added.
 
 cargo-deny can ban a dependency only by naming, for each crate, which crates may depend on it (read in torrust/torrust-tracker, `deny.toml`, at 9c8bcdf), so it would hold one entry per crate where the script holds each rule once.
@@ -817,13 +820,13 @@ A pull request's CI finishes within 20 minutes with a warm cache, a starting val
 
 ## Left open
 
-- Whether a recording replays on a PC with a different CPU: Windows' C runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" ([5.1.1]), and Rust's `f64` functions reach that math ([core log](../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version)), so `apps/core` links the C runtime statically with FMA3 off; replaying a recording made on a friend's PC on ours settles it.
+- Whether a recording replays on a PC with a different CPU: Windows' C runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" ([5.1.1]), and Rust's `f64` functions reach that math ([core log](../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version)), so `src/apps/core` links the C runtime statically with FMA3 off; replaying a recording made on a friend's PC on ours settles it.
 - What [a connection for each feature](#a-connection-for-each-feature-for-each-load) leaves unmeasured, and whether the edge's exception tags hold among writes each frame: [node 7](plan.md#7-testing)'s tests in the sim.
 - The stand-in sim's model, how it paces frames, how it plays our WASM module, and how a core on a stand-in reaches the sim's pages, which connect to the core beside this seam, so its pilot can reach Ready to fly and use Go to: [node 7](plan.md#7-testing).
 - Which operations an `ops` module in the bridge offers plugins, and how a plugin's API names the panels they reach: plugins' design, after v1 ([plugins and the sandbox](../plugins/01-plugins.md#what-this-answers)).
 - Two cores in sessions on one sim would feed the same slots, which a developer running a development core beside the installed one doesn't do, so nothing guards against it (user, 2026-10-15).
 - Which unit of the platform loads the EventBus bridge's listener into the EFB's document, which [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim) leaves open, for after v1.
-- Whether the stand-in sim keeps the loop's rules, which [tiers](#tiers) holds it to until then, and where the list of routines lives if the bench runs them natively, since the bench can't link `sim-package/wasm-module/`, a cdylib alone: [node 7](plan.md#7-testing).
+- Whether the stand-in sim keeps the loop's rules, which [tiers](#tiers) holds it to until then, and where the list of routines lives if the bench runs them natively, since the bench can't link `src/sim-package/wasm-module/`, a cdylib alone: [node 7](plan.md#7-testing).
 - How long CI takes on Windows runners, and how much a warm cache saves: the first stage of [node 8](plan.md#8-the-build-order) that builds real code measures it with `cargo build --timings`, against [budgets for the workspace](#budgets-for-the-workspace).
 - Which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which this design gives no feature: plugins' design, after v1.
 - The self-describing record a later version reads: [node 6](plan.md#6-systems).

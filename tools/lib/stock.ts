@@ -1,5 +1,5 @@
 // The sim's own files that our package ships changed copies of, kept byte for byte in
-// sim-package/stock/ (record/areas/build/01-the-build.md, "The sim's stock files").
+// src/sim-package/stock/ (record/areas/build/01-the-build.md, "The sim's stock files").
 
 import { createHash } from "node:crypto"
 import fs from "node:fs"
@@ -8,10 +8,10 @@ import path from "node:path"
 import { ROOT } from "./repo.ts"
 import { Failed, output } from "./run.ts"
 
-export const STOCK = path.join(ROOT, "sim-package", "stock")
+export const STOCK = path.join(ROOT, "src", "sim-package", "stock")
 export const STOCK_JSON = path.join(STOCK, "stock.json")
 
-/** Each stock file by its name in sim-package/stock/, and its path in the sim's Packages folder. */
+/** Each stock file by its name in src/sim-package/stock/, and its path in the sim's Packages folder. */
 export const STOCK_FILES: { name: string; from: string }[] = [
   { name: "VCockpit.js", from: "asobo-vcockpits-core/html_ui/Pages/VCockpit/Core/VCockpit.js" },
   // BlurPage, the menu's page our copy brings our menu script in through.
@@ -115,12 +115,12 @@ function fileVersion(exe: string): string {
  */
 export function checkStock(): void {
   const mismatched = stockMismatches()
-  if (mismatched.length) throw new Failed(`sim-package/stock/ doesn't match its stock.json: ${mismatched.join(", ")}`)
+  if (mismatched.length) throw new Failed(`src/sim-package/stock/ doesn't match its stock.json: ${mismatched.join(", ")}`)
   const sim = steamSim()
   if (!sim) return
   const changed = changedInSim(sim)
   if (!changed.length) return
-  const what = `the sim's ${changed.join(", ")} differ${changed.length === 1 ? "s" : ""} from sim-package/stock/`
+  const what = `the sim's ${changed.join(", ")} differ${changed.length === 1 ? "s" : ""} from src/sim-package/stock/`
   if (sim.branch !== "public") {
     console.warn(`warning: ${what}, on Steam's ${sim.branch} branch; the build goes on with the public branch's files`)
     return

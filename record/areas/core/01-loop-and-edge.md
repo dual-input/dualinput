@@ -18,7 +18,7 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.
 The kernel calls each handler with its unit's own state, a read-only view of every other unit's, and an outbox, and runs every call one unit asks of another after the asking handler returns.
-The core's edge, in `apps/core`, runs the threads that wait, carries out the outbox, and records every input from the core's first but those a feature declares unrecorded, with a hash once a second of the outputs of every unit that has no unrecorded input, so a replay on the same build finds the second where it diverged.
+The core's edge, in `src/apps/core`, runs the threads that wait, carries out the outbox, and records every input from the core's first but those a feature declares unrecorded, with a hash once a second of the outputs of every unit that has no unrecorded input, so a replay on the same build finds the second where it diverged.
 A panic crashes the core, which comes back as a late joiner, and a quit, from the pilot or from Windows ending their session, leaves the session before the core exits.
 
 This answers node 6.1 of the [architecture plan](../architecture/plan.md#61-the-cores-loop-and-edge).
@@ -29,7 +29,7 @@ The code map's [one loop](../architecture/02-code-map.md#one-loop), [what a feat
 | Unit | Holds |
 | --- | --- |
 | kernel | The registry, the store of each unit's state, moments and the calls units ask of each other, requests and their guards, the outbox and its running hash, timers, jobs, the handles and IDs it hands out, and the call that handles one input |
-| `apps/core` | `main` and the list of units; the queue; the clock; the edge's threads; a sink for each output type; the recording's writer; replay; the panic hook; the log's subscriber; and the one foreign function it declares, [below](#the-cores-math) |
+| `src/apps/core` | `main` and the list of units; the queue; the clock; the edge's threads; a sink for each output type; the recording's writer; replay; the panic hook; the log's subscriber; and the one foreign function it declares, [below](#the-cores-math) |
 
 ## Threads
 
@@ -84,7 +84,7 @@ pub fn register(r: &mut Registry) {
 
 fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
     let session = cx.read::<Session>();               // another unit's state, read-only
-    cx.out(Lock { display: me.display });             // an output, which apps/core routes by its type
+    cx.out(Lock { display: me.display });             // an output, which src/apps/core routes by its type
     me.unlock = Some(cx.timer(secs(5)));              // a handle now, an input when it fires
 }
 ```
@@ -107,7 +107,7 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
 
 - `cx.raise(m)` queues a moment behind the moments and calls already waiting, and the kernel runs them all, in that order, before the next input.
 - More than 1,000 moments and calls for one input is a cycle, which is a bug, and the kernel panics.
-- The map check also searches `features/` for `impl Moment`, as it searches a feature's source for another feature's modules, so no feature raises a moment of its own; this adds to [the map check](../architecture/02-code-map.md#the-map-check)'s searches.
+- The map check also searches `src/features/` for `impl Moment`, as it searches a feature's source for another feature's modules, so no feature raises a moment of its own; this adds to [the map check](../architecture/02-code-map.md#the-map-check)'s searches.
 
 ### Requests and guards
 
@@ -120,7 +120,7 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
 ### Outputs
 
 - `cx.out(o)` puts out `o`, of a type the crate whose edge carries it out defines, such as the sim service's calls or the network's sends, and every output type is `Serialize + Send + 'static`.
-- After the input and its moments and calls, `apps/core` hands each output to the sink it registered for that type, in the order handlers put them out.
+- After the input and its moments and calls, `src/apps/core` hands each output to the sink it registered for that type, in the order handlers put them out.
   An edge carries out its outputs in that order, and nothing is promised between two edges.
 - A unit that needs one thing done before another waits for the input that says it's done.
   The session crate writes the session file with its raised restart count as a job, and opens links only once the job's result says it's written, as [the session file](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts) requires.
@@ -188,15 +188,15 @@ Rust's `f64` math and QuickJS-ng's `Math` both call the C runtime's functions, a
 
 Windows always loads its own `ucrtbase.dll`, whose version follows each pilot's Windows, even when a program ships its own copy beside it (documented, [Universal CRT deployment](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment)).
 So the core links the C runtime statically, which puts the math in our program, and `main` calls `_set_FMA3_enable(0)` before it starts any thread, in a live run and a replay.
-It links the runtime through one entry in the workspace's `.cargo/config.toml`, which every x86_64 program of ours shares, and a `compile_error!` in `apps/core` stops a build whose `RUSTFLAGS` replaced the entry ([the C runtime](../build/01-the-build.md#the-c-runtime)).
+It links the runtime through one entry in the workspace's `.cargo/config.toml`, which every x86_64 program of ours shares, and a `compile_error!` in `src/apps/core` stops a build whose `RUSTFLAGS` replaced the entry ([the C runtime](../build/01-the-build.md#the-c-runtime)).
 That two CPUs give the same bits from one build with FMA3 off is unverified, and replaying a recording made on a friend's PC on ours settles it, which then answers 02-code-map's item in [left open](../architecture/02-code-map.md#left-open) on a PC with another CPU.
 
-`_set_FMA3_enable` is in neither windows-sys 0.61.2 nor libc 0.2.190 (read in each crate's source), so `apps/core` declares that one foreign function itself, the third crate the code map's [tiers](../architecture/02-code-map.md#tiers) let declare one, for that function alone; the timer thread takes its functions from windows-sys.
+`_set_FMA3_enable` is in neither windows-sys 0.61.2 nor libc 0.2.190 (read in each crate's source), so `src/apps/core` declares that one foreign function itself, the third crate the code map's [tiers](../architecture/02-code-map.md#tiers) let declare one, for that function alone; the timer thread takes its functions from windows-sys.
 
 ## A panic
 
 A release build sets `panic = "abort"`, so a panic on any thread ends the core (documented, [Cargo's profiles](https://doc.rust-lang.org/cargo/reference/profiles.html#panic)), and the process exits with a code other than 0 (unverified; a bench case checks it).
-The panic hook in `apps/core` runs first, as std runs it "with both the aborting and unwinding runtimes" (documented, [`std::panic::set_hook`](https://doc.rust-lang.org/std/panic/fn.set_hook.html)): it logs the panic, the input's sequence number, and the unit that was running, and has the writer record the input being handled, even an unrecorded one, and end its zstd frame, waiting at most 500ms.
+The panic hook in `src/apps/core` runs first, as std runs it "with both the aborting and unwinding runtimes" (documented, [`std::panic::set_hook`](https://doc.rust-lang.org/std/panic/fn.set_hook.html)): it logs the panic, the input's sequence number, and the unit that was running, and has the writer record the input being handled, even an unrecorded one, and end its zstd frame, waiting at most 500ms.
 The crash then takes [decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)'s path: the desktop app starts the core again ([the sim and the core](../install/01-installing-and-updating.md#the-sim-and-the-core)), and the pilot comes back as a late joiner, while a replay of the recording reproduces a panic in a whole unit at the same input ([a panic](../recording/01-recording-and-bug-reports.md#a-panic)).
 
 Catching a feature's panic and turning that feature off for the session would be a mechanism for recovering from our own bugs, and would leave a session half working: a following machine whose flight-model feature was off would fly on its own, where a restart and a late join bring every feature back (user, 2026-10-15).
@@ -237,7 +237,7 @@ The session crate runs a quit as a Leave, so the crew sees the pilot leave rathe
 
 ## Logging
 
-- The loop's crates log through `tracing`'s macros, and `apps/core`'s subscriber writes each line to the run's log file, beside its recording in `recordings\` ([what a recording holds](#what-a-recording-holds)), stamped with the stamp and sequence number of the input being handled, which the kernel exposes.
+- The loop's crates log through `tracing`'s macros, and `src/apps/core`'s subscriber writes each line to the run's log file, beside its recording in `recordings\` ([what a recording holds](#what-a-recording-holds)), stamped with the stamp and sequence number of the input being handled, which the kernel exposes.
 - The level is a setting, and a replay may raise it, since a log line is neither an output nor in the hash, and changes nothing a handler reads.
 - A live run's log file stops at 16 MB: the subscriber writes one line saying so, then drops every later line but the panic hook's, which a crash needs most.
   The core deletes old runs only when it starts ([what each PC keeps](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)), so without a cap one storm of lines could fill the disk within a session.

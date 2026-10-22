@@ -9,7 +9,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { test } from "node:test"
 
-import type { Played } from "../../../engines/messages/ts/bench/Played.ts"
+import type { Played } from "../../../src/engines/messages/ts/bench/Played.ts"
 import { BenchRun } from "../cores.ts"
 
 // SimConnect's numbers for the flow events, in SDK 1.8.1's SimConnect.h.

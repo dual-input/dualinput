@@ -3,9 +3,9 @@
 // own page-client over the core's real WebSocket, sending the sim's Origin, so the core
 // can't tell a fake page from a real one (record/areas/build/02-testing.md, "The sim's pages").
 
-import type { ToClient } from "../../engines/messages/ts/clients/ToClient.ts"
-import type { JsonValue } from "../../engines/messages/ts/serde_json/JsonValue.ts"
-import { type Env, PageClient, type Socket } from "../../engines/page-client/src/page-client.ts"
+import type { ToClient } from "../../src/engines/messages/ts/clients/ToClient.ts"
+import type { JsonValue } from "../../src/engines/messages/ts/serde_json/JsonValue.ts"
+import { type Env, PageClient, type Socket } from "../../src/engines/page-client/src/page-client.ts"
 import type { Core } from "./cores.ts"
 
 /** What every page in the sim sends as its Origin, which the core takes (decision 013). */

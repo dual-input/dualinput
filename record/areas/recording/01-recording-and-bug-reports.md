@@ -36,7 +36,7 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 > - [What each PC keeps](#what-each-pc-keeps): its rules stay, and 1 GB holds roughly 8 to 22 hours at 45 to 126 MB an hour, where it says over 250 hours.
 > - [A bug report](#a-bug-report): when a pilot reports a problem, we ask for the run's `log.txt` first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand.
 >   Uploading a part, what the backend admits, asking a missing pilot, and on our end come after v1, built on the same files.
->   So do the units `backend/`'s reports and `tools/reports.ts`, the edge's HTTPS for the upload, the run's `key` file, which only the upload's signature reads, the index's `uploaded` field, the note of 2026-10-17's command that uploads a session, and [left open](#left-open)'s item on R2.
+>   So do the units `src/backend/`'s reports and `tools/reports.ts`, the edge's HTTPS for the upload, the run's `key` file, which only the upload's signature reads, the index's `uploaded` field, the note of 2026-10-17's command that uploads a session, and [left open](#left-open)'s item on R2.
 > - [Budgets](#budgets): the budgets for a session's recording and for a run with no session rest on partial recording's rules, and p10's 45 MB an hour passes the first; what replaces them is open.
 > - [Cases for the bench](#cases-for-the-bench): the session with traffic, avatars, the flight model, and ATC audio running matches every unit's checkpoints, and the cases on unrecorded inputs, the setting, a partly recorded unit's drift and its panic, a signed part, a restarted core's upload, and a missing pilot's part go.
 
@@ -64,8 +64,8 @@ Under this design's rules, p10's sim inputs came to 0.9 MB an hour with zstd at 
 | `recording` | Platform | Each run's index, marks, the recorded sessions the report page lists, which runs to keep, uploads and the check for a missing part, and the setting that records everything | On the loop |
 | `recording-format` | Engine | The run file's encoding: its header, inputs, the sandbox's stops, checkpoints, and marks; and the index's JSON | Wherever the message crate does |
 | kernel | Platform | Each unit's handles, IDs, and connection numbers, each output's unit, and which units a replay checks | On the loop |
-| `apps/core`'s edge | App | The writer and its filter, the home folder's placeholder, the clipboard's filter, and the upload's HTTPS | The edge's threads |
-| `backend/`'s reports | Backend | The report requests, and the files in R2 | On Cloudflare Workers |
+| `src/apps/core`'s edge | App | The writer and its filter, the home folder's placeholder, the clipboard's filter, and the upload's HTTPS | The edge's threads |
+| `src/backend/`'s reports | Backend | The report requests, and the files in R2 | On Cloudflare Workers |
 | `tools/reports.ts` | Tool | Listing and fetching reports | On our PCs |
 
 ## Unrecorded inputs
@@ -222,7 +222,7 @@ The sim's `AircraftLoaded` names an aircraft from the Community folder by a path
   So a SimConnect record keeps its size, every string's position stays where its struct puts it, and the core never holds the real path.
 - An output that names a file, such as a job that reads the flight file, gets the real path back from the edge before the file is opened.
 - A replay needs no pilot's path, since it opens no file: every job's result is in the recording.
-- `apps/core`'s log subscriber replaces the home folder's path and the Windows username in each line as it writes it, since the edge's own lines aren't inputs.
+- `src/apps/core`'s log subscriber replaces the home folder's path and the Windows username in each line as it writes it, since the edge's own lines aren't inputs.
 - The Windows username elsewhere in an input, outside a path, stays, which narrows [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports)' rule to paths and logs; we know of no input that carries it.
 
 ### The clipboard

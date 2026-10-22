@@ -8,7 +8,7 @@ import { run } from "./run.ts"
  * The folder ts-rs writes the messages' TypeScript types into. TS_RS_EXPORT_DIR in
  * .cargo/config.toml names the same folder, so change both together.
  */
-export const TYPES = path.join(ROOT, "engines", "messages", "ts")
+export const TYPES = path.join(ROOT, "src", "engines", "messages", "ts")
 
 /**
  * Writes the messages' TypeScript types and `stamp.ts` again, by running the message

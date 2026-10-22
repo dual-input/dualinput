@@ -3,7 +3,7 @@
 // and the Coherent GT check checks, and our package for the sim's Community folder, in
 // target/sim-package/dualinput. It first checks that the installed MSFS SDK is the version
 // msfs-sdk.txt names, so no build uses another, and that the sim's stock files our copies
-// start from are the ones in sim-package/stock/. When you add a program or package that
+// start from are the ones in src/sim-package/stock/. When you add a program or package that
 // `cargo build` doesn't build, add its build here
 // (record/areas/architecture/02-code-map.md, "Building every target").
 //

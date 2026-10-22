@@ -37,7 +37,7 @@ At any depth, don't chase history or background the bullet doesn't ask for.
 
 Write the chapter to `record/learn/<course>/NN-<slug>.md`, where `NN` is the part number with a leading zero.
 If it runs past 3,000 words, split it as the chapter guide says.
-Then run `node scripts/prose-lint.mjs` on it, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
+Then run `node tools/prose-lint.mjs` on it, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
 Skip the rest of that list: the /learn skill decides what runs after you.
 
 ## Report

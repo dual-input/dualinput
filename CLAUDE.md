@@ -6,6 +6,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 
 ## Layout
 
+- `src/` holds the product's code, in the folders [the workspace](record/areas/architecture/02-code-map.md#the-workspace) lays out, and `tools/` holds what builds, checks, and tests it, so a new part of Dual Input goes in a folder under `src/`, never a new one at the root.
 - `docs/` is reserved for documentation people write for other people.
   Create or edit it only when asked, and keep the author's voice.
 - `record/` holds the documents agents write.
@@ -17,7 +18,7 @@ Until a decision in `record/decisions/` picks them, propose a language, framewor
 - `.claude/rules/` holds the conventions agents follow, and Claude Code loads the files there on its own.
   `writing.md` is how everything agents write is written, and it loads into every session.
   `chapter-guide.md` is how a learning chapter is written, and it loads when a file in `record/learn/` is read.
-- `scripts/prose-lint.mjs` makes the mechanical checks from writing.md, on Markdown and on the comments in code.
+- `tools/prose-lint.mjs` makes the mechanical checks from writing.md, on Markdown and on the comments in code.
   A hook runs it after every edit, and its findings come back to you as context.
 - `.claude/agents/doc-reviewer.md` makes the judgment checks the lint can't.
 - `.claude/agents/code-reviewer.md` checks product code against its plan stage, its design doc, and the rules below.
@@ -70,7 +71,7 @@ Probes are Node `.mjs` files and panel `.js` files.
 
 **Group a folder's files by what they're for once the plan shows it growing past about a dozen.**
 Name each group's folder, and each file, for what it holds, as in `edges/timer.rs` and `data_folder.rs`, and in Rust put `edges.rs` beside `edges/` rather than an `edges/mod.rs`.
-`apps/core/src` reached 17 flat files, among them `data.rs` and `built.rs`, which hid what belonged together, while a folder made for files that won't grow only adds nesting.
+`src/apps/core/src` reached 17 flat files, among them `data.rs` and `built.rs`, which hid what belonged together, while a folder made for files that won't grow only adds nesting.
 
 **Name everything the sim shares `DUALINPUT_<KIND>_<NAME>`.**
 That covers panel globals, CommBus events, client data areas, and `L:` variables.

@@ -14,7 +14,7 @@ You report findings, and you don't edit files.
 1. Read `.claude/rules/writing.md` in full before anything else.
 2. Read the target.
    Work out its kind from the table in writing.md, and who reads it.
-3. Run `node scripts/prose-lint.mjs <file>`.
+3. Run `node tools/prose-lint.mjs <file>`.
    The author already sees these findings after every edit, so list any that remain in one line each at the end of your report, and spend your attention on what the lint can't see.
 4. Read the target once, at speed, as its reader.
    Note every place you slowed down, read twice, or had to rebuild a concrete case in your head.

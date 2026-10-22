@@ -83,7 +83,7 @@ fn main() -> Result<()> {
 }
 
 /// The folder cargo-msfs reads the 2024 SDK from. `sdkFolder` in tools/lib/sdk.ts and
-/// `sdk_folder` in engines/simconnect-types/build.rs name the same folder, so change all
+/// `sdk_folder` in src/engines/simconnect-types/build.rs name the same folder, so change all
 /// three together.
 fn sdk_folder() -> Result<PathBuf> {
     let appdata = env::var_os("APPDATA").context("APPDATA isn't set")?;

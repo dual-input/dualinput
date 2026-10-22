@@ -6,8 +6,8 @@
 import net from "node:net"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import type { StandInHelperAct } from "../../engines/messages/ts/bench/StandInHelperAct.ts"
-import type { StandInHelperLine } from "../../engines/messages/ts/bench/StandInHelperLine.ts"
+import type { StandInHelperAct } from "../../src/engines/messages/ts/bench/StandInHelperAct.ts"
+import type { StandInHelperLine } from "../../src/engines/messages/ts/bench/StandInHelperLine.ts"
 import type { CoreOptions } from "./cores.ts"
 
 /** The stand-in core helper that tools/bench.ts built, by the path Cargo reported. */

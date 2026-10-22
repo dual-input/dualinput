@@ -1,5 +1,5 @@
 // Copies the sim's own files that our package ships changed copies of, VCockpit.js and
-// BlurPage's two files, into sim-package/stock/, and writes stock.json with the sim's release
+// BlurPage's two files, into src/sim-package/stock/, and writes stock.json with the sim's release
 // and each file's SHA-256. Run it when a build stops because a sim update changed one, then
 // commit what it changed, which shows what the update changed
 // (record/areas/build/01-the-build.md, "The sim's stock files").
@@ -28,5 +28,5 @@ main(() => {
     console.log(`copied ${from}`)
   }
   fs.writeFileSync(STOCK_JSON, `${JSON.stringify(json, null, 2)}\n`)
-  console.log(`wrote sim-package/stock/stock.json for the sim's ${sim.version}`)
+  console.log(`wrote src/sim-package/stock/stock.json for the sim's ${sim.version}`)
 })

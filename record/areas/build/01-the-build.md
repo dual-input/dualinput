@@ -7,7 +7,7 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 ```
 
 > **Note**
-> Since 2026-10-18, the relays' tokens live in a private repository of ours rather than in `relays/relays.toml` ([the network's units](../network/02-units.md)), so the build job in [a release](#a-release) also checks that repository out, with a read-only key from this repository's secrets, and the network crate's build compiles each release's default relay list from both; a release build stops when a relay in `relays/relays.toml` has no token.
+> Since 2026-10-18, the relays' tokens live in a private repository of ours rather than in `src/relays/relays.toml` ([the network's units](../network/02-units.md)), so the build job in [a release](#a-release) also checks that repository out, with a read-only key from this repository's secrets, and the network crate's build compiles each release's default relay list from both; a release build stops when a relay in `src/relays/relays.toml` has no token.
 > A pull request's build carries no tokens, and the network's tests run through a local relay with a test token (user, 2026-10-18).
 >
 > Since 2026-10-18, `tools/` also holds `replay.ts`, which fetches the release a recording names from GitHub, takes `dualinput-core.exe` from its full package, and replays with it, so a release's recording needs no rebuild and no older SDK; [left open](#left-open)'s item on older SDK installers then bears only on a rebuild for added logging ([01-loop-and-edge](../core/01-loop-and-edge.md); user, 2026-10-18).
@@ -78,7 +78,7 @@ rustflags = ["-C", "target-feature=+crt-static"]
 - **The module's build.** cargo-msfs's own `RUSTFLAGS` outrank the entry, so the module builds as it does without it, and after the first build each of four, alternating `cargo build` and cargo-msfs's, compiled no crate (measured, [log][crt]).
   That holds from Cargo 1.85, which gives a crate built with other flags files of its own, so `rust-toolchain.toml` names 1.85 or later.
 - **The desktop app.** `tauri.conf.json` turns Tauri's `build.windows.staticVCRuntime` off, so the entry decides the desktop app's runtime too, where Tauri's own default links the UCRT through Windows' copy for that one program (measured with tauri-build 2.7.1, [log][crt]).
-- **A guard.** A `RUSTFLAGS` of any value, an empty one included, replaces the entry without a word (measured, [log][crt]), so `apps/core` stops a build that lacks the flag:
+- **A guard.** A `RUSTFLAGS` of any value, an empty one included, replaces the entry without a word (measured, [log][crt]), so `src/apps/core` stops a build that lacks the flag:
 
   ```rust
   #[cfg(all(target_env = "msvc", not(target_feature = "crt-static")))]
@@ -101,7 +101,7 @@ rustflags = ["-C", "target-feature=+crt-static"]
 
 ## The sim's stock files
 
-- `sim-package/stock/` holds the sim's `VCockpit.js`, and BlurPage's `.html` and `.json`, byte for byte as the sim ships them, and `stock.json`, which names the sim release and Steam branch they came from and each file's SHA-256.
+- `src/sim-package/stock/` holds the sim's `VCockpit.js`, and BlurPage's `.html` and `.json`, byte for byte as the sim ships them, and `stock.json`, which names the sim release and Steam branch they came from and each file's SHA-256.
   `.gitattributes` marks the folder `-text`, so git never rewrites their CRLF line ends and the hashes hold on every checkout.
 - That puts three of Asobo's files in the public tree, where the sim's other files we read stay out ([commbus log](../commbus/log.md)), since our package ships changed copies of them anyway, and YourControls keeps its copy of `VCockpit.js` in its public repository, as FS Copilot keeps its own in its source (read in YourControls/yourcontrols, `scripts/build-include/2024/YourControls/`, and in the FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/Pages/VCockpit/Core/VCockpit.js`, [results][msfs]; user, 2026-10-18).
 - The build makes our copies from them, putting our blocks in at named anchors, and refuses when an anchor is missing ([our VCockpit.js](../core/02-clients-and-panel-bridge.md#our-vcockpitjs)).
@@ -188,7 +188,7 @@ No step of the build rewrites `for`-`of` loops, which settles the spine's [left 
   It tells Cargo to run it again only when one of those files changes, since a build script with no `rerun-if-changed` runs again on any change in its package (documented, [Cargo's build scripts](https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed)), and `tools/build.ts` writes the crate's `ts/` folder on every build.
 - So the hash covers each message's fields and every encoding its types take, JSON, postcard, a data slot's struct, or the helper's binary, and a new version of a codec, where FS Copilot's fingerprint covers a type's fields and not its codec ([09-05](../../learn/foundations/09-05-versions-and-security.md#serialization-protocol-versioning-and-compatibility-between-app-versions)).
 - Two development builds that differ by a comment in the crate refuse each other, which costs a release nothing, since every component of a release carries one commit's hash.
-- **To TypeScript.** The same `cargo test` that writes ts-rs's types writes `engines/messages/ts/stamp.ts`, holding the version and the hash, so it's committed beside the types, and CI's check for a difference after it generates them again covers it ([building every target](../architecture/02-code-map.md#building-every-target)).
+- **To TypeScript.** The same `cargo test` that writes ts-rs's types writes `src/engines/messages/ts/stamp.ts`, holding the version and the hash, so it's committed beside the types, and CI's check for a difference after it generates them again covers it ([building every target](../architecture/02-code-map.md#building-every-target)).
   The hash covers nothing in `ts/`, so writing the stamp never changes it.
 
 ## Each component's version and hash
@@ -280,7 +280,7 @@ In the sim:
 
 On a desk:
 
-- A build with `RUSTFLAGS` set, even empty, stops at `apps/core`'s guard, and one whose installed SDK isn't `msfs-sdk.txt`'s stops and names `node tools/setup.ts`.
+- A build with `RUSTFLAGS` set, even empty, stops at `src/apps/core`'s guard, and one whose installed SDK isn't `msfs-sdk.txt`'s stops and names `node tools/setup.ts`.
 - No shipped program imports `VCRUNTIME140.dll`, and the core imports no `api-ms-win-crt-*` DLL, by `dumpbin /imports`.
 - A change to the message crate committed without the stamp generated again fails CI; one commit built on two PCs, one checked out with CRLF line ends, gives one hash; and a `tools/build.ts` run followed by `cargo build` compiles no crate.
 - A development build of the desktop app writes nothing to `Community`, and `tools/build.ts install` writes the package and refuses while the sim runs.

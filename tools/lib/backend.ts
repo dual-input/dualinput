@@ -1,5 +1,5 @@
 // The backend run on this PC: the Worker under `wrangler dev --local`, on a local D1 in a
-// folder of its own with backend/migrations applied, for the backend's tests and the bench
+// folder of its own with src/backend/migrations applied, for the backend's tests and the bench
 // (record/areas/network/02-units.md, "Cases for the bench").
 
 import { spawn, spawnSync } from "node:child_process"
@@ -11,7 +11,7 @@ import { ROOT } from "./repo.ts"
 import { Failed } from "./run.ts"
 
 const WRANGLER = path.join(ROOT, "node_modules", "wrangler", "bin", "wrangler.js")
-const CONFIG = path.join(ROOT, "backend", "wrangler.jsonc")
+const CONFIG = path.join(ROOT, "src", "backend", "wrangler.jsonc")
 
 /** wrangler asks no question with CI set, and sends Cloudflare no usage data with the other. */
 const QUIET = { ...process.env, CI: "true", WRANGLER_SEND_METRICS: "false" }

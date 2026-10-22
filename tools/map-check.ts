@@ -3,14 +3,14 @@
 // the design that says which code may use which, and this checks our code against it.
 //
 // The map sorts code into tiers by folder, and each folder in a tier, such as
-// engines/messages, is a unit:
+// src/engines/messages, is a unit:
 //
-//   engines/    libraries that know nothing of Dual Input, such as the message crate
-//   platform/   the services features run on: in the core, Dual Input's main program,
-//               and outside it, in our WASM module inside the sim, in the sim's cockpit
-//               panels, and in the EFB and desktop apps
-//   features/   one folder for each thing a pilot gets, such as pointer sync
-//   apps/, sim-package/, and tools/   the programs and packages built from the rest
+//   src/engines/    libraries that know nothing of Dual Input, such as the message crate
+//   src/platform/   the services features run on: in the core, Dual Input's main program,
+//                   and outside it, in our WASM module inside the sim, in the sim's cockpit
+//                   panels, and in the EFB and desktop apps
+//   src/features/   one folder for each thing a pilot gets, such as pointer sync
+//   src/apps/, src/sim-package/, and tools/   the programs and packages built from the rest
 //
 // Code may use only the tiers below its own, and the rules below narrow that further.
 //
@@ -54,9 +54,9 @@ export type Rule =
   | "outside-the-core" // the platform outside the core and the core's crates may not use each other, and the routine host may use only messages
   | "feature-on-feature" // a feature may not use another feature's code, or name its module in messages or the profile engine
   | "feature-parts" // each part may use messages and its own platform: routines the routine host and loop engines, panel modules the panel bridge, sections their app's shell
-  | "nothing-on-apps" // nothing may use apps/, sim-package/, or tools/
+  | "nothing-on-apps" // nothing may use src/apps/, src/sim-package/, or tools/
   | "loop-io" // a loop crate may not reach a crate that does I/O, directly or through others (see EDGE_ENGINES)
-  | "foreign-functions" // only the sim edge and our WASM module may declare foreign functions, and apps/core only _set_FMA3_enable
+  | "foreign-functions" // only the sim edge and our WASM module may declare foreign functions, and src/apps/core only _set_FMA3_enable
   | "feature-moments" // a feature may not implement Moment, since only the platform raises moments, the events features learn of each other through
   | "platform-names-feature" // the platform may not name a feature's module in messages
 
@@ -109,12 +109,14 @@ type Unit =
 
 /**
  * The unit a crate's folder or a TypeScript file belongs to, from its path from the root,
- * such as `features/traffic/core`.
+ * such as `src/features/traffic/core`.
  * Returns undefined for a path in one of the map's folders that matches no unit, which is
- * a finding, and null for a path outside them, such as `scripts/`, which the check skips.
+ * a finding, and null for a path outside them, such as `src/backend/`, which the check skips.
  */
 function unitOf(rel: string): Unit | undefined | null {
-  const [top, name, part] = rel.split("/")
+  // The tiers are folders under src/, and the tools a folder at the root.
+  const parts = rel.split("/")
+  const [top, name, part] = parts[0] === "src" ? parts.slice(1) : parts[0] === "tools" ? parts : []
   if (!name) return null
   const lineOf = (lines: string[][]) => lines.findIndex((line) => line.includes(name))
   switch (top) {
@@ -150,9 +152,9 @@ const sameUnit = (a: Unit, b: Unit) =>
 /** Whether one of our crates may depend on another, or the rule it breaks. */
 function crateRule(from: Unit, to: Unit): Rule | null {
   if (to.tier === "app" || to.tier === "sim-package" || to.tier === "tool") {
-    // The one exception, which the note at the top of the code map allows: apps/core links
-    // sim-package/routines, so tests can run our WASM module's routines inside the core,
-    // and sim-package/wasm-module links it as well.
+    // The one exception, which the note at the top of the code map allows: src/apps/core links
+    // src/sim-package/routines, so tests can run our WASM module's routines inside the core,
+    // and src/sim-package/wasm-module links it as well.
     const routines = to.tier === "sim-package" && to.name === "routines"
     if (routines && ((from.tier === "app" && from.name === "core") || from.tier === "sim-package")) return null
     if (from.tier === "tool" && to.tier === "tool") return null
@@ -188,8 +190,8 @@ function crateRule(from: Unit, to: Unit): Rule | null {
 /** Whether one of our TypeScript files may import another, or the rule it breaks. */
 function importRule(from: Unit, to: Unit, toRel: string, features: Set<string>): Rule | null {
   if (sameUnit(from, to)) return null
-  // The message crate's TypeScript types for a feature sit in engines/messages/ts/<feature>/.
-  const typesOf = /^engines\/messages\/ts\/([^/]+)\//.exec(toRel)?.[1]
+  // The message crate's TypeScript types for a feature sit in src/engines/messages/ts/<feature>/.
+  const typesOf = /^src\/engines\/messages\/ts\/([^/]+)\//.exec(toRel)?.[1]
   const featureTypes = typesOf && features.has(typesOf) ? typesOf : null
 
   if (to.tier === "app" || to.tier === "sim-package" || to.tier === "tool") {
@@ -226,7 +228,7 @@ type Metadata = {
 /** Every finding for the tree at `root`. */
 export function checkMap(root = ROOT): Finding[] {
   const findings: Finding[] = []
-  const features = new Set(listDirs(path.join(root, "features")))
+  const features = new Set(listDirs(path.join(root, "src", "features")))
   if (fs.existsSync(path.join(root, "Cargo.toml"))) checkCrates(root, features, findings)
   checkImports(root, features, findings)
   return findings
@@ -278,7 +280,7 @@ function checkCrates(root: string, features: Set<string>, findings: Finding[]): 
   }
 }
 
-/** Every crate outside apps/, sim-package/, tools/, and the edge engines runs on the loop. */
+/** Every crate outside src/apps/, src/sim-package/, tools/, and the edge engines runs on the loop. */
 function isLoopCrate(u: Unit): boolean {
   if (u.tier === "app" || u.tier === "sim-package" || u.tier === "tool") return false
   return !(u.tier === "engine" && EDGE_ENGINES.includes(u.name))
@@ -316,7 +318,7 @@ function checkRustSource(crate: Crate, features: Set<string>, findings: Finding[
     const source = withoutComments(fs.readFileSync(file, "utf8"))
 
     // Foreign functions are declared in `extern "ABI" { ... }` blocks, which the crate graph
-    // can't show. apps/core may declare one, _set_FMA3_enable, which turns off the C
+    // can't show. src/apps/core may declare one, _set_FMA3_enable, which turns off the C
     // runtime's FMA3 math so the core's results don't depend on whether the CPU has FMA3.
     for (const block of externBlocks(source)) {
       const declared = [...block.matchAll(/\bfn\s+(\w+)/g)].map((m) => m[1])
@@ -385,7 +387,7 @@ function withoutComments(source: string): string {
 // tools/map-check.test.ts has a case that fails if they go missing.
 function checkImports(root: string, features: Set<string>, findings: Finding[]): void {
   const tsc = path.join(path.dirname(createRequire(import.meta.url).resolve("typescript/package.json")), "bin", "tsc")
-  const folders = ["engines", "platform", "features", "apps", "sim-package", "tools"].map((f) => path.join(root, f))
+  const folders = ["src/engines", "src/platform", "src/features", "src/apps", "src/sim-package", "tools"].map((f) => path.join(root, f))
   const configs = folders.flatMap((f) => listFiles(f, (file) => path.basename(file) === "tsconfig.json", ["node_modules", "target"]))
   const seen = new Set<string>()
   for (const config of configs) {

@@ -27,7 +27,7 @@ import { requireSdk } from "../lib/sdk.ts"
 const SIM = "FlightSimulator2024.exe"
 
 /**
- * What each log line the cases look for says, as `apps/core` and `platform/sim-service` log
+ * What each log line the cases look for says, as `src/apps/core` and `src/platform/sim-service` log
  * them, so change both together. A line is `<stamp>µs #<seq> [<unit>] <LEVEL> <target>:
  * <message> <fields>`.
  */

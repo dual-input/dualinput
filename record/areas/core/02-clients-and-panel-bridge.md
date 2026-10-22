@@ -19,7 +19,7 @@ Decides:     The core's WebSocket library and its Origin check; the client proto
 > - `clients` raises a trouble notice when no cockpit panel's `hello` comes within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)).
 > - A client whose version differs is logged and nothing more, which settles what [a client whose version differs](#a-client-whose-version-differs) leaves to 6.16; where a notice shows waits for the apps' stage.
 >
-> Since 2026-10-18, the sim's stock `VCockpit.js` is on disk in our Steam install, in its `asobo-vcockpits-core` package, where [our VCockpit.js](#our-vcockpitjs) has the sim stream it; the build makes our copy from the stock file it keeps in `sim-package/stock/`, and a build on a PC with the sim compares the sim's own file with it ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files); [build log](../build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed)).
+> Since 2026-10-18, the sim's stock `VCockpit.js` is on disk in our Steam install, in its `asobo-vcockpits-core` package, where [our VCockpit.js](#our-vcockpitjs) has the sim stream it; the build makes our copy from the stock file it keeps in `src/sim-package/stock/`, and a build on a PC with the sim compares the sim's own file with it ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files); [build log](../build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed)).
 >
 > Since 2026-10-21, the core records every input, so no unit's slice drifts in a replay, and a replay checks every slice, where the note of 2026-10-16 leaves a partly recorded unit's out; the core's `alive` every 2s whatever else it sends, from that note, then guards against no drift, and [the protocol](#the-protocol)'s `alive` after 2s of nothing would replay exactly too (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 >
@@ -44,7 +44,7 @@ The spine's [communication](../architecture/01-spine.md#communication), decision
 
 | Unit | Holds |
 | --- | --- |
-| `apps/core`'s edge | The WebSocket server, its `Origin` check, and a tokio task for each socket; a socket opening, a text message, and a close come in as inputs, and "send this text" and "close this socket" go out as outputs |
+| `src/apps/core`'s edge | The WebSocket server, its `Origin` check, and a tokio task for each socket; a socket opening, a text message, and a close come in as inputs, and "send this text" and "close this socket" go out as outputs |
 | `clients`, on the loop | The protocol, the table of clients, the keepalive, client state, commands, messages to clients, notices, settings, which panel modules each panel loads, and the transport for `ops`; it raises a client joining or leaving, a panel's socket replaced, and a setting changed |
 | `page-client`, in TypeScript | Hearing the core's announcement, connecting, the `hello`, the keepalive, and handing each message to whoever registered its tag |
 | `panel-bridge`, in TypeScript | Our two blocks in `VCockpit.js`, a record of each instrument, loading panel modules, locks and overlays, the `ops` module, and `window.DUALINPUT_UNLOCK()` |

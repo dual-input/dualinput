@@ -29,7 +29,7 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 | `session` | Platform | The members, the session's keys and their stamps, control, the session file, joining and leaving, preflight and `Hold`, the match check and its items, the display name setting, and when the core exits | On the loop |
 | `rate-and-pause` | Feature | Active pause, the simulation rate, the pause menu's notice, and the match check's time of day | Its crate in the core, and a part in the EFB app |
 | `go-to` | Feature | The PF's spot and the Go to button | Its crate in the core, and a section in the desktop app |
-| The menu script | Platform outside the core | Reporting the menu's page, and running the world map's requests | In mainUi, through our copy of BlurPage, in `sim-package/pages` |
+| The menu script | Platform outside the core | Reporting the menu's page, and running the world map's requests | In mainUi, through our copy of BlurPage, in `src/sim-package/pages` |
 
 The session crate depends on the kernel, `clients`, `sim-service`, `network`, and `recording`, as the code map's [platform](../architecture/02-code-map.md#the-platform) row has it.
 The crates above it reach it through its moments, its requests, and the keys they declare: the profile loader writes the pinned bundle, state sync guards Ready, and the cockpit stream guards control.

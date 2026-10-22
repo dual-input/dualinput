@@ -12,7 +12,7 @@ import { type LocalBackend, startBackend } from "../lib/backend.ts"
 import type { Core, CoreOptions } from "./cores.ts"
 
 export const TOKEN = "bench-token"
-/** The production cap, 256 KiB/s, which relays/relays.toml gives each relay. */
+/** The production cap, 256 KiB/s, which src/relays/relays.toml gives each relay. */
 export const CAP = 262144
 
 /** The bench relay that tools/bench.ts built, by the path Cargo reported. */

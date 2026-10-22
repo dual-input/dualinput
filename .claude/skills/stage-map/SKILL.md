@@ -29,7 +29,7 @@ Before publishing:
 
 - check every file and line against the code
 - check that the page's tags balance
-- strip the page to its text and run `scripts/prose-lint.mjs` on it
+- strip the page to its text and run `tools/prose-lint.mjs` on it
 
 Write the page in the session's scratchpad, and publish it with the Artifact tool, titled "Dual Input stage N", with the icon "map".
 After a change, publish to the same link.

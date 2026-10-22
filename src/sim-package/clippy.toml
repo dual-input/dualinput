@@ -1,0 +1,4 @@
+# Our WASM module runs in the sim, not on the core's loop: its edge calls the sim's APIs and
+# reads the module's own clock. So the crates in src/sim-package/ leave out the list of calls the
+# root's clippy.toml forbids the loop's crates. Clippy reads the clippy.toml nearest a
+# crate's folder, which is this one.

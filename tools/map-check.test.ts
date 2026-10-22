@@ -64,17 +64,17 @@ test("a tree that keeps every rule passes", () => {
     ...rust(
       [
         // A derive macro runs in the compiler, so what it reaches is no loop crate's I/O.
-        { dir: "engines/messages", name: "messages", deps: ["derive"] },
-        { dir: "engines/sim-client", name: "sim-client", deps: ["messages"] },
-        { dir: "engines/object-mirror", name: "object-mirror" },
-        { dir: "platform/kernel", name: "kernel", deps: ["messages"] },
-        { dir: "platform/clients", name: "clients", deps: ["kernel", "messages"] },
-        { dir: "platform/routine-host", name: "routine-host", deps: ["messages"] },
-        { dir: "features/pointer-sync/core", name: "pointer-sync", deps: ["clients", "messages"], source: "use messages::pointer_sync::Press;\n" },
-        { dir: "features/traffic/routines", name: "traffic-routines", deps: ["messages", "routine-host", "object-mirror"] },
-        { dir: "sim-package/routines", name: "routines", deps: ["traffic-routines", "routine-host"] },
+        { dir: "src/engines/messages", name: "messages", deps: ["derive"] },
+        { dir: "src/engines/sim-client", name: "sim-client", deps: ["messages"] },
+        { dir: "src/engines/object-mirror", name: "object-mirror" },
+        { dir: "src/platform/kernel", name: "kernel", deps: ["messages"] },
+        { dir: "src/platform/clients", name: "clients", deps: ["kernel", "messages"] },
+        { dir: "src/platform/routine-host", name: "routine-host", deps: ["messages"] },
+        { dir: "src/features/pointer-sync/core", name: "pointer-sync", deps: ["clients", "messages"], source: "use messages::pointer_sync::Press;\n" },
+        { dir: "src/features/traffic/routines", name: "traffic-routines", deps: ["messages", "routine-host", "object-mirror"] },
+        { dir: "src/sim-package/routines", name: "routines", deps: ["traffic-routines", "routine-host"] },
         {
-          dir: "apps/core",
+          dir: "src/apps/core",
           name: "dualinput-core",
           deps: ["pointer-sync", "kernel", "routines"],
           source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n}\n`,
@@ -87,11 +87,11 @@ test("a tree that keeps every rule passes", () => {
       ],
     ),
     ...TS,
-    "engines/messages/ts/stamp.ts": `export const HASH = "0";\n`,
-    "engines/messages/ts/pointer-sync/press.ts": `export type Press = { x: number };\n`,
-    "engines/page-client/index.ts": `import { HASH } from "../messages/ts/stamp.ts";\nexport const hash = HASH;\n`,
-    "platform/panel-bridge/index.ts": `import { hash } from "../../engines/page-client/index.ts";\nexport const bridge = hash;\n`,
-    "features/pointer-sync/panel/index.ts":
+    "src/engines/messages/ts/stamp.ts": `export const HASH = "0";\n`,
+    "src/engines/messages/ts/pointer-sync/press.ts": `export type Press = { x: number };\n`,
+    "src/engines/page-client/index.ts": `import { HASH } from "../messages/ts/stamp.ts";\nexport const hash = HASH;\n`,
+    "src/platform/panel-bridge/index.ts": `import { hash } from "../../engines/page-client/index.ts";\nexport const bridge = hash;\n`,
+    "src/features/pointer-sync/panel/index.ts":
       `import { bridge } from "../../../platform/panel-bridge/index.ts";\n` +
       `import type { Press } from "../../../engines/messages/ts/pointer-sync/press.ts";\n` +
       `export const press = (p: Press) => bridge + p.x;\n`,
@@ -106,40 +106,40 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     name: "an engine on the platform",
     rules: ["down-the-tiers"],
     tree: rust([
-      { dir: "engines/messages", name: "messages", deps: ["kernel"] },
-      { dir: "platform/kernel", name: "kernel" },
+      { dir: "src/engines/messages", name: "messages", deps: ["kernel"] },
+      { dir: "src/platform/kernel", name: "kernel" },
     ]),
   },
   {
     name: "a platform crate on a line above its own",
     rules: ["lines-below"],
     tree: rust([
-      { dir: "platform/kernel", name: "kernel", deps: ["clients"] },
-      { dir: "platform/clients", name: "clients" },
+      { dir: "src/platform/kernel", name: "kernel", deps: ["clients"] },
+      { dir: "src/platform/clients", name: "clients" },
     ]),
   },
   {
     name: "an engine on another engine of its own line",
     rules: ["lines-below"],
     tree: rust([
-      { dir: "engines/sim-client", name: "sim-client", deps: ["sim-awareness"] },
-      { dir: "engines/sim-awareness", name: "sim-awareness" },
+      { dir: "src/engines/sim-client", name: "sim-client", deps: ["sim-awareness"] },
+      { dir: "src/engines/sim-awareness", name: "sim-awareness" },
     ]),
   },
   {
     name: "the core's platform on the routine host",
     rules: ["outside-the-core"],
     tree: rust([
-      { dir: "platform/kernel", name: "kernel", deps: ["routine-host"] },
-      { dir: "platform/routine-host", name: "routine-host" },
+      { dir: "src/platform/kernel", name: "kernel", deps: ["routine-host"] },
+      { dir: "src/platform/routine-host", name: "routine-host" },
     ]),
   },
   {
     name: "the routine host on an engine besides the message crate",
     rules: ["outside-the-core"],
     tree: rust([
-      { dir: "platform/routine-host", name: "routine-host", deps: ["sim-client"] },
-      { dir: "engines/sim-client", name: "sim-client" },
+      { dir: "src/platform/routine-host", name: "routine-host", deps: ["sim-client"] },
+      { dir: "src/engines/sim-client", name: "sim-client" },
     ]),
   },
   {
@@ -147,32 +147,32 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     name: "an engine's proc macro on a feature",
     rules: ["down-the-tiers"],
     tree: rust([
-      { dir: "engines/messages", name: "messages", deps: ["pointer-sync"], procMacro: true },
-      { dir: "features/pointer-sync/core", name: "pointer-sync" },
+      { dir: "src/engines/messages", name: "messages", deps: ["pointer-sync"], procMacro: true },
+      { dir: "src/features/pointer-sync/core", name: "pointer-sync" },
     ]),
   },
   {
     name: "a feature on another feature's crate",
     rules: ["feature-on-feature"],
     tree: rust([
-      { dir: "features/avatars/core", name: "avatars", deps: ["pointer-sync"] },
-      { dir: "features/pointer-sync/core", name: "pointer-sync" },
+      { dir: "src/features/avatars/core", name: "avatars", deps: ["pointer-sync"] },
+      { dir: "src/features/pointer-sync/core", name: "pointer-sync" },
     ]),
   },
   {
     name: "a feature naming another feature's modules of the message crate and the profile engine",
     rules: ["feature-on-feature"],
     tree: rust([
-      { dir: "features/avatars/core", name: "avatars", source: "use messages::{ids, pointer_sync as p};\nuse profile_engine::pointer_sync::Displays;\n" },
-      { dir: "features/pointer-sync/core", name: "pointer-sync" },
+      { dir: "src/features/avatars/core", name: "avatars", source: "use messages::{ids, pointer_sync as p};\nuse profile_engine::pointer_sync::Displays;\n" },
+      { dir: "src/features/pointer-sync/core", name: "pointer-sync" },
     ]),
   },
   {
     name: "a feature's routines on the core's platform",
     rules: ["feature-parts"],
     tree: rust([
-      { dir: "features/traffic/routines", name: "traffic-routines", deps: ["kernel"] },
-      { dir: "platform/kernel", name: "kernel" },
+      { dir: "src/features/traffic/routines", name: "traffic-routines", deps: ["kernel"] },
+      { dir: "src/platform/kernel", name: "kernel" },
     ]),
   },
   {
@@ -180,15 +180,15 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     name: "a feature's routines on an engine that keeps the edge's rules",
     rules: ["feature-parts", "loop-io"],
     tree: rust([
-      { dir: "features/traffic/routines", name: "traffic-routines", deps: ["transport"] },
-      { dir: "engines/transport", name: "transport" },
+      { dir: "src/features/traffic/routines", name: "traffic-routines", deps: ["transport"] },
+      { dir: "src/engines/transport", name: "transport" },
     ]),
   },
   {
     name: "the platform on a tool",
     rules: ["nothing-on-apps"],
     tree: rust([
-      { dir: "platform/kernel", name: "kernel", deps: ["thing"] },
+      { dir: "src/platform/kernel", name: "kernel", deps: ["thing"] },
       { dir: "tools/thing", name: "thing" },
     ]),
   },
@@ -196,7 +196,7 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     name: "a loop crate reaching tokio through a crate that isn't ours",
     rules: ["loop-io"],
     tree: rust(
-      [{ dir: "platform/kernel", name: "kernel", deps: ["helper"] }],
+      [{ dir: "src/platform/kernel", name: "kernel", deps: ["helper"] }],
       [
         { dir: "outside/helper", name: "helper", deps: ["tokio"] },
         { dir: "outside/tokio", name: "tokio" },
@@ -207,36 +207,36 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     name: "a loop crate reaching the transport",
     rules: ["loop-io"],
     tree: rust([
-      { dir: "features/traffic/core", name: "traffic", deps: ["transport"] },
-      { dir: "engines/transport", name: "transport" },
+      { dir: "src/features/traffic/core", name: "traffic", deps: ["transport"] },
+      { dir: "src/engines/transport", name: "transport" },
     ]),
   },
   {
-    name: "foreign functions outside the edges, and in apps/core beside _set_FMA3_enable",
+    name: "foreign functions outside the edges, and in src/apps/core beside _set_FMA3_enable",
     rules: ["foreign-functions"],
     tree: rust([
-      { dir: "engines/messages", name: "messages", source: `unsafe extern "C" {\n    fn puts(s: *const u8) -> i32;\n}\n` },
-      { dir: "apps/core", name: "dualinput-core", source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n    fn rand() -> i32;\n}\n` },
+      { dir: "src/engines/messages", name: "messages", source: `unsafe extern "C" {\n    fn puts(s: *const u8) -> i32;\n}\n` },
+      { dir: "src/apps/core", name: "dualinput-core", source: `unsafe extern "C" {\n    fn _set_FMA3_enable(flag: i32) -> i32;\n    fn rand() -> i32;\n}\n` },
     ]),
   },
   {
     name: "a feature implementing Moment",
     rules: ["feature-moments"],
-    tree: rust([{ dir: "features/traffic/core", name: "traffic", source: "pub struct Spotted;\nimpl kernel::Moment for Spotted {}\n" }]),
+    tree: rust([{ dir: "src/features/traffic/core", name: "traffic", source: "pub struct Spotted;\nimpl kernel::Moment for Spotted {}\n" }]),
   },
   {
     name: "the platform naming a feature's module of the message crate",
     rules: ["platform-names-feature"],
     tree: rust([
-      { dir: "platform/session", name: "session", source: "use messages::traffic::Copy;\n" },
-      { dir: "features/traffic/core", name: "traffic" },
+      { dir: "src/platform/session", name: "session", source: "use messages::traffic::Copy;\n" },
+      { dir: "src/features/traffic/core", name: "traffic" },
     ]),
   },
   {
     name: "crates in no unit of the picture",
     rules: ["unmapped"],
     tree: rust([
-      { dir: "engines/widgets", name: "widgets" },
+      { dir: "src/engines/widgets", name: "widgets" },
       { dir: "misc/thing", name: "thing" },
     ]),
   },
@@ -245,8 +245,8 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     rules: ["feature-on-feature"],
     tree: {
       ...TS,
-      "features/pointer-sync/panel/press.ts": `export type Press = { x: number };\n`,
-      "features/avatars/panel/hand.ts": `import type { Press } from "../../pointer-sync/panel/press.ts";\nexport const reach = (p: Press) => p.x;\n`,
+      "src/features/pointer-sync/panel/press.ts": `export type Press = { x: number };\n`,
+      "src/features/avatars/panel/hand.ts": `import type { Press } from "../../pointer-sync/panel/press.ts";\nexport const reach = (p: Press) => p.x;\n`,
     },
   },
   {
@@ -254,8 +254,8 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     rules: ["feature-parts"],
     tree: {
       ...TS,
-      "platform/efb-shell/api.ts": `export const api = 1;\n`,
-      "features/pointer-sync/panel/index.ts": `import { api } from "../../../platform/efb-shell/api.ts";\nexport const x = api;\n`,
+      "src/platform/efb-shell/api.ts": `export const api = 1;\n`,
+      "src/features/pointer-sync/panel/index.ts": `import { api } from "../../../platform/efb-shell/api.ts";\nexport const x = api;\n`,
     },
   },
   {
@@ -263,8 +263,8 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     rules: ["nothing-on-apps"],
     tree: {
       ...TS,
-      "sim-package/pages/efb.ts": `export const efb = 1;\n`,
-      "platform/panel-bridge/bridge.ts": `import { efb } from "../../sim-package/pages/efb.ts";\nexport const bridge = efb;\n`,
+      "src/sim-package/pages/efb.ts": `export const efb = 1;\n`,
+      "src/platform/panel-bridge/bridge.ts": `import { efb } from "../../sim-package/pages/efb.ts";\nexport const bridge = efb;\n`,
     },
   },
   {
@@ -272,9 +272,9 @@ const cases: { name: string; rules: Rule[]; tree: Tree }[] = [
     rules: ["platform-names-feature"],
     tree: {
       ...TS,
-      "engines/messages/ts/traffic/copy.ts": `export type Copy = { id: string };\n`,
-      "features/traffic/efb/slice.ts": `export const slice = 1;\n`,
-      "platform/efb-shell/frame.ts": `import type { Copy } from "../../engines/messages/ts/traffic/copy.ts";\nexport const frame = (c: Copy) => c.id;\n`,
+      "src/engines/messages/ts/traffic/copy.ts": `export type Copy = { id: string };\n`,
+      "src/features/traffic/efb/slice.ts": `export const slice = 1;\n`,
+      "src/platform/efb-shell/frame.ts": `import type { Copy } from "../../engines/messages/ts/traffic/copy.ts";\nexport const frame = (c: Copy) => c.id;\n`,
     },
   },
 ]

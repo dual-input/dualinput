@@ -25,7 +25,7 @@ const checks: [string, () => void][] = [
   ["the messages' TypeScript types", checkMessageTypes],
   // RUSTFLAGS would replace the static C runtime that .cargo/config.toml sets, so
   // -D warnings goes on Clippy's command line instead. --all-features lints the bench
-  // build's code too, which only apps/core's `stand-in` feature compiles.
+  // build's code too, which only src/apps/core's `stand-in` feature compiles.
   ["Clippy", () => run("cargo", ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"])],
   ["the default members' tests", () => run("cargo", ["test"])],
   ["our WASM module's build and exports", checkModule],
@@ -78,18 +78,18 @@ function checkModule(): void {
 
 function typeCheck(): void {
   const tsc = path.join(path.dirname(createRequire(import.meta.url).resolve("typescript/package.json")), "bin", "tsc")
-  const configs = ["engines", "platform", "features", "apps", "sim-package", "backend", "relays", "tools"].flatMap((f) => find(path.join(ROOT, f), "tsconfig.json"))
+  const configs = ["src", "tools"].flatMap((f) => find(path.join(ROOT, f), "tsconfig.json"))
   for (const config of configs) run(process.execPath, [tsc, "-p", fromRoot(config)])
 }
 
 function typeScriptTests(): string[] {
-  return ["engines", "platform", "features", "sim-package", "backend", "relays", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
+  return ["src", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
 }
 
 /** CI has no sim, so it checks only that each stock file matches stock.json. */
 function checkStockFiles(): void {
   const mismatched = stockMismatches()
-  if (mismatched.length) throw new Failed(`sim-package/stock/ doesn't match its stock.json: ${mismatched.join(", ")}`)
+  if (mismatched.length) throw new Failed(`src/sim-package/stock/ doesn't match its stock.json: ${mismatched.join(", ")}`)
 }
 
 /** Every file under `dir` whose name ends with `suffix`, outside node_modules and target. */

@@ -11,7 +11,7 @@ Decides:     That the desktop app does the watcher's jobs from a tray icon; what
 >
 > - Our package is one folder named `dualinput`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, most likely wins over ours (inference, not run), and the warning names it ([our package](../build/01-the-build.md#our-package)).
 > - The app writes our package only when it runs from Velopack's `current\` folder, as an installed app does, beside what [our package](#our-package) says; a developer installs a development build's package with `node tools/build.ts install`, since a rebuild keeps the version and the app's rule would never copy it in ([our package](../build/01-the-build.md#our-package)).
-> - The build keeps the sim's stock files in `sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
+> - The build keeps the sim's stock files in `src/sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 > - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
 >
 > Since 2026-10-18, the sim service raises one trouble notice for our package, from either [our own package](#our-own-package)'s check on disk or the module's status of Missing or Differs, where each raises its own; Stopped keeps its own notice (user, 2026-10-18).
@@ -49,7 +49,7 @@ The research behind it is in this area's [log](log.md).
 | Unit | Holds |
 | --- | --- |
 | Velopack's Setup.exe and Update.exe | Not ours: the installer, and the swap of one release's programs for the next ([the installer and the updater](#the-installer-and-the-updater)) |
-| `apps/desktop` | The tray icon and the window, and in its Rust side the watcher's jobs: noticing the sim, starting the core and starting it again, checking for, downloading, and applying updates, writing our Community package, the firewall rule, and the 24 hours of figures |
+| `src/apps/desktop` | The tray icon and the window, and in its Rust side the watcher's jobs: noticing the sim, starting the core and starting it again, checking for, downloading, and applying updates, writing our Community package, the firewall rule, and the 24 hours of figures |
 | `sim-service` | The packages folders, the search for packages that override our files, and the check of our own package |
 
 ## The installer and the updater

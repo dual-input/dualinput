@@ -298,7 +298,7 @@ Our WASM module is Rust, built by Navigraph's cargo-msfs and packaged by our own
 
 ### The core helper
 
-The core's work with Windows input and audio runs in the core helper, a Rust program in `apps/core-helper/` that the core starts, and starts again if it exits ([tentative decisions](decisions.md#the-cores-input-and-audio-work-runs-in-a-helper-it-starts); [the units](02-code-map.md#the-units)).
+The core's work with Windows input and audio runs in the core helper, a Rust program in `src/apps/core-helper/` that the core starts, and starts again if it exits ([tentative decisions](decisions.md#the-cores-input-and-audio-work-runs-in-a-helper-it-starts); [the units](02-code-map.md#the-units)).
 A crash there, such as in a speech recognizer's C or C++ library, costs the take-control input, the figure's hand, and the audio only until the core restarts it, while in the core's own process it would take the pilot out of the session until the desktop app restarted the core and they rejoined.
 
 - Our probes already work this way: mouse.mjs starts PowerShell, which compiles C# that reads the mouse through Raw Input, and the probe reads that program's reports line by line from its standard output ([mouse.mjs](../../../experiments/tools/mouse.mjs)).

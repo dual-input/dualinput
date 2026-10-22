@@ -45,7 +45,7 @@ This answers node 6.8 of the [architecture plan](../architecture/plan.md#68-prof
 ## The profile engine
 
 ```rust
-// a sketch: engines/profile-engine
+// a sketch: src/engines/profile-engine
 pub const LEVEL: u32 = 1;                                                  // the highest level this build reads
 
 pub fn read(bundle: &[u8], level: u32) -> Result<Profile, Report>;        // a bundle, checked against that level's schema
@@ -74,7 +74,7 @@ impl Profile {
 
 ### Levels
 
-- Each level's schema, as JSON Schema, so an editor's YAML support can complete a profile's fields, and its declarations, as one `.d.ts`, are files the engine generates from its blocks into `engines/profile-engine/levels/<n>/`.
+- Each level's schema, as JSON Schema, so an editor's YAML support can complete a profile's fields, and its declarations, as one `.d.ts`, are files the engine generates from its blocks into `src/engines/profile-engine/levels/<n>/`.
   They're committed, and CI generates them again and fails on a difference, beside holding a released level's to its release tag ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)).
 - TypeScript checks with `noLib`, so a level's declarations are the scripts' whole world: the ten global types TypeScript still needs, `Array`, `Boolean`, `CallableFunction`, `Function`, `IArguments`, `NewableFunction`, `Number`, `Object`, `RegExp`, and `String` ([log][p02]), then the names, `write()`, the chain, `state`, `aircraft`, and `plugin`, and nothing the sandbox leaves out, such as `Date` ([one loop](../architecture/02-code-map.md#one-loop)).
 
@@ -92,7 +92,7 @@ Windows' `Get-FileHash` takes SHA-256 by default, so anyone can check a bundle a
 ## The builder
 
 ```rust
-// a sketch: engines/profile-build
+// a sketch: src/engines/profile-build
 pub struct Compiler;                                                       // typescript.js in a QuickJS-ng runtime of its own
 
 impl Compiler {

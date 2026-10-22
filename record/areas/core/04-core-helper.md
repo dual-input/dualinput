@@ -50,9 +50,9 @@ Decisions [004](../../decisions/004-core-works-out-figures-hand.md), [006](../..
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
 | `core-helper-service` | Platform | What each feature registered and which of it is on, the helper's life, the pipe's messages, the output device and microphone settings, the slice that lists devices and programs, and the helper's notices | On the loop |
-| `apps/core-helper` | App | Raw Input, the audio devices, capture, Opus, playback, sounds, and speech | A process of its own, which the core starts |
+| `src/apps/core-helper` | App | Raw Input, the audio devices, capture, Opus, playback, sounds, and speech | A process of its own, which the core starts |
 | The message crate's `core_helper` module | Engine | `ToHelper` and `FromHelper`, and the types inside them | Wherever the message crate does |
-| `apps/core`'s edge | App | Starting the helper's process, reading and writing its pipe, and killing it | On tokio, as [threads](01-loop-and-edge.md#threads) has it |
+| `src/apps/core`'s edge | App | Starting the helper's process, reading and writing its pipe, and killing it | On tokio, as [threads](01-loop-and-edge.md#threads) has it |
 
 ## What runs where
 
@@ -231,10 +231,10 @@ The helper runs on std's threads and channels, with no async runtime, since each
 
 ### Speech
 
-- While phrases are wanted, the helper captures the microphone and hands it to a detector, which tells speech from noise, and to a recognizer, which listens for the phrases, both behind one trait in `apps/core-helper` that [6.12](../architecture/plan.md#612-control) fills.
+- While phrases are wanted, the helper captures the microphone and hands it to a detector, which tells speech from noise, and to a recognizer, which listens for the phrases, both behind one trait in `src/apps/core-helper` that [6.12](../architecture/plan.md#612-control) fills.
 
   ```rust
-  // a sketch, inside apps/core-helper
+  // a sketch, inside src/apps/core-helper
   trait Listener {
       fn phrases(&mut self, phrases: &[String]);
       fn feed(&mut self, samples: &[f32], at: u64) -> Option<Heard>;   // Heard: the phrase's index, and when it began and ended

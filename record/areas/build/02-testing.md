@@ -106,7 +106,7 @@ The bench builds into `target/bench`, a target folder of its own, because a buil
 ### Where it lives
 
 `tools/bench/` holds the bench, as the code map's [workspace](../architecture/02-code-map.md#the-workspace) has it: its scenarios, fake pages, and local profiles' site in TypeScript on Node, as `tools/build.ts` and the other scripts there are, and the stand-in core helper, a Rust program on the message crate.
-The stand-in sim is an engine, `engines/stand-in-sim`, and the bench build of the core links it.
+The stand-in sim is an engine, `src/engines/stand-in-sim`, and the bench build of the core links it.
 
 `node tools/bench.ts` runs the bench (user, 2026-10-20):
 
@@ -119,7 +119,7 @@ The stand-in sim is an engine, `engines/stand-in-sim`, and the bench build of th
 
 ### Its place
 
-The bench build of the core is `apps/core` built with its Cargo feature `stand-in`, which links `stand-in-sim` and the routines, built natively, and puts the stand-in where the edge goes.
+The bench build of the core is `src/apps/core` built with its Cargo feature `stand-in`, which links `stand-in-sim` and the routines, built natively, and puts the stand-in where the edge goes.
 The feature also registers the test units the cases name, such as one that panics, one that raises moments in a cycle, and one that reads the clock, and the bench build's list of routines adds a test routine built to panic ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim), [01-loop-and-edge's](../core/01-loop-and-edge.md#cases-for-the-bench)).
 Apart from those, everything above the sim seam is a release's code, `tools/build.ts release` builds without the feature, and the edge's own code runs only in the sim.
 The bench build listens on a local socket the bench drives the stand-in and the test units through, and a release build has no such socket.
@@ -153,7 +153,7 @@ The systems' cases set 4, 30, and 89 a second ([the sync units' cases](../sync/0
 ### Our WASM module
 
 - The routine host and the routines run natively in the stand-in's frame: each frame, the stand-in hands the routine host its slots' newest writes and the frame, and carries out its wants on the aircraft's table, as [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for) lists them: reads, writes, the freeze, events, `H:` events, and reports into the report slots.
-- The module's list of routines lives in a library crate of its own, `sim-package/routines/`, which the module and the bench build both link, the one dependency on `sim-package/` the code map's note allows.
+- The module's list of routines lives in a library crate of its own, `src/sim-package/routines/`, which the module and the bench build both link, the one dependency on `src/sim-package/` the code map's note allows.
   The bench can't link the module itself, because the module builds only as a cdylib ([02-code-map](../architecture/02-code-map.md#left-open)).
 - The stand-in takes the module through a trait, which the bench build fills with the routine host and that list, so the stand-in, an engine, depends on no platform or feature code, as node 5 requires of it ([the architecture plan](../architecture/plan.md#7-testing)).
 - A routine's panic stops the stand-in's module as the sim stops a module that went `DIRTY`: the stand-in catches the panic and runs the module no more, and its thread belongs to no run of the core's, so the core's panic hook leaves the core running.

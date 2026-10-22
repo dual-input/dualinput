@@ -25,6 +25,6 @@ rustflags = ["-C", "target-feature=+crt-static"]
 # A type that names another imports it by its file, `.ts` included, as Node runs our tools
 # by stripping their types, and Node resolves an import only by its whole file name.
 [env]
-TS_RS_EXPORT_DIR = { value = "engines/messages/ts", relative = true }
+TS_RS_EXPORT_DIR = { value = "src/engines/messages/ts", relative = true }
 TS_RS_LARGE_INT = "number"
 TS_RS_IMPORT_EXTENSION = "ts"

@@ -95,7 +95,7 @@ Write what you find to `notes.md` as you read, because a long read outlasts your
 1. Write each name list you pulled, such as input events, `L:` variables, CommBus names, or a module's imports, to its own plain-text file in `inventory/`.
    Its first line says which package, version, file, and method it came from, and each name carries its direction where the files say it.
 2. Write `study.md` from the template, citing each claim as the Evidence section of writing.md says.
-3. Run `node scripts/prose-lint.mjs` on each Markdown file, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
+3. Run `node tools/prose-lint.mjs` on each Markdown file, fix what it reports, and do steps 1 and 2 of Finishing a document in writing.md.
    Then check every sentence that cites one of our measurements against the log entry it cites, because a study read from files can outrun what was measured.
 4. Search what you wrote for a username, a home folder path, or a machine name, and replace each path with a placeholder such as `%APPDATA%`.
 5. Last, find the aircraft's license, in its packages, its installer, or on the vendor's site.

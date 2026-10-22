@@ -25,7 +25,7 @@ import path from "node:path"
 import { createInterface } from "node:readline"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import type { Bound } from "../../engines/messages/ts/core_helper/Bound.ts"
+import type { Bound } from "../../src/engines/messages/ts/core_helper/Bound.ts"
 import { BenchRun, type Core } from "../bench/cores.ts"
 import { FakePage } from "../bench/pages.ts"
 import { buildPrograms } from "../lib/cargo.ts"

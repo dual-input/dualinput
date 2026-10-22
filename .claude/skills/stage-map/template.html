@@ -208,10 +208,10 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
   <ol class="story">
     <li><b>1</b><div>tools/bench.ts builds the core with its <code>stand-in</code> feature into target/bench, so the bench never overwrites the core a plain <code>cargo build</code> makes.<span class="at">tools/bench.ts:45 buildBenchCore()</span></div></li>
     <li><b>2</b><div>cores.ts starts the core on a new data folder, reads the port the core wrote there, connects, and checks that the core was built from this tree.<span class="at">tools/bench/cores.ts:95 Core.start()</span></div></li>
-    <li><b>3</b><div>A load line starts the playback, and puts nothing in the queue itself.<span class="at">apps/core/src/bench/socket.rs:65 playback::play(…)</span></div></li>
+    <li><b>3</b><div>A load line starts the playback, and puts nothing in the queue itself.<span class="at">src/apps/core/src/bench/socket.rs:65 playback::play(…)</span></div></li>
     <li><b>4</b><div>The socket puts each count and exit line in the queue, as an input.<span class="at">socket.rs:72 queue.push(sources.lines, line, true)</span></div></li>
-    <li><b>5</b><div>The playback pushes a flight's inputs and a session's into the queue, each when it falls due.<span class="at">apps/core/src/bench/playback.rs:243 queue.push(…)</span></div></li>
-    <li><b>6</b><div>The loop takes one input at a time and hands it to a test unit.<span class="at">apps/core/src/run.rs:296 kernel.handle(&amp;input)</span></div></li>
+    <li><b>5</b><div>The playback pushes a flight's inputs and a session's into the queue, each when it falls due.<span class="at">src/apps/core/src/bench/playback.rs:243 queue.push(…)</span></div></li>
+    <li><b>6</b><div>The loop takes one input at a time and hands it to a test unit.<span class="at">src/apps/core/src/run.rs:296 kernel.handle(&amp;input)</span></div></li>
     <li><b>7</b><div>The recording's writer saves every input, and the loop's stats go to the log.<span class="at">run.rs:309 stats.handled(…)</span></div></li>
     <li><b>8</b><div>When the scenario ends, even by failing, cores.ts kills any core still running and replays each recording. A replay that differs from its run fails the scenario.<span class="at">tools/bench/cores.ts:49 test.after(() =&gt; this.end())</span></div></li>
   </ol>
@@ -229,9 +229,9 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
     <div class="st">the bench build<small>in target/bench</small></div>
   </div>
   <ol class="walk">
-    <li><span class="do">The core's Cargo.toml declares the feature and the crates it needs.</span><span class="at"><b>apps/core/Cargo.toml</b><code>[features] stand-in = ["dep:serde", …]</code></span></li>
-    <li><span class="do">With the feature on, <code>main</code> registers the test units after the core's own units.</span><span class="at"><b>apps/core/src/lib.rs:61</b><code>let units = &amp;[units, bench::UNITS].concat();</code></span></li>
-    <li><span class="do">As the core starts, it opens the bench's socket only if the test units registered.</span><span class="at"><b>apps/core/src/run.rs:130, 198</b><code>bench::Sources::of(&amp;kernel)</code> then <code>bench::start(…)</code></span></li>
+    <li><span class="do">The core's Cargo.toml declares the feature and the crates it needs.</span><span class="at"><b>src/apps/core/Cargo.toml</b><code>[features] stand-in = ["dep:serde", …]</code></span></li>
+    <li><span class="do">With the feature on, <code>main</code> registers the test units after the core's own units.</span><span class="at"><b>src/apps/core/src/lib.rs:61</b><code>let units = &amp;[units, bench::UNITS].concat();</code></span></li>
+    <li><span class="do">As the core starts, it opens the bench's socket only if the test units registered.</span><span class="at"><b>src/apps/core/src/run.rs:130, 198</b><code>bench::Sources::of(&amp;kernel)</code> then <code>bench::start(…)</code></span></li>
     <li><span class="do">tools/bench.ts builds the bench build into target/bench, and runs the program Cargo reports it built.</span><span class="at"><b>tools/bench.ts:46, 59</b><code>--features stand-in --target-dir target/bench</code>, <code>message.executable</code></span></li>
     <li><span class="do">A scenario checks that a release build can't reach the stand-in sim.</span><span class="at"><b>tools/bench/scenarios/builds.ts:24</b><code>!release.some(line =&gt; line.startsWith("stand-in-sim "))</code></span></li>
   </ol>
@@ -265,7 +265,7 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
   </svg>
   </div>
   <ol class="walk">
-    <li><span class="do">The core asks Windows for a free port on 127.0.0.1.</span><span class="at"><b>apps/core/src/bench/socket.rs:23</b><code>TcpListener::bind(("127.0.0.1", 0))</code></span></li>
+    <li><span class="do">The core asks Windows for a free port on 127.0.0.1.</span><span class="at"><b>src/apps/core/src/bench/socket.rs:23</b><code>TcpListener::bind(("127.0.0.1", 0))</code></span></li>
     <li><span class="do">It writes the port to <code>bench-port.new</code>, then renames that to <code>bench-port</code>, so the bench never reads half a number.</span><span class="at"><b>socket.rs:26–28</b><code>std::fs::write</code> · <code>std::fs::rename</code></span></li>
     <li><span class="do">The bench waits for <code>bench-port</code>, then connects.</span><span class="at"><b>tools/bench/cores.ts:108–113</b><code>net.connect({ host: "127.0.0.1", port })</code></span></li>
     <li><span class="do">The core sends its version and hash, and the bench fails unless they match its own.</span><span class="at"><b>socket.rs:46 · cores.ts:117</b><code>Hello { version, hash }</code> · <code>assert.deepEqual(hello, { VERSION, HASH })</code></span></li>
@@ -284,10 +284,10 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
     <div class="box"><h4>The load unit</h4><ul><li>a flight-model input: 100 outputs, then holds the loop 98.7µs, as 100 write functions did in p10</li><li>every 60s: holds the loop 100ms, as a write function at its limit</li><li>a timer 5 times a second, and a file job every 30s</li><li>any other input: passes its bytes on as an output</li></ul></div>
   </div>
   <ol class="walk">
-    <li><span class="do">The lines unit parses each line from the socket.</span><span class="at"><b>apps/core/src/bench/lines.rs:26</b><code>fn line</code> · <code>serde_json::from_slice</code></span></li>
+    <li><span class="do">The lines unit parses each line from the socket.</span><span class="at"><b>src/apps/core/src/bench/lines.rs:26</b><code>fn line</code> · <code>serde_json::from_slice</code></span></li>
     <li><span class="do">For a count line, it logs n and puts out <code>Counted(n)</code>.</span><span class="at"><b>lines.rs:31–32</b><code>tracing::debug!(n, …)</code> · <code>cx.out(Counted(n))</code></span></li>
     <li><span class="do">For an exit line, it puts out the core's exit.</span><span class="at"><b>lines.rs:34</b><code>ToCore::Exit =&gt; cx.out(Exit)</code></span></li>
-    <li><span class="do">The load unit reads each input's kind from its first two bytes.</span><span class="at"><b>apps/core/src/bench/load.rs:90</b><code>fn input</code> · <code>match kind</code></span></li>
+    <li><span class="do">The load unit reads each input's kind from its first two bytes.</span><span class="at"><b>src/apps/core/src/bench/load.rs:90</b><code>fn input</code> · <code>match kind</code></span></li>
     <li><span class="do">The start input sets its timers and its file job going.</span><span class="at"><b>load.rs:98</b><code>START =&gt; cx.timer(TICK, …) · cx.timer(STOP_EVERY, …) · cx.job(…)</code></span></li>
     <li><span class="do">For a flight-model input, it puts out 100 writes, then holds the loop.</span><span class="at"><b>load.rs:105–114</b><code>cx.out(Wrote::Entry { … })</code> · <code>hold(started, WRITE_FUNCTIONS)</code></span></li>
     <li><span class="do">Once a minute, its stop timer holds the loop for 100ms.</span><span class="at"><b>load.rs:145–146</b><code>fn stop</code> · <code>hold(Instant::now(), LIMIT)</code></span></li>
@@ -313,7 +313,7 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
 <text class="s" x="960" y="248" text-anchor="end">one 100ms slice, schematic · each dot an input</text>
 </svg></div>
   <ol class="walk">
-    <li><span class="do">A load line from the bench starts the playback on a thread of its own.</span><span class="at"><b>apps/core/src/bench/playback.rs:26</b><code>pub fn play(path, plays, queue, source, context)</code></span></li>
+    <li><span class="do">A load line from the bench starts the playback on a thread of its own.</span><span class="at"><b>src/apps/core/src/bench/playback.rs:26</b><code>pub fn play(path, plays, queue, source, context)</code></span></li>
     <li><span class="do">It decompresses the capture into memory and indexes its records.</span><span class="at"><b>playback.rs:59–61</b><code>Capture::read</code> · <code>zstd::stream::read::Decoder</code></span></li>
     <li><span class="do">It sets up the made-up streams: 109 cockpit changes a second, 30 avatar poses, 1 heartbeat, 10 panel messages, 50 ATC frames, and cursor drags.</span><span class="at"><b>playback.rs:189</b><code>fn session() -&gt; Vec&lt;Box&lt;dyn Stream&gt;&gt;</code></span></li>
     <li><span class="do">It keeps every stream in a heap, ordered by when its next input is due.</span><span class="at"><b>playback.rs:227</b><code>BinaryHeap&lt;Reverse&lt;(u64, usize)&gt;&gt;</code></span></li>
@@ -345,11 +345,11 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
   <pre class="log">the loop's stats window="minute" seconds=60.0 inputs=34768 busy_percent=0.52 wait_p50_us=12
   wait_p99_us=87 wait_p999_us=223 wait_max_us=98509 over_1ms=1 slowest_us=100004 slowest_seq=625250</pre>
   <ol class="walk">
-    <li><span class="do">The loop notes the time it takes an input from the queue.</span><span class="at"><b>apps/core/src/run.rs:263</b><code>let popped = Instant::now();</code></span></li>
+    <li><span class="do">The loop notes the time it takes an input from the queue.</span><span class="at"><b>src/apps/core/src/run.rs:263</b><code>let popped = Instant::now();</code></span></li>
     <li><span class="do">It works out how long the input waited since it was queued.</span><span class="at"><b>run.rs:264</b><code>let waited = clock::now() - input.stamp;</code></span></li>
     <li><span class="do">It times the handlers.</span><span class="at"><b>run.rs:296–297</b><code>kernel.handle(&amp;input)</code> · <code>let took = handling.elapsed();</code></span></li>
     <li><span class="do">It passes the three times to the stats, counting everything since it took the input as busy.</span><span class="at"><b>run.rs:309</b><code>stats.handled(&amp;input, waited, took, popped.elapsed())</code></span></li>
-    <li><span class="do">The stats add them to the minute's totals and the run's, and log the minute's line once 60s have passed.</span><span class="at"><b>apps/core/src/loop_stats.rs:34–39</b><code>fn handled</code> · <code>self.minute.log("minute")</code></span></li>
+    <li><span class="do">The stats add them to the minute's totals and the run's, and log the minute's line once 60s have passed.</span><span class="at"><b>src/apps/core/src/loop_stats.rs:34–39</b><code>fn handled</code> · <code>self.minute.log("minute")</code></span></li>
     <li><span class="do">The percentiles come from a fixed table of wait times, and are at most 1/16 above the true ones.</span><span class="at"><b>loop_stats.rs:127, 156</b><code>Histogram::bucket</code> · <code>at_most(0.99)</code></span></li>
     <li><span class="do">As the core exits, the loop logs the whole run's line.</span><span class="at"><b>run.rs:318</b><code>stats.finish()</code></span></li>
   </ol>
@@ -402,7 +402,7 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
     <div class="state stop"><h4>Sim exited</h4><ul><li>It reports the process's exit code.</li><li>It keeps watching a process the bench named next.</li></ul><div class="via">the core looks again</div></div>
   </div>
   <ol class="walk">
-    <li><span class="do">The stand-in runs on a thread of its own, and waits until a call comes or the sim's process ends.</span><span class="at"><b>engines/stand-in-sim/src/lib.rs:148, 161</b><code>fn run</code> · <code>WaitForMultipleObjects(…)</code></span></li>
+    <li><span class="do">The stand-in runs on a thread of its own, and waits until a call comes or the sim's process ends.</span><span class="at"><b>src/engines/stand-in-sim/src/lib.rs:148, 161</b><code>fn run</code> · <code>WaitForMultipleObjects(…)</code></span></li>
     <li><span class="do">The bench names the process that plays the sim's.</span><span class="at"><b>lib.rs:212</b><code>Act::Watch { process } =&gt; self.watched = Some(process)</code></span></li>
     <li><span class="do">When the core asks it to look, the stand-in opens that process and reports its ID and creation time.</span><span class="at"><b>lib.rs:233, 262</b><code>fn find</code> · <code>OpenProcess</code> · <code>Up::Found { … }</code></span></li>
     <li><span class="do">An open fails while no sim runs, and succeeds while one does, followed by MSFS's open message.</span><span class="at"><b>lib.rs:176, 201</b><code>E_FAIL</code> · <code>S_OK</code> and <code>open_message()</code></span></li>
@@ -424,10 +424,10 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
     <div class="side"><span class="label">Below the seam: the sim edge, the stand-in sim, or a replay</span><span class="chip up">Message { connection, record }</span><span class="chip up">Opened { connection, result }</span><span class="chip up">Lost { connection }</span><span class="chip up">Found { process, created }</span><span class="chip up">Exited { code }</span></div>
   </div>
   <ol class="walk">
-    <li><span class="do">Before it generates anything, the build script checks that the SDK on disk is the version msfs-sdk.txt names, and stops with "run node tools/setup.ts" if not.</span><span class="at"><b>engines/simconnect-types/build.rs:17–48</b><code>std::process::exit(1)</code></span></li>
+    <li><span class="do">Before it generates anything, the build script checks that the SDK on disk is the version msfs-sdk.txt names, and stops with "run node tools/setup.ts" if not.</span><span class="at"><b>src/engines/simconnect-types/build.rs:17–48</b><code>std::process::exit(1)</code></span></li>
     <li><span class="do">bindgen reads SimConnect.h and generates a Rust type for each name that starts SIMCONNECT_.</span><span class="at"><b>build.rs:62</b><code>.allowlist_type("SIMCONNECT_.*")</code></span></li>
     <li><span class="do">Cargo builds the types again when a header changes, and the crate records the SDK's version.</span><span class="at"><b>build.rs:50, 70</b><code>SIMCONNECT_SDK_VERSION</code> · <code>CargoCallbacks</code></span></li>
-    <li><span class="do">The five kinds of input that come up.</span><span class="at"><b>engines/sim-client/src/lib.rs:28</b><code>enum Up { Message, Opened, Lost, Found, Exited }</code></span></li>
+    <li><span class="do">The five kinds of input that come up.</span><span class="at"><b>src/engines/sim-client/src/lib.rs:28</b><code>enum Up { Message, Opened, Lost, Found, Exited }</code></span></li>
     <li><span class="do">The three calls that go down.</span><span class="at"><b>sim-client/src/lib.rs:61</b><code>enum SimCall { FindProcess, Open, Close }</code></span></li>
     <li><span class="do">An input becomes bytes for the queue, and bytes again on the loop.</span><span class="at"><b>sim-client/src/lib.rs:48, 53</b><code>Up::encode</code> · <code>Up::decode</code></span></li>
   </ol>
@@ -469,9 +469,9 @@ pre.log{margin:0;background:var(--panel);border:1px solid var(--line);border-rad
   <div class="part-head"><h2 id="h-order">Reading the diff</h2></div>
   <ol class="order">
     <li>Stage 3's lines in the plan, and the cases moved to later stages. <span>record/areas/build/plan.md</span></li>
-    <li>The sim seam's types, then the stand-in sim. <span>engines/simconnect-types, sim-client, stand-in-sim</span></li>
-    <li>The bench socket's messages. <span>engines/messages/src/bench.rs</span></li>
-    <li>The core: the loop's stats, then the bench build's socket and test units. <span>apps/core/src/loop_stats.rs, run.rs, bench/</span></li>
+    <li>The sim seam's types, then the stand-in sim. <span>src/engines/simconnect-types, sim-client, stand-in-sim</span></li>
+    <li>The bench socket's messages. <span>src/engines/messages/src/bench.rs</span></li>
+    <li>The core: the loop's stats, then the bench build's socket and test units. <span>src/apps/core/src/loop_stats.rs, run.rs, bench/</span></li>
     <li>The bench. <span>tools/bench.ts, tools/bench/</span></li>
     <li>The map check's change, the logs, and the measured results. <span>tools/map-check.ts, record/areas/*/log.md</span></li>
   </ol>

@@ -9,7 +9,7 @@ publish = false
 # and does what the bench tells it over a line of its own
 # (record/areas/build/02-testing.md, "The stand-in core helper").
 [dependencies]
-messages = { path = "../../../engines/messages" }
+messages = { path = "../../../src/engines/messages" }
 serde_json = "1.0.145"
 # Its stamps are µs on the performance counter, as the real helper's are.
 windows-sys = { version = "0.61.2", features = ["Win32_System_Performance"] }

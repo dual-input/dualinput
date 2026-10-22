@@ -1,23 +1,23 @@
 # Every Rust crate of Dual Input is in this one workspace, so every program builds with the
 # same version of each dependency, from one Cargo.lock, and shares the settings below.
 [workspace]
-# Members are named by folder globs: `engines/*` makes every folder under engines/ a
+# Members are named by folder globs: `src/engines/*` makes every folder under src/engines/ a
 # member, so adding or deleting a crate's folder needs no edit here. Cargo stops with an
 # error when a glob matches no folder at all, or matches a folder without a Cargo.toml.
-# Some engines are TypeScript rather than Rust, such as engines/page-client, and have no
+# Some engines are TypeScript rather than Rust, such as src/engines/page-client, and have no
 # Cargo.toml.
 #
 # - When you add the first crate under a top folder that has no glob yet, such as
-#   features/, add that folder's glob along with it.
+#   src/features/, add that folder's glob along with it.
 # - When you add a TypeScript folder that a glob matches, list it in an `exclude` list
 #   beside `members`.
-members = ["engines/*", "platform/*", "apps/*", "sim-package/*", "tools/msfs-sdk", "tools/bench/core-helper", "tools/bench/relay", "tools/sim/desk"]
+members = ["src/engines/*", "src/platform/*", "src/apps/*", "src/sim-package/*", "tools/msfs-sdk", "tools/bench/core-helper", "tools/bench/relay", "tools/sim/desk"]
 # TypeScript, and the sim's stock files.
-exclude = ["engines/page-client", "platform/panel-bridge", "sim-package/pages", "sim-package/stock"]
-# A plain `cargo build` builds these. sim-package/'s glob stays out of this list, since our
+exclude = ["src/engines/page-client", "src/platform/panel-bridge", "src/sim-package/pages", "src/sim-package/stock"]
+# A plain `cargo build` builds these. src/sim-package/'s glob stays out of this list, since our
 # WASM module's build script needs settings only cargo-msfs gives it, so the module's list of
 # routines, which builds anywhere, is named on its own.
-default-members = ["engines/*", "platform/*", "apps/*", "sim-package/routines", "tools/msfs-sdk", "tools/bench/core-helper", "tools/bench/relay", "tools/sim/desk"]
+default-members = ["src/engines/*", "src/platform/*", "src/apps/*", "src/sim-package/routines", "tools/msfs-sdk", "tools/bench/core-helper", "tools/bench/relay", "tools/sim/desk"]
 resolver = "3"
 
 # Two builds with different versions refuse to connect, rather than misread each other's
@@ -27,8 +27,8 @@ version = "0.1.0"
 edition = "2024"
 
 # A replay of the core has to visit everything in the order the run did, and a HashMap's
-# order is seeded at random each run. So the loop's crates, every crate outside apps/,
-# sim-package/, tools/, the transport, the sim edge, and the stand-in sim, fail Clippy on a
+# order is seeded at random each run. So the loop's crates, every crate outside src/apps/,
+# src/sim-package/, tools/, the transport, the sim edge, and the stand-in sim, fail Clippy on a
 # `for` loop over one, and on a call to a function clippy.toml lists, such as
 # `Instant::now`, even without `-D warnings`. Each loop crate opts in with
 # `[lints] workspace = true`. clippy.toml and EDGE_ENGINES in tools/map-check.ts list the

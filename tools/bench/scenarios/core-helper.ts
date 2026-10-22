@@ -10,7 +10,7 @@ import path from "node:path"
 import { type TestContext, test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import type { Bound } from "../../../engines/messages/ts/core_helper/Bound.ts"
+import type { Bound } from "../../../src/engines/messages/ts/core_helper/Bound.ts"
 import { ROOT } from "../../lib/repo.ts"
 import { BenchRun, type Core } from "../cores.ts"
 import { type HelperRun, StandInHelper } from "../helper.ts"
@@ -18,7 +18,7 @@ import { FakePage } from "../pages.ts"
 
 const KEY_A: Bound = { input: { key: { scan: 30, extended: false } }, name: "A" }
 const KEY_B: Bound = { input: { key: { scan: 48, extended: false } }, name: "B" }
-const TONE_BYTES = fs.statSync(path.join(ROOT, "apps", "core", "src", "bench", "tone.opus")).size
+const TONE_BYTES = fs.statSync(path.join(ROOT, "src", "apps", "core", "src", "bench", "tone.opus")).size
 
 async function started(run: BenchRun, name: string, settings: Record<string, unknown> = {}): Promise<{ core: Core; helper: StandInHelper }> {
   const helper = await StandInHelper.start()

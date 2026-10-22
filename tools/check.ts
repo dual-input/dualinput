@@ -34,7 +34,8 @@ const checks: [string, () => void][] = [
   ["the stock files against stock.json", checkStockFiles],
   ["the Coherent GT check on our code in the sim", () => checkPages(buildPages())],
   ["the map check", () => run(process.execPath, [path.join("tools", "map-check.ts")])],
-  // The tools' tests, and our TypeScript's own, such as page-client's, on Node's test runner.
+  // The tools' tests, and our TypeScript's own, such as page-client's and the backend's, the
+  // backend's on a local D1, on Node's test runner.
   ["the TypeScript tests", () => run(process.execPath, ["--test", ...typeScriptTests()])],
 ]
 
@@ -77,12 +78,12 @@ function checkModule(): void {
 
 function typeCheck(): void {
   const tsc = path.join(path.dirname(createRequire(import.meta.url).resolve("typescript/package.json")), "bin", "tsc")
-  const configs = ["engines", "platform", "features", "apps", "sim-package", "tools"].flatMap((f) => find(path.join(ROOT, f), "tsconfig.json"))
+  const configs = ["engines", "platform", "features", "apps", "sim-package", "backend", "relays", "tools"].flatMap((f) => find(path.join(ROOT, f), "tsconfig.json"))
   for (const config of configs) run(process.execPath, [tsc, "-p", fromRoot(config)])
 }
 
 function typeScriptTests(): string[] {
-  return ["engines", "platform", "features", "sim-package", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
+  return ["engines", "platform", "features", "sim-package", "backend", "relays", "tools"].flatMap((f) => find(path.join(ROOT, f), ".test.ts")).map((f) => fromRoot(f))
 }
 
 /** CI has no sim, so it checks only that each stock file matches stock.json. */

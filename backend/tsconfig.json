@@ -1,0 +1,20 @@
+// The Worker runs in workerd, which implements the web's APIs, so this checks it against
+// the "webworker" lib and the few runtime types src/workers.d.ts declares. wrangler bundles
+// it with esbuild, and Node runs its tests by stripping the types, so `erasableSyntaxOnly`
+// flags what Node can't strip.
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024", "webworker"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}

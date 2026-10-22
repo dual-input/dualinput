@@ -13,6 +13,7 @@ import { setTimeout as sleep } from "node:timers/promises"
 import type { ClientsAct } from "../../engines/messages/ts/bench/ClientsAct.ts"
 import type { FromCore } from "../../engines/messages/ts/bench/FromCore.ts"
 import type { HelperAct } from "../../engines/messages/ts/bench/HelperAct.ts"
+import type { NetAct } from "../../engines/messages/ts/bench/NetAct.ts"
 import type { PortFile } from "../../engines/messages/ts/clients/PortFile.ts"
 import type { Hello } from "../../engines/messages/ts/bench/Hello.ts"
 import type { SimCall } from "../../engines/messages/ts/bench/SimCall.ts"
@@ -166,6 +167,11 @@ export class Core {
   /** Has the core helper's test unit, which stands in for the features that want things of the helper, act. */
   helper(act: HelperAct): void {
     this.send({ kind: "helper", act })
+  }
+
+  /** Has the network's test unit, which stands in for the session crate and a feature with a channel of each delivery, act. */
+  net(act: NetAct): void {
+    this.send({ kind: "net", act })
   }
 
   /** Calls `f` with each CommBus call the core makes for JavaScript, as the sim's pages hear it, from now on. */

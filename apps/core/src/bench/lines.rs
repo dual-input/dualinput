@@ -39,7 +39,8 @@ impl Lines {
                 | ToCore::StandIn { .. }
                 | ToCore::Sim { .. }
                 | ToCore::Clients { .. }
-                | ToCore::Helper { .. },
+                | ToCore::Helper { .. }
+                | ToCore::Net { .. },
             ) => {}
             Err(error) => tracing::warn!(%error, "a line from the bench isn't one of its messages"),
         }

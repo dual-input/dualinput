@@ -102,6 +102,7 @@ impl Bench {
                 Ok(ToCore::Sim { .. }) => self.queue.push(self.sources.sim, line),
                 Ok(ToCore::Clients { .. }) => self.queue.push(self.sources.clients, line),
                 Ok(ToCore::Helper { .. }) => self.queue.push(self.sources.helper, line),
+                Ok(ToCore::Net { .. }) => self.queue.push(self.sources.net, line),
                 Ok(_) => self.queue.push(self.sources.lines, line),
                 Err(error) => {
                     tracing::warn!(%error, "a line from the bench isn't one of its messages")

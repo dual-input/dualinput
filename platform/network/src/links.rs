@@ -213,6 +213,9 @@ impl Network {
                         endpoint: link.member.endpoint,
                     });
                 }
+                if !lost.is_empty() {
+                    me.ping(cx);
+                }
             }
             Event::Bound(Err(error)) => {
                 tracing::error!(error, "the network's endpoint didn't bind");
@@ -260,6 +263,27 @@ impl Network {
             } => me.one_off(conn, channel, bytes, cx),
             Event::Closed { conn, code } => {
                 me.conns.remove(&conn);
+                // A close can overtake the first message the other side sent before it, so the
+                // refused side shows the refusal from the close too, under the same notice its
+                // own check raises. A refused connection never joined a link, so this comes
+                // before the link is looked up.
+                if let Ok(
+                    refused @ (codes::WRONG_CODE | codes::WRONG_VERSION | codes::WRONG_HASH),
+                ) = code
+                {
+                    let why = match refused {
+                        codes::WRONG_CODE => "it holds another session's code",
+                        codes::WRONG_VERSION => "it runs another version of Dual Input",
+                        _ => "its build's messages differ from this one's",
+                    };
+                    clients::notice(
+                        cx,
+                        "refused",
+                        Level::Warning,
+                        &format!("Another pilot's PC refused this one's connection: {why}"),
+                        None,
+                    );
+                }
                 let Some((&pilot, _)) = me.links.iter().find(|(_, l)| l.conn == Some(conn)) else {
                     return;
                 };

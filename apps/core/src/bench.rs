@@ -8,6 +8,7 @@ mod helper;
 mod lines;
 mod load;
 mod module;
+mod net;
 mod playback;
 mod sim;
 mod socket;
@@ -31,6 +32,7 @@ pub const UNITS: &[fn(&mut Registry)] = &[
     helper::BenchHelper::register,
     load::Load::register,
     sim::Probe::register,
+    net::BenchNet::register,
 ];
 
 /// The sources the bench's edge pushes the test units' inputs under, and each unit's name by
@@ -41,6 +43,7 @@ pub struct Sources {
     sim: SourceId,
     clients: SourceId,
     helper: SourceId,
+    net: SourceId,
     units: Vec<&'static str>,
 }
 
@@ -54,6 +57,7 @@ impl Sources {
             sim: kernel.source::<sim::Calls>()?,
             clients: kernel.source::<clients::Acts>()?,
             helper: kernel.source::<helper::Acts>()?,
+            net: kernel.source::<net::Acts>()?,
             units: kernel.units(),
         })
     }

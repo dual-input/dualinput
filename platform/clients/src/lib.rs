@@ -162,6 +162,12 @@ impl Clients {
     pub fn joined(&self) -> usize {
         self.sockets.values().filter(|c| c.hello.is_some()).count()
     }
+
+    /// The notice up under its full ID, the raising unit's name, `.`, and its own ID, as
+    /// `network.refused`.
+    pub fn notice_up(&self, id: &str) -> Option<&Notice> {
+        self.notices.get(id)
+    }
 }
 
 /// Registers the clients crate.

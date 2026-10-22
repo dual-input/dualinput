@@ -144,7 +144,83 @@ fn replace(path: &Path, bytes: &[u8], id: JobId) -> std::io::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use std::io::{Read, Write};
+
     use super::*;
+
+    /// One answer from a server on 127.0.0.1, which hands back the request it got.
+    fn serve(answer: &'static [u8]) -> (u16, std::thread::JoinHandle<String>) {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a port should bind");
+        let port = listener
+            .local_addr()
+            .expect("a listener has an address")
+            .port();
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("the fetch should connect");
+            let mut request = Vec::new();
+            let mut buf = [0; 4096];
+            while !request.ends_with(b"{}") {
+                let n = stream.read(&mut buf).expect("the request should read");
+                if n == 0 {
+                    break;
+                }
+                request.extend(&buf[..n]);
+            }
+            stream.write_all(answer).expect("the answer should write");
+            String::from_utf8_lossy(&request).to_lowercase()
+        });
+        (port, server)
+    }
+
+    fn fetch(url: String) -> Result<Vec<u8>, String> {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .expect("a runtime should build");
+        runtime.block_on(fetch_one(
+            &http(),
+            Fetch {
+                method: Method::Post,
+                url,
+                headers: vec![("x-bench".into(), "1".into())],
+                body: b"{}".to_vec(),
+                keep: vec!["etag".into()],
+            },
+        ))
+    }
+
+    /// Whatever its status, a fetch's answer is the job's result, with only the headers its
+    /// request keeps, so the recording holds only what a unit reads.
+    #[test]
+    fn a_fetch_hands_up_its_status_the_headers_it_keeps_and_its_body() {
+        let (port, server) = serve(
+            b"HTTP/1.1 404 Not Found\r\nETag: \"v1\"\r\nX-Other: no\r\nContent-Length: 2\r\nConnection: close\r\n\r\nno",
+        );
+        let fetched = fetch(format!("http://127.0.0.1:{port}/v1/lookup"))
+            .expect("the fetch should get an answer");
+        assert_eq!(
+            Fetched::decode(&fetched),
+            Some(Fetched {
+                status: 404,
+                headers: vec![("etag".into(), "\"v1\"".into())],
+                body: b"no".to_vec(),
+            })
+        );
+        let request = server.join().expect("the server should end");
+        assert!(request.starts_with("post /v1/lookup"), "{request}");
+        assert!(request.contains("x-bench: 1"), "{request}");
+    }
+
+    #[test]
+    fn a_fetch_that_gets_no_answer_is_the_jobs_error() {
+        let port = std::net::TcpListener::bind("127.0.0.1:0")
+            .and_then(|l| l.local_addr())
+            .expect("a port should bind")
+            .port();
+        let error =
+            fetch(format!("http://127.0.0.1:{port}/v1/lookup")).expect_err("nothing listens there");
+        assert!(error.contains("got no answer"), "{error}");
+    }
 
     #[test]
     fn a_path_whose_home_folder_was_hidden_gets_it_back() {

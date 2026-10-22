@@ -5,7 +5,6 @@
 import { spawn, spawnSync } from "node:child_process"
 import fs from "node:fs"
 import net from "node:net"
-import os from "node:os"
 import path from "node:path"
 
 import { ROOT } from "./repo.ts"
@@ -33,7 +32,10 @@ export type LocalBackend = {
 }
 
 export async function startBackend(): Promise<LocalBackend> {
-  const persist = fs.mkdtempSync(path.join(os.tmpdir(), "dualinput-backend-"))
+  // In target/, the build's output, so a folder that stays behind is gone with the next
+  // `cargo clean`.
+  fs.mkdirSync(path.join(ROOT, "target", "backend"), { recursive: true })
+  const persist = fs.mkdtempSync(path.join(ROOT, "target", "backend", "d1-"))
   wrangler(["d1", "migrations", "apply", "DB", "--local", "--persist-to", persist, "--config", CONFIG])
   const port = await freePort()
   const child = spawn(
@@ -78,8 +80,8 @@ export async function startBackend(): Promise<LocalBackend> {
       // workerd lets go of the database's file a moment after it exits.
       try {
         fs.rmSync(persist, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })
-      } catch (error) {
-        console.warn(`the local backend's folder ${persist} stays behind: ${error}`)
+      } catch {
+        // It stays behind in target/backend/.
       }
     },
   }

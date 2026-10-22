@@ -43,6 +43,9 @@ pub enum ToCore {
     /// Has the core helper's test unit, which stands in for the features that want things
     /// of the core helper, act.
     Helper { act: HelperAct },
+    /// Has the network's test unit, which stands in for the session crate and for a feature
+    /// with a channel of each delivery, act.
+    Net { act: NetAct },
 }
 
 /// What the core helper's test unit does. It registers one of each want: a binding to the
@@ -300,4 +303,83 @@ pub struct Called {
     /// The call's arguments, as Rust prints them.
     pub arguments: String,
     pub before_open_reply: bool,
+}
+
+/// What the network's test unit does. It stands in for the session crate, hosting, joining,
+/// opening with what the backend answers, and keeping its session in `bench-session.json` so a
+/// restarted core opens again under a higher restart count; and for a feature with a channel
+/// of each delivery, whose probes carry their send stamp so the receiver measures how late
+/// each came.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "act", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum NetAct {
+    Host {
+        name: String,
+    },
+    /// Looks the code up and opens the session the backend finds, under `open_as` in place
+    /// of the code when it's given, so the other cores refuse its first message.
+    Join {
+        code: String,
+        name: String,
+        open_as: Option<String>,
+    },
+    /// Whether each connection's first message goes out, which a scenario turns off to see
+    /// the other side close a connection that sends none.
+    First {
+        send: bool,
+    },
+    /// Sends `count` probes of `bytes` bytes each on the channel of `delivery`, one every
+    /// `every_ms`, to every member whose link is up.
+    Send {
+        delivery: Delivery,
+        count: u32,
+        every_ms: u32,
+        bytes: u32,
+    },
+    /// Tells the bench what came on each channel since the last report, and its clock offset
+    /// from each member, as a `net report` line.
+    Report,
+    Leave {
+        quit: bool,
+    },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum Delivery {
+    Stream,
+    Newest,
+    Deadline,
+}
+
+/// The network's test unit's channels: the session channel it opens each connection with, and
+/// one of each delivery.
+pub const SESSION: crate::net::Channel<String> =
+    crate::net::Channel::new(1000, crate::net::Delivery::Stream, u8::MAX);
+pub const STREAM: crate::net::Channel<Probe> =
+    crate::net::Channel::new(1001, crate::net::Delivery::Stream, 100);
+pub const NEWEST: crate::net::Channel<Probe> =
+    crate::net::Channel::new(1002, crate::net::Delivery::Newest, 200);
+pub const DEADLINE: crate::net::Channel<Probe> =
+    crate::net::Channel::new(1003, crate::net::Delivery::Deadline, 150);
+
+/// One probe: its number, its send stamp in µs on the sender's counter, which two cores on
+/// one PC share, and bytes that make it the size a scenario asks.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Probe {
+    pub n: u32,
+    pub sent: u64,
+    /// For a deadline channel's probe, when its turn passes, in µs on the counter.
+    pub deadline: Option<u64>,
+    pub pad: Vec<u8>,
+}
+impl crate::net::OneOff for Probe {
+    fn wait(&self) -> crate::net::Wait {
+        match self.deadline {
+            Some(at) => crate::net::Wait::Deadline { at },
+            None => crate::net::Wait::Newest { key: 0 },
+        }
+    }
 }

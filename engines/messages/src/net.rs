@@ -143,6 +143,20 @@ pub enum Command {
     Shutdown,
 }
 
+/// What a one-off channel's message names about how it waits for room in QUIC's queue: the
+/// key whose newest packet alone waits, such as a pose's figure, or its deadline, such as an
+/// ATC frame's turn to play. The network reads it on the loop. It lives here, beside every
+/// message type, so each type implements it in its own module of this crate.
+pub trait OneOff {
+    fn wait(&self) -> Wait;
+}
+
+impl OneOff for Heartbeat {
+    fn wait(&self) -> Wait {
+        Wait::Newest { key: 0 }
+    }
+}
+
 /// How a one-off packet waits for room in QUIC's queue.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Wait {

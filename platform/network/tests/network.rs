@@ -10,10 +10,12 @@ use kernel::{
 };
 use messages::backend::{Kind, NewSession};
 use messages::net::{
-    Channel, Command, Delivery, EndpointId, Event, HEARTBEAT, Header, Heartbeat, PilotId, codes,
+    Channel, Command, Delivery, EndpointId, Event, HEARTBEAT, Header, Heartbeat, PilotId, Relay,
+    codes,
 };
 use network::{
-    BackendAnswered, LinkLost, LinkUp, Me, Member, MemberLeft, NetUnit, Opened, Sender, To,
+    BackendAnswered, LinkLost, LinkUp, Me, Member, MemberLeft, MemberOut, NetUnit, Network, Opened,
+    Sender, To,
 };
 use serde::{Deserialize, Serialize};
 
@@ -29,10 +31,17 @@ enum Act {
     Open {
         crew: Vec<(PilotId, u32, EndpointId)>,
     },
+    /// Opens as `Open` does, with one relay in the session's list.
+    OpenRelayed {
+        crew: Vec<(PilotId, u32, EndpointId)>,
+    },
     Send(u32),
     Leave,
+    Quit,
     Host,
     Join(String),
+    /// Says whether the PC reaches the internet, and whether the refused notice is up.
+    Peek,
 }
 
 fn me() -> Me {
@@ -68,6 +77,7 @@ impl Session {
         })
         .on::<LinkLost>(|_: &mut Session, _: &LinkLost, cx: &mut Cx| cx.out(Saw("lost".into())))
         .on::<MemberLeft>(|_: &mut Session, _: &MemberLeft, cx: &mut Cx| cx.out(Saw("left".into())))
+        .on::<MemberOut>(|_: &mut Session, _: &MemberOut, cx: &mut Cx| cx.out(Saw("out".into())))
         .on::<BackendAnswered>(|_: &mut Session, a: &BackendAnswered, cx: &mut Cx| {
             cx.out(Saw(format!("answered {:?} {:?}", a.asked, a.answer)))
         });
@@ -75,26 +85,27 @@ impl Session {
 
     fn act(_: &mut Session, input: &Input, cx: &mut Cx) {
         match postcard::from_bytes(&input.bytes).unwrap() {
-            Act::Open { crew } => network::open(
+            Act::Open { crew } => open(cx, crew, Vec::new()),
+            Act::OpenRelayed { crew } => open(
                 cx,
-                network::Open {
-                    code: "ABC123".into(),
-                    me: me(),
-                    restart: 0,
-                    key: [9; 32],
-                    relays: Vec::new(),
-                    crew: crew
-                        .into_iter()
-                        .map(|(pilot, restart, endpoint)| Member {
-                            pilot,
-                            restart,
-                            endpoint,
-                        })
-                        .collect(),
-                },
+                crew,
+                vec![Relay {
+                    url: "http://relay.test/".into(),
+                    token: "t".into(),
+                    cap: 0,
+                }],
             ),
             Act::Send(n) => network::send(cx, DATA, To::Crew, &n),
             Act::Leave => network::leave(cx, false),
+            Act::Quit => network::leave(cx, true),
+            Act::Peek => {
+                let internet = cx.read::<Network>().internet();
+                let refused = cx
+                    .read::<clients::Clients>()
+                    .notice_up("network.refused")
+                    .is_some();
+                cx.out(Saw(format!("internet={internet:?} refused={refused}")));
+            }
             Act::Host => network::host(
                 cx,
                 network::Host {
@@ -119,6 +130,27 @@ impl Session {
     }
 }
 
+fn open(cx: &Cx, crew: Vec<(PilotId, u32, EndpointId)>, relays: Vec<Relay>) {
+    network::open(
+        cx,
+        network::Open {
+            code: "ABC123".into(),
+            me: me(),
+            restart: 0,
+            key: [9; 32],
+            relays,
+            crew: crew
+                .into_iter()
+                .map(|(pilot, restart, endpoint)| Member {
+                    pilot,
+                    restart,
+                    endpoint,
+                })
+                .collect(),
+        },
+    );
+}
+
 const SECOND: u64 = 1_000_000;
 
 struct Core {
@@ -135,6 +167,11 @@ struct Core {
 
 impl Core {
     fn new() -> Core {
+        Core::with_settings(None)
+    }
+
+    /// A core whose `settings.json` holds `settings`.
+    fn with_settings(settings: Option<&str>) -> Core {
         let mut registry = Registry::new();
         clients::register(&mut registry);
         network::register(&mut registry);
@@ -155,7 +192,13 @@ impl Core {
         };
         core.handle(
             FIRST,
-            first_input([1; 32], vec![("settings.json".into(), None)]),
+            first_input(
+                [1; 32],
+                vec![(
+                    "settings.json".into(),
+                    settings.map(|s| s.as_bytes().to_vec()),
+                )],
+            ),
         );
         core
     }
@@ -255,13 +298,20 @@ impl Core {
 
     /// The other core's first message on `conn`, as its stream's bytes.
     fn their_first(&mut self, conn: u64, restart: u32, code: &str) {
-        let header = Header {
-            version: messages::VERSION.into(),
-            hash: messages::HASH.into(),
-            code: code.into(),
-            pilot: THEM,
-            restart,
-        };
+        self.their_header(
+            conn,
+            Header {
+                version: messages::VERSION.into(),
+                hash: messages::HASH.into(),
+                code: code.into(),
+                pilot: THEM,
+                restart,
+            },
+        );
+    }
+
+    /// The other core's first message on `conn`, under `header`.
+    fn their_header(&mut self, conn: u64, header: Header) {
         let mut bytes = postcard::to_stdvec(&header).unwrap();
         bytes.extend(postcard::to_stdvec(&"their keys".to_string()).unwrap());
         self.event(Event::Stream {
@@ -686,4 +736,159 @@ fn a_core_whose_crew_doesnt_answer_in_10s_looks_the_code_up() {
     core.advance(core.now + 10 * SECOND);
     let looked: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
     assert_eq!(looked, ["Post https://api.dualinput.app/v1/lookup"]);
+}
+
+/// A first message from another release, or another build of this one, closes with the code
+/// naming which (record/areas/network/02-units.md, "The first message").
+#[test]
+fn a_first_message_of_another_version_or_hash_is_refused_with_its_code() {
+    for (conn, header, code) in [
+        (
+            1,
+            Header {
+                version: "0.0.1".into(),
+                hash: messages::HASH.into(),
+                code: "ABC123".into(),
+                pilot: THEM,
+                restart: 0,
+            },
+            codes::WRONG_VERSION,
+        ),
+        (
+            2,
+            Header {
+                version: messages::VERSION.into(),
+                hash: "0".repeat(64),
+                code: "ABC123".into(),
+                pilot: THEM,
+                restart: 0,
+            },
+            codes::WRONG_HASH,
+        ),
+    ] {
+        let mut core = Core::new();
+        core.act(Act::Open { crew: Vec::new() });
+        core.event(Event::Bound(Ok(MY_ENDPOINT)));
+        core.event(Event::Connected {
+            conn,
+            endpoint: [7; 32],
+            dialed: false,
+        });
+        core.take();
+        core.their_header(conn, header);
+        let (commands, saw) = core.take();
+        assert_eq!(commands, [Command::Close { conn, code }]);
+        assert!(saw.is_empty(), "nothing should link: {saw:?}");
+    }
+}
+
+#[test]
+fn a_member_with_no_connection_for_30_minutes_is_counted_out() {
+    let mut core = Core::new();
+    core.act(Act::Open {
+        crew: vec![(THEM, 0, [7; 32])],
+    });
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    core.advance(core.now + 30 * 60 * SECOND - 1);
+    assert!(!core.take().1.contains(&"out".to_string()));
+    core.advance(core.now + 1);
+    assert!(core.take().1.contains(&"out".to_string()));
+}
+
+/// While a link is lost, each dial asks every relay for `/ping`: an answer means this PC
+/// reaches the internet, and none within 2s means it doesn't (record/areas/network/02-units.md,
+/// "What the pilot sees, and settings").
+#[test]
+fn a_dial_while_a_link_is_lost_checks_whether_the_internet_answers() {
+    let mut core = Core::new();
+    core.act(Act::OpenRelayed {
+        crew: vec![(THEM, 0, [7; 32])],
+    });
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    let pings: Vec<_> = core
+        .fetches()
+        .into_iter()
+        .filter(|(w, _)| w.starts_with("Get"))
+        .collect();
+    let [(what, job)] = &pings[..] else {
+        panic!("one ping should start: {pings:?}")
+    };
+    assert_eq!(what, "Get http://relay.test/ping");
+    let job = job.clone();
+    core.answer(&job, 200, "");
+    core.act(Act::Peek);
+    assert_eq!(core.take().1, ["internet=Some(true) refused=false"]);
+
+    // The next dial, 2s on, checks again, and no answer within 2s means no internet.
+    core.advance(core.now + 2 * SECOND);
+    assert_eq!(
+        core.fetches()
+            .iter()
+            .filter(|(w, _)| w.starts_with("Get"))
+            .count(),
+        1
+    );
+    core.advance(core.now + 2 * SECOND);
+    core.act(Act::Peek);
+    assert!(
+        core.take()
+            .1
+            .contains(&"internet=Some(false) refused=false".to_string())
+    );
+}
+
+#[test]
+fn the_relays_only_setting_clears_the_endpoints_ip_transports() {
+    let mut core = Core::with_settings(Some(r#"{"network.relays-only": true}"#));
+    core.act(Act::Open { crew: Vec::new() });
+    let (commands, _) = core.take();
+    assert!(
+        matches!(commands[0], Command::Bind { ip: false, .. }),
+        "{commands:?}"
+    );
+}
+
+/// A close can overtake the first message the other side sent before it, so a close with a
+/// refusal's code shows the refusal even on a connection no link took.
+#[test]
+fn a_close_with_a_refusals_code_shows_the_refused_notice() {
+    let mut core = Core::new();
+    core.act(Act::Open {
+        crew: vec![(THEM, 0, [7; 32])],
+    });
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    core.event(Event::Connected {
+        conn: 1,
+        endpoint: [7; 32],
+        dialed: true,
+    });
+    core.event(Event::Closed {
+        conn: 1,
+        code: Ok(codes::WRONG_CODE),
+    });
+    core.act(Act::Peek);
+    assert!(
+        core.take()
+            .1
+            .contains(&"internet=None refused=true".to_string())
+    );
+}
+
+#[test]
+fn a_quit_closes_each_connection_with_the_quit_code_and_shuts_the_endpoint() {
+    let mut core = Core::new();
+    core.linked(1, [7; 32]);
+    core.take();
+    core.act(Act::Quit);
+    let (commands, _) = core.take();
+    assert_eq!(
+        commands,
+        [
+            Command::Close {
+                conn: 1,
+                code: codes::QUIT
+            },
+            Command::Shutdown
+        ]
+    );
 }

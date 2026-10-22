@@ -20,6 +20,7 @@ pub use backend::{
 };
 pub use edge::{Transport, encode as encode_event};
 pub use hooks::{NetUnit, Opened, Sender};
+pub use messages::net::OneOff;
 
 use std::collections::BTreeMap;
 
@@ -27,8 +28,8 @@ use clients::{Clients, ClientsUnit, SettingDef};
 use kernel::{Cx, Moment, Registry, TimerId, View};
 use messages::clients::SettingKind;
 use messages::net::{
-    Channel, Command, Delivery, EndpointId, HEARTBEAT, Header, Heartbeat, MemberLink, NetSlice,
-    PilotId, Relay, SLICE, Wait,
+    Channel, Command, Delivery, EndpointId, HEARTBEAT, Header, MemberLink, NetSlice, PilotId,
+    Relay, SLICE, Wait,
 };
 use serde::Serialize;
 use serde_json::json;
@@ -80,18 +81,6 @@ pub enum To {
     Member(PilotId),
 }
 
-/// What a one-off packet's message says about how it waits for room in QUIC's queue: the
-/// key whose newest packet alone waits, or its deadline.
-pub trait OneOff {
-    fn wait(&self) -> Wait;
-}
-
-impl OneOff for Heartbeat {
-    fn wait(&self) -> Wait {
-        Wait::Newest { key: 0 }
-    }
-}
-
 /// This core in the session it opened.
 #[derive(Clone, Debug)]
 pub(crate) struct InSession {
@@ -130,6 +119,12 @@ impl Network {
     /// Whether a member's link is up.
     pub fn up(&self, pilot: &PilotId) -> bool {
         self.links.get(pilot).is_some_and(|l| l.conn.is_some())
+    }
+
+    /// Whether this PC reaches the internet, as the last check made while a link was lost
+    /// found, or `None` before the first.
+    pub fn internet(&self) -> Option<bool> {
+        self.backend.internet
     }
 
     fn slice(&self) -> NetSlice {

@@ -70,6 +70,16 @@ impl Side {
         .expect("the event should come within 10s")
     }
 
+    /// Every event in the next `ms`.
+    async fn during(&mut self, ms: u64) -> Vec<Event> {
+        let mut events = Vec::new();
+        let until = tokio::time::Instant::now() + Duration::from_millis(ms);
+        while let Ok(Some(event)) = tokio::time::timeout_at(until, self.events.recv()).await {
+            events.push(event);
+        }
+        events
+    }
+
     async fn bind(&mut self, key: u8, url: &str) -> [u8; 32] {
         self.transport.send(Command::Bind {
             key: [key; 32],
@@ -217,4 +227,95 @@ async fn a_relay_url_that_doesnt_read_fails_the_bind() {
         })
         .await;
     assert!(bound.is_err());
+}
+
+/// Two transports bound to one relay, with `a` dialed to `b`, and each side's connection.
+async fn linked(url: &str) -> (Side, Side, u64, u64) {
+    let (mut a, mut b) = (Side::start(), Side::start());
+    a.bind(1, url).await;
+    let b_id = b.bind(2, url).await;
+    a.transport.send(Command::Dial { endpoint: b_id });
+    let a_conn = a
+        .next(|e| match e {
+            Event::Connected { conn, .. } => Some(conn),
+            _ => None,
+        })
+        .await;
+    let b_conn = b
+        .next(|e| match e {
+            Event::Connected { conn, .. } => Some(conn),
+            _ => None,
+        })
+        .await;
+    (a, b, a_conn, b_conn)
+}
+
+/// A core runs one dial to a member at a time, the newest in place of any still running,
+/// since every dial still running when a link returns would connect.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_dial_replaces_the_one_running_to_that_endpoint() {
+    let (_relay, url) = relay().await;
+    let (mut a, mut b) = (Side::start(), Side::start());
+    a.bind(1, &url).await;
+    let b_id = b.bind(2, &url).await;
+    a.transport.send(Command::Dial { endpoint: b_id });
+    a.transport.send(Command::Dial { endpoint: b_id });
+    let connected = a
+        .during(3_000)
+        .await
+        .into_iter()
+        .filter(|e| matches!(e, Event::Connected { .. }))
+        .count();
+    assert_eq!(connected, 1);
+}
+
+/// An ATC frame whose turn to play has passed is dropped before it goes to QUIC.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_deadline_packet_whose_deadline_passed_is_dropped() {
+    let (_relay, url) = relay().await;
+    let (a, mut b, a_conn, b_conn) = linked(&url).await;
+    for (byte, at) in [(1, now().saturating_sub(1)), (2, now() + 1_000_000)] {
+        a.transport.send(Command::OneOff {
+            conn: a_conn,
+            channel: 6,
+            priority: 150,
+            wait: Wait::Deadline { at },
+            bytes: vec![byte],
+            stamp: false,
+        });
+    }
+    let got: Vec<Vec<u8>> = b
+        .during(1_500)
+        .await
+        .into_iter()
+        .filter_map(|e| match e {
+            Event::OneOff {
+                conn,
+                channel: 6,
+                bytes,
+            } if conn == b_conn => Some(bytes),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(got, [vec![2]]);
+}
+
+/// `finish` closes the endpoint, which sends the other side each connection's close, before
+/// the core's runtime stops.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn finish_closes_the_endpoint_and_its_connections() {
+    let (_relay, url) = relay().await;
+    let (a, mut b, _, b_conn) = linked(&url).await;
+    let started = Instant::now();
+    tokio::task::block_in_place(|| a.transport.finish(Duration::from_secs(1)));
+    assert!(
+        started.elapsed() < Duration::from_secs(1),
+        "finish took {:?}",
+        started.elapsed()
+    );
+    b.next(|e| match e {
+        Event::Closed { conn, .. } if conn == b_conn => Some(()),
+        _ => None,
+    })
+    .await;
 }

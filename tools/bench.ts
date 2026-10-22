@@ -27,7 +27,12 @@ main(() => {
   // The loop under load measures timing, so it runs the release profile, as a pilot's core
   // does; the scenarios check behavior, and build faster without it.
   const built = buildBench(what === "load")
-  const env = { ...process.env, DUALINPUT_BENCH_CORE: built.core, DUALINPUT_BENCH_STAND_IN_HELPER: built.helper }
+  const env = {
+    ...process.env,
+    DUALINPUT_BENCH_CORE: built.core,
+    DUALINPUT_BENCH_STAND_IN_HELPER: built.helper,
+    DUALINPUT_BENCH_RELAY: built.relay,
+  }
   if (what === "load") {
     run(process.execPath, [path.join("tools", "bench", "load.ts"), plays ?? "6"], { env })
     return
@@ -40,17 +45,17 @@ main(() => {
 })
 
 /**
- * Builds the core with its `stand-in` feature, and the stand-in core helper, into
+ * Builds the core with its `stand-in` feature, the stand-in core helper, and the bench relay, into
  * target/bench, and returns the paths Cargo wrote them to. A build with the feature in
  * target/ would replace the dualinput-core.exe a plain `cargo build` writes there, and a
  * developer's next build would replace the bench's.
  */
-function buildBench(release: boolean): { core: string; helper: string } {
+function buildBench(release: boolean): { core: string; helper: string; relay: string } {
   const args = [
-    ...["-p", "dualinput-core", "-p", "stand-in-core-helper"],
+    ...["-p", "dualinput-core", "-p", "stand-in-core-helper", "-p", "bench-relay"],
     ...["--features", "dualinput-core/stand-in", "--target-dir", path.join("target", "bench")],
   ]
   if (release) args.push("--release")
-  const built = buildPrograms(args, ["dualinput-core", "stand-in-core-helper"])
-  return { core: built["dualinput-core"], helper: built["stand-in-core-helper"] }
+  const built = buildPrograms(args, ["dualinput-core", "stand-in-core-helper", "bench-relay"])
+  return { core: built["dualinput-core"], helper: built["stand-in-core-helper"], relay: built["bench-relay"] }
 }

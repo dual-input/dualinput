@@ -22,6 +22,7 @@ use std::time::Duration;
 use iroh::endpoint::{QuicTransportConfig, VarInt, presets};
 use iroh::{
     Endpoint, EndpointAddr, EndpointId, RelayConfig, RelayMap, RelayMode, RelayUrl, SecretKey,
+    Watcher,
 };
 use messages::net::{Command, Event, Relay};
 use tokio::runtime::Handle;
@@ -244,6 +245,7 @@ impl Driver {
                     ip,
                     "the transport bound its endpoint"
                 );
+                tokio::spawn(log_home(endpoint.clone()));
                 self.accepting = Some(
                     tokio::spawn(accept(endpoint.clone(), self.connected.clone())).abort_handle(),
                 );
@@ -271,7 +273,14 @@ impl Driver {
         for relay in relays {
             let url = RelayUrl::from_str(&relay.url)
                 .map_err(|e| format!("the relay URL {} didn't read: {e}", relay.url))?;
-            let mut config = RelayConfig::from(url.clone());
+            // A relay over plain HTTP, as `iroh-relay --dev` and the bench's serve one, runs no
+            // QUIC address discovery, which needs TLS, and iroh waited 3s for its probe there
+            // before it picked a home relay (measured on the bench, 2026-10-22,
+            // record/areas/network/log.md). Our relays serve it over HTTPS.
+            let mut config = match url.scheme() {
+                "https" => RelayConfig::from(url.clone()),
+                _ => RelayConfig::new(url.clone(), None),
+            };
             if !relay.token.is_empty() {
                 config = config.with_auth_token(&relay.token);
             }
@@ -388,5 +397,30 @@ async fn accept(endpoint: Endpoint, connected: mpsc::UnboundedSender<Connected>)
                 Err(error) => tracing::debug!(%error, "an incoming connection failed"),
             }
         });
+    }
+}
+
+/// Logs each home relay the endpoint takes, which iroh picks by latency and keeps private, so
+/// a log shows which relay a relayed pair crossed (record/areas/network/01-between-machines.md,
+/// "The relays"). It ends with the endpoint.
+async fn log_home(endpoint: Endpoint) {
+    let mut status = endpoint.home_relay_status();
+    let mut last = None;
+    loop {
+        let home = status
+            .get()
+            .into_iter()
+            .find(|s| s.is_connected())
+            .map(|s| s.url().to_string());
+        if home.is_some() && home != last {
+            tracing::info!(
+                "the endpoint's home relay is {}",
+                home.as_deref().unwrap_or("")
+            );
+            last = home;
+        }
+        if status.updated().await.is_err() {
+            return;
+        }
     }
 }

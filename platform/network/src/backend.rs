@@ -197,7 +197,7 @@ impl Network {
     fn join(me: &mut Network, join: Join, cx: &mut Cx) {
         me.backend.key = Some(cx.random_bytes::<32>());
         tracing::info!("the network looks an invite code up");
-        me.look_up(Asked::Join, join.code, cx);
+        me.look_up(Asked::Join, join.code.to_ascii_uppercase(), cx);
     }
 
     fn look_up(&mut self, asked: Asked, code: String, cx: &Cx) {
@@ -222,6 +222,7 @@ impl Network {
         if let Some((_, job, timer)) = self.backend.asking.take() {
             cx.cancel_job(job);
             cx.cancel_timer(timer);
+            self.backend.jobs.retain(|(j, _)| *j != job);
         }
         let job = self.post(path, body, key, JobFor::Ask(asked), cx);
         let timer = cx.timer(ANSWER_WITHIN, Network::no_answer);
@@ -318,6 +319,10 @@ impl Network {
 
     /// Posts this core's entry, which lists or renews it, and again in 10 minutes.
     pub(crate) fn renew(&mut self, cx: &Cx) {
+        // A joiner lists itself at its first `LinkUp`, so it renews only once it has.
+        if !self.backend.listed {
+            return;
+        }
         let (Some(key), Some(my), Some(open)) =
             (self.backend.key, self.backend.me.clone(), &self.session)
         else {
@@ -392,6 +397,14 @@ impl Network {
     pub(crate) fn link_came_up(&mut self, cx: &Cx) {
         if let Some(timer) = self.backend.check.take() {
             cx.cancel_timer(timer);
+        }
+        // A member answered, so a restart's lookup still running answers nothing the session
+        // crate should act on.
+        if let Some((Asked::Check, job, timer)) = self.backend.asking {
+            cx.cancel_job(job);
+            cx.cancel_timer(timer);
+            self.backend.jobs.retain(|(j, _)| *j != job);
+            self.backend.asking = None;
         }
         if !self.backend.listed {
             self.backend.listed = true;

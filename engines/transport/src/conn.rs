@@ -28,9 +28,6 @@ const PACED_WRITE: usize = 4_096;
 /// (record/areas/network/02-units.md, "Who hosts them").
 const RELAYED_OVERHEAD: usize = 150;
 
-/// The bytes of QUIC's packet a stream fills, at QUIC's starting packet size.
-const STREAM_PACKET: usize = 1_162;
-
 /// Each relay's pacer, by its URL.
 pub(crate) type Pacers = Arc<BTreeMap<RelayUrl, Pacer>>;
 
@@ -163,7 +160,7 @@ async fn write_stream(
                 None => rest.len(),
             };
             if let Some(pacer) = pacer {
-                let packets = take.div_ceil(STREAM_PACKET);
+                let packets = take.div_ceil(crate::PACKET);
                 pacer
                     .take(priority, take + packets * RELAYED_OVERHEAD)
                     .await;

@@ -14,15 +14,12 @@ use std::path::Path;
 fn no_two_channels_share_a_number() {
     let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut seen: BTreeMap<u16, String> = BTreeMap::new();
-    let mut files: Vec<_> = std::fs::read_dir(&src)
-        .expect("src should list")
-        .map(|e| e.expect("an entry should read").path())
-        .filter(|p| p.extension().is_some_and(|e| e == "rs"))
-        .collect();
+    let mut files = Vec::new();
+    rust_files(&src, &mut files);
     files.sort();
     for file in files {
         let text = std::fs::read_to_string(&file).expect("a source file should read");
-        let name = file.file_name().unwrap().to_string_lossy().to_string();
+        let name = file.strip_prefix(&src).unwrap().display().to_string();
         for (at, _) in text.match_indices("Channel::new(") {
             let rest = text[at + "Channel::new(".len()..].trim_start();
             let digits: String = rest.chars().take_while(char::is_ascii_digit).collect();
@@ -39,4 +36,16 @@ fn no_two_channels_share_a_number() {
         seen.contains_key(&1),
         "the heartbeat's channel, 1, should be among them"
     );
+}
+
+/// Every `.rs` file under `dir`, in its folders too, as `src/module/` holds some.
+fn rust_files(dir: &Path, out: &mut Vec<std::path::PathBuf>) {
+    for entry in std::fs::read_dir(dir).expect("a folder of src should list") {
+        let path = entry.expect("an entry should read").path();
+        if path.is_dir() {
+            rust_files(&path, out);
+        } else if path.extension().is_some_and(|e| e == "rs") {
+            out.push(path);
+        }
+    }
 }

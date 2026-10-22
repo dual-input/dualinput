@@ -134,3 +134,15 @@ test("a body that doesn't read is refused", async () => {
   assert.deepEqual(await post("/v1/lookup", `{"code":"ABCDEF"}`), { status: 400, body: { error: "the request didn't read" } })
   assert.deepEqual(await post("/v1/nothing", "{}"), { status: 404, body: { error: "no such request" } })
 })
+
+test("a member's entry and its leave read the code in either case, as a lookup does", async () => {
+  const { code } = await host()
+  const joiner = key()
+  const lower = code.toLowerCase()
+  const entry = `{"code":"${lower}","member":{"pilot":"${JOINER_PILOT}","name":"Joiner","kind":"crew","endpoint":"${joiner.endpoint}"}}`
+  assert.deepEqual(await post("/v1/members", entry, joiner.headers(entry)), { status: 200, body: {} })
+  assert.equal(((await lookup(code, "198.51.100.7")).body.crew as unknown[]).length, 2)
+  const leave = `{"code":"${lower}","endpoint":"${joiner.endpoint}"}`
+  assert.deepEqual(await post("/v1/members/leave", leave, joiner.headers(leave)), { status: 200, body: {} })
+  assert.equal(((await lookup(code, "198.51.100.7")).body.crew as unknown[]).length, 1)
+})

@@ -44,6 +44,7 @@ export interface Env {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method !== "POST") return refuse(405, "only POST is answered")
+    if (Number(request.headers.get("content-length") ?? 0) > MOST_BYTES) return refuse(413, "the body is too large")
     const bytes = new Uint8Array(await request.arrayBuffer())
     if (bytes.length > MOST_BYTES) return refuse(413, "the body is too large")
     const now = Date.now()
@@ -81,8 +82,10 @@ async function sessions(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1
           .prepare("INSERT INTO sessions (code, session, relays, version, hash, created) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING")
           .bind(code, body.session, JSON.stringify(body.relays), body.version, body.hash, now),
         db
-          .prepare("INSERT INTO members (code, endpoint, entry, renewed) SELECT ?, ?, ?, ? WHERE changes() = 1")
-          .bind(code, endpoint, JSON.stringify(body.host), now),
+          // Only beside this request's own session, so a code some other session holds gets
+          // no member of this one.
+          .prepare("INSERT INTO members (code, endpoint, entry, renewed) SELECT ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM sessions WHERE code = ? AND session = ?)")
+          .bind(code, endpoint, JSON.stringify(body.host), now, code, body.session),
       ])
       return taken?.meta.changes === 1
     },
@@ -95,13 +98,15 @@ async function lookup(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1Da
   const body = read(bytes)
   if (!isLookup(body)) return refuse(400, "the request didn't read")
   const address = request.headers.get("CF-Connecting-IP") ?? "unknown"
-  const wrong = await db
-    .prepare("SELECT count FROM wrong_codes WHERE address = ? AND hour = ?")
-    .bind(address, hour(now))
+  // Each lookup takes one of the address's 20 guesses this hour in the same statement that
+  // checks it, so lookups made at once can't all read a count under 20, and a right code gives
+  // its guess back. An address at the limit is refused even with a right code, so the limit
+  // can't be told from a wrong code by guessing on.
+  const guess = await db
+    .prepare("INSERT INTO wrong_codes (address, hour, count) VALUES (?, ?, 1) ON CONFLICT DO UPDATE SET count = count + 1 WHERE count < ? RETURNING count")
+    .bind(address, hour(now), WRONG_CODES)
     .first<{ count: number }>()
-  // A right code from an address at the limit is refused too, so the limit can't be told
-  // from a wrong code by guessing on.
-  if ((wrong?.count ?? 0) >= WRONG_CODES) return answer<LookedUp>({ answer: "too-many-wrong-codes" })
+  if (!guess) return answer<LookedUp>({ answer: "too-many-wrong-codes" })
 
   const code = body.code.toUpperCase()
   const session = wellFormed(code)
@@ -115,13 +120,8 @@ async function lookup(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1Da
   const crew = session
     ? (await db.prepare("SELECT entry FROM members WHERE code = ? AND renewed >= ?").bind(code, now - LAPSE_MS).all<{ entry: string }>()).results
     : []
-  if (!session || crew.length === 0) {
-    await db
-      .prepare("INSERT INTO wrong_codes (address, hour, count) VALUES (?, ?, 1) ON CONFLICT DO UPDATE SET count = count + 1")
-      .bind(address, hour(now))
-      .run()
-    return answer<LookedUp>({ answer: "no-such-code" })
-  }
+  if (!session || crew.length === 0) return answer<LookedUp>({ answer: "no-such-code" })
+  await db.prepare("UPDATE wrong_codes SET count = count - 1 WHERE address = ? AND hour = ?").bind(address, hour(now)).run()
   if (session.version !== body.version) {
     return answer<LookedUp>({ answer: "other-version", older: older(body.version, session.version) })
   }
@@ -144,7 +144,7 @@ async function members(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1D
     .prepare(
       "INSERT INTO members (code, endpoint, entry, renewed) SELECT code, ?, ?, ? FROM sessions WHERE code = ? ON CONFLICT DO UPDATE SET entry = excluded.entry, renewed = excluded.renewed",
     )
-    .bind(endpoint, JSON.stringify(body.member), now, body.code)
+    .bind(endpoint, JSON.stringify(body.member), now, body.code.toUpperCase())
     .run()
   if (listed.meta.changes === 0) return refuse(404, "no session has the code")
   return answer<Taken>({})
@@ -156,7 +156,7 @@ async function leave(request: Request, bytes: Uint8Array<ArrayBuffer>, db: D1Dat
   const body = read(bytes)
   if (!isLeave(body)) return refuse(400, "the request didn't read")
   if (body.endpoint !== endpoint) return refuse(403, "the request names another endpoint")
-  await db.prepare("DELETE FROM members WHERE code = ? AND endpoint = ?").bind(body.code, endpoint).run()
+  await db.prepare("DELETE FROM members WHERE code = ? AND endpoint = ?").bind(body.code.toUpperCase(), endpoint).run()
   return answer<Taken>({})
 }
 

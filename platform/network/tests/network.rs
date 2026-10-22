@@ -42,6 +42,8 @@ enum Act {
     Join(String),
     /// Says whether the PC reaches the internet, and whether the refused notice is up.
     Peek,
+    /// Opens with no crew under this code.
+    OpenAs(String),
 }
 
 fn me() -> Me {
@@ -98,6 +100,17 @@ impl Session {
             Act::Send(n) => network::send(cx, DATA, To::Crew, &n),
             Act::Leave => network::leave(cx, false),
             Act::Quit => network::leave(cx, true),
+            Act::OpenAs(code) => network::open(
+                cx,
+                network::Open {
+                    code,
+                    me: me(),
+                    restart: 0,
+                    key: [9; 32],
+                    relays: Vec::new(),
+                    crew: Vec::new(),
+                },
+            ),
             Act::Peek => {
                 let internet = cx.read::<Network>().internet();
                 let refused = cx
@@ -890,5 +903,63 @@ fn a_quit_closes_each_connection_with_the_quit_code_and_shuts_the_endpoint() {
             },
             Command::Shutdown
         ]
+    );
+}
+
+/// A pilot may type a code in lower case, and the backend reads it upper-cased, so the lookup
+/// and every first message carry it upper-cased.
+#[test]
+fn a_code_typed_in_lower_case_is_looked_up_and_sent_upper_cased() {
+    let mut core = Core::new();
+    core.act(Act::Join("abc123".into()));
+    let (_, job) = core.fetches().remove(0);
+    let Work::Fetch(fetch) = &job.job.work else {
+        unreachable!()
+    };
+    assert!(String::from_utf8_lossy(&fetch.body).contains(r#""code":"ABC123""#));
+
+    let mut core = Core::new();
+    core.act(Act::OpenAs("abc123".into()));
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    core.event(Event::Connected {
+        conn: 1,
+        endpoint: [7; 32],
+        dialed: true,
+    });
+    let (commands, _) = core.take();
+    let Some(Command::Stream { bytes, .. }) = commands.last() else {
+        panic!("the first message should go out: {commands:?}")
+    };
+    let (header, _) = postcard::take_from_bytes::<Header>(&bytes[4..]).unwrap();
+    assert_eq!(header.code, "ABC123");
+}
+
+/// A member can leave before its first message passes, on a connection no link holds yet.
+#[test]
+fn a_leave_before_the_first_message_passes_is_still_a_leave() {
+    let mut core = Core::new();
+    core.act(Act::Open {
+        crew: vec![(THEM, 0, [7; 32])],
+    });
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    core.event(Event::Connected {
+        conn: 1,
+        endpoint: [7; 32],
+        dialed: true,
+    });
+    core.take();
+    core.event(Event::Closed {
+        conn: 1,
+        code: Ok(codes::LEAVE),
+    });
+    assert_eq!(core.take().1, ["left"]);
+    // It stops dialing that member.
+    core.advance(core.now + 10 * SECOND);
+    assert!(
+        !core
+            .take()
+            .0
+            .iter()
+            .any(|c| matches!(c, Command::Dial { .. }))
     );
 }

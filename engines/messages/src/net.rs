@@ -143,6 +143,12 @@ pub enum Command {
     Shutdown,
 }
 
+/// The bytes a one-off message may take: a one-off packet's 1,162 at QUIC's starting packet size,
+/// less the 2 the transport puts the channel's number in, and a stamped channel's message takes
+/// 8 fewer again. A traffic batch sizes itself from this. `PACKET` in engines/transport/src/lib.rs
+/// holds the 1,162, so change both together.
+pub const ONE_OFF_ROOM: usize = 1_162 - 2;
+
 /// What a one-off channel's message names about how it waits for room in QUIC's queue: the
 /// key whose newest packet alone waits, such as a pose's figure, or its deadline, such as an
 /// ATC frame's turn to play. The network reads it on the loop. It lives here, beside every

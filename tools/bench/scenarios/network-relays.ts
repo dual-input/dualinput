@@ -38,6 +38,13 @@ test("with the cores homed at different relays, both directions cross the dialed
   t.diagnostic(
     `bytes into each relay over 5s: the host ${sent(0, a)} and ${sent(1, a)}, the joiner ${sent(0, b)} and ${sent(1, b)}`,
   )
+  assert.equal(homes(a)[0], one.url + "/", "the host should home at the first relay")
+  assert.equal(homes(b)[0], two.url + "/", "the joiner should home at the second relay")
+  // The joiner dialed, so both directions cross the host's home relay, the first.
+  for (const core of [a, b]) {
+    assert.ok(sent(0, core) > 50_000, `each core's probes should cross the first relay`)
+    assert.ok(sent(1, core) < 5_000, `no core's probes should cross the second relay`)
+  }
   assert.ok((await report(a)).probes["1002"]?.count, "the host should get the joiner's probes")
   assert.ok((await report(b)).probes["1002"]?.count, "the joiner should get the host's probes")
 

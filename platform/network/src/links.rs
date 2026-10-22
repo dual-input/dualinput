@@ -54,10 +54,11 @@ impl Link {
         }
     }
 
-    /// Cancels the link's timers.
-    pub(crate) fn stop(&mut self, cx: &Cx) {
+    /// Cancels the link's timers, and forgets what each was for.
+    pub(crate) fn stop(&mut self, cx: &Cx, timer_for: &mut BTreeMap<TimerId, TimerFor>) {
         for timer in self.timers.drain(..) {
             cx.cancel_timer(timer);
+            timer_for.remove(&timer);
         }
     }
 }
@@ -80,7 +81,11 @@ pub(crate) struct Conn {
 }
 
 impl Network {
+    /// Starts a lost link to a member this core holds no link to; one it holds keeps its own.
     pub(crate) fn add_link(&mut self, member: Member, cx: &Cx) {
+        if self.links.contains_key(&member.pilot) {
+            return;
+        }
         let mut link = Link::new(member);
         link.timers
             .push(self.timer(cx, OUT_AFTER, TimerFor::Out(member.pilot)));
@@ -92,6 +97,11 @@ impl Network {
         let id = cx.timer(after, Network::fired);
         self.timer_for.insert(id, purpose);
         id
+    }
+
+    fn cancel(&mut self, cx: &Cx, id: TimerId) {
+        cx.cancel_timer(id);
+        self.timer_for.remove(&id);
     }
 
     /// Dials a lost link's member, and again in 2s while it stays lost.
@@ -129,7 +139,7 @@ impl Network {
                     tracing::info!(
                         "a member had no connection for 30 minutes, so the network counts them out"
                     );
-                    link.stop(cx);
+                    link.stop(cx, &mut me.timer_for);
                     cx.raise(MemberOut { member: pilot });
                 }
             }
@@ -174,7 +184,7 @@ impl Network {
             return;
         };
         link.conn = None;
-        link.stop(cx);
+        link.stop(cx, &mut self.timer_for);
         let out = self.timer(cx, OUT_AFTER, TimerFor::Out(pilot));
         if let Some(link) = self.links.get_mut(&pilot) {
             link.timers.push(out);
@@ -187,7 +197,7 @@ impl Network {
         if let Some(closed) = self.conns.remove(&conn)
             && let Some(timer) = closed.first_timer
         {
-            cx.cancel_timer(timer);
+            self.cancel(cx, timer);
         }
         cx.out(Command::Close { conn, code });
     }
@@ -262,7 +272,7 @@ impl Network {
                 bytes,
             } => me.one_off(conn, channel, bytes, cx),
             Event::Closed { conn, code } => {
-                me.conns.remove(&conn);
+                let closed = me.conns.remove(&conn);
                 // A close can overtake the first message the other side sent before it, so the
                 // refused side shows the refusal from the close too, under the same notice its
                 // own check raises. A refused connection never joined a link, so this comes
@@ -284,14 +294,24 @@ impl Network {
                         None,
                     );
                 }
-                let Some((&pilot, _)) = me.links.iter().find(|(_, l)| l.conn == Some(conn)) else {
+                // A member can leave on a connection whose first message hasn't passed yet, which
+                // no link holds, so a leave finds its link by the member's endpoint too.
+                let leave = matches!(code, Ok(codes::LEAVE | codes::QUIT));
+                let Some((&pilot, _)) = me.links.iter().find(|(_, l)| {
+                    l.conn == Some(conn)
+                        || (leave
+                            && l.conn.is_none()
+                            && closed
+                                .as_ref()
+                                .is_some_and(|c| c.endpoint == l.member.endpoint))
+                }) else {
                     return;
                 };
                 match code {
                     Ok(codes::LEAVE | codes::QUIT) => {
                         tracing::info!(conn, "a member left the session");
                         if let Some(mut link) = me.links.remove(&pilot) {
-                            link.stop(cx);
+                            link.stop(cx, &mut me.timer_for);
                         }
                         cx.raise(MemberLeft { member: pilot });
                     }
@@ -348,8 +368,12 @@ impl Network {
             pending.drain(..4 + length);
         }
         for frame in frames {
-            let from = self.conns.get(&conn).and_then(|c| c.from);
-            match from {
+            // A refusal, or the link keeping another connection, closes this one, and the
+            // frames after its first message belong to no connection.
+            let Some(c) = self.conns.get(&conn) else {
+                return;
+            };
+            match c.from {
                 Some(from) => {
                     self.heard(from, conn, cx);
                     self.deliver(from, channel, frame, cx);
@@ -534,7 +558,7 @@ impl Network {
         link.conn = Some(conn);
         link.up_before = true;
         link.last_heard = cx.now();
-        link.stop(cx);
+        link.stop(cx, &mut self.timer_for);
         let heard = self.timer(cx, LOST_AFTER, TimerFor::Heard(header.pilot));
         if let Some(link) = self.links.get_mut(&header.pilot) {
             link.timers.push(heard);
@@ -544,6 +568,7 @@ impl Network {
                 c.from = Some(from);
                 if let Some(timer) = c.first_timer.take() {
                     cx.cancel_timer(timer);
+                    self.timer_for.remove(&timer);
                 }
                 std::mem::take(&mut c.held)
             }
@@ -551,6 +576,8 @@ impl Network {
         };
         tracing::info!(conn, again, restart = from.restart, "a member's link is up");
         cx.raise(LinkUp { member, again });
+        // A link that came up shows this PC isn't refused, whatever an earlier connection was.
+        clients::clear_notice(cx, "refused");
         self.link_came_up(cx);
         if let Some(channel) = self.opener.as_ref().map(|o| o.channel) {
             self.deliver(from, channel, keys, cx);

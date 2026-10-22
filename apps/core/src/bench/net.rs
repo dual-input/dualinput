@@ -43,6 +43,8 @@ pub struct BenchNet {
     /// The code a join looked up, which opens the session once the backend finds it.
     joining: Option<String>,
     saved: Option<Saved>,
+    /// The session waiting for its session file's write, which opens it.
+    opening: Option<(JobId, Saved)>,
     /// A sender for each delivery a scenario asked for, by the delivery's number, and the
     /// delivery each of their timers is for.
     sending: BTreeMap<u8, Sending>,
@@ -279,11 +281,25 @@ impl BenchNet {
         self.open(saved, cx);
     }
 
-    /// Writes the session file, then opens the session, as the session crate does.
+    /// Writes the session file, and opens the session once it's written, as the session crate
+    /// does, so a core killed in between starts again under the restart count the file holds.
     fn open(&mut self, saved: Saved, cx: &Cx) {
         let bytes = serde_json::to_vec(&saved).expect("serde_json should write the session file");
-        cx.job(Job::write(SESSION_FILE, bytes), BenchNet::wrote);
-        let Some(my) = self.me.clone() else { return };
+        let job = cx.job(Job::write(SESSION_FILE, bytes), BenchNet::written);
+        self.opening = Some((job, saved));
+    }
+
+    fn written(me: &mut BenchNet, job: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
+        let Some((_, saved)) = me.opening.take_if(|(j, _)| *j == job) else {
+            return;
+        };
+        if let Err(error) = result {
+            return tracing::error!(
+                error,
+                "the bench's session file didn't write, so the session stays shut"
+            );
+        }
+        let Some(my) = me.me.clone() else { return };
         network::open(
             cx,
             network::Open {
@@ -303,7 +319,7 @@ impl BenchNet {
                     .collect(),
             },
         );
-        self.saved = Some(saved);
+        me.saved = Some(saved);
     }
 
     fn wrote(_: &mut BenchNet, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx) {

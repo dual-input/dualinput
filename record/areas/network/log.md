@@ -38,6 +38,7 @@ What we found about connecting the crew's machines, directly or through our rela
   | 84ms, 3% | 150.6ms | 154.4ms | 152.7ms |
 
   The stream's p99 came within 7.4ms of the one-off packets', inside the case's 17ms, as [p06] found.
+  The proxy draws its hold once for each read, and a read can carry several of the relay's frames, so in a burst fewer than 1% or 3% of packets were held.
 - **A held-back pair:** with one of three cores held back, the other pair's one-off packets came at a p99 of 0.3ms, and the held core's at 154ms.
 - **The busiest mix**, p06's 121 one-off packets and 20 stream messages a second for 65s, on release builds: the sender's busiest second through the relay carried 35,102 bytes, 7.5 times under the cap of 262,144, and each core used 1.9% to 2.0% of one CPU core in all; the receiver's loop took 9,255 inputs in its first minute, 154 a second, busy 0.09% of it, its queue's wait at 13µs p99 and 2.1ms at most, none over 1ms.
 - **Two relays:** with the host homed at one and the joiner at the other, the joiner's dial put both directions through the host's home relay, 124,207 and 123,987 bytes into it in 5s and none into the other, as [p05] found.

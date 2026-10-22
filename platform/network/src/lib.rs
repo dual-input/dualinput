@@ -274,8 +274,10 @@ impl Network {
             crew = open.crew.len(),
             "the network opens the session"
         );
+        // A pilot may type a code in either case, and the backend reads it upper-cased, so every
+        // first message carries it so too.
         me.session = Some(InSession {
-            code: open.code,
+            code: open.code.to_ascii_uppercase(),
             pilot: open.me.pilot,
             restart: open.restart,
         });
@@ -324,12 +326,14 @@ impl Network {
         }
         me.conns.clear();
         for link in me.links.values_mut() {
-            link.stop(cx);
+            link.stop(cx, &mut me.timer_for);
         }
         me.links.clear();
         me.tell_leave(cx);
         me.forget(cx);
         me.session = None;
+        me.endpoint = None;
+        clients::clear_notice(cx, "refused");
         if let Some(heartbeat) = me.heartbeat.take() {
             cx.cancel_timer(heartbeat);
         }

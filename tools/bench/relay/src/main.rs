@@ -215,7 +215,12 @@ async fn main() {
 
 async fn accept(listener: TcpListener, proxy: SocketAddr, shared: Shared) {
     while let Ok((client, from)) = listener.accept().await {
-        let pid = owner(from, proxy).unwrap_or(u32::MAX);
+        let pid = owner(from, proxy).unwrap_or_else(|| {
+            eprintln!(
+                "no process owns the connection from {from}, so no core's rule applies to it"
+            );
+            u32::MAX
+        });
         let (relay, cut) = {
             let state = lock(&shared);
             let cut = state
@@ -322,33 +327,39 @@ fn owner(client: SocketAddr, proxy: SocketAddr) -> Option<u32> {
         TCP_TABLE_OWNER_PID_CONNECTIONS,
     };
     const AF_INET: u32 = 2;
-    let mut size = 0u32;
-    // SAFETY: with a null table, GetExtendedTcpTable only writes the size it needs.
-    unsafe {
-        GetExtendedTcpTable(
-            std::ptr::null_mut(),
-            &mut size,
-            0,
-            AF_INET,
-            TCP_TABLE_OWNER_PID_CONNECTIONS,
-            0,
-        )
-    };
-    // u64s, so the table's u32 fields sit aligned.
-    let mut buf = vec![0u64; (size as usize).div_ceil(8) + 64];
-    let mut size = u32::try_from(buf.len() * 8).ok()?;
-    // SAFETY: `buf` holds `size` bytes, which GetExtendedTcpTable fills with the table.
-    let status = unsafe {
-        GetExtendedTcpTable(
-            buf.as_mut_ptr().cast(),
-            &mut size,
-            0,
-            AF_INET,
-            TCP_TABLE_OWNER_PID_CONNECTIONS,
-            0,
-        )
-    };
-    if status != 0 {
+    const ERROR_INSUFFICIENT_BUFFER: u32 = 122;
+    // The table can grow between the call that sizes it and the one that fills it, so a fill
+    // that finds it too small sizes it again.
+    let mut buf: Vec<u64> = Vec::new();
+    let mut filled = false;
+    for _ in 0..4 {
+        let mut size = u32::try_from(buf.len() * 8).ok()?;
+        // SAFETY: `buf` holds `size` bytes, which GetExtendedTcpTable fills with the table, or
+        // with a null table of size 0 it only writes the size it needs.
+        let status = unsafe {
+            GetExtendedTcpTable(
+                if buf.is_empty() {
+                    std::ptr::null_mut()
+                } else {
+                    buf.as_mut_ptr().cast()
+                },
+                &mut size,
+                0,
+                AF_INET,
+                TCP_TABLE_OWNER_PID_CONNECTIONS,
+                0,
+            )
+        };
+        match status {
+            0 if !buf.is_empty() => {
+                filled = true;
+                break;
+            }
+            0 | ERROR_INSUFFICIENT_BUFFER => buf = vec![0u64; (size as usize).div_ceil(8) + 64],
+            _ => return None,
+        }
+    }
+    if !filled {
         return None;
     }
     let table = buf.as_ptr().cast::<MIB_TCPTABLE_OWNER_PID>();

@@ -19,7 +19,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex, mpsc as std_mpsc};
 use std::time::Duration;
 
-use iroh::endpoint::{QuicTransportConfig, VarInt, presets};
+use iroh::endpoint::{QuicTransportConfig, RelayStatus, VarInt, presets};
 use iroh::{
     Endpoint, EndpointAddr, EndpointId, RelayConfig, RelayMap, RelayMode, RelayUrl, SecretKey,
     Watcher,
@@ -50,13 +50,18 @@ const BIND_WITHIN: Duration = Duration::from_secs(5);
 const PATH_IDLE: Duration = Duration::from_secs(2);
 const PATH_KEEP_ALIVE: Duration = Duration::from_millis(667);
 
-/// QUIC's queue of one-off packets holds three of 1,162 bytes, each one-off packet's size at
-/// QUIC's starting packet size, and the rest wait in the transport's slots, so a newer
-/// sample never waits behind stale ones (record/areas/network/01-between-machines.md,
-/// "Sending").
-const ONE_OFF_QUEUE: usize = 3 * 1_162;
+/// A one-off packet's size at QUIC's starting packet size, which a relayed path never goes
+/// under, so no packet outgrows a path that shrinks (record/areas/network/01-between-machines.md,
+/// "Sending"). A message gets `messages::net::ONE_OFF_ROOM` of it, after the channel's number,
+/// so change both together. conn.rs counts a stream's packets by it too.
+pub(crate) const PACKET: usize = 1_162;
 
-/// The 750ms the core's edges get to finish once the core exits
+/// QUIC's queue of one-off packets holds three, and the rest wait in the transport's slots, so
+/// a newer sample never waits behind stale ones.
+const ONE_OFF_QUEUE: usize = 3 * PACKET;
+
+/// The 750ms the core's edges get to finish once the core exits, which `GRACE` in
+/// apps/core/src/run.rs gives them, so change both together
 /// (record/areas/core/01-loop-and-edge.md, "Exiting").
 const CLOSE_WITHIN: Duration = Duration::from_millis(750);
 
@@ -227,14 +232,19 @@ impl Driver {
     async fn bind(&mut self, key: [u8; 32], relays: Vec<Relay>, ip: bool) {
         self.shut().await;
         let bound = match self.build(key, &relays, ip) {
-            Ok(builder) => match tokio::time::timeout(BIND_WITHIN, builder.bind()).await {
-                Ok(Ok(endpoint)) => Ok(endpoint),
-                Ok(Err(error)) => Err(error.to_string()),
-                Err(_) => Err(format!(
-                    "binding took longer than {}s",
-                    BIND_WITHIN.as_secs()
-                )),
-            },
+            // A task of its own, so a bind that blocks without yielding holds a worker thread
+            // rather than this task, and the timeout still fires.
+            Ok(builder) => {
+                match tokio::time::timeout(BIND_WITHIN, tokio::spawn(builder.bind())).await {
+                    Ok(Ok(Ok(endpoint))) => Ok(endpoint),
+                    Ok(Ok(Err(error))) => Err(error.to_string()),
+                    Ok(Err(error)) => Err(format!("binding stopped: {error}")),
+                    Err(_) => Err(format!(
+                        "binding took longer than {}s",
+                        BIND_WITHIN.as_secs()
+                    )),
+                }
+            }
             Err(error) => Err(error),
         };
         match bound {
@@ -245,7 +255,11 @@ impl Driver {
                     ip,
                     "the transport bound its endpoint"
                 );
-                tokio::spawn(log_home(endpoint.clone()));
+                tokio::spawn(
+                    endpoint
+                        .closed()
+                        .run_until(log_home(endpoint.home_relay_status())),
+                );
                 self.accepting = Some(
                     tokio::spawn(accept(endpoint.clone(), self.connected.clone())).abort_handle(),
                 );
@@ -358,8 +372,10 @@ impl Driver {
         self.conns.insert(number, handle);
     }
 
-    /// Closes the endpoint, which sends each connection still open its close, within the
-    /// 750ms the core's edges get.
+    /// Closes the endpoint, which sends each connection still open its close, and waits for it
+    /// within the 750ms the core's edges get. The close runs as a task of its own, so one that
+    /// waits longer, for a connection whose other side has gone, still ends iroh's work on the
+    /// endpoint when it finishes, rather than leaving it running until the core exits.
     async fn shut(&mut self) {
         for (_, dial) in std::mem::take(&mut self.dials) {
             dial.abort();
@@ -368,10 +384,8 @@ impl Driver {
             accepting.abort();
         }
         if let Some(endpoint) = self.endpoint.take() {
-            if tokio::time::timeout(CLOSE_WITHIN, endpoint.close())
-                .await
-                .is_err()
-            {
+            let closing = tokio::spawn(async move { endpoint.close().await });
+            if tokio::time::timeout(CLOSE_WITHIN, closing).await.is_err() {
                 tracing::warn!("the transport's endpoint took longer than 750ms to close");
             }
             tracing::info!("the transport closed its endpoint");
@@ -402,9 +416,9 @@ async fn accept(endpoint: Endpoint, connected: mpsc::UnboundedSender<Connected>)
 
 /// Logs each home relay the endpoint takes, which iroh picks by latency and keeps private, so
 /// a log shows which relay a relayed pair crossed (record/areas/network/01-between-machines.md,
-/// "The relays"). It ends with the endpoint.
-async fn log_home(endpoint: Endpoint) {
-    let mut status = endpoint.home_relay_status();
+/// "The relays"). It holds only the endpoint's watcher, which outlives the endpoint's close, so
+/// its caller ends it when the endpoint closes.
+async fn log_home(mut status: impl Watcher<Value = Vec<RelayStatus>>) {
     let mut last = None;
     loop {
         let home = status

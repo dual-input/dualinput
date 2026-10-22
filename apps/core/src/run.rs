@@ -35,7 +35,8 @@ use crate::{clock, cpu, data_folder};
 pub(crate) const STACK: usize = 16 * 1024 * 1024;
 
 /// How long the edges have, once the exit goes out, to carry out the outputs already put
-/// out, such as the crew's goodbye. FS Copilot, the shared-cockpit app we worked on before
+/// out, such as the crew's goodbye. `CLOSE_WITHIN` in engines/transport/src/lib.rs gives the
+/// endpoint's close the same, so change both together. FS Copilot, the shared-cockpit app we worked on before
 /// Dual Input, gave its goodbye on the way out this long (record/areas/core/01-loop-and-edge.md,
 /// "Exiting").
 const GRACE: Duration = Duration::from_millis(750);

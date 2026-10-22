@@ -69,6 +69,9 @@ test("holding one core's relay connection back leaves the other pair's messages 
   const [onTime, held] = [(await report(b)).probes, (await report(c)).probes]
   t.diagnostic(`p99 to the core not held back: newest ${ms(onTime["1002"]?.p99_us)}ms, stream ${ms(onTime["1001"]?.p99_us)}ms; to the held one: newest ${ms(held["1002"]?.p99_us)}ms`)
   assert.ok((onTime["1002"]?.p99_us ?? Infinity) < 50_000, "the pair not held back should get its one-off packets within 50ms")
+  // The proxy found the held core's connection by its process, so the hold reached it.
+  assert.ok(String(c.process.pid) in (await relay.rates()), "the relay should know the held core's process")
+  assert.ok((held["1002"]?.p99_us ?? 0) > 100_000, "the held core's one-off packets should come late")
 })
 
 test("v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute", { timeout: 240_000 }, async (t) => {

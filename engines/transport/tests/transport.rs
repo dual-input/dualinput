@@ -319,3 +319,43 @@ async fn finish_closes_the_endpoint_and_its_connections() {
     })
     .await;
 }
+
+/// noq drops the oldest one-off packet to make room for a new one, so a burst handed to it
+/// whole would lose packets. The transport hands a packet over only once QUIC's queue has room,
+/// so a burst far past the queue's 3,486 bytes all arrives (record/areas/network/02-units.md,
+/// "Cases for the bench").
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn a_burst_of_one_off_packets_loses_none_to_quics_queue() {
+    let (_relay, url) = relay().await;
+    let (a, mut b, a_conn, b_conn) = linked(&url).await;
+    for n in 0..200u8 {
+        a.transport.send(Command::OneOff {
+            conn: a_conn,
+            channel: 6,
+            priority: 150,
+            wait: Wait::Deadline {
+                at: now() + 10_000_000,
+            },
+            bytes: vec![n; 1_000],
+            stamp: false,
+        });
+    }
+    let got: Vec<u8> = b
+        .during(3_000)
+        .await
+        .into_iter()
+        .filter_map(|e| match e {
+            Event::OneOff {
+                conn,
+                channel: 6,
+                bytes,
+            } if conn == b_conn => Some(bytes[0]),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(got.len(), 200, "{} of 200 arrived", got.len());
+    assert!(
+        got.windows(2).all(|w| w[0] < w[1]),
+        "a deadline channel's packets should keep their order"
+    );
+}

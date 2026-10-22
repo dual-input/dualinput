@@ -25,6 +25,12 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > - No channel is declared `.unrecorded()`.
 > - The lost-link timer's count of a connection's recorded inputs counts every packet, as [links](#links) has it.
 > - The backend takes no bug report's parts and stores nothing in R2 in v1, since the report endpoints come after v1; the 30 days it keeps a session's rows after a leave serve those endpoints' check, and whether v1's backend keeps them is open.
+>
+> Since 2026-10-22, the network's stage of the build settles two things (user, 2026-10-22; [build plan](../build/plan.md#7-the-network)):
+>
+> - It pins iroh, noq, and `iroh-relay` at 1.3.0, the versions our probes measured, over iroh 1.4.0 and 1.4.1, of 2026-10-20 and 2026-10-21; moving to 1.4 is a change of its own, as [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) gives it.
+> - v1's backend ends a member at its leave or lapse, as [its requests](#its-requests) and [codes, lapses, and wrong codes](#codes-lapses-and-wrong-codes) have it, and keeps no rows for 30 days after, which only the report endpoints after v1 need.
+> - The private repository that holds the relays' tokens is `dual-input/relay-tokens`, made in stage 7 rather than in stage 22 with the rest of GitHub.
 
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.

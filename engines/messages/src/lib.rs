@@ -27,6 +27,7 @@ pub mod bench;
 pub mod clients;
 pub mod core_helper;
 pub mod module;
+pub mod net;
 pub mod sim;
 
 // Tests run off the core's loop, so they may write files, which the root's clippy.toml

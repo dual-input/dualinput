@@ -1,4 +1,4 @@
 // Written by the test `writes_the_stamp` in engines/messages/src/lib.rs.
 // node tools/build.ts writes it again, so edit the test, not this file.
 export const VERSION = "0.1.0";
-export const HASH = "c4d151b849f9b6a90a3358a1c19b559d5ec751d7e0bb2a7fbba74acf49033dbf";
+export const HASH = "095a5e71da9d69f1236aeeac214b363ea4925cf8e90a7bf1087b6250d5a387c3";

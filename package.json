@@ -12,6 +12,7 @@
     "esbuild": "0.28.2",
     "eslint-scope": "9.1.2",
     "source-map-js": "1.2.2",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "wrangler": "4.152.0"
   }
 }

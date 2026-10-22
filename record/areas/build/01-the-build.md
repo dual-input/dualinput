@@ -35,6 +35,9 @@ Decides:     What a release holds; how every x86_64 program links the C runtime 
 > - The check lives in `tools/coherent-check/` until its repository is made, and a hook runs it after each edit to our code in the sim, in about 0.3s ([core results](../core/results/2026-10-22-stage-5-budgets.txt)).
 > - In one flight with both packages installed, our `VCockpit.js` won over FS Copilot's, and why is unverified ([installing log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
 >   [Our package](#our-package) infers the opposite, and has this outcome break FS Copilot with no word from it, so [cases for the bench](#cases-for-the-bench)' case with FS Copilot's package installed, which expects its file to win, failed in its one run.
+>
+> Since 2026-10-22, [left open](#left-open)'s item on holding a backend path's bodies to the release that first served them is settled with no job of its own (user, 2026-10-22; [build plan](plan.md#7-the-network)): a change to a released path's request or answer goes on a new path beside it, such as `/v2/lookup`, and each path's tests send its request written out as literal JSON, which once a release serves that path is never edited, only added to, so the backend's own tests catch a change that would break an older core.
+> The private repository of the relays' tokens is `dual-input/relay-tokens`, made in stage 7 of the build plan rather than with the rest of GitHub in stage 22.
 
 `tools/build.ts` lays out one folder, which becomes a release's `current\`: the desktop app, the core, the core helper, the SDK's `SimConnect.dll`, and our one Community package, `dualinput`.
 One line of Cargo config links every x86_64 program's C runtime statically, the build installs the SDK version the repository names, and the sim's stock files that our `VCockpit.js` and BlurPage copy start from live in the tree.

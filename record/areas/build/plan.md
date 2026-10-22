@@ -33,6 +33,7 @@ The stages follow these rules (user, 2026-10-18):
 - No stage builds code that a later stage replaces: what a stage builds is final, and only the bench's stand-ins and test units stand in for what isn't built yet.
 - Nothing on GitHub comes before [stage 22](#22-github): no pull requests, no workflows, no releases, no Pages site, and no repository of ours beside this one, since waiting on pull requests and CI slows the build down (user, 2026-10-18).
   Until then a stage's commits go straight to `main`, and are pushed once the user has reviewed the stage, and stage 22 builds CI as [testing](02-testing.md#what-keeps-ci-green) and [the build](01-the-build.md#ci) design it.
+  The one exception is the private repository that holds the relays' tokens, `dual-input/relay-tokens`, made in stage 7, which needs the tokens before stage 22 (user, 2026-10-22).
 
 ## Working a stage
 
@@ -248,9 +249,34 @@ Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts
 
 ## 7 The network
 
-Builds: the network crate, the transport, the backend's invite codes, and our relays, with the bench's local relays, their proxies, and its local backend ([01-between-machines](../network/01-between-machines.md), [the network's units](../network/02-units.md), [the backend](01-the-build.md#the-backend)).
+Builds:
+
+- the message crate's `net` module: the kinds of delivery, the first message's header, and the transport's commands and events, with a test that fails on two channels with one number ([the units](../network/02-units.md#the-units), [channels and sends](../network/02-units.md#channels-and-sends))
+- `network`: channels and sends; the first message, with the opener hook the session crate fills; links, one for each pilot ID, with the 2s redial, the 5s lost timer, the 10s first-message timeout, the rule for which of two connections stays, and `MemberOut` at 30 minutes; the moments `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered`; the requests `Host`, `Join`, `Open`, `Dial`, and `Leave`, with the backend's requests signed by the endpoint key; the heartbeat and clock offsets; and its slice, settings, and notices ([the network crate](../network/02-units.md#the-network-crate))
+- `transport`, an engine at the core's edge: its commands and events; the endpoint from `presets::Minimal` with `RelayMode::Custom`, the path timers, and the one-off queue's size; the newest-only slots and ATC audio's queue; pacing through a relay; the heartbeat's send stamp; and binding under a timeout ([the transport](../network/02-units.md#the-transport), [sending](../network/01-between-machines.md#sending), [paths](../network/01-between-machines.md#paths))
+- `apps/core`'s edge for the transport, on tokio, and its jobs that fetch over HTTPS, the first stage whose units start them ([threads](../core/01-loop-and-edge.md#threads))
+- `backend/`: the Worker's four requests, codes, lapses, wrong codes, signatures, and hourly Cron Trigger, its D1 migrations, and its tests against a local D1 ([the backend](../network/02-units.md#the-backend))
+- `relays/`: `relays.toml`, the default relay list the network crate compiles from it, and `relays/deploy.ts` ([the relays](../network/02-units.md#the-relays))
+- the bench's two local `iroh-relay`s with test tokens, a TCP proxy in front of each that holds back or cuts one core's connection, its local backend on a local D1, and a test unit that stands in for the session crate's opener and requests, and for channels of each delivery ([what it touches](02-testing.md#what-it-touches))
+
+The cases that need features of later stages come with them: the cockpit stream's replay on `LinkUp` with `again` in [stage 13](#13-the-sync-engine-and-the-cockpit-stream), a PF's Leave and a take-control during a cut with the session crate in [stage 9](#9-the-session) and take-control in [stage 20](#20-take-control).
+The release workflow that deploys the backend comes in [stage 22](#22-github), and the private repository that holds the relays' tokens, `dual-input/relay-tokens`, comes now, the one exception to [how the stages are ordered](#how-the-stages-are-ordered)'s rule on GitHub (user, 2026-10-22).
+
+Designs first: iroh's version, since the design pinned 1.3 and iroh 1.4.1 has come out ([iroh as a dependency](../network/01-between-machines.md#iroh-as-a-dependency)); where the network crate's build finds the relays' tokens ([their configuration](../network/02-units.md#their-configuration)); how a released backend path's bodies are held to the release that first served them ([the build's left open](01-the-build.md#left-open)); and whether v1's backend keeps a session's rows for 30 days after a leave ([the network's units](../network/02-units.md)' note of 2026-10-21).
+The user settled all four on 2026-10-22: iroh's version, the repository, and the 30 days as [the network's units](../network/02-units.md)' note of 2026-10-22 has them, and the backend's released bodies as [the build](01-the-build.md)'s note of the same day has them.
+
 Needs: 5.
-Tests, from stage 3: a scenario that holds back one pair's relay leaves the other pairs' messages on time ([the bench's own cases](02-testing.md#cases-for-the-bench)).
+
+Tests:
+
+- From [02-units' cases](../network/02-units.md#cases-for-the-bench), on the bench, with two or three cores through the local relays and their proxies: every channel through a relay at a 1% and a 3% rate of held-back bytes, the streams' p99 lateness within 17ms of the one-off packets'; a core suspended for 60s, with `LinkLost` after 5s and, on resuming, a redial, a first message, and `LinkUp` with `again`; a core killed and restarted, whose higher restart count ends the old link with `LinkUp`'s `again` false and no `MemberOut`; the proxy cutting both cores for 10s, 30s, 60s, and 120s, with the time to data again recorded; the relay down for 40s; a core's home relay moved; two relays with the cores homed at different ones; both cores redialing at once in either order, keeping one connection; a joiner whose first dials fail linking once the proxy lets it through; no first message for 10s, and a wrong code, version, or hash, each closing with its code and the refused side's notice; a burst of one-off packets never holding more than 3,486 bytes in QUIC's queue, nor a flight sample going out after a newer one; two cores' clock offsets within 1ms of 0; and the backend's requests against a local D1.
+- From stage 3: a scenario that holds back one pair's relay leaves the other pairs' messages on time ([the bench's own cases](02-testing.md#cases-for-the-bench)).
+- [02-units' budgets](../network/02-units.md#budgets): about 140 inputs a second from one link within the loop's budgets; the transport within the edge's 2% of one CPU core; a join within 3s on a direct path; and v1's busiest mix through the relay, whose peak rate sets the relay's cap.
+- By hand, on our droplets: v1's full mix on a direct path at no loss, 1%, and 3%, through `tc netem`, with and without the newest-only slots, which settles [left open](../network/02-units.md#left-open)'s item on them.
+
+This stage's by-hand run on our droplets, and stage 6's cases that need a person or the sim, make one session (user, 2026-10-22).
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the network's scenarios and the backend's tests among them; two bench cores link through a local relay, lose the link, and link again, as the network's log shows; the by-hand run on our droplets has run; and the [network's log](../network/log.md) has an entry for the cases and budgets.
 
 ## 8 Recording and bug reports
 

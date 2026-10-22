@@ -9,7 +9,7 @@ use std::time::Duration;
 
 use clients::Level;
 use kernel::{Cx, Input, TimerId};
-use messages::net::{Command, EndpointId, Event, HEARTBEAT, Header, Heartbeat, codes};
+use messages::net::{Command, EndpointId, Event, HEARTBEAT, Header, Heartbeat, Path, codes};
 
 use crate::hooks::{Opened, Received, Sender};
 use crate::{LinkLost, LinkUp, Member, MemberLeft, MemberOut, Network, edge};
@@ -76,6 +76,7 @@ pub(crate) struct Conn {
     held: Vec<(u16, Vec<u8>)>,
     /// The last heartbeat received on it: its send stamp, and its input's stamp.
     pub(crate) echo: Heartbeat,
+    pub(crate) path: Option<Path>,
 }
 
 impl Network {
@@ -105,6 +106,7 @@ impl Network {
             cx.out(Command::Dial {
                 endpoint: link.member.endpoint,
             });
+            self.ping(cx);
         }
         let timer = self.timer(cx, REDIAL_EVERY, TimerFor::Dial(pilot));
         if let Some(link) = self.links.get_mut(&pilot) {
@@ -239,6 +241,7 @@ impl Network {
                         pending: BTreeMap::new(),
                         held: Vec::new(),
                         echo: Heartbeat::default(),
+                        path: None,
                     },
                 );
                 if let Some(opener) = &me.opener {
@@ -279,7 +282,10 @@ impl Network {
                 }
             }
             Event::Path { conn, path } => {
-                tracing::info!(conn, ?path, "a connection's path changed")
+                tracing::info!(conn, ?path, "a connection's path changed");
+                if let Some(c) = me.conns.get_mut(&conn) {
+                    c.path = Some(path);
+                }
             }
             Event::Stats {
                 conn,
@@ -394,7 +400,9 @@ impl Network {
     }
 
     fn first_message(&mut self, conn: u64, frame: Vec<u8>, cx: &mut Cx) {
-        let Some(my) = self.me.clone() else { return };
+        let Some(my) = self.session.clone() else {
+            return;
+        };
         // The header's version and hash stay first in every release, so a core of another
         // release is always read far enough to be told why it's refused.
         let (code, reason) = match postcard::take_from_bytes::<Header>(&frame) {
@@ -519,6 +527,7 @@ impl Network {
         };
         tracing::info!(conn, again, restart = from.restart, "a member's link is up");
         cx.raise(LinkUp { member, again });
+        self.link_came_up(cx);
         if let Some(channel) = self.opener.as_ref().map(|o| o.channel) {
             self.deliver(from, channel, keys, cx);
         }

@@ -1,12 +1,18 @@
-//! Running the loop's jobs on tokio's blocking pool, each result coming back as an input.
+//! Running the loop's jobs, each result coming back as an input: files on tokio's blocking
+//! pool, and fetches as tasks on its runtime.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::Duration;
 
-use kernel::{JOBS, JobId, StartJob, Work};
+use kernel::{Fetch, Fetched, JOBS, JobId, Method, StartJob, Work};
 
 use crate::home::Home;
 use crate::queue::Queue;
+
+/// A fetch with no answer by then is the job's error, so a job never waits on a server that
+/// stopped answering. The network keeps its own 10s for the backend's answer.
+const FETCH_WITHIN: Duration = Duration::from_secs(30);
 
 /// What every job needs besides itself.
 #[derive(Clone)]
@@ -15,32 +21,98 @@ pub struct Jobs {
     pub queue: Arc<Queue>,
     pub data: Arc<PathBuf>,
     pub home: Arc<Home>,
+    pub http: reqwest::Client,
+}
+
+/// The client every fetch shares, which keeps its connections to a server open between
+/// fetches. It reaches HTTPS through reqwest 0.13 with rustls, which iroh already brings into
+/// the core, and checks certificates against Windows' own store
+/// (record/areas/core/01-loop-and-edge.md, "Timers, jobs, and IDs"). rustls needs a crypto
+/// provider installed before the first client, and the core installs ring's, which iroh
+/// already builds; an install that finds one there already changes nothing.
+pub fn http() -> reqwest::Client {
+    let _ = rustls::crypto::ring::default_provider().install_default();
+    reqwest::Client::builder()
+        .timeout(FETCH_WITHIN)
+        .build()
+        .expect("reqwest should build a client once rustls has a crypto provider")
 }
 
 impl Jobs {
     pub fn start(&self, start: StartJob) {
         let jobs = self.clone();
-        self.runtime.spawn_blocking(move || {
-            let result = run(&jobs, &start);
-            jobs.queue.push(JOBS, start.id.finished(result));
-        });
+        match start.job.work {
+            Work::Fetch(ref fetch) => {
+                let fetch = fetch.clone();
+                self.runtime.spawn(async move {
+                    let result = fetch_one(&jobs.http, fetch)
+                        .await
+                        .and_then(|bytes| then(&start, bytes));
+                    jobs.queue.push(JOBS, start.id.finished(result));
+                });
+            }
+            _ => {
+                self.runtime.spawn_blocking(move || {
+                    let result = run(&jobs, &start).and_then(|bytes| then(&start, bytes));
+                    jobs.queue.push(JOBS, start.id.finished(result));
+                });
+            }
+        }
     }
 }
 
-fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
-    let bytes = match &start.job.work {
-        Work::Read { path } => std::fs::read(resolve(&jobs.data, &jobs.home, path))
-            .map_err(|e| format!("couldn't read {path}: {e}"))?,
-        Work::Write { path, bytes } => {
-            replace(&resolve(&jobs.data, &jobs.home, path), bytes, start.id)
-                .map_err(|e| format!("couldn't write {path}: {e}"))?;
-            Vec::new()
-        }
-    };
+fn then(start: &StartJob, bytes: Vec<u8>) -> Result<Vec<u8>, String> {
     match start.job.then {
         Some(then) => then(bytes),
         None => Ok(bytes),
     }
+}
+
+fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
+    match &start.job.work {
+        Work::Read { path } => std::fs::read(resolve(&jobs.data, &jobs.home, path))
+            .map_err(|e| format!("couldn't read {path}: {e}")),
+        Work::Write { path, bytes } => {
+            replace(&resolve(&jobs.data, &jobs.home, path), bytes, start.id)
+                .map_err(|e| format!("couldn't write {path}: {e}"))?;
+            Ok(Vec::new())
+        }
+        Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
+    }
+}
+
+async fn fetch_one(http: &reqwest::Client, fetch: Fetch) -> Result<Vec<u8>, String> {
+    let method = match fetch.method {
+        Method::Get => reqwest::Method::GET,
+        Method::Post => reqwest::Method::POST,
+    };
+    let mut request = http.request(method, &fetch.url).body(fetch.body);
+    for (name, value) in &fetch.headers {
+        request = request.header(name, value);
+    }
+    let answer = request
+        .send()
+        .await
+        .map_err(|e| format!("{} got no answer: {e}", fetch.url))?;
+    let status = answer.status().as_u16();
+    let headers = fetch
+        .keep
+        .iter()
+        .filter_map(|name| {
+            let value = answer.headers().get(name)?.to_str().ok()?;
+            Some((name.clone(), value.to_string()))
+        })
+        .collect();
+    let body = answer
+        .bytes()
+        .await
+        .map_err(|e| format!("{}'s answer broke off: {e}", fetch.url))?;
+    Ok(Fetched {
+        status,
+        headers,
+        body: body.to_vec(),
+    }
+    .encode())
 }
 
 /// The file a job's path names. A path from an input has the home folder's path hidden at

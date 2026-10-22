@@ -13,6 +13,7 @@
 use std::marker::PhantomData;
 
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 /// How a channel's messages travel.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -91,8 +92,10 @@ pub struct Header {
     pub restart: u32,
 }
 
-/// A relay as a session's list names it.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// A relay as a session's list names it. The backend keeps each session's list, so the
+/// Worker reads it too.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "net/")]
 pub struct Relay {
     pub url: String,
     pub token: String,
@@ -190,10 +193,34 @@ pub enum Event {
     },
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// The path a connection runs on: straight between the two PCs, or through a relay.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "net/")]
 pub enum Path {
     Direct,
     Relay { url: String },
+}
+
+/// The network's slice of client state, which the apps show the pilot.
+pub const SLICE: &str = "network";
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "net/")]
+pub struct NetSlice {
+    pub members: Vec<MemberLink>,
+    /// Whether this PC reaches the internet, as the last check made while a link was lost
+    /// found, or `None` before the first.
+    pub internet: Option<bool>,
+}
+
+/// One member's link, by the member's pilot ID as 32 hex digits.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "net/")]
+pub struct MemberLink {
+    pub pilot: String,
+    pub up: bool,
+    /// The path of the link's connection, while it has one whose path is known.
+    pub path: Option<Path>,
 }
 
 /// The application codes a core closes a connection with, so the other side tells a leave

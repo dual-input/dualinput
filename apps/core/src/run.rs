@@ -79,6 +79,8 @@ struct Ready {
     /// The core helper's service's source, when the core has one, which the helper's edge
     /// pushes under.
     helper: Option<SourceId>,
+    /// The network crate's source, when the core has one, which the transport pushes under.
+    network: Option<SourceId>,
     #[cfg(feature = "stand-in")]
     bench: Option<crate::bench::Sources>,
 }
@@ -129,6 +131,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
                 seam: kernel.source::<sim_client::Seam>(),
                 sockets: kernel.source::<clients::Sockets>(),
                 helper: kernel.source::<core_helper_service::Pipe>(),
+                network: kernel.source::<network::Transport>(),
                 #[cfg(feature = "stand-in")]
                 bench: crate::bench::Sources::of(&kernel),
             });
@@ -139,6 +142,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         seam,
         sockets,
         helper,
+        network,
         #[cfg(feature = "stand-in")]
         bench,
     }) = units_ready.recv()
@@ -179,8 +183,8 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     let (timers, timer_thread) = Timers::start(queue.clone(), context.clone())?;
     let tokio_context = context.clone();
     let runtime = tokio::runtime::Builder::new_multi_thread()
-        // The clients' WebSocket server's sockets, and the core helper's pipe and its 1s to
-        // exit once stopped.
+        // The clients' WebSocket server's sockets, the core helper's pipe and its 1s to exit
+        // once stopped, and the transport's endpoint and its timers.
         .enable_io()
         .enable_time()
         .worker_threads(2)
@@ -193,6 +197,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         queue: queue.clone(),
         data: Arc::new(options.data.clone()),
         home: home.clone(),
+        http: crate::edges::jobs::http(),
     };
     let mut sinks = Sinks::default();
     let set = timers.clone();
@@ -222,6 +227,9 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
             &mut sinks,
         );
     }
+    let transport = network.map(|source| {
+        crate::edges::network::start(runtime.handle(), queue.clone(), source, &mut sinks)
+    });
     // The sim's side of the seam: the sim edge on SimConnect.dll, or in a bench build the
     // stand-in sim, which the bench's edge starts.
     #[cfg(not(feature = "stand-in"))]
@@ -250,6 +258,11 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         Ok(exited) => exited.expect("the loop's thread got what it needed to run"),
         Err(panic) => std::panic::resume_unwind(panic),
     };
+    // Shutting the runtime down drops its tasks where they wait, so the endpoint's close,
+    // which sends each connection's close to the other cores, finishes first.
+    if let Some(transport) = transport {
+        transport.finish(GRACE.saturating_sub(exited.elapsed()));
+    }
     runtime.shutdown_timeout(GRACE.saturating_sub(exited.elapsed()));
     if let Some(server) = server {
         server.stop();

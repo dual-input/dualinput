@@ -114,8 +114,9 @@ pub struct StartJob {
     pub job: Job,
 }
 
-/// Work the edge does for a unit, off the loop: reading or writing a file, then optionally
-/// an engine's work on what it read, as the profile loader parses and checks a bundle.
+/// Work the edge does for a unit, off the loop: reading or writing a file, or fetching over
+/// HTTPS, then optionally an engine's work on what it got, as the profile loader parses and
+/// checks a bundle.
 #[derive(Clone, Debug, Serialize)]
 pub struct Job {
     pub work: Work,
@@ -142,6 +143,44 @@ pub enum Work {
     /// Writes a whole file, replacing it, through a file beside it that's renamed over it,
     /// so a crash never leaves it half written. The result is empty.
     Write { path: String, bytes: Vec<u8> },
+    /// Fetches a URL, as the network's requests to the backend do. The result is a
+    /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
+    Fetch(Fetch),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct Fetch {
+    pub method: Method,
+    pub url: String,
+    pub headers: Vec<(String, String)>,
+    pub body: Vec<u8>,
+    /// The answer's headers the result keeps, by name, such as `etag`, so the recording
+    /// holds only what a unit reads.
+    pub keep: Vec<String>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum Method {
+    Get,
+    Post,
+}
+
+/// What a fetch got: the answer's status, the headers its request kept, and its body.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Fetched {
+    pub status: u16,
+    pub headers: Vec<(String, String)>,
+    pub body: Vec<u8>,
+}
+
+impl Fetched {
+    pub fn encode(&self) -> Vec<u8> {
+        postcard::to_stdvec(self).expect("postcard should encode what a fetch got")
+    }
+
+    pub fn decode(bytes: &[u8]) -> Option<Fetched> {
+        postcard::from_bytes(bytes).ok()
+    }
 }
 
 impl Job {
@@ -158,6 +197,13 @@ impl Job {
                 path: path.into(),
                 bytes,
             },
+            then: None,
+        }
+    }
+
+    pub fn fetch(fetch: Fetch) -> Job {
+        Job {
+            work: Work::Fetch(fetch),
             then: None,
         }
     }

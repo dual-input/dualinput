@@ -1,0 +1,5 @@
+# The transport runs iroh on tokio at the core's edge, off the loop, so it keeps the edge's
+# rules rather than the loop's: it reads the clock, waits, and does I/O
+# (record/areas/network/02-units.md, "What runs where"). So it leaves out the list of calls
+# the root's clippy.toml forbids the loop's crates. Clippy reads the clippy.toml nearest a
+# crate's folder, which is this one.

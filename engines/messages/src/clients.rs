@@ -203,6 +203,8 @@ pub enum SettingKind {
     /// A key or button the core helper named at the next press, a `core_helper::Bound`, or
     /// `null` for none.
     Input,
+    /// A list of relays, each a `net::Relay`.
+    Relays,
 }
 
 impl SettingKind {
@@ -221,6 +223,7 @@ impl SettingKind {
                 Option::<crate::core_helper::DeviceInfo>::deserialize(value).is_ok()
             }
             SettingKind::Input => Option::<crate::core_helper::Bound>::deserialize(value).is_ok(),
+            SettingKind::Relays => Vec::<crate::net::Relay>::deserialize(value).is_ok(),
         }
     }
 }

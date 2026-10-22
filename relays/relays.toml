@@ -1,0 +1,20 @@
+# Dual Input's relays, each written once: its region, its URL, and its cap, the bytes a second
+# one pilot may send through it (record/areas/network/02-units.md, "Their configuration").
+#
+# The network crate's build compiles each release's default relay list from this file, and
+# relays/deploy.ts renders each relay's iroh-relay configuration from it. Each relay's tokens,
+# newest first, live in the private repository dual-input/relay-tokens, in its tokens.toml,
+# under the relay's region, since this repository goes public.
+#
+# The cap is 256 KiB/s, about 6 times what p06's busiest mix sent with headers, until the
+# bench's peak rate sets it (record/areas/network/02-units.md, "Budgets").
+
+[[relay]]
+region = "nyc"
+url = "https://nyc.relay.dualinput.app"
+cap = 262144
+
+[[relay]]
+region = "fra"
+url = "https://fra.relay.dualinput.app"
+cap = 262144

@@ -5,23 +5,33 @@
 //! asks the transport, at the core's edge, to carry them out
 //! (record/areas/network/02-units.md, "The network crate").
 //!
-//! Register it after the clients crate and before every unit that registers a channel.
+//! Register it after the clients crate, whose settings, slice, and notices it uses, and before
+//! every unit that registers a channel.
 
+mod backend;
 mod clock;
 mod edge;
 mod hooks;
 mod links;
 
+pub use backend::{
+    Answer, Asked, BACKEND, BackendAnswered, Host, Join, Me, RELAYS, RELAYS_ONLY, Refusal, host,
+    join, member,
+};
 pub use edge::{Transport, encode as encode_event};
 pub use hooks::{NetUnit, Opened, Sender};
 
 use std::collections::BTreeMap;
 
-use kernel::{Cx, Moment, Registry, Started, TimerId};
+use clients::{Clients, ClientsUnit, SettingDef};
+use kernel::{Cx, Moment, Registry, TimerId, View};
+use messages::clients::SettingKind;
 use messages::net::{
-    Channel, Command, Delivery, EndpointId, HEARTBEAT, Header, Heartbeat, PilotId, Relay, Wait,
+    Channel, Command, Delivery, EndpointId, HEARTBEAT, Header, Heartbeat, MemberLink, NetSlice,
+    PilotId, Relay, SLICE, Wait,
 };
 use serde::Serialize;
+use serde_json::json;
 
 use crate::clock::Offset;
 use crate::hooks::{ChannelReg, OpenerReg};
@@ -84,7 +94,7 @@ impl OneOff for Heartbeat {
 
 /// This core in the session it opened.
 #[derive(Clone, Debug)]
-pub(crate) struct Me {
+pub(crate) struct InSession {
     pub(crate) code: String,
     pub(crate) pilot: PilotId,
     pub(crate) restart: u32,
@@ -95,7 +105,7 @@ pub(crate) struct Me {
 pub struct Network {
     channels: BTreeMap<u16, ChannelReg>,
     opener: Option<OpenerReg>,
-    me: Option<Me>,
+    session: Option<InSession>,
     /// This core's endpoint ID, once bound.
     endpoint: Option<EndpointId>,
     links: BTreeMap<PilotId, Link>,
@@ -105,6 +115,7 @@ pub struct Network {
     heartbeat: Option<TimerId>,
     /// What each of the links' timers is for.
     timer_for: BTreeMap<TimerId, links::TimerFor>,
+    backend: backend::Backend,
 }
 
 impl Network {
@@ -120,31 +131,78 @@ impl Network {
     pub fn up(&self, pilot: &PilotId) -> bool {
         self.links.get(pilot).is_some_and(|l| l.conn.is_some())
     }
+
+    fn slice(&self) -> NetSlice {
+        NetSlice {
+            members: self
+                .links
+                .iter()
+                .map(|(pilot, link)| MemberLink {
+                    pilot: backend::hex(pilot),
+                    up: link.conn.is_some(),
+                    path: link
+                        .conn
+                        .and_then(|c| self.conns.get(&c))
+                        .and_then(|c| c.path.clone()),
+                })
+                .collect(),
+            internet: self.backend.internet,
+        }
+    }
 }
 
 /// Registers the network crate.
 pub fn register(r: &mut Registry) {
     let mut me = r.unit::<Network>("network");
     me.source::<Transport>(Network::event);
-    me.on::<Started>(Network::started);
+    me.setting(
+        RELAYS,
+        SettingDef {
+            label: "The relays a session you host runs through",
+            kind: SettingKind::Relays,
+            default: json!(backend::default_relays()),
+            part_only: false,
+            development: false,
+        },
+    )
+    .setting(
+        RELAYS_ONLY,
+        SettingDef {
+            label: "Send everything through the relays, never straight to the other PCs",
+            kind: SettingKind::Bool,
+            default: json!(false),
+            part_only: false,
+            development: true,
+        },
+    )
+    .setting(
+        BACKEND,
+        SettingDef {
+            label: "The backend's address, the release's own when empty",
+            kind: SettingKind::Text,
+            default: json!(""),
+            part_only: false,
+            development: true,
+        },
+    )
+    .client_state(SLICE, |me: &Network, _: &View| me.slice());
 }
 
 /// Opens the session: binds the endpoint with `key` and the session's relays, and dials each
-/// crew member. `ip` off clears the endpoint's IP transports, so two cores on one PC reach
-/// each other through a relay.
+/// crew member.
 pub fn open(cx: &Cx, open: Open) {
     cx.call(Network::open_session, open);
 }
 
-/// What `open` needs.
+/// What `open` needs: the session's code, this core's pilot and restart count, the endpoint
+/// key Host or Join drew or the session file kept, the session's relays, and the crew to dial.
 pub struct Open {
     pub code: String,
-    pub pilot: PilotId,
+    pub me: Me,
     pub restart: u32,
     pub key: [u8; 32],
     pub relays: Vec<Relay>,
     pub crew: Vec<Member>,
-    pub ip: bool,
 }
 
 /// Dials a member that another's entry names and this core holds no link to.
@@ -152,11 +210,11 @@ pub fn dial(cx: &Cx, member: Member) {
     cx.call(Network::dial_member, member);
 }
 
-/// Closes each connection with Leave's code, or the quit code, and shuts the endpoint.
+/// Closes each connection with Leave's code, or the quit code, tells the backend, and shuts
+/// the endpoint.
 pub fn leave(cx: &Cx, quit: bool) {
     cx.call(Network::leave_session, quit);
 }
-
 /// Sends a message on a stream channel.
 pub fn send<M: Serialize>(cx: &Cx, channel: Channel<M>, to: To, message: &M) {
     debug_assert_eq!(channel.delivery, Delivery::Stream);
@@ -214,10 +272,6 @@ pub(crate) fn frame(bytes: &[u8]) -> Vec<u8> {
 }
 
 impl Network {
-    fn started(me: &mut Network, _: &Started, cx: &mut Cx) {
-        me.heartbeat = Some(cx.timer(links::HEARTBEAT_EVERY, Network::heartbeat_out));
-    }
-
     fn open_session(me: &mut Network, open: Open, cx: &mut Cx) {
         tracing::info!(
             code = open.code,
@@ -225,16 +279,33 @@ impl Network {
             crew = open.crew.len(),
             "the network opens the session"
         );
-        me.me = Some(Me {
+        me.session = Some(InSession {
             code: open.code,
-            pilot: open.pilot,
+            pilot: open.me.pilot,
             restart: open.restart,
         });
+        me.backend.key = Some(open.key);
+        me.backend.me = Some(open.me);
+        me.backend.relays = open.relays.clone();
+        let relays_only = cx
+            .read::<Clients>()
+            .setting_as::<bool>(RELAYS_ONLY)
+            .unwrap_or(false);
         cx.out(Command::Bind {
             key: open.key,
             relays: open.relays,
-            ip: open.ip,
+            ip: !relays_only,
         });
+        // The heartbeat runs only while a session is open, so a core with none puts no input
+        // a second into its recording.
+        if me.heartbeat.is_none() {
+            me.heartbeat = Some(cx.timer(links::HEARTBEAT_EVERY, Network::heartbeat_out));
+        }
+        me.backend.renew =
+            Some(cx.timer(backend::RENEW_EVERY, |me: &mut Network, _, cx| me.renew(cx)));
+        if !open.crew.is_empty() {
+            me.start_check(cx);
+        }
         for member in open.crew {
             me.add_link(member, cx);
         }
@@ -261,10 +332,14 @@ impl Network {
             link.stop(cx);
         }
         me.links.clear();
-        me.me = None;
+        me.tell_leave(cx);
+        me.forget(cx);
+        me.session = None;
+        if let Some(heartbeat) = me.heartbeat.take() {
+            cx.cancel_timer(heartbeat);
+        }
         cx.out(Command::Shutdown);
     }
-
     fn send_bytes(
         me: &mut Network,
         (channel, priority, to, outgoing): (u16, u8, To, Outgoing),
@@ -298,7 +373,7 @@ impl Network {
     }
 
     fn send_first(me: &mut Network, (conn, keys): (u64, Vec<u8>), cx: &mut Cx) {
-        let (Some(my), Some(opener)) = (&me.me, &me.opener) else {
+        let (Some(my), Some(opener)) = (&me.session, &me.opener) else {
             return tracing::error!("a first message was sent with no session open or no opener");
         };
         let header = Header {

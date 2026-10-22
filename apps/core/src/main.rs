@@ -12,6 +12,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     clients::register,
     sim_service::register,
     core_helper_service::register,
+    network::register,
 ];
 
 fn main() -> ExitCode {

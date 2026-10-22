@@ -5,13 +5,16 @@
 use std::collections::BTreeMap;
 
 use kernel::{
-    CancelTimer, Cx, FIRST, Input, Kernel, Output, Registry, SetTimer, SourceId, TIMERS, TimerId,
-    first_input,
+    CancelTimer, Cx, FIRST, Fetched, Input, JOBS, Kernel, Output, Registry, SetTimer, SourceId,
+    StartJob, TIMERS, TimerId, Work, first_input,
 };
+use messages::backend::{Kind, NewSession};
 use messages::net::{
     Channel, Command, Delivery, EndpointId, Event, HEARTBEAT, Header, Heartbeat, PilotId, codes,
 };
-use network::{LinkLost, LinkUp, Member, MemberLeft, NetUnit, Opened, Sender, To};
+use network::{
+    BackendAnswered, LinkLost, LinkUp, Me, Member, MemberLeft, NetUnit, Opened, Sender, To,
+};
 use serde::{Deserialize, Serialize};
 
 const SESSION: Channel<String> = Channel::new(100, Delivery::Stream, u8::MAX);
@@ -28,6 +31,16 @@ enum Act {
     },
     Send(u32),
     Leave,
+    Host,
+    Join(String),
+}
+
+fn me() -> Me {
+    Me {
+        pilot: ME,
+        name: "Pilot".into(),
+        kind: Kind::Crew,
+    }
 }
 
 /// What the test unit saw, put out so the test reads it.
@@ -54,8 +67,9 @@ impl Session {
             )))
         })
         .on::<LinkLost>(|_: &mut Session, _: &LinkLost, cx: &mut Cx| cx.out(Saw("lost".into())))
-        .on::<MemberLeft>(|_: &mut Session, _: &MemberLeft, cx: &mut Cx| {
-            cx.out(Saw("left".into()))
+        .on::<MemberLeft>(|_: &mut Session, _: &MemberLeft, cx: &mut Cx| cx.out(Saw("left".into())))
+        .on::<BackendAnswered>(|_: &mut Session, a: &BackendAnswered, cx: &mut Cx| {
+            cx.out(Saw(format!("answered {:?} {:?}", a.asked, a.answer)))
         });
     }
 
@@ -65,7 +79,7 @@ impl Session {
                 cx,
                 network::Open {
                     code: "ABC123".into(),
-                    pilot: ME,
+                    me: me(),
                     restart: 0,
                     key: [9; 32],
                     relays: Vec::new(),
@@ -77,11 +91,18 @@ impl Session {
                             endpoint,
                         })
                         .collect(),
-                    ip: false,
                 },
             ),
             Act::Send(n) => network::send(cx, DATA, To::Crew, &n),
             Act::Leave => network::leave(cx, false),
+            Act::Host => network::host(
+                cx,
+                network::Host {
+                    session: "5d0c6a8e-2b3f-4c1d-9e7a-0f1b2c3d4e5f".into(),
+                    me: me(),
+                },
+            ),
+            Act::Join(code) => network::join(cx, network::Join { code, me: me() }),
         }
     }
 
@@ -108,6 +129,7 @@ struct Core {
     now: u64,
     timers: BTreeMap<(u64, TimerId), ()>,
     commands: Vec<Command>,
+    jobs: Vec<StartJob>,
     saw: Vec<String>,
 }
 
@@ -128,6 +150,7 @@ impl Core {
             now: SECOND,
             timers: BTreeMap::new(),
             commands: Vec::new(),
+            jobs: Vec::new(),
             saw: Vec::new(),
         };
         core.handle(
@@ -165,6 +188,13 @@ impl Core {
                 }
                 Err(value) => value,
             };
+            let value = match value.downcast::<StartJob>() {
+                Ok(job) => {
+                    self.jobs.push(*job);
+                    continue;
+                }
+                Err(value) => value,
+            };
             let value = match value.downcast::<Command>() {
                 Ok(command) => {
                     self.commands.push(*command);
@@ -180,6 +210,26 @@ impl Core {
 
     fn act(&mut self, act: Act) {
         self.handle(self.acts, postcard::to_stdvec(&act).unwrap());
+    }
+
+    /// The fetch jobs started since the last call, as each one's method, URL, and job.
+    fn fetches(&mut self) -> Vec<(String, StartJob)> {
+        std::mem::take(&mut self.jobs)
+            .into_iter()
+            .map(|job| match &job.job.work {
+                Work::Fetch(f) => (format!("{:?} {}", f.method, f.url), job),
+                other => panic!("only fetches should start: {other:?}"),
+            })
+            .collect()
+    }
+
+    fn answer(&mut self, job: &StartJob, status: u16, body: &str) {
+        let fetched = Fetched {
+            status,
+            headers: Vec::new(),
+            body: body.as_bytes().to_vec(),
+        };
+        self.handle(JOBS, job.id.finished(Ok(fetched.encode())));
     }
 
     fn event(&mut self, event: Event) {
@@ -250,7 +300,7 @@ fn a_connection_whose_first_message_passes_links_and_hands_on_what_waited_behind
         crew: vec![(THEM, 0, [7; 32])],
     });
     let (commands, _) = core.take();
-    assert!(matches!(commands[0], Command::Bind { ip: false, .. }));
+    assert!(matches!(commands[0], Command::Bind { ip: true, .. }));
     core.event(Event::Bound(Ok(MY_ENDPOINT)));
     let (commands, _) = core.take();
     assert_eq!(commands, [Command::Dial { endpoint: [7; 32] }]);
@@ -510,4 +560,130 @@ fn heartbeats_go_out_every_second_and_their_exchanges_give_the_others_clock_offs
         },
         "the next heartbeat echoes the one received"
     );
+}
+
+/// A Host goes to the backend signed by a fresh endpoint key, whose public half its entry
+/// names, and the code comes back in `BackendAnswered` (record/areas/network/02-units.md,
+/// "Requests the session crate makes").
+#[test]
+fn a_host_asks_for_a_code_signed_by_its_endpoint_key() {
+    use ed25519_dalek::{Signature, VerifyingKey};
+
+    let mut core = Core::new();
+    core.act(Act::Host);
+    let fetches = core.fetches();
+    let [(what, job)] = &fetches[..] else {
+        panic!("one fetch should start: {fetches:?}")
+    };
+    assert_eq!(what, "Post https://api.dualinput.app/v1/sessions");
+    let Work::Fetch(fetch) = &job.job.work else {
+        unreachable!()
+    };
+    let header = |name: &str| {
+        fetch
+            .headers
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, v)| v.clone())
+            .unwrap()
+    };
+    let unhex = |s: String| -> Vec<u8> {
+        (0..s.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
+            .collect()
+    };
+    let endpoint: [u8; 32] = unhex(header("DualInput-Endpoint")).try_into().unwrap();
+    let signature: [u8; 64] = unhex(header("DualInput-Signature")).try_into().unwrap();
+    VerifyingKey::from_bytes(&endpoint)
+        .unwrap()
+        .verify_strict(&fetch.body, &Signature::from_bytes(&signature))
+        .expect("the signature should match the body");
+    let body: NewSession = serde_json::from_slice(&fetch.body).unwrap();
+    assert_eq!(body.host.endpoint, header("DualInput-Endpoint"));
+    assert_eq!(body.host.pilot, "01".repeat(16));
+    assert_eq!(body.version, messages::VERSION);
+
+    let job = job.clone();
+    core.answer(&job, 200, r#"{"code":"K7Q2XM"}"#);
+    assert_eq!(
+        core.take().1,
+        [r#"answered Host Created { code: "K7Q2XM" }"#]
+    );
+}
+
+#[test]
+fn a_lookup_answers_with_the_session_or_why_not() {
+    let mut core = Core::new();
+    core.act(Act::Join("K7Q2XM".into()));
+    let (what, job) = core.fetches().remove(0);
+    assert_eq!(what, "Post https://api.dualinput.app/v1/lookup");
+    core.answer(
+        &job,
+        200,
+        r#"{"answer":"found","session":"s","relays":[{"url":"https://r","token":"t","cap":1}],
+            "crew":[{"pilot":"02020202020202020202020202020202","name":"Them","kind":"crew",
+            "endpoint":"0707070707070707070707070707070707070707070707070707070707070707"}]}"#,
+    );
+    let saw = core.take().1;
+    assert!(saw[0].starts_with("answered Join Found"), "{saw:?}");
+
+    core.act(Act::Join("K7Q2XN".into()));
+    let (_, job) = core.fetches().remove(0);
+    core.answer(&job, 200, r#"{"answer":"other-version","older":"mine"}"#);
+    assert_eq!(core.take().1, ["answered Join Refused(OtherVersion(Mine))"]);
+
+    core.act(Act::Join("K7Q2XP".into()));
+    let (_, job) = core.fetches().remove(0);
+    core.answer(&job, 403, r#"{"error":"the signature didn't match"}"#);
+    assert_eq!(
+        core.take().1,
+        [r#"answered Join Refused(Other("the signature didn't match"))"#]
+    );
+}
+
+#[test]
+fn a_request_with_no_answer_in_10s_answers_no_answer() {
+    let mut core = Core::new();
+    core.act(Act::Join("K7Q2XM".into()));
+    core.fetches();
+    core.advance(core.now + 10 * SECOND);
+    assert_eq!(
+        core.take().1,
+        [r#"answered Join NoAnswer("the backend didn't answer within 10s")"#]
+    );
+}
+
+/// A joiner lists itself at its first `LinkUp`, renews every 10 minutes, and tells the
+/// backend when it leaves.
+#[test]
+fn a_joiner_lists_itself_at_its_first_link_up_and_tells_the_backend_it_left() {
+    let mut core = Core::new();
+    core.linked(1, [7; 32]);
+    let posted: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert_eq!(posted, ["Post https://api.dualinput.app/v1/members"]);
+    core.advance(core.now + 600 * SECOND);
+    let renewed: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert!(
+        renewed.contains(&"Post https://api.dualinput.app/v1/members".to_string()),
+        "{renewed:?}"
+    );
+    core.act(Act::Leave);
+    let left: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert_eq!(left, ["Post https://api.dualinput.app/v1/members/leave"]);
+}
+
+/// A core back from a restart dials the crew in its session file, and looks the code up when
+/// none answers within 10s (record/areas/network/01-between-machines.md, "A session file after
+/// a long outage").
+#[test]
+fn a_core_whose_crew_doesnt_answer_in_10s_looks_the_code_up() {
+    let mut core = Core::new();
+    core.act(Act::Open {
+        crew: vec![(THEM, 0, [7; 32])],
+    });
+    core.event(Event::Bound(Ok(MY_ENDPOINT)));
+    core.advance(core.now + 10 * SECOND);
+    let looked: Vec<String> = core.fetches().into_iter().map(|(w, _)| w).collect();
+    assert_eq!(looked, ["Post https://api.dualinput.app/v1/lookup"]);
 }

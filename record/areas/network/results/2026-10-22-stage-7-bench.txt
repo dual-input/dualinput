@@ -1,0 +1,450 @@
+Stage 7's bench runs on our development machine, 2026-10-22, Windows 11, node --test.
+Runs 1, 2, and 4 used debug builds of the bench core while the bench relay's proxy waited a timer tick
+(about 15.6ms on Windows) on every read; the proxy was fixed before runs 3 and 5. A game ran beside them.
+
+== Run 1: every network scenario, debug builds, the proxy before its fix
+
+TAP version 13
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 1 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+  ---
+  duration_ms: 96497.8665
+  type: 'test'
+  ...
+# 22ms away at 1%: p99 stream 49.7ms, newest 45.9ms, deadline 45.1ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 50.6ms, newest 47.3ms, deadline 48.7ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 150.7ms, newest 148.7ms, deadline 155.6ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 156.7ms, newest 157.1ms, deadline 159.4ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 2 - holding one core's relay connection back leaves the other pair's messages on time
+  ---
+  duration_ms: 23972.0217
+  type: 'test'
+  ...
+# p99 to the core not held back: newest 19.0ms, stream 20.9ms; to the held one: newest 155.3ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 3 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+  ---
+  duration_ms: 74821.0041
+  type: 'test'
+  ...
+# join through the relay 1184ms; the sender's peak through the relay 35171 bytes in a second, 34623 a second on average
+# CPU of one core over the mix: the sender 7.74%, the receiver 6.84%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 18.9ms, 20.9ms, 20.8ms
+# the receiver's loop: no minute's stats yet
+# Subtest: the link is lost after 5s of each outage, and comes back after it
+ok 4 - the link is lost after 5s of each outage, and comes back after it
+  ---
+  duration_ms: 415034.7516
+  type: 'test'
+  ...
+# a 30s cut: lost after 4999ms, up again 26839ms after it ended
+# a 60s cut: lost after 5000ms, up again 14820ms after it ended
+# a 120s cut: lost after 5000ms, up again 30236ms after it ended
+# the relay down for 40s: lost after 4995ms, up again 26221ms after it came back
+# a core suspended for 60s: up again 140ms after it resumed
+# Subtest: with the cores homed at different relays, both directions cross the dialed core's home relay
+ok 5 - with the cores homed at different relays, both directions cross the dialed core's home relay
+  ---
+  duration_ms: 74218.5051
+  type: 'test'
+  ...
+# homes: the host http://127.0.0.1:60780/, the joiner http://127.0.0.1:60782/
+# bytes into each relay over 5s: the host 124207 and 0, the joiner 123987 and 0
+# the host's home relay cut for 60s: the link was lost, and up again 2011ms after the cut ended; homes then: http://127.0.0.1:60780/ then http://127.0.0.1:60782/
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+not ok 6 - two cores join through the backend, link through a relay, lose the link, and link again
+  ---
+  duration_ms: 34092.9566
+  type: 'test'
+  location: '<repo>\\tools\\bench\\scenarios\\network.ts:12:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    3 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (<repo>/tools/bench/scenarios/network.ts:46:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# from the code entered to the link up through the relay: 1153ms
+# a 10s cut: the link lost after 5001ms, and up again 7820ms after the cut ended
+# Subtest: a core killed and started again links under a higher restart count, with no member counted out
+not ok 7 - a core killed and started again links under a higher restart count, with no member counted out
+  ---
+  duration_ms: 14575.216
+  type: 'test'
+  location: '<repo>\\tools\\bench\\scenarios\\network.ts:54:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    the core's test unit never said net restarted restart=1; it said:
+    net up 87b0356e again=false restart=0
+    net keys Host
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    Core.hear (<repo>/tools/bench/cores.ts:216:28)
+    async TestContext.<anonymous> (<repo>/tools/bench/scenarios/network.ts:66:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+ok 8 - a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+  ---
+  duration_ms: 20641.7718
+  type: 'test'
+  ...
+# linked 17315ms after the join, through an 8s cut
+# Subtest: a connection with no first message closes after 10s, and one with another code closes with its code
+not ok 9 - a connection with no first message closes after 10s, and one with another code closes with its code
+  ---
+  duration_ms: 17463.1057
+  type: 'test'
+  location: '<repo>\\tools\\bench\\scenarios\\network.ts:91:1'
+  failureType: 'testCodeFailure'
+  error: 'the host should close the silent connection'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (<repo>/tools/bench/scenarios/network.ts:105:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 6
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 771697.3962
+
+== Run 2: network.ts and network-loss.ts again after the test fixes, debug builds, the proxy before its fix
+
+TAP version 13
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 1 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+  ---
+  duration_ms: 94087.7123
+  type: 'test'
+  ...
+# 22ms away at 1%: p99 stream 45.1ms, newest 43.5ms, deadline 44.9ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 50.7ms, newest 48.8ms, deadline 46.6ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 152.1ms, newest 144.0ms, deadline 143.3ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 154.9ms, newest 157.6ms, deadline 161.1ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 2 - holding one core's relay connection back leaves the other pair's messages on time
+  ---
+  duration_ms: 24027.6776
+  type: 'test'
+  ...
+# p99 to the core not held back: newest 20.9ms, stream 21.1ms; to the held one: newest 159.2ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 3 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+  ---
+  duration_ms: 74930.6715
+  type: 'test'
+  ...
+# join through the relay 1178ms; the sender's peak through the relay 35236 bytes in a second, 34753 a second on average
+# CPU of one core over the mix: the sender 8.88%, the receiver 5.94%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 20.4ms, 20.8ms, 20.8ms
+# the receiver's loop: no minute's stats
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+not ok 4 - two cores join through the backend, link through a relay, lose the link, and link again
+  ---
+  duration_ms: 31423.5677
+  type: 'test'
+  location: '<repo>\\tools\\bench\\scenarios\\network.ts:12:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    every stream probe should arrive
+    
+    19 !== 20
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 20
+  actual: 19
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (<repo>/tools/bench/scenarios/network.ts:45:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# from the code entered to the link up through the relay: 1138ms
+# a 10s cut: the link lost after 5000ms, and up again 5066ms after the cut ended
+# Subtest: a core killed and started again links under a higher restart count, with no member counted out
+ok 5 - a core killed and started again links under a higher restart count, with no member counted out
+  ---
+  duration_ms: 4732.8432
+  type: 'test'
+  ...
+# the restarted core linked 204ms after it started; the other core said: net up ea7e5d09 again=false restart=1; net keys Joiner 1
+# Subtest: a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+ok 6 - a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+  ---
+  duration_ms: 16673.1124
+  type: 'test'
+  ...
+# linked 13317ms after the join, through an 8s cut
+# Subtest: a connection with another code closes with its code, and one with no first message never links
+ok 7 - a connection with another code closes with its code, and one with no first message never links
+  ---
+  duration_ms: 23420.845
+  type: 'test'
+  ...
+# the host refused the other code with code 10, and never linked the silent core
+# Subtest: a join on a direct path links within 3s of the code entered
+not ok 8 - a join on a direct path links within 3s of the code entered
+  ---
+  duration_ms: 8151.6853
+  type: 'test'
+  location: '<repo>\\tools\\bench\\scenarios\\network.ts:119:1'
+  failureType: 'testCodeFailure'
+  error: 'the join took 4118ms'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (<repo>/tools/bench/scenarios/network.ts:129:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# from the code entered to the link up: 4118ms
+1..8
+# tests 8
+# suites 0
+# pass 6
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 277652.6359
+
+== Run 3: network-loss.ts on release builds, the proxy fixed
+
+TAP version 13
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 1 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+  ---
+  duration_ms: 92801.1349
+  type: 'test'
+  ...
+# 22ms away at 1%: p99 stream 40.4ms, newest 38.9ms, deadline 40.2ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 40.6ms, newest 42.3ms, deadline 40.6ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 148.2ms, newest 148.4ms, deadline 140.8ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 150.6ms, newest 154.4ms, deadline 152.7ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 2 - holding one core's relay connection back leaves the other pair's messages on time
+  ---
+  duration_ms: 23373.4619
+  type: 'test'
+  ...
+# p99 to the core not held back: newest 0.3ms, stream 0.4ms; to the held one: newest 154.2ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 3 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+  ---
+  duration_ms: 73420.1159
+  type: 'test'
+  ...
+# join through the relay 1061ms; the sender's peak through the relay 35102 bytes in a second, 34733 a second on average
+# CPU of one core over the mix: the sender 1.87%, the receiver 2.04%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 0.3ms, 0.3ms, 0.3ms
+# the receiver's loop: no minute's stats
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 189719.2084
+
+== The receiver's loop stats from run 3's busiest mix, from its log.txt
+
+30825745273µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=9255 busy_percent=0.09 wait_p50_us=7 wait_p99_us=13 wait_p999_us=29 wait_max_us=2136 over_1ms=0 slowest_us=152 slowest_seq=3 slowest_stamp=30765801654
+30836026246µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=10.3 inputs=1264 busy_percent=0.08 wait_p50_us=7 wait_p99_us=14 wait_p999_us=37 wait_max_us=47 over_1ms=0 slowest_us=122 slowest_seq=10517 slowest_stamp=30836025879
+30836026257µs  INFO dualinput_core::loop_stats: the loop's stats window="run" seconds=70.3 inputs=10519 busy_percent=0.09 wait_p50_us=7 wait_p99_us=13 wait_p999_us=29 wait_max_us=2136 over_1ms=0 slowest_us=152 slowest_seq=3 slowest_stamp=30765801654
+
+== Run 4: network.ts's link and direct-join cases, debug builds, after the transport's fix for plain-HTTP relays and before the proxy's, copied from the terminal
+
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+not ok 1 - two cores join through the backend, link through a relay, lose the link, and link again
+  error: 'an offset of -3866µs'
+# from the code entered to the link up through the relay: 1157ms
+# a 10s cut: the link lost after 5000ms, and up again 7066ms after the cut ended
+# LinkUp after the cut: 1 on the host, 1 on the joiner
+# clock offsets: -3866, 3809µs
+# Subtest: a join on a direct path links within 3s of the code entered
+ok 2 - a join on a direct path links within 3s of the code entered
+# from the code entered to the link up: 1166ms
+
+== Run 5: network.ts's link case, debug builds, after the proxy's fix, copied from the terminal
+
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+ok 1 - two cores join through the backend, link through a relay, lose the link, and link again
+# from the code entered to the link up through the relay: 1090ms
+# a 10s cut: the link lost after 4999ms, and up again 6030ms after the cut ended
+# LinkUp after the cut: 2 on the host, 1 on the joiner
+# clock offsets: 163, -164µs
+== Run 6: node tools/bench.ts, every scenario of every stage, debug builds, the proxy fixed, 2026-10-23
+
+# Subtest: the bench build and the release build carry one message crate, and the release build reaches no stand-in sim
+ok 1 - the bench build and the release build carry one message crate, and the release build reaches no stand-in sim
+# Subtest: the core suspended for 12s leaves every page its socket, and each panel's modules carry on without loading again
+ok 2 - the core suspended for 12s leaves every page its socket, and each panel's modules carry on without loading again
+# budget: a page connected again 2ms after the restarted core's announcement, against 2,000ms
+# budget: a page connected again 3ms after the restarted core's announcement, against 2,000ms
+# Subtest: the core restarted on another port has every page connect again within 2s of its next announcement
+ok 3 - the core restarted on another port has every page connect again within 2s of its next announcement
+# budget: 20 panels answered 31ms after the profile loaded, against 1,000ms
+# Subtest: panels connect only in a session, each of 20 is answered within 1s of the profile loading, and one told none stays away until the next session
+ok 4 - panels connect only in a session, each of 20 is answered within 1s of the profile loading, and one told none stays away until the next session
+# Subtest: a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old
+ok 5 - a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old
+# budget: at most 20.7 messages a second to one panel, against 30
+# budget: the slowest input of a run with 20 panels in rounds took 230µs, 0 over 1ms, against 1,000µs for a round
+# Subtest: a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop
+ok 6 - a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop
+# Subtest: no cockpit panel within 10s of the profile loading raises the clients crate's trouble notice, cleared once one connects
+ok 7 - no cockpit panel within 10s of the profile loading raises the clients crate's trouble notice, cleared once one connects
+# Subtest: a module from another build while a test routine is fed raises the sim service's trouble notice for our package
+ok 8 - a module from another build while a test routine is fed raises the sim service's trouble notice for our package
+# Subtest: a fake page that heard the stand-in's announcement connects, and the core answers its commands
+ok 9 - a fake page that heard the stand-in's announcement connects, and the core answers its commands
+# Subtest: a socket from a browser page closes with 1008, and nothing it sent reaches the loop
+ok 10 - a socket from a browser page closes with 1008, and nothing it sent reaches the loop
+# Subtest: a client of another version is logged with both versions and still served, and a message that doesn't parse is dropped
+ok 11 - a client of another version is logged with both versions and still served, and a message that doesn't parse is dropped
+# Subtest: a settings file keeps a key no unit registered through the core's write of it
+ok 12 - a settings file keeps a key no unit registered through the core's write of it
+# Subtest: a slice that changes 100 times a second reaches a page at most once a round
+ok 13 - a slice that changes 100 times a second reaches a page at most once a round
+# Subtest: the helper runs only while a want is on, gets the sound and then the wants after its hello, and exits once nothing is wanted
+ok 14 - the helper runs only while a want is on, gets the sound and then the wants after its hello, and exits once nothing is wanted
+# budget: the helper ran again with every want sent 2025ms after it was killed, against 3,000ms
+# Subtest: a press reaches the feature, and a helper killed while a want is on runs again within 3s with the binding sent as before
+ok 15 - a press reaches the feature, and a helper killed while a want is on runs again within 3s with the binding sent as before
+# budget: the helper exited 5ms after the core was killed, against 1,000ms
+# Subtest: the core killed, the helper exits within 1s
+ok 16 - the core killed, the helper exits within 1s
+# Subtest: a helper of another build is logged, killed, and started again, and the trouble notice shows 5s after it went down
+ok 17 - a helper of another build is logged, killed, and started again, and the trouble notice shows 5s after it went down
+# Subtest: the next press turns itself off once it comes, and a setting changed whose key a binding names sends the wants again
+ok 18 - the next press turns itself off once it comes, and a setting changed whose key a binding names sends the wants again
+# Subtest: a sound plays while the helper runs, and a play while it's stopped is dropped
+ok 19 - a sound plays while the helper runs, and a play while it's stopped is dropped
+# Subtest: a want the helper can't carry out warns, naming the feature, until the want goes off, and the device list ends at its answer or its failure
+ok 20 - a want the helper can't carry out warns, naming the feature, until the want goes off, and the device list ends at its answer or its failure
+# Subtest: a capture's program and frames reach its feature, and a missing output device warns until the helper plays on it
+ok 21 - a capture's program and frames reach its feature, and a missing output device warns until the helper plays on it
+# Subtest: a helper that won't start is tried again while a want is on, even after a want went on and off before the start failed
+ok 22 - a helper that won't start is tried again while a want is on, even after a want went on and off before the start failed
+# budget: 600 mouse moves reached the core and 600 frames reached the helper in 3s, each way against 200 a second
+# budget: the slowest input of a run with 200 messages a second each way took 637µs, against 1,000µs
+# Subtest: the pipe carries 200 messages a second each way, each handled within the loop's 1ms
+ok 23 - the pipe carries 200 messages a second each way, each handled within the loop's 1ms
+# Subtest: a killed core's recording replays to its last whole frame, losing at most its last second
+ok 24 - a killed core's recording replays to its last whole frame, losing at most its last second
+# 257 of 300 lines reached the recording, which lost the last 673ms before the kill
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 25 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+# 22ms away at 1%: p99 stream 41.8ms, newest 42.7ms, deadline 41.3ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 45.1ms, newest 43.4ms, deadline 41.5ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 137.9ms, newest 149.4ms, deadline 150.0ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 152.2ms, newest 155.6ms, deadline 153.7ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 26 - holding one core's relay connection back leaves the other pair's messages on time
+# p99 to the core not held back: newest 1.6ms, stream 1.9ms; to the held one: newest 155.3ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 27 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+# join through the relay 1088ms; the sender's peak through the relay 35022 bytes in a second, 34484 a second on average
+# CPU of one core over the mix: the sender 7.86%, the receiver 6.04%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 1.3ms, 1.3ms, 1.4ms
+# the receiver's loop: 31451638510µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=9194 busy_percent=0.63 wait_p50_us=10 wait_p99_us=61 wait_p999_us=143 wait_max_us=2783 over_1ms=0 slowest_us=692 slowest_seq=26 slowest_stamp=31392781611
+# Subtest: the link is lost after 5s of each outage, and comes back after it
+ok 28 - the link is lost after 5s of each outage, and comes back after it
+# a 30s cut: lost after 4999ms, up again 16794ms after it ended
+# a 60s cut: lost after 5000ms, up again 16268ms after it ended
+# a 120s cut: lost after 5000ms, up again 31900ms after it ended
+# the relay down for 40s: lost after 4995ms, up again 18282ms after it came back
+# a core suspended for 60s: up again 0ms after it resumed
+# Subtest: with the cores homed at different relays, both directions cross the dialed core's home relay
+ok 29 - with the cores homed at different relays, both directions cross the dialed core's home relay
+# homes: the host http://127.0.0.1:64631/, the joiner http://127.0.0.1:64633/
+# bytes into each relay over 5s: the host 125188 and 0, the joiner 125121 and 0
+# the host's home relay cut for 60s: the link was lost, and up again 2006ms after the cut ended; homes then: http://127.0.0.1:64631/ then http://127.0.0.1:64633/
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+ok 30 - two cores join through the backend, link through a relay, lose the link, and link again
+# from the code entered to the link up through the relay: 1088ms
+# a 10s cut: the link lost after 5000ms, and up again 7701ms after the cut ended
+# LinkUp after the cut: 3 on the host, 3 on the joiner
+# clock offsets: 82, -157µs
+# Subtest: a core killed and started again links under a higher restart count, with no member counted out
+ok 31 - a core killed and started again links under a higher restart count, with no member counted out
+# the restarted core linked 38ms after it started; the other core said: net up 828d1c4a again=false restart=1; net keys Joiner 1
+# Subtest: a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+ok 32 - a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+# linked 16618ms after the join, through an 8s cut
+# Subtest: a connection with another code closes with its code, and one with no first message never links
+ok 33 - a connection with another code closes with its code, and one with no first message never links
+# the host refused the other code with code 10, and never linked the silent core
+# Subtest: a join on a direct path links within 3s of the code entered
+ok 34 - a join on a direct path links within 3s of the code entered
+# from the code entered to the link up: 1087ms
+# Subtest: a call with no sim fails at once
+ok 35 - a call with no sim fails at once
+# Subtest: the platform's connection takes its masking group before the sim's open reply
+ok 36 - the platform's connection takes its masking group before the sim's open reply
+# Subtest: a lost connection opens again with its setup made again, and the gone one's messages are dropped
+ok 37 - a lost connection opens again with its setup made again, and the gone one's messages are dropped
+# Subtest: a variable the sim rejects leaves the watch's other values arriving
+ok 38 - a variable the sim rejects leaves the watch's other values arriving
+# Subtest: p08's flight load raises one Loading, one Ready to fly, and one Flying, with the PA-24
+ok 39 - p08's flight load raises one Loading, one Ready to fly, and one Flying, with the PA-24
+# Subtest: a module from another build runs none of the core's feeds, and the core reports it differs
+ok 40 - a module from another build runs none of the core's feeds, and the core reports it differs
+# Subtest: the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes
+ok 41 - the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes
+# Subtest: a routine fed again after its end starts with nothing from its last feeding
+ok 42 - a routine fed again after its end starts with nothing from its last feeding
+# Subtest: a module stopped by a routine's panic, with a routine live in Flying, has the core unfreeze the aircraft
+ok 43 - a module stopped by a routine's panic, with a routine live in Flying, has the core unfreeze the aircraft
+# the aircraft unfroze 3050ms after the module stopped
+# Subtest: a module that stops while Loading leaves the aircraft frozen
+ok 44 - a module that stops while Loading leaves the aircraft frozen
+# Subtest: a module that stops while paused leaves the aircraft frozen
+ok 45 - a module that stops while paused leaves the aircraft frozen
+# Subtest: a module that stops with no routine live leaves the aircraft frozen
+ok 46 - a module that stops with no routine live leaves the aircraft frozen
+# Subtest: a stopped module's 3s count only from the end of a pause
+ok 47 - a stopped module's 3s count only from the end of a pause
+# the aircraft unfroze 3056ms after the pause ended
+# Subtest: the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash
+ok 48 - the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash
+# Subtest: two bench cores each see only their own stub, and killing one ends that core's sim alone
+ok 49 - two bench cores each see only their own stub, and killing one ends that core's sim alone
+# tests 49
+# suites 0
+# pass 49
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 924638.4121

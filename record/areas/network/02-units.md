@@ -26,11 +26,22 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > - The lost-link timer's count of a connection's recorded inputs counts every packet, as [links](#links) has it.
 > - The backend takes no bug report's parts and stores nothing in R2 in v1, since the report endpoints come after v1; the 30 days it keeps a session's rows after a leave serve those endpoints' check, and whether v1's backend keeps them is open.
 >
-> Since 2026-10-22, the network's stage of the build settles two things (user, 2026-10-22; [build plan](../build/plan.md#7-the-network)):
+> Since 2026-10-22, the network's stage of the build settles three things (user, 2026-10-22; [build plan](../build/plan.md#7-the-network)):
 >
 > - It pins iroh, noq, and `iroh-relay` at 1.3.0, the versions our probes measured, over iroh 1.4.0 and 1.4.1, of 2026-10-20 and 2026-10-21; moving to 1.4 is a change of its own, as [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) gives it.
 > - v1's backend ends a member at its leave or lapse, as [its requests](#its-requests) and [codes, lapses, and wrong codes](#codes-lapses-and-wrong-codes) have it, and keeps no rows for 30 days after, which only the report endpoints after v1 need.
 > - The private repository that holds the relays' tokens is `dual-input/relay-tokens`, made in stage 7 rather than in stage 22 with the rest of GitHub.
+>
+> Since 2026-10-22, the network's stage of the build settles what this design left to it, in the sections each item links, and [the network's log](log.md#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay) holds its bench run:
+>
+> - The relays run at `nyc.relay.dualinput.app` and `fra.relay.dualinput.app`, and the backend at `api.dualinput.app`, on Dual Input's domain (user, 2026-10-22; [who hosts them](#who-hosts-them)).
+> - `dual-input/relay-tokens` holds `tokens.toml`, each relay's tokens newest first under its region, which the network crate's build reads from the clone `DUALINPUT_RELAY_TOKENS` names, and `relays/deploy.ts` installs n0's own build of `iroh-relay` 1.3.0, checked against its SHA-256 ([their configuration](#their-configuration)).
+> - Each one-off channel's message type implements the message crate's `OneOff` trait, whose `wait()` gives its key or its deadline, in the type's own module, because Rust accepts `impl OneOff for T` only in the crate that defines `OneOff` or the one that defines `T` ([channels and sends](#channels-and-sends)).
+> - The network sends heartbeats only while a session is open, so a core outside a session records no heartbeat input each second ([the heartbeat and clock offsets](#the-heartbeat-and-clock-offsets)).
+> - The backend's bodies give pilot and endpoint IDs as lowercase hex, a signed request carries the endpoint ID and its signature in the `DualInput-Endpoint` and `DualInput-Signature` headers, and a member's kind is crew or passenger, so a passenger's entry needs no new path ([its requests](#its-requests)).
+> - A core whose connection closes with a refusal's code shows the refusal's notice, as it does when it refuses the other core's first message itself, because the close can arrive before the first message the other core sent ahead of it ([the first message](#the-first-message)).
+> - The bench's relays are `iroh-relay`'s own server, as a library in `tools/bench/relay`, each behind a proxy that tells one core's connection from another's by the process that owns it, in place of the `iroh-relay` program on `127.0.0.1:3340` ([cases for the bench](#cases-for-the-bench)).
+>   A core reaches such a relay over plain HTTP with its token, which settles [left open](#left-open)'s item on it, and asks a relay over plain HTTP for no QUIC address discovery.
 
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.

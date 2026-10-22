@@ -2,6 +2,69 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-22: on the bench, two cores join in 1.1s, lose the link 5.0s into each outage and get it back 0.1s to 30s after, and every channel runs within 8ms of the others through a lossy relay
+
+**Asked:** for stage 7 of the [build plan](../build/plan.md#7-the-network), do the network crate, the transport, and the backend pass [02-units' cases](02-units.md#cases-for-the-bench), and where do the network's [budgets](02-units.md#budgets) land?
+
+**Expected:** the cases as 02-units words them; p06's finding that a relay's held-back bytes hold every channel back alike ([p06]); and no bound on the time from an outage's end to data again, which this first run sets.
+
+**Found:** on our development machine, on 2026-10-22, with bench cores on one PC, everything through the bench's local relay with its IP transports cleared, the bench's backend on a local D1, and a game running beside the bench:
+
+- **Joining:** from the code entered to the link up took 1,061ms to 1,184ms through the relay, and 1,166ms on a direct path, within the 3s budget.
+  The direct path first took 4,118ms, because each core waited 3.0s after binding before it took a home relay: iroh asks each relay for the PC's address over QUIC, and a relay over plain HTTP, as the bench's and `iroh-relay --dev` are, answers no such probe.
+- **A lost link:** every outage raised `LinkLost` 4,995ms to 5,001ms in.
+- **Back after an outage**, from its end to `LinkUp` with `again`:
+
+  | Outage | Back after |
+  | --- | --- |
+  | The proxy cutting both cores for 10s | 5.1s to 7.8s, in five runs |
+  | for 30s | 16.8s and 26.8s |
+  | for 60s | 14.8s and 16.3s |
+  | for 120s | 30.2s and 31.9s |
+  | The relay down for 40s | 18.3s and 26.2s |
+  | A core suspended for 60s | 0.14s at most |
+  | A joiner's dials cut for 8s | 5.3s to 9.3s, in three runs |
+
+  The longer waits fit iroh's reconnect backoff for the home relay connection, up to 16s plus a 10s connect timeout ([iroh as a dependency](01-between-machines.md#iroh-as-a-dependency)), as p07's 23.8s did ([p07]), which this run didn't trace (inference).
+- **A restarted core** linked 38ms to 204ms after it started, its `LinkUp` with restart count 1 and `again` false, and no `MemberOut` or `LinkLost` on the other core.
+- **Both redialing after a cut:** a dial still running when the link came back connected too, and the link's rule moved both cores onto one connection, raising `LinkUp` up to 3 times on each core; a stream probe sent before a move was lost with the connection it left, as [links](02-units.md#links) expects, and probes sent 3s after the link came back all arrived.
+- **Through a relay holding the sender's bytes back**, on release builds, 20s of the busiest mix each, with every probe arriving and no newest probe after a newer one:
+
+  | Round trip to the relay, held back | p99 of the stream | of the newest-only channel | of the deadline channel |
+  | --- | --- | --- | --- |
+  | 22ms, 1% | 40.4ms | 38.9ms | 40.2ms |
+  | 22ms, 3% | 40.6ms | 42.3ms | 40.6ms |
+  | 84ms, 1% | 148.2ms | 148.4ms | 140.8ms |
+  | 84ms, 3% | 150.6ms | 154.4ms | 152.7ms |
+
+  The stream's p99 came within 7.4ms of the one-off packets', inside the case's 17ms, as [p06] found.
+- **A held-back pair:** with one of three cores held back, the other pair's one-off packets came at a p99 of 0.3ms, and the held core's at 154ms.
+- **The busiest mix**, p06's 121 one-off packets and 20 stream messages a second for 65s, on release builds: the sender's busiest second through the relay carried 35,102 bytes, 7.5 times under the cap of 262,144, and each core used 1.9% to 2.0% of one CPU core in all; the receiver's loop took 9,255 inputs in its first minute, 154 a second, busy 0.09% of it, its queue's wait at 13µs p99 and 2.1ms at most, none over 1ms.
+- **Two relays:** with the host homed at one and the joiner at the other, the joiner's dial put both directions through the host's home relay, 124,207 and 123,987 bytes into it in 5s and none into the other, as [p05] found.
+  The host's home relay cut from it for 60s lost the link, which came back 2.0s after the cut ended, and the host homed at the other relay meanwhile.
+- **Clock offsets:** each core's estimate of the other's offset came to between −164µs and 163µs.
+- **Refusals:** the host refused a core opening under another code with code 10, `WRONG_CODE`.
+  A core that sent no first message never linked, but the host's 10s timeout never fired: the silent core took the host's first message, so its own link came up, heard nothing for 5s, and redialed, closing each connection before the host's 10s ran out.
+- **Plain HTTP:** a core reached the bench's relay over `http://` with a test token, which settles [left open](02-units.md#left-open)'s item.
+
+Not in this run: QUIC's queue holding no more than 3,486 bytes, which the transport keeps by handing a packet over only when the queue has room for it; a refusal for another version or hash, and the refused side's notice, which the network crate's tests cover; and the backend's requests, which its tests run against a local D1 in `tools/check.ts`.
+
+The first runs measured lateness and offsets through a proxy that waited a timer tick, about 15.6ms on Windows, on every read, which gave every probe a p99 of about 20ms and the offsets 3.8ms; the table and the offsets above come after its fix.
+
+**Changed:**
+
+- The transport asks no relay over plain HTTP for QUIC address discovery.
+- The bench's proxy writes a read at once when nothing holds it back, and asks Windows for 1ms timers.
+- The bench's refusal case asserts that a core sending no first message never links, where 02-units' case has the host close it after 10s, since the silent core closes each connection first; only the network crate's tests hold a connection silent for 10s.
+- The redial case counts each `LinkUp` after the cut rather than expecting one, and sends its probes 3s after the link comes back, since a dial still running moves the link and loses what went out before the move.
+- The restart case waits for the other core's `LinkUp`, since the restarted core opens from its session file before the bench connects to it, and tells the bench nothing it can hear.
+- The cap stays 256 KiB/s: v1's busiest session also carries a replay and a catch-up, which come with stage 13's cockpit stream, and its peak sets the cap then.
+- What the build settled beside these is in [02-units](02-units.md)'s note of this date.
+
+**Affects:** [02-units](02-units.md)' budgets, cases, and left open; [01-between-machines](01-between-machines.md)' coming back.
+
+**Evidence:** [results/2026-10-22-stage-7-bench.txt](results/2026-10-22-stage-7-bench.txt), each run's output and the receiver's loop stats.
+
 ## 2026-10-16: iroh-relay 1.3.0 builds and runs on Windows, and in dev mode answers on IPv6 loopback only
 
 **Asked:** for node 6.4, can CI's Windows runners build and run the `iroh-relay` that the network's tests run through ([01-between-machines](01-between-machines.md#two-cores-on-one-pc)), since CI runs on Windows only ([02-code-map](../architecture/02-code-map.md#ci))?
@@ -563,3 +626,7 @@ The real share for our pilots gets measured later: a script that friends run for
 **Affects:** [01-aims](../product/01-aims.md#relay-and-license), and the plan's step 6.
 
 **Evidence:** the sources above; no probe ran.
+
+[p05]: #2026-10-11-when-two-endpoints-home-at-different-relays-iroh-carries-both-directions-through-the-dialed-endpoints-home-relay-so-whoever-dials-picks-the-relay
+[p06]: #2026-10-11-on-irohs-relay-under-loss-v1s-streams-run-as-late-as-its-one-off-packets-and-no-later-because-quic-never-sees-a-loss-there-so-a-sender-that-keeps-only-each-channels-newest-packet-changes-nothing
+[p07]: #2026-10-11-after-a-total-outage-a-redialed-connection-carries-data-03s-to-14s-after-the-link-returns-while-one-that-lived-through-a-10s-outage-takes-5s-to-7s

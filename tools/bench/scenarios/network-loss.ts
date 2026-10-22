@@ -96,7 +96,11 @@ test("v1's busiest mix through the relay: its peak rate, the cores' CPU, and the
   // once it exits, which writes its log whole.
   b.send({ kind: "exit" })
   await b.exited
-  const minute = b.log().split(/\r?\n/).filter((l) => l.includes("the loop's stats") && l.includes("window=minute")).at(-1)
+  // The first whole minute's line, as apps/core/src/loop_stats.rs writes it.
+  const minute = b
+    .log()
+    .split(/\r?\n/)
+    .find((l) => l.includes("the loop's stats") && l.includes('window="minute" seconds=60'))
   t.diagnostic(`the receiver's loop: ${minute ?? "no minute's stats"}`)
   assert.ok(sending[1] < 262144, `the sender's peak, ${sending[1]} bytes in a second, passed the cap`)
 })

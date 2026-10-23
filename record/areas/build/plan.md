@@ -43,7 +43,9 @@ The stages follow these rules (user, 2026-10-18):
    You'll see its `Builds:`, `Needs:`, `Tests:`, and `Exit:` lines.
 3. If the stage has a `Designs first:` line, propose that design to the user, and once they agree, write it in the design doc it belongs to.
    You'll see the design in its doc before any of the stage's code.
-4. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, until `node tools/check.ts` passes, and from stage 3 the whole bench too.
+4. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, until `node tools/check.ts` passes, and from stage 3 the bench's scenarios that the stage added or changed, with `node tools/bench.ts <scenario>...`.
+   The whole bench, `node tools/bench.ts`, runs in their place at the close of stages 10, 15, and 20, before a release, and at the close of any stage that changes what every scenario runs on: the kernel, the core's edge, the message crate's framing, or a pinned dependency such as iroh, since waiting on it at every stage slowed the build (user, 2026-10-23).
+   An `Exit:` line's `node tools/bench.ts` means whichever of the two the stage runs.
    You'll see every check pass on our development machine.
 5. If the stage's system has cases in the sim, run them, and measure the stage's budgets in the sim, in one session in the sim ([in the sim](02-testing.md#in-the-sim)).
    You'll have each case's report and each measurement.
@@ -276,6 +278,7 @@ Tests:
 - By hand, on our droplets: v1's full mix on a direct path at no loss, 1%, and 3%, through `tc netem`, with and without the newest-only slots, which settles [left open](../network/02-units.md#left-open)'s item on them.
 
 This stage's by-hand run on our droplets, and stage 6's cases that need a person or the sim, make one session (user, 2026-10-22).
+The stage closes on its network scenarios, without the whole bench, though it pinned iroh's crates, since the whole bench passed on its code before the pin and before the product's code moved into `src/` (user, 2026-10-23).
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the network's scenarios and the backend's tests among them; two bench cores link through a local relay, lose the link, and link again, as the network's log shows; the by-hand run on our droplets has run; and the [network's log](../network/log.md) has an entry for the cases and budgets.
 

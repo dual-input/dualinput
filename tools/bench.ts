@@ -5,9 +5,12 @@
 // another commit, and the stand-in core helper beside it. A stage's code passes both this and
 // tools/check.ts.
 //
-//   node tools/bench.ts               runs every scenario in tools/bench/scenarios/
-//   node tools/bench.ts load [plays]  runs the loop under load: p10's flight, played
-//                                     `plays` times over, 6 unless given, which is an hour
+//   node tools/bench.ts                 runs every scenario in tools/bench/scenarios/
+//   node tools/bench.ts <scenario>...   runs the scenarios named, such as `network network-loss`,
+//                                       as a stage closes on the ones it added or changed
+//                                       (record/areas/build/plan.md, "Working a stage")
+//   node tools/bench.ts load [plays]    runs the loop under load: p10's flight, played
+//                                       `plays` times over, 6 unless given, which is an hour
 
 import fs from "node:fs"
 import path from "node:path"
@@ -19,8 +22,15 @@ import { Failed, main, run } from "./lib/run.ts"
 import { requireSdk } from "./lib/sdk.ts"
 
 main(() => {
-  const [what, plays] = process.argv.slice(2)
-  if (what !== undefined && what !== "load") throw new Failed("usage: node tools/bench.ts [load [plays]]")
+  const args = process.argv.slice(2)
+  const [what, plays] = args
+  const scenarios = path.join(ROOT, "tools", "bench", "scenarios")
+  const all = fs.readdirSync(scenarios).filter((f) => f.endsWith(".ts")).sort().map((f) => f.replace(/\.ts$/, ""))
+  const named = what === "load" ? [] : args
+  const unknown = named.filter((n) => !all.includes(n))
+  if (unknown.length > 0) {
+    throw new Failed(`usage: node tools/bench.ts [<scenario>... | load [plays]]\nno scenario named ${unknown.join(", ")}; the scenarios are ${all.join(", ")}`)
+  }
   requireSdk()
   // The cores check their hash against these types, so they're written from this tree too.
   writeMessageTypes()
@@ -37,8 +47,7 @@ main(() => {
     run(process.execPath, [path.join("tools", "bench", "load.ts"), plays ?? "6"], { env })
     return
   }
-  const scenarios = path.join(ROOT, "tools", "bench", "scenarios")
-  const files = fs.readdirSync(scenarios).filter((f) => f.endsWith(".ts")).sort().map((f) => fromRoot(path.join(scenarios, f)))
+  const files = (named.length > 0 ? named : all).map((n) => fromRoot(path.join(scenarios, `${n}.ts`)))
   // One scenario at a time, so no scenario's cores take CPU from another's timing; and each
   // scenario's process exits once its tests end, whatever handle a failed one left open.
   run(process.execPath, ["--test", "--test-concurrency=1", "--test-force-exit", ...files], { env })

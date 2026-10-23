@@ -245,7 +245,7 @@ Tests:
 - In this stage's session in the sim, with the real helper: a bound key crosses with the sim's main window or a popped-out display in front, and not with another program in front; a click in the sim's main window crosses with its place and the window's size, and a click in a popped-out display crosses nothing; the helper captures BeyondATC's speech; and from [traffic and ATC's cases](../traffic-atc/01-traffic-and-atc.md#cases-for-the-bench), whether the helper captures SayIntentions' speech through `SayIntentionsAI`.
 - [04's budgets](../core/04-core-helper.md#budgets): on a desk, the helper under 1% of one CPU core while it captures and plays, under 20 MB of private working set, a press on the queue within 5ms of the helper's stamp at p99, and exited within 1s of its standard input closing; and on the bench, running with every want sent within 3s of an exit, and the pipe under 200 messages a second each way.
 
-The cases on a desk that need a person at the PC, and this stage's cases in the sim, run in [stage 7](#7-the-network)'s session, with stage 7's own, so stage 7 is built while stage 6 waits for them (user, 2026-10-22).
+The cases on a desk that need a person at the PC, and this stage's cases in the sim, run in one session of their own, after stage 7, which was built while stage 6 waited for them (user, 2026-10-22).
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the helper's own tests and the stand-in core helper's scenarios among them; on a desk and in this stage's session in the sim, a core built from the tree starts the real helper, which sends a bound key's press, a click in the sim's window with its place, and a captured program's frames, and plays a sound on the device picked; and the [core's log](../core/log.md) has an entry for the desk's and the session's cases and budgets.
 
@@ -277,10 +277,12 @@ Tests:
 - [02-units' budgets](../network/02-units.md#budgets): about 140 inputs a second from one link within the loop's budgets; the transport within the edge's 2% of one CPU core; a join within 3s on a direct path; and v1's busiest mix through the relay, whose peak rate sets the relay's cap.
 - By hand, on our droplets: v1's full mix on a direct path at no loss, 1%, and 3%, through `tc netem`, with and without the newest-only slots, which settles [left open](../network/02-units.md#left-open)'s item on them.
 
-This stage's by-hand run on our droplets, and stage 6's cases that need a person or the sim, make one session (user, 2026-10-22).
+This stage's by-hand run on our droplets ran unattended, on its own, so stage 6's cases that need a person or the sim keep a session of their own.
 The stage closes on its network scenarios, without the whole bench, though it pinned iroh's crates, since the whole bench passed on its code before the pin and before the product's code moved into `src/` (user, 2026-10-23).
+It closes before `src/relays/deploy.ts` has deployed our relays, which waits for their DNS records, and [stage 22](#22-github)'s tests deploy them (user, 2026-10-23).
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the network's scenarios and the backend's tests among them; two bench cores link through a local relay, lose the link, and link again, as the network's log shows; the by-hand run on our droplets has run; and the [network's log](../network/log.md) has an entry for the cases and budgets.
+Done on 2026-10-23.
 
 ## 8 Recording and bug reports
 
@@ -406,6 +408,7 @@ Tests:
 
 - From stage 1: CI's time against the 20 minutes of [budgets for the workspace](../architecture/02-code-map.md#budgets-for-the-workspace), with `cargo build --timings`; one commit built on our development machine and on CI's runner gives one hash ([the build's cases on a desk](01-the-build.md#cases-for-the-bench)); and the runner, set up from nothing by the steps for a new PC in [building every target](../architecture/02-code-map.md#building-every-target), builds and tests the tree.
 - From stage 3: whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies ([testing's left open](02-testing.md#left-open)); a pull request's bench within the code map's 20 minutes, as a job beside the others; and the check before a release within 15 minutes of a person's time, from a sim at the main menu ([testing's budgets](02-testing.md#budgets)).
+- From stage 7: once `nyc.relay.dualinput.app` and `fra.relay.dualinput.app` point at our droplets, `node src/relays/deploy.ts nyc fra` deploys both relays, and each answers `/ping` over HTTPS with the certificate it took from Let's Encrypt, before the first release ([their configuration](../network/02-units.md#their-configuration)).
 
 ## 23 v1's release
 

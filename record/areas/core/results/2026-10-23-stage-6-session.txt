@@ -1,0 +1,100 @@
+== Stage 6's session, 2026-10-23, on our development machine: node tools/sim/core-helper.ts person, person 5, sim, and audio,
+== with release builds of a bench core and the real helper, then the opus-quality probe in experiments/areas/core/opus-quality.
+
+== person: steps 1 to 5; step 5's check failed on the test's own window size, and the desk tool and the test were fixed
+a bench core started in target\bench\runs\2026-10-23_10-55-40-core-helper-person, with the real helper
+1. Open Windows' sound settings. Press Enter, and a 2s two-tone sound plays on the default device, again and again for 40s. While it plays, switch the default output device to another one, wait for two sounds, and switch it back.
+the helper played on: "Speakers (NVIDIA Broadcast)", "Speakers (Focusrite USB Audio)", "Speakers (NVIDIA Broadcast)", "Speakers (Focusrite USB Audio)"
+Did the sound come back in the device you switched back to? Type y or n, then Enter.
+ok: Windows' default output device changed while a sound played, and the sound carried on in the new device
+  1. Speakers (Focusrite USB Audio)
+  2. Speakers (NVIDIA Broadcast)
+2. Type the number of a device you can unplug, a USB headset or the audio interface yours is plugged into, then Enter, or s to skip. It may be Windows' default device: while it's missing, Windows makes another one the default.
+Dual Input now plays on Speakers (Focusrite USB Audio). Press Enter, then, as the sound plays every 2s, take your time to unplug it, wait about 5s, and plug it into another USB port; or disable it in Windows' Sound control panel (mmsys.cpl), wait about 5s, and enable it again.
+Press Enter once the sound is back in the headset.
+Did you unplug it into another port (u) or disable and enable it (d)? Type u or d, then Enter.
+the device went missing by being unplugged and plugged into another port
+the helper played on: "Speakers (NVIDIA Broadcast)", "Speakers (NVIDIA Broadcast)", "Speakers (Focusrite USB Audio)"
+ok: with the picked headset unplugged, Dual Input warned: 10336095323Âµs #4671 [clients]  INFO clients: a notice was raised id="core-helper.missing-output" level=Warning text="Speakers (Focusrite USB Audio) isn't connected, so Dual Input plays on Windows' default device until it is"
+ok: Dual Input played on Windows' default, and went back to the headset in another port
+3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.
+Now press a button on the yoke or throttle, not that switch, then press Enter.
+the next press: next press T.A320 Pilot button 1
+ok: while binding, with a switch held on, only the button pressed crosses, and then nothing
+4. If an Xbox controller is connected, press Enter, then press its A button within 10s; otherwise type s.
+Raw Input saw no button of the Xbox controller in 10s
+5. The main display is at 100%. Set it to 150% in Windows' display settings, then press Enter, or type s to skip.
+at 144 DPI, 150%, clicks: mouse LeftDown -1.000 1.000; mouse LeftDown 0.998 -0.981
+FAILED: on a monitor scaled to 150%, the client area's corners cross as -1, 1 and nearly 1, -1
+Done. Set Windows' default output device and the display's scaling back as you had them.
+the core's recordings replayed to every checkpoint; 1 FAILED
+
+== person 5: step 5 again, with the test clicking the client area's real corners
+a bench core started in target\bench\runs\2026-10-23_11-06-29-core-helper-person, with the real helper
+5. The main display is at 100%. Set it to 150% in Windows' display settings, then press Enter, or type s to skip.
+at 144 DPI, 150%, in a client area of 1280 by 720, clicks: mouse LeftDown -1.000 1.000; mouse LeftDown 0.997 -0.997
+ok: on a monitor scaled to 150%, the client area's corners cross as -1, 1 and nearly 1, -1
+Done. Set Windows' default output device and the display's scaling back as you had them.
+the core's recordings replayed to every checkpoint; every case passed
+
+== sim: the sim's windows and BeyondATC, with the helper encoding in Opus's Voip mode at 24 kbps
+a bench core started in target\bench\runs\2026-10-23_11-20-11-core-helper-sim, with the real helper
+Which ATC app will you use? Type b for BeyondATC, i for SayIntentionsAI, both, or n for neither, then Enter.
+
+In the sim, a voice says each step, a high beep is a pass and a low one a fail, and Page Up skips a step:
+  1. Load into a flight, and click into the sim's window.
+  2. Pop out a display, by holding right Alt and clicking a screen, and click inside the pop-out; then click it once more when the voice asks.
+  3. Click once in the sim's main window, on the sky or anything that does nothing.
+  4. Switch to another program, such as this terminal.
+  5. Get BeyondATC talking for about a minute, such as by asking for the ATIS.
+Then come back here to listen to the ATC recordings.
+
+The sim wasn't running, so Steam is starting it.
+Press Enter, then go to the sim.
+ok: a bound key crosses with the sim's main window in front: 2 presses and releases
+ok: a click in a popped-out display crosses nothing
+ok: a bound key crosses with a popped-out display in front: 2 presses and releases
+ok: a click in the sim's main window crosses with its place: mouse LeftDown -0.810 0.742
+ok: a bound key with another program in front crosses nothing: 0 presses and releases
+ok: the helper captures BeyondATC's speech: 3503 frames crossed the gate
+budget: capturing BeyondATC, the helper took 2.59% of one CPU core on average over 7 readings of 10s, 2.79% at most, against 1%
+ATC through opus-rs at 24 kbps with 0% of frames lost: frames 3503 small 0 level -22.7 decode 37
+ATC through opus-rs at 24 kbps with 5% of frames lost: frames 3503 small 0 level -23.0 decode 35
+Listening to ATC with 0% of frames lost, target\bench\runs\2026-10-23_11-20-11-core-helper-sim\atc-0-loss.wav, which opens now. Press Enter when you've heard enough.
+Listening to ATC with 5% of frames lost, target\bench\runs\2026-10-23_11-20-11-core-helper-sim\atc-5-loss.wav, which opens now. Press Enter when you've heard enough.
+Does the 5% one have a fault a pilot would notice, beyond a word clipped here and there? Type y or n, then Enter.
+ok: ATC speech through opus-rs with 5% of frames lost has no fault a pilot would notice
+the core's recordings replayed to every checkpoint; every case passed
+
+== audio: the desk's audio cases again, with the helper encoding in Audio mode
+a bench core started in target\bench\runs\2026-10-23_12-00-11-core-helper-audio, with the real helper
+desk-tone at 1 in the mixer, as captured: frames 251 small 0 level -26.0 decode 28
+desk-tone at 0.3 in the mixer, as captured: frames 251 small 0 level -26.0 decode 26
+ok: the captured program exited, the capture stopped, and attached again once it started again
+ok: frames from a program at 30% in the Windows mixer arrive at the level it has at 100%: -26 dBFS against -26 dBFS
+the helper took 0.46% of one CPU core over 10s with the output device open and nothing playing
+the helper took 0.27% of one CPU core over 10s capturing a program that plays silence
+budget: the helper took 0.67% of one CPU core over 10s capturing a tone, and 0.93% capturing it and playing it back, so about 0.26% playing, each against 1%
+budget: the helper held 4.2 MB of private working set, against 20 MB
+ok: the helper under 1% of one CPU core while it captures
+ok: the helper under 1% of one CPU core while it plays
+ok: the helper under 20 MB of private working set
+the helper plays on: "Speakers (Focusrite USB Audio)"
+ok: the bench's tone plays on the output device
+the core's recordings replayed to every checkpoint; every case passed
+
+== opus-quality record: BeyondATC through process loopback, 48 kHz stereo float, until 90s of speech
+recorded 114.1s: 20582 packets on 20582 wakes, 0 silent; level -19.7 dBFS, peak -1.8 dBFS; the probe took 0.26% of one CPU core capturing, with no Opus
+
+== opus-quality encode: each setting's copy of that recording, mixed to mono, at the original's loudness
+original, mixed to mono: level -19.7 dBFS
+port-voip-24k-c5-as-shipped: 34.6 kbps sent, 141us a frame to encode, 0.71% of one core at 50 frames a second, level matched by +0.6 dB
+port-voip-48k-c5: 46.9 kbps sent, 143us a frame to encode, 0.72% of one core at 50 frames a second, level matched by +0.3 dB
+port-audio-32k-c5: 27.6 kbps sent, 44us a frame to encode, 0.22% of one core at 50 frames a second, level matched by +0.0 dB
+port-audio-48k-c5: 41.1 kbps sent, 46us a frame to encode, 0.23% of one core at 50 frames a second, level matched by +0.0 dB
+port-audio-64k-c5: 54.6 kbps sent, 50us a frame to encode, 0.25% of one core at 50 frames a second, level matched by -0.0 dB
+port-audio-48k-c9: 41.1 kbps sent, 50us a frame to encode, 0.25% of one core at 50 frames a second, level matched by +0.0 dB
+libopus-voip-24k-c5: 22.0 kbps sent, 338us a frame to encode, 1.69% of one core at 50 frames a second, level matched by +0.6 dB
+libopus-audio-32k-c5: 27.6 kbps sent, 152us a frame to encode, 0.76% of one core at 50 frames a second, level matched by +0.0 dB
+libopus-audio-48k-c5: 41.1 kbps sent, 159us a frame to encode, 0.80% of one core at 50 frames a second, level matched by -0.0 dB
+libopus-audio-48k-c9: 42.6 kbps sent, 349us a frame to encode, 1.75% of one core at 50 frames a second, level matched by +0.1 dB

@@ -10,14 +10,17 @@
 //       own take the focus, and quiet tones play on Windows' default output device
 //   node tools/sim/core-helper.ts audio
 //       the desk's audio cases alone, which take no focus
-//   node tools/sim/core-helper.ts person
+//   node tools/sim/core-helper.ts person [step...]
 //       the cases that need someone at the PC: Windows' default output device changed while
 //       a sound plays, a headset unplugged, a throttle quadrant's switch held on while
-//       binding, an Xbox controller, and clicks at 150%
+//       binding, an Xbox controller, and clicks at 150%; or only the steps named, by number
 //   node tools/sim/core-helper.ts sim
 //       the cases with the sim in a flight, and BeyondATC's speech through Opus
 //
-// A person and a sim run ask for each step in the terminal, and Enter goes on.
+// A person run asks for each step in the terminal, and Enter goes on. A sim run asks one
+// question there, starts the sim through Steam if it isn't running, and then guides you by
+// voice and beeps from inside the sim (tools/sim/guide.ts), back to the terminal only to
+// listen to the ATC it captured.
 
 import { spawn, spawnSync, type ChildProcess } from "node:child_process"
 import fs from "node:fs"
@@ -29,8 +32,10 @@ import type { Bound } from "../../src/engines/messages/ts/core_helper/Bound.ts"
 import { BenchRun, type Core } from "../bench/cores.ts"
 import { FakePage } from "../bench/pages.ts"
 import { buildPrograms } from "../lib/cargo.ts"
+import { simRunning } from "../lib/install.ts"
 import { ROOT } from "../lib/repo.ts"
 import { Failed, main } from "../lib/run.ts"
+import { Guide } from "./guide.ts"
 
 /** Scan codes, which the helper binds a key by. F22 to F24 sit on no keyboard, so nothing takes them. */
 const F22 = 0x6d
@@ -95,22 +100,44 @@ function build(): Tools {
 /** A window of tools/sim/desk's, which brings itself to the front before each key or click. */
 class DeskWindow {
   readonly dpi: number
+  /** The client area's size in pixels, as Windows made it. */
+  readonly width: number
+  readonly height: number
   private readonly process: ChildProcess
   private readonly lines: AsyncIterator<string>
 
-  private constructor(process: ChildProcess, lines: AsyncIterator<string>, dpi: number) {
+  private constructor(process: ChildProcess, lines: AsyncIterator<string>, [dpi, width, height]: number[]) {
     this.process = process
     this.lines = lines
-    this.dpi = dpi
+    this.dpi = dpi ?? 0
+    this.width = width ?? 0
+    this.height = height ?? 0
   }
 
   static async open(desk: string, cls: string, title: string): Promise<DeskWindow> {
     const child = spawn(desk, ["window", cls, title], { stdio: ["pipe", "pipe", "inherit"] })
     const lines = createInterface({ input: child.stdout! })[Symbol.asyncIterator]()
     const ready = (await lines.next()).value as string
-    const dpi = Number(/^ready (\d+)/.exec(ready)?.[1])
-    if (!dpi) throw new Failed(`the desk's window didn't open: ${ready}`)
-    return new DeskWindow(child, lines, dpi)
+    const sizes = /^ready (\d+) (\d+) (\d+)/.exec(ready)?.slice(1).map(Number)
+    if (!sizes) throw new Failed(`the desk's window didn't open: ${ready}`)
+    return new DeskWindow(child, lines, sizes)
+  }
+
+  /** Clicks the client area's top-left pixel, then its bottom-right one. */
+  async clickCorners(): Promise<void> {
+    await this.do("click 0 0")
+    await this.do(`click ${this.width - 1} ${this.height - 1}`)
+  }
+
+  /**
+   * Whether two clicks crossed as the client area's corners: the top-left pixel as -1, 1, and
+   * the bottom-right one, at its far edge less a pixel, as 2(w-1)/w - 1 and 1 - 2(h-1)/h.
+   */
+  cornersCrossed(clicks: string[]): boolean {
+    const place = (line: string | undefined) => (line ?? "").split(" ").slice(2).map(Number)
+    const near = (got: number[], want: number[]) => got.length === 2 && got.every((v, i) => Math.abs(v - want[i]!) < 0.0015)
+    const [w, h] = [this.width, this.height]
+    return clicks.length === 2 && near(place(clicks[0]), [-1, 1]) && near(place(clicks[1]), [(2 * (w - 1)) / w - 1, 1 - (2 * (h - 1)) / h])
   }
 
   /** Runs one command, and returns whether the window was in front for it. */
@@ -187,15 +214,14 @@ async function desk(s: Session): Promise<void> {
     core.helper({ act: "mouse", on: true })
     await sleep(500)
     from = core.heard().length
-    await main.do("click 0 0")
-    await main.do("click 1279 719")
+    await main.clickCorners()
     await popOut.do("click 640 360")
     await other.do("click 640 360")
     await sleep(300)
     const clicks = since(core, from, "mouse LeftDown")
-    say(`clicks: ${clicks.join("; ")}`)
+    say(`clicks, in a client area of ${main.width} by ${main.height}: ${clicks.join("; ")}`)
     check(clicks.length === 2, "only the clicks in the sim's main window cross, not one in a popped-out display or another program")
-    check(clicks[0] === "mouse LeftDown -1.000 1.000" && clicks[1] === "mouse LeftDown 0.998 -0.997", `at ${main.dpi} DPI, the top-left pixel of the client area crosses as -1, 1, and the bottom-right as nearly 1, -1`)
+    check(main.cornersCrossed(clicks), `at ${main.dpi} DPI, the top-left pixel of the client area crosses as -1, 1, and the bottom-right as nearly 1, -1`)
 
     core.helper({ act: "next-press", on: true })
     await sleep(300)
@@ -303,6 +329,9 @@ function logLines(core: Core, text: string): string[] {
 
 async function person(s: Session): Promise<void> {
   const { core, run, tools, say, check } = s
+  // `person 5` runs step 5 alone, and `person 2 3` steps 2 and 3, as after a fix to one case.
+  const steps = process.argv.slice(3).map(Number).filter(Boolean)
+  const runs = (step: number) => steps.length === 0 || steps.includes(step)
   core.act({ act: "watch", process: run.stub().id })
   await core.hear("stage Starting aircraft none")
   const desktop = new FakePage(core, { component: "desktop" })
@@ -311,28 +340,35 @@ async function person(s: Session): Promise<void> {
     core.helper({ act: "sounds", on: true })
     await helperProcess(core)
 
-    await ask(say, "1. Open Windows' sound settings. Press Enter, and a 2s two-tone sound plays on Windows' default output device, again and again for 15s; while it plays, change the default output device.")
+    // Switching away and back lets the ear judge the second switch on a device it can hear,
+    // when the only other device plays nothing, as NVIDIA Broadcast with no speaker effect.
     let before = logLines(core, "plays on this output device").length
-    for (let played = 0; played < 15_000; played += 1_500) {
-      core.helper({ act: "play" })
-      await sleep(1_500)
+    if (runs(1) && (await ask(say, "1. Open Windows' sound settings. Press Enter, and a 2s two-tone sound plays on the default device, again and again for 40s, or type s to skip. While it plays, switch the default output device to another one, wait for two sounds, and switch it back.")) !== "s") {
+      for (let played = 0; played < 40_000; played += 1_500) {
+        core.helper({ act: "play" })
+        await sleep(1_500)
+      }
+      const moved = logLines(core, "plays on this output device").slice(before)
+      say(`the helper played on: ${moved.map((l) => /output=("[^"]*"|\S+)/.exec(l)?.[1]).join(", ")}`)
+      const heard = await ask(say, "Did the sound come back in the device you switched back to? Type y or n, then Enter.")
+      check(moved.length >= 2 && heard === "y", "Windows' default output device changed while a sound played, and the sound carried on in the new device")
     }
-    const moved = logLines(core, "plays on this output device").slice(before)
-    say(`the helper played on: ${moved.map((l) => /output=("[^"]*"|\S+)/.exec(l)?.[1]).join(", ")}`)
-    const heard = await ask(say, "Did the sound carry on in the new device? Type y or n, then Enter.")
-    check(moved.length >= 1 && heard === "y", "Windows' default output device changed while a sound played, and the sound carried on in the new device")
 
-    const devices = runDesk(tools, "devices").split("\n").map((l) => l.split("\t") as [string, string])
+    const devices = runs(2) ? runDesk(tools, "devices").split("\n").map((l) => l.split("\t") as [string, string]) : []
     devices.forEach(([, name], i) => say(`  ${i + 1}. ${name}`))
-    const pick = Number(await ask(say, "2. Type the number of a headset you can unplug, then Enter, or s to skip."))
+    const pick = !runs(2) ? 0 : Number(await ask(say, "2. Type the number of a device you can unplug, a USB headset or the audio interface yours is plugged into, then Enter, or s to skip. It may be Windows' default device: while it's missing, Windows makes another one the default."))
     const headset = devices[pick - 1]
     if (headset) {
       await desktop.client.command("clients.set-setting", { key: "core-helper.output", value: { id: headset[0], name: headset[1] } })
-      await ask(say, `Dual Input now plays on ${headset[1]}. Press Enter, then, as the sound plays every 2s, unplug the headset, wait for the sound on Windows' default device, and plug it into another USB port.`)
+      // The log, not the ear, tells whether the helper went to Windows' default, since a
+      // default that plays through the unplugged device, as NVIDIA Broadcast does, goes silent.
+      await ask(say, `Dual Input now plays on ${headset[1]}. Press Enter, then, as the sound plays every 2s, take your time to unplug it, wait about 5s, and plug it into another USB port; or disable it in Windows' Sound control panel (mmsys.cpl), wait about 5s, and enable it again.`)
       before = logLines(core, "plays on this output device").length
       const plays = setInterval(() => core.helper({ act: "play" }), 2_000)
       await ask(say, "Press Enter once the sound is back in the headset.")
       clearInterval(plays)
+      const how = await ask(say, "Did you unplug it into another port (u) or disable and enable it (d)? Type u or d, then Enter.")
+      say(`the device went missing by ${how === "u" ? "being unplugged and plugged into another port" : "being disabled and enabled again in Windows' Sound control panel"}`)
       const used = logLines(core, "plays on this output device").slice(before).map((l) => /output=("[^"]*"|\S+)/.exec(l)?.[1])
       say(`the helper played on: ${used.join(", ")}`)
       const warned = logLines(core, "core-helper.missing-output").length > 0
@@ -341,7 +377,7 @@ async function person(s: Session): Promise<void> {
       await desktop.client.command("clients.set-setting", { key: "core-helper.output", value: null })
     }
 
-    if ((await ask(say, "3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.")) !== "s") {
+    if (runs(3) && (await ask(say, "3. Turn a switch on your throttle quadrant on, and leave it on. Then press Enter, or type s to skip.")) !== "s") {
       core.helper({ act: "next-press", on: true })
       const from = core.heard().length
       await ask(say, "Now press a button on the yoke or throttle, not that switch, then press Enter.")
@@ -350,7 +386,7 @@ async function person(s: Session): Promise<void> {
       check(next.length === 1 && /button \d+$/.test(next[0]!), "while binding, with a switch held on, only the button pressed crosses, and then nothing")
     }
 
-    if ((await ask(say, "4. If an Xbox controller is connected, press Enter, then press its A button within 10s; otherwise type s.")) !== "s") {
+    if (runs(4) && (await ask(say, "4. If an Xbox controller is connected, press Enter, then press its A button within 10s; otherwise type s.")) !== "s") {
       core.helper({ act: "next-press", on: true })
       const from = core.heard().length
       await sleep(10_000)
@@ -358,24 +394,28 @@ async function person(s: Session): Promise<void> {
       say(next.length ? `Raw Input saw the Xbox controller's button: ${next[0]}` : "Raw Input saw no button of the Xbox controller in 10s")
     }
 
-    const dpi = await DeskWindow.open(tools.desk, "AceApp", `${MAIN_TITLE} - Dual Input's scaling test`)
-    dpi.close()
-    if (dpi.dpi !== 144 && (await ask(say, `5. The main display is at ${Math.round((dpi.dpi * 100) / 96)}%. Set it to 150% in Windows' display settings, then press Enter, or type s to skip.`)) !== "s") {
+    const scaling = (dpi: number) => Math.round((dpi * 100) / 96)
+    const probe = runs(5) ? await DeskWindow.open(tools.desk, "AceApp", `${MAIN_TITLE} - Dual Input's scaling test`) : undefined
+    probe?.close()
+    const at150 = probe !== undefined && (probe.dpi === 144 || (await ask(say, `5. The main display is at ${scaling(probe.dpi)}%. Set it to 150% in Windows' display settings, then press Enter, or type s to skip.`)) !== "s")
+    if (at150) {
       const main = await DeskWindow.open(tools.desk, "AceApp", `${MAIN_TITLE} - Dual Input's scaling test`)
       try {
         core.helper({ act: "mouse", on: true })
         await sleep(500)
         const from = core.heard().length
-        await main.do("click 0 0")
-        await main.do("click 1279 719")
+        await main.clickCorners()
         await sleep(300)
         const clicks = since(core, from, "mouse LeftDown")
-        say(`at ${main.dpi} DPI, clicks: ${clicks.join("; ")}`)
-        check(clicks[0] === "mouse LeftDown -1.000 1.000" && clicks[1] === "mouse LeftDown 0.998 -0.997", "on a monitor scaled to 150%, the client area's corners cross as -1, 1 and nearly 1, -1")
+        say(`at ${main.dpi} DPI, ${scaling(main.dpi)}%, in a client area of ${main.width} by ${main.height}, clicks: ${clicks.join("; ")}`)
+        if (main.dpi === 144) {
+          check(main.cornersCrossed(clicks), "on a monitor scaled to 150%, the client area's corners cross as -1, 1 and nearly 1, -1")
+        } else check(false, "the display was at 150% for the clicks", `it was at ${scaling(main.dpi)}%`)
       } finally {
         main.close()
       }
     }
+    say(`Done. Set Windows' default output device${at150 && probe?.dpi !== 144 ? " and the display's scaling" : ""} back as you had them.`)
   } finally {
     desktop.close()
   }
@@ -387,66 +427,187 @@ function front(tools: Tools): { cls: string; title: string } {
   return { cls, title }
 }
 
-async function until(holds: () => boolean, ms: number): Promise<boolean> {
-  for (let waited = 0; waited < ms; waited += 200) {
-    if (holds()) return true
-    await sleep(200)
-  }
-  return holds()
+const mainInFront = (tools: Tools) => {
+  const { cls, title } = front(tools)
+  return cls === "AceApp" && title.startsWith(MAIN_TITLE)
 }
 
+const popOutInFront = (tools: Tools) => {
+  const { cls, title } = front(tools)
+  return cls === "AceApp" && !title.startsWith(MAIN_TITLE)
+}
+
+/** Waits until `holds`, Page Up, or `ms`, whichever comes first, and says which. */
+async function step(guide: Guide, holds: () => boolean, ms: number): Promise<"done" | "skipped" | "timeout"> {
+  guide.skipped()
+  for (let waited = 0; waited < ms; waited += 200) {
+    if (holds()) return "done"
+    if (guide.skipped()) return "skipped"
+    await sleep(200)
+  }
+  return holds() ? "done" : "timeout"
+}
+
+/** The helper's share of one CPU core over `ms`, as tools/sim/desk's `usage` reads it, without holding up the session. */
+function cpuOver(tools: Tools, pid: number, ms: number): Promise<number> {
+  return new Promise((resolve) => {
+    const child = spawn(tools.desk, ["usage", String(pid), String(ms)], { stdio: ["ignore", "pipe", "ignore"] })
+    let out = ""
+    child.stdout!.on("data", (d: Buffer) => (out += d.toString()))
+    child.on("close", () => resolve(Number(/cpu ([\d.]+)/.exec(out)?.[1])))
+  })
+}
+
+/**
+ * The cases in the sim. Past the first question, nothing needs the terminal until the
+ * listening at the end: a voice says each step, the session moves on once it sees the step
+ * done, and Page Up skips one, since the sim covers the terminal.
+ */
 async function sim(s: Session): Promise<void> {
   const { core, tools, say, check } = s
-  core.helper({ act: "binding", on: true })
-  core.helper({ act: "mouse", on: true })
-  const helper = await helperProcess(core)
-
-  await ask(say, "1. Start the sim, load a flight, and click into the sim's window. Then come back here and press Enter; the next 30s wait for the sim to be in front again.")
-  let from = core.heard().length
-  if (await until(() => front(tools).cls === "AceApp" && front(tools).title.startsWith(MAIN_TITLE), 30_000)) {
+  const choice = (await ask(say, "Which ATC app will you use? Type b for BeyondATC, i for SayIntentionsAI, both, or n for neither, then Enter.")).toLowerCase()
+  const apps = ({ b: ["BeyondATC"], i: ["SayIntentionsAI"], both: ["BeyondATC", "SayIntentionsAI"] } as Record<string, string[]>)[choice] ?? []
+  say(
+    [
+      "",
+      "In the sim, a voice says each step, a high beep is a pass and a low one a fail, and Page Up skips a step:",
+      "  1. Load into a flight, and click into the sim's window.",
+      "  2. Pop out a display, by holding right Alt and clicking a screen, and click inside the pop-out; then click it once more when the voice asks.",
+      "  3. Click once in the sim's main window, on the sky or anything that does nothing.",
+      "  4. Switch to another program, such as this terminal.",
+      ...apps.map((app, i) => `  ${5 + i}. Get ${app} talking${i === 0 ? " for about a minute, such as by asking for the ATIS" : " for a few seconds"}.`),
+      `Then come back here${apps.length ? " to listen to the ATC recordings" : ""}.`,
+      "",
+    ].join("\n"),
+  )
+  if (!simRunning()) {
+    spawn("cmd", ["/c", "start", "", "steam://rungameid/2537590"], { stdio: "ignore", detached: true }).unref()
+    say("The sim wasn't running, so Steam is starting it.")
+  }
+  await ask(say, "Press Enter, then go to the sim.")
+  const guide = await Guide.start()
+  const verdict = (ok: boolean, what: string, detail = "") => {
+    check(ok, what, detail)
+    if (ok) guide.pass()
+    else guide.fail()
+  }
+  const missed = (outcome: "skipped" | "timeout", what: string) => {
+    if (outcome === "skipped") {
+      say(`skipped: ${what}`)
+      guide.tick()
+    } else verdict(false, what, "it didn't happen in time")
+  }
+  const keyCrosses = async () => {
+    const from = core.heard().length
     runDesk(tools, "key", String(F24), "200")
     await sleep(300)
-    check(since(core, from, "press").length === 2, "a bound key crosses with the sim's main window in front")
-  } else check(false, "the sim's main window came to the front within 30s")
+    return since(core, from, "press").length
+  }
 
-  await ask(say, "2. Pop out a display (hold right Alt and click it), then click on the popped-out window once. Come back here and press Enter; the next 30s wait for the pop-out to be in front.")
-  from = core.heard().length
-  if (await until(() => front(tools).cls === "AceApp" && !front(tools).title.startsWith(MAIN_TITLE), 30_000)) {
-    runDesk(tools, "key", String(F24), "200")
-    await sleep(300)
-    check(since(core, from, "press").length === 2, "a bound key crosses with a popped-out display in front")
-  } else check(false, "a popped-out display came to the front within 30s")
-  check(since(core, from, "mouse").length === 0, "the click in the popped-out display crossed nothing")
+  try {
+    core.helper({ act: "binding", on: true })
+    core.helper({ act: "mouse", on: true })
+    const helper = await helperProcess(core)
 
-  await ask(say, "3. Press Enter, then within 15s click once in the sim's main window, on something that does nothing, such as the sky.")
-  from = core.heard().length
-  await until(() => since(core, from, "mouse LeftDown").length > 0, 15_000)
-  const click = since(core, from, "mouse LeftDown")
-  check(click.length >= 1, "a click in the sim's main window crosses with its place", click.join("; "))
+    guide.say("Step 1. Load into a flight, and click into the sim's window.")
+    let outcome = await step(guide, () => mainInFront(tools), 20 * 60_000)
+    if (outcome === "done") {
+      await sleep(1_000)
+      const presses = await keyCrosses()
+      verdict(presses === 2, "a bound key crosses with the sim's main window in front", `${presses} presses and releases`)
+    } else missed(outcome, "a bound key with the sim's main window in front")
 
-  await ask(say, "4. Switch to another program, such as this terminal, then press Enter.")
-  from = core.heard().length
-  runDesk(tools, "key", String(F24), "200")
-  await sleep(300)
-  check(since(core, from, "press").length === 0, "a bound key with another program in front crosses nothing")
+    guide.say("Step 2. Pop out a display: hold right Alt and click a screen, then click once inside the pop-out.")
+    outcome = await step(guide, () => popOutInFront(tools), 5 * 60_000)
+    if (outcome === "done") {
+      guide.tick()
+      guide.say("Now click inside the pop-out once more.")
+      // Counted from here, since the click that pops a display out lands in the main window,
+      // and the one that brings the pop-out to the front may land before it's in front.
+      const [from, clicked] = [core.heard().length, guide.clicks()]
+      outcome = await step(guide, () => guide.clicks() > clicked, 2 * 60_000)
+      if (outcome === "done") {
+        await sleep(400)
+        const crossed = since(core, from, "mouse")
+        verdict(popOutInFront(tools) && crossed.length === 0, "a click in a popped-out display crosses nothing", crossed.join("; "))
+        const presses = await keyCrosses()
+        verdict(presses === 2, "a bound key crosses with a popped-out display in front", `${presses} presses and releases`)
+      } else missed(outcome, "a click in a popped-out display")
+    } else missed(outcome, "a popped-out display in front")
 
-  const app = await ask(say, "5. Type the ATC app you have, BeyondATC or SayIntentionsAI, then Enter; it's captured once it runs.")
-  core.helper({ act: "capture", programs: [app || "BeyondATC"] })
-  from = core.heard().length
-  await ask(say, `Start ${app || "BeyondATC"} if it isn't running, and have it talk for about a minute, such as by asking for the ATIS. Press Enter once it's talking.`)
-  const program = await until(() => since(core, from, "capturing Some").length > 0, 30_000)
-  check(program, `the helper captures ${app || "BeyondATC"}'s speech`, since(core, from, "capturing").join("; "))
-  const usage = runDesk(tools, "usage", String(helper), "10000")
-  say(`the helper while capturing ATC: ${usage}`)
-  await ask(say, "Press Enter once it has talked for a minute.")
-  const hex = since(core, from, "captured").map((h) => h.split(" ")[3] ?? "")
-  // ATC speech is another program's, so it stays in target/, which the repository leaves out
-  // (record/areas/core/04-core-helper.md's note of 2026-10-22).
-  const frames = path.join(s.run.folder, "atc.hex")
-  fs.writeFileSync(frames, `${hex.join("\n")}\n`)
+    guide.say("Step 3. Click once in the sim's main window, on the sky or anything that does nothing. If you hear no beep, click again.")
+    let from = core.heard().length
+    outcome = await step(guide, () => since(core, from, "mouse LeftDown").length > 0, 3 * 60_000)
+    if (outcome === "done") {
+      const click = since(core, from, "mouse LeftDown")[0] ?? ""
+      const [x, y] = click.split(" ").slice(2).map(Number)
+      const inside = (v: number | undefined) => v !== undefined && Math.abs(v) <= 1
+      verdict(inside(x) && inside(y), "a click in the sim's main window crosses with its place", click)
+    } else missed(outcome, "a click in the sim's main window")
+
+    guide.say("Step 4. Switch to another program, such as the terminal.")
+    outcome = await step(guide, () => front(tools).cls !== "AceApp", 3 * 60_000)
+    if (outcome === "done") {
+      await sleep(500)
+      const presses = await keyCrosses()
+      verdict(presses === 0, "a bound key with another program in front crosses nothing", `${presses} presses and releases`)
+    } else missed(outcome, "a bound key with another program in front")
+
+    for (const [i, app] of apps.entries()) {
+      // The first app's speech goes through the Opus check: a minute of it, 50 frames a second
+      // that cross the gate; any other app's only shows it's captured.
+      const wanted = i === 0 ? 3_000 : 250
+      core.helper({ act: "capture", programs: [app] })
+      from = core.heard().length
+      guide.say(i === 0 ? `Step ${5 + i}. Get ${app} talking for about a minute, for example by asking for the ATIS.` : `Step ${5 + i}. Get ${app} talking for a few seconds.`)
+      outcome = await step(guide, () => since(core, from, "capturing Some").length > 0, 5 * 60_000)
+      if (outcome !== "done") {
+        missed(outcome, `the helper captures ${app}'s speech`)
+        core.helper({ act: "capture", programs: null })
+        continue
+      }
+      guide.tick()
+      const readings: number[] = []
+      let capturing = true
+      const sampling = (async () => {
+        while (capturing) {
+          const cpu = await cpuOver(tools, helper, 10_000)
+          if (capturing) readings.push(cpu)
+        }
+      })()
+      outcome = await step(guide, () => since(core, from, "captured").length >= wanted, 10 * 60_000)
+      capturing = false
+      await sampling
+      core.helper({ act: "capture", programs: null })
+      const hex = since(core, from, "captured").map((h) => h.split(" ")[3] ?? "")
+      verdict(hex.length > 0, `the helper captures ${app}'s speech`, `${hex.length} frames crossed the gate`)
+      if (readings.length) {
+        const mean = readings.reduce((a, b) => a + b, 0) / readings.length
+        say(`budget: capturing ${app}, the helper took ${mean.toFixed(2)}% of one CPU core on average over ${readings.length} readings of 10s, ${Math.max(...readings).toFixed(2)}% at most, against 1%`)
+      }
+      if (i > 0) continue
+      // ATC speech is another program's, so it stays in target/, which the repository leaves
+      // out (record/areas/core/04-core-helper.md's note of 2026-10-22).
+      const frames = path.join(s.run.folder, "atc.hex")
+      fs.writeFileSync(frames, `${hex.join("\n")}\n`)
+      for (const loss of ["0", "5"]) {
+        const wav = path.join(s.run.folder, `atc-${loss}-loss.wav`)
+        say(`ATC through opus-rs, as the helper encoded it, with ${loss}% of frames lost: ${runDesk(tools, "frames", frames, wav, loss)}`)
+      }
+    }
+    guide.say("That's every step in the sim. Come back to the terminal.")
+    guide.pass()
+  } finally {
+    await sleep(3_000)
+    guide.close()
+  }
+
+  if (!fs.existsSync(path.join(s.run.folder, "atc-0-loss.wav"))) return
   for (const loss of ["0", "5"]) {
     const wav = path.join(s.run.folder, `atc-${loss}-loss.wav`)
-    say(`ATC through opus-rs at 24 kbps with ${loss}% of frames lost: ${runDesk(tools, "frames", frames, wav, loss)}; listen to ${path.relative(ROOT, wav)}`)
+    spawn("cmd", ["/c", "start", "", wav], { stdio: "ignore", detached: true }).unref()
+    await ask(say, `Listening to ATC with ${loss}% of frames lost, ${path.relative(ROOT, wav)}, which opens now. Press Enter when you've heard enough.`)
   }
-  core.helper({ act: "capture", programs: null })
+  const fault = await ask(say, "Does the 5% one have a fault a pilot would notice, beyond a word clipped here and there? Type y or n, then Enter.")
+  check(fault === "n", "ATC speech through opus-rs with 5% of frames lost has no fault a pilot would notice", fault === "y" ? "it does, so libopus goes in its place" : "")
 }

@@ -24,6 +24,8 @@ Decides:     What the traffic host polls, how often, and which objects it carrie
 >
 > - [The buffer](#the-buffer)'s transmission ends once no frame has come for the buffer's most depth, 300ms, rather than at the first turn with nothing buffered: until then it conceals each turn, a frame that comes within it plays on, and one that comes after it counts as late toward the next depth. Frames late in order once ended a transmission at the first such turn, and dropped the rest of it unheard.
 > - On [every other machine](#every-other-machine), ATC audio closes its playback stream and opens a new one when the ATC host's restart count rises, as when the key moves, since a restarted host numbers its frames from 0 again, and every message carries its sender's restart count ([channels and sends](../network/02-units.md#channels-and-sends)).
+>
+> Since 2026-10-23, ATC audio's capture starts at 32 kbps, where [the ATC host](#the-atc-host) keeps FS Copilot's bitrate, 24 kbps, since the core helper encodes in Opus's Audio mode, at 27.6 kbps on BeyondATC's speech, where a listener told it from the original no more than any other setting (user, 2026-10-23; [core log](../core/log.md#2026-10-23-stage-6s-helper-passes-every-case-at-the-desk-and-in-the-sim-and-captures-within-1-of-a-core-in-opuss-audio-mode-but-never-sees-an-xbox-controllers-buttons-over-usb)).
 
 On the traffic host, traffic polls the sim's AI aircraft and helicopters within the radius setting, and the ground objects within 1km whose titles it allows, twice a second.
 It sends each object's identity once, and its state when it changes or every 5s.

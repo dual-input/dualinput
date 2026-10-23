@@ -22,8 +22,14 @@ pub struct Encoder(OpusEncoder);
 impl Encoder {
     /// A VBR encoder for speech at `bitrate` bits a second.
     pub fn new(bitrate: u32) -> Result<Encoder, String> {
+        // The capture's 1% of a core holds only if encoding ATC speech stays cheap. Opus's
+        // Voip mode filters and emphasizes speech for intelligibility, where its Audio mode
+        // codes the signal as it is: on 90s of BeyondATC's speech, Voip took 165µs a frame,
+        // about 0.8% of a core at 50 frames a second, and Audio 46µs to 55µs, and a listener
+        // told no copy from the original (measured on our development machine, 2026-10-23,
+        // record/areas/core/log.md).
         let mut encoder =
-            OpusEncoder::new(RATE as i32, 1, Application::Voip).map_err(str::to_string)?;
+            OpusEncoder::new(RATE as i32, 1, Application::Audio).map_err(str::to_string)?;
         encoder.bitrate_bps = i32::try_from(bitrate).unwrap_or(i32::MAX);
         encoder.use_cbr = false;
         // Complexity sets how hard the encoder works for quality at its bitrate, not how much

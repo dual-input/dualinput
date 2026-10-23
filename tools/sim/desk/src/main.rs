@@ -2,8 +2,10 @@
 //! (record/areas/build/plan.md, "6 The core helper"). tools/sim/core-helper.ts runs it.
 //!
 //!   desk window <class> <title>
-//!       opens a window of that class and title, its client area 1280 by 720, brings it to
-//!       the front, prints `ready <dpi>`, then takes one command a line on its standard input,
+//!       opens a window of that class and title, its client area about 1280 by 720, brings it
+//!       to the front, prints `ready <dpi> <width> <height>` with the client area's real size,
+//!       since a frame sized at one DPI comes out another size at another, then takes one
+//!       command a line on its standard input,
 //!       and prints `done` after each, or `not-front` when it couldn't bring its window to the
 //!       front first:
 //!         front               brings its window to the front
@@ -46,9 +48,10 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     AdjustWindowRect, BringWindowToTop, CS_HREDRAW, CS_VREDRAW, CW_USEDEFAULT, CreateWindowExW,
-    DefWindowProcW, DispatchMessageW, GetClassNameW, GetForegroundWindow, GetMessageW,
-    GetWindowTextW, GetWindowThreadProcessId, MSG, RegisterClassExW, SW_SHOW, SetCursorPos,
-    SetForegroundWindow, ShowWindow, WINDOW_EX_STYLE, WNDCLASSEXW, WS_OVERLAPPEDWINDOW,
+    DefWindowProcW, DispatchMessageW, GetClassNameW, GetClientRect, GetForegroundWindow,
+    GetMessageW, GetWindowTextW, GetWindowThreadProcessId, MSG, RegisterClassExW, SW_SHOW,
+    SetCursorPos, SetForegroundWindow, ShowWindow, WINDOW_EX_STYLE, WNDCLASSEXW,
+    WS_OVERLAPPEDWINDOW,
 };
 use windows::core::{HSTRING, PCWSTR};
 
@@ -136,9 +139,18 @@ fn window(class: &str, title: &str) -> Result<(), String> {
         return Err("the window didn't open".into());
     }
     let front = to_front(window);
-    // SAFETY: GetDpiForWindow reads a window of ours.
-    let dpi = unsafe { GetDpiForWindow(window) };
-    println!("ready {dpi}{}", if front { "" } else { " not-front" });
+    let mut client = RECT::default();
+    // SAFETY: GetDpiForWindow and GetClientRect read a window of ours.
+    let dpi = unsafe {
+        let _ = GetClientRect(window, &mut client);
+        GetDpiForWindow(window)
+    };
+    println!(
+        "ready {dpi} {} {}{}",
+        client.right - client.left,
+        client.bottom - client.top,
+        if front { "" } else { " not-front" }
+    );
     for line in std::io::stdin().lock().lines() {
         let Ok(line) = line else { break };
         let words: Vec<&str> = line.split_whitespace().collect();

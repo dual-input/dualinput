@@ -1,0 +1,23 @@
+# How ATC speech sounds through Opus at each setting, from a lossless recording of an ATC app:
+# `record` captures a program as the core helper does, and `encode` makes each setting's copy
+# of the recording for listening, into recordings/, which git leaves out.
+#
+# Build it with RUSTFLAGS set to a single space. The repository's .cargo/config.toml links the
+# C runtime statically, and opusic-sys's CMake build of libopus links it dynamically, so the
+# link fails until the space replaces the repository's flags for this build alone.
+[package]
+name = "opus-quality"
+edition = "2024"
+version = "0.1.0"
+publish = false
+
+[workspace]
+
+[dependencies]
+opus = "=0.4.0"
+opus-rs = "=0.1.39"
+wasapi = "=0.25.0"
+
+[dependencies.windows]
+version = "0.62"
+features = ["Win32_Foundation", "Win32_System_Threading", "Win32_System_WindowsProgramming"]

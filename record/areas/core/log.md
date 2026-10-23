@@ -3,6 +3,51 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-23: Stage 6's helper passes every case at the desk and in the sim, and captures within 1% of a core in Opus's Audio mode, but never sees an Xbox controller's buttons over USB
+
+**Asked:** do [stage 6](../build/plan.md#6-the-core-helper)'s cases that need a person at the PC or the sim hold for the real helper, and where does capturing an ATC app's speech land against the capture's 1% of a core ([04's cases](04-core-helper.md#cases-for-the-bench), [04's budgets](04-core-helper.md#budgets))?
+
+**Expected:** each case as 04 designs it, and speech over the budget, as the desk's continuous tone took 1.4% ([the entry before](#2026-10-22-stage-6s-helper-passes-on-nothing-it-wasnt-asked-for-and-comes-back-2s-after-a-kill-but-capturing-a-continuous-tone-takes-14-of-a-core-against-1)).
+
+**Found:** on our development machine, on 2026-10-23, with release builds of a bench core and the real helper, through `node tools/sim/core-helper.ts` ([results](results/2026-10-23-stage-6-session.txt)):
+
+- **At the desk:**
+  - With Windows' default output device switched from the Focusrite to NVIDIA Broadcast and back, twice, while a sound played, the helper played on each in turn, and the sound came back on the Focusrite.
+  - With the Focusrite picked as the output, unplugged, and plugged into another USB port, the helper warned that it "isn't connected, so Dual Input plays on Windows' default device until it is", played on NVIDIA Broadcast, and went back to the Focusrite.
+  - With a throttle's switch held on while binding, only the button pressed crossed, as `T.A320 Pilot button 1`.
+  - With an Xbox controller on a USB cable, Raw Input gave the helper none of its buttons in 10s, with a terminal in front, so with the helper in the background, as it always is, Raw Input doesn't deliver them, and binding one would take XInput; this settles [left open](04-core-helper.md#left-open)'s item on it.
+  - At 150%, the client area's top-left pixel crossed as −1, 1, and its bottom-right as 0.997, −0.997.
+    A first try failed: the desk tool's window came out 1,280 by 726 pixels, the test clicked the row it took for the bottom, 6 rows short, and the helper's −0.981 was right for that window, so the desk tool now reports its client area's real size and the test clicks its real corners.
+- **In the sim:** a bound key crossed with the sim's main window in front and with a popped-out display in front, and nothing crossed with another program in front; a click in a pop-out crossed nothing; a click in the main window crossed with its place, −0.810, 0.742; and the helper captured BeyondATC, 3,503 frames, none of 6 bytes or fewer.
+- **BeyondATC's speech, as the helper encoded it** in Opus's Voip mode at 24 kbps, came at 96 bytes a frame, 38 kbps while talking, and with 5% of frames lost had no fault a pilot would notice (user, 2026-10-23).
+  Capturing it took 2.59% of a core on average over seven readings of 10s, and 2.79% at most, against 1%.
+- **A lossless recording of BeyondATC,** 114s holding 90s of speech, made by `experiments/areas/core/opus-quality` through the helper's own process loopback, cost 0.26% of a core to capture with no Opus at all.
+  Each setting's copy of it, mixed to mono and at the original's loudness within 0.6dB:
+
+  | Setting | Sent | Encoding a frame | Of a core at 50 frames a second |
+  | --- | --- | --- | --- |
+  | opus-rs, Voip, 24 kbps, as the helper shipped | 34.6 kbps | 165µs | 0.83% |
+  | opus-rs, Voip, 48 kbps | 46.9 kbps | 162µs | 0.81% |
+  | opus-rs, Audio, 32 kbps | 27.6 kbps | 46µs | 0.23% |
+  | opus-rs, Audio, 48 kbps | 41.1 kbps | 51µs | 0.26% |
+  | opus-rs, Audio, 64 kbps | 54.6 kbps | 55µs | 0.28% |
+  | libopus, Audio, 48 kbps | 41.1 kbps | 189µs | 0.95% |
+
+  Listening to the copies against the original, the user told none of them apart, the shipped setting included (user, 2026-10-23).
+  The session's own copy had sounded processed beside BeyondATC's playback, a difference anyone could hear, but it held only the frames that crossed the gate, decoded back to back, so every pause was cut and each transmission spliced to the last, where ATC audio's playback plays each frame at its stamp (inference).
+  libopus took several times opus-rs's time, which may be how this build of it was compiled (unverified).
+- **Capture and Voip encoding** come to about 1.1% of a core from the probe's numbers, so about 1.5% of the session's 2.59% came from elsewhere in the helper; its mouse want was on while the pilot moved around the sim, which this session didn't separate (unverified).
+- **With the helper in Audio mode,** the desk's audio cases passed again: capturing a tone took 0.67% of a core, against 1.36% to 1.52% in Voip mode, playing it back added 0.26%, and the helper held 4.2 MB.
+
+**Changed:**
+
+- The helper encodes in Opus's Audio mode, and ATC audio starts at 32 kbps, which settles the capture's budget [the entry before](#2026-10-22-stage-6s-helper-passes-on-nothing-it-wasnt-asked-for-and-comes-back-2s-after-a-kill-but-capturing-a-continuous-tone-takes-14-of-a-core-against-1) left to the user, within its 1% (user, 2026-10-23).
+- `tools/sim/core-helper.ts`'s sim mode guides the pilot by voice and beeps and moves on as it sees each step done, and its person mode runs the steps named, such as `person 5`.
+
+**Affects:** [04-core-helper](04-core-helper.md) and [traffic and ATC](../traffic-atc/01-traffic-and-atc.md), whose notes of 2026-10-23 carry the change, and [stage 6](../build/plan.md#6-the-core-helper)'s exit.
+
+**Evidence:** [results/2026-10-23-stage-6-session.txt](results/2026-10-23-stage-6-session.txt).
+
 ## 2026-10-22: Stage 6's helper passes on nothing it wasn't asked for and comes back 2s after a kill, but capturing a continuous tone takes 1.4% of a core against 1%
 
 **Asked:** do [stage 6](../build/plan.md#6-the-core-helper)'s cases on the bench and on a desk hold for the core helper, and its budgets ([04's cases](04-core-helper.md#cases-for-the-bench), [04's budgets](04-core-helper.md#budgets))?

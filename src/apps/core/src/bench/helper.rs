@@ -77,11 +77,11 @@ impl BenchHelper {
             HelperAct::NextPress { on } => core_helper_service::next_press(cx, on),
             HelperAct::Mouse { on } => core_helper_service::mouse(cx, on),
             HelperAct::Capture { programs } => {
-                // FS Copilot's bitrate, gate, and hangover, ATC audio's starting values
-                // (record/areas/core/04-core-helper.md, "Capturing a program").
+                // ATC audio's starting values: 32 kbps, and FS Copilot's gate and hangover
+                // (record/areas/core/04-core-helper.md's note of 2026-10-23).
                 let capture = programs.map(|programs| Capture {
                     programs,
-                    bitrate: 24_000,
+                    bitrate: 32_000,
                     gate_dbfs: -50.0,
                     hangover_ms: 300,
                 });

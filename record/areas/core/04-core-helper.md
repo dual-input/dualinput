@@ -36,6 +36,12 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 >
 > The ATC speech for [Opus](#opus)'s check is BeyondATC's, which the helper captures in that stage's session in the sim, and a short stretch of it is committed as the check's fixture (user, 2026-10-22).
 > The helper encodes at Opus's complexity 5, where opus-rs's default, 9, took about 1% of a core for a continuous tone, the capture's whole budget; complexity changes no frame's size (user, 2026-10-22; [core log](log.md#2026-10-22-stage-6s-helper-passes-on-nothing-it-wasnt-asked-for-and-comes-back-2s-after-a-kill-but-capturing-a-continuous-tone-takes-14-of-a-core-against-1)).
+>
+> Since 2026-10-23, the helper's session settles three things ([core log](log.md#2026-10-23-stage-6s-helper-passes-every-case-at-the-desk-and-in-the-sim-and-captures-within-1-of-a-core-in-opuss-audio-mode-but-never-sees-an-xbox-controllers-buttons-over-usb)):
+>
+> - The helper encodes in Opus's Audio mode, and ATC audio starts at 32 kbps, where [capturing a program](#capturing-a-program) starts at FS Copilot's 24 kbps: Voip mode's speech processing took about three times Audio's time on BeyondATC's speech, and a listener told neither from the original, so a capture stays inside its 1% of a core in [budgets](#budgets), at 0.67% for a continuous tone (user, 2026-10-23).
+> - Raw Input doesn't deliver an Xbox controller's buttons over USB to the helper, which always runs in the background, which settles [left open](#left-open)'s item on it; binding one would take XInput, which no v1 feature asks for yet.
+> - The cases on a desk that need a person at the PC, and those in the sim, passed, as the core log's entry has them.
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

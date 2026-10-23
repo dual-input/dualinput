@@ -46,6 +46,15 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 > - A core whose connection closes with a refusal's code shows the refusal's notice, as it does when it refuses the other core's first message itself, because the close can arrive before the first message the other core sent ahead of it ([the first message](#the-first-message)).
 > - The bench's relays are `iroh-relay`'s own server, as a library in `tools/bench/relay`, each behind a proxy that tells one core's connection from another's by the process that owns it, in place of the `iroh-relay` program on `127.0.0.1:3340` ([cases for the bench](#cases-for-the-bench)).
 >   A core reaches such a relay over plain HTTP with its token, which settles [left open](#left-open)'s item on it, and asks a relay over plain HTTP for no QUIC address discovery.
+>
+> Since 2026-10-23, two more things hold for the network's stage of the build (user, 2026-10-23):
+>
+> - The transport pins `noq-proto`, `noq-udp`, `iroh-base`, and `iroh-dns` at 1.3.0 beside iroh, noq, and `iroh-relay`, the versions every network experiment of ours that ran iroh ran, because iroh 1.3.0 and `iroh-relay` 1.3.0 take any 1.x of them from 1.3.0, and `Cargo.lock` had moved them to 1.4 ([network log](log.md#2026-10-23-cargolock-ran-noq-proto-140-under-our-130-pins-so-the-transport-pins-the-crates-iroh-and-noq-are-built-from-too)).
+> - The run by hand in [cases for the bench](#cases-for-the-bench) runs `tools/bench/droplet`, a small core for Linux: the kernel's loop with the clients and network crates and a test unit that sends [p06]'s busy mix, and the transport at an edge of its own.
+>   Its build as a static musl program settles that the network crate and the transport build on Linux.
+>   The listening end runs `iroh-relay`'s server as a library inside the same program, and that relay only introduces the two ends before they go direct, so the run needs no DNS and no deployed relay.
+>   The run without the newest-only slots happens once, on the droplet build's own copy of the transport, with a patch that drops them and is kept with that run's results, so the transport carries no switch for the slots.
+>   Later runs, at each change of iroh's or noq's version, run the transport as it ships, because [the burst case](#cases-for-the-bench) keeps the slots whatever that first run shows.
 
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.

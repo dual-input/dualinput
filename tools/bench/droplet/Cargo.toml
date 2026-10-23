@@ -1,0 +1,30 @@
+[package]
+name = "bench-droplet"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+# The droplet run's program: a small core for Linux, the kernel's loop with the clients and
+# network crates and a unit that sends v1's busy mix, with the transport at an edge of its own,
+# since the core runs only on Windows. tools/bench/droplet/run.ts runs two of them between our
+# droplets over a direct path under `tc netem` (record/areas/network/02-units.md, "Cases for
+# the bench").
+[dependencies]
+clients = { path = "../../../src/platform/clients" }
+# The listener's endpoint ID, the public half of its endpoint key, which the dialer needs to
+# dial it. iroh-base derives it with the same crate.
+ed25519-dalek = { version = "3.0.0", default-features = false }
+# The relay inside the listener, which only introduces the two ends before they go direct.
+iroh-relay = { version = "=1.3.0", features = ["server"] }
+kernel = { path = "../../../src/platform/kernel" }
+messages = { path = "../../../src/engines/messages" }
+network = { path = "../../../src/platform/network" }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.145"
+tokio = { version = "1.53.3", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "std"] }
+transport = { path = "../../../src/engines/transport" }
+
+[lints]
+workspace = true

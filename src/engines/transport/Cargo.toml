@@ -8,16 +8,23 @@ publish = false
 # streams, and what turns on real time and bytes (record/areas/network/02-units.md, "The
 # transport"). iroh keeps private behavior a minor release may change, so iroh, noq, and
 # iroh-relay are pinned exactly, and moving them is a change of its own
-# (record/areas/network/01-between-machines.md, "iroh as a dependency"). The transport calls
-# noq only through iroh's re-exports, and names it here for the pin alone.
+# (record/areas/network/01-between-machines.md, "iroh as a dependency"). iroh 1.3.0 and
+# iroh-relay 1.3.0 take any 1.x from 1.3.0 of the crates they're built from, so each of those
+# is pinned too, or Cargo.lock moves to the newest: noq-proto holds QUIC's own logic, the
+# one-off packets' queue among it. The transport calls noq and those crates only through
+# iroh's re-exports, and names them here for the pin alone.
 [dependencies]
 # A one-off packet goes to QUIC as `Bytes`, which iroh already builds.
 bytes = "1.12.1"
 # Reads iroh's stream of each connection's paths through StreamExt.
 futures-util = { version = "0.3.34", default-features = false }
 iroh = "=1.3.0"
+iroh-base = { version = "=1.3.0", default-features = false }
+iroh-dns = { version = "=1.3.0", default-features = false }
 messages = { path = "../messages" }
 noq = "=1.3.0"
+noq-proto = { version = "=1.3.0", default-features = false }
+noq-udp = { version = "=1.3.0", default-features = false }
 tokio = { version = "1.53.3", features = ["macros", "rt", "sync", "time"] }
 tracing = "0.1.44"
 

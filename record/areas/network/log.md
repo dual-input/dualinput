@@ -2,6 +2,23 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-23: Cargo.lock ran noq-proto 1.4.0 under our 1.3.0 pins, so the transport pins the crates iroh and noq are built from too
+
+**Asked:** does the transport run the iroh and noq our experiments measured, as [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) asks?
+
+**Expected:** yes, since the transport's `Cargo.toml` pins iroh, noq, and `iroh-relay` at `=1.3.0`.
+
+**Found:** on 2026-10-23, building the droplet run's program for Linux showed `Cargo.lock` holding `noq-proto` 1.4.0, `noq-udp` 1.4.0, `iroh-base` 1.4.1, and `iroh-dns` 1.4.1 beside them.
+iroh 1.3.0 and `iroh-relay` 1.3.0 ask for each of those as `"1.3.0"`, which Cargo reads as any 1.x from 1.3.0 (read in iroh 1.3.0 and iroh-relay 1.3.0, `Cargo.toml`), so the lock took the newest.
+Every network experiment of ours that ran iroh ran 1.3.0 of all four: p03, p05, p06, p07, and two-cores (read in each one's `Cargo.lock` in `experiments/areas/network/`).
+`noq-proto` holds QUIC's own logic, including the one-off packets' queue, which [sending](01-between-machines.md#sending) read in 1.3.0, so [the stage's bench run](#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay) ran QUIC code no experiment had measured.
+`n0-watcher`, a small crate of iroh's on its own version line, sits at 1.0.1 against the experiments' 1.0.0, and stays unpinned.
+
+**Changed:** the transport pins the four at `=1.3.0`, without their default features, so a pin turns on nothing iroh doesn't already.
+Its 12 tests pass on them, and so do the 10 cases of the bench's four network scenarios ([results](results/2026-10-23-network-scenarios-on-pinned-crates.txt)): a join through the relay took 1,088ms, the streams' p99 through a lossy relay came within 8.0ms of the one-off packets', and the cuts of 30s and longer and the relay's 40s down came back 13.5s to 28.8s after they ended, against 14.8s to 31.9s in the stage's run.
+
+**Affects:** [02-units](02-units.md)' note of 2026-10-23.
+
 ## 2026-10-22: on the bench, two cores join in 1.1s, lose the link 5.0s into each outage and get it back 0.1s to 30s after, and every channel runs within 8ms of the others through a lossy relay
 
 **Asked:** for stage 7 of the [build plan](../build/plan.md#7-the-network), do the network crate, the transport, and the backend pass [02-units' cases](02-units.md#cases-for-the-bench), and where do the network's [budgets](02-units.md#budgets) land?

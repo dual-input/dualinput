@@ -1,0 +1,99 @@
+== The bench's four network scenarios, network, network-loss, network-relays, and network-outages,
+== on a bench build with noq-proto, noq-udp, iroh-base, and iroh-dns pinned at 1.3.0, on 2026-10-23,
+== on our development machine. The build's output before the tests is left out.
+
+TAP version 13
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 1 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+  ---
+  duration_ms: 93650.8458
+  type: 'test'
+  ...
+# 22ms away at 1%: p99 stream 41.6ms, newest 42.3ms, deadline 41.2ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 43.5ms, newest 43.1ms, deadline 41.3ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 150.1ms, newest 143.8ms, deadline 142.1ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 151.9ms, newest 155.6ms, deadline 157.3ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 2 - holding one core's relay connection back leaves the other pair's messages on time
+  ---
+  duration_ms: 23591.1504
+  type: 'test'
+  ...
+# p99 to the core not held back: newest 1.1ms, stream 1.3ms; to the held one: newest 154.7ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 3 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+  ---
+  duration_ms: 73617.9317
+  type: 'test'
+  ...
+# join through the relay 1088ms; the sender's peak through the relay 35236 bytes in a second, 34812 a second on average
+# CPU of one core over the mix: the sender 8.64%, the receiver 5.42%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 1.1ms, 1.2ms, 1.3ms
+# the receiver's loop: 4078699305µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=9254 busy_percent=0.54 wait_p50_us=10 wait_p99_us=41 wait_p999_us=71 wait_max_us=2462 over_1ms=0 slowest_us=469 slowest_seq=26 slowest_stamp=4019855654
+# Subtest: the link is lost after 5s of each outage, and comes back after it
+ok 4 - the link is lost after 5s of each outage, and comes back after it
+  ---
+  duration_ms: 401471.465
+  type: 'test'
+  ...
+# a 30s cut: lost after 4999ms, up again 22039ms after it ended
+# a 60s cut: lost after 5000ms, up again 28751ms after it ended
+# a 120s cut: lost after 5000ms, up again 13517ms after it ended
+# the relay down for 40s: lost after 4996ms, up again 21782ms after it came back
+# a core suspended for 60s: up again 0ms after it resumed
+# Subtest: with the cores homed at different relays, both directions cross the dialed core's home relay
+ok 5 - with the cores homed at different relays, both directions cross the dialed core's home relay
+  ---
+  duration_ms: 74061.2345
+  type: 'test'
+  ...
+# homes: the host http://127.0.0.1:58513/, the joiner http://127.0.0.1:58515/
+# bytes into each relay over 5s: the host 125416 and 0, the joiner 125712 and 0
+# the host's home relay cut for 60s: the link was lost, and up again 2005ms after the cut ended; homes then: http://127.0.0.1:58513/ then http://127.0.0.1:58515/
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+ok 6 - two cores join through the backend, link through a relay, lose the link, and link again
+  ---
+  duration_ms: 35553.8728
+  type: 'test'
+  ...
+# from the code entered to the link up through the relay: 1085ms
+# a 10s cut: the link lost after 5000ms, and up again 6174ms after the cut ended
+# LinkUp after the cut: 2 on the host, 1 on the joiner
+# clock offsets: 53, -50µs
+# Subtest: a core killed and started again links under a higher restart count, with no member counted out
+ok 7 - a core killed and started again links under a higher restart count, with no member counted out
+  ---
+  duration_ms: 4393.4711
+  type: 'test'
+  ...
+# the restarted core linked 52ms after it started; the other core said: net up 34cb6fc8 again=false restart=1; net keys Joiner 1
+# Subtest: a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+ok 8 - a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+  ---
+  duration_ms: 11337.7657
+  type: 'test'
+  ...
+# linked 8109ms after the join, through an 8s cut
+# Subtest: a connection with another code closes with its code, and one with no first message never links
+ok 9 - a connection with another code closes with its code, and one with no first message never links
+  ---
+  duration_ms: 23374.0125
+  type: 'test'
+  ...
+# the host refused the other code with code 10, and never linked the silent core
+# Subtest: a join on a direct path links within 3s of the code entered
+ok 10 - a join on a direct path links within 3s of the code entered
+  ---
+  duration_ms: 7613.1716
+  type: 'test'
+  ...
+# from the code entered to the link up: 1091ms
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 748999.5939

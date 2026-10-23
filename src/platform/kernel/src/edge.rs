@@ -43,8 +43,8 @@ pub fn first_input(seed: [u8; 32], files: Vec<(String, Option<Vec<u8>>)>) -> Vec
     postcard::to_stdvec(&First { seed, files }).expect("postcard should encode the first input")
 }
 
-/// A number a unit draws from its own counter, for a timer, a job, or a call that waits for
-/// an answer.
+/// A number from the kernel's counter, for a timer, a job, or a call that waits for an
+/// answer, with the unit that drew it, whose handler its answer goes to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Handle {
     pub(crate) unit: u32,
@@ -57,7 +57,7 @@ impl Handle {
         self.unit
     }
 
-    /// Its number among that unit's handles, from 0.
+    /// Its number among the core's handles, from 0.
     pub fn n(self) -> u64 {
         self.n
     }
@@ -114,8 +114,8 @@ pub struct StartJob {
     pub job: Job,
 }
 
-/// Work the edge does for a unit, off the loop: reading or writing a file, or fetching over
-/// HTTPS, then optionally an engine's work on what it got, as the profile loader parses and
+/// Work the edge does for a unit, off the loop: reading, writing, listing, or deleting files,
+/// or fetching over HTTPS, then optionally an engine's work on what it got, as the profile loader parses and
 /// checks a bundle.
 #[derive(Clone, Debug, Serialize)]
 pub struct Job {
@@ -131,11 +131,9 @@ pub struct Job {
 /// An engine's work on what a job read: its result, or its error as text.
 pub type Then = fn(Vec<u8>) -> Result<Vec<u8>, String>;
 
-/// A path is relative to the core's data folder, or absolute. A path from an input may have
-/// the home folder's path hidden at its start, and the edge puts the real path back before
-/// it opens the file (record/areas/recording/01-recording-and-bug-reports.md, "The home
-/// folder's path"). The pool runs several jobs at once, so a unit that writes one path again
-/// waits for the first write's result, or the two can land in either order.
+/// A path is relative to the core's data folder, or absolute. The pool runs several jobs at
+/// once, so a unit that writes one path again waits for the first write's result, or the two
+/// can land in either order.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum Work {
     /// Reads a whole file, whose bytes are the job's result.
@@ -143,6 +141,11 @@ pub enum Work {
     /// Writes a whole file, replacing it, through a file beside it that's renamed over it,
     /// so a crash never leaves it half written. The result is empty.
     Write { path: String, bytes: Vec<u8> },
+    /// Lists a folder: the result is its entries, encoded by `Entry::encode`, sorted by
+    /// name. A folder that doesn't exist lists nothing.
+    List { path: String },
+    /// Deletes a file, or a folder and everything in it. The result is empty.
+    Delete { path: String },
     /// Fetches a URL, as the network's requests to the backend do. The result is a
     /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
     Fetch(Fetch),
@@ -183,6 +186,24 @@ impl Fetched {
     }
 }
 
+/// One entry of a folder a job listed: its name, and its size in bytes, a folder's being the
+/// total of every file inside it.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Entry {
+    pub name: String,
+    pub size: u64,
+}
+
+impl Entry {
+    pub fn encode(entries: &[Entry]) -> Vec<u8> {
+        postcard::to_stdvec(entries).expect("postcard should encode a folder's entries")
+    }
+
+    pub fn decode(bytes: &[u8]) -> Option<Vec<Entry>> {
+        postcard::from_bytes(bytes).ok()
+    }
+}
+
 impl Job {
     pub fn read(path: impl Into<String>) -> Job {
         Job {
@@ -197,6 +218,20 @@ impl Job {
                 path: path.into(),
                 bytes,
             },
+            then: None,
+        }
+    }
+
+    pub fn list(path: impl Into<String>) -> Job {
+        Job {
+            work: Work::List { path: path.into() },
+            then: None,
+        }
+    }
+
+    pub fn delete(path: impl Into<String>) -> Job {
+        Job {
+            work: Work::Delete { path: path.into() },
             then: None,
         }
     }

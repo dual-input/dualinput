@@ -59,6 +59,14 @@ FS Copilot's aircraft profiles come from community contributors with varying exp
 
 ## Working rules
 
+**Weigh every mechanism against the simplicity it costs.**
+Each rule, mechanism, or special case is one more thing every developer and agent after us has to learn, and can miss.
+Add one only for a failure likely enough or bad enough to matter, and cover it with the simplest mechanism that does.
+This weighs guards, fallbacks, and special cases, not a feature we designed, groundwork a later feature needs, or state other code reads: cutting those moves the work to later or breaks a reader.
+Before leaving a failure uncovered, or taking out a mechanism once a decision has taken its reason away, ask the user, and name a gap they accept in the design's known limits.
+Partial recording, which left a feature's high-rate inputs out of the replay log, failed this test: four rules every platform crate had to keep, to save disk space we didn't need, and stage 4's review found three bugs where a crate broke one ([recording log](record/areas/recording/log.md)).
+A recording that stops when the drive has under 1 GB free passes it: one check, against filling the pilot's system drive mid-flight.
+
 **Batch everything that needs the simulator into one deliberate session.**
 Getting MSFS into a flight with the right aircraft and panel takes a person minutes.
 Write each probe to answer as much as it can in one run, and print a report that stands on its own.

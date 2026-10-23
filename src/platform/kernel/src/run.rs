@@ -49,20 +49,16 @@ struct Work {
     pending: VecDeque<Pending>,
     /// The moments and calls queued for the input being handled.
     queued: u32,
-    units: Vec<UnitWork>,
+    /// The number of the next handle.
+    next: u64,
+    /// The generator of random IDs, which the first input seeds.
+    rng: Option<ChaCha20Rng>,
     timers: BTreeMap<Handle, TimerFn>,
     jobs: BTreeMap<Handle, JobFn>,
     /// The running hash of every output.
     hash: Sha256,
     verdicts: Vec<Option<Verdict>>,
     started: bool,
-}
-
-struct UnitWork {
-    /// The number of the unit's next handle.
-    next: u64,
-    /// The unit's generator of random IDs, which the first input seeds.
-    rng: Option<ChaCha20Rng>,
 }
 
 type TimerFn = Box<dyn FnOnce(&mut dyn Any, TimerId, &mut Cx)>;
@@ -78,11 +74,6 @@ enum Pending {
 impl Kernel {
     pub fn new(mut registry: Registry) -> Kernel {
         let states = std::mem::take(&mut registry.states);
-        let units = registry
-            .units
-            .iter()
-            .map(|_| UnitWork { next: 0, rng: None })
-            .collect();
         let verdicts = registry.requests.iter().map(|_| None).collect();
         Kernel {
             states,
@@ -92,7 +83,8 @@ impl Kernel {
                 outputs: Vec::new(),
                 pending: VecDeque::new(),
                 queued: 0,
-                units,
+                next: 0,
+                rng: None,
                 timers: BTreeMap::new(),
                 jobs: BTreeMap::new(),
                 hash: Sha256::new(),
@@ -176,11 +168,7 @@ impl Kernel {
         );
         let first: First =
             postcard::from_bytes(&input.bytes).expect("the first input should decode");
-        for (place, unit) in self.work.units.iter_mut().enumerate() {
-            let mut rng = ChaCha20Rng::from_seed(first.seed);
-            rng.set_stream(place as u64);
-            unit.rng = Some(rng);
-        }
+        self.work.rng = Some(ChaCha20Rng::from_seed(first.seed));
         self.work.started = true;
         for file in &self.table.start_files {
             let bytes = first
@@ -553,25 +541,25 @@ impl Cx<'_> {
         self.work.borrow_mut().jobs.remove(&id.0);
     }
 
-    /// The next handle from the running unit's own counter, for a call that waits for an
-    /// answer, such as one of the sim's.
+    /// The next handle, for a call that waits for an answer, such as one of the sim's, named
+    /// for the running unit.
     pub fn handle(&self) -> Handle {
         let mut work = self.work.borrow_mut();
-        let unit = &mut work.units[self.unit as usize];
-        let n = unit.next;
-        unit.next += 1;
+        let n = work.next;
+        work.next += 1;
         Handle { unit: self.unit, n }
     }
 
-    /// A version 4 UUID from the running unit's generator, so a replay draws the same one.
+    /// A version 4 UUID from the core's generator, so a replay draws the same one.
     pub fn new_id(&self) -> Uuid {
         uuid::Builder::from_random_bytes(self.random_bytes()).into_uuid()
     }
 
-    /// Random bytes from the running unit's generator, such as a key's.
+    /// Random bytes from the core's generator, such as a key's.
     pub fn random_bytes<const N: usize>(&self) -> [u8; N] {
         let mut bytes = [0; N];
-        self.work.borrow_mut().units[self.unit as usize]
+        self.work
+            .borrow_mut()
             .rng
             .as_mut()
             .expect("the core's first input should come before any handler draws an ID")

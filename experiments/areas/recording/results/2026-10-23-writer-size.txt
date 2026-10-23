@@ -1,0 +1,22 @@
+writer-size, 2026-10-23, on the development machine, release build, on commit bf43be3
+cargo run --release -- ../../../../tools/bench/fixtures/flight-58p-egll-600s.bin.zst
+
+312702 records, 47.5 MB, over 600.0s of the capture's clock
+
+kind          records    1s frames    one frame    ratio
+all            312702     66.71 MB     42.48 MB    1.57x
+1               15617     11.83 MB     11.40 MB    1.04x
+2                2676      0.39 MB      0.20 MB    1.95x
+3                   8      0.00 MB      0.00 MB    1.37x
+4              174715     38.19 MB     23.86 MB    1.60x
+5              100088     12.38 MB      2.31 MB    5.37x
+6                1023      0.13 MB      0.07 MB    1.95x
+7               15616      3.17 MB      3.06 MB    1.04x
+8                2957      0.89 MB      0.58 MB    1.55x
+11                  1      0.00 MB      0.00 MB    1.00x
+12                  1      0.01 MB      0.01 MB    1.00x
+
+MB an hour with zstd at recording-format's level, on the capture's clock.
+
+One frame flushed each second: 42.64 MB an hour, 600 flushes
+Cut at byte 4883976 of 7107624: read 166306 inputs, 166306 were flushed before the cut, truncated: true

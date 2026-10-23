@@ -1,12 +1,11 @@
 //! The one queue every input reaches the loop through.
 
 use std::collections::VecDeque;
-use std::sync::{Arc, Condvar, Mutex, MutexGuard};
+use std::sync::{Condvar, Mutex, MutexGuard};
 
 use kernel::{Input, SourceId};
 
 use crate::clock;
-use crate::home::Home;
 
 /// A replay compares what a run did input by input, so the inputs' stamps have to rise in
 /// the order the loop takes them, or a handler that compares two stamps would decide one
@@ -18,34 +17,22 @@ use crate::home::Home;
 ///
 /// The queue is unbounded: the sim thread has to go on taking SimConnect's messages, and
 /// tokio's tasks must never wait on the loop.
+#[derive(Default)]
 pub struct Queue {
     state: Mutex<State>,
     /// The loop sleeps on this while the queue is empty.
     ready: Condvar,
-    home: Arc<Home>,
 }
 
+#[derive(Default)]
 struct State {
     inputs: VecDeque<Input>,
     next: u64,
 }
 
 impl Queue {
-    pub fn new(home: Arc<Home>) -> Queue {
-        Queue {
-            state: Mutex::new(State {
-                inputs: VecDeque::new(),
-                next: 0,
-            }),
-            ready: Condvar::new(),
-            home,
-        }
-    }
-
-    /// Stamps and numbers an input and appends it, with the home folder's path hidden in its
-    /// bytes, so the recording never holds it.
-    pub fn push(&self, source: SourceId, mut bytes: Vec<u8>) {
-        self.home.hide(&mut bytes);
+    /// Stamps and numbers an input and appends it.
+    pub fn push(&self, source: SourceId, bytes: Vec<u8>) {
         let mut state = self.lock();
         let seq = state.next;
         state.next += 1;
@@ -93,7 +80,7 @@ mod tests {
     /// on three, through the recording's writer, which refuses a stamp that falls.
     #[test]
     fn stamps_rise_with_sequence_numbers_while_two_threads_push() {
-        let queue = Queue::new(Arc::new(Home::none()));
+        let queue = Queue::default();
         std::thread::scope(|s| {
             for source in [10, 11] {
                 let queue = &queue;

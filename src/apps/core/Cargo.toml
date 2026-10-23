@@ -26,6 +26,7 @@ futures-util = { version = "0.3.34", default-features = false, features = ["sink
 kernel = { path = "../../platform/kernel" }
 messages = { path = "../../engines/messages" }
 network = { path = "../../platform/network" }
+recording = { path = "../../platform/recording" }
 recording-format = { path = "../../engines/recording-format" }
 # The edge's fetches, through the reqwest and rustls iroh already builds, with ring, iroh's
 # crypto provider, and Windows' own store of certificates.
@@ -58,11 +59,11 @@ zstd = { version = "0.14.3", default-features = false, optional = true }
 version = "0.61.2"
 features = [
     "Win32_Foundation",
-    "Win32_Globalization",
     "Win32_Security",
     "Win32_Security_Cryptography",
     "Win32_System_Com",
     "Win32_System_Performance",
+    "Win32_Storage_FileSystem",
     "Win32_System_Threading",
     "Win32_UI_Shell",
 ]

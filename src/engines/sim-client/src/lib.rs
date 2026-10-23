@@ -21,9 +21,9 @@ use serde::{Deserialize, Serialize};
 /// Names the source the seam's inputs come up under, through `Kernel::source::<Seam>()`.
 pub struct Seam;
 
-/// One SimConnect connection. The sim service numbers each one by the place of the unit
-/// that holds it and that unit's own count of opens, so a unit that opens fewer in a replay
-/// shifts no other unit's numbers (record/areas/core/03-sim-seam-and-wasm-module.md,
+/// One SimConnect connection: the place of the unit that holds it, and which of that unit's
+/// opens it is, so the sim service hands each message to its unit and drops one from a
+/// connection it has since closed (record/areas/core/03-sim-seam-and-wasm-module.md,
 /// "Connections").
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Connection {

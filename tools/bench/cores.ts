@@ -347,7 +347,7 @@ export type Replayed = {
   file: string
   inputs: number
   checkpoints: number
-  /** The recording stopped inside a frame, as a killed core's can. */
+  /** The recording stops partway, after its last flush, as a killed core's can. */
   cut: boolean
   /** How long the replay took. */
   ms: number
@@ -364,7 +364,7 @@ export function replay(file: string, level = "info"): Replayed {
   // As dualinput-core's replay prints it, in src/apps/core/src/lib.rs, such as "replayed 76
   // inputs, and all 3 checkpoints matched", so change both together.
   const said =
-    /^replayed (\d+) inputs?, and (?:it held no checkpoint to compare|its (1) checkpoint matched|all (\d+) checkpoints matched)(, up to the last whole frame of a cut recording)?$/m.exec(
+    /^replayed (\d+) inputs?, and (?:it held no checkpoint to compare|its (1) checkpoint matched|all (\d+) checkpoints matched)(, up to the last flush of a cut recording)?$/m.exec(
       result.stdout,
     )
   assert.ok(said, `the replay of ${file} said something else:\n${result.stdout}`)

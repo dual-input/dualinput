@@ -32,6 +32,12 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 >
 > Since 2026-10-22, a cockpit panel's first message names its panel, such as `VCockpit66`, and the core replaces a socket when a new first message names the same panel, where [modules in the panel bridge](#modules-in-the-panel-bridge) has it replace one when the new message names the same instruments; that closed a live socket, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED` (user, 2026-10-22; [core log](../core/log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
 >
+> Since 2026-10-23, stage 8's design picks change this document in three places (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)):
+>
+> - [The platform](#the-platform): `recording` holds the runs, which to keep, the slice of runs, and the commands to mark the moment and to delete a run; the session, the profile loader, and the cockpit stream don't depend on it, since they tell it nothing.
+> - [Engines](#engines): `recording-format` encodes the replay log alone, since v1 writes no self-describing record, and [one loop](#one-loop)'s record for a later version comes with the uploads after v1.
+> - [The registry and moments](#the-registry-and-moments): every unit's handles come from one counter, and its random IDs from one generator, where each unit draws its own; and its example of a request, the session asking the recording crate to start a recording, names one v1 doesn't make.
+>
 > Since 2026-10-23, the code sits in `src/`, the tiers' folders, `apps/`, `sim-package/`, `backend/`, and `relays/` among it, while `tools/` and `profiles/` stay at the root, and prose-lint moves from `scripts/` into `tools/`; the paths in this document name each folder where it is now (user, 2026-10-23; [decisions](decisions.md#one-repository-holds-all-of-dual-input-its-folders-by-tier-with-each-features-parts-in-one-folder)).
 
 Dual Input's code is a platform, engines, and features.

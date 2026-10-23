@@ -364,7 +364,7 @@ fn timers_and_jobs_come_back_as_inputs() {
     assert_eq!(
         (set.id.handle().unit(), set.id.handle().n()),
         (1, 0),
-        "the waiter's first handle"
+        "the core's first handle, named for the waiter"
     );
     let job = *outputs
         .next()
@@ -438,23 +438,26 @@ impl Other {
     }
 }
 
-/// Each unit draws from a generator of its own, so how many IDs one unit draws leaves every
-/// other unit's IDs as they were.
+/// Every unit draws from the core's one generator, which the first input's seed keys, so a
+/// replay of the same inputs draws the same IDs.
 #[test]
-fn ids_follow_the_seed_and_each_units_place() {
-    let ids = |draws: usize| {
+fn ids_follow_the_seed() {
+    let ids = || {
         let (_, outputs) = started(|r| {
             r.unit::<Drawer>("drawer").on::<Started>(Drawer::draw);
-            r.state_mut::<Drawer>().draws = draws;
+            r.state_mut::<Drawer>().draws = 2;
             r.unit::<Other>("other").on::<Started>(Other::draw);
         });
         values::<Said>(outputs)
     };
-    let (once, twice) = (ids(1), ids(2));
-    assert_eq!(once[1..], twice[2..], "the other unit's draws don't move");
-    assert_eq!(once[0], twice[0]);
-    assert_ne!(twice[0], twice[1]);
-    let id: uuid::Uuid = once[0].1.parse().unwrap();
+    let (first, again) = (ids(), ids());
+    assert_eq!(first, again, "the same seed draws the same IDs");
+    assert_ne!(first[0], first[1]);
+    assert_ne!(
+        first[1].1, first[2].1,
+        "another unit's draw comes next in the one sequence"
+    );
+    let id: uuid::Uuid = first[0].1.parse().unwrap();
     assert_eq!(id.get_version_num(), 4);
 }
 

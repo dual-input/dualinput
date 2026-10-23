@@ -8,6 +8,8 @@ Decides:     What a gesture sends, and when; how another machine's panel plays i
 
 > **Note**
 > Since 2026-10-18, a mouse-up with no gesture open sends nothing, where [a gesture](#a-gesture) sends it as a down and an up, as FS Copilot's `_onUp` does with no reason given; the receiver already plays nothing for an up with no gesture, and the other display would click where this one didn't, which the case in the sim that [cases for the bench](#cases-for-the-bench) lists checks (user, 2026-10-18).
+>
+> Since 2026-10-23, a recording holds no marks, so an `Up` finished after 1s, in the table of what each message answers, goes in the run's log at info rather than marking the recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 
 A gesture is one press or drag on a synced display, an instrument the profile's `displays` names, from a button's down to its up.
 It goes to the crew as it happens: its down, its moves, and its up, each a cockpit message keyed by the display.

@@ -1,0 +1,16 @@
+# How big the core's recording of a flight comes out, from p10's capture written through
+# recording-format's own writer, flushed each second as the core flushes it, and as one frame
+# with no flush; and whether a recording cut between two flushes reads back.
+#
+# cargo run --release -- ../../../../tools/bench/fixtures/flight-58p-egll-600s.bin.zst
+[package]
+name = "writer-size"
+edition = "2024"
+version = "0.1.0"
+publish = false
+
+[workspace]
+
+[dependencies]
+recording-format = { path = "../../../../src/engines/recording-format" }
+zstd = { version = "0.14.3", default-features = false }

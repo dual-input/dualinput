@@ -1261,30 +1261,40 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** the edge's writer records every input the core takes, from its first, and a replay checks every unit's outputs.
   No unit is partly recorded, and no channel, sim call, core helper want, or job is declared unrecorded, so the edge drops no input, no unit is held to a leaf rule, no setting records everything, and the header lists no partly recorded units.
+  The kernel draws every unit's handles from one counter and its random IDs from one generator, each output still names its unit, for the log, and the core still sends each client `alive` every 2s whatever else it sends ([02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22).
   A replay on the same commit with uncommitted changes warns and runs.
-  Settled in node 6.6 by the user, 2026-10-16, and changed to every input by the user, 2026-10-21 ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+  Settled in node 6.6 by the user, 2026-10-16, changed to every input by the user, 2026-10-21 ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)), and its drift rules dropped by the user, 2026-10-23 ([recording log][writer]).
 - **Because:**
   - Stage 4's code review found three bugs in the sim service, each from partial recording: call tags drawn from one counter across units, the rewrite timer started by whichever unit fed first, and the module's unfreeze turning on a partly recorded feature's feeds; each platform crate that serves features would bring more ([recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
   - Recording every input costs only file size: a flying machine that hosts traffic at EGLL took in 45 MB an hour with zstd ([architecture log][p10]), against 0.9 MB for its sim inputs under partial recording's rules ([architecture log][lean]), and stage 3's bench recorded 126 MB in its hour under its busiest load ([core log](../core/log.md#2026-10-20-stage-3s-bench-carries-an-hour-of-a-busy-flight-at-05-of-a-core-with-a-p99-wait-of-87µs-replays-it-in-17s-and-a-killed-core-loses-its-last-064s)).
   - The user's call of 2026-10-16, that 45 MB an hour is too much to upload after a flight or to keep several flights of, doesn't apply while v1 uploads nothing and we ask for a run's log first (user, 2026-10-21).
-- **Leaves out:** how big a following machine's recording is, which v1's friend sessions show; how much of a recording avatars' model job takes, which is unmeasured; and whether each unit's own handles, IDs, and connection numbers, each output naming its unit, and the core's `alive` to each client every 2s whatever else it sends, which kept a partly recorded unit's drift to itself, stay.
+- **Leaves out:** how big a following machine's recording is, which v1's friend sessions show; and how much of a recording avatars' model job takes, which avatars' stage measures.
 
-## The edge keeps the home folder's path, and anything but an invite code on the clipboard, out of every input
+## The writer keeps one zstd frame for the run, flushed each second, and stops with under 1 GB free
 
-- **Decided:** the edge puts a run of `~` as many bytes long as the home folder's path in its place wherever it appears in an input, in UTF-8 or the ANSI code page, as written or lowercased, and the real path back in each output that names a file; the clipboard's job hands up only six characters from the invite code's alphabet; and the log subscriber writes each line with the home folder's path and the Windows username replaced.
-  Settled in node 6.6 by the user, 2026-10-16 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-stays-out)).
+- **Decided:** the edge's writer keeps one zstd frame open for the run and flushes it each second, and stops the recording, as it stops on a failed write, when the data folder's drive has under 1 GB free; a session's recording is budgeted under 60 MB an hour with zstd on either machine.
+  Settled in stage 8 by the user, 2026-10-23 ([recording log][writer]).
 - **Because:**
-  - `AircraftLoaded` names a Community aircraft by a path under `%APPDATA%`, in the pilot's home folder, lowercased (measured on MSFS 2024, 2026-10-09, `experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.txt`), and [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) scrubs home folders from every report.
-  - Scrubbing a recording after the fact would change its inputs and break its replay, while a placeholder of the same length keeps every SimConnect record's size, and a replay opens no file.
-- **Leaves out:** the Windows username outside a path in an input, which we know of no input to carry, so 03-v1-scope's rule holds for usernames in the logs alone.
+  - p10's capture of a flying machine that hosts traffic at EGLL came to 42.6 MB an hour as one frame flushed each second, and 66.7 MB with a frame ended each second, and a file cut between flushes read back every input flushed before the cut ([recording log][writer]).
+  - Filling the pilot's system drive mid-flight would stall more than Dual Input, and one check keeps the recording off the drive's last 1 GB.
+- **Leaves out:** how much the crew's messages add to the budget, which v1's friend sessions show.
+
+## The log keeps the home folder's path and the Windows username out, and the clipboard's job hands up only an invite code
+
+- **Decided:** the log subscriber writes each line with the home folder's path and the Windows username replaced, and the clipboard's job hands up only six characters from the invite code's alphabet; the edge leaves every input as it came.
+  Settled in node 6.6 by the user, 2026-10-16, and the inputs left as they came by the user, 2026-10-23 ([recording log][writer]).
+- **Because:**
+  - `AircraftLoaded` names a Community aircraft by a path under `%APPDATA%`, in the pilot's home folder, lowercased (measured on MSFS 2024, 2026-10-09, `experiments/areas/architecture/results/p08-flight-2026-10-09-17-12-31.txt`), and a log is what a pilot pastes in public.
+  - A pilot sends a recording to us by hand, when we ask, so the home folder's path in its inputs reaches only us.
+- **Leaves out:** the home folder's path in a recording's inputs.
 
 ## Each PC keeps whole runs within 1 GB, with no minimal recording
 
-- **Decided:** the recording crate deletes each run with no session that isn't among the 3 newest runs before the one starting, then the oldest runs while all together pass 1 GB, never the newest that held a session; each run's small JSON index of its sessions, with their times, aircraft, departure airport, and crew, is the one record a later Dual Input reads; and no setting chooses full or minimal recording.
+- **Decided:** when the core starts, the recording crate deletes the oldest runs while all of them together pass 1 GB; v1 writes no index of a run's sessions, and the recording crate's slice lists the runs by their folders' names, which are their starts in UTC, with their sizes, beside commands that mark the moment and delete a run; and no setting chooses full or minimal recording.
   This changes [decision 016](../../decisions/016-core-keeps-pilots-settings.md)'s recording mode, once step 8's decisions are numbered.
-  Settled in node 6.6 by the user, 2026-10-16, and kept at 1 GB with every input recorded by the user, 2026-10-21 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps); [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
-- **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), so a run is kept or deleted whole, and at 45 to 126 MB an hour, 1 GB holds roughly 8 to 22 hours (arithmetic; user, 2026-10-21).
-- **Leaves out:** the desktop app's list of recordings with their sizes and a way to delete them, for [6.16](plan.md#616-the-apps).
+  Settled in node 6.6 by the user, 2026-10-16, kept at 1 GB with every input recorded by the user, 2026-10-21, and reduced to one rule with no index by the user, 2026-10-23 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps); [recording log][writer]).
+- **Because:** a replay starts at a run's first input ([01-loop-and-edge](../core/01-loop-and-edge.md#what-a-recording-holds)), so a run is kept or deleted whole, and at under 60 MB an hour, 1 GB holds about 17 hours of a busy session (arithmetic); a run with no session takes under 0.5 MB an hour, so it never crowds a session out.
+- **Leaves out:** keeping a run we ask for once the pilot has recorded about 1 GB more, about 17 hours of busy sessions, since the oldest go first; and listing a run's sessions by aircraft and crew, which the uploads after v1 bring with what they need.
 
 ## v1 uploads no bug report: a pilot sends a run's folder by hand when we ask, and its log comes first
 
@@ -1885,6 +1895,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 [nwin]: ../network/log.md#2026-10-16-iroh-relay-130-builds-and-runs-on-windows-and-in-dev-mode-answers-on-ipv6-loopback-only
 [p10]: log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly
 [lean]: log.md#2026-10-16-reading-traffic-only-as-it-changes-within-50km-once-a-second-and-the-flight-model-and-camera-at-their-send-rates-would-shrink-p10s-recording-from-45-to-13-mb-an-hour
+[writer]: ../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb
 [p02]: ../environment/log.md#2026-10-16-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off-and-no-simconnect-event-we-tried-does
 [pr01]: ../profiles/log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked
 [pr02]: ../profiles/log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack

@@ -2,6 +2,37 @@
 
 What we found about the recording, replays, and bug reports, newest entry first.
 
+## 2026-10-23: One zstd frame flushed each second keeps a busy flight's recording at 42.6 MB an hour, where a frame ended each second takes 66.7 MB
+
+**Asked:** what budget a session's recording gets now that every input is recorded, since [budgets](01-recording-and-bug-reports.md#budgets)' 4 MB an hour rested on partial recording; and how big the core's own writer makes a busy flight's recording, since p10's 45 MB an hour compressed its 600s as one stream, while the writer ends a zstd frame each second.
+
+**Expected:** close to p10's 45 MB an hour.
+
+**Found:** on our development machine, p10's capture of a flying machine that hosts traffic at EGLL, written through `recording-format`'s writer at zstd level 3 (`experiments/areas/recording/writer-size`; [results](../../../experiments/areas/recording/results/2026-10-23-writer-size.txt)):
+
+- With a frame ended each second, as the core's writer ends one, it came to 66.7 MB an hour.
+- As one frame, it came to 42.5 MB an hour, 1.57 times smaller, since a frame that ends each second compresses each second alone: ground vehicles, whose polls 500ms apart barely change, shrank 5.4 times, and AI aircraft 1.6 times.
+- As one frame flushed each second, it came to 42.6 MB an hour.
+  Cut midway between two flushes, as a killed core's file would be, it read back through `recording-format`'s reader with all 166,306 inputs flushed before the cut, and the reader said the file was truncated.
+- Once stage 8 built that writer, the same capture through it came to 42.6 MB an hour, and the same cut read back the same 166,306 inputs ([results](../../../experiments/areas/recording/results/2026-10-23-writer-size-built.txt)).
+  The whole bench then passed on stage 8's code, all 50 scenarios in 944s, the killed core's recording among them, replayed to its last flush ([results](results/2026-10-23-stage-8-whole-bench.txt)).
+
+**Changed:** the user decided on 2026-10-23:
+
+1. The writer keeps one zstd frame for the run and flushes it each second, so a killed core still loses at most its last second.
+2. A session's recording is budgeted under 60 MB an hour with zstd on either machine: 42.6 MB of a busy flight's sim inputs, up to 14.4 MB an hour of ATC audio while it plays, at 32 kbps, which zstd can't shrink, and the crew's messages, unmeasured.
+   A run with no session keeps its 0.5 MB an hour, and the writer and a replay keep their budgets.
+   Avatars' stage sets a figure for the aircraft's model, which avatars' job hands up and the recording keeps at each load.
+3. The recording stops when the data folder's drive has under 1 GB free, as it stops when a write fails, so it never fills the pilot's system drive mid-flight.
+4. [What keeps the drift from spreading](01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading) goes whole, since no unit is partly recorded: the kernel draws every unit's handles from one counter and its random IDs from one ChaCha20 generator.
+5. Marks go: the EFB app's button that marks the moment sends a command, which the recording holds as an input and the recording crate logs at info, and a write that never lands is an info line, as [logging](../core/01-loop-and-edge.md#logging) has each decision a pilot can notice.
+6. When the core starts, the recording crate deletes the oldest runs while all of them together pass 1 GB, with no rule for runs without a session or for the newest that held one.
+7. The home folder's path stays out of the log, and the edge leaves it in the recording's inputs: a pilot sends a recording to us by hand, and a log is what gets pasted in public.
+8. v1 writes no index: the recording crate's slice lists the runs by their folders' names, which are their starts in UTC, with their sizes, and the session crate, the profile loader, and the cockpit stream tell it nothing.
+9. The slice of runs and the command that deletes one stay (user, 2026-10-16 and 2026-10-23).
+
+**Affects:** [01-recording-and-bug-reports](01-recording-and-bug-reports.md); [01-loop-and-edge](../core/01-loop-and-edge.md); [the code map](../architecture/02-code-map.md) and the architecture's [tentative decisions](../architecture/decisions.md); [the session's units](../session/02-units.md); [the profiles' units](../profiles/02-units.md); [the sync units](../sync/05-units.md), [order and recovery](../sync/04-order-and-recovery.md), and [pointer sync](../pointer-sync/01-pointer-sync.md); [the apps](../interface/01-apps.md); [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) in 03-v1-scope; and stage 8 of the [build plan](../build/plan.md#8-recording-and-bug-reports).
+
 ## 2026-10-21: Partial recording caused three bugs in stage 4's sim service, while recording every input costs 45 to 126 MB an hour
 
 **Asked:** should the core go on leaving a partly recorded unit's high-rate inputs out of its recording, as [unrecorded inputs](01-recording-and-bug-reports.md#unrecorded-inputs) designs it, once stage 4's code review found bugs where the sim service had to keep such a unit's drift to itself?

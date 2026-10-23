@@ -1,7 +1,7 @@
-// The core is killed, its recording reads up to its last full frame, and it loses at most
-// the recording's last second (record/areas/core/01-loop-and-edge.md, "Cases for the bench"
-// and "Budgets"). The recording's writer ends a zstd frame once a second, so a kill loses
-// only the frame it hadn't ended.
+// The core is killed, its recording reads up to its last flush, and it loses at most the
+// recording's last second (record/areas/core/01-loop-and-edge.md, "Cases for the bench" and
+// "Budgets"). The recording's writer flushes once a second, so a kill loses only what it
+// hadn't flushed.
 
 import assert from "node:assert/strict"
 import fs from "node:fs"
@@ -11,15 +11,15 @@ import { setTimeout as sleep } from "node:timers/promises"
 import { BenchRun } from "../cores.ts"
 
 /**
- * The writer ends a frame on a timer that can wake a scheduler tick late, 15.6ms at
+ * The writer flushes on a timer that can wake a scheduler tick late, 15.6ms at
  * Windows' default, and a line takes a little while to reach the loop.
  */
 const SLACK_MS = 100
 
-test("a killed core's recording replays to its last whole frame, losing at most its last second", { timeout: 60_000 }, async (t) => {
+test("a killed core's recording replays to its last flush, losing at most its last second", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("killed-core", t)
   const core = await run.core("a")
-  // Lines go out for about 4s, so the kill lands inside a frame the writer hasn't ended.
+  // Lines go out for about 4s, so the kill lands between two of the writer's flushes.
   const sent: number[] = []
   for (let n = 1; n <= 300; n++) {
     core.send({ kind: "count", n })
@@ -41,7 +41,7 @@ test("a killed core's recording replays to its last whole frame, losing at most 
   const firstLost = sent[reached]
   const lostMs = firstLost === undefined ? 0 : killed - firstLost
   t.diagnostic(
-    `${reached} of ${sent.length} lines reached the recording, which lost the last ${lostMs.toFixed(0)}ms before the kill${replayed.cut ? " and stopped inside a frame" : ""}`,
+    `${reached} of ${sent.length} lines reached the recording, which lost the last ${lostMs.toFixed(0)}ms before the kill${replayed.cut ? " and stopped after its last flush" : ""}`,
   )
   assert.ok(lostMs <= 1_000 + SLACK_MS, `the recording lost the last ${lostMs.toFixed(0)}ms of lines`)
 })

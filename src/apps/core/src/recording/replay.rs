@@ -9,7 +9,6 @@ use kernel::{Kernel, Registry};
 use recording_format::{Header, Reader, Record};
 use tracing::level_filters::LevelFilter;
 
-use crate::home::Home;
 use crate::recording::build_info;
 use crate::recording::convert::from_record;
 use crate::run::{STACK, build};
@@ -24,8 +23,8 @@ pub struct Replay {
 }
 
 pub enum Outcome {
-    /// Every checkpoint matched. `truncated` says the recording stopped inside a frame, as
-    /// a killed core's does.
+    /// Every checkpoint matched. `truncated` says the recording stops partway through a
+    /// record or a block, as a killed core's does.
     Matched {
         inputs: u64,
         checkpoints: u64,
@@ -77,13 +76,8 @@ pub fn replay(
             outcome: Outcome::Refused(reason),
         });
     };
-    let (context, _scope) = run_context::open(
-        &folder.join("log.txt"),
-        None,
-        level,
-        &Home::from_environment(),
-        abort_on_panic,
-    )?;
+    let (context, _scope) =
+        run_context::open(&folder.join("log.txt"), None, level, abort_on_panic)?;
     for warning in &warnings {
         tracing::warn!("{warning}");
     }

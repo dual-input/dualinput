@@ -149,6 +149,10 @@ pub fn start_job(
                 "{} got no answer: the droplet run has no backend",
                 fetch.url
             )),
+            // Only the recording crate lists and deletes, and the droplet runs none.
+            Work::List { path } | Work::Delete { path } => {
+                Err(format!("{path}: the droplet program keeps no runs"))
+            }
         };
         let result = match start.job.then {
             Some(then) => result.and_then(then),

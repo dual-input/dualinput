@@ -21,7 +21,6 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 use crate::clock;
-use crate::home::Home;
 use crate::run_context;
 
 /// A live run's log stops here. The core deletes old runs only when it starts, so without a
@@ -36,7 +35,9 @@ pub struct Log {
     /// level.
     cap: Option<u64>,
     level: LevelFilter,
-    /// The home folder's path in each form UTF-8 text holds it.
+    /// The home folder's path, which names the pilot's Windows account, as written and
+    /// lowercased, since the sim sends paths under it lowercased
+    /// (record/areas/recording/01-recording-and-bug-reports.md, "The home folder's path").
     home: Vec<String>,
     /// The Windows username, which can also be an ordinary word, such as "User" or
     /// "Owner", so it's hidden only as a whole word.
@@ -50,24 +51,24 @@ struct Lines {
 }
 
 impl Log {
-    pub fn open(
-        path: &Path,
-        cap: Option<u64>,
-        level: LevelFilter,
-        home: &Home,
-    ) -> std::io::Result<Log> {
-        let user = std::env::var("USERNAME").ok().filter(|u| !u.is_empty());
-        Log::with(path, cap, level, home, user)
+    pub fn open(path: &Path, cap: Option<u64>, level: LevelFilter) -> std::io::Result<Log> {
+        let named = |name| std::env::var(name).ok().filter(|v: &String| !v.is_empty());
+        Log::with(path, cap, level, named("USERPROFILE"), named("USERNAME"))
     }
 
     fn with(
         path: &Path,
         cap: Option<u64>,
         level: LevelFilter,
-        home: &Home,
+        home: Option<String>,
         user: Option<String>,
     ) -> std::io::Result<Log> {
         let file = File::create(path)?;
+        let mut home: Vec<String> = home
+            .into_iter()
+            .flat_map(|h| [h.to_lowercase(), h])
+            .collect();
+        home.dedup();
         Ok(Log {
             lines: Mutex::new(Lines {
                 file,
@@ -76,7 +77,7 @@ impl Log {
             }),
             cap,
             level,
-            home: home.text_forms().map(str::to_string).collect(),
+            home,
             user,
         })
     }
@@ -243,7 +244,7 @@ mod tests {
     fn stops_at_the_cap_with_one_line_saying_so_and_keeps_a_panics_line() {
         let path =
             std::env::temp_dir().join(format!("dualinput-log-cap-{}.txt", std::process::id()));
-        let log = Log::open(&path, Some(100), LevelFilter::INFO, &Home::none()).unwrap();
+        let log = Log::with(&path, Some(100), LevelFilter::INFO, None, None).unwrap();
         for i in 0..20 {
             log.line(&format!("line {i:02} of the run\n"));
         }
@@ -262,17 +263,18 @@ mod tests {
     fn hides_the_home_folders_path() {
         let path =
             std::env::temp_dir().join(format!("dualinput-log-home-{}.txt", std::process::id()));
-        let log = Log::open(
+        let log = Log::with(
             &path,
             None,
             LevelFilter::INFO,
-            &Home::new(r"C:\Users\Pilot"),
+            Some(r"C:\Users\Pilot".into()),
+            Some("Pilot".into()),
         )
         .unwrap();
-        log.line("read c:\\users\\pilot\\settings.json and C:\\Users\\Pilot\\x\n");
+        log.line("read c:\\users\\pilot\\settings.json and C:\\Users\\Pilot\\x as Pilot\n");
         assert_eq!(
             read(&path),
-            "read %USERPROFILE%\\settings.json and %USERPROFILE%\\x\n"
+            "read %USERPROFILE%\\settings.json and %USERPROFILE%\\x as %USERNAME%\n"
         );
         drop(log);
         std::fs::remove_file(&path).unwrap();

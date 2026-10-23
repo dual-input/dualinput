@@ -13,6 +13,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     sim_service::register,
     core_helper_service::register,
     network::register,
+    recording::register,
 ];
 
 fn main() -> ExitCode {

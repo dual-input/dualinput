@@ -287,11 +287,33 @@ Done on 2026-10-23.
 
 ## 8 Recording and bug reports
 
-Builds: the recording crate, and the self-describing record and the replay log's marks in `recording-format` ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+Builds, as [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-23 has them:
+
+- `recording-format`: one zstd frame for the run, flushed each second, in place of the frame it ended each second ([the files](../recording/01-recording-and-bug-reports.md#the-files))
+- `src/apps/core`'s writer: the flush each second, and the recording stopped, as on a failed write, when the data folder's drive has under 1 GB free
+- the kernel: every unit's handles from one counter, and its random IDs from one ChaCha20 generator; and two jobs the edge runs, one that lists a folder with each entry's size, and one that deletes a file or a folder ([timers, jobs, and IDs](../core/01-loop-and-edge.md#timers-jobs-and-ids))
+- `src/apps/core`'s edge: every input as it came, so `home.rs`'s placeholder, and the jobs' and the core helper's way back to the real path, go; the log subscriber still replaces the home folder's path and the Windows username in each line
+- `recording`: at the core's start, listing `recordings\` and deleting the oldest runs while all of them together pass 1 GB; a slice of the runs by their folders' names, with their sizes and the newest as the run in progress; a command that marks the moment, which logs a line at info; and a command that deletes a run, refusing the one in progress, then lists the runs again ([slices and commands](../interface/01-apps.md#slices-and-commands))
+
 The rule that each unit logs at info each decision a pilot can notice, with its reason, is in [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-21 on [logging](../core/01-loop-and-edge.md#logging), and each stage's units keep it.
-The report page is the desktop shell's, and comes with [the apps](#11-the-apps).
+The report page is the desktop shell's, and comes with [the apps](#11-the-apps); the clipboard's job, which hands up only an invite code, comes with the first stage whose units start it, as [stage 2](#2-the-cores-loop-and-edge) has the edge's jobs come.
+
 Designs first: the budgets for a session's recording and for a run with no session, which rested on partial recording, and which of [what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)'s rules stay, now that every input is recorded ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-21).
+The user settled both on 2026-10-23, with the writer's flush, the stop under 1 GB free, and the cuts that leave the recording no marks, index, or placeholder for the home folder, as the [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)'s entry of that day has them.
+
 Needs: 7.
+
+Tests:
+
+- As `recording-format`'s tests: a recording cut between two flushes reads back every input flushed before the cut, and says it's truncated.
+- As `src/apps/core`'s tests: the writer stops the recording when the drive has under 1 GB free, and the run goes on; and a log line holding the home folder's path and the username shows neither.
+- As `recording`'s tests: runs past 1 GB lose the oldest at the core's start, however many held no session.
+- On the bench: a killed core's recording replays to its last flush, losing at most its last second; a fake page's command deletes an older run, refuses the one in progress, and the slice shows the runs left; and a replay on the same commit with a log line added warns, runs, and matches every checkpoint.
+- [Budgets](../recording/01-recording-and-bug-reports.md#budgets): p10's capture through the writer this stage builds, within a session's 60 MB an hour.
+
+The kernel changes, so the whole bench runs at this stage's close, which also covers the move into `src/` and iroh's pin that it hasn't run on (user, 2026-10-23).
+
+Exit: on our development machine, `node tools/check.ts` and the whole `node tools/bench.ts` pass, the recording's scenarios among them; a killed core's recording, written in one frame flushed each second, replays to its last flush; and the [recording log](../recording/log.md) has the built writer's size on p10's capture.
 
 ## 9 The session
 

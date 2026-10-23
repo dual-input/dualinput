@@ -5,9 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use kernel::{Fetch, Fetched, JOBS, JobId, Method, StartJob, Work};
+use kernel::{Entry, Fetch, Fetched, JOBS, JobId, Method, StartJob, Work};
 
-use crate::home::Home;
 use crate::queue::Queue;
 
 /// A fetch with no answer by then is the job's error, so a job never waits on a server that
@@ -20,7 +19,6 @@ pub struct Jobs {
     pub runtime: tokio::runtime::Handle,
     pub queue: Arc<Queue>,
     pub data: Arc<PathBuf>,
-    pub home: Arc<Home>,
     pub http: reqwest::Client,
 }
 
@@ -70,15 +68,57 @@ fn then(start: &StartJob, bytes: Vec<u8>) -> Result<Vec<u8>, String> {
 
 fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
     match &start.job.work {
-        Work::Read { path } => std::fs::read(resolve(&jobs.data, &jobs.home, path))
+        Work::Read { path } => std::fs::read(resolve(&jobs.data, path))
             .map_err(|e| format!("couldn't read {path}: {e}")),
         Work::Write { path, bytes } => {
-            replace(&resolve(&jobs.data, &jobs.home, path), bytes, start.id)
+            replace(&resolve(&jobs.data, path), bytes, start.id)
                 .map_err(|e| format!("couldn't write {path}: {e}"))?;
+            Ok(Vec::new())
+        }
+        Work::List { path } => list(&resolve(&jobs.data, path))
+            .map(|entries| Entry::encode(&entries))
+            .map_err(|e| format!("couldn't list {path}: {e}")),
+        Work::Delete { path } => {
+            let target = resolve(&jobs.data, path);
+            let deleted = if target.is_dir() {
+                std::fs::remove_dir_all(&target)
+            } else {
+                std::fs::remove_file(&target)
+            };
+            deleted.map_err(|e| format!("couldn't delete {path}: {e}"))?;
             Ok(Vec::new())
         }
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
     }
+}
+
+/// `folder`'s entries by name, each with its size, a folder's being the total of every file
+/// inside it.
+fn list(folder: &Path) -> std::io::Result<Vec<Entry>> {
+    let read = match std::fs::read_dir(folder) {
+        Ok(read) => read,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(e) => return Err(e),
+    };
+    let mut entries = read
+        .map(|entry| {
+            let entry = entry?;
+            Ok(Entry {
+                name: entry.file_name().to_string_lossy().into_owned(),
+                size: size(&entry.path())?,
+            })
+        })
+        .collect::<std::io::Result<Vec<_>>>()?;
+    entries.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(entries)
+}
+
+fn size(path: &Path) -> std::io::Result<u64> {
+    let metadata = std::fs::metadata(path)?;
+    if !metadata.is_dir() {
+        return Ok(metadata.len());
+    }
+    std::fs::read_dir(path)?.try_fold(0, |total, entry| Ok(total + size(&entry?.path())?))
 }
 
 async fn fetch_one(http: &reqwest::Client, fetch: Fetch) -> Result<Vec<u8>, String> {
@@ -115,17 +155,9 @@ async fn fetch_one(http: &reqwest::Client, fetch: Fetch) -> Result<Vec<u8>, Stri
     .encode())
 }
 
-/// The file a job's path names. A path from an input has the home folder's path hidden at
-/// its start, which leaves it looking relative, as `~~~~~~~~~~~~~~\AppData\x.flt` does, so
-/// the home folder's path goes back first, and only a path still relative after that is in
-/// the data folder.
-fn resolve(data: &Path, home: &Home, path: &str) -> PathBuf {
-    let path = home.reveal(path);
-    if path.is_relative() {
-        data.join(path)
-    } else {
-        path
-    }
+/// The file a job's path names: a relative path is in the data folder.
+fn resolve(data: &Path, path: &str) -> PathBuf {
+    data.join(path)
 }
 
 /// Writes a file beside `path` and renames it over `path`, so a crash in the middle leaves
@@ -223,20 +255,9 @@ mod tests {
     }
 
     #[test]
-    fn a_path_whose_home_folder_was_hidden_gets_it_back() {
-        let home = Home::new(r"C:\Users\Pilot");
+    fn a_relative_path_is_in_the_data_folder() {
         let data = Path::new(r"C:\Users\Pilot\AppData\Roaming\DualInput");
-        assert_eq!(
-            resolve(data, &home, r"~~~~~~~~~~~~~~\AppData\Roaming\x.flt"),
-            PathBuf::from(r"C:\Users\Pilot\AppData\Roaming\x.flt")
-        );
-        assert_eq!(
-            resolve(data, &home, "settings.json"),
-            data.join("settings.json")
-        );
-        assert_eq!(
-            resolve(data, &home, r"D:\x.flt"),
-            PathBuf::from(r"D:\x.flt")
-        );
+        assert_eq!(resolve(data, "settings.json"), data.join("settings.json"));
+        assert_eq!(resolve(data, r"D:\x.flt"), PathBuf::from(r"D:\x.flt"));
     }
 }

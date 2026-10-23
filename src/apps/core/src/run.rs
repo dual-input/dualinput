@@ -2,7 +2,6 @@
 //! (record/areas/core/01-loop-and-edge.md, "Starting and stopping").
 
 use std::any::TypeId;
-use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Arc, mpsc};
@@ -17,7 +16,6 @@ use windows_sys::Win32::Security::Cryptography::{
 
 use crate::edges::jobs::Jobs;
 use crate::edges::timer::Timers;
-use crate::home::Home;
 use crate::log;
 use crate::loop_stats::Stats;
 use crate::queue::Queue;
@@ -102,17 +100,15 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         return Ok(Ran::AlreadyRunning);
     };
     let folder = data_folder::run_folder(&options.data)?;
-    let home = Arc::new(Home::from_environment());
     let (context, _scope) = run_context::open(
         &folder.join("log.txt"),
         Some(log::CAP),
         options.level,
-        &home,
         options.abort_on_panic,
     )?;
     tracing::info!(commit = build_info::COMMIT, uncommitted = ?build_info::UNCOMMITTED, profile = build_info::PROFILE, messages = messages::HASH, "the core started");
     let seed = seed()?;
-    let queue = Arc::new(Queue::new(home.clone()));
+    let queue = Arc::new(Queue::default());
 
     // The units' handlers can hold state that isn't `Send`, such as QuickJS-ng's runtimes,
     // so the kernel is built on the loop's own thread, which reports back what the edge
@@ -173,11 +169,8 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         fma3,
         checkpoint_every_input: options.checkpoint_every_input,
     };
-    let (writer, writer_thread) = writer::start(
-        File::create(folder.join("inputs.zst"))?,
-        &header,
-        context.clone(),
-    )?;
+    let (writer, writer_thread) =
+        writer::start(&folder.join("inputs.zst"), &header, context.clone())?;
     let _ = context.writer.set(writer.clone());
     queue.push(FIRST, kernel::first_input(seed, files));
 
@@ -197,7 +190,6 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
         runtime: runtime.handle().clone(),
         queue: queue.clone(),
         data: Arc::new(options.data.clone()),
-        home: home.clone(),
         http: crate::edges::jobs::http(),
     };
     let mut sinks = Sinks::default();
@@ -220,13 +212,7 @@ pub fn run(options: &Options, units: &[fn(&mut Registry)]) -> std::io::Result<Ra
     // Closing the runtime at the exit drops the helper's standard input, which tells it to
     // exit with the core.
     if let Some(source) = helper {
-        crate::edges::core_helper::start(
-            runtime.handle(),
-            queue.clone(),
-            source,
-            home.clone(),
-            &mut sinks,
-        );
+        crate::edges::core_helper::start(runtime.handle(), queue.clone(), source, &mut sinks);
     }
     let transport = network.map(|source| {
         crate::edges::network::start(runtime.handle(), queue.clone(), source, &mut sinks)

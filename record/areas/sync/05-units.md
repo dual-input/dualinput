@@ -20,6 +20,8 @@ Decides:     What each of sync's three units holds and offers; a cockpit message
 >
 > - In [writing](#writing), every entry holds its writes, live and in catch-up, until its first reading arrives, as the note of 2026-10-17 has an `instrument()` entry do, and `step_made` waits for held writes; a counted or event entry, which gets no reading, is exempt, and a read the sim refuses drops the held writes.
 > - A write function at its limit stops its entry only on its own machine, which skips arriving changes to the entry, sends none, and shows its pilot state sync's notice, so [kinds](#kinds) has no `STOPPED`, where [write functions](#write-functions) stops the entry on every machine; the function runs only on a receiving machine, and the entry is still read from the sim.
+>
+> Since 2026-10-23, a recording holds no marks, so state sync logs at info each write flagged, each watch-only entry whose values differ, and an aircraft that never went quiet, with what [Ready, notices, marks, and the checklist](#ready-notices-marks-and-the-checklist) has its mark carry; and the cockpit stream doesn't depend on the recording crate, where [the units](#the-units) has it (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 
 The sync engine is one state machine for each loaded profile, with no I/O, so the IDE and the bench link it on their own.
 The cockpit stream, in the platform, carries every cockpit message in causal order, holds each state entry's newest value, paces what it applies, keeps what it sent for a replay, and runs catch-up, which the catching-up machine asks for.

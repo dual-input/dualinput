@@ -4,9 +4,12 @@
 //! each an input the core handled or a checkpoint of what it had put out by then. Only the
 //! build that wrote a recording replays it, so the layout carries no version.
 //!
-//! The file is a run of zstd frames, and a frame decompresses without the ones after it.
-//! The core ends a frame each second, so a core that's killed loses only the frame it
-//! hadn't ended, and `Reader` stops at the last whole record before it.
+//! A core that's killed loses only what it wrote since it last flushed, which it does each
+//! second. The file is one zstd frame, and a flush ends zstd's block, so everything written
+//! before it decompresses without what comes after, and `Reader` stops at the last whole
+//! record before the cut. One frame lets zstd find what repeats from one second to the next,
+//! such as ground vehicles polled every 500ms: p10's flight came to 42.6 MB an hour that way,
+//! and to 66.7 MB with a frame ended each second (record/areas/recording/log.md, 2026-10-23).
 //!
 //! Decompressed, a recording reads:
 //!
@@ -93,40 +96,33 @@ pub struct Checkpoint {
     pub hash: u64,
 }
 
-/// Writes a recording, a frame at a time.
+/// Writes a recording into one zstd frame.
 pub struct Writer<W: Write> {
-    frame: Frame<W>,
+    /// `None` once a write failed, which took the output with it.
+    encoder: Option<zstd::stream::write::Encoder<'static, W>>,
     seq: u64,
     stamp: u64,
 }
 
-enum Frame<W: Write> {
-    /// No frame is open, so nothing is held in memory, and the file ends on a whole frame.
-    Closed(W),
-    Open(zstd::stream::write::Encoder<'static, W>),
-    /// A write failed, and the writer took the output with it.
-    Lost,
-}
-
 impl<W: Write> Writer<W> {
-    /// Starts a recording on `out` with its header, in a frame of its own.
+    /// Starts a recording on `out` with its header, flushed.
     pub fn new(out: W, header: &Header) -> io::Result<Self> {
         let header = postcard::to_stdvec(header).map_err(io::Error::other)?;
         let mut bytes = MAGIC.to_vec();
         put_varint(&mut bytes, header.len() as u64);
         bytes.extend_from_slice(&header);
         let mut writer = Writer {
-            frame: Frame::Closed(out),
+            encoder: Some(zstd::stream::write::Encoder::new(out, LEVEL)?),
             seq: 0,
             stamp: 0,
         };
         writer.put(&bytes)?;
-        writer.end_frame()?;
+        writer.flush()?;
         Ok(writer)
     }
 
-    /// Adds a record to the open frame. Inputs come in the order of their sequence numbers,
-    /// as the core's queue hands them out.
+    /// Adds a record. Inputs come in the order of their sequence numbers, as the core's queue
+    /// hands them out.
     pub fn write(&mut self, record: &Record) -> io::Result<()> {
         let mut bytes = Vec::new();
         match record {
@@ -161,39 +157,35 @@ impl<W: Write> Writer<W> {
         self.put(&bytes)
     }
 
-    /// Ends the open frame, if there is one, and flushes it to `out`, so a reader gets every
-    /// record written so far even if nothing is written after.
-    pub fn end_frame(&mut self) -> io::Result<()> {
-        self.frame = match std::mem::replace(&mut self.frame, Frame::Lost) {
-            Frame::Open(encoder) => {
-                let mut out = encoder.finish()?;
-                out.flush()?;
-                Frame::Closed(out)
-            }
-            Frame::Lost => return Err(lost()),
-            closed => closed,
-        };
-        Ok(())
+    /// Ends zstd's block and flushes it to `out`, so a reader gets every record written so
+    /// far even if nothing is written after.
+    pub fn flush(&mut self) -> io::Result<()> {
+        self.with(|encoder| {
+            encoder.flush()?;
+            encoder.get_mut().flush()
+        })
     }
 
-    /// Ends the last frame, and hands back `out`.
+    /// Ends the frame, and hands back `out`.
     pub fn finish(mut self) -> io::Result<W> {
-        self.end_frame()?;
-        match self.frame {
-            Frame::Closed(out) => Ok(out),
-            _ => Err(lost()),
-        }
+        let mut out = self.encoder.take().ok_or_else(lost)?.finish()?;
+        out.flush()?;
+        Ok(out)
     }
 
     fn put(&mut self, bytes: &[u8]) -> io::Result<()> {
-        self.frame = match std::mem::replace(&mut self.frame, Frame::Lost) {
-            Frame::Closed(out) => Frame::Open(zstd::stream::write::Encoder::new(out, LEVEL)?),
-            open => open,
-        };
-        match &mut self.frame {
-            Frame::Open(encoder) => encoder.write_all(bytes),
-            _ => Err(lost()),
+        self.with(|encoder| encoder.write_all(bytes))
+    }
+
+    fn with(
+        &mut self,
+        f: impl FnOnce(&mut zstd::stream::write::Encoder<'static, W>) -> io::Result<()>,
+    ) -> io::Result<()> {
+        let result = f(self.encoder.as_mut().ok_or_else(lost)?);
+        if result.is_err() {
+            self.encoder = None;
         }
+        result
     }
 }
 
@@ -394,8 +386,22 @@ mod tests {
         (header, records, reader.truncated())
     }
 
+    /// An output a test can read while the writer still holds it.
+    #[derive(Clone, Default)]
+    struct Shared(std::rc::Rc<std::cell::RefCell<Vec<u8>>>);
+
+    impl Write for Shared {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.0.borrow_mut().write(bytes)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
     #[test]
-    fn reads_back_what_it_wrote_across_frames() {
+    fn reads_back_what_it_wrote_across_flushes() {
         let records = vec![
             input(0, 1_000, b"first"),
             input(1, 1_000, b""),
@@ -410,27 +416,27 @@ mod tests {
         for (i, record) in records.iter().enumerate() {
             writer.write(record).unwrap();
             if i % 2 == 1 {
-                writer.end_frame().unwrap();
+                writer.flush().unwrap();
             }
         }
         let file = writer.finish().unwrap();
         assert_eq!(read_all(&file), (header(), records, false));
     }
 
-    /// A killed core leaves its last frame half written, and the records before that frame
-    /// still read.
+    /// A killed core leaves the file cut after its last flush, and the records flushed before
+    /// the cut still read.
     #[test]
-    fn stops_at_the_last_whole_frame_of_a_cut_file() {
-        let mut writer = Writer::new(Vec::new(), &header()).unwrap();
+    fn stops_at_the_last_flush_of_a_cut_file() {
+        let out = Shared::default();
+        let mut writer = Writer::new(out.clone(), &header()).unwrap();
         writer.write(&input(0, 10, b"kept")).unwrap();
-        writer.end_frame().unwrap();
-        let whole = writer.finish().unwrap().len();
-        let mut writer = Writer::new(Vec::new(), &header()).unwrap();
-        writer.write(&input(0, 10, b"kept")).unwrap();
-        writer.end_frame().unwrap();
+        writer.flush().unwrap();
+        let flushed = out.0.borrow().len();
         writer.write(&input(1, 20, &[7; 5_000])).unwrap();
-        let mut file = writer.finish().unwrap();
-        file.truncate(whole + (file.len() - whole) / 2);
+        writer.flush().unwrap();
+        let mut file = out.0.borrow().clone();
+        assert!(file.len() > flushed, "the second flush should add a block");
+        file.truncate(flushed + (file.len() - flushed) / 2);
         let (_, records, truncated) = read_all(&file);
         assert_eq!(records, vec![input(0, 10, b"kept")]);
         assert!(truncated);

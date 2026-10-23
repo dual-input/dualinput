@@ -82,7 +82,7 @@ impl Sim<'_, '_> {
         handle
     }
 
-    /// A new handle from the calling unit's own counter, and the call's origin with it.
+    /// A new handle, and the call's origin with it.
     fn origin(&self) -> (Handle, Origin) {
         let handle = self.cx.handle();
         let origin = Origin {

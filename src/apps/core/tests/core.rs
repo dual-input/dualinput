@@ -90,7 +90,7 @@ fn write_all(file: &Path, header: &Header, records: &[Record]) {
     let mut writer = Writer::new(File::create(file).unwrap(), header).unwrap();
     for record in records {
         if matches!(record, Record::Checkpoint(_)) {
-            writer.end_frame().unwrap();
+            writer.flush().unwrap();
         }
         writer.write(record).unwrap();
     }
@@ -274,6 +274,34 @@ fn a_replay_built_from_another_commit_refuses_naming_the_commit() {
         }
         _ => panic!("a replay built from another commit should refuse"),
     }
+}
+
+/// A replay on the same commit with other uncommitted changes, such as a log line added to
+/// investigate, warns and runs, and matches where the changes leave the outputs alone
+/// (record/areas/recording/01-recording-and-bug-reports.md, "A replay on the same commit
+/// with local changes").
+#[test]
+fn a_replay_with_other_local_changes_warns_and_matches() {
+    let data = data_folder("local-changes");
+    std::fs::write(data.join("note.txt"), "a note").unwrap();
+    let Ran::Exited { recording, .. } = run(&options(&data), UNITS).unwrap() else {
+        panic!()
+    };
+    let (mut header, records) = read_all(&recording.join("inputs.zst"));
+    header.uncommitted = Some("a log line added".into());
+    let copy = data.join("local").join("inputs.zst");
+    write_all(&copy, &header, &records);
+    let Replay { warnings, outcome } = replay(&copy, UNITS, LevelFilter::INFO, false).unwrap();
+    assert!(
+        warnings
+            .iter()
+            .any(|w| w.contains("uncommitted changes a log line added")),
+        "{warnings:?}"
+    );
+    assert!(
+        matches!(outcome, Outcome::Matched { inputs: 76, .. }),
+        "the replay should run and match"
+    );
 }
 
 /// The core links the C runtime statically, so it imports none of the runtime's DLLs

@@ -39,6 +39,20 @@ Decides:     Which inputs a recording leaves out, and how a feature declares the
 >   So do the units `src/backend/`'s reports and `tools/reports.ts`, the edge's HTTPS for the upload, the run's `key` file, which only the upload's signature reads, the index's `uploaded` field, the note of 2026-10-17's command that uploads a session, and [left open](#left-open)'s item on R2.
 > - [Budgets](#budgets): the budgets for a session's recording and for a run with no session rest on partial recording's rules, and p10's 45 MB an hour passes the first; what replaces them is open.
 > - [Cases for the bench](#cases-for-the-bench): the session with traffic, avatars, the flight model, and ATC audio running matches every unit's checkpoints, and the cases on unrecorded inputs, the setting, a partly recorded unit's drift and its panic, a signed part, a restarted core's upload, and a missing pilot's part go.
+>
+> Since 2026-10-23, stage 8's design picks change this document in these places (user, 2026-10-23; [recording log](log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)):
+>
+> - [Budgets](#budgets): a session's recording is under 60 MB an hour with zstd on either machine, and a run with no session under 0.5 MB an hour; avatars' stage sets a figure for the aircraft's model, which a recording keeps at each load.
+> - [The files](#the-files): `inputs.zst` is one zstd frame for the run, flushed each second, where the table has a frame ended each second, so a killed core still loses only its last second.
+>   The recording stops when the data folder's drive has under 1 GB free, as it stops when a write fails.
+>   A run's folder holds `inputs.zst` and `log.txt`: v1 writes no [index](#the-index) and no `key`.
+> - [What keeps the drift from spreading](#what-keeps-the-drift-from-spreading) goes, where the note of 2026-10-21 left its other rules open: the kernel draws every unit's handles from one counter and its random IDs from one generator, and an output still names its unit, for the log; the core still sends each client `alive` every 2s whatever else it sends, as [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22 has it.
+> - [Marks](#marks) go: the EFB app's button that marks the moment sends the recording crate's command, which the recording holds as an input and the crate logs at info, and a write that never lands is an info line.
+> - [The home folder's path](#the-home-folders-path): the edge leaves every input as it came, and only the log subscriber replaces the path and the Windows username.
+> - [What each PC keeps](#what-each-pc-keeps): when the core starts, the recording crate lists `recordings\` through a job and deletes the oldest runs while all of them together pass 1 GB, with no rule for runs without a session or for the newest that held one.
+> - [The units](#the-units): `recording` holds the runs it last listed, which to keep, a slice of the runs by their folders' names, which are their starts in UTC, with their sizes, and commands to mark the moment and to delete a run; it takes the newest run as the one in progress, which the slice shows and the delete refuses.
+>   `recording-format` encodes the replay log alone.
+> - [Cases for the bench](#cases-for-the-bench): a recording cut between two flushes replays to the last; runs past 1 GB lose the oldest at the next start; the delete removes an older run and refuses the one in progress; a log line holding the home folder's path and the username shows neither; the clipboard and the replay on the same commit with a log line added stay; and the rest go.
 
 A recording is a replay log of the core's inputs, less the high-rate samples a feature marks as unrecorded, such as traffic's positions and the flight model's, so their bytes never reach the disk while the events around them do.
 A unit with any unrecorded input runs in a replay on what was recorded, and its outputs go unchecked, while every other unit replays exactly: the platform's, and the features state sync, pointer sync, take-control, voice, rate and pause, and Go to.

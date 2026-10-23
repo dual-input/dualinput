@@ -1,0 +1,421 @@
+node tools/bench.ts, 2026-10-23, on the development machine, on stage 8's code before its commit
+
+> cargo test -p messages --lib
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+     Running unittests src\lib.rs (target\debug\deps\messages-81262eca7fbd9f13.exe)
+
+running 60 tests
+test backend::export_bindings_leave ... ok
+test bench::export_bindings_called ... ok
+test bench::export_bindings_hello ... ok
+test bench::export_bindings_clientsact ... ok
+test bench::export_bindings_delivery ... ok
+test backend::export_bindings_created ... ok
+test backend::export_bindings_lookup ... ok
+test backend::export_bindings_kind ... ok
+test backend::export_bindings_older ... ok
+test backend::export_bindings_taken ... ok
+test backend::export_bindings_refused ... ok
+test bench::export_bindings_helperact ... ok
+test bench::export_bindings_signal ... ok
+test bench::export_bindings_simcall ... ok
+test bench::export_bindings_fromcore ... ok
+test backend::export_bindings_entry ... ok
+test clients::export_bindings_announce ... ok
+test clients::export_bindings_hello ... ok
+test bench::export_bindings_netact ... ok
+test bench::export_bindings_played ... ok
+test clients::export_bindings_level ... ok
+test clients::export_bindings_panelmodule ... ok
+test bench::export_bindings_standinhelperline ... ok
+test backend::export_bindings_renew ... ok
+test clients::export_bindings_portfile ... ok
+test clients::export_bindings_settingkind ... ok
+test core_helper::tests::a_bound_key_reads_from_its_setting ... ok
+test core_helper::tests::a_frame_is_its_length_then_its_postcard ... ok
+test core_helper::tests::a_length_over_the_most_is_none ... ok
+test core_helper::tests::hello_is_the_first_variant ... ok
+test clients::export_bindings_notice ... ok
+test bench::export_bindings_standinact ... ok
+test core_helper::export_bindings_deviceinfo ... ok
+test backend::export_bindings_newsession ... ok
+test core_helper::export_bindings_input ... ok
+test core_helper::export_bindings_wantid ... ok
+test core_helper::export_bindings_bound ... ok
+test net::export_bindings_path ... ok
+test backend::export_bindings_lookedup ... ok
+test net::export_bindings_relay ... ok
+test recording::export_bindings_deleterun ... ok
+test bench::export_bindings_standinhelperact ... ok
+test core_helper::export_bindings_helperslice ... ok
+test tests::hash_is_sha256_hex ... ok
+test tests::writes_the_stamp ... ok
+test recording::export_bindings_run ... ok
+test clients::export_bindings_setsetting ... ok
+test clients::export_bindings_fromclient ... ok
+test net::export_bindings_memberlink ... ok
+test sim::export_bindings_aircraft ... ok
+test sim::export_bindings_ending ... ok
+test sim::export_bindings_menupage ... ok
+test sim::export_bindings_modulestate ... ok
+test sim::export_bindings_stage ... ok
+test recording::export_bindings_recordingslice ... ok
+test clients::export_bindings_setting ... ok
+test clients::export_bindings_toclient ... ok
+test net::export_bindings_netslice ... ok
+test bench::export_bindings_tocore ... ok
+test sim::export_bindings_simslice ... ok
+
+test result: ok. 60 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+
+> cargo build -p dualinput-core -p stand-in-core-helper -p bench-relay --features dualinput-core/stand-in --target-dir target\bench
+   Compiling dualinput-core v0.1.0 (<repository>\src\apps\core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.86s
+> node --test --test-concurrency=1 --test-force-exit tools/bench/scenarios/builds.ts tools/bench/scenarios/clients-outages.ts tools/bench/scenarios/clients-panels.ts tools/bench/scenarios/clients-protocol.ts tools/bench/scenarios/core-helper.ts tools/bench/scenarios/killed-core.ts tools/bench/scenarios/network-loss.ts tools/bench/scenarios/network-outages.ts tools/bench/scenarios/network-relays.ts tools/bench/scenarios/network.ts tools/bench/scenarios/recording.ts tools/bench/scenarios/sim-connections.ts tools/bench/scenarios/sim-load.ts tools/bench/scenarios/sim-module.ts tools/bench/scenarios/sim-runs.ts
+TAP version 13
+# Subtest: the bench build and the release build carry one message crate, and the release build reaches no stand-in sim
+ok 1 - the bench build and the release build carry one message crate, and the release build reaches no stand-in sim
+  ---
+  duration_ms: 547.072
+  type: 'test'
+  ...
+# Subtest: the core suspended for 12s leaves every page its socket, and each panel's modules carry on without loading again
+ok 2 - the core suspended for 12s leaves every page its socket, and each panel's modules carry on without loading again
+  ---
+  duration_ms: 20942.3176
+  type: 'test'
+  ...
+# budget: a page connected again 3ms after the restarted core's announcement, against 2,000ms
+# budget: a page connected again 3ms after the restarted core's announcement, against 2,000ms
+# Subtest: the core restarted on another port has every page connect again within 2s of its next announcement
+ok 3 - the core restarted on another port has every page connect again within 2s of its next announcement
+  ---
+  duration_ms: 4130.7071
+  type: 'test'
+  ...
+# budget: 20 panels answered 30ms after the profile loaded, against 1,000ms
+# Subtest: panels connect only in a session, each of 20 is answered within 1s of the profile loading, and one told none stays away until the next session
+ok 4 - panels connect only in a session, each of 20 is answered within 1s of the profile loading, and one told none stays away until the next session
+  ---
+  duration_ms: 9206.5779
+  type: 'test'
+  ...
+# Subtest: a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old
+ok 5 - a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old
+  ---
+  duration_ms: 4070.5925
+  type: 'test'
+  ...
+# budget: at most 20.7 messages a second to one panel, against 30
+# budget: the slowest input of a run with 20 panels in rounds took 305µs, 0 over 1ms, against 1,000µs for a round
+# Subtest: a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop
+ok 6 - a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop
+  ---
+  duration_ms: 6088.044
+  type: 'test'
+  ...
+# Subtest: no cockpit panel within 10s of the profile loading raises the clients crate's trouble notice, cleared once one connects
+ok 7 - no cockpit panel within 10s of the profile loading raises the clients crate's trouble notice, cleared once one connects
+  ---
+  duration_ms: 14072.2019
+  type: 'test'
+  ...
+# Subtest: a module from another build while a test routine is fed raises the sim service's trouble notice for our package
+ok 8 - a module from another build while a test routine is fed raises the sim service's trouble notice for our package
+  ---
+  duration_ms: 4104.3585
+  type: 'test'
+  ...
+# Subtest: a fake page that heard the stand-in's announcement connects, and the core answers its commands
+ok 9 - a fake page that heard the stand-in's announcement connects, and the core answers its commands
+  ---
+  duration_ms: 2074.5689
+  type: 'test'
+  ...
+# Subtest: a socket from a browser page closes with 1008, and nothing it sent reaches the loop
+ok 10 - a socket from a browser page closes with 1008, and nothing it sent reaches the loop
+  ---
+  duration_ms: 2377.1791
+  type: 'test'
+  ...
+# Subtest: a client of another version is logged with both versions and still served, and a message that doesn't parse is dropped
+ok 11 - a client of another version is logged with both versions and still served, and a message that doesn't parse is dropped
+  ---
+  duration_ms: 2075.325
+  type: 'test'
+  ...
+# Subtest: a settings file keeps a key no unit registered through the core's write of it
+ok 12 - a settings file keeps a key no unit registered through the core's write of it
+  ---
+  duration_ms: 2098.4913
+  type: 'test'
+  ...
+# Subtest: a slice that changes 100 times a second reaches a page at most once a round
+ok 13 - a slice that changes 100 times a second reaches a page at most once a round
+  ---
+  duration_ms: 4578.2271
+  type: 'test'
+  ...
+# Subtest: the helper runs only while a want is on, gets the sound and then the wants after its hello, and exits once nothing is wanted
+ok 14 - the helper runs only while a want is on, gets the sound and then the wants after its hello, and exits once nothing is wanted
+  ---
+  duration_ms: 1173.5622
+  type: 'test'
+  ...
+# budget: the helper ran again with every want sent 2027ms after it was killed, against 3,000ms
+# Subtest: a press reaches the feature, and a helper killed while a want is on runs again within 3s with the binding sent as before
+ok 15 - a press reaches the feature, and a helper killed while a want is on runs again within 3s with the binding sent as before
+  ---
+  duration_ms: 2106.0082
+  type: 'test'
+  ...
+# budget: the helper exited 5ms after the core was killed, against 1,000ms
+# Subtest: the core killed, the helper exits within 1s
+ok 16 - the core killed, the helper exits within 1s
+  ---
+  duration_ms: 68.7012
+  type: 'test'
+  ...
+# Subtest: a helper of another build is logged, killed, and started again, and the trouble notice shows 5s after it went down
+ok 17 - a helper of another build is logged, killed, and started again, and the trouble notice shows 5s after it went down
+  ---
+  duration_ms: 8176.3789
+  type: 'test'
+  ...
+# Subtest: the next press turns itself off once it comes, and a setting changed whose key a binding names sends the wants again
+ok 18 - the next press turns itself off once it comes, and a setting changed whose key a binding names sends the wants again
+  ---
+  duration_ms: 2122.3807
+  type: 'test'
+  ...
+# Subtest: a sound plays while the helper runs, and a play while it's stopped is dropped
+ok 19 - a sound plays while the helper runs, and a play while it's stopped is dropped
+  ---
+  duration_ms: 638.7747
+  type: 'test'
+  ...
+# Subtest: a want the helper can't carry out warns, naming the feature, until the want goes off, and the device list ends at its answer or its failure
+ok 20 - a want the helper can't carry out warns, naming the feature, until the want goes off, and the device list ends at its answer or its failure
+  ---
+  duration_ms: 2228.9149
+  type: 'test'
+  ...
+# Subtest: a capture's program and frames reach its feature, and a missing output device warns until the helper plays on it
+ok 21 - a capture's program and frames reach its feature, and a missing output device warns until the helper plays on it
+  ---
+  duration_ms: 2168.9898
+  type: 'test'
+  ...
+# Subtest: a helper that won't start is tried again while a want is on, even after a want went on and off before the start failed
+ok 22 - a helper that won't start is tried again while a want is on, even after a want went on and off before the start failed
+  ---
+  duration_ms: 73.416
+  type: 'test'
+  ...
+# budget: 600 mouse moves reached the core and 600 frames reached the helper in 3s, each way against 200 a second
+# budget: the slowest input of a run with 200 messages a second each way took 521µs, against 1,000µs
+# Subtest: the pipe carries 200 messages a second each way, each handled within the loop's 1ms
+ok 23 - the pipe carries 200 messages a second each way, each handled within the loop's 1ms
+  ---
+  duration_ms: 4095.4103
+  type: 'test'
+  ...
+# Subtest: a killed core's recording replays to its last flush, losing at most its last second
+ok 24 - a killed core's recording replays to its last flush, losing at most its last second
+  ---
+  duration_ms: 4720.7109
+  type: 'test'
+  ...
+# 257 of 300 lines reached the recording, which lost the last 666ms before the kill and stopped after its last flush
+# Subtest: at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+ok 25 - at 1% and 3% held back, the streams' p99 lateness stays within 17ms of the one-off packets'
+  ---
+  duration_ms: 93314.7608
+  type: 'test'
+  ...
+# 22ms away at 1%: p99 stream 40.7ms, newest 40.7ms, deadline 40.7ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 22ms away at 3%: p99 stream 41.2ms, newest 41.2ms, deadline 41.1ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 1%: p99 stream 149.1ms, newest 141.1ms, deadline 138.6ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# 84ms away at 3%: p99 stream 149.7ms, newest 149.8ms, deadline 149.8ms; 400, 1420, and 1000 came, 0 newest behind a newer one
+# Subtest: holding one core's relay connection back leaves the other pair's messages on time
+ok 26 - holding one core's relay connection back leaves the other pair's messages on time
+  ---
+  duration_ms: 23683.4012
+  type: 'test'
+  ...
+# p99 to the core not held back: newest 1.2ms, stream 1.4ms; to the held one: newest 149.8ms
+# Subtest: v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+ok 27 - v1's busiest mix through the relay: its peak rate, the cores' CPU, and the loop's minute
+  ---
+  duration_ms: 73668.9336
+  type: 'test'
+  ...
+# join through the relay 1079ms; the sender's peak through the relay 35309 bytes in a second, 34926 a second on average
+# CPU of one core over the mix: the sender 9.14%, the receiver 5.70%
+# received: 4615 newest, 3250 deadline, 1300 stream; p99 1.1ms, 1.3ms, 1.5ms
+# the receiver's loop: 19720112464µs  INFO dualinput_core::loop_stats: the loop's stats window="minute" seconds=60.0 inputs=9261 busy_percent=0.56 wait_p50_us=11 wait_p99_us=43 wait_p999_us=67 wait_max_us=2415 over_1ms=0 slowest_us=460 slowest_seq=27 slowest_stamp=19661261420
+# Subtest: the link is lost after 5s of each outage, and comes back after it
+ok 28 - the link is lost after 5s of each outage, and comes back after it
+  ---
+  duration_ms: 374446.1299
+  type: 'test'
+  ...
+# a 30s cut: lost after 4999ms, up again 5452ms after it ended
+# a 60s cut: lost after 5000ms, up again 25874ms after it ended
+# a 120s cut: lost after 5000ms, up again 7122ms after it ended
+# the relay down for 40s: lost after 4995ms, up again 20652ms after it came back
+# a core suspended for 60s: up again 38ms after it resumed
+# Subtest: with the cores homed at different relays, both directions cross the dialed core's home relay
+ok 29 - with the cores homed at different relays, both directions cross the dialed core's home relay
+  ---
+  duration_ms: 74111.8283
+  type: 'test'
+  ...
+# homes: the host http://127.0.0.1:53880/, the joiner http://127.0.0.1:53882/
+# bytes into each relay over 5s: the host 124489 and 0, the joiner 124699 and 0
+# the host's home relay cut for 60s: the link was lost, and up again 2003ms after the cut ended; homes then: http://127.0.0.1:53880/ then http://127.0.0.1:53882/
+# Subtest: two cores join through the backend, link through a relay, lose the link, and link again
+ok 30 - two cores join through the backend, link through a relay, lose the link, and link again
+  ---
+  duration_ms: 36994.159
+  type: 'test'
+  ...
+# from the code entered to the link up through the relay: 1143ms
+# a 10s cut: the link lost after 4999ms, and up again 7566ms after the cut ended
+# LinkUp after the cut: 1 on the host, 1 on the joiner
+# clock offsets: -54, 28µs
+# Subtest: a core killed and started again links under a higher restart count, with no member counted out
+ok 31 - a core killed and started again links under a higher restart count, with no member counted out
+  ---
+  duration_ms: 4523.3452
+  type: 'test'
+  ...
+# the restarted core linked 33ms after it started; the other core said: net up acc2a0b3 again=false restart=1
+# Subtest: a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+ok 32 - a joiner whose first dials fail redials every 2s and links once the proxy lets it through
+  ---
+  duration_ms: 18852.8769
+  type: 'test'
+  ...
+# linked 15392ms after the join, through an 8s cut
+# Subtest: a connection with another code closes with its code, and one with no first message never links
+ok 33 - a connection with another code closes with its code, and one with no first message never links
+  ---
+  duration_ms: 23497.5141
+  type: 'test'
+  ...
+# the host refused the other code with code 10, and never linked the silent core
+# Subtest: a join on a direct path links within 3s of the code entered
+ok 34 - a join on a direct path links within 3s of the code entered
+  ---
+  duration_ms: 7459.7774
+  type: 'test'
+  ...
+# from the code entered to the link up: 1091ms
+# Subtest: a page deletes an older run, is refused the one in progress, and marks the moment
+ok 35 - a page deletes an older run, is refused the one in progress, and marks the moment
+  ---
+  duration_ms: 2115.9591
+  type: 'test'
+  ...
+# Subtest: a call with no sim fails at once
+ok 36 - a call with no sim fails at once
+  ---
+  duration_ms: 65.2139
+  type: 'test'
+  ...
+# Subtest: the platform's connection takes its masking group before the sim's open reply
+ok 37 - the platform's connection takes its masking group before the sim's open reply
+  ---
+  duration_ms: 2052.5278
+  type: 'test'
+  ...
+# Subtest: a lost connection opens again with its setup made again, and the gone one's messages are dropped
+ok 38 - a lost connection opens again with its setup made again, and the gone one's messages are dropped
+  ---
+  duration_ms: 2644.6146
+  type: 'test'
+  ...
+# Subtest: a variable the sim rejects leaves the watch's other values arriving
+ok 39 - a variable the sim rejects leaves the watch's other values arriving
+  ---
+  duration_ms: 2040.6428
+  type: 'test'
+  ...
+# Subtest: p08's flight load raises one Loading, one Ready to fly, and one Flying, with the PA-24
+ok 40 - p08's flight load raises one Loading, one Ready to fly, and one Flying, with the PA-24
+  ---
+  duration_ms: 2729.1126
+  type: 'test'
+  ...
+# Subtest: a module from another build runs none of the core's feeds, and the core reports it differs
+ok 41 - a module from another build runs none of the core's feeds, and the core reports it differs
+  ---
+  duration_ms: 2752.3762
+  type: 'test'
+  ...
+# Subtest: the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes
+ok 42 - the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes
+  ---
+  duration_ms: 5652.9946
+  type: 'test'
+  ...
+# Subtest: a routine fed again after its end starts with nothing from its last feeding
+ok 43 - a routine fed again after its end starts with nothing from its last feeding
+  ---
+  duration_ms: 2716.2726
+  type: 'test'
+  ...
+# Subtest: a module stopped by a routine's panic, with a routine live in Flying, has the core unfreeze the aircraft
+ok 44 - a module stopped by a routine's panic, with a routine live in Flying, has the core unfreeze the aircraft
+  ---
+  duration_ms: 5278.4185
+  type: 'test'
+  ...
+# the aircraft unfroze 3070ms after the module stopped
+# Subtest: a module that stops while Loading leaves the aircraft frozen
+ok 45 - a module that stops while Loading leaves the aircraft frozen
+  ---
+  duration_ms: 48830.5791
+  type: 'test'
+  ...
+# Subtest: a module that stops while paused leaves the aircraft frozen
+ok 46 - a module that stops while paused leaves the aircraft frozen
+  ---
+  duration_ms: 6874.5632
+  type: 'test'
+  ...
+# Subtest: a module that stops with no routine live leaves the aircraft frozen
+ok 47 - a module that stops with no routine live leaves the aircraft frozen
+  ---
+  duration_ms: 6688.3848
+  type: 'test'
+  ...
+# Subtest: a stopped module's 3s count only from the end of a pause
+ok 48 - a stopped module's 3s count only from the end of a pause
+  ---
+  duration_ms: 9481.7149
+  type: 'test'
+  ...
+# the aircraft unfroze 3093ms after the pause ended
+# Subtest: the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash
+ok 49 - the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash
+  ---
+  duration_ms: 6042.7141
+  type: 'test'
+  ...
+# Subtest: two bench cores each see only their own stub, and killing one ends that core's sim alone
+ok 50 - two bench cores each see only their own stub, and killing one ends that core's sim alone
+  ---
+  duration_ms: 2602.9433
+  type: 'test'
+  ...
+1..50
+# tests 50
+# suites 0
+# pass 50
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 944292.1984

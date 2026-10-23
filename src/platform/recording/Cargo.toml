@@ -1,0 +1,15 @@
+[package]
+name = "recording"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clients = { path = "../clients" }
+kernel = { path = "../kernel" }
+messages = { path = "../../engines/messages" }
+serde_json = "1.0.145"
+tracing = "0.1.44"
+
+[lints]
+workspace = true

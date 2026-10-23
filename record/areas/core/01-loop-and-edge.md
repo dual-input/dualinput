@@ -14,6 +14,14 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 > - [A panic](#a-panic)'s hook has no unrecorded input to record, and a panic in any unit replays at the same input.
 > - [Logging](#logging): each unit logs at info each decision a pilot can notice, with its reason, such as control passing, a value applied or refused, a link lost, and catch-up's steps.
 >   When a pilot reports a problem, we ask for the run's `log.txt` first, and for the recording only when the log isn't enough, and the pilot sends either by hand, where the 16 MB cap's arithmetic has a bug report upload the log.
+>
+> Since 2026-10-23, stage 8's design picks change this document in three places (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)):
+>
+> - [Timers, jobs, and IDs](#timers-jobs-and-ids): the kernel draws every unit's handles from one counter, and every random ID from one ChaCha20 generator keyed with the core's seed, since no unit is partly recorded; a handle still names the unit that drew it, whose handler its timer's firing or its job's result calls.
+>   chacha20 stays, since nothing in it reaches `getrandom`.
+>   A job may also list a folder, with each entry's size, or delete a file or a folder, for the recording crate's runs.
+> - [What a recording holds](#what-a-recording-holds): a recording holds inputs, the sandbox's stops, and checkpoints, and no marks, in one zstd frame for the run, flushed each second.
+> - [Inputs](#inputs): the edge leaves every input as it came, so no placeholder replaces the home folder's path, and no output that names a file gets the path back ([the home folder's path](../recording/01-recording-and-bug-reports.md#the-home-folders-path)).
 
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.

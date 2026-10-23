@@ -15,7 +15,6 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::{Child, ChildStdin, ChildStdout, Command};
 use tokio::sync::mpsc;
 
-use crate::home::Home;
 use crate::queue::Queue;
 use crate::sinks::Sinks;
 
@@ -40,7 +39,6 @@ pub fn start(
     runtime: &tokio::runtime::Handle,
     queue: Arc<Queue>,
     source: SourceId,
-    home: Arc<Home>,
     sinks: &mut Sinks,
 ) {
     let runtime = runtime.clone();
@@ -59,7 +57,7 @@ pub fn start(
                     frames: Some(frames),
                     kill,
                 });
-                let path = program_path(&home, &program);
+                let path = program_path(&program);
                 runtime.spawn(run_helper(
                     run,
                     path,
@@ -107,10 +105,8 @@ pub fn start(
 }
 
 /// The program to start: the helper beside the core, or the one the development setting
-/// names, which a relative path finds from the core's folder. The setting came in with an
-/// input, so its home folder's path may be hidden, and goes back first
-/// (record/areas/core/01-loop-and-edge.md, "Inputs").
-fn program_path(home: &Home, program: &str) -> PathBuf {
+/// names, which a relative path finds from the core's folder.
+fn program_path(program: &str) -> PathBuf {
     let folder = std::env::current_exe()
         .ok()
         .and_then(|exe| exe.parent().map(PathBuf::from))
@@ -118,7 +114,7 @@ fn program_path(home: &Home, program: &str) -> PathBuf {
     if program.is_empty() {
         folder.join(PROGRAM)
     } else {
-        folder.join(home.reveal(program))
+        folder.join(program)
     }
 }
 

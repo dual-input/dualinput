@@ -8,6 +8,8 @@ Decides:     What comes back after a link, a core, a sim, or a PC goes down; how
 
 > **Note**
 > Since 2026-10-21, the core records every input, so [keys several members write](#keys-several-members-write)' reason for seat claims riding avatars' poses rather than the session channel, avatars being partly recorded, goes, and whether they move is open, as [avatars](../avatars/01-avatars.md)' note of 2026-10-21 says (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+>
+> Since 2026-10-23, a recording holds no marks, so a driven entry, in [entries the aircraft drives itself](#entries-the-aircraft-drives-itself), goes in the run's log at info rather than marking the recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 
 What comes back depends on what went down.
 A pilot whose link was cut while everything else kept running gets every missed change replayed in order, and loses nothing, since their cockpit kept everything no profile entry reads, such as a display's page or an FMS.

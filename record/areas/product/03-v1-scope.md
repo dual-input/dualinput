@@ -13,6 +13,8 @@ Decides:     The scope of every v1 feature.
 > - When a pilot reports a problem, we ask for the run's log first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand.
 > - Each pilot's upload to our Worker, the 30 days in R2, the report page's upload, our view of who has uploaded and who's missing, and the offer of a pilot's part come after v1.
 >   So [the EFB app](#efb-app)'s line on a moment marked for a bug report the pilot uploads later, and the notices that ask for a bug report from the desktop app, such as [notification banner](#notification-banner)'s, name an upload v1 doesn't have.
+>
+> Since 2026-10-23, Dual Input logs, rather than marks the recording, when a synced control never matches after its retries, in [state sync](#state-sync) and [recording and bug reports](#recording-and-bug-reports); the EFB app's button logs the moment the pilot pressed it, which the recording also holds as an input; and 1 GB holds about 17 hours of a busy session's recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.

@@ -946,6 +946,7 @@ dependencies = [
  "kernel",
  "messages",
  "network",
+ "recording",
  "recording-format",
  "reqwest",
  "routine-host",
@@ -3225,6 +3226,17 @@ dependencies = [
  "time",
  "x509-parser",
  "yasna",
+]
+
+[[package]]
+name = "recording"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "serde_json",
+ "tracing",
 ]
 
 [[package]]

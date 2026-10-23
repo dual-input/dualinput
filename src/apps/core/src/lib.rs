@@ -26,7 +26,6 @@ mod clock;
 mod cpu;
 mod data_folder;
 mod edges;
-mod home;
 mod log;
 mod loop_stats;
 mod panic;
@@ -118,7 +117,7 @@ fn replay_file(file: &str, level: LevelFilter, units: &[fn(&mut Registry)]) -> E
                         n => format!("all {n} checkpoints matched"),
                     };
                     let cut = if truncated {
-                        ", up to the last whole frame of a cut recording"
+                        ", up to the last flush of a cut recording"
                     } else {
                         ""
                     };

@@ -10,7 +10,6 @@ use std::sync::{Arc, OnceLock};
 use kernel::Input;
 use tracing::level_filters::LevelFilter;
 
-use crate::home::Home;
 use crate::log::{self, Log};
 use crate::panic;
 use crate::recording::writer;
@@ -41,11 +40,10 @@ pub fn open(
     path: &Path,
     cap: Option<u64>,
     level: LevelFilter,
-    home: &Home,
     abort_on_panic: bool,
 ) -> std::io::Result<(Arc<Context>, Scope)> {
     let context = Arc::new(Context {
-        log: Log::open(path, cap, level, home)?,
+        log: Log::open(path, cap, level)?,
         writer: OnceLock::new(),
         abort_on_panic,
     });

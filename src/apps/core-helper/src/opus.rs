@@ -94,14 +94,22 @@ mod tests {
             .collect()
     }
 
-    /// 10s of BeyondATC's speech as Ogg Opus at 128 kbps, the stretch of stage 6's recording
-    /// that held the most speech, which experiments/areas/core/opus-quality's `snippet` wrote
+    /// Stage 6's recording of BeyondATC, 114s holding 90s of speech, as a 48 kHz 16-bit mono
+    /// WAV, since its two channels matched within one 16-bit step
     /// (record/areas/core/04-core-helper.md's note of 2026-10-22).
-    const ATC: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/beyondatc-10s.opus");
+    const ATC: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/beyondatc.wav");
 
     /// The ATC speech's 20ms frames that cross ATC audio's gate, at −50dBFS.
     fn atc_frames() -> Vec<Vec<f32>> {
-        let samples = crate::audio::sound::decode(&std::fs::read(ATC).unwrap()).unwrap();
+        let wav = std::fs::read(ATC).unwrap();
+        assert!(
+            wav.starts_with(b"RIFF") && wav[20..24] == [1, 0, 1, 0],
+            "the fixture should be a 16-bit mono PCM WAV"
+        );
+        let samples: Vec<f32> = wav[44..]
+            .chunks_exact(2)
+            .map(|b| f32::from(i16::from_le_bytes([b[0], b[1]])) / 32_768.0)
+            .collect();
         samples
             .chunks_exact(FRAME)
             .filter(|f| crate::audio::gate::level_dbfs(f) > -50.0)

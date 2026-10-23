@@ -7,9 +7,6 @@
 //!   opus-quality encode <in.wav> <out folder>
 //!       makes each setting's copy of the recording, mixed to mono as the helper mixes it,
 //!       encoded and decoded, at the original's loudness, and prints each one's cost
-//!   opus-quality snippet <in.wav> <secs> <out.opus>
-//!       writes the stretch of `secs` that holds the most speech, mixed to mono, as Ogg Opus at
-//!       128 kbps, near enough the original that encoding it again stands in for the original
 
 use std::time::{Duration, Instant};
 
@@ -26,8 +23,7 @@ fn main() {
     let result = match args[..] {
         ["record", pid, secs, out] => record(pid.parse().unwrap_or(0), secs.parse().unwrap_or(60), out),
         ["encode", input, out] => encode(input, out),
-        ["snippet", input, secs, out] => snippet(input, secs.parse().unwrap_or(10), out),
-        _ => Err("usage: opus-quality record <pid> <secs> <out.wav> | encode <in.wav> <out folder> | snippet <in.wav> <secs> <out.opus>".into()),
+        _ => Err("usage: opus-quality record <pid> <secs> <out.wav> | encode <in.wav> <out folder>".into()),
     };
     if let Err(error) = result {
         eprintln!("{error}");
@@ -236,53 +232,6 @@ fn encode(input: &str, out: &str) -> Result<(), String> {
             20.0 * (gain as f64).log10()
         );
     }
-    Ok(())
-}
-
-fn snippet(input: &str, secs: usize, out: &str) -> Result<(), String> {
-    use ogg::writing::{PacketWriteEndInfo, PacketWriter};
-    let (stereo, channels) = read_wav(input)?;
-    let mono: Vec<f32> = if channels == 2 { stereo.chunks_exact(2).map(|f| (f[0] + f[1]) / 2.0).collect() } else { stereo };
-    // Each 20ms frame's speech, then the window of `secs` with the most frames above −60 dBFS.
-    let speech: Vec<bool> = mono.chunks_exact(FRAME).map(|f| dbfs_of(f) > -60.0).collect();
-    let span = secs * 50;
-    let start = (0..speech.len().saturating_sub(span)).step_by(50).max_by_key(|&s| speech[s..s + span].iter().filter(|x| **x).count()).unwrap_or(0);
-    let frames = &mono[start * FRAME..(start + span) * FRAME];
-    let mut encoder = opus_rs::OpusEncoder::new(RATE as i32, 1, opus_rs::Application::Audio).map_err(str::to_string)?;
-    encoder.bitrate_bps = 128_000;
-    encoder.use_cbr = false;
-    encoder.complexity = 9;
-    let mut file = Vec::new();
-    let mut writer = PacketWriter::new(&mut file);
-    // RFC 7845's identification and comment headers, as the helper's sound reader takes them.
-    let mut head = b"OpusHead".to_vec();
-    head.extend([1, 1]);
-    head.extend(0u16.to_le_bytes());
-    head.extend((RATE as u32).to_le_bytes());
-    head.extend([0, 0, 0]);
-    writer.write_packet(head, 1, PacketWriteEndInfo::EndPage, 0).map_err(|e| e.to_string())?;
-    let mut tags = b"OpusTags".to_vec();
-    let vendor = b"Dual Input";
-    tags.extend((vendor.len() as u32).to_le_bytes());
-    tags.extend(vendor);
-    tags.extend(0u32.to_le_bytes());
-    writer.write_packet(tags, 1, PacketWriteEndInfo::EndPage, 0).map_err(|e| e.to_string())?;
-    let mut packet = vec![0u8; 1276];
-    let chunks: Vec<&[f32]> = frames.chunks_exact(FRAME).collect();
-    for (i, frame) in chunks.iter().enumerate() {
-        let length = encoder.encode(frame, FRAME, &mut packet).map_err(str::to_string)?;
-        let end = if i + 1 == chunks.len() { PacketWriteEndInfo::EndStream } else { PacketWriteEndInfo::NormalPacket };
-        writer.write_packet(packet[..length].to_vec(), 1, end, ((i + 1) * FRAME) as u64).map_err(|e| e.to_string())?;
-    }
-    drop(writer);
-    std::fs::write(out, &file).map_err(|e| e.to_string())?;
-    let spoken = speech[start..start + span].iter().filter(|x| **x).count();
-    println!(
-        "wrote {secs}s from {:.1}s in, {:.1}s of it speech, {} bytes",
-        start as f64 * 0.02,
-        spoken as f64 * 0.02,
-        file.len()
-    );
     Ok(())
 }
 

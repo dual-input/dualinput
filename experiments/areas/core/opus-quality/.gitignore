@@ -1,7 +1,7 @@
 # The probe's build output.
 target/
 
-# Recordings of an ATC app's speech, and every copy made from them, each far longer than the
-# short stretch committed as the Opus check's fixture, src/apps/core-helper/fixtures/
-# (record/areas/core/04-core-helper.md's note of 2026-10-22).
+# Its recordings and their copies, as `record` and `encode` write them. The recording of
+# BeyondATC that's kept is committed as the Opus check's fixture,
+# src/apps/core-helper/fixtures/beyondatc.wav.
 recordings/

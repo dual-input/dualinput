@@ -9,7 +9,7 @@ pub(crate) mod gate;
 mod jitter;
 mod output;
 mod programs;
-pub(crate) mod sound;
+mod sound;
 
 use std::collections::BTreeMap;
 use std::sync::Arc;

@@ -6,30 +6,9 @@ Depends on:  01-profile-entries.md, 02-live-sync.md, ../product/03-v1-scope.md (
 Decides:     Which catch-up runs when, the order state applies in, what happens while catch-up runs, and when a freshly loaded aircraft counts as settled.
 ```
 
-> **Note**
-> Since 2026-10-11, a pilot cut off for up to 30 minutes whose sim kept running comes back to a replay, where [replaying a short outage](#replaying-a-short-outage) below sizes one for 5 minutes; the replay keeps the rule below, which bounds it at 2s a change, and skips all but the last of each run of PF-owned changes, which is all the shortening it needs ([04-order-and-recovery](../sync/04-order-and-recovery.md#the-replay)).
-> Control no longer passes when the PF's connection drops, so a PM's catch-up doesn't stop for it, as [while catch-up runs](#while-catch-up-runs) below says; a catch-up cut off by a lost link starts again on the new connection ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
-> Since 2026-10-11, catch-up writes each entry in the order the flying machine's cockpit first took its value, which settles [choosing the order](#choosing-the-order); v1's catch-up pipeline has the one step, catching up state; the catching-up machine takes the catch-up's vector clock for every counter but its own, so a queued message the state already holds drops as a copy; control can't pass to a pilot until their own catch-up ends; and a sim that closed comes back by catch-up, never by replay, a sim crash included, and so does a core that crashed ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
-> Since 2026-10-12, whether catch-up's writes are retried, and whether a write function runs again when an entry it read lands, as steps 4 and 5 in [catching up state](#catching-up-state) say, stay open for sync's stage of step 8, which starts from one attempt per write and one run of a function per value; a write right behind the battery switch, before the bus has power, is among the cases it tests, and that such a write fails at all is unmeasured ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
-> [04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up) also changes this document in six places:
->
-> - An ex-PF catches up state from the new PF when a change of control drops a message they had applied, a third row for [which catch-up runs when](#which-catch-up-runs-when) ([a change of control](../sync/04-order-and-recovery.md#a-change-of-control)).
-> - A catch-up ends once it has made its last write and its aircraft has settled, whichever comes later, where [while catch-up runs](#while-catch-up-runs) below ends it when the aircraft has settled.
-> - The core reads an input event's value once when it starts watching it, since subscribing reports nothing until the value changes, so step 2 of [catching up state](#catching-up-state) can tell whether that entry matches.
-> - What queues while catch-up runs applies on top paced as every cockpit message is, each waiting only what's left of the gap its sender left before it, capped at 2s ([the replay](../sync/04-order-and-recovery.md#the-replay)).
-> - When a session starts, or its profile loads, after Ready to fly, [settling after a load](#settling-after-a-load)'s 30s floor still counts from Ready to fly, and its 15s quiet window from the profile's load ([an aircraft that loaded before its session](../sync/04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session)).
-> - An entry that changes more than 5 times since the load just leaves the quiet check for that load; "driven by the aircraft" means only 04-order-and-recovery's test, which stops an entry syncing ([entries the aircraft drives itself](../sync/04-order-and-recovery.md#entries-the-aircraft-drives-itself)).
->
-> Since 2026-10-16, [the sync units](05-units.md#catch-up) has the catching-up machine ask the flying machine for its catch-up: whenever its profile loads after preflight has ended, which covers a late joiner, a pilot back after a sim restart, and a profile that loaded late; when preflight ends with its profile loaded; and again when control passes during it ([which catch-up runs when](#which-catch-up-runs-when)).
-> Step 4 of [catching up state](#catching-up-state) runs a write function once, never again when an entry it read lands ([write functions](05-units.md#write-functions)); what queued during a catch-up applies once its writes are made; and [what the open questions still hold](05-units.md#what-the-open-questions-still-hold) answers [open questions](#open-questions).
->
-> Since 2026-10-17, pointer presses that arrive during the catch-up preflight's end starts queue and apply once its writes are made, since neither cockpit's displays were touched in preflight, where [while catch-up runs](#while-catch-up-runs) drops every press that arrives during a catch-up; and the catching-up machine's synced displays lock until it ends ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
->
-> Since 2026-10-23, an aircraft counts as settled 30s after Ready to fly, in [settling after a load](#settling-after-a-load), with no quiet window, no 1.5-minute cap, and no rule for an entry that changes more than 5 times, so the notes above on a late profile's window and on such an entry go, and [open questions](#open-questions)' item on the 30s floor is settled ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
-
 A cockpit catches up in one of two ways.
-After a short outage with the sim still running, it replays the changes it missed, in order.
-After a late join, a sim restart, or the end of preflight, it takes the flying machine's state as it stands, applies each entry once in an order step 7 decides, checks every write, and flags what never matches.
+After a link cut for up to 30 minutes, with the sim still running, it replays the changes it missed, in order.
+After a late join, a sim or core that went down, or the end of preflight, it takes the flying machine's state as it stands, applies each entry once in the order the flying machine's cockpit first took its value, checks every write, and flags what never matches.
 Events and pointer presses from before a catch-up began aren't recovered, so after a late join or a restart, a display's page, an FMS's contents, and anything else the profile can't read can differ.
 
 The flying machine is the PF's, and a following machine is any other pilot's.
@@ -38,20 +17,28 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 
 | Situation | Catch-up |
 | --- | --- |
-| A short outage, with the sim still running | Replay the stream since the drop: state changes, events, and pointer presses, in order |
-| Preflight ends, a pilot joins late, or a pilot rejoins after a sim restart | Catch up state, below |
+| A link cut for up to 30 minutes, with the sim still running | Replay the stream since the drop: state changes, events, and pointer presses, in order |
+| Preflight ends, a pilot joins late, or a pilot comes back after their sim closed or crashed, or their core crashed ([04-order-and-recovery](04-order-and-recovery.md#catch-up)) | Catch up state, below |
+| A change of control drops a message an ex-PF had applied ([a change of control](04-order-and-recovery.md#a-change-of-control)) | The ex-PF catches up state from the new PF |
 
 The replay needs only what was sent since the drop, up to the cut-off that ends a pilot's session ([the connection](../product/03-v1-scope.md#the-connection)), because a pilot cut off for longer comes back as a late joiner.
 
+The catching-up machine asks the flying machine for its catch-up ([catch-up](05-units.md#catch-up)):
+
+- whenever its profile loads after preflight has ended, which covers a late joiner, a pilot back after a sim restart, and a profile that loaded late;
+- when preflight ends with its profile loaded;
+- and again when control passes during it.
+
 ## Replaying a short outage
 
-The replay keeps the PF's spacing between changes, with each gap cut to at most 2s.
+The replay keeps the PF's spacing between changes, with each gap cut to at most 2s, and skips all but the last of each run of PF-owned changes ([04-order-and-recovery](04-order-and-recovery.md#the-replay)).
 
 Replayed back to back, a sequence that needs time between its steps breaks.
 Say the PF pressed a key that opens a display page, then pressed a button on that page a second later: with no gap, the second press lands before the page has drawn.
 Replayed at the PF's real spacing, a 5-minute outage takes 5 minutes to replay, while the following machine's position stays live.
-With gaps capped at 2s, an outage with 30 changes replays in about a minute at most, and each step keeps up to 2s of the time the PF gave it.
-A follow-up further apart than that, such as an APU bleed opened a minute after the APU start, still replays too early, and the bleed fails: that's the cost of a replay that ends within about a minute.
+With gaps capped at 2s, a replay lasts at most 2s for each change it carries: an outage with 30 changes replays in about a minute at most, and each step keeps up to 2s of the time the PF gave it.
+Skipping all but the last of each run of PF-owned changes is all the shortening a replay needs.
+A follow-up further apart than 2s, such as an APU bleed opened a minute after the APU start, still replays too early, and the bleed fails: that's the cost of the cap.
 The 2s is a starting value, to tune once we've watched a real outage replay.
 
 Our FS Copilot fork's pointer sync did the same for presses: it resent what it held in sequence order, kept each press's idle time before it, `GapMs`, capped at 1s, so "a panel that loads a page after a click gets the time the pilot gave it", and dropped what the receiver had already applied (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
@@ -61,26 +48,27 @@ Dual Input's replay does the same for every kind of change, with the longer cap,
 
 1. The flying machine sends its state object as it stands.
 2. The catching-up machine skips every entry its cockpit already matches, and every watch-only entry, which it only compares.
+   The core reads an input event's value once when it starts watching it, since subscribing reports nothing until the value changes, so this step can tell whether that entry matches ([04-order-and-recovery](04-order-and-recovery.md#catch-up)).
 3. It applies each remaining entry once, at the PF's value, in the order [below](#choosing-the-order).
    Entries the PF never changed since the aircraft loaded go first.
    Immediate writes go out in that order in one short burst, and stepped writes start in that order and run side by side, since each moves a different control.
    Of two writes to one variable sent in one frame, the second won on every try on six studied aircraft, so SimConnect keeps the order of writes to one variable (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-two-writes-in-one-frame-land-in-the-order-sent-and-a-write-shows-within-2-frames)).
    Whether an aircraft's code sees writes to two different entries in the order sent, which is what an interlock turns on, is untested.
    For a shadow value, the catching-up machine steps the control by the difference between the PF's shadow and its own, and its own shadow counts those steps as they land.
-4. A write function runs again when an entry it read lands, so a transponder function that skipped while the battery was off runs once the battery is on.
-5. It checks every write, retries what doesn't match, and flags what never does, as live sync does ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)).
+4. A write function runs once, and never again when an entry it read lands ([write functions](05-units.md#write-functions)).
+5. It checks every write, giving each one attempt, and flags what never matches, as live sync does ([02-live-sync](02-live-sync.md#checking-that-a-write-landed)).
 
 Applying each entry once, at its final value, keeps the catching-up machine from running the PF's history: an APU the PF started, stopped, and started again starts once.
 
-Catching up state is one step of catch-up, and an aircraft's [plugin](../product/03-v1-scope.md#plugins) can add steps after it, such as one that sends the A220's `A22X.Resync` for its full state ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
+v1's catch-up pipeline has one step, catching up state, and an aircraft's [plugin](../product/03-v1-scope.md#plugins) can add steps after it, such as one that sends the A220's `A22X.Resync` for its full state ([04-room-for-later](../product/04-room-for-later.md#a-catch-up-pipeline)).
 
 ## Choosing the order
 
 The order matters for an interlock: a control that acts once, when it's set, and only if another control is already set.
-Take a hypothetical aircraft whose APU master, written before the battery, tries to start the APU, fails, and leaves the switch reading on: the check finds no mismatch to retry, and the APU stays off.
+Take a hypothetical aircraft whose APU master, written before the battery, tries to start the APU, fails, and leaves the switch reading on: the check finds no mismatch, and the APU stays off.
 Which real aircraft behave like this is unverified, and one probe on an aircraft with an APU would show it.
 
-Two orders were weighed, and we lean toward the second; the architecture decides between them at step 7 of [the plan](../product/plan.md):
+Two orders were weighed, and catch-up takes the second ([04-order-and-recovery](04-order-and-recovery.md#catch-up)):
 
 - **The order the PF last changed each entry**, which the stamps from [the conflict rule](02-live-sync.md#when-two-pilots-change-one-entry) already record, so it needs nothing more.
 - **The order each entry first took the value it holds now**, which needs the session's history, kept in the recording.
@@ -89,8 +77,8 @@ Say the PF turned the battery on, then the APU master, then cycled the battery o
 Both end on, and the battery's last change came after the APU's, so last-change order writes the APU master first, while the catching-up machine's battery is still off, and on the hypothetical aircraft the APU stays off with nothing flagged.
 The battery first took "on" before the APU did, so first-final-value order writes the battery first, and the APU starts.
 
-For a write that reads back wrong without power, such as a radio frequency, the two orders end the same way, because a retry lands it once the battery is on.
-If the PF's battery ends off, both orders skip it on a catching-up aircraft that loaded cold and dark, so writes that need power fail on every retry, and Dual Input flags them.
+A write that reads back wrong without power, such as a radio frequency, may fail right behind the battery switch, before the bus has power; that such a write fails at all is unmeasured, and it's among the cases the bench tests at sync's stage of step 8 ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).
+If the PF's battery ends off, both orders skip it on a catching-up aircraft that loaded cold and dark, so writes that need power fail, and Dual Input flags them.
 
 ## When preflight ends
 
@@ -102,15 +90,19 @@ When the countdown ends, every other pilot's cockpit catches up state from the P
 
 ## While catch-up runs
 
-A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a flight, and lasts until their aircraft has settled ([below](#settling-after-a-load)).
+A late joiner's or a rejoining pilot's catch-up starts as soon as they're in a flight, and ends once it has made its last write and its aircraft has settled, whichever comes later ([04-order-and-recovery](04-order-and-recovery.md#catch-up); [settling after a load](#settling-after-a-load)).
 
 - The catching-up pilot's own changes aren't sent, and Dual Input moves them back toward the PF's state, which also undoes the aircraft restoring its saved state.
   The banner says "Catching up...", and tells the pilot that switches they move now will be reset.
-- Changes the other pilots make while catch-up runs, state and events alike, queue, and replay in stream order on top of the catch-up.
+- The catching-up machine's synced displays lock until its catch-up ends ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+- Changes the other pilots make while catch-up runs, state and events alike, queue, and apply in stream order on top of the catch-up once its writes are made, each waiting only what's left of the gap its sender left before it, capped at 2s ([the replay](04-order-and-recovery.md#the-replay)).
   So if a pilot presses a state control, then an event control, then another state control, the event still applies between the two.
+  The catching-up machine takes the catch-up's vector clock for every counter but its own, so a queued message the state already holds drops as a copy ([04-order-and-recovery](04-order-and-recovery.md#catch-up)).
 - Pointer presses that arrive while catch-up runs are dropped, because the displays never showed the state those presses were made on.
   Our fork's pointer sync follows a similar rule for a new session, "recovery replays, first contact does not" (documented in the FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R04), and drops a press for a display that hasn't announced itself (documented in the FS Copilot fork, `record/pointer-forwarding/docs/13-pr-prep.md`).
-- When the PF's connection drops and the PM is catching up, their catch-up stops first ([the take-control key](../product/03-v1-scope.md#take-control-key)).
+  In the catch-up that preflight's end starts, presses queue instead and apply once its writes are made, since neither cockpit's displays were touched in preflight ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+- Control can't pass to the catching-up pilot until their own catch-up ends ([04-order-and-recovery](04-order-and-recovery.md#catch-up)).
+  A PM's catch-up doesn't stop when the PF's connection drops, since that doesn't pass control, and a catch-up cut off by a lost link starts again on the new connection ([01-between-machines](../network/01-between-machines.md#while-a-link-is-lost)).
 
 ## Settling after a load
 
@@ -126,25 +118,20 @@ The sim marks Ready to fly with the flow event `SIMCONNECT_FLOW_EVENT_RTC_END` (
 Our client got it as the button was clicked, by the pilot or by Flow Pro, and again for each load when a flight loaded twice, so the last one marks the load the pilot flies (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
 Counted from Fly, the rule can run out behind the loading screen, where nothing changes: the A350's second load took 67s from Fly to Ready to fly, so the rule called it settled 37s before Ready, with 354 values still to change (same log entry).
 
-So an aircraft counts as settled at whichever comes first:
+So an aircraft counts as settled 30s after load ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+When a session starts, or its profile loads, after Ready to fly, the 30s still counts from Ready to fly ([an aircraft that loaded before its session](04-order-and-recovery.md#an-aircraft-that-loaded-before-its-session)).
 
-- 15s with no change to any state entry, counted from 15s after load, so 30s after load at the earliest
-- 1.5 minutes after load, in which case the recording notes that the aircraft never went quiet
-
-Only `state:` entries count, so gauges, timers, and animations never hold it up.
-An entry that changes more than 5 times since the load is one the aircraft drives itself, such as a knob that recenters or a light that blinks, and it leaves the quiet check for that load.
-
-A quiet window detects a pause, not a finish.
+A quiet window, which waits until no entry has changed for a while, detects a pause, not a finish.
 fsc-editor's rule for knowing when an aircraft's variables had all appeared waited for two equal scans of the sim's `L:` name table.
 After a cold-and-dark load of an A2A aircraft, it stopped when the table held 3,963 of the 5,343 names it later held, 74%.
 The aircraft registered the 1,380 missing cockpit variables in bursts with pauses between, and a duplicate aircraft-loaded event had also made two scans equal by construction (measured on MSFS 2024, 2026-08-24, fsc-editor, `docs/sim-vars/build/v1-log.md`, "Re-enumeration stops on a pause, not on a finished table").
 A Bonanza's last 3 of its 88 variables appeared 35s after load, 18s after the burst before (measured on MSFS 2024, 2026-08-27, same log, "The settle rule did not fail here, and one aircraft was two").
 Those are variables appearing, not restored values changing.
-Restored values didn't pause that long: on six studied aircraft, loaded from the menu, the switches made their last change 1.6s to 12.1s after Ready to fly, so the rule called every aircraft's switches settled at its 30s floor (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
-The only aircraft state that changed after the rule's verdict was the Fenix's ground power and its door locks: each flipped 10s to 22s after Ready to fly and flipped back 46s to 54s after it, so only the return came after the verdict (same log entry).
-A restore that does come after a window closes syncs like a pilot's change: it carries the newest stamp, wins, and moves that control in every cockpit, the PF's included, and the check can't catch it, because it isn't a mismatch.
+Restored values didn't pause that long: on six studied aircraft, loaded from the menu, the switches made their last change 1.6s to 12.1s after Ready to fly, so every aircraft's switches had settled by 30s (measured on MSFS 2024, 2026-10-05, [sync log](log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
+The only aircraft state that changed after 30s was the Fenix's ground power and its door locks: each flipped 10s to 22s after Ready to fly and flipped back 46s to 54s after it, so only the return came after 30s (same log entry).
+A restore that comes after 30s syncs like a pilot's change: it carries the newest stamp, wins, and moves that control in every cockpit, the PF's included, and the check can't catch it, because it isn't a mismatch.
 That's the trade we chose (user, 2026-10-04): a fast join every time, with an occasional control moving on its own soon after a rejoin, over a slow join every time.
-If it proves common, the fallback is a longer quiet window for late joins only, where the risk is.
+If it proves common, the fallback is a longer wait for late joins only, where the risk is.
 
 ## Considered and dropped
 
@@ -160,5 +147,5 @@ Replaying only the presses made while parked, for state that's mostly determinis
 
 ## Open questions
 
-- Whether the rule's 30s floor can come down, since every studied aircraft's switches were done within 15s of Ready to fly, and whether 5 changes tells a restore from an aircraft driving a control.
-- Which [order](#choosing-the-order) catch-up applies state in, decided at step 7, and whether any studied aircraft has an interlock that fails while reading back right, which would settle it for first-final-value order.
+- Whether any studied aircraft has an interlock that fails while reading back right, which a case in the sim settles ([what the open questions still hold](05-units.md#what-the-open-questions-still-hold)).
+- Whether catch-up's writes are retried, which the bench at sync's stage of step 8 settles, starting from one attempt per write ([01-format-and-delivery](../profiles/01-format-and-delivery.md#checking-a-write)).

@@ -41,7 +41,7 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 ## What keeps CI green
 
 - A pull request that changes code runs the bench beside the checks the code map's [CI](../architecture/02-code-map.md#ci) lists, the unit tests among them, and a merge needs every one green.
-- Each merge to `main` runs the bench again with the setting that records every input, so every unit is whole and its replay checked ([recording everything](../recording/01-recording-and-bug-reports.md#recording-everything)).
+- Each merge to `main` runs the bench again with the setting that records every input, so every unit is whole and its replay checked (recording everything).
   The merge has already happened, so a red run blocks nothing, and it's fixed before the next release.
 - The release workflow's build job runs the bench twice, once as a pull request does and once with the setting that records every input, beside every check a pull request runs ([a release](01-the-build.md#a-release)), so no release ships past a red run.
 - CI's bench checks behavior, and no timing budget fails a pull request, since a shared runner's other load would move a timing from run to run (inference).
@@ -136,7 +136,7 @@ The bench build listens on a local socket the bench drives the stand-in and the 
 
 The stand-in runs where the edge runs: off the loop, on a thread of its own, with a clock of its own.
 It hands up stamped inputs, and the recording keeps them as it keeps the edge's, so a bench run's recording replays on the core's replay with no stand-in, as a release's recording replays with no sim ([a replay](../recording/01-recording-and-bug-reports.md#a-replay)).
-So it keeps the edge's rules rather than the loop's, and the note at the top of the code map exempts it as [tiers](../architecture/02-code-map.md#tiers) exempts the sim edge.
+So it keeps the edge's rules rather than the loop's, and [tiers](../architecture/02-code-map.md#tiers) exempts it as it exempts the sim edge.
 
 ### What it models
 
@@ -156,7 +156,7 @@ The systems' cases set 4, 30, and 89 a second ([the sync units' cases](../sync/0
 
 - The routine host and the routines run natively in the stand-in's frame: each frame, the stand-in hands the routine host its slots' newest writes and the frame, and carries out its wants on the aircraft's table, as [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for) lists them: reads, writes, the freeze, events, `H:` events, and reports into the report slots.
 - The module's list of routines lives in a library crate of its own, `src/sim-package/routines/`, which the module and the bench build both link, the one dependency on `src/sim-package/` the code map's note allows.
-  The bench can't link the module itself, because the module builds only as a cdylib ([02-code-map](../architecture/02-code-map.md#left-open)).
+  The bench can't link the module itself, because the module builds only as a cdylib.
 - The stand-in takes the module through a trait, which the bench build fills with the routine host and that list, so the stand-in, an engine, depends on no platform or feature code, as node 5 requires of it ([the architecture plan](../architecture/plan.md#7-testing)).
 - A routine's panic stops the stand-in's module as the sim stops a module that went `DIRTY`: the stand-in catches the panic and runs the module no more, and its thread belongs to no run of the core's, so the core's panic hook leaves the core running.
   The bench build's test routine, `PROBE`, panics on one of its modes, and on the others shows whether it carried anything from one feeding into the next.
@@ -185,7 +185,7 @@ The stub is named `FlightSimulator2024.exe` in the desktop app's cases alone, an
 
 - Every bench scenario ends by replaying each core's recording, and fails on any checkpoint that doesn't match, so a change that makes a replay drift fails its own pull request.
 - A replay checks only whole units.
-  The default run checks every unit except those the recording's [what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading) names as partly recorded, and the run that records everything checks those too ([cases for the bench](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
+  The default run checks every unit except those the recording's what keeps the drift from spreading names as partly recorded, and the run that records everything checks those too ([cases for the bench](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
 
 ## The loop under load
 

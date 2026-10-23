@@ -15,7 +15,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-/// The longest message either side sends, where a second of Opus at 24 kbps is about 3 KB.
+/// The longest message either side sends, where a second of Opus at 32 kbps is about 4 KB.
 /// Only a bug in our one build sends a longer one.
 pub const MOST: usize = 1024 * 1024;
 

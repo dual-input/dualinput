@@ -6,45 +6,6 @@ Depends on:  01-spine.md, decisions.md, log.md, ../network/01-between-machines.m
 Decides:     The tiers, the tests that keep each unit apart, every unit with its folder and what it may depend on, and the systems node 6 designs (node 5); how the platform runs its features, and what a feature registers with it, calls, and guards (node 5.1); where the core's code meets the sim, so a stand-in and a replay can take the sim's place, and which SimConnect connections the core holds (node 5.2); how a feature adds work to our WASM module and the panel bridge, and how that work ends (node 5.3); where each unit lives, how one repository builds every target, and how CI checks the map (node 5.4).
 ```
 
-> **Note**
-> Since 2026-10-18, [testing](../build/02-testing.md) settles [left open](#left-open)'s items on the stand-in sim and on whether one loop meets its budgets, and changes three things here:
->
-> - The stand-in sim keeps the sim edge's rules, not the loop's, since it runs where the edge runs, off the loop with a clock of its own, and its inputs are stamped and recorded like the edge's, so [tiers](#tiers) exempts it as it exempts the sim edge ([its rules](../build/02-testing.md#its-rules)).
-> - The module's list of routines is a library crate of its own, `src/sim-package/routines/`, which `src/sim-package/wasm-module/` and the bench build of the core both link, where [the workspace](#the-workspace) keeps it in the module; that link of `src/apps/core`'s is the one dependency on `src/sim-package/` that [tiers](#tiers)' rule allows ([our WASM module](../build/02-testing.md#our-wasm-module)).
-> - `src/apps/core` has a Cargo feature, `stand-in`, that no release build turns on, which puts the stand-in where the edge goes and registers the test units and the test routine the cases name, and `tools/bench/` holds the bench's scenarios, its fake pages, its local profiles' site, and the stand-in core helper ([its place](../build/02-testing.md#its-place), [where it lives](../build/02-testing.md#where-it-lives)).
->
-> Since 2026-10-18, building stage 1 of [the build plan](../build/plan.md#1-the-workspace-and-its-checks) changes three things in [the workspace](#the-workspace) ([build log](../build/log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import)):
->
-> - Cargo refuses a member glob that matches no folder, or a folder without a `Cargo.toml`, so the root `Cargo.toml` adds each tier's glob with the tier's first crate, and its `exclude` names each folder of TypeScript a glob would match, such as `src/engines/page-client`.
-> - `.cargo/config.toml` also sets ts-rs's `TS_RS_EXPORT_DIR` and `TS_RS_LARGE_INT`, so a plain `cargo test` writes the messages' types into the message crate's `ts/`, typed as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) asks.
-> - `node tools/check.ts` runs each check [CI](#ci) lists that the tree has something for, and [the map check](#the-map-check) reads TypeScript's imports from `tsc --explainFiles`, which lists type-only ones.
->
-> Since 2026-10-20, building stage 3 of [the build plan](../build/plan.md#3-the-bench) changes two things ([build log](../build/log.md#2026-10-20-bindgen-builds-the-windows-sides-simconnect-types-with-the-static-c-runtime-and-ts-rss-derive-reaches-windows-sys)):
->
-> - The SDK in cargo-msfs's folder serves the Windows side's bindings too, which [building every target](#building-every-target) has as unverified.
-> - [The map check](#the-map-check) follows no proc macro's own dependencies when it looks for a loop crate's I/O, as it follows no build dependency's, since a proc macro runs in the compiler too: ts-rs's derive reaches `windows-sys` through `termcolor`.
->   A proc macro of ours still keeps the tiers' other rules.
->
-> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
->
-> - [One loop](#one-loop) leaves out no input, and a replay checks every unit, where it has a unit with an unrecorded input run unchecked and register no guard, catch-up step, or cockpit kind; so no unit draws fewer handles in a replay than live, which each unit's own counters in [the registry and moments](#the-registry-and-moments) guard against.
-> - The recording crate holds no uploads or bug reports in v1, and `src/backend/` no reports, where [the platform](#the-platform) and [systems](#systems) list them; they come after v1.
->
-> Since 2026-10-22, a cockpit panel's first message names its panel, such as `VCockpit66`, and the core replaces a socket when a new first message names the same panel, where [modules in the panel bridge](#modules-in-the-panel-bridge) has it replace one when the new message names the same instruments; that closed a live socket, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED` (user, 2026-10-22; [core log](../core/log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
->
-> Since 2026-10-23, stage 8's design picks change this document in three places (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)):
->
-> - [The platform](#the-platform): `recording` holds the runs, which to keep, the slice of runs, and the commands to mark the moment and to delete a run; the session, the profile loader, and the cockpit stream don't depend on it, since they tell it nothing.
-> - [Engines](#engines): `recording-format` encodes the replay log alone, since v1 writes no self-describing record, and [one loop](#one-loop)'s record for a later version comes with the uploads after v1.
-> - [The registry and moments](#the-registry-and-moments): every unit's handles come from one counter, and its random IDs from one generator, where each unit draws its own; and its example of a request, the session asking the recording crate to start a recording, names one v1 doesn't make.
->
-> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in two places (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
->
-> - [One loop](#one-loop): the loop reads no clock, since the sandbox's time limit counts QuickJS-ng's interrupt checks, and [engines](#engines)' sandbox calls no check from the core's edge ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
-> - [When the module stops](#when-the-module-stops): a module taken as stopped raises its notice, and the core unfreezes the aircraft when the last routine that holds the freeze ends, as its pilot takes control or leaves, rather than at once.
->
-> Since 2026-10-23, the code sits in `src/`, the tiers' folders, `apps/`, `sim-package/`, `backend/`, and `relays/` among it, while `tools/` and `profiles/` stay at the root, and prose-lint moves from `scripts/` into `tools/`; the paths in this document name each folder where it is now (user, 2026-10-23; [decisions](decisions.md#one-repository-holds-all-of-dual-input-its-folders-by-tier-with-each-features-parts-in-one-folder)).
-
 Dual Input's code is a platform, engines, and features.
 The core runs as one loop that owns all its state and takes every input, stamped, from one queue, and each feature plugs into that loop through one registration, so deleting a feature leaves everything else building and passing its tests (user, 2026-10-14).
 A feature reads the platform's state, reaches other features only through moments the platform raises, and reaches the world only through outputs, and a feature that can block a request registers a guard rather than having the platform check on it.
@@ -74,8 +35,9 @@ The map allows these, and [the map check](#the-map-check) holds each:
 - The platform outside the core depends on no crate of the core's, nor the core's on it, and the routine host depends on the message crate alone.
 - No feature depends on another feature's code, nor names another feature's module in the message crate or the profile engine ([what a handler sees and does](#what-a-handler-sees-and-does)).
 - Of our code, a feature's routines depend only on the message crate, the routine host, and an engine that keeps the loop's rules and builds for wasm32, such as `object-mirror` ([work in the sim](#work-in-the-sim)); its panel modules on the panel bridge and the message crate's types; and its sections on its app's shell and the message crate's types.
-- Nothing depends on `src/apps/`, `src/sim-package/`, or `tools/`.
-- The loop's crates, every crate outside `src/apps/`, `src/sim-package/`, `tools/`, the transport, and the sim edge, keep [the loop's rules](#one-loop), and depend on neither tokio nor any crate on the map check's list of crates that do I/O; the stand-in sim is held to them until [node 7](plan.md#7-testing) decides otherwise.
+- Nothing depends on `src/apps/`, `src/sim-package/`, or `tools/`, except that the bench build of `src/apps/core` links `src/sim-package/routines/`, the module's list of routines ([our WASM module](../build/02-testing.md#our-wasm-module)).
+- The loop's crates, every crate outside `src/apps/`, `src/sim-package/`, `tools/`, the transport, the sim edge, and the stand-in sim, keep [the loop's rules](#one-loop), and depend on neither tokio nor any crate on the map check's list of crates that do I/O.
+  The stand-in sim keeps the sim edge's rules instead, since it runs where the edge runs, off the loop with a clock of its own, and its inputs are stamped and recorded like the edge's ([its rules](../build/02-testing.md#its-rules)).
 - Only the two edges, the sim edge and our WASM module's in `src/sim-package/wasm-module/`, and `src/apps/core` declare foreign functions, so only the edges call `SimConnect.dll` and the sim's APIs ([the sim seam](#the-sim-seam)); `src/apps/core` declares one, the C runtime's `_set_FMA3_enable` ([the core's math](../core/01-loop-and-edge.md#the-cores-math)).
 
 A system is the units one design doc designs, in one area, and [node 6](plan.md#6-systems) of the plan designs each of [the systems](#systems).
@@ -89,7 +51,7 @@ The tables say what each owns and what it uses; the map check holds [the rules i
 
 ```text
 apps/         core  core-helper  desktop  ide (later)
-sim-package/  wasm-module  pages
+sim-package/  wasm-module  routines  pages
 tools/        profile-builder  profile-author  bench (node 7)  build.ts  setup.ts  the map check
 features/     state-sync  pointer-sync  flight-model  avatars  traffic
               atc-audio  take-control  voice (Soon)  rate-and-pause  go-to
@@ -118,9 +80,9 @@ The platform is split this way, and named the platform rather than the host, bec
 | msfs-rpn | Expanding, compiling, and running the sim's calculator code ([avatars](../avatars/01-avatars.md#the-units)) | Nothing |
 | ray-cast | A BVH for each mesh, and a cast through the nodes' transforms ([avatars](../avatars/01-avatars.md#the-units)) | Nothing |
 | object-mirror | The gate and the playout, generic over the sample, which traffic and its routine `Traffic` use ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md#the-units)) | Nothing |
-| sandbox | QuickJS-ng's runtimes under [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)'s limits, giving a script no clock; its interrupt handler calls the check the core's edge hands it ([one loop](#one-loop)) | Nothing |
+| sandbox | QuickJS-ng's runtimes under [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)'s limits, with a time limit that counts QuickJS-ng's interrupt checks ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)), giving a script no clock | Nothing |
 | profile-engine | The profile format, its own blocks, `state` and `events`, each feature's block, its checker, and its levels; its `ts/` folder holds the declarations that profiles' scripts and plugins are checked against, which a level freezes with its schema | messages |
-| recording-format | How the replay log and the self-describing record are encoded | messages |
+| recording-format | How the replay log is encoded, and nothing else, since v1 writes no self-describing record ([one loop](#one-loop)) | messages |
 | aircraft-model | Reading an aircraft's glTF models and the behavior code that poses them, with `quick-xml`, and casting a ray into them, as [avatars' tentative decisions](../avatars/decisions.md#the-models-come-from-the-aircrafts-own-package) describe | msfs-gltf, msfs-rpn, ray-cast |
 | sim-client | The [sim seam](#the-sim-seam)'s sim client | simconnect-types, messages |
 | sim-awareness | Sim awareness's logic: one step function from a sim signal to the sim's state, with no clock and no I/O ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-units)) | messages |
@@ -128,7 +90,7 @@ The platform is split this way, and named the platform rather than the host, bec
 | profile-build | The builder, which type-checks and compiles with TypeScript 6.0.3 inside QuickJS-ng, for `tools/profile-builder` and later the IDE; the core links `profile-engine` alone ([the profiles' units](../profiles/02-units.md#the-units)) | profile-engine |
 | transport | The connections between cores through iroh, as [01-between-machines](../network/01-between-machines.md#the-link-between-two-cores) has them | messages |
 | sim-edge | The [sim seam](#the-sim-seam)'s edge, and SimConnect's function declarations | simconnect-types, sim-client |
-| stand-in-sim | The bench's sim, which [node 7](plan.md#7-testing) designs | simconnect-types, sim-client |
+| stand-in-sim | The bench's sim, which [testing](../build/02-testing.md#the-stand-in-sim) designs | simconnect-types, sim-client |
 | page-client | In TypeScript, how a sim page reaches the core: finding it, its first message, a message every 2s ([decision 010](../../decisions/010-clients-message-core-every-2s.md)), and connecting again; the desktop app reaches the core from its Rust side instead ([01-spine](01-spine.md#messages-between-components)) | messages' `ts/` |
 
 ### The platform
@@ -140,16 +102,17 @@ The platform is split this way, and named the platform rather than the host, bec
 | sim-service | The sim service, sim awareness, masking, the module's version and counter and the unfreeze, and the CommBus event that announces the core's port ([what the platform keeps](#what-the-platform-keeps)), and the world map's requests, which the menu script runs for whichever feature asks; aircraft awareness, the loaded aircraft's package, folder, install location, version, and livery, which a job of its own finds while a session is held, and which the session crate's match check and avatars read there ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md); user, 2026-10-18); and the packages folders, the check for packages that override ours, and the check of our own package ([the checks in the core](../install/01-installing-and-updating.md#the-checks-in-the-core)) | `SimChanged`, for each change of the sim's state, a load among them, and `AircraftChanged` | kernel, clients, sim-client, sim-awareness |
 | network | Each link's state, the channels, the heartbeat, clock offsets, coming back, the backend's invite codes, and the version check at join, at the backend and in each connection's first message ([02-units](../network/02-units.md#the-first-message)) | `LinkUp`, `LinkLost`, `MemberLeft`, `MemberOut`, and `BackendAnswered` ([moments](../network/02-units.md#moments)) | kernel, clients |
 | core-helper-service | Starting the core helper and starting it again; the bindings, captures, and sounds features register with it, the next press, the mouse, and playback streams; the output device setting; and the slice of devices and programs ([04-core-helper](../core/04-core-helper.md#what-a-feature-registers-and-calls)); and phrases and the microphone setting with the voice phrases, a Soon pick | | kernel, clients |
-| recording | Each run's index, marks, what's recorded beyond the queue, as other units ask, the recording's settings, the recorded sessions, which runs to keep, uploads, and bug reports, whose upload the core's edge runs as a job ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#the-units)) | | kernel, clients, recording-format |
-| session | Members, session keys, control, the session file, joining and leaving, preflight, the match check, and showing the backend's refusal at join | A session starting and ending, a member joining or leaving, a member entering or leaving the flight, a session key changing, control passing, and preflight ending | kernel, clients, sim-service, network, recording |
-| profile-loader | Fetching a profile's bundle by hash, the cache, loading it on the pilot's aircraft, and writing the bundle a session pins, as a session key the PF's core writes | The profile's load and unload | kernel, clients, sim-service, recording, session, profile-engine |
-| cockpit-stream | The cockpit stream, catch-up, and the platform's guard that holds control back from a pilot whose catch-up or replay runs | "Cockpit sent" | kernel, network, recording, session |
+| recording | The runs, which to keep, the slice of runs, and the commands to mark the moment and to delete a run; uploads and bug reports come after v1 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#the-units)) | | kernel, clients, recording-format |
+| session | Members, session keys, control, the session file, joining and leaving, preflight, the match check, and showing the backend's refusal at join | A session starting and ending, a member joining or leaving, a member entering or leaving the flight, a session key changing, control passing, and preflight ending | kernel, clients, sim-service, network |
+| profile-loader | Fetching a profile's bundle by hash, the cache, loading it on the pilot's aircraft, and writing the bundle a session pins, as a session key the PF's core writes | The profile's load and unload | kernel, clients, sim-service, session, profile-engine |
+| cockpit-stream | The cockpit stream, catch-up, and the platform's guard that holds control back from a pilot whose catch-up or replay runs | "Cockpit sent" | kernel, network, session |
 | routine-host | Our WASM module's side of [work in the sim](#work-in-the-sim): `Routine`, wants, slots, `routines!`, the freeze, and the platform's own routine, `Hold` | | messages |
 | panel-bridge | In TypeScript, [what the bridge owns](#what-the-bridge-owns), and loading panel modules | | page-client, messages' `ts/` |
 | efb-shell | In TypeScript, the EFB app's frame, its session controls and preflight summary, the banner's page, and the API its sections use, on the MSFS Avionics Framework | | page-client, messages' `ts/` |
 | desktop-shell | In TypeScript, the desktop app's frame, the session's view, settings, the report page, the API its sections use, and the components they share, in React and Tailwind | | messages' `ts/` |
 
 The session crate reads none of the profile loader, state sync, or the cockpit stream: the profile loader writes the bundle a session pins, and state sync and the cockpit stream guard the session crate's Ready and control requests ([the session's units](../session/02-units.md#the-units)).
+The session crate, the profile loader, and the cockpit stream don't depend on the recording crate, since they tell it nothing (user, 2026-10-23; [recording log][stage-8]).
 v1 builds no plugins, so the platform has no plugins crate ([plugins and the sandbox](../plugins/01-plugins.md#no-plugins-in-v1)).
 
 ### Features
@@ -180,13 +143,16 @@ A feature's section in an app is one part, which the app's list names in one lin
 
 | Unit | What it is | Uses, of ours |
 | --- | --- | --- |
-| `src/apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets, the timer thread, which waits on a high-resolution waitable timer, the WebSocket server, the core helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the seed of the kernel's random IDs; it declares one foreign function, the C runtime's `_set_FMA3_enable`, to turn FMA3 off in the C runtime it links statically, and stops a build whose `RUSTFLAGS` replaced that static runtime ([the core's math](../core/01-loop-and-edge.md#the-cores-math), [the C runtime](../build/01-the-build.md#the-c-runtime)) | Every crate on the core's side, the transport, and the sim edge |
+| `src/apps/core` | `main`, the list of the platform's crates and the features in the order they register, and the core's edge: tokio's sockets, the timer thread, which waits on a high-resolution waitable timer, the WebSocket server, the core helper's pipe, files, HTTPS, the worker pool, the replay log's writer, and the seed of the kernel's random IDs; it declares one foreign function, the C runtime's `_set_FMA3_enable`, to turn FMA3 off in the C runtime it links statically, and stops a build whose `RUSTFLAGS` replaced that static runtime ([the core's math](../core/01-loop-and-edge.md#the-cores-math), [the C runtime](../build/01-the-build.md#the-c-runtime)); and a Cargo feature, `stand-in`, that no release build turns on, which puts the stand-in where the edge goes and registers the test units and the test routine the cases name ([its place](../build/02-testing.md#its-place)) | Every crate on the core's side, the transport, and the sim edge; in its `stand-in` build, the stand-in sim and `src/sim-package/routines` |
 | `src/apps/core-helper` | The core helper: Raw Input and audio, and speech with the voice phrases, a Soon pick | messages |
 | `src/apps/desktop` | Tauri's Rust side, which holds the watcher's jobs and runs from login as a tray icon, and links the `velopack` crate, as no other program does, since a program that runs Velopack's startup applies a downloaded update ([installing and updating](../install/01-installing-and-updating.md#the-installer-and-the-updater)); Vite's entry; and the list of the desktop app's sections | desktop-shell, each feature's `desktop/`, messages |
-| `src/sim-package/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers, and the list of routines | routine-host, each feature's `routines/` |
+| `src/sim-package/wasm-module` | The cdylib cargo-msfs builds: the edge on the sim's APIs, whose bindings its build script generates from the SDK's headers | routine-host, `src/sim-package/routines` |
+| `src/sim-package/routines` | The module's list of routines, a library crate of its own, which `src/sim-package/wasm-module` and the bench build of the core both link ([our WASM module](../build/02-testing.md#our-wasm-module)) | routine-host, each feature's `routines/` |
 | `src/sim-package/pages` | The `VCockpit.js` override, the EFB app's entry and its list of sections, the banner's entry, and the menu script, which reports the menu's page and runs the world map's requests | panel-bridge, efb-shell, page-client, each feature's `efb/` |
 | `tools/profile-builder` | Checks each profile and builds its bundle, for CI and for authors | profile-build |
 | `tools/profile-author` | The seat tool and the click tool ([the authoring tool](../avatars/01-avatars.md#the-authoring-tool)) | sim-client, sim-edge, aircraft-model, messages |
+
+`tools/bench/` holds the bench's scenarios, its fake pages, its local profiles' site, and the stand-in core helper ([where it lives](../build/02-testing.md#where-it-lives)).
 
 Each crate in `src/apps/` and `src/sim-package/` is named `dualinput-` and its folder, since Cargo names a program after its crate (documented, [Cargo targets](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#binaries)), so each program's file carries Dual Input's name, and no program's crate can take a name a crate of the platform's or an engine holds, which Cargo refuses in one workspace (measured on our development machine, 2026-10-15, [architecture log][map]).
 
@@ -195,8 +161,9 @@ Each crate in `src/apps/` and `src/sim-package/` is named `dualinput-` and its f
 - The kernel holds the registry, and what every hook shares: moments, requests and their guards, timers, jobs, and the store of each unit's state.
 - Each crate of the platform's adds the hooks it runs to the registry, such as the clients crate's commands and the cockpit stream's kinds, so a feature that registers a command depends on the clients crate, and the kernel names no service.
 - Each moment's type lives in the crate that raises it, so a feature that handles `LinkLost` depends on the network crate.
-- Each unit's state is written by its own handlers alone, a crate of the platform's as much as a feature, and another unit asks with a request, as the session asks the recording crate to start a recording.
-- Each unit draws its own handles and IDs: it counts its own timers, jobs, and calls, and draws its random IDs from a generator of its own, seeded from the core's one seed and its place in the registry, so a unit that draws fewer in a replay shifts no other unit's ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+- Each unit's state is written by its own handlers alone, a crate of the platform's as much as a feature, and another unit asks with a request, as take-control asks the session crate for control.
+- Every unit's handles, for its timers, jobs, and calls, come from one counter, and its random IDs from the kernel's one generator, seeded from the core's one seed (user, 2026-10-23; [recording log][stage-8]).
+  The core records every input, so no unit draws fewer in a replay than live (user, 2026-10-21; [recording log][every-input]).
 - The core's `main` registers the platform's crates first, from the kernel up, then the features in their list, each through the same `register` ([what a feature registers](#what-a-feature-registers)).
 
 ### Systems
@@ -207,7 +174,7 @@ Each system is one of [the spine's parts](01-spine.md#parts), with two changes: 
 | System | Area | Units | Designed in |
 | --- | --- | --- | --- |
 | The core's loop and edge | `core/` | kernel, `src/apps/core` | [One loop](#one-loop), [01-loop-and-edge](../core/01-loop-and-edge.md) |
-| The sim seam and our WASM module | `core/` | sim-service, sim-client, sim-awareness, sim-edge, simconnect-types, routine-host, `src/sim-package/wasm-module` | [The sim seam](#the-sim-seam), [work in the sim](#work-in-the-sim), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) |
+| The sim seam and our WASM module | `core/` | sim-service, sim-client, sim-awareness, sim-edge, simconnect-types, routine-host, `src/sim-package/wasm-module`, `src/sim-package/routines` | [The sim seam](#the-sim-seam), [work in the sim](#work-in-the-sim), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) |
 | Clients and the panel bridge | `core/` | clients, page-client, panel-bridge | [What the bridge owns](#what-the-bridge-owns), [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md) |
 | The core helper | `core/` | core-helper-service, `src/apps/core-helper` | [04-core-helper](../core/04-core-helper.md) |
 | The network | `network/` | network, transport, `src/backend/`'s invite codes | [01-between-machines](../network/01-between-machines.md), [02-units](../network/02-units.md) |
@@ -221,7 +188,7 @@ Each system is one of [the spine's parts](01-spine.md#parts), with two changes: 
 | Avatars | `avatars/` | avatars, aircraft-model, msfs-gltf, msfs-rpn, ray-cast | [01-avatars](../avatars/01-avatars.md) |
 | Traffic and ATC | `traffic-atc/` | traffic, atc-audio | [01-traffic-and-atc](../traffic-atc/01-traffic-and-atc.md) |
 | The apps | `interface/` | efb-shell, desktop-shell, `src/apps/desktop`, `src/sim-package/pages` | [01-apps](../interface/01-apps.md) |
-| Recording and bug reports | `recording/` | recording, recording-format, `src/backend/`'s reports | [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) |
+| Recording and bug reports | `recording/` | recording, recording-format, and after v1 `src/backend/`'s reports | [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) |
 | Installing and updating | `install/` | `src/apps/desktop`'s watcher jobs, and the installer, Velopack's Setup.exe | [01-installing-and-updating](../install/01-installing-and-updating.md) |
 | The build | `build/` | `tools/`, CI, the map check | [The workspace](#the-workspace), [01-the-build](../build/01-the-build.md) |
 
@@ -249,7 +216,7 @@ A feature plugs in by registering what it handles, what it declares, and what it
   Each stamps an input in µs on the PC's counter ([01-spine](01-spine.md#times)) as it pushes it, so the stamps rise in the order the loop takes the inputs.
 - Everything the loop reads from disk arrives as an input too: the settings and the session file when the core starts, and the profile's bundle, its plugin included, when it loads.
 - Handlers are synchronous, and none reads a clock, draws a random number, does I/O, waits, starts a thread, or iterates a `HashMap`, whose order is randomly seeded.
-  A random ID the core draws, such as the session's when the host starts one ([decision 022](../../decisions/022-random-uuids-as-text.md)), comes from a ChaCha20 generator in the kernel, the drawing unit's own, seeded from the one seed the core's edge puts in the core's first input and from the unit's place in the registry ([timers, jobs, and IDs](../core/01-loop-and-edge.md#timers-jobs-and-ids), [the registry and moments](#the-registry-and-moments)).
+  A random ID the core draws, such as the session's when the host starts one ([decision 022](../../decisions/022-random-uuids-as-text.md)), comes from the kernel's one ChaCha20 generator, seeded from the one seed the core's edge puts in the core's first input ([timers, jobs, and IDs](../core/01-loop-and-edge.md#timers-jobs-and-ids), [the registry and moments](#the-registry-and-moments)).
   [Tiers](#tiers) names the loop's crates by folder, so a crate that never runs on the loop, such as the routine host, keeps the same rules.
   The loop's crates set two of Clippy's lints to deny, so `cargo clippy` fails on a call to a function their shared `clippy.toml` lists, such as `Instant::now`, `std::thread::spawn`, or `HashMap::keys`, through `disallowed_methods`, and on a `for` loop over a `HashMap`, through `iter_over_hash_type` (documented, [disallowed_methods](https://rust-lang.github.io/rust-clippy/master/index.html#disallowed_methods), [iter_over_hash_type](https://rust-lang.github.io/rust-clippy/master/index.html#iter_over_hash_type)).
   Clippy lints only our own crates, and none of its lints bans `.await` (unverified: [its list of lints](https://rust-lang.github.io/rust-clippy/master/index.html) shows none), so the map check keeps every crate on its I/O list out of the loop's crates.
@@ -262,15 +229,12 @@ A feature plugs in by registering what it handles, what it declares, and what it
   The sandbox deletes `Math.random`, which QuickJS-ng seeds from the wall clock ([5.1.1]), and `queueMicrotask`, and pins the stack's top at each call into JS ([the sandbox](../plugins/01-plugins.md#the-sandbox)).
   QuickJS-ng's hash seed, which it takes from the wall clock when it makes a context ([5.1.1]), changes nothing a script sees (same section).
   A script that has to wait asks the platform for a timer.
-- The one clock read on the loop is behind QuickJS-ng's 100ms limit, which runs by the clock ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)).
-  The sandbox's interrupt handler calls a check the core's edge hands it.
-  In a run, the check reads the clock and stops a script call that passes 100ms, and the run's recording holds how many interrupt calls that script call made before it stopped.
-  In a replay, the check reads no clock and stops the same script call at the same count, so none of the loop's crates reads the clock itself.
+- The loop reads no clock: the sandbox's time limit counts QuickJS-ng's interrupt checks, and the sandbox calls no check from the core's edge ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
 
-The platform records its queue, each input with its kind and stamp, under a header that names the build, so the same build replays a whole run from it, and a bug report names the build to check out.
-It leaves out only the inputs a feature declares unrecorded, on a channel, a sim call, a core helper want, or a job ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)), and a unit with one runs in a replay on what was recorded, unchecked, and may register no guard, catch-up step, or cockpit kind.
+The platform records its queue, each input with its kind and stamp, under a header that names the build, so the same build replays a whole run from it, and a bug report after v1 names the build to check out.
+It leaves out no input, and a replay checks every unit (user, 2026-10-21; [recording log][every-input]).
 Only the build that wrote a recording reads it as a replay.
-What a later version reads from a recording, such as the report page's list of sessions, the debrief timeline, and plugin tests, is a separate record in a self-describing format with named fields, so adding a field breaks no older reader, and the recording's design in [node 6](plan.md#6-systems) shapes it.
+What a later version reads from a recording, such as the report page's list of sessions, the debrief timeline, and plugin tests, is a separate record in a self-describing format with named fields, so adding a field breaks no older reader; v1 writes none, and the record comes with the uploads after v1 (user, 2026-10-23; [recording log][stage-8]).
 
 One loop costs three things ([5.1.1]):
 
@@ -353,14 +317,14 @@ The platform offers one request that claims several keys together, refused whole
 The platform never knows what either key is for, and deleting traffic removes its key from the switch in the apps, as deleting a feature removes its section in each app.
 Both keys go out in one message on the session channel, and each key's stamp counts that key's own changes ([01-between-machines](../network/01-between-machines.md#channels)).
 When both pilots flip the switch at once, both keys carry the same counts, so both settle on the same pilot (unverified; a [node 7](plan.md#7-testing) bench case in which both pilots claim at once settles it).
-This changes [roles and members](../session/01-roles-and-members.md#the-traffic-and-atc-host), which gives the two one role that can split, and [decision 044](../../decisions/044-table-of-roles.md) once step 8's decisions are numbered.
+This changes [decision 044](../../decisions/044-table-of-roles.md), which gives the two one role that can split, once step 8's decisions are numbered.
 
 ### Budgets
 
 Each is a starting value, which [node 7](plan.md#7-testing)'s bench measures:
 
 - The queue stays under one sim frame at p99: 11.2ms at the 89 sim updates a second our module saw in a flight ([architecture log](log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start)).
-- A handler takes at most 1ms, apart from calls into QuickJS-ng, which keep their 100ms limit ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)).
+- A handler takes at most 1ms, apart from calls into QuickJS-ng, which keep their limit of a count of interrupt checks, about 100ms on our development machine ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), [decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
   One call at that limit holds back about 9 sim updates, in order (arithmetic), and about 5 of ATC audio's 20ms frames, which would reach the playback buffer after their turn and be dropped if the buffer holds less than 100ms (unverified; the ATC design sets the buffer, and the bench measures it).
 - A write function that hits its limit fails that write, and its entry stops syncing on its own machine for the rest of the load, skipping arriving changes to the entry and sending none, because on one loop a stuck call holds up every input behind it ([decisions.md](decisions.md#a-write-function-that-hits-its-limit-stops-its-entry-syncing-for-the-rest-of-the-load)).
   This changes decision 046 for write functions once step 8's decisions are numbered.
@@ -387,7 +351,7 @@ The platform holds one SimConnect connection from the sim's start, and gives eac
 | Sim service | Platform | Opens and closes the connections, knows which feature holds each, discards a message for a connection it closed, and keeps the platform's own uses of the sim, [below](#what-the-platform-keeps) | On the loop |
 | Sim client | Engine | For each connection: hands out SimConnect's IDs, parses each message, and routes it to the call that caused it; on a lost connection the platform opens again, makes its definitions, requests, and subscriptions again | On the loop, and in the IDE |
 | Edge | Engine | Keeps each connection's handle on one thread, since SimConnect's clients "are not currently thread-safe" ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)); makes each call through `SimConnect.dll`; tags each exception with the handle of its call; and hands what comes up, stamped, to the program it runs in | Off the loop, in the core and the IDE |
-| Stand-in sim | Engine | Takes the edge's place on the bench, and answers each call as the sim would, with SimConnect's own messages and its exceptions already tagged; [node 7](plan.md#7-testing) designs it | On the bench |
+| Stand-in sim | Engine | Takes the edge's place on the bench, and answers each call as the sim would, with SimConnect's own messages and its exceptions already tagged; [testing](../build/02-testing.md#the-stand-in-sim) designs it | On the bench |
 | Bindings, simconnect-types | Engine | SimConnect's types and constants, which bindgen generates from the SDK's headers ([01-spine](01-spine.md#the-core)); the edge alone declares SimConnect's functions, so the crate graph shows that only the edge can call `SimConnect.dll`, where one crate holding both would let the sim client call it unseen | With the edge, the sim client, and the stand-in |
 
 Four kinds of input come up through the seam, each stamped and recorded: a message SimConnect hands over, copied whole; the result of each `SimConnect_Open`; a connection's loss, from a failed call, a failed dispatch, or the sim's quit message ([04-03](../../learn/foundations/04-03-client-data-ai-and-throughput.md#throughput-threading-and-reconnects)); and the sim's process, found with its ID and creation time or exited with its exit code ([its inputs](../core/03-sim-seam-and-wasm-module.md#its-inputs)).
@@ -504,7 +468,7 @@ A plugin ships no code into the sim ([decision 020](../../decisions/020-plugin-c
 
 ### Routines in our WASM module
 
-A routine is a small crate of its feature's, built for wasm32 into the module's one binary through one line in the module's list, and natively for its tests and for [node 7](plan.md#7-testing)'s bench, which runs the routine host and routines beside the stand-in sim.
+A routine is a small crate of its feature's, built for wasm32 into the module's one binary through one line in the module's list, `src/sim-package/routines/`, and natively for its tests and for [node 7](plan.md#7-testing)'s bench, which runs the routine host and routines beside the stand-in sim.
 It never calls the sim: the routine host hands it its slot's values and each frame, and does what it asks.
 
 ```rust
@@ -573,7 +537,9 @@ The module never learns the session's state, so routines' slots replace the cont
 
 A module whose code hits an error goes `DIRTY`, and the sim stops running it (documented, [05-03](../../learn/foundations/05-03-toolchain-versioning-and-debugging.md#debugging-crashes-required-exports)), so one routine's error would stop every routine, and with them the routine host, which would unfreeze the aircraft; whether a Rust panic, which traps, puts our module there is unverified, since our records hold no module crash.
 So the core unfreezes it.
-When the module's counter hasn't moved for 3s, in a flight that's neither loading nor paused, while a routine of ours is live, the platform's connection reads `A:IS LATITUDE LONGITUDE FREEZE ON`, `A:IS ALTITUDE FREEZE ON`, and `A:IS ATTITUDE FREEZE ON`, the flags FS Copilot's module reads (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `module_init`), and sends `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, or `K:FREEZE_ATTITUDE_SET` with 0 for each that's on, as a client outside the sim released a frozen Baron that way (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
+When the module's counter hasn't moved for 3s, in a flight that's neither loading nor paused, while a routine of ours is live, the core takes the module as stopped and raises its notice.
+It unfreezes the aircraft when the last routine that holds the freeze ends, as its pilot takes control or leaves (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+To unfreeze it, the platform's connection sends `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET`, each with 0, in the input that ends the routine, with no read of the flags first, so a quit's exit, which takes no input after it, still carries them out; a client outside the sim released a frozen Baron that way (measured on MSFS 2024, 2026-10-03, [flight-model log](../flight-model/log.md#2026-10-03-freezing-holds-the-pose-but-not-the-velocities-so-a-follower-has-to-write-them-all)).
 The core takes a freeze then to be ours, since a module with no routine live froze nothing ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
 A pause is left out because whether the sim runs a standalone module's update during a pause is unmeasured ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#lifecycle-init-per-frame-update-deinit)).
 Each routine's crate denies Clippy's `unwrap_used`, `expect_used`, `panic`, and `indexing_slicing` lints (documented, [Clippy's lints](https://rust-lang.github.io/rust-clippy/master/index.html)), so the commonest panics, an `unwrap`, an `expect`, a `panic!`, and an index out of range, fail its build.
@@ -583,7 +549,8 @@ Each routine's crate denies Clippy's `unwrap_used`, `expect_used`, `panic`, and 
 - The sim loads our `VCockpit.js` override into every cockpit panel, and the override is the sim's file plus a few guarded lines, which load the bridge's own file and queue each instrument the sim creates before that file has loaded, in `DUALINPUT_BRIDGE_PENDING`, as FS Copilot's copy does ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)).
   Everything of ours beyond those lines is in files of its own, so a mistake in one of them stops no instrument.
 - A feature registers each panel module with a rule for which panels get it, as pointer sync's takes the panels its profile's [`displays`](../profiles/01-format-and-delivery.md#displays) names, and the core answers a panel's first message with the modules to load ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) once the profile has loaded, since a panel can connect before it does ([01-spine](01-spine.md#the-sims-pages)).
-- A first message naming the instruments another socket holds replaces that socket, and the core closes the old one, since a page's socket stays open after a reload ([decision 010](../../decisions/010-clients-message-core-every-2s.md)).
+- A cockpit panel's first message names its panel, such as `VCockpit66`, and a first message naming the panel another socket holds replaces that socket, and the core closes the old one, since a page's socket stays open after a reload ([decision 010](../../decisions/010-clients-message-core-every-2s.md)).
+  The core matches the panel rather than the instruments, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED`, and matching the instruments closed a live socket (user, 2026-10-22; [core log](../core/log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
   A press sent to the old socket that its panel never played is skipped and counts as applied, as a press for a display whose panel hasn't announced itself does ([the cockpit stream](../sync/04-order-and-recovery.md#the-cockpit-stream)).
 - The bridge loads each panel module from its own file and calls its `start` and `stop` each in a `try`, so one that throws stops only itself.
   Whether a file that fails to parse stops the bridge's later loads in its panel is unverified, and a case for the bench settles it.
@@ -629,7 +596,7 @@ FS Copilot's panel code, by contrast, replaces `EventTarget.prototype.addEventLi
 | The profile unloads, or the session ends | The platform ends each of the feature's routines, then closes its connection | The core stops each panel module, and a panel left with none closes its socket |
 | The core hangs | 1s with no write leaves every routine unfed | Each visible lock turns into a warning 8s to 10s after its last renewal |
 | The core exits | The same | Its socket closes, and the bridge stops every panel module and drops every lock |
-| Our own code in the sim stops | The module goes `DIRTY`, and the core unfreezes the aircraft | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
+| Our own code in the sim stops | The module goes `DIRTY`, the core raises its notice, and the core unfreezes the aircraft when the last routine that holds the freeze ends | A bridge that never loaded sends no first message, and the core reports it ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
 | A person steps in | Nothing to call | `window.DUALINPUT_BRIDGE_UNLOCK()` |
 
 ### Budgets for work in the sim
@@ -647,7 +614,7 @@ Each is a starting value, which [node 7](plan.md#7-testing) measures:
 - Through a 20s gap in the flying machine's data, the following aircraft stays frozen, carried for 2s and then held.
 - A routine fed again after its end mark starts with nothing from its last feeding.
 - With the core killed, the following aircraft unfreezes within 1s of the last write, plus a frame.
-- With the module stopped by an error, from a test routine built to panic, the module goes `DIRTY` and the core unfreezes the aircraft within 3s of the counter's last tick, while the counter stalling through a flight load or a pause unfreezes nothing.
+- With the module stopped by an error, from a test routine built to panic, the module goes `DIRTY`, the core raises its notice within 3s of the counter's last tick, and the core unfreezes the aircraft when the last routine that holds the freeze ends, while the counter stalling through a flight load or a pause raises no notice and unfreezes nothing.
 - A panel module that fails to parse, or throws in `start`, leaves the other panel modules in its panel running.
 - With the core suspended, a locked display's overlay turns into a warning within 10s, and `window.DUALINPUT_BRIDGE_UNLOCK()` removes it at once.
 - With the core's socket closed, every lock drops and every panel module stops at once.
@@ -674,14 +641,15 @@ A unit that needs a name of a new kind adds the kind to this table.
 ## The workspace
 
 One repository holds all of Dual Input: its programs, our WASM module, our code in the sim, the backend, and the profiles (user, 2026-10-15).
-Its code sits in `src/`, in folders that follow the [tiers](#tiers), and each feature keeps every part it has in one folder; what builds and checks the code sits beside `src/` in `tools/` (user, 2026-10-23).
+Its code sits in `src/`, in folders that follow the [tiers](#tiers), and each feature keeps every part it has in one folder; what builds and checks the code sits beside `src/` in `tools/` (user, 2026-10-23; [decisions](decisions.md#one-repository-holds-all-of-dual-input-its-folders-by-tier-with-each-features-parts-in-one-folder)).
 One Cargo workspace builds every Rust crate, the module's among them, and one npm lockfile covers every TypeScript folder; `tools/build.ts`, run by Node, builds every target but the backend and the profiles, and every build that reads the SDK reads the one copy `tools/setup.ts` installs.
 CI runs on Windows, and one script checks both the crates and the TypeScript imports against this map.
 
 ```text
 dualinput/
   Cargo.toml  Cargo.lock  package.json  package-lock.json  rust-toolchain.toml
-  .cargo/config.toml     one entry, which links every x86_64 program's C runtime statically
+  .cargo/config.toml     links every x86_64 program's C runtime statically, and sets ts-rs's
+                         TS_RS_EXPORT_DIR and TS_RS_LARGE_INT
   msfs-sdk.txt           the SDK version every build uses
   src/
     engines/<name>/      each engine in the units' table, such as messages/ and sync-engine/
@@ -696,13 +664,14 @@ dualinput/
       desktop/           Tauri: its Rust side, and its pages built by Vite
       ide/               the Dual Input IDE, once it's built
     sim-package/
-      wasm-module/       the cdylib cargo-msfs builds: the edge, and the routines' list
+      wasm-module/       the cdylib cargo-msfs builds: the edge
+      routines/          the module's list of routines, which the module and the core's bench build link
       pages/             the VCockpit.js override, the EFB app, the banner, the menu script
       stock/             the sim's stock files our copies start from
     backend/             the Cloudflare Worker, on D1, with no framework
     relays/              each relay's region, URL, and cap, and the script that deploys them
   profiles/              aircraft/ and modules/, as 01-format-and-delivery's repository
-  tools/                 build.ts, setup.ts, stock.ts, release.ts, the map check, and prose-lint;
+  tools/                 build.ts, check.ts, setup.ts, stock.ts, release.ts, the map check, and prose-lint;
                          profile-builder/, profile-author/, msfs-sdk/, and the bench
 ```
 
@@ -710,6 +679,7 @@ A feature has only the parts it needs: pointer sync has a crate in the core and 
 Avatars keeps its figure's SimObject in its folder too, in `src/features/avatars/figure/`.
 Deleting one deletes its folder, its modules in the message crate and the profile engine, and its line and its dependency in each assembly in `src/apps/` and `src/sim-package/`.
 The root `Cargo.toml` names its members by globs, such as `src/features/*/core`, so deleting a feature's folder takes its crates out of the workspace with no edit there, and `default-members` takes the same globs but leaves out `src/sim-package/`, whose module's build script needs what cargo-msfs sets; Cargo took globs in both lists (measured on our development machine, 2026-10-15, [architecture log][p12]).
+Cargo refuses a member glob that matches no folder, or a folder without a `Cargo.toml`, so the root `Cargo.toml` adds each tier's glob with the tier's first crate, and its `exclude` names each folder of TypeScript a glob would match, such as `src/engines/page-client` ([build log][stage-1]).
 A feature's block that a released level of the profile format holds stays in the profile engine after the feature goes, since levels only add ([levels](../profiles/01-format-and-delivery.md#levels)).
 
 ### Building every target
@@ -726,16 +696,19 @@ A feature's block that a released level of the profile format holds stays in the
 
 - **Our WASM module is a member of the workspace,** left out of `default-members` with the rest of `src/sim-package/` because its build script needs what cargo-msfs sets, and cargo-msfs builds it from its own folder.
   p11 built it that way against the same message crate as the Windows side, in one `target/` folder and one `Cargo.lock`, and building either side after the other compiled no crate ([architecture log][p11]).
-  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `src/sim-package/wasm-module/` is a cdylib alone, and the routine host and the routines are crates of their own, which node 7's bench can link natively.
+  cargo-msfs refuses a crate whose build outputs more than one file (read in navigraph/cargo-msfs v1.1.0, `src/main.rs`, Build), so `src/sim-package/wasm-module/` is a cdylib alone, and the routine host, the routines, and the module's list of them in `src/sim-package/routines/` are crates of their own, which node 7's bench can link natively.
 - **One copy of the SDK** is the version `msfs-sdk.txt` names, which `tools/setup.ts` installs through `tools/msfs-sdk` into cargo-msfs's data folder, `%APPDATA%\cargo-msfs\data\msfs2024`, which holds SimConnect's header, its import library, and `SimConnect.dll` (read on disk, SDK 1.8.1, 2026-10-15; [the SDK](../build/01-the-build.md#the-sdk)).
   The bindings' build scripts read the SDK from `MSFS_SDK`, which cargo-msfs sets for the module, fall back to that folder for the Windows side, and fail with a message naming `node tools/setup.ts` when the installed SDK isn't that version.
-  That the one copy serves the Windows side is unverified, since p11 generated no bindings for it, and the first build of the sim's edge settles it.
+  The one copy serves the Windows side's bindings too ([build log][stage-3]).
 - **The bindings follow the SDK:** bindgen generates them at each build, so no file derived from the SDK's headers is in the repository, and tells Cargo every header it read (read in bindgen 0.72.1, `src/lib.rs`, `CargoCallbacks`), so a new SDK in the same folder generates them again.
   cargo-msfs installs only the newest SDK, with no way to name a version (read in navigraph/cargo-msfs v1.1.0, `src/sdk.rs`, `install_latest_sdk`), so `tools/msfs-sdk` installs the one `msfs-sdk.txt` names, the build prints the version it built against, from the `version.txt` `tools/msfs-sdk` writes beside the SDK, and CI keys its cache on it.
 - **`RUSTFLAGS` is never set,** in CI or in our tools, because cargo-msfs hands the build its caller's environment after setting `RUSTFLAGS` to its own link arguments (same function as above, Build), and ours would replace them; Clippy's `-D warnings` goes on Clippy's own command line.
   `src/apps/core` stops a build whose `RUSTFLAGS` replaced the static C runtime that the root's `.cargo/config.toml` sets ([the C runtime](../build/01-the-build.md#the-c-runtime)).
 - **The release profile is the root's,** with `lto` and `strip` on, as cargo-msfs's README asks, since a workspace reads profiles only from its root.
-- **The messages' TypeScript types** are generated into `src/engines/messages/ts/`, the folder `TS_RS_EXPORT_DIR` names, which `tools/build.ts` deletes before it runs the message crate's tests, since ts-rs removes no file it wrote before, so a deleted message's type would stay (read in ts-rs 12.0.1's source, which calls no `remove_file`); they're committed and imported from there; CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
+- **The messages' TypeScript types** are generated into `src/engines/messages/ts/`, the folder `TS_RS_EXPORT_DIR` names.
+  The root's `.cargo/config.toml` sets it and `TS_RS_LARGE_INT`, so a plain `cargo test` writes the types, typed as [decision 025](../../decisions/025-messages-in-one-rust-crate.md) asks ([build log][stage-1]).
+  `tools/build.ts` deletes the folder before it runs the message crate's tests, since ts-rs removes no file it wrote before, so a deleted message's type would stay (read in ts-rs 12.0.1's source, which calls no `remove_file`).
+  The types are committed and imported from there, and CI generates them again and fails on any difference, which answers the spine's [left open](01-spine.md#left-open) item on that check.
   ts-rs's derives built into the module in p11, so the message crate needs no second form for wasm32.
   The message crate's build script writes its hash, running again only when what it hashes changes, and the `cargo test` that writes ts-rs's types also writes `ts/stamp.ts`, with the version and the hash, which that check covers ([the message crate's hash](../build/01-the-build.md#the-message-crates-hash)).
 - **TypeScript** has one lockfile at the root, and two npm workspaces, each with a `package.json` of its own beside the root's: `src/apps/desktop/`, because the Tauri CLI takes the folder it runs in when that holds a `package.json` (read in tauri-apps/tauri, its default branch on 2026-10-15, `crates/tauri-cli/src/helpers/app_paths.rs`), and `src/backend/`, since Cloudflare recommends installing wrangler in the project (documented, [Wrangler's commands](https://developers.cloudflare.com/workers/wrangler/commands/)).
@@ -794,6 +767,7 @@ CI runs on Windows runners only (user, 2026-10-15), because Dual Input runs only
 Windows runners build slower than Linux ones: in one report, a project's crates built up to nearly 2x slower on Windows on two unlike machines, and about 13s against 18s on one cloud instance, with a whole build nearly 70% slower (documented, [rust-lang/rust#66192](https://github.com/rust-lang/rust/issues/66192)), and the first stage of [node 8](plan.md#8-the-build-order) that builds real code measures ours.
 
 A pull request that changes code runs Rustfmt, Clippy, and the tests of the default members; builds the module and checks its exports against the list p03 checked; type-checks each tsconfig and runs the Coherent GT check on every file we ship into the sim; generates the messages' types and checks for a difference; runs the map check; checks the files compiled with the sim against their sources' hashes, and the stock files against `stock.json`; and checks and builds the profiles.
+`node tools/check.ts` runs each of these checks that the tree has something for ([build log][stage-1]).
 A pull request that changes only `profiles/` runs the profiles' job alone, through conditions on each job rather than on the workflow, so the checks a merge requires still report, and it needs no SDK, so a new SDK can't fail it.
 CI installs Rust with rustup and sets `LIBCLANG_PATH`, each step runs one command, and the profiles' job is a reusable workflow the release workflow calls too ([CI](../build/01-the-build.md#ci)).
 
@@ -802,7 +776,7 @@ CI installs Rust with rustup and sets `LIBCLANG_PATH`, each step runs one comman
 The code map's [third test](#tiers) is a script in `tools/` that CI and a developer both run, and it checks each rule [tiers](#tiers) lists.
 
 - A crate's tier is its folder, from the `manifest_path` that `cargo metadata` gives each crate, and the script reads the resolved graph, crates from outside the workspace included, so a routine that reaches tokio through any crate fails.
-- A TypeScript file's tier is its folder, and the script takes each file's imports, type-only ones included, from the TypeScript compiler's own resolution, since esbuild's metafile listed no import for a file whose only import was `import type` (measured on our development machine, 2026-10-15, esbuild 0.28.2, [architecture log][p12]).
+- A TypeScript file's tier is its folder, and the script takes each file's imports from `tsc --explainFiles`, the TypeScript compiler's own resolution, which lists type-only ones ([build log][stage-1]), since esbuild's metafile listed no import for a file whose only import was `import type` (measured on our development machine, 2026-10-15, esbuild 0.28.2, [architecture log][p12]).
 - The message crate and the profile engine each hold every feature's module, so the crate graph can't show one feature using another's there; the script searches each feature's source for the names of other features' modules.
 - The script also searches `src/features/` for `impl Moment`, so no feature raises a moment of its own ([moments](../core/01-loop-and-edge.md#moments)).
 - The script also fails a platform unit, in Rust or TypeScript, whose source names a feature's module of the message crate, which [tiers](#tiers)' rules allow, since the message crate is an engine ([a feature's parts](../interface/01-apps.md#a-features-parts)).
@@ -817,6 +791,8 @@ The code map's [third test](#tiers) is a script in `tools/` that CI and a develo
   - the desktop app and audio: tauri, wry, cpal, wasapi
   - ours: the transport and the sim edge
 - The script reads normal dependencies only, so a build dependency such as bindgen, which reads the SDK's headers while simconnect-types builds, never trips it.
+  It follows no proc macro's own dependencies either, since a proc macro runs in the compiler too: ts-rs's derive reaches `windows-sys` through `termcolor` ([build log][stage-3]).
+  A proc macro of ours still keeps the tiers' other rules.
   A listed crate the script lets a loop crate reach anyway carries its reason in the script.
 - p10's loop has 11 crates besides itself among its normal dependencies, rquickjs and zstd among them, none on the list (measured on our development machine, 2026-10-15, [architecture log][map]).
   p07's message crate turned on uuid's `v4`, which reaches `getrandom` (read in `experiments/areas/architecture/types/messages/Cargo.toml` and `types/Cargo.lock`), so the message crate keeps it off, as p11's did ([architecture log][p11]), and the kernel draws the IDs from the seed the core's edge hands it.
@@ -833,18 +809,19 @@ A pull request's CI finishes within 20 minutes with a warm cache, a starting val
 
 - Whether a recording replays on a PC with a different CPU: Windows' C runtime picks its FMA3 math by CPU, and "Differences may also be observable between computers" ([5.1.1]), and Rust's `f64` functions reach that math ([core log](../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version)), so `src/apps/core` links the C runtime statically with FMA3 off; replaying a recording made on a friend's PC on ours settles it.
 - What [a connection for each feature](#a-connection-for-each-feature-for-each-load) leaves unmeasured, and whether the edge's exception tags hold among writes each frame: [node 7](plan.md#7-testing)'s tests in the sim.
-- The stand-in sim's model, how it paces frames, how it plays our WASM module, and how a core on a stand-in reaches the sim's pages, which connect to the core beside this seam, so its pilot can reach Ready to fly and use Go to: [node 7](plan.md#7-testing).
 - Which operations an `ops` module in the bridge offers plugins, and how a plugin's API names the panels they reach: plugins' design, after v1 ([plugins and the sandbox](../plugins/01-plugins.md#what-this-answers)).
 - Two cores in sessions on one sim would feed the same slots, which a developer running a development core beside the installed one doesn't do, so nothing guards against it (user, 2026-10-15).
 - Which unit of the platform loads the EventBus bridge's listener into the EFB's document, which [04-room-for-later](../product/04-room-for-later.md#code-inside-the-sim) leaves open, for after v1.
-- Whether the stand-in sim keeps the loop's rules, which [tiers](#tiers) holds it to until then, and where the list of routines lives if the bench runs them natively, since the bench can't link `src/sim-package/wasm-module/`, a cdylib alone: [node 7](plan.md#7-testing).
 - How long CI takes on Windows runners, and how much a warm cache saves: the first stage of [node 8](plan.md#8-the-build-order) that builds real code measures it with `cargo build --timings`, against [budgets for the workspace](#budgets-for-the-workspace).
 - Which of the platform's hooks and moments plugins reach through QuickJS-ng, and whether a plugin needs a moment only a feature could raise, which this design gives no feature: plugins' design, after v1.
-- The self-describing record a later version reads: [node 6](plan.md#6-systems).
-- Whether one loop meets its budgets, which p10's loop measures offline: [node 7](plan.md#7-testing).
+- The self-describing record a later version reads, which comes with the uploads after v1.
 
 [flight]: log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [5.1.1]: log.md#2026-10-14-a-core-replays-a-whole-run-when-one-ordered-loop-owns-its-state-and-takes-every-input-stamped-through-one-queue-as-sans-io-cores-lmax-and-tigerbeetle-run-and-neither-actors-nor-simulation-runtimes-can-replay-a-run-from-a-pilots-pc
 [p11]: log.md#2026-10-15-our-wasm-module-builds-with-cargo-msfs-from-inside-the-cores-cargo-workspace-against-the-same-message-crate-and-neither-build-disturbs-the-others
 [p12]: log.md#2026-10-15-cargo-takes-globs-in-default-members-too-and-esbuilds-metafile-leaves-out-a-type-only-import
 [map]: log.md#2026-10-15-cargo-refuses-two-crates-of-one-name-in-a-workspace-and-p10s-loop-reaches-no-crate-that-does-io
+[stage-1]: ../build/log.md#2026-10-18-cargo-refuses-a-member-glob-that-matches-no-folder-or-a-folder-without-a-cargotoml-and-typescript-702s---explainfiles-lists-a-type-only-import
+[stage-3]: ../build/log.md#2026-10-20-bindgen-builds-the-windows-sides-simconnect-types-with-the-static-c-runtime-and-ts-rss-derive-reaches-windows-sys
+[every-input]: ../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour
+[stage-8]: ../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb

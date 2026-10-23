@@ -3,37 +3,11 @@
 ```text
 Purpose:     How the core's clients reach it and talk to it, and how a cockpit panel loads what features run there.
 Depends on:  ../architecture/02-code-map.md, ../architecture/01-spine.md, 01-loop-and-edge.md, ../architecture/decisions.md, log.md
-Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notices and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; the transport for ops; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
+Decides:     The core's WebSocket library and its Origin check; the client protocol's messages; how a unit's state, commands, and messages reach the clients; notices and settings; the moments the clients crate raises; what a client whose version differs gets; how page-client finds, joins, and rejoins the core; how our VCockpit.js loads the bridge and the bridge loads panel modules; what v1 builds for clients beyond the PC; and the budgets (node 6.2).
 ```
 
-> **Note**
-> Since 2026-10-15, every name the sim shares is `DUALINPUT_<KIND>_<NAME>` ([names the sim shares](../architecture/02-code-map.md#names-the-sim-shares)), so the core's announcement is `DUALINPUT_CORE_ANNOUNCE`, where [page-client](#page-client) has `DUALINPUT_CORE`, and the bridge's globals are `DUALINPUT_BRIDGE_API`, `DUALINPUT_BRIDGE_PENDING`, and `window.DUALINPUT_BRIDGE_UNLOCK()`, where [the units](#the-units) and [our VCockpit.js](#our-vcockpitjs) have `DUALINPUT_BRIDGE`, `DUALINPUT_PENDING`, and `window.DUALINPUT_UNLOCK()` ([03-sim-seam-and-wasm-module](03-sim-seam-and-wasm-module.md)).
-> Since 2026-10-16, the core sends each client `alive` every 2s whatever else it sends, where [the protocol](#the-protocol) has it send `alive` once it has sent nothing for 2s, so a slice of a partly recorded unit, which drifts in a replay, never moves when the core's `alive` goes out; and a partly recorded unit's slice is left out of a replay's check ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
-> Since 2026-10-17, beside what [panel modules](#panel-modules) has a `ctx` do, a panel module's `ctx` watches a slice of client state through `ctx.watch`, as pointer sync's watches its visible lock, and `load` names each module's instruments.
-> An unseen lock lapses 2s after the module last renews it, where [the protocol](#the-protocol) has any message from the core renew a panel's locks; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([pointer sync](../pointer-sync/01-pointer-sync.md#locks)).
-> Since 2026-10-17, v1 has no plugins, so the panel bridge has no `ops` module and `clients` carries no `ops` request, where [the units](#the-units), [the protocol](#the-protocol), [the moments clients raises](#the-moments-clients-raises-and-the-calls-it-takes), and [ops](#ops) have them, and the case for the bench on an unanswered `ops` request goes; a panel module that reads values in a gauge's JavaScript is state sync's `instrument-reads` ([plugins and the sandbox](../plugins/01-plugins.md#reading-it-in-the-panel)).
-> Since 2026-10-17, [the apps' design](../interface/01-apps.md) changes this document in four places:
->
-> - Any client changes any setting with `clients`' command, where [what a unit registers and calls](#what-a-unit-registers-and-calls) has the desktop app change them, and a setting also registers a label and what an app needs that its type doesn't say, while a development setting shows in no app ([settings](../interface/01-apps.md#settings)).
-> - A `unit` message also reaches an app's part, by its unit's name; `clients` also holds a command for a notice clicked outside its action and one that brings the desktop app forward, and its slice says whether a banner page's socket is open; and `page-client` gives its page the connection's state ([the apps](../interface/01-apps.md#slices-and-commands)).
-> - `clients` raises a trouble notice when no cockpit panel's `hello` comes within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)).
-> - A client whose version differs is logged and nothing more, which settles what [a client whose version differs](#a-client-whose-version-differs) leaves to 6.16; where a notice shows waits for the apps' stage.
->
-> Since 2026-10-18, the sim's stock `VCockpit.js` is on disk in our Steam install, in its `asobo-vcockpits-core` package, where [our VCockpit.js](#our-vcockpitjs) has the sim stream it; the build makes our copy from the stock file it keeps in `src/sim-package/stock/`, and a build on a PC with the sim compares the sim's own file with it ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files); [build log](../build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed)).
->
-> Since 2026-10-21, the core records every input, so no unit's slice drifts in a replay, and a replay checks every slice, where the note of 2026-10-16 leaves a partly recorded unit's out; the core's `alive` every 2s whatever else it sends, from that note, then guards against no drift, and [the protocol](#the-protocol)'s `alive` after 2s of nothing would replay exactly too (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
->
-> Since 2026-10-22, building stage 5 of [the build plan](../build/plan.md#5-clients-and-the-panel-bridge) settles two things this design left open, then changes three:
->
-> - Each side sends `alive` every 2s whatever else it sends, where [the protocol](#the-protocol) has a side send it once it has sent nothing for 2s: one timer on each side, with no record of what went to each client, at about 10 messages a second across the 20 cockpit panels of the Black Square Baron 58P (user, 2026-10-22).
-> - The port file is `port.json` in the core's data folder, the message crate's `PortFile`: the port, the core's process ID, and its creation time.
-> - The profile loader tells `clients` when its profile loads and unloads, where [the moments clients raises](#the-moments-clients-raises-and-the-calls-it-takes) has it hand over the profile, and each panel module's rule reads the loaded profile from the profile loader's state, so `clients` needs no type of the profile engine's.
-> - A cockpit panel's `hello` names its panel, as the sim's `globalPanelData.sName` gives it, such as `VCockpit66`, and a panel's socket is replaced when a `hello` names the panel it holds, where [the moments clients raises](#the-moments-clients-raises-and-the-calls-it-takes) has it replaced when a `hello` names instruments it holds, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED` (user, 2026-10-22; [log](log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
->   Whether a reloaded panel keeps its `sName` is unverified, and if it doesn't, its new socket joins beside the old one, which the core closes 8s after the old page's last message (inference); reading `sName` before and after reloading one panel through the sim's inspector settles it.
-> - A 2s tick of `clients` that fires more than 2s late starts each client's 8s of quiet again, since the core itself stopped and heard nothing, so a core suspended for 12s closes no page's socket, as [cases for the bench](#cases-for-the-bench) has it (same log entry).
-
 The core serves every client over one protocol of JSON messages on a WebSocket, through tokio-websockets, which iroh already brings into the core.
-A client opens with a `hello` that names it and its version, and from then on each side sends something at least every 2s, while only the core closes a socket that goes quiet.
+A client opens with a `hello` that names it and its version, and from then on each side sends `alive` every 2s, while only the core closes a socket that goes quiet.
 A unit reaches the clients through slices of state, which the `clients` crate sends on a timer to the clients that show them, through commands the clients send it, and through messages of its own to a client by name.
 In a cockpit panel, our `VCockpit.js` hands each instrument to the panel bridge without ever delaying it, and loads our files through script elements of its own, outside the sim's script loader.
 
@@ -45,9 +19,9 @@ The spine's [communication](../architecture/01-spine.md#communication), decision
 | Unit | Holds |
 | --- | --- |
 | `src/apps/core`'s edge | The WebSocket server, its `Origin` check, and a tokio task for each socket; a socket opening, a text message, and a close come in as inputs, and "send this text" and "close this socket" go out as outputs |
-| `clients`, on the loop | The protocol, the table of clients, the keepalive, client state, commands, messages to clients, notices, settings, which panel modules each panel loads, and the transport for `ops`; it raises a client joining or leaving, a panel's socket replaced, and a setting changed |
-| `page-client`, in TypeScript | Hearing the core's announcement, connecting, the `hello`, the keepalive, and handing each message to whoever registered its tag |
-| `panel-bridge`, in TypeScript | Our two blocks in `VCockpit.js`, a record of each instrument, loading panel modules, locks and overlays, the `ops` module, and `window.DUALINPUT_UNLOCK()` |
+| `clients`, on the loop | The protocol, the table of clients, the keepalive, client state, commands, messages to clients, notices, settings, and which panel modules each panel loads; it raises a client joining or leaving, a panel's socket replaced, and a setting changed |
+| `page-client`, in TypeScript | Hearing the core's announcement, connecting, the `hello`, the keepalive, handing each message to whoever registered its tag, and giving its page the connection's state |
+| `panel-bridge`, in TypeScript | Our two blocks in `VCockpit.js`, a record of each instrument, loading panel modules, locks and overlays, and `window.DUALINPUT_BRIDGE_UNLOCK()` |
 
 ## The WebSocket server
 
@@ -59,6 +33,7 @@ The spine's [communication](../architecture/01-spine.md#communication), decision
 - **Limits:** tokio-websockets' `Limits` cap a message at 64 MiB by default ([core log][p02]); the edge sets 1 MiB, sixteen times the [budget](#budgets)'s 64 KiB, so a message over budget still arrives and the bench catches it, while a runaway closes the socket.
   Only text is taken, and a binary message closes the socket.
 - **Socket IDs** come from a counter at the edge, inside each input, so a replay sees the same IDs.
+- **The port file** is `port.json` in the core's data folder, the message crate's `PortFile`: the port, the core's process ID, and its creation time.
 
 ## The protocol
 
@@ -66,19 +41,21 @@ Each message is JSON with a `t` tag, defined in the message crate's clients modu
 
 | `t` | From | Carries |
 | --- | --- | --- |
-| `hello` | A client | Its component, its version, the message crate's hash, and for a cockpit panel its instruments' keys |
-| `alive` | Either | Nothing: a side sends it once it has sent nothing for 2s |
+| `hello` | A client | Its component, its version, the message crate's hash, and for a cockpit panel its panel's name and its instruments' keys |
+| `alive` | Either | Nothing: each side sends it every 2s, whatever else it sends |
 | `watch` | A client | The slices of state it shows, after its `hello` and whenever that changes |
 | `state` | The core | One slice's name and its whole value |
 | `command`, then `answer` | A client, then the core | An ID, the command's name, and its arguments; then the same ID, and "taken" or an error |
-| `unit` | Either | A unit's name and a body of its own: a panel module's press, an `ops` request, the sim service's world-map request to the menu script, or the order that opens the EFB onto our app |
-| `load`, `stop`, `none` | The core, to a cockpit panel | The panel modules to load or to stop, or nothing for this panel, after which it closes its socket ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
+| `unit` | Either | A unit's name and a body of its own: a panel module's press, the sim service's world-map request to the menu script, or the order that opens the EFB onto our app |
+| `load`, `stop`, `none` | The core, to a cockpit panel | The panel modules to load, with each one's instruments, or to stop, or nothing for this panel, after which it closes its socket ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)) |
 | `bye` | The core | Nothing: the core sends it as it quits ([01-loop-and-edge](01-loop-and-edge.md#quitting)) |
 
-- **Each side sends at least every 2s, and only the core closes a socket that has been quiet for 8s.**
+- **Each side sends `alive` every 2s, and only the core closes a socket that has been quiet for 8s.**
+  One timer on each side sends it, with no record of what went to each client, at about 10 messages a second across the 20 cockpit panels of the Black Square Baron 58P (user, 2026-10-22).
   [Decision 010](../../decisions/010-clients-message-core-every-2s.md) has the clients' message every 2s and the core's close after 8s; the core's own message every 2s is this design's, and adds to decision 010 once step 8's decisions are numbered.
+  A 2s tick of `clients` that fires more than 2s late starts each client's 8s of quiet again, since the core itself stopped and heard nothing, so a core suspended for 12s closes no page's socket ([core log][stage5]).
   A client notes the core's silence and keeps its socket, and the EFB app can show it.
-  Any message from the core renews a panel's locks, so when the core hangs, the bridge turns a visible lock into a warning 8s to 10s after the core's last message, as the code map's [how work in the sim ends](../architecture/02-code-map.md#how-work-in-the-sim-ends) has it.
+  Any message from the core renews a panel's visible locks, so when the core hangs, the bridge turns a visible lock into a warning 8s to 10s after the core's last message, as the code map's [how work in the sim ends](../architecture/02-code-map.md#how-work-in-the-sim-ends) has it.
 - **A command's answer says only whether the command was taken.**
   What it led to shows in state: a join, for one, answers at once, and its progress shows in the session's slice.
 - **`bye`** goes to every client when the session crate quits, which asks `clients` for it in the handler that puts out the exit; the apps use it to tell the pilot that Dual Input quit rather than stopped, as FS Copilot's panels told a deliberate shutdown from a crash by its goodbye (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`).
@@ -87,9 +64,9 @@ Each message is JSON with a `t` tag, defined in the message crate's clients modu
 
 ## A client whose version differs
 
-A `hello` whose version or hash differs from the core's is logged by the client's name, with both versions, and the core goes on talking to it (user, 2026-10-15).
+A `hello` whose version or hash differs from the core's is logged by the client's name, with both versions, and nothing more: the core goes on talking to it (user, 2026-10-15), and no notice shows ([trouble](../interface/01-apps.md#trouble)).
 The watcher updates the Community package with Dual Input while the sim is closed ([installing and updating](../product/03-v1-scope.md#installing-and-updating)), so we expect a mismatch to mean a developer's stale package (inference).
-This settles, for the WebSocket clients, the spine's item in [left open](../architecture/01-spine.md#left-open) on what the core does beyond logging; our WASM module, whose data slots are structs the module reads in place ([messages and their types](../architecture/01-spine.md#messages-and-their-types)), is [6.3](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)'s, and whether the pilot sees a mismatch is [6.16](../architecture/plan.md#616-the-apps)'s.
+This settles, for the WebSocket clients, the spine's item in [left open](../architecture/01-spine.md#left-open) on what the core does beyond logging; our WASM module, whose data slots are structs the module reads in place ([messages and their types](../architecture/01-spine.md#messages-and-their-types)), is [6.3](../architecture/plan.md#63-the-sim-seam-and-our-wasm-module)'s.
 
 ## What a unit registers and calls
 
@@ -106,15 +83,17 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
   The timer bounds the work however many inputs arrive, and needs no unit to mark what changed.
   A slice no unit registered, such as a deleted feature's, is ignored.
 - **Commands:** `clients` calls a command's handler by name, through the kernel, once its own handler returns ([01-loop-and-edge](01-loop-and-edge.md#hooks)); a name no unit registered answers "unknown".
-- **Messages to a client:** `cx.send` puts out a `unit` message to every client of a component, or to a panel module, and a client's `unit` message reaches the unit that registered its name.
+  `clients` holds a command for a notice clicked outside its action, and one that brings the desktop app forward ([the apps](../interface/01-apps.md#slices-and-commands)).
+- **Messages to a client:** `cx.send` puts out a `unit` message to every client of a component, to a panel module, or to an app's part, by its unit's name, and a client's `unit` message reaches the unit that registered its name ([the apps](../interface/01-apps.md#slices-and-commands)).
   Unlike a slice, a message goes once, so a client that connects later never gets it: a menu script that reconnects never gets a world-map request the sim service sent before it.
 - **Notices:** a notice's ID is its unit's own, its feature writes its text, its level is information, a warning, or trouble, and its action, if it has one, is the command a click on it sends.
-  The notices are a slice of `clients`' own, and where each one shows is [6.16](../architecture/plan.md#616-the-apps)'s.
-- **Settings:** a unit registers each setting with a key, a type, and a default, and `clients` keeps them in `settings.json` in the data folder, whose bytes come with the core's first input ([01-loop-and-edge](01-loop-and-edge.md#starting-and-stopping)).
+  The notices are a slice of `clients`' own, which also says whether a banner page's socket is open, and where each notice shows waits for the apps' stage ([left to the apps' stage](../interface/01-apps.md#left-to-the-apps-stage)).
+- **Settings:** a unit registers each setting with a key, a type, a default, a label, and what an app needs that its type doesn't say, and `clients` keeps them in `settings.json` in the data folder, whose bytes come with the core's first input ([01-loop-and-edge](01-loop-and-edge.md#starting-and-stopping)).
   - A change writes the whole file again, as a job.
-  - A stored value that no longer fits its type gives way to the default, and the core logs it.
+  - A stored value that doesn't fit its type gives way to the default, and the core logs it.
   - A key no unit registered stays in the file through every write, so a feature deleted and restored finds its values.
-  - The desktop app shows the settings as a slice and changes one by command ([decision 016](../../decisions/016-core-keeps-pilots-settings.md)).
+  - The settings are a slice, which the desktop app shows, and any client changes any setting with `clients`' command ([decision 016](../../decisions/016-core-keeps-pilots-settings.md); [settings](../interface/01-apps.md#settings)).
+  - A development setting shows in no app.
 
 ## The moments clients raises, and the calls it takes
 
@@ -123,28 +102,33 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
 | Moment | Raised when | Such as |
 | --- | --- | --- |
 | A client joined, or left | A `hello` arrives, or a socket closes, with the client's component | The session crate exits once the desktop app has gone and the rest of the spine's rule holds ([what moves them](../architecture/01-spine.md#what-moves-them)) |
-| A panel's socket replaced | A `hello` names instruments another socket holds | Pointer sync counts a press sent to the old socket that its panel never played as applied ([modules in the panel bridge](../architecture/02-code-map.md#modules-in-the-panel-bridge)) |
+| A panel's socket replaced | A `hello` names the panel another socket holds | Pointer sync counts a press sent to the old socket that its panel never played as applied ([modules in the panel bridge](../architecture/02-code-map.md#modules-in-the-panel-bridge)) |
 | A setting changed | A command changes a setting, with its key | The core-helper-service gives the core helper a rebound take-control key |
 
-- The profile loader hands `clients` the profile it loaded, and its unload, so `clients` can run the panel modules' rules.
+A cockpit panel's `hello` names its panel as the sim's `globalPanelData.sName` gives it, such as `VCockpit66`, and the panel's name decides a replacement, since two of the Black Square Baron's panels each hold an instrument keyed `GNS_DISABLED` (user, 2026-10-22; [core log][stage5]).
+Whether a reloaded panel keeps its name is [left open](#left-open).
+
+- The profile loader tells `clients` when its profile loads and unloads, and each panel module's rule reads the loaded profile from the profile loader's state, so `clients` needs no type of the profile engine's.
 - The session crate asks `clients` for `bye` before it puts out the exit.
-- The plugins crate sends `ops` requests through `clients`.
 
 ## Cockpit panels and their modules
 
 - A panel module's rule picks instruments, given the loaded profile, as pointer sync's takes the instruments its profile's [`displays`](../profiles/01-format-and-delivery.md#displays) names.
 - An instrument's key is its identifier, or its tag's name if it has none, followed by `|` and the query of its `url` attribute where it has one, as FS Copilot's `Channel.keyFor` joins them (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`), the key the profile's `displays` names.
-- Once the profile has loaded and a panel's `hello` has arrived, `clients` answers the panel with `load` and the modules its instruments get, or with `none`; a profile that unloads sends `stop`.
+- Once the profile has loaded and a panel's `hello` has arrived, `clients` answers the panel with `load`, naming the modules its instruments get and each one's instruments, or with `none`; a profile that unloads sends `stop`.
+- `clients` raises a trouble notice when no cockpit panel's `hello` comes within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)).
 - A panel told `none` stays closed until an announcement brings another port or says the session ended, so it connects once a session.
 
 ## page-client
 
-1. It listens for the core's announcement, a CommBus event named `DUALINPUT_CORE` whose payload holds the core's port and whether a session runs, by each kind of page's route in [finding the core](../architecture/01-spine.md#finding-the-core).
-   The event's name is new in this design.
+1. It listens for the core's announcement, a CommBus event named `DUALINPUT_CORE_ANNOUNCE` whose payload holds the core's port and whether a session runs, by each kind of page's route in [finding the core](../architecture/01-spine.md#finding-the-core).
+   The event's name is new in this design, and follows [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares).
 2. When it hears an announcement with no socket open, or one naming a port other than its socket's, it connects to that port and sends its `hello`; a cockpit panel connects only to an announcement that says a session runs ([decision 011](../../decisions/011-cockpit-panels-connect-only-in-session.md)).
 3. When its socket closes, it connects again on the next announcement, so it needs no backoff.
 4. It queues nothing while it has no socket, and a send then is dropped: a core that restarted comes back as a late joiner ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)), and a press played into a cockpit already caught up would undo the catch-up.
    FS Copilot's channel kept up to 200 messages for at most 30s, since "stale input is worse than none" (FS Copilot fork, `FsCopilot.Bridge/PackageSources/HTML_UI/FsCopilot/channel.js`, `MAX_QUEUE` and `MAX_QUEUE_AGE_MS`); ours keeps none.
+
+`page-client` gives its page the connection's state ([the apps](../interface/01-apps.md#slices-and-commands)).
 
 ## The panel bridge
 
@@ -152,24 +136,21 @@ cx.notice(id, Notice { level, text, action });                // a notice, and c
 
 Our `VCockpit.js` is the stock file with two blocks between markers, as FS Copilot's copy has ([06-02](../../learn/foundations/06-02-apis-debugger-and-injection.md#injecting-code-into-panels-overriding-vcockpit-load-order-conflicts-failing-open)):
 
-- The block at the top sets `DUALINPUT_PENDING = []` and, in a `try`, adds a script element of its own for `/DualInput/bridge.js`, one esbuild bundle of the bridge and page-client, which loads the sim's `CommBus.js` the same way where the panel lacks it.
-- The block in `createInstrument`, after the sim's code has set the instrument up, runs `try { if (window.DUALINPUT_BRIDGE) DUALINPUT_BRIDGE.add(template); else DUALINPUT_PENDING.push(template); } catch (e) {}`, and the bridge takes every instrument waiting in `DUALINPUT_PENDING` when it loads.
+- The block at the top sets `DUALINPUT_BRIDGE_PENDING = []` and, in a `try`, adds a script element of its own for `/DualInput/bridge.js`, one esbuild bundle of the bridge and page-client, which loads the sim's `CommBus.js` the same way where the panel lacks it.
+- The block in `createInstrument`, after the sim's code has set the instrument up, runs `try { if (window.DUALINPUT_BRIDGE_API) DUALINPUT_BRIDGE_API.add(template); else DUALINPUT_BRIDGE_PENDING.push(template); } catch (e) {}`, and the bridge takes every instrument waiting in `DUALINPUT_BRIDGE_PENDING` when it loads.
 
 Our files never go through the sim's `Include.addImports`, which FS Copilot's copy uses.
 Stock `VCockpit.js` sets the sim's loader to one script at a time before it loads each instrument's scripts, and in that mode the loader requests a script only once the one before it fires `onload`, so a file of ours that never loads would keep every instrument script behind it from being requested (read in the sim's `common.js`, `IncludeMgr`, not run; [core log][include]).
-So the sim creates each instrument exactly as it would without us, and if `bridge.js` never loads, the cockpit should run as if Dual Input weren't installed (unverified; a case for the bench settles it).
-The build makes our copy by putting the two blocks into the stock file at named anchors, and refuses when an anchor is missing, as our prototype refused when one of FS Copilot's markers was (same chapter).
-The sim streams its stock file rather than keeping it on disk (same chapter), so how the build gets it after each sim update is [6.18](../architecture/plan.md#618-the-build)'s.
+So the sim creates each instrument exactly as it would without us, and if `bridge.js` never loads, or throws as it loads, the cockpit runs as if Dual Input weren't installed (measured on MSFS 2024, 2026-10-22, [core log](log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key)).
+The build makes our copy from the stock file it keeps in `src/sim-package/stock/`, putting the two blocks into it at named anchors, and refuses when an anchor is missing, as our prototype refused when one of FS Copilot's markers was (same chapter).
+The sim's stock `VCockpit.js` is on disk in our Steam install, in its `asobo-vcockpits-core` package, and a build on a PC with the sim compares the sim's own file with the one we keep ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files); [build log](../build/log.md#2026-10-18-the-sims-stock-vcockpitjs-is-on-disk-in-our-steam-install-in-asobo-vcockpits-core-not-streamed)).
 
 ### Panel modules
 
 - Each panel module is a file in `/DualInput/modules/`, built from its feature's `panel/` folder ([the workspace](../architecture/02-code-map.md#the-workspace)), which the bridge loads through a script element of its own when `load` names it.
-- A module's `ctx` sends and receives its `unit` messages, and asks the bridge for a lock.
-
-### ops
-
-An `ops` request carries an ID, an operation's name, and its arguments, and its answer carries the same ID and a value or an error; the plugins crate gives up on a request after 1s, through a timer.
-Which operations `ops` offers is [6.15](../architecture/plan.md#615-plugins)'s.
+- A module's `ctx` sends and receives its `unit` messages, asks the bridge for a lock, and watches a slice of client state through `ctx.watch`, as pointer sync's watches its visible lock.
+- An unseen lock lapses 2s after the module last renews it; a press that lands on it paints it until that press's up, and a lock a blocked press is held on stays until that up ([pointer sync](../pointer-sync/01-pointer-sync.md#locks)).
+- v1 has no plugins, so the bridge has no `ops` module, and a panel module that reads values in a gauge's JavaScript is state sync's `instrument-reads` ([plugins and the sandbox](../plugins/01-plugins.md#reading-it-in-the-panel)).
 
 ## Clients beyond the PC
 
@@ -202,13 +183,14 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A slice that changes 100 times a second reaches a client at most once a round.
 - A command no unit registered answers "unknown".
 - A settings file keeps a key no unit registered.
-- An `ops` request nobody answers gives up after 1s.
 - A cockpit whose `bridge.js` is missing, or throws as it loads, loads every instrument as it would without Dual Input.
 
 ## Left open
 
 - The fields of each message: choices inside the message crate.
 - Whether a script element's `onerror` fires in Coherent GT for a file that's missing or doesn't parse, which the last case for the bench shows.
+- Whether a reloaded panel keeps its `sName`: if it doesn't, its new socket joins beside the old one, which the core closes 8s after the old page's last message (inference); reading `sName` before and after reloading one panel through the sim's inspector settles it.
 
 [p02]: log.md#2026-10-15-iroh-13-already-brings-tokio-websockets-into-the-core-so-serving-the-clients-with-it-keeps-the-core-at-one-websocket-implementation
 [include]: log.md#2026-10-15-the-sims-script-loader-holds-every-later-script-behind-one-that-never-loads-while-it-loads-one-at-a-time
+[stage5]: log.md#2026-10-22-stage-5s-bridge-loads-in-all-20-of-the-barons-panels-joins-the-core-on-a-sessions-announcement-and-leaves-the-cockpit-whole-when-bridgejs-is-missing-or-throws-but-two-panels-shared-an-instrument-key

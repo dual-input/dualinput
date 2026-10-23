@@ -27,7 +27,7 @@ Here a pose is the aircraft's position and attitude.
 | `flight-model` | Feature | On the flying machine, the last sample it sent, which it sends again through a pause; on a following machine, the newest stamp it took, the clock offset it applies, and `Follow`'s feeds | Its crate in the core, and the routines `Lead` and `Follow` in our WASM module |
 
 It depends on the network for its channel and each sender's offset, on the session for control and who is in the flight, and on the sim service for its routines and the flying sim's pause.
-It registers as partly recorded, with `Lead`'s reports and its samples' channel unrecorded ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
+It registers as partly recorded, with `Lead`'s reports and its samples' channel unrecorded (unrecorded inputs).
 It loads no profile, so it flies a session whose aircraft has none.
 
 ## The sample

@@ -6,63 +6,10 @@ Depends on:  01-between-machines.md, ../architecture/02-code-map.md, ../core/01-
 Decides:     What runs on the loop and what in the transport; the network crate's channels, sends, links, moments, and requests, and the hook the session's first message comes through; the transport's commands and events; the heartbeat and its clock stamps; the endpoint key; the backend's framework, storage, requests, and its count of wrong codes; who hosts the relays and where their configuration lives; what the code map changes in 01-between-machines; the budgets; and the cases for the bench (node 6.4).
 ```
 
-> **Note**
-> Since 2026-10-16, [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md) changes this document in three places:
->
-> - A channel can be declared `.unrecorded()`, beside its delivery and priority in [channels and sends](#channels-and-sends), so the recording leaves out its messages.
-> - The lost-link timer in [links](#links) counts only a connection's recorded inputs, its streams, its heartbeat, and its recorded one-off channels, where it counts every packet.
-> - The backend keeps a session's row and its members' rows for 30 days after the later of a member's last renewal and their leave, which marks the row as left rather than ending it, where [its requests](#its-requests) and [codes, lapses, and wrong codes](#codes-lapses-and-wrong-codes) end a member at their leave or lapse; a lookup lists neither a left nor a lapsed member. It takes bug reports' parts from members into R2, beside D1's tables in [its framework and storage](#its-framework-and-storage).
->
-> Since 2026-10-18, the release workflow deploys the backend, its D1 migrations and then its Worker, just before it publishes each release, and a second workflow deploys it alone for a fix, so the backend running is the newest release's and answers older releases' cores too, and a change to a request's body in [its requests](#its-requests) takes a new path beside the old one ([the backend](../build/01-the-build.md#the-backend)).
->
-> Since 2026-10-18, the relays' tokens stay out of this repository, which goes public: a private repository of ours, under Dual Input's GitHub organization, holds each relay's tokens newest first, where [their configuration](#their-configuration) puts them in `src/relays/relays.toml`, which keeps each relay's region, URL, and cap (user, 2026-10-18).
-> Developers trusted with the tokens are given access to it, and adding or retiring a token is a commit there.
-> `src/relays/deploy.ts` reads the tokens from a clone of it, and the network crate's build compiles them into each release's default list from the copy [the release's build job](../build/01-the-build.md#a-release) checks out, so a token is exposed only as far as a release's program exposes it, where their configuration has the tokens go public with the repository.
-> The local `iroh-relay` that [cases for the bench](#cases-for-the-bench) runs two cores through takes a test token, not the production one, so CI's tests need no access.
->
-> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes the note of 2026-10-16 in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
->
-> - No channel is declared `.unrecorded()`.
-> - The lost-link timer's count of a connection's recorded inputs counts every packet, as [links](#links) has it.
-> - The backend takes no bug report's parts and stores nothing in R2 in v1, since the report endpoints come after v1; the 30 days it keeps a session's rows after a leave serve those endpoints' check, and whether v1's backend keeps them is open.
->
-> Since 2026-10-22, the network's stage of the build settles three things (user, 2026-10-22; [build plan](../build/plan.md#7-the-network)):
->
-> - It pins iroh, noq, and `iroh-relay` at 1.3.0, the versions our probes measured, over iroh 1.4.0 and 1.4.1, of 2026-10-20 and 2026-10-21; moving to 1.4 is a change of its own, as [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) gives it.
-> - v1's backend ends a member at its leave or lapse, as [its requests](#its-requests) and [codes, lapses, and wrong codes](#codes-lapses-and-wrong-codes) have it, and keeps no rows for 30 days after, which only the report endpoints after v1 need.
-> - The private repository that holds the relays' tokens is `dual-input/relay-tokens`, made in stage 7 rather than in stage 22 with the rest of GitHub.
->
-> Since 2026-10-22, the network's stage of the build settles what this design left to it, in the sections each item links, and [the network's log](log.md#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay) holds its bench run:
->
-> - The relays run at `nyc.relay.dualinput.app` and `fra.relay.dualinput.app`, and the backend at `api.dualinput.app`, on Dual Input's domain (user, 2026-10-22; [who hosts them](#who-hosts-them)).
-> - `dual-input/relay-tokens` holds `tokens.toml`, each relay's tokens newest first under its region, which the network crate's build reads from the clone `DUALINPUT_RELAY_TOKENS` names, and `src/relays/deploy.ts` installs n0's own build of `iroh-relay` 1.3.0, checked against its SHA-256 ([their configuration](#their-configuration)).
-> - Each one-off channel's message type implements the message crate's `OneOff` trait, whose `wait()` gives its key or its deadline, in the type's own module, because Rust accepts `impl OneOff for T` only in the crate that defines `OneOff` or the one that defines `T` ([channels and sends](#channels-and-sends)).
-> - A one-off message gets `ONE_OFF_ROOM` in the message crate, 1,160 bytes, since the transport puts its channel's number in the first 2 of a packet's 1,162, and a stamped channel's message gets 8 fewer, where [sending](01-between-machines.md#sending) keeps a traffic batch under 1,162 ([channels and sends](#channels-and-sends)).
-> - The network sends heartbeats only while a session is open, so a core outside a session records no heartbeat input each second ([the heartbeat and clock offsets](#the-heartbeat-and-clock-offsets)).
-> - The backend's bodies give pilot and endpoint IDs as lowercase hex, a signed request carries the endpoint ID and its signature in the `DualInput-Endpoint` and `DualInput-Signature` headers, and a member's kind is crew or passenger, so a passenger's entry needs no new path ([its requests](#its-requests)).
-> - An IPv6 address counts its wrong codes by its /64, the network a home usually gets and whose addresses its PCs may switch among, and an IPv4 address by itself; a lookup takes its guess in the statement that checks the count, and a right code gives it back, so lookups made at once can't pass 20 (user, 2026-10-23; [codes, lapses, and wrong codes](#codes-lapses-and-wrong-codes)).
-> - A member entry's pilot ID isn't tied to its key, so someone holding the code could list another pilot's ID under a key of their own, and v1 leaves that, since only someone the crew gave the code to could (user, 2026-10-23; [its requests](#its-requests)).
-> - Of two connections one side dialed, the newer stays, and the two sides can rank a pair differently when a handshake's last packet is lost and a redial's connection finishes first on one side; both then close, redial, and link within a redial or two, which v1 leaves (user, 2026-10-23; [links](#links)).
-> - A core whose connection closes with a refusal's code shows the refusal's notice, as it does when it refuses the other core's first message itself, because the close can arrive before the first message the other core sent ahead of it ([the first message](#the-first-message)).
-> - The bench's relays are `iroh-relay`'s own server, as a library in `tools/bench/relay`, each behind a proxy that tells one core's connection from another's by the process that owns it, in place of the `iroh-relay` program on `127.0.0.1:3340` ([cases for the bench](#cases-for-the-bench)).
->   A core reaches such a relay over plain HTTP with its token, which settles [left open](#left-open)'s item on it, and asks a relay over plain HTTP for no QUIC address discovery.
->
-> Since 2026-10-23, two more things hold for the network's stage of the build (user, 2026-10-23):
->
-> - The transport pins `noq-proto`, `noq-udp`, `iroh-base`, and `iroh-dns` at 1.3.0 beside iroh, noq, and `iroh-relay`, the versions every network experiment of ours that ran iroh ran, because iroh 1.3.0 and `iroh-relay` 1.3.0 take any 1.x of them from 1.3.0, and `Cargo.lock` had moved them to 1.4 ([network log](log.md#2026-10-23-cargolock-ran-noq-proto-140-under-our-130-pins-so-the-transport-pins-the-crates-iroh-and-noq-are-built-from-too)).
-> - The run by hand in [cases for the bench](#cases-for-the-bench) runs `tools/bench/droplet`, a small core for Linux: the kernel's loop with the clients and network crates and a test unit that sends [p06]'s busy mix, and the transport at an edge of its own.
->   Its build as a static musl program settles that the network crate and the transport build on Linux.
->   The listening end runs `iroh-relay`'s server as a library inside the same program, and that relay only introduces the two ends before they go direct, so the run needs no DNS and no deployed relay.
->   The run without the newest-only slots happens once, on the droplet build's own copy of the transport, with a patch that drops them and is kept with that run's results, so the transport carries no switch for the slots.
->   Later runs, at each change of iroh's or noq's version, run the transport as it ships, because [the burst case](#cases-for-the-bench) keeps the slots whatever that first run shows.
-> - That first run settles [left open](#left-open)'s item on the slots: on a direct path 85ms away at 3% loss, they kept one-off packets within 39ms at p99, where without them they ran up to 221ms late, and 23ms away the two came within 3ms of each other ([network log](log.md#2026-10-23-on-a-direct-path-85ms-away-at-3-loss-the-newest-only-slots-keep-one-off-packets-within-39ms-at-p99-where-without-them-they-run-up-to-221ms-late)).
->
-> Since 2026-10-23, [the first message](#the-first-message) has no 10s timeout, so a connection whose first message never comes stays open until it closes, and [cases for the bench](#cases-for-the-bench) drops the case that closes it; the bench never saw the timeout fire, since a core that sends no first message closes its own connection first (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
-
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.
 The network owns everything between machines, the backend's requests among it, and the session crate fills each connection's first message with the session's keys through one hook.
-The backend is a Cloudflare Worker on D1, and our relays run on two servers of ours, in New York and Frankfurt, configured from `src/relays/`.
+The backend is a Cloudflare Worker on D1, and our relays run on two servers of ours, in New York and Frankfurt, configured from `src/relays/`, with their tokens in a private repository of ours.
 
 This answers node 6.4 of the [architecture plan](../architecture/plan.md#64-the-network).
 [01-between-machines](01-between-machines.md), decisions [032](../../decisions/032-one-quic-connection-through-iroh.md) to [039](../../decisions/039-cut-link-replays-others-late-join.md) and [041](../../decisions/041-core-crash-comes-back-as-late-joiner.md), the code map's [units](../architecture/02-code-map.md#the-units), [01-loop-and-edge](../core/01-loop-and-edge.md), and [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md) give the rules this design builds on, and this document holds only what they leave out.
@@ -75,7 +22,7 @@ This answers node 6.4 of the [architecture plan](../architecture/plan.md#64-the-
 | `transport` | Engine | iroh's endpoint, its connections and streams, the newest-only slots and ATC audio's queue, pacing through a relay, and the send stamp | On tokio at the core's edge, and in any program that links it |
 | The message crate's `net` module | Engine | The kinds of delivery, the first message's header, and the transport's commands and events, while each channel's constant lives in its owner's module | Wherever the message crate does |
 | `src/backend/`'s sessions | Backend | Invite codes, sessions, members, and wrong codes, in D1 | On Cloudflare Workers |
-| `src/relays/` | Configuration | Each relay's region, URL, tokens, and cap, and the script that deploys them | On our relay servers, and compiled into each release's default list |
+| `src/relays/` | Configuration | Each relay's region, URL, and cap, and the script that deploys them with their tokens from `dual-input/relay-tokens` | On our relay servers, and compiled into each release's default list |
 
 The transport's commands and events live in the message crate because the network crate keeps the loop's rules, and the map check lists the transport among the crates that do I/O, so the network crate can't depend on it ([the map check](../architecture/02-code-map.md#the-map-check)).
 The sim's calls follow the same split: `SimCall` lives in the sim client, not in the sim edge ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-sim-client)).
@@ -116,7 +63,9 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
   - `Stream`: every message in order and resent, on a QUIC stream of the sender's that opens with the channel's number.
   - `Newest`: one-off packets, of which only the newest for each key waits to go, the key named by the message type, such as a pose's figure.
   - `Deadline`: one-off packets in a short queue, each dropped once its deadline passes, the deadline named by the message type, such as an ATC frame's turn to play.
+  - Each one-off channel's message type implements the message crate's `OneOff` trait, whose `wait()` gives its key or its deadline, in the type's own module, because Rust accepts `impl OneOff for T` only in the crate that defines `OneOff` or the one that defines `T`.
   - The network reads the key or the deadline from the message on the loop, and hands it to the transport with the packet's bytes.
+- **A one-off message's room** is `ONE_OFF_ROOM` in the message crate, 1,160 bytes, since the transport puts its channel's number in the first 2 of a packet's 1,162, and a stamped channel's message gets 8 fewer, which narrows the 1,162 bytes [sending](01-between-machines.md#sending) keeps a traffic batch under.
 - **Priority** orders streams among streams and one-off packets among one-off packets, as [channels](01-between-machines.md#channels) ranks them, and QUIC puts waiting one-off packets ahead of stream data in every packet it builds ([sending](01-between-machines.md#sending)).
 - **A send names its receivers:** `To::Crew`, every member whose link is up, or `To::Member(pilot)`, as catch-up's stream goes only to the machine catching up.
 - **A received message reaches its channel's handler** with its sender's pilot ID and restart count and its input's stamp.
@@ -131,13 +80,17 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - On a connection's first message, the network checks the header itself.
   - A code, version, or hash other than its own closes the connection with an application code naming which.
   - Otherwise it hands the keys to the session channel's handler, and the link takes the connection ([links](#links)).
-- Until then, the network drops the connection's one-off packets and keeps its other streams' bytes in arrival order, since QUIC keeps no order across streams; after 10s with no first message, it closes the connection ([the link between two cores](01-between-machines.md#the-link-between-two-cores)).
+- Until then, the network drops the connection's one-off packets and keeps its other streams' bytes in arrival order, since QUIC keeps no order across streams ([the link between two cores](01-between-machines.md#the-link-between-two-cores)).
+  The first message has no timeout, so a connection whose first message never comes stays open until it closes; the bench never saw a timeout fire, since a core that sends no first message closes its own connection first (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - So the version check at join is the network's, at the backend and at the first message.
   The session crate shows the backend's refusal, which reaches it in `BackendAnswered`, and the network shows a connection refused for its code, version, or hash, and an endpoint that failed to bind, as notices of its own ([notices](../core/02-clients-and-panel-bridge.md#what-a-unit-registers-and-calls)).
+  A core whose connection closes with a refusal's code shows the refusal's notice, as it does when it refuses the other core's first message itself, because the close can arrive before the first message the other core sent ahead of it.
 
 ### Links
 
 - The network keeps one link for each member's pilot ID, holding at most one connection, the one [the link between two cores](01-between-machines.md#the-link-between-two-cores)'s rule keeps.
+  Of two connections one side dialed, the newer stays.
+  The two sides can rank a pair differently when a handshake's last packet is lost and a redial's connection finishes first on one side; both then close, redial, and link within a redial or two, which v1 leaves (user, 2026-10-23).
 - A member that `Open` or `Dial` names starts lost, so a first join and a redial take one path.
   While a link is lost, the network dials its member every 2s, each dial replacing the one running, until a first message passes, and raises `MemberOut` once the link has been lost for 30 minutes.
 - One timer per link fires at its connection's last-heard time plus 5s, counting a stream's bytes and a one-off packet alike; when it fires and something has arrived since, it's set again for the new time plus 5s, and otherwise the network raises `LinkLost`, closes the connection, and the link is lost again.
@@ -179,7 +132,8 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 ### The heartbeat and clock offsets
 
-- The network sends a heartbeat on each connection once a second, a one-off packet carrying the last heartbeat it received on that connection: that packet's send stamp, and the stamp of the input it arrived in.
+- While a session is open, the network sends a heartbeat on each connection once a second, a one-off packet carrying the last heartbeat it received on that connection: that packet's send stamp, and the stamp of the input it arrived in.
+  A core outside a session sends none, so it records no heartbeat input each second.
   The transport adds the packet's own send stamp as it hands the packet to QUIC, 8 bytes of µs on the PC's counter.
 - From a heartbeat, the receiver takes T1 as its own earlier send stamp, echoed back, T2 as the other core's receive stamp of it, T3 as this packet's send stamp, and T4 as this input's stamp, and keeps the offset ½[(T2 − T1) + (T3 − T4)] with the shortest round trip of the last 8, as [decision 038](../../decisions/038-clock-offset-from-timed-exchange.md) has it.
 - Receive stamps are the queue's, read as the edge pushes the input ([the queue](../core/01-loop-and-edge.md#the-queue)), so the error left is the time between the socket and the queue, and between QUIC and the wire, which the shortest round trip keeps small.
@@ -198,9 +152,12 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 - The network keeps a slice of client state: each member with its link's state and its path, direct or the relay's URL, and whether this PC reaches the internet.
   While any link is lost, each time a dial starts, a job asks every relay in the session's list for `/ping`, which answers with no token ([network log][win]), and the PC reaches the internet when any answers before a 2s timer fires.
-- It registers its settings: the relay list, whose default each release compiles in from `src/relays/`; and, for development, sending through relays only, which clears the endpoint's IP transports ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)), and the backend's URL, which the bench points at a local backend.
+- It registers its settings: the relay list, whose default each release compiles in from `src/relays/` and `dual-input/relay-tokens`; and, for development, sending through relays only, which clears the endpoint's IP transports ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)), and the backend's URL, which the bench points at a local backend.
 
 ## The transport
+
+The transport pins iroh, noq, and `iroh-relay` at 1.3.0, the versions our probes measured, over iroh 1.4.0 and 1.4.1, of 2026-10-20 and 2026-10-21; moving to 1.4 is a change of its own, as [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) gives it (user, 2026-10-22; [build plan](../build/plan.md#7-the-network)).
+It pins `noq-proto`, `noq-udp`, `iroh-base`, and `iroh-dns` at 1.3.0 beside them, the versions every network experiment of ours that ran iroh ran, because iroh 1.3.0 and `iroh-relay` 1.3.0 take any 1.x of them from 1.3.0, and `Cargo.lock` had moved them to 1.4 (user, 2026-10-23; [network log](log.md#2026-10-23-cargolock-ran-noq-proto-140-under-our-130-pins-so-the-transport-pins-the-crates-iroh-and-noq-are-built-from-too)).
 
 ### Its commands
 
@@ -236,7 +193,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - D1 holds three tables: sessions, members, and wrong codes.
   On the Workers Free plan, D1 allows 5 million rows read and 100,000 written a day and 5 GB in all, a write counts one more row for each index its columns are in, and the limits reset at 00:00 UTC ([D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), as of 2026-04-21); a database holds at most 500 MB, and a row at most 2 MB ([D1 limits](https://developers.cloudflare.com/d1/platform/limits/)).
 - No Durable Object: fsc-editor's Worker holds one per code because it holds each session's WebSockets (read in fsc-editor, `relay/src/index.ts`, `Session`), and this backend holds no connection.
-- Bug reports' files, which may pass D1's 2 MB a row, are [6.6](../architecture/plan.md#66-recording-and-bug-reports)'s to store.
+- Bug reports' files, which may pass D1's 2 MB a row, are [6.6](../architecture/plan.md#66-recording-and-bug-reports)'s to store, after v1: v1's backend takes no bug report's parts and stores nothing in R2, since the report endpoints come after v1 (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 - Its bodies are the message crate's types, through the TypeScript ts-rs generates ([building every target](../architecture/02-code-map.md#building-every-target)).
 
 ### Its requests
@@ -248,9 +205,12 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 | `POST /v1/members` | The code and the member's entry | Taken, the member listed or renewed |
 | `POST /v1/members/leave` | The code and the endpoint ID | Taken |
 
-- Every request but a lookup carries the member's endpoint ID and an Ed25519 signature over the body by the endpoint key, which the backend checks through `crypto.subtle`, which lists Ed25519 for `verify()` ([Web Crypto](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/), as of 2026-09-30), unverified until the backend's tests run.
+- The bodies give pilot and endpoint IDs as lowercase hex, and a member's kind is crew or passenger, so a passenger's entry needs no new path.
+- Every request but a lookup carries the member's endpoint ID and an Ed25519 signature over the body by the endpoint key, in the `DualInput-Endpoint` and `DualInput-Signature` headers, which the backend checks through `crypto.subtle`, which lists Ed25519 for `verify()` ([Web Crypto](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/), as of 2026-09-30), unverified until the backend's tests run.
   A captured request could be sent again, but only by someone who also holds the code it carries, which admits them to the session outright, and the requests travel inside HTTPS.
+- A member entry's pilot ID isn't tied to its key, so someone holding the code could list another pilot's ID under a key of their own, and v1 leaves that, since only someone the crew gave the code to could (user, 2026-10-23).
 - The path carries the backend's version.
+  The release workflow deploys the backend, its D1 migrations and then its Worker, just before it publishes each release, and a second workflow deploys it alone for a fix, so the backend running is the newest release's and answers older releases' cores too, and a change to a request's body takes a new path beside the old one ([the backend](../build/01-the-build.md#the-backend)).
 
 ### Codes, lapses, and wrong codes
 
@@ -259,8 +219,9 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 - A member row keeps when it last renewed.
   A lookup lists only members renewed within 30 minutes, and answers a session with none as no such code.
   An hourly Cron Trigger, one of the 5 the Workers Free plan allows an account ([Workers limits](https://developers.cloudflare.com/workers/platform/limits/)), deletes lapsed members, empty sessions, and past hours' counts of wrong codes.
-- Each address, as `CF-Connecting-IP` names it, has a count of wrong codes for the current hour.
-  A lookup reads the count first and refuses at 20, then looks the code up, and adds one only when the code is wrong.
+- A member's leave or lapse ends their row, and the backend keeps no rows for 30 days after, which only the report endpoints after v1 need, to check a part's sender ([what the backend admits](../recording/01-recording-and-bug-reports.md#what-the-backend-admits); user, 2026-10-22; [build plan](../build/plan.md#7-the-network)).
+- Each address, as `CF-Connecting-IP` names it, has a count of wrong codes for the current hour: an IPv6 address counts by its /64, the network a home usually gets and whose addresses its PCs may switch among, and an IPv4 address by itself (user, 2026-10-23).
+  A lookup takes its guess in the statement that checks the count, refusing at 20, then looks the code up, and a right code gives the guess back, so lookups made at once can't pass 20.
   So a right code never counts, and an address at the limit is refused even when it guesses right, where fsc-editor's Worker counts every well-formed join through Cloudflare's rate-limiting binding (read in fsc-editor, `relay/src/index.ts`, `join`).
   With 30⁶, about 729 million codes, and 1,000 live sessions, an address's 20 guesses an hour hit one with a chance of about 1 in 36,000 (arithmetic).
 
@@ -269,6 +230,7 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 ### Who hosts them
 
 - Two servers of ours, DigitalOcean droplets in New York and Frankfurt, at $4 to $6 a month each (documented, [research report 06](results/2026-10-10-transport-research-reports/06-relay-hosting-and-cost.txt), prices fetched 2026-10-09), so $8 to $12 a month for both (user, 2026-10-16).
+- The relays run at `nyc.relay.dualinput.app` and `fra.relay.dualinput.app`, and the backend at `api.dualinput.app`, on Dual Input's domain (user, 2026-10-22).
 - p03, p05, p06, and p07 measured iroh through droplets in those two cities ([2.3]; [p07]), with 2 vCPUs and 2 GiB each (read in `experiments/areas/network/p03-home-networks/deploy/deploy.mjs`, `SIZE`), larger than the $4 and $6 droplets, which have 1 vCPU and 512 MiB or 1 GiB (same report).
 - Two $4 droplets pool 1,000 GiB of transfer a month (same report), about 6,000 relayed session-hours at [p06]'s busy mix, about 168 MB an hour out of the relay with 130 to 150 bytes of overhead a relayed packet (arithmetic; the overhead is unverified, [2.1]).
 - `iroh-relay` keeps its own certificates through its `LetsEncrypt` certificate mode (read in iroh-relay 1.3.0, `src/main.rs`, `CertMode`).
@@ -277,11 +239,15 @@ fn send(me: &mut FlightModel, sample: Sample, cx: &mut Cx) {
 
 ### Their configuration
 
-- `src/relays/relays.toml` lists each relay: its region, its URL, its tokens newest first, and its cap in bytes a second, written once (user, 2026-10-16).
-  - The network crate compiles each release's default relay list from it: each relay's URL, its first token, and its cap.
-  - A deploy script beside it, `src/relays/deploy.ts`, run by Node as `tools/build.ts` is, renders each relay's `iroh-relay` configuration from the same entry, `access.shared_token` with all its tokens and `limits.client.rx.bytes_per_second` with its cap (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig` and `RateLimitConfig`), installs it over SSH, and restarts the relay, at a quiet hour ([the relays](01-between-machines.md#the-relays)).
+- `src/relays/relays.toml` lists each relay: its region, its URL, and its cap in bytes a second, written once (user, 2026-10-16).
+- The relays' tokens stay out of this repository, which goes public: the private repository `dual-input/relay-tokens`, under Dual Input's GitHub organization, holds `tokens.toml`, each relay's tokens newest first under its region (user, 2026-10-18 and 2026-10-22).
+  - Developers trusted with the tokens are given access to it, and adding or retiring a token is a commit there.
+  - Stage 7 of [the build plan](../build/plan.md#7-the-network) makes it, ahead of the rest of GitHub in stage 22.
+- The network crate's build compiles each release's default relay list from both, each relay's URL, its first token, and its cap, reading the tokens from the clone that `DUALINPUT_RELAY_TOKENS` names, which for a release is the copy [the release's build job](../build/01-the-build.md#a-release) checks out.
+  So a token is exposed only as far as a release's program exposes it ([the relays](01-between-machines.md#the-relays)).
+- A deploy script beside `relays.toml`, `src/relays/deploy.ts`, run by Node as `tools/build.ts` is, reads the tokens from a clone of `dual-input/relay-tokens` and installs n0's own build of `iroh-relay` 1.3.0, checked against its SHA-256.
+  - It renders each relay's `iroh-relay` configuration from its entries, `access.shared_token` with all its tokens and `limits.client.rx.bytes_per_second` with its cap (read in iroh-relay 1.3.0, `src/main.rs`, `AccessConfig` and `RateLimitConfig`), installs it over SSH, and restarts the relay, at a quiet hour ([the relays](01-between-machines.md#the-relays)).
   - A new token reaches every relay before the release that carries it.
-- The tokens go public with the repository, the same exposure as a token read out of a release ([the relays](01-between-machines.md#the-relays)).
 - A relay of our own, if we ever write one, lives in `src/relays/` too (user, 2026-10-16).
 
 ## What the code map changes in 01-between-machines
@@ -304,10 +270,11 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 
 ## Cases for the bench
 
-[Node 7](../architecture/plan.md#7-testing) turns each into a test.
-In CI and on a developer's PC, on Windows, two cores run through a local `iroh-relay` with a test token and the production cap, each core's IP transports cleared ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)).
-The relay binds `127.0.0.1:3340` through `http_bind_addr`, because in `--dev` mode it answered on IPv6 loopback only; no run has tried that binding yet ([network log][win]).
-A TCP proxy sits in front of the relay, and both cores' relay list names the proxy, since a session uses one list ([joining](01-between-machines.md#joining)); the proxy can hold back or cut each core's connection through it on its own.
+[Node 7](../architecture/plan.md#7-testing) turns each into a test, and [the network's log](log.md#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay) holds their run at the network's stage of the build.
+In CI and on a developer's PC, on Windows, two cores run through the bench's relays, each core's IP transports cleared ([two cores on one PC](01-between-machines.md#two-cores-on-one-pc)).
+The bench's relays are `iroh-relay`'s own server, as a library in `tools/bench/relay`, with the production cap and a test token, so CI's tests need no access to `dual-input/relay-tokens`.
+Each relay sits behind a TCP proxy, which tells one core's connection from another's by the process that owns it, and can hold back or cut each core's connection through it on its own; both cores' relay list names the proxies, since a session uses one list ([joining](01-between-machines.md#joining)).
+A core reaches such a relay over plain HTTP with its token, as iroh-relay's client maps an `http` relay URL to a WebSocket without TLS (read in iroh-relay 1.3.0, `src/client.rs`), and asks a relay over plain HTTP for no QUIC address discovery.
 The cores' backend is a local one on a local D1.
 On iroh's relay a lost packet only holds back the packets behind it until TCP resends it, and QUIC sees no loss ([p06]), so the proxy stands in for a lost packet by holding it, and every byte behind it, for a round trip and a quarter ([2.1]) of the 22ms and 84ms round trips [p06] ran through Frankfurt and New York, at a 1% and a 3% rate:
 
@@ -320,7 +287,7 @@ On iroh's relay a lost packet only holds back the packets behind it until TCP re
 - Two relays, with the two cores homed at different ones: both directions cross the dialed core's home relay ([p05]).
 - Both cores redialing at once after a cut, each pair of dials in either order: both sides keep the same connection, and the replay arrives whole.
 - A joiner whose first dials fail redials every 2s and links once the proxy lets it through.
-- No first message for 10s closes the connection; a wrong code, version, or hash closes it with the code naming which, and the refused side shows a notice.
+- A wrong code, version, or hash closes the connection with the code naming which, and the refused side shows a notice.
 - A take-control during a cut, with the ex-PF changing the sim rate and pause alone: after the return, every machine holds the new PF's values.
 - A PF's Leave mid-flight: the PM holds control within 1s, and its core raises `MemberLeft` and stops dialing; a PF's quit does the same, tells the backend, and exits within 01-loop-and-edge's 3s for a quit.
 - A burst of one-off packets: QUIC's queue never holds more than 3,486 bytes, and a flight sample never goes out after a newer one.
@@ -328,14 +295,17 @@ On iroh's relay a lost packet only holds back the packets behind it until TCP re
 - v1's busiest session through the relay, with a replay and a catch-up beside the live channels: its peak rate sets the relay's cap.
 - The backend, against a local D1: each request's answer; a code that meets a held one drawn again; the 21st wrong code in an hour refused, and a right code from that address too; a member unrenewed for 30 minutes missing from a lookup, and a session with none answered as no such code; a signature by another key refused; a joiner on an older version told whose is older.
 
-By hand, on our droplets, at the network's stage of the build and whenever iroh's or noq's pinned version changes, as step 3 of [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) runs the network's tests (user, 2026-10-16):
+By hand, on our droplets, at the network's stage of the build and whenever iroh's or noq's pinned version changes, as step 3 of [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) runs the network's tests (user, 2026-10-16), `tools/bench/droplet` runs v1's full mix on a direct path at no loss, 1%, and 3%, through `tc netem` as [p06] ran it (user, 2026-10-23):
 
-- v1's full mix on a direct path at no loss, 1%, and 3%, through `tc netem` as [p06] ran it, with and without the newest-only slots, in a program built on the network crate and the transport, since the core runs only on Windows; whether those two build on Linux, that program's first build settles.
+- `tools/bench/droplet` is a small core for Linux, since the core runs only on Windows: the kernel's loop with the clients and network crates and a test unit that sends [p06]'s busy mix, and the transport at an edge of its own.
+  Its build as a static musl program settles that the network crate and the transport build on Linux.
+- The listening end runs `iroh-relay`'s server as a library inside the same program, and that relay only introduces the two ends before they go direct, so the run needs no DNS and no deployed relay.
+- The run without the newest-only slots happens once, on the droplet build's own copy of the transport, with a patch that drops them and is kept with that run's results, so the transport carries no switch for the slots.
+  On a direct path 85ms away at 3% loss, the slots kept one-off packets within 39ms at p99, where without them they ran up to 221ms late, and 23ms away the two came within 3ms of each other ([network log](log.md#2026-10-23-on-a-direct-path-85ms-away-at-3-loss-the-newest-only-slots-keep-one-off-packets-within-39ms-at-p99-where-without-them-they-run-up-to-221ms-late)).
+- Every later run, at each change of iroh's or noq's version, runs the transport as it ships, because [the burst case](#cases-for-the-bench) keeps the slots whatever that first run showed.
 
 ## Left open
 
-- Whether the newest-only slots change anything on a direct path, which the case run by hand settles.
-- Whether a core reaches the bench's local relay over plain HTTP, as `--dev` serves it, or needs a certificate it trusts, which the bench's first run shows; iroh-relay's client maps an `http` relay URL to a WebSocket without TLS (read in iroh-relay 1.3.0, `src/client.rs`).
 - Whether a droplet with 1 vCPU and 512 MiB carries `iroh-relay` through a busy evening, since p05 to p07 ran on 2 vCPUs and 2 GiB, which the first deployment's CPU and memory show.
 - A sweep of wrong codes from many addresses could spend D1's 100,000 free writes in a day, after which every D1 query fails until 00:00 UTC: no pilot could join, and renewals would fail, though running sessions fly on, since none waits on the backend; the Workers Paid plan includes 50 million rows written a month ([D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)), and we move to it if that happens.
 - Pilots in Asia and Oceania relay through New York or Frankfurt, and v1's recordings show whether a third region pays for itself.

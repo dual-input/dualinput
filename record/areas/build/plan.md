@@ -298,7 +298,7 @@ Builds, as [01-recording-and-bug-reports](../recording/01-recording-and-bug-repo
 The rule that each unit logs at info each decision a pilot can notice, with its reason, is in [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-21 on [logging](../core/01-loop-and-edge.md#logging), and each stage's units keep it.
 The report page is the desktop shell's, and comes with [the apps](#11-the-apps); the clipboard's job, which hands up only an invite code, comes with the first stage whose units start it, as [stage 2](#2-the-cores-loop-and-edge) has the edge's jobs come.
 
-Designs first: the budgets for a session's recording and for a run with no session, which rested on partial recording, and which of [what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)'s rules stay, now that every input is recorded ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-21).
+Designs first: the budgets for a session's recording and for a run with no session, which rested on partial recording, and which of what keeps the drift from spreading's rules stay, now that every input is recorded ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-21).
 The user settled both on 2026-10-23, with the writer's flush, the stop under 1 GB free, and the cuts that leave the recording no marks, index, or placeholder for the home folder, as the [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)'s entry of that day has them.
 
 Needs: 7.

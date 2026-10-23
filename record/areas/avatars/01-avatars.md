@@ -2,22 +2,9 @@
 
 ```text
 Purpose:     How each pilot's figure takes its seat, looks where its pilot looks, and reaches for what they click or change, on every machine, and how the core reads an aircraft's own models to find where a hand goes.
-Depends on:  ../product/03-v1-scope.md, decisions.md, log.md, ../architecture/02-code-map.md, ../core/03-sim-seam-and-wasm-module.md, ../core/04-core-helper.md, ../network/01-between-machines.md, ../network/02-units.md, ../recording/01-recording-and-bug-reports.md, ../session/02-units.md, ../profiles/01-format-and-delivery.md, ../sync/05-units.md, ../flight-model/01-flight-model-sync.md
+Depends on:  ../product/03-v1-scope.md, decisions.md, log.md, ../architecture/02-code-map.md, ../core/03-sim-seam-and-wasm-module.md, ../core/04-core-helper.md, ../network/01-between-machines.md, ../network/02-units.md, ../recording/01-recording-and-bug-reports.md, ../session/02-units.md, ../profiles/01-format-and-delivery.md, ../sync/05-units.md, ../flight-model/01-flight-model-sync.md, ../build/01-the-build.md
 Decides:     What runs on a pilot's own machine and what on every machine; what a pose carries, and how often it goes; how a seat is taken and held; how a click, a drag, a wheel turn, and a change made without a click become a hand's target; how Figure draws each figure and holds a hand on a yoke; the names the sim shares; the aircraft-model engine and the three engines under it; the authoring tool; which of avatars' tentative decisions this design confirms; the budgets; and the cases for the bench (node 6.13).
 ```
-
-> **Note**
-> Since 2026-10-18, `fspackagetool` compiles the figure's SimObject on a PC with the sim, closed, since it starts the sim to build, and the compiled model files are committed beside their source with the sources' hashes, which CI checks ([files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
-> The figure ships in our one package, `dualinput`, with the order hint `PANEL_PATCH`, where the probes' figure had a package of its own ([our package](../build/01-the-build.md#our-package)).
-> v1 ships `tools/profile-author` to nobody: it runs from the repository for the core team, where [the units](#the-units) and [the authoring tool](#the-authoring-tool) have it on a profile author's PC ([authoring tools](../build/01-the-build.md#authoring-tools)).
-> Since 2026-10-18, avatars' model job takes the aircraft's package folder from the sim service's aircraft awareness, starting once the profile has loaded and `AircraftChanged` has named the folder, where [finding the files](#finding-the-files), the register sketch in [what it registers](#what-it-registers), and the bench case on a late folder have it wait for this member's `match` key ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md); user, 2026-10-18).
->
-> Since 2026-10-18, avatars turns the core helper's mouse on with no process ID, where [the mouse](#the-mouse) passes the sim's, and removes no figure itself at the profile's unload: the platform's close of avatars' sim connection removes them, and the sim service removes any the close leaves, where [what it registers](#what-it-registers) and [the figures this machine draws](#the-figures-this-machine-draws) have avatars remove each until node 7 settles the close (user, 2026-10-18).
->
-> Since 2026-10-21, the core records every input, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
->
-> - Avatars doesn't register as partly recorded: its camera read, its `Frame` events, its poses' channel, its model's job, and its watches are recorded, where [the units](#the-units), [what it registers](#what-it-registers), [the pose](#the-pose), and [posing](#posing) leave them out, and a replay checks its outputs, its notices among them.
-> - With no leaf rule, the reason [the pose](#the-pose) gives for carrying the seat rather than a session key goes, and so does the reason [a machine that can't read the models](#a-machine-that-cant-read-the-models) gives for replacing the match check's example; whether the seat moves to a session key, and whether a model its machine can't read becomes a match item, are open.
 
 A pilot's own core works out their figure: it reads the camera every frame and the mouse through the core helper, takes a seat by where the camera is, casts each click's ray into the aircraft's own models, and decides where each hand goes and when.
 It sends the whole figure to the crew as a pose, at most every 33ms.
@@ -31,21 +18,21 @@ Here a pose is everything one pilot's figure shows, and a target is where one of
 
 | Unit | Tier | Holds | Runs |
 | --- | --- | --- | --- |
-| `avatars` | Feature | The seat this pilot holds, each hand's target and its timers, the figures this machine draws, the model, and the settings | Its crate in the core, the routine `Figure` in our WASM module, and the figure's SimObject in our Community package |
+| `avatars` | Feature | The seat this pilot holds, each hand's target and its timers, the figures this machine draws, the model, and the settings | Its crate in the core, the routine `Figure` in our WASM module, and the figure's SimObject in our package |
 | `aircraft-model` | Engine | Finding an aircraft's model files, the model built from them, posing it from the aircraft's code, and casting into it | In avatars' job, which builds the model, and on the loop, which poses and casts; and in the authoring tool |
 | `msfs-gltf` | Engine | Reading an MSFS glTF and its buffer | Under `aircraft-model` |
 | `msfs-rpn` | Engine | Expanding, compiling, and running the sim's calculator code | Under `aircraft-model` |
 | `ray-cast` | Engine | A BVH for each mesh, and a cast through the nodes' transforms | Under `aircraft-model` |
-| `tools/profile-author` | Tool | The seat tool and the click tool | On a profile author's PC, with the sim running |
+| `tools/profile-author` | Tool | The seat tool and the click tool | From the repository, with the sim running ([the authoring tool](#the-authoring-tool)) |
 
-- Avatars depends on the session, for control, the members, who is in the flight, and the package the aircraft came from; the network, for its channel, each link's state, and whether this PC reaches the internet; the sim service; the core helper's service, for the mouse; the cockpit stream, for `CockpitSent`; the profile loader, for the seats and the locations; `clients`, for its settings and notices; and `aircraft-model`.
+- Avatars depends on the session, for control, the members, and who is in the flight; the network, for its channel, each link's state, and whether this PC reaches the internet; the sim service, which also gives the aircraft's package folder; the core helper's service, for the mouse; the cockpit stream, for `CockpitSent`; the profile loader, for the seats and the locations; `clients`, for its settings and notices; and `aircraft-model`.
   The code map's [features](../architecture/02-code-map.md#features) row lists all but the session and `clients`.
 - `msfs-gltf`, `msfs-rpn`, and `ray-cast` depend on nothing of ours, so they sit on the engines' bottom line beside `messages`, and `aircraft-model` on them.
-- Avatars registers as partly recorded ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)).
-  Its camera read every frame, its `Frame` events, its poses' channel, and the job that reads the models are unrecorded, as 6.6 has them, and so are three watches 6.6 doesn't list: the variables the posing code reads, the avatar on foot, and the aircraft's pose while its pilot is on foot.
-  The figures' create answers, the core helper's clicks, `ProfileLoaded`, `CockpitSent`, and the session's and the network's moments stay recorded.
-- So avatars registers no guard, catch-up step, or cockpit kind, makes no request the platform decides, and turns the mouse on and off only on recorded inputs ([the mouse](#the-mouse)).
-  Its notices turn on the camera and the model's job, so they count as avatars' own outputs, which a replay leaves unchecked, rather than as the notices slice's of `clients`.
+- The core records every input avatars takes: its camera read every frame, its `Frame` events, its poses' channel, its model's job, and its watches, among them the variables the posing code reads, the avatar on foot, and the aircraft's pose while its pilot is on foot.
+  A replay checks avatars' outputs, its notices among them (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+- Avatars registers no guard, catch-up step, or cockpit kind.
+- The figure ships in our one package, `dualinput`, with the order hint `PANEL_PATCH` ([our package](../build/01-the-build.md#our-package)).
+  `fspackagetool` compiles the figure's SimObject on a PC with the sim, closed, since it starts the sim to build, and the compiled model files are committed beside their source with the sources' hashes, which CI checks ([files compiled with the sim](../build/01-the-build.md#files-compiled-with-the-sim)).
 
 ## Names
 
@@ -62,13 +49,13 @@ Avatars owns the kind `FIGURE` in [names the sim shares](../architecture/02-code
 ```rust
 // a sketch; the hooks' names follow the platform's units, and the one marked is hypothetical
 pub fn register(r: &mut Registry) {
-    let me = r.unit::<Avatars>("avatars").partly_recorded();
-    me.channel(avatars::POSES, Avatars::on_pose);                 // Newest and unrecorded, in avatars' module of the message crate
+    let me = r.unit::<Avatars>("avatars");
+    me.channel(avatars::POSES, Avatars::on_pose);                 // Newest, in avatars' module of the message crate
     me.mouse(Avatars::on_mouse);                                   // hypothetical name for 6.5's mouse want
     me.on_sim(Avatars::on_sim);                                    // the camera, frames, the avatar, the posing values, each figure's object ID
     me.on::<ProfileLoaded>(Avatars::load);                         // the seats, and the mouse on
-    me.on::<ProfileUnloaded>(Avatars::unload);                     // the mouse off, and every figure removed
-    me.on::<KeyChanged>(Avatars::key);                             // this member's match key: the package folder for the model's job
+    me.on::<ProfileUnloaded>(Avatars::unload);                     // the mouse off
+    me.on::<AircraftChanged>(Avatars::aircraft);                   // the aircraft's package folder, for the model's job
     me.on::<CockpitSent>(Avatars::sent);                           // a change made without a click
     me.on::<ControlPassed>(Avatars::control);                      // the new PF's figure takes its yoke
     me.on::<MemberGone>(Avatars::gone);                            // its figure goes
@@ -82,7 +69,7 @@ pub fn register(r: &mut Registry) {
 
 ```rust
 // a sketch: avatars' module of the message crate; N and P are hypothetical
-pub const POSES: Channel<Pose> = Channel::new(N, Delivery::Newest, Priority(P)).unrecorded();   // keyed by its sender
+pub const POSES: Channel<Pose> = Channel::new(N, Delivery::Newest, Priority(P));   // keyed by its sender
 
 pub struct Pose {
     pub at: u64,                 // µs on the sender's counter, which orders poses
@@ -110,9 +97,8 @@ pub enum Hand {
 - A pose is under 100 bytes in postcard (an estimate), about 150 with the 58 bytes of headers [flight-model sync](../flight-model/01-flight-model-sync.md#budgets) counts a packet, so at most about 4.5 KB/s from each pilot (arithmetic).
 - A receiver keeps each sender's pose with the highest `at`, and draws it at once ([drawing on arrival](#drawing-on-arrival)).
 - Every point is in the aircraft's frame, in meters from its reference point, x left, y up, z forward, the frame `location` uses ([state entries](../profiles/01-format-and-delivery.md#state-entries)), and on foot too, so one aircraft drawn a little apart on two machines still has the figure in the same place on it.
-- The pose carries the seat by its key, as [seats](../profiles/01-format-and-delivery.md#seats) has seat claims carry it.
-  The seat rides the pose rather than a session key because avatars, partly recorded, makes no request the platform decides, and every session key's write is one ([session keys](../session/02-units.md#session-keys)); no other unit reads a seat.
-  So the seat claims that [channels](../network/01-between-machines.md#channels) puts among the session channel's keys go with the pose.
+- The pose carries the seat by its key, as [seats](../profiles/01-format-and-delivery.md#seats) has seat claims carry it, and no other unit reads a seat.
+  So the seat claims that [channels](../network/01-between-machines.md#channels) puts among the session channel's keys go with the pose, and whether the seat moves to a session key is [left open](#left-open).
 - Two pilots who picked the same color both show it, and sort it out between themselves (user, 2026-10-17).
   A figure whose pose carries no color takes, on every machine, the first palette color that no member's setting names and no colorless figure with a lower pilot ID took, so every machine agrees and nothing writes a setting.
 
@@ -135,7 +121,7 @@ The seats are the profile's `seats` ([seats](../profiles/01-format-and-delivery.
 
 ### The mouse
 
-- Avatars turns the core helper's mouse want on at `ProfileLoaded`, with the sim's process ID from sim awareness, and off at `ProfileUnloaded`, both recorded ([what a feature registers and calls](../core/04-core-helper.md#what-a-feature-registers-and-calls)).
+- Avatars turns the core helper's mouse want on at `ProfileLoaded`, with no process ID, and off at `ProfileUnloaded`, both recorded ([what a feature registers and calls](../core/04-core-helper.md#what-a-feature-registers-and-calls); user, 2026-10-18).
 - The want gains two things 6.5's [raw input](../core/04-core-helper.md#raw-input) left out:
   - a wheel notch, with the cursor's place, since a notch turns a knob, and most of the 58P's radios and bugs are knobs;
   - on the right button's release, the raw counts the mouse moved while the button was held, summed as our probes' `mouse.mjs` sums them (read in `experiments/tools/mouse.mjs`), for the right-click test below.
@@ -197,7 +183,8 @@ On `CockpitSent` for an entry whose `location` covers this pilot's variant, the 
 
 - Avatars creates a figure for each member whose pose has arrived, and one for its own pilot, through `create_ai` with `DUALINPUT_FIGURE_PILOT`, at the aircraft's position, then freezes each one's position, altitude, and attitude with `K:FREEZE_LATITUDE_LONGITUDE_SET`, `K:FREEZE_ALTITUDE_SET`, and `K:FREEZE_ATTITUDE_SET` with 1 on its object ID, as p25 to p27 did (read in `p25-figure-hands.mjs`).
 - A figure goes when its member is gone from the session, and every figure goes when the profile unloads.
-  The SDK documents that closing a connection removes the objects it created, which we've measured only for a killed client, so until [node 7](../architecture/plan.md#7-testing) settles it, avatars removes its figures itself, as [a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load) has the sim service do if closing leaves them.
+  At the unload, avatars removes none itself: the platform's close of avatars' sim connection removes them, and the sim service removes any the close leaves ([a connection for each feature](../architecture/02-code-map.md#a-connection-for-each-feature-for-each-load); user, 2026-10-18).
+  The SDK documents that closing a connection removes the objects it created, which we've measured only for a killed client.
 - Each frame, avatars works out each figure's state from its newest pose and this machine's view of its member:
   - the figure of a member out of the flight slumps and turns gray at once, its link up or not;
   - while the link to a member is lost and this PC reaches the internet, by the network's check ([what the pilot sees](../network/02-units.md#what-the-pilot-sees-and-settings)), that member's figure slumps and turns gray;
@@ -267,14 +254,14 @@ The iniBuilds A380 and the Phenom 300E, both from the Marketplace, ship their fi
 - Seats, heads, on foot, and located changes still work, through the box around the seats' eyes ([a seat](#a-seat)), and a notice tells that pilot.
 - The crew's other machines draw as usual.
 
-This replaces [preflight match check](../product/03-v1-scope.md#preflight-match-check)'s example that avatar sync stays off when one pilot's copy lacks a model it needs, because a match item's value would come from the model's job, which is unrecorded, while the session crate's `match` key is recorded and checked in a replay.
+This replaces [preflight match check](../product/03-v1-scope.md#preflight-match-check)'s example that avatar sync stays off when one pilot's copy lacks a model it needs, and whether a model its machine can't read becomes a match item is [left open](#left-open).
 
 ## The aircraft model
 
 ### Finding the files
 
-- Avatars' job looks in the package folder the session crate's job found for the match check ([the match check](../session/02-units.md#the-match-check)), under the preset's path from sim awareness ([the aircraft](../core/03-sim-seam-and-wasm-module.md#the-aircraft)).
-  It starts once both hold, the profile loaded and this member's `match` key naming the folder, since nothing orders the two.
+- Avatars' job takes the aircraft's package folder from the sim service's aircraft awareness ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts); user, 2026-10-18), and looks in it under the preset's path from sim awareness ([the aircraft](../core/03-sim-seam-and-wasm-module.md#the-aircraft)).
+  It starts once both hold, the profile loaded and `AircraftChanged` naming the folder, since nothing orders the two.
 - From the preset's `aircraft.cfg`, it takes the model folder, from its `model.cfg` the interior and exterior models, the LOD with the largest `minSize` of each, and the behavior XML with the files it includes, as our probes found them (read in `experiments/areas/avatars/lib/cockpit-files.mjs`, `cockpitFiles` and `behaviorText`).
   The probes followed only `<IncludeBase>`, and the Comanche's cockpit also includes `A2A_Templates.xml` through `<Include File>`, so `aircraft-model` follows both (read in a2a-aircraft-pa24 2.1.3, `PA24_250_INTERIOR.xml`).
 - The job reads the files and runs `aircraft-model` on them, as the profile loader's job reads and checks a bundle ([timers, jobs, and IDs](../core/01-loop-and-edge.md#timers-jobs-and-ids)), and hands up the built model as one flat buffer, which the loop reads in place, so taking it costs a check of its header rather than a decode.
@@ -296,7 +283,7 @@ The 58P's two models come to 907,362 triangles as their scenes instance them, no
 
 ### Posing
 
-- `aircraft-model` lists the `A:` and `L:` variables its code reads, and avatars watches them on change each sim frame, unrecorded.
+- `aircraft-model` lists the `A:` and `L:` variables its code reads, and avatars watches them on change each sim frame.
 - Before a cast, it runs only the code whose variables changed since the last pose, moves those nodes, and hides the parts whose visibility code says so.
 
 ### Casting
@@ -306,7 +293,8 @@ The 58P's two models come to 907,362 triangles as their scenes instance them, no
 
 ## The authoring tool
 
-`tools/profile-author` is one Rust program with two commands, on `sim-client`, `sim-edge`, `aircraft-model`, and the message crate, run with the sim in a flight in the aircraft:
+`tools/profile-author` is one Rust program with two commands, on `sim-client`, `sim-edge`, `aircraft-model`, and the message crate, run with the sim in a flight in the aircraft, and v1 ships it to nobody: the core team runs it from the repository ([authoring tools](../build/01-the-build.md#authoring-tools)).
+Its commands:
 
 - **`seats`** seeds each seat from the seat objects SimConnect lists, then the cockpit model's `PILOT_` nodes, then a point the author marks on the cushion; it creates our figure and feeds `Figure`'s slot, so the author sees the figure seated while tuning the hip, knees, feet, and eye, and it writes the seats into the profile.
 - **`locations`** walks the profile's entries; the author points the cursor at each control and marks it with Page Down, or skips it with Page Up, and the tool casts the ray and writes the entry's `location` for the loaded variant, and its `deadband` when the author gives one.
@@ -319,7 +307,7 @@ The 58P's two models come to 907,362 triangles as their scenes instance them, no
 | [The hand goes where the pilot clicks](decisions.md#the-hand-goes-where-the-pilot-clicks-found-from-the-aircrafts-geometry) | Confirms |
 | [The clicking pilot's machine finds the point](decisions.md#the-clicking-pilots-machine-finds-the-point-and-the-other-machine-only-draws-it) | Confirms, and settles what it leaves out: each machine finds the grips from its own models |
 | [The ray needs no calibration](decisions.md#the-ray-needs-no-calibration) | Changes it, in place: `SIMOBJECT` in the aircraft, `WORLD` on foot |
-| [The models come from the aircraft's own package](decisions.md#the-models-come-from-the-aircrafts-own-package) | Confirms, through the session crate's package folder |
+| [The models come from the aircraft's own package](decisions.md#the-models-come-from-the-aircrafts-own-package) | Confirms, through the package folder from the sim service's aircraft awareness |
 | [The model is posed only from code in the aircraft's own files](decisions.md#the-model-is-posed-only-from-code-in-the-aircrafts-own-files) | Confirms, and expands the aircraft's own macros and template parameters |
 | [The yoke hand holds the grips the aircraft marks](decisions.md#the-yoke-hand-holds-the-grips-the-aircraft-marks-or-their-copy-on-the-copilots-yoke) | Confirms |
 | [The hands follow a pilot's habits](decisions.md#the-hands-follow-a-pilots-habits-with-the-right-hand-on-the-yoke-in-the-right-seat) | Confirms the rules, with p27's times as the starting values |
@@ -366,7 +354,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A link lost with this PC reaching the internet: that figure slumps and turns gray; with it not reaching: the other figures ease to rest in their colors, the PF's on its yoke, and the own figure turns gray.
 - The PF's sim crashing with the link up: the PF's figure slumps, turns gray, and lets go of its yoke at once.
 - The model's job failing: no hand from a click, grips drawn at rest, the notice, and the seats and heads as before.
-- The profile loading before the session crate's job finds the package folder: the model's job starts once the folder arrives.
+- The profile loading before `AircraftChanged` names the package folder: the model's job starts once the folder arrives.
 - A following machine's yoke moved through `Follow`'s events: the PF's hand stays on its horn, each frame.
 - The 58P's model taken on the loop within its budget, and a cast within its budget, measured.
 - After a flight load, the figures are created again and `Figure`'s writes land ([cases for the bench](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)).
@@ -391,3 +379,4 @@ In the sim:
 - How avatars tells that a pilot is in VR: a sim check with a headset, at the same stage.
 - How the authoring tool edits the profile's YAML and keeps its comments: inside the tool.
 - How the figure's legs step on foot: the build's stage, by eye.
+- Whether the seat moves from the pose to a session key ([the pose](#the-pose)), and whether a model its machine can't read becomes a match item ([a machine that can't read the models](#a-machine-that-cant-read-the-models)) (user, 2026-10-21).

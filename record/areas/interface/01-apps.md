@@ -110,7 +110,7 @@ These are the ones the apps need that no unit had:
 - A setting registers, beside its key, type, and default ([what a unit registers and calls](../core/02-clients-and-panel-bridge.md#what-a-unit-registers-and-calls)), a label in its feature's words, as a notice's text is, and what an app needs that the type doesn't say: a number's range, a list's choices or the slice that lists them, such as the output devices, and whether only its feature's part shows it, as take-control's input, which its section writes after Bind.
   So avatars' settings, and traffic's and ATC audio's, need no part.
 - A development setting says so when it registers, and shows in no app: a developer edits `settings.json` while the core is stopped.
-- Recording everything is an ordinary setting, and the profile loader's local folder a development one, since v1 ships no authoring tool ([recording everything](../recording/01-recording-and-bug-reports.md#recording-everything); [the local folder](../profiles/02-units.md#the-local-folder); user, 2026-10-18).
+- Recording everything is an ordinary setting, and the profile loader's local folder a development one, since v1 ships no authoring tool (recording everything; [the local folder](../profiles/02-units.md#the-local-folder); user, 2026-10-18).
 - The display name is a setting like any other, which Host and Join need ([members](../session/02-units.md#members)).
 
 ## Quit

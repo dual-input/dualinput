@@ -24,7 +24,7 @@ What we found about the recording, replays, and bug reports, newest entry first.
    A run with no session keeps its 0.5 MB an hour, and the writer and a replay keep their budgets.
    Avatars' stage sets a figure for the aircraft's model, which avatars' job hands up and the recording keeps at each load.
 3. The recording stops when the data folder's drive has under 1 GB free, as it stops when a write fails, so it never fills the pilot's system drive mid-flight.
-4. [What keeps the drift from spreading](01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading) goes whole, since no unit is partly recorded: the kernel draws every unit's handles from one counter and its random IDs from one ChaCha20 generator.
+4. What keeps the drift from spreading goes whole, since no unit is partly recorded: the kernel draws every unit's handles from one counter and its random IDs from one ChaCha20 generator.
 5. Marks go: the EFB app's button that marks the moment sends a command, which the recording holds as an input and the recording crate logs at info, and a write that never lands is an info line, as [logging](../core/01-loop-and-edge.md#logging) has each decision a pilot can notice.
 6. When the core starts, the recording crate deletes the oldest runs while all of them together pass 1 GB, with no rule for runs without a session or for the newest that held one.
 7. The home folder's path stays out of the log, and the edge leaves it in the recording's inputs: a pilot sends a recording to us by hand, and a log is what gets pasted in public.
@@ -35,9 +35,9 @@ What we found about the recording, replays, and bug reports, newest entry first.
 
 ## 2026-10-21: Partial recording caused three bugs in stage 4's sim service, while recording every input costs 45 to 126 MB an hour
 
-**Asked:** should the core go on leaving a partly recorded unit's high-rate inputs out of its recording, as [unrecorded inputs](01-recording-and-bug-reports.md#unrecorded-inputs) designs it, once stage 4's code review found bugs where the sim service had to keep such a unit's drift to itself?
+**Asked:** should the core go on leaving a partly recorded unit's high-rate inputs out of its recording, as unrecorded inputs designs it, once stage 4's code review found bugs where the sim service had to keep such a unit's drift to itself?
 
-**Expected:** that [what keeps the drift from spreading](01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading) would hold in each platform crate that serves features, at a small cost in each.
+**Expected:** that what keeps the drift from spreading would hold in each platform crate that serves features, at a small cost in each.
 
 **Found:**
 
@@ -63,7 +63,7 @@ What we found about the recording, replays, and bug reports, newest entry first.
 4. Logs come first: when a pilot reports a problem, we ask for the run's `log.txt`, and for the recording only when the log isn't enough.
    A recording then replays at any log level, even on a build of the same commit with log lines added afterward, as [a replay on the same commit with local changes](01-recording-and-bug-reports.md#a-replay-on-the-same-commit-with-local-changes) allows.
    Each unit logs at info each decision a pilot can notice, with its reason, such as control passing, a value applied or refused, a link lost, and catch-up's steps.
-5. This reverses the user's call of 2026-10-16, in [why it records less than every input](01-recording-and-bug-reports.md#why-it-records-less-than-every-input), that 45 MB an hour is too much to upload after a flight or to keep several flights of: v1 uploads nothing, and logs come first, so that cost no longer applies.
+5. This reverses the user's call of 2026-10-16, in why it records less than every input, that 45 MB an hour is too much to upload after a flight or to keep several flights of: v1 uploads nothing, and logs come first, so that cost no longer applies.
 
 **Affects:** [01-recording-and-bug-reports](01-recording-and-bug-reports.md); [01-loop-and-edge](../core/01-loop-and-edge.md), whose [logging](../core/01-loop-and-edge.md#logging) gets the rule above; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md), [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md), and [04-core-helper](../core/04-core-helper.md); [flight-model sync](../flight-model/01-flight-model-sync.md), [traffic and ATC](../traffic-atc/01-traffic-and-atc.md), [avatars](../avatars/01-avatars.md), and [take-control](../control/01-take-control.md); [01-between-machines](../network/01-between-machines.md) and the [network's units](../network/02-units.md); [order and recovery](../sync/04-order-and-recovery.md); the [session's units](../session/02-units.md); [the profiles' units](../profiles/02-units.md); [the apps](../interface/01-apps.md); [testing](../build/02-testing.md); [the spine](../architecture/01-spine.md), [the code map](../architecture/02-code-map.md), the [architecture plan](../architecture/plan.md), and the architecture's [tentative decisions](../architecture/decisions.md); [recording and bug reports](../product/03-v1-scope.md#recording-and-bug-reports) in 03-v1-scope; and stages 8 and 16 of the [build plan](../build/plan.md).
 

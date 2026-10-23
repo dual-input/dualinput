@@ -345,7 +345,7 @@ State sync hears `H:` events in one cockpit panel, through its panel module `h-e
 
 - State sync's guard on `Ready` denies it until the engine says the aircraft has settled, and allows it while no profile is loaded ([preflight](../session/02-units.md#preflight)); the wording of its reason is [6.16](../architecture/plan.md#616-the-apps)'s.
 - A flagged write, an entry the driven-entry test stops, and an entry a write function's limit stops each show one notice, once per entry for each load, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([checking that a write landed](02-live-sync.md#checking-that-a-write-landed)).
-- It marks the recording through `cx.recording().mark` for each of those, for a watch-only entry whose values differ, and for an aircraft that never went quiet ([marks](../recording/01-recording-and-bug-reports.md#marks)); a flagged write's mark carries the entry, the value wanted, the reading, and 0 retries.
+- It marks the recording through `cx.recording().mark` for each of those, for a watch-only entry whose values differ, and for an aircraft that never went quiet (marks); a flagged write's mark carries the entry, the value wanted, the reading, and 0 retries.
 - The PF's checklist, each counting entry's `name` and `default`, is a slice of client state while preflight runs, which [6.16](../architecture/plan.md#616-the-apps) shows beside the preflight summary.
 
 ## What the code map changes in the sync docs

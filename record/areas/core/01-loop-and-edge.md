@@ -137,7 +137,7 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
   An edge carries out its outputs in that order, and nothing is promised between two edges.
 - A unit that needs one thing done before another waits for the input that says it's done.
   The session crate writes the session file with its raised restart count as a job, and opens links only once the job's result says it's written, as [the session file](../architecture/01-spine.md#the-session-file-and-a-core-that-restarts) requires.
-- Each output names its unit, and the kernel folds only whole units' outputs, each by its postcard encoding, into a running 64-bit hash, for the recording's checkpoints ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).  A whole unit is one with no unrecorded input: an input a feature declares unrecorded, which the writer leaves out ([what a recording holds](#what-a-recording-holds)).
+- Each output names its unit, and the kernel folds only whole units' outputs, each by its postcard encoding, into a running 64-bit hash, for the recording's checkpoints (what keeps the drift from spreading).  A whole unit is one with no unrecorded input: an input a feature declares unrecorded, which the writer leaves out ([what a recording holds](#what-a-recording-holds)).
 - The hash is the first 8 bytes of a running SHA-256, from the sha2 crate the message crate's hash already uses.
   A build of the header's commit made with another rustc still replays, with a warning ([running a replay](#running-a-replay)), so the hash has to come out the same across Rust releases, and std's `DefaultHasher` "should not be relied upon over releases" (documented, [DefaultHasher](https://doc.rust-lang.org/std/hash/struct.DefaultHasher.html)).
   xxh3 would be many times faster, and FNV-1a needs no crate, but whole units' outputs leave out the heavy ones, traffic's, avatars', the flight model's, and ATC audio's, so SHA-256's hundreds of MB a second leave the hash a small part of the loop's time (unverified; the bench measures the loop's CPU).
@@ -150,9 +150,9 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
   The edge fetches over HTTPS through reqwest 0.13 with rustls, which iroh already brings into the core ([fetching](../profiles/02-units.md#fetching)), and hands up the clipboard only when it holds an invite code ([the clipboard](../recording/01-recording-and-bug-reports.md#the-clipboard)).
 - A timer or a job canceled after its input was queued still comes up, and the kernel drops it.
 - Each unit counts its own timers, jobs, and calls that wait for an answer, such as the sim's, and takes their handles from its own counters on the loop, so a replay hands out the same ones.
-  A unit with an unrecorded input that takes fewer in a replay then shifts no other unit's ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+  A unit with an unrecorded input that takes fewer in a replay then shifts no other unit's (what keeps the drift from spreading).
 - `cx.new_id()` draws a version 4 UUID, and `cx.random_bytes()` draws random bytes, such as the network's endpoint key ([the endpoint key](../network/02-units.md#the-endpoint-key)), each from the unit's own ChaCha20 generator in the kernel.
-  Each unit's generator takes the core's one seed, 256 random bits the edge draws from the operating system and puts in the core's first input, as its key, and the unit's place in the registry as its stream ([what keeps the drift from spreading](../recording/01-recording-and-bug-reports.md#what-keeps-the-drift-from-spreading)).
+  Each unit's generator takes the core's one seed, 256 random bits the edge draws from the operating system and puts in the core's first input, as its key, and the unit's place in the registry as its stream (what keeps the drift from spreading).
   `uuid`'s `Builder::from_random_bytes` sets the version and variant on bytes it's given (read in uuid 1.28.0, `src/builder.rs`), so the message crate keeps `v4` off.
   A replay draws the same IDs, and nobody without the recording can predict them.
 - The generator is chacha20's `ChaCha20Rng`, with only the crate's `rng` feature, because ChaCha's 64-bit stream number gives each unit a sequence of its own from one key (read in chacha20 0.10.2, `src/rng.rs`).
@@ -163,7 +163,7 @@ fn lock_displays(me: &mut PointerSync, _: &LinkLost, cx: &mut Cx) {
 
 ### What a recording holds
 
-The writer records every input from the core's first but those a feature declares unrecorded ([unrecorded inputs](../recording/01-recording-and-bug-reports.md#unrecorded-inputs)), in every run of the core, with or without a session, because a replay has to start where the run did: the seed, the handles, sim awareness, and the clients all build up from the first input.
+The writer records every input from the core's first but those a feature declares unrecorded (unrecorded inputs), in every run of the core, with or without a session, because a replay has to start where the run did: the seed, the handles, sim awareness, and the clients all build up from the first input.
 A unit with an unrecorded input runs in a replay on what was recorded, and its outputs aren't checked ([what it runs](../recording/01-recording-and-bug-reports.md#what-it-runs)).
 What a run's recording is kept for, and for how long, is [6.6](../architecture/plan.md#66-recording-and-bug-reports)'s, which keeps or deletes a recording whole.
 Each run's recording sits in a folder of its own in the data folder's `recordings\`, with the run's log file ([the files](../recording/01-recording-and-bug-reports.md#the-files)).
@@ -175,7 +175,7 @@ A recording starts with a header, then holds four kinds of record, in the order 
 - **Checkpoints:** when an input's stamp starts a new second since the core's first input, the edge records the running hash of the whole units' outputs and the input's sequence number, 8 bytes each, before the loop handles it, about 58 KB an hour before framing (arithmetic).
   A recording can instead hold a checkpoint before every input, which its header says, for the bench.
   The edge also records one after the input that put out the core's exit, as if before an input that never came, so a replay checks a run's last second too.
-- **Marks,** each written by a unit through `cx.recording().mark(...)` ([marks](../recording/01-recording-and-bug-reports.md#marks)).
+- **Marks,** each written by a unit through `cx.recording().mark(...)` (marks).
 
 The header names the build: its commit, a hash of its diff when it's uncommitted, its profile, the versions of `rustc`, of the MSVC compiler `cc` builds QuickJS-ng with, and of the Windows SDK, whose C runtime the core links ([the core's math](#the-cores-math)), and the SimConnect SDK the build printed ([building every target](../architecture/02-code-map.md#building-every-target)).
 It doesn't name the program's bytes, since a build of one commit on two PCs needn't match byte for byte (unverified for ours).

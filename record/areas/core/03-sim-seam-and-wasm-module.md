@@ -32,6 +32,11 @@ Decides:     The sim edge's thread and its inputs, the sim's process among them;
 >
 > - No unit registers as partly recorded or declares a call `.unrecorded()`, and the sim service hands the edge no request to leave out, where [what a feature calls](#what-a-feature-calls) and its sketch of flight-model sync have both.
 > - Every unit's calls and feeds replay, so three things each replay exactly: each call's tag from one counter of the service's, as the first note of 2026-10-21 has it; the 200ms rewrite, whichever unit's feed starts it; and [the module's status](#the-modules-status)'s unfreeze, which turns on whether any feature's routine is live.
+>
+> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in two places (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
+>
+> - [Packages on disk](#packages-on-disk): the sim service searches no other package for files that override ours and checks nothing of our own package on disk; it still reads the packages folders from `UserCfg.opt`.
+> - [The module's status](#the-modules-status): a module taken as stopped raises its notice, and the core unfreezes the aircraft when the last routine that holds the freeze ends, as its pilot takes control or leaves, rather than at once, sending the three unfreeze events in that input with no read of the flags first.
 
 The core reaches the sim through one thread at its edge, which holds every SimConnect connection and watches the sim's process, and everything that thread hands up is parsed on the loop.
 Sim awareness, an engine of its own, turns the sim's signals into six stages, and the sim service raises one moment, `SimChanged`, for each change, so a load is one entry into Loading however many signals the sim sends.

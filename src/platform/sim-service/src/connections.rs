@@ -77,9 +77,8 @@ pub(crate) struct Platform {
     pub(crate) pause: u32,
     pub(crate) aircraft_state: Option<u32>,
     pub(crate) status: u32,
-    /// The once-reads it waits on: `A:TITLE`, and the freeze flags before an unfreeze.
+    /// The once-read of `A:TITLE` it waits on.
     pub(crate) title: Option<u32>,
-    pub(crate) freeze: Option<u32>,
 }
 
 impl SimService {

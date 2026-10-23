@@ -63,10 +63,12 @@ impl Log {
         home: Option<String>,
         user: Option<String>,
     ) -> std::io::Result<Log> {
-        let file = File::create(path)?;
+        let file = crate::data_folder::create_run_file(path)?;
+        // A field logged with `?`, or a text field, comes out with its backslashes doubled.
         let mut home: Vec<String> = home
             .into_iter()
             .flat_map(|h| [h.to_lowercase(), h])
+            .flat_map(|h| [h.replace('\\', "\\\\"), h])
             .collect();
         home.dedup();
         Ok(Log {

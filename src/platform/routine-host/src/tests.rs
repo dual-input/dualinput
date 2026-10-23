@@ -34,7 +34,7 @@ struct Note {
 }
 
 impl Routine for Note {
-    const ID: RoutineId = RoutineId("NOTE");
+    const ID: RoutineId = NOTE;
     type Slot = NoteSlot;
 
     fn on_slot(&mut self, slot: &NoteSlot) {
@@ -86,7 +86,10 @@ fn host() -> Host {
     Host::new(routines![Note, Hold], HASH, "0.1.0")
 }
 
-const NOTE: RoutineId = RoutineId("NOTE");
+const NOTE: RoutineId = RoutineId {
+    name: "NOTE",
+    freezes: true,
+};
 
 #[test]
 fn each_slot_has_the_header_and_its_struct() {

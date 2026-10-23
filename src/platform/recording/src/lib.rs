@@ -6,9 +6,10 @@
 //! of 2026-10-23).
 //!
 //! The core's edge creates the run's folder before the loop starts, named by its start in
-//! UTC, so the newest folder by name is the run in progress. A PC whose clock was set back
-//! between two runs would show an older run as in progress, and refuse to delete that one,
-//! while Windows refuses to delete the files the core still has open.
+//! UTC, so of the folders named as runs, the newest is the run in progress. A PC whose clock
+//! was set back between two runs would show an older run as in progress, and refuse to
+//! delete that one, while Windows refuses to delete the files the core still has open, which
+//! the edge opens to be read and written but not deleted.
 //!
 //! Register it after the clients crate, whose slice and commands it uses.
 
@@ -55,9 +56,17 @@ impl Recording {
                 mb = run.size / 1_000_000,
                 "a run was deleted, since all runs together passed 1 GB"
             );
-            cx.job(Job::delete(path(&run.name)), Recording::deleted);
+            cx.job(Job::delete(path(&run.name)), Recording::deleted_at_start);
         }
         me.runs = runs;
+    }
+
+    /// The runs this start deletes run as jobs at once, so none lists the runs again: a
+    /// listing could find a run another job is still deleting.
+    fn deleted_at_start(_: &mut Recording, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx) {
+        if let Err(error) = result {
+            tracing::warn!(%error, "a run couldn't be deleted");
+        }
     }
 
     /// A deleted run leaves the slice as soon as it's asked for, and a run that couldn't be
@@ -117,7 +126,7 @@ impl Recording {
 /// The runs a listing found, oldest first, or `None` after logging why it failed.
 fn listing(result: Result<Vec<u8>, String>) -> Option<Vec<Entry>> {
     match result.map(|bytes| Entry::decode(&bytes)) {
-        Ok(Some(runs)) => Some(runs),
+        Ok(Some(entries)) => Some(entries.into_iter().filter(|e| is_run(&e.name)).collect()),
         Ok(None) => {
             tracing::error!("the runs' listing didn't decode");
             None
@@ -139,6 +148,24 @@ fn oldest_past(runs: &[Entry], keep: u64) -> usize {
         old += 1;
     }
     old
+}
+
+/// Whether `name` is a run's folder, named by its start as `2026-10-20_14-02-11`, with `-2`
+/// and on after it for a second run within the same second. Anything else in `recordings\`,
+/// such as a zip a pilot made of a run to send us, would sort after the run it holds and pass
+/// for the run in progress, so only runs are listed, kept, or deleted.
+fn is_run(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    let stamp = bytes.len() >= 19
+        && bytes[..19].iter().enumerate().all(|(i, &b)| match i {
+            4 | 7 | 13 | 16 => b == b'-',
+            10 => b == b'_',
+            _ => b.is_ascii_digit(),
+        });
+    let rest = &bytes[19.min(bytes.len())..];
+    stamp
+        && (rest.is_empty()
+            || (rest.len() > 1 && rest[0] == b'-' && rest[1..].iter().all(u8::is_ascii_digit)))
 }
 
 fn path(run: &str) -> String {
@@ -173,6 +200,22 @@ mod tests {
             1
         );
         assert_eq!(oldest_past(&runs(&[300 * MB, 300 * MB, 300 * MB]), KEEP), 0);
+    }
+
+    #[test]
+    fn lists_only_folders_named_as_runs() {
+        for run in ["2026-10-20_14-02-11", "2026-10-20_14-02-11-2"] {
+            assert!(is_run(run), "{run}");
+        }
+        for other in [
+            "2026-10-20_14-02-11.zip",
+            "2026-10-20_14-02-11 - Copy",
+            "2026-10-20_14-02-11-",
+            "desktop.ini",
+            "2026-10-20",
+        ] {
+            assert!(!is_run(other), "{other}");
+        }
     }
 
     #[test]

@@ -1,8 +1,8 @@
 // Our WASM module, as the stand-in runs it natively: its status, a module from another build,
-// a routine's life between feedings, and the core unfreezing the aircraft once the module
-// stops with a routine live in Flying, unpaused, and not otherwise
-// (record/areas/core/03-sim-seam-and-wasm-module.md, "Cases for the bench";
-// record/areas/architecture/02-code-map.md, "Cases for the bench, for work in the sim").
+// a routine's life between feedings, the module taken as stopped once its counter stays still
+// with a routine live in Flying, unpaused, and the core lifting the freeze only when that
+// routine ends (record/areas/core/03-sim-seam-and-wasm-module.md, "Cases for the bench";
+// record/areas/architecture/log.md, 2026-10-23).
 
 import assert from "node:assert/strict"
 import { test } from "node:test"
@@ -90,7 +90,7 @@ test("a routine fed again after its end starts with nothing from its last feedin
   assert.equal(await frozen(core), false, "the routine remembered its last feeding's mark")
 })
 
-test("a module stopped by a routine's panic, with a routine live in Flying, has the core unfreeze the aircraft", { timeout: 30_000 }, async (t) => {
+test("a module stopped by a routine's panic, with a routine live in Flying, keeps the aircraft frozen until the routine ends", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("sim-module-stopped", t)
   const core = await started(run, "a")
   core.call({ call: "feed", routine: "HOLD", mode: 0 })
@@ -98,13 +98,20 @@ test("a module stopped by a routine's panic, with a routine live in Flying, has 
   const heard = core.heard().length
   core.call({ call: "feed", routine: "PROBE", mode: 4 })
   while (!(await core.report()).module_stopped) await sleep(25)
-  const unfrozen = await untilFrozen(core, false, 6_000)
-  await core.hear("module Stopped", { after: heard })
-  t.diagnostic(`the aircraft unfroze ${unfrozen.toFixed(0)}ms after the module stopped`)
+  const stopped = performance.now()
   // The counter ticks once a second, so its last tick came up to 1s before the stop, and the
-  // core takes 3s of stillness from that tick, checks every 200ms, then reads the freeze
-  // flags before it turns them off.
-  assert.ok(unfrozen <= 3_500, `the core unfroze the aircraft ${unfrozen.toFixed(0)}ms after the module stopped`)
+  // core takes 3s of stillness from that tick and checks every 200ms.
+  await core.hear("module Stopped", { after: heard, ms: 3_500 })
+  t.diagnostic(`the core took the module as stopped ${(performance.now() - stopped).toFixed(0)}ms after it stopped`)
+  await sleep(1_000)
+  assert.equal(await frozen(core), true, "the core lifted the freeze before the routine ended")
+  // Both routines hold the freeze, so the first to end leaves it, and the last lifts it.
+  core.call({ call: "end", routine: "PROBE" })
+  await sleep(500)
+  assert.equal(await frozen(core), true, "the core lifted the freeze while another routine that holds it was live")
+  core.call({ call: "end", routine: "HOLD" })
+  const unfrozen = await untilFrozen(core, false, 2_000)
+  t.diagnostic(`the aircraft unfroze ${unfrozen.toFixed(0)}ms after the last routine that held the freeze ended`)
 })
 
 for (const [why, arrange] of [
@@ -114,28 +121,32 @@ for (const [why, arrange] of [
   ],
   ["while paused", async (core: Core) => core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "pause", flags: 4 } }] })],
 ] as const) {
-  test(`a module that stops ${why} leaves the aircraft frozen`, { timeout: 30_000 }, async (t) => {
+  test(`a module that stops ${why} isn't taken as stopped, and leaves the aircraft frozen`, { timeout: 30_000 }, async (t) => {
     const run = new BenchRun(`sim-module-${why.replace(" ", "-")}`, t)
     const core = await started(run, "a")
     core.call({ call: "feed", routine: "HOLD", mode: 0 })
     await untilFrozen(core, true)
     await arrange(core)
     await sleep(200)
+    const heard = core.heard().length
     core.act({ act: "stop-module" })
     await sleep(4_500)
+    assert.ok(!core.heard().slice(heard).includes("module Stopped"), `the core took the module as stopped ${why}`)
     assert.equal(await frozen(core), true)
   })
 }
 
-test("a module that stops with no routine live leaves the aircraft frozen", { timeout: 30_000 }, async (t) => {
+test("a module that stops with no routine live isn't taken as stopped, and leaves the aircraft frozen", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("sim-module-no-routine", t)
   const core = await started(run, "a")
   for (const event of ["K:FREEZE_LATITUDE_LONGITUDE_SET", "K:FREEZE_ALTITUDE_SET", "K:FREEZE_ATTITUDE_SET"]) {
     core.call({ call: "key", event, value: 1 })
   }
   await untilFrozen(core, true)
+  const heard = core.heard().length
   core.act({ act: "stop-module" })
   await sleep(4_500)
+  assert.ok(!core.heard().slice(heard).includes("module Stopped"), "the core took the module as stopped with no routine live")
   assert.equal(await frozen(core), true)
 })
 
@@ -148,9 +159,10 @@ test("a stopped module's 3s count only from the end of a pause", { timeout: 30_0
   await sleep(200)
   core.act({ act: "stop-module" })
   await sleep(4_000)
+  const unpaused = core.heard().length
   core.act({ act: "play", signals: [{ after_ms: 0, signal: { signal: "pause", flags: 0 } }] })
   await sleep(2_000)
-  assert.equal(await frozen(core), true, "the core unfroze the aircraft under 3s after the pause ended")
-  const unfrozen = await untilFrozen(core, false, 3_000)
-  t.diagnostic(`the aircraft unfroze ${(2_000 + unfrozen).toFixed(0)}ms after the pause ended`)
+  assert.ok(!core.heard().slice(unpaused).includes("module Stopped"), "the core took the module as stopped under 3s after the pause ended")
+  await core.hear("module Stopped", { after: unpaused, ms: 2_000 })
+  assert.equal(await frozen(core), true, "the core lifted the freeze with the routine still live")
 })

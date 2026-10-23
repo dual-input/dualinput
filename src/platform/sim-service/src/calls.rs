@@ -190,9 +190,6 @@ impl SimService {
                 if let Some((_, Value::Text(title))) = values.first() {
                     tracing::info!(title, aircraft, "the loaded aircraft's title");
                 }
-            } else if self.platform.freeze == Some(data.request) {
-                self.platform.freeze = None;
-                self.freeze_read(&values, cx);
             }
             return;
         }

@@ -143,7 +143,7 @@ impl SimService {
                     cx,
                     STOPPED_NOTICE,
                     Level::Trouble,
-                    "Dual Input's module in the sim stopped, so the core let go of the aircraft. Restart the sim to bring it back.",
+                    "Dual Input's module in the sim stopped, so it can't fly or hold the aircraft. A frozen aircraft stays frozen until you take control or leave the session. Restart the sim to bring the module back.",
                     None,
                 );
             } else {

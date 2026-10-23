@@ -11,6 +11,12 @@ Decides:     The topology, the transport, the way through home routers, the rela
 >
 > - The backend holds no bug reports in v1, where [who does what](#who-does-what) has it hold them; that comes after v1.
 > - [Channels](#channels)' reason for a seat claim riding the avatar's pose, avatars being partly recorded, goes, and whether the claim moves to a session key is open, as [avatars](../avatars/01-avatars.md)' note of 2026-10-21 says.
+>
+> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in three places (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
+>
+> - A flight-model sample carries nothing of the control value, where the opening's list and [control](#control) have it carry the generation alone.
+> - [The link between two cores](#the-link-between-two-cores): a connection whose first message never comes stays open until it closes, with no 10s timeout.
+> - [Leaving](#leaving): Windows ending the pilot's session ends the core with no quit, so the crew sees a lost link, where a shutdown or logoff passes control and closes with the quit code.
 
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.

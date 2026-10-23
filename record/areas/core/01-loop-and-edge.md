@@ -20,8 +20,13 @@ Decides:     The core's threads; how the queue stamps and orders inputs, and wha
 > - [Timers, jobs, and IDs](#timers-jobs-and-ids): the kernel draws every unit's handles from one counter, and every random ID from one ChaCha20 generator keyed with the core's seed, since no unit is partly recorded; a handle still names the unit that drew it, whose handler its timer's firing or its job's result calls.
 >   chacha20 stays, since nothing in it reaches `getrandom`.
 >   A job may also list a folder, with each entry's size, or delete a file or a folder, for the recording crate's runs.
-> - [What a recording holds](#what-a-recording-holds): a recording holds inputs, the sandbox's stops, and checkpoints, and no marks, in one zstd frame for the run, flushed each second.
+> - [What a recording holds](#what-a-recording-holds): a recording holds inputs and checkpoints, and no marks, in one zstd frame for the run, flushed each second.
 > - [Inputs](#inputs): the edge leaves every input as it came, so no placeholder replaces the home folder's path, and no output that names a file gets the path back ([the home folder's path](../recording/01-recording-and-bug-reports.md#the-home-folders-path)).
+>
+> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in two places (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
+>
+> - The core keeps no window thread, so [threads](#threads), [starting and stopping](#starting-and-stopping), [quitting](#quitting), [budgets](#budgets), and [cases for the bench](#cases-for-the-bench) lose its row, its start, `WM_QUERYENDSESSION`'s quit within 3s, and the case of Windows signing a pilot out: Windows ending the pilot's session ends the core with no quit, and the crew sees a lost link.
+> - [What a recording holds](#what-a-recording-holds) has no sandbox's stops, since the sandbox's time limit counts QuickJS-ng's interrupt checks, so a replay stops a call at the same check with nothing recorded, and the loop reads no clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
 
 The core runs every unit on one thread, the loop, which takes one input at a time from one queue.
 An input is its source and its bytes, stamped under the queue's lock, so the stamps rise in the order the loop takes the inputs, and the unit that owns the source parses the bytes on the loop, so a live run and a replay take one path.

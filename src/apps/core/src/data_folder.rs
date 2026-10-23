@@ -1,11 +1,13 @@
 //! The core's data folder, `%APPDATA%\DualInput\`, which holds the pilot's settings, the
 //! session file, and each run's recording, and of which one core runs at a time.
 
+use std::os::windows::fs::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use sha2::{Digest, Sha256};
 use windows_sys::Win32::Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GetLastError, HANDLE};
+use windows_sys::Win32::Storage::FileSystem::{FILE_SHARE_READ, FILE_SHARE_WRITE};
 use windows_sys::Win32::System::Com::CoTaskMemFree;
 use windows_sys::Win32::System::Threading::CreateMutexW;
 use windows_sys::Win32::UI::Shell::{
@@ -100,6 +102,20 @@ pub fn run_folder(data: &Path) -> std::io::Result<PathBuf> {
     unreachable!("some n makes a folder that doesn't exist yet")
 }
 
+/// Creates one of a run's files, `inputs.zst` or `log.txt`, which other programs may read
+/// and write but not delete while the core holds it. A delete of the run in progress then
+/// fails rather than taking its recording and log from under the core, should the recording
+/// crate's guess at which run is in progress be wrong; std opens a file that may be deleted
+/// unless told otherwise (documented, `std::os::windows::fs::OpenOptionsExt::share_mode`).
+pub fn create_run_file(path: &Path) -> std::io::Result<std::fs::File> {
+    std::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+        .open(path)
+}
+
 /// Seconds since 1970 in UTC, as `YYYY-MM-DD_HH-MM-SS`, by Howard Hinnant's
 /// `civil_from_days` ("chrono-Compatible Low-Level Date Algorithms").
 fn utc(seconds: u64) -> String {
@@ -136,6 +152,18 @@ mod tests {
         assert_eq!(utc(0), "1970-01-01_00-00-00");
         assert_eq!(utc(951_782_400), "2000-02-29_00-00-00");
         assert_eq!(utc(1_792_504_931), "2026-10-20_14-02-11");
+    }
+
+    #[test]
+    fn a_run_file_cant_be_deleted_while_open() {
+        let path = std::env::temp_dir().join(format!("dualinput-run-file-{}", std::process::id()));
+        let file = create_run_file(&path).unwrap();
+        assert!(
+            std::fs::remove_file(&path).is_err(),
+            "the open file was deleted"
+        );
+        drop(file);
+        std::fs::remove_file(&path).unwrap();
     }
 
     #[test]

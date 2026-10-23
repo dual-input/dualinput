@@ -9,7 +9,10 @@ use stand_in_sim::{Aircraft, Module};
 
 /// The bench's test routine, whose mode its feed sets, so a scenario can tell what a
 /// routine carried from one feeding into the next, and can stop the module with a panic.
-pub const PROBE: RoutineId = RoutineId("PROBE");
+pub const PROBE: RoutineId = RoutineId {
+    name: "PROBE",
+    freezes: true,
+};
 
 #[derive(Clone, Copy, Debug, Default, Pod, Zeroable)]
 #[repr(C)]

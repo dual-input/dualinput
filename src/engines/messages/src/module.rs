@@ -17,17 +17,26 @@ pub const STATUS: &str = "DUALINPUT_MODULE_STATUS";
 
 /// A routine, by the name its slot carries, such as `HOLD` for `DUALINPUT_ROUTINE_HOLD`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct RoutineId(pub &'static str);
+pub struct RoutineId {
+    pub name: &'static str,
+    /// Whether it asks the routine host to freeze the aircraft. A module that stopped can't
+    /// lift that freeze, so the core lifts it when the last such routine ends
+    /// (record/areas/architecture/log.md, 2026-10-23).
+    pub freezes: bool,
+}
 
 impl RoutineId {
     /// The client data area the core writes the routine's feeds into.
     pub fn slot(self) -> String {
-        format!("DUALINPUT_ROUTINE_{}", self.0)
+        format!("DUALINPUT_ROUTINE_{}", self.name)
     }
 }
 
 /// Preflight's routine, which holds the pilot's aircraft frozen.
-pub const HOLD: RoutineId = RoutineId("HOLD");
+pub const HOLD: RoutineId = RoutineId {
+    name: "HOLD",
+    freezes: true,
+};
 
 /// What the module writes into its status slot once a second. Its layout never changes,
 /// so a core reads the status of a module from any build, and can say which build it is.

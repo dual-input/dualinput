@@ -792,7 +792,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 - **Decided:** one thread owns the platform's services, every feature's state, and the QuickJS-ng runtimes, and handles one input at a time from one queue, which edge tasks for SimConnect, tokio's sockets and timers, the core helper's pipe, and a pool for slow work fill, each stamping an input as it pushes it.
   Everything the loop reads from disk, the settings, the session file, and the profile's bundle, arrives as an input.
   Handlers are synchronous, read no clock, draw no random number, do no I/O, and iterate no `HashMap`; time and any random ID arrive with an input, and timers and slow work leave as outputs and come back as inputs.
-  A profile's script and a plugin get no clock: their QuickJS-ng contexts leave out `Date`, `performance`, and `Math.random`, and one that has to wait asks the platform for a timer; the 100ms limit stays by the clock, and the recording keeps the count of interrupt calls at which it fired.
+  A profile's script and a plugin get no clock: their QuickJS-ng contexts leave out `Date`, `performance`, and `Math.random`, and one that has to wait asks the platform for a timer; the time limit counts QuickJS-ng's interrupt checks, so a replay stops a call at the same check with nothing recorded ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
   The platform records the queue under a header that names the build, so the same build replays a whole run, and only that build reads it as a replay; what a later version reads from a recording is a separate, self-describing record with named fields.
   Settled in node 5.1 by the user, 2026-10-14 ([02-code-map](02-code-map.md#one-loop)).
 - **Because:**
@@ -897,7 +897,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   The sim service writes each feed on the feature's own connection and writes the last one again every 200ms until the feature feeds another or ends the routine, and the routine host makes a routine new at its first feed.
   Preflight's hold and the plugins' mechanisms are the platform's own routines, which live in the routine host and are fed on the platform's connection.
   Each frame a routine asks for what it wants, and the routine host freezes the aircraft while any routine asks, and unfreezes it, if it froze it, once none does, so no routine keeps a flag the routine host must clear; following asks for the freeze in every frame it runs, with a pose to write or not.
-  The platform ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, while a routine of ours is live, the core unfreezes the aircraft through its own connection ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
+  The platform ends each of a feature's routines before it closes the feature's connection, and when the module's counter hasn't moved for 3s in a flight that's neither loading nor paused, while a routine of ours is live, the core takes the module as stopped and raises its notice, and unfreezes the aircraft through its own connection once the last routine that holds the freeze ends, as the pilot takes control or leaves, rather than handing the pilot a flying aircraft unasked (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
   The module never learns the session's state, so routines' slots replace [decision 017](../../decisions/017-core-writes-control-slot-every-200ms.md)'s control slot, which carries that state, and a numbered decision makes the change once step 8's decisions are numbered; the module still leaves its version in a slot and writes a counter every second.
   Settled in node 5.3 by the user, 2026-10-15 ([02-code-map](02-code-map.md#routines-in-our-wasm-module)).
 - **Because:**
@@ -1039,13 +1039,12 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## A quit leaves the session before the core exits, and a deliberate exit returns 0
 
-- **Decided:** a quit, from the desktop app, the watcher's tray, or Windows ending the pilot's session, which the core hears through a top-level window it never shows, runs as a Leave before the core exits; every deliberate exit drains the edges' outputs within 750ms and returns 0, and a panic's abort never does.
-  Settled in node 6.1, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)).
+- **Decided:** a quit, from the desktop app or the watcher's tray, runs as a Leave before the core exits; every deliberate exit drains the edges' outputs within 750ms and returns 0, and a panic's abort never does.
+  Settled in node 6.1, 2026-10-15 ([01-loop-and-edge](../core/01-loop-and-edge.md#quitting)), with Windows ending the pilot's session left out by the user, 2026-10-23 ([architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - **Because:**
   - A core killed in a session looks like an outage to the crew, and FS Copilot's quit did: its goodbye was queued and "the process exits before LiteNetLib's update thread sends it" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-12 — A deliberate quit reaches the peer as an outage").
-  - Windows sends `WM_QUERYENDSESSION` to a window, and a core with no window would end without hearing it (documented, [WM_QUERYENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-queryendsession)).
   - The watcher starts the core again when it exits while the sim runs ([decision 002](../../decisions/002-core-starts-with-every-sim-run.md)), so it needs the exit code to tell a quit from a crash.
-- **Leaves out:** whether Windows sends those messages to a window that's never shown, for [node 7](plan.md#7-testing)'s bench; and how the pilot asks for a quit, for node 6's designs of the apps and of installing and updating.
+- **Leaves out:** Windows ending the pilot's session, which ends the core with no quit, so the crew sees a lost link; hearing it would take a window the core never shows, `WM_QUERYENDSESSION` (documented, [WM_QUERYENDSESSION](https://learn.microsoft.com/en-us/windows/win32/shutdown/wm-queryendsession)), and a quit that holds Windows' shutdown open, for a pilot who shuts down mid-session; and how the pilot asks for a quit, for node 6's designs of the apps and of installing and updating.
 
 ## The core serves its clients with tokio-websockets, and closes a socket with another Origin before reading it
 
@@ -1121,12 +1120,12 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 - **Decided:** the module leaves its version, the slots hash, a hash of the slot structs alone, and its counter in `DUALINPUT_MODULE_STATUS`, in a layout that never changes, and each routine's slot header carries the slots hash; the routine host ignores a feed whose slots hash isn't its own, and the sim service logs both versions and reports the module as differing.
   The routine host reads and writes `A:`, `L:`, and `Z:` variables through `fsVarsAVarGet`, `fsVarsAVarSet`, `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarGet`, and `fsVarsZVarSet`, freezes through `fsEventsTriggerKeyEvent` with the SDK's `KEY_FREEZE_*_SET` numbers, and runs a plugin's calculator code through `execute_calculator_code`.
-  The core unfreezes the aircraft once the counter has been still for 3s spent in Flying, unpaused, with a routine of ours live.
+  The core takes the module as stopped once the counter has been still for 3s spent in Flying, unpaused, with a routine of ours live, and unfreezes the aircraft when the last routine that holds the freeze ends (user, 2026-10-23).
   Settled in node 6.3 by the user, 2026-10-15 ([03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md#our-wasm-module)).
 - **Because:**
   - A routine reads its slot in place, so a struct laid out by another build could become wrong values written into the pilot's aircraft, and a hash of the slot structs alone spares a developer a sim restart for a change to a WebSocket message.
   - p12 read and wrote `A:` variables through `fsVarsAVarGet` and `fsVarsAVarSet` in the sim (read in `experiments/areas/avatars/wasm/src/follow.cpp`, `read_pose` and `write_pose`), and SDK 1.7.3 marks `execute_calculator_code` deprecated while nothing else runs calculator code (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/Legacy/gauges.h`).
-  - The session sits above the sim service, which can't read it, and a module with no routine live froze nothing.
+  - The session sits above the sim service, which can't read it, and a stopped module can't lift the freeze its routine holds.
 - **Leaves out:** whether `fsVarsAVarSet` holds the pilot's own aircraft's pose and whether `fsEventsTriggerKeyEvent` freezes it, for [node 7](plan.md#7-testing)'s tests in the sim, after which calculator code carries either that fails, as FS Copilot's module writes its pose and freeze; and whether bindgen brings in the freeze events' numbers, since p08's build generated bindings only from `SimConnect.h` and `MSFS_Vars.h`.
 
 ## Every name the sim shares is DUALINPUT_, a kind, and a name
@@ -1433,15 +1432,15 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - `Follow` draws on the module's clock, so the following machine needs the samples on it whoever stamps them, and the core already writes every slot at least every 200ms.
 - **Leaves out:** nothing; the bench measures how soon the offset settles.
 
-## A flight-model sample carries its control's generation alone, and a receiver drops one under any other value
+## A flight-model sample carries nothing of control, and a receiver drops one from a sender who isn't the PF
 
-- **Decided:** a sample carries its control value's generation, and its PF is its sender; a following machine drops a sample whose sender and generation aren't the session's control, a newer one included, until the control key arrives.
+- **Decided:** a sample carries nothing of the control value, and its PF is its sender; a following machine drops a sample whose sender isn't the session's PF, or whose stamp is no later than the newest it took, until the control key arrives.
   This changes [decision 036](../../decisions/036-control-is-one-value.md), under which every sample carries the whole value and a receiver adopts a newer one met on a sample, once step 8's decisions are numbered.
-  Settled in node 6.10 by the user, 2026-10-17 ([taking a sample](../flight-model/01-flight-model-sync.md#taking-a-sample)).
+  Settled in node 6.10 by the user, 2026-10-17 ([taking a sample](../flight-model/01-flight-model-sync.md#taking-a-sample)), with the sample's generation dropped by the user, 2026-10-23 ([architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - **Because:**
-  - Only the flying machine sends samples, and the network hands each message to its handler with its sender's pilot ID ([channels and sends](../network/02-units.md#channels-and-sends)), so the 16 bytes of a pilot ID in every sample say nothing new.
+  - Only the flying machine sends samples, and the network hands each message to its handler with its sender's pilot ID ([channels and sends](../network/02-units.md#channels-and-sends)), so the sender check drops an ex-PF's late samples and a new PF's that come before the key.
   - Flight-model sync can't change control, which the session crate holds, and the next sample after the key replaces each one dropped.
-- **Leaves out:** nothing.
+- **Leaves out:** a sample delayed across two handovers that hand control back to its sender, which the sender check passes and which can draw one stale point.
 
 ## A following machine draws 400ms behind, carries through a gap for up to 2s, and eases back over 3s, and a paused flying machine repeats its last sample
 
@@ -1712,6 +1711,10 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 
 ## The sim service warns of packages that override our files and checks our own, and Dual Input turns no package off
 
+> **Note**
+> Since 2026-10-23, the sim service searches no other package for files that override ours and checks nothing of our own package on disk: our `VCockpit.js` won over FS Copilot's on 2026-10-22, against the mount order this rested on, the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, and the module's Missing and Differs cover our own package (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+> It still reads the packages folders from `UserCfg.opt` for the session crate's search, and Dual Input still turns no package off.
+
 - **Decided:** the sim service reads the packages folders from `UserCfg.opt`, and gives them to the session crate's search for an aircraft's package; at the core's start and at each sim start it searches other packages' `layout.json` in `Community` and `Community2024` for the paths ours lists outside our own folders, `VCockpit.js` and BlurPage's component, without regard to letter case, since FS Copilot's lists its `VCockpit.js` in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`), skipping a package the sim's `Content.xml` marks `UserDisabled`, and raises a warning notice for each package found, which the match check shows as one item; and it checks that our own package is there, at the core's version, and not off in the sim, raising a trouble notice otherwise, one notice with the module's status of Missing or Differs (the design review after node 6, user, 2026-10-18).
   Removing or turning off a package the warning names is the pilot's, and the offer to disable it, which [installing and updating](../product/03-v1-scope.md#installing-and-updating) gives the desktop app, moves to Later (user, 2026-10-18).
   Settled in node 6.17 by the user, 2026-10-18 ([the checks in the core](../install/01-installing-and-updating.md#the-checks-in-the-core)).
@@ -1837,7 +1840,7 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 ## Dual Input is tested at four levels, and CI keeps the unit tests and the bench green on every pull request
 
 - **Decided:** Dual Input is tested by each crate's and each TypeScript part's own tests; on the bench, two or three bench builds of the core on one PC, each on a stand-in sim; in the sim, with a bench core on a stand-in as the second pilot where a case needs a crew; and with friends on two PCs.
-  A pull request that changes code runs the unit tests and the bench, and a merge needs them green; each merge to `main` runs the bench again recording every input; the release workflow's build job runs both passes; and no timing budget fails CI.
+  A pull request that changes code runs the unit tests and the bench, and a merge needs them green; the release workflow's build job runs both again; and no timing budget fails CI (the bench's run on each merge and the release's second run dropped by the user, 2026-10-23, since every run records every input; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
   Each stage of node 8 turns its system's cases into tests, measures its budgets on our development machine, runs the cases that need a third-party aircraft's files there too, and runs its cases in the sim in one session at its end; a short session in the sim comes before each release, and the release workflow takes the commit that session checked and stops unless it's `main`'s head; friends come at a stage whose cases need two PCs and before v1 ships; and no second MSFS runs in a virtual machine.
   Settled in node 7 by the user, 2026-10-18 ([testing](../build/02-testing.md)).
 - **Because:**

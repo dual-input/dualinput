@@ -24,6 +24,8 @@ Decides:     Which catch-up runs when, the order state applies in, what happens 
 > Step 4 of [catching up state](#catching-up-state) runs a write function once, never again when an entry it read lands ([write functions](05-units.md#write-functions)); what queued during a catch-up applies once its writes are made; and [what the open questions still hold](05-units.md#what-the-open-questions-still-hold) answers [open questions](#open-questions).
 >
 > Since 2026-10-17, pointer presses that arrive during the catch-up preflight's end starts queue and apply once its writes are made, since neither cockpit's displays were touched in preflight, where [while catch-up runs](#while-catch-up-runs) drops every press that arrives during a catch-up; and the catching-up machine's synced displays lock until it ends ([pointer sync](../pointer-sync/01-pointer-sync.md#playing-a-gesture)).
+>
+> Since 2026-10-23, an aircraft counts as settled 30s after Ready to fly, in [settling after a load](#settling-after-a-load), with no quiet window, no 1.5-minute cap, and no rule for an entry that changes more than 5 times, so the notes above on a late profile's window and on such an entry go, and [open questions](#open-questions)' item on the 30s floor is settled ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
 
 A cockpit catches up in one of two ways.
 After a short outage with the sim still running, it replays the changes it missed, in order.

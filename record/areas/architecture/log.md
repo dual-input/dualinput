@@ -3,6 +3,40 @@
 What our experiments found for the [architecture plan](plan.md)'s nodes, newest entry first.
 The probes and their raw output are in [experiments/areas/architecture](../../../experiments/areas/architecture), with the results in its `results/` folder.
 
+## 2026-10-23: A review against the simplicity rule cut eight guards, and kept every designed feature it questioned
+
+**Asked:** which mechanisms in the designs fail CLAUDE.md's rule of 2026-10-23, that every rule, mechanism, or special case is weighed against the simplicity it costs, and added only for a failure likely enough or bad enough to matter?
+
+**Expected:** a handful of guards against failures a sensible crew doesn't meet.
+
+**Found:** four agents read the designs of every area but recording, about 8,500 lines, and named 22 candidates, which the user judged one by one (user, 2026-10-23):
+
+- Eight were guards, and go, as **Changed** says.
+- Two were guards worth their cost, and stay: signed backend requests, the groundwork for the signed report uploads after v1 ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report)), and the map check's rule that a platform or engine crate depends only on the lines below its own, against a sideways dependency that Cargo, which refuses only a cycle, lets through.
+- Twelve were features we designed, groundwork for a later pick, or state other units read, and stay: shadow values, `ignore`, the filter for an input event reported twice, the driven-entry test, catch-up's order from each entry's history, the hand reaching for a change made without a click, traffic's 15s staleness timer, the restart count, which receivers and the sync engine key every sender by, the internet check while a link is lost, the masking group, the firewall rule, and the profile cache's cleanup.
+  That scope is in the rule now: it weighs guards, fallbacks, and special cases, not a designed feature, groundwork, or state other code reads.
+- About ten designs carry dated notes that overturn so much of their body that a reader can't tell what holds, so [writing.md](../../../.claude/rules/writing.md) has such a design rewritten to its current state.
+
+**Changed:** the user decided on 2026-10-23:
+
+1. The sandbox's time limit counts the interrupt checks QuickJS-ng makes, one every 10,000 ticks of its own counter, where it stops a call at 100ms by the clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
+   A replay stops a call at the same check with nothing recorded, so a recording holds no sandbox's stops, and the loop reads no clock at all.
+   A runaway call on a slower PC holds the loop longer than 100ms before it stops.
+2. An aircraft counts as settled 30s after Ready to fly, with no quiet window, no 1.5-minute cap, no rule that drops an entry changing more than 5 times from the check, and no window of its own for a profile that loads late: six aircraft's switches, the PMDG 777's and the Fenix A320's among them, last changed 1.6s to 12.1s after Ready to fly, and the rule called each settled at its 30s floor ([sync log](../sync/log.md#2026-10-05-every-aircraft-restores-its-switches-within-15s-of-ready-to-fly-and-settling-timed-from-fly-misleads)).
+   A restore after 30s syncs like a pilot's change, the trade of 2026-10-04 ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+3. The sim service doesn't search other packages for files that override ours, or check our own package on disk: ours won over FS Copilot's `VCockpit.js` on 2026-10-22, against the alphabet the check assumed ([install log](../install/log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)), the clients crate's notice when no cockpit panel connects within 10s of the profile loading names another package's `VCockpit.js` as the likeliest cause, and the module's Missing and Differs cover our own package.
+   The pilot learns of a conflict once a profile loads, without the package's name.
+4. A flight-model sample carries no control generation, and a following machine drops one whose sender isn't the session's PF or whose stamp isn't newer than the last it took.
+   A sample delayed across two handovers that hand control back to its sender can draw one stale point.
+5. The core keeps no window to hear Windows end the pilot's session, so a shutdown or sign-out ends the core with no quit, and the crew sees a lost link where the user's call of 2026-10-11 had them see a leave.
+6. The bench runs once on a pull request and once in the release's build job: its run on each merge and the release's second run go, since the setting they ran with went with partial recording.
+7. Our module that stops with a routine live still raises Stopped and its notice, and the core lifts the freeze when the last routine that holds it ends, as its pilot takes control or leaves, where it lifted it the moment the module stopped, which handed the pilot a flying aircraft unasked; a stopped module can't lift the freeze itself, so the core's lift stays.
+   Each routine says whether it holds the freeze, and the core sends the three unfreeze events in the input that ends the routine, with no read of the flags first, so a quit's exit, which takes no input after it, still carries them out (stage 8's code review, 2026-10-23).
+8. A connection with no first message stays open until it closes: the bench never saw the 10s timeout fire, since a core that sends no first message closes its own connection first ([network log](../network/log.md#2026-10-22-on-the-bench-two-cores-join-in-11s-lose-the-link-50s-into-each-outage-and-get-it-back-01s-to-30s-after-and-every-channel-runs-within-8ms-of-the-others-through-a-lossy-relay)).
+   Only a bug of ours sends heartbeats and never a first message.
+
+**Affects:** [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md), which [decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md) changes, and [decision 040](../../decisions/040-catch-up-first-final-value-order.md), which [decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md) changes; [the code map](02-code-map.md), this area's [tentative decisions](decisions.md), and [the spine](01-spine.md); [plugins and the sandbox](../plugins/01-plugins.md) and [01-format-and-delivery](../profiles/01-format-and-delivery.md); [03-catch-up](../sync/03-catch-up.md), [04-order-and-recovery](../sync/04-order-and-recovery.md), and [the sync units](../sync/05-units.md); [03-sim-seam-and-wasm-module](../core/03-sim-seam-and-wasm-module.md) and [01-loop-and-edge](../core/01-loop-and-edge.md); [installing and updating](../install/01-installing-and-updating.md) and [the apps](../interface/01-apps.md); [flight-model sync](../flight-model/01-flight-model-sync.md); [01-between-machines](../network/01-between-machines.md) and [the network's units](../network/02-units.md); [the session's units](../session/02-units.md); [testing](../build/02-testing.md); [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md); and stages 9, 12, and 15 of the [build plan](../build/plan.md).
+
 ## 2026-10-16: Reading traffic only as it changes, within 50km, once a second, and the flight model and camera at their send rates, would shrink p10's recording from 45 to 13 MB an hour
 
 **Asked:** p10's 45 MB an hour ([below](#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly)) is too much to upload after every flight and to keep several flights of (user, 2026-10-16); how much smaller would the recording be if the core read less, since a replay needs every input it read?

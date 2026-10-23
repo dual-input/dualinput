@@ -254,8 +254,6 @@ pub mod codes {
     pub const QUIT: u32 = 2;
     /// Nothing for 5s, so the link is lost and the core redials.
     pub const LOST: u32 = 3;
-    /// No first message within 10s.
-    pub const NO_FIRST_MESSAGE: u32 = 4;
     /// The other of two connections stays.
     pub const OTHER_STAYS: u32 = 5;
     /// A first message with a higher restart count.

@@ -100,7 +100,7 @@ Builds:
 - the recording's writer and `dualinput-core replay`, with the replay log's encoding in `recording-format`: its header, inputs, and checkpoints ([replay](../core/01-loop-and-edge.md#replay))
 - the loop's Clippy rules: the root's `clippy.toml` and the workspace's lint on a `HashMap`'s order, which the loop's crates take ([one loop](../architecture/02-code-map.md#one-loop))
 
-The sim thread comes in stage 4, the WebSocket server and the port file in stage 5, the marks' record in stage 8, the window thread in stage 9 with the session crate that handles the quit it pushes, the sandbox's stops' record in stage 12, and `tools/replay.ts` in stage 22.
+The sim thread comes in stage 4, the WebSocket server and the port file in stage 5, and `tools/replay.ts` in stage 22.
 The edge's jobs read and write files, and its other jobs, fetching over HTTPS and reading the clipboard, come with the first stage whose units start them.
 01-loop-and-edge's other cases and budgets are in the `Tests` lines of stages 3, 4, 5, 9, 15, and 18, each marked as from stage 2.
 
@@ -314,10 +314,12 @@ Tests:
 The kernel changes, so the whole bench runs at this stage's close, which also covers the move into `src/` and iroh's pin that it hasn't run on (user, 2026-10-23).
 
 Exit: on our development machine, `node tools/check.ts` and the whole `node tools/bench.ts` pass, the recording's scenarios among them; a killed core's recording, written in one frame flushed each second, replays to its last flush; and the [recording log](../recording/log.md) has the built writer's size on p10's capture.
+Done on 2026-10-23.
 
 ## 9 The session
 
-Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)); and `src/apps/core`'s window thread, which pushes a quit when Windows ends the pilot's session ([quitting](../core/01-loop-and-edge.md#quitting)).
+Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)).
+Windows ending the pilot's session ends the core with no quit, so the crew sees a lost link, as [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-23 has it.
 From stage 4, it also builds the menu script and our BlurPage copy in `src/sim-package/pages`, with the menu script's report of the menu's page, which ends sim awareness's Starting ([the menu script](../session/02-units.md#the-menu-script), [leaving Starting](../core/03-sim-seam-and-wasm-module.md#leaving-starting)); the sim service's aircraft awareness, which runs while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)); the sim service's feed of preflight's `Hold` on the platform's connection ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module)); and the session crate's calls to `sim_service::announce` as a session starts or ends, which stage 5 builds ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement)).
 From stage 5, it also builds the bench's fake menu script ([the sim's pages](02-testing.md#the-sims-pages)).
 Its features come in [stage 21](#21-rate-and-pause-and-go-to).
@@ -325,7 +327,7 @@ Needs: 4, 7, and 8.
 
 Tests:
 
-- From stage 2: a pilot quits Dual Input in a session, and Windows signs a pilot out with a session held, and each time the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
+- From stage 2: a pilot quits Dual Input in a session, and the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
 - From stage 4: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)), raising one `SimChanged` for the load it finds ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); and in this stage's session in the sim, `fsEventsTriggerKeyEvent` freezes and unfreezes the pilot's aircraft through `Hold` (same cases).
 
 ## 10 Profiles
@@ -345,7 +347,7 @@ Tests, from stage 5: in this stage's session in the sim, with a bench core runni
 
 ## 12 The sandbox
 
-Builds: the sandbox, with the check `src/apps/core` hands its interrupt handler and the replay log's record of its stops ([plugins and the sandbox](../plugins/01-plugins.md), [what a recording holds](../core/01-loop-and-edge.md#what-a-recording-holds)).
+Builds: the sandbox, with its time limit counted in QuickJS-ng's interrupt checks, set to about 100ms of a call on our development machine, which the plugins' log records ([plugins and the sandbox](../plugins/01-plugins.md), [decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
 It needs only stage 1, so it can be built any time before stage 13.
 Needs: 1.
 
@@ -368,7 +370,7 @@ Tests:
 
 ## 15 Installing and updating
 
-Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, writing our package, and the core's checks of the packages that override ours ([installing and updating](../install/01-installing-and-updating.md)).
+Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, and writing our package ([installing and updating](../install/01-installing-and-updating.md)).
 From stage 4, the release's folder also holds the C++ runtime's three DLLs that `SimConnect.dll` imports ([the build](01-the-build.md)), and the desktop app copies our package as [installing and updating](../install/01-installing-and-updating.md)'s note of 2026-10-21 has it.
 The release workflow comes in [stage 22](#22-github).
 Needs: 3 and 11.

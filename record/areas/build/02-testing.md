@@ -16,6 +16,8 @@ Decides:     The four levels of testing, and where and when each runs; which tes
 >
 > Since 2026-10-22, the bench scripts [the stand-in core helper](#the-stand-in-core-helper) over a line of its own: the bench starts each core with `DUALINPUT_BENCH_HELPER` naming a local port, the stand-in inherits it from the core that starts it and connects there, and over that line the bench tells it what to send or do, and hears each message the core sent it ([build plan](plan.md#6-the-core-helper)).
 > The core's pipe can't carry the script, since the core owns both its ends, and the core still starts only the program its development setting names.
+>
+> Since 2026-10-23, the bench runs once on a pull request and once in the release's build job: [what keeps CI green](#what-keeps-ci-green)'s run on each merge to `main` and the release's second run go, since every run records every input (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.

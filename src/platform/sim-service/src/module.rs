@@ -1,7 +1,9 @@
 //! Our WASM module, as the core sees it: the routines' feeds, which the service writes again
-//! every 200ms until a feature feeds another or ends the routine, and the module's status,
-//! which decides when the core unfreezes the aircraft for a module that stopped
-//! (record/areas/core/03-sim-seam-and-wasm-module.md, "The module's status").
+//! every 200ms until a feature feeds another or ends the routine, and the module's status. A
+//! module that stopped can't lift the freeze its routine holds, so the core lifts it when the
+//! routine ends, as the pilot takes control or leaves, rather than the moment the module
+//! stops, which would hand the pilot a flying aircraft unasked
+//! (record/areas/architecture/log.md, 2026-10-23).
 
 use std::collections::BTreeMap;
 use std::time::Duration;
@@ -11,7 +13,7 @@ use messages::module::slots::SlotHeader;
 use messages::module::{ModuleStatus, RoutineId};
 use messages::sim::Stage;
 use sim_awareness::SimAwareness;
-use sim_client::{Area, Period, Value, Var};
+use sim_client::Area;
 
 use crate::SimService;
 use crate::connections::Origin;
@@ -25,14 +27,11 @@ pub(crate) const REWRITE: Duration = Duration::from_millis(200);
 /// before the core takes the module as stopped, in µs.
 const STOPPED: u64 = 3_000_000;
 
-/// The freeze flags the core reads, and the event that turns each off.
-const FREEZES: [(&str, &str); 3] = [
-    (
-        "A:IS LATITUDE LONGITUDE FREEZE ON",
-        "K:FREEZE_LATITUDE_LONGITUDE_SET",
-    ),
-    ("A:IS ALTITUDE FREEZE ON", "K:FREEZE_ALTITUDE_SET"),
-    ("A:IS ATTITUDE FREEZE ON", "K:FREEZE_ATTITUDE_SET"),
+/// The events that turn off each of the three freezes the routine host sets.
+const UNFREEZES: [&str; 3] = [
+    "K:FREEZE_LATITUDE_LONGITUDE_SET",
+    "K:FREEZE_ALTITUDE_SET",
+    "K:FREEZE_ATTITUDE_SET",
 ];
 
 /// Our WASM module's status, which the apps show, so its type is the message crate's.
@@ -110,6 +109,18 @@ impl SimService {
         }
         feed.live = false;
         me.write_slot(unit, routine, cx);
+        let still_frozen = me
+            .module
+            .feeds
+            .iter()
+            .any(|((_, other), f)| f.live && other.freezes);
+        if me.module.status == Status::Stopped && routine.freezes && !still_frozen {
+            tracing::info!(
+                routine = routine.name,
+                "a routine that held the freeze ended while our WASM module was stopped, so the core lifts it"
+            );
+            me.unfreeze(cx);
+        }
         me.check_stall(cx);
     }
 
@@ -193,8 +204,8 @@ impl SimService {
 
     /// Counts the time the module's counter has been still while Stopped's conditions held,
     /// at each moment one of them can change, so the 3s count only while all three hold,
-    /// and an aircraft unpaused after a long pause isn't unfrozen before the module's next
-    /// write (record/areas/core/03-sim-seam-and-wasm-module.md, "The module's status").
+    /// and a module unpaused after a long pause isn't taken as stopped before its next write
+    /// (record/areas/core/03-sim-seam-and-wasm-module.md, "The module's status").
     pub(crate) fn check_stall(&mut self, cx: &Cx) {
         let now = cx.now();
         if let Some(since) = self.module.holding_since {
@@ -211,19 +222,19 @@ impl SimService {
             self.module.holding_since = None;
             tracing::warn!(
                 still_ms = self.module.still / 1_000,
-                "our WASM module stopped with a routine live, so the core unfreezes the aircraft"
+                "our WASM module stopped with a routine live, so the aircraft stays frozen until the routine ends"
             );
-            self.unfreeze(cx);
         }
         // Every moment that can change the status or whether a routine is live runs this,
         // so the notices follow both from here.
         self.module_notices(cx);
     }
 
-    /// Reads the three freeze flags through the platform's connection, then turns off each
-    /// that's on, as a client outside the sim released a frozen Baron that way (measured on
-    /// MSFS 2024, 2026-10-03, record/areas/flight-model/log.md). A module with no routine
-    /// live froze nothing, so a freeze now is taken to be ours.
+    /// Turns off all three freezes through the platform's connection, as a client outside the
+    /// sim released a frozen Baron (measured on MSFS 2024, 2026-10-03,
+    /// record/areas/flight-model/log.md). The events go out in the same input as the
+    /// routine's end, with no read of the flags first, so a quit's exit, which takes no
+    /// input after it, still carries them out.
     fn unfreeze(&mut self, cx: &Cx) {
         let origin = Origin {
             unit: self.me(),
@@ -232,32 +243,10 @@ impl SimService {
         let Some(client) = self.client(origin, cx) else {
             return;
         };
-        let vars: Vec<Var> = FREEZES
+        let ops = UNFREEZES
             .iter()
-            .map(|(var, _)| Var::number(var, "bool"))
+            .flat_map(|event| client.key(&origin, event, 0))
             .collect();
-        let (watch, ops) = client.watch(&origin, &vars, Period::Once);
-        self.platform.freeze = Some(watch.request);
-        self.make(origin, ops, cx);
-    }
-
-    /// The freeze flags the unfreeze read.
-    pub(crate) fn freeze_read(&mut self, values: &[(usize, Value)], cx: &Cx) {
-        let origin = Origin {
-            unit: self.me(),
-            handle: None,
-        };
-        let Some(client) = self.client(origin, cx) else {
-            return;
-        };
-        let mut ops = Vec::new();
-        for (place, value) in values {
-            if let (Some((_, event)), Value::Number(on)) = (FREEZES.get(*place), value)
-                && *on != 0.0
-            {
-                ops.extend(client.key(&origin, event, 0));
-            }
-        }
         self.make(origin, ops, cx);
     }
 }

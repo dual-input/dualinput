@@ -8,6 +8,8 @@ Decides:     That plugins come after v1; the `instrument()` name, what its path 
 
 > **Note**
 > Since 2026-10-18, an `instrument()` path reads own data properties only and ends in a number, text, or boolean, with no method call, where [what a path reaches](#what-a-path-reaches) lets it end in a no-argument method the panel's scripts wrote; so the `[native code]` check and its case go, and the 58P's radar range syncs in v1 only if a data field of Asobo's map holds it (user, 2026-10-18).
+>
+> Since 2026-10-23, [the sandbox](#the-sandbox)'s time limit counts QuickJS-ng's interrupt checks, about 100ms of a call on our development machine, so a replay stops a call at the same check with nothing recorded, where the core's edge hands the sandbox a check that reads the clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
 
 v1 builds no plugins.
 The Baron 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, which a panel module of state sync's reads every 250ms.

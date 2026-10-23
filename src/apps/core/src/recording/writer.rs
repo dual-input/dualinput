@@ -1,6 +1,5 @@
 //! The recording's writer, on a thread of its own, so the loop never waits on the disk.
 
-use std::fs::File;
 use std::io::BufWriter;
 use std::os::windows::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
@@ -60,7 +59,10 @@ pub fn start(
     header: &Header,
     context: Arc<Context>,
 ) -> std::io::Result<(Handle, JoinHandle<()>)> {
-    let writer = Writer::new(BufWriter::new(File::create(path)?), header)?;
+    let writer = Writer::new(
+        BufWriter::new(crate::data_folder::create_run_file(path)?),
+        header,
+    )?;
     let folder = path.parent().map_or_else(PathBuf::new, Path::to_path_buf);
     let (to, from) = mpsc::channel();
     let thread = std::thread::Builder::new()
@@ -166,6 +168,7 @@ mod tests {
     use super::*;
     use recording_format::{Input, Reader};
     use std::cell::Cell;
+    use std::fs::File;
 
     fn header() -> Header {
         Header {

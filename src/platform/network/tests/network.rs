@@ -435,23 +435,6 @@ fn a_first_message_with_another_code_is_refused_with_its_code() {
 }
 
 #[test]
-fn a_connection_with_no_first_message_closes_after_10s() {
-    let mut core = Core::new();
-    core.act(Act::Open { crew: Vec::new() });
-    core.event(Event::Connected {
-        conn: 1,
-        endpoint: [7; 32],
-        dialed: false,
-    });
-    core.take();
-    core.advance(core.now + 10 * SECOND);
-    assert!(core.take().0.contains(&Command::Close {
-        conn: 1,
-        code: codes::NO_FIRST_MESSAGE
-    }));
-}
-
-#[test]
 fn a_link_with_nothing_for_5s_is_lost_redials_every_2s_and_comes_back_again() {
     let mut core = Core::new();
     core.linked(1, [7; 32]);

@@ -14,6 +14,8 @@ Decides:     How a feature's part plugs into each app and comes out; what a part
 > - [Left to the apps' stage](#left-to-the-apps-stage): the report page's upload comes after v1.
 >
 > Since 2026-10-23, `recording`'s slice in [slices and commands](#slices-and-commands) lists the runs by their folders' names, which are their starts in UTC, with their sizes and the one in progress, since v1 writes no index, and marking the moment writes a line to the run's log (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+>
+> Since 2026-10-23, [trouble](#trouble) has no warning for a package that overrides our files, nor its item in the match check, since the sim service no longer searches for one; the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 
 A feature shows itself in each app through one part, which the app lists in one line, so deleting a feature deletes its folder and that line, and the platform's shells never name a feature.
 The apps reach the core only through slices of state, commands, and a part's `unit` messages, and any client sends any command, a setting's change and a quit among them.

@@ -325,7 +325,7 @@ pub enum NetAct {
         open_as: Option<String>,
     },
     /// Whether each connection's first message goes out, which a scenario turns off to see
-    /// the other side close a connection that sends none.
+    /// that the other side never links a connection that sends none.
     First {
         send: bool,
     },

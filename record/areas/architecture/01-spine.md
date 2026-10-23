@@ -9,6 +9,11 @@ Decides:     Which components Dual Input runs, where each runs, and what each ow
 > **Note**
 > Since 2026-10-18, [testing](../build/02-testing.md) settles [left open](#left-open)'s item under the build: the stand-in for the second pilot's sim is the bench's stand-in sim, a bench core on it plays the second pilot even beside the real sim, and no second MSFS runs in a virtual machine ([dropped](../build/02-testing.md#dropped)).
 > Since 2026-10-21, v1 uploads no bug report: a pilot sends a run's folder by hand when we ask for it, and the core's upload from the desktop app's report page, the backend's part of a bug report, and R2 come after v1, where [components](#components), [frameworks](#frameworks), and [parts](#parts) have them in v1 (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+>
+> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in two places (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
+>
+> - [What moves them](#what-moves-them): an aircraft whose session or profile starts after it loaded counts as settled 30s after its Ready to fly, with no quiet window from the profile's load ([decision 048](../../decisions/048-settled-30s-after-ready-to-fly.md)).
+> - [The WASM module](#the-wasm-module): when the counter stops in a flight, unpaused, with a routine of ours live, the core takes the module as stopped and unfreezes the aircraft when the last routine that holds the freeze ends, rather than at once.
 
 Each section up to [Frameworks](#frameworks) answers one child of node 1 in the [architecture plan](plan.md), and [Parts](#parts) and [Left open](#left-open) answer node 1 itself; the tentative decisions behind them, with their findings, are in [decisions.md](decisions.md).
 The desktop app and the core are Dual Input's two long-running processes, the desktop app from the pilot's login as a tray icon ([one program from login](../install/01-installing-and-updating.md#one-program-from-login)), and the core starts with every sim run ([tentative decisions](decisions.md#the-core-starts-with-every-sim-run)).

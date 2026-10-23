@@ -15,7 +15,7 @@ What we found about the recording, replays, and bug reports, newest entry first.
 - As one frame flushed each second, it came to 42.6 MB an hour.
   Cut midway between two flushes, as a killed core's file would be, it read back through `recording-format`'s reader with all 166,306 inputs flushed before the cut, and the reader said the file was truncated.
 - Once stage 8 built that writer, the same capture through it came to 42.6 MB an hour, and the same cut read back the same 166,306 inputs ([results](../../../experiments/areas/recording/results/2026-10-23-writer-size-built.txt)).
-  The whole bench then passed on stage 8's code, all 50 scenarios in 944s, the killed core's recording among them, replayed to its last flush ([results](results/2026-10-23-stage-8-whole-bench.txt)).
+  The whole bench then passed on stage 8's code, all 50 scenarios in 944s, the killed core's recording among them, replayed to its last flush ([results](results/2026-10-23-stage-8-whole-bench.txt)), and again in 902s once its code review's fixes were in ([results](results/2026-10-23-stage-8-whole-bench-after-review.txt)).
 
 **Changed:** the user decided on 2026-10-23:
 

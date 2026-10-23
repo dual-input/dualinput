@@ -22,7 +22,6 @@ const LOST_AFTER: Duration = Duration::from_secs(5);
 /// Every dial still running when a link returns connects, so a core runs one at a time and
 /// starts a new one every 2s in place of the last.
 const REDIAL_EVERY: Duration = Duration::from_secs(2);
-const FIRST_WITHIN: Duration = Duration::from_secs(10);
 const OUT_AFTER: Duration = Duration::from_secs(30 * 60);
 
 /// What one of the network's timers is for.
@@ -31,7 +30,6 @@ pub(crate) enum TimerFor {
     Heard(messages::net::PilotId),
     Dial(messages::net::PilotId),
     Out(messages::net::PilotId),
-    First(u64),
 }
 
 pub(crate) struct Link {
@@ -69,7 +67,6 @@ pub(crate) struct Conn {
     dialed: bool,
     /// Its first message's sender, once that passed.
     from: Option<Sender>,
-    first_timer: Option<TimerId>,
     /// Each stream's bytes that aren't a whole frame yet.
     pending: BTreeMap<u16, Vec<u8>>,
     /// Frames that came on other streams before the first message passed, in arrival order,
@@ -97,11 +94,6 @@ impl Network {
         let id = cx.timer(after, Network::fired);
         self.timer_for.insert(id, purpose);
         id
-    }
-
-    fn cancel(&mut self, cx: &Cx, id: TimerId) {
-        cx.cancel_timer(id);
-        self.timer_for.remove(&id);
     }
 
     /// Dials a lost link's member, and again in 2s while it stays lost.
@@ -141,15 +133,6 @@ impl Network {
                     );
                     link.stop(cx, &mut me.timer_for);
                     cx.raise(MemberOut { member: pilot });
-                }
-            }
-            TimerFor::First(conn) => {
-                if me.conns.get(&conn).is_some_and(|c| c.from.is_none()) {
-                    tracing::info!(
-                        conn,
-                        "a connection sent no first message within 10s, so the network closed it"
-                    );
-                    me.close(conn, codes::NO_FIRST_MESSAGE, cx);
                 }
             }
         }
@@ -194,11 +177,7 @@ impl Network {
     }
 
     fn close(&mut self, conn: u64, code: u32, cx: &Cx) {
-        if let Some(closed) = self.conns.remove(&conn)
-            && let Some(timer) = closed.first_timer
-        {
-            self.cancel(cx, timer);
-        }
+        self.conns.remove(&conn);
         cx.out(Command::Close { conn, code });
     }
 
@@ -243,14 +222,12 @@ impl Network {
                 dialed,
             } => {
                 tracing::info!(conn, dialed, "a connection to another core opened");
-                let first_timer = Some(me.timer(cx, FIRST_WITHIN, TimerFor::First(conn)));
                 me.conns.insert(
                     conn,
                     Conn {
                         endpoint,
                         dialed,
                         from: None,
-                        first_timer,
                         pending: BTreeMap::new(),
                         held: Vec::new(),
                         echo: Heartbeat::default(),
@@ -566,10 +543,6 @@ impl Network {
         let held = match self.conns.get_mut(&conn) {
             Some(c) => {
                 c.from = Some(from);
-                if let Some(timer) = c.first_timer.take() {
-                    cx.cancel_timer(timer);
-                    self.timer_for.remove(&timer);
-                }
                 std::mem::take(&mut c.held)
             }
             None => Vec::new(),

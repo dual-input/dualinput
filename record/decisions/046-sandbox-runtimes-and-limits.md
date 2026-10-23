@@ -1,5 +1,8 @@
 # 046: Each aircraft's profile and plugin run in runtimes of their own, with 64 MB each, 100ms a call, and 4 KB a value
 
+> **Note**
+> [Decision 047](047-sandbox-time-limit-counts-interrupt-checks.md) changes this decision's time limit: a call stops after a fixed count of QuickJS-ng's interrupt checks, about 100ms on our development machine, rather than at 100ms by the clock.
+
 Each loaded aircraft gets two QuickJS-ng runtimes in the core, one for its profile's script and one for its plugin, each limited to 64 MB of memory and 100ms a call by the clock, and an entry's value is capped at 4 KB as sent, with no cap of its own on the state object.
 A write function at a limit fails that write and its entry is flagged; a plugin at a limit is turned off for the rest of the session, and every machine stops syncing its entries; and a value over 4 KB isn't sent and its entry is flagged.
 Decided by the user on 2026-10-11 and 2026-10-12, in node 4 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#each-aircrafts-profile-and-plugin-run-in-runtimes-of-their-own-with-64-mb-each-100ms-a-call-and-4-kb-a-value).

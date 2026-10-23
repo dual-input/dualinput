@@ -107,8 +107,7 @@ test("a connection with another code closes with its code, and one with no first
   assert.match(a.log(), /the network refused a connection conn=\d+ code=10/, "the host should refuse the other code with code 10")
 
   // The silent core takes the host's first message, so its own link comes up, hears nothing
-  // for 5s, and redials, closing each connection before the host's 10s; the network's own
-  // tests hold a connection silent for the 10s.
+  // for 5s, and redials, closing each connection it opened, while the host never links it.
   b.net({ act: "first", send: false })
   b.net({ act: "join", code, name: "Silent", open_as: null })
   await b.hear(/^net join found 1$/)

@@ -6,6 +6,9 @@ Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-
 Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what fails a load; the sandbox's limits; and how profiles reach pilots, with the level of the format each needs.
 ```
 
+> **Note**
+> Since 2026-10-23, [the sandbox](#the-sandbox)'s time limit counts QuickJS-ng's interrupt checks, about 100ms of a call on our development machine, where its table stops a call at 100ms by the clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.

@@ -14,6 +14,8 @@ Decides:     The session crate's members, session keys, control, session file, j
 > - A display name from the Windows account would reach crewmates and their recordings, and reach R2 only after v1, where [members](#members) names our R2.
 >
 > Since 2026-10-23, v1 writes no index of a run's sessions, so the session crate tells the recording crate nothing: not a session's ID and endpoint key at its start or its end in [joining and leaving](#joining-and-leaving), a joiner's display name in [members](#members), or the aircraft and departure airport at preflight's end in [preflight](#preflight) (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+>
+> Since 2026-10-23, Windows ending the pilot's session reaches the session crate as nothing, in [joining and leaving](#joining-and-leaving) and [cases for the bench](#cases-for-the-bench): the core keeps no window to hear `WM_QUERYENDSESSION`, so it ends with no quit, and the crew sees a lost link (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 
 The session crate keeps the members, the session's keys, control, the session file, preflight, and the match check, and decides every request about them on the loop; the network carries its keys, and the features hang off its moments.
 Every core works out who is in the flight from a key each member writes about its own sim, so a pilot in another aircraft joins and waits out of the flight, and control, preflight, and the session's end all turn on that one rule.

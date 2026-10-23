@@ -1,5 +1,8 @@
 # 040: Catch-up writes in the order the flying machine's cockpit first took each value
 
+> **Note**
+> [Decision 048](048-settled-30s-after-ready-to-fly.md) changes this decision's rule for a session started after the aircraft loaded: the aircraft counts as settled 30s after Ready to fly, with no quiet window from the profile's load.
+
 Catch-up writes each entry at the flying machine's value, in the order the flying machine's cockpit first took each of those values, read from its recording, with entries it took before the session or never changed first.
 It carries the flying machine's vector clock, and ends once it has made its last write and its aircraft has settled, whichever comes later.
 Decided by the user on 2026-10-11 and 2026-10-12, in node 3 of the [architecture plan](../areas/architecture/plan.md), and numbered on 2026-10-13 from its [tentative decision](../areas/architecture/decisions.md#catch-up-writes-in-the-order-the-flying-machines-cockpit-first-took-each-value).

@@ -45,6 +45,7 @@ These three have different lifetimes, and keeping them apart is what keeps each 
 **A design doc** says what a part is, and it's stable.
 When a result overturns part of it, add a blockquote at the top naming the log entry, and leave the text below as it was.
 A design doc that quietly changed is worse than one that's openly out of date.
+Once its notes overturn so much of the body that a reader can't tell what holds, rewrite it to its current state and drop the notes, since git keeps the old text and the log keeps why it changed.
 It opens with three lines, so it can be judged before it's read:
 
 ```text

@@ -38,6 +38,11 @@ Decides:     The tiers, the tests that keep each unit apart, every unit with its
 > - [Engines](#engines): `recording-format` encodes the replay log alone, since v1 writes no self-describing record, and [one loop](#one-loop)'s record for a later version comes with the uploads after v1.
 > - [The registry and moments](#the-registry-and-moments): every unit's handles come from one counter, and its random IDs from one generator, where each unit draws its own; and its example of a request, the session asking the recording crate to start a recording, names one v1 doesn't make.
 >
+> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in two places (user, 2026-10-23; [architecture log](log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
+>
+> - [One loop](#one-loop): the loop reads no clock, since the sandbox's time limit counts QuickJS-ng's interrupt checks, and [engines](#engines)' sandbox calls no check from the core's edge ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
+> - [When the module stops](#when-the-module-stops): a module taken as stopped raises its notice, and the core unfreezes the aircraft when the last routine that holds the freeze ends, as its pilot takes control or leaves, rather than at once.
+>
 > Since 2026-10-23, the code sits in `src/`, the tiers' folders, `apps/`, `sim-package/`, `backend/`, and `relays/` among it, while `tools/` and `profiles/` stay at the root, and prose-lint moves from `scripts/` into `tools/`; the paths in this document name each folder where it is now (user, 2026-10-23; [decisions](decisions.md#one-repository-holds-all-of-dual-input-its-folders-by-tier-with-each-features-parts-in-one-folder)).
 
 Dual Input's code is a platform, engines, and features.

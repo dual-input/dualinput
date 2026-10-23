@@ -42,6 +42,7 @@ Decides:     What runs in the helper and what on the loop; what a feature regist
 > - The helper encodes in Opus's Audio mode, and ATC audio starts at 32 kbps, where [capturing a program](#capturing-a-program) starts at FS Copilot's 24 kbps: Voip mode's speech processing took about three times Audio's time on BeyondATC's speech, and a listener told neither from the original, so a capture stays inside its 1% of a core in [budgets](#budgets), at 0.67% for a continuous tone (user, 2026-10-23).
 > - Raw Input doesn't deliver an Xbox controller's buttons over USB to the helper, which always runs in the background, which settles [left open](#left-open)'s item on it; binding one would take XInput, which no v1 feature asks for yet.
 > - The cases on a desk that need a person at the PC, and those in the sim, passed, as the core log's entry has them.
+>   The note of 2026-10-22's fixture is `src/apps/core-helper/fixtures/beyondatc-10s.opus`, 10s of BeyondATC's speech as Ogg Opus at 128 kbps, from which the helper's tests check that no frame of speech above the gate comes out 6 bytes or fewer, as [Opus](#opus) asks.
 
 The core helper runs only what features want of it.
 The core-helper-service crate, on the loop, keeps each want a feature registered and turned on, runs the helper while any is on, sends the helper every want whole after each start and each change, and starts it again 2s after it exits.

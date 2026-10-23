@@ -586,8 +586,9 @@ async function sim(s: Session): Promise<void> {
         say(`budget: capturing ${app}, the helper took ${mean.toFixed(2)}% of one CPU core on average over ${readings.length} readings of 10s, ${Math.max(...readings).toFixed(2)}% at most, against 1%`)
       }
       if (i > 0) continue
-      // ATC speech is another program's, so it stays in target/, which the repository leaves
-      // out (record/areas/core/04-core-helper.md's note of 2026-10-22).
+      // The session's whole capture stays in target/, which git leaves out; only a short
+      // stretch of ATC speech is committed, as the Opus check's fixture in
+      // src/apps/core-helper/fixtures/ (record/areas/core/04-core-helper.md's note of 2026-10-22).
       const frames = path.join(s.run.folder, "atc.hex")
       fs.writeFileSync(frames, `${hex.join("\n")}\n`)
       for (const loss of ["0", "5"]) {

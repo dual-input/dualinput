@@ -94,22 +94,64 @@ mod tests {
             .collect()
     }
 
+    /// 10s of BeyondATC's speech as Ogg Opus at 128 kbps, the stretch of stage 6's recording
+    /// that held the most speech, which experiments/areas/core/opus-quality's `snippet` wrote
+    /// (record/areas/core/04-core-helper.md's note of 2026-10-22).
+    const ATC: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/beyondatc-10s.opus");
+
+    /// The ATC speech's 20ms frames that cross ATC audio's gate, at −50dBFS.
+    fn atc_frames() -> Vec<Vec<f32>> {
+        let samples = crate::audio::sound::decode(&std::fs::read(ATC).unwrap()).unwrap();
+        samples
+            .chunks_exact(FRAME)
+            .filter(|f| crate::audio::gate::level_dbfs(f) > -50.0)
+            .map(<[f32]>::to_vec)
+            .collect()
+    }
+
+    /// opus-rs's CELT packets of 5 to 6 bytes differ from libopus's at their tail and lose
+    /// some SNR, by its own notes, and Audio mode codes speech in CELT, so no frame of speech
+    /// that crosses the gate may come out that small (record/areas/core/04-core-helper.md,
+    /// "Opus").
+    #[test]
+    fn atc_speech_above_the_gate_encodes_to_no_frame_of_6_bytes_or_fewer() {
+        let frames = atc_frames();
+        assert!(
+            frames.len() > 400,
+            "only {} frames crossed the gate",
+            frames.len()
+        );
+        let mut encoder = Encoder::new(32_000).unwrap();
+        let sizes: Vec<usize> = frames
+            .iter()
+            .map(|f| encoder.encode(f).unwrap().len())
+            .collect();
+        let small = sizes.iter().filter(|&&n| n <= 6).count();
+        assert_eq!(
+            small,
+            0,
+            "{small} of {} frames came out 6 bytes or fewer",
+            sizes.len()
+        );
+    }
+
     #[test]
     #[ignore = "a timing, measured by hand in a release build"]
     fn encode_cost() {
-        let signal = tone(FRAME * 500);
+        let speech: Vec<f32> = atc_frames().concat();
         for complexity in [9, 7, 5, 3, 1] {
-            let mut encoder = Encoder::new(24_000).unwrap();
+            let mut encoder = Encoder::new(32_000).unwrap();
             encoder.0.complexity = complexity;
             let started = std::time::Instant::now();
-            let bytes: usize = signal
-                .chunks(FRAME)
+            let frames = speech.len() / FRAME;
+            let bytes: usize = speech
+                .chunks_exact(FRAME)
                 .map(|f| encoder.encode(f).unwrap().len())
                 .sum();
-            let per = started.elapsed().as_micros() / 500;
+            let per = started.elapsed().as_micros() / frames as u128;
             println!(
                 "complexity {complexity}: {per}us a frame, {} bytes a frame",
-                bytes / 500
+                bytes / frames
             );
         }
     }

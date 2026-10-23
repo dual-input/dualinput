@@ -1,6 +1,7 @@
 # The probe's build output.
 target/
 
-# Recordings of an ATC app's speech, and every copy made from them: another program's audio,
-# which stays out of the repository (record/areas/core/04-core-helper.md's note of 2026-10-22).
+# Recordings of an ATC app's speech, and every copy made from them, each far longer than the
+# short stretch committed as the Opus check's fixture, src/apps/core-helper/fixtures/
+# (record/areas/core/04-core-helper.md's note of 2026-10-22).
 recordings/

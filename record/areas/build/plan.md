@@ -248,6 +248,7 @@ Tests:
 The cases on a desk that need a person at the PC, and this stage's cases in the sim, run in one session of their own, after stage 7, which was built while stage 6 waited for them (user, 2026-10-22).
 
 Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the helper's own tests and the stand-in core helper's scenarios among them; on a desk and in this stage's session in the sim, a core built from the tree starts the real helper, which sends a bound key's press, a click in the sim's window with its place, and a captured program's frames, and plays a sound on the device picked; and the [core's log](../core/log.md) has an entry for the desk's and the session's cases and budgets.
+Done on 2026-10-23.
 
 ## 7 The network
 

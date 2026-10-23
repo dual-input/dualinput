@@ -1,0 +1,14 @@
+2026-10-23T09:44:44.352436Z  INFO network: the network opens the session code="DROPLET" restart=0 crew=1
+2026-10-23T09:44:44.358474Z  INFO transport: the transport bound its endpoint relays=1 ip=true
+2026-10-23T09:44:44.358544Z  INFO network::links: the network's endpoint is bound
+2026-10-23T09:44:44.478947Z  INFO network::links: a connection to another core opened conn=1 dialed=true
+2026-10-23T09:44:44.479231Z  INFO network::links: a connection's path changed conn=1 path=Relay { url: "http://209.38.215.63:3340/" }
+2026-10-23T09:44:44.509925Z  INFO network::links: a member's link is up conn=1 again=false restart=0
+2026-10-23T09:44:44.510201Z  WARN network::backend: a member's request got no answer from the backend error="https://api.dualinput.app/v1/members got no answer: the droplet run has no backend" purpose=Renew
+2026-10-23T09:44:44.557311Z  INFO network::links: a connection's path changed conn=1 path=Direct
+2026-10-23T09:44:44.611595Z  INFO endpoint{id=08f40d7f5f}:relay-actor: iroh::socket::transports::relay::actor: home is now relay http://209.38.215.63:3340/, was None
+2026-10-23T09:44:44.611676Z  INFO transport: the endpoint's home relay is http://209.38.215.63:3340/
+2026-10-23T09:44:46.358689Z  INFO network::backend: whether this PC reaches the internet changed internet=Some(false)
+2026-10-23T09:44:49.510334Z  INFO bench_droplet::mix: the mix starts secs=60
+2026-10-23T09:45:54.511804Z  INFO network: the network leaves the session quit=true
+2026-10-23T09:45:54.536003Z  INFO transport: the transport closed its endpoint

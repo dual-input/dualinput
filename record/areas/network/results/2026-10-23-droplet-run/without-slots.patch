@@ -1,0 +1,97 @@
+--- a/src/engines/transport/src/lib.rs
++++ b/src/engines/transport/src/lib.rs
+@@ -308,7 +308,6 @@
+         let transport = QuicTransportConfig::builder()
+             .default_path_max_idle_timeout(PATH_IDLE)
+             .default_path_keep_alive_interval(PATH_KEEP_ALIVE)
+-            .datagram_send_buffer_size(ONE_OFF_QUEUE)
+             .build();
+         let mut builder = Endpoint::builder(presets::Minimal)
+             .secret_key(SecretKey::from_bytes(&key))
+--- a/src/engines/transport/src/conn.rs
++++ b/src/engines/transport/src/conn.rs
+@@ -173,8 +173,9 @@
+     }
+ }
+ 
+-/// Hands the waiting one-off packets to QUIC, highest priority first, each only once QUIC's
+-/// queue has room for it, so the queue never drops one to make room.
++/// The droplet run's "without the slots" arm, as p06's variant (a): every one-off packet goes
++/// to QUIC as it comes, with iroh's default queue of 1 MiB, from which noq drops the oldest to
++/// make room for a new one. No slot, no priority order, and no deadline.
+ async fn send_one_offs(
+     conn: Connection,
+     mut incoming: mpsc::UnboundedReceiver<Packet>,
+@@ -182,52 +183,27 @@
+     through: Through,
+     pacers: Pacers,
+ ) {
+-    let mut waiting = Waiting::default();
+-    loop {
+-        let soonest = waiting.expire((shared.now)());
+-        let next = waiting.next().map(|(slot, packet)| {
+-            let mut bytes = Vec::with_capacity(packet.bytes.len() + 10);
+-            bytes.extend(packet.channel.to_le_bytes());
+-            bytes.extend(&packet.bytes);
+-            // Taken as the packet goes to QUIC, so the loop's own delay stays out of the
+-            // time on the path. A packet that then waits for room carries an early stamp,
+-            // and the longer round trip that gives keeps the exchange out of the clock
+-            // offset, which takes the shortest of the last 8.
+-            if packet.stamp {
+-                bytes.extend((shared.now)().to_le_bytes());
+-            }
+-            (slot, Bytes::from(bytes))
+-        });
+-        let until_soonest =
+-            soonest.map(|at| Duration::from_micros(at.saturating_sub((shared.now)())));
+-        tokio::select! {
+-            biased;
+-            packet = incoming.recv() => match packet {
+-                Some(packet) => waiting.put(packet),
+-                None => return,
+-            },
+-            sent = async {
+-                let (_, bytes) = next.as_ref().expect("the branch runs only with a packet");
+-                conn.send_datagram_wait(bytes.clone()).await
+-            }, if next.is_some() => {
+-                let (slot, bytes) = next.expect("the branch runs only with a packet");
+-                match sent {
+-                    Ok(()) => {
+-                        if let Some(url) = relay_of(&through)
+-                            && let Some(pacer) = pacers.get(&url)
+-                        {
+-                            pacer.spend(bytes.len() + RELAYED_OVERHEAD);
+-                        }
+-                        waiting.sent(slot);
+-                    }
+-                    Err(SendDatagramError::TooLarge) => {
+-                        tracing::warn!(bytes = bytes.len(), "a one-off packet was larger than the path takes, so it was dropped");
+-                        waiting.sent(slot);
+-                    }
+-                    Err(_) => return,
++    while let Some(packet) = incoming.recv().await {
++        let mut bytes = Vec::with_capacity(packet.bytes.len() + 10);
++        bytes.extend(packet.channel.to_le_bytes());
++        bytes.extend(&packet.bytes);
++        if packet.stamp {
++            bytes.extend((shared.now)().to_le_bytes());
++        }
++        let bytes = Bytes::from(bytes);
++        let len = bytes.len();
++        match conn.send_datagram(bytes) {
++            Ok(()) => {
++                if let Some(url) = relay_of(&through)
++                    && let Some(pacer) = pacers.get(&url)
++                {
++                    pacer.spend(len + RELAYED_OVERHEAD);
+                 }
+-            },
+-            _ = tokio::time::sleep(until_soonest.unwrap_or_default()), if until_soonest.is_some() => {}
++            }
++            Err(SendDatagramError::TooLarge) => {
++                tracing::warn!(bytes = len, "a one-off packet was larger than the path takes, so it was dropped");
++            }
++            Err(_) => return,
+         }
+     }
+ }

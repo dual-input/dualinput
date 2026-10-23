@@ -2,6 +2,44 @@
 
 What we found about connecting the crew's machines, directly or through our relay, newest entry first.
 
+## 2026-10-23: on a direct path 85ms away at 3% loss, the newest-only slots keep one-off packets within 39ms at p99, where without them they run up to 221ms late
+
+**Asked:** do the newest-only slots change anything on a direct path, which [left open](02-units.md#left-open) asks, and how late does v1's busy mix run on a direct path under loss, the case [02-units](02-units.md#cases-for-the-bench) runs by hand on our droplets?
+
+**Expected:** on a direct path QUIC sees each loss, unlike through a relay, where [p06] found the slots change nothing; so its congestion window shrinks, one-off packets queue in QUIC up to its 1 MiB default, and the packets behind them run late, which the slots bound.
+
+**Found:** on 2026-10-23, `tools/bench/droplet` at 57a0d1b ran between our two droplets, `dualinput-relay-fra` in fra1 and `dualinput-relay-nyc` in nyc3, each 1 vCPU and 512 MB on Ubuntu 24.04 ([results](results/2026-10-23-droplet-run/report.txt)).
+The dialer sent [p06]'s busy mix for 60s from a network namespace on the Frankfurt droplet, whose link lost packets each way at the run's rate through `tc netem`, to a listener on the same droplet with 11ms added each way, a 23ms round trip, or on the New York droplet, 83ms to 93ms away, about 85ms.
+Each case ran on the transport as it ships, and on a copy with [the patch](results/2026-10-23-droplet-run/without-slots.patch) that hands every one-off packet to QUIC as it comes, with QUIC's default queue, as p06's variant (a) did.
+Every connection went direct 68ms to 362ms after it opened, and in one run 1,008ms and 1,422ms after at its two ends, before its mix started, and stayed direct to its end.
+
+How late each came above its direction's fastest one-off packet, at p99, in ms, with the slots and without:
+
+| Round trip, loss | Flight | Audio | Cockpit stream | Session round trip |
+| --- | --- | --- | --- | --- |
+| 23ms, 0% | 5.4, 2.5 | 5.3, 2.9 | 5.1, 2.5 | 29.8, 24.4 |
+| 23ms, 1% | 2.9, 4.7 | 4.5, 5.0 | 26.1, 27.1 | 39.5, 68.9 |
+| 23ms, 3% | 6.5, 4.7 | 6.9, 5.4 | 32.6, 32.9 | 122.6, 95.3 |
+| 85ms, 0% | 6.6, 4.1 | 7.3, 4.8 | 7.4, 4.3 | 132.8, 91.3 |
+| 85ms, 1% | 8.1, 16.0 | 8.3, 12.3 | 29.4, 95.5 | 119.8, 95.0 |
+| 85ms, 3% | 38.7, 180.3 | 34.0, 221.2 | 108.3, 183.2 | 292.7, 887.8 |
+
+The session round trip is the whole trip, not its lateness.
+
+- **23ms away**, the two builds came within 3ms of each other on every one-off part at every rate, and the stream's p99 rose to 26ms to 33ms under loss, about the round trip QUIC takes to resend a lost packet's stream data.
+- **85ms away at 3%**, without the slots every part ran late: the flight, controls, avatar, and audio parts 180ms to 221ms at p99, the batch 122ms, the avatar coming back 321ms, the cockpit stream 183ms, and the session's round trip 888ms.
+  With them, the one-off parts stayed within 39ms, the stream within 108ms, and the round trip within 293ms.
+  At 1%, the slots kept the stream within 29ms, against 96ms without.
+  That fits one-off packets queued in QUIC ahead of the rest while its window shrank, which this run didn't log (inference).
+- **The slots drop a sample a newer one replaces**, which the report counts as lost: 0.3% of the flight, controls, avatar, and batch probes 23ms away with no loss, where QUIC lost no packet and the build without them lost none.
+  Under netem's loss, each one-off part lost within 1.3 points of its rate with either build.
+- **Single probes ran far late** in a few runs whose p99 stayed low, such as an audio probe 212.7ms late 23ms away with no loss and the slots, against a p99 of 5.3ms, which a stall of the droplet's one CPU would give (unverified).
+
+**Changed:** nothing in the design: the slots stay, as the burst case already kept them, and this run settles left open's item on them.
+The patch stays out of the tree, as 02-units' note of 2026-10-23 has it.
+
+**Affects:** [02-units](02-units.md)' note of 2026-10-23, and [stage 7](../build/plan.md#7-the-network)'s exit, whose run on our droplets this is.
+
 ## 2026-10-23: Cargo.lock ran noq-proto 1.4.0 under our 1.3.0 pins, so the transport pins the crates iroh and noq are built from too
 
 **Asked:** does the transport run the iroh and noq our experiments measured, as [iroh as a dependency](01-between-machines.md#iroh-as-a-dependency) asks?

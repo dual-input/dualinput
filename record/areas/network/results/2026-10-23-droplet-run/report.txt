@@ -1,0 +1,175 @@
+== The droplet run of 2026-10-23: tools/bench/droplet at 57a0d1b between dualinput-relay-fra (fra1) and dualinput-relay-nyc (nyc3),
+== 512 MB droplets on Ubuntu 24.04. with-slots is the transport as it ships; without-slots has without-slots.patch applied.
+== Made with: node tools/bench/droplet/report.ts record/areas/network/results/2026-10-23-droplet-run/raw
+
+== with-slots far-0pct
+  session round trip p50 83.3ms, p99 132.8ms, max 132.8ms
+  QUIC at the dial end: 7552 packets sent, 0 lost, smallest window 12000 bytes, longest round trip 86.9ms
+  QUIC at the listen end: 4037 packets sent, 0 lost, smallest window 12000 bytes, longest round trip 91.7ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1200    0.0%      2.4     6.6    47.5
+  controls    out   1200   1200    0.0%      2.4     7.5    47.5
+  avatar      out   1200   1200    0.0%      2.4     7.5    47.5
+  batch       out    661    661    0.0%      2.2     6.7    47.5
+  audio       out   3000   3000    0.0%      2.2     7.3    47.5
+  cockpit     out   1200   1200    0.0%      2.3     7.4    47.5
+  request     out     60     60    0.0%      2.5    47.5    47.5
+  avatar      back  1200   1200    0.0%      3.1     6.8    41.1
+== with-slots far-1pct
+  session round trip p50 85.7ms, p99 119.8ms, max 119.8ms
+  QUIC at the dial end: 6938 packets sent, 68 lost, smallest window 6944 bytes, longest round trip 85.8ms
+  QUIC at the listen end: 4104 packets sent, 32 lost, smallest window 2904 bytes, longest round trip 87.7ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1189    0.9%      0.9     8.1    37.2
+  controls    out   1200   1189    0.9%      1.0     8.1    37.2
+  avatar      out   1200   1190    0.8%      1.0     8.2    37.2
+  batch       out    661    655    0.9%      0.7     4.1    37.2
+  audio       out   3000   2967    1.1%      0.7     8.3    37.2
+  cockpit     out   1200   1200    0.0%      0.8    29.4   109.7
+  request     out     60     60    0.0%      3.3    37.1    37.1
+  avatar      back  1200   1190    0.8%      0.8     5.0    50.0
+== with-slots far-3pct
+  session round trip p50 86.5ms, p99 292.7ms, max 292.7ms
+  QUIC at the dial end: 6337 packets sent, 194 lost, smallest window 2904 bytes, longest round trip 86.4ms
+  QUIC at the listen end: 4077 packets sent, 135 lost, smallest window 2904 bytes, longest round trip 84.2ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1159    3.4%      3.1    38.7    96.6
+  controls    out   1200   1161    3.3%      3.5    38.7    96.5
+  avatar      out   1200   1161    3.3%      3.6    38.7    96.5
+  batch       out    661    650    1.7%      1.1    23.2    74.2
+  audio       out   3000   2893    3.6%      1.3    34.0   116.6
+  cockpit     out   1200   1200    0.0%      2.3   108.3   253.5
+  request     out     60     60    0.0%      4.1   115.3   115.3
+  avatar      back  1200   1160    3.3%      0.9     5.5    38.0
+== with-slots near-0pct
+  session round trip p50 23.1ms, p99 29.8ms, max 29.8ms
+  QUIC at the dial end: 7050 packets sent, 0 lost, smallest window 13200 bytes, longest round trip 37.1ms
+  QUIC at the listen end: 4028 packets sent, 0 lost, smallest window 12000 bytes, longest round trip 30.2ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1197    0.3%      0.4     5.4    12.5
+  controls    out   1200   1197    0.3%      0.4     5.4    12.5
+  avatar      out   1200   1197    0.3%      0.4     5.4    12.5
+  batch       out    661    659    0.3%      0.5     5.0    28.8
+  audio       out   3000   3000    0.0%      0.4     5.3   212.7
+  cockpit     out   1200   1200    0.0%      0.4     5.1    12.5
+  request     out     60     60    0.0%      0.5     7.3     7.3
+  avatar      back  1200   1196    0.3%      0.2     4.6   106.8
+== with-slots near-1pct
+  session round trip p50 23.0ms, p99 39.5ms, max 39.5ms
+  QUIC at the dial end: 7317 packets sent, 69 lost, smallest window 3150 bytes, longest round trip 23.4ms
+  QUIC at the listen end: 4104 packets sent, 38 lost, smallest window 2904 bytes, longest round trip 25.2ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1190    0.8%      0.5     2.9    10.8
+  controls    out   1200   1190    0.8%      0.5     3.0    10.8
+  avatar      out   1200   1190    0.8%      0.5     3.0    10.8
+  batch       out    661    654    1.1%      0.4     3.4    16.2
+  audio       out   3000   2975    0.8%      0.4     4.5    34.9
+  cockpit     out   1200   1200    0.0%      0.5    26.1    72.9
+  request     out     60     60    0.0%      0.6     8.8     8.8
+  avatar      back  1200   1190    0.8%      0.3     2.1    42.7
+== with-slots near-3pct
+  session round trip p50 23.2ms, p99 122.6ms, max 122.6ms
+  QUIC at the dial end: 7353 packets sent, 241 lost, smallest window 2904 bytes, longest round trip 24.7ms
+  QUIC at the listen end: 4395 packets sent, 149 lost, smallest window 2904 bytes, longest round trip 23.7ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1156    3.7%      0.4     6.5    29.3
+  controls    out   1200   1158    3.5%      0.5     6.8    29.3
+  avatar      out   1200   1160    3.3%      0.5     6.8    29.3
+  batch       out    661    637    3.6%      0.4     2.8     4.2
+  audio       out   3000   2897    3.4%      0.4     6.9    65.2
+  cockpit     out   1200   1200    0.0%      0.4    32.6    76.6
+  request     out     60     60    0.0%      0.6    72.7    72.7
+  avatar      back  1200   1164    3.0%      0.3     1.5    10.6
+== without-slots far-0pct
+  session round trip p50 83.2ms, p99 91.3ms, max 91.3ms
+  QUIC at the dial end: 7530 packets sent, 0 lost, smallest window 12000 bytes, longest round trip 88.2ms
+  QUIC at the listen end: 3989 packets sent, 0 lost, smallest window 12000 bytes, longest round trip 87.7ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1200    0.0%      1.6     4.1    30.1
+  controls    out   1200   1200    0.0%      1.6     4.3    30.1
+  avatar      out   1200   1200    0.0%      1.6     4.4    30.1
+  batch       out    661    661    0.0%      1.5     3.5     8.9
+  audio       out   3000   3000    0.0%      1.5     4.8    40.1
+  cockpit     out   1200   1200    0.0%      1.6     4.3    30.0
+  request     out     60     60    0.0%      1.6    10.4    10.4
+  avatar      back  1200   1200    0.0%      1.6     3.0    43.2
+== without-slots far-1pct
+  session round trip p50 89.4ms, p99 95.0ms, max 95.0ms
+  QUIC at the dial end: 6966 packets sent, 72 lost, smallest window 4242 bytes, longest round trip 85.4ms
+  QUIC at the listen end: 4127 packets sent, 34 lost, smallest window 2904 bytes, longest round trip 87.1ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1186    1.2%      1.0    16.0    40.6
+  controls    out   1200   1190    0.8%      2.7    16.0    40.6
+  avatar      out   1200   1190    0.8%      2.8    16.0    40.6
+  batch       out    661    650    1.7%      0.7     6.5    17.1
+  audio       out   3000   2974    0.9%      0.8    12.3    51.9
+  cockpit     out   1200   1200    0.0%      1.1    95.5   234.0
+  request     out     60     60    0.0%      6.8    13.0    13.0
+  avatar      back  1200   1183    1.4%      0.8     6.5    46.1
+== without-slots far-3pct
+  session round trip p50 92.6ms, p99 887.8ms, max 887.8ms
+  QUIC at the dial end: 6406 packets sent, 205 lost, smallest window 3224 bytes, longest round trip 140.0ms
+  QUIC at the listen end: 3920 packets sent, 120 lost, smallest window 2904 bytes, longest round trip 87.7ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1167    2.8%      0.5   180.3   246.9
+  controls    out   1200   1170    2.5%      0.6   180.3   246.9
+  avatar      out   1200   1169    2.6%      0.6   180.3   246.9
+  batch       out    661    645    2.4%      0.4   121.7   254.8
+  audio       out   3000   2901    3.3%      0.4   221.2   255.1
+  cockpit     out   1200   1200    0.0%      0.5   183.2   317.3
+  request     out     60     60    0.0%      9.5   200.4   200.4
+  avatar      back  1200   1167    2.8%      0.4   320.7   820.8
+== without-slots near-0pct
+  session round trip p50 23.1ms, p99 24.4ms, max 24.4ms
+  QUIC at the dial end: 7599 packets sent, 0 lost, smallest window 13200 bytes, longest round trip 24.5ms
+  QUIC at the listen end: 4207 packets sent, 0 lost, smallest window 12000 bytes, longest round trip 23.9ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1200    0.0%      0.4     2.5     7.4
+  controls    out   1200   1200    0.0%      0.4     2.5     7.4
+  avatar      out   1200   1200    0.0%      0.4     2.5     7.4
+  batch       out    661    661    0.0%      0.4     3.0     6.5
+  audio       out   3000   3000    0.0%      0.3     2.9    13.9
+  cockpit     out   1200   1200    0.0%      0.4     2.5     7.4
+  request     out     60     60    0.0%      0.5     1.1     1.1
+  avatar      back  1200   1200    0.0%      0.3     2.5     7.6
+== without-slots near-1pct
+  session round trip p50 23.1ms, p99 68.9ms, max 68.9ms
+  QUIC at the dial end: 7526 packets sent, 72 lost, smallest window 3049 bytes, longest round trip 23.7ms
+  QUIC at the listen end: 4121 packets sent, 32 lost, smallest window 2904 bytes, longest round trip 26.8ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1187    1.1%      0.4     4.7     9.3
+  controls    out   1200   1190    0.8%      0.4     4.7     9.3
+  avatar      out   1200   1190    0.8%      0.4     4.7     9.3
+  batch       out    661    657    0.6%      0.3     5.4    41.5
+  audio       out   3000   2968    1.1%      0.3     5.0    20.6
+  cockpit     out   1200   1200    0.0%      0.4    27.1    85.4
+  request     out     60     60    0.0%      0.6    10.1    10.1
+  avatar      back  1200   1195    0.4%      0.3     3.5    17.2
+== without-slots near-3pct
+  session round trip p50 23.1ms, p99 95.3ms, max 95.3ms
+  QUIC at the dial end: 7457 packets sent, 236 lost, smallest window 2904 bytes, longest round trip 23.8ms
+  QUIC at the listen end: 4316 packets sent, 139 lost, smallest window 2904 bytes, longest round trip 23.9ms
+  part        way  made   got    lost   late p50  p99     max
+  flight      out   1200   1162    3.2%      0.4     4.7     7.7
+  controls    out   1200   1151    4.1%      0.4     4.7     7.1
+  avatar      out   1200   1151    4.1%      0.4     4.7     7.1
+  batch       out    661    638    3.5%      0.4     2.1     6.7
+  audio       out   3000   2913    2.9%      0.3     5.4    18.8
+  cockpit     out   1200   1200    0.0%      0.4    32.9    72.8
+  request     out     60     60    0.0%      0.6    72.8    72.8
+  avatar      back  1200   1153    3.9%      0.3     3.4    40.0
+
+late in ms, p99/max, and the batch's loss; refused runs left out
+run                         flight       audio        avatar back  cockpit      batch loss  round trip
+with-slots far-0pct         6.6/47.5     7.3/47.5     6.8/41.1     7.4/47.5     0.0%        132.8/132.8
+with-slots far-1pct         8.1/37.2     8.3/37.2     5.0/50.0     29.4/109.7   0.9%        119.8/119.8
+with-slots far-3pct         38.7/96.6    34.0/116.6   5.5/38.0     108.3/253.5  1.7%        292.7/292.7
+with-slots near-0pct        5.4/12.5     5.3/212.7    4.6/106.8    5.1/12.5     0.3%        29.8/29.8
+with-slots near-1pct        2.9/10.8     4.5/34.9     2.1/42.7     26.1/72.9    1.1%        39.5/39.5
+with-slots near-3pct        6.5/29.3     6.9/65.2     1.5/10.6     32.6/76.6    3.6%        122.6/122.6
+without-slots far-0pct      4.1/30.1     4.8/40.1     3.0/43.2     4.3/30.0     0.0%        91.3/91.3
+without-slots far-1pct      16.0/40.6    12.3/51.9    6.5/46.1     95.5/234.0   1.7%        95.0/95.0
+without-slots far-3pct      180.3/246.9  221.2/255.1  320.7/820.8  183.2/317.3  2.4%        887.8/887.8
+without-slots near-0pct     2.5/7.4      2.9/13.9     2.5/7.6      2.5/7.4      0.0%        24.4/24.4
+without-slots near-1pct     4.7/9.3      5.0/20.6     3.5/17.2     27.1/85.4    0.6%        68.9/68.9
+without-slots near-3pct     4.7/7.7      5.4/18.8     3.4/40.0     32.9/72.8    3.5%        95.3/95.3

@@ -55,6 +55,7 @@ Decides:     What runs on the loop and what in the transport; the network crate'
 >   The listening end runs `iroh-relay`'s server as a library inside the same program, and that relay only introduces the two ends before they go direct, so the run needs no DNS and no deployed relay.
 >   The run without the newest-only slots happens once, on the droplet build's own copy of the transport, with a patch that drops them and is kept with that run's results, so the transport carries no switch for the slots.
 >   Later runs, at each change of iroh's or noq's version, run the transport as it ships, because [the burst case](#cases-for-the-bench) keeps the slots whatever that first run shows.
+> - That first run settles [left open](#left-open)'s item on the slots: on a direct path 85ms away at 3% loss, they kept one-off packets within 39ms at p99, where without them they ran up to 221ms late, and 23ms away the two came within 3ms of each other ([network log](log.md#2026-10-23-on-a-direct-path-85ms-away-at-3-loss-the-newest-only-slots-keep-one-off-packets-within-39ms-at-p99-where-without-them-they-run-up-to-221ms-late)).
 
 The network crate makes every decision on the loop: each link's state and timers, every dial and close, which connection stays, and what goes out on which channel, so a replay reproduces each one.
 The transport, an engine at the core's edge, runs iroh and keeps only what turns on real time and bytes: the newest packet of each kind waiting for room in QUIC's queue, pacing through a relay, and the heartbeat's send stamp.

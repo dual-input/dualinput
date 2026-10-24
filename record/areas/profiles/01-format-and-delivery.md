@@ -6,9 +6,6 @@ Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-
 Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what fails a load; the sandbox's limits; and how profiles reach pilots, with the level of the format each needs.
 ```
 
-> **Note**
-> Since 2026-10-23, [the sandbox](#the-sandbox)'s time limit counts QuickJS-ng's interrupt checks, about 100ms of a call on our development machine, where its table stops a call at 100ms by the clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
-
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.
@@ -407,7 +404,7 @@ A profile's script gets no clock: its runtime leaves out `Date`, `performance`, 
 | Limit | Value | Why that value |
 | --- | --- | --- |
 | Memory | 64 MB per runtime | QuickJS stopped a runaway allocation at this limit in 88ms, and the host ran on; an idle runtime held 0.9 MB, and a profile's state object should take a few MB at most (an estimate the 58P's profile measures) |
-| Time | 100ms per call, by the clock | QuickJS stopped an endless loop at this limit, and the host ran on; a call that does little can still wait behind other work on a PC MSFS keeps busy, so the limit sits far above what a healthy call takes, 100 write functions in 75µs, and a stuck call, a bug, holds up every input behind it for no longer |
+| Time | A count of QuickJS-ng's interrupt checks per call, about 100ms of a call on our development machine ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)) | QuickJS stopped an endless loop at a limit of 100ms by the clock, and the host ran on; a call that does little can still wait behind other work on a PC MSFS keeps busy, so the limit sits far above what a healthy call takes, 100 write functions in 75µs, and a stuck call, a bug, holds up every input behind it for no longer |
 | One entry's value | 4 KB, as sent | Numbers and switches never come near it; the KNS-81's 10 waypoints, the largest value we know of, would be a few hundred bytes (an estimate), and a cockpit change naming its entry and two pilots in full took 84 bytes ([network log](../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does)) |
 
 The memory and time figures were measured on our development machine, 2026-10-08, in a host doing nothing else, not inside a core at work ([architecture log](../architecture/log.md#2026-10-08-embedded-in-rust-quickjs-runs-100-write-functions-a-frame-in-75µs-idles-under-1-mb-and-holds-its-memory-and-time-limits-while-v8s-memory-limit-failed-until-turbofan-was-off)).

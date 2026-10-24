@@ -6,11 +6,6 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     What a gesture sends, and when; how another machine's panel plays it, and when each of its messages counts as applied; how a gesture is timed, and which clock the panel bridge measures a span on; which displays lock, when, and what a pilot's blocked press shows; what pointer sync registers; its known limits; the budgets; and the cases for the bench (node 6.11).
 ```
 
-> **Note**
-> Since 2026-10-18, a mouse-up with no gesture open sends nothing, where [a gesture](#a-gesture) sends it as a down and an up, as FS Copilot's `_onUp` does with no reason given; the receiver already plays nothing for an up with no gesture, and the other display would click where this one didn't, which the case in the sim that [cases for the bench](#cases-for-the-bench) lists checks (user, 2026-10-18).
->
-> Since 2026-10-23, a recording holds no marks, so an `Up` finished after 1s, in the table of what each message answers, goes in the run's log at info rather than marking the recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
-
 A gesture is one press or drag on a synced display, an instrument the profile's `displays` names, from a button's down to its up.
 It goes to the crew as it happens: its down, its moves, and its up, each a cockpit message keyed by the display.
 Each other machine's panel plays each message on its own copy of the display, at the same fractions of the display's size, as it arrives.
@@ -57,7 +52,9 @@ The panel module captures as FS Copilot's does, apart from when it sends:
   `Held` goes each time 1s passes with nothing else sent, so a press held still keeps its lock on the other machines and its length in a replay.
   `Up` goes at that button's `mouseup`, wherever it lands, with `click` set when the pointer never got 4px from the down, counted the same way, FS Copilot's line between a press and a drag (same file, `_onUp`).
 - The next `mousedown` in the document first ends any gesture still open, sending its `Up` with no click, so a release the panel never heard ends no later than the pilot's next press.
-  A `mouseup` inside a display with no gesture open goes as a `Down` and an `Up` at its point, as FS Copilot sends such an up as a press (same function).
+  A `mouseup` with no gesture open sends nothing (user, 2026-10-18).
+  FS Copilot sends such an up as a press, with no reason given (same function).
+  Sent as a `Down` and an `Up`, it would click on the other display where this one didn't, and an `Up` alone plays nothing there ([playing a gesture](#playing-a-gesture)); a case in the sim checks what goes out ([cases for the bench](#cases-for-the-bench)).
 - Each goes to the core as a `unit` message with the display's key, and the core sends it on the cockpit stream under that key.
   The stream sends none before preflight ends or while this member is out of the flight ([sending](../sync/05-units.md#sending)), so a press then acts on its own display alone.
 - A gesture has no cap: a long press plays for as long as it's held, and a drag sends as many moves as it takes, where FS Copilot capped a hold at 1.5s and a drag at 240 points (same file, `_onUp` and `DRAG_MAX_POINTS`).
@@ -91,7 +88,7 @@ The core's handler for the kind answers each message as the stream asks ([kinds]
 | Any, while a catch-up runs here that preflight's end didn't start | `Skipped`, as [the cockpit stream](../sync/04-order-and-recovery.md#the-cockpit-stream) skips a press then |
 | Any, for a display no panel here has announced | `Skipped` |
 | `Down`, `Move`, or `Held` | `Done`, once handed to each panel that announced the display |
-| `Up` | `Unfinished(handle)`, and `cx.cockpit().applied(handle)` once each of those panels is done with it or its socket has closed or been replaced, or after 1s, the one case that marks the recording |
+| `Up` | `Unfinished(handle)`, and `cx.cockpit().applied(handle)` once each of those panels is done with it or its socket has closed or been replaced, or after 1s, a case the run's log notes at info (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)) |
 
 - The catch-up at preflight's end skips no gesture, since neither cockpit's displays were touched in preflight ([preflight](../product/03-v1-scope.md#preflight)): what the PF presses in its first seconds queues behind the catch-up's writes and plays once they're made ([catch-up](../sync/05-units.md#catch-up)).
   Any other catch-up, a late joiner's, a rejoiner's, or an ex-PF's, skips gestures, since its displays may show other pages than the ones they were made on.
@@ -203,7 +200,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A 10s cut partway through a drag: the other machine ends the gesture 2s after its last move, and the replay starts it again from its next move and plays every gesture after it.
 - A press on a display under the unseen lock: the flash shows while it's held and goes at the up, the display gets nothing, nothing is sent, and a lock whose gesture ends meanwhile stays until that up.
 - The other pilot's `Down` while this pilot's button is down on the display: the lock comes at this pilot's up, and their own `Up` goes out.
-- An `Up` for a display with no gesture playing: answered at once, with no wait and no mark; an up the panel never answers: applied after 1s and marked; a module that throws partway through a gesture: its lock gone within 2s.
+- An `Up` for a display with no gesture playing: answered at once, with no wait and no line in the run's log; an up the panel never answers: applied after 1s, with a line in the run's log at info; a module that throws partway through a gesture: its lock gone within 2s.
 - A receiving panel that reloads partway through a gesture: the up handed to the old socket counts as applied, and the new panel ignores the rest.
 - A `Down` that arrives during a late joiner's catch-up: skipped, and its moves and up after the catch-up ends are ignored; a PF's press in the first second after preflight's end: it plays on the PM's display once the catch-up's writes are made.
 - The PM's link to the PF lost: within 5s every synced display on the PM's machine locks and none on the PF's, taking control lifts it, and after the link returns it holds until the replay ends.

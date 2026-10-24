@@ -6,13 +6,6 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architec
 Decides:     Who reads the flying aircraft, and how often; what a sample carries; the clock our WASM module stamps on, and how it learns the core's; whether a page's arrival stamp matters; how a following machine takes a sample, draws the aircraft, carries it through a gap, eases it back, and starts; how it eases the clock offset; when each routine runs; what this adds to our module; the budgets; and the cases for the bench (node 6.10).
 ```
 
-> **Note**
-> Since 2026-10-17, pointer sync's presses send no span, where [the core's counter in our module](#the-cores-counter-in-our-module) has them send one: each gesture goes as it happens, and the cockpit stream's gaps time it in a replay, each the difference between two arrival stamps, so a constant delay before the core's stamp cancels, and no v1 unit still waits on how far a page's arrival stamp trails its read ([pointer sync](../pointer-sync/01-pointer-sync.md#timing)).
->
-> Since 2026-10-21, the core records every input, so flight-model sync doesn't register as partly recorded, `Lead`'s reports and its samples' channel are recorded, and a replay checks its outputs, where [the units](#the-units), [the sample](#the-sample), and [what this adds to our WASM module](#what-this-adds-to-our-wasm-module) declare them `.unrecorded()` (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
->
-> Since 2026-10-23, a sample carries no control generation, in [the sample](#the-sample) and [taking a sample](#taking-a-sample), and a following machine drops one whose sender isn't the session's PF or whose stamp is no later than the newest it took; a sample delayed across two handovers that hand control back to its sender can draw one stale point (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
-
 On the flying machine, the PF's, a routine in our WASM module, `Lead`, reads the aircraft's pose, velocities, control surfaces, and toe brakes about 20 times a second, each read stamped with its frame's time, and the core sends each read to the crew as a sample.
 On each following machine, any other pilot's, `Follow` draws the aircraft 400ms behind those samples, along straight lines between them, carries it on through a gap of up to 2s, and eases it back over 3s.
 Our module keeps an estimate of the core's counter, from a stamp the core puts in every slot it writes, so every routine runs on the core's timeline and the core never estimates the module's clock.
@@ -27,19 +20,18 @@ Here a pose is the aircraft's position and attitude.
 | `flight-model` | Feature | On the flying machine, the last sample it sent, which it sends again through a pause; on a following machine, the newest stamp it took, the clock offset it applies, and `Follow`'s feeds | Its crate in the core, and the routines `Lead` and `Follow` in our WASM module |
 
 It depends on the network for its channel and each sender's offset, on the session for control and who is in the flight, and on the sim service for its routines and the flying sim's pause.
-It registers as partly recorded, with `Lead`'s reports and its samples' channel unrecorded (unrecorded inputs).
+The core records every input, `Lead`'s reports and its samples' channel among them, so a replay checks flight-model sync's outputs (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 It loads no profile, so it flies a session whose aircraft has none.
 
 ## The sample
 
 ```rust
 // a sketch: flight-model sync's module of the message crate
-pub const SAMPLES: Channel<Sample> = Channel::new(N, Delivery::Newest, Priority(P)).unrecorded();  // N and P hypothetical
+pub const SAMPLES: Channel<Sample> = Channel::new(N, Delivery::Newest, Priority(P));  // N and P hypothetical
 pub const PERIOD: u64 = 50_000;   // µs between Lead's reports
 
 pub struct Sample {
     pub at: u64,              // µs on the sender's counter, the frame Lead read it in
-    pub generation: u32,      // the control value's generation; its PF is the sender
     pub snapshot: Snapshot,
 }
 
@@ -65,12 +57,13 @@ pub struct Snapshot {
 
 - With the pose alone, p02's replayed 58P was 22 kt off within two minutes, and with both velocities written each frame as well it stayed within 3.2 kt ([flight-model log](log.md#2026-10-03-written-every-frame-the-velocities-hold-and-the-followers-airspeed-matches-while-its-engine-temperatures-start-apart)).
 - Position stays `f64`, because an `f32` latitude steps by about 0.4m, and the rest is `f32`, which cut 2.2's sample from 105 bytes to 69 in postcard ([network log](../network/log.md#2026-10-10-postcard-packs-every-v1-message-smallest-but-one-and-which-fields-a-message-carries-changes-its-size-more-than-the-format-does)).
-  With the surfaces, brakes, stamp, and generation, a sample comes to under 90 bytes (arithmetic).
+  With the surfaces, brakes, and stamp, a sample comes to under 90 bytes (arithmetic).
 - The surfaces and brakes are the yoke, rudder, and toe brakes that [channels](../network/01-between-machines.md#channels) puts in the sample.
   The SDK calls `A:AILERON POSITION` the "aileron input" ([control variables](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Aircraft_SimVars/Aircraft_Control_Variables.htm)), and on the 58P each surface variable read its axis event's value negated, through the six phases of our masking probe's first run (measured on MSFS 2024, 2026-10-01, [p01's result](../../../experiments/areas/flight-controls/results/p01-mask-2026-10-01-20-28-54.txt)).
   So a surface sent back negated repeats the PF's input, and the following aircraft moves its own yoke from it.
   The yoke's own variables are the aircraft's response, not its input: `A:YOKE X POSITION` read 6/25 of `A:AILERON POSITION` at small deflections in the same run.
-- A sample carries its control value's generation and not its PF, since only the flying machine sends samples and the network hands each message to its handler with its sender's pilot ID ([channels and sends](../network/02-units.md#channels-and-sends)), which saves the 16 bytes of a pilot ID in every sample.
+- A sample carries nothing of control, neither its PF nor the control value's generation (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+  Its PF is its sender, since only the flying machine sends samples, and the network hands each message to its handler with its sender's pilot ID ([channels and sends](../network/02-units.md#channels-and-sends)), so a sample saves the 16 bytes of a pilot ID.
 
 ## The flying machine
 
@@ -97,7 +90,7 @@ impl Routine for Lead {
 - Each report's `at` is the frame's time on the core's counter, as [the core's counter in our module](#the-cores-counter-in-our-module) gives it, so a report that reaches the core late still carries when it was read.
   Read through SimConnect instead and stamped as it arrived, an `L:` variable our module set in the frame of a slot's write trailed that slot by 1.14ms at least, 2.90ms at the 99th percentile, and once by 193ms (measured on MSFS 2024, 2026-10-09, [architecture log][flight]), which at 150 kt would put that sample 15m off its path (arithmetic).
   The core would also take a read each sim frame, about 89 a second if the frames came as the module's updates did in that run (inference), rather than 20.
-- On each report, flight-model sync builds a sample with the session's control generation and sends it `To::Crew`.
+- On each report, flight-model sync builds a sample and sends it `To::Crew`.
 - While the flying sim is paused, `Pause_EX1` not 0 ([what the platform's connection holds](../core/03-sim-seam-and-wasm-module.md#what-the-platforms-connection-holds)), flight-model sync sends the last sample again every 50ms once no report has gone for 100ms.
   Each repeat is stamped 50ms after the one before, so a following machine draws the aircraft standing still rather than carrying it on.
   That works whether or not the module's update runs in a pause, which is unmeasured ([when the module stops](../architecture/02-code-map.md#when-the-module-stops)).
@@ -115,7 +108,9 @@ Our WASM module keeps an estimate of the core's counter, and `Frame::now` is tha
 - Which event sets that clock's 0 changes nothing: a module that starts again, as `module_init` may after sign-in ([left open](../core/03-sim-seam-and-wasm-module.md#left-open)), starts its offset again from the next header, and a routine runs only from its first feed, whose header brings one.
 
 This settles the spine's item on the module's clock ([left open](../architecture/01-spine.md#left-open)).
-The spine's other item, how far the core's arrival stamp trails a page's read, is one no v1 unit waits on: a page that times something sends the span ([times](../architecture/01-spine.md#times)), as pointer sync's presses do, and `h-events` matches an `H:` event against a token that lasts 1s ([its own echo](../sync/05-units.md#its-own-echo)).
+The spine's other item, how far the core's arrival stamp trails a page's read, is one no v1 unit waits on.
+Pointer sync's presses send no span: each gesture goes as it happens, and the cockpit stream's gaps time it in a replay, each the difference between two arrival stamps, so a constant delay before the core's stamp cancels ([pointer sync](../pointer-sync/01-pointer-sync.md#timing)).
+A page that times something sends the span ([times](../architecture/01-spine.md#times)), and `h-events` matches an `H:` event against a token that lasts 1s ([its own echo](../sync/05-units.md#its-own-echo)).
 
 ## The following machine
 
@@ -123,7 +118,7 @@ The spine's other item, how far the core's arrival stamp trails a page's read, i
 // a sketch: flight-model sync's crate on a following machine
 fn on_sample(me: &mut FlightModel, s: &Sample, from: &Sender, cx: &mut Cx) {
     let control = cx.session().control();
-    if !me.following || from.pilot != control.pf || s.generation != control.generation || s.at <= me.newest { return }
+    if !me.following || from.pilot != control.pf || s.at <= me.newest { return }
     let Some(offset) = me.offset.apply(cx.net().offset(from), cx.now()) else { return };   // none yet: dropped
     me.newest = s.at;
     cx.module().feed(routine::FOLLOW, FollowSlot { delay: DELAY, sample: s.on_our_counter(offset) });
@@ -133,8 +128,9 @@ fn on_sample(me: &mut FlightModel, s: &Sample, from: &Sender, cx: &mut Cx) {
 ### Taking a sample
 
 - The handler drops every sample while flight-model sync isn't running `Follow`, so a pilot out of the flight, at the main menu or in another aircraft, never has an aircraft frozen and moved.
-- It drops a sample from a sender who isn't the session's PF, under a generation other than the session's, or with a stamp no later than the newest it took since `Follow` started.
-  So it drops a newer control value's samples until the session's control key arrives, rather than adopting the value as [control](../network/01-between-machines.md#control) has a receiver do, because flight-model sync can't change control, which the session crate holds; the next sample after the key replaces each one dropped.
+- It drops a sample from a sender who isn't the session's PF, or with a stamp no later than the newest it took since `Follow` started (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+  So it drops a new PF's samples until the session's control key arrives, because flight-model sync can't change control, which the session crate holds; the next sample after the key replaces each one dropped.
+  A sample delayed across two handovers that hand control back to its sender can draw one stale point (same entry).
 - It drops a sample whose sender the network has no offset for yet, which lasts until the first heartbeat's exchange on that link, at most about 1s ([the heartbeat and clock offsets](../network/02-units.md#the-heartbeat-and-clock-offsets)).
 - Each time it starts `Follow`, it forgets the newest stamp it took and takes the network's next estimate of the PF's offset at once.
   After that, it moves the offset it applies toward the network's estimate by at most 5ms a second, so a step in the estimate, as when the connection moves between paths, slows or speeds the drawn aircraft by at most 0.5% rather than moving it in one frame; a 10ms step taken at once would move it 0.8m at 150 kt (arithmetic).
@@ -198,7 +194,7 @@ impl Routine for Follow {
 
 - **The core's counter in each routine slot's header,** which gives the routine host its offset, above.
 - **A report:** a routine hands the routine host a struct, and once every routine's frame has run, the host writes it into the routine's report slot, `DUALINPUT_REPORT_` and the routine's ID.
-  The module creates that slot in `module_init` with the read-only flag, and the sim service requests it `ON_SET` on the feature's connection through `cx.module().reports(routine)`, so each report reaches the feature as a value; a partly recorded unit declares the request `.unrecorded()`, as it does a watch.
+  The module creates that slot in `module_init` with the read-only flag, and the sim service requests it `ON_SET` on the feature's connection through `cx.module().reports(routine)`, so each report reaches the feature as a value, which the core records as it does every input.
 - **Events with values:** `fsEventsTriggerKeyEvent` takes an event and its values (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h`), sent once every routine's frame has run, with nothing to undo when no routine asks.
 - **`flight_model::Lead`** joins the module's list, with `DUALINPUT_ROUTINE_LEAD` and `DUALINPUT_REPORT_LEAD`.
   `REPORT` is a kind of its own in [names the sim shares](../architecture/02-code-map.md#names-the-sim-shares), owned by the routine host, so a report slot never collides with a routine whose ID ends in `_REPORT`.
@@ -227,7 +223,7 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - A 20s gap: carried 2s, then held, frozen throughout, and written at once when samples return more than 1km on.
 - A PF in the pause menu, the stand-in's module updating or not: the following aircraft holds and never carries, and the first report after the pause is taken.
 - A 30ms step in the network's offset: the applied offset reaches it within 6s, and the written pose never jumps.
-- A sample while this pilot is out of the flight, from a sender who isn't the PF, under an older or a newer generation before the key, with an old stamp, or before the link's first offset: each dropped.
+- A sample while this pilot is out of the flight, from a sender who isn't the PF, from a new PF before the key, with an old stamp, or before the link's first offset: each dropped.
 - A handover: the ex-PF's aircraft flies on, eases back, and never stops or jumps.
 - Three cores, across a change of PF: the third machine takes the new PF's samples, with the new PF's offset taken at once.
 - A joiner whose PF is 50km away: written at once at the first drawn pose; one at the PF's stand 10m away: eased over 3s.

@@ -6,10 +6,6 @@ Depends on:  ../product/03-v1-scope.md, ../architecture/02-code-map.md, ../core/
 Decides:     How a pilot binds the key or button, as a single or a long press; how a press, or a button in the apps, asks for control; what a pilot gets when the guards refuse, and when the link to the PF is lost; what marks a pass on each machine; the budgets; and the cases for the bench (node 6.12).
 ```
 
-> **Note**
-> Since 2026-10-18, [budgets](#budgets) has no row for the long press, which repeated the core's own timer budget; the case that a 0.9s hold does nothing and a 1.2s hold passes control at 1s stays, and the hold stays 1s, with no setting for it (user, 2026-10-18).
-> Since 2026-10-21, the core records every input, so a replay checks every unit, take-control among them, where [the units](#the-units) has it checked for having no unrecorded input (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
-
 A pilot binds one keyboard key or flight-hardware button in the desktop app, as a single press, which takes control on its down, or a long press, which takes control once it has been held 1s.
 The press, or the take-control button in the EFB app or the desktop app, asks the session crate's `TakeControl`, whose guards decide, and a refused press plays a short refusal cue and shows the guards' reason on the banner.
 When control passes, every machine whose pilot is in the flight plays the control-passed cue and shows who has control, with no recorded line.
@@ -24,7 +20,7 @@ This answers node 6.12 of the [architecture plan](../architecture/plan.md#612-co
 | `take-control` | Feature | The binding's two settings, a long press's timer, its slice of client state, its two sounds, and its notices | Its crate in the core, a button in the EFB app, and a section in the desktop app |
 
 It depends on the session, the core helper's service, and `clients`, as the code map's [features](../architecture/02-code-map.md#features) has it, and reads this core's link to the PF from the session's `status` keys ([members](../session/02-units.md#members)).
-It has no unrecorded input, so the recording's replay checks it ([a replay](../recording/01-recording-and-bug-reports.md#a-replay)).
+The core records every input, so the recording's replay checks take-control, as it checks every unit ([a replay](../recording/01-recording-and-bug-reports.md#a-replay); user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 ## What it registers
 
@@ -63,6 +59,7 @@ It turns on its binding over the same span, while an input is set.
 - **A single press** asks for control on the binding's down.
 - **A long press** starts a 1s timer on the down, through the loop's timers, and asks for control when it fires, while the button is still held; an up before then cancels it, so a tap asks for nothing.
   It keeps a brushed button from taking control.
+  The hold is 1s, with no setting for it (user, 2026-10-18).
 
 ## Taking control
 
@@ -106,7 +103,6 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 | What | Budget |
 | --- | --- |
 | A single press to the cue, on this machine | Under 50ms from the helper's stamp on the down, of which 6.5 gives the helper's stamp to the queue 5ms at p99, and the loop and the helper's output stream the rest |
-| A long press | Asks 1s after its down, plus the loop timer's lateness, which a high-resolution waitable timer kept within 1.5ms with the sim closed and the PC otherwise idle (measured on our development machine, 2026-10-15, [core log](../core/log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version)); with the sim running it's unmeasured |
 
 ## Cases for the bench
 

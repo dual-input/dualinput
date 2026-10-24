@@ -6,18 +6,6 @@ Depends on:  01-aims.md, 02-users.md, and the v1 picks in plan.md
 Decides:     The scope of every v1 feature.
 ```
 
-> **Note**
-> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes [recording and bug reports](#recording-and-bug-reports) in three places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
->
-> - Every crew member's machine records every input that passes through Dual Input, the high-rate samples such as traffic's positions and the flight model's included, and keeps its runs within 1 GB, which holds roughly 8 to 22 hours at 45 to 126 MB an hour.
-> - When a pilot reports a problem, we ask for the run's log first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand.
-> - Each pilot's upload to our Worker, the 30 days in R2, the report page's upload, our view of who has uploaded and who's missing, and the offer of a pilot's part come after v1.
->   So [the EFB app](#efb-app)'s line on a moment marked for a bug report the pilot uploads later, and the notices that ask for a bug report from the desktop app, such as [notification banner](#notification-banner)'s, name an upload v1 doesn't have.
->
-> Since 2026-10-23, Dual Input logs, rather than marks the recording, when a synced control never matches after its retries, in [state sync](#state-sync) and [recording and bug reports](#recording-and-bug-reports); the EFB app's button logs the moment the pilot pressed it, which the recording also holds as an input; and 1 GB holds about 17 hours of a busy session's recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
->
-> Since 2026-10-23, [installing and updating](#installing-and-updating)'s warning for another package that overrides `VCockpit.js`, and its line in the match check's list, go: Dual Input searches no other package, since ours won over FS Copilot's against the mount order the warning assumed, and the notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, without naming the package (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
-
 This document walks one v1 session from start to finish, then scopes each feature [the plan](plan.md) puts in v1, one section per feature, in the order step 4 gives.
 Each feature's section says what the feature does, the cases v1 covers and leaves out, the rules for its behavior, what it depends on, and its open questions.
 It says what Dual Input does, not how: mechanisms are for the sync design in `record/areas/sync/` and the architecture, step 7, and screens and wording for a later pass.
@@ -191,7 +179,7 @@ A change either pilot makes in the cockpit shows up in the other pilot's cockpit
 - A cockpit that missed changes, or never had them, catches up ([catch-up](../sync/03-catch-up.md)).
   When [preflight](#preflight) ends, when a pilot joins late, and when one rejoins after a sim restart, it takes the flying machine's value for every control the profile can read, or can track by counting the events that change it.
   After a short outage with the sim still running, it replays the changes it missed, in order.
-- Dual Input checks that each write it makes lands, and when one never does, it marks the recording and shows a notice on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
+- Dual Input checks that each write it makes lands, and when one never does, it logs it and shows a notice on the [notification banner](#notification-banner) ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed); user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 
 **Not in v1:**
 
@@ -374,7 +362,7 @@ The connection carries everything between the crew's machines, directly when it 
   How the core tells a crash from a pilot closing the sim is open (same entry).
 - A pilot who leaves the flight but not the session, by going to the sim's main menu or loading another flight, drops out of flying: control passes to the PM if they were the PF, and the others get a notice.
   Once they're in a flight again, Dual Input rejoins them as a late joiner.
-- A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app, and closing Dual Input without Leave session counts as a Leave.
+- A pilot leaves the session with Leave session, in the [EFB app](#efb-app) or the desktop app, and closing Dual Input from the tray or for an update counts as a Leave, while a Windows shutdown or logoff ends it with no quit, so the crew sees a lost link ([leaving](../network/01-between-machines.md#leaving)).
 
 **Depends on:**
 
@@ -690,7 +678,7 @@ A small app on the sim's EFB holds what a pilot needs during a flight, so a pilo
 
 - An app of its own, built on the sim's EFB framework, not the desktop app reused.
   Shipping EFB apps are written that way: A2A's tablet is TSX bundled by esbuild on Asobo's EFB API and the MSFS Avionics Framework, and it registers with `Efb.use` (read in a2a-aircraft-aerostar600 1.0.6, `A2ATabletApp.js`).
-- What a pilot needs during a flight: the take-control button, the crew and the connection's state, the Ready button beside the match check's warnings and errors, Go without for each pilot who drops out during [preflight](#preflight), the box for an invite code, Leave session, and a button that marks the moment for a bug report, which the pilot uploads later from the desktop app.
+- What a pilot needs during a flight: the take-control button, the crew and the connection's state, the Ready button beside the match check's warnings and errors, Go without for each pilot who drops out during [preflight](#preflight), the box for an invite code, Leave session, and a button for a bug report that logs the moment the pilot pressed it, which the recording also holds as an input (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 - Opening onto what a notice on the [notification banner](#notification-banner) is about when the pilot clicks the notice anywhere but on its action, whether the EFB was open on another app or closed.
   The core passes the click to the app, whose own code runs while the EFB is closed: it opens the EFB if it's closed and fires `OPEN_BY_KEY` with its own name, which opened a crowded EFB onto our app whether the EFB was closed, open on another app, or closed after use, with our app on neither the dock nor the first page of the app list (measured on MSFS 2024, 2026-10-06, [interface log](../interface/log.md#2026-10-06-our-efb-apps-own-code-opens-the-efb-onto-it-wherever-it-sits-in-a-crowded-efb-and-runs-while-the-efb-is-closed)).
 - A button that brings the desktop app to the front while Dual Input's core is running.
@@ -723,7 +711,7 @@ A notice can carry one action of its own, such as Ready on the preflight summary
 **In v1:**
 
 - The banner, in VR as on a monitor, for notices such as "James is in the pause menu", "You've lost the connection", and "You have control".
-- A notice when a synced control never matches after Dual Input's retries, once per control per flight, such as "Couldn't sync the beacon. After your flight, send a bug report from the desktop app." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
+- A notice when a synced control never matches after Dual Input's retries, once per control per flight, such as "Couldn't sync the beacon." ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
 - While a pilot's cockpit catches up, a "Catching up..." notice saying that switches they move now will be reset ([catch-up](../sync/03-catch-up.md#while-catch-up-runs)).
 - During [preflight](#preflight), a summary of who has joined, who's ready, and how many warnings and errors the [preflight match check](#preflight-match-check) found, with a Ready button, and for pilots other than the PF, a line telling them to touch nothing in the cockpit.
 - Dual Input opening the banner's panel itself when a flight loads, with no click from the pilot.
@@ -767,31 +755,34 @@ Every pilot's machine records its side of the session, and a bug report gathers 
 
 **In v1:**
 
-- Every crew member's machine records every input that passes through Dual Input, such as each synced change, each handover, and the connection's events, but the high-rate samples a feature leaves out, such as traffic's positions and the flight model's ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+- Every crew member's machine records every input that passes through Dual Input, such as each synced change, each handover, and the connection's events, the high-rate samples such as traffic's positions and the flight model's included ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md); user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 - The recording keeps the readings state sync's panel module takes from the gauges' JavaScript, which arrive as inputs, and what plugin tests need from a recording waits for plugins' design, after v1 ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md#left-open)).
 - The recording keeps each watch-only profile entry whose value differs between machines, with both values ([live sync](../sync/02-live-sync.md#values-not-events)).
-- Dual Input marks the recording itself when a synced control never matches after its retries, with the control, both machines' values, and the retries, the same kind of marker as the [EFB app](#efb-app)'s button that marks the moment ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed)).
-- Each machine keeps its runs within 1 GB.
+- Dual Input logs a synced control that never matches after its retries, with both machines' values and the retries, as the [EFB app](#efb-app)'s button logs the moment the pilot pressed it, which the recording also holds as an input ([live sync](../sync/02-live-sync.md#checking-that-a-write-landed); user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
+- Each machine keeps its runs within 1 GB, which holds about 17 hours of a busy session's recording (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
 - A bug report brings together every crew member's recording, with everything else that helps us see the session as if we'd been there, such as the logs, the versions of Dual Input, the sim, and the aircraft, the profile, and the connection's statistics.
-- Each pilot uploads their own part to our Worker, labeled with the session's ID, and the parts meet there, so a report works after the crew has gone: if something goes wrong on landing and everyone goes to bed, there's no live session the next morning.
-  The Worker keeps each part in R2 for 30 days, and takes it only from a member of that session ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
-  The session's ID is a version 4 UUID, drawn by the host's core when it starts the session, and every machine shares it; it can't be the code, since a later session can draw the same six characters ([architecture's spine](../architecture/01-spine.md#ids)).
-- A report page lists the pilot's recorded sessions so each is easy to recognize, by date and time, aircraft, departure airport, and crew, and offers to upload one.
-- On our end, a report shows as one session with who has uploaded and who's missing, such as "uploaded: James, Adam; missing: Greg".
-- A pilot's Dual Input offers their part when a crewmate has sent one.
+- When a pilot reports a problem, we ask for the run's log first, and for the recording only when the log isn't enough, and the pilot sends the run's folder by hand (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
+- The desktop app lists the machine's runs by when each started, with its size, and deletes any but the one in progress ([what each PC keeps](../recording/01-recording-and-bug-reports.md#what-each-pc-keeps)).
 
 **Not in v1:**
 
 - The debrief timeline that plays a flight back, a Later pick in [the plan](plan.md).
+- Uploads, which come after v1 (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
+  - Each pilot uploading their own part to our Worker, labeled with the session's ID, where the parts meet, so a report works after the crew has gone: if something goes wrong on landing and everyone goes to bed, there's no live session the next morning.
+    The Worker keeps each part in R2 for 30 days, and takes it only from a member of that session ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
+    The session's ID is a version 4 UUID, drawn by the host's core when it starts the session, and every machine shares it; it can't be the code, since a later session can draw the same six characters ([architecture's spine](../architecture/01-spine.md#ids)).
+  - A report page that lists the pilot's recorded sessions from each run's index, so each is easy to recognize, by date and time, aircraft, departure airport, and crew, and offers to upload one.
+  - On our end, a report showing as one session with who has uploaded and who's missing, such as "uploaded: James, Adam; missing: Greg".
+  - A pilot's Dual Input offering their part when a crewmate has sent one.
 
 **Rules:**
 
-- Home-folder paths are scrubbed from everything in a report, and Windows usernames from its logs, since a recording's inputs keep their bytes for a replay; pilots' display names stay.
+- Each run's log has home-folder paths and the Windows username replaced as each line is written, while a recording's inputs keep them as they came, since a replay needs their bytes; pilots' display names stay ([the home folder's path](../recording/01-recording-and-bug-reports.md#the-home-folders-path)).
   A screenshot taken during our avatar work showed both a home folder's path and a person's name ([avatars log](../avatars/log.md#2026-10-03-a-probe-can-screenshot-the-sim-window-and-a-screenshot-can-show-a-home-folders-path-and-a-persons-name)).
 
 **Depends on:**
 
-- [The connection](#the-connection), for the session's ID that labels every part.
+- [The connection](#the-connection), for the session's ID that labels every part after v1.
 
 ## Getting Dual Input
 
@@ -813,12 +804,12 @@ One installer puts Dual Input's app and its package in the sim's Community folde
 - Dual Input has no watcher: the desktop app starts with Windows as a tray icon, for the pilot's own account, as a setting the pilot can turn off (user, 2026-10-06 and 2026-10-18; [one program from login](../install/01-installing-and-updating.md#one-program-from-login)).
   A pilot who rarely flies with a crew will ask why it runs all day, so it records its own CPU and memory use and the core's, and shows them over its last 24 hours of running, in words a pilot takes in at a glance, when they open it from the tray icon, choose to quit it, or find its setting.
   Beside the numbers it says what it does for them and what quitting costs, in concrete terms.
-- When another Community package overrides `VCockpit.js`, such as FS Copilot's or YourControls', the desktop app and the EFB app each show a warning, such as "Conflict: another mod (mod-name) overrides a sim file Dual Input overrides. You may experience issues. [Learn more]", and the [preflight match check](#preflight-match-check)'s list shows it as one, rather than a Windows notification as the sim starts (user, 2026-10-08).
-  The SDK says the package mounted later wins (documented, [02-01](../../learn/foundations/02-01-installs-and-packages.md)), so only one override runs.
+- Dual Input searches no other Community package for one that overrides `VCockpit.js`, such as FS Copilot's or YourControls' (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+  The SDK says the package mounted later wins (documented, [02-01](../../learn/foundations/02-01-installs-and-packages.md)), so only one override runs, but ours won over FS Copilot's against the mount order a search would rely on (same entry).
+  A losing Dual Input's panel bridge never loads, so pointer sync and every module a feature names in a panel stop, with no error, and the notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, without naming the package (same entry).
+  Removing that package is the pilot's ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)).
   FS Copilot treats YourControls' package as a conflict: its setup won't continue until the pilot removes it, and its app warns "Conflict detected with YourControls package." while YourControls' panel variable is set (read in the FS Copilot fork, `FsCopilot/ViewModels/SetupViewModel.cs` and `FsCopilot/ViewModels/MainViewModel.cs`; user, 2026-10-08).
-  Its code doesn't say why they conflict, and both overriding `VCockpit.js` is the likely reason (unverified); the warning holds either way.
-  A losing Dual Input's panel bridge never loads, so pointer sync and every module a feature names in a panel stop, with no error.
-  The warning names the package, and removing it is the pilot's ([packages that override our files](../install/01-installing-and-updating.md#packages-that-override-our-files)).
+  Its code doesn't say why they conflict, and both overriding `VCockpit.js` is the likely reason (unverified).
 
 **Not in v1:**
 

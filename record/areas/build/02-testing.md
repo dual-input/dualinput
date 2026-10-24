@@ -6,19 +6,6 @@ Depends on:  01-the-build.md, ../architecture/02-code-map.md, ../architecture/01
 Decides:     The four levels of testing, and where and when each runs; which tests a merge and a release need green, and which run outside CI; what the bench runs, touches, and checks, and how it runs only what it built; the stand-in sim's place, rules, model, frames, WASM module, pages, and process; the stand-in core helper; the replay check; the loop under load; the check before a release; and that no second MSFS runs in a virtual machine (node 7).
 ```
 
-> **Note**
-> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
->
-> - Every replay checks every unit, and no setting records every input, so [replays](#replays) has no default run and no run that records everything, and the bench runs that [what keeps CI green](#what-keeps-ci-green) gives that setting, on each merge to `main` and the release's second, are the same run as a pull request's.
-> - [With friends](#with-friends): each pilot sends their run's folder by hand, where it comes back through Dual Input's own bug report.
->
-> Since 2026-10-22, page-client's and the panel bridge's own tests run on Node's test runner, as the tools' do, which settles [left open](#left-open)'s item on the runner for the product's TypeScript ([build plan](plan.md#5-clients-and-the-panel-bridge)).
->
-> Since 2026-10-22, the bench scripts [the stand-in core helper](#the-stand-in-core-helper) over a line of its own: the bench starts each core with `DUALINPUT_BENCH_HELPER` naming a local port, the stand-in inherits it from the core that starts it and connects there, and over that line the bench tells it what to send or do, and hears each message the core sent it ([build plan](plan.md#6-the-core-helper)).
-> The core's pipe can't carry the script, since the core owns both its ends, and the core still starts only the program its development setting names.
->
-> Since 2026-10-23, the bench runs once on a pull request and once in the release's build job: [what keeps CI green](#what-keeps-ci-green)'s run on each merge to `main` and the release's second run go, since every run records every input (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
-
 Dual Input is tested at four levels: each crate's and each TypeScript part's own tests; the bench, two or three real cores on one PC, each on a stand-in sim; our own MSFS; and friends on two PCs.
 CI runs the first two on every pull request that changes code, and the release workflow runs them again, so a merge and a release each need both green.
 [The four levels](#the-four-levels) gives when the sim and friends come in.
@@ -34,16 +21,16 @@ Two rules from our earlier benches hold throughout, as node 7 gives them: no dev
 | Level | What runs | Where | When |
 | --- | --- | --- | --- |
 | Unit tests | Each crate's tests, the engines alone, the routines built natively, and each TypeScript part's tests; seam inputs recorded from the real sim, such as p08's signals, played into the sim client and sim awareness ([cases for the bench](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)) | CI, and a developer's PC | Every pull request that changes code, and while developing |
-| The bench | Two or three bench builds of the core, each on a stand-in sim, with fake pages, a stand-in core helper, and local stand-ins for the relays, the backend, and the profiles' site | CI's Windows runner, and a developer's PC | Every pull request that changes code, every merge to `main`, and while developing |
+| The bench | Two or three bench builds of the core, each on a stand-in sim, with fake pages, a stand-in core helper, and local stand-ins for the relays, the backend, and the profiles' site | CI's Windows runner, and a developer's PC | Every pull request that changes code, and while developing |
 | In the sim | A build of the core from the tree, its package installed with `node tools/build.ts install` ([our package](01-the-build.md#our-package)), on our MSFS, with a bench core on a stand-in as the second pilot where a case needs a crew | Our development machine | At the end of each stage whose system has cases in the sim, and before each release |
 | With friends | Each pilot's installed Dual Input | Two PCs on two home networks | At a stage whose cases need two PCs, and before v1 ships |
+
+The tests of `page-client` and of the panel bridge run on Node's test runner, as the tools' and the bench's do ([build plan](plan.md#5-clients-and-the-panel-bridge)).
 
 ## What keeps CI green
 
 - A pull request that changes code runs the bench beside the checks the code map's [CI](../architecture/02-code-map.md#ci) lists, the unit tests among them, and a merge needs every one green.
-- Each merge to `main` runs the bench again with the setting that records every input, so every unit is whole and its replay checked (recording everything).
-  The merge has already happened, so a red run blocks nothing, and it's fixed before the next release.
-- The release workflow's build job runs the bench twice, once as a pull request does and once with the setting that records every input, beside every check a pull request runs ([a release](01-the-build.md#a-release)), so no release ships past a red run.
+- The release workflow's build job runs the bench once, as a pull request does, beside every check a pull request runs ([a release](01-the-build.md#a-release)), so no release ships past a red run (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - CI's bench checks behavior, and no timing budget fails a pull request, since a shared runner's other load would move a timing from run to run (inference).
 
 ## What runs outside CI
@@ -185,15 +172,16 @@ The stub is named `FlightSimulator2024.exe` in the desktop app's cases alone, an
 ## The stand-in core helper
 
 - A development setting names the program the core starts as its core helper, and the bench names its own, which speaks the real pipe's messages ([the pipe](../core/04-core-helper.md#the-pipe)) and takes a script from the bench: presses, the mouse, captured audio frames, and what to report it played.
-- The core still starts the program, sends it every want, reads its `Hello`, and starts it again when it exits, so the core's real path runs, and the rule that no development mode skips it holds.
+- The bench scripts it over a line of its own ([build plan](plan.md#6-the-core-helper)): the bench starts each core with `DUALINPUT_BENCH_HELPER` naming a local port, the stand-in inherits the variable from the core that starts it and connects there, and over that line the bench tells it what to send or do, and hears each message the core sent it.
+  The core's pipe can't carry the script, since the core owns both its ends.
+- The core still starts only the program its development setting names, sends it every want, reads its `Hello`, and starts it again when it exits, so the core's real path runs, and the rule that no development mode skips it holds.
   Only the Windows calls behind the pipe differ, and the core helper's own tests on a desk and its cases in the sim run those ([cases for the bench](../core/04-core-helper.md#cases-for-the-bench)).
 - This settles the question [6.5](../architecture/plan.md#65-the-core-helper) raised for node 7 on that setting.
 
 ## Replays
 
 - Every bench scenario ends by replaying each core's recording, and fails on any checkpoint that doesn't match, so a change that makes a replay drift fails its own pull request.
-- A replay checks only whole units.
-  The default run checks every unit except those the recording's what keeps the drift from spreading names as partly recorded, and the run that records everything checks those too ([cases for the bench](../recording/01-recording-and-bug-reports.md#cases-for-the-bench)).
+- A replay checks every unit, since the core records every input ([cases for the bench](../recording/01-recording-and-bug-reports.md#cases-for-the-bench); user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 
 ## The loop under load
 
@@ -243,7 +231,7 @@ The release workflow takes the commit this check ran on, and its build job stops
 ## With friends
 
 - A session's checklist gathers the cases with friends of every stage built by then, so one session checks many things, as node 7 asks (user, 2026-10-14).
-- Each pilot's recording comes back through Dual Input's own bug report ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report)), so the session needs no video call, and a following machine's recording measures its own [budget](../recording/01-recording-and-bug-reports.md#budgets).
+- Each pilot sends their run's folder by hand ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report); user, 2026-10-21), so the session needs no video call, and a following machine's recording measures its own [budget](../recording/01-recording-and-bug-reports.md#budgets).
 
 ## Budgets
 
@@ -279,17 +267,15 @@ Each stage of [node 8](../architecture/plan.md#8-the-build-order) that builds a 
 
 ## Dropped
 
-A second MSFS with its own Dual Input in a virtual machine on the same PC, which the spine's [left open](../architecture/01-spine.md#left-open) asks about for the bench: a bench core on a stand-in plays the second pilot, and friends bring two real sims (user, 2026-10-18).
+A second MSFS with its own Dual Input in a virtual machine on the same PC, which the spine's [parts](../architecture/01-spine.md#parts) drop for the bench: a bench core on a stand-in plays the second pilot, and friends bring two real sims (user, 2026-10-18).
 
 ## Left open
 
-- Which test runner the product's TypeScript parts use, such as `page-client`: the first stage that writes one's tests.
-  The tools and the bench run on Node's.
 - Whether a GitHub-hosted Windows runner holds three cores, two relays, and their proxies within the bench's budget: the first stage that runs the bench in CI.
 
 ## What this changes elsewhere
 
-The notes at the top of [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [the build](01-the-build.md), and [04-core-helper](../core/04-core-helper.md) list what this design changes there, and the [tentative decisions](../architecture/decisions.md#dual-input-is-tested-at-four-levels-and-ci-keeps-the-unit-tests-and-the-bench-green-on-every-pull-request) give the reasons.
+This design changes [the code map](../architecture/02-code-map.md), [the spine](../architecture/01-spine.md), [the build](01-the-build.md), and [04-core-helper](../core/04-core-helper.md), and the [tentative decisions](../architecture/decisions.md#dual-input-is-tested-at-four-levels-and-ci-keeps-the-unit-tests-and-the-bench-green-on-every-pull-request) give the reasons.
 
 [flight]: ../architecture/log.md#2026-10-09-in-a-flight-a-rust-client-on-simconnectdll-masks-creates-ai-objects-with-liveries-sets-input-events-reads-the-camera-and-follows-the-load-the-rust-module-echoes-raw-input-gets-a-persons-key-and-button-and-the-modules-clock-counts-the-counters-ticks-from-near-the-sims-start
 [p10]: ../architecture/log.md#2026-10-16-a-flying-machine-that-hosts-traffic-at-egll-takes-in-285-mb-of-inputs-an-hour-45-mb-with-zstd-mostly-traffic-and-one-loop-carries-them-at-05-of-a-core-and-replays-them-exactly

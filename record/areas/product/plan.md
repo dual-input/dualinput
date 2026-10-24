@@ -208,7 +208,7 @@ Exit: the four are agreed, and these checks pass:
 - Every v1 pick, the three things [step 3](#3-v1-or-later) gives v1 whatever is picked (flight-model sync, the connection, and profiles), and every item the record leaves to step 8 are each in a stage with its own exit criterion.
 
 Design docs keep the notes later designs added at their top, and a builder reads each doc's notes with the text below them, as [writing.md](../../../.claude/rules/writing.md#design-plan-and-log) has a design doc's amendments work.
-Node 6's exit worked the notes of ten docs into their text and stopped there, since folding and checking all 30 cost more usage than a cleaner read saves (user, 2026-10-18).
+Node 6's exit worked the notes of ten docs into their text and stopped there, since folding and checking all 30 cost more usage than a cleaner read saves (user, 2026-10-18), and the rest were folded on 2026-10-23 and 2026-10-24, apart from four that stages 11a and 13 build from: [the apps](../interface/01-apps.md), [the sync units](../sync/05-units.md), [order and recovery](../sync/04-order-and-recovery.md), and [plugins](../plugins/01-plugins.md), which fold once those stages land (user, 2026-10-24).
 
 ## 9. Build, test, and release v1
 

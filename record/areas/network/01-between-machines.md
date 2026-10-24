@@ -6,18 +6,6 @@ Depends on:  ../architecture/01-spine.md, ../product/01-aims.md, ../product/03-v
 Decides:     The topology, the transport, the way through home routers, the relay and its language, encryption, how a crew finds each other, how each channel travels and tells a copy from a late message, how control travels, what a session does while a link is lost and when it comes back, which ways to soften a short gap v1 builds, two cores on one PC, and how a receiver estimates a sender's clock offset.
 ```
 
-> **Note**
-> Since 2026-10-21, the core records every input, and v1 uploads no bug report, which changes this document in two places (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)):
->
-> - The backend holds no bug reports in v1, where [who does what](#who-does-what) has it hold them; that comes after v1.
-> - [Channels](#channels)' reason for a seat claim riding the avatar's pose, avatars being partly recorded, goes, and whether the claim moves to a session key is open, as [avatars](../avatars/01-avatars.md)' note of 2026-10-21 says.
->
-> Since 2026-10-23, a review against CLAUDE.md's rule on mechanisms changes this document in three places (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)):
->
-> - A flight-model sample carries nothing of the control value, where the opening's list and [control](#control) have it carry the generation alone.
-> - [The link between two cores](#the-link-between-two-cores): a connection whose first message never comes stays open until it closes, with no 10s timeout.
-> - [Leaving](#leaving): Windows ending the pilot's session ends the core with no quit, so the crew sees a lost link, where a shutdown or logoff passes control and closes with the quit code.
-
 Every pair of cores in a session holds one QUIC connection that iroh 1.3 makes and keeps: directly when hole punching gets through both pilots' routers, and through one of our relays when it doesn't.
 Our backend turns an invite code into the crew's endpoint IDs when a pilot joins, and no running session waits on it; the relays run n0's `iroh-relay` with nothing of ours on them.
 Four models carry the rest:
@@ -25,7 +13,7 @@ Four models carry the rest:
 - **One state machine per link:** up; lost after 5s of silence, on which the core closes the connection and redials; up again once a new connection's first message passes; and disconnected after 30 minutes without a connection.
   Every return is the same sequence: a new connection whose first message carries the session's state whole, then the cockpit stream's replay.
 - **One replayed log, the cockpit's.** Everything else that must arrive is state, sent as the newest value of each key, and whole on each new connection.
-- **One control value,** a generation and the PF's pilot ID, raised by every change of PF, which every machine compares the same way; every message that depends on who flies carries it, a flight-model sample its generation alone, and the session's shared settings are stamped the same way.
+- **One control value,** a generation and the PF's pilot ID, raised by every change of PF, which every machine compares the same way; every message that depends on who flies carries it, except a flight-model sample, which carries nothing of it, and the session's shared settings are stamped the same way.
 - **No address tracking:** a core reaches a crew member by endpoint ID through every relay in the session's list, and iroh finds the direct path itself.
 
 This answers node 2 of the [architecture plan](../architecture/plan.md#2-how-the-cores-reach-each-other) from its children's findings in the [network log](log.md): [2.1] chose iroh, [2.2] the encoding, and [2.3] measured iroh across home networks, and [p04] to [p07] settled what the design leaned on.
@@ -55,7 +43,7 @@ The terms:
 | Every core | On each pilot's PC | Its iroh endpoint, under a key drawn fresh for each session; a connection to every other crew member, and each link's state; the channels and what sends them; the session's state and the replay when a link comes back; clock offsets; recording each connection's path, loss, and relay stalls, and each sender's clock offset |
 | The flying machine's core | The PF's PC | What 03-v1-scope already gives it: the flight model and the aircraft's authority; nothing more for the connection |
 | Relay | n0's `iroh-relay`, unmodified, on two servers of ours off the pilots' machines, in New York and Frankfurt ([the relays](#the-relays)) | Carries a pair's packets when no direct path works, tells each endpoint its public address, and admits only Dual Input |
-| Backend | Off the pilots' machines: a Cloudflare Worker on D1 ([01-spine](../architecture/01-spine.md#components); [02-units](02-units.md#its-framework-and-storage)) | Draws invite codes and maps each to the crew's endpoint IDs, limits code guessing, and holds bug reports; nothing a running session waits on |
+| Backend | Off the pilots' machines: a Cloudflare Worker on D1 ([01-spine](../architecture/01-spine.md#components); [02-units](02-units.md#its-framework-and-storage)) | Draws invite codes and maps each to the crew's endpoint IDs, and limits code guessing, nothing a running session waits on; after v1, it also holds bug reports (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)) |
 
 ## The link between two cores
 
@@ -89,7 +77,7 @@ When two connections between a pair both pass their first message, each side pic
 - Of two connections from the same restart, the one the lower endpoint ID dialed stays, comparing the two IDs as numbers, which both sides hold; of two the same side dialed, the newer stays, since a core dials a member only while it holds no connection to them.
   The rule needs nothing a cut puts in doubt, such as who is PF.
 - A connection with nothing on it for 5s closes, as any lost one does, which clears one whose other side dropped it without the close arriving.
-- A connection whose first message hasn't arrived within 10s closes.
+- A connection whose first message never comes stays open until it closes, with no timeout of its own (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - Each close carries an application code of its own.
 
 In our FS Copilot work, two connections between one pair carried every packet twice, and a duplicate arriving at the same instant pulled the traffic receiver's delay estimate down until the aircraft stuttered (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-06 · Stage 4, traffic: what the app needed that the prototype did not", item 5).
@@ -197,7 +185,7 @@ Everything else that must arrive is state: the session channel and traffic's ide
 | Session | Every machine | A stream from each sender, the newest value of each key, all of them again in a new connection's first message | A receiver keeps each key's value with the highest stamp (below) | Above every other stream |
 | Cockpit | Every machine | A stream from each sender, the one replayed log | Causal order across senders ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)); telling a copy from a late message is node 3's ([01-spine](../architecture/01-spine.md#left-open)) | Below the session's |
 | Catch-up | The flying machine | A stream to the catching-up machine, started again on a new connection | In order | Below the cockpit's |
-| Flight model | The flying machine | One-off packets, one sample each, at a fixed rate | A receiver drops a sample whose stamp isn't later than the newest it applied from that sender, or that was made under a control value older than the newest it knows, or under a newer one until the control key arrives | Ahead of every stream |
+| Flight model | The flying machine | One-off packets, one sample each, at a fixed rate | A receiver drops a sample whose stamp isn't later than the newest it applied from that sender ([taking a sample](../flight-model/01-flight-model-sync.md#taking-a-sample)) | Ahead of every stream |
 | Avatars | Every machine | One-off packets, one pose each | The newest pose of each figure, by stamp | Ahead of every stream |
 | Traffic | The traffic host | Each object's identity on a stream, the newest value of each, the whole set again on a new connection; samples as one-off packets in batches | Each object's newest identity, a new connection's set merged into the receiver's, since a copy with no sample for 15s is removed, keeping its identity so that its next sample creates it again ([which copies it shows](../traffic-atc/01-traffic-and-atc.md#which-copies-it-shows)); and each object's newest sample by the time it was read | Identities below the cockpit's; samples ahead of every stream |
 | ATC audio | The ATC host | One-off packets, one 20ms Opus frame each, numbered | Played in number order behind an adaptive buffer; a frame that arrives after its turn is dropped | Ahead of every stream |
@@ -205,7 +193,7 @@ Everything else that must arrive is state: the session channel and traffic's ide
 
 - The session channel's keys are the session's state: the control value ([control](#control)); each member's entry, its pilot ID, display name, kind, and endpoint ID, which it writes itself; Ready and the countdown; the traffic host and the ATC host, two keys, which one request claims together ([02-code-map](../architecture/02-code-map.md#the-traffic-and-atc-switch)); the simulation rate and pause, but no time of day or date, which v1 doesn't sync; the PF's position and stand; the match check's comparison; a sim crash or a flight left; the plugin channel instances; and whom each member is connected to and who left ([03-v1-scope](../product/03-v1-scope.md#a-session-from-start-to-finish)).
   A core dials any member it learns of from another's entry and holds no connection to, so two pilots who join at the same moment, each listed by the backend without the other, still find each other.
-  A pilot's seat claim rides their avatar's pose on the avatars channel, each pose carrying the whole figure, since avatars, partly recorded, writes no session key ([the pose](../avatars/01-avatars.md#the-pose)).
+  A pilot's seat claim rides their avatar's pose on the avatars channel, each pose carrying the whole figure ([the pose](../avatars/01-avatars.md#the-pose)).
 - Every key but control carries a stamp: the control value its writer held, a number one past the highest its writer has seen on that key, and the writer's pilot ID.
   A receiver keeps the value with the highest stamp, comparing control values first, as [control](#control) orders them, then the numbers, with the lower pilot ID winning a tie.
   So of two changes to a key several pilots write, such as active pause, made at once or during a cut, every machine keeps the same one.
@@ -215,7 +203,7 @@ Everything else that must arrive is state: the session channel and traffic's ide
 - The flight-model sample also carries the yoke, rudder, and toe-brake positions the flying aircraft applied, which move nearly every frame while the PF hand-flies and would flood the cockpit stream and its replay; the fixed rate means the PF's values overwrite any yoke input of the PM's within a sample, and a later feature that mixes the PM's input adds a channel toward the flying machine and changes nothing the following machines read (user, 2026-10-11).
   Which fields the sample carries is the flight-model sync's.
 - The PF's engine levers and trim move far less often, so they stay entries on the cockpit stream, owned by the PF, and the following machine writes the PF's last value back at once when its own sim reports that the PM moved one, which keeps [the take-control key](../product/03-v1-scope.md#take-control-key)'s rule that the PM's hardware can't hold them away (user, 2026-10-11).
-- Every cockpit message carries the control value it was made under, its generation and its PF, and every flight-model sample its generation alone, since its sender is its PF ([control](#control)).
+- Every cockpit message carries the control value it was made under, its generation and its PF, and a flight-model sample carries nothing of it ([control](#control)).
 - The cockpit-stream crate acknowledges what its machine applied on a one-off channel of its own, sending the machine's vector clock once a second ([02-units](02-units.md#the-heartbeat-and-clock-offsets)).
 
 ### Sending
@@ -244,10 +232,9 @@ Who may change control, and when, is the table of roles that [node 3](../archite
 
 The value rides the session channel as one key, so a new connection's first message carries it, and a receiver applies nothing else from that connection until the first message has passed ([joining](#joining)).
 Control changes only through that key (user, 2026-10-18).
-Every cockpit message carries the whole value it was made under, so a receiver can tell apart two pilots who took control from the same generation, and a flight-model sample carries the value's generation alone, since its PF is its sender ([the sample](../flight-model/01-flight-model-sync.md#the-sample)).
-QUIC can deliver a new PF's first lever change or flight-model sample before the control key it rode after, so flight-model sync drops a sample made under a newer value until the key arrives ([taking a sample](../flight-model/01-flight-model-sync.md#taking-a-sample)), and the cockpit stream waits for the `CONTROL` message that carries the change ([the sync units](../sync/05-units.md#a-change-of-control)).
+Every cockpit message carries the whole value it was made under, so a receiver can tell apart two pilots who took control from the same generation, and a flight-model sample carries nothing of the value ([the sample](../flight-model/01-flight-model-sync.md#the-sample); user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+QUIC can deliver a new PF's first lever change or flight-model sample before the control key it rode after, so the cockpit stream waits for the `CONTROL` message that carries the change ([the sync units](../sync/05-units.md#a-change-of-control)), and which samples a following machine takes is flight-model sync's ([taking a sample](../flight-model/01-flight-model-sync.md#taking-a-sample)).
 
-- A receiver drops a flight-model sample made under a value older than the newest it knows, since only the flying machine sends samples.
 - Each change of control carries its maker's vector clock, and of cockpit messages, a receiver drops those a superseded value's PF made under that value only when that clock doesn't include them, whether they arrive live or in a replay ([coming back](#coming-back); [04-order-and-recovery](../sync/04-order-and-recovery.md#a-change-of-control)), so an ex-PF's solo flying through a cut never replays into the new PF's cockpit, as FS Copilot once replayed a pilot's solo input into a fresh session (FS Copilot fork, `record/pointer-forwarding/docs/12-pre-pr-review.md`, R04).
   A switch the PF flipped in the round trip before it learned of a handover is dropped too, and every machine that applied a dropped message catches up from the new PF, which undoes the switch in the ex-PF's own cockpit.
 - A dropped message counts as delivered for the cockpit stream's causal order, so no later message waits on it; how the order marks it is node 3's.
@@ -293,7 +280,8 @@ Leave session closes each connection with an application code of ours that only 
 - noq lets a peer drop stream data it hasn't delivered once a close arrives (read in noq 1.3.0, `src/connection.rs`, `Connection::close`), so a goodbye message sent just before the close could be lost.
 - So a PF who leaves first passes control to the PM as an ordinary handover, and closes 1s after passing it, since the leaving core writes the new control value itself and the PM sends nothing carrying it promptly (user, 2026-10-18).
   If the close reaches the PM before the new control value does, the PM's machine locks and holds as when it has lost the flying machine ([while a link is lost](#while-a-link-is-lost)), and the PM can take control with no warning, since the close's Leave code says the PF has gone.
-- Closing Dual Input any other way, from the tray, by a Windows shutdown or logoff, or for an update, passes control the same way and closes each connection with a quit code of ours before `Endpoint::close`, and the others treat a quit as a Leave (user, 2026-10-11).
+- Closing Dual Input any other way, from the tray or for an update, passes control the same way and closes each connection with a quit code of ours before `Endpoint::close`, and the others treat a quit as a Leave (user, 2026-10-11).
+- Windows ending the pilot's session, by a shutdown or logoff, ends the core with no quit, so the crew sees a lost link (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 - A process that dies sends no close, or at most one with code 0, which noq sends when every handle to a connection is dropped (read in noq 1.3.0, `src/connection.rs`, the docs of `Connection`), so code 0 and every error QUIC or iroh closes with count as a lost link, never as a leave.
 - A core that exits awaits iroh's `Endpoint::close`, bounded in time, which resends the closes until each peer acknowledges them (read in iroh 1.3.0, `src/endpoint.rs`, `Endpoint::close`).
 - Leave session also tells the backend, which frees the code once the last member has left, and the session channel tells any member who can't reach the leaver.
@@ -384,6 +372,7 @@ So a release build targets the baseline x86-64 CPU, and the core binds its endpo
 ## Left open
 
 - How the status list looks, which waits for the apps' stage, and node 6.16 settles only how the apps reach the network's and the session's slices ([the apps](../interface/01-apps.md#left-to-the-apps-stage)), and how a pilot sees which kind of connection they have, which [the connection](../product/03-v1-scope.md#the-connection) leaves to a design for later.
+- Whether a pilot's seat claim moves from their avatar's pose to a session key ([channels](#channels)), which [avatars](../avatars/01-avatars.md#left-open) leaves open too (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
 - The 5s, the 2s path idle timeout, the 30 minutes, the 10-minute renewal, the relay's cap, and the ATC buffer's limits, which v1's recordings tune.
 - Checks for the network's stage of step 8, which tune the network layer without changing this design (user, 2026-10-11):
   - v1's full mix of channels on a direct path under loss, run by hand on our droplets ([02-units](02-units.md#cases-for-the-bench)), with and without the newest-only slots, since [p06] ran only through the relay;

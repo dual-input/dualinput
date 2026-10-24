@@ -28,7 +28,7 @@ The probes and their raw output are in [experiments/areas/interface](../../../ex
 The banner runs in a page of its own, outside the EFB's document, so it gets neither unless its page links `efb_os.css` itself, which no run has tried.
 Whether Dual Input takes the sim's look or one of its own is the user's to decide.
 
-**Affects:** the apps' look, which stage 11 designs ([build plan](../build/plan.md#11-the-apps)), and [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md)'s pinned copy of the framework, which the EFB API's controls would have to work with.
+**Affects:** the apps' look, which stage 11b designs ([build plan](../build/plan.md#11b-the-apps)), and [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md)'s pinned copy of the framework, which the EFB API's controls would have to work with.
 
 **Evidence:** the files above, read on our development machine on 2026-10-24; their contents are Asobo's and A2A's, so none is copied into the tree.
 

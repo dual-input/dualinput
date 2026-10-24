@@ -203,8 +203,8 @@ Builds:
 Designs first: whether the core sends each client `alive` every 2s whatever else it sends, or only after 2s of nothing, as [the protocol](../core/02-clients-and-panel-bridge.md#the-protocol) has it, since recording every input took away the drift the first guarded against ([recording log](../recording/log.md)); [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22 settles it.
 
 From stage 4, it also builds the sim service's announcement every 2s, whose body holds the clients crate's port, and `sim_service::announce`, which a bench test unit calls in the session crate's place until stage 9; `SimConnect_CallCommBusEvent` in `sim-client`, the edge, and the stand-in, which hands each call to the bench's fake pages; the sim service's slice of client state; and the module's trouble notices ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement), [sim awareness](../core/03-sim-seam-and-wasm-module.md#sim-awareness), [the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status)).
-The bridge's locks come with pointer sync in [stage 19](#19-pointer-sync), the one v1 feature that asks for them, and what `clients` holds for the apps alone comes with the apps in [stage 11](#11-the-apps) (user, 2026-10-22).
-The bench's fake EFB app and banner come in stage 11 too, and its fake menu script in stage 9.
+The bridge's locks come with pointer sync in [stage 19](#19-pointer-sync), the one v1 feature that asks for them, and what `clients` holds for the apps alone comes with the apps' wiring in [stage 11a](#11a-the-apps-wiring) (user, 2026-10-22).
+The bench's fake EFB app and banner come in stage 11a too, and its fake menu script in stage 9.
 A bench test unit stands in for the profile loader until stage 10, telling `clients` when the profile loads and unloads, as [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md)'s note of 2026-10-22 has it.
 
 Needs: 4.
@@ -212,7 +212,7 @@ Needs: 4.
 Tests:
 
 - From stage 2: a feature's command handler reads the clients crate's settings while the clients crate dispatches it ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
-- From stage 3: a fake page that heard the stand-in's announcement connects; and in this stage's session in the sim, with a bench core running beside the real sim's core, every cockpit panel connects to the real sim's core, and none to the bench core, while stage 11's session checks the sim's other pages ([the bench's own cases](02-testing.md#cases-for-the-bench)).
+- From stage 3: a fake page that heard the stand-in's announcement connects; and in this stage's session in the sim, with a bench core running beside the real sim's core, every cockpit panel connects to the real sim's core, and none to the bench core, while stage 11b's session checks the sim's other pages ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 - From [02's cases](../core/02-clients-and-panel-bridge.md#cases-for-the-bench), on the bench: a socket from a browser page closes with 1008, and nothing it sent reaches the loop; a `hello` from a client of another version is logged with both versions, and the core goes on talking to it; a message that doesn't parse is logged and dropped, and a `command` whose arguments don't parse answers with an error; the core suspended for 12s leaves every fake page its socket, and each fake panel's modules carry on without loading again; the core restarted on another port has every fake page connect again within 2s of its next announcement; a panel told `none` connects no more until the session ends; a slice that changes 100 times a second reaches a fake page at most once a round; a command no unit registered answers "unknown"; and a settings file keeps a key no unit registered.
 - From [the code map's cases for work in the sim](../architecture/02-code-map.md#cases-for-the-bench-for-work-in-the-sim): as the bridge's own tests, a panel module that fails to load, or throws in `start`, leaves the other panel modules in its panel running, and with the core's socket closed every panel module stops at once; and on the bench, a panel that reloads mid-session gets its panel modules again on its new socket, and the core closes the old one.
 - From [the apps' cases](../interface/01-apps.md#cases-for-the-bench), on the bench: a setting changed from a fake page's socket takes effect; no cockpit panel connecting within 10s of the profile loading raises `clients`' trouble notice, cleared once one connects; and a module from another build while a test routine is fed raises the sim service's trouble notice for our package.
@@ -303,7 +303,7 @@ Builds, as [01-recording-and-bug-reports](../recording/01-recording-and-bug-repo
 - `recording`: at the core's start, listing `recordings\` and deleting the oldest runs while all of them together pass 1 GB; a slice of the runs by their folders' names, with their sizes and the newest as the run in progress; a command that marks the moment, which logs a line at info; and a command that deletes a run, refusing the one in progress, then lists the runs again ([slices and commands](../interface/01-apps.md#slices-and-commands))
 
 The rule that each unit logs at info each decision a pilot can notice, with its reason, is in [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-21 on [logging](../core/01-loop-and-edge.md#logging), and each stage's units keep it.
-The report page is the desktop shell's, and comes with [the apps](#11-the-apps); the clipboard's job, which hands up only an invite code, comes with the first stage whose units start it, as [stage 2](#2-the-cores-loop-and-edge) has the edge's jobs come.
+The report page is the desktop shell's, and comes with [the apps](#11b-the-apps); the clipboard's job, which hands up only an invite code, comes with the first stage whose units start it, as [stage 2](#2-the-cores-loop-and-edge) has the edge's jobs come.
 
 Designs first: the budgets for a session's recording and for a run with no session, which rested on partial recording, and which of what keeps the drift from spreading's rules stay, now that every input is recorded ([01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)'s note of 2026-10-21).
 The user settled both on 2026-10-23, with the writer's flush, the stop under 1 GB free, and the cuts that leave the recording no marks, index, or placeholder for the home folder, as the [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)'s entry of that day has them.
@@ -411,13 +411,18 @@ This stage's close runs the whole bench ([working a stage](#working-a-stage)).
 Exit: on our development machine, `node tools/check.ts` and the whole `node tools/bench.ts` pass, the profiles' scenarios among them; `dualinput-profile-builder build profiles` builds the tree's profile to the same bytes twice; two bench cores pin a bundle from the local profiles' site, the joiner fetches it by its hash, both load it, and the match check shows it loaded; and the [profiles' log](../profiles/log.md) has an entry for the cases and budgets.
 Done on 2026-10-24.
 
-## 11 The apps
+## 11a The apps' wiring
+
+Builds, from stage 5: what `clients` holds for the apps alone: the banner's socket in its slice, the command for a notice clicked outside its action with the order that opens the EFB, and the command that brings the desktop app forward, with the core's start of the desktop app's program ([slices and commands](../interface/01-apps.md#slices-and-commands), [notices](../interface/01-apps.md#notices), [bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)); and the bench's fake EFB app and banner ([the sim's pages](02-testing.md#the-sims-pages)).
+None of it shows anything to a pilot, so it's split from [the apps](#11b-the-apps) and built while the apps' design waits for the user (user, 2026-10-24).
+Needs: 9 and 10.
+
+## 11b The apps
 
 Designs first: the apps' looks and words, from [the apps' list](../interface/01-apps.md#left-to-the-apps-stage) and [installing and updating's](../install/01-installing-and-updating.md#left-to-the-apps-stage).
 Builds: the EFB shell, the desktop shell, `src/apps/desktop`'s window and Rust side, and `src/sim-package/pages`' EFB app and banner ([01-apps](../interface/01-apps.md)).
-From stage 5, it also builds what `clients` holds for the apps alone: the banner's socket in its slice, the command for a notice clicked outside its action with the order that opens the EFB, and the command that brings the desktop app forward, with the core's start of the desktop app's program ([slices and commands](../interface/01-apps.md#slices-and-commands), [notices](../interface/01-apps.md#notices), [bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward)); and the bench's fake EFB app and banner ([the sim's pages](02-testing.md#the-sims-pages)).
 Each feature's part in the apps comes with that feature's stage.
-Needs: 9 and 10.
+Needs: 9, 10, and 11a.
 Tests, from stage 5: in this stage's session in the sim, with a bench core running beside the real sim's core, the EFB app, the banner, and the menu script connect to the real sim's core, and none to the bench core ([the bench's own cases](02-testing.md#cases-for-the-bench)).
 
 ## 12 The sandbox
@@ -453,7 +458,7 @@ Needs: 10 and 12.
 Builds: the state sync feature, its routine `HEvents`, its panel modules `h-events` and `instrument-reads`, its parts in the apps, and the Baron 58P profile's `state` and `events` blocks ([the sync units](../sync/05-units.md), [reading it in the panel](../plugins/01-plugins.md#reading-it-in-the-panel)).
 From stage 4, it also builds the sim service's `listen`, `input`, and `set_input`, with `sim-client`'s `B:` names; the routine host's `H:` events; and the stand-in's answers to each, with the rules a scenario scripts for its aircraft's own behavior ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the sim client](../core/03-sim-seam-and-wasm-module.md#the-sim-client), [what a routine can ask for](../architecture/02-code-map.md#what-a-routine-can-ask-for), [what it models](02-testing.md#what-it-models)).
 It ends with the first session in the sim, with a bench core as the second pilot ([how the stages are ordered](#how-the-stages-are-ordered)).
-Needs: 11 and 13.
+Needs: 11b and 13.
 
 Tests:
 
@@ -465,7 +470,7 @@ Tests:
 Builds: the desktop app's tray icon and its jobs, the installer and updates through Velopack, packed on our development machine, the firewall rule, and writing our package ([installing and updating](../install/01-installing-and-updating.md)).
 From stage 4, the release's folder also holds the C++ runtime's three DLLs that `SimConnect.dll` imports ([the build](01-the-build.md)), and the desktop app copies our package as [installing and updating](../install/01-installing-and-updating.md)'s note of 2026-10-21 has it.
 The release workflow comes in [stage 22](#22-github).
-Needs: 3 and 11.
+Needs: 3 and 11b.
 
 Tests:
 
@@ -492,7 +497,7 @@ Tests, from stage 4: after a `RESET`, `Figure`'s `Z:` writes still land ([03's c
 
 Builds: the traffic feature, its routine `Traffic`, `object-mirror`, and the ATC audio feature, with their parts in the apps ([traffic and ATC](../traffic-atc/01-traffic-and-atc.md)).
 From stage 4, it also builds the sim service's `poll` and `release`, and the stand-in's answers to them ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls)).
-Needs: 6, 9, and 11.
+Needs: 6, 9, and 11b.
 
 Tests:
 
@@ -509,13 +514,13 @@ Tests, from stage 5: with the core suspended, a locked display's overlay turns i
 ## 20 Take-control
 
 Builds: the take-control feature, with its parts in the EFB app and the desktop app ([take-control](../control/01-take-control.md)).
-Needs: 6 and 11.
+Needs: 6 and 11b.
 
 ## 21 Rate and pause, and Go to
 
 Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the desktop app ([the session's units](../session/02-units.md)).
 From stage 4, it also builds the sim service's `world_map`, and the menu script's requests that carry it out ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the menu script](../session/02-units.md#the-menu-script)), with the menu script's report of the menu's page, read every 500ms in a session, which only Go to reads.
-Needs: 9 and 11.
+Needs: 9 and 11b.
 
 ## 22 GitHub
 

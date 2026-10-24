@@ -3,6 +3,33 @@
 What we found about the core's own process, its loop and its edge, newest entry first.
 The probes are in [experiments/areas/core](../../../experiments/areas/core), and their raw output is in its `results/` folder.
 
+## 2026-10-24: Our WASM module read none of the core's writes, because its dispatch callback reached its buffer through the context pointer; with a thread's own slot it reads them, and Hold freezes the aircraft
+
+**Asked:** why didn't preflight's `Hold` freeze the aircraft in [stage 9](../build/plan.md#9-the-session)'s sim session, where the core fed it from Ready to fly and a cockpit panel read all three freezes off 10s into the flight?
+
+**Expected:** the freeze through `fsEventsTriggerKeyEvent`, which [the sim seam](03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis) listed as unrun, as the likeliest fault; the user suggested the pilot's walkaround, which the session's run started in.
+
+**Found:** on MSFS 2024 SunRise 12.2.282174.999, in a flight on the ground in the Black Square Baron 58P Professional, with the release core hosting a session alone:
+
+- **p06** fed `Hold` for 50s, with the pilot in the cockpit, then asked to go to walkaround, then back, and a cockpit panel read the freezes off throughout.
+  `A:CAMERA STATE` read 2 in every phase, so it didn't show whether the pilot was in walkaround.
+- **From a cockpit panel's JavaScript,** the same three `_SET` events froze the aircraft, all three flags 1 a second later, and released it.
+- **p07,** a SimConnect client of its own, heard the core write `DUALINPUT_ROUTINE_HOLD` 25 times in 5s, feed 1 and no end mark, under slots hash `b0828a8b3c652b62`, the one our module's status carried.
+- **p08,** against our module built with a diagnostic patch, found it running about 30 frames a second and reading the freeze flags 0 times, so no routine ran.
+  It heard no client data at all: not the core's writes, not the probe's to two areas of its own, one at ID 3 and one at `0xD000`, and no exception.
+- Our module passed its buffer as `SimConnect_CallDispatch`'s context, and its callback dropped a message with a null context, where the modules of [2026-10-08 and 2026-10-09](../architecture/log.md#2026-10-08-a-standalone-module-built-from-rust-with-cargo-msfs-and-packaged-by-our-own-script-runs-on-msfs-2024-and-trades-data-slots-with-a-simconnect-client-once-its-simconnect-handle-is-64-bits-wide), which read a client's writes, passed none.
+  With the buffer in a thread's own slot and no context, the module heard 75 writes in 19s, 71 of them `Hold`'s.
+  The routine host read each flag as 1.0 after one `fsEventsTriggerKeyEvent` of each, and the panel read all three on.
+  When the core stopped, the routine host dropped `Hold` 1s after its last feed and turned the flags off, through `SimConnect_TransmitClientEvent` on the module's own connection, which p08 had switched to, and the panel read them off.
+- Whether the sim hands the callback a null context or doesn't call it when given one, the run doesn't tell, since the first builds counted nothing before that check (unverified).
+- The bench couldn't catch it, since the stand-in sim runs the routine host without the module's connection.
+
+**Changed:** the module's dispatch callback collects into a thread's own slot, and `fsEventsTriggerKeyEvent` freezes the aircraft, measured.
+
+**Affects:** [the sim seam](03-sim-seam-and-wasm-module.md#wants-and-the-sims-apis)'s table of wants.
+
+**Evidence:** in [experiments/areas/core/results](../../../experiments/areas/core/results), `p06-hold-in-walkaround-2026-10-24-08-32-50.txt`, `p07-hold-slot-2026-10-24-08-38-00.txt`, and `p08-module-freeze-2026-10-24-08-49-09.txt`, `-08-58-01.txt`, and `-09-04-50.txt`, the last with the fix.
+
 ## 2026-10-23: Stage 6's helper passes every case at the desk and in the sim, and captures within 1% of a core in Opus's Audio mode, but never sees an Xbox controller's buttons over USB
 
 **Asked:** do [stage 6](../build/plan.md#6-the-core-helper)'s cases that need a person at the PC or the sim hold for the real helper, and where does capturing an ATC app's speech land against the capture's 1% of a core ([04's cases](04-core-helper.md#cases-for-the-bench), [04's budgets](04-core-helper.md#budgets))?

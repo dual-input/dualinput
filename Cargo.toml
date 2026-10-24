@@ -49,3 +49,16 @@ disallowed_methods = "deny"
 lto = true
 strip = true
 panic = "abort"
+
+# The bench's scenarios check timing as well as behavior, so the bench builds its programs
+# optimized, as a pilot's core is, with the checks a development build makes still on. It
+# unwinds a panic, since the stand-in sim catches a routine's panic the way the sim traps our
+# module, and it leaves out `lto` and builds incrementally, so a run after a small change
+# rebuilds quickly (record/areas/build/02-testing.md, "Building what it runs").
+[profile.release-with-checks]
+inherits = "release"
+overflow-checks = true
+debug-assertions = true
+panic = "unwind"
+lto = false
+incremental = true

@@ -9,6 +9,7 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { BenchRun } from "../cores.ts"
+import { FakeApp } from "../pages.ts"
 
 /** The sim service tries again every 2s, and a check waits out one try with room to spare. */
 const RETRY_MS = 2_500
@@ -16,6 +17,9 @@ const RETRY_MS = 2_500
 test("the quit message then the exit is a close, nothing opens between them, and an exit alone is a crash", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("sim-runs", t)
   const core = await run.core("a")
+  // With the desktop app's window open, the core outlives the sim it watches.
+  const desktop = await FakeApp.open(core, [])
+  t.after(() => desktop.close())
   const sim = run.stub()
   core.act({ act: "watch", process: sim.id })
   await core.hear("stage Starting aircraft none")
@@ -48,6 +52,8 @@ test("the quit message then the exit is a close, nothing opens between them, and
 test("two bench cores each see only their own stub, and killing one ends that core's sim alone", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("sim-stubs", t)
   const [a, b] = [await run.core("a"), await run.core("b")]
+  const desktops = [await FakeApp.open(a, []), await FakeApp.open(b, [])]
+  t.after(() => desktops.forEach((d) => d.close()))
   const [simA, simB] = [run.stub(), run.stub()]
   a.act({ act: "watch", process: simA.id })
   b.act({ act: "watch", process: simB.id })

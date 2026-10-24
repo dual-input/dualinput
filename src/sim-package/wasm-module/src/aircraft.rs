@@ -131,9 +131,9 @@ impl Sim for Aircraft {
     }
 
     /// Sends the flag's `_SET` event with 1 to turn it on or 0 to turn it off, as an
-    /// integer, the type SimConnect sends an event's value as. That this call freezes the
-    /// aircraft is unrun (record/areas/core/03-sim-seam-and-wasm-module.md, "Wants and the
-    /// sim's APIs").
+    /// integer, the type SimConnect sends an event's value as. It froze a Baron 58P in a
+    /// flight at the first send of each flag (measured on MSFS 2024, 2026-10-24,
+    /// record/areas/core/log.md).
     fn set_frozen(&mut self, flag: Flag, on: bool) {
         let event = match flag {
             Flag::LatitudeLongitude => KEY_FREEZE_LATITUDE_LONGITUDE_SET,

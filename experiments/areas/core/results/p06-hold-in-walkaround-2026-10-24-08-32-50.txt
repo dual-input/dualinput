@@ -1,0 +1,38 @@
+   4.9s  the core started on target\sim\runs\2026-10-24-08-32-50-p06\core
+   5.5s  the core holds the aircraft
+   5.5s  cockpit: Sit in the cockpit.
+  11.6s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  12.7s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  13.8s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  14.9s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  16.0s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  17.1s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  18.2s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  19.3s    cockpit: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  20.3s  walkaround: Go to walkaround now, and try to walk.
+  26.4s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  27.5s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  28.6s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  29.7s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  30.8s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  31.9s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  33.0s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  34.1s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  35.2s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  36.3s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  37.4s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  38.5s    walkaround: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  39.5s  cockpit again: Go back to the cockpit now.
+  45.5s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  46.6s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  47.7s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  48.8s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  49.9s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  51.3s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  52.3s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  53.4s    cockpit again: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  57.6s  preflight ended
+  59.7s    after preflight: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  60.8s    after preflight: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  61.9s    after preflight: freezes 0 0 0, camera 2, from VCockpit60 - WeatherSquare4000_int
+  62.9s  done; the report is experiments\areas\core\results\p06-hold-in-walkaround-2026-10-24-08-32-50.txt

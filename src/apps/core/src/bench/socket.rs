@@ -150,6 +150,7 @@ impl Bench {
                     Err(_) => return tracing::warn!(slots_hash, "a slots hash that isn't hex"),
                 }
             }
+            StandInAct::Set { numbers, texts } => Act::Set { numbers, texts },
             StandInAct::Stale { unit: name } => match unit(&name) {
                 Some(place) => Act::Stale { unit: place as u32 },
                 None => return tracing::warn!(name, "the bench named no unit of the core's"),

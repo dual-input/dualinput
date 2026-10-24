@@ -17,7 +17,8 @@ use messages::backend::{
     Created, ENDPOINT_HEADER, Entry, Kind, LEAVE, LOOKUP, Leave, LookedUp, Lookup, MEMBERS,
     NewSession, Older, Refused, Renew, SESSIONS, SIGNATURE_HEADER,
 };
-use messages::net::{PilotId, Relay};
+use messages::net::{EndpointId, PilotId, Relay};
+use messages::{hex, unhex};
 use serde::Serialize;
 
 use crate::{Member, Network};
@@ -122,6 +123,12 @@ pub enum Refusal {
     Other(String),
 }
 
+/// The endpoint ID a session's endpoint key gives: the public half of the key, as iroh's
+/// endpoint ID is its secret key's Ed25519 public key.
+pub fn endpoint_id(key: &[u8; 32]) -> EndpointId {
+    SigningKey::from_bytes(key).verifying_key().to_bytes()
+}
+
 /// A member entry's pilot ID and endpoint ID, as `open` takes a crew member, or `None` for
 /// an entry whose hex doesn't read. A member's restart count comes only with its first
 /// message, so it starts at 0.
@@ -145,8 +152,11 @@ pub(crate) enum JobFor {
 #[derive(Default)]
 pub(crate) struct Backend {
     /// The session's endpoint key, drawn at Host or Join, which the session crate writes into
-    /// its session file.
-    pub(crate) key: Option<[u8; 32]>,
+    /// its session file. A `SigningKey` holds its public half, so a signed request costs one
+    /// curve multiplication, the signature's, where working the public half out again for the
+    /// entry and the header would make three, a third of a joiner's first `LinkUp` on an
+    /// unoptimized build (record/areas/session/log.md, 2026-10-23).
+    pub(crate) key: Option<SigningKey>,
     pub(crate) me: Option<Me>,
     /// Whether the backend lists this core's entry: a host's is listed with its code, and
     /// any other core posts its own at its first `LinkUp`.
@@ -174,12 +184,11 @@ pub fn join(cx: &Cx, join: Join) {
 impl Network {
     /// The session's endpoint key, once Host or Join drew it.
     pub fn key(&self) -> Option<[u8; 32]> {
-        self.backend.key
+        self.backend.key.as_ref().map(SigningKey::to_bytes)
     }
 
     fn host(me: &mut Network, host: Host, cx: &mut Cx) {
-        let key = cx.random_bytes::<32>();
-        me.backend.key = Some(key);
+        let key = SigningKey::from_bytes(&cx.random_bytes::<32>());
         let body = NewSession {
             session: host.session,
             relays: cx
@@ -191,11 +200,12 @@ impl Network {
             hash: messages::HASH.into(),
         };
         tracing::info!("the network asks the backend for a code");
-        me.ask(Asked::Host, SESSIONS, &body, Some(key), cx);
+        me.ask(Asked::Host, SESSIONS, &body, Some(&key), cx);
+        me.backend.key = Some(key);
     }
 
     fn join(me: &mut Network, join: Join, cx: &mut Cx) {
-        me.backend.key = Some(cx.random_bytes::<32>());
+        me.backend.key = Some(SigningKey::from_bytes(&cx.random_bytes::<32>()));
         tracing::info!("the network looks an invite code up");
         me.look_up(Asked::Join, join.code.to_ascii_uppercase(), cx);
     }
@@ -216,7 +226,7 @@ impl Network {
         asked: Asked,
         path: &str,
         body: &impl Serialize,
-        key: Option<[u8; 32]>,
+        key: Option<&SigningKey>,
         cx: &Cx,
     ) {
         if let Some((_, job, timer)) = self.backend.asking.take() {
@@ -233,22 +243,15 @@ impl Network {
         &mut self,
         path: &str,
         body: &impl Serialize,
-        key: Option<[u8; 32]>,
+        key: Option<&SigningKey>,
         purpose: JobFor,
         cx: &Cx,
     ) -> JobId {
         let body = serde_json::to_vec(body).expect("serde_json should write a backend request");
         let mut headers = vec![("content-type".into(), "application/json".into())];
         if let Some(key) = key {
-            let signing = SigningKey::from_bytes(&key);
-            headers.push((
-                ENDPOINT_HEADER.into(),
-                hex(&signing.verifying_key().to_bytes()),
-            ));
-            headers.push((
-                SIGNATURE_HEADER.into(),
-                hex(&signing.sign(&body).to_bytes()),
-            ));
+            headers.push((ENDPOINT_HEADER.into(), hex(&key.verifying_key().to_bytes())));
+            headers.push((SIGNATURE_HEADER.into(), hex(&key.sign(&body).to_bytes())));
         }
         let fetch = Fetch {
             method: Method::Post,
@@ -323,16 +326,18 @@ impl Network {
         if !self.backend.listed {
             return;
         }
-        let (Some(key), Some(my), Some(open)) =
-            (self.backend.key, self.backend.me.clone(), &self.session)
-        else {
+        let (Some(key), Some(my), Some(open)) = (
+            self.backend.key.clone(),
+            self.backend.me.clone(),
+            &self.session,
+        ) else {
             return;
         };
         let body = Renew {
             code: open.code.clone(),
             member: entry(&my, &key),
         };
-        self.post(MEMBERS, &body, Some(key), JobFor::Renew, cx);
+        self.post(MEMBERS, &body, Some(&key), JobFor::Renew, cx);
         if let Some(timer) = self.backend.renew.take() {
             cx.cancel_timer(timer);
         }
@@ -341,14 +346,14 @@ impl Network {
 
     /// Tells the backend this core left.
     pub(crate) fn tell_leave(&mut self, cx: &Cx) {
-        let (Some(key), Some(open)) = (self.backend.key, &self.session) else {
+        let (Some(key), Some(open)) = (self.backend.key.clone(), &self.session) else {
             return;
         };
         let body = Leave {
             code: open.code.clone(),
-            endpoint: hex(&SigningKey::from_bytes(&key).verifying_key().to_bytes()),
+            endpoint: hex(&key.verifying_key().to_bytes()),
         };
-        self.post(LEAVE, &body, Some(key), JobFor::Leave, cx);
+        self.post(LEAVE, &body, Some(&key), JobFor::Leave, cx);
     }
 
     /// Clears what the session held, once it's left.
@@ -466,12 +471,12 @@ fn backend_url(cx: &Cx) -> String {
         .to_string()
 }
 
-fn entry(me: &Me, key: &[u8; 32]) -> Entry {
+fn entry(me: &Me, key: &SigningKey) -> Entry {
     Entry {
         pilot: hex(&me.pilot),
         name: me.name.clone(),
         kind: me.kind,
-        endpoint: hex(&SigningKey::from_bytes(key).verifying_key().to_bytes()),
+        endpoint: hex(&key.verifying_key().to_bytes()),
     }
 }
 
@@ -513,25 +518,4 @@ fn refused(fetched: &Fetched) -> String {
     serde_json::from_slice::<Refused>(&fetched.body)
         .map(|r| r.error)
         .unwrap_or_else(|_| format!("the backend answered with status {}", fetched.status))
-}
-
-pub(crate) fn hex(bytes: &[u8]) -> String {
-    const DIGITS: &[u8; 16] = b"0123456789abcdef";
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for b in bytes {
-        out.push(char::from(DIGITS[usize::from(b >> 4)]));
-        out.push(char::from(DIGITS[usize::from(b & 15)]));
-    }
-    out
-}
-
-fn unhex<const N: usize>(text: &str) -> Option<[u8; N]> {
-    if text.len() != N * 2 {
-        return None;
-    }
-    let mut out = [0; N];
-    for (i, byte) in out.iter_mut().enumerate() {
-        *byte = u8::from_str_radix(text.get(i * 2..i * 2 + 2)?, 16).ok()?;
-    }
-    Some(out)
 }

@@ -46,6 +46,11 @@ pub const PORT_FILE: &str = "port.json";
 pub mod component {
     /// A cockpit panel's bridge, which our `VCockpit.js` loads into every cockpit panel.
     pub const PANEL_BRIDGE: &str = "panel-bridge";
+    /// The menu script, which our copy of BlurPage brings into the sim's menu.
+    /// src/sim-package/pages/menu.ts names it too, so change both together.
+    pub const MENU_SCRIPT: &str = "menu-script";
+    /// The desktop app, while its window is open.
+    pub const DESKTOP: &str = "desktop";
 }
 
 /// A client's first message.

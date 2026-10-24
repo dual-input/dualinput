@@ -1,7 +1,7 @@
 //! The test unit that stands in for what uses the clients crate before it's built: the
-//! session crate's announcement and goodbye, the profile loader's load and unload, and a
-//! feature with a slice, a setting, a command, and a panel module that echoes its panel's
-//! messages (record/areas/build/02-testing.md, "Its place").
+//! profile loader's load and unload, and a feature with a slice, a setting, a command, and a
+//! panel module that echoes its panel's messages (record/areas/build/02-testing.md, "Its
+//! place").
 
 use std::time::Duration;
 
@@ -60,7 +60,6 @@ impl BenchClients {
             return;
         };
         match act {
-            ClientsAct::Session { on } => sim_service::announce(cx, on),
             ClientsAct::Profile { loaded, picks } => {
                 me.picks = loaded.then_some(picks);
                 if loaded {
@@ -77,7 +76,6 @@ impl BenchClients {
                 });
                 cx.timer(every, BenchClients::churn);
             }
-            ClientsAct::Bye => clients::bye(cx),
         }
     }
 

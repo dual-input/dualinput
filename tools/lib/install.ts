@@ -14,7 +14,8 @@ export const SIM_PROCESS = "FlightSimulator2024.exe"
 /**
  * Where each edition of the sim keeps its UserCfg.opt: Steam's in `%APPDATA%`, and the
  * Microsoft Store's in `%LOCALAPPDATA%` (record/areas/install/01-installing-and-updating.md,
- * "The packages folders").
+ * "The packages folders"). `USER_CFGS` in src/platform/sim-service/src/aircraft.rs names the
+ * same files, so change both together.
  */
 export function userCfgs(env: NodeJS.ProcessEnv = process.env): string[] {
   const files: string[] = []
@@ -30,6 +31,8 @@ export function userCfgs(env: NodeJS.ProcessEnv = process.env): string[] {
  * `InstalledPackagesPath "D:\MSFS 2024\Packages"`. The line's name must be followed by a
  * space, since a longer name, `InstalledPackagesPathNextBoot`, starts with the same letters
  * (read in flybywiresim/installer v3.7.2, `src/renderer/actions/install-path.utils.tsx`).
+ * `packages_folder` in src/platform/sim-service/src/aircraft.rs reads the line the same way,
+ * so change both together.
  */
 export function packagesFolders(cfgs: string[]): string[] {
   const folders = new Map<string, string>()

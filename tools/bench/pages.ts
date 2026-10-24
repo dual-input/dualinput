@@ -3,8 +3,12 @@
 // own page-client over the core's real WebSocket, sending the sim's Origin, so the core
 // can't tell a fake page from a real one (record/areas/build/02-testing.md, "The sim's pages").
 
+import type { FromClient } from "../../src/engines/messages/ts/clients/FromClient.ts"
+import type { Notice } from "../../src/engines/messages/ts/clients/Notice.ts"
 import type { ToClient } from "../../src/engines/messages/ts/clients/ToClient.ts"
 import type { JsonValue } from "../../src/engines/messages/ts/serde_json/JsonValue.ts"
+import type { MenuPage } from "../../src/engines/messages/ts/sim/MenuPage.ts"
+import { HASH, VERSION } from "../../src/engines/messages/ts/stamp.ts"
 import { type Env, PageClient, type Socket } from "../../src/engines/page-client/src/page-client.ts"
 import type { Core } from "./cores.ts"
 
@@ -116,6 +120,99 @@ export class FakePage {
     this.unlisten()
     for (const timer of this.timers) clearInterval(timer)
     for (const ws of this.sockets) ws.close()
+  }
+}
+
+/**
+ * The menu script, as the bench fakes it: a page that joins as `menu-script` and answers the
+ * sim service's ask with the master page the scenario gives, `main` for the main menu's and
+ * `in-game` for a flight's (record/areas/session/02-units.md, "The menu script").
+ */
+export function fakeMenuScript(core: Core, master: MenuPage): FakePage {
+  const page = new FakePage(core, { component: "menu-script" })
+  page.client.onUnit("sim-service", () => {
+    page.client.sendUnit("sim-service", { master })
+  })
+  return page
+}
+
+/**
+ * The desktop app, as the bench fakes it: a client that finds the core through its port file
+ * and sends no Origin, as the desktop app's Rust side does (decision 013), says `alive` every
+ * 2s, and sends commands, such as the session crate's Host and Join. While it's open the core
+ * doesn't exit when the sim closes, as with the desktop app's window open.
+ */
+export class FakeApp {
+  private readonly socket: RawSocket
+  private readonly timer: ReturnType<typeof setInterval>
+  private next = 1
+
+  private constructor(socket: RawSocket) {
+    this.socket = socket
+    // A scenario ends its cores, which closes the socket, so the timer never holds the bench
+    // open after it.
+    this.timer = setInterval(() => this.send({ t: "alive" }), 2_000).unref()
+  }
+
+  /** Connects to `core`, says hello as `component`, and watches `slices`. */
+  static async open(core: Core, slices: string[], component = "desktop"): Promise<FakeApp> {
+    const socket = new RawSocket(core.port(), null)
+    await socket.open()
+    const app = new FakeApp(socket)
+    app.send({ t: "hello", component, version: VERSION, hash: HASH })
+    app.send({ t: "watch", slices })
+    return app
+  }
+
+  private send(message: FromClient): void {
+    this.socket.send(JSON.stringify(message))
+  }
+
+  /** Sends a command, and returns the core's answer: `null` when it was taken, or its error. */
+  async command(name: string, args: JsonValue = null): Promise<string | null> {
+    const id = this.next++
+    this.send({ t: "command", id, name, args })
+    let answer: Extract<ToClient, { t: "answer" }> | undefined
+    await this.socket.until(() => {
+      answer = this.socket.received.find((m): m is Extract<ToClient, { t: "answer" }> => m.t === "answer" && m.id === id)
+      return answer !== undefined
+    }, `an answer to ${name}`)
+    return answer!.error ?? null
+  }
+
+  /** Sends a command, and fails unless the core took it. */
+  async ok(name: string, args: JsonValue = null): Promise<void> {
+    const error = await this.command(name, args)
+    if (error !== null) throw new Error(`the core refused ${name}: ${error}`)
+  }
+
+  /** The newest value of a slice the app watches, as the core last sent it. */
+  slice<T = JsonValue>(name: string): T | undefined {
+    const states = this.socket.received.filter((m) => m.t === "state" && m.slice === name) as Extract<ToClient, { t: "state" }>[]
+    return states.at(-1)?.value as T | undefined
+  }
+
+  /** The notices up, as the core last sent them. */
+  notices(): Notice[] {
+    return this.slice<Notice[]>("notices") ?? []
+  }
+
+  /** Waits until `ok` holds, checking every 20ms, for at most `ms`. */
+  until(ok: () => boolean, what: string, ms = 10_000): Promise<void> {
+    return this.socket.until(ok, what, ms)
+  }
+
+  get closed(): { code: number } | null {
+    return this.socket.closed
+  }
+
+  received(): ToClient[] {
+    return this.socket.received
+  }
+
+  close(): void {
+    clearInterval(this.timer)
+    this.socket.close()
   }
 }
 

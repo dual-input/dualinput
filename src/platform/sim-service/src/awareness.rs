@@ -3,9 +3,11 @@
 //! signal for the sim awareness engine (record/areas/core/03-sim-seam-and-wasm-module.md,
 //! "What the platform's connection holds").
 
+use clients::{ClientJoined, Sender, To};
 use kernel::{Cx, Job, JobId};
+use messages::clients::component;
+use messages::sim::{MENU_UNIT, MenuPage, MenuReport};
 use sim_awareness::{Departure, Flow, Process, Signal, SimAwareness};
-use sim_client::{Period, Var};
 use simconnect_types::SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE;
 
 use crate::connections::Origin;
@@ -21,6 +23,7 @@ pub(crate) enum Step {
     FlightLoaded,
     Flow(Flow),
     Pause(u32),
+    Page(MenuPage),
     Departure(Departure),
 }
 
@@ -41,6 +44,7 @@ impl Step {
             Step::FlightLoaded => Signal::FlightLoaded,
             Step::Flow(flow) => Signal::Flow(*flow),
             Step::Pause(flags) => Signal::Pause(*flags),
+            Step::Page(page) => Signal::Page(*page),
             Step::Departure(departure) => Signal::Departure(departure.clone()),
         };
         if awareness.step(signal) {
@@ -115,8 +119,8 @@ impl SimService {
         self.make(me, ops, cx);
     }
 
-    /// Reads the flight file `FlightLoaded` named, for its `[Departure]` section, which the
-    /// session crate and Go to read (record/areas/session/02-units.md, "Preflight").
+    /// Reads the flight file `FlightLoaded` named, for its `[Departure]` section, which Go to
+    /// reads (record/areas/session/02-units.md, "Go to").
     pub(crate) fn read_flight_file(&self, file: String, cx: &Cx) {
         cx.job(Job::read(file), SimService::flight_file);
     }
@@ -131,24 +135,42 @@ impl SimService {
         }
     }
 
-    /// Each load that reaches Flying: reads `A:TITLE` once, to log beside the aircraft's
-    /// path, since the path, not the title, names the preset
-    /// (record/areas/core/03-sim-seam-and-wasm-module.md, "The aircraft").
+    /// Each load that reaches Ready to fly or Flying: the aircraft's facts start again, with
+    /// its title read once to log beside the aircraft's path, since the path, not the title,
+    /// names the preset (record/areas/core/03-sim-seam-and-wasm-module.md, "The aircraft").
     pub(crate) fn sim_changed(me: &mut SimService, changed: &SimChanged, cx: &mut Cx) {
-        let flying = cx.read::<SimAwareness>().stage == messages::sim::Stage::Flying;
-        if flying && changed.before.stage != messages::sim::Stage::Flying {
-            let origin = Origin {
-                unit: me.me(),
-                handle: None,
-            };
-            let Some(client) = me.client(origin, cx) else {
-                return;
-            };
-            let (watch, ops) = client.watch(&origin, &[Var::text("A:TITLE")], Period::Once);
-            me.platform.title = Some(watch.request);
-            me.make(origin, ops, cx);
+        let in_flight = |stage| {
+            matches!(
+                stage,
+                messages::sim::Stage::ReadyToFly | messages::sim::Stage::Flying
+            )
+        };
+        if in_flight(cx.read::<SimAwareness>().stage) && !in_flight(changed.before.stage) {
+            me.aircraft_loaded(cx);
         }
         me.check_stall(cx);
+    }
+}
+
+impl SimService {
+    /// The menu script's socket joined: the service asks it for its master page, which ends
+    /// Starting for a core that found the sim already running, since no SimConnect signal
+    /// tells the main menu from a flight then (record/areas/core/03-sim-seam-and-wasm-module.md,
+    /// "Leaving Starting").
+    pub(crate) fn client_joined(_: &mut SimService, joined: &ClientJoined, cx: &mut Cx) {
+        if joined.component == component::MENU_SCRIPT {
+            clients::send(
+                cx,
+                To::Component(component::MENU_SCRIPT.into()),
+                MENU_UNIT,
+                &serde_json::json!({}),
+            );
+        }
+    }
+
+    pub(crate) fn menu_report(_: &mut SimService, _: Sender, report: MenuReport, cx: &mut Cx) {
+        tracing::info!(master = ?report.master, "the menu script reported its master page");
+        Step::signal(cx, Step::Page(report.master));
     }
 }
 

@@ -1,0 +1,272 @@
+Stage 9's handler budget, 2026-10-23, on our development machine: the countdown case of tools/bench/scenarios/session.ts,
+with a patch we didn't keep that logged each input's handlers over 300us (TIMING: total, the kernel's refresh of verdicts,
+and each handler at or over 10us, by how it ran: input, moment, call, ask) and, in run 3, the clients round's slices
+(ROUNDTIMING, SLICEBUILD, SLICESTRING). Source 1 is the kernel's timers, 2 its jobs, 3 the apps' sockets, 4 the sim edge,
+and 6 the transport. Lines at or over 550us, and each core's stats for the run, from each core's log.
+
+== Run 1: the unoptimized bench build, the stage's code as it was ==
+-- Adam
+kernel::run: TIMING seq=75 source=4 total_us=634 verdicts_us=2 runs=6 parts=input:sim-service=572 call:sim-awareness=40
+kernel::run: TIMING seq=91 source=2 total_us=670 verdicts_us=26 runs=10 parts=input:network=149 moment:session=362 call:sim-service=48 call:session=38
+kernel::run: TIMING seq=137 source=6 total_us=1017 verdicts_us=6 runs=10 parts=input:network=788 moment:session=51 call:session=68 call:network=22 call:session=48 call:network=12
+kernel::run: TIMING seq=156 source=4 total_us=583 verdicts_us=13 runs=17 parts=input:sim-service=116 call:sim-awareness=90 moment:sim-service=87 call:session=147 call:session=12 call:network=19 call:sim-service=30
+kernel::run: TIMING seq=159 source=2 total_us=877 verdicts_us=21 runs=1 parts=input:sim-service=111
+kernel::run: TIMING seq=218 source=1 total_us=598 verdicts_us=568 runs=1 parts=input:bench-sim=18
+kernel::run: TIMING seq=315 source=4 total_us=582 verdicts_us=58 runs=1 parts=input:sim-service=474
+dualinput_core::loop_stats: the loop's stats window="run" seconds=10.2 inputs=453 busy_percent=0.76 wait_p50_us=12 wait_p99_us=863 wait_p999_us=3125 wait_max_us=3125 over_1ms=1 slowest_us=1077 slowest_seq=137 slowest_stamp=45643859321
+-- James
+kernel::run: TIMING seq=161 source=3 total_us=950 verdicts_us=2 runs=4 parts=input:clients=23 call:session=139 call:network=770 call:clients=10
+kernel::run: TIMING seq=165 source=2 total_us=727 verdicts_us=10 runs=12 parts=input:network=100 moment:session=482 call:sim-service=48 call:session=50
+kernel::run: TIMING seq=197 source=1 total_us=581 verdicts_us=14 runs=1 parts=input:clients=557
+kernel::run: TIMING seq=222 source=4 total_us=582 verdicts_us=13 runs=10 parts=input:sim-service=431 call:session=17 call:session=82 call:network=11 call:network=10
+kernel::run: TIMING seq=231 source=1 total_us=679 verdicts_us=604 runs=1 parts=input:sim-service=70
+kernel::run: TIMING seq=295 source=1 total_us=564 verdicts_us=29 runs=1 parts=input:clients=523
+kernel::run: TIMING seq=438 source=1 total_us=564 verdicts_us=16 runs=1 parts=input:clients=543
+kernel::run: TIMING seq=469 source=1 total_us=640 verdicts_us=15 runs=1 parts=input:clients=618
+dualinput_core::loop_stats: the loop's stats window="run" seconds=12.2 inputs=524 busy_percent=0.83 wait_p50_us=13 wait_p99_us=895 wait_p999_us=5860 wait_max_us=5860 over_1ms=0 slowest_us=997 slowest_seq=161 slowest_stamp=45642603967
+
+== Run 2: unoptimized, the endpoint key held with its public half ==
+-- Adam
+kernel::run: TIMING seq=93 source=2 total_us=648 verdicts_us=6 runs=10 parts=input:network=177 moment:session=322 call:sim-service=55 call:session=41
+kernel::run: TIMING seq=139 source=6 total_us=643 verdicts_us=9 runs=10 parts=input:network=420 moment:session=51 call:session=76 call:network=16 call:session=33 call:network=12
+kernel::run: TIMING seq=148 source=6 total_us=678 verdicts_us=9 runs=5 parts=input:network=12 call:session=564 call:session=84
+kernel::run: TIMING seq=158 source=4 total_us=890 verdicts_us=14 runs=17 parts=input:sim-service=66 call:sim-awareness=66 moment:sim-service=135 moment:session=10 call:session=327 call:session=16 call:session=14 call:network=17 call:sim-service=27
+kernel::run: TIMING seq=162 source=4 total_us=597 verdicts_us=18 runs=9 parts=input:sim-service=149 call:sim-awareness=66 moment:bench-sim=16 call:session=299 call:network=23
+kernel::run: TIMING seq=300 source=1 total_us=667 verdicts_us=41 runs=1 parts=input:clients=621
+-- James
+kernel::run: TIMING seq=0 source=0 total_us=621 verdicts_us=13 runs=6 parts=input:clients=68 moment:clients=16 moment:sim-service=34 moment:recording=14 moment:bench-sim=408
+kernel::run: TIMING seq=104 source=1 total_us=564 verdicts_us=7 runs=1 parts=input:clients=94
+kernel::run: TIMING seq=130 source=1 total_us=988 verdicts_us=6 runs=1 parts=input:clients=971
+kernel::run: TIMING seq=162 source=3 total_us=681 verdicts_us=1 runs=4 parts=input:clients=23 call:session=113 call:network=533
+kernel::run: TIMING seq=165 source=2 total_us=707 verdicts_us=14 runs=12 parts=input:network=89 moment:session=442 call:sim-service=54 call:session=73
+kernel::run: TIMING seq=173 source=1 total_us=563 verdicts_us=12 runs=1 parts=input:clients=544
+kernel::run: TIMING seq=263 source=1 total_us=966 verdicts_us=18 runs=1 parts=input:clients=943
+kernel::run: TIMING seq=324 source=1 total_us=608 verdicts_us=22 runs=1 parts=input:clients=576
+kernel::run: TIMING seq=394 source=1 total_us=686 verdicts_us=19 runs=1 parts=input:clients=662
+kernel::run: TIMING seq=452 source=1 total_us=800 verdicts_us=26 runs=1 parts=input:clients=697
+kernel::run: TIMING seq=473 source=1 total_us=634 verdicts_us=41 runs=1 parts=input:clients=573
+dualinput_core::loop_stats: the loop's stats window="run" seconds=12.2 inputs=527 busy_percent=0.80 wait_p50_us=12 wait_p99_us=639 wait_p999_us=6195 wait_max_us=6195 over_1ms=2 slowest_us=1117 slowest_seq=130 slowest_stamp=46127319640
+
+== Run 3: unoptimized, as run 2, with the clients round's slices timed ==
+-- Adam
+kernel::run: TIMING seq=90 source=2 total_us=595 verdicts_us=7 runs=10 parts=input:network=158 moment:session=300 call:sim-service=43 call:session=42
+kernel::run: TIMING seq=136 source=6 total_us=627 verdicts_us=5 runs=10 parts=input:network=451 moment:session=52 call:session=50 call:network=16 call:session=28
+kernel::run: TIMING seq=392 source=1 total_us=590 verdicts_us=44 runs=1 parts=input:clients=534
+clients::state: SLICEBUILD slice="session" us=590
+clients::state: ROUNDTIMING total_us=770 sockets=1 parts=notices=4us/2b session=709us/831b
+kernel::run: TIMING seq=446 source=1 total_us=845 verdicts_us=16 runs=1 parts=input:clients=823
+kernel::run: TIMING seq=450 source=1 total_us=552 verdicts_us=17 runs=1 parts=input:clients=530
+-- James
+kernel::run: TIMING seq=161 source=3 total_us=773 verdicts_us=2 runs=4 parts=input:clients=14 call:session=111 call:network=632 call:clients=10
+kernel::run: TIMING seq=163 source=2 total_us=551 verdicts_us=16 runs=12 parts=input:network=84 moment:session=332 call:sim-service=36 call:session=50
+kernel::run: TIMING seq=292 source=1 total_us=647 verdicts_us=55 runs=1 parts=input:clients=582
+clients::state: ROUNDTIMING total_us=568 sockets=1 parts=notices=11us/2b session=475us/807b
+kernel::run: TIMING seq=375 source=1 total_us=670 verdicts_us=28 runs=1 parts=input:clients=630
+kernel::run: TIMING seq=382 source=1 total_us=598 verdicts_us=22 runs=1 parts=input:clients=566
+clients::state: SLICESTRING slice="session" us=602
+clients::state: ROUNDTIMING total_us=1222 sockets=1 parts=notices=10us/2b session=1157us/808b
+kernel::run: TIMING seq=432 source=1 total_us=1421 verdicts_us=21 runs=1 parts=input:clients=1393
+kernel::run: TIMING seq=435 source=1 total_us=583 verdicts_us=25 runs=1 parts=input:clients=549
+kernel::run: TIMING seq=454 source=1 total_us=559 verdicts_us=35 runs=1 parts=input:clients=513
+clients::state: ROUNDTIMING total_us=675 sockets=1 parts=notices=10us/2b session=610us/808b
+kernel::run: TIMING seq=459 source=1 total_us=809 verdicts_us=64 runs=1 parts=input:clients=734
+kernel::run: TIMING seq=462 source=1 total_us=551 verdicts_us=25 runs=1 parts=input:clients=515
+dualinput_core::loop_stats: the loop's stats window="run" seconds=12.1 inputs=523 busy_percent=0.73 wait_p50_us=12 wait_p99_us=303 wait_p999_us=3512 wait_max_us=3512 over_1ms=1 slowest_us=1505 slowest_seq=432 slowest_stamp=46448527632
+
+== Run 4: unoptimized, slices written straight to JSON text ==
+-- Adam
+kernel::run: TIMING seq=75 source=4 total_us=618 verdicts_us=2 runs=6 parts=input:sim-service=526 call:sim-awareness=59 moment:bench-sim=14
+kernel::run: TIMING seq=93 source=2 total_us=826 verdicts_us=6 runs=10 parts=input:network=172 moment:session=472 call:sim-service=56 call:session=45
+kernel::run: TIMING seq=137 source=6 total_us=562 verdicts_us=5 runs=10 parts=input:network=338 moment:session=58 call:session=78 call:network=20 call:session=34
+kernel::run: TIMING seq=188 source=1 total_us=617 verdicts_us=19 runs=1 parts=input:clients=593
+kernel::run: TIMING seq=243 source=1 total_us=591 verdicts_us=16 runs=1 parts=input:clients=569
+kernel::run: TIMING seq=265 source=1 total_us=1073 verdicts_us=27 runs=1 parts=input:clients=1037
+kernel::run: TIMING seq=275 source=3 total_us=825 verdicts_us=23 runs=7 parts=input:clients=50 call:session=162 call:network=25 call:session=534 call:clients=17
+kernel::run: TIMING seq=319 source=3 total_us=683 verdicts_us=18 runs=8 parts=input:clients=84 call:session=10 ask:session=264 call:clients=10 call:network=22 call:session=251
+kernel::run: TIMING seq=333 source=1 total_us=558 verdicts_us=32 runs=1 parts=input:clients=521
+kernel::run: TIMING seq=377 source=1 total_us=827 verdicts_us=592 runs=1 parts=input:clients=226
+kernel::run: TIMING seq=381 source=1 total_us=571 verdicts_us=28 runs=1 parts=input:clients=519
+dualinput_core::loop_stats: the loop's stats window="run" seconds=10.2 inputs=456 busy_percent=0.72 wait_p50_us=12 wait_p99_us=1087 wait_p999_us=3456 wait_max_us=3456 over_1ms=1 slowest_us=1149 slowest_seq=265 slowest_stamp=46781034960
+-- James
+kernel::run: TIMING seq=75 source=4 total_us=911 verdicts_us=2 runs=6 parts=input:sim-service=853 call:sim-awareness=38
+kernel::run: TIMING seq=162 source=3 total_us=864 verdicts_us=1 runs=4 parts=input:clients=25 call:session=130 call:network=695
+kernel::run: TIMING seq=165 source=2 total_us=595 verdicts_us=11 runs=12 parts=input:network=87 moment:session=379 call:sim-service=35 call:session=51
+kernel::run: TIMING seq=224 source=4 total_us=852 verdicts_us=14 runs=18 parts=input:sim-service=61 call:sim-awareness=60 moment:sim-service=70 call:session=506 call:session=20 call:session=14 call:network=15 call:sim-service=20
+kernel::run: TIMING seq=468 source=1 total_us=621 verdicts_us=27 runs=1 parts=input:clients=259
+dualinput_core::loop_stats: the loop's stats window="run" seconds=12.2 inputs=528 busy_percent=0.69 wait_p50_us=12 wait_p99_us=895 wait_p999_us=4553 wait_max_us=4553 over_1ms=0 slowest_us=962 slowest_seq=224 slowest_stamp=46778467230
+
+== Run 5: the release profile, timing patch still in, every session scenario; its budget lines ==
+(Its one failure is the late joiner's check that read a slice listing no members, fixed before run 6.)
+# budget: preflight ended on the two cores 0.4ms apart, against one network delay
+# budget: James's slowest input took 242µs, 0 over 1ms, against 1,000µs for a handler
+# budget: Adam's slowest input took 405µs, 0 over 1ms, against 1,000µs for a handler
+# budget: control reached the other pilot 32ms after the leave, against 1,000ms
+not ok 10 - a pilot flying who leaves mid-flight hands control over within 1s and is a leave, not an outage; one who quits does the same, and exits
+# tests 15
+# pass 14
+# fail 1
+
+== Run 6: the profile release-with-checks, the patch taken out, every session scenario; its budget lines ==
+Finished `release-with-checks` profile [optimized] target(s) in 2m 30s
+# budget: preflight ended on the two cores 0.4ms apart, against one network delay
+# budget: James's slowest input took 477µs, 0 over 1ms, against 1,000µs for a handler
+# budget: Adam's slowest input took 380µs, 0 over 1ms, against 1,000µs for a handler
+# budget: control reached the other pilot 21ms after the leave, against 1,000ms
+# tests 15
+# pass 15
+# fail 0
+
+== Run 7: the whole bench on release-with-checks, the patch taken out: each core's stats for its whole run, from the cores that logged them as they exited ==
+clients-panel-rate                       a      inputs=770    busy_percent=0.32  over_1ms=0 slowest_us=380
+core-helper-pipe                         a      inputs=1273   busy_percent=0.83  over_1ms=0 slowest_us=213
+network-busiest                          b      inputs=11987  busy_percent=0.27  over_1ms=0 slowest_us=832
+session-countdown                        Adam   inputs=452    busy_percent=0.19  over_1ms=1 slowest_us=1049
+session-countdown                        James  inputs=524    busy_percent=0.19  over_1ms=0 slowest_us=411
+session-pf-leaves                        Adam   inputs=471    busy_percent=0.18  over_1ms=0 slowest_us=432
+session-quit-exit                        a      inputs=43     busy_percent=0.08  over_1ms=0 slowest_us=389
+session-quit-exit                        b      inputs=38     busy_percent=0.07  over_1ms=0 slowest_us=341
+In all: 15558 inputs, 1 over 1ms.
+
+== Run 3's slices, every line the patch logged for the clients round (the lines above keep only those at or over 550us) ==
+-- Adam
+clients::state: SLICESTRING slice="session" us=175
+clients::state: ROUNDTIMING total_us=353 sockets=1 parts=notices=10us/2b session=316us/419b
+clients::state: SLICEBUILD slice="session" us=243
+clients::state: ROUNDTIMING total_us=363 sockets=1 parts=notices=10us/2b session=329us/419b
+clients::state: SLICEBUILD slice="session" us=170
+clients::state: ROUNDTIMING total_us=319 sockets=1 parts=notices=4us/2b session=295us/419b
+clients::state: SLICEBUILD slice="session" us=151
+clients::state: ROUNDTIMING total_us=314 sockets=1 parts=notices=9us/2b session=280us/808b
+clients::state: SLICEBUILD slice="session" us=169
+clients::state: ROUNDTIMING total_us=338 sockets=1 parts=notices=11us/2b session=299us/808b
+clients::state: SLICEBUILD slice="session" us=154
+clients::state: SLICEBUILD slice="session" us=173
+clients::state: ROUNDTIMING total_us=351 sockets=1 parts=notices=10us/2b session=311us/808b
+clients::state: SLICEBUILD slice="session" us=161
+clients::state: ROUNDTIMING total_us=310 sockets=1 parts=notices=10us/2b session=273us/808b
+clients::state: SLICEBUILD slice="session" us=188
+clients::state: ROUNDTIMING total_us=311 sockets=1 parts=notices=8us/2b session=283us/808b
+clients::state: SLICEBUILD slice="session" us=253
+clients::state: ROUNDTIMING total_us=400 sockets=1 parts=notices=4us/2b session=379us/808b
+clients::state: SLICEBUILD slice="session" us=233
+clients::state: ROUNDTIMING total_us=383 sockets=1 parts=notices=4us/2b session=347us/807b
+clients::state: SLICEBUILD slice="session" us=250
+clients::state: ROUNDTIMING total_us=441 sockets=1 parts=notices=4us/2b session=396us/808b
+clients::state: SLICEBUILD slice="session" us=175
+clients::state: ROUNDTIMING total_us=337 sockets=1 parts=notices=3us/2b session=313us/808b
+clients::state: SLICEBUILD slice="session" us=193
+clients::state: ROUNDTIMING total_us=313 sockets=1 parts=notices=3us/2b session=291us/808b
+clients::state: SLICEBUILD slice="session" us=590
+clients::state: ROUNDTIMING total_us=770 sockets=1 parts=notices=4us/2b session=709us/831b
+clients::state: SLICEBUILD slice="session" us=216
+clients::state: ROUNDTIMING total_us=442 sockets=1 parts=notices=8us/2b session=350us/833b
+clients::state: SLICEBUILD slice="session" us=174
+clients::state: ROUNDTIMING total_us=345 sockets=1 parts=notices=11us/2b session=304us/833b
+clients::state: SLICEBUILD slice="session" us=170
+clients::state: ROUNDTIMING total_us=334 sockets=1 parts=notices=11us/2b session=291us/833b
+clients::state: SLICEBUILD slice="session" us=177
+clients::state: ROUNDTIMING total_us=348 sockets=1 parts=notices=10us/2b session=308us/833b
+-- James
+clients::state: SLICEBUILD slice="session" us=215
+clients::state: ROUNDTIMING total_us=355 sockets=1 parts=notices=9us/2b session=324us/450b
+clients::state: SLICEBUILD slice="session" us=153
+clients::state: SLICEBUILD slice="session" us=169
+clients::state: ROUNDTIMING total_us=332 sockets=1 parts=notices=11us/2b session=292us/808b
+clients::state: SLICEBUILD slice="session" us=154
+clients::state: SLICEBUILD slice="session" us=173
+clients::state: ROUNDTIMING total_us=351 sockets=1 parts=notices=10us/2b session=312us/808b
+clients::state: SLICEBUILD slice="session" us=161
+clients::state: ROUNDTIMING total_us=347 sockets=1 parts=notices=10us/2b session=311us/808b
+clients::state: SLICEBUILD slice="session" us=289
+clients::state: ROUNDTIMING total_us=521 sockets=1 parts=notices=9us/2b session=487us/808b
+clients::state: SLICEBUILD slice="session" us=193
+clients::state: ROUNDTIMING total_us=369 sockets=1 parts=notices=12us/2b session=325us/808b
+clients::state: SLICEBUILD slice="session" us=169
+clients::state: ROUNDTIMING total_us=329 sockets=1 parts=notices=10us/2b session=288us/808b
+clients::state: SLICEBUILD slice="session" us=193
+clients::state: ROUNDTIMING total_us=352 sockets=1 parts=notices=12us/2b session=306us/808b
+clients::state: SLICEBUILD slice="session" us=161
+clients::state: ROUNDTIMING total_us=317 sockets=1 parts=notices=12us/2b session=271us/808b
+clients::state: SLICEBUILD slice="session" us=164
+clients::state: ROUNDTIMING total_us=306 sockets=1 parts=notices=9us/2b session=270us/808b
+clients::state: SLICEBUILD slice="session" us=239
+clients::state: ROUNDTIMING total_us=412 sockets=1 parts=notices=11us/2b session=355us/808b
+clients::state: SLICEBUILD slice="session" us=185
+clients::state: ROUNDTIMING total_us=347 sockets=1 parts=notices=10us/2b session=307us/808b
+clients::state: SLICEBUILD slice="session" us=160
+clients::state: ROUNDTIMING total_us=367 sockets=1 parts=notices=11us/2b session=323us/808b
+clients::state: SLICESTRING slice="session" us=182
+clients::state: ROUNDTIMING total_us=421 sockets=1 parts=notices=9us/2b session=386us/807b
+clients::state: SLICEBUILD slice="session" us=172
+clients::state: ROUNDTIMING total_us=322 sockets=1 parts=notices=11us/2b session=279us/807b
+clients::state: SLICEBUILD slice="session" us=179
+clients::state: ROUNDTIMING total_us=356 sockets=1 parts=notices=11us/2b session=313us/807b
+clients::state: SLICEBUILD slice="session" us=168
+clients::state: ROUNDTIMING total_us=332 sockets=1 parts=notices=10us/2b session=294us/807b
+clients::state: SLICEBUILD slice="session" us=304
+clients::state: ROUNDTIMING total_us=568 sockets=1 parts=notices=11us/2b session=475us/807b
+clients::state: ROUNDTIMING total_us=311 sockets=1 parts=notices=10us/2b session=187us/807b
+clients::state: SLICEBUILD slice="session" us=153
+clients::state: ROUNDTIMING total_us=304 sockets=1 parts=notices=13us/2b session=259us/807b
+clients::state: SLICEBUILD slice="session" us=274
+clients::state: ROUNDTIMING total_us=521 sockets=1 parts=notices=10us/2b session=434us/807b
+clients::state: SLICEBUILD slice="session" us=174
+clients::state: ROUNDTIMING total_us=327 sockets=1 parts=notices=10us/2b session=289us/808b
+clients::state: SLICEBUILD slice="session" us=180
+clients::state: ROUNDTIMING total_us=374 sockets=1 parts=notices=12us/2b session=330us/808b
+clients::state: SLICEBUILD slice="session" us=191
+clients::state: ROUNDTIMING total_us=343 sockets=1 parts=notices=10us/2b session=304us/808b
+clients::state: SLICEBUILD slice="session" us=167
+clients::state: ROUNDTIMING total_us=332 sockets=1 parts=notices=11us/2b session=288us/808b
+clients::state: SLICEBUILD slice="session" us=228
+clients::state: ROUNDTIMING total_us=355 sockets=1 parts=notices=8us/2b session=324us/808b
+clients::state: SLICEBUILD slice="session" us=157
+clients::state: SLICEBUILD slice="session" us=269
+clients::state: SLICESTRING slice="session" us=602
+clients::state: ROUNDTIMING total_us=1222 sockets=1 parts=notices=10us/2b session=1157us/808b
+clients::state: SLICEBUILD slice="session" us=267
+clients::state: ROUNDTIMING total_us=489 sockets=1 parts=notices=10us/2b session=418us/808b
+clients::state: SLICEBUILD slice="session" us=185
+clients::state: ROUNDTIMING total_us=370 sockets=1 parts=notices=12us/2b session=324us/808b
+clients::state: SLICEBUILD slice="session" us=174
+clients::state: ROUNDTIMING total_us=320 sockets=1 parts=notices=12us/2b session=274us/808b
+clients::state: SLICEBUILD slice="session" us=173
+clients::state: ROUNDTIMING total_us=311 sockets=1 parts=notices=11us/2b session=271us/808b
+clients::state: SLICEBUILD slice="session" us=283
+clients::state: ROUNDTIMING total_us=468 sockets=1 parts=notices=12us/2b session=423us/808b
+clients::state: SLICEBUILD slice="session" us=161
+clients::state: ROUNDTIMING total_us=348 sockets=1 parts=notices=10us/2b session=304us/808b
+clients::state: SLICEBUILD slice="session" us=409
+clients::state: ROUNDTIMING total_us=675 sockets=1 parts=notices=10us/2b session=610us/808b
+clients::state: SLICEBUILD slice="session" us=163
+clients::state: ROUNDTIMING total_us=328 sockets=1 parts=notices=11us/2b session=285us/808b
+clients::state: SLICEBUILD slice="session" us=235
+clients::state: ROUNDTIMING total_us=456 sockets=1 parts=notices=11us/2b session=411us/808b
+clients::state: SLICEBUILD slice="session" us=190
+clients::state: ROUNDTIMING total_us=353 sockets=1 parts=notices=12us/2b session=306us/808b
+clients::state: SLICEBUILD slice="session" us=181
+clients::state: ROUNDTIMING total_us=415 sockets=1 parts=notices=10us/2b session=311us/808b
+clients::state: SLICEBUILD slice="session" us=181
+clients::state: ROUNDTIMING total_us=353 sockets=1 parts=notices=11us/2b session=310us/808b
+clients::state: SLICEBUILD slice="session" us=157
+clients::state: ROUNDTIMING total_us=325 sockets=1 parts=notices=10us/2b session=286us/808b
+clients::state: SLICEBUILD slice="session" us=183
+clients::state: ROUNDTIMING total_us=347 sockets=1 parts=notices=10us/2b session=306us/808b
+clients::state: SLICEBUILD slice="session" us=191
+clients::state: ROUNDTIMING total_us=347 sockets=1 parts=notices=10us/2b session=304us/808b
+clients::state: SLICEBUILD slice="session" us=163
+clients::state: ROUNDTIMING total_us=325 sockets=1 parts=notices=10us/2b session=286us/808b
+clients::state: SLICEBUILD slice="session" us=155
+clients::state: ROUNDTIMING total_us=310 sockets=1 parts=notices=9us/2b session=271us/808b
+clients::state: SLICEBUILD slice="session" us=164
+
+== Run 8: the stage's final whole bench (results/2026-10-24-stage-9-whole-bench.txt), the countdown case's cores: the keys' sizes ==
+-- Adam
+session: a connection's first message carries this core's keys conn=1 bytes=197
+session::preflight: preflight ended, and the session's keys take this much bytes=1073 members=2
+-- James
+session: a connection's first message carries this core's keys conn=1 bytes=254
+session::preflight: preflight ended, and the session's keys take this much bytes=1073 members=2
+
+== A rebuild on release-with-checks after touching src/platform/session/src/slice.rs, timed by PowerShell's Measure-Command ==
+    Finished `release-with-checks` profile [optimized] target(s) in 6.29s

@@ -180,16 +180,9 @@ impl SimService {
             return;
         };
         if unit == me {
-            if self.platform.title == Some(data.request) {
-                self.platform.title = None;
-                let aircraft = cx
-                    .read::<crate::SimAwareness>()
-                    .aircraft
-                    .as_ref()
-                    .map(|a| a.path.clone());
-                if let Some((_, Value::Text(title))) = values.first() {
-                    tracing::info!(title, aircraft, "the loaded aircraft's title");
-                }
+            if self.aware.read == Some(data.request) {
+                self.aware.read = None;
+                self.title_read(&values, cx);
             }
             return;
         }

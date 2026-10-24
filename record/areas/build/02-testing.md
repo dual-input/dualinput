@@ -105,6 +105,14 @@ FS Copilot's exerciser harness ran whatever its checkout had compiled last, and 
 On a developer's PC the build is incremental, so a run with nothing changed builds nothing.
 The bench builds into `target/bench`, a target folder of its own, because a build with the `stand-in` feature in `target/` would replace the `dualinput-core.exe` a plain `cargo build` writes there, and a developer's next build would replace the bench's (user, 2026-10-20).
 
+The scenarios' programs build with the root's profile `release-with-checks`: the release profile's optimizations, so a scenario's timing checks measure about what a pilot's core takes, with a development build's overflow checks and debug assertions still on (user, 2026-10-23).
+An unoptimized build ran the clients crate's round, every 50ms, at 300µs to 650µs, close enough to the code map's [1ms for a handler](../architecture/02-code-map.md#budgets) that a pause of the loop's thread put a different input past it in each run, while in the same scenarios this profile's slowest input took 477µs ([session log](../session/log.md#2026-10-23-an-unoptimized-bench-build-sat-close-enough-to-a-handlers-1ms-for-a-pause-of-the-pcs-to-cross-it-so-the-bench-builds-optimized)).
+Where the release profile aborts at a panic, this one unwinds, as a development build does, since the stand-in sim catches a routine's panic the way the sim traps our module, and it leaves out `lto` and builds incrementally, so a run after a small change rebuilds in seconds: 6s after a change to one file of the session crate, on our development machine.
+
+A scenario that checks the 1ms for a handler allows each core one input over it, if under 2ms, because a pause of the loop's thread still puts an input past it now and then, and the loop's stats time an input by the wall clock, which can't tell a pause from work (user, 2026-10-23).
+We infer the pauses, unverified, from a step of about 20µs that once took 592µs, and in a whole bench on this profile, of the 15,558 inputs of the 8 cores that logged their run's stats as they exited, 1 went over, at 1,049µs, in an input that wrote no log line, on a core busy 0.19% of its run ([session log](../session/log.md#2026-10-23-an-unoptimized-bench-build-sat-close-enough-to-a-handlers-1ms-for-a-pause-of-the-pcs-to-cross-it-so-the-bench-builds-optimized)).
+A handler that takes over 1ms each time it runs still fails, and one that runs once in a scenario and takes 1ms to 2ms passes, which is the gap this leaves.
+
 ### Where it lives
 
 `tools/bench/` holds the bench, as the code map's [workspace](../architecture/02-code-map.md#the-workspace) has it: its scenarios, fake pages, and local profiles' site in TypeScript on Node, as `tools/build.ts` and the other scripts there are, and the stand-in core helper, a Rust program on the message crate.

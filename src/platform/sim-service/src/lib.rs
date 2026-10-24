@@ -12,6 +12,7 @@
 //! whose port it announces and to which it adds its slice, and before every feature that
 //! calls the sim, since a feature's `on_sim` registers with the service.
 
+mod aircraft;
 mod announce;
 mod awareness;
 mod calls;
@@ -19,9 +20,10 @@ mod connections;
 mod module;
 mod seam;
 
+pub use aircraft::{AircraftChanged, USER_CFG, aircraft_awareness};
 pub use announce::announce;
 pub use calls::{ModuleCalls, Sim, SimCx, SimUnit};
-pub use module::Status;
+pub use module::{Status, hold};
 pub use sim_awareness::SimAwareness;
 pub use sim_client::{Period, Value, Var};
 
@@ -91,6 +93,7 @@ pub struct SimService {
     platform: connections::Platform,
     module: ModuleWatch,
     announcing: announce::Announcing,
+    aware: aircraft::Awareness,
 }
 
 impl SimService {
@@ -112,7 +115,10 @@ pub fn register(r: &mut Registry) {
     let id = me.id();
     me.on::<Started>(SimService::started)
         .on::<SimChanged>(SimService::sim_changed)
+        .on::<clients::ClientJoined>(SimService::client_joined)
+        .client_messages(messages::sim::MENU_UNIT, SimService::menu_report)
         .client_state(messages::sim::SLICE, SimService::slice);
+    aircraft::setting(&mut me);
     me.source::<Seam>(SimService::seam);
     r.state_mut::<SimService>().me = Some(id);
 }

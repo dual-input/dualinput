@@ -153,6 +153,11 @@ pub fn start_job(
             Work::List { path } | Work::Delete { path } => {
                 Err(format!("{path}: the droplet program keeps no runs"))
             }
+            // Only the session crate and the sim service ask these, and the droplet runs
+            // neither.
+            Work::Find { .. } | Work::InviteCode => {
+                Err("the droplet program has no sim and no clipboard".to_string())
+            }
         };
         let result = match start.job.then {
             Some(then) => result.and_then(then),

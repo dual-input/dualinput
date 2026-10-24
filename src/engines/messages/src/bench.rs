@@ -37,14 +37,14 @@ pub enum ToCore {
     StandIn { act: StandInAct },
     /// Has the sim's test unit, which stands in for a feature, make a call of the sim.
     Sim { call: SimCall },
-    /// Has the clients' test unit, which stands in for the session crate, the profile
-    /// loader, and a feature with a slice and a panel module, act.
+    /// Has the clients' test unit, which stands in for the profile loader, and a feature with
+    /// a slice and a panel module, act.
     Clients { act: ClientsAct },
     /// Has the core helper's test unit, which stands in for the features that want things
     /// of the core helper, act.
     Helper { act: HelperAct },
-    /// Has the network's test unit, which stands in for the session crate and for a feature
-    /// with a channel of each delivery, act.
+    /// Has the network's test unit, which stands in for a feature with a channel of each
+    /// delivery, act.
     Net { act: NetAct },
 }
 
@@ -172,15 +172,11 @@ pub enum StandInHelperLine {
 #[serde(tag = "act", rename_all = "kebab-case")]
 #[ts(export, export_to = "bench/")]
 pub enum ClientsAct {
-    /// Has the core announce that a session started, or ended, as the session crate does.
-    Session { on: bool },
     /// Loads a profile whose panel module `bench-panel` takes each instrument whose key
     /// starts with one of `picks`, or unloads it, as the profile loader does.
     Profile { loaded: bool, picks: Vec<String> },
     /// Changes the slice `bench` `per_second` times a second for `for_ms`.
     Churn { per_second: u32, for_ms: u64 },
-    /// Says `bye` to every client, as the session crate does as the core quits.
-    Bye,
 }
 
 /// What the bench does to the stand-in sim.
@@ -208,6 +204,12 @@ pub enum StandInAct {
     ModuleFrom { slots_hash: String },
     /// Hands up one more message on the named unit's last connection that's gone.
     Stale { unit: String },
+    /// Sets the aircraft's variables, each a number or a text, such as `A:SIM ON GROUND` or
+    /// `A:TITLE`.
+    Set {
+        numbers: Vec<(String, f64)>,
+        texts: Vec<(String, String)>,
+    },
     /// Answers with a `FromCore::StandIn` line.
     Report,
 }
@@ -305,30 +307,12 @@ pub struct Called {
     pub before_open_reply: bool,
 }
 
-/// What the network's test unit does. It stands in for the session crate, hosting, joining,
-/// opening with what the backend answers, and keeping its session in `bench-session.json` so a
-/// restarted core opens again under a higher restart count; and for a feature with a channel
-/// of each delivery, whose probes carry their send stamp so the receiver measures how late
-/// each came.
+/// What the network's test unit does. It stands in for a feature with a channel of each
+/// delivery, whose probes carry their send stamp so the receiver measures how late each came.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
 #[serde(tag = "act", rename_all = "kebab-case")]
 #[ts(export, export_to = "bench/")]
 pub enum NetAct {
-    Host {
-        name: String,
-    },
-    /// Looks the code up and opens the session the backend finds, under `open_as` in place
-    /// of the code when it's given, so the other cores refuse its first message.
-    Join {
-        code: String,
-        name: String,
-        open_as: Option<String>,
-    },
-    /// Whether each connection's first message goes out, which a scenario turns off to see
-    /// that the other side never links a connection that sends none.
-    First {
-        send: bool,
-    },
     /// Sends `count` probes of `bytes` bytes each on the channel of `delivery`, one every
     /// `every_ms`, to every member whose link is up.
     Send {
@@ -340,9 +324,6 @@ pub enum NetAct {
     /// Tells the bench what came on each channel since the last report, and its clock offset
     /// from each member, as a `net report` line.
     Report,
-    Leave {
-        quit: bool,
-    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -354,10 +335,7 @@ pub enum Delivery {
     Deadline,
 }
 
-/// The network's test unit's channels: the session channel it opens each connection with, and
-/// one of each delivery.
-pub const SESSION: crate::net::Channel<String> =
-    crate::net::Channel::new(1000, crate::net::Delivery::Stream, u8::MAX);
+/// The network's test unit's channels, one of each delivery.
 pub const STREAM: crate::net::Channel<Probe> =
     crate::net::Channel::new(1001, crate::net::Delivery::Stream, 100);
 pub const NEWEST: crate::net::Channel<Probe> =

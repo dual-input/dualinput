@@ -1,0 +1,73 @@
+Stage 9 sim session, MSFS 2024 SunRise 12.2.282174.999, Black Square Baron 58P Professional, on 2026-10-24.
+Each run: node tools/sim/session.ts --core target/release/dualinput-core.exe, its report.txt, then the core log's lines on the sim's stage, the menu script, the module, and preflight.
+
+== Run 1: the menu script loaded but never reached the core (fixed in the page client, then reinstalled)
+-- report.txt
+the core started, in target\sim\runs\2026-10-24_08-04-43-session
+Start the sim, and wait at the main menu.
+the core's replay: replayed 7883 inputs, and all 1076 checkpoints matched, up to the last flush of a cut recording
+-- the core's log
+2655269782µs #27 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+2784091139µs #838 [sim-service]  INFO sim_service::module: our WASM module is running module="0.1.0"
+
+== Run 2: the menu script worked; Hold never froze the aircraft (fixed in the WASM module, see record/areas/core/log.md, 2026-10-24)
+-- report.txt
+the core started, in target\sim\runs\2026-10-24_08-27-10-session
+Start the sim, and wait at the main menu.
+PASSED: our BlurPage copy brought the menu script, whose master page took the core from Starting to Menu
+hosted the session 3X4Q6F
+Load a flight on the ground in any aircraft, then press Ready to fly.
+the sim is Flying; waiting 10s for the cockpit's panels
+FAILED: preflight's Hold froze the aircraft: the core fed Hold true, and the freezes read [false,false,false]
+preflight ended; waiting 3s for the routine host to drop Hold
+PASSED: preflight's end let the aircraft go: the freezes read [false,false,false]
+Done. Press q in the terminal to stop the core and replay its recording.
+the core's replay: replayed 2850 inputs, and all 114 checkpoints matched, up to the last flush of a cut recording
+-- the core's log
+3998488767µs #3 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+4037509564µs #258 [sim-service]  INFO sim_service::module: our WASM module is running module="0.1.0"
+4043466691µs #312 [clients]  INFO clients::sockets: a client joined socket=0 component="menu-script" instruments=0
+4043487056µs #313 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Main
+4043487056µs #313 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Menu
+4043557905µs #318 [clients]  INFO clients::sockets: a client joined socket=1 component="desktop" instruments=0
+4073442890µs #1189 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading
+4092177311µs #1977 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+4092177311µs #1977 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+4092217211µs #1986 [session]  INFO session::preflight: this core holds the aircraft for preflight on=true
+4093525075µs #2044 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+4103841945µs #2468 [session]  INFO session::preflight: this pilot is ready
+4103841945µs #2468 [session]  INFO session::preflight: every counted member is ready, so the countdown runs
+4106842254µs #2594 [session]  INFO session::preflight: the countdown ran out, so preflight ended
+4106842254µs #2594 [session]  INFO session::preflight: this core holds the aircraft for preflight on=false
+4106842254µs #2594 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=580 members=1
+
+== Run 3: the final code, every check passed
+-- report.txt
+the core started, in target\sim\runs\2026-10-24_09-12-26-session
+Start the sim, and wait at the main menu.
+PASSED: our BlurPage copy brought the menu script, whose master page took the core from Starting to Menu
+hosted the session BFQXAZ
+Load a flight on the ground in any aircraft, then press Ready to fly.
+the sim is Flying; waiting 10s for the cockpit's panels
+PASSED: preflight's Hold froze the aircraft: the core fed Hold true, and the freezes read [true,true,true]
+preflight ended; waiting 3s for the routine host to drop Hold
+PASSED: preflight's end let the aircraft go: the freezes read [false,false,false]
+Done. Press q in the terminal to stop the core and replay its recording.
+the core's replay: replayed 2267 inputs, and all 59 checkpoints matched, up to the last flush of a cut recording
+-- the core's log
+6714346408µs #3 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Starting
+6714429833µs #9 [clients]  INFO clients::sockets: a client joined socket=0 component="menu-script" instruments=0
+6714470559µs #11 [sim-service]  INFO sim_service::awareness: the menu script reported its master page master=Main
+6714470559µs #11 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Menu
+6714616885µs #17 [clients]  INFO clients::sockets: a client joined socket=1 component="desktop" instruments=0
+6714752599µs #27 [sim-service]  INFO sim_service::module: our WASM module is running module="0.1.0"
+6729621820µs #460 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Loading
+6750304228µs #1308 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=ReadyToFly aircraft="bksq-aircraft-baronpropress"
+6750304228µs #1308 [session]  INFO session::preflight: the pilot flying set the session's aircraft aircraft="bksq-aircraft-baronpropress"
+6750350783µs #1319 [session]  INFO session::preflight: this core holds the aircraft for preflight on=true
+6751642367µs #1388 [sim-awareness]  INFO sim_service::awareness: the sim's stage changed stage=Flying aircraft="bksq-aircraft-baronpropress"
+6761793522µs #1806 [session]  INFO session::preflight: this pilot is ready
+6761793522µs #1806 [session]  INFO session::preflight: every counted member is ready, so the countdown runs
+6764793869µs #1923 [session]  INFO session::preflight: the countdown ran out, so preflight ended
+6764793869µs #1923 [session]  INFO session::preflight: this core holds the aircraft for preflight on=false
+6764793869µs #1923 [session]  INFO session::preflight: preflight ended, and the session's keys take this much bytes=580 members=1

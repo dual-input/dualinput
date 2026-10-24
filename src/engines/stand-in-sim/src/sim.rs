@@ -267,6 +267,16 @@ impl Sim {
                 self.module = module;
                 self.module_stopped = false;
             }
+            Act::Set { numbers, texts } => {
+                for (name, value) in numbers {
+                    self.aircraft
+                        .set_number(name.strip_prefix("A:").unwrap_or(&name), value);
+                }
+                for (name, value) in texts {
+                    self.aircraft
+                        .set_text(name.strip_prefix("A:").unwrap_or(&name), &value);
+                }
+            }
             Act::Stale { unit } => {
                 if let Some(&connection) = self.gone.get(&unit) {
                     self.hand_up(Up::Message {

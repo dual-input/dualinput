@@ -21,6 +21,20 @@ pub const LOOKUP: &str = "/v1/lookup";
 pub const MEMBERS: &str = "/v1/members";
 pub const LEAVE: &str = "/v1/members/leave";
 
+/// An invite code is this many characters from this alphabet, which leaves out I, L, O, U, 0,
+/// and 1, since a pilot reads a code aloud and types it while looking at a sim
+/// (record/areas/product/03-v1-scope.md, "Invite code"). `ALPHABET` and `LENGTH` in
+/// src/backend/src/codes.ts hold the same two values, so change both together.
+pub const CODE_ALPHABET: &str = "ABCDEFGHJKMNPQRSTVWXYZ23456789";
+pub const CODE_LENGTH: usize = 6;
+
+/// The invite code `text` holds, as a pilot copied it, with the spaces around it and any
+/// lowercase forgiven; `None` for any other text.
+pub fn invite_code(text: &str) -> Option<String> {
+    let code = text.trim().to_ascii_uppercase();
+    (code.len() == CODE_LENGTH && code.chars().all(|c| CODE_ALPHABET.contains(c))).then_some(code)
+}
+
 pub const ENDPOINT_HEADER: &str = "DualInput-Endpoint";
 pub const SIGNATURE_HEADER: &str = "DualInput-Signature";
 

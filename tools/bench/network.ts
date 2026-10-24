@@ -8,8 +8,10 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process"
 import readline from "node:readline"
 
+import type { SessionSlice } from "../../src/engines/messages/ts/session/SessionSlice.ts"
 import { type LocalBackend, startBackend } from "../lib/backend.ts"
 import type { Core, CoreOptions } from "./cores.ts"
+import { FakeApp } from "./pages.ts"
 
 export const TOKEN = "bench-token"
 /** The production cap, 256 KiB/s, which src/relays/relays.toml gives each relay. */
@@ -133,12 +135,40 @@ export class BenchNetwork {
   }
 }
 
+/** Each core's fake desktop app, which the session crate's commands go through. */
+const apps = new WeakMap<Core, FakeApp>()
+
+/** `core`'s fake desktop app, watching the session's slice, opened at its first use. */
+export async function app(core: Core): Promise<FakeApp> {
+  let app = apps.get(core)
+  if (!app) {
+    app = await FakeApp.open(core, ["session", "notices"])
+    apps.set(core, app)
+  }
+  return app
+}
+
+/** Hosts a session on `core`, as the pilot `name`, and returns its code once the backend gave one. */
+export async function host(core: Core, name: string): Promise<string> {
+  const desktop = await app(core)
+  await desktop.ok("clients.set-setting", { key: "session.name", value: name })
+  await desktop.ok("session.host")
+  await desktop.until(() => typeof desktop.slice<SessionSlice>("session")?.code === "string", "the session's code", 15_000)
+  return desktop.slice<SessionSlice>("session")!.code!
+}
+
+/** Joins the session `code` names on `core`, as the pilot `name`. */
+export async function join(core: Core, code: string, name: string): Promise<void> {
+  const desktop = await app(core)
+  await desktop.ok("clients.set-setting", { key: "session.name", value: name })
+  await desktop.ok("session.join", { code })
+}
+
 /** Hosts on `host` and joins on each of `joiners`, and returns the code once every joiner's link is up. */
-export async function session(host: Core, joiners: Core[]): Promise<{ code: string; joinMs: number }> {
-  host.net({ act: "host", name: "Host" })
-  const code = (await host.hear(/^net host code [A-Z0-9]{6}$/, { ms: 15_000 })).split(" ").at(-1)!
+export async function session(hostCore: Core, joiners: Core[]): Promise<{ code: string; joinMs: number }> {
+  const code = await host(hostCore, "Host")
   const started = performance.now()
-  for (const [i, joiner] of joiners.entries()) joiner.net({ act: "join", code, name: `Joiner ${i + 1}`, open_as: null })
+  for (const [i, joiner] of joiners.entries()) await join(joiner, code, `Joiner ${i + 1}`)
   for (const joiner of joiners) await joiner.hear(/^net up \S+ again=false restart=0$/, { ms: 15_000 })
   return { code, joinMs: performance.now() - started }
 }

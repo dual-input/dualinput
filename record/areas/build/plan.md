@@ -318,17 +318,44 @@ Done on 2026-10-23.
 
 ## 9 The session
 
-Builds: the session crate: members, session keys, control, the session file, joining and leaving, preflight, and the match check ([01-roles-and-members](../session/01-roles-and-members.md), [the session's units](../session/02-units.md)).
+Builds:
+
+- `session`: members and their four keys, and who is in the flight ([members](../session/02-units.md#members), [in the flight](../session/02-units.md#in-the-flight)); session keys, with their three writers, `Member`, `Anyone`, and `PilotFlying`, the `WriteKeys` request, which any guard on one key refuses whole, `KeyChanged`, and every key in each connection's first message through the network's opener ([session keys](../session/02-units.md#session-keys)); control, with `TakeControl` and the session crate's own guard on it, and the passes the platform makes itself ([control](../session/02-units.md#control)); the session file ([the session file](../session/02-units.md#the-session-file)); Host, Join, Leave, and Quit, the join from the clipboard that the EFB app's code box asks for, with the edge's job that reads the clipboard and hands up only an invite code, and when the core exits ([joining and leaving](../session/02-units.md#joining-and-leaving)); preflight, its phases, Ready with the session crate's own guard, Go without, and the 3s countdown ([preflight](../session/02-units.md#preflight)); the match check, with its own three items, the aircraft's package and where it's installed, its version, and its livery ([the match check](../session/02-units.md#the-match-check)); the display name setting; and its slice and the switch that claims every role key ([slices and commands](../interface/01-apps.md#slices-and-commands))
+- `sim-service`: aircraft awareness, from the packages folders it reads from `UserCfg.opt`, which runs while a session is held, and `AircraftChanged` ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)); and the feed of preflight's `Hold` on the platform's connection ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module))
+- the menu script and our BlurPage copy in `src/sim-package/pages`, with the menu script's report of its master page, which ends sim awareness's Starting ([the menu script](../session/02-units.md#the-menu-script), [leaving Starting](../core/03-sim-seam-and-wasm-module.md#leaving-starting)); the menu's page, which only Go to reads, comes with Go to
+- the bench's fake menu script ([the sim's pages](02-testing.md#the-sims-pages)); and the bench's test unit that stood in for the session crate keeps only its channels of each delivery, so the network's scenarios host and join through the session crate
+
 Windows ending the pilot's session ends the core with no quit, so the crew sees a lost link, as [01-loop-and-edge](../core/01-loop-and-edge.md)'s note of 2026-10-23 has it.
-From stage 4, it also builds the menu script and our BlurPage copy in `src/sim-package/pages`, with the menu script's report of the menu's page, which ends sim awareness's Starting ([the menu script](../session/02-units.md#the-menu-script), [leaving Starting](../core/03-sim-seam-and-wasm-module.md#leaving-starting)); the sim service's aircraft awareness, which runs while a session is held ([the aircraft's facts](../core/03-sim-seam-and-wasm-module.md#the-aircrafts-facts)); the sim service's feed of preflight's `Hold` on the platform's connection ([routines in our WASM module](../architecture/02-code-map.md#routines-in-our-wasm-module)); and the session crate's calls to `sim_service::announce` as a session starts or ends, which stage 5 builds ([the announcement](../core/03-sim-seam-and-wasm-module.md#the-announcement)).
-From stage 5, it also builds the bench's fake menu script ([the sim's pages](02-testing.md#the-sims-pages)).
-Its features come in [stage 21](#21-rate-and-pause-and-go-to).
+The guards other crates add come with them: the cockpit stream's on control in [stage 13](#13-the-sync-engine-and-the-cockpit-stream), state sync's on Ready in [stage 14](#14-state-sync), and the profile loader's pin and match item in [stage 10](#10-profiles).
+The session's features, rate and pause and Go to, come in [stage 21](#21-rate-and-pause-and-go-to), and the world map's requests with Go to.
+
 Needs: 4, 7, and 8.
 
 Tests:
 
+- From [the session's cases](../session/02-units.md#cases-for-the-bench), on the bench, with two cores, the stand-in sim, and the fake pages:
+  - A host starts a session before the sim runs: the joiner's slice shows the host hasn't loaded a flight yet, then the session's aircraft once the host loads one.
+  - A host starts a session from a flight: `control` names the host, `preflight` holds the aircraft at once, and preflight runs, or ends at once when the host is airborne.
+  - A joiner in another aircraft is a member and out of the flight, and enters the flight, as a late joiner after preflight, once it loads the session's aircraft.
+  - The PF loads the wrong aircraft in preflight, returns to the menu, keeping control, then loads the right one: the session's aircraft follows.
+  - The PF leaves the session in preflight while the PM is at the menu: the PM holds control, and preflight runs once the PM is in a flight.
+  - Both pilots ready: the countdown runs and preflight ends on both cores, and `Hold` holds each aircraft until then; an un-ready at 2.9s cancels it; a lost link during the countdown cancels it, and the returning member is unready; a ready pilot whose sim crashes comes back unready.
+  - Go without a PM whose sim kept running: preflight ends, and on return the PM raises `PreflightEnded`; the PM can't name the PF.
+  - The PF leaves the flight after preflight with the PM in it: control passes to the PM; then the PM leaves the flight too: both cores leave, and the session ends.
+  - A restarted core with a session file: a raised restart count before `Open`, `SessionStarted` and the announcement, and a pass of control it held before its own `FlightChanged`.
+  - A streamed copy against an installed one: a warning; two streamed copies: nothing.
 - From stage 2: a pilot quits Dual Input in a session, and the other core sees a leave, not an outage ([01-loop-and-edge's cases](../core/01-loop-and-edge.md#cases-for-the-bench)).
-- From stage 4: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)), raising one `SimChanged` for the load it finds ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)); and in this stage's session in the sim, `fsEventsTriggerKeyEvent` freezes and unfreezes the pilot's aircraft through `Hold` (same cases).
+- From stage 4: a connection made in the main menu reaches Menu, and one made in a flight reaches Flying with the `AircraftLoaded` state's aircraft, by the menu script's master page ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)), raising one `SimChanged` for the load it finds ([the code map's cases](../architecture/02-code-map.md#cases-for-the-bench)).
+- From stage 5: a quit sent from the EFB app's socket takes effect, and a module from another build while `Hold` is fed raises the sim service's trouble notice for our package ([the apps' cases](../interface/01-apps.md#cases-for-the-bench)).
+- From stage 7: a PF's Leave mid-flight, after which the PM holds control within 1s, and its core raises `MemberLeft` and stops dialing; and a PF's quit, which does the same, tells the backend, and exits ([02-units' cases](../network/02-units.md#cases-for-the-bench)).
+- In this stage's session in the sim: `fsEventsTriggerKeyEvent` freezes and unfreezes the pilot's aircraft through `Hold` ([03's cases](../core/03-sim-seam-and-wasm-module.md#cases-for-the-bench)); and our BlurPage copy brings the menu script, whose master page takes a core that found the sim at the main menu to Menu.
+- [The session's budgets](../session/02-units.md#budgets): a handler within the code map's 1ms; under 1 MB for the keys and members of a v1 session; a first message's keys under 4 KB with two pilots; and preflight's end on each core within one network delay of the PF's.
+
+The kernel's view of the units' states gains each request's verdict, which the session's slice shows, so the whole bench runs at this stage's close.
+
+Exit: on our development machine, `node tools/check.ts` and `node tools/bench.ts` pass, the session's and the network's scenarios among them; two bench cores host and join, hold both aircraft through preflight, end it on a countdown, pass control, and end the session; in one session in the sim, `Hold` freezes and unfreezes the aircraft, and the menu script takes the core out of Starting; and the [session's log](../session/log.md) has an entry for the cases and budgets.
+
+Done on 2026-10-24.
 
 ## 10 Profiles
 
@@ -421,7 +448,7 @@ Needs: 6 and 11.
 ## 21 Rate and pause, and Go to
 
 Builds: the rate and pause feature with its part in the EFB app, and Go to with its part in the desktop app ([the session's units](../session/02-units.md)).
-From stage 4, it also builds the sim service's `world_map`, and the menu script's requests that carry it out ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the menu script](../session/02-units.md#the-menu-script)).
+From stage 4, it also builds the sim service's `world_map`, and the menu script's requests that carry it out ([what a feature calls](../core/03-sim-seam-and-wasm-module.md#what-a-feature-calls), [the menu script](../session/02-units.md#the-menu-script)), with the menu script's report of the menu's page, read every 500ms in a session, which only Go to reads.
 Needs: 9 and 11.
 
 ## 22 GitHub

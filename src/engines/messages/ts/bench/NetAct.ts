@@ -2,10 +2,7 @@
 import type { Delivery } from "./Delivery.ts";
 
 /**
- * What the network's test unit does. It stands in for the session crate, hosting, joining,
- * opening with what the backend answers, and keeping its session in `bench-session.json` so a
- * restarted core opens again under a higher restart count; and for a feature with a channel
- * of each delivery, whose probes carry their send stamp so the receiver measures how late
- * each came.
+ * What the network's test unit does. It stands in for a feature with a channel of each
+ * delivery, whose probes carry their send stamp so the receiver measures how late each came.
  */
-export type NetAct = { "act": "host", name: string, } | { "act": "join", code: string, name: string, open_as: string | null, } | { "act": "first", send: boolean, } | { "act": "send", delivery: Delivery, count: number, every_ms: number, bytes: number, } | { "act": "report" } | { "act": "leave", quit: boolean, };
+export type NetAct = { "act": "send", delivery: Delivery, count: number, every_ms: number, bytes: number, } | { "act": "report" };

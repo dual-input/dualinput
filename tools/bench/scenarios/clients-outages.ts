@@ -7,12 +7,13 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { BenchRun, type Core } from "../cores.ts"
+import { BenchRun, type Core, type CoreOptions } from "../cores.ts"
+import { BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
 import { resume, suspend } from "../suspend.ts"
 
-async function announcing(run: BenchRun, name: string): Promise<Core> {
-  const core = await run.core(name)
+async function announcing(run: BenchRun, name: string, options: CoreOptions = {}): Promise<Core> {
+  const core = await run.core(name, options)
   core.act({ act: "watch", process: run.stub().id })
   await core.hear("stage Starting aircraft none")
   return core
@@ -20,8 +21,10 @@ async function announcing(run: BenchRun, name: string): Promise<Core> {
 
 test("the core suspended for 12s leaves every page its socket, and each panel's modules carry on without loading again", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-suspended", t)
-  const core = await announcing(run, "a")
-  core.clients({ act: "session", on: true })
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net.core())
+  await host(core, "Host")
   const efb = new FakePage(core, { component: "efb" })
   const panel = new FakePage(core, { component: "panel-bridge", sessionOnly: true, panel: "VCockpit60", instruments: ["PFD_0"] })
   t.after(() => [efb, panel].forEach((p) => p.close()))

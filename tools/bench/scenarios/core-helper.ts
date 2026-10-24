@@ -251,8 +251,5 @@ test("the pipe carries 200 messages a second each way, each handled within the l
   // (record/areas/core/01-loop-and-edge.md, "Logging").
   core.send({ kind: "exit" })
   assert.equal(await core.exited, 0)
-  const stats = core.log().split("\n").filter((l) => l.includes("the loop's stats")).at(-1) ?? ""
-  const slowest = Number(/slowest_us=(\d+)/.exec(stats)?.[1])
-  console.log(`budget: the slowest input of a run with 200 messages a second each way took ${slowest}µs, against 1,000µs`)
-  assert.equal(Number(/over_1ms=(\d+)/.exec(stats)?.[1]), 0, `inputs took over 1ms: ${stats}`)
+  core.checkHandlers("a run with 200 messages a second each way")
 })

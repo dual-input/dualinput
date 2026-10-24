@@ -83,6 +83,12 @@ pub enum Act {
     /// Hands up one more message on the unit's last connection that's gone, as the sim can
     /// send one the edge reads after the connection closed.
     Stale { unit: u32 },
+    /// Sets the aircraft's variables, each a number or a text, such as `SIM ON GROUND` or
+    /// `TITLE`, as the sim's aircraft holds them.
+    Set {
+        numbers: Vec<(String, f64)>,
+        texts: Vec<(String, String)>,
+    },
 }
 
 /// What the stand-in tells the bench when asked.

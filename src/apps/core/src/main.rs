@@ -14,6 +14,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     core_helper_service::register,
     network::register,
     recording::register,
+    session::register,
 ];
 
 fn main() -> ExitCode {

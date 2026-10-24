@@ -39,6 +39,9 @@ pub struct Kernel {
     states: Vec<Option<Box<dyn Any>>>,
     table: Registry,
     work: Work,
+    /// Each request's verdict as of the last input, which handlers and slices read, and only
+    /// `refresh_verdicts` changes, between inputs.
+    verdicts: Vec<Option<Verdict>>,
 }
 
 /// What handlers change through `Cx`, apart from their own state.
@@ -57,7 +60,6 @@ struct Work {
     jobs: BTreeMap<Handle, JobFn>,
     /// The running hash of every output.
     hash: Sha256,
-    verdicts: Vec<Option<Verdict>>,
     started: bool,
 }
 
@@ -88,9 +90,9 @@ impl Kernel {
                 timers: BTreeMap::new(),
                 jobs: BTreeMap::new(),
                 hash: Sha256::new(),
-                verdicts,
                 started: false,
             },
+            verdicts,
         }
     }
 
@@ -151,6 +153,7 @@ impl Kernel {
                     &mut self.states,
                     &self.table,
                     &mut self.work,
+                    &self.verdicts,
                     handler.unit,
                     |state, cx| (handler.f)(state, input, cx),
                 );
@@ -180,6 +183,7 @@ impl Kernel {
                 &mut self.states,
                 &self.table,
                 &mut self.work,
+                &self.verdicts,
                 file.unit,
                 |state, cx| (file.f)(state, bytes, cx),
             );
@@ -197,6 +201,7 @@ impl Kernel {
                 &mut self.states,
                 &self.table,
                 &mut self.work,
+                &self.verdicts,
                 handle.unit,
                 |state, cx| f(state, TimerId(handle), cx),
             ),
@@ -212,6 +217,7 @@ impl Kernel {
                 &mut self.states,
                 &self.table,
                 &mut self.work,
+                &self.verdicts,
                 handle.unit,
                 |state, cx| f(state, JobId(handle), result, cx),
             ),
@@ -231,21 +237,28 @@ impl Kernel {
                             &mut self.states,
                             &self.table,
                             &mut self.work,
+                            &self.verdicts,
                             handler.unit,
                             |state, cx| (handler.f)(state, &*moment, cx),
                         );
                     }
                 }
-                Pending::Call(unit, f) => {
-                    run(&mut self.states, &self.table, &mut self.work, unit, f)
-                }
+                Pending::Call(unit, f) => run(
+                    &mut self.states,
+                    &self.table,
+                    &mut self.work,
+                    &self.verdicts,
+                    unit,
+                    f,
+                ),
                 Pending::Ask(index, request) => {
                     let entry = &self.table.requests[index];
-                    match judge(&self.states, &self.table, entry, &*request) {
+                    match judge(&self.states, &self.table, &self.verdicts, entry, &*request) {
                         Verdict::Allowed => run(
                             &mut self.states,
                             &self.table,
                             &mut self.work,
+                            &self.verdicts,
                             entry.decider,
                             |state, cx| (entry.decide)(state, request, cx),
                         ),
@@ -264,13 +277,21 @@ impl Kernel {
         let view = View {
             states: &self.states,
             table: &self.table,
+            verdicts: &self.verdicts,
         };
-        for (index, entry) in self.table.requests.iter().enumerate() {
-            let decider = slot(&self.states, &self.table, entry.decider);
-            let request = as_unit(&self.table, entry.decider, || (entry.build)(decider, &view));
-            self.work.verdicts[index] =
-                request.map(|request| judge(&self.states, &self.table, entry, &*request));
-        }
+        let verdicts = self
+            .table
+            .requests
+            .iter()
+            .map(|entry| {
+                let decider = slot(&self.states, &self.table, entry.decider);
+                let request = as_unit(&self.table, entry.decider, || (entry.build)(decider, &view));
+                request.map(|request| {
+                    judge(&self.states, &self.table, &self.verdicts, entry, &*request)
+                })
+            })
+            .collect();
+        self.verdicts = verdicts;
     }
 }
 
@@ -280,6 +301,7 @@ fn run(
     states: &mut [Option<Box<dyn Any>>],
     table: &Registry,
     work: &mut Work,
+    verdicts: &[Option<Verdict>],
     unit: u32,
     f: impl FnOnce(&mut dyn Any, &mut Cx),
 ) {
@@ -293,6 +315,7 @@ fn run(
             states,
             table,
             work: RefCell::new(work),
+            verdicts,
             unit,
         },
     );
@@ -312,10 +335,15 @@ fn as_unit<R>(table: &Registry, unit: u32, f: impl FnOnce() -> R) -> R {
 fn judge(
     states: &[Option<Box<dyn Any>>],
     table: &Registry,
+    verdicts: &[Option<Verdict>],
     entry: &Request,
     request: &dyn Any,
 ) -> Verdict {
-    let view = View { states, table };
+    let view = View {
+        states,
+        table,
+        verdicts,
+    };
     let reasons: Vec<String> = entry
         .guards
         .iter()
@@ -356,16 +384,38 @@ pub enum Verdict {
     Denied(Vec<String>),
 }
 
-/// Every unit's state, read-only, for a guard and for building a request.
+/// Every unit's state, read-only, for a guard, for building a request, and for a slice of
+/// client state, with each request's verdict as of the last input.
 pub struct View<'k> {
     states: &'k [Option<Box<dyn Any>>],
     table: &'k Registry,
+    verdicts: &'k [Option<Verdict>],
 }
 
 impl View<'_> {
     pub fn read<T: 'static>(&self) -> &T {
         read(self.states, self.table)
     }
+
+    /// The verdict on the request `R` that this pilot would make now, as of the last input,
+    /// or `None` when they couldn't make one at all, which a slice shows so the apps say why
+    /// not before the pilot asks.
+    pub fn verdict<R: 'static>(&self) -> Option<Verdict> {
+        verdict::<R>(self.table, self.verdicts)
+    }
+}
+
+fn verdict<R: 'static>(table: &Registry, verdicts: &[Option<Verdict>]) -> Option<Verdict> {
+    let index = *table
+        .request_by_type
+        .get(&TypeId::of::<R>())
+        .unwrap_or_else(|| {
+            panic!(
+                "request {} should be declared by a unit",
+                std::any::type_name::<R>()
+            )
+        });
+    verdicts[index].clone()
 }
 
 /// An output a unit put out, for the edge to hand to the sink it registered for the
@@ -404,6 +454,7 @@ pub struct Cx<'k> {
     states: &'k [Option<Box<dyn Any>>],
     table: &'k Registry,
     work: RefCell<&'k mut Work>,
+    verdicts: &'k [Option<Verdict>],
     /// The unit whose handler is running.
     unit: u32,
 }
@@ -432,6 +483,7 @@ impl Cx<'_> {
         View {
             states: self.states,
             table: self.table,
+            verdicts: self.verdicts,
         }
     }
 
@@ -492,8 +544,7 @@ impl Cx<'_> {
     /// The verdict on the request `R` that this pilot would make now, as of the last input,
     /// or `None` when they couldn't make one at all.
     pub fn verdict<R: 'static>(&self) -> Option<Verdict> {
-        let index = self.request::<R>();
-        self.work.borrow().verdicts[index].clone()
+        verdict::<R>(self.table, self.verdicts)
     }
 
     /// Sets a timer that fires `after` this input's stamp, as an input of its own, which

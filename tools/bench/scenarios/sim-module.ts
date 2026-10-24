@@ -9,6 +9,7 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { BenchRun, type Core } from "../cores.ts"
+import { FakeApp } from "../pages.ts"
 
 const FREEZES = ["IS LATITUDE LONGITUDE FREEZE ON", "IS ALTITUDE FREEZE ON", "IS ATTITUDE FREEZE ON"]
 const RTC_END = 11
@@ -55,6 +56,9 @@ test("a module from another build runs none of the core's feeds, and the core re
 test("the sim's exit ends every routine, and the next run of the sim starts none and reads Missing until its module writes", { timeout: 30_000 }, async (t) => {
   const run = new BenchRun("sim-module-next-run", t)
   const core = await run.core("a")
+  // With the desktop app's window open, the core outlives the sim it watches.
+  const desktop = await FakeApp.open(core, [])
+  t.after(() => desktop.close())
   const first = run.stub()
   core.act({ act: "watch", process: first.id })
   await core.hear("module Running")

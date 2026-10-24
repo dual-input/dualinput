@@ -74,7 +74,7 @@ impl<S: 'static> ClientsUnit<S> for Unit<'_, S> {
         slice: &'static str,
         view: fn(&S, &View) -> V,
     ) -> &mut Self {
-        let build = Box::new(move |v: &View| serde_json::to_value(view(v.read::<S>(), v)));
+        let build = Box::new(move |v: &View| serde_json::to_string(&view(v.read::<S>(), v)));
         let clients = self.registry().state_mut::<Clients>();
         assert!(
             !clients.slices.iter().any(|s| s.name == slice),

@@ -34,8 +34,9 @@ main(() => {
   requireSdk()
   // The cores check their hash against these types, so they're written from this tree too.
   writeMessageTypes()
-  // The loop under load measures timing, so it runs the release profile, as a pilot's core
-  // does; the scenarios check behavior, and build faster without it.
+  // The loop under load runs the release profile, as a pilot's core does; the scenarios run it
+  // with overflow checks and debug assertions on, and without `lto`, which only slows their
+  // build (record/areas/build/02-testing.md, "Building what it runs").
   const built = buildBench(what === "load")
   const env = {
     ...process.env,
@@ -64,7 +65,7 @@ function buildBench(release: boolean): { core: string; helper: string; relay: st
     ...["-p", "dualinput-core", "-p", "stand-in-core-helper", "-p", "bench-relay"],
     ...["--features", "dualinput-core/stand-in", "--target-dir", path.join("target", "bench")],
   ]
-  if (release) args.push("--release")
+  args.push("--profile", release ? "release" : "release-with-checks")
   const built = buildPrograms(args, ["dualinput-core", "stand-in-core-helper", "bench-relay"])
   return { core: built["dualinput-core"], helper: built["stand-in-core-helper"], relay: built["bench-relay"] }
 }

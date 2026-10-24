@@ -2,6 +2,8 @@
 // and 1, since a pilot reads a code aloud and types it while looking at a sim
 // (record/areas/product/03-v1-scope.md, "Invite code").
 
+// `CODE_ALPHABET` and `CODE_LENGTH` in src/engines/messages/src/backend.rs hold the same two
+// values, so change both together.
 export const ALPHABET = "ABCDEFGHJKMNPQRSTVWXYZ23456789"
 export const LENGTH = 6
 

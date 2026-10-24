@@ -3,11 +3,20 @@
 // (record/areas/network/02-units.md, "Cases for the bench").
 
 import assert from "node:assert/strict"
+import fs from "node:fs"
+import path from "node:path"
 import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
+import type { SessionSlice } from "../../../src/engines/messages/ts/session/SessionSlice.ts"
 import { BenchRun } from "../cores.ts"
-import { BenchNetwork, report, session, took } from "../network.ts"
+import { app, BenchNetwork, host, join, report, session, took } from "../network.ts"
+import type { FakeApp } from "../pages.ts"
+
+/** The members the session's slice lists, by name, this pilot first. */
+function names(desktop: FakeApp): string[] {
+  return desktop.slice<SessionSlice>("session")?.members.map((m) => m.name) ?? []
+}
 
 test("two cores join through the backend, link through a relay, lose the link, and link again", { timeout: 120_000 }, async (t) => {
   const net = await BenchNetwork.start()
@@ -18,8 +27,11 @@ test("two cores join through the backend, link through a relay, lose the link, a
 
   const { joinMs } = await session(a, [b])
   await a.hear(/^net up \S+ again=false restart=0$/)
-  await a.hear("net keys Joiner 1")
-  await b.hear("net keys Host")
+  // Each first message carried its sender's keys, its member entry among them.
+  for (const core of [a, b]) {
+    const desktop = await app(core)
+    await desktop.until(() => names(desktop).join(",") === (core === a ? "Host,Joiner 1" : "Joiner 1,Host"), "both members, by name")
+  }
   t.diagnostic(`from the code entered to the link up through the relay: ${joinMs.toFixed(0)}ms`)
 
   const [aBefore, bBefore] = [a.heard().length, b.heard().length]
@@ -80,43 +92,47 @@ test("a joiner whose first dials fail redials every 2s and links once the proxy 
   t.after(() => net.stop())
   const a = await run.core("a", net.core())
   const b = await run.core("b", net.core())
-  a.net({ act: "host", name: "Host" })
-  const code = (await a.hear(/^net host code /, { ms: 15_000 })).split(" ").at(-1)!
+  const code = await host(a, "Host")
   await net.relays[0]!.cut(b.process.pid!, 8_000)
   const started = performance.now()
-  b.net({ act: "join", code, name: "Joiner", open_as: null })
+  await join(b, code, "Joiner")
   await b.hear(/^net up \S+ again=false restart=0$/, { ms: 30_000 })
   const ms = performance.now() - started
   t.diagnostic(`linked ${ms.toFixed(0)}ms after the join, through an 8s cut`)
   assert.ok(ms >= 8_000, `linked ${ms.toFixed(0)}ms after the join, inside the cut`)
 })
 
-test("a connection with another code closes with its code, and one with no first message never links", { timeout: 120_000 }, async (t) => {
+// The session crate always sends a first message, so a connection that sends none is the
+// network crate's own test, a_connection_whose_first_message_passes_links_and_hands_on_what_waited_behind_it.
+test("a connection with another session's code closes with its code, and the refused side says so", { timeout: 120_000 }, async (t) => {
   const net = await BenchNetwork.start()
   const run = new BenchRun("network-refusals", t)
   t.after(() => net.stop())
   const a = await run.core("a", net.core())
   const b = await run.core("b", net.core())
-  const c = await run.core("c", net.core())
-  a.net({ act: "host", name: "Host" })
-  const code = (await a.hear(/^net host code /, { ms: 15_000 })).split(" ").at(-1)!
+  await session(a, [b])
 
-  c.net({ act: "join", code, name: "Wrong", open_as: "ZZZZZZ" })
-  await c.hear(/^net join found 1$/)
-  await sleep(6_000)
-  assert.match(a.log(), /the network refused a connection conn=\d+ code=10/, "the host should refuse the other code with code 10")
-
-  // The silent core takes the host's first message, so its own link comes up, hears nothing
-  // for 5s, and redials, closing each connection it opened, while the host never links it.
-  b.net({ act: "first", send: false })
-  b.net({ act: "join", code, name: "Silent", open_as: null })
-  await b.hear(/^net join found 1$/)
-  // The silent core says this once it takes the host's first message, so its connection did
-  // reach the host.
-  await b.hear(/^net up /, { ms: 15_000 })
-  await sleep(14_000)
-  assert.ok(!a.heard().some((l) => l.startsWith("net up")), "a connection with no first message should never link")
-  t.diagnostic("the host refused the other code with code 10, and never linked the silent core")
+  // A core that comes back with a session file naming another code dials the crew under it,
+  // as one whose session file held a code that has since gone to another session would.
+  await b.kill()
+  const file = path.join(b.data, "session.json")
+  const saved = JSON.parse(fs.readFileSync(file, "utf8")) as { code: string }
+  fs.writeFileSync(file, JSON.stringify({ ...saved, code: "ZZZZZZ" }, null, 2))
+  const before = a.heard().length
+  const wrong = await run.core("b", net.core())
+  const desktop = await app(wrong)
+  await desktop.until(() => desktop.notices().some((n) => n.id === "network.refused"), "a refusal's notice", 20_000)
+  // Each core checks the other's first message, so whichever reads first refuses: the host,
+  // or the core with the other code.
+  const refuser = [a, wrong].find((c) => /the network refused a connection conn=\d+ code=10/.test(c.log()))
+  assert.ok(refuser, "one side should refuse the other code with code 10")
+  const refused = refuser === a ? wrong : a
+  const said = /a notice was raised id="network\.refused" .*refused this one's connection/
+  for (const started = Date.now(); !said.test(refused.log()); await sleep(50)) {
+    assert.ok(Date.now() - started < 5_000, "the refused side should say it was refused")
+  }
+  assert.ok(!a.heard().slice(before).some((l) => l.startsWith("net up")), "the host should never link a connection under another code")
+  t.diagnostic(`${refuser === a ? "the host" : "the core with the other code"} refused with code 10, and the other side said it was refused`)
 })
 test("a join on a direct path links within 3s of the code entered", { timeout: 60_000 }, async (t) => {
   const net = await BenchNetwork.start()

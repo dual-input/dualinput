@@ -1,0 +1,32 @@
+  5.46s  before the core: module frames 2296, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 207s, marker 8080808
+  5.73s  the core holds the aircraft; the module sends through fsEventsTriggerKeyEvent
+  6.73s    fsEvents: module frames 2336, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 208s, marker 8080808
+  7.09s    fsEvents: panel freezes 0 0 0
+  8.10s    fsEvents: module frames 2376, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 210s, marker 8080808
+  8.46s    fsEvents: panel freezes 0 0 0
+  9.47s    fsEvents: module frames 2416, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 211s, marker 8080808
+  9.83s    fsEvents: panel freezes 0 0 0
+ 10.84s    fsEvents: module frames 2464, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 212s, marker 8080808
+ 11.20s    fsEvents: panel freezes 0 0 0
+ 12.21s    fsEvents: module frames 2504, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 214s, marker 8080808
+ 12.56s    fsEvents: panel freezes 0 0 0
+ 12.56s  the module sends through its SimConnect connection
+ 13.57s    SimConnect: module frames 2544, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 215s, marker 8080808
+ 13.92s    SimConnect: panel freezes 0 0 0
+ 14.93s    SimConnect: module frames 2584, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 216s, marker 8080808
+ 15.29s    SimConnect: panel freezes 0 0 0
+ 16.30s    SimConnect: module frames 2624, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 218s, marker 8080808
+ 16.66s    SimConnect: panel freezes 0 0 0
+ 17.67s    SimConnect: module frames 2664, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 219s, marker 8080808
+ 18.02s    SimConnect: panel freezes 0 0 0
+ 19.03s    SimConnect: module frames 2704, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 220s, marker 8080808
+ 19.38s    SimConnect: panel freezes 0 0 0
+ 19.38s  the core stopped, so the routine host drops Hold 1s after its last feed
+ 20.40s    after the core: module frames 2744, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 222s, marker 8080808
+ 20.76s    after the core: panel freezes 0 0 0
+ 21.77s    after the core: module frames 2792, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 223s, marker 8080808
+ 22.13s    after the core: panel freezes 0 0 0
+ 23.14s    after the core: module frames 2832, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 225s, marker 8080808
+ 23.48s    after the core: panel freezes 0 0 0
+ 24.22s  the panel's own unfreeze: true; panel freezes 0 0 0
+ 24.34s  the report is experiments\areas\core\results\p08-module-freeze-2026-10-24-08-49-09.txt

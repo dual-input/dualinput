@@ -15,8 +15,8 @@ mod hooks;
 mod links;
 
 pub use backend::{
-    Answer, Asked, BACKEND, BackendAnswered, Host, Join, Me, RELAYS, RELAYS_ONLY, Refusal, host,
-    join, member,
+    Answer, Asked, BACKEND, BackendAnswered, Host, Join, Me, RELAYS, RELAYS_ONLY, Refusal,
+    endpoint_id, host, join, member,
 };
 pub use edge::{Transport, encode as encode_event};
 pub use hooks::{NetUnit, Opened, Sender};
@@ -133,7 +133,7 @@ impl Network {
                 .links
                 .iter()
                 .map(|(pilot, link)| MemberLink {
-                    pilot: backend::hex(pilot),
+                    pilot: messages::hex(pilot),
                     up: link.conn.is_some(),
                     path: link
                         .conn
@@ -281,7 +281,11 @@ impl Network {
             pilot: open.me.pilot,
             restart: open.restart,
         });
-        me.backend.key = Some(open.key);
+        // Host and Join drew the key a session opens with, and hold it with its public half
+        // already, so only a session from the session file costs a curve multiplication here.
+        if me.key() != Some(open.key) {
+            me.backend.key = Some(ed25519_dalek::SigningKey::from_bytes(&open.key));
+        }
         me.backend.me = Some(open.me);
         me.backend.relays = open.relays.clone();
         let relays_only = cx

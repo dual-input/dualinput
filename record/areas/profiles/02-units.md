@@ -218,7 +218,7 @@ FS Copilot's app downloads every profile at once, as one zip from its own server
 
 ```rust
 // a sketch: the message crate's profile-loader module; the number is hypothetical
-pub const PIN: Key<Option<Pin>> = Key::new(60, Writer::Pf);
+pub const PIN: Key<Option<Pin>> = Key::new(60, Writer::PilotFlying);
 
 pub struct Pin { pub hash: [u8; 32], pub local: bool }
 ```

@@ -9,8 +9,8 @@ use std::collections::BTreeMap;
 use std::time::Duration;
 
 use kernel::{Cx, TimerId, UnitId};
-use messages::module::slots::SlotHeader;
-use messages::module::{ModuleStatus, RoutineId};
+use messages::module::slots::{HoldSlot, SlotHeader};
+use messages::module::{HOLD, ModuleStatus, RoutineId};
 use messages::sim::Stage;
 use sim_awareness::SimAwareness;
 use sim_client::Area;
@@ -36,6 +36,25 @@ const UNFREEZES: [&str; 3] = [
 
 /// Our WASM module's status, which the apps show, so its type is the message crate's.
 pub use messages::sim::ModuleState as Status;
+
+/// Feeds preflight's `Hold`, the platform's own routine, on the platform's connection, or ends
+/// it, which the session crate asks for as its pilot enters the flight in preflight and as
+/// preflight ends (record/areas/architecture/02-code-map.md, "Routines in our WASM module").
+pub fn hold(cx: &Cx, on: bool) {
+    cx.call(SimService::hold_preflight, on);
+}
+
+impl SimService {
+    fn hold_preflight(me: &mut SimService, on: bool, cx: &mut Cx) {
+        let unit = me.me();
+        if on {
+            let body = bytemuck::bytes_of(&HoldSlot {}).to_vec();
+            SimService::feed(me, (unit, HOLD, body), cx);
+        } else {
+            SimService::end(me, (unit, HOLD), cx);
+        }
+    }
+}
 
 #[derive(Default)]
 pub(crate) struct ModuleWatch {

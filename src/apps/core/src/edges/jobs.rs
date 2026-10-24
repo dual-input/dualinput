@@ -88,7 +88,88 @@ fn run(jobs: &Jobs, start: &StartJob) -> Result<Vec<u8>, String> {
             deleted.map_err(|e| format!("couldn't delete {path}: {e}"))?;
             Ok(Vec::new())
         }
+        Work::Find { roots, holding } => {
+            let mut found = Vec::new();
+            for (root, depth) in roots {
+                find(
+                    &resolve(&jobs.data, root),
+                    *depth,
+                    Path::new(holding),
+                    &mut found,
+                );
+            }
+            Ok(found.join("\n").into_bytes())
+        }
+        Work::InviteCode => {
+            let text = clipboard::text().unwrap_or_default();
+            Ok(messages::backend::invite_code(&text)
+                .unwrap_or_default()
+                .into_bytes())
+        }
         Work::Fetch(_) => unreachable!("a fetch runs as a task, not on the blocking pool"),
+    }
+}
+
+/// Each folder `depth` levels under `folder` that holds `holding`, by its path. A folder that
+/// can't be listed, such as a Community entry whose junction's target is gone, holds none.
+fn find(folder: &Path, depth: u8, holding: &Path, found: &mut Vec<String>) {
+    let Ok(entries) = std::fs::read_dir(folder) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        if depth <= 1 {
+            if path.join(holding).exists() {
+                found.push(path.display().to_string());
+            }
+        } else {
+            find(&path, depth - 1, holding, found);
+        }
+    }
+}
+
+/// The clipboard's text, read through Windows' clipboard functions.
+mod clipboard {
+    use windows_sys::Win32::System::DataExchange::{
+        CloseClipboard, GetClipboardData, OpenClipboard,
+    };
+    use windows_sys::Win32::System::Memory::{GlobalLock, GlobalSize, GlobalUnlock};
+    use windows_sys::Win32::System::Ole::CF_UNICODETEXT;
+
+    pub(super) fn text() -> Option<String> {
+        // SAFETY: a null owner opens the clipboard for this thread, and every path below
+        // closes it again.
+        if unsafe { OpenClipboard(std::ptr::null_mut()) } == 0 {
+            return None;
+        }
+        let text = read();
+        // SAFETY: the clipboard is open on this thread.
+        unsafe { CloseClipboard() };
+        text
+    }
+
+    fn read() -> Option<String> {
+        // SAFETY: the clipboard is open, and the handle stays the clipboard's while it is.
+        let handle = unsafe { GetClipboardData(u32::from(CF_UNICODETEXT)) };
+        if handle.is_null() {
+            return None;
+        }
+        // SAFETY: CF_UNICODETEXT's handle is global memory, locked here and unlocked below.
+        let data = unsafe { GlobalLock(handle) } as *const u16;
+        if data.is_null() {
+            return None;
+        }
+        // SAFETY: the locked block holds GlobalSize's bytes, of UTF-16 text ending at a 0.
+        let units = unsafe { GlobalSize(handle) } / 2;
+        let slice = unsafe { std::slice::from_raw_parts(data, units) };
+        let end = slice.iter().position(|&u| u == 0).unwrap_or(units);
+        let text = String::from_utf16_lossy(&slice[..end]);
+        // SAFETY: the block was locked above.
+        unsafe { GlobalUnlock(handle) };
+        Some(text)
     }
 }
 
@@ -155,8 +236,16 @@ async fn fetch_one(http: &reqwest::Client, fetch: Fetch) -> Result<Vec<u8>, Stri
     .encode())
 }
 
-/// The file a job's path names: a relative path is in the data folder.
+/// The file a job's path names: a relative path is in the data folder, and `%APPDATA%` or
+/// `%LOCALAPPDATA%` at its start is the pilot's folder of that name.
 fn resolve(data: &Path, path: &str) -> PathBuf {
+    for var in ["APPDATA", "LOCALAPPDATA"] {
+        if let Some(rest) = path.strip_prefix(&format!("%{var}%"))
+            && let Some(folder) = std::env::var_os(var)
+        {
+            return PathBuf::from(folder).join(rest.trim_start_matches(['\\', '/']));
+        }
+    }
     data.join(path)
 }
 

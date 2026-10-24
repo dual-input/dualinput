@@ -1,50 +1,25 @@
-//! The test unit that stands in for the session crate, hosting, joining, and opening the
-//! session with what the backend answers, and for a feature with a channel of each delivery.
-//! It keeps its session in `bench-session.json`, as the session crate keeps its session file,
-//! so a core killed and started again opens under a higher restart count, and tells the bench
-//! what happens as lines of text (record/areas/build/plan.md, "7 The network").
+//! The test unit that stands in for a feature with a channel of each delivery, whose probes
+//! carry their send stamp so the receiver measures how late each came, and that tells the
+//! bench, as lines of text, what the network raises. The session crate hosts, joins, and opens
+//! the session, through the commands the bench's fake desktop app sends
+//! (record/areas/build/plan.md, "7 The network" and "9 The session").
 
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use clients::Clients;
-use kernel::{Cx, Input, Job, JobId, Registry, TimerId};
-use messages::backend::Kind;
-use messages::bench::{DEADLINE, Delivery, NEWEST, NetAct, Probe, SESSION, STREAM, ToCore};
-use messages::net::{Channel, EndpointId, PilotId, Relay};
-use network::{
-    Answer, Asked, BackendAnswered, LinkLost, LinkUp, Me, Member, MemberLeft, MemberOut, NetUnit,
-    Network, Opened, Sender, To,
-};
-use serde::{Deserialize, Serialize};
+use kernel::{Cx, Input, Registry, TimerId};
+use messages::bench::{DEADLINE, Delivery, NEWEST, NetAct, Probe, STREAM, ToCore};
+use messages::net::{Channel, PilotId};
+use network::{LinkLost, LinkUp, MemberLeft, MemberOut, NetUnit, Network, Sender, To};
+use serde::Serialize;
 
 use super::sim::Heard;
 
 /// Names the source the bench's lines for this unit come in under.
 pub struct Acts;
 
-const SESSION_FILE: &str = "bench-session.json";
-
-/// What the session file keeps: enough to open the session again after a restart.
-#[derive(Clone, Serialize, Deserialize)]
-struct Saved {
-    code: String,
-    pilot: PilotId,
-    name: String,
-    restart: u32,
-    key: [u8; 32],
-    relays: Vec<Relay>,
-    crew: Vec<(PilotId, EndpointId)>,
-}
-
 #[derive(Default)]
 pub struct BenchNet {
-    me: Option<Me>,
-    /// The code a join looked up, which opens the session once the backend finds it.
-    joining: Option<String>,
-    saved: Option<Saved>,
-    /// The session waiting for its session file's write, which opens it.
-    opening: Option<(JobId, Saved)>,
     /// A sender for each delivery a scenario asked for, by the delivery's number, and the
     /// delivery each of their timers is for.
     sending: BTreeMap<u8, Sending>,
@@ -52,8 +27,6 @@ pub struct BenchNet {
     got: BTreeMap<u16, Got>,
     /// Each member's restart count, as its latest `LinkUp` gave it.
     members: BTreeMap<PilotId, u32>,
-    /// Whether first messages stay unsent.
-    silent: bool,
 }
 
 struct Sending {
@@ -108,15 +81,11 @@ impl BenchNet {
     pub fn register(r: &mut Registry) {
         let mut me = r.unit::<BenchNet>("bench-net");
         me.source::<Acts>(BenchNet::act);
-        me.start_file(SESSION_FILE, BenchNet::session_file)
-            .opener(SESSION, BenchNet::opened)
-            .channel(SESSION, BenchNet::keys)
-            .channel(STREAM, |me: &mut BenchNet, _, p, cx| me.got(STREAM, p, cx))
+        me.channel(STREAM, |me: &mut BenchNet, _, p, cx| me.got(STREAM, p, cx))
             .channel(NEWEST, |me: &mut BenchNet, _, p, cx| me.got(NEWEST, p, cx))
             .channel(DEADLINE, |me: &mut BenchNet, _, p, cx| {
                 me.got(DEADLINE, p, cx)
             })
-            .on::<BackendAnswered>(BenchNet::answered)
             .on::<LinkUp>(|me: &mut BenchNet, up: &LinkUp, cx: &mut Cx| {
                 me.members.insert(up.member.pilot, up.member.restart);
                 cx.out(Heard(format!(
@@ -137,41 +106,12 @@ impl BenchNet {
             });
     }
 
-    /// A session file from before a restart opens the session again, one restart higher.
-    fn session_file(me: &mut BenchNet, bytes: Option<&[u8]>, cx: &mut Cx) {
-        let Some(mut saved) = bytes.and_then(|b| serde_json::from_slice::<Saved>(b).ok()) else {
-            return;
-        };
-        saved.restart += 1;
-        me.me = Some(Me {
-            pilot: saved.pilot,
-            name: saved.name.clone(),
-            kind: Kind::Crew,
-        });
-        cx.out(Heard(format!("net restarted restart={}", saved.restart)));
-        me.open(saved, cx);
-    }
-
     fn act(me: &mut BenchNet, input: &Input, cx: &mut Cx) {
         let Ok(ToCore::Net { act }) = serde_json::from_slice(&input.bytes) else {
             tracing::warn!("a line for the network's test unit isn't one of its acts");
             return;
         };
         match act {
-            NetAct::Host { name } => {
-                let my = me.me(name, cx);
-                let session = cx.new_id().to_string();
-                network::host(cx, network::Host { session, me: my });
-            }
-            NetAct::Join {
-                code,
-                name,
-                open_as,
-            } => {
-                let my = me.me(name, cx);
-                me.joining = Some(open_as.unwrap_or_else(|| code.clone()));
-                network::join(cx, network::Join { code, me: my });
-            }
             NetAct::Send {
                 delivery,
                 count,
@@ -192,7 +132,6 @@ impl BenchNet {
                 );
                 me.send(which, cx);
             }
-            NetAct::First { send } => me.silent = !send,
             NetAct::Report => {
                 let probes: BTreeMap<u16, Summary> =
                     me.got.iter().map(|(c, g)| (*c, g.summary())).collect();
@@ -208,136 +147,7 @@ impl BenchNet {
                 cx.out(Heard(format!("net report {report}")));
                 me.got.clear();
             }
-            NetAct::Leave { quit } => {
-                me.saved = None;
-                cx.job(Job::write(SESSION_FILE, Vec::new()), BenchNet::wrote);
-                network::leave(cx, quit);
-            }
         }
-    }
-
-    fn me(&mut self, name: String, cx: &Cx) -> Me {
-        let me = Me {
-            pilot: cx.random_bytes::<16>(),
-            name,
-            kind: Kind::Crew,
-        };
-        self.me = Some(me.clone());
-        me
-    }
-
-    fn answered(me: &mut BenchNet, answered: &BackendAnswered, cx: &mut Cx) {
-        let asked = match answered.asked {
-            Asked::Host => "host",
-            Asked::Join => "join",
-            Asked::Check => "check",
-        };
-        match &answered.answer {
-            Answer::Created { code } => {
-                cx.out(Heard(format!("net {asked} code {code}")));
-                let relays = cx
-                    .read::<Clients>()
-                    .setting_as::<Vec<Relay>>(network::RELAYS)
-                    .unwrap_or_default();
-                me.open_new(code.clone(), relays, Vec::new(), cx);
-            }
-            Answer::Found { relays, crew, .. } => {
-                cx.out(Heard(format!("net {asked} found {}", crew.len())));
-                if let (Asked::Join, Some(code)) = (answered.asked, me.joining.take()) {
-                    let mine = me.me.as_ref().map(|m| m.pilot);
-                    let crew = crew
-                        .iter()
-                        .filter_map(network::member)
-                        .filter(|m| Some(m.pilot) != mine)
-                        .map(|m| (m.pilot, m.endpoint))
-                        .collect();
-                    me.open_new(code, relays.clone(), crew, cx);
-                }
-            }
-            Answer::Refused(why) => cx.out(Heard(format!("net {asked} refused {why:?}"))),
-            Answer::NoAnswer(why) => cx.out(Heard(format!("net {asked} no-answer {why}"))),
-        }
-    }
-
-    fn open_new(
-        &mut self,
-        code: String,
-        relays: Vec<Relay>,
-        crew: Vec<(PilotId, EndpointId)>,
-        cx: &Cx,
-    ) {
-        let (Some(my), Some(key)) = (self.me.clone(), cx.read::<Network>().key()) else {
-            return tracing::error!("the backend answered with no join or host asked");
-        };
-        let saved = Saved {
-            code,
-            pilot: my.pilot,
-            name: my.name,
-            restart: 0,
-            key,
-            relays,
-            crew,
-        };
-        self.open(saved, cx);
-    }
-
-    /// Writes the session file, and opens the session once it's written, as the session crate
-    /// does, so a core killed in between starts again under the restart count the file holds.
-    fn open(&mut self, saved: Saved, cx: &Cx) {
-        let bytes = serde_json::to_vec(&saved).expect("serde_json should write the session file");
-        let job = cx.job(Job::write(SESSION_FILE, bytes), BenchNet::written);
-        self.opening = Some((job, saved));
-    }
-
-    fn written(me: &mut BenchNet, job: JobId, result: Result<Vec<u8>, String>, cx: &mut Cx) {
-        let Some((_, saved)) = me.opening.take_if(|(j, _)| *j == job) else {
-            return;
-        };
-        if let Err(error) = result {
-            return tracing::error!(
-                error,
-                "the bench's session file didn't write, so the session stays shut"
-            );
-        }
-        let Some(my) = me.me.clone() else { return };
-        network::open(
-            cx,
-            network::Open {
-                code: saved.code.clone(),
-                me: my,
-                restart: saved.restart,
-                key: saved.key,
-                relays: saved.relays.clone(),
-                crew: saved
-                    .crew
-                    .iter()
-                    .map(|&(pilot, endpoint)| Member {
-                        pilot,
-                        restart: 0,
-                        endpoint,
-                    })
-                    .collect(),
-            },
-        );
-        me.saved = Some(saved);
-    }
-
-    fn wrote(_: &mut BenchNet, _: JobId, result: Result<Vec<u8>, String>, _: &mut Cx) {
-        if let Err(error) = result {
-            tracing::error!(error, "the bench's session file didn't write");
-        }
-    }
-
-    fn opened(me: &mut BenchNet, opened: Opened, cx: &mut Cx) {
-        if me.silent {
-            return;
-        }
-        let name = me.me.as_ref().map(|m| m.name.clone()).unwrap_or_default();
-        network::first(cx, opened, &name);
-    }
-
-    fn keys(_: &mut BenchNet, _: Sender, name: String, cx: &mut Cx) {
-        cx.out(Heard(format!("net keys {name}")));
     }
 
     fn send(&mut self, which: u8, cx: &Cx) {
@@ -372,6 +182,7 @@ impl BenchNet {
         });
         self.timers.insert(timer, which);
     }
+
     fn got(&mut self, channel: Channel<Probe>, probe: Probe, cx: &Cx) {
         let got = self.got.entry(channel.number).or_default();
         got.late.push(cx.now().saturating_sub(probe.sent));

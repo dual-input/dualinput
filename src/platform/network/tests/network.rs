@@ -544,6 +544,16 @@ fn a_close_with_leaves_code_is_a_leave_and_any_other_a_lost_link() {
         code: Ok(codes::LEAVE),
     });
     assert_eq!(core.take().1, ["left"]);
+    // A lost link redials every 2s, and a leave never does.
+    let dials = |core: &mut Core| {
+        core.advance(core.now + 4 * SECOND);
+        core.take()
+            .0
+            .iter()
+            .filter(|c| matches!(c, Command::Dial { .. }))
+            .count()
+    };
+    assert_eq!(dials(&mut core), 0, "a dial after a leave");
 
     let mut core = Core::new();
     core.linked(1, [7; 32]);
@@ -553,6 +563,7 @@ fn a_close_with_leaves_code_is_a_leave_and_any_other_a_lost_link() {
         code: Ok(0),
     });
     assert_eq!(core.take().1, ["lost"]);
+    assert!(dials(&mut core) > 0, "no dial after a lost link");
 }
 
 #[test]

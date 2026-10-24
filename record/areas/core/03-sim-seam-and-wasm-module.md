@@ -167,7 +167,7 @@ impl SimAwareness {
 }
 ```
 
-The sim service reads, as a job, the flight file each `FlightLoaded` names, and gives sim awareness its `[Departure]` section's airport, stand name, and stand number as a signal of its own, since the session crate and Go to both read it ([preflight](../session/02-units.md#preflight)).
+The sim service reads, as a job, the flight file each `FlightLoaded` names, and gives sim awareness its `[Departure]` section's airport, stand name, and stand number as a signal of its own, since Go to reads it ([go to](../session/02-units.md#go-to)).
 
 The stage, the page, and the aircraft are types of the message crate, since the clients show them.
 The sim service registers a slice of client state holding sim awareness's stage, page, aircraft, pause, and how the last run ended, and the module's status.
@@ -202,15 +202,17 @@ Which of the slice the apps show is the apps' design ([slices and commands](../i
   So the PA-24's `SimObjects\Airplanes\pa24-250\presets\a2a\pa24-250\config\aircraft.CFG` becomes `pa24-250/presets/a2a/pa24-250`, whose first part is the folder ([02-02](../../learn/foundations/02-02-aircraft.md#how-an-aircraft-is-identified)).
 - So the A350's two reports of one load, 1ms apart, one relative and mixed-case and one absolute and lowercase (same chapter), name one aircraft, and a profile's preset path, compared ignoring case, matches it ([the aircraft and its variants](../profiles/01-format-and-delivery.md#the-aircraft-and-its-variants)).
 - The path names the preset on the PA-24 and the A350 (same chapter), so the core reads the preset from it, not from `A:TITLE`, which a profile would have to list and which carries the livery in an aircraft that isn't modular (same chapter; user, 2026-10-15).
-  The sim service reads `A:TITLE` once each load reaches Flying, and logs it beside the path.
+  The sim service reads `A:TITLE` and `A:LIVERY NAME` once each load reaches Ready to fly or Flying, through the platform's connection, and logs them beside the path.
 - A path with no `simobjects/airplanes/` in it gives no aircraft, and the sim service logs it.
 
 ### The aircraft's facts
 
-The sim service holds the loaded aircraft's facts, aircraft awareness, beside sim awareness's aircraft path: the package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, and the livery, `A:LIVERY NAME` (user, 2026-10-18).
+The sim service holds the loaded aircraft's facts, aircraft awareness, beside sim awareness's aircraft path: the package that holds the aircraft's folder, its folder on disk, where it's installed (`Community`, `Community2024`, an `Official` folder, or `StreamedPackages`), its `package_version` where its `manifest.json` has one, the livery, `A:LIVERY NAME` (user, 2026-10-18), and the title, `A:TITLE`, which names the aircraft in the crew's notices, such as "Load the L1011-500 Cabin w/ Lounge to fly with James", since the path, such as `pa24-250/presets/a2a/pa24-250`, holds folder names, not a name a pilot knows, and `A:TITLE` gave each of the L-1011's presets its own title (measured on MSFS 2024, 2026-10-21, [core log][session]).
 
 - A job finds the package in the packages folders the sim service reads from `UserCfg.opt` ([packages on disk](#packages-on-disk)), searching them as [the session's match check](../session/02-units.md#the-match-check) describes.
   It runs while a session is held: at each aircraft load, and when a session starts with an aircraft already loaded, since every v1 reader is in a session.
+  An aircraft no installed package holds counts as streamed, since a streamed package keeps no aircraft folder on disk ([aircraft log][p16]).
+- A development setting names the `UserCfg.opt` files, which the bench points at a packages folder of its own.
 - The sim service raises `AircraftChanged` when those facts change, the search's result included, and the match check's items and avatars' model job read them there, so no feature takes the aircraft's package from another's key.
 
 ### The moment
@@ -270,7 +272,7 @@ Without our copy of BlurPage, which brings the menu script ([preflight](../produ
 | Read an `A:` variable, of the pilot's aircraft or of an object by its ID | `fsVarsAVarGet` | p12 read both in the sim (read in `experiments/areas/avatars/wasm/src/follow.cpp`, `read_pose`) |
 | Write an `A:` variable | `fsVarsAVarSet` | p12 wrote another object's pose each frame (same file, `write_pose`); on the pilot's own aircraft, unrun |
 | Read or write an `L:` or `Z:` variable | `fsVarsLVarGet`, `fsVarsLVarSet`, `fsVarsZVarGet`, and `fsVarsZVarSet` | p08 and p12 ran them in the sim (same file; `experiments/areas/architecture/flight/module/src/lib.rs`) |
-| Freeze the pilot's aircraft | The three `A:IS ... FREEZE ON` flags through `fsVarsAVarGet`, and `fsEventsTriggerKeyEvent` with `KEY_FREEZE_LATITUDE_LONGITUDE_SET`, `KEY_FREEZE_ALTITUDE_SET`, and `KEY_FREEZE_ATTITUDE_SET` | Unrun; FS Copilot's module sends the same events as calculator code (read in the FS Copilot fork, `FsCopilot.Bridge.Wasm/wasm_module.cpp`, `apply_control`) |
+| Freeze the pilot's aircraft | The three `A:IS ... FREEZE ON` flags through `fsVarsAVarGet`, and `fsEventsTriggerKeyEvent` with `KEY_FREEZE_LATITUDE_LONGITUDE_SET`, `KEY_FREEZE_ALTITUDE_SET`, and `KEY_FREEZE_ATTITUDE_SET` | Froze a Baron 58P in a flight at one event of each flag (measured on MSFS 2024, 2026-10-24, [core log](log.md#2026-10-24-our-wasm-module-read-none-of-the-cores-writes-because-its-dispatch-callback-reached-its-buffer-through-the-context-pointer-with-a-threads-own-slot-it-reads-them-and-hold-freezes-the-aircraft)) |
 | Send an event with values | `fsEventsTriggerKeyEvent` with its values | Unrun; it takes an event and its values (read in MSFS 2024 SDK 1.7.3, `WASM/include/MSFS/MSFS_Events.h`) |
 | Fire an `H:` event, for state sync's `HEvents` | `fsEventsRegisterHEvent`, which takes the event's name, and `fsEventsHEventCall` | Unrun; read in `MSFS_Events.h` ([`H:` events](../sync/05-units.md#h-events)) |
 | Write a routine's report | `SimConnect_SetClientData` on the module's own connection, into the routine's report slot | p08's module wrote its echo through it in a flight (read in `experiments/areas/architecture/flight/module/src/lib.rs`, `write_out`; [architecture log][flight]) |
@@ -355,6 +357,7 @@ In the sim:
 
 - `module_init` also runs "after sign-in", so it may run twice in one run of the sim ([05-01](../../learn/foundations/05-01-kinds-lifecycle-and-apis.md#lifecycle-init-per-frame-update-deinit)); whether a second run finds its slots still there when it creates them again is unverified.
 
+[p16]: ../aircraft/log.md#2026-10-16-a-streamed-package-keeps-no-version-on-disk-while-every-installed-one-with-a-manifest-has-its-package_version
 [session]: log.md#2026-10-21-stage-4s-core-follows-the-sim-through-three-boots-and-five-loads-and-replays-all-of-it-but-ending-a-flight-sends-no-back_to_main_menu-and-a-failed-open-blocks-for-45s
 [p01]: log.md#2026-10-15-a-high-resolution-waitable-timer-wakes-within-15ms-where-tokios-wake-up-to-17ms-late-and-the-cores-math-changes-with-the-c-runtimes-fma3-switch-and-with-its-version
 [numbers]: ../build/log.md#2026-10-21-bindgen-brings-the-freeze-events-numbers-into-our-wasm-module-and-the-module-its-package-and-the-cores-simconnectdll-build-from-the-tree

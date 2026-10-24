@@ -18,10 +18,24 @@ import { STOCK } from "./stock.ts"
 export const PAGES = path.join(ROOT, "target", "sim-pages")
 
 /** Each bundle, by its entry, and where our package puts it. */
-const BUNDLES: { entry: string; to: string }[] = [{ entry: "src/sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" }]
+const BUNDLES: { entry: string; to: string }[] = [
+  { entry: "src/sim-package/pages/bridge.ts", to: "html_ui/DualInput/bridge.js" },
+  { entry: "src/sim-package/pages/menu.ts", to: "html_ui/DualInput/menu.js" },
+]
 
 /** Our VCockpit.js, where our package puts it, so it takes the stock file's place in every cockpit panel. */
 const VCOCKPIT = "html_ui/Pages/VCockpit/Core/VCockpit.js"
+
+/** BlurPage, the smallest of the components MasterPage places in the menu, which no other package we've seen copies (record/areas/interface/log.md, 2026-10-06). */
+const BLURPAGE = "{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}"
+
+/**
+ * What our BlurPage copy adds before the stock component's last closing tag, so it sits inside
+ * its root element: a hidden image with no source, whose error handler loads menu.js once in
+ * each document, as Flow Pro's copy of the start page loads its script (read in
+ * p42-util-flow-pro 26.33.5; record/areas/interface/log.md, 2026-10-06).
+ */
+const MENU_LOADER = `<svg style="display:none"><foreignObject><img src onerror="(function () { if (!window.DUALINPUT_MENU_LOADED) { window.DUALINPUT_MENU_LOADED = true; var script = document.createElement('script'); script.type = 'text/javascript'; script.src = 'coui://html_ui/DualInput/menu.js'; document.head.appendChild(script); } })()"></img></foreignObject></svg>`
 
 /**
  * Our two blocks, each put in at its anchor, a line of the stock file that holds its text
@@ -60,7 +74,20 @@ export function buildPages(out = PAGES): Built[] {
   const vcockpit = path.join(out, "VCockpit.js")
   fs.writeFileSync(vcockpit, makeVCockpit(fs.readFileSync(path.join(STOCK, "VCockpit.js"), "utf8")))
   built.push({ file: vcockpit, to: VCOCKPIT })
+  const blurpage = path.join(out, `${BLURPAGE}.html`)
+  fs.writeFileSync(blurpage, makeBlurPage(fs.readFileSync(path.join(STOCK, `${BLURPAGE}.html`), "utf8")))
+  built.push({ file: blurpage, to: `cookedcomps/${BLURPAGE}.html` })
+  // The component's .json, which says it has no animations, states, or exposed children,
+  // goes as the sim ships it.
+  built.push({ file: path.join(STOCK, `${BLURPAGE}.json`), to: `cookedcomps/${BLURPAGE}.json` })
   return built
+}
+
+/** Our BlurPage copy: the stock component with the menu script's loader before its last closing tag. */
+export function makeBlurPage(stock: string): string {
+  const at = stock.lastIndexOf("</")
+  if (at < 0) throw new Failed(`the stock ${BLURPAGE}.html has no closing tag to put the menu script's loader before`)
+  return stock.slice(0, at) + MENU_LOADER + stock.slice(at)
 }
 
 /**
@@ -88,7 +115,7 @@ export function makeVCockpit(stock: string, blocks = BLOCKS, root = ROOT): strin
  */
 export function checkPages(built: Built[]): void {
   const findings: string[] = []
-  for (const { file } of built) {
+  for (const { file } of built.filter((b) => b.file.endsWith(".js"))) {
     const parsed = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" })
     if (parsed.status !== 0) findings.push(`${fromRoot(file)} doesn't parse:\n${parsed.stderr}`)
     for (const f of checkFile(file)) findings.push(format(fromRoot(file), f))

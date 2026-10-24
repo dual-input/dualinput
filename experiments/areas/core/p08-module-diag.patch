@@ -1,0 +1,274 @@
+diff --git a/src/sim-package/wasm-module/src/aircraft.rs b/src/sim-package/wasm-module/src/aircraft.rs
+index a2984d9..69acc15 100644
+--- a/src/sim-package/wasm-module/src/aircraft.rs
++++ b/src/sim-package/wasm-module/src/aircraft.rs
+@@ -90,6 +90,22 @@ impl Ids {
+ #[derive(Default)]
+ pub(crate) struct Aircraft {
+     ids: Option<Ids>,
++    // p08's diagnostic patch: what the freeze read and sent.
++    pub(crate) p08_reads: u32,
++    pub(crate) p08_values: [u32; 3],
++    pub(crate) p08_errors: [u32; 3],
++    pub(crate) p08_ids_ok: u32,
++    pub(crate) p08_fs_sends: u32,
++    pub(crate) p08_sc_sends: u32,
++    pub(crate) p08_sc_result: u32,
++}
++
++fn p08_index(flag: Flag) -> usize {
++    match flag {
++        Flag::LatitudeLongitude => 0,
++        Flag::Altitude => 1,
++        Flag::Attitude => 2,
++    }
+ }
+ 
+ impl Aircraft {
+@@ -108,6 +124,8 @@ impl Sim for Aircraft {
+     /// A flag the sim can't read counts as off, so while a routine wants the freeze, the
+     /// routine host sends it each frame rather than never sending it.
+     fn frozen(&mut self, flag: Flag) -> bool {
++        self.p08_reads = self.p08_reads.wrapping_add(1);
++        self.p08_ids_ok = u32::from(self.ids().is_some());
+         let Some(ids) = self.ids() else {
+             return false;
+         };
+@@ -127,6 +145,13 @@ impl Sim for Aircraft {
+                 FS_OBJECT_ID_USER_AIRCRAFT,
+             )
+         };
++        let i = p08_index(flag);
++        if let (Some(v), Some(e)) = (self.p08_values.get_mut(i), self.p08_errors.get_mut(i)) {
++            // The high half of the f64's bits, 0x3ff00000 for 1.0, since a float-to-integer
++            // cast compiles to an instruction the module's validator refuses.
++            *v = (value.to_bits() >> 32) as u32;
++            *e = error as u32;
++        }
+         error == FS_VAR_ERROR_NONE && value != 0.0
+     }
+ 
+@@ -135,6 +160,18 @@ impl Sim for Aircraft {
+     /// flight at the first send of each flag (measured on MSFS 2024, 2026-10-24,
+     /// record/areas/core/log.md).
+     fn set_frozen(&mut self, flag: Flag, on: bool) {
++        if crate::connection::P08_MODE.load(Ordering::Relaxed) == 1 {
++            let handle = crate::connection::P08_HANDLE.load(Ordering::Relaxed);
++            // SAFETY: the call takes only numbers. Object 0 is the user aircraft, priority 1
++            // the highest, and flag 16 GROUPID_IS_PRIORITY, as the core sends its events.
++            let result = unsafe {
++                crate::bindings::SimConnect_TransmitClientEvent(handle, 0, 801 + p08_index(flag) as u32, u32::from(on), 1, 16)
++            };
++            self.p08_sc_sends = self.p08_sc_sends.wrapping_add(1);
++            self.p08_sc_result = result as u32;
++            return;
++        }
++        self.p08_fs_sends = self.p08_fs_sends.wrapping_add(1);
+         let event = match flag {
+             Flag::LatitudeLongitude => KEY_FREEZE_LATITUDE_LONGITUDE_SET,
+             Flag::Altitude => KEY_FREEZE_ALTITUDE_SET,
+diff --git a/src/sim-package/wasm-module/src/connection.rs b/src/sim-package/wasm-module/src/connection.rs
+index 2ae3519..ebe0114 100644
+--- a/src/sim-package/wasm-module/src/connection.rs
++++ b/src/sim-package/wasm-module/src/connection.rs
+@@ -30,8 +30,40 @@ pub(crate) struct Connection {
+     handle: HANDLE,
+     /// Each routine's slot, by its area less one.
+     routines: Vec<RoutineId>,
++    p08_out: u32,
++    p08_mode: u32,
+ }
+ 
++// p08's diagnostic patch: the connection's handle for the freeze through SimConnect, and the
++// mode the probe writes, 0 for fsEventsTriggerKeyEvent and 1 for SimConnect.
++pub(crate) static P08_HANDLE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
++pub(crate) static P08_MODE: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
++// Words 16 to 28 of the report: exceptions, which mode area delivered, client data heard, and
++// the send IDs of the calls an exception could name.
++pub(crate) static P08_WORDS: [std::sync::atomic::AtomicU32; 16] = [const { std::sync::atomic::AtomicU32::new(0) }; 16];
++const P08_MODE_HIGH: u32 = 0xD000;
++fn p08_add(i: usize, by: u32) {
++    if let Some(w) = P08_WORDS.get(i) {
++        w.fetch_add(by, std::sync::atomic::Ordering::Relaxed);
++    }
++}
++fn p08_set(i: usize, v: u32) {
++    if let Some(w) = P08_WORDS.get(i) {
++        w.store(v, std::sync::atomic::Ordering::Relaxed);
++    }
++}
++fn p08_send_id(handle: HANDLE) -> u32 {
++    let mut id: DWORD = 0;
++    // SAFETY: SimConnect writes the ID into `id`, which outlives the call.
++    unsafe { crate::bindings::SimConnect_GetLastSentPacketID(handle, &mut id) };
++    id as u32
++}
++pub(crate) const P08_EVENTS: [&std::ffi::CStr; 3] = [
++    c"FREEZE_LATITUDE_LONGITUDE_SET",
++    c"FREEZE_ALTITUDE_SET",
++    c"FREEZE_ATTITUDE_SET",
++];
++
+ impl Connection {
+     /// Opens the connection, creates the status slot and each routine's slot in `slots`,
+     /// with its size in bytes, and asks for each routine's slot whenever the core sets it.
+@@ -53,10 +85,27 @@ impl Connection {
+         if opened != 0 {
+             return None;
+         }
++        let p08_out = STATUS_AREA + 1 + slots.len() as u32;
+         let connection = Connection {
+             handle,
+             routines: slots.iter().map(|&(id, _)| id).collect(),
++            p08_out,
++            p08_mode: p08_out + 1,
+         };
++        P08_HANDLE.store(handle, std::sync::atomic::Ordering::Relaxed);
++        connection.create(p08_out, "DUALINPUT_P08_OUT", 128, SIMCONNECT_CREATE_CLIENT_DATA_FLAG_DEFAULT);
++        connection.create(p08_out + 1, "DUALINPUT_P08_MODE", 4, SIMCONNECT_CREATE_CLIENT_DATA_FLAG_DEFAULT);
++        connection.create(P08_MODE_HIGH, "DUALINPUT_P08_MODEHI", 4, SIMCONNECT_CREATE_CLIENT_DATA_FLAG_DEFAULT);
++        // SAFETY: as below, and SimConnect reads each name during its call.
++        unsafe {
++            SimConnect_RequestClientData(handle, p08_out + 1, p08_out + 1, p08_out + 1, SIMCONNECT_CLIENT_DATA_PERIOD_ON_SET, 0, 0, 0, 0);
++            p08_set(11, p08_send_id(handle));
++            SimConnect_RequestClientData(handle, P08_MODE_HIGH, P08_MODE_HIGH, P08_MODE_HIGH, SIMCONNECT_CLIENT_DATA_PERIOD_ON_SET, 0, 0, 0, 0);
++            p08_set(12, p08_send_id(handle));
++            for (i, name) in P08_EVENTS.iter().enumerate() {
++                crate::bindings::SimConnect_MapClientEventToSimEvent(handle, 801 + i as u32, name.as_ptr());
++            }
++        }
+         // The core trusts the status slot to say whether our module runs, and the read-only
+         // flag lets only the slot's creator, this connection, write it
+         // (record/areas/core/03-sim-seam-and-wasm-module.md, "Its slots").
+@@ -66,6 +115,7 @@ impl Connection {
+             size_of::<ModuleStatus>() as u32,
+             SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY,
+         );
++        p08_set(9, p08_send_id(handle));
+         for (area, &(id, size)) in (STATUS_AREA + 1..).zip(slots) {
+             connection.create(
+                 area,
+@@ -89,6 +139,7 @@ impl Connection {
+                     0,
+                 )
+             };
++            p08_set(10, p08_send_id(handle));
+         }
+         Some(connection)
+     }
+@@ -126,6 +177,17 @@ impl Connection {
+             .with(|gathered| gathered.take())
+             .into_iter()
+             .filter_map(|(request, bytes)| {
++                p08_add(6, 1);
++                p08_set(7, request);
++                if request == self.p08_mode || request == P08_MODE_HIGH {
++                    p08_add(if request == P08_MODE_HIGH { 5 } else { 4 }, 1);
++                    let mode = bytes.get(..4).map_or(0, |b| u32::from_le_bytes([b[0], b[1], b[2], b[3]]));
++                    P08_MODE.store(mode, std::sync::atomic::Ordering::Relaxed);
++                    return None;
++                }
++                if request == 1 {
++                    p08_add(8, 1);
++                }
+                 let index = usize::try_from(request).ok()?.checked_sub(1)?;
+                 Some((*self.routines.get(index)?, bytes))
+             })
+@@ -149,6 +211,17 @@ impl Connection {
+         }
+     }
+ 
++    pub(crate) fn write_p08(&self, first: &[u32; 16]) {
++        let mut words = [0u32; 32];
++        for (to, from) in words.iter_mut().zip(first.iter().chain(P08_WORDS.iter().map(|w| w.load(std::sync::atomic::Ordering::Relaxed)).collect::<Vec<_>>().iter())) {
++            *to = *from;
++        }
++        // SAFETY: SimConnect copies the bytes out during the call.
++        unsafe {
++            SimConnect_SetClientData(self.handle, self.p08_out, self.p08_out, SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT, 0, 128, (&raw mut words).cast());
++        }
++    }
++
+     pub(crate) fn close(self) {
+         // SAFETY: the call takes only the handle, which no call uses after this one.
+         unsafe { SimConnect_Close(self.handle) };
+@@ -167,12 +240,24 @@ thread_local! {
+ /// SimConnect's dispatch callback, which copies each client data message's request and bytes
+ /// into `GATHERED`. A client data message is a `SIMCONNECT_RECV_SIMOBJECT_DATA` with nothing
+ /// added, and its bytes start at `dwData` (read in MSFS 2024 SDK 1.8.1, `SimConnect.h`).
+-unsafe extern "C" fn gather(recv: *mut SIMCONNECT_RECV, size: DWORD, _: *mut c_void) {
++unsafe extern "C" fn gather(recv: *mut SIMCONNECT_RECV, size: DWORD, context: *mut c_void) {
++    p08_add(13, 1);
++    if context.is_null() {
++        p08_add(14, 1);
++    }
+     if recv.is_null() {
+         return;
+     }
+     // SAFETY: SimConnect hands a message of `size` bytes, which lives through this call.
+     unsafe {
++        if (*recv).dwID == crate::bindings::SIMCONNECT_RECV_ID_EXCEPTION as DWORD {
++            let e = recv.cast::<crate::bindings::SIMCONNECT_RECV_EXCEPTION>();
++            p08_add(0, 1);
++            p08_set(1, (*e).dwException as u32);
++            p08_set(2, (*e).dwSendID as u32);
++            p08_set(3, (*e).dwIndex as u32);
++            return;
++        }
+         if (*recv).dwID != SIMCONNECT_RECV_ID_CLIENT_DATA as DWORD {
+             return;
+         }
+diff --git a/src/sim-package/wasm-module/src/lib.rs b/src/sim-package/wasm-module/src/lib.rs
+index 33f36b9..f9756c2 100644
+--- a/src/sim-package/wasm-module/src/lib.rs
++++ b/src/sim-package/wasm-module/src/lib.rs
+@@ -33,6 +33,9 @@ struct Module {
+     connection: Connection,
+     host: Host,
+     aircraft: Aircraft,
++    // p08's diagnostic patch.
++    p08_frames: u64,
++    p08_written: u64,
+ }
+ 
+ impl Module {
+@@ -54,6 +57,30 @@ impl Module {
+         if let Some(status) = self.host.frame(clock, &mut self.aircraft) {
+             self.connection.write_status(&status);
+         }
++        self.p08_frames += 1;
++        if clock.saturating_sub(self.p08_written) >= 250_000 {
++            self.p08_written = clock;
++            let a = &self.aircraft;
++            let words = [
++                self.p08_frames as u32,
++                (self.p08_frames >> 32) as u32,
++                a.p08_reads,
++                crate::connection::P08_MODE.load(std::sync::atomic::Ordering::Relaxed),
++                a.p08_values[0],
++                a.p08_values[1],
++                a.p08_values[2],
++                a.p08_errors[0],
++                a.p08_errors[1],
++                a.p08_errors[2],
++                a.p08_ids_ok,
++                a.p08_fs_sends,
++                a.p08_sc_sends,
++                a.p08_sc_result,
++                (clock / 1_000_000) as u32,
++                0x0808_0808,
++            ];
++            self.connection.write_p08(&words);
++        }
+     }
+ }
+ 
+@@ -94,6 +121,8 @@ pub extern "C" fn module_init() {
+         connection,
+         host,
+         aircraft: Aircraft::default(),
++        p08_frames: 0,
++        p08_written: 0,
+     };
+     module.take_writes();
+     with_module(|slot| *slot = Some(module));

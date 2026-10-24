@@ -1,0 +1,34 @@
+  5.33s  before the core: module frames 1712, reads 0, mode 0, values 0 0 0, errors 0 0 0, ids 0, fsEvents sends 0, SimConnect sends 0 last result 0, clock 268s, marker 8080808
+  5.33s  before the core: the module's connection: exceptions 0, the last 0 for send 0 index 0; mode writes heard at the low ID 1 and at 0xD000 1; client data heard 2, the last for request 53248; HOLD writes heard 0; send IDs: status 18, HOLD's request 22, the low mode's 11, the 0xD000 mode's 12; dispatch callbacks 3, with a null context 3
+  5.62s  the core holds the aircraft; the module sends through fsEventsTriggerKeyEvent
+  6.62s    fsEvents: module frames 1744, reads 90, mode 0, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 269s, marker 8080808
+  6.96s    fsEvents: panel freezes 1 1 1
+  7.98s    fsEvents: module frames 1784, reads 210, mode 0, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 270s, marker 8080808
+  8.33s    fsEvents: panel freezes 1 1 1
+  9.34s    fsEvents: module frames 1832, reads 354, mode 0, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 272s, marker 8080808
+  9.70s    fsEvents: panel freezes 1 1 1
+ 10.71s    fsEvents: module frames 1872, reads 474, mode 0, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 273s, marker 8080808
+ 11.07s    fsEvents: panel freezes 1 1 1
+ 12.08s    fsEvents: module frames 1912, reads 594, mode 0, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 275s, marker 8080808
+ 12.43s    fsEvents: panel freezes 1 1 1
+ 12.43s  the module sends through its SimConnect connection
+ 13.44s    SimConnect: module frames 1952, reads 714, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 276s, marker 8080808
+ 13.80s    SimConnect: panel freezes 1 1 1
+ 14.80s    SimConnect: module frames 1992, reads 834, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 277s, marker 8080808
+ 15.16s    SimConnect: panel freezes 1 1 1
+ 16.18s    SimConnect: module frames 2032, reads 954, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 279s, marker 8080808
+ 16.53s    SimConnect: panel freezes 1 1 1
+ 17.55s    SimConnect: module frames 2072, reads 1074, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 280s, marker 8080808
+ 17.91s    SimConnect: panel freezes 1 1 1
+ 18.92s    SimConnect: module frames 2112, reads 1194, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 281s, marker 8080808
+ 19.27s    SimConnect: panel freezes 1 1 1
+ 19.27s  the core stopped, so the routine host drops Hold 1s after its last feed
+ 20.29s    after the core: module frames 2160, reads 1338, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 0 last result 0, clock 283s, marker 8080808
+ 20.63s    after the core: panel freezes 0 0 0
+ 21.64s    after the core: module frames 2200, reads 1341, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 3 last result 0, clock 284s, marker 8080808
+ 22.00s    after the core: panel freezes 0 0 0
+ 23.02s    after the core: module frames 2240, reads 1341, mode 1, values 3ff00000 3ff00000 3ff00000, errors 0 0 0, ids 1, fsEvents sends 3, SimConnect sends 3 last result 0, clock 286s, marker 8080808
+ 23.37s    after the core: panel freezes 0 0 0
+ 23.37s  the module's connection: exceptions 0, the last 0 for send 0 index 0; mode writes heard at the low ID 2 and at 0xD000 2; client data heard 75, the last for request 1; HOLD writes heard 71; send IDs: status 18, HOLD's request 22, the low mode's 11, the 0xD000 mode's 12; dispatch callbacks 76, with a null context 76
+ 24.09s  the panel's own unfreeze: true; panel freezes 0 0 0
+ 24.21s  the report is experiments\areas\core\results\p08-module-freeze-2026-10-24-09-04-50.txt

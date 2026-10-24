@@ -1,7 +1,7 @@
-// Cockpit panels and their modules, with the clients' test unit standing in for the session
-// crate's announcement and the profile loader: panels connect only in a session, each is
-// answered once the profile loads, a panel told none stays away, a reloaded panel replaces
-// its socket, and trouble shows when no panel connects
+// Cockpit panels and their modules, with a session hosted through the bench's local backend,
+// and the clients' test unit standing in for the profile loader: panels connect only in a
+// session, each is answered once the profile loads, a panel told none stays away, a reloaded
+// panel replaces its socket, and trouble shows when no panel connects
 // (record/areas/core/02-clients-and-panel-bridge.md, "Cases for the bench" and "Budgets";
 // record/areas/interface/01-apps.md, "Cases for the bench").
 
@@ -10,10 +10,12 @@ import { test } from "node:test"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { BenchRun, type Core } from "../cores.ts"
+import { app, BenchNetwork, host } from "../network.ts"
 import { FakePage } from "../pages.ts"
 
-async function announcing(run: BenchRun, name: string): Promise<Core> {
-  const core = await run.core(name)
+/** A core on a stub sim, with the bench's backend, which its session needs. */
+async function announcing(run: BenchRun, name: string, net: BenchNetwork): Promise<Core> {
+  const core = await run.core(name, net.core())
   core.act({ act: "watch", process: run.stub().id })
   await core.hear("stage Starting aircraft none")
   return core
@@ -39,7 +41,9 @@ function nextAnnouncement(core: Core, session: boolean): Promise<number> {
 
 test("panels connect only in a session, each of 20 is answered within 1s of the profile loading, and one told none stays away until the next session", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-panels", t)
-  const core = await announcing(run, "a")
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net)
   // As many cockpit panels as the Black Square Baron 58P has, 3 of them with a display the
   // profile's panel module takes (record/areas/interface/log.md, 2026-10-04), and the last
   // two each holding an instrument keyed GNS_DISABLED, as two of the Baron's do.
@@ -49,10 +53,11 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   await sleep(2_500)
   assert.equal(panels.filter((p) => p.opened.length).length, 0, "no panel connects with no session")
 
-  // The announcement goes out within one input of the session crate's call, so long before
-  // the next 2s one (record/areas/core/03-sim-seam-and-wasm-module.md, "Budgets").
+  // The announcement goes out within one input of the session crate's call, in the input of
+  // the backend's answer, so long before the next 2s one
+  // (record/areas/core/03-sim-seam-and-wasm-module.md, "Budgets").
   const announced = nextAnnouncement(core, true)
-  core.clients({ act: "session", on: true })
+  await host(core, "Host")
   const ms = await announced
   assert.ok(ms < 500, `the announcement came ${ms.toFixed(0)}ms after the session started`)
   await panels[0]!.until(() => panels.every((p) => p.client.connected), "every panel connecting")
@@ -72,17 +77,19 @@ test("panels connect only in a session, each of 20 is answered within 1s of the 
   await sleep(4_500)
   assert.equal(told.opened.length, 1, "a panel told none connected again in the same session")
   // A session's end closes every panel's socket, those with modules among them (decision 011).
-  core.clients({ act: "session", on: false })
+  await (await app(core)).ok("session.leave")
   await panels[0]!.until(() => panels.every((p) => p.client.state === "closed"), "every panel's socket closing at the session's end")
-  core.clients({ act: "session", on: true })
+  await host(core, "Host")
   await told.until(() => told.opened.length === 2, "the panel told none connecting in the next session")
   for (const p of panels) assert.deepEqual(p.overBudget(), [])
 })
 
 test("a panel module's messages reach its feature and come back, and a reloaded panel gets its modules on its new socket while the core closes the old", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-panel-reload", t)
-  const core = await announcing(run, "a")
-  core.clients({ act: "session", on: true })
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net)
+  await host(core, "Host")
   const first = panel(core, "VCockpit60", ["PFD_0|side=0"])
   t.after(() => first.close())
   await first.until(() => first.client.connected, "the panel connecting")
@@ -103,8 +110,10 @@ test("a panel module's messages reach its feature and come back, and a reloaded 
 
 test("a slice 20 panels watch reaches each under 30 messages a second, though it changes 100 times a second, and each round takes under 1ms on the loop", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-panel-rate", t)
-  const core = await announcing(run, "a")
-  core.clients({ act: "session", on: true })
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net)
+  await host(core, "Host")
   const panels = Array.from({ length: 20 }, (_, i) => panel(core, `VCockpit${i + 60}`, [`GAUGE_${i}`]))
   t.after(() => panels.forEach((p) => p.close()))
   await panels[0]!.until(() => panels.every((p) => p.client.connected), "every panel connecting")
@@ -122,21 +131,19 @@ test("a slice 20 panels watch reaches each under 30 messages a second, though it
   // "Logging").
   core.send({ kind: "exit" })
   assert.equal(await core.exited, 0)
-  const stats = core.log().split("\n").filter((l) => l.includes("the loop's stats")).at(-1) ?? ""
-  const slowest = Number(/slowest_us=(\d+)/.exec(stats)?.[1])
-  const over = Number(/over_1ms=(\d+)/.exec(stats)?.[1])
-  console.log(`budget: the slowest input of a run with 20 panels in rounds took ${slowest}µs, ${over} over 1ms, against 1,000µs for a round`)
-  assert.equal(over, 0, `inputs took over 1ms: ${stats}`)
+  core.checkHandlers("a run with 20 panels in rounds")
 })
 
 test("no cockpit panel within 10s of the profile loading raises the clients crate's trouble notice, cleared once one connects", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-no-panel", t)
-  const core = await announcing(run, "a")
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net)
   const efb = new FakePage(core, { component: "efb" })
   t.after(() => efb.close())
   efb.client.watch("notices", () => {})
   await efb.until(() => efb.slice("notices") !== undefined, "the notices")
-  core.clients({ act: "session", on: true })
+  await host(core, "Host")
   core.clients({ act: "profile", loaded: true, picks: ["PFD"] })
   const ids = () => ((efb.slice("notices") ?? []) as { id: string }[]).map((n) => n.id)
   await sleep(9_000)
@@ -149,7 +156,9 @@ test("no cockpit panel within 10s of the profile loading raises the clients crat
 
 test("a module from another build while a test routine is fed raises the sim service's trouble notice for our package", { timeout: 60_000 }, async (t) => {
   const run = new BenchRun("clients-package-notice", t)
-  const core = await announcing(run, "a")
+  const net = await BenchNetwork.start()
+  t.after(() => net.stop())
+  const core = await announcing(run, "a", net)
   await core.hear("module Running")
   const efb = new FakePage(core, { component: "efb" })
   t.after(() => efb.close())

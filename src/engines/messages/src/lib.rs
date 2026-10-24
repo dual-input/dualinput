@@ -30,7 +30,31 @@ pub mod core_helper;
 pub mod module;
 pub mod net;
 pub mod recording;
+pub mod session;
 pub mod sim;
+
+/// Bytes as lowercase hex, two digits a byte, the form pilot and endpoint IDs take in the
+/// messages, the backend's requests, and the session file.
+pub fn hex(bytes: &[u8]) -> String {
+    use std::fmt::Write;
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for b in bytes {
+        let _ = write!(out, "{b:02x}");
+    }
+    out
+}
+
+/// `2 * N` hex digits back to their `N` bytes, or `None` when `text` isn't that.
+pub fn unhex<const N: usize>(text: &str) -> Option<[u8; N]> {
+    if text.len() != N * 2 {
+        return None;
+    }
+    let mut out = [0; N];
+    for (i, byte) in out.iter_mut().enumerate() {
+        *byte = u8::from_str_radix(text.get(i * 2..i * 2 + 2)?, 16).ok()?;
+    }
+    Some(out)
+}
 
 // Tests run off the core's loop, so they may write files, which the root's clippy.toml
 // forbids only the loop.

@@ -10,7 +10,10 @@ use serde_json::Value;
 
 use crate::{Clients, ROUND};
 
-type Build = Box<dyn Fn(&View) -> Result<Value, serde_json::Error>>;
+/// Builds a slice as JSON text, written straight from the unit's value rather than through a
+/// `Value` tree, which would allocate every field again in each round, 20 a second for every
+/// slice a client shows.
+type Build = Box<dyn Fn(&View) -> Result<String, serde_json::Error>>;
 
 /// A slice a unit registered, with what builds it.
 pub(crate) struct Slice {
@@ -61,16 +64,16 @@ impl Clients {
 
     /// A slice's value as JSON text, or `None` for a slice no unit registered.
     fn build(&self, slice: &str, cx: &Cx) -> Option<String> {
-        let value = match slice {
-            NOTICES => serde_json::to_value(self.notices.values().collect::<Vec<_>>()),
-            SETTINGS => serde_json::to_value(self.settings.slice()),
+        let text = match slice {
+            NOTICES => serde_json::to_string(&self.notices.values().collect::<Vec<_>>()),
+            SETTINGS => serde_json::to_string(&self.settings.slice()),
             _ => {
                 let registered = self.slices.iter().find(|s| s.name == slice)?;
                 (registered.build)(&cx.view())
             }
         };
-        match value {
-            Ok(value) => Some(value.to_string()),
+        match text {
+            Ok(text) => Some(text),
             Err(error) => {
                 tracing::error!(slice, %error, "a slice didn't encode as JSON");
                 None

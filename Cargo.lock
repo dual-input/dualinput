@@ -954,6 +954,7 @@ dependencies = [
  "rustls",
  "serde",
  "serde_json",
+ "session",
  "sha2 0.10.9",
  "sim-awareness",
  "sim-client",
@@ -3674,6 +3675,21 @@ checksum = "66cf8fedced2fcf12406bcb34223dffb92eaf34908ede12fed414c82b7f00b3e"
 dependencies = [
  "base16ct",
  "serde",
+]
+
+[[package]]
+name = "session"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "network",
+ "postcard",
+ "serde",
+ "serde_json",
+ "sim-service",
+ "tracing",
 ]
 
 [[package]]

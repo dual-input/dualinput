@@ -77,8 +77,6 @@ pub(crate) struct Platform {
     pub(crate) pause: u32,
     pub(crate) aircraft_state: Option<u32>,
     pub(crate) status: u32,
-    /// The once-read of `A:TITLE` it waits on.
-    pub(crate) title: Option<u32>,
 }
 
 impl SimService {

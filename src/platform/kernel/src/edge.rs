@@ -131,9 +131,10 @@ pub struct Job {
 /// An engine's work on what a job read: its result, or its error as text.
 pub type Then = fn(Vec<u8>) -> Result<Vec<u8>, String>;
 
-/// A path is relative to the core's data folder, or absolute. The pool runs several jobs at
-/// once, so a unit that writes one path again waits for the first write's result, or the two
-/// can land in either order.
+/// A path is relative to the core's data folder, or absolute, and may start with `%APPDATA%`
+/// or `%LOCALAPPDATA%`, which the edge fills in, as the sim's `UserCfg.opt` sits under one or
+/// the other. The pool runs several jobs at once, so a unit that writes one path again waits
+/// for the first write's result, or the two can land in either order.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum Work {
     /// Reads a whole file, whose bytes are the job's result.
@@ -146,6 +147,18 @@ pub enum Work {
     List { path: String },
     /// Deletes a file, or a folder and everything in it. The result is empty.
     Delete { path: String },
+    /// Finds the folders under each root, at its depth, such as 1 for the root's own
+    /// children, that hold the path `holding`. The result is their paths, one to a line, as
+    /// `<root>\<child>`, in no order; a root that doesn't exist holds none.
+    Find {
+        roots: Vec<(String, u8)>,
+        holding: String,
+    },
+    /// Reads the clipboard's text, and hands up the invite code it holds, if it holds one,
+    /// and nothing else of it, so the recording never holds what a pilot copied for another
+    /// program (record/areas/recording/01-recording-and-bug-reports.md, "The clipboard"). The
+    /// result is the code, or empty.
+    InviteCode,
     /// Fetches a URL, as the network's requests to the backend do. The result is a
     /// `Fetched`, whatever its status, and a fetch that got no answer is the job's error.
     Fetch(Fetch),
@@ -232,6 +245,23 @@ impl Job {
     pub fn delete(path: impl Into<String>) -> Job {
         Job {
             work: Work::Delete { path: path.into() },
+            then: None,
+        }
+    }
+
+    pub fn find(roots: Vec<(String, u8)>, holding: impl Into<String>) -> Job {
+        Job {
+            work: Work::Find {
+                roots,
+                holding: holding.into(),
+            },
+            then: None,
+        }
+    }
+
+    pub fn invite_code() -> Job {
+        Job {
+            work: Work::InviteCode,
             then: None,
         }
     }

@@ -1,0 +1,10 @@
+  3.55s  the core started on target\sim\runs\2026-10-24-08-38-00-p07\core
+  4.11s  the core holds the aircraft
+  4.17s  HOLD once: feeds 1, end 0, slots hash b0828a8b3c652b62, counter 4647119179
+  4.50s  status: counter 611, slots hash b0828a8b3c652b62, version 0.1.0
+  5.50s  status: counter 612, slots hash b0828a8b3c652b62, version 0.1.0
+  6.53s  status: counter 613, slots hash b0828a8b3c652b62, version 0.1.0
+  7.57s  status: counter 614, slots hash b0828a8b3c652b62, version 0.1.0
+  8.60s  status: counter 615, slots hash b0828a8b3c652b62, version 0.1.0
+  9.15s  HOLD: 25 writes in 5s, feeds 1, end 0
+  9.15s  slots hashes the core wrote: b0828a8b3c652b62; the module's: b0828a8b3c652b62

@@ -159,7 +159,7 @@ export class Core {
     this.send({ kind: "sim", call })
   }
 
-  /** Has the clients' test unit, which stands in for the session crate and the profile loader, act. */
+  /** Has the clients' test unit, which stands in for the profile loader, act. */
   clients(act: ClientsAct): void {
     this.send({ kind: "clients", act })
   }
@@ -169,7 +169,7 @@ export class Core {
     this.send({ kind: "helper", act })
   }
 
-  /** Has the network's test unit, which stands in for the session crate and a feature with a channel of each delivery, act. */
+  /** Has the network's test unit, which stands in for a feature with a channel of each delivery, act. */
   net(act: NetAct): void {
     this.send({ kind: "net", act })
   }
@@ -192,6 +192,21 @@ export class Core {
     const recordings = path.join(this.data, "recordings")
     const newest = fs.readdirSync(recordings).sort().at(-1)
     return newest ? fs.readFileSync(path.join(recordings, newest, "log.txt"), "utf8") : ""
+  }
+
+  /**
+   * Checks the loop's stats for the whole run, which the core logs as it exits, against the
+   * code map's 1ms for a handler. Windows now and then pauses the loop's thread mid-input,
+   * and the stats time inputs by the wall clock, which can't tell a pause from work, so a run
+   * may hold one input over 1ms if it's under 2ms, and a handler slow each time it runs still
+   * fails (record/areas/build/02-testing.md, "Building what it runs").
+   */
+  checkHandlers(run: string): void {
+    const stats = this.log().split("\n").filter((l) => l.includes("the loop's stats")).at(-1) ?? ""
+    const slowest = Number(/slowest_us=(\d+)/.exec(stats)?.[1])
+    const over = Number(/over_1ms=(\d+)/.exec(stats)?.[1])
+    console.log(`budget: ${run}: the slowest input took ${slowest}µs, ${over} over 1ms, against 1,000µs for a handler with one pause under 2ms allowed`)
+    assert.ok(over <= 1 && slowest < 2_000, `inputs took over 1ms: ${stats}`)
   }
 
   /** Every line the sim's test unit has told the bench so far, oldest first. */

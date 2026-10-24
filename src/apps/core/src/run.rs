@@ -25,9 +25,12 @@ use crate::run_context;
 use crate::sinks::Sinks;
 use crate::{clock, cpu, data_folder};
 
-/// A plugin's script runs on the loop's thread, in QuickJS-ng, whose deep recursion needs
-/// stack. p10, the probe that ran a core's whole load on one thread, gave its loop 16 MB
-/// with no reason recorded (record/areas/core/01-loop-and-edge.md, "Threads").
+/// A profile's write functions run on the loop's thread, in the sandbox, which lets QuickJS-ng
+/// use `STACK` in src/engines/sandbox/src/lib.rs below each call into JS, so the loop needs
+/// that much above its own frames. p10, the probe that ran a core's whole load on one thread,
+/// gave its loop 16 MB with no reason recorded (record/areas/core/01-loop-and-edge.md,
+/// "Threads"). `LOOP_STACK` in src/engines/sandbox/tests/sandbox.rs gives the sandbox's tests
+/// the same, so change both together.
 // TODO: size it from what QuickJS-ng needs, once the bench, which runs whole cores on one
 // PC, has measured the sandbox on it.
 pub(crate) const STACK: usize = 16 * 1024 * 1024;

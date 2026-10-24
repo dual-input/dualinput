@@ -3713,6 +3713,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sandbox"
+version = "0.1.0"
+dependencies = [
+ "rquickjs",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "saphyr"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

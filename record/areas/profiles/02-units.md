@@ -23,6 +23,8 @@ Decides:     Which compiler builds a bundle, and where it runs; the YAML parser;
 >
 > Since 2026-10-24, a level's declarations open with the JavaScript the sandbox runs, TypeScript 6.0.3's own library declarations kept to the globals and members the sandbox's context defines, where [levels](#levels) has the ten global types TypeScript needs ([profiles log](log.md#2026-10-24-the-sandboxs-context-runs-quickjs-ngs-base-objects-past-es2020-without-json-map-set-date-or-promise-and-level-1-types-write-functions-by-exactly-what-it-runs)).
 > They name neither `instrument()`, which only a watch takes and the engine reads without TypeScript, so a write function that calls it fails its type check, nor `aircraft`, which the format never defined, since `only` covers what differs between variants (user, 2026-10-24).
+>
+> Since 2026-10-24, the sandbox's context also takes rquickjs's `Promise` intrinsic and deletes the `Promise` and `AsyncDisposableStack` globals it adds, where the note of 2026-10-17 has `Eval` and `RegExp` alone, so a script sees the same globals as without the intrinsic ([plugins and the sandbox](../plugins/01-plugins.md)'s note of 2026-10-24).
 
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.

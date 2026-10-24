@@ -10,6 +10,14 @@ Decides:     That plugins come after v1; the `instrument()` name, what its path 
 > Since 2026-10-18, an `instrument()` path reads own data properties only and ends in a number, text, or boolean, with no method call, where [what a path reaches](#what-a-path-reaches) lets it end in a no-argument method the panel's scripts wrote; so the `[native code]` check and its case go, and the 58P's radar range syncs in v1 only if a data field of Asobo's map holds it (user, 2026-10-18).
 >
 > Since 2026-10-23, [the sandbox](#the-sandbox)'s time limit counts QuickJS-ng's interrupt checks, about 100ms of a call on our development machine, so a replay stops a call at the same check with nothing recorded, where the core's edge hands the sandbox a check that reads the clock ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
+>
+> Since 2026-10-24, stage 12's build changes [the sandbox](#the-sandbox) in four places (user, 2026-10-24; [plugins log](log.md#2026-10-24-stage-12s-sandbox-stops-a-write-functions-endless-loop-at-100-interrupt-checks-and-needs-quickjs-ngs-promise-intrinsic-without-which-an-async-function-aborts-the-core-when-its-sandbox-is-dropped)):
+>
+> - The context also takes rquickjs's `Promise` intrinsic, and the sandbox deletes the `Promise` and `AsyncDisposableStack` globals it adds, as it deletes `Math.random`, where the context has `Eval` and `RegExp` alone: without it, an async function, or `Array.fromAsync`, left an object behind that made QuickJS-ng abort the core when the profile's sandbox was dropped.
+>   An async function a script makes from a string runs to its first `await` and never resumes, since nothing runs its jobs; TypeScript refuses one in a write function, which settles the "unverified with our builder" on the `queueMicrotask` item below.
+> - The time limit is 100 checks, set by a write function's own endless loop, which calls a name, such as `K('X')`, and `write()` each pass, and stops in about 100ms; a check's length turns on what a loop does between ticks, so an empty loop stops sooner and one that builds an object each pass later.
+> - A function that catches "out of memory" and keeps allocating meets the time limit only after about 2.5s, where the design has it meet the limit at 100ms, since each of its checks took about 25ms, for a reason we haven't traced.
+> - QuickJS-ng throws "out of memory in regexp execution" when a regex's stack outgrows the limit, and `null` when even the error object doesn't fit, as with a runaway of small objects, beside the "out of memory" the design names; the sandbox reads all three as the memory limit, so a script's own `throw null` does too.
 
 v1 builds no plugins.
 The Baron 58P's profile reads the settings that live only in its gauges' JavaScript through a name, `instrument()`, which a panel module of state sync's reads every 250ms.
@@ -177,7 +185,7 @@ Its contexts already leave out `Date` and `Performance` ([one loop](../architect
 
 ## What this changes elsewhere
 
-Each doc this design changes carries a note at its top saying how, and the tentative decisions behind them are [v1 builds no plugins](../architecture/decisions.md#v1-builds-no-plugins-and-a-profile-reads-a-gauges-javascript-through-instrument-and-writes-it-only-through-the-gauges-h-events) and [the sandbox's rules](../architecture/decisions.md#the-sandbox-deletes-mathrandom-pins-the-stacks-top-at-each-call-into-js-and-builds-its-contexts-from-eval-and-regexp-alone).
+Each doc this design changes carries a note at its top saying how, and the tentative decisions behind them are [v1 builds no plugins](../architecture/decisions.md#v1-builds-no-plugins-and-a-profile-reads-a-gauges-javascript-through-instrument-and-writes-it-only-through-the-gauges-h-events) and [the sandbox's rules](../architecture/decisions.md#the-sandbox-deletes-mathrandom-and-the-promise-globals-pins-the-stacks-top-at-each-call-into-js-and-builds-its-contexts-from-eval-regexp-and-promise).
 
 ## Budgets
 

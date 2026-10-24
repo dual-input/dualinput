@@ -141,6 +141,8 @@ fn a_write_function_types_what_the_sandbox_runs_and_nothing_it_lacks() {
         "write(L('X'), JSON.parse('1'))",
         "write(L('X'), new Map([[1, 2]]).size)",
         "Promise.resolve(1)",
+        "queueMicrotask(() => write(H('X')))",
+        "const later = async () => write(H('X'))",
     ];
     let cases: Vec<(String, bool)> = fine
         .iter()
@@ -151,6 +153,13 @@ fn a_write_function_types_what_the_sandbox_runs_and_nothing_it_lacks() {
         for (yaml, ok) in &cases {
             let built = build(&tree(&[("p.yaml", yaml)]), "p.yaml", compiler);
             assert_eq!(!built.report.has_errors(), *ok, "{yaml}\n{}", built.report);
+            if !ok {
+                assert!(
+                    built.report.errors().all(|e| e.code.starts_with("TS")),
+                    "only TypeScript should refuse it:\n{yaml}\n{}",
+                    built.report
+                );
+            }
         }
     });
 }

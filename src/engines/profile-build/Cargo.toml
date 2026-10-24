@@ -4,6 +4,8 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
+# rquickjs is pinned to the version src/engines/sandbox runs profiles' scripts in, so the check
+# that each compiled script parses runs the same QuickJS-ng; change both together.
 [dependencies]
 profile-engine = { path = "../profile-engine" }
 rquickjs = "=0.14.0"

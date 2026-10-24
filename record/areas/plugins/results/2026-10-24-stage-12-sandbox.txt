@@ -1,0 +1,130 @@
+Stage 12's sandbox, 2026-10-24, on the development machine: an AMD Ryzen 7 7800X3D on Windows
+10.0.26200, rustc 1.95.0, rquickjs 0.14.0 with QuickJS-ng 0.16.2, release builds unless a section
+says otherwise. The run at 100 checks had no game running and tixati using 4.6% of a core; the
+runs at 1,000 checks, which the count was chosen from, weren't checked for other load each time.
+
+== The time limit at 1,000 checks, each runaway the body of a function given 1
+> cargo test -p sandbox --release --test sandbox -- --ignored --nocapture time_limit
+(each line the median of five runs, each in a sandbox of its own)
+TIME LIMIT	a write function that steps past its value	1028.5ms at 1000 checks	1028.50µs a check
+TIME LIMIT	a write function that writes forever	1310.3ms at 1000 checks	1310.31µs a check
+TIME LIMIT	an empty loop	15.0ms at 1000 checks	15.01µs a check
+TIME LIMIT	a loop that counts	376.3ms at 1000 checks	376.29µs a check
+TIME LIMIT	a loop that reads and writes an object	377.4ms at 1000 checks	377.43µs a check
+TIME LIMIT	a loop that calls a function	195.5ms at 1000 checks	195.52µs a check
+TIME LIMIT	a loop that calls the host	326.2ms at 1000 checks	326.24µs a check
+TIME LIMIT	a loop that builds objects	2457.8ms at 1000 checks	2457.79µs a check
+TIME LIMIT	a loop that slices a string	632.2ms at 1000 checks	632.23µs a check
+TIME LIMIT	a regex that backtracks	94.7ms at 1000 checks	94.65µs a check
+
+== The time limit at 100 checks, the count set
+> cargo test -p sandbox --release --test sandbox -- --ignored --nocapture time_limit
+TIME LIMIT	a write function that steps past its value	104.5ms at 100 checks	1044.88µs a check
+TIME LIMIT	a write function that writes forever	130.6ms at 100 checks	1305.67µs a check
+TIME LIMIT	an empty loop	1.7ms at 100 checks	17.34µs a check
+TIME LIMIT	a loop that counts	37.9ms at 100 checks	378.82µs a check
+TIME LIMIT	a loop that reads and writes an object	38.1ms at 100 checks	380.82µs a check
+TIME LIMIT	a loop that calls a function	20.2ms at 100 checks	201.52µs a check
+TIME LIMIT	a loop that calls the host	31.2ms at 100 checks	311.52µs a check
+TIME LIMIT	a loop that builds objects	248.2ms at 100 checks	2481.54µs a check
+TIME LIMIT	a loop that slices a string	63.9ms at 100 checks	639.49µs a check
+TIME LIMIT	a regex that backtracks	9.1ms at 100 checks	91.42µs a check
+TIME LIMIT	a loop that catches running out of memory	2561.0ms at 100 checks	25609.56µs a check
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 16.27s
+tixati used 4.6% of a core over the 17s run
+
+== One script in a fresh sandbox, which is then dropped, in a release build of a scratch probe
+on the sandbox crate, before the Promise intrinsic; an exit of -1073740791 is QuickJS-ng's
+assertion ending the process
+(async () => 1)()
+  -> Err(Threw("TypeError: not a function\n    at <eval> (eval_script:1:13)")) in 0.1ms, 1 checks
+Assertion failed: list_empty(&rt->gc_obj_list), file ...\rquickjs-sys-3bd3e90f79dbaf6d\out\quickjs.c, line 2704
+  exit -1073740791
+(async () => { await 1; return 2 })()
+  -> Err(Threw("TypeError: not a function\n    at <eval> (eval_script:1:33)")) in 0.1ms, 1 checks
+Assertion failed: list_empty(&rt->gc_obj_list), file ...\rquickjs-sys-3bd3e90f79dbaf6d\out\quickjs.c, line 2704
+  exit -1073740791
+async function f() {}; typeof f
+  -> Ok("object") in 0.1ms, 1 checks
+Assertion failed: list_empty(&rt->gc_obj_list), file ...\rquickjs-sys-3bd3e90f79dbaf6d\out\quickjs.c, line 2704
+  exit -1073740791
+for (;;) {}
+  -> Err(TimeLimit) in 29.1ms, 1000 checks
+  dropped
+  exit 0
+const hold = []; for (;;) hold.push(new Array(1024).fill(hold.length))
+  -> Err(MemoryLimit) in 77.9ms, 2 checks
+  dropped
+  exit 0
+const kept = []; for (let i = 0; i < 5000; i++) { try { kept.push(new Array(1024).fill(0)) } catch (e) {} }; kept.length
+  -> Ok("3895") in 91.5ms, 3 checks
+  dropped
+  exit 0
+(function* () { yield 1 })().next().value
+  -> Ok("1") in 0.1ms, 1 checks
+  dropped
+  exit 0
+(async function* () { yield 1 })()
+  -> Err(Threw("TypeError: not a function\n    at <eval> (eval_script:1:30)")) in 0.1ms, 1 checks
+Assertion failed: list_empty(&rt->gc_obj_list), file ...\rquickjs-sys-3bd3e90f79dbaf6d\out\quickjs.c, line 2704
+  exit -1073740791
+Math.random()
+  -> Err(Threw("TypeError: not a function\n    at <eval> (eval_script:1:5)")) in 0.1ms, 1 checks
+  dropped
+  exit 0
+null.x
+  -> Err(Threw("TypeError: cannot read property 'x' of null\n    at <eval> (eval_script:1:1)")) in 0.1ms, 1 checks
+  dropped
+  exit 0
+Array.fromAsync([1])
+Assertion failed: list_empty(&rt->gc_obj_list), file ...\rquickjs-sys-3bd3e90f79dbaf6d\out\quickjs.c, line 2704
+  -> Err(Threw("TypeError: not a function\n    at <eval> (eval_script:1:6)")) in 0.2ms, 1 checks
+  exit -1073740791
+const s = new DisposableStack(); s.defer(() => 0); s.dispose(); s.disposed
+  -> Ok("true") in 0.1ms, 1 checks
+  dropped
+  exit 0
+Iterator.from([1, 2]).map((x) => x * 2).toArray().join()
+  -> Ok("2,4") in 0.1ms, 1 checks
+  dropped
+  exit 0
+
+== The same probe with the Promise intrinsic added and the Promise global deleted
+async function f() {}; typeof f
+  -> Ok("function") in 0.1ms, 1 checks
+  dropped
+  exit 0
+(async () => { await 1; return 2 })()
+  -> Ok("[object Promise]") in 0.1ms, 1 checks
+  dropped
+  exit 0
+(async () => 1)().then((v) => v)
+  -> Ok("[object Promise]") in 0.1ms, 1 checks
+  dropped
+  exit 0
+typeof Promise
+  -> Ok("undefined") in 0.0ms, 1 checks
+  dropped
+  exit 0
+> cargo test -p sandbox --test sandbox -- the_context_defines
+the sandbox's context and src/engines/profile-engine/javascript/sandbox.json differ; once the context is right, bring the list to it and run node tools/javascript-types.ts:
+the context defines AsyncDisposableStack, which sandbox.json doesn't list
+globalThis defines AsyncDisposableStack, which sandbox.json doesn't list
+(so the sandbox deletes AsyncDisposableStack too, and the test then passes)
+
+== A loop that catches running out of memory, at 1,000 checks, in the same probe
+const kept = []; for (;;) { try { kept.push(new Array(1024).fill(0)) } catch (e) {} }
+  -> Err(TimeLimit) in 24580.7ms, 1000 checks
+
+== TypeScript's refusal of an async write function, through the builder
+> cargo run -q -p dualinput-profile-builder -- build <a folder holding one profile>
+aircraft/test-async.yaml: failed
+aircraft/test-async.yaml:1:1: error TS2318: Cannot find global type 'Promise'.
+Some profiles have errors
+
+== A recursion's depth, in a debug build, with the stack's pin taken out of the build
+> cargo test -p sandbox --test sandbox -- a_recursion
+assertion `left == right` failed: each call should stop at the same depth
+  left: [30, 69, 143]
+ right: [68, 68, 68]
+(with the pin, the test passes: 68 at every depth in a debug build, and 296 in a release one)

@@ -422,10 +422,26 @@ Tests, from stage 5: in this stage's session in the sim, with a bench core runni
 
 ## 12 The sandbox
 
-Builds: the sandbox, with its time limit counted in QuickJS-ng's interrupt checks, set to about 100ms of a call on our development machine, which the plugins' log records ([plugins and the sandbox](../plugins/01-plugins.md), [decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md)).
-It needs only stage 1, so it can be built any time before stage 13.
-Its context defines exactly the globals and members that `src/engines/profile-engine/javascript/sandbox.json` lists, which a test of the sandbox's checks, since level 1 of the profile format types write functions by that list ([stage 10](#10-profiles)).
+Builds: the sandbox, on rquickjs 0.14.0 as `profile-build` is ([plugins and the sandbox](../plugins/01-plugins.md)).
+Its time limit counts QuickJS-ng's interrupt checks, and stops a call at the count that lets a write function's endless loop run about 100ms on our development machine, which the [plugins log](../plugins/log.md) records with how long each kind of runaway ran at it ([decision 047](../../decisions/047-sandbox-time-limit-counts-interrupt-checks.md); user, 2026-10-24).
+Its context defines exactly the globals and members that `src/engines/profile-engine/javascript/sandbox.json` lists, which a test checks, since level 1 of the profile format types write functions by that list ([stage 10](#10-profiles)).
+The context takes QuickJS-ng's `Promise` intrinsic and deletes the `Promise` and `AsyncDisposableStack` globals, since without the intrinsic an async function made QuickJS-ng abort the core when its sandbox was dropped, as [plugins and the sandbox](../plugins/01-plugins.md)'s note of 2026-10-24 has it (user, 2026-10-24).
+The sync engine's names, `write()`, and `state` in the context, and what a write function at a limit does to its entry, come with the sync engine in [stage 13](#13-the-sync-engine-and-the-cockpit-stream).
+
 Needs: 1.
+
+Tests:
+
+- From [the sandbox's cases](../plugins/01-plugins.md#cases-for-the-bench), as its own tests, with no core and no sim ([the sandbox's cases](02-testing.md#the-sandboxs-cases)):
+  - A recursion that runs until its `RangeError`, called from two depths of the Rust stack, in a run and in a replay, stops at the same depth each time.
+  - A run and two replays count the same interrupt checks in each call into JS, one stopped at the time limit among them, which stops at the same tick each time.
+  - A call to `Math.random` or `queueMicrotask` fails; and in `profile-build`'s tests, a write function that names `queueMicrotask`, or is async, fails its type check, as one that names `Math.random` does from stage 10.
+- From [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md): an endless loop stops at the time limit, which no `catch` or `finally` in the script sees; a runaway allocation stops at 64 MB, of large arrays, of small objects, and in a regex; and after either limit, the next call runs.
+- An async function a script makes through `eval`, and `Array.fromAsync`, run to their first `await`, and the sandbox drops without QuickJS-ng aborting.
+- By hand, in a release build on our development machine: how long each kind of runaway runs before the time limit stops it.
+
+Exit: on our development machine, `node tools/check.ts` passes, the sandbox's tests among them; in a release build, a write function's endless loop stops at the time limit within 50ms to 200ms; and the [plugins log](../plugins/log.md) has an entry with the count and how long each kind of runaway ran at it.
+Done on 2026-10-24.
 
 ## 13 The sync engine and the cockpit stream
 

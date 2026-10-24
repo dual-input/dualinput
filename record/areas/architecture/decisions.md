@@ -1596,19 +1596,20 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
   - The plugin design so far isn't the one the user had in mind, so plugins are designed afresh when a pick needs them (user, 2026-10-17).
 - **Leaves out:** plugins, and what node 6.15's raised lines left to them: their hooks, `ops`, channels, plugin tests, object mirroring, and claims on objects; a value carried as JSON text; and setting a gauge's field directly.
 
-## The sandbox deletes `Math.random`, pins the stack's top at each call into JS, and builds its contexts from `Eval` and `RegExp` alone
+## The sandbox deletes `Math.random` and the promise globals, pins the stack's top at each call into JS, and builds its contexts from `Eval`, `RegExp`, and `Promise`
 
-- **Decided:** the sandbox gives each loaded profile one QuickJS-ng runtime, whose context holds QuickJS-ng's base objects and, of rquickjs's intrinsics, `Eval` and `RegExp`; after making it, the sandbox deletes `Math.random` and `queueMicrotask`; it calls `JS_UpdateStackTop` at its one entry into JS and sets a 1 MB stack with `JS_SetMaxStackSize`; and the sync engine hands values into JS from a `Vec` or a `BTreeMap`, never a `HashMap`.
+- **Decided:** the sandbox gives each loaded profile one QuickJS-ng runtime, whose context holds QuickJS-ng's base objects and, of rquickjs's intrinsics, `Eval`, `RegExp`, and `Promise`; after making it, the sandbox deletes `Math.random`, `Promise`, `AsyncDisposableStack`, and `queueMicrotask`; it calls `JS_UpdateStackTop` at its one entry into JS and sets a 1 MB stack with `JS_SetMaxStackSize`; and the sync engine hands values into JS from a `Vec` or a `BTreeMap`, never a `HashMap`.
   A script may catch "out of memory".
   This settles the code map's item in [left open](02-code-map.md#left-open) on QuickJS-ng's hash seed: a script sees nothing of it.
-  Settled in node 6.15 by the user, 2026-10-17 ([the sandbox](../plugins/01-plugins.md#the-sandbox)).
+  Settled in node 6.15 by the user, 2026-10-17 ([the sandbox](../plugins/01-plugins.md#the-sandbox)); the `Promise` intrinsic, with the two globals it adds deleted, settled by the user in stage 12, 2026-10-24 ([plugins log][stage-12]).
 - **Because:**
   - QuickJS-ng seeds `Math.random` from the wall clock when it makes a context, and reads its hash seed only to pick a Map's or a Set's bucket, while their iteration walks insertion order (read in rquickjs-sys 0.14.0, `quickjs/quickjs.c`, `JS_NewContextRaw`, `map_hash_key`, `js_map_forEach`).
-  - It sets its stack limit from the stack pointer when the runtime is made, so a recursion's depth at its error turns on the Rust stack at the call unless the top is pinned (read in `quickjs.c`, `update_stack_limit`; rquickjs-core 0.14.0, `src/runtime/raw.rs`).
+  - It sets its stack limit from the stack pointer when the runtime is made, so a recursion's depth at its error turns on the Rust stack at the call unless the top is pinned (read in `quickjs.c`, `update_stack_limit`; rquickjs-core 0.14.0, `src/runtime/raw.rs`); with the pin, a recursion stopped at the same depth from two depths of the Rust stack, and a run and two replays made the same interrupt checks in each call (measured on our development machine, 2026-10-24, [plugins log][stage-12]).
   - `WeakRef`'s and `FinalizationRegistry`'s callbacks follow the garbage collector, and rquickjs builds an object from a `HashMap` in its randomly seeded order (read in `quickjs.c`, `reset_weak_ref`; rquickjs-core 0.14.0, `src/value/convert/into.rs`).
   - A level's declarations name `RegExp` and no Map, Set, or Promise ([the profiles' units](../profiles/02-units.md)), and compiling the write functions needs `Eval`.
-  - The limits are for bugs ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)), and a function that catches "out of memory" and keeps allocating meets the 100ms limit.
-- **Leaves out:** whether the interrupt count and a recursion's depth repeat in a replay, which the bench measures.
+  - A write function returns before the loop's next input, so nothing runs a job that `queueMicrotask` or a promise queues.
+  - Without the `Promise` intrinsic, an async function or `Array.fromAsync` left an object behind that made QuickJS-ng abort the process when the runtime was dropped, and with its globals deleted a script sees the same globals as without it (measured on our development machine, 2026-10-24, [plugins log][stage-12]).
+  - The limits are for bugs ([decision 046](../../decisions/046-sandbox-runtimes-and-limits.md)), and a function that catches "out of memory" and keeps allocating meets the time limit, after about 2.5s ([plugins log][stage-12]).
 
 ## A feature shows itself in each app through one part the app lists, and no shell names a feature
 
@@ -1902,3 +1903,4 @@ Numbered as [decision 046](../../decisions/046-sandbox-runtimes-and-limits.md) o
 [p02]: ../environment/log.md#2026-10-16-the-toolbars-toolbar_set_active_pause-called-from-the-toolbars-or-the-efbs-document-turns-active-pause-on-and-off-and-no-simconnect-event-we-tried-does
 [pr01]: ../profiles/log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked
 [pr02]: ../profiles/log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack
+[stage-12]: ../plugins/log.md#2026-10-24-stage-12s-sandbox-stops-a-write-functions-endless-loop-at-100-interrupt-checks-and-needs-quickjs-ngs-promise-intrinsic-without-which-an-async-function-aborts-the-core-when-its-sandbox-is-dropped

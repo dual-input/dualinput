@@ -2,30 +2,14 @@
 
 ```text
 Purpose:     What each Soon and Later pick needs from what v1 builds, so it slots in without rework.
-Depends on:  01-aims.md, 03-v1-scope.md, ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/03-catch-up.md
+Depends on:  01-aims.md, 03-v1-scope.md, ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/03-catch-up.md, ../sync/04-order-and-recovery.md, ../architecture/01-spine.md, ../architecture/02-code-map.md, ../network/01-between-machines.md, ../network/02-units.md, ../session/01-roles-and-members.md, ../profiles/01-format-and-delivery.md, ../core/02-clients-and-panel-bridge.md, ../core/04-core-helper.md, ../recording/01-recording-and-bug-reports.md, ../plugins/01-plugins.md
 Decides:     What Dual Input must allow for each Soon and Later pick, and what v1 builds now so that it does.
 ```
 
-> **Note**
-> A plugin's code runs only in the core, though [Code inside the sim](#code-inside-the-sim) and [Plugins](#plugins) below give plugins hooks in the cockpit panels and the WASM module: our panel bridge and module carry out what a plugin asks of them through generic APIs ([architecture's tentative decisions](../architecture/decisions.md#plugin-code-runs-only-in-the-core), 2026-10-08).
-> The helper the sim launches, in [An input layer](#an-input-layer) below, is the watcher's job in [the architecture's spine](../architecture/01-spine.md#components) (user, 2026-10-06), and the spine's helper is the core's process for Windows input and audio.
-> Since 2026-10-09, each vector clock counter belongs to a pilot's ID and their core's restart count, where [People beyond the crew](#people-beyond-the-crew) below keeps one counter per pilot ([architecture's tentative decisions](../architecture/decisions.md#a-pilot-keeps-their-id-through-a-core-restart-and-the-core-counts-its-restarts)).
-> Profiles and plugins reach pilots apart from Dual Input's releases, so the [profile registry](#profiles)'s fetch by hash comes in v1 for our own profiles ([architecture's tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases), 2026-10-08).
-> Since 2026-10-11, v1's [catch-up pipeline](#a-catch-up-pipeline) has one step, catching up state, because the time, date, and simulation rate reach a late joiner as session keys, and traffic as the host's identity set, neither as a step ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)); v1's table of [roles](#roles) is in [roles and members](../session/01-roles-and-members.md#the-table-of-roles).
-> Since 2026-10-11, the flight model's samples also carry the PF's yoke, rudder, and toe-brake positions, and v1 adds two channels to the six below: catch-up's stream from the flying machine, and a heartbeat once a second from every machine, carrying the clock exchange and the replay's acknowledgments; how channels travel, the session channel as the newest value of each key and the cockpit's as the one replayed log, is in [01-between-machines](../network/01-between-machines.md#channels).
-> Since 2026-10-11, the direction field in [profiles](#profiles) is `owner`, whose values name roles, and a request comes later as a field of its own, since a pushback still belongs to the PF; the core computes a profile's hash, and a profile carries no version of its own; and a plugin reaches only the sim and the aircraft, through Dual Input's APIs, where [plugins](#plugins) lets it read the pilot's files ([01-format-and-delivery](../profiles/01-format-and-delivery.md)).
-> Since 2026-10-15, v1 builds no listener beyond the PC, where [one protocol for every client](#one-protocol-for-every-client) below has v1 build one, off by default: the protocol takes nothing about a client from its address, so the tablet's design adds the listener and a way in without changing what v1 built (user, 2026-10-15; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#clients-beyond-the-pc)).
-> Since 2026-10-14, a channel never joins the cockpit's shared order, as [channels](#channels) below has one do: a feature whose messages must apply in that order registers kinds on the cockpit stream; and the one table of roles that [roles](#roles) below has v1 build is the session's documentation, since a role is a session key a feature declares, naming its holder, and who may hold it is a guard on writing the key ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
-> Since 2026-10-16, a channel declares its delivery and priority, each send names its receivers, and the receiving handler checks who may send, where [channels](#channels) below has a channel declare who sends and receives it; and the heartbeat carries the clock exchange alone, where the note above has it carry the replay's acknowledgments too ([02-units](../network/02-units.md#channels-and-sends)).
-> Since 2026-10-16, v1's recording is a replay log that leaves out the high-rate samples a feature marks, the flight model's among them, with a small index of each run's sessions as the one record a later version reads, where [recording](#recording) below has v1 build a versioned format with the flight model's samples, each channel recording itself, and each plugin's exported values: the debrief timeline gets no format from v1 and is built only if it fits without pressing on other design, and what plugin tests need is left to the plugins' design (user, 2026-10-16; [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
-> Since 2026-10-17, the voice phrases are a Soon pick (user, 2026-10-17), which [by pick](#by-pick) doesn't list.
-> They need no section of their own: v1's core helper leaves room for a want of phrases and the `Listener` trait that [04-core-helper](../core/04-core-helper.md#speech) designs, and a voice answer is one more `TakeControl` request.
-> What they still need is a detector, a recognizer, and a way for an offer to reach the other machine, which the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon)'s research starts.
-> Since 2026-10-17, v1 builds no plugins, no hooks for them, and none of [code inside the sim](#code-inside-the-sim)'s mechanisms for them, where [plugins](#plugins) has v1 build plugin values and write methods, the hooks, and the 58P's plugin; plugins are designed afresh when a pick first needs one, starting from but not bound by this document's plugins and code inside the sim (user, 2026-10-17; [plugins and the sandbox](../plugins/01-plugins.md)).
-
 v1 builds what each Soon and Later pick in [the plan](plan.md) needs from it, so no pick rebuilds part of v1, because v1 gives up features, never design ([01-aims](01-aims.md#aims)).
-That's channels that each declare how they travel, catch-up as a pipeline of steps, plugins and the hooks they use, hosts inside the sim that load modules by name, one table of roles, a session that holds passengers, one protocol for every client, a profile format with room to grow, and a versioned recording.
-The one need v1 doesn't build is the input layer, and v1 builds the two things it starts from: a helper the sim launches, and a connection to the sim that comes up with no flight loaded.
+That's channels that each declare how they travel, catch-up as a pipeline of steps, hosts inside the sim that load modules by name, one table of roles, a session that holds passengers, one protocol for every client, a profile format with room to grow, and a recording that's a replay log of every input.
+v1 doesn't build the input layer, but it builds the two things the layer starts from: a core that starts with every sim run, and a connection to the sim that comes up with no flight loaded.
+Nor does it build plugins, which are designed afresh when a pick first needs one ([Plugins](#plugins)).
 A pick can still need work of its own, which [By pick](#by-pick) names beside the sections it needs.
 
 Each section below names the picks that need it and ends with what v1 builds.
@@ -34,16 +18,16 @@ The flying machine is the PF's, and a following machine is any other pilot's.
 
 ## Channels
 
-A channel is what one feature sends, or several features whose messages must apply in one order: its messages, how they travel, how they're recorded, and how a cockpit catches up on them.
-A channel that doesn't join the cockpit's shared order changes nothing for the others but the bandwidth, and removing a channel removes all of it.
+A channel is what one feature sends, or several features whose messages must apply in one order: its messages, how they travel, and how a cockpit catches up on them.
+A channel changes nothing for the other channels but the bandwidth, and removing a channel removes all of it.
 
-v1 has six channels:
+v1 has eight channels: the six in this table, catch-up's stream from the flying machine, and a heartbeat once a second from every machine, which carries only the clock exchange ([01-between-machines](../network/01-between-machines.md#channels), [02-units](../network/02-units.md#channels-and-sends)).
 
 | Channel | From | To | Needs |
 | --- | --- | --- | --- |
-| Session: joins, Ready, control, and the time, date, sim rate, and pause | Every machine | Every other | Every message, in order |
-| Cockpit: state, events, and pointer presses | Every machine | Every other | Every message, in causal order ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)) |
-| Flight model | The flying machine | Following machines | Only the newest sample ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)) |
+| Session: joins, Ready, control, and the time, date, sim rate, and pause | Every machine | Every other | The newest value of each key ([01-between-machines](../network/01-between-machines.md#channels)) |
+| Cockpit: state, events, and pointer presses | Every machine | Every other | Every message, in causal order ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)), as one replayed log ([01-between-machines](../network/01-between-machines.md#channels)) |
+| Flight model, with the PF's yoke, rudder, and toe-brake positions | The flying machine | Following machines | Only the newest sample ([02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order)) |
 | Avatars | Every machine | Every other | The newest pose of each figure |
 | Traffic | The traffic host | The others | Each object's identity reliably, and its newest sample (FS Copilot fork, `record/traffic-atc/docs/04-transport.md`) |
 | ATC audio | The ATC host | The others | Low delay, with loss acceptable |
@@ -64,27 +48,27 @@ That document's channels are wire channels, not this document's.
 The fork found the rule when a joining machine received about 130 traffic identities on its one reliable ordered wire channel, and every cockpit update waited behind them (FS Copilot fork, `record/traffic-atc/docs/build/log.md`, "2026-09-08 · Unreliable never crossed the relay; relay protocol v2, channels, budgets").
 So each channel declares:
 
-- who sends it and who receives it
 - its delivery: every message in order, only the newest value for each key, or the lowest delay with loss acceptable
 - its priority, so a bulk transfer never delays the flight model or the axes
-- whether it joins the cockpit's shared order
+
+Each send names its receivers, and the receiving handler checks who may send ([02-units](../network/02-units.md#channels-and-sends)).
 
 The shared order is the causal order [02-live-sync](../sync/02-live-sync.md#one-stream-in-causal-order) gives the cockpit's messages, so that a page key always lands before a press on the page it opened.
-A channel joins it when its messages must apply in order with the cockpit's, as a bus message that opens a page would.
+No channel joins it: a feature whose messages must apply in order with the cockpit's, as a bus message that opens a page would, registers kinds on the cockpit stream ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
 A channel that writes into the sim uses live sync's echo tokens ([02-live-sync](../sync/02-live-sync.md#keeping-a-change-from-applying-twice)).
 If the EventBus bridge publishes a carried topic through one of the receiving machine's buses with the `sync` flag, that bus sends it out again under `wt.eb.evt`, as it does every synced topic, and our listener there hears it as a new change to send back.
 Handed in as another bus's package, the topic may not go out again, because each bus publishes other buses' packages locally and skips its own (read in the A220's DisplayUnits bundle, [06-01](../../learn/foundations/06-01-the-engine-and-instruments.md#the-msfs-avionics-framework-and-working-title-avionics)).
 The bridge can hand topics in that way: a package our code sent under `wt.eb.evt` with a `busId` of its own, carrying the Phenom 300E's G3000 MFD's zoom-in, moved the MFD's map (measured on MSFS 2024, 2026-10-06, [CommBus log](../commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends)).
 
-Traffic sync's object mirroring and hearing ATC's capture by process are kinds of channel that any feature or plugin can open, and a GSX plugin would be built mostly from those two ([Plugins](ideas.md#plugins)).
-Traffic sync picks the objects it carries through a filter that a plugin can claim objects from, so when a GSX plugin carries GSX's vehicles, the crew doesn't see each one twice.
+Traffic sync's object mirroring and hearing ATC's capture by process are kinds of channel that any feature can open, and a GSX plugin would be built mostly from those two ([Plugins](ideas.md#plugins)).
+Traffic sync picks the objects it carries through a filter, and a later plugin that claims objects from it, as a GSX plugin carrying GSX's vehicles would so the crew doesn't see each one twice, waits for plugins' design ([plugins and the sandbox](../plugins/01-plugins.md)).
 
-**v1 builds** a transport in which each channel declares those four things, v1's six channels as separate channels, object mirroring and audio capture as channel kinds, and traffic sync's filter.
+**v1 builds** a transport in which each channel declares its delivery and priority and each send names its receivers, v1's eight channels as separate channels, object mirroring and audio capture as channel kinds, and traffic sync's filter.
 
 ## A catch-up pipeline
 
-Catch-up is a pipeline of steps, and [catching up state](../sync/03-catch-up.md#catching-up-state) is one of them.
-v1 needs others: a late joiner also takes the PF's time of day, date, and simulation rate ([time, date, sim rate, and pause](03-v1-scope.md#time-date-sim-rate-and-pause)), and the traffic it hasn't seen.
+Catch-up is a pipeline of steps, and in v1 it has one, [catching up state](../sync/03-catch-up.md#catching-up-state).
+A late joiner also takes the PF's time of day, date, and simulation rate ([time, date, sim rate, and pause](03-v1-scope.md#time-date-sim-rate-and-pause)), and the traffic it hasn't seen, but neither as a step: the time, date, and simulation rate reach it as session keys, and traffic as the host's identity set ([04-order-and-recovery](../sync/04-order-and-recovery.md#catch-up)).
 Each step says where it runs relative to the others, such as after state so the battery is on, and how it checks that it landed.
 Later picks add steps:
 
@@ -94,27 +78,29 @@ Later picks add steps:
   Sent from our listener in the EFB's document, it had the Phenom 300E's buses send that listener 306 distinct topics within 5s, while the MFD's listener got 26, for a reason we haven't found (measured on MSFS 2024, 2026-10-06, [CommBus log](../commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends)); whether 306 is every synced topic is unverified.
 - **Aircraft adapters:** a step in an adapter's plugin for state that isn't one value, such as loading a PMDG 777 panel state, which its CDU does by name (unverified), though whether the 777 loads one mid-flight is untested; loading one from the CDU in flight settles both ([aircraft adapters](ideas.md#aircraft-adapters)).
 
-After a short outage, each channel replays its own missed messages, and the channels in the cockpit's shared order replay together, as [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage) replays state changes, events, and presses in one sequence.
+After a short outage, the cockpit stream replays its missed messages in its one log, as [03-catch-up](../sync/03-catch-up.md#replaying-a-short-outage) replays state changes, events, and presses in one sequence, and the session channel and traffic's identities send each of their keys again on the new connection ([01-between-machines](../network/01-between-machines.md#channels)).
 
-**v1 builds** catch-up as a pipeline whose steps v1's own channels fill.
+**v1 builds** catch-up as a pipeline with one step, catching up state.
 
 ## Plugins
 
 A plugin is code we ship for one aircraft or one add-on, and code that serves one product lives in a plugin, never in Dual Input's own code ([03-v1-scope](03-v1-scope.md#plugins)).
+Plugins are designed afresh when a pick first needs one, starting from but not bound by this section and [code inside the sim](#code-inside-the-sim) (user, 2026-10-17; [plugins and the sandbox](../plugins/01-plugins.md)).
 
 A plugin's first job is to find state the profile can't reach and export it as values, `plugin.state.<name>`, which the profile watches as it watches an `L:` variable ([01-profile-entries](../sync/01-profile-entries.md#watching-a-value)).
 For each value it can set, the plugin registers a write method, which the engine calls as `writer.plugin().<name>(value)`; the plugin itself never calls the writer ([01-profile-entries](../sync/01-profile-entries.md#the-writer-api)).
 Live sync, read-back, the conflict rule, catch-up, pacing, and echo marking then cover a plugin's values and writes as they cover any entry, with no code of the plugin's.
-The 58P's plugin does that for the radio settings that live only in its gauges' JavaScript ([03-v1-scope](03-v1-scope.md#plugins)).
+A 58P plugin would do that for the radio settings that live only in its gauges' JavaScript ([03-v1-scope](03-v1-scope.md#plugins)).
 
 For what isn't a value, a plugin reaches every layer through hooks:
 
 - moments in a session, such as an aircraft loading, preflight ending, and control passing
 - channels of its own, of the kinds above
 - steps in the catch-up pipeline
-- code inside the sim, in the aircraft's panels and in a WASM module ([below](#code-inside-the-sim))
+- code inside the sim, in the aircraft's panels and in a WASM module, where our panel bridge and module carry out what the plugin asks of them through generic APIs ([below](#code-inside-the-sim))
 
-Where no hook reaches, a plugin reads the sim, the aircraft's panels, and the pilot's files directly, since we review every plugin, and it changes what Dual Input watches only in its write methods ([03-v1-scope](03-v1-scope.md#plugins)).
+A plugin reaches only the sim and the aircraft, through Dual Input's APIs ([01-format-and-delivery](../profiles/01-format-and-delivery.md)).
+It changes what Dual Input watches only in its write methods ([03-v1-scope](03-v1-scope.md#plugins)).
 Each aircraft has one plugin, and plugins for aircraft that share code share it through a library rather than a copy.
 
 These picks put their product-specific parts in plugins:
@@ -132,15 +118,13 @@ Dual Input's own code owns each mechanism, and a plugin owns the policy.
 The input layer masks, and a plugin says what to hold back; the axes channel carries the PM's input, and a plugin mixes it.
 Two plugins then never fight over one mechanism, and every mechanism keeps the fail-open rules [CLAUDE.md](../../../CLAUDE.md#before-writing-code-that-runs-in-a-panel) sets for anything in the pilot's input path.
 
-v1's own features are built on the hooks plugins use, so the hooks carry more than the 58P plugin's work from the first release, and a later feature is one more module on them.
-
-**v1 builds** plugin values and write methods in the profile and the writer, the hooks, v1's features on them, and the 58P's plugin.
+**v1 builds** no plugins, no hooks for them, and no plugin values or write methods in the profile and the writer.
 
 ## Code inside the sim
 
-v1 runs code inside the sim in two places, and both load what they run by name, so features and plugins add to them without changing them:
+v1 runs code inside the sim in two places, and both load what they run by name, so features add to them without changing them:
 
-- **The panel bridge,** which v1 injects into the aircraft's panel documents for pointer sync, loads a module for each instrument a feature or a plugin names.
+- **The panel bridge,** which v1 injects into the aircraft's panel documents for pointer sync, loads a module for each instrument a feature names.
   The bus bridge and adapters such as the A220's each need a listener inside an instrument's document ([bus bridge](ideas.md#bus-bridge), [aircraft adapters](ideas.md#aircraft-adapters)).
   The [EventBus bridge](ideas.md#eventbus-bridge)'s listener can't be one of the panel bridge's modules: inside an instrument's document it misses that instrument's own bus, while in the EFB's document it heard all five of the Phenom 300E's G3000 buses (measured on MSFS 2024, 2026-10-06, [CommBus log](../commbus/log.md#2026-10-06-our-own-code-hears-wtebevt-from-the-efbs-document-and-the-g3000-acts-on-a-package-it-sends)).
   It runs in the EFB's document, beside the EFB app, and which host loads it there is open.
@@ -149,7 +133,9 @@ v1 runs code inside the sim in two places, and both load what they run by name, 
 - **The WASM module,** which places figures in v1 ([avatar sync](03-v1-scope.md#avatar-sync)), places objects of any kind.
   Later it places [Dual Input objects in the cockpit](ideas.md#dual-input-objects-in-the-cockpit) and the arrows the [Dual Input IDE](ideas.md#seat-awareness) draws on a figure to place it.
 
-**v1 builds** both as hosts that load modules by name.
+A plugin's code runs only in the core, so its hooks in the cockpit panels and the WASM module are the panel bridge and the module carrying out what it asks of them through generic APIs ([architecture's tentative decisions](../architecture/decisions.md#plugin-code-runs-only-in-the-core), 2026-10-08).
+
+**v1 builds** both as hosts that load modules by name, and none of their mechanisms for plugins (user, 2026-10-17; [plugins and the sandbox](../plugins/01-plugins.md)).
 
 ## An input layer
 
@@ -162,15 +148,16 @@ Several picks hold a pilot's input back from their own sim:
 
 Masking holds the axis events back on stock flight controls and the PMDG 777, and the block ends when the masking client dies (measured on MSFS 2024, 2026-10-01, [flight-controls log](../flight-controls/log.md#2026-10-01-masking-stops-a-pilots-hardware-input-and-closing-the-masking-client-gives-it-back)).
 On an aircraft whose module asks for the same priority, such as the A2A PA-24, masks work only if they're in place before the aircraft loads ([flight-controls log](../flight-controls/log.md#2026-10-01-the-mask-registered-first-gets-ahead-of-accu-sims)).
-So the part of Dual Input that masks has to be able to start with the sim, and in v1 the sim launches a helper of ours ([installing and updating](03-v1-scope.md#installing-and-updating)).
+So the part of Dual Input that masks has to be able to start with the sim, and in v1 the core does: the desktop app, which runs from login, starts it with every sim run ([decision 002](../../decisions/002-core-starts-with-every-sim-run.md), [installing and updating](../install/01-installing-and-updating.md#one-program-from-login)).
 
 Holding back a mouse click, such as one on the IDE's arrows or on a Dual Input object, is a different problem, and we haven't looked for a way ([Seat awareness](ideas.md#seat-awareness)).
 
-**v1 builds** no input layer, but it builds the two things the layer starts from: a helper the sim launches, and a connection to the sim that comes up without a flight loaded, which v1 needs anyway, since Dual Input and the sim start in either order ([invite code](03-v1-scope.md#invite-code)).
+**v1 builds** no input layer, but it builds the two things the layer starts from: a core that starts with every sim run, and a connection to the sim that comes up without a flight loaded, which v1 needs anyway, since Dual Input and the sim start in either order ([invite code](03-v1-scope.md#invite-code)).
 
 ## Roles
 
 v1 has two roles: the PF, who holds control, and the traffic host, who keeps the role when control passes and is also the ATC host ([traffic sync](03-v1-scope.md#traffic-sync)).
+A role is a session key a feature declares, naming its holder, and who may hold it is a guard on writing the key ([02-code-map](../architecture/02-code-map.md#what-a-feature-registers)).
 Soon and Later picks add roles and duties:
 
 - the machine that carries out ground services, which is the flying machine ([ground operations sync](ideas.md#ground-operations-sync))
@@ -179,12 +166,13 @@ Soon and Later picks add roles and duties:
 - a flight engineer, whom control never passes to ([take-control key](03-v1-scope.md#take-control-key))
 - passengers ([join modes](ideas.md#join-modes))
 
-**v1 builds** one table of roles, each with its rule for who holds it, how it moves, and what happens when its holder drops out, with the PF and the traffic host as its first two.
+**v1 builds** one table of roles, which is the session's documentation, in [roles and members](../session/01-roles-and-members.md#the-table-of-roles), giving each role's rule for who holds it, how it moves, and what happens when its holder drops out, with the PF and the traffic host as its first two.
 
 ## People beyond the crew
 
 A session can hold any number of people ([01-aims](01-aims.md#aims)).
-A crew of any size already fits live sync, which keeps one vector clock counter per pilot and, between two following machines that didn't see each other's change, takes the lower pilot ID's ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
+A crew of any size already fits live sync.
+Its vector clock gives each counter to a pilot's ID and their core's restart count ([architecture's tentative decisions](../architecture/decisions.md#a-pilot-keeps-their-id-through-a-core-restart-and-the-core-counts-its-restarts)), and between two following machines that didn't see each other's change, live sync takes the lower pilot ID's change ([02-live-sync](../sync/02-live-sync.md#when-two-pilots-change-one-entry)).
 Passengers send almost nothing and can take more delay (unverified, [join modes](ideas.md#join-modes)), so they stay out of the vector clocks and off the crew's links, and take a feed from one crew machine or down a tree, because a link between every pair of people grows with the square of their number.
 
 Each sim draws a figure for every person in the session, its own pilot's included in an outside view, so in v1 each sim draws two ([avatar sync](03-v1-scope.md#avatar-sync)).
@@ -215,9 +203,10 @@ So the EFB app speaks the same protocol as a browser, rather than reach Dual Inp
 
 - **The tablet in a browser** is one more client on the same protocol, reached across the home network.
   The tablet loads the PC's address, which the desktop app shows as a QR code that also carries a token, so other devices on the network can't take control.
+  The tablet's design adds the listener beyond the PC that this needs, and that way in, without changing what v1 built, since the protocol takes nothing about a client from its address (user, 2026-10-15; [02-clients-and-panel-bridge](../core/02-clients-and-panel-bridge.md#clients-beyond-the-pc)).
 - **The Dual Input IDE** is one more client too, with commands of its own: discovering what an aircraft exposes, live values, running one entry's write, and reloading a profile mid-session.
 
-**v1 builds** one protocol that every client speaks, which can listen beyond the PC itself, off by default.
+**v1 builds** one protocol that every client speaks, and no listener beyond the PC.
 An EFB app loaded the sim's way, rather than code in the EFB's document, is untried, and so is an in-game panel of our own.
 
 ## Profiles
@@ -225,24 +214,23 @@ An EFB app loaded the sim's way, rather than code in the EFB's document, is untr
 - **Watch-only entries:** an entry with no `write` is watched on every machine and compared, never written ([01-profile-entries](../sync/01-profile-entries.md#writing-a-value)).
   The rest of the [pre-sync checklist](ideas.md#pre-sync-checklist) uses them to tick off a control once both cockpits agree on it, and [what doesn't sync](ideas.md#what-doesnt-sync) uses them to name a control nobody can sync.
 - **Plugin values:** a profile watches a value a plugin exports, and sets it through the plugin's write method, as it would a variable ([Plugins](#plugins)).
-- **Requests:** a third direction beside the PF's entries and shared ones ([01-profile-entries](../sync/01-profile-entries.md#choosing-who-sends)), for an action any pilot asks for and only the flying machine carries out, such as a pushback ([ground operations sync](ideas.md#ground-operations-sync)).
+- **Requests:** for an action any pilot asks for and only the flying machine carries out, such as a pushback ([ground operations sync](ideas.md#ground-operations-sync)).
+  The direction field is `owner`, whose values name roles, and a pushback still belongs to the PF, so a request comes later as a field of its own ([01-format-and-delivery](../profiles/01-format-and-delivery.md)).
   The input layer keeps the asking pilot's own sim from acting on it.
-- **A profile's identity:** each profile carries its version and a hash of its contents.
-  In v1 the [preflight match check](03-v1-scope.md#preflight-match-check) compares them, and once profiles come from a [registry](ideas.md#profile-registry), the same hash tells a pilot's Dual Input which profile to fetch.
+- **A profile's identity:** the core computes each profile's hash, and a profile carries no version of its own ([01-format-and-delivery](../profiles/01-format-and-delivery.md)).
+  In v1 the [preflight match check](03-v1-scope.md#preflight-match-check) compares the hashes, and the same hash tells a pilot's Dual Input which of our own profiles to fetch from the [registry](ideas.md#profile-registry), since profiles and plugins reach pilots apart from Dual Input's releases ([architecture's tentative decisions](../architecture/decisions.md#profiles-and-plugins-reach-pilots-apart-from-dual-inputs-releases), 2026-10-08).
 - **New blocks:** the format takes blocks beyond `state:` and `events:`, such as the checklist's items or the controls that don't sync, each with its reason.
 
-**v1 builds** watch-only entries, plugin values, a direction field with room for a third value, profile hashes the match check compares, and a format that takes new blocks.
+**v1 builds** watch-only entries, the direction field `owner`, profile hashes the core computes, which the match check compares and the fetch by hash of our own profiles uses, and a format that takes new blocks.
 
 ## Recording
 
 - **The debrief timeline** plays a flight back from the recording ([flight recorder and debrief](ideas.md#flight-recorder-and-debrief)).
-  So the recording holds the flight model's track, the handovers, and every channel with its timing, in a format later versions of Dual Input still read, and the crew's recordings merge by the session's ID and the vector clocks.
+  v1 gives it no format, and it's built only if it fits without pressing on other design (user, 2026-10-16).
 - **Telemetry** sends the event v1 raises when a write never lands, the one that marks the recording and puts a notice on the banner ([02-live-sync](../sync/02-live-sync.md#checking-that-a-write-landed)), carrying nothing that identifies the pilot ([telemetry](ideas.md#telemetry)).
-- **Plugin tests:** the recorder keeps every value a plugin exported and every write method Dual Input called on it, so a test replays a recorded flight against the plugin's profile entries and checks what Dual Input did with those values, with no copy of the aircraft.
-  The author writes no test: they fly with recording on, as pilots do for [bug reports](03-v1-scope.md#recording-and-bug-reports).
-  The plugin's own reads and writes into the aircraft's panels, such as into the A220's Redux store, run only in the sim, and only flying with the plugin checks them.
+- **Plugin tests:** what they need from the recording is left to the plugins' design (user, 2026-10-16).
 
-**v1 builds** a versioned recording format with the flight model's samples, each channel recording itself, and each plugin's exported values and the write methods Dual Input called on it, as [recording and bug reports](03-v1-scope.md#recording-and-bug-reports) scopes.
+**v1 builds** a recording that's a replay log of every input the core takes, and after v1 each run gains an index of its sessions, the one record a later version reads (user, 2026-10-21; [01-recording-and-bug-reports](../recording/01-recording-and-bug-reports.md)).
 
 ## By pick
 
@@ -253,6 +241,7 @@ An EFB app loaded the sim's way, rather than code in the EFB's document, is untr
 | [Mixed flight controls](ideas.md#mixed-flight-controls) | [Channels](#channels), [input layer](#an-input-layer), [plugins](#plugins) | A decision in `record/decisions/` before it's built |
 | The rest of the [pre-sync checklist](ideas.md#pre-sync-checklist), and state watching | [Profiles](#profiles) | |
 | [Dual Input IDE](ideas.md#dual-input-ide) | [One protocol](#one-protocol-for-every-client), [code inside the sim](#code-inside-the-sim) | A way to hold back a click on its arrows ([input layer](#an-input-layer)), and the single-machine setup in step 7 of [the plan](plan.md) for its two-instance write test |
+| The voice phrases, from [voice handover](ideas.md#voice-handover) | No section of this document: v1's core helper leaves room for a want of phrases and the `Listener` trait that [04-core-helper](../core/04-core-helper.md#speech) designs, and a voice answer is one more `TakeControl` request | A detector, a recognizer, and a way for an offer to reach the other machine, which the [control log](../control/log.md#2026-10-17-research-puts-silero-vad-and-sherpa-onnx-ahead-for-recognizing-the-voice-phrases-on-the-pilots-pc-and-the-voice-phrases-move-to-soon)'s research starts |
 | [Bus bridge](ideas.md#bus-bridge) | [Channels](#channels), [catch-up pipeline](#a-catch-up-pipeline), [plugins](#plugins), [code inside the sim](#code-inside-the-sim) | Whether a carried message changes the receiving aircraft's state, a probe deferred until after v1 ([the plan](plan.md)'s step 6) |
 | [EventBus bridge](ideas.md#eventbus-bridge) | [Channels](#channels), [catch-up pipeline](#a-catch-up-pipeline), [code inside the sim](#code-inside-the-sim) | Which topics belong to the aircraft rather than to one machine, and carrying them between two machines ([EventBus bridge](ideas.md#eventbus-bridge)) |
 | [WASM instrument sync](ideas.md#wasm-instrument-sync) | [Plugins](#plugins), [code inside the sim](#code-inside-the-sim) | |
@@ -261,8 +250,8 @@ An EFB app loaded the sim's way, rather than code in the EFB's document, is untr
 | Weather, from [environment sync](ideas.md#environment-sync) | [Channels](#channels), [roles](#roles) | How to set the weather from outside the sim, which is unknown |
 | Home-network discovery, from [one-click invite](ideas.md#one-click-invite) | | Joining from a session found on the home network as well as from a code |
 | Crews beyond two, and passengers, from [join modes](ideas.md#join-modes) | [People beyond the crew](#people-beyond-the-crew), [roles](#roles), [channels](#channels) | A lighter figure for passengers, such as a seated one without legs, since a figure in view costs frame time ([avatars log](../avatars/log.md#2026-10-05-each-figure-poses-from-its-own-objects-variables-and-costs-frame-time-in-view-and-almost-none-out-of-view)) |
-| The tablet in a browser, from [Dual Input's interface](ideas.md#dual-inputs-interface-in-the-efb-and-on-a-tablet) | [One protocol](#one-protocol-for-every-client) | |
-| The debrief timeline, from [flight recorder and debrief](ideas.md#flight-recorder-and-debrief) | [Recording](#recording) | The viewer |
+| The tablet in a browser, from [Dual Input's interface](ideas.md#dual-inputs-interface-in-the-efb-and-on-a-tablet) | [One protocol](#one-protocol-for-every-client) | A listener beyond the PC, and a way in, which the tablet's design adds |
+| The debrief timeline, from [flight recorder and debrief](ideas.md#flight-recorder-and-debrief) | [Recording](#recording) | The viewer, and a format, since v1 gives it none |
 | Automatic profile fetch, and the community registry, from [profile registry](ideas.md#profile-registry) | [Profiles](#profiles), [channels](#channels) | |
 | [What doesn't sync](ideas.md#what-doesnt-sync) | [Profiles](#profiles) | |
 | [Dual Input objects in the cockpit](ideas.md#dual-input-objects-in-the-cockpit) | [Code inside the sim](#code-inside-the-sim) | A way to hold back a click on one ([input layer](#an-input-layer)), and whether an object our WASM module writes holds still enough, since [decision 001](../../decisions/001-changing-other-developers-packages.md) rules out attaching it through the aircraft's files |

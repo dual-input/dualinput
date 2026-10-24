@@ -2,33 +2,13 @@
 
 ```text
 Purpose:     The profile engine's, the profile builder's, and the profile loader's interfaces, and how a bundle is built, published, fetched, cached, pinned, and loaded.
-Depends on:  01-format-and-delivery.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/03-sim-seam-and-wasm-module.md, ../session/02-units.md, ../recording/01-recording-and-bug-reports.md, log.md
+Depends on:  01-format-and-delivery.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/03-sim-seam-and-wasm-module.md, ../session/02-units.md, ../sync/05-units.md, ../plugins/01-plugins.md, ../recording/01-recording-and-bug-reports.md, ../build/01-the-build.md, log.md
 Decides:     Which compiler builds a bundle, and where it runs; the YAML parser; a bundle's exact bytes and its hash; the index; how CI publishes and keeps every bundle, and at which levels; whether CI holds a released level's builder output to its release tag; where the core fetches from; the cache; the local folder; the pin's key; how a bundle loads; the match check's item; the budgets; and the cases for the bench (node 6.8).
 ```
 
-> **Note**
-> Since 2026-10-16, [the sync units](../sync/05-units.md#catch-up) answers [the pin](#the-pin)'s question on a late load: a following machine asks for a catch-up whenever its profile loads after preflight has ended, so a pin that goes from none to a bundle after preflight brings every following cockpit to the flying machine's.
-> Since 2026-10-17, v1 has no plugins, so a bundle has no `plugin` key, `program` writes no TypeScript file for a plugin, and the declarations name `instrument` and not `plugin`, where [the profile engine](#the-profile-engine) has them all; the sandbox's contexts hold, of rquickjs's intrinsics, `Eval` and `RegExp` alone, beside the base objects ([plugins and the sandbox](../plugins/01-plugins.md#the-sandbox)).
-> Since 2026-10-18, v1 ships no authoring tool, so `dualinput-profile-builder` keeps its name and runs from the repository for the core team, where [the units](#the-units) and [the builder program](#the-builder-program) have authors run it; a contributor without the workspace's setup sends a profile's change as a pull request and reads CI's check; and the release workflow calls the profiles' job, a reusable workflow, which [publishing](#publishing) runs on each release ([authoring tools](../build/01-the-build.md#authoring-tools)).
-> That settles [left open](#left-open)'s item on the builder program's name and how authors get it.
->
-> Since 2026-10-18, the design review after node 6 changes this document in two places (user, 2026-10-18):
->
-> - [The match check's item](#the-match-checks-item) reports whether the pinned bundle loaded, couldn't be fetched, or there's no profile for the aircraft, and the session shows the pinned hash once, since every core loads only the pinned bundle, so two cores' hashes can't differ.
-> - [The local folder](#the-local-folder)'s setting is a development setting, which no app shows, since v1 ships no authoring tool; the IDE makes it a pilot's setting.
->
-> Since 2026-10-21, v1 uploads no bug report, so the upload that [a bundle's bytes](#a-bundles-bytes) has use sha2 comes after v1, and how a run's folder, which a pilot sends by hand, carries a local bundle's text, which [in the recording](#in-the-recording) has a bug report carry, is open (user, 2026-10-21; [recording log](../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour)).
->
-> Since 2026-10-23, the loader tells the recording crate nothing, where [in the recording](#in-the-recording) has it tell the loaded bundle's hash and whether it's local, since v1 writes no index of a run (user, 2026-10-23; [recording log](../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb)).
->
-> Since 2026-10-24, a level's declarations open with the JavaScript the sandbox runs, TypeScript 6.0.3's own library declarations kept to the globals and members the sandbox's context defines, where [levels](#levels) has the ten global types TypeScript needs ([profiles log](log.md#2026-10-24-the-sandboxs-context-runs-quickjs-ngs-base-objects-past-es2020-without-json-map-set-date-or-promise-and-level-1-types-write-functions-by-exactly-what-it-runs)).
-> They name neither `instrument()`, which only a watch takes and the engine reads without TypeScript, so a write function that calls it fails its type check, nor `aircraft`, which the format never defined, since `only` covers what differs between variants (user, 2026-10-24).
->
-> Since 2026-10-24, the sandbox's context also takes rquickjs's `Promise` intrinsic and deletes the `Promise` and `AsyncDisposableStack` globals it adds, where the note of 2026-10-17 has `Eval` and `RegExp` alone, so a script sees the same globals as without the intrinsic ([plugins and the sandbox](../plugins/01-plugins.md)'s note of 2026-10-24).
-
 The core loads bundles and never builds one.
 A published bundle comes from our Pages site under its hash, and an unpublished one from a local folder that the profile builder or the IDE wrote it into.
-The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `dualinput-profile-builder` program authors run, and later in the IDE, so `typescript.js` never ships to pilots.
+The profile builder type-checks and compiles with TypeScript 6.0.3's own compiler inside QuickJS-ng, the same code in CI, in the `dualinput-profile-builder` program the core team runs from the repository, and later in the IDE, so `typescript.js` never ships to pilots.
 CI publishes to a branch it only ever adds files to, and only at levels a release supports, and the index lists, for each profile, the bundle a core at each level takes.
 On the core, a job reads, parses, and checks the pinned bundle, and the loop decodes the result and raises `ProfileLoaded`.
 
@@ -42,7 +22,7 @@ This answers node 6.8 of the [architecture plan](../architecture/plan.md#68-prof
 | `profile-engine` | Engine | The format, its blocks and each feature's, every check but the type check, the levels' frozen schemas and declarations, reading a bundle, writing one, and the program TypeScript checks | In the core's jobs, the builder, and CI |
 | `profile-build` | Engine | Building a bundle: modules merged, the type check and compile with TypeScript 6.0.3 inside QuickJS-ng, the level worked out, and the bundle read back | In the builder, CI, and later the IDE, and never in the core |
 | `profile-loader` | Platform | The index, the cache, the local folder, the pin, the loaded profile, and the match check's item | On the loop, with jobs at the edge |
-| `tools/profile-builder` | Tool | The program `dualinput-profile-builder`: building, watching, and publishing | For authors and CI |
+| `tools/profile-builder` | Tool | The program `dualinput-profile-builder`: building, watching, and publishing | For the core team, from the repository, and CI |
 
 - `profile-engine` uses the message crate, as the code map's [engines](../architecture/02-code-map.md#engines) row has it, and reads no file: whoever runs it hands it the files' bytes.
 - `profile-build` uses `profile-engine` and rquickjs, so it sits on the engines' top line, beside the sync engine.
@@ -75,7 +55,7 @@ impl Profile {
   serde-saphyr 2.0.0 deserializes into serde types with spans, but has one owner on crates.io, shipped 1.0.0 on 2026-07-31 and 2.0.0 on 2026-10-13, and loses a value's place inside untagged enums, which `write:` is, since "Serde buffers the values without preserving YAML location" (documented, serde-saphyr's README, `Spanned`).
   serde_yaml is deprecated, and the libyaml translation under it carries advisory [RUSTSEC-2024-0449](https://rustsec.org/advisories/RUSTSEC-2024-0449.html).
 - Each feature's block is a module of the engine's, which registers the block's key, the level it came in at, its fields with theirs, its checks, and its declarations, as the code map's [tiers](../architecture/02-code-map.md#tiers) keep each feature's block there.
-- `program` writes, for each variant, one TypeScript file that declares `state` with that variant's entries and wraps each write function in a constant of its type, and one for the plugin, so a function that reads a key a variant lacks fails as [what fails a load](01-format-and-delivery.md#what-fails-a-load) requires.
+- `program` writes, for each variant, one TypeScript file that declares `state` with that variant's entries and wraps each write function in a constant of its type, so a function that reads a key a variant lacks fails as [what fails a load](01-format-and-delivery.md#what-fails-a-load) requires.
   It records where each script sits, so `place` turns TypeScript's lines into the YAML's.
 - `read` checks a bundle against the schema of the level it's given, the core's `LEVEL`, and runs no type check, since the builder ran it on that bundle's source.
 
@@ -83,17 +63,20 @@ impl Profile {
 
 - Each level's schema, as JSON Schema, so an editor's YAML support can complete a profile's fields, and its declarations, as one `.d.ts`, are files the engine generates from its blocks into `src/engines/profile-engine/levels/<n>/`.
   They're committed, and CI generates them again and fails on a difference, beside holding a released level's to its release tag ([profiles in this repository](../architecture/02-code-map.md#profiles-in-this-repository)).
-- TypeScript checks with `noLib`, so a level's declarations are the scripts' whole world: the ten global types TypeScript still needs, `Array`, `Boolean`, `CallableFunction`, `Function`, `IArguments`, `NewableFunction`, `Number`, `Object`, `RegExp`, and `String` ([log][p02]), then the names, `write()`, the chain, `state`, `aircraft`, and `plugin`, and nothing the sandbox leaves out, such as `Date` ([one loop](../architecture/02-code-map.md#one-loop)).
+- TypeScript checks with `noLib`, so a level's declarations are the scripts' whole world: first the JavaScript the sandbox runs, TypeScript 6.0.3's own library declarations kept to the globals and members the sandbox's context defines ([log][p03]), then the names, `write()`, the chain, and `state`, and nothing the sandbox leaves out, such as `Date` ([one loop](../architecture/02-code-map.md#one-loop)).
+  - They name no `instrument()`, which only a watch takes and the engine reads without TypeScript, so a write function that calls it fails its type check, and no `aircraft`, which the format never defined, since `only` covers what differs between variants (user, 2026-10-24).
+  - They name no `plugin`, since v1 has no plugins ([no plugins in v1](../plugins/01-plugins.md#no-plugins-in-v1)).
+- The sandbox's context holds the base objects and, of rquickjs's intrinsics, `Eval`, `RegExp`, and `Promise`, and deletes the `Promise` and `AsyncDisposableStack` globals that `Promise` adds, so a script sees the same globals as without it ([the sandbox](../plugins/01-plugins.md#the-sandbox); [plugins log](../plugins/log.md#2026-10-24-stage-12s-sandbox-stops-a-write-functions-endless-loop-at-100-interrupt-checks-and-needs-quickjs-ngs-promise-intrinsic-without-which-an-async-function-aborts-the-core-when-its-sandbox-is-dropped)).
 
 ### A bundle's bytes
 
 `write` lays a bundle out in one way, so the same files and the same builder give the same bytes on any PC:
 
-- The top-level keys come in one fixed order, ending with `plugin`, and the entries in their source's order, the profile's first, then each module's in the order it's imported.
+- The top-level keys come in one fixed order, and the entries in their source's order, the profile's first, then each module's in the order it's imported.
 - Every script is a `|` block holding the compiled JavaScript, every other value is plain where YAML allows it, and the file has no comments and no `import`, in UTF-8 with LF line endings.
 - The level isn't in the bytes, since the index carries it ([the index](#the-index)).
 
-A bundle's hash is SHA-256 over its bytes, written as lowercase hex, through `sha2` 0.11, which iroh already brings into the core (read in our network probes' `Cargo.lock`, such as `experiments/areas/network/two-cores/Cargo.lock`), and which a bug report's upload uses too ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report)).
+A bundle's hash is SHA-256 over its bytes, written as lowercase hex, through `sha2` 0.11, which iroh already brings into the core (read in our network probes' `Cargo.lock`, such as `experiments/areas/network/two-cores/Cargo.lock`), and which a bug report's upload, after v1, uses too ([a bug report](../recording/01-recording-and-bug-reports.md#a-bug-report); user, 2026-10-21; [recording log][every]).
 Windows' `Get-FileHash` takes SHA-256 by default, so anyone can check a bundle against its name.
 
 ## The builder
@@ -143,7 +126,8 @@ So moving to TypeScript 7, if the IDE's editor runs it, is a change to the build
 
 ### The builder program
 
-`tools/profile-builder` builds `dualinput-profile-builder`, whose commands are a sketch until [6.18](../architecture/plan.md#618-the-build) names the program and how authors get it:
+`tools/profile-builder` builds `dualinput-profile-builder`, which keeps that name and runs from the repository for the core team, since v1 ships no authoring tool ([authoring tools](../build/01-the-build.md#authoring-tools)).
+Its commands:
 
 | Command | Does |
 | --- | --- |
@@ -151,11 +135,12 @@ So moving to TypeScript 7, if the IDE's editor runs it, is a change to the build
 | `watch <profile or folder> --out <folder>` | The same, again on every save |
 | `publish` | CI's: builds every profile in `profiles/aircraft/` and lays out the Pages tree ([publishing](#publishing)) |
 
-An author points `--out` at their local folder ([the local folder](#the-local-folder)), and the IDE, once it comes, calls `build` in process on each save, so its authors run no command (user, 2026-10-16).
+A member of the core team points `--out` at their local folder ([the local folder](#the-local-folder)), and the IDE, once it comes, calls `build` in process on each save, so its authors run no command (user, 2026-10-16).
+A contributor without the workspace's setup sends a profile's change as a pull request and reads CI's check ([authoring tools](../build/01-the-build.md#authoring-tools)).
 
 ## Publishing
 
-CI's profiles job runs on each merge to `main` that changes `profiles/` or either profile engine, and on each release:
+CI's profiles job, a reusable workflow, runs on each merge to `main` that changes `profiles/` or either profile engine, and on each release, whose workflow calls it ([authoring tools](../build/01-the-build.md#authoring-tools)):
 
 1. It runs `dualinput-profile-builder publish` on `main`'s newest commit.
 2. It fails on any error, and when two profiles cover one folder or preset.
@@ -215,6 +200,7 @@ FS Copilot's app downloads every profile at once, as one zip from its own server
 ## The local folder
 
 - The local folder is a setting the loader registers, empty at first, naming a folder of bundle files that the builder or the IDE wrote, one for each profile (user, 2026-10-16).
+  It's a development setting, which no app shows, since v1 ships no authoring tool, and the IDE makes it a pilot's setting (user, 2026-10-18).
 - The loader lists it at start and whenever it chooses or looks up a bundle, as a job that runs `read` at `LEVEL` on each file and skips, and logs, one that fails, so it never takes a bundle at a level this core can't read.
   A local bundle that covers an aircraft is taken over a published one, as [testing an edit](01-format-and-delivery.md#testing-an-edit) has it.
 - A new local bundle takes effect when the session's aircraft next changes before preflight ends, or at the next session, and a crewmate testing with the author puts the same file in their own folder before joining; equal hashes prove they run the same copy.
@@ -231,7 +217,8 @@ pub struct Pin { pub hash: [u8; 32], pub local: bool }
 
 - The PF's loader writes its choice into `PIN` when the session's aircraft changes before preflight ends, as [which bundle a session pins](../session/02-units.md#which-bundle-a-session-pins) has it, and when the key holds none and its choice becomes one, as when the start's fetch finishes after the aircraft was set.
 - Its choice is a local bundle that covers the session's aircraft, or else the bundle the cached index gives this core's `LEVEL` for it, when the cache holds that bundle, or else none.
-- After preflight ends, the pin changes only from none, as when the PF's fetch finishes after a session that started airborne; whether state sync catches up on that late load is [6.9](../architecture/plan.md#69-sync)'s.
+- After preflight ends, the pin changes only from none, as when the PF's fetch finishes after a session that started airborne.
+  A following machine asks for a catch-up whenever its profile loads after preflight has ended, so that late pin brings every following cockpit to the flying machine's ([catch-up](../sync/05-units.md#catch-up)).
 - Every core looks for the pinned hash in its cache, then in its local folder.
   It fetches a published pin it lacks as soon as the pin names it, and doesn't fetch a local one, since no copy of it is on Pages.
 
@@ -247,16 +234,16 @@ pub struct Pin { pub hash: [u8; 32], pub local: bool }
 ```rust
 // a sketch: what a handler reads
 let loaded = cx.read::<Profiles>().loaded();   // Option<&Loaded>: its hash, whether it's local, the variant,
-                                               // each block resolved for it, and the plugin's JavaScript
+                                               // and each block resolved for it
 ```
 
-State sync's sync engine compiles the write functions from it ([6.9](../architecture/plan.md#69-sync)), and the plugins crate runs the plugin ([6.15](../architecture/plan.md#615-plugins)).
+State sync's sync engine compiles the write functions from it ([6.9](../architecture/plan.md#69-sync)).
 
 ### In the recording
 
 - The job's result is an input, so the recording holds the decoded profile, and a replay decodes it again with no file read ([running a replay](../core/01-loop-and-edge.md#running-a-replay)).
-- The loader tells the recording crate the loaded bundle's hash and whether it's local.
-- A bug report carries a local bundle's text, since a published one stays on Pages under its hash (user, 2026-10-16).
+- The loader tells the recording crate nothing, since v1 writes no index of a run (user, 2026-10-23; [recording log][flush]).
+- A published bundle stays on Pages under its hash, so only a local bundle's text has to reach us with a run (user, 2026-10-16), and how a run's folder, which a pilot sends by hand, carries it is [left open](#left-open).
 
 ## The match check's item
 
@@ -265,15 +252,15 @@ State sync's sync engine compiles the write functions from it ([6.9](../architec
 me.match_item(profile_loader::BUNDLE, ProfileLoader::bundle);
 ```
 
-Each member's value is one of four:
+Each member's value is one of three (user, 2026-10-18):
 
 | Value | When | Level |
 | --- | --- | --- |
-| A published hash | This core loaded a bundle from Pages | An error when the hashes differ |
-| A local hash, shown as "unpublished" | This core loaded a bundle from its local folder | The same |
+| Loaded | This core loaded the pinned bundle, from Pages or from its local folder | None, since two cores' hashes can't differ |
 | "No profile for this aircraft" | The pin holds none, since no profile covers the aircraft ([the match check](../session/02-units.md#the-match-check)) | An error, even when every member shows it |
 | "Couldn't get the session's profile" | The pin names a bundle this core couldn't fetch, find, or read | An error, even when every member shows it |
 
+- The session shows the pinned hash once, as "unpublished" for a local bundle, since every core loads only the pinned bundle (user, 2026-10-18).
 - The value changes on `ProfileLoaded`, on a failed fetch or read, and on a new pin, and the session crate writes this member's `match` key again whenever one of its values changes, so a profile that loads after its member entered the flight shows as loaded.
 - The wording, and how a hash shows, are [6.16](../architecture/plan.md#616-the-apps)'s.
 
@@ -291,7 +278,7 @@ Each is a starting value:
   Until a profile of ours is larger, that's a bench fixture of 200 KB with 300 write functions, above 1.5 times FS Copilot's largest, below, since ours carry more blocks in a wordier format (user, 2026-10-24).
 - **A start with nothing new:** one answer of headers ([log][p01]).
 - **A bundle's size:** no cap.
-  FS Copilot's largest profile with its modules merged, the iFly 737 MAX8's, is 114,855 bytes, and the median of its 56 is 33,700 (read on disk, FS Copilot fork, `Definitions/`), while ours also carry seats, possibly hundreds on an airliner, and plugins of any length, so they run larger (user, 2026-10-16).
+  FS Copilot's largest profile with its modules merged, the iFly 737 MAX8's, is 114,855 bytes, and the median of its 56 is 33,700 (read on disk, FS Copilot fork, `Definitions/`), while ours also carry seats, possibly hundreds on an airliner, so they run larger (user, 2026-10-16).
 - **The Pages site:** a site holds at most 1 GB ([GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)), about 2,000 bundles of a hypothetical 500 KB.
   The FS Copilot fork changed its profiles' files 75 times in 10 months (read in its git history of `Definitions/`, 2025-12-03 to 2026-10-11), and a change to a module publishes every profile that imports it again, so ours run several times that, which still leaves years.
 
@@ -299,7 +286,7 @@ Each is a starting value:
 
 - The PF's start fetch finishes after the session's aircraft is set: the pin goes from none to the bundle, every core in the flight loads it, and the match check shows it loaded.
 - Control passes before preflight ends to a pilot whose cache holds an older bundle: the pin stays.
-- A member whose cache lacks the pinned bundle fetches it by hash and loads it, and the match check shows no difference.
+- A member whose cache lacks the pinned bundle fetches it by hash and loads it, and the match check shows it loaded.
 - A member offline whose cache lacks the pin shows "Couldn't get the session's profile", loads nothing, and fetches it when it next enters the flight online.
 - The PF pins a local bundle: a member with the same file loads it, and one without it fetches nothing and shows the error.
 - The session's aircraft changes before preflight ends, and a member enters the new aircraft before the new pin arrives: it loads nothing, then loads the new bundle.
@@ -321,11 +308,14 @@ The builder's own tests, which CI runs, take these:
 
 ## Left open
 
-- The builder program's name, and how authors get it: [6.18](../architecture/plan.md#618-the-build).
-- Where the apps show the local folder's setting and the match check's item: [6.16](../architecture/plan.md#616-the-apps).
+- How a run's folder, which a pilot sends by hand, carries a local bundle's text (user, 2026-10-21; [recording log][every]).
+- Where the apps show the match check's item: [6.16](../architecture/plan.md#616-the-apps).
 - Which TypeScript the IDE's editor runs, which may move the builder to TypeScript 7: the IDE's design.
 - Test sessions, in which the author's core sends each new bundle to the crew: the IDE's dev loop, as [testing an edit](01-format-and-delivery.md#testing-an-edit) has them.
 - Expiring superseded bundles, if the Pages site nears 1 GB, since a pin needs only recent ones.
 
 [p01]: log.md#2026-10-16-github-pages-answers-a-repeat-fetch-of-an-unchanged-file-with-a-304-and-no-body-and-compresses-what-it-sends-when-asked
 [p02]: log.md#2026-10-16-typescript-603s-compiler-type-checks-and-compiles-inside-quickjs-ng-as-under-node-in-09s-for-300-write-functions-on-a-1-mb-stack
+[p03]: log.md#2026-10-24-the-sandboxs-context-runs-quickjs-ngs-base-objects-past-es2020-without-json-map-set-date-or-promise-and-level-1-types-write-functions-by-exactly-what-it-runs
+[every]: ../recording/log.md#2026-10-21-partial-recording-caused-three-bugs-in-stage-4s-sim-service-while-recording-every-input-costs-45-to-126-mb-an-hour
+[flush]: ../recording/log.md#2026-10-23-one-zstd-frame-flushed-each-second-keeps-a-busy-flights-recording-at-426-mb-an-hour-where-a-frame-ended-each-second-takes-667-mb

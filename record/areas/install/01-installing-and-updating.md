@@ -2,32 +2,15 @@
 
 ```text
 Purpose:     How Dual Input reaches a pilot's PC and stays current, and what runs on it between runs of the sim.
-Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/03-sim-seam-and-wasm-module.md, ../session/02-units.md, ../interface/01-apps.md, log.md
-Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Dual Input; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how the core finds packages that override our files and checks our own; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
+Depends on:  ../product/03-v1-scope.md, ../architecture/01-spine.md, ../architecture/02-code-map.md, ../core/01-loop-and-edge.md, ../core/03-sim-seam-and-wasm-module.md, ../session/02-units.md, ../interface/01-apps.md, ../build/01-the-build.md, log.md
+Decides:     That the desktop app does the watcher's jobs from a tray icon; what installs and updates Dual Input; where it lives on disk; when an update is checked for and when it applies; when our Community package is written; how the sim's start reaches the core; who adds and checks the firewall rule; how a package that overrides our files, and trouble with our own, shows in the core; what uninstalling removes; and what an unsigned v1 costs (node 6.17).
 ```
-
-> **Note**
-> Since 2026-10-18, [the build](../build/01-the-build.md) settles what [left open](#left-open) and [our package](#our-package) leave to 6.18, and changes our package's rule:
->
-> - Our package is one folder named `dualinput`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too, so FS Copilot's `fscopilot-bridge`, later in the alphabet in the same group, most likely wins over ours (inference, not run), and the warning names it ([our package](../build/01-the-build.md#our-package)).
-> - The app writes our package only when it runs from Velopack's `current\` folder, as an installed app does, beside what [our package](#our-package) says; a developer installs a development build's package with `node tools/build.ts install`, since a rebuild keeps the version and the app's rule would never copy it in ([our package](../build/01-the-build.md#our-package)).
-> - The build keeps the sim's stock files in `src/sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
-> - `current\` also holds the SDK's `SimConnect.dll` beside the core, where [the installer and the updater](#the-installer-and-the-updater) names the three programs and our package ([what a release holds](../build/01-the-build.md#what-a-release-holds)).
->
-> Since 2026-10-18, the sim service raises one trouble notice for our package, from either [our own package](#our-own-package)'s check on disk or the module's status of Missing or Differs, where each raises its own; Stopped keeps its own notice (user, 2026-10-18).
->
-> Since 2026-10-21, the app copies our package through a folder it makes fresh for each copy, beside `Community` or beside the folder a `Community` junction leads to, as `tools/build.ts install` does, where [our package](#our-package) and the uninstall name one `DualInput\` folder, since a junction to `%APPDATA%\Community` would put that folder at `%APPDATA%\DualInput\`, the pilot's data folder (user, 2026-10-21; [log](log.md#2026-10-21-a-fixed-dualinput-staging-folder-beside-a-community-junctions-target-can-be-the-pilots-data-folder)).
->
-> Since 2026-10-22, our `VCockpit.js` won over FS Copilot's in one flight with both packages in `Community`, where the note of 2026-10-18 has FS Copilot's most likely win, by [packages that override our files](#packages-that-override-our-files)' rule that the package later in the alphabet wins ([log](log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
-> Why ours won is unverified, so a pilot with both packages installed may find FS Copilot's panels running our bridge in place of its own.
->
-> Since 2026-10-23, [the checks in the core](#the-checks-in-the-core) go: the core searches no other package for files that override ours and checks nothing of our own package on disk, since ours won over FS Copilot's against the mount order those checks assumed, the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, and the module's Missing and Differs cover our own package; [packages that override our files](#packages-that-override-our-files) keeps what we know of them (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
 
 Dual Input has no watcher: the desktop app runs from login as a tray icon, at 2.2 MB until its window first opens and 3.7 MB after, and does the watcher's jobs, and it shows its window when the pilot opens it.
 Velopack installs it for the pilot's own account and updates it, with the desktop app as Velopack's main program, so no update asks for an administrator, and every program keeps one path from release to release.
 The app applies an update only while the sim is closed, no session is held, and the core has exited, and Install now quits the core to get there.
-At its start and at each sim close, it writes our Community package wherever it's missing or of another version, and on its first run it adds the firewall rule.
-In the core, the sim service warns of packages that override our files and checks our own, and Dual Input turns no package off.
+At its start and at each sim close, an installed app writes our Community package wherever it's missing or of another version, and on its first run it adds the firewall rule.
+The core searches no other package for files that override ours, and checks nothing of our own package on disk: the clients crate's notice when no cockpit panel connects names another package's `VCockpit.js` as the likeliest cause, the module's status raises our package's trouble notice, and Dual Input turns no package off.
 
 This answers node 6.17 of the [architecture plan](../architecture/plan.md#617-installing-and-updating).
 [Installing and updating](../product/03-v1-scope.md#installing-and-updating), decisions [002](../../decisions/002-core-starts-with-every-sim-run.md) and [003](../../decisions/003-watcher-keeps-blurpage-copy-current.md), and the spine's [desktop app and the core](../architecture/01-spine.md#the-desktop-app-and-the-core) give the rules this design builds on, with the desktop app doing what they give the watcher, and this document holds only what they leave out.
@@ -52,7 +35,7 @@ The research behind it is in this area's [log](log.md).
 | --- | --- |
 | Velopack's Setup.exe and Update.exe | Not ours: the installer, and the swap of one release's programs for the next ([the installer and the updater](#the-installer-and-the-updater)) |
 | `src/apps/desktop` | The tray icon and the window, and in its Rust side the watcher's jobs: noticing the sim, starting the core and starting it again, checking for, downloading, and applying updates, writing our Community package, the firewall rule, and the 24 hours of figures |
-| `sim-service` | The packages folders, the search for packages that override our files, and the check of our own package |
+| `sim-service` | The packages folders, and our package's trouble notice |
 
 ## The installer and the updater
 
@@ -63,7 +46,7 @@ It's MIT-licensed, and its 1.x line began on 2026-05-26.
   Setup.exe installs to `%LOCALAPPDATA%\DualInput\` with no administrator prompt, and an update replaces the `current\` folder there by two renames, so `current\dualinput-core.exe` keeps its path from release to release (read in velopack 1.2.161, `src/bins/src/setup.rs` and `src/bins/src/commands/apply_windows_impl.rs`).
   The firewall rule names that path.
 - **One release, three programs.**
-  The desktop app is Velopack's main program, and the core, the core helper, and our Community package ride beside it in `current\`, so the core starts the core helper and the desktop app from its own folder, as [the helper's life](../core/04-core-helper.md#the-helpers-life) and [bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward) need.
+  The desktop app is Velopack's main program, and the core, the core helper, the SDK's `SimConnect.dll` beside the core, and our Community package ride beside it in `current\` ([what a release holds](../build/01-the-build.md#what-a-release-holds)), so the core starts the core helper and the desktop app from its own folder, as [the helper's life](../core/04-core-helper.md#the-helpers-life) and [bringing the desktop app forward](../interface/01-apps.md#bringing-the-desktop-app-forward) need.
   The desktop app builds with `tauri build --no-bundle`, so Tauri makes no installer of its own (documented, [Tauri's CLI](https://v2.tauri.app/reference/cli/)).
 - **Shortcuts.**
   Packed with `--shortcuts StartMenuRoot`, Setup.exe puts a Start-menu shortcut to the main program, which starts it from `current\` (read in `src/bins/src/windows/shortcuts.rs`); the login start needs `--tray`, so the Run value, not a Startup shortcut, carries it.
@@ -96,7 +79,7 @@ An MSI installed per machine prompts for an administrator at every update (read 
 | The core's data folder | `%APPDATA%\DualInput\` |
 | The desktop app's own files, its figures among them | `%APPDATA%\DualInput\app\` |
 | Our package | `Community` in each packages folder ([the packages folders](#the-packages-folders)) |
-| Our package while the app copies it | `DualInput\` in each packages folder, beside `Community`, for the seconds the copy takes while the sim is closed |
+| Our package while the app copies it | A folder the app makes fresh for each copy, beside `Community` or beside the folder a `Community` junction leads to, for the seconds the copy takes while the sim is closed |
 
 - The data folder sits outside Velopack's folder, whose contents an uninstall deletes (read in `src/bins/src/commands/uninstall.rs`), and in `%APPDATA%`, the folder the sim's Steam edition keeps its own packages in (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - Our package goes in `Community`, where FS Copilot's, YourControls', and FlyByWire's installers put theirs ([prior installers](results/2026-10-18-prior-installers.txt); [installer frameworks](results/2026-10-18-installer-frameworks.txt)), though the SDK names `Community2024` for packages only MSFS 2024 runs (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)).
@@ -160,32 +143,40 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 
 ## Our package
 
+- Our package is one folder named `dualinput`, with the order hint `PANEL_PATCH`, which holds our WASM module and the figure's SimObject too ([our package](../build/01-the-build.md#our-package)).
 - At its start and each time the sim closes, while the sim is closed, the desktop app writes our package from `current\` into each packages folder's `Community` where the package is missing or its `manifest.json`'s `package_version` isn't the app's version.
   That one rule writes it at an install, after an update, after a reinstall, and after a pilot or a mod deletes it, and nothing watches `Community` between those moments (user, 2026-10-18).
-- The build finishes the package in `current\`, its `layout.json` included, so the app only copies it: first into `DualInput\` beside `Community`, then it renames the old copy out of `Community` and the new one in, and deletes the old one.
+  The app writes it only when it runs from Velopack's `current\` folder, as an installed app does, so a developer installs a development build's package with `node tools/build.ts install`, since a rebuild keeps the version and the app's rule would never copy it in ([our package](../build/01-the-build.md#our-package)).
+- The build finishes the package in `current\`, its `layout.json` included, so the app only copies it: first into a folder it makes fresh for each copy, beside `Community` or beside the folder a `Community` junction leads to, as `tools/build.ts install` does, then it renames the old copy out of `Community` and the new one in, and deletes the old one.
+  - A folder of one fixed name, `DualInput\`, could be the pilot's data folder: a junction to `%APPDATA%\Community` would put it at `%APPDATA%\DualInput\` (user, 2026-10-21; [log](log.md#2026-10-21-a-fixed-dualinput-staging-folder-beside-a-community-junctions-target-can-be-the-pilots-data-folder)).
   - A copy made inside `Community` would most likely mount as a second package, since the sim's `Content.xml` names each folder there by its name, suffixes included (read on our development machine, 2026-10-18; unverified by a run).
   - Our FS Copilot exerciser's sync of a new build into its own folder, while it ran, "deleted 349 of 355 files" before it reached one in use, and its fix "stages then swaps rather than deleting first" (FS Copilot fork, `record/pointer-forwarding/docs/build/log.md`, "2026-09-19 — The exerciser leaves the tree, and takes four compile-time couplings with it").
   - Before it deletes a folder, the app checks whether it's a junction and removes only the link, since fsc-editor found two packages in our Community folder that were junctions to folders under `Program Files` (read in fsc-editor, `src/main/sim/install.ts`, `removeEntry`).
 - **The BlurPage copy ships in our package,** built from the sim's stock file as our `VCockpit.js` is, and a release follows any sim update that changes either, where [decision 003](../../decisions/003-watcher-keeps-blurpage-copy-current.md) has the watcher make the copy on each pilot's PC (user, 2026-10-18).
   - Every pilot then gets the same copy, the Microsoft Store edition's pilots too, whose install folder a program may not be able to read (unverified, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)), and no PC reads, hashes, or watches the sim's files.
   - The copy should rarely fall behind: on our Steam install, BlurPage's two files were last written on 2025-11-04, though Steam's update of 2026-10-14 rewrote other files in `fs-base-ui`, and the `.json` matches the copy we took on 2026-10-06 (read on our development machine, 2026-10-18, [log](log.md#2026-10-18-the-sims-blurpage-files-havent-changed-since-2025-11-04)).
-  - When a sim update does change BlurPage, our older copy hides the sim's new one until our next release, and what that does to the menu is unknown until it happens; how the build notices such an update, and gets the stock files, is [6.18](../architecture/plan.md#618-the-build)'s.
+  - When a sim update does change BlurPage, our older copy hides the sim's new one until our next release, and what that does to the menu is unknown until it happens.
+    The build keeps the sim's stock files in `src/sim-package/stock/`, and a developer's build on a PC with the sim stops when the sim's own differ from them ([the sim's stock files](../build/01-the-build.md#the-sims-stock-files)).
 
-## The checks in the core
+## How package trouble shows
 
 ### Packages that override our files
 
-- At the core's start, and each time sim awareness finds the sim's process, the sim service searches, in a job, each other package's `layout.json` in each packages folder's `Community` and `Community2024` for the paths our package lists outside our own folders, comparing them without regard to letter case: `html_ui/Pages/VCockpit/Core/VCockpit.js`, and BlurPage's `cookedcomps/{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html` and its `.json`.
+- Our package lists three paths outside our own folders: `html_ui/Pages/VCockpit/Core/VCockpit.js`, and BlurPage's `cookedcomps/{8B92BB9A-4176-4F1A-A9CE-CB1195C4E952}.html` and its `.json`.
   FS Copilot's package lists `html_ui/pages/vcockpit/core/vcockpit.js`, all in lowercase (read in the FS Copilot fork, `FsCopilot.Bridge/Packages/fscopilot-bridge/layout.json`).
-- It skips a package that the profile's `Content.xml`, under `%APPDATA%\Microsoft Flight Simulator 2024\`, marks `UserDisabled`, which the sim most likely doesn't mount (unverified); that file names each package `communityfs24-` or `communityfs20-` and its folder's name, lowercased (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
-- Each package it finds raises a warning notice naming it, and the session crate's match check shows the list as one item, from the sim service's state.
-- Dual Input turns no package off: removing or turning off a package the warning names is the pilot's, however they keep their mods, and the offer [installing and updating](../product/03-v1-scope.md#installing-and-updating) makes to disable it moves to Later (user, 2026-10-18).
-- Of two packages with the same order hint that override one file, the one mounted later wins, in alphabetical order (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)), and which copy won shows when the pages that need it say hello or don't: the panel bridge within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)), and the menu script, without which Go to is unavailable ([go to](../session/02-units.md#go-to)).
+- Of two packages with the same order hint that override one file, the one mounted later wins, in alphabetical order (documented, [Virtual File System Information](https://docs.flightsimulator.com/msfs2024/html/2_DevMode/Menus/Tools/Virtual_File_System_Information.htm)).
+  But our `VCockpit.js` won over FS Copilot's in one flight with both packages in `Community`, though `fscopilot-bridge` sorts after `dualinput` with the same order hint (measured on MSFS 2024, 2026-10-22, [log](log.md#2026-10-22-our-vcockpitjs-won-over-fs-copilots-though-fscopilot-bridge-sorts-after-dualinput-with-the-same-order-hint)).
+  Why ours won is unverified, so a pilot with both packages installed may find FS Copilot's panels running our bridge in place of its own.
+- The sim most likely doesn't mount a package that the profile's `Content.xml`, under `%APPDATA%\Microsoft Flight Simulator 2024\`, marks `UserDisabled` (unverified); that file names each package `communityfs24-` or `communityfs20-` and its folder's name, lowercased (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
+- The core searches no other package for files that override ours, since ours won over FS Copilot's against the mount order such a search assumed.
+  Which copy won shows when the pages that need it say hello or don't: the panel bridge within 10s of the profile loading ([trouble](../interface/01-apps.md#trouble)), and the menu script, without which Go to is unavailable ([go to](../session/02-units.md#go-to)).
+  When no cockpit panel connects, the clients crate's notice names another package's `VCockpit.js` as the likeliest cause (user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+- Dual Input turns no package off: removing or turning off a package that overrides our files is the pilot's, however they keep their mods, and the offer [installing and updating](../product/03-v1-scope.md#installing-and-updating) makes to disable it moves to Later (user, 2026-10-18).
 
 ### Our own package
 
-- In the same search, the sim service checks our package in each `Community` folder: that it's there, that its `manifest.json`'s `package_version` is the core's version, and that `Content.xml` doesn't mark it `UserDisabled`; otherwise it raises a trouble notice.
-- So a package that's missing, out of date, or off in the sim shows before any session, where the EFB app and the banner never connecting goes only to the log ([trouble](../interface/01-apps.md#trouble)).
+- The core checks nothing of our own package on disk, since the module's status of Missing or Differs covers it ([the module's status](../core/03-sim-seam-and-wasm-module.md#the-modules-status); user, 2026-10-23; [architecture log](../architecture/log.md#2026-10-23-a-review-against-the-simplicity-rule-cut-eight-guards-and-kept-every-designed-feature-it-questioned)).
+- The sim service raises one trouble notice for our package from either status, and Stopped raises a notice of its own (user, 2026-10-18).
 
 ## The firewall rule
 
@@ -205,7 +196,7 @@ The warning that a waiting update needs a sim restart, which [installing and upd
 - Velopack force-stops every process running from its folder before it runs the hook (read in velopack 1.2.161, `src/bins/src/commands/uninstall.rs`, `uninstall`), so a core that runs at an uninstall dies with no quit, and a crew in a session with it sees its link lost; uninstalling in a session isn't a path a crew takes.
 - Only the pilot starts an uninstall, from Windows' list of installed programs, and an update never does, since it applies only with no core running.
   The nearest thing to an accident is running Setup.exe again over the install, which asks the pilot to confirm, then force-stops our programs and runs the install hook, not the uninstall hook (read in velopack 1.2.161, `src/bins/src/commands/install.rs`), so the data folder stays: the new app, finding the session file, starts a core, and the pilot comes back as a late joiner, as after a crash ([decision 041](../../decisions/041-core-crash-comes-back-as-late-joiner.md)).
-- The hook deletes our package from each `Community`, the `DualInput\` folder beside each, the Run value, and the data folder.
+- The hook deletes our package from each `Community`, the Run value, and the data folder.
 - Velopack then deletes its own folder, the programs and WebView2's data among it, ignoring any file it can't delete, the Start-menu shortcut, and its entry in the pilot's list of installed programs (same file); WebView2's processes run from the runtime's own folder, so whether one outlives the app it served and holds a file there is unverified ([cases on a desk](#cases-on-a-desk)).
 - The firewall rule stays, as [the firewall rule](#the-firewall-rule) says.
 
@@ -253,9 +244,8 @@ Each is a starting value, which [node 7](../architecture/plan.md#7-testing)'s be
 - The tray's Quit in a session: the other core sees a leave, the core exits with 0, and the app ends.
 - A second start of the app, from the Start menu or from the core, opens the running app's window and exits.
 - Closing the window, with the stand-in ended and no session: the app's socket closes and the core exits.
-- Our package removed, or at another version: the sim service's trouble notice, and the app writes it at its next start or the stand-in's next end.
+- Our package removed, or at another version: the app writes it at its next start or the stand-in's next end.
 - An install with the stand-in running, then a restart before it ends: our package is written once it ends.
-- A package in `Community` or `Community2024` whose `layout.json` lists `html_ui/pages/vcockpit/core/vcockpit.js`, as FS Copilot's does: a warning naming it, and the match check's item; the same package marked `UserDisabled`: neither.
 - Uninstalling with the core running: Velopack kills it, a crew's core sees its link lost, and the data folder goes.
 - A first install, then a restart of the PC: the Run value starts the app as a tray icon, and a reinstall over a firewall rule left behind shows no UAC prompt.
 
@@ -278,7 +268,6 @@ These need no sim:
 
 ## Left open
 
-- Our package's folder name, which sets its place in the mount order among packages with the same order hint, and so whether our `VCockpit.js` or another's wins, and whether our WASM module needs a package of its own, as [code in the sim](../architecture/01-spine.md#code-in-the-sim) has it until two modules in one package are tried: [6.18](../architecture/plan.md#618-the-build)'s.
 - A sim started in the seconds Update.exe takes to swap `current\` boots with the old package beside a new core, whose module then differs from the core and raises its trouble notice until the sim closes; nothing guards against it.
 
 ## Left to the apps' stage
@@ -289,7 +278,7 @@ These wait for the apps' stage of step 8, with [the apps' list](../interface/01-
 - How the app's setting to start with Windows follows Windows' own switch for its Run value, which Settings and Task Manager keep under `StartupApproved` (read on our development machine, 2026-10-18, [Windows and MSFS facts](results/2026-10-18-windows-and-msfs-facts.txt)).
 - How the window shows the update's states, Install now, and Check now, and what Install now says while it waits.
 - How the app offers the firewall fix, and what it shows while no `UserCfg.opt` exists.
-- The words of each override warning, the match check's item, our package's trouble notice, and the join check's refusal when the host is the one behind, which tells them to leave the session first.
+- The words of our package's trouble notice, and of the join check's refusal when the host is the one behind, which tells them to leave the session first.
 
 ## What this changes elsewhere
 

@@ -104,8 +104,9 @@ If the tree holds changes you didn't make, stop and ask before rebasing, because
 Don't run `git merge`, or `git pull` without `--rebase`.
 The Claude desktop app's `sync_with_base_branch` tool merges too, so don't use it.
 
-**Ask before a code review.**
+**Ask before a code review, except at a build stage's close.**
 After writing or substantially changing product code, ask the user whether to run the `code-reviewer` agent, because the user decides which changes are worth a review.
+A build stage's close runs it without asking, alongside the bench, as [working a stage](record/areas/build/plan.md#working-a-stage) says, so the review doesn't wait for the bench (user, 2026-10-24).
 Experiments get none.
 
 **Commit at any checkpoint without asking.**

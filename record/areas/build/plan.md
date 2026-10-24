@@ -42,21 +42,28 @@ The stages follow these rules (user, 2026-10-18):
 2. If the stage has only its headline, write its lines in this plan, as [how a stage reads](#how-a-stage-reads) gives them, from what step 1 read.
    You'll see its `Builds:`, `Needs:`, `Tests:`, and `Exit:` lines.
 3. If the stage has a `Designs first:` line, propose that design to the user, and once they agree, write it in the design doc it belongs to.
+   The proposal can go out while the stage before is still running its bench or its review, so neither the runs nor the user's answer wait on the other (user, 2026-10-24).
    You'll see the design in its doc before any of the stage's code.
 4. Write the stage's code, and turn its cases into tests, as [left to each stage](02-testing.md#left-to-each-stage) says, until `node tools/check.ts` passes, and from stage 3 the bench's scenarios that the stage added or changed, with `node tools/bench.ts <scenario>...`.
    The whole bench, `node tools/bench.ts`, runs in their place at the close of stages 10, 15, and 20, before a release, and at the close of any stage that changes what every scenario runs on: the kernel, the core's edge, the message crate's framing, or a pinned dependency such as iroh, since waiting on it at every stage slowed the build (user, 2026-10-23).
    An `Exit:` line's `node tools/bench.ts` means whichever of the two the stage runs.
-   You'll see every check pass on our development machine.
+   Once `node tools/check.ts` passes, run the `code-reviewer` agent on the stage's code while the bench runs, without asking, and fix or answer each finding, so the review doesn't wait for the bench (user, 2026-10-24).
+   You'll see every check pass on our development machine, and each of the review's findings fixed or answered.
 5. If the stage's system has cases in the sim, run them, and measure the stage's budgets in the sim, in one session in the sim ([in the sim](02-testing.md#in-the-sim)).
+   A case moves to a later stage's session when that session sets up what the case needs anyway and no stage between them builds on what the case checks, so the sim is set up once rather than twice (user, 2026-10-24).
    You'll have each case's report and each measurement.
 6. Measure the stage's budgets on the bench, on our development machine, and write each result, from the bench and from the sim, with how it was taken, in the log of the area it belongs to.
    A result that misses its budget goes back to the design that set it, as [left to each stage](02-testing.md#left-to-each-stage) says.
    You'll see a log entry for each budget.
 7. Once the stage's exit has happened, make the stage's map with `/stage-map`: a private page that shows what each of the stage's parts does, why, and how its code works, which the user reads before the diff (user, 2026-10-20).
-   Then show the user the map, and the stage's lines and its code together as one uncommitted diff, and ask whether to run the `code-reviewer` agent, as [CLAUDE.md](../../../CLAUDE.md#working-rules) says (user, 2026-10-18).
-   You'll have the map's link and the user's answer, and if they want changes or a review, its findings fixed or answered, and the map published again if they changed what it shows.
+   Then show the user the map, and the stage's lines and its code together as one uncommitted diff, with the code review's findings and what was done about each (user, 2026-10-18).
+   You'll have the map's link and the user's answer, and if they want changes, those changes made, and the map published again if they changed what it shows.
 8. Once the user has looked, add `Done on <YYYY-MM-DD>.` under the stage's `Exit:` line, commit the stage, and push it.
    You'll see the stage's commit on `origin/main`, and the next open stage is where the build stands.
+
+A stage built beside another, as [how a stage reads](#how-a-stage-reads) allows, runs in a session of its own in its own git worktree, so neither stage's uncommitted work lands in the other's commit (user, 2026-10-24).
+At step 8 it rebases onto `origin/main` and pushes its commit to `main` as a fast-forward, with `git push origin HEAD:main`.
+A run that measures a budget waits until no other stage's build or bench is running on our development machine, since either takes the CPU the budget is measured on.
 
 ## When building shows a design is wrong
 

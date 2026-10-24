@@ -3,6 +3,35 @@
 What our experiments found about showing Dual Input to the pilot inside the sim, such as the notification banner and the EFB app, newest entry first.
 The probes and their raw output are in [experiments/areas/interface](../../../experiments/areas/interface), with the results in its `results/` folder.
 
+## 2026-10-24: The sim's EFB styles its apps' controls through `--efb-` variables sized from a 516 by 716 base, and an app gets the controls by bundling the SDK's EFB API
+
+**Asked:** what the sim's own EFB stylesheet defines that Dual Input's EFB app and banner could reuse, since their CSS is written by hand for Coherent GT rather than built with Tailwind (user, 2026-10-24)?
+
+**Expected:** no prediction.
+
+**Found:** in the sim's files on disk, on our Steam install, with no sim running:
+
+- `steamapps\common\Limitless\Packages\fs-base-efb` 0.1.10 holds the EFB's document, `html_ui/efb_ui/efb_os/efb_ui.html`, its stylesheet `efb_os.css`, 3,280 lines, and its fonts.
+- `efb_os.css` defines 71 custom properties and reads them 691 times.
+  The theme is the `--efb-` ones, such as `--efb-primary-color: #00b4ff`, `--efb-button-primary-base: 19, 144, 227`, `--efb-button-important-base: 255, 222, 3`, `--efb-button-emergency-background: 236, 64, 64`, `--efb-full-page-background: 30, 40, 54`, `--efb-border-radius: 0px`, and `--efb-component-transition-delay: 0.18s`.
+  Most colors are RGB triplets, read as `rgba(var(--efb-button-primary-base), 1)`.
+- Every size is written for a 516 by 716 page and scaled to the EFB's, as `calc(10px * var(--panel-width) / var(--base-width, 516))`, and its 67 `@media` rules switch on `max-height: 716px`, `max-width: 516px`, and `orientation: landscape`.
+- Its 23 `@font-face` rules declare Roboto and Roboto Mono from TTF files in the package, one family for each weight, such as `Roboto-Regular`, `Roboto-Medium`, `Roboto-Bold`, and `RobotoMono-Regular`, and its text falls back to Meiryo UI, Noto Sans SC, and Malgun for Japanese, Chinese, and Korean.
+- Its rules style the EFB's own controls by class: notifications (48 rules), tooltips, the status bar, buttons, text boxes, sliders, paging, circular progress, tabs, dropdowns, steppers, panels, tags, the dock, search, switches, scroll bars, text areas, accordions, timers, lists, and progress bars.
+- An app gets those controls by bundling them: A2A's tablet app defines `_Button`, `_AbstractButton`, `_DropdownButton`, `_IconButton`, and more, and puts out the `abstract-button` class `efb_os.css` styles (read in a2a-aircraft-pa24 2.1.3, `A2ATabletAppComanche250.js`).
+  The SDK ships them as the EFB API, in the samples' `PackageSources\efb_api` folder, which an app installs with `npm install` (documented, [the EFB API](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/efb/electronic-flight-bag-api/)); no npm package publishes it, and our SDK 1.7.3 install has no samples.
+- What the sim's own CSS uses, it can draw: custom properties with fallbacks, `calc()` around `var()`, flexbox, grid with `grid-gap`, `gap`, and media queries on size and orientation.
+  It uses no `hsl()`, `oklch()`, `color-mix()`, `rem`, `vh`, `@supports`, or `@keyframes`, so those stay for p13 to measure.
+- The sim's menus and in-game panels have a theme of their own, 201 custom properties in `fs-base-ui` 0.1.10's `html_ui/SCSS/common.css`, such as `--color-yellow: #FFD300`, `--primaryColor`, `--accentColor`, and `--filterBlur`.
+
+**Changed:** our EFB app can build on the EFB API's controls and look like the sim's own apps, styled by `efb_os.css` with nothing of ours, and our hand-written CSS can read the `--efb-` variables and the sim's Roboto faces.
+The banner runs in a page of its own, outside the EFB's document, so it gets neither unless its page links `efb_os.css` itself, which no run has tried.
+Whether Dual Input takes the sim's look or one of its own is the user's to decide.
+
+**Affects:** the apps' look, which stage 11 designs ([build plan](../build/plan.md#11-the-apps)), and [decision 029](../../decisions/029-in-sim-interface-on-msfs-avionics-framework.md)'s pinned copy of the framework, which the EFB API's controls would have to work with.
+
+**Evidence:** the files above, read on our development machine on 2026-10-24; their contents are Asobo's and A2A's, so none is copied into the tree.
+
 ## 2026-10-09: Installed from the Community folder, our toolbar script loads at the flight load, and it and our EFB app's code each open the banner when the client asks over the CommBus
 
 **Asked:** does the toolbar script run outside a Build and Mount, and open the banner's panel after a flight loads and when a session starts mid-flight; and can our EFB app's code open it instead ([architecture plan](../architecture/plan.md#15-a-flight-with-dual-inputs-rust-pieces), node 1.5)?

@@ -1,8 +1,41 @@
 # Sync: log
 
-What our experiments found about keeping cockpits in sync, through profile entries, live sync, and catch-up, newest entry first.
+What our experiments and the build's stages found about keeping cockpits in sync, through profile entries, live sync, and catch-up, newest entry first.
 The probes are in [experiments/areas/sync](../../../experiments/areas/sync), and their raw output is in its `results/` folder.
-Every entry was measured on MSFS 2024 SunRise 12.2.282174.999 on 2026-10-05, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
+Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on our development machine with Flow Pro 26.33.5, ChasePlane 2026.39.1.16, and GSX Pro 4.0.19 installed, with the frame rate capped near 30 fps unless the entry says otherwise.
+
+## 2026-10-24: Stage 13's sync engine passes every case that needs no sim, and its cockpit stream replays a cut at its sender's gaps and catches a late joiner up between bench cores
+
+**Asked:** do [stage 13](../build/plan.md#13-the-sync-engine-and-the-cockpit-stream)'s cases hold: the sync engine's, with no core, and the cockpit stream's, between bench cores with a test unit in state sync's and pointer sync's place; and do its budgets?
+
+**Expected:** the starting rules [the sync units](05-units.md) give, which no run had tried, and the budgets that doc set as estimates.
+
+**Found:** on our development machine, with Cyberpunk 2077 running beside the runs, which ran at below-normal priority:
+
+- The sync engine's 23 tests pass, each from [the sync units' cases](05-units.md#cases-for-the-bench) that needs no sim.
+  Among them, a knob turned a detent a frame sends nothing back while its reading lags, a `toggle` over a lamp that lights 2s late flips once and is flagged, catch-up writes the battery before the APU master, an entry the aircraft changes every 3s stops syncing within 33s, and an input event reported twice a frame apart goes out once, and twice at 4 fps.
+- The cockpit stream's own tests of its order pass, with three machines and no core: B's press waits at C until A's page key has applied, and a change of control drops the solo change the new pilot flying hadn't seen.
+- Between bench cores, all 7 cockpit scenarios pass, and every core's recording replays to the same outputs.
+  A lever changed 120 times over about 2s went out as 30 messages, inside 20 a second.
+  A 60s cut's replay waited 2,000ms for a gap of 3.2s, its cap, applied only the last of each run of the pilot flying's changes, and denied take-control until it ended.
+  In the run with the lever, the slowest input took 345µs on the pilot flying's core, against a handler's 1ms.
+- The code review made 11 findings, the worst a stepping write that a put-back or a new value replaced, which lost its duty to tell the stream it was done and could hold the stream or a catch-up forever; each is fixed, with a test for each the engine's tests could reach.
+- A change of state sync's takes 95 bytes, so a 30-minute cut at 20 changes a second keeps 3.42 MB, against the [budget](05-units.md#budgets)'s 4 MB; a catch-up's answer for 500 entries takes 44,638 bytes, against 64 KB, near the doc's estimate of 90 bytes an entry.
+- An engine call's time and the compile of 300 write functions, which the budgets set by hand in a release build, wait for a run with no game on the PC.
+
+**Changed:** the stage built five things the docs leave open or state two ways, each in its code's comments:
+
+- A catch-up step's unit tells the stream whether it can give and take, through `cx.cockpit().step_ready`, since the stream can't read the profile loader, and a core with no step never asks for a catch-up.
+- A held message carries the control value it was made under, as [a change of control](04-order-and-recovery.md#a-change-of-control) needs, where [sending](05-units.md#sending) has the stream fill it in as the message goes.
+- A message from a superseded pilot flying is judged against the newest control value the stream or the session crate knows, since the change's message can come before its key.
+- A pulse's firing carries the value the pulse rose to, so an event entry that writes its own pulse variable replays it.
+- The stream applies at most 50 messages in one input, and the rest in the inputs of a timer, since each queues two calls and the kernel panics past 1,000.
+
+The user also chose two changes to the format, which [01-format-and-delivery](../profiles/01-format-and-delivery.md)'s note of 2026-10-25 gives: an event entry takes no `toggle` or stepping write, since an event has no value to compare or step from, and a write function's `write()` on a variable needs a value at the type check (user, 2026-10-24 and 2026-10-25).
+
+**Affects:** [the sync units](05-units.md) and [order and recovery](04-order-and-recovery.md), whose notes fold into their text once this stage lands ([the product plan](../product/plan.md#8-v1-build-plan)).
+
+**Evidence:** [results/2026-10-24-stage-13-bench.txt](results/2026-10-24-stage-13-bench.txt).
 
 ## 2026-10-05: The A350's stock heading is an output of its module, and its dial takes a value written straight into it
 

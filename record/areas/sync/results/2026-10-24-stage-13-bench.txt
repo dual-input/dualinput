@@ -1,0 +1,32 @@
+Stage 13's runs on our development machine, 2026-10-24, with Cyberpunk 2077 running, the bench at below-normal priority.
+
+The cockpit scenarios after the code review's fixes, in a whole-bench run stopped once they had run (tests 14 to 19 of it):
+# budget: James's run, with a lever changed 60 times a second: the slowest input took 345µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+# budget: Adam's run, with a lever changed 60 times a second: the slowest input took 221µs, 0 over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+ok 14 - a lever changed 60 times a second goes out at most 20 times a second, its last value before the press after it
+# budget: 120 changes over about 2s went out as 30 messages, against 20 a second
+ok 15 - a 60s cut replays at the sender's gaps, collapses runs of the pilot flying's changes, and denies take-control until it ends
+# the replay waited 2000ms for a gap of 3.2s, against its 2s cap
+ok 16 - a takeover during a cut drops the old pilot flying's solo changes, and the ex-pilot flying catches up from the new one
+ok 17 - a late joiner asks, is answered once the pilot flying can give, asks again after a cut, and drops the copies it queued
+ok 18 - control passing between two others during a catch-up has the catching-up core ask the new pilot flying
+ok 19 - a pilot flying who leaves the flight during the other's replay hands over everything it sent
+
+The first run of the cockpit scenarios, before the code review, whose test 1 read the loop's stats before the cores exited:
+# budget: cockpit-held, James: the slowest input took NaNµs, NaN over 1ms, against 1,000µs for a handler with one pause under 2ms allowed
+not ok 1 - a lever changed 60 times a second goes out at most 20 times a second, its last value before the press after it
+# budget: 120 changes over about 2s went out as 30 messages, against 20 a second
+ok 2 - a 60s cut replays at the sender's gaps, collapses runs of the pilot flying's changes, and denies take-control until it ends
+# the replay waited 2001ms for a gap of 3.2s, against its 2s cap
+ok 3 - a takeover during a cut drops the old pilot flying's solo changes, and the ex-pilot flying catches up from the new one
+ok 4 - a late joiner asks, is answered once the pilot flying can give, asks again after a cut, and drops the copies it queued
+ok 5 - control passing between two others during a catch-up has the catching-up core ask the new pilot flying
+ok 6 - a pilot flying who leaves the flight during the other's replay hands over everything it sent
+ok 7 - a member whose aircraft has no profile applies the change of control, ends its replay, and may take control
+# tests 7
+# pass 6
+# fail 1
+
+The size budgets, from the stream's and the engine's own tests:
+budget: a change took 95 bytes, so a 30-minute cut at 20 a second keeps 3420000 bytes, against 4,194,304
+budget: a catch-up's answer for 500 entries took 44638 bytes, against 65,536

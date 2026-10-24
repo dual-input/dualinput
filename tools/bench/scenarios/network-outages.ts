@@ -64,5 +64,14 @@ test("the link is lost after 5s of each outage, and comes back after it", { time
     await a.hear(/^net up \S+ again=true restart=0$/, { after: after[0], ms: 60_000 })
     await b.hear(/^net up \S+ again=true restart=0$/, { after: after[1], ms: 60_000 })
     t.diagnostic(`a core suspended for 60s: up again ${(performance.now() - resumed).toFixed(0)}ms after it resumed`)
+    // On a link up again, the cockpit stream on each side replays what the other lacks
+    // (record/areas/sync/05-units.md, "Kept messages and a replay").
+    for (const [core, other] of [[a, b], [b, a]] as const) {
+      const ups = other.heard().filter((l) => /^net up \S+ again=true/.test(l)).length
+      const replays = () => core.log().split("\n").filter((l) => l.includes("another member's replay of what this machine missed begins")).length
+      for (const started = Date.now(); replays() < ups && Date.now() - started < 5_000; ) await sleep(100)
+      assert.ok(ups >= 5, `${other.data} should have its link up again after each of 5 outages`)
+      assert.equal(replays(), ups, `${core.data}'s cockpit stream should get a replay at each of the other's links up again`)
+    }
   }
 })

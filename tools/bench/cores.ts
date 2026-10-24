@@ -11,6 +11,7 @@ import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import type { ClientsAct } from "../../src/engines/messages/ts/bench/ClientsAct.ts"
+import type { CockpitAct } from "../../src/engines/messages/ts/bench/CockpitAct.ts"
 import type { FromCore } from "../../src/engines/messages/ts/bench/FromCore.ts"
 import type { HelperAct } from "../../src/engines/messages/ts/bench/HelperAct.ts"
 import type { NetAct } from "../../src/engines/messages/ts/bench/NetAct.ts"
@@ -178,6 +179,11 @@ export class Core {
   /** Has the network's test unit, which stands in for a feature with a channel of each delivery, act. */
   net(act: NetAct): void {
     this.send({ kind: "net", act })
+  }
+
+  /** Has the cockpit stream's test unit, which stands in for state sync and pointer sync, act. */
+  cockpit(act: CockpitAct): void {
+    this.send({ kind: "cockpit", act })
   }
 
   /** Calls `f` with each CommBus call the core makes for JavaScript, as the sim's pages hear it, from now on. */

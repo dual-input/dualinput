@@ -58,8 +58,11 @@ interface Chain {
   every(pace: Pace): Chain;
 }
 
+/** Hands the engine one action: a variable set to the value. */
+declare function write(target: Variable, value: number | string): Chain;
 /** Hands the engine one action: the name's own values, or the value, then the name's. */
-declare function write(target: Variable | Event, value?: number | string): Chain;
+declare function write(target: Event, value?: number | string): Chain;
+/** Hands the engine one action: the name's values, with the function's own value where `value` marks. */
 declare function write(target: ValueEvent): Chain;
 "#,
     ),

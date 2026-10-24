@@ -352,6 +352,20 @@ fn each_error_is_reported_at_its_place_with_its_code() {
             12,
         ),
         (
+            "events:\n  x:\n    name: X\n    watch: K('X')\n    write:\n      toggle: K('X')\n"
+                .to_string(),
+            "write",
+            10,
+            7,
+        ),
+        (
+            "events:\n  x:\n    name: X\n    watch: K('X')\n    write:\n      inc: K('I')\n      dec: K('D')\n"
+                .to_string(),
+            "write",
+            10,
+            7,
+        ),
+        (
             entry(
                 "    watch: L('X')\n    write:\n      inc: K('I')\n      dec: K('D')\n      wrap: false\n      pace: 2 frame\n",
             ),

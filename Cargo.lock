@@ -604,6 +604,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "cockpit-stream"
+version = "0.1.0"
+dependencies = [
+ "clients",
+ "kernel",
+ "messages",
+ "network",
+ "postcard",
+ "serde",
+ "session",
+ "tracing",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -974,6 +988,7 @@ dependencies = [
  "bytemuck",
  "cc",
  "clients",
+ "cockpit-stream",
  "core-helper-service",
  "futures-util",
  "kernel",
@@ -4215,6 +4230,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "sync-engine"
+version = "0.1.0"
+dependencies = [
+ "messages",
+ "postcard",
+ "profile-engine",
+ "sandbox",
+ "tracing",
 ]
 
 [[package]]

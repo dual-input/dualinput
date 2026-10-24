@@ -211,6 +211,12 @@ impl Session {
         self.held.as_ref().map(|h| h.me)
     }
 
+    /// This core's restart count in the session, which the cockpit stream counts its messages
+    /// under.
+    pub fn restart(&self) -> Option<u32> {
+        self.held.as_ref().map(|h| h.restart)
+    }
+
     /// The session's invite code.
     pub fn code(&self) -> Option<&str> {
         self.held.as_ref().map(|h| h.code.as_str())

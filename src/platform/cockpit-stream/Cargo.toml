@@ -1,0 +1,18 @@
+[package]
+name = "cockpit-stream"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+clients = { path = "../clients" }
+kernel = { path = "../kernel" }
+messages = { path = "../../engines/messages" }
+network = { path = "../network" }
+postcard = { version = "1.1.3", default-features = false, features = ["use-std"] }
+serde = { version = "1.0.229", features = ["derive"] }
+session = { path = "../session" }
+tracing = "0.1.44"
+
+[lints]
+workspace = true

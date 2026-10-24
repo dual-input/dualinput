@@ -40,7 +40,8 @@ impl Lines {
                 | ToCore::Sim { .. }
                 | ToCore::Clients { .. }
                 | ToCore::Helper { .. }
-                | ToCore::Net { .. },
+                | ToCore::Net { .. }
+                | ToCore::Cockpit { .. },
             ) => {}
             Err(error) => tracing::warn!(%error, "a line from the bench isn't one of its messages"),
         }

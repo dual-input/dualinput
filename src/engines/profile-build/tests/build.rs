@@ -134,8 +134,14 @@ fn a_write_function_types_what_the_sandbox_runs_and_nothing_it_lacks() {
         "if (`${value}`.padStart(3, '0').startsWith('00')) write(H('X'))",
         "for (const [i, n] of [4, 5].entries()) write(L('X'), i + n)",
         "write(L('X'), Object.keys({ a: 1 }).length + /x+/.exec('xx')!.length)",
+        "write(K('KOHLSMAN_SET', 2, value))",
+        "write(B('X_Toggle'))",
     ];
     let refused = [
+        // A variable is set to a value, so one written with none fails here rather than at
+        // every run (record/areas/profiles/01-format-and-delivery.md, "Write functions").
+        "write(L('X'))",
+        "write(A('X', 'Bool'))",
         "write(L('X'), Math.random())",
         "write(L('X'), Date.now())",
         "write(L('X'), JSON.parse('1'))",

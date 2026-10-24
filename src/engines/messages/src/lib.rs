@@ -26,6 +26,7 @@ include!(concat!(env!("OUT_DIR"), "/hash.rs"));
 pub mod backend;
 pub mod bench;
 pub mod clients;
+pub mod cockpit;
 pub mod core_helper;
 pub mod module;
 pub mod net;
@@ -33,6 +34,7 @@ pub mod profiles;
 pub mod recording;
 pub mod session;
 pub mod sim;
+pub mod sync;
 
 /// Bytes as lowercase hex, two digits a byte, the form pilot and endpoint IDs take in the
 /// messages, the backend's requests, and the session file.

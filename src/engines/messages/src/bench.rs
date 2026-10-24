@@ -46,7 +46,60 @@ pub enum ToCore {
     /// Has the network's test unit, which stands in for a feature with a channel of each
     /// delivery, act.
     Net { act: NetAct },
+    /// Has the cockpit stream's test unit, which stands in for state sync and pointer sync,
+    /// act.
+    Cockpit { act: CockpitAct },
 }
+
+/// What the cockpit stream's test unit does. It registers a kind of each sort the stream offers,
+/// as state sync's and pointer sync's are, and a catch-up step that hands over the values it
+/// holds, by key.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, TS)]
+#[serde(tag = "act", rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum CockpitAct {
+    /// Sends `count` messages of `kind` for `key`, the first with `value` and each after with 1
+    /// more, one every `every_ms`.
+    Send {
+        kind: BenchKind,
+        key: String,
+        value: f64,
+        count: u32,
+        every_ms: u32,
+    },
+    /// Says whether its catch-up step can give and take while this member is in the flight, as
+    /// state sync's can while its profile is loaded.
+    Ready { on: bool },
+    /// How long its step takes to land after it takes a catch-up, as an aircraft settling.
+    Settle { ms: u64 },
+    /// Asks for control, as the take-control key does.
+    TakeControl,
+    /// Tells the bench, as a `cockpit report` line, the values it holds, the take-control
+    /// verdict, and the stream's state.
+    Report,
+}
+
+/// The kinds of the cockpit stream's test unit.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "kebab-case")]
+#[ts(export, export_to = "bench/")]
+pub enum BenchKind {
+    /// A shared entry's value, which the stream holds newest, as state sync's change.
+    Held,
+    /// A value only the pilot flying sends, which a replay collapses, as state sync's.
+    PilotFlying,
+    /// An event, as state sync's firing.
+    Event,
+    /// A press, done once its panel plays it through, as pointer sync's gesture.
+    Press,
+}
+
+pub const HELD: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1001);
+pub const PILOT_FLYING: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1002);
+pub const EVENT: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1003);
+pub const PRESS: crate::cockpit::CockpitKind<f64> = crate::cockpit::CockpitKind::new(1004);
+/// The test unit's catch-up step.
+pub const STEP: u16 = 1001;
 
 /// What the core helper's test unit does. It registers one of each want: a binding to the
 /// setting `bench.input`, the next press, the mouse, a capture, a playback stream, and a

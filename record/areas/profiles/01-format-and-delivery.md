@@ -6,6 +6,12 @@ Depends on:  ../sync/01-profile-entries.md, ../sync/02-live-sync.md, ../sync/04-
 Decides:     A profile's syntax, fields, and file layout; how its script names and writes things; how a write is checked; what fails a load; the sandbox's limits; and how profiles reach pilots, with the level of the format each needs.
 ```
 
+> **Note**
+> Since 2026-10-25, two forms fail at build or load rather than at every run, where [writing](#writing) and [event entries](#event-entries) allow them (user, 2026-10-24 and 2026-10-25; [sync log](../sync/log.md#2026-10-24-stage-13s-sync-engine-passes-every-case-that-needs-no-sim-and-its-cockpit-stream-replays-a-cut-at-its-senders-gaps-and-catches-a-late-joiner-up-between-bench-cores)):
+>
+> - An event entry's `write` takes no `toggle` or stepping map, since an event has no value of the cockpit's to compare or step from: a toggle event is written as a name on its own, `write: K('TOGGLE_BEACON_LIGHTS')`, a value the aircraft keeps out of sight is a state entry counting into a shadow value, and an event carrying a count of steps takes a write function.
+> - A write function's `write()` on an `L:` or `A:` variable needs a value, which level 1's declarations require, so TypeScript refuses `write(L('X'))`; and a `K:` event with `value` among its values, written with none, takes the function's own value there.
+
 A profile is one YAML file, and wherever a value names or writes something in the sim, it's JavaScript calling functions Dual Input defines.
 `L('BKSQ_MixtureLeverPosition_1')` names a variable, and `write()` is the one call that writes.
 Profiles live as flat files in `profiles/` in Dual Input's own public repository, where CI checks each one, works out the level of the format it needs, and publishes it on GitHub Pages as one file, with its modules in it, under its hash.

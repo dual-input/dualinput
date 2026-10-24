@@ -16,6 +16,7 @@ const UNITS: &[fn(&mut Registry)] = &[
     recording::register,
     session::register,
     profile_loader::register,
+    cockpit_stream::register,
 ];
 
 fn main() -> ExitCode {

@@ -20,6 +20,7 @@ stand-in = [
 [dependencies]
 bytemuck = { version = "1.25.2", optional = true }
 clients = { path = "../../platform/clients" }
+cockpit-stream = { path = "../../platform/cockpit-stream" }
 core-helper-service = { path = "../../platform/core-helper-service" }
 # Each socket's task reads and writes its WebSocket through StreamExt and SinkExt.
 futures-util = { version = "0.3.34", default-features = false, features = ["sink"] }

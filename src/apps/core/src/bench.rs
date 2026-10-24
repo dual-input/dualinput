@@ -4,6 +4,7 @@
 //! release's code (record/areas/build/02-testing.md, "Its place").
 
 mod clients;
+mod cockpit;
 mod helper;
 mod lines;
 mod load;
@@ -33,6 +34,7 @@ pub const UNITS: &[fn(&mut Registry)] = &[
     load::Load::register,
     sim::Probe::register,
     net::BenchNet::register,
+    cockpit::BenchCockpit::register,
 ];
 
 /// The sources the bench's edge pushes the test units' inputs under, and each unit's name by
@@ -44,6 +46,7 @@ pub struct Sources {
     clients: SourceId,
     helper: SourceId,
     net: SourceId,
+    cockpit: SourceId,
     units: Vec<&'static str>,
 }
 
@@ -58,6 +61,7 @@ impl Sources {
             clients: kernel.source::<clients::Acts>()?,
             helper: kernel.source::<helper::Acts>()?,
             net: kernel.source::<net::Acts>()?,
+            cockpit: kernel.source::<cockpit::Acts>()?,
             units: kernel.units(),
         })
     }

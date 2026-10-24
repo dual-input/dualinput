@@ -683,6 +683,22 @@ impl Checker {
                 WriteAt::Ready(Write::Function(t.text.clone())),
                 Some(t.clone()),
             )),
+            // An event has no value of the cockpit's to compare with a wanted one, or to step
+            // from, so on an event entry a toggle could only send its event, which a name
+            // written on its own does, and a stepping write has nothing to step.
+            Kind::Map(fields) if event => {
+                let toggle = fields.iter().any(|(k, _)| k.text == "toggle");
+                self.error(
+                    &node.at,
+                    "write",
+                    if toggle {
+                        "An event entry's `write` sends its event as a name on its own, such as `write: K('TOGGLE_BEACON_LIGHTS')`, since an event has no value to compare before a toggle"
+                    } else {
+                        "An event entry's `write` can't step, since an event has no value to step from: a value the aircraft keeps out of sight is a state entry that counts into a shadow value, and an event that carries a count of steps takes a write function"
+                    },
+                );
+                None
+            }
             Kind::Map(fields) if fields.iter().any(|(k, _)| k.text == "toggle") => {
                 let module = self.module;
                 let mut toggle = None;

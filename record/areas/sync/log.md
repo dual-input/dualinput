@@ -33,7 +33,7 @@ Every entry of 2026-10-05 was measured on MSFS 2024 SunRise 12.2.282174.999, on 
 
 The user also chose two changes to the format, which [01-format-and-delivery](../profiles/01-format-and-delivery.md)'s note of 2026-10-25 gives: an event entry takes no `toggle` or stepping write, since an event has no value to compare or step from, and a write function's `write()` on a variable needs a value at the type check (user, 2026-10-24 and 2026-10-25).
 
-**Affects:** [the sync units](05-units.md) and [order and recovery](04-order-and-recovery.md), whose notes fold into their text once this stage lands ([the product plan](../product/plan.md#8-v1-build-plan)).
+**Affects:** [the sync units](05-units.md), whose text, folded before this stage landed, doesn't yet say the five things above, and [01-format-and-delivery](../profiles/01-format-and-delivery.md), whose note of 2026-10-25 gives the format's two changes.
 
 **Evidence:** [results/2026-10-24-stage-13-bench.txt](results/2026-10-24-stage-13-bench.txt).
 
